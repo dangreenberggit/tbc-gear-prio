@@ -1,0 +1,21 @@
+# Vendored skill content — not our source, formatted by upstream.
+.agents/
+.claude/
+
+# Captured/generated data must stay byte-identical to what was fetched or
+# recorded — reformatting would break the sha256 checks in data/wowsims.lock.json
+# and make the raw WCL fixture no longer "raw". See docs/verification-log.md.
+data/
+test/fixtures/
+findings.json
+findings2.json
+
+pnpm-lock.yaml
+
+# Hand-tuned planning prose predating this harness — reformatting would
+# rewrite hundreds of lines of tables/code-fences with no behavioral upside.
+# New docs written after this commit are expected to pass format:check.
+PLAN.md
+PLAN-REVIEW.md
+docs/phase0-findings.md
+docs/verification-log.md

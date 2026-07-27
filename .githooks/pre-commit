@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# main only receives merges (see docs/workflow.md) — direct commits go to dev.
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$branch" = "main" ]; then
+  echo "Refusing direct commit to main — branch off dev instead." >&2
+  echo "(escape hatch: git commit --no-verify, spike/throwaway branches only)" >&2
+  exit 1
+fi
+
+npx lint-staged
