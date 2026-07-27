@@ -1,1 +1,13 @@
 node_modules/
+.env
+__pycache__/
+coverage/
+.data/
+dist/
+*.tsbuildinfo
+
+# Pinned wowsims build inputs — fetched by `pnpm sync:wowsims`, never committed.
+# What we commit is the *generated* output (data/items/index.json, data/gems/
+# palette.json) plus data/wowsims.lock.json, which records exactly which upstream
+# release those were generated from. See PLAN.md §8.5.
+vendor/

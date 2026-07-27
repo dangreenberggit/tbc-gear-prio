@@ -1,0 +1,106 @@
+{
+  "token_url": "https://www.warcraftlogs.com/oauth/token",
+  "limit_per_hour": 3600,
+  "character_fields": [
+    "canonicalID",
+    "claimed",
+    "classID",
+    "encounterRankings",
+    "faction",
+    "gameData",
+    "guildRank",
+    "guilds",
+    "hidden",
+    "id",
+    "level",
+    "name",
+    "recentReports",
+    "server",
+    "zoneRankings"
+  ],
+  "EventDataType": [
+    "All",
+    "Buffs",
+    "Casts",
+    "CombatantInfo",
+    "DamageDone",
+    "DamageTaken",
+    "Deaths",
+    "Debuffs",
+    "Dispels",
+    "Healing",
+    "Interrupts",
+    "Resources",
+    "Summons",
+    "Threat"
+  ],
+  "TableDataType": [
+    "Summary",
+    "Buffs",
+    "Casts",
+    "DamageDone",
+    "DamageTaken",
+    "Deaths",
+    "Debuffs",
+    "Dispels",
+    "Healing",
+    "Interrupts",
+    "Resources",
+    "Summons",
+    "Survivability",
+    "Threat"
+  ],
+  "tbc_zones": [
+    [
+      1013,
+      "Sunwell Plateau"
+    ],
+    [
+      1011,
+      "BT / Hyjal"
+    ],
+    [
+      1008,
+      "Gruul / Magtheridon"
+    ],
+    [
+      1003,
+      "Zul'Gurub"
+    ],
+    [
+      1012,
+      "Zul'Aman"
+    ],
+    [
+      1007,
+      "Karazhan"
+    ]
+  ],
+  "recent_reports": [
+    "jPdQg3Nr1vFwqyWA",
+    "XtfkVwxbqGrFAZzP",
+    "1gLnCXzfdcYpVtHW",
+    "DbkNyXw7HPZrYRtC",
+    "2dqrHYyBfVjAxZk9",
+    "j3nD9HbFCygfJAXw",
+    "6V2jdLxk4GT3K1Cy",
+    "qcF2xvNbW91MjJyG",
+    "Vy3b6cn41pRPvWzw",
+    "3fQyhcHGDvNmXb7T"
+  ],
+  "spec_strings": [
+    "Druid",
+    "Hunter",
+    "Mage",
+    "Paladin",
+    "Priest",
+    "Rogue",
+    "Shaman",
+    "Unknown",
+    "Warlock",
+    "Warrior"
+  ],
+  "talentPoints": "talents-field",
+  "enchants": "present (9/19)",
+  "gems": "present (6/19)"
+}
