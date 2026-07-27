@@ -150,6 +150,28 @@ function categoryCount(color: number, counts: GemColorCounts): number {
 }
 
 /**
+ * How far counts are from meeting the meta condition. 0 = met.
+ * Min-colour: sum of primary shortfalls. Compare-colour: how many more
+ * of the greater colour are needed to strictly exceed lesser.
+ */
+export function metaDeficit(metaId: number, counts: GemColorCounts): number {
+  const cond = CONDITIONS.get(metaId);
+  if (!cond) {
+    throw new Error(`missing meta gem condition for gem: ${metaId}`);
+  }
+  if (cond.compareGreater != null && cond.compareLesser != null) {
+    const greater = categoryCount(cond.compareGreater, counts);
+    const lesser = categoryCount(cond.compareLesser, counts);
+    return Math.max(0, lesser - greater + 1);
+  }
+  return (
+    Math.max(0, (cond.minRed ?? 0) - counts.red) +
+    Math.max(0, (cond.minYellow ?? 0) - counts.yellow) +
+    Math.max(0, (cond.minBlue ?? 0) - counts.blue)
+  );
+}
+
+/**
  * Head sockets[0] is conventionally the meta socket when colour === Meta.
  * Pass every gem id on the character (all slots); meta is among them.
  */

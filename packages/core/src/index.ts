@@ -72,12 +72,20 @@ export {
   type ItemSlot,
 } from "./items.js";
 export { compose, type ComposePlayer } from "./compose.js";
-export { Stat, statAt } from "./stats.js";
+export { Stat, epScore, statAt } from "./stats.js";
 export {
   gemColorCounts,
   gemColorMatchesSocket,
   isMetaConditionMet,
+  metaDeficit,
   metaStatus,
   type GemColorCounts,
   type MetaStatus,
 } from "./meta.js";
+export {
+  MetaUnsolvableError,
+  repairMeta,
+  type MetaRepairResult,
+  type MetaRepairSwap,
+  type SocketedItem,
+} from "./meta-repair.js";
