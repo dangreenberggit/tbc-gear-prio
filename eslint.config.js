@@ -28,6 +28,8 @@ export default tseslint.config(
   {
     // .agents/ and .claude/ hold vendored skill content (Matt Pocock's
     // skills, mirrored per repo convention) — not our source, not ours to lint.
+    // packages/core/src/proto/ is `buf generate` output (PLAN.md §8.1) — linting
+    // it as hand-written code produces noise on every regen for no benefit.
     ignores: [
       "**/dist/**",
       "**/node_modules/**",
@@ -35,6 +37,7 @@ export default tseslint.config(
       "vendor/**",
       ".agents/**",
       ".claude/**",
+      "packages/core/src/proto/**",
     ],
   },
   {
