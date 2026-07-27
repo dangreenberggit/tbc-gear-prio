@@ -3,7 +3,7 @@
 **Status:** de-risking probe run against the live Warcraft Logs API. Converts the plan's Warcraft-Logs-side assumptions from documented-but-unproven to verified.
 **Probe script:** [`wcl_probe.py`](../wcl_probe.py) (handoff doc for the script's own design lives in the session that produced it; not duplicated here — see script docstring).
 **Runs:** two characters, two classes, both on Dreamscythe-US, both SSC/TK logs against Hydross the Unstable.
-**Raw output:** [`findings.json`](../findings.json) (slamaltman), [`findings2.json`](../findings2.json) (shredzepelin).
+**Probe summaries (not fixtures):** [`docs/phase0-probe-summaries/slamaltman.json`](phase0-probe-summaries/slamaltman.json), [`docs/phase0-probe-summaries/shredzepelin.json`](phase0-probe-summaries/shredzepelin.json). The real gear payloads are under `test/fixtures/*.raw.json`.
 
 ---
 
@@ -16,8 +16,8 @@
 - [x] 19 → 17 slot mapping verified both directions — **see §10**
 - [x] enchant / gem ID namespace resolved — **see §10**
 - [x] race retrievability — **answered NO, decisively; see §10**
-- [ ] preset decode path (`decodelink`, §8.2 of the plan) — **not tested by this probe; out of scope, still open**
-- [ ] real logged gear through the pinned binary to a valid `RaidSimResult` — **still open, needs `wowsimcli`**
+- [x] preset decode path (`decodelink`, §8.2 of the plan) — **closed 2026-07-26, third sitting; see verification-log**
+- [x] real logged gear through the pinned binary to a valid `RaidSimResult` — **closed 2026-07-26, third sitting; DPS avg 2042.85**
 
 ---
 
@@ -91,13 +91,14 @@ The `Buffs` table for both fights contains `Dire Bear Form`, `Bear Form`, `Cat F
 
 ## 8. Zone / encounter IDs
 
-Captured for all raid tiers exposed by the endpoint: Karazhan, Gruul/Magtheridon, Zul'Gurub, Zul'Aman, SSC/TK (not itemized above but present in the 32-zone list), BT/Hyjal, Sunwell Plateau. Full list in `findings.json`.
+Captured for all raid tiers exposed by the endpoint: Karazhan, Gruul/Magtheridon, Zul'Gurub, Zul'Aman, SSC/TK (not itemized above but present in the 32-zone list), BT/Hyjal, Sunwell Plateau. Full list in `docs/phase0-probe-summaries/slamaltman.json`.
 
-## 9. Still open
+## 9. Still open / deferred
 
-- Share-link `decodelink` path (§8.2 of the plan) — not exercised by this probe at all; still needs its own check against the pinned `wowsimcli` binary.
+- ~~Share-link `decodelink` path~~ — **closed 2026-07-26**, third sitting.
 - ~~Slot-count reconciliation~~ — **closed 2026-07-26**, see §10.
-- This was sampled from one fight (Hydross, SSC/TK) per character. Both characters happened to be on the same encounter; worth a third check against a different encounter/raid tier before treating slot-eligibility logic as fully general, though the item-DB cross-check makes that a low-risk gap rather than an open question about WCL's reliability.
+- ~~Real logged gear → `RaidSimResult`~~ — **closed 2026-07-26**, third sitting.
+- This was sampled from one fight (Hydross, SSC/TK) per character. Both characters happened to be on the same encounter; worth a third fixture against a different encounter/raid tier (and ideally an inactive meta) before treating slot-eligibility logic as fully general. Deferred — not a Phase 0 gate.
 
 ---
 
@@ -105,7 +106,7 @@ Captured for all raid tiers exposed by the endpoint: Karazhan, Gruul/Magtheridon
 
 Full detail and reproduction commands in [`verification-log.md`](verification-log.md). Summarised here because three items above are superseded.
 
-**This document's §6 said the raw payload was inspected. It was — but it was never saved.** `findings.json` records `"enchants": "present (10/19)"` and nothing else, so every downstream question that needed the actual IDs stayed open. `wcl_probe.py` now takes `--raw-out` and writes `test/fixtures/slamaltman.raw.json` (all 25 combatants plus the buffs table), and warns when the flag is omitted. **A summary is not a fixture** — that's the reusable lesson.
+**This document's §6 said the raw payload was inspected. It was — but it was never saved.** The probe summary (`docs/phase0-probe-summaries/slamaltman.json`) records `"enchants": "present (10/19)"` and nothing else, so every downstream question that needed the actual IDs stayed open. `wcl_probe.py` now takes `--raw-out` and writes `test/fixtures/slamaltman.raw.json` (all 25 combatants plus the buffs table), and warns when the flag is omitted. **A summary is not a fixture** — that's the reusable lesson.
 
 **Slot mapping (§6's "manual TODO") is closed.** WCL's 19-entry order verified 19/19 against `db.json`; the sim's 17-entry order verified 16/16 against wowsims' own curated ret set, which carries slot-typed enchants and so proves the ordering without the binary. Dropping shirt and tabard *without reordering* gets **11 of 17 positions wrong**.
 
@@ -116,3 +117,22 @@ Full detail and reproduction commands in [`verification-log.md`](verification-lo
 **Race is not retrievable — a new, decisive negative.** No race on `ReportActor`, none on `CombatantInfo`, and `Character.gameData` returns `{"error": "This game does not support cached game data."}`. The *Heroic Presence* aura — which would have been a **better** signal than race, since it is party-wide and is what actually moves the cap — is absent from 6/6 reports, in tables that do track 163 auras including passive party auras of the same shape. Given both characters are Alliance and every Alliance shaman is a Draenei, there were Draenei in those raids. The plan changed to suit (assumed race, `capUncertainty: 16`, user override).
 
 **Cost:** 41.3 points for the whole sitting, against 3,600/hour.
+
+---
+
+## 11. Third sitting, 2026-07-26 — `wowsimcli` boxes + `events[0]` footgun
+
+Full detail in [`verification-log.md`](verification-log.md).
+
+**`events[0]` is not the named character.** The raw fixture keeps every combatant;
+`[0]` was Hagguth (Warrior). §6's item table above quoting Destroyer Battle-Helm
+`30120` for the slamaltman run was that warrior's gear. Slamaltman (`sourceID=11`)
+wears Furious Gizmatic Goggles `32461` + Crystalforge Breastplate `30129`. R17/R19
+conclusions re-confirmed against the real actor; `verify_fixture.py` now matches
+by `actors[].name`.
+
+**`decodelink` works** on the pinned binary (v0.0.101). First preset committed:
+`data/presets/ret/p2.individual-sim-settings.json`.
+
+**Logged ret gear sims.** Hand-composed `RaidSimRequest` → DPS avg **2042.85**
+(3000 iterations, seed 42). Fixtures under `test/fixtures/slamaltman.raid-sim-*.json`.

@@ -68,12 +68,32 @@ def main():
     ench_by_item = {e["itemId"]: e for e in db["enchants"] if "itemId" in e}
 
     events = fx["combatant_info_events"]
-    # The paladin we care about is the one whose gear matches the fixture character.
-    ev = events[0]
+    # The fixture holds every combatant in the fight. events[0] is whoever the
+    # API returned first — in the slamaltman capture that was Hagguth (Warrior),
+    # not Slamaltman. Match the character via the actors table.
+    actors = {a["id"]: a for a in fx.get("actors", [])}
+    want = None
+    # Filename convention: <name>.raw.json
+    stem = os.path.splitext(os.path.basename(fixture_path))[0]
+    if stem.endswith(".raw"):
+        stem = stem[: -len(".raw")]
+    for ev in events:
+        actor = actors.get(ev.get("sourceID"))
+        if actor and actor.get("name", "").lower() == stem.lower():
+            want = ev
+            break
+    if want is None:
+        print(f"!! no combatant named {stem!r} in actors; refusing events[0]",
+              file=sys.stderr)
+        return 2
+    ev = want
     gear = ev["gear"]
+    actor = actors[ev["sourceID"]]
 
     print("=" * 78)
-    print(f"FIXTURE: {fixture_path}  ({len(events)} combatants, probing [0])")
+    print(f"FIXTURE: {fixture_path}  ({len(events)} combatants)")
+    print(f"TARGET:  {actor['name']}  sourceID={ev['sourceID']}  "
+          f"subType={actor.get('subType')}")
     print(f"DB:      {DB}  ({len(db['items'])} items, {len(db['gems'])} gems, "
           f"{len(db['enchants'])} enchants)")
     print("=" * 78)
@@ -86,15 +106,21 @@ def main():
     resolved = []
     mismatches = []
     for idx, g in enumerate(gear):
-        iid = g.get("id")
-        it = items.get(iid)
+        iid = g.get("id") or 0
         claimed = CLAIMED_WCL_ORDER[idx] if idx < len(CLAIMED_WCL_ORDER) else "?"
+        # Empty slot (2H wielder's offhand, etc.) — not an item, not a mismatch.
+        if not iid:
+            print(f"{idx:>3}  {'-':>7}  {'(empty)':<10} {claimed:<10} {'(no item)':<38} ok")
+            resolved.append(None)
+            continue
+        it = items.get(iid)
         if not it:
             # Shirt and tabard are cosmetic; wowsims has no reason to carry them.
             note = "(not in db -- expected for shirt/tabard)"
+            ok = claimed in ("SHIRT", "TABARD")
             print(f"{idx:>3}  {iid:>7}  {'-':<10} {claimed:<10} {note:<38} "
-                  f"{'ok' if claimed in ('SHIRT', 'TABARD') else 'MISMATCH'}")
-            if claimed not in ("SHIRT", "TABARD"):
+                  f"{'ok' if ok else 'MISMATCH'}")
+            if not ok:
                 mismatches.append((idx, iid, claimed, "absent from db"))
             resolved.append(None)
             continue
@@ -263,4 +289,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main() or 0)

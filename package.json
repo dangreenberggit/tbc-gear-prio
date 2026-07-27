@@ -13,7 +13,10 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sync:wowsims": "python scripts/sync_wowsims.py --update",
+    "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
+    "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

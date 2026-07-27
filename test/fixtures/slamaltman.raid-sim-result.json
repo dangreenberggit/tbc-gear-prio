@@ -1,0 +1,28 @@
+{
+  "error": null,
+  "iterationsDone": 3000,
+  "firstIterationDuration": 182.415648787,
+  "avgIterationDuration": 179.9662304177737,
+  "simVersion": "v0.0.101",
+  "raidMetrics": {
+    "dps": {
+      "avg": 2042.8475927950003,
+      "stdev": 119.03770835170653,
+      "min": 1581.2271211277427,
+      "max": 2493.1684701395066,
+      "minSeed": "208",
+      "maxSeed": "2353"
+    }
+  },
+  "playerMetrics": {
+    "name": "slamaltman",
+    "dps": {
+      "avg": 2042.8475927950003,
+      "stdev": 119.03770835170653,
+      "min": 1581.2271211277427,
+      "max": 2493.1684701395066,
+      "minSeed": "208",
+      "maxSeed": "2353"
+    }
+  }
+}

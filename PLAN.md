@@ -3,7 +3,7 @@
 **Status:** for review, pre-implementation
 **Supersedes:** agent 1's `ARCHITECTURE.md`, agent 2's `tbc_upgrade_ranker_8c29d59f.plan.md`
 **Last updated:** 2026-07-26
-**Phase 0 findings applied:** [`docs/phase0-findings.md`](docs/phase0-findings.md). Sections carrying a verified fact are marked **[P0]**. Phase 0's gate is **not yet closed** — see §14.
+**Phase 0 findings applied:** [`docs/phase0-findings.md`](docs/phase0-findings.md). Sections carrying a verified fact are marked **[P0]**. Phase 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
 **Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections landed in the pool, the preset pipeline, the gem solver, the statistics and the display layer.
 
 ---
@@ -769,7 +769,7 @@ Nothing else in this plan is worth starting until a real `CombatantInfo` payload
 - Confirm the link-decoding path for presets (§8.2)
 - Write `docs/phase0-findings.md`, including the synthesis policy if fields are missing
 
-**Gate — partially met. Phase 1 does not start until the two open boxes are closed.**
+**Gate — met.** Recorded in [`docs/verification-log.md`](docs/verification-log.md).
 
 | | |
 |---|---|
@@ -777,16 +777,14 @@ Nothing else in this plan is worth starting until a real `CombatantInfo` payload
 | ☑ | present/absent fields documented, with synthesis policy for anything absent — §9, eligibility-aware |
 | ☑ | spec identification for Retribution — **not** a `specName` string; `specID` / talent-tree points (§5.2) |
 | ☑ | points cost per resolve measured — ~10.6 of 3,600/hr (§4) |
-| ☐ | **real logged ret gear produced a valid `RaidSimResult`** — the probe stopped at reading WCL. The sim half of this gate, the hand-composed `RaidSimRequest` through the pinned binary, has not been run. This is the half that proves the *whole* Phase 0 premise, since a readable payload we can't feed to the sim de-risks nothing |
-| ☐ | **preset decode path confirmed or fallback scoped** — out of scope for the probe. Review R10 asserts `decodelink` is a real subcommand; that is a claim about the tool, not an observation of ours. Verify against the pinned binary |
-| ☑ | **[R19] enchant and gem ID namespaces confirmed against `db.json`** — `permanentEnchant` is unambiguously the `tbc-new` **`effectId`** namespace: 10/10 resolved as `effectId`, 0 as `itemId`, and each enchant's type matches the slot it sat on. Confirmed again from the other direction — wowsims' own ret set writes `enchant: 3003` on the head and slamaltman's logged head enchant is also `3003`. **No conversion table needed; R14 is not real work.** All 12 gems resolve, meta included |
-| ☑ | **[R17] the 19 → 17 slot mapping verified item-by-item** (§8.4) — both orders confirmed, WCL's 19/19 and the sim's 16/16, the latter without needing the binary. Drop-only gets **11 of 17 positions wrong** |
-| ☑ | **content tier default sourced from upstream** — wowsims `CURRENT_PHASE`, pinned via `scripts/sync_wowsims.py` and `data/wowsims.lock.json` (§8.5) |
+| ☑ | **real logged ret gear produced a valid `RaidSimResult`** — `wowsimcli` v0.0.101, hand-composed `RaidSimRequest` from Slamaltman's mapped gear, DPS avg **2042.85** (3000 iter, seed 42). Fixtures: `test/fixtures/slamaltman.raid-sim-{request,result}.json`. **Also:** the raw fixture's `events[0]` is not the named character — match via `actors[]` |
+| ☑ | **preset decode path confirmed** — `wowsimcli decodelink` on a real ret P2 share link yields `IndividualSimSettings`; committed as `data/presets/ret/p2.individual-sim-settings.json`. zlib+base64 fallback stays scoped for export (§12) |
+| ☑ | **[R19] enchant and gem ID namespaces confirmed against `db.json`** — `permanentEnchant` is unambiguously the `tbc-new` **`effectId`** namespace. Re-confirmed on the *real* Slamaltman actor (9/9 effectId, 0 itemId; 10/10 gems). Head enchant `3003` matches wowsims' own ret set. **No conversion table needed; R14 is not real work.** |
+| ☑ | **[R17] the 19 → 17 slot mapping verified item-by-item** (§8.4) — both orders confirmed, WCL's 19/19 and the sim's 16/16. Drop-only gets **11 of 17 positions wrong** |
+| ☑ | **content tier default sourced from upstream** — wowsims `CURRENT_PHASE`, pinned via `scripts/sync_wowsims.py` / `pnpm sync:wowsims` and `data/wowsims.lock.json` (§8.5) |
 | ☒ | **[R8] `race` is NOT retrievable** — probed four routes, all negative, including the *Heroic Presence* aura across 6/6 reports on two confirmed-Alliance characters. **This box closes as a documented "no", not as a pass**: the design changed to suit (assumed race + `capUncertainty` + user override, §4) rather than the finding being deferred |
-| ☐ | **real logged ret gear produced a valid `RaidSimResult`** *(unchanged — needs the binary)* |
-| ☐ | **preset decode path confirmed or fallback scoped** *(unchanged — needs the binary)* |
 
-**Where this leaves Phase 0.** Everything readable from WCL or from `db.json` is now settled, and it's all recorded in [`docs/verification-log.md`](docs/verification-log.md) with the commands to reproduce it. The two remaining boxes are both exercises against `wowsimcli`, which is not yet vendored — one sitting's work, and they should be done together.
+**Where this leaves Phase 0.** Closed. Phase 1 may start.
 
 ### Phase 1 — The engine (ret, CLI only)
 
