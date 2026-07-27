@@ -298,3 +298,27 @@ re-provisional 3.0). Paired-replicate SE for the top ~8 stays Phase 2.
 One gate box closed. Remaining Phase 1 work: scaffold, generated protos, three
 seams + adapters, eight stages, slot-mapping test, gem solver, curated pool,
 `pnpm rank`, and the human-trust checks on a real shortlist.
+
+---
+
+## 2026-07-27 — Compose rotation: APL is load-bearing under TypeSimple
+
+Question: the golden `ret-p2.raid-sim-skeleton.json` / slamaltman request labels
+`rotation.type` as `TypeSimple` while also carrying the four APL fields from
+pinned `vendor/wowsims/ret_default.apl.json`. Are those APL fields inert?
+
+Reproduce (pinned `wowsimcli` v0.0.101, fixture request, 3000 iter, seed 42):
+
+| Variant | avg DPS |
+|---|---|
+| Committed request (baseline) | **2042.847593** |
+| `prepullActions` stripped or `[]` | 789.024346 |
+| Only `type` + `simple` (no APL fields) | 673.740575 |
+| Label flipped to `TypeAPL`, APL kept | **2042.847593** |
+| Rotation replaced with vendor APL only | **2042.847593** |
+
+**Conclusion:** the APL block — especially `prepullActions` — is active. The
+`TypeSimple` label is not what the Go sim is running for the Phase 0 baseline.
+Compose / the skeleton generator must merge the pinned APL; `type`+`simple`
+alone is wrong. PLAN.md §8.2 updated to the build-time generator + golden
+skeleton shape (design C).

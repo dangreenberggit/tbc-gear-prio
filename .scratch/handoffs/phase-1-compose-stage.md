@@ -8,7 +8,16 @@
 
 ## Status
 
-partial — design work done and evidenced, no compose code written yet
+partial — §4 settled (APL load-bearing), design C locked in PLAN.md §8.2,
+`compose` green against slamaltman oracle, meta activation check landed
+(slamaltman active). Still open: min-EP meta repair, ticket 03 disclosure
+drawer, ticket 05 proto drift, wiring compose into `rankUpgrades`.
+
+**Branch tip after this sitting:** run `git log -1 --oneline` — was built on
+`9a01680` + uncommitted work (ask before commit).
+
+**Paused:** yes — do not land to `dev` unless the user explicitly asks after a
+`pre-merge-review` has been written and seen
 
 ## Branch
 
