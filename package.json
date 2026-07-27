@@ -4,6 +4,7 @@
   "private": true,
   "description": "tbc gear prio",
   "type": "module",
+  "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
     "verify": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test",
