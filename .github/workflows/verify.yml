@@ -1,0 +1,28 @@
+name: verify
+
+# Runs on every push and every PR into dev/main. No secrets, no native binary:
+# PLAN.md's three seams (GearSource, SimRunner, Store) all have recorded
+# adapters, so the whole engine is designed to run offline from committed
+# fixtures (see docs/verification-log.md). Green CI is the standing proof
+# that path still works.
+on:
+  push:
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run verify
