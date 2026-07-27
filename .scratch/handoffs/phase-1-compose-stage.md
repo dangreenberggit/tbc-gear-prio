@@ -9,28 +9,34 @@
 ## Status
 
 partial — compose, meta activation/repair, and offline baseline path through
-`rankUpgrades` are green (`pnpm verify`: 53 tests + skeleton:check).
+`rankUpgrades` are green. Tip: `9868b79`. `pnpm verify`: 54 tests +
+`skeleton:check`. Offline
+`pnpm rank --region US --realm dreamscythe --character slamaltman --offline`
+prints **baseline 2042.85** (metaAdjusted=false).
 
 **Done this sitting:** §4 APL finding, design C, compose oracle, Stat/epScore,
 meta conditions + min-EP repair (R4), `rankUpgrades` baseline
-(resolve→gear→compose→sim) with `baseline.metaAdjusted`.
+(resolve→gear→compose→sim) with `baseline.metaAdjusted`, offline slamaltman
+CLI via CliSimRunner.
 
-**Still open:** disclosure drawer (tickets 03/04 substitutions), candidate
-pool/ranking loop, ticket 05 proto drift. Offline CLI slamaltman path works.
+**Still open:** disclosure / Substitution[] (tickets 03/04), candidate
+pool generator + ranking loop, ticket 05 proto drift.
 
 **Paused:** yes — do not land to `dev` unless the user explicitly asks after a
 `pre-merge-review` has been written and seen
 
 ## Branch
 
-`phase-1/five-seed-spread` @ `d77cba5`. **Not pushed.** `dev` is ahead of
+`phase-1/five-seed-spread` @ `9868b79`. **Not pushed.** `dev` is ahead of
 `origin/dev`. No `pre-merge-review` exists for this branch yet.
 
 ```bash
 git checkout phase-1/five-seed-spread
 pnpm install
-pnpm verify          # expect 8 files / 39 tests green
+pnpm verify          # expect 54 tests + skeleton:check green
 pnpm issues:open     # expect 03, 04, 05 open (all Blocks: phase-1)
+pnpm rank --region US --realm dreamscythe --character slamaltman --offline
+                     # expect baseline ~2042.85
 ```
 
 ---
