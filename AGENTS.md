@@ -28,7 +28,7 @@ When a phase or feature branch has **independent** slices (different kinds of wo
 
 ### Models and walls
 
-**Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute. On **Cursor**, sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug). Elsewhere prefer Sonnet/Terra workhorse and Opus/sol/`codex` sharp when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
+**Workhorse** = best mid-tier the harness will actually run; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute. On **Cursor Pro**, workers pin **Composer** (Other-pool Terra/Sol often die at spawn); sharp = **Grok high**. Elsewhere: Sonnet/Terra-class workhorse and Opus/sol/`codex` sharp when quota is real. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 
