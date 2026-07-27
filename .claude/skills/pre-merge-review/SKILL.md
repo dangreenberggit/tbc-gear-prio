@@ -1,6 +1,6 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch before it lands on dev. Use when the user wants to review a feature branch before merging, asks to "run pre-merge review", or a feature's work looks done and is about to be landed with pnpm land.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any land ask.
 ---
 
 # Pre-Merge Review
@@ -29,23 +29,39 @@ Three-dot diff against the merge-base, same convention as `code-review`.
 Confirm the diff is non-empty before dispatching anything — an empty diff
 means there's nothing to review, not three empty reports.
 
-### 2. Dispatch, degrading gracefully
+### 2. Dispatch (sharp lane — slow is fine)
 
-Try in order, use the first that's available:
+Reviewers are on the **sharp** model lane — see
+[`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
 
-1. **`codex exec`**, if the binary is on `PATH` — genuine cross-vendor
-   adversarial review. Pipe the brief + diff to it directly.
-2. **Parallel subagents** on the current harness (Sonnet by default, per
-   this repo's convention — spawn all three in one batch, don't run them
-   sequentially).
-3. **Print and hand off** — if neither is available, print each brief plus
-   the diff command and tell the user to paste them into a fresh session
-   (a different chat, a different tool, doesn't matter — the only
-   requirement is that it starts with no memory of writing this code).
+**Cursor ceiling vs wall:** If Cursor refuses Sol/Opus and only offers Grok
+high, that is the sharp lane here — note it in the dispatch line and
+continue on Grok high (prefer non-fast; else `…-high-fast`). That is not
+a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure (or
+a swap to something *below* Grok high on Cursor / below the harness top
+elsewhere) — then wait, serialise, or hand off; do not invent a weaker
+model to finish.
 
-Run the **adversarial** and **domain** sub-agents yourself using the briefs
-above. Invoke the **`code-review`** skill separately for the third axis —
-don't re-implement its Standards/Spec logic here.
+Try in order:
+
+1. **`codex exec`**, if the binary is on `PATH` — cross-vendor sharp review.
+   Pipe the brief + diff to it directly.
+2. **Fresh subagents on a sharp model** (explicit id). On **Cursor**: Grok
+   high (prefer non-fast; else the current `…-high-fast` slug). Elsewhere:
+   Opus-class / GPT high/sol-class / top reasoning tier. Prefer all three
+   axes in one parallel batch when the harness is healthy.
+3. **On a wall** (see above):
+   - Retry once after a short wait on the **same sharp class**.
+   - Then run axes **one at a time** (adversarial → domain → code-review),
+     still sharp — slower wall-clock is acceptable.
+   - Then **print and hand off**: each brief + `git diff dev...HEAD` for a
+     fresh session or other tool (no memory of writing this code).
+4. **Same-session review by the authoring agent** only if the user
+   explicitly opts in. Label it in the review file’s dispatch note.
+
+Run the **adversarial** and **domain** sub-agents with the briefs above.
+Invoke the **`code-review`** skill for the third axis — don't re-implement
+its Standards/Spec logic here.
 
 ### 3. Aggregate, file tickets, write the review
 
@@ -97,10 +113,12 @@ On `phase-N/*` with open `Blocks: phase-N` tickets still open:
 pnpm land --check-only --ack-open-blockers
 ```
 
-### 5. Report
+### 5. Report — then stop
 
 Tell the user where the review file is, the summary, and that
-`pnpm land --check-only` is green. **Do not land on their behalf** — they
-run `pnpm land` when ready. Do not `git merge` into `dev` by hand; the
-pre-commit hook will refuse the merge commit unless `TBC_ALLOW_DEV_MERGE=1`
-(which `pnpm land` sets). Escape hatch: `TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>`.
+`pnpm land --check-only` is green. **Stop there.** Do not run `pnpm land`,
+do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
+unless the user has **explicitly asked to land after seeing the review
+summary**. “Review and land” / “the branch looks done” / “commit this” /
+finishing this skill is **not** permission to land — wait for a separate
+ask. When they do ask, use `pnpm land` only — never a raw merge into `dev`.
