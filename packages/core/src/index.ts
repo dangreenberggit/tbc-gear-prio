@@ -27,6 +27,7 @@ export {
   type SimRunOpts,
   type SimRunner,
 } from "./seams/sim-runner.js";
+export { CliSimRunner } from "./seams/cli-sim-runner.js";
 export {
   MemoryStore,
   type Job,
