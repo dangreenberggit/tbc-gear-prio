@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "data/wowsims.lock.json"
 VENDOR = ROOT / "vendor"
 
-# Upstream asset name → (vendor dirname suffix, binary name inside the zip)
+# platform → (GitHub release zip name, binary name inside that zip)
 ASSETS = {
     "win32-x64": ("wowsimcli-windows.exe.zip", "wowsimcli-windows.exe"),
     "linux-x64": ("wowsimcli-amd64-linux.zip", "wowsimcli"),

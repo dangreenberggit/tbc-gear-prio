@@ -89,6 +89,7 @@ def main():
     ev = want
     gear = ev["gear"]
     actor = actors[ev["sourceID"]]
+    failed = False
 
     print("=" * 78)
     print(f"FIXTURE: {fixture_path}  ({len(events)} combatants)")
@@ -139,6 +140,7 @@ def main():
 
     print()
     if mismatches:
+        failed = True
         print(f"  !! {len(mismatches)} MISMATCH(ES) -- PLAN.md 8.4's table is WRONG:")
         for m in mismatches:
             print(f"     idx {m[0]} item {m[1]}: claimed {m[2]}, db says {m[3]}")
@@ -210,8 +212,10 @@ def main():
         print("  enchant's type matches the slot it was found on. No conversion table")
         print("  needed. R14/R19 CLOSED.")
     elif hits_item and not hits_effect:
+        failed = True
         print("\n  VERDICT: itemId namespace -- a lookup table IS required (R14 is real work).")
     else:
+        failed = True
         print("\n  VERDICT: ambiguous, inspect by hand.")
 
     # ---------------------------------------------------------------- R4
@@ -278,6 +282,8 @@ def main():
             print(f"  [{i:>2}] claims {claim:<10} db says {db_slot:<9} "
                   f"enchant: {ename[:40]:<40} {'ok' if ok_slot else 'MISMATCH'}")
         print(f"\n  {agree} agree, {disagree} disagree.")
+        if disagree:
+            failed = True
         if not disagree:
             print("  The sim's 17-entry order in PLAN.md 8.4 is CONFIRMED -- independently")
             print("  of the WCL side, and note the enchant names land on the slots their")
@@ -286,7 +292,12 @@ def main():
             print("  the same effectId namespace that WCL reports.")
 
     print("\n" + "=" * 78)
+    if failed:
+        print("FAILED — one or more checks disagreed with PLAN.md / db.json",
+              file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main() or 0)
+    raise SystemExit(main())

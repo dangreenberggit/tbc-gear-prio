@@ -25,11 +25,17 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+LOCK = ROOT / "data/wowsims.lock.json"
 FIXTURE = ROOT / "test/fixtures/slamaltman.raw.json"
 SKELETON = ROOT / "test/fixtures/ret-p2.raid-sim-skeleton.json"
-CLI = ROOT / "vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe"
 OUT_REQ = ROOT / "test/fixtures/slamaltman.raid-sim-request.json"
 OUT_RES = ROOT / "test/fixtures/slamaltman.raid-sim-result.json"
+
+# Same layout as scripts/fetch_wowsimcli.py — keep the binary names in sync.
+CLI_BINARIES = {
+    "win32-x64": "wowsimcli-windows.exe",
+    "linux-x64": "wowsimcli",
+}
 
 # WCL client order (19). Indices 3 and 18 are shirt/tabard — dropped.
 WCL_ORDER = [
@@ -80,6 +86,14 @@ ITERATIONS = 3000
 RANDOM_SEED = "42"
 
 
+def resolve_cli() -> Path:
+    """vendor/wowsimcli-<lock.tag>-<platform>/<binary> — same pin as db.json."""
+    tag = json.loads(LOCK.read_text(encoding="utf-8"))["tag"]
+    platform = "win32-x64" if sys.platform.startswith("win") else "linux-x64"
+    binary = CLI_BINARIES[platform]
+    return ROOT / "vendor" / f"wowsimcli-{tag}-{platform}" / binary
+
+
 def wcl_to_item_spec(slot: dict) -> dict:
     """Map one WCL gear entry to a wowsims ItemSpec (protojson).
 
@@ -115,16 +129,40 @@ def map_equipment(wcl_gear: list) -> list:
     return items
 
 
+def slim_distribution(d: dict | None) -> dict | None:
+    if not d:
+        return d
+    keep = ("avg", "stdev", "min", "max", "minSeed", "maxSeed")
+    return {k: d[k] for k in keep if k in d}
+
+
+def slim_result(result: dict, sim_version: str) -> dict:
+    """Drop per-spell action/aura payloads; keep raid/player DPS distributions."""
+    out = {
+        "error": result.get("error"),
+        "iterationsDone": result.get("iterationsDone"),
+        "firstIterationDuration": result.get("firstIterationDuration"),
+        "avgIterationDuration": result.get("avgIterationDuration"),
+        "simVersion": sim_version,
+        "raidMetrics": {
+            "dps": slim_distribution((result.get("raidMetrics") or {}).get("dps")),
+        },
+    }
+    parties = (result.get("raidMetrics") or {}).get("parties") or []
+    if parties and (parties[0].get("players") or []):
+        player = parties[0]["players"][0]
+        out["playerMetrics"] = {
+            "name": player.get("name"),
+            "dps": slim_distribution(player.get("dps")),
+        }
+    return out
+
+
 def main() -> int:
-    if not CLI.is_file():
-        print(f"missing wowsimcli at {CLI}", file=sys.stderr)
-        print(
-            "fetch: curl -sL -o /tmp/cli.zip "
-            "https://github.com/wowsims/tbc-new/releases/download/v0.0.101/"
-            "wowsimcli-windows.exe.zip && unzip into "
-            "vendor/wowsimcli-v0.0.101-win32-x64/",
-            file=sys.stderr,
-        )
+    cli = resolve_cli()
+    if not cli.is_file():
+        print(f"missing wowsimcli at {cli}", file=sys.stderr)
+        print("fetch: pnpm fetch:wowsimcli", file=sys.stderr)
         return 2
     if not SKELETON.is_file():
         print(f"missing skeleton RaidSimRequest at {SKELETON}", file=sys.stderr)
@@ -175,10 +213,12 @@ def main() -> int:
     OUT_REQ.write_text(json.dumps(req, indent=2) + "\n", encoding="utf-8")
     print(f"wrote {OUT_REQ.relative_to(ROOT)}")
 
+    version = subprocess.check_output([str(cli), "version"], text=True).strip()
+
     tmp_out = ROOT / ".scratch/phase0-close/slamaltman.raid-sim-result.raw.json"
     tmp_out.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
-        str(CLI),
+        str(cli),
         "sim",
         "--infile",
         str(OUT_REQ),
@@ -193,52 +233,34 @@ def main() -> int:
         return proc.returncode
 
     result = json.loads(tmp_out.read_text(encoding="utf-8"))
-    # Full protojson is hundreds of KB of per-action histograms. The committed
-    # RecordedSimRunner fixture keeps the observation shape we'll key on later.
-    slim = slim_result(result)
-    OUT_RES.write_text(json.dumps(slim, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote {OUT_RES.relative_to(ROOT)} (slimmed; full raw at {tmp_out.relative_to(ROOT)})")
-
+    err = result.get("error")
+    if err not in (None, {}, {"type": "ErrorOutcomeNone"}):
+        # Protojson often emits error as null; a typed error is a hard fail.
+        if isinstance(err, dict) and err.get("type") and err.get("type") != "ErrorOutcomeNone":
+            print(f"sim error: {json.dumps(err)}", file=sys.stderr)
+            return 1
+    done = result.get("iterationsDone")
+    if done != ITERATIONS:
+        print(
+            f"iterationsDone={done!r}, expected {ITERATIONS}",
+            file=sys.stderr,
+        )
+        return 1
     try:
-        dps = slim["raidMetrics"]["dps"]["avg"]
+        dps = result["raidMetrics"]["dps"]["avg"]
     except (KeyError, TypeError):
-        print("WARN: could not find raidMetrics.dps.avg", file=sys.stderr)
-        print(json.dumps(slim.get("error"), indent=2))
+        print("missing raidMetrics.dps.avg", file=sys.stderr)
+        print(json.dumps(result.get("error"), indent=2))
         return 1
 
-    version = subprocess.check_output([str(CLI), "version"], text=True).strip()
+    # Validate before writing the committed fixture — don't leave a green-looking
+    # file behind a failed run.
+    slim = slim_result(result, version)
+    OUT_RES.write_text(json.dumps(slim, indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {OUT_RES.relative_to(ROOT)} (slimmed; full raw at {tmp_out.relative_to(ROOT)})")
     print(f"DPS avg={dps:.2f}  iterations={ITERATIONS}  seed={RANDOM_SEED}")
     print(f"wowsimcli version: {version}")
     return 0
-
-
-def slim_distribution(d: dict | None) -> dict | None:
-    if not d:
-        return d
-    keep = ("avg", "stdev", "min", "max", "minSeed", "maxSeed")
-    return {k: d[k] for k in keep if k in d}
-
-
-def slim_result(result: dict) -> dict:
-    """Drop per-spell action/aura payloads; keep raid/player DPS distributions."""
-    out = {
-        "error": result.get("error"),
-        "iterationsDone": result.get("iterationsDone"),
-        "firstIterationDuration": result.get("firstIterationDuration"),
-        "avgIterationDuration": result.get("avgIterationDuration"),
-        "simVersion": "v0.0.101",
-        "raidMetrics": {
-            "dps": slim_distribution((result.get("raidMetrics") or {}).get("dps")),
-        },
-    }
-    parties = (result.get("raidMetrics") or {}).get("parties") or []
-    if parties and (parties[0].get("players") or []):
-        player = parties[0]["players"][0]
-        out["playerMetrics"] = {
-            "name": player.get("name"),
-            "dps": slim_distribution(player.get("dps")),
-        }
-    return out
 
 
 if __name__ == "__main__":
