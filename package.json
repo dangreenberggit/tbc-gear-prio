@@ -21,6 +21,7 @@
     "fetch:protos": "python scripts/fetch_protos.py",
     "fetch:protos:check": "python scripts/fetch_protos.py --check",
     "proto:generate": "buf generate data/proto --template buf.gen.yaml",
+    "data:items:generate": "python scripts/generate_item_gem_index.py",
     "experiment:five-seed": "python scripts/five_seed_spread.py",
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",

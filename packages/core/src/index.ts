@@ -57,3 +57,17 @@ export type {
   Region,
   SpecId,
 } from "./types.js";
+export {
+  gemPalette,
+  gemsForPhase,
+  getGem,
+  type GemColour,
+  type GemEntry,
+} from "./gems.js";
+export {
+  getItem,
+  isEnchantable,
+  socketsFor,
+  type ItemEntry,
+  type ItemSlot,
+} from "./items.js";
