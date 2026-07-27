@@ -24,6 +24,7 @@
     "data:items:generate": "python scripts/generate_item_gem_index.py",
     "experiment:five-seed": "python scripts/five_seed_spread.py",
     "skeleton:check": "python scripts/check_raid_sim_skeleton.py",
+    "pool:generate": "python scripts/generate_pool.py",
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",
     "issues:open": "python scripts/check_merge_ready.py --list-only"
