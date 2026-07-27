@@ -1,0 +1,18 @@
+# Generates packages/core/src/proto/ from data/proto/*.proto (PLAN.md §8.1).
+#
+# `buf generate` is invoked with the pinned .proto directory as its own input
+# (no buf.yaml / module needed for a plain directory of files), so this is the
+# only config file the codegen step requires. Regenerating and diffing is the
+# CI check that a sim-version bump didn't silently drift the committed types.
+version: v2
+plugins:
+  - local: protoc-gen-es
+    out: packages/core/src/proto
+    opt:
+      # target=ts (not js+dts): source is fine to commit for a monorepo build,
+      # and dodges protobuf-es's dts codegen quirks under our strict tsconfig.
+      - target=ts
+      # This repo's tsconfig.base.json is moduleResolution: NodeNext, which
+      # requires explicit extensions on relative imports (TS2835) — protobuf-es
+      # defaults to bundler-style extension-less imports, so it needs telling.
+      - import_extension=js
