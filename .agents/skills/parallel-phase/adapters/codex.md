@@ -14,4 +14,4 @@ Run merge commands from a Codex session checked out on the **feature branch** (d
 
 ## Review / land
 
-Unchanged: `pre-merge-review` then `pnpm land`. Codex may already be used as a cross-vendor reviewer inside pre-merge-review — that is separate from this fan-out skill.
+Unchanged land path: `pre-merge-review`, then **ask** before `pnpm land`. Codex may already be used as a cross-vendor reviewer inside pre-merge-review — that is separate from this fan-out skill.

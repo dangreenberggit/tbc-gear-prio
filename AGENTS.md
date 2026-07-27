@@ -24,15 +24,19 @@ Invoke the `tdd` skill for any red/green work. The seams are the three PLAN.md �
 
 ### Parallel agents
 
-When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges by default; a merger worker is the fallback). Then `pnpm verify` on the integrated tip and the normal review / `pnpm land` once — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
+When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges by default; a merger worker is the fallback). Then `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
+
+### Models and walls
+
+**Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute. On **Cursor**, sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug). Elsewhere prefer Sonnet/Terra workhorse and Opus/sol/`codex` sharp when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 
 1. Branch off `dev`: `feat/<slug>` (or `phase-N/<slug>` for a PLAN.md phase).
 2. Red → green, one slice at a time, with regular commits.
 3. `pnpm verify` before every push — typecheck, lint, format, test (also on pre-push).
-4. Run the `pre-merge-review` skill → `docs/reviews/<branch>.md`. Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime.
-5. **`pnpm land`** — the only supported door into `dev`: verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first). Do not `git merge` into `dev` by hand — the pre-commit hook refuses merge commits on `dev` unless `pnpm land` ran (sets `TBC_ALLOW_DEV_MERGE=1`). Escape: `TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>`.
+4. When the branch looks done: run the `pre-merge-review` skill → `docs/reviews/<branch>.md` (commit it on the feature branch). Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime. **Do not skip this** — `pnpm land` only checks that the review file exists; it does not run the review.
+5. **Ask before landing.** Never `pnpm land`, never `git merge` into `dev`, and never set `TBC_ALLOW_DEV_MERGE=1`, unless the user has explicitly asked to land/merge **after** the review file is written and they have had a chance to see the summary (a combined “review and land” request is **not** enough — finish the review, stop, wait for a separate land ask). When they ask: `pnpm land` is the only supported door — verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first).
 6. `main` only receives a merge from `dev` when a PLAN.md §14 phase gate is fully checked off in `docs/verification-log.md`.
 
 ### Gates

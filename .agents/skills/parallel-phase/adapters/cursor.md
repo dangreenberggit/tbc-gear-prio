@@ -11,7 +11,7 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 
 ## Orchestrate (optional, large fan-out)
 
-For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this repo’s rules: merge onto the **feature branch**, never land workers to `dev`; after fan-in, still run `pre-merge-review` + `pnpm land` once.
+For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this repo’s rules: merge onto the **feature branch**, never land workers to `dev`; after fan-in, run `pre-merge-review`, then **ask** before `pnpm land`.
 
 ## Merge
 
