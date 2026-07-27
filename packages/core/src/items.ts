@@ -42,6 +42,14 @@ export type ItemEntry = {
    * (rings) are enchantable via the Enchanting profession's "Enchant Ring -
    * *" recipes, confirmed against real WCL fixture data
    * (test/fixtures/slamaltman.raw.json shows 14/50 ring slots enchanted).
+   *
+   * Not sufficient to gate synthesis on its own. Ring enchants are
+   * enchanter-only (the only four records in db.json's enchants[] with a
+   * requiredProfession), so `enchantable: true` on a finger does not mean
+   * this player can apply one. Synthesis must additionally gate on observed
+   * per-slot presence, or a synthesized candidate enchant gets compared
+   * against a bare baseline slot and its stats are misattributed to the
+   * item — PLAN.md §9, "the symmetry invariant".
    */
   enchantable: boolean;
   setId: number | null;
