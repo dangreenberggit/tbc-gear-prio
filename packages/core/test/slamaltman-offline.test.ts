@@ -1,0 +1,27 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import {
+  slamaltmanOfflineRecordings,
+  SLAMALTMAN_REF,
+  type SlamaltmanRawFixture,
+} from "../src/fixtures/slamaltman-offline.js";
+import { characterFightKey, fightGearKey } from "../src/seams/gear-source.js";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+describe("slamaltmanOfflineRecordings", () => {
+  it("loads the Phase 0 raw fixture into GearSource recordings", () => {
+    const raw = JSON.parse(
+      readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")
+    ) as SlamaltmanRawFixture;
+    const data = slamaltmanOfflineRecordings(raw);
+    const fights = data.fights.get(characterFightKey(SLAMALTMAN_REF, "ret"));
+    expect(fights).toHaveLength(1);
+    expect(fights![0]?.encounterName).toBe("Hydross the Unstable");
+    const gear = data.gear.get(fightGearKey(fights![0]!));
+    expect(gear?.items).toHaveLength(17);
+    expect(gear?.items[0]?.id).toBe(32461);
+  });
+});

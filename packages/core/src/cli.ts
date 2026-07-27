@@ -3,13 +3,20 @@
  * I/O lives here; the core module stays pure.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
+import {
+  slamaltmanOfflineRecordings,
+  SLAMALTMAN_REF,
+  type SlamaltmanRawFixture,
+} from "./fixtures/slamaltman-offline.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
+import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
-import { RecordedSimRunner, type RaidSimRequest } from "./seams/sim-runner.js";
+import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
 import type { Region } from "./types.js";
 
@@ -74,6 +81,13 @@ function loadJson<T>(rel: string): T {
   return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
 }
 
+function resolveWowsimcli(): string {
+  const tag = loadJson<{ tag: string }>("data/wowsims.lock.json").tag;
+  const plat = platform().startsWith("win") ? "win32-x64" : "linux-x64";
+  const binary = plat === "win32-x64" ? "wowsimcli-windows.exe" : "wowsimcli";
+  return join(root, "vendor", `wowsimcli-${tag}-${plat}`, binary);
+}
+
 export async function main(argv = process.argv.slice(2)): Promise<number> {
   const args = parseArgs(argv);
   if (!args.offline) {
@@ -100,15 +114,33 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     "data/presets/ret/p2.ep-weights.json"
   ).weights;
 
+  const isSlamaltman =
+    args.region === SLAMALTMAN_REF.region &&
+    args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
+    args.character.toLowerCase() === SLAMALTMAN_REF.name;
+
+  const gearData = isSlamaltman
+    ? slamaltmanOfflineRecordings(
+        loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
+      )
+    : { fights: new Map(), gear: new Map() };
+
+  const binary = resolveWowsimcli();
+  if (!existsSync(binary)) {
+    console.error(`missing wowsimcli at ${binary}`);
+    console.error("fetch: pnpm fetch:wowsimcli");
+    return 2;
+  }
+  const sim: SimRunner = new CliSimRunner(binary);
+
   console.log(
     `rank ${args.character}@${args.realm}-${args.region} (offline) cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
   );
 
   try {
     const ranking = await rankUpgrades(input, {
-      // Empty recordings until Phase 1 wires fixture packs into the CLI.
-      gear: new RecordedGearSource({ fights: new Map(), gear: new Map() }),
-      sim: new RecordedSimRunner("v0.0.101", new Map()),
+      gear: new RecordedGearSource(gearData),
+      sim,
       store: new MemoryStore(),
       clock: () => new Date(),
       raidSimSkeleton: skeleton,

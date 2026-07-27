@@ -15,8 +15,8 @@ partial — compose, meta activation/repair, and offline baseline path through
 meta conditions + min-EP repair (R4), `rankUpgrades` baseline
 (resolve→gear→compose→sim) with `baseline.metaAdjusted`.
 
-**Still open:** CLI fixture pack for offline slamaltman, disclosure drawer
-(tickets 03/04), candidate pool/ranking loop, ticket 05 proto drift.
+**Still open:** disclosure drawer (tickets 03/04 substitutions), candidate
+pool/ranking loop, ticket 05 proto drift. Offline CLI slamaltman path works.
 
 **Paused:** yes — do not land to `dev` unless the user explicitly asks after a
 `pre-merge-review` has been written and seen
