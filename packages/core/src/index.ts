@@ -71,3 +71,13 @@ export {
   type ItemEntry,
   type ItemSlot,
 } from "./items.js";
+export { compose, type ComposePlayer } from "./compose.js";
+export { Stat, statAt } from "./stats.js";
+export {
+  gemColorCounts,
+  gemColorMatchesSocket,
+  isMetaConditionMet,
+  metaStatus,
+  type GemColorCounts,
+  type MetaStatus,
+} from "./meta.js";
