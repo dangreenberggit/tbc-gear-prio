@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -39,7 +40,20 @@ import check_merge_ready  # noqa: E402
 ALLOW_DEV_MERGE = "TBC_ALLOW_DEV_MERGE"
 
 
+def _resolve_cmd(cmd: list[str]) -> list[str]:
+    """On Windows, bare 'pnpm'/'npx' need the .cmd shim."""
+    if not cmd:
+        return cmd
+    exe = cmd[0]
+    if os.name == "nt" and exe in ("pnpm", "npx", "npm", "git"):
+        found = shutil.which(exe)
+        if found:
+            return [found, *cmd[1:]]
+    return cmd
+
+
 def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
+    cmd = _resolve_cmd(cmd)
     print("+", " ".join(cmd))
     return subprocess.run(cmd, cwd=ROOT, **kwargs)
 
