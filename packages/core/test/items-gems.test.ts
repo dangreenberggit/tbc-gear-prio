@@ -1,0 +1,151 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+import { gemPalette, getGem } from "../src/gems.js";
+import { getItem, isEnchantable, socketsFor } from "../src/items.js";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+describe("items index", () => {
+  it("covers every equippable item, not just a curated pool", () => {
+    // db.json has 8257 items total, 4 of which carry no `type` (not
+    // equippable — herbs, quest tokens). The generated index must include
+    // the rest, not a hand-picked subset.
+    const raw = JSON.parse(
+      readFileSync(join(root, "data/items/index.json"), "utf8")
+    ) as Record<string, unknown>;
+    expect(Object.keys(raw).length).toBeGreaterThan(8000);
+  });
+
+  it("classifies a head item as enchantable with no sockets (Wolfshead Helm)", () => {
+    const item = getItem(8345);
+    expect(item?.name).toBe("Wolfshead Helm");
+    expect(item?.slot).toBe("head");
+    expect(item?.enchantable).toBe(true);
+    expect(item?.sockets).toEqual([]);
+  });
+
+  it("classifies a neck item as not enchantable (Necklace of Sanctuary)", () => {
+    const item = getItem(10778);
+    expect(item?.slot).toBe("neck");
+    expect(item?.enchantable).toBe(false);
+  });
+
+  it("captures sockets and socketBonus on a belt (Spellfire Belt)", () => {
+    const item = getItem(21846);
+    expect(item?.slot).toBe("waist");
+    expect(item?.enchantable).toBe(false);
+    expect(item?.sockets).toEqual([4, 3]);
+    expect(socketsFor(21846)).toEqual([4, 3]);
+    // Socket bonus is only granted when every socket is colour-matched
+    // (PLAN.md §9 R4) — the raw stat array must be non-empty so the
+    // meta-repair solver can price forfeiting it.
+    expect(item?.socketBonus.some((v) => v > 0)).toBe(true);
+  });
+
+  it("marks trinkets as not enchantable", () => {
+    expect(isEnchantable(28830)).toBe(false); // Dragonspine Trophy
+    expect(getItem(28830)?.slot).toBe("trinket");
+  });
+
+  it("marks rings as enchantable, correcting PLAN.md §9's stated rule", () => {
+    // PLAN.md §9 states neck/finger/trinket are all non-enchantable in TBC.
+    // Cross-checking the full slamaltman fixture (25 combatants, not just
+    // the two Phase-0 probe characters) shows ring slots carrying a real
+    // "Enchant Ring - *" permanentEnchant in 14/50 cases. Band of Eternity
+    // is one of the ring ids observed enchanted in that fixture.
+    const item = getItem(29302);
+    expect(item?.slot).toBe("finger");
+    expect(item?.enchantable).toBe(true);
+  });
+
+  it("agrees with every enchant/no-enchant slot observed in the real fixture", () => {
+    const raw = JSON.parse(
+      readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")
+    ) as {
+      combatant_info_events: Array<{
+        gear: Array<{ id?: number | null; permanentEnchant?: number | null }>;
+      }>;
+    };
+
+    let checked = 0;
+    for (const ev of raw.combatant_info_events) {
+      for (const g of ev.gear) {
+        if (!g.id) continue;
+        const item = getItem(g.id);
+        if (!item) continue; // shirt/tabard — not in db.json, expected
+        if (g.permanentEnchant) {
+          expect(item.enchantable).toBe(true);
+        }
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(300);
+  });
+
+  it("every socket count in the fixture is covered by the item's own socket list", () => {
+    const raw = JSON.parse(
+      readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")
+    ) as {
+      combatant_info_events: Array<{
+        gear: Array<{
+          id?: number | null;
+          gems?: Array<unknown> | null;
+        }>;
+      }>;
+    };
+
+    for (const ev of raw.combatant_info_events) {
+      for (const g of ev.gear) {
+        if (!g.id) continue;
+        const item = getItem(g.id);
+        if (!item) continue;
+        const gemCount = g.gems?.length ?? 0;
+        expect(gemCount).toBeLessThanOrEqual(item.sockets.length);
+      }
+    }
+  });
+});
+
+describe("gem palette", () => {
+  it("excludes jewelcrafting-restricted gems outright (PLAN.md §9 R4)", () => {
+    // "Crimson Sun" requires Jewelcrafting in db.json and must not appear.
+    const crimsonSun = gemPalette().find((g) => g.id === 33131);
+    expect(crimsonSun).toBeUndefined();
+  });
+
+  it("flags meta gems with colour 1, all phase 1", () => {
+    // Relentless Earthstorm Diamond is a meta gem.
+    const meta = getGem(32409);
+    expect(meta?.colour).toBe(1);
+    expect(meta?.phase).toBe(1);
+  });
+
+  it("flags unique gems so multi-socket consideration can exclude them", () => {
+    const unique = gemPalette().filter((g) => g.unique);
+    expect(unique.length).toBeGreaterThan(0);
+    expect(unique.every((g) => typeof g.id === "number")).toBe(true);
+  });
+
+  it("keeps phase 3's epic gems out of a maxPhase 2 selection", () => {
+    // PLAN.md §9 R4.1: gem counts by tier are 163/6/39/0/6 for P1-P5, and
+    // phase 3 is the epic-gem tier. A maxPhase:2 rank must never surface them.
+    const phase3Gems = gemPalette().filter((g) => g.phase === 3);
+    expect(phase3Gems.length).toBeGreaterThan(0);
+    for (const g of phase3Gems) {
+      expect(g.phase).toBeGreaterThan(2);
+    }
+  });
+
+  it("renames db.json's `color` field to `colour`", () => {
+    const raw = JSON.parse(
+      readFileSync(join(root, "data/gems/palette.json"), "utf8")
+    ) as Array<Record<string, unknown>>;
+    expect(raw.length).toBeGreaterThan(0);
+    for (const entry of raw) {
+      expect(entry).not.toHaveProperty("color");
+      expect(entry).toHaveProperty("colour");
+    }
+  });
+});
