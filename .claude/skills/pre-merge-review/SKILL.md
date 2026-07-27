@@ -1,6 +1,6 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch before it lands on dev. Use when the user wants to review a feature branch before merging, asks to "run pre-merge review", or a feature's work looks done and is about to be landed with pnpm land.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any land ask.
 ---
 
 # Pre-Merge Review
@@ -32,20 +32,25 @@ means there's nothing to review, not three empty reports.
 ### 2. Dispatch (sharp lane — slow is fine)
 
 Reviewers are on the **sharp** model lane — see
-[`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md). Do
-**not** silently downgrade to a weaker model when the harness rate-limits
-or swaps models. Prefer waiting, serialising, or handing off.
+[`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
+
+**Cursor ceiling vs wall:** If Cursor refuses Sol/Opus and only offers Grok
+high, that is the sharp lane here — note it in the dispatch line and
+continue on Grok high (prefer non-fast; else `…-high-fast`). That is not
+a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure (or
+a swap to something *below* Grok high on Cursor / below the harness top
+elsewhere) — then wait, serialise, or hand off; do not invent a weaker
+model to finish.
 
 Try in order:
 
 1. **`codex exec`**, if the binary is on `PATH` — cross-vendor sharp review.
    Pipe the brief + diff to it directly.
-2. **Fresh subagents on a sharp model** (explicit model id — Opus-class /
-   GPT high/sol-class or the harness’s current top reasoning tier, not a
-   workhorse mid-tier). Prefer all three axes in one parallel batch when
-   the harness is healthy.
-3. **On a wall** (rate/usage/quota/`429`/spawn failure/automatic model
-   downgrade message):
+2. **Fresh subagents on a sharp model** (explicit id). On **Cursor**: Grok
+   high (prefer non-fast; else the current `…-high-fast` slug). Elsewhere:
+   Opus-class / GPT high/sol-class / top reasoning tier. Prefer all three
+   axes in one parallel batch when the harness is healthy.
+3. **On a wall** (see above):
    - Retry once after a short wait on the **same sharp class**.
    - Then run axes **one at a time** (adversarial → domain → code-review),
      still sharp — slower wall-clock is acceptable.
@@ -113,8 +118,7 @@ pnpm land --check-only --ack-open-blockers
 Tell the user where the review file is, the summary, and that
 `pnpm land --check-only` is green. **Stop there.** Do not run `pnpm land`,
 do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
-unless the user has **explicitly asked** to land/merge this branch into
-`dev` (after seeing the review, or in the same message as approving land).
-“The branch looks done” / “commit this” / finishing the review is **not**
-permission to land. When they do ask, use `pnpm land` only — never a raw
-merge into `dev`.
+unless the user has **explicitly asked to land after seeing the review
+summary**. “Review and land” / “the branch looks done” / “commit this” /
+finishing this skill is **not** permission to land — wait for a separate
+ask. When they do ask, use `pnpm land` only — never a raw merge into `dev`.

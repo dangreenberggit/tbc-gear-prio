@@ -50,10 +50,12 @@ because that would need updating every time a tool changes.
    List anytime: `pnpm issues:open`.
 
 5. **Ask the user, then `pnpm land`.** Agents must not land or merge into
-   `dev` unless the user explicitly asks after the review (or in the same
-   breath as approving land). `pnpm land` is the only supported door: verify
-   → review/ticket check → `git merge --no-ff` into `dev`. Do not merge into
-   `dev` by hand. On `phase-N/*`, open `Blocks: phase-N` tickets require
+   `dev` unless the user explicitly asks **after** the review file exists
+   and they have seen the summary. “Review and land” in one message means
+   run the review and stop — wait for a separate land ask. `pnpm land` is
+   the only supported door: verify → review/ticket check →
+   `git merge --no-ff` into `dev`. Do not merge into `dev` by hand. On
+   `phase-N/*`, open `Blocks: phase-N` tickets require
    `--ack-open-blockers` (or close / re-block them first). Check without
    merging: `pnpm land --check-only` (or `pnpm merge-ready`).
 
@@ -66,9 +68,10 @@ When a feature or phase branch has independent slices, use the
 Workers get their own worktree or clone; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
-then the same pre-merge-review / `pnpm land` door into `dev`. The skill is
-harness-agnostic: plain git plus optional Cursor / Claude Code / Codex
-adapters. See [`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
+then `pre-merge-review`, then **ask** before `pnpm land` into `dev`. The
+skill is harness-agnostic: plain git plus optional Cursor / Claude Code /
+Codex adapters. See
+[`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
 
 ## Gates — what's enforced vs. advisory
 

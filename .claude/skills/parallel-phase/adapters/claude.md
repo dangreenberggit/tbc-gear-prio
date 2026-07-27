@@ -15,7 +15,7 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 
 ## Orchestrate (optional, large fan-out)
 
-Ports of Cursor-style orchestrate (e.g. claude-orchestrate) are allowed for large trees. Same land rule: feature-branch fan-in, then one `pnpm land`.
+Ports of Cursor-style orchestrate (e.g. claude-orchestrate) are allowed for large trees. Same land rule: feature-branch fan-in, `pre-merge-review`, then **ask** before `pnpm land`.
 
 ## Merge
 
