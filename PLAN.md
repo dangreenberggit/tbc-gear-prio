@@ -348,10 +348,10 @@ Two methods. Behind them: OAuth2 client-credentials with token reuse, the classi
 
 `Character.recentReports`, `Character.encounterRankings`, `Character.zoneRankings`, `EventDataType.CombatantInfo`/`.Buffs`/`.Casts` and `TableDataType.Buffs` are all present in the schema, so both the resolve route and the events-fallback route are viable as drafted.
 
-**[P0] Spec classification — WCL has no spec label.** The actor-level `subType` field returns **class-level strings only** (`Paladin`, `Druid`, `Warrior`, …). There is no `Retribution` or `Feral`, for any class. Two usable signals, both on the combatant record:
+**[P0] Spec classification — WCL has no spec label.** The actor-level `subType` field returns **class-level strings only** (`Paladin`, `Druid`, `Warrior`, …). There is no `Retribution` or `Feral`, for any class.
 
-- `CombatantInfo.specID` — numeric, present on every combatant in both probe runs.
-- `CombatantInfo.talents` — a three-entry array of `{id, icon}` where **`id` is points spent in that tree** (`[{id:21},{id:40},{id:0}]` reads 21/40/0). The `talentPoints` field the plan assumed is **absent**; this array is where the distribution actually lives. Spec falls out of whichever tree holds the plurality.
+- **Classifier (source of truth):** `CombatantInfo.talents` — a three-entry array of `{id, icon}` where **`id` is points spent in that tree** (`[{id:21},{id:40},{id:0}]` reads 21/40/0). The `talentPoints` field the plan assumed is **absent**; this array is where the distribution actually lives. Spec falls out of whichever tree holds the plurality (`classifySpec` in `packages/core/src/spec.ts` — Paladin-only today; other classes return `unsupported-class` until a fixture verifies their tree order).
+- **`CombatantInfo.specID` is unusable on TBC Anniversary** in our fixtures: **every** combatant has `specID: 0`, including confirmed Ret (slamaltman `5/11/45`). Do **not** branch on `specID` alone — treating `0` as Holy (or any real spec) mis-specs the whole raid. Re-probe before ever trusting it; until then it is noise.
 
 This is a small addition to the normalize stage, not a structural one, and it stays behind `GearSource` where the rest of WCL's vocabulary already lives. It applies to **every** spec including ret — see §5.4.
 
@@ -361,7 +361,7 @@ Per review R7, the field on `LoggedGear` is named **`talentPointsByTree: [number
 
 **[R8, P0] `race` is NOT here, because WCL does not have it.** Probed and settled — see §4 and [`docs/verification-log.md`](docs/verification-log.md). `LoggedGear` must not carry a `race` field at all, not even an optional one: the whole lesson of R18 is that a field which *looks* readable will be read, and a silently-wrong race shifts every hit-adjacent ranking. Race enters through `RankInput`, where its status as an assumption is explicit.
 
-> **Caution on `specID` (review addendum).** TBC has no native concept of a specialization ID; that arrives much later in WoW's history. Any `specID` on a TBC Classic log is something Warcraft Logs *derived*, not something the client recorded. So **talent-tree plurality is the source of truth** — it's what WCL itself uses — and `specID` is a cross-check. Cheap validation before depending on either: confirm the two agree on both existing fixtures.
+> **Caution on `specID`.** TBC has no native client specialization ID. On Anniversary logs the field is present but **always 0** in captured fixtures, so it is not even a useful cross-check today. **Talent-tree plurality is the only classifier.**
 
 - `WclGearSource` — production. Also **records** every response to `test/fixtures/` when `RECORD_FIXTURES=1`.
 - `RecordedGearSource` — replays those fixtures. Used by every test and by `pnpm rank --offline`.
@@ -390,7 +390,7 @@ This is the payoff of §8.2, and it's why feral is a Phase 2 *gate* rather than 
 
 **[P0] Two levels of spec detection, not one.** The plan previously treated spec detection as a feral-only concern. It isn't:
 
-1. **Classification — every spec, ret included.** Derive the spec from `CombatantInfo.specID` / `talentPointsByTree` (§5.2). Cheap, always runs, no per-spec code.
+1. **Classification — every spec, ret included.** Derive the spec from `talentPointsByTree` plurality (§5.2). Cheap, always runs. Do not use `specID` (0 on Anniversary).
 2. **Behavioural disambiguation — feral only.** Bear vs cat can't be separated by talents, so it needs form uptime. **[P0] Confirmed available:** the `Buffs` table returns `Dire Bear Form`, `Bear Form`, `Cat Form` and `Moonkin` entries for TBC fights, so the Phase 2 gate is unblocked on data.
 
 Per review R12, the rule for (2) is **declared in the preset**, e.g. `{ disambiguate: { buff: 'Bear Form', maxUptime: 0.2 } }`, and evaluated behind `GearSource.findFights` as a per-spec *confidence* field. Neither level is a branch in the engine.
@@ -861,7 +861,7 @@ Decisions here that a future architecture review must not re-litigate:
 4. Pool generated-then-curated; `sources` is never authoritative (§8.3)
 5. Meta repair at minimum EP loss, not re-optimization (§9)
 6. Single container + SQLite; no Redis, no separate worker (§1.1)
-7. **[P0]** Spec is classified from `specID`/talent-tree points, never from a WCL spec string — no such string exists at actor level (§5.2)
+7. **[P0]** Spec is classified from talent-tree plurality, never `specID` (always 0 on Anniversary) or a WCL spec string — no such string exists at actor level (§5.2)
 8. **[P0]** Enchant/gem synthesis is eligibility-aware, gated on item-DB socket and enchantability metadata (§9)
 9. **[R2]** Content tier is a user input (`maxPhase`, inclusive), never a build target; pools are per-spec, not per-tier (§1.1, §8.3)
 10. **[R16]** `ItemSource` is a discriminated union with tier tokens carrying the **token's drop zone**; `source` is curated, required, and build-gated (§8.3.2)

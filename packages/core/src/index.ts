@@ -43,6 +43,12 @@ export {
   type SimItemSpec,
   type WclGearEntry,
 } from "./slots.js";
+export {
+  classifySpec,
+  talentPointsFromWclTalents,
+  type SpecClassification,
+  type TalentPointsByTree,
+} from "./spec.js";
 export type {
   CharacterRef,
   ContentPhase,
