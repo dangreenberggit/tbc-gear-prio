@@ -11,7 +11,7 @@ Fan out independent slices to isolated workers, merge them back onto the **featu
 
 Fan out only when slices are **mostly independent**: different kinds of work, and mostly different files or clear regions of a file. If two slices would thrash the same module, keep them sequential.
 
-Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** model lane (Sonnet-class / GPT Terra-class); see [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md). On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
+Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** lane — best mid-tier the harness will actually run; on **Cursor Pro** pin **Composer** (not Terra/Other-pool). See [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md). On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
 
 ## Roles
 
