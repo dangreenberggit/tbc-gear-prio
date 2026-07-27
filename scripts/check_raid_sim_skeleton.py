@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""
+check_raid_sim_skeleton.py — design C (PLAN.md §8.2).
+
+The golden RaidSimRequest skeleton is assembled from:
+  - data/presets/<spec>/<tier>.individual-sim-settings.json  (decodelink)
+  - vendor/wowsims/<spec>_default.apl.json                   (pinned APL)
+
+Full byte-identical regeneration is blocked on the exported consumables
+menus (potions[] / conjuredItems[]) — inert for ret, unknown filter.
+This script checks the regenerable invariants so a preset refresh or APL
+pin bump fails loudly instead of silently drifting the Phase 0 baseline.
+
+    python scripts/check_raid_sim_skeleton.py --spec ret --tier p2
+
+Exit 0 = ok, 1 = drift, 2 = error.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# Equipment items[] indices in SIM_ORDER (packages/core/src/slots-table.json).
+FINGER1 = 10
+FINGER2 = 11
+
+APL_KEYS = ("prepullActions", "priorityList", "groups", "valueVariables")
+
+
+def load(path: Path) -> object:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--spec", default="ret")
+    ap.add_argument("--tier", default="p2")
+    args = ap.parse_args()
+
+    preset_path = ROOT / f"data/presets/{args.spec}/{args.tier}.individual-sim-settings.json"
+    golden_path = ROOT / f"data/presets/{args.spec}/{args.tier}.raid-sim-skeleton.json"
+    apl_path = ROOT / f"vendor/wowsims/{args.spec}_default.apl.json"
+
+    for p in (preset_path, golden_path, apl_path):
+        if not p.is_file():
+            print(f"missing {p.relative_to(ROOT)}", file=sys.stderr)
+            return 2
+
+    preset = load(preset_path)
+    golden = load(golden_path)
+    apl = load(apl_path)
+    assert isinstance(preset, dict) and isinstance(golden, dict) and isinstance(apl, dict)
+
+    errors: list[str] = []
+
+    raid = golden.get("raid") or {}
+    parties = raid.get("parties") or []
+    if not parties:
+        errors.append("golden missing raid.parties[0]")
+        print("\n".join(errors), file=sys.stderr)
+        return 1
+    party0 = parties[0]
+    players = party0.get("players") or []
+    if not players:
+        errors.append("golden missing raid.parties[0].players[0]")
+        print("\n".join(errors), file=sys.stderr)
+        return 1
+    player = players[0]
+
+    checks = [
+        ("raidBuffs → raid.buffs", preset.get("raidBuffs"), raid.get("buffs")),
+        ("debuffs → raid.debuffs", preset.get("debuffs"), raid.get("debuffs")),
+        ("partyBuffs → parties[0].buffs", preset.get("partyBuffs"), party0.get("buffs")),
+        ("encounter → encounter", preset.get("encounter"), golden.get("encounter")),
+    ]
+    for label, a, b in checks:
+        if a != b:
+            errors.append(f"drift: {label}")
+
+    rot = player.get("rotation") or {}
+    for key in APL_KEYS:
+        if apl.get(key) != rot.get(key):
+            errors.append(
+                f"drift: rotation.{key} ≠ vendor {args.spec}_default.apl.json"
+            )
+
+    items = ((player.get("equipment") or {}).get("items")) or []
+    for idx, label in ((FINGER1, "finger1"), (FINGER2, "finger2")):
+        if idx >= len(items):
+            errors.append(f"missing equipment.items[{idx}] ({label})")
+            continue
+        slot = items[idx] or {}
+        if slot.get("enchant"):
+            errors.append(
+                f"{label} carries enchant {slot['enchant']} — symmetry invariant "
+                "requires bare rings on this preset (PLAN.md §9), or synthesis "
+                "must gate on observed presence"
+            )
+
+    if errors:
+        print("skeleton check FAILED:", file=sys.stderr)
+        for e in errors:
+            print(f"  {e}", file=sys.stderr)
+        return 1
+
+    print(
+        f"ok: {golden_path.relative_to(ROOT)} — "
+        f"4 preset mappings, {len(APL_KEYS)} APL fields, bare rings"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

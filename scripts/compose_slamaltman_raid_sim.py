@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "data/wowsims.lock.json"
 FIXTURE = ROOT / "test/fixtures/slamaltman.raw.json"
-SKELETON = ROOT / "test/fixtures/ret-p2.raid-sim-skeleton.json"
+SKELETON = ROOT / "data/presets/ret/p2.raid-sim-skeleton.json"
 OUT_REQ = ROOT / "test/fixtures/slamaltman.raid-sim-request.json"
 OUT_RES = ROOT / "test/fixtures/slamaltman.raid-sim-result.json"
 
@@ -115,7 +115,7 @@ def main() -> int:
         print(f"missing skeleton RaidSimRequest at {SKELETON}", file=sys.stderr)
         print(
             "re-export: wowsims.com ret P2 → Export → CLI → "
-            "test/fixtures/ret-p2.raid-sim-skeleton.json",
+            "data/presets/ret/p2.raid-sim-skeleton.json",
             file=sys.stderr,
         )
         return 2
