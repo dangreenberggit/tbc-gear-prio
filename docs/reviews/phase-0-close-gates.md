@@ -130,22 +130,27 @@ Do not merge until the findings above have been read. Merge is the user’s call
 
 ---
 
-## Disposition (post-review)
+## Disposition
 
-Fixed on this branch before merge:
+Tickets are the source of truth for deferred work; this table links them.
+Machine-readable for `pnpm land` / `merge-ready`. Disposition is exactly
+`fixed` | `defer` | `wontfix`.
 
-| Finding                                           | Fix                                                                                     |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Adversarial: hardcoded `simVersion`               | Stamped from `wowsimcli version` into the slim fixture                                  |
-| Adversarial: compose binary path vs lock          | `resolve_cli()` reads `data/wowsims.lock.json` tag + platform                           |
-| Adversarial: success without checking error/iters | Validate `error` / `iterationsDone` / `dps.avg` **before** writing the committed result |
-| Adversarial: `verify_fixture` exits 0 on mismatch | Exits 1 if WCL slot mismatches, R19 ambiguous, or sim-order disagree                    |
-| Standards: misleading `ASSETS` comment            | Corrected                                                                               |
-
-Deferred (out of this branch’s cheap-fix scope; workflow for parking them is a separate branch):
-
-- Domain: `specID: 0` on every combatant — Phase 1 must not trust `specID` as documented
-- Domain/Adversarial: full 17-slot assert; shared slot-map source of truth
-- Adversarial/Domain: `temporaryEnchant` → consumable imbue
-- Domain: meta activation check (PLAN §9 / gem solver)
-- Spec: slim vs full `RaidSimResult`; share-link repro in git; one-entry-per-box log shape
+| ID  | Axis        | Disposition | Ticket / note                                                                     |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `simVersion` stamped from `wowsimcli version`                                     |
+| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/03-temporary-enchant-imbue.md`                     |
+| A3  | Adversarial | fixed       | validate `error` / `iterationsDone` / `dps.avg` before writing result             |
+| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/02-shared-slot-map.md`                             |
+| A5  | Adversarial | fixed       | `resolve_cli()` reads lockfile tag + platform                                     |
+| A6  | Adversarial | fixed       | `verify_fixture.py` exits 1 on mismatch                                           |
+| D1  | Domain      | defer       | `.scratch/carry-forward/issues/01-specid-unusable.md`                             |
+| D2  | Domain      | wontfix     | historical 10/10·12-gem prose left as Hagguth-era; third sitting + PLAN corrected |
+| D3  | Domain      | defer       | `.scratch/carry-forward/issues/04-meta-activation-check.md`                       |
+| D4  | Domain      | defer       | `.scratch/carry-forward/issues/02-shared-slot-map.md`                             |
+| D5  | Domain      | fixed       | same as A5 — compose pin follows lockfile                                         |
+| S1  | Standards   | fixed       | `ASSETS` comment corrected                                                        |
+| P1  | Spec        | wontfix     | share-link not in git; preset JSON is the durable decode artifact                 |
+| P2  | Spec        | wontfix     | one sitting / one log section is readable enough for Phase 0                      |
+| P3  | Spec        | wontfix     | slim `RaidSimResult` fixture intentional (histograms in `.scratch` only)          |
+| P4  | Spec        | wontfix     | skeleton + `events[0]` fix are load-bearing for the gate, not creep to revert     |

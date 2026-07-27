@@ -9,9 +9,40 @@ Issues and specs (you may know a spec as a PRD) for this repo live as markdown f
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+### Carry-forward tickets (deferred from a review)
+
+**Tickets are the source of truth** for “fix later” work — not the review
+prose, not chat. Findings that aren’t fixed on the branch that found them
+become:
+
+```
+.scratch/carry-forward/issues/<NN>-<slug>.md
+```
+
+Each file starts with these lines (machine-readable; `pnpm land` / `merge-ready` parse them):
+
+```
+Status: open
+Type: task
+Origin: docs/reviews/<branch>.md
+Blocks: phase-1
+```
+
+- **`Status:`** — `open` / `claimed` / `resolved` (same vocabulary as wayfinding).
+- **`Origin:`** — the review that created it.
+- **`Blocks:`** — which phase must deal with this (e.g. `phase-1`). On
+  `phase-N/*`, `pnpm land` refuses while matching tickets are still open,
+  unless you pass `--ack-open-blockers`. Prefer closing or rewriting
+  `Blocks:` with a note over ritual acknowledgment.
+
+The review’s Disposition table **links** tickets for `defer` rows; it does
+not replace them. List open ones anytime: `pnpm issues:open`.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
+For a deferred pre-merge finding, publish under `.scratch/carry-forward/issues/`
+instead and link it from the review's `## Disposition` table.
 
 ## When a skill says "fetch the relevant ticket"
 

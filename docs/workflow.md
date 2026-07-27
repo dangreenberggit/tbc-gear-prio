@@ -40,28 +40,40 @@ because that would need updating every time a tool changes.
      ([`.agents/reviews/domain.md`](../.agents/reviews/domain.md))
    - **Standards + Spec** — the existing `code-review` skill, unchanged
 
-   Findings land in `docs/reviews/<branch>.md`, a durable file that
-   survives a harness switch.
+   Findings land in `docs/reviews/<branch>.md`. **Tickets are the source of
+   truth for deferred work** — every `defer` creates
+   `.scratch/carry-forward/issues/<NN>-<slug>.md` and the Disposition table
+   only links it. See [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
+   List anytime: `pnpm issues:open`.
 
-5. Merge to `dev` with `--no-ff`.
+5. **`pnpm land`** — the only supported door into `dev`. Runs verify, checks
+   the review + deferred tickets, then `git merge --no-ff` into `dev`. Do
+   not merge into `dev` by hand. On `phase-N/*`, open `Blocks: phase-N`
+   tickets require `--ack-open-blockers` (or close / re-block them first).
+   Check without merging: `pnpm land --check-only` (or `pnpm merge-ready`).
+
 6. When a phase gate closes, merge `dev` → `main` and tag it.
 
 ## Gates — what's enforced vs. advisory
 
-| Gate                                                                           | Enforcement                                              | Escape hatch                             |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------- | ---------------------------------------- |
-| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure         | `git push --no-verify`                   |
-| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                | `git commit --no-verify`                 |
-| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)          | none — this is the backstop              |
-| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`   | none, short of disabling the rule inline |
-| Pre-merge review happened                                                      | Not mechanically enforced — a process step               | —                                        |
-| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding | —                                        |
+| Gate                                                                           | Enforcement                                                                             | Escape hatch                                                  |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure                                        | `git push --no-verify`                                        |
+| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                                               | `git commit --no-verify`                                      |
+| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)                                         | none — this is the backstop                                   |
+| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`                                  | none, short of disabling the rule inline                      |
+| Land on `dev`                                                                  | `pnpm land` + pre-commit refuses merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1` | `TBC_ALLOW_DEV_MERGE=1 git merge …`; `git commit --no-verify` |
+| Deferred findings filed as tickets                                             | `pnpm land` / `merge-ready` — every `defer` links an open carry-forward ticket          | `wontfix` with a reason, or fix on branch                     |
+| Phase open-blockers seen                                                       | `pnpm land` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                  | `--ack-open-blockers`                                         |
+| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically
 because it only skips the _local_ hook: a branch pushed with `--no-verify`
-still hits CI, which has no bypass, and can't reach `dev` through the
-review step regardless. Never use `--no-verify` on `dev` or `main` directly.
+still hits CI, which has no bypass. Never use `--no-verify` / `land --no-verify`
+/ `TBC_ALLOW_DEV_MERGE=1` on `dev` or `main` for real work. Never land on
+`dev` with a raw `git merge` when `pnpm land` exists — that bypasses the
+ticket check (the pre-commit hook blocks it unless the escape env is set).
 
 ## Why no coverage threshold
 

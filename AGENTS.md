@@ -26,11 +26,11 @@ Invoke the `tdd` skill for any red/green work. The seams are the three PLAN.md �
 
 1. Branch off `dev`: `feat/<slug>` (or `phase-N/<slug>` for a PLAN.md phase).
 2. Red → green, one slice at a time, with regular commits.
-3. `pnpm verify` before every push — typecheck, lint, format, test.
-4. Run the `pre-merge-review` skill: three independent axes (adversarial, domain, standards+spec) against a fresh context, findings written to `docs/reviews/<branch>.md`.
-5. Merge to `dev` with `--no-ff`, so the feature stays one revertable unit.
+3. `pnpm verify` before every push — typecheck, lint, format, test (also on pre-push).
+4. Run the `pre-merge-review` skill → `docs/reviews/<branch>.md`. Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime.
+5. **`pnpm land`** — the only supported door into `dev`: verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first). Do not `git merge` into `dev` by hand — the pre-commit hook refuses merge commits on `dev` unless `pnpm land` ran (sets `TBC_ALLOW_DEV_MERGE=1`). Escape: `TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>`.
 6. `main` only receives a merge from `dev` when a PLAN.md §14 phase gate is fully checked off in `docs/verification-log.md`.
 
 ### Gates
 
-`pnpm verify` is required before every push (`.githooks/pre-push`) and direct commits to `main` are refused (`.githooks/pre-commit`) — merges only. `git push --no-verify` / `git commit --no-verify` exist for spikes and throwaway branches; never use them on `dev` or `main`. CI (`.github/workflows/verify.yml`) runs the same `pnpm verify` on every push and can't be bypassed the same way, so it's the backstop if a local hook is skipped.
+`pnpm verify` is required before every push (`.githooks/pre-push`) and direct commits to `main` are refused (`.githooks/pre-commit`) — merges only. Landing on `dev` goes through `pnpm land`; merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1` are refused by pre-commit. `git push --no-verify` / `git commit --no-verify` / `pnpm land --no-verify` / `TBC_ALLOW_DEV_MERGE=1` exist for spikes; never use them on `dev` or `main` for real work. CI (`.github/workflows/verify.yml`) runs the same `pnpm verify` on every push and can't be bypassed the same way, so it's the backstop if a local hook is skipped.
