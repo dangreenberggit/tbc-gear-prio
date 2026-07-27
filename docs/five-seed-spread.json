@@ -1,0 +1,50 @@
+{
+  "simVersion": "v0.0.101",
+  "fixture": "test/fixtures/slamaltman.raid-sim-request.json",
+  "iterations": 5000,
+  "independentSeeds": ["11", "22", "33", "44", "55"],
+  "sharedSeed": "42",
+  "sharedRepeats": 5,
+  "independent": {
+    "avgs": [
+      2042.4501547001391, 2042.4414878046143, 2042.4680006611636,
+      2042.44404899197, 2042.3689734334712
+    ],
+    "meanAvg": 2042.4345331182717,
+    "spreadMaxMin": 0.09902722769243155,
+    "sampleSdOfAvgs": 0.038082482957302814,
+    "meanReportedSe": 1.6781279634965076,
+    "reportedSes": [
+      1.6765521368155454, 1.6770934007693108, 1.6774830573536506,
+      1.6792942359139742, 1.680216986630057
+    ]
+  },
+  "shared": {
+    "avgs": [
+      2042.3926145882197, 2042.3926145882197, 2042.3926145882197,
+      2042.3926145882197, 2042.3926145882197
+    ],
+    "meanAvg": 2042.3926145882197,
+    "spreadMaxMin": 0.0,
+    "sampleSdOfAvgs": 0.0,
+    "meanReportedSe": 1.677882068975652,
+    "reportedSes": [
+      1.677882068975652, 1.677882068975652, 1.677882068975652,
+      1.677882068975652, 1.677882068975652
+    ]
+  },
+  "spreadRatioIndependentOverShared": null,
+  "recommendedCutoff": {
+    "absDps": 3.4,
+    "pct": 0.15,
+    "noiseFloorSe": 1.6781279634965076,
+    "observedMeanSpreadMaxMin": 0.09902722769243155,
+    "basis": "max(3.0, 2\u00d7 mean reported SE 1.678) \u2192 3.4; observed max\u2212min of five means was only 0.099 (not the tie-group scale); pct fixed at 0.15% of baseline (~3.06 DPS at 2042.4)"
+  },
+  "planR5Reference": {
+    "note": "prior measurement cited in PLAN.md \u00a710 / PLAN-REVIEW R5",
+    "independentSpreadDps": 1.58,
+    "sharedSpreadDps": 0.06,
+    "iterations": 5000
+  }
+}

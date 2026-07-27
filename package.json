@@ -17,6 +17,7 @@
     "sync:wowsims": "python scripts/sync_wowsims.py --update",
     "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
     "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py",
+    "experiment:five-seed": "python scripts/five_seed_spread.py",
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",
     "issues:open": "python scripts/check_merge_ready.py --list-only"

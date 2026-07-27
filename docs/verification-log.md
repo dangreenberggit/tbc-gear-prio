@@ -239,3 +239,62 @@ Slot mapping assertion embedded in the compose script: `sim[3].id == wcl[14].id`
 
 Both remaining boxes closed. Phase 1 may start once this log is on `dev` and the
 §14 checklist in PLAN.md / `docs/phase0-findings.md` is ticked to match.
+
+---
+
+## 2026-07-26 — Phase 1, first sitting (five-seed spread)
+
+PLAN.md §14: run the §10 / R5 experiment *before* fixing the cutoff. Identical
+logged ret gear, five independent seeds vs five repeats of one shared seed, at
+the plan default of 5,000 iterations.
+
+Reproduce with:
+
+```bash
+python scripts/five_seed_spread.py
+# optional: --iterations 5000 (default)
+```
+
+Fixture: `test/fixtures/slamaltman.raid-sim-request.json` (equipment already
+mapped). Binary: `wowsimcli` v0.0.101 from `data/wowsims.lock.json`. Full numbers:
+[`docs/five-seed-spread.json`](five-seed-spread.json).
+
+### ☑ Independent-seed noise floor (reported SE, not max−min of means)
+
+| Arm | Seeds / repeats | max−min of avgs | mean reported SE (`stdev/√n`) |
+|---|---|---|---|
+| Independent | 11, 22, 33, 44, 55 | **0.099 DPS** | **1.678 DPS** |
+| Shared | 42 × 5 | **0.000 DPS** | 1.678 DPS |
+
+Shared-seed repeats are bit-identical — the sim is deterministic given a seed.
+Independent seeds barely move the *mean* (0.1 DPS); what forms tie groups is the
+**reported** independent SE on the ~1.7 DPS scale.
+
+### Against R5's cited 1.58 / 0.06
+
+R5 (PLAN-REVIEW) reported identical-gear spreads of **1.58 DPS** (independent)
+and **0.06 DPS** (shared) at 5,000 iterations. Our max−min numbers do not match
+that pair. The figure that *does* land on the same scale is mean reported SE
+(**1.678 ≈ 1.58**). Shared-seed collapse to 0.06 looks like residual non-
+determinism in whatever harness produced R5; under pinned `wowsimcli` v0.0.101
+here, shared repeats are exactly 0. The cutoff derivation therefore uses
+**reported SE**, which is the quantity PLAN.md §10 says tie intervals are built
+from — not max−min of five means.
+
+### ☑ Cutoff constant derived
+
+```
+cutoff = { absDps: 3.4, pct: 0.15 }
+# absDps = max(3.0, 2 × 1.678) → 3.4
+# pct unchanged from the plan's dual threshold
+```
+
+At slamaltman's ~2042 DPS baseline, 0.15% is ~3.06 DPS — same order as
+`absDps`. Phase 1 engine code should pin this pair as one constant (not
+re-provisional 3.0). Paired-replicate SE for the top ~8 stays Phase 2.
+
+### Where this leaves Phase 1
+
+One gate box closed. Remaining Phase 1 work: scaffold, generated protos, three
+seams + adapters, eight stages, slot-mapping test, gem solver, curated pool,
+`pnpm rank`, and the human-trust checks on a real shortlist.
