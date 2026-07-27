@@ -54,6 +54,17 @@ because that would need updating every time a tool changes.
 
 6. When a phase gate closes, merge `dev` → `main` and tag it.
 
+### Parallel fan-out (optional)
+
+When a feature or phase branch has independent slices, use the
+`parallel-phase` skill instead of serializing everything in one checkout.
+Workers get their own worktree or clone; they merge **into the feature
+branch** (the delegator prefers to merge — it already planned the fit; a
+dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
+then the same pre-merge-review / `pnpm land` door into `dev`. The skill is
+harness-agnostic: plain git plus optional Cursor / Claude Code / Codex
+adapters. See [`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
+
 ## Gates — what's enforced vs. advisory
 
 | Gate                                                                           | Enforcement                                                                             | Escape hatch                                                  |

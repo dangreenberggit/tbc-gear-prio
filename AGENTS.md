@@ -22,6 +22,10 @@ Comments explain **why**, never **what**. If a comment restates the code, delete
 
 Invoke the `tdd` skill for any red/green work. The seams are the three PLAN.md §5 already defines — `GearSource`, `SimRunner`, `Store` — each with a recorded adapter, so the engine runs deterministically offline from committed fixtures. No test is written at a seam that isn't one of those three without agreeing it first.
 
+### Parallel agents
+
+When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges by default; a merger worker is the fallback). Then `pnpm verify` on the integrated tip and the normal review / `pnpm land` once — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
+
 ### The loop
 
 1. Branch off `dev`: `feat/<slug>` (or `phase-N/<slug>` for a PLAN.md phase).
