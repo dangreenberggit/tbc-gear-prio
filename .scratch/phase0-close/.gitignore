@@ -1,0 +1,4 @@
+# Probe scratch — keep the spec, not the one-off exports / raw sim dumps.
+*
+!spec.md
+!.gitignore

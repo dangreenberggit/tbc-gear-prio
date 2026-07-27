@@ -1,11 +1,11 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch before it merges to dev. Use when the user wants to review a feature branch before merging, asks to "run pre-merge review", or a feature's work looks done and is about to be merged back to dev.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch before it lands on dev. Use when the user wants to review a feature branch before merging, asks to "run pre-merge review", or a feature's work looks done and is about to be landed with pnpm land.
 ---
 
 # Pre-Merge Review
 
-Three independent axes review the branch before it merges to `dev`. Each
+Three independent axes review the branch before it lands on `dev`. Each
 reviewer gets **fresh context** — the diff and its own brief only, no access
 to this conversation. That's the point: a reviewer that remembers writing
 the code stops finding the code's mistakes.
@@ -47,9 +47,14 @@ Run the **adversarial** and **domain** sub-agents yourself using the briefs
 above. Invoke the **`code-review`** skill separately for the third axis —
 don't re-implement its Standards/Spec logic here.
 
-### 3. Aggregate and write
+### 3. Aggregate, file tickets, write the review
 
-Write `docs/reviews/<branch-name>.md`:
+**Tickets are the source of truth for deferred work.** For every finding
+you would defer, create `.scratch/carry-forward/issues/<NN>-<slug>.md`
+first (`Status: open`, `Origin:`, `Blocks: phase-N`), then link it from
+Disposition. See [`docs/agents/issue-tracker.md`](../../../docs/agents/issue-tracker.md).
+
+Write `docs/reviews/<branch-name>.md` (slashes → dashes):
 
 ```markdown
 # Pre-merge review — <branch>
@@ -57,23 +62,45 @@ Write `docs/reviews/<branch-name>.md`:
 Diffed against: dev...<branch> (<short-sha>)
 
 ## Adversarial
-<verbatim or lightly cleaned>
+…
 
 ## Domain
-<verbatim or lightly cleaned>
+…
 
 ## Standards + Spec
-<code-review skill's output>
+…
 
 ## Summary
-<total findings per axis, worst issue per axis — no cross-axis reranking>
+…
+
+## Disposition
+
+| ID | Axis | Disposition | Ticket / note |
+| --- | --- | --- | --- |
+| A1 | Adversarial | fixed | <what landed> |
+| A2 | Adversarial | defer | `.scratch/carry-forward/issues/0N-slug.md` |
+| D1 | Domain | wontfix | <why> |
 ```
 
-The file is the artifact, not the chat transcript — it survives a harness
-switch and doubles as merge-commit or PR reference material.
+`Disposition` is exactly `fixed`, `defer`, or `wontfix`. Append a one-liner
+to `.scratch/carry-forward/map.md` when filing tickets.
 
-### 4. Report
+### 4. Prove the check (do not merge here)
 
-Tell the user where the file is and give the one-line summary. Do not
-merge on their behalf — the merge is theirs to do once they've read the
-findings.
+```bash
+pnpm land --check-only
+```
+
+On `phase-N/*` with open `Blocks: phase-N` tickets still open:
+
+```bash
+pnpm land --check-only --ack-open-blockers
+```
+
+### 5. Report
+
+Tell the user where the review file is, the summary, and that
+`pnpm land --check-only` is green. **Do not land on their behalf** — they
+run `pnpm land` when ready. Do not `git merge` into `dev` by hand; the
+pre-commit hook will refuse the merge commit unless `TBC_ALLOW_DEV_MERGE=1`
+(which `pnpm land` sets). Escape hatch: `TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>`.

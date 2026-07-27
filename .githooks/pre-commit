@@ -1,10 +1,23 @@
 #!/usr/bin/env sh
-# main only receives merges (see docs/workflow.md) — direct commits go to dev.
+# main only receives merges (see docs/workflow.md) — direct commits go to
+# feature branches / occasionally to dev for tiny workflow fixes.
 branch=$(git symbolic-ref --short HEAD 2>/dev/null)
 if [ "$branch" = "main" ]; then
   echo "Refusing direct commit to main — branch off dev instead." >&2
   echo "(escape hatch: git commit --no-verify, spike/throwaway branches only)" >&2
   exit 1
+fi
+
+# Merges into dev must go through `pnpm land` (sets TBC_ALLOW_DEV_MERGE=1).
+# Direct commits on dev (tiny workflow fixes) are still allowed.
+merge_head=$(git rev-parse --git-path MERGE_HEAD 2>/dev/null)
+if [ "$branch" = "dev" ] && [ -n "$merge_head" ] && [ -f "$merge_head" ]; then
+  if [ "$TBC_ALLOW_DEV_MERGE" != "1" ]; then
+    echo "Refusing merge into dev — use: pnpm land" >&2
+    echo "(escape hatch: TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>)" >&2
+    echo "(or: git commit --no-verify after a raw merge — spikes only)" >&2
+    exit 1
+  fi
 fi
 
 npx lint-staged

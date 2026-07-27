@@ -12,13 +12,13 @@ Closes three review findings against data on disk. Reproduce with:
 
 ```bash
 python scripts/sync_wowsims.py --update
-python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US --raw-out test/fixtures/slamaltman.raw.json --json-out findings.json
+python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US --raw-out test/fixtures/slamaltman.raw.json --json-out docs/phase0-probe-summaries/slamaltman.json
 python scripts/verify_fixture.py test/fixtures/slamaltman.raw.json
 ```
 
 ### Fixture capture — the first run's output was not a fixture
 
-`findings.json` from the first probe run recorded `"enchants": "present (10/19)"`
+The first probe's summary (`docs/phase0-probe-summaries/slamaltman.json`) recorded `"enchants": "present (10/19)"`
 and threw the payload away. The raw gear array was printed to stdout and never
 persisted, which is why R17 and R19 could not be settled after the fact despite
 the data having been on screen at the time.
@@ -152,12 +152,90 @@ row.
 - Gem records carry `unique` and `requiredProfession`, so §9's palette filter has
   the fields it needs.
 
-### Still open — Phase 0 does not close yet
+### Still open after this sitting
+
+The two `wowsimcli` boxes — closed in the third sitting below.
+
+---
+
+## 2026-07-26 — Phase 0, third sitting (close the last two boxes)
+
+Vendored `wowsimcli` v0.0.101, confirmed `decodelink`, and ran a hand-composed
+`RaidSimRequest` built from Slamaltman's real logged gear through the binary.
+
+Reproduce with:
+
+```bash
+pnpm fetch:wowsimcli                          # or: python scripts/fetch_wowsimcli.py
+# Box 2 — any ret share link from wowsims.com Export → Link works; one that did:
+#   https://www.wowsims.com/tbc/paladin/retribution/#eJyr4OXi... (full link in
+#   .scratch/phase0-close/p2-share-link.txt if present; re-export from the site)
+vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe decodelink '<share-link>'
+# Box 1 — skeleton is test/fixtures/ret-p2.raid-sim-skeleton.json (CLI export)
+python scripts/compose_slamaltman_raid_sim.py
+```
+
+### Footgun found before either box could close: `events[0]` is not the character
+
+`test/fixtures/slamaltman.raw.json` holds all 25 combatants. `combatant_info_events[0]`
+is **Hagguth** (Warrior, Destroyer Battlegear) — not Slamaltman (Paladin,
+`sourceID=11`). `scripts/verify_fixture.py` previously probed `[0]`, so the second
+sitting's R17/R19 numbers were measured against the wrong actor. The *conclusions*
+still hold on the real character (re-run below): drop-and-reorder, `effectId`
+namespace, gems resolve. What was wrong was the attributed gear — Destroyer helm
+`30120` was Hagguth's; Slamaltman wears Furious Gizmatic Goggles `32461` and
+Crystalforge Breastplate `30129`.
+
+Feeding Hagguth's warrior set into a `ClassPaladin` request panics the Go sim
+inside a warrior set-bonus registration (`RetributionPaladin is not warrior.WarriorAgent`).
+Silent wrong-DPS is the failure mode the plan fears for slot mapping; this one
+at least crashes. Both `verify_fixture.py` and `compose_slamaltman_raid_sim.py`
+now resolve the target via the `actors` table by name.
+
+### ☑ Preset decode path — `decodelink` works
+
+```text
+wowsimcli version → v0.0.101
+wowsimcli decodelink <ret-p2-share-link> → IndividualSimSettings JSON (exit 0)
+```
+
+Committed as `data/presets/ret/p2.individual-sim-settings.json`. Filename states
+the protobuf message deliberately (`IndividualSimSettings` ≠ `RaidSimRequest`).
+The zlib+base64 fallback stays scoped for the export side (§12) even though the
+primary path is confirmed.
+
+### ☑ Real logged ret gear → valid `RaidSimResult`
+
+Hand-composed request: stock ret P2 CLI export as skeleton (buffs / talents /
+consumes / encounter / simple rotation), Slamaltman's mapped equipment swapped
+in, assumed `RaceHuman` (Alliance faction known; race unreadable — R8),
+`iterations=3000`, `randomSeed=42`.
 
 | | |
 |---|---|
-| ☐ | real logged ret gear produces a valid `RaidSimResult` through the pinned binary |
-| ☐ | `decodelink` verified against the pinned binary |
+| sim version | v0.0.101 |
+| DPS avg | **2042.85** (stdev 119.04, min 1581.23, max 2493.17) |
+| iterationsDone | 3000 |
+| error | none |
 
-Both need `wowsimcli`, which is not yet vendored. They remain one sitting's work
-and are the last two boxes before Phase 1 starts.
+Fixtures:
+
+- `test/fixtures/slamaltman.raid-sim-request.json` — the composed `RaidSimRequest`
+- `test/fixtures/slamaltman.raid-sim-result.json` — slimmed observation (avg/stdev;
+  per-action histograms kept only in `.scratch/`)
+
+Slot mapping assertion embedded in the compose script: `sim[3].id == wcl[14].id`
+(back), so a filter-only regression fails before the binary runs.
+
+### Housekeeping folded into this sitting
+
+- `pnpm sync:wowsims` / `pnpm sync:wowsims:check` aliases (were referenced by
+  `.gitignore` and PLAN.md §8.5 but missing from `package.json`)
+- `pnpm fetch:wowsimcli` → `scripts/fetch_wowsimcli.py`
+- Probe summaries moved off the repo root:
+  `docs/phase0-probe-summaries/{slamaltman,shredzepelin}.json`
+
+### Phase 0 gate
+
+Both remaining boxes closed. Phase 1 may start once this log is on `dev` and the
+§14 checklist in PLAN.md / `docs/phase0-findings.md` is ticked to match.
