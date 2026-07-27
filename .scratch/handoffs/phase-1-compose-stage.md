@@ -8,13 +8,15 @@
 
 ## Status
 
-partial — §4 settled (APL load-bearing), design C locked in PLAN.md §8.2,
-`compose` green against slamaltman oracle, meta activation check landed
-(slamaltman active). Still open: min-EP meta repair, ticket 03 disclosure
-drawer, ticket 05 proto drift, wiring compose into `rankUpgrades`.
+partial — compose, meta activation/repair, and offline baseline path through
+`rankUpgrades` are green (`pnpm verify`: 53 tests + skeleton:check).
 
-**Branch tip after this sitting:** run `git log -1 --oneline` — was built on
-`9a01680` + uncommitted work (ask before commit).
+**Done this sitting:** §4 APL finding, design C, compose oracle, Stat/epScore,
+meta conditions + min-EP repair (R4), `rankUpgrades` baseline
+(resolve→gear→compose→sim) with `baseline.metaAdjusted`.
+
+**Still open:** CLI fixture pack for offline slamaltman, disclosure drawer
+(tickets 03/04), candidate pool/ranking loop, ticket 05 proto drift.
 
 **Paused:** yes — do not land to `dev` unless the user explicitly asks after a
 `pre-merge-review` has been written and seen

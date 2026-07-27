@@ -24,13 +24,15 @@ Phase 0's 2042.85 DPS proves "logged gear sims," not "legal gemming."
 
 ## Still open
 
-- Wire into normalize / baseline path; set `baseline.metaAdjusted` on Ranking.
+- Wire recorded slamaltman fixture pack into the offline CLI (rankUpgrades
+  baseline path works in tests; CLI still has empty recordings).
 - Find or build a real inactive-meta character fixture (PLAN §16).
+- Candidate pool / ranking loop beyond baseline.
 
 ## Done when
 
-- Baseline path records meta active/inactive.
+- Baseline path records meta active/inactive. ✅ (`baseline.metaAdjusted`)
 - Inactive meta is repaired at minimum EP loss (PLAN §9), disclosed as a
   substitution — not silently simmed as-is for rankings users act on.
-- A repair that would break a socket bonus picks the other move (§9 R4).
-  _(solver + unit test done; baseline wiring still open)_
+  _(repair ✅; disclosure drawer / Substitution[] still open)_
+- A repair that would break a socket bonus picks the other move (§9 R4). ✅

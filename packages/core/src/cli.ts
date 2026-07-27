@@ -3,12 +3,17 @@
  * I/O lives here; the core module stays pure.
  */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { CUTOFF } from "./cutoff.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
-import { RecordedSimRunner } from "./seams/sim-runner.js";
+import { RecordedSimRunner, type RaidSimRequest } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
 import type { Region } from "./types.js";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 function usage(): never {
   console.error(
@@ -65,6 +70,10 @@ function parseArgs(argv: string[]): {
   };
 }
 
+function loadJson<T>(rel: string): T {
+  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
+}
+
 export async function main(argv = process.argv.slice(2)): Promise<number> {
   const args = parseArgs(argv);
   if (!args.offline) {
@@ -84,20 +93,33 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     maxPhase: 2,
   };
 
+  const skeleton = loadJson<RaidSimRequest>(
+    "data/presets/ret/p2.raid-sim-skeleton.json"
+  );
+  const epWeights = loadJson<{ weights: Record<string, number> }>(
+    "data/presets/ret/p2.ep-weights.json"
+  ).weights;
+
   console.log(
     `rank ${args.character}@${args.realm}-${args.region} (offline) cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
   );
 
   try {
-    await rankUpgrades(input, {
+    const ranking = await rankUpgrades(input, {
+      // Empty recordings until Phase 1 wires fixture packs into the CLI.
       gear: new RecordedGearSource({ fights: new Map(), gear: new Map() }),
       sim: new RecordedSimRunner("v0.0.101", new Map()),
       store: new MemoryStore(),
       clock: () => new Date(),
+      raidSimSkeleton: skeleton,
+      epWeights,
     });
+    console.log(
+      `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
+    );
   } catch (err) {
-    if (err instanceof RankError && err.kind === "not-implemented") {
-      console.error(err.message);
+    if (err instanceof RankError) {
+      console.error(`${err.kind}: ${err.message}`);
       return 1;
     }
     throw err;
