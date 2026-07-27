@@ -41,12 +41,20 @@ ALLOW_DEV_MERGE = "TBC_ALLOW_DEV_MERGE"
 
 
 def _resolve_cmd(cmd: list[str]) -> list[str]:
-    """On Windows, bare 'pnpm'/'npx' need the .cmd shim."""
-    if not cmd:
+    """On Windows, prefer *.cmd shims — bare 'pnpm' is often a non-PE script."""
+    if not cmd or os.name != "nt":
         return cmd
     exe = cmd[0]
-    if os.name == "nt" and exe in ("pnpm", "npx", "npm", "git"):
+    if exe in ("pnpm", "npx", "npm"):
+        for candidate in (f"{exe}.CMD", f"{exe}.cmd"):
+            found = shutil.which(candidate)
+            if found:
+                return [found, *cmd[1:]]
         found = shutil.which(exe)
+        if found:
+            return [found, *cmd[1:]]
+    if exe == "git":
+        found = shutil.which("git")
         if found:
             return [found, *cmd[1:]]
     return cmd
