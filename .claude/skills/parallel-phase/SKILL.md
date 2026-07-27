@@ -11,7 +11,7 @@ Fan out independent slices to isolated workers, merge them back onto the **featu
 
 Fan out only when slices are **mostly independent**: different kinds of work, and mostly different files or clear regions of a file. If two slices would thrash the same module, keep them sequential.
 
-Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones.
+Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** model lane (Sonnet-class / GPT Terra-class); see [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md). On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
 
 ## Roles
 
@@ -30,7 +30,7 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 3. **Spawn workers** — One isolated worktree or clone per slice, branched from the **feature-branch HEAD** (not `main`/`dev` alone). Give each worker the handoff template and its path scope.
 4. **Collect handoffs** — Each worker ends with [handoff-template.md](handoff-template.md). No sibling chat for implementation; the delegator relays upstream context via `dependsOn` when a later slice needs an earlier result.
 5. **Merge onto the feature branch** — Delegator (preferred) or merger: merge each worker branch into the feature branch with an explicit conflict policy. Run `pnpm verify` on the **integrated** tip. Per-worker green is not enough.
-6. **Land once** — `pre-merge-review` → `pnpm land`. Workers and mergers do not land to `dev`.
+6. **Review, then ask** — run `pre-merge-review`, commit the review file, then **ask** before `pnpm land`. Workers and mergers do not land to `dev`; the delegator does not land without an explicit user ask.
 
 ### Completion criteria
 

@@ -30,8 +30,9 @@ because that would need updating every time a tool changes.
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
    tool.
-4. Run the `pre-merge-review` skill. Three independent axes review the
-   diff, each with fresh context (no memory of writing the code):
+4. Run the `pre-merge-review` skill **before** any land. Three independent
+   axes review the diff, each with fresh context (no memory of writing the
+   code):
    - **Adversarial** — correctness bugs, silent-failure modes, test theatre
      ([`.agents/reviews/adversarial.md`](../.agents/reviews/adversarial.md))
    - **Domain** — TBC/WCL/wowsims facts checked against
@@ -40,17 +41,21 @@ because that would need updating every time a tool changes.
      ([`.agents/reviews/domain.md`](../.agents/reviews/domain.md))
    - **Standards + Spec** — the existing `code-review` skill, unchanged
 
-   Findings land in `docs/reviews/<branch>.md`. **Tickets are the source of
-   truth for deferred work** — every `defer` creates
+   Findings land in `docs/reviews/<branch>.md` (commit that file on the
+   feature branch). **`pnpm land` does not run this review** — it only
+   checks that the file and Disposition table exist. **Tickets are the
+   source of truth for deferred work** — every `defer` creates
    `.scratch/carry-forward/issues/<NN>-<slug>.md` and the Disposition table
    only links it. See [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
    List anytime: `pnpm issues:open`.
 
-5. **`pnpm land`** — the only supported door into `dev`. Runs verify, checks
-   the review + deferred tickets, then `git merge --no-ff` into `dev`. Do
-   not merge into `dev` by hand. On `phase-N/*`, open `Blocks: phase-N`
-   tickets require `--ack-open-blockers` (or close / re-block them first).
-   Check without merging: `pnpm land --check-only` (or `pnpm merge-ready`).
+5. **Ask the user, then `pnpm land`.** Agents must not land or merge into
+   `dev` unless the user explicitly asks after the review (or in the same
+   breath as approving land). `pnpm land` is the only supported door: verify
+   → review/ticket check → `git merge --no-ff` into `dev`. Do not merge into
+   `dev` by hand. On `phase-N/*`, open `Blocks: phase-N` tickets require
+   `--ack-open-blockers` (or close / re-block them first). Check without
+   merging: `pnpm land --check-only` (or `pnpm merge-ready`).
 
 6. When a phase gate closes, merge `dev` → `main` and tag it.
 
@@ -121,11 +126,12 @@ Green CI is the standing proof that the recorded-fixture path still works.
 Each of the three axes is dispatched with **no context beyond the diff and
 its own brief** — that's deliberate. A reviewer that remembers writing the
 code stops finding the code's mistakes; a fresh one doesn't have that
-blind spot. The skill degrades gracefully depending on what's available in
-the current environment: `codex exec` if installed (genuine cross-vendor
-review), otherwise parallel subagents on whichever harness is running
-(Sonnet by default), otherwise the brief and diff command are printed for
-manual dispatch into a separate fresh session.
+blind spot. Reviewers stay on the **sharp** model lane (see
+[`docs/agents/model-policy.md`](agents/model-policy.md)): `codex exec` if
+installed, otherwise fresh sharp subagents (parallel when healthy, **one
+axis at a time** after a rate-limit wall), otherwise print briefs for a
+fresh session. Never silently swap in a weaker model to finish the review;
+same-session authoring-agent review only with an explicit user opt-in.
 
 The domain axis exists because PLAN.md and its findings docs carry a lot of
 hard-won, non-obvious facts (the 19→17 slot mapping, which enchant ID
