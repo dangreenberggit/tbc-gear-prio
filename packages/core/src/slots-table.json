@@ -1,0 +1,42 @@
+{
+  "wclOrder": [
+    "head",
+    "neck",
+    "shoulder",
+    "SHIRT",
+    "chest",
+    "waist",
+    "legs",
+    "feet",
+    "wrist",
+    "hands",
+    "finger1",
+    "finger2",
+    "trinket1",
+    "trinket2",
+    "back",
+    "mainhand",
+    "offhand",
+    "ranged",
+    "TABARD"
+  ],
+  "simOrder": [
+    "head",
+    "neck",
+    "shoulder",
+    "back",
+    "chest",
+    "wrist",
+    "hands",
+    "waist",
+    "legs",
+    "feet",
+    "finger1",
+    "finger2",
+    "trinket1",
+    "trinket2",
+    "mainhand",
+    "offhand",
+    "ranged"
+  ]
+}

@@ -35,6 +35,13 @@ export {
   type JobUpdateInput,
   type Store,
 } from "./seams/store.js";
+export {
+  SIM_ORDER,
+  WCL_ORDER,
+  mapWclGearToSim,
+  type SimItemSpec,
+  type WclGearEntry,
+} from "./slots.js";
 export type {
   CharacterRef,
   ContentPhase,
