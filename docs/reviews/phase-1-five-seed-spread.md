@@ -64,18 +64,18 @@ tags, raid-recipe crafts) remain open by design.
 
 ## Disposition
 
-| ID      | Axis                 | Disposition | Ticket / note                                                                      |
-| ------- | -------------------- | ----------- | ---------------------------------------------------------------------------------- |
-| A1 / D1 | Adversarial / Domain | defer       | `.scratch/carry-forward/issues/06-candidate-ungemmed-swaps.md`                     |
-| A2 / Sp | Adversarial / Spec   | defer       | `.scratch/carry-forward/issues/08-universe-sources0-raid-view.md`                  |
-| A3      | Adversarial          | defer       | `.scratch/carry-forward/issues/07-ranked-se-is-stdev.md`                           |
-| A4      | Adversarial          | defer       | Covered by 06 (tests encode empty gems)                                            |
-| A5      | Adversarial          | wontfix     | Typo zone low blast; fix opportunistically with Wowhead list refresh               |
-| D2      | Domain               | defer       | `.scratch/carry-forward/issues/09-cli-maxphase-from-lock.md`                       |
-| D3–D5   | Domain               | wontfix     | Soft unverified / wording; not land blockers                                       |
-| St1     | Standards            | defer       | `.scratch/carry-forward/issues/10-rank-test-stage-order.md`                        |
-| St2–St6 | Standards            | wontfix     | Comment/smell judgement calls; D7 fork intentional until 11                        |
-| Sp1–Sp3 | Spec                 | defer       | `.scratch/carry-forward/issues/11-retire-ep-generate-pool.md` (crafts/BiS/EP path) |
-| Sp4     | Spec                 | defer       | Same as A2 → 08                                                                    |
-| Sp5     | Spec                 | defer       | Folded into 11 (recipeZone / crafts)                                               |
-| Sp6     | Spec                 | wontfix     | Documented `it.todo` source gaps (30257 / 12-of-36)                                |
+| ID      | Axis                 | Disposition | Ticket / note                                                        |
+| ------- | -------------------- | ----------- | -------------------------------------------------------------------- |
+| A1 / D1 | Adversarial / Domain | defer       | `.scratch/carry-forward/issues/06-candidate-ungemmed-swaps.md`       |
+| A2      | Adversarial          | defer       | `.scratch/carry-forward/issues/08-universe-sources0-raid-view.md`    |
+| A3      | Adversarial          | defer       | `.scratch/carry-forward/issues/07-ranked-se-is-stdev.md`             |
+| A4      | Adversarial          | defer       | `.scratch/carry-forward/issues/06-candidate-ungemmed-swaps.md`       |
+| A5      | Adversarial          | wontfix     | Typo zone low blast; fix opportunistically with Wowhead list refresh |
+| D2      | Domain               | defer       | `.scratch/carry-forward/issues/09-cli-maxphase-from-lock.md`         |
+| D3–D5   | Domain               | wontfix     | Soft unverified / wording; not land blockers                         |
+| St1     | Standards            | defer       | `.scratch/carry-forward/issues/10-rank-test-stage-order.md`          |
+| St2–St6 | Standards            | wontfix     | Comment/smell judgement calls; D7 fork intentional until 11          |
+| Sp1–Sp3 | Spec                 | defer       | `.scratch/carry-forward/issues/11-retire-ep-generate-pool.md`        |
+| Sp4     | Spec                 | defer       | `.scratch/carry-forward/issues/08-universe-sources0-raid-view.md`    |
+| Sp5     | Spec                 | defer       | `.scratch/carry-forward/issues/11-retire-ep-generate-pool.md`        |
+| Sp6     | Spec                 | wontfix     | Documented `it.todo` source gaps (30257 / 12-of-36)                  |
