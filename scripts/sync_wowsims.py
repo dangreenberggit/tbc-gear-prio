@@ -192,7 +192,7 @@ def do_restore():
         print(f"  {LOCKFILE} has no files map", file=sys.stderr)
         return 2
 
-    print(f"  restoring {lock['repo']} @ {lock['tag']} ({sha[:12]}) → {VENDOR}")
+    print(f"  restoring {lock['repo']} @ {lock['tag']} ({sha[:12]}) -> {VENDOR}")
     os.makedirs(VENDOR, exist_ok=True)
 
     errors = []
