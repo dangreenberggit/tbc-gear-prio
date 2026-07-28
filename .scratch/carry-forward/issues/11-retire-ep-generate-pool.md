@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: docs/reviews/phase-1-five-seed-spread.md
 Blocks: none
@@ -26,3 +26,13 @@ raid-recipe craft two-hop (`recipeZone`), and aligning D7 eligibility into
   rewritten so it cannot be mistaken for the pool source of truth.
 - Optional follow-ons (bisTags import, raid-recipe crafts) tracked here or
   split once started.
+
+## Resolution (2026-07-28)
+
+- Rank path remains universes only; `data/pools/README.md` states that.
+- `generate_pool.py` / `curate_ret_pool.py` marked DEPRECATED; `pnpm
+  pool:generate` / `pool:curate` exit with a pointer to
+  `pnpm universe:assemble`.
+- `pool-file.test.ts` no longer treats ~12/slot density as a membership
+  gate; maxPhase↔palette test uses the universe.
+- Follow-ons split to tickets 12 (bisTags) and 13 (raid-recipe crafts).

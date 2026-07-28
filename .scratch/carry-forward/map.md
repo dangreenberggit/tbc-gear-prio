@@ -16,3 +16,6 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   path / BiS / crafts).
 - 2026-07-28 — Resolved 06–09 after stash salvage gem fill + follow-up
   fixes (independent SE, multi-source raid filter, lock-file maxPhase).
+- 2026-07-28 — Resolved 10–11 (stage-order test; EP path demoted). Split
+  bisTags → 12, raid-recipe crafts → 13. Land blocker scan limited to
+  `.scratch/carry-forward/issues/` (no nested worktree copies).

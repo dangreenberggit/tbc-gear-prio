@@ -27,7 +27,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REVIEWS = ROOT / "docs" / "reviews"
 CARRY = ROOT / ".scratch" / "carry-forward" / "issues"
-SCRATCH = ROOT / ".scratch"
 
 DISPOSITION_RE = re.compile(
     r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
@@ -90,9 +89,10 @@ def read_status(path: Path) -> str | None:
 
 
 def iter_issue_files() -> list[Path]:
-    if not SCRATCH.is_dir():
+    """Only carry-forward tickets — not nested worktree / scratch copies."""
+    if not CARRY.is_dir():
         return []
-    return sorted(SCRATCH.glob("**/issues/*.md"))
+    return sorted(CARRY.glob("*.md"))
 
 
 def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:

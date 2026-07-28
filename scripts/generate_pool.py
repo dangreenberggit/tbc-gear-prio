@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-generate_pool.py — EP-rank equippable items into data/pools/<spec>.generated.json
-(PLAN.md §8.3).
+DEPRECATED — do not use for ranking membership.
 
-db.json is a build input only. The generated file is the starting point for
-human curation into data/pools/<spec>.json; re-runs should diff, never clobber
-curation (diff mode lands in a follow-up).
+generate_pool.py — EP top-N equippable dump into data/pools/<spec>.generated.json.
 
-Equippability is armor type + weapon type (R11) — classAllowlist is empty on
-most items. Ret: plate; weapons exclude staff (paladins cannot equip staves)
-and polearm (product scope choice — paladins can equip polearms in TBC, but
-this pool excludes them; see PLAN.md D8).
+Raid-scoped universes (`scripts/assemble_universe.py` →
+`data/universes/ret-p*.json`) are the only membership path for `pnpm rank`.
+EP top-N membership is rejected (plan D1/D2/S4). This script remains only as
+archaeology / comparison; it must not be treated as the pool source of truth.
+
+Equippability here is still plate-only for armor — D7 (plate+leather+mail)
+lives in assemble_universe.py, not here.
 
     python scripts/generate_pool.py --spec ret
 
@@ -211,7 +211,20 @@ def generate(spec: str) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", default="ret")
+    ap.add_argument(
+        "--force-legacy",
+        action="store_true",
+        help="run anyway (archaeology only — not the rank membership path)",
+    )
     args = ap.parse_args()
+    if not args.force_legacy:
+        print(
+            "DEPRECATED: EP top-N membership is retired. "
+            "Use: pnpm universe:assemble -- --max-phase N\n"
+            "(pass --force-legacy only for archaeology dumps)",
+            file=sys.stderr,
+        )
+        return 2
     if args.spec != "ret":
         print("only --spec ret is implemented", file=sys.stderr)
         return 2

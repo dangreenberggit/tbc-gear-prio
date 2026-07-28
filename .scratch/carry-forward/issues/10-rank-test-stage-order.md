@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: docs/reviews/phase-1-five-seed-spread.md
 Blocks: none
@@ -16,3 +16,8 @@ stay reorganisable. `packages/core/test/rank.test.ts` expects the full
 
 - Tests assert observable ranking outcomes / seam behaviour, not the
   ordered list of stage names (or the stage-order assertion is removed).
+
+## Resolution (2026-07-28)
+
+Removed the `stages` callback and sequence expectation from the empty-pool
+seam test; it still asserts baseline, cutoff, assumptions, and substitutions.

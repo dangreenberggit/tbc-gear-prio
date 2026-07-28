@@ -186,7 +186,6 @@ describe("rankUpgrades", () => {
     const opts = { seed: 42, iterations: 3000 };
     const key = simCacheKey(request, "v0.0.101", opts);
 
-    const stages: string[] = [];
     const ranking = await rankUpgrades(
       {
         character: CHAR,
@@ -218,8 +217,7 @@ describe("rankUpgrades", () => {
         clock: () => new Date("2026-07-26T12:00:00.000Z"),
         raidSimSkeleton: skeleton,
         epWeights,
-      },
-      (p) => stages.push(p.stage)
+      }
     );
 
     expect(ranking.baseline).toEqual({
@@ -237,15 +235,6 @@ describe("rankUpgrades", () => {
     ]);
     expect(ranking.assumptions.race).toBe("RaceHuman");
     expect(ranking.substitutions).toEqual([]);
-    expect(stages).toEqual([
-      "resolving",
-      "reading-gear",
-      "composing",
-      "building-pool",
-      "simming",
-      "simming",
-      "ranking",
-    ]);
   });
 
   it("ranks a single-item neck swap by deltaDps against the baseline", async () => {

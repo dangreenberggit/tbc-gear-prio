@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
+DEPRECATED — do not use for ranking membership.
+
 curate_ret_pool.py — build data/pools/ret.json from ret.generated.json.
 
-Fills remaining source:null gaps with a hand map (PLAN.md §8.3.2). Exits
-non-zero if any entry would still ship without a source.
+Fills remaining source:null gaps with a hand map. The rank CLI no longer
+loads this file; universes from assemble_universe.py are the membership path.
+Kept for archaeology / optional legacy fixtures only.
 """
 
 from __future__ import annotations
@@ -141,8 +144,25 @@ HAND: dict[int, dict] = {
 
 
 def main() -> int:
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--force-legacy",
+        action="store_true",
+        help="run anyway (archaeology only — not the rank membership path)",
+    )
+    args = ap.parse_args()
+    if not args.force_legacy:
+        print(
+            "DEPRECATED: curated ret.json is not the rank path. "
+            "Use: pnpm universe:assemble -- --max-phase N\n"
+            "(pass --force-legacy only for archaeology dumps)",
+            file=sys.stderr,
+        )
+        return 2
     if not GENERATED.is_file():
-        print(f"missing {GENERATED} — run pnpm pool:generate", file=sys.stderr)
+        print(f"missing {GENERATED} — run with --force-legacy after a legacy generate", file=sys.stderr)
         return 2
     gen = json.loads(GENERATED.read_text(encoding="utf-8"))
     entries = []
