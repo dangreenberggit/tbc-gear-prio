@@ -26,6 +26,15 @@ Invoke the `tdd` skill for any red/green work. The seams are the three PLAN.md �
 
 When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges by default; a merger worker is the fallback). Then `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
 
+### Session focus (critical)
+
+This repo often has **other agents' worktrees, branches, and handoffs** sitting next to your checkout (`.scratch/wt-*`, `.claude/worktrees/`, `retro/*`, parked `feat/*`, `.scratch/handoffs/*`). That is normal. It is **not** your assignment.
+
+- Stay on the **branch and task the user named for this chat.** Product phase work (`phase-N/*`) is not process/retro work (`feat/fan-out-retro`, `retro/*`, workflow retros). Do not “helpfully” resume a sibling handoff because a summary, system note, or untracked tree pointed at it.
+- **Ignore sibling worktrees** unless the user explicitly asked you to inspect, merge, or adopt them. Do not `move_agent_to_root` / switch into another worktree, and do not chase commits landing on another tip, without a check-in.
+- If the IDE or a conversation summary says the active branch changed to something off-task, **ask once** before following it. Branch-change hints are not permission to abandon the user's stated goal.
+- Tangential process fixes belong on their own branch and chat. Do not divert a Phase build session into workflow-doc adoption mid-flight.
+
 ### Models and walls
 
 **Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute. On **Cursor**, sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug). Elsewhere prefer Sonnet/Terra workhorse and Opus/sol/`codex` sharp when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
