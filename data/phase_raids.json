@@ -1,0 +1,14 @@
+{
+  "specNote": "Phase → raid zone mapping for raid-scoped pool membership. Zone names are canonical db.json zones[].name strings. Carryover policy: union of all raids with phase <= maxPhase (sub-phase 0 D1).",
+  "zones": [
+    { "phase": 1, "name": "Karazhan", "zoneId": 3457 },
+    { "phase": 1, "name": "Gruul's Lair", "zoneId": 3923 },
+    { "phase": 1, "name": "Magtheridon's Lair", "zoneId": 3836 },
+    { "phase": 2, "name": "Serpentshrine Cavern", "zoneId": 3607 },
+    { "phase": 2, "name": "Tempest Keep", "zoneId": 3845 },
+    { "phase": 3, "name": "Black Temple", "zoneId": 3959 },
+    { "phase": 3, "name": "Hyjal Summit", "zoneId": 3606 },
+    { "phase": 4, "name": "Zul'Aman", "zoneId": 3805 },
+    { "phase": 5, "name": "Sunwell Plateau", "zoneId": 4075 }
+  ]
+}
