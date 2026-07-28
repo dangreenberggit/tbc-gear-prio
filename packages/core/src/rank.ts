@@ -187,7 +187,7 @@ export async function rankUpgrades(
   );
   const candidates = prefilterPool(
     filterPoolByPhase(deps.pool ?? [], input.maxPhase),
-    { fullPool: input.fullPool }
+    input.fullPool ? { fullPool: true } : {}
   );
 
   const totalSims = 1 + candidates.length;
