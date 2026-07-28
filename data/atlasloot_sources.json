@@ -1,0 +1,9645 @@
+{
+  "21524": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "21525": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "21882": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "21903": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "21904": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "21907": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "22545": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "22559": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "22560": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "22561": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "22920": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "22921": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "22927": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "23617": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "23723": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "23735": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "23809": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "23857": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "23862": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "23864": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "23865": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "23881": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "23886": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "23887": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "23891": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "23933": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "24139": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "24160": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "24173": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "24248": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "24308": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "24309": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "24310": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "24311": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "24312": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "24313": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "25461": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "25462": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "25728": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27447": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27448": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27449": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27450": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27451": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27452": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27453": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27454": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27455": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27456": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27457": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27458": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27459": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27460": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27461": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27462": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27463": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27464": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27465": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27466": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27467": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27468": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27474": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27475": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27476": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27477": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27478": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27483": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27484": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27485": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27487": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27488": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27489": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27490": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27491": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27492": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27493": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27494": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27495": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27497": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27505": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27506": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27507": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27508": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27509": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27510": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27512": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27514": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27517": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27518": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27519": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27520": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27521": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27522": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27523": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27524": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27525": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27526": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27527": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27528": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27529": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27531": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27533": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27534": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27535": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27536": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27537": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27538": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27539": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27540": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27541": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27542": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27543": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27544": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27545": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27546": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27547": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27548": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27549": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27550": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27551": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27632": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27633": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27672": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27673": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27683": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27712": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27713": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27714": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27737": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27738": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27739": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "27740": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27741": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27742": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27743": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27744": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27745": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27746": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27747": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27748": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27755": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27757": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27758": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27759": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27760": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27761": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27762": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27763": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27764": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27765": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27766": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27767": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27768": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27769": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27770": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27771": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27772": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27773": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27775": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27776": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27778": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27779": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27780": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27781": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27783": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27784": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27787": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27788": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27789": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27790": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27791": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27792": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27793": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27794": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27795": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27796": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27797": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27798": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27799": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27800": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "27801": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27802": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27803": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27804": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27805": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27806": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27813": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27814": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27815": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27816": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27817": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27818": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27821": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27822": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27823": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27824": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27825": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27826": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27827": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27828": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27829": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27831": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27835": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27837": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27838": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27839": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27840": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27842": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27843": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27844": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "27845": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27846": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27847": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27848": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "27865": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27866": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27867": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27868": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27869": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27870": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27871": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27872": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27873": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27874": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "27875": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27876": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27877": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27878": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27884": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27885": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27886": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27887": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27888": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27889": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27890": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27891": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27892": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27893": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27895": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27896": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27897": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27898": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27899": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "27900": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27901": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27902": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27903": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27904": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "27905": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27906": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "27907": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27908": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27909": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27910": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27911": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "27912": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27913": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "27914": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27915": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27916": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27917": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27918": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27919": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27925": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27936": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27937": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "27938": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "27946": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27948": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27977": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27980": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27981": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27985": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27986": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27987": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27988": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27991": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "27993": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27994": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27995": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "27996": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28033": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28034": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28121": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "28124": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "28134": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "28184": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28185": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28186": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28187": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28188": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28189": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28190": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28191": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28192": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28193": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28194": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28202": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28203": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "28204": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28205": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28206": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28207": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "28210": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28211": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28212": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28213": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28214": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28215": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28216": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28217": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28218": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28219": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28220": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28221": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28222": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28223": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28224": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28225": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28226": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28227": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28228": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28229": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28230": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "28231": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28232": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "28233": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28248": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28249": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28250": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28251": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28252": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28253": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28254": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28255": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28256": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28257": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28258": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28259": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28260": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28262": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28263": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28264": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "28265": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28266": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28267": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28268": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "28269": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28275": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28278": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28285": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28286": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28288": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "28296": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28301": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28304": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28306": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28311": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28315": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28316": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28317": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28318": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28321": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28322": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28323": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28324": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28325": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28327": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28328": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28337": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "28338": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28339": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28340": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28341": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28342": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28343": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28344": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28345": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28347": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28348": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28349": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28350": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28367": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28370": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28371": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "28372": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28373": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28374": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28375": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28384": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28386": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28387": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28390": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28391": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28392": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28393": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28394": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28396": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28397": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28398": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28400": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "28401": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "28403": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28406": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28407": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28412": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28413": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28414": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28415": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28416": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28418": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28419": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "28453": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28454": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28477": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28490": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "28502": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28503": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28504": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28505": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28506": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28507": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28508": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28509": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28510": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28511": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28512": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28514": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28515": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28516": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28517": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28518": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28519": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28520": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28521": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28522": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28523": [
+    {
+      "boss": "Maiden of Virtue",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28524": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28525": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28528": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28529": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28530": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28545": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28565": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28566": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28567": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28568": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28569": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28570": [
+    {
+      "boss": "Moroes",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28572": [
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28573": [
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28578": [
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28579": [
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28581": [
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28582": [
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28583": [
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28584": [
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28585": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28586": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28587": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28588": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28589": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28590": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28591": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28592": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28593": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28594": [
+    {
+      "boss": "The Wizard of Oz",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "The Big Bad Wolf",
+      "kind": "raid",
+      "zone": "Karazhan"
+    },
+    {
+      "boss": "Romulo and Julianne",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28597": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28599": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28600": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28601": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28602": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28603": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28604": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28606": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28608": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28609": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28610": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28611": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28612": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28621": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28631": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28633": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28647": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28649": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28652": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28653": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28654": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28655": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28656": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28657": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28658": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28659": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28660": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28661": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28662": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28663": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28666": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28669": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28670": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28671": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28672": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28673": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28674": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28675": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28726": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28727": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28728": [
+    {
+      "boss": "Shade of Aran",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28729": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28730": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28731": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28732": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28733": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28734": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28735": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28740": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28741": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28742": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28743": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28744": [
+    {
+      "boss": "Netherspite",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28745": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28746": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28747": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28748": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28749": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28750": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28751": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28752": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28753": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28754": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28755": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28756": [
+    {
+      "boss": "Chess Event",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28757": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28762": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28763": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28764": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28765": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28766": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28767": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28768": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28770": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28771": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28772": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28773": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28774": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28775": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28776": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28777": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28778": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28779": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28780": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28781": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28782": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28783": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28785": [
+    {
+      "boss": "Terestian Illhoof",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "28789": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "28794": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28795": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28796": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28797": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28799": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28800": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28801": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28802": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28803": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28804": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28810": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28822": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28823": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28824": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28825": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28826": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28827": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28828": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "28830": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29238": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "29239": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "29240": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "29241": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "29242": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "29243": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "29244": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "29245": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "29246": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "29247": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "29248": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "29249": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29250": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "29251": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "29252": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "29253": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "29254": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29255": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29257": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "29258": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "29259": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29261": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "29262": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "29263": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29264": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "29265": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "29346": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "29347": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "29348": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29349": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "29350": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "29351": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "29352": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "29353": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "29354": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "29355": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "29356": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "29357": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "29359": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "29360": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "29362": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "29434": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    },
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    },
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "29458": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "29463": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "29673": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "29674": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "29675": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "29753": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "29754": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "29755": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "29756": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29757": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29758": [
+    {
+      "boss": "The Curator",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29759": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29760": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29761": [
+    {
+      "boss": "Prince Malchezaar",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "29762": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29763": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29764": [
+    {
+      "boss": "High King Maulgar",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29765": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29766": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29767": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "29905": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29906": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "29918": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29920": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29921": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29922": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29923": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29924": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29925": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29947": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29948": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29949": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29950": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29951": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29962": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29965": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29966": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29972": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29976": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29977": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29981": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29982": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29983": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29984": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29985": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29986": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29987": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29988": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29989": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29990": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29991": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29992": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29993": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29994": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29995": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29996": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29997": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "29998": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30008": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30020": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30021": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30022": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30023": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30024": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30025": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30026": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30027": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30028": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30029": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30030": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30047": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30048": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30049": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30050": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30051": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30052": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30053": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30054": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30055": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30056": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30057": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30058": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30059": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30060": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30061": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30062": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30063": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30064": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30065": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30066": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30067": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30068": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30075": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30079": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30080": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30081": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30082": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30083": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30084": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30085": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30090": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30091": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30092": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30095": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30096": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30097": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30098": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30099": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30100": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30101": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30102": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30103": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30104": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30105": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30106": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30107": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30108": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30109": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30110": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30111": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30112": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30183": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30236": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30237": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30238": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30239": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30240": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30241": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30242": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30243": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30244": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30245": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30246": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30247": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30248": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30249": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30250": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30280": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30281": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30282": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30283": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30301": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30302": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30303": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30304": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30305": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30306": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30307": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30308": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30311": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30312": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30313": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30314": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30316": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30317": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30318": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30319": [
+    {
+      "boss": "Legendaries",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30321": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30322": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30323": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30324": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30446": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30447": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30448": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30449": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30450": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30480": [
+    {
+      "boss": "Attumen the Huntsman",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30531": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "30532": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30533": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "30534": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "30535": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "30536": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "30538": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "30541": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "30543": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "30546": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30547": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30548": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30549": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "30550": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "30551": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "30552": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30553": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30554": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30555": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "30556": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "30558": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "30559": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30560": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30563": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30564": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "30565": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "30566": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "30572": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "30573": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "30574": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "30575": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "30581": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "30582": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "30583": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "30584": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "30585": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "30586": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "30587": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "30588": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "30589": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "30590": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "30591": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "30592": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "30593": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "30594": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "30600": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "30601": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "30602": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "30603": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "30604": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "30605": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "30606": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "30607": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "30608": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "30619": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "30620": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30621": [
+    {
+      "boss": "Lady Vashj",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30626": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30627": [
+    {
+      "boss": "Leotheras the Blind",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30629": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30641": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30642": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30643": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30644": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30663": [
+    {
+      "boss": "Fathom-Lord Karathress",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30664": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30665": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30666": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30667": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30668": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30673": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30674": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30675": [
+    {
+      "boss": "Hyakiss the Lurker",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30676": [
+    {
+      "boss": "Hyakiss the Lurker",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30677": [
+    {
+      "boss": "Hyakiss the Lurker",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30678": [
+    {
+      "boss": "Hyakiss the Lurker",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30680": [
+    {
+      "boss": "Shadikith the Glider",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30681": [
+    {
+      "boss": "Shadikith the Glider",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30682": [
+    {
+      "boss": "Shadikith the Glider",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30683": [
+    {
+      "boss": "Shadikith the Glider",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30684": [
+    {
+      "boss": "Rokad the Ravager",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30685": [
+    {
+      "boss": "Rokad the Ravager",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30686": [
+    {
+      "boss": "Rokad the Ravager",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30687": [
+    {
+      "boss": "Rokad the Ravager",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "30705": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30707": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30708": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30709": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30710": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30720": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30808": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30827": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "30828": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "30829": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "30861": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30862": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30863": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30864": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30865": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30866": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30868": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30869": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30870": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30871": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30872": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30873": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30874": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30878": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30879": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30880": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30881": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30882": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30883": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30884": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30885": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30886": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30887": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30888": [
+    {
+      "boss": "Anetheron",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30889": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30891": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30892": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30893": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30894": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30895": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30896": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30897": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30898": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30899": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30900": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30901": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30902": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30903": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30904": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30905": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30906": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30907": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30908": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30909": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30910": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30911": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30912": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30913": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30914": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30915": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30916": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30917": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30918": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "30919": [
+    {
+      "boss": "Kaz'rogal",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31085": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "31086": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "31089": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31090": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31091": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31092": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31093": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31094": [
+    {
+      "boss": "Azgalor",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31095": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31096": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31097": [
+    {
+      "boss": "Archimonde",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "31098": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31099": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31100": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31101": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31102": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31103": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "31554": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31562": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31570": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31578": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31716": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "31721": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "31722": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "31744": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "31750": [
+    {
+      "boss": "Gruul the Dragonkiller",
+      "kind": "raid",
+      "zone": "Gruul's Lair"
+    }
+  ],
+  "31751": [
+    {
+      "boss": "Nightbane",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "31919": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31920": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31921": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31922": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31923": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "31924": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "32072": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "32073": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32076": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "32077": [
+    {
+      "dungeon": "Hellfire Ramparts",
+      "kind": "heroic"
+    }
+  ],
+  "32078": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "32080": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "32081": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "32082": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "32227": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32228": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32229": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32230": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32231": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32232": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32234": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32235": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32236": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32237": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32238": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32239": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32240": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32241": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32242": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32243": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32245": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32247": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32248": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32249": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "32250": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32251": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32252": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32253": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32254": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32255": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32256": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32257": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32258": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32259": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32260": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32261": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32262": [
+    {
+      "boss": "Supremus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32263": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32264": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32265": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32266": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32267": [
+    {
+      "boss": "High Astromancer Solarian",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "32268": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32269": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32270": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32271": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32273": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32275": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32276": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32278": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32279": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32280": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32285": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32289": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32295": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32296": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32297": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32298": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32303": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32307": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32323": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32324": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32325": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32326": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32327": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32328": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32329": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32330": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32331": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32332": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32333": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32334": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32335": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32336": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32337": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32338": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32339": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32340": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32341": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32342": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32343": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32344": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32345": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32346": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32347": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32348": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32349": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32350": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32351": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32352": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32353": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32354": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32361": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32362": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32363": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32365": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32366": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32367": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32368": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32369": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32370": [
+    {
+      "boss": "Mother Shahraz",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32373": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32374": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32375": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32376": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32377": [
+    {
+      "boss": "High Warlord Naj'entus",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32385": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "32405": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "32428": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32458": [
+    {
+      "boss": "Kael'thas Sunstrider",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "32459": [
+    {
+      "boss": "Rage Winterchill",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32471": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32483": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32496": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32497": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32500": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32501": [
+    {
+      "boss": "Gurtogg Bloodboil",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32505": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32510": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32512": [
+    {
+      "boss": "Teron Gorefiend",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32513": [
+    {
+      "boss": "Shade of Akama",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32515": [
+    {
+      "boss": "Void Reaver",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "32516": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "32517": [
+    {
+      "boss": "Reliquary of the Lost",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32518": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32519": [
+    {
+      "boss": "The Illidari Council",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32521": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32524": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32525": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32526": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32527": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32528": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32589": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32590": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32591": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32592": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32593": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32606": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32608": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32609": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32736": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32737": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32738": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32739": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32744": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32745": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32746": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32747": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32748": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32749": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32750": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32751": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32752": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32753": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32754": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32755": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32768": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32769": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32778": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32779": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32780": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32781": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "32837": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32838": [
+    {
+      "boss": "Illidan Stormrage",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32897": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32943": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "32944": [
+    {
+      "boss": "Al'ar",
+      "kind": "raid",
+      "zone": "Tempest Keep"
+    }
+  ],
+  "32945": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "32946": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "33054": [
+    {
+      "boss": "The Lurker Below",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "33055": [
+    {
+      "boss": "Hydross the Unstable",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "33058": [
+    {
+      "boss": "Morogrim Tidewalker",
+      "kind": "raid",
+      "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "33102": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33191": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33203": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33206": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33211": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33214": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33215": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33216": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33281": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33283": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33285": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33286": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33293": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33297": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33298": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33299": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33300": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33303": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33307": [
+    {
+      "boss": "Akil'zon",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    },
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33317": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33322": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33326": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33327": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33328": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33329": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33332": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33354": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33356": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33357": [
+    {
+      "boss": "Jan'alai",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33388": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33389": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33421": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33432": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33446": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33453": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33463": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33464": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33465": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33466": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33467": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33468": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33469": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33471": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33473": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33474": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33476": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33478": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33479": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33480": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33481": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33483": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33489": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33490": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33491": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33492": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33493": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33494": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33495": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33496": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33497": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33498": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33499": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33500": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33533": [
+    {
+      "boss": "Halazzi",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33590": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33591": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33592": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33640": [
+    {
+      "boss": "Nalorakk",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33805": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33809": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33814": [
+    {
+      "dungeon": "The Blood Furnace",
+      "kind": "heroic"
+    }
+  ],
+  "33815": [
+    {
+      "dungeon": "The Shattered Halls",
+      "kind": "heroic"
+    }
+  ],
+  "33821": [
+    {
+      "dungeon": "The Slave Pens",
+      "kind": "heroic"
+    }
+  ],
+  "33826": [
+    {
+      "dungeon": "The Underbog",
+      "kind": "heroic"
+    }
+  ],
+  "33827": [
+    {
+      "dungeon": "The Steamvault",
+      "kind": "heroic"
+    }
+  ],
+  "33828": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33829": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33830": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33831": [
+    {
+      "boss": "Zul'jin",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33834": [
+    {
+      "dungeon": "Sethekk Halls",
+      "kind": "heroic"
+    }
+  ],
+  "33835": [
+    {
+      "dungeon": "Mana-Tombs",
+      "kind": "heroic"
+    }
+  ],
+  "33836": [
+    {
+      "dungeon": "Auchenai Crypts",
+      "kind": "heroic"
+    }
+  ],
+  "33840": [
+    {
+      "dungeon": "Shadow Labyrinth",
+      "kind": "heroic"
+    }
+  ],
+  "33847": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "33858": [
+    {
+      "dungeon": "The Black Morass",
+      "kind": "heroic"
+    }
+  ],
+  "33859": [
+    {
+      "dungeon": "The Botanica",
+      "kind": "heroic"
+    }
+  ],
+  "33860": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "33861": [
+    {
+      "dungeon": "The Arcatraz",
+      "kind": "heroic"
+    }
+  ],
+  "33865": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33930": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33931": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33932": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33933": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33971": [
+    {
+      "boss": "Timed Chest",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "33993": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "34009": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    },
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "34010": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Hyjal Summit"
+    }
+  ],
+  "34011": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "34012": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Black Temple"
+    }
+  ],
+  "34029": [
+    {
+      "boss": "Hex Lord Malacrass",
+      "kind": "raid",
+      "zone": "Zul'Aman"
+    }
+  ],
+  "34164": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34165": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34166": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34167": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34168": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34169": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34170": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34176": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34177": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34178": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34179": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34180": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34181": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34182": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34183": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34184": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34185": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34186": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34188": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34189": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34190": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34192": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34193": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34194": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34195": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34196": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34197": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34198": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34199": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34202": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34203": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34204": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34205": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34206": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34208": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34209": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34210": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34211": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34212": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34213": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34214": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34215": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34216": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34228": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34229": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34230": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34231": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34232": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34233": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34234": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34240": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34241": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34242": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34243": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34244": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34245": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34247": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34329": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34331": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34332": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34333": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34334": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34335": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34336": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34337": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34339": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34340": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34341": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34342": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34343": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34344": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34345": [
+    {
+      "boss": "Kil'jaeden",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34346": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34347": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34348": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34349": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34350": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34351": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34352": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34427": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34428": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34429": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34430": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34470": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34471": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34472": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34473": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34601": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34602": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34603": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34604": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34605": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34606": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34607": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34608": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34609": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34610": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34611": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34612": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34613": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34614": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34615": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34616": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "34664": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34845": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "34846": [
+    {
+      "boss": "Magtheridon",
+      "kind": "raid",
+      "zone": "Magtheridon's Lair"
+    }
+  ],
+  "34848": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34851": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34852": [
+    {
+      "boss": "Kalecgos",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34853": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34854": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34855": [
+    {
+      "boss": "Brutallus",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34856": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34857": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "34858": [
+    {
+      "boss": "Felmyst",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35186": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35187": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35189": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35190": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35191": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35192": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35193": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35194": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35195": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35196": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35197": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35198": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35199": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35200": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35201": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35202": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35203": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35204": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35205": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35206": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35207": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35208": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35209": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35210": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35211": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35212": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35213": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35214": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35215": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35216": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35217": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35218": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35219": [
+    {
+      "boss": "Patterns",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35273": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35275": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35282": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35283": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35284": [
+    {
+      "boss": "M'uru",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35290": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35291": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35292": [
+    {
+      "boss": "Eredar Twins",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35294": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35304": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35311": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35504": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35513": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "35582": [
+    {
+      "dungeon": "The Mechanar",
+      "kind": "heroic"
+    }
+  ],
+  "35733": [
+    {
+      "boss": "Trash",
+      "kind": "raid",
+      "zone": "Sunwell Plateau"
+    }
+  ],
+  "35756": [
+    {
+      "dungeon": "Magisters' Terrace",
+      "kind": "heroic"
+    }
+  ],
+  "38276": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "38329": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "38506": [
+    {
+      "dungeon": "Old Hillsbrad Foothills",
+      "kind": "heroic"
+    }
+  ],
+  "38658": [
+    {
+      "boss": "Prince Tenris Mirkblood",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ],
+  "39769": [
+    {
+      "boss": "Prince Tenris Mirkblood",
+      "kind": "raid",
+      "zone": "Karazhan"
+    }
+  ]
+}
