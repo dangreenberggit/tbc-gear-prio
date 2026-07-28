@@ -2,8 +2,13 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { fillCandidateGems } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
+import { gemsForPhase } from "../src/gems.js";
+import { isEnchantable } from "../src/items.js";
+import { equipmentFromLoggedGear } from "../src/logged-gear.js";
+import { repairMeta } from "../src/meta-repair.js";
 import { RankError, rankUpgrades } from "../src/rank.js";
 import {
   RecordedGearSource,
@@ -14,10 +19,17 @@ import {
   RecordedSimRunner,
   simCacheKey,
   type RaidSimRequest,
+  type SimObservation,
+  type SimRunOpts,
+  type SimRunner,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../src/slots.js";
-import { equipmentFromLoggedGear } from "../src/logged-gear.js";
+import {
+  mapWclGearToSim,
+  SIM_ORDER,
+  type SimItemSpec,
+  type WclGearEntry,
+} from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -76,6 +88,62 @@ function slamaltmanLoggedGear(): LoggedGear {
     };
   }
   throw new Error("slamaltman not found");
+}
+
+class CapturingSimRunner implements SimRunner {
+  readonly requests: RaidSimRequest[] = [];
+
+  constructor(
+    private readonly simVersion: string,
+    private readonly recordings: ReadonlyMap<string, SimObservation>
+  ) {}
+
+  async version(): Promise<string> {
+    return this.simVersion;
+  }
+
+  async run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
+    this.requests.push(req);
+    const key = simCacheKey(req, this.simVersion, opts);
+    const hit = this.recordings.get(key);
+    if (!hit) {
+      throw new Error(`no recording for sim key ${key}`);
+    }
+    return hit;
+  }
+}
+
+/** Mirror rank.ts candidate swap: fill sockets then repair meta on the full set. */
+function candidateEquipmentForTest(
+  equipment: SimItemSpec[],
+  slotName: (typeof SIM_ORDER)[number],
+  itemId: number,
+  maxPhase: 1 | 2 | 3 | 4 | 5,
+  epWeights: Record<string, number>
+): SimItemSpec[] {
+  const slotIndex = SIM_ORDER.indexOf(slotName);
+  const palette = gemsForPhase(maxPhase);
+  const swapped = equipment.map((spec, i) => {
+    if (i !== slotIndex) return spec;
+    const out: SimItemSpec = {
+      id: itemId,
+      gems: fillCandidateGems(itemId, palette, epWeights),
+    };
+    if (spec.enchant && isEnchantable(itemId)) {
+      out.enchant = spec.enchant;
+    }
+    return out;
+  });
+  const socketed = swapped.map((spec) => ({
+    itemId: spec.id ?? 0,
+    gems: [...spec.gems],
+  }));
+  const repaired = repairMeta({ items: socketed, epWeights, palette });
+  return swapped.map((spec, i) => {
+    const row = repaired.items[i];
+    if (!row || !spec.id) return spec;
+    return { ...spec, gems: [...row.gems] };
+  });
 }
 
 describe("CUTOFF", () => {
@@ -359,5 +427,112 @@ describe("rankUpgrades", () => {
     );
     // maxPhase 1 must drop the phase-2 chest even though it is in the pool file.
     expect(a.items.map((i) => i.itemId)).toEqual([29381]);
+  });
+
+  it("gem-fills socketed candidates before simming", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const headId = 32461; // Furious Gizmatic Goggles — three sockets
+    const upgradedEquipment = candidateEquipmentForTest(
+      equipment,
+      "head",
+      headId,
+      2,
+      epWeights
+    );
+    const headIdx = SIM_ORDER.indexOf("head");
+    expect(upgradedEquipment[headIdx]!.gems.length).toBeGreaterThan(0);
+    expect(upgradedEquipment[headIdx]!.gems.every((id) => id > 0)).toBe(true);
+
+    const baselineReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const upgradedReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment: upgradedEquipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(baselineReq, "v0.0.101", opts);
+    const upgradedKey = simCacheKey(upgradedReq, "v0.0.101", opts);
+
+    const sim = new CapturingSimRunner(
+      "v0.0.101",
+      new Map([
+        [
+          baselineKey,
+          {
+            dps: 2042.85,
+            stdev: 91.9,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          },
+        ],
+        [
+          upgradedKey,
+          {
+            dps: 2060.0,
+            stdev: 93.0,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          },
+        ],
+      ])
+    );
+
+    const pool = [
+      {
+        itemId: headId,
+        name: "Furious Gizmatic Goggles",
+        slot: "head" as const,
+        phase: 2,
+        source: {
+          kind: "raid" as const,
+          zone: "Tempest Keep",
+          boss: "Void Reaver",
+        },
+      },
+    ];
+
+    await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool,
+      }
+    );
+
+    expect(sim.requests).toHaveLength(2);
+    const candidateReq = sim.requests[1]!;
+    const items =
+      (
+        candidateReq.raid as {
+          parties: Array<{
+            players: Array<{
+              equipment: { items: Array<{ id: number; gems: number[] }> };
+            }>;
+          }>;
+        }
+      ).parties[0]?.players[0]?.equipment.items ?? [];
+    const headItem = items[headIdx]!;
+    expect(headItem.id).toBe(headId);
+    expect(headItem.gems.length).toBeGreaterThan(0);
+    expect(headItem.gems.every((id) => id > 0)).toBe(true);
   });
 });

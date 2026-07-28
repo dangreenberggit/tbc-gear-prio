@@ -3,7 +3,7 @@
  * I/O lives here; the core module stays pure.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:os";
@@ -13,6 +13,7 @@ import {
   SLAMALTMAN_REF,
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
+import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
   filterByZone,
@@ -31,7 +32,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -44,6 +45,7 @@ function parseArgs(argv: string[]): {
   offline: boolean;
   maxPhase: ContentPhase;
   raid?: string;
+  report?: string;
 } {
   const out: {
     region?: Region;
@@ -52,6 +54,7 @@ function parseArgs(argv: string[]): {
     offline: boolean;
     maxPhase: ContentPhase;
     raid?: string;
+    report?: string;
   } = { offline: false, maxPhase: 2 };
 
   for (let i = 0; i < argv.length; i++) {
@@ -86,6 +89,15 @@ function parseArgs(argv: string[]): {
       i++;
       continue;
     }
+    if (arg === "--report") {
+      if (next && !next.startsWith("-")) {
+        out.report = next;
+        i++;
+      } else {
+        out.report = "";
+      }
+      continue;
+    }
     usage();
   }
 
@@ -97,7 +109,18 @@ function parseArgs(argv: string[]): {
     offline: out.offline,
     maxPhase: out.maxPhase,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
+    ...(out.report !== undefined ? { report: out.report } : {}),
   };
+}
+
+function defaultReportPath(args: {
+  character: string;
+  realm: string;
+  region: string;
+}): string {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const name = `${args.character}@${args.realm}-${args.region}-${stamp}.html`;
+  return join(root, ".scratch", "rank-reports", name);
 }
 
 function loadJson<T>(rel: string): T {
@@ -233,6 +256,32 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       if (item.setBonusNote) {
         console.log(`    set: ${item.setBonusNote}`);
       }
+    }
+
+    if (args.report !== undefined) {
+      const reportPath =
+        args.report === "" ? defaultReportPath(args) : args.report;
+      const reportRanking = args.raid ? { ...ranking, items } : ranking;
+      mkdirSync(dirname(reportPath), { recursive: true });
+      const meta = {
+        character: args.character,
+        realm: args.realm,
+        region: args.region,
+        spec: input.spec,
+        maxPhase: input.maxPhase,
+        poolSize: pool.length,
+        generatedAt: new Date().toISOString(),
+        ...(args.raid !== undefined ? { raid: args.raid } : {}),
+      };
+      writeFileSync(reportPath, renderRankHtml(reportRanking, meta), "utf8");
+      const jsonPath = reportPath.replace(/\.html$/i, ".json");
+      writeFileSync(
+        jsonPath,
+        JSON.stringify({ meta, ranking: reportRanking }, null, 2),
+        "utf8"
+      );
+      console.log(`report ${reportPath}`);
+      console.log(`report-json ${jsonPath}`);
     }
   } catch (err) {
     if (err instanceof RankError) {
