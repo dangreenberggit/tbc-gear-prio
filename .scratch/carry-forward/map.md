@@ -10,3 +10,7 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   landed on `phase-0/close-gates`; the rest `Blocks: phase-1`.
 - 2026-07-26 — Landing is `pnpm land` only. Open `Blocks: phase-N` tickets
   require `--ack-open-blockers` (or close/re-block), not path-in-review theater.
+- 2026-07-28 — From `docs/reviews/phase-1-five-seed-spread.md`: filed 06
+  (candidate ungemmed swaps), 07 (se vs stdev), 08 (sources[0] raid view),
+  09 (CLI maxPhase from lock), 10 (stage-order test), 11 (retire EP generate
+  path / BiS / crafts).
