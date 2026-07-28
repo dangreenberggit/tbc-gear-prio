@@ -50,7 +50,11 @@ describe("S6: bisTags do not affect curated pool membership", () => {
       ...e,
       bisTags: ["BiS" as const],
     }));
-    const stripped = curatedEntries.map(({ bisTags: _tags, ...rest }) => rest);
+    const stripped = curatedEntries.map((e) => {
+      const copy = { ...e };
+      delete copy.bisTags;
+      return copy;
+    });
     const before = filterPoolByPhase(curatedEntries, maxPhase)
       .map((e) => e.itemId)
       .sort((a, b) => a - b);
@@ -72,7 +76,11 @@ describe("S6: bisTags do not affect curated pool membership", () => {
       ...e,
       bisTags: ["Realistic" as const],
     }));
-    const stripped = curatedEntries.map(({ bisTags: _tags, ...rest }) => rest);
+    const stripped = curatedEntries.map((e) => {
+      const copy = { ...e };
+      delete copy.bisTags;
+      return copy;
+    });
     const before = filterPoolByZone(curatedEntries, zone)
       .map((e) => e.itemId)
       .sort((a, b) => a - b);

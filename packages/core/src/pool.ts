@@ -47,14 +47,15 @@ export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
   if (!source) {
     throw new Error(`universe row ${entry.itemId} has no sources`);
   }
+  const curationHint = entry.curationHint ?? entry.ep;
   return {
     itemId: entry.itemId,
     name: entry.name,
     slot: entry.slot,
     phase: entry.phase,
     source,
-    curationHint: entry.curationHint ?? entry.ep,
-    bisTags: entry.bisTags,
+    ...(curationHint !== undefined ? { curationHint } : {}),
+    ...(entry.bisTags !== undefined ? { bisTags: entry.bisTags } : {}),
   };
 }
 

@@ -96,7 +96,7 @@ function parseArgs(argv: string[]): {
     character: out.character,
     offline: out.offline,
     maxPhase: out.maxPhase,
-    raid: out.raid,
+    ...(out.raid !== undefined ? { raid: out.raid } : {}),
   };
 }
 
