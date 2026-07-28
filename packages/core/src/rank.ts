@@ -103,6 +103,8 @@ export type RankedItem = {
   slot: PoolEntry["slot"];
   slotChoice?: "a" | "b";
   source: ItemSource;
+  /** Full provenance when the pool row carried multiple sources. */
+  sources?: ItemSource[];
   deltaDps: number;
   deltaPct: number;
   se: number;
@@ -282,11 +284,13 @@ export async function rankUpgrades(
       source: entry.source,
       deltaDps: best.deltaDps,
       deltaPct,
-      se: best.stdev,
+      // PLAN.md §10 Phase 1: independent SE of the mean = stdev / √n
+      se: best.stdev / Math.sqrt(iterations),
       seMethod: "independent",
       bisTags: entry.bisTags ?? [],
       belowCutoff,
     };
+    if (entry.sources) item.sources = entry.sources;
     if (best.slotChoice) item.slotChoice = best.slotChoice;
     if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
     if (owned) item.owned = true;

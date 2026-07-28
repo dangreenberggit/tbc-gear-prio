@@ -73,6 +73,36 @@ describe("filterPoolByZone", () => {
       expect.objectContaining({ itemId: 4 })
     );
   });
+
+  it("matches any zone in sources[], not only the primary source", () => {
+    const multi: PoolEntry[] = [
+      {
+        itemId: 30129,
+        name: "Crystalforge Breastplate",
+        slot: "chest",
+        phase: 2,
+        source: {
+          kind: "token",
+          zone: "Tempest Keep",
+          token: "Chestguard of the Forgotten Conqueror",
+        },
+        sources: [
+          {
+            kind: "token",
+            zone: "Tempest Keep",
+            token: "Chestguard of the Forgotten Conqueror",
+          },
+          { kind: "raid", zone: "Serpentshrine Cavern", boss: "Lady Vashj" },
+        ],
+      },
+    ];
+    expect(
+      filterPoolByZone(multi, "Serpentshrine Cavern").map((e) => e.itemId)
+    ).toEqual([30129]);
+    expect(
+      filterPoolByZone(multi, "Tempest Keep").map((e) => e.itemId)
+    ).toEqual([30129]);
+  });
 });
 
 describe("filterByZone", () => {
@@ -110,6 +140,7 @@ describe("poolFromUniverse", () => {
       itemId: 28672,
       source: { kind: "raid", zone: "Karazhan", boss: "Shade of Aran" },
       curationHint: 68.49,
+      sources: [{ kind: "raid", zone: "Karazhan", boss: "Shade of Aran" }],
     });
   });
 

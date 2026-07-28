@@ -30,6 +30,27 @@ import type { ContentPhase, Region } from "./types.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
+function loadJson<T>(rel: string): T {
+  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
+}
+
+/** DEFAULT_MAX_PHASE from the wowsims lock — never a second hardcoded tier. */
+function defaultMaxPhaseFromLock(): ContentPhase {
+  const lock = loadJson<{
+    defaultMaxPhase?: number;
+    currentPhase?: number;
+  }>("data/wowsims.lock.json");
+  const n = lock.defaultMaxPhase ?? lock.currentPhase;
+  if (n !== 1 && n !== 2 && n !== 3 && n !== 4 && n !== 5) {
+    console.error(
+      `wowsims.lock.json missing usable defaultMaxPhase/currentPhase (got ${String(n)})`
+    );
+    process.exit(2);
+    throw new Error("unreachable");
+  }
+  return n;
+}
+
 function usage(): never {
   console.error(
     "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--report [<path.html>]]"
@@ -55,7 +76,7 @@ function parseArgs(argv: string[]): {
     maxPhase: ContentPhase;
     raid?: string;
     report?: string;
-  } = { offline: false, maxPhase: 2 };
+  } = { offline: false, maxPhase: defaultMaxPhaseFromLock() };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -121,10 +142,6 @@ function defaultReportPath(args: {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const name = `${args.character}@${args.realm}-${args.region}-${stamp}.html`;
   return join(root, ".scratch", "rank-reports", name);
-}
-
-function loadJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
 }
 
 function loadUniversePool(maxPhase: ContentPhase): PoolEntry[] {

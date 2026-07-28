@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: docs/reviews/phase-1-five-seed-spread.md
 Blocks: phase-1
@@ -19,3 +19,8 @@ When upstream flips phase, the CLI drifts unless every caller passes
 - Default `maxPhase` is read from `data/wowsims.lock.json` (or the same
   constant the sync script writes).
 - No second hardcoded content-tier default in the CLI.
+
+## Resolution (2026-07-28)
+
+`defaultMaxPhaseFromLock()` reads `defaultMaxPhase` (fallback
+`currentPhase`) from `data/wowsims.lock.json` and fails closed if missing.

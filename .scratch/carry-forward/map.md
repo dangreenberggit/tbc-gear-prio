@@ -14,3 +14,5 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   (candidate ungemmed swaps), 07 (se vs stdev), 08 (sources[0] raid view),
   09 (CLI maxPhase from lock), 10 (stage-order test), 11 (retire EP generate
   path / BiS / crafts).
+- 2026-07-28 — Resolved 06–09 after stash salvage gem fill + follow-up
+  fixes (independent SE, multi-source raid filter, lock-file maxPhase).

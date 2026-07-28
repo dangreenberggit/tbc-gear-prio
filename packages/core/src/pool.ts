@@ -21,6 +21,8 @@ export type PoolEntry = {
   slot: ItemSlot;
   phase: number;
   source: ItemSource;
+  /** Full provenance when loaded from a universe row; raid view matches any. */
+  sources?: ItemSource[];
   /**
    * Unvalidated ordering hint for curation scripts only — not a measured
    * quantity and not used by rankUpgrades. Libram values are hand-typed.
@@ -54,6 +56,7 @@ export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
     slot: entry.slot,
     phase: entry.phase,
     source,
+    sources: [...entry.sources],
     ...(curationHint !== undefined ? { curationHint } : {}),
     ...(entry.bisTags !== undefined ? { bisTags: entry.bisTags } : {}),
   };
@@ -73,11 +76,18 @@ export function filterPoolByPhase(
   return pool.filter((e) => e.phase <= maxPhase);
 }
 
-export function filterByZone<T extends { source: ItemSource }>(
-  entries: readonly T[],
-  zone: string
-): T[] {
-  return entries.filter((e) => "zone" in e.source && e.source.zone === zone);
+function sourceHasZone(source: ItemSource, zone: string): boolean {
+  return "zone" in source && source.zone === zone;
+}
+
+export function filterByZone<
+  T extends { source: ItemSource; sources?: readonly ItemSource[] },
+>(entries: readonly T[], zone: string): T[] {
+  return entries.filter(
+    (e) =>
+      sourceHasZone(e.source, zone) ||
+      (e.sources?.some((s) => sourceHasZone(s, zone)) ?? false)
+  );
 }
 
 export function filterPoolByZone(
@@ -91,6 +101,9 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
   const zones = new Set<string>();
   for (const e of pool) {
     if ("zone" in e.source) zones.add(e.source.zone);
+    for (const s of e.sources ?? []) {
+      if ("zone" in s) zones.add(s.zone);
+    }
   }
   return [...zones].sort();
 }

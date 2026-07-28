@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: docs/reviews/phase-1-five-seed-spread.md
 Blocks: phase-1
@@ -19,3 +19,8 @@ five-seed spread cutoff basis.
 - `se` is either true independent SE, or the field/method labels match what
   is stored (no `"independent"` on raw stdev).
 - Report/CLI consumers updated if the numeric scale changes.
+
+## Resolution (2026-07-28)
+
+`se` is now `stdev / √iterations` with `seMethod: "independent"` (PLAN.md
+§10 Phase 1). Seam test asserts `92 / √3000` for the recorded neck swap.

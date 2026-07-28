@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: docs/reviews/phase-1-five-seed-spread.md
 Blocks: phase-1
@@ -21,3 +21,9 @@ zone matches.
 - Rank/report path can filter by zone against the full `sources[]` (or an
   equivalent multi-zone view), not only the primary source.
 - Dual-zone fixtures in tests cover at least one of the known IDs above.
+
+## Resolution (2026-07-28)
+
+`PoolEntry.sources` retained from the universe row; `filterByZone` /
+`zonesInPool` match any source with a zone. Ranked items carry `sources`
+through for report-time `--raid`. Test covers Crystalforge `30129` SSC/TK.

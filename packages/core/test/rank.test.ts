@@ -329,6 +329,8 @@ describe("rankUpgrades", () => {
     expect(top.deltaDps).toBeCloseTo(7.15, 5);
     expect(top.rank).toBe(1);
     expect(top.belowCutoff).toBe(false);
+    expect(top.seMethod).toBe("independent");
+    expect(top.se).toBeCloseTo(92.0 / Math.sqrt(3000), 5);
     expect(top.source).toEqual({
       kind: "raid",
       zone: "Karazhan",
