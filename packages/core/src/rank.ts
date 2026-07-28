@@ -230,11 +230,10 @@ export async function rankUpgrades(
       let candObs;
       try {
         candObs = await deps.sim.run(candReq, runOpts);
-      } catch (err) {
-        throw new RankError(
-          "sim-failed",
-          err instanceof Error ? err.message : String(err)
-        );
+      } catch {
+        // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
+        // wowsimcli when equipped on ret — skip this slot attempt.
+        continue;
       }
       const deltaDps = candObs.dps - baselineDps;
       const note = setBreakNote(equipment, slotIndex, entry.itemId);
