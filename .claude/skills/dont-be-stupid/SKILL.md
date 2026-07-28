@@ -16,10 +16,12 @@ Before reporting a task done, ask: did I do any of these?
 - **Skipped a ten-second question to avoid friction.** Had a clear, cheap clarifying question available and chose to guess instead because asking felt like it would slow things down. **Fix:** if the question is cheap and the wrong guess is expensive (wasted review, wrong direction), ask.
 - **Conflated "proceed silently" guidance with "the user gave a direct instruction."** A repo convention about tolerating missing docs during background exploration got applied to a case where the user explicitly named a specific file. **Fix:** direct user instructions about a named artifact always override general exploration conventions.
 - **Chased a sibling worktree / parked handoff ("oh look a birdy").** User was on Phase product work; another agent's `retro/*` / `feat/fan-out-retro` worktrees and handoffs were visible; a conversation summary + branch-change hint pulled the session onto process/retro adoption instead of Phase 1. **Fix:** sibling trees are noise unless the user named them. Ask before switching roots or resuming tangential handoffs. See `AGENTS.md` § Session focus.
+- **Stuffed the wrong kind of rule into a skill.** Added pipeline/engineering jargon to a game-domain SME skill because it was “related to the review.” **Fix:** before editing a skill, check fit to that skill’s nature; put the material where it belongs. See `AGENTS.md` § Editing skills.
 
 ## Log of incidents
 
 - 2026-07-26, tbc-gear-prio: asked to review PLAN.md against "the tbc domain context md" — no such file exists in the repo or on disk. Reviewed from general TBC/wowsims knowledge instead and reported it as the requested review, without flagging the substitution or the missing source. See `[[feedback-missing-referenced-file]]` in memory.
 - 2026-07-27, tbc-gear-prio: Phase 1 (`phase-1/five-seed-spread`) session diverted into Pass B adoption on `feat/fan-out-retro` because a prior-transcript summary and sibling `.scratch/wt-*` trees looked "in progress." User had to call it out. Rule added under `AGENTS.md` § Session focus.
+- 2026-07-27, tbc-gear-prio: SME skill got pipeline rules (“never offered”, EP top-N, etc.) that a game SME would not know or care about. Stripped; rule added under `AGENTS.md` § Editing skills.
 
 Check memory for `feedback-missing-referenced-file` and similar entries for full detail on past incidents.
