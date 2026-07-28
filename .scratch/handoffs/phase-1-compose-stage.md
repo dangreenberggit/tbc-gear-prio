@@ -8,24 +8,16 @@
 
 ## Status
 
-partial — compose, meta activation/repair, offline baseline path, pool
-generator, **candidate ranking loop**, and a thin curated `data/pools/ret.json`
-are green. Tip: check `git log -1 --oneline`. `pnpm verify`: 56 tests +
-`skeleton:check`. Offline
-`pnpm rank --region US --realm dreamscythe --character slamaltman --offline`
-prints **baseline 2042.85** and ranks pool swaps (e.g. Band of the
-Ranger-General above cutoff).
+partial — compose, meta, offline baseline, pool generator, ranking loop,
+disclosure, EP prefilter, and a 44-entry curated `data/pools/ret.json` are
+green. Tip: `git log -1 --oneline`. `pnpm verify`: 60 tests + skeleton:check.
+Offline rank prints baseline, standing assumptions, and ranked swaps.
 
-**Done this sitting (continued):** session-focus rule in AGENTS.md; ranking
-loop (single-item swaps + cutoff); starter curated pool with sources; maxPhase
-filter test.
+**Still open:** thicken pool further toward ~8/slot; player-aware EP clipping
+(needs item stats on the index); ticket 05 proto CI byte-compare (needs a
+real push/CI read); inactive-meta live fixture (follow-up after ticket 04).
 
-**Still open:** thicken `data/pools/ret.json` toward ~8/slot, EP prefilter,
-disclosure / Substitution[] (tickets 03/04), ticket 05 proto drift, pool
-generate diff-against-curated mode.
-
-**Paused:** yes — do not land to `dev` unless the user explicitly asks after a
-`pre-merge-review` has been written and seen
+Tickets 03 and 04 are **resolved**. Only 05 still blocks phase-1.
 
 ## Branch
 
