@@ -8,7 +8,9 @@ human curation into data/pools/<spec>.json; re-runs should diff, never clobber
 curation (diff mode lands in a follow-up).
 
 Equippability is armor type + weapon type (R11) — classAllowlist is empty on
-most items. Ret: plate; weapons exclude polearm and staff.
+most items. Ret: plate; weapons exclude staff (paladins cannot equip staves)
+and polearm (product scope choice — paladins can equip polearms in TBC, but
+this pool excludes them; see PLAN.md D8).
 
     python scripts/generate_pool.py --spec ret
 
@@ -142,6 +144,7 @@ def ret_equippable(it: dict) -> bool:
         return it.get("armorType") == ARMOR_PLATE
     if slot == "weapon":
         wt = it.get("weaponType")
+        # Staff: equip rule. Polearm: product scope (PLAN.md D8), not equip rule.
         if wt in (WEAPON_POLEARM, WEAPON_STAFF):
             return False
         return True

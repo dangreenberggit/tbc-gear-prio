@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { gemsForPhase } from "../src/gems.js";
 import {
   filterPoolByPhase,
-  poolFromUniverse,
+  filterPoolByZone,
   type PoolEntry,
 } from "../src/pool.js";
 
@@ -39,6 +39,53 @@ describe("data/pools/ret.json", () => {
     for (const [slot, n] of bySlot) {
       expect(n, slot).toBeGreaterThanOrEqual(8);
     }
+  });
+});
+
+describe("S6: bisTags do not affect curated pool membership", () => {
+  const maxPhase = 3;
+
+  it("filterPoolByPhase ignores bisTags", () => {
+    const tagged = curatedEntries.map((e) => ({
+      ...e,
+      bisTags: ["BiS" as const],
+    }));
+    const stripped = curatedEntries.map(({ bisTags: _tags, ...rest }) => rest);
+    const before = filterPoolByPhase(curatedEntries, maxPhase)
+      .map((e) => e.itemId)
+      .sort((a, b) => a - b);
+    expect(
+      filterPoolByPhase(tagged, maxPhase)
+        .map((e) => e.itemId)
+        .sort((a, b) => a - b)
+    ).toEqual(before);
+    expect(
+      filterPoolByPhase(stripped, maxPhase)
+        .map((e) => e.itemId)
+        .sort((a, b) => a - b)
+    ).toEqual(before);
+  });
+
+  it("filterPoolByZone ignores bisTags", () => {
+    const zone = "Karazhan";
+    const tagged = curatedEntries.map((e) => ({
+      ...e,
+      bisTags: ["Realistic" as const],
+    }));
+    const stripped = curatedEntries.map(({ bisTags: _tags, ...rest }) => rest);
+    const before = filterPoolByZone(curatedEntries, zone)
+      .map((e) => e.itemId)
+      .sort((a, b) => a - b);
+    expect(
+      filterPoolByZone(tagged, zone)
+        .map((e) => e.itemId)
+        .sort((a, b) => a - b)
+    ).toEqual(before);
+    expect(
+      filterPoolByZone(stripped, zone)
+        .map((e) => e.itemId)
+        .sort((a, b) => a - b)
+    ).toEqual(before);
   });
 });
 

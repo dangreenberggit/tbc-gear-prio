@@ -40,6 +40,16 @@ VENDOR = "vendor/wowsims"
 
 # Everything we consume from upstream. Adding a file here and re-running --update
 # is the whole process for taking on a new upstream input.
+#
+# Per-phase refresh runbook (manual — not automated in CI):
+# - wowsims gear-set files stop at P2 upstream; new phase gear sets require a
+#   hand edit to TRACKED after checking the pinned tag in data/wowsims.lock.json.
+# - Pool membership refreshes from AtlasLoot (data/atlasloot_sources.json),
+#   Wowhead ret lists (data/wowhead-lists/ret/), and the tier token map
+#   (data/two-hop/ret-tokens.json) — not from wowsims curated gear sets
+#   (those are bisTags/display input only).
+# - Each new tier needs token-to-piece verification against Wowhead before
+#   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
 TRACKED = {
     "db.json": "assets/database/db.json",
     "constants_other.ts": "ui/core/constants/other.ts",

@@ -30,7 +30,7 @@ export {
   type PoolEntry,
   type UniverseEntry,
 } from "./pool.js";
-export { isKaelTempLegendary } from "./kael-temp.js";
+export { isKaelTempLegendary, KAEL_TEMP_LEGENDARY_IDS } from "./kael-temp.js";
 export {
   RecordedGearSource,
   characterFightKey,
