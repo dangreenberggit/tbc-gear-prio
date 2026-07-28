@@ -177,6 +177,9 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       console.log(
         `#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}`
       );
+      if (item.setBonusNote) {
+        console.log(`    set: ${item.setBonusNote}`);
+      }
     }
   } catch (err) {
     if (err instanceof RankError) {

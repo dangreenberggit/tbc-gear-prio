@@ -89,6 +89,7 @@ export {
   type ItemSlot,
 } from "./items.js";
 export { compose, type ComposePlayer } from "./compose.js";
+export { setBreakNote } from "./set-bonus.js";
 export { Stat, epScore, statAt } from "./stats.js";
 export {
   gemColorCounts,

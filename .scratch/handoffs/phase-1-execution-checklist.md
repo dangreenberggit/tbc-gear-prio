@@ -15,7 +15,7 @@ for *this* phase so sessions do not invent new forks mid-flight.
 - [ ] One real character produces a ranking you would act on tonight
       (offline slamaltman ranks; human judgment still required)
 - [ ] Top items survive check vs wowsims BiS / Wowhead ret guide
-- [ ] Known set-break case shows `setBonusNote`
+- [x] Known set-break case shows `setBonusNote` (`set-bonus.test.ts`)
 
 ## Tickets
 

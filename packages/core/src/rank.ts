@@ -33,6 +33,7 @@ import {
 import type { GearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
+import { setBreakNote } from "./set-bonus.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
@@ -107,6 +108,7 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
+  setBonusNote?: string;
   owned?: boolean;
   belowCutoff: boolean;
 };
@@ -214,6 +216,7 @@ export async function rankUpgrades(
       deltaDps: number;
       stdev: number;
       slotChoice?: "a" | "b";
+      setBonusNote?: string;
     } | null = null;
 
     for (let s = 0; s < slotNames.length; s++) {
@@ -236,14 +239,22 @@ export async function rankUpgrades(
         );
       }
       const deltaDps = candObs.dps - baselineDps;
+      const note = setBreakNote(equipment, slotIndex, entry.itemId);
       if (!best || deltaDps > best.deltaDps) {
-        best = {
+        const next: {
+          deltaDps: number;
+          stdev: number;
+          slotChoice?: "a" | "b";
+          setBonusNote?: string;
+        } = {
           deltaDps,
           stdev: candObs.stdev,
         };
         if (slotNames.length > 1) {
-          best.slotChoice = s === 0 ? "a" : "b";
+          next.slotChoice = s === 0 ? "a" : "b";
         }
+        if (note) next.setBonusNote = note;
+        best = next;
       }
     }
 
@@ -269,6 +280,7 @@ export async function rankUpgrades(
       belowCutoff,
     };
     if (best.slotChoice) item.slotChoice = best.slotChoice;
+    if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
     if (owned) item.owned = true;
     ranked.push(item);
   }
