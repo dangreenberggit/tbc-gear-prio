@@ -22,6 +22,10 @@ happens to be in -- a guild farming Karazhan for badges would read as P1.
     python scripts/sync_wowsims.py --update    # fetch latest tag, rewrite lockfile
     python scripts/sync_wowsims.py --update --tag v0.0.101
 
+--check also reports files present in a WATCHED_DIRS directory but absent from
+TRACKED -- a new gear set is otherwise invisible, since no tracked path or checksum
+changes when upstream merely ADDS one.
+
 Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
 """
 
@@ -48,6 +52,18 @@ TRACKED = {
     "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
 }
+
+# Directories where we intend to track EVERY file, so a file appearing upstream
+# that TRACKED does not name is a finding worth reporting.
+#
+# Not every parent directory in TRACKED belongs here. We take exactly one file out
+# of assets/database/ and ui/core/constants/ -- those are big shared upstream dirs
+# whose other contents are none of our business, and listing them would bury the
+# signal below under routine noise.
+WATCHED_DIRS = (
+    "ui/paladin/retribution/gear_sets",
+    "ui/paladin/retribution/apls",
+)
 
 RAW = "https://raw.githubusercontent.com/{repo}/{sha}/{path}"
 
@@ -76,6 +92,43 @@ def fetch(sha, path):
     url = RAW.format(repo=REPO, sha=sha, path=path)
     with urllib.request.urlopen(url, timeout=120) as r:
         return r.read()
+
+
+def list_dir(sha, path):
+    """Names of the files directly inside an upstream directory at `sha`.
+    Subdirectories are ignored -- TRACKED only ever names files."""
+    raw = gh(f"repos/{REPO}/contents/{path}?ref={sha}", "--jq",
+             '.[] | select(.type=="file") | .name')
+    return [n for n in raw.splitlines() if n]
+
+
+def untracked_upstream_files(sha):
+    """TRACKED is a hardcoded path map, so a file upstream ADDS to a WATCHED_DIRS
+    directory is otherwise invisible to --check: no tracked path changed, no
+    checksum moved. That is exactly how a new tier's p3.gear.json would arrive,
+    and PLAN.md 8.5 leans on --check as the P3 launch signal. Report those files;
+    do not fetch them. Taking on a new upstream input stays a human decision --
+    see the comment on TRACKED."""
+    tracked = set(TRACKED.values())
+    findings = []
+    for d in WATCHED_DIRS:
+        # A watched dir that no TRACKED path lives in would report every file in it
+        # as new, or -- if upstream moved the dir -- quietly report nothing at all.
+        # Either way the two lists have drifted apart and a human should look.
+        if not any(p.startswith(f"{d}/") for p in tracked):
+            findings.append(f"WATCHED_DIRS lists {d}/ but no TRACKED path is in it")
+            continue
+        try:
+            names = list_dir(sha, d)
+        except SystemExit as e:
+            findings.append(f"could not list upstream {d}/: {e}")
+            continue
+        extra = sorted(n for n in names if f"{d}/{n}" not in tracked)
+        for name in extra:
+            findings.append(
+                f"new upstream file {d}/{name} -- not in TRACKED. "
+                "Decide whether to take it on, then add it to TRACKED and --update.")
+    return findings
 
 
 def parse_current_phase(ts_source):
@@ -188,6 +241,11 @@ def do_check():
                     "-- new tier launched; pools, gem palette and engineVersion all need work")
         except SystemExit as e:
             drift.append(f"could not read upstream CURRENT_PHASE: {e}")
+
+    # Directory awareness. Checked at the PINNED ref, not at upstream HEAD: this
+    # answers "is our TRACKED map complete for the release we are actually on",
+    # which stays true (and keeps reporting) even when no new tag has landed.
+    drift.extend(untracked_upstream_files(lock["commit"]))
 
     # Local tampering / partial fetches.
     for local, meta in lock.get("files", {}).items():
