@@ -1,0 +1,7 @@
+# Generated proto JSON and sources stay LF so Windows autocrlf does not leave
+# these trees permanently "modified" in `git status` (which makes lint-staged
+# stash/restore on every commit). This does **not** change committed bytes and
+# does not remove the ordinary trailing spaces `protoc-gen-es` emits on blank
+# `//` comment lines — see ticket 05-proto-codegen-byte-stability.md.
+data/proto/**              text eol=lf
+packages/core/src/proto/** text eol=lf

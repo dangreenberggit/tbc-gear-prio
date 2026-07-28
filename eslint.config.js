@@ -37,6 +37,7 @@ export default tseslint.config(
       "vendor/**",
       ".agents/**",
       ".claude/**",
+      // Scratch holds retros, handoffs, and leftover nested checkouts — not source.
       ".scratch/**",
       "packages/core/src/proto/**",
     ],

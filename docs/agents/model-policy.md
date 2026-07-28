@@ -39,8 +39,11 @@ implementation correctness without the user saying so.
 
 ## Parallelism vs serial
 
-- **Implementation (`parallel-phase`):** parallel worktrees with workhorse
-  models is the point — often faster _and_ better than one long chain.
+- **Implementation (`parallel-phase`):** parallel worktrees with **workhorse**
+  models is the point — often faster _and_ better than one long chain. Cap
+  around **3–5** workers. Do **not** fan out a swarm of high-ticket sharp
+  models (Opus at effort `high`+, Fable, Sol, etc.) — they burn usage limits
+  before fan-in finishes. Workers stay workhorse; sharp is for review axes.
 - **Review (`pre-merge-review`):** parallel sharp reviewers when the
   harness allows; on a wall, **serialise** (one axis, wait, next) rather
   than three weak ones. Wall clock can grow; finding quality must not drop.
@@ -68,13 +71,32 @@ swapped; that burns time without changing the ceiling.
   something _below_ Grok high — then wait, serialise, or hand off; never
   invent a weaker model to finish.
 
+### Claude Code (effort, not a “medium” slug)
+
+On Claude Code, the Opus **model** and the **effort level** are separate
+controls ([model config](https://code.claude.com/docs/en/model-config#adjust-effort-level),
+[effort API](https://platform.claude.com/docs/en/build-with-claude/effort)).
+Effort is `low` | `medium` | `high` | `xhigh` | `max` via `/effort`,
+`--effort`, `effortLevel`, or API `output_config.effort`. There is no
+`claude-opus-*-medium` model slug — set Opus **and** the effort.
+
+**This repo’s preference** (not Anthropic’s marketing default): for tough
+Claude / Opus work, default to **effort `medium`**. Reserve effort `high`
+(and above: `xhigh` / `max`) for niche cases — e.g. a **single** narrow
+adversarial pre-merge review axis — where overthinking is worth the spend.
+At high effort Opus here tends to trip on wording and wander; medium stays
+tighter for this repo’s tasks.
+
+Workhorse on Claude Code remains Sonnet-class / mid. Prefer this harness
+when a non-Grok Opus reviewer is required; sequential review on rate limit.
+
 ### Other
 
 - **Cursor Cloud Agents API:** honor `429` with backoff; usage endpoints
   are for accounting, not preflight “can I spawn Opus.”
-- **Claude Code / Codex:** mid for workers, top for review; sequential
-  review on rate limit. Prefer those harnesses when a non-Grok sharp
-  reviewer is required.
+- **Codex:** mid for workers, top for review; sequential review on rate
+  limit.
 
-Model _names_ change; the **lane** (workhorse vs sharp) and the **Cursor =
-Grok high ceiling** do not. When in doubt, ask which lane the user wants.
+Model _names_ change; the **lane** (workhorse vs sharp), the **Cursor =
+Grok high ceiling**, and the **Claude Code Opus + effort `medium` default**
+do not. When in doubt, ask which lane the user wants.

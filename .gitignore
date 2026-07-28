@@ -11,3 +11,8 @@ dist/
 # palette.json) plus data/wowsims.lock.json, which records exactly which upstream
 # release those were generated from. See PLAN.md §8.5.
 vendor/
+
+# Agent worktrees (parallel-phase). Never tracked. Also excluded from vitest
+# (see vitest.config.ts). Tracked here so every clone gets it — .git/info/exclude
+# is per-checkout only.
+.claude/worktrees/

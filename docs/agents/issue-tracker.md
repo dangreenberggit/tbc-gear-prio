@@ -26,6 +26,7 @@ Status: open
 Type: task
 Origin: docs/reviews/<branch>.md
 Blocks: phase-1
+Blocked by: none
 ```
 
 - **`Status:`** — `open` / `claimed` / `resolved` (same vocabulary as wayfinding).
@@ -34,6 +35,16 @@ Blocks: phase-1
   `phase-N/*`, `pnpm land` refuses while matching tickets are still open,
   unless you pass `--ack-open-blockers`. Prefer closing or rewriting
   `Blocks:` with a note over ritual acknowledgment.
+- **`Blocked by:`** — what must exist before this ticket can be _started_, or
+  `none`. Either other ticket files (`03`, `04` — clears when those close), or a
+  **component that does not exist yet**, named with its PLAN.md section:
+  `compose stage (PLAN.md §8.2) — not yet built`. It is the inverse of `Blocks:`
+  — `Blocks:` says which phase must deal with the ticket, `Blocked by:` says what
+  the ticket is waiting on. **Convention, not a gate:** `pnpm land` never reads
+  it, because "is the compose stage built?" is not machine-checkable. It exists
+  so `pnpm issues:open` can show that a ticket is unstartable _before_ someone
+  sizes it. Write it when you file the ticket; a review that defers a finding
+  into a component that is not built yet must fill it in.
 
 The review’s Disposition table **links** tickets for `defer` rows; it does
 not replace them. List open ones anytime: `pnpm issues:open`.

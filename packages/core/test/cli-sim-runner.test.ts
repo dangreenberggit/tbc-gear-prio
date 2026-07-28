@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -20,7 +20,10 @@ const binaryPath = join(
   binaryName
 );
 
-describe("CliSimRunner", () => {
+// The only test that needs the real wowsimcli. vendor/ is gitignored and CI
+// fetches nothing, so this must skip there rather than fail — the recorded
+// SimRunner adapter is what keeps the seam covered offline (PLAN.md §5).
+describe.skipIf(!existsSync(binaryPath))("CliSimRunner", () => {
   it("reports the pinned wowsimcli version", async () => {
     const sim = new CliSimRunner(binaryPath);
     expect(await sim.version()).toBe("v0.0.101");

@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check",
+    "verify": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run mirrors:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -27,7 +27,8 @@
     "pool:generate": "python scripts/generate_pool.py",
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",
-    "issues:open": "python scripts/check_merge_ready.py --list-only"
+    "issues:open": "python scripts/check_merge_ready.py --list-only",
+    "mirrors:check": "python scripts/check_skill_mirrors.py"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.72.0",
