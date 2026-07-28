@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "rank": "tsx packages/core/src/cli.ts",
     "sync:wowsims": "python scripts/sync_wowsims.py --update",
+    "sync:wowsims:restore": "python scripts/sync_wowsims.py --restore",
     "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
     "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py",
     "fetch:protos": "python scripts/fetch_protos.py",

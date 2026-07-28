@@ -18,7 +18,8 @@ people who track it for a living. It is the source of DEFAULT_MAX_PHASE (PLAN.md
 1.1). We do NOT infer the tier from whatever raid a player's most recent log
 happens to be in -- a guild farming Karazhan for badges would read as P1.
 
-    python scripts/sync_wowsims.py --check     # drift report, no writes. CI-friendly.
+    python scripts/sync_wowsims.py --check     # drift report, no writes
+    python scripts/sync_wowsims.py --restore  # fetch lock pin into vendor/ (CI / fresh tree)
     python scripts/sync_wowsims.py --update    # fetch latest tag, rewrite lockfile
     python scripts/sync_wowsims.py --update --tag v0.0.101
 
@@ -174,6 +175,57 @@ def do_update(tag):
     return 0
 
 
+def do_restore():
+    """Fetch pinned files into vendor/ from the lock commit. Does not rewrite the lock.
+
+    CI and fresh worktrees need this — vendor/ is gitignored, and --update would
+    chase latest and rewrite data/wowsims.lock.json.
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+
+    sha = lock["commit"]
+    files = lock.get("files") or {}
+    if not files:
+        print(f"  {LOCKFILE} has no files map", file=sys.stderr)
+        return 2
+
+    print(f"  restoring {lock['repo']} @ {lock['tag']} ({sha[:12]}) → {VENDOR}")
+    os.makedirs(VENDOR, exist_ok=True)
+
+    errors = []
+    for local, meta in files.items():
+        path = meta.get("path")
+        expect = meta.get("sha256")
+        if not path or not expect:
+            errors.append(f"{local}: lock entry missing path/sha256")
+            continue
+        try:
+            blob = fetch(sha, path)
+        except Exception as e:
+            errors.append(f"{local}: fetch failed: {e}")
+            continue
+        digest = hashlib.sha256(blob).hexdigest()
+        if digest != expect:
+            errors.append(
+                f"{local}: sha256 mismatch (got {digest[:12]}, lock {expect[:12]})"
+            )
+            continue
+        dest = os.path.join(VENDOR, local)
+        with open(dest, "wb") as fh:
+            fh.write(blob)
+        print(f"    {local:<26} {len(blob):>9,} bytes")
+
+    if errors:
+        for e in errors:
+            print(f"  !! {e}", file=sys.stderr)
+        return 2
+    print("  restore ok.")
+    return 0
+
+
 def do_check():
     lock = load_lock()
     if not lock:
@@ -203,7 +255,7 @@ def do_check():
     for local, meta in lock.get("files", {}).items():
         path = os.path.join(VENDOR, local)
         if not os.path.exists(path):
-            drift.append(f"missing locally: {path} (run --update)")
+            drift.append(f"missing locally: {path} (run --restore or --update)")
             continue
         with open(path, "rb") as fh:
             if hashlib.sha256(fh.read()).hexdigest() != meta["sha256"]:
@@ -222,11 +274,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
     ap.add_argument("--update", action="store_true", help="fetch and rewrite the lockfile")
+    ap.add_argument(
+        "--restore",
+        action="store_true",
+        help="fetch pinned files into vendor/ from the lock (no lock rewrite)",
+    )
     ap.add_argument("--tag", help="pin a specific tag instead of the latest")
     args = ap.parse_args()
 
     if args.update:
         sys.exit(do_update(args.tag))
+    elif args.restore:
+        sys.exit(do_restore())
     elif args.check:
         sys.exit(do_check())
     else:

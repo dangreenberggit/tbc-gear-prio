@@ -119,9 +119,10 @@ being true by construction.
 
 ## CI
 
-`.github/workflows/verify.yml` runs `pnpm install --frozen-lockfile && pnpm run verify`
-on every push and on PRs into `dev`/`main`. It needs **no secrets and no
-native binary** — not an oversight, a consequence of the seam design above.
+`.github/workflows/verify.yml` runs `pnpm install --frozen-lockfile`, then
+`pnpm run sync:wowsims:restore` (fetches gitignored `vendor/wowsims/` from
+`data/wowsims.lock.json` over HTTPS — still **no secrets and no native
+binary**), then `pnpm run verify` on every push and on PRs into `dev`/`main`.
 Green CI is the standing proof that the recorded-fixture path still works.
 
 ## Pre-merge review, in more detail

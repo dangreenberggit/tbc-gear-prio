@@ -25,6 +25,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # vendor/ is gitignored; skeleton:check needs the pinned APL (and
+      # hardening soft-checks use db.json). Restore from data/wowsims.lock.json
+      # without rewriting the lock.
+      - run: pnpm run sync:wowsims:restore
+
       - run: pnpm run verify
 
       # PLAN.md §8.1: regenerating packages/core/src/proto/ from the pinned
