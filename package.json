@@ -21,7 +21,7 @@
     "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py",
     "fetch:protos": "python scripts/fetch_protos.py",
     "fetch:protos:check": "python scripts/fetch_protos.py --check",
-    "proto:generate": "buf generate data/proto --template buf.gen.yaml",
+    "proto:generate": "buf generate data/proto --template buf.gen.yaml && python scripts/normalize_proto_gen.py",
     "data:items:generate": "python scripts/generate_item_gem_index.py",
     "experiment:five-seed": "python scripts/five_seed_spread.py",
     "skeleton:check": "python scripts/check_raid_sim_skeleton.py",

@@ -19,3 +19,5 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
 - 2026-07-28 — Resolved 10–11 (stage-order test; EP path demoted). Split
   bisTags → 12, raid-recipe crafts → 13. Land blocker scan limited to
   `.scratch/carry-forward/issues/` (no nested worktree copies).
+- 2026-07-28 — Resolved 05: CI run 30409397254 showed Linux vs Windows
+  empty-JSDoc trailing-space drift; normalize after `buf generate`.

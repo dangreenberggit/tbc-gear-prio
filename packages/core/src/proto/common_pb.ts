@@ -1860,14 +1860,14 @@ export const ProfessionSchema: GenEnum<Profession> = /*@__PURE__*/
  * 	  tooltips during database generation. Alternatively, if the stat is
  * 	  required for reconstructing a target NPC from saved Encounter
  * 	  settings, then it also belongs in the Stat enum.
- * 
+ *
  * 	- If the above criterion is not satisfied, then the best practice is to
  * 	  define the property as a PseudoStat rather than a Stat. For example,
  * 	  the various school-specific versions of Hit, Crit, and Haste are all
  * 	  defined as PseudoStats from Cataclysm onwards, since only the generic
  * 	  Ratings need to be parsed from item data and stored in the sim
  * 	  database.
- * 
+ *
  * 	- Note that the above rules apply only for the proto messages used for
  * 	  saving and loading data in the browser. It is perfectly okay to define
  * 	  additional Stats in the back-end code for convenience or performance
@@ -1879,18 +1879,18 @@ export const ProfessionSchema: GenEnum<Profession> = /*@__PURE__*/
  * 	  UnitStats protos for character stats and stat weights requests. This
  * 	  keeps the item database compact while still giving the UI access to
  * 	  calculated tertiary stats like SpellHit, MeleeCrit, RangedHaste, etc.
- * 
+ *
  * 	- When adding new Stats or PseudoStats, make the units for each property
  * 	  explicit in the name to avoid confusion. For example, append "Rating"
  * 	  to the end of the field name for properties that are represented in
  * 	  Rating units (regardless of how they are stored in-game), and append
  * 	  "Chance" to the end of the field name for properties that represent
  * 	  probabilities (between 0 and 1).
- * 
+ *
  * Keep in sync with sim/core/stats/stats.go. As mentioned above, it is okay for
  * the Go Stats array to be larger than the size of the Stat enum proto, but the
  * shared indices between the two must exactly match.
- * 
+ *
  * NextIndex: 42;
  *
  * @generated from enum proto.Stat
@@ -2133,7 +2133,7 @@ export const StatSchema: GenEnum<Stat> = /*@__PURE__*/
  * Not all pseudostats are included here; just the ones we want to pass
  * between the UI and backend. It's also OK to include things here which aren't
  * in the PseudoStats struct.
- * 
+ *
  * NextIndex: 27;
  *
  * @generated from enum proto.PseudoStat

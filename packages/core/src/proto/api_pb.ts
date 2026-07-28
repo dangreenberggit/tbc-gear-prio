@@ -321,7 +321,7 @@ export type Raid = Message<"proto.Raid"> & {
    * The number of parties in the raid who participate in the sim, e.g.
    * 10-man vs 25-man raids. The remaining parties are unused but can hold
    * bench players.
-   * 
+   *
    * If this value is 0, all parties are included.
    *
    * @generated from field: int32 num_active_parties = 2;
