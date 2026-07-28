@@ -1,7 +1,7 @@
 # Raid-scoped pool — fan-out process
 
 **Feature branch:** `phase-1/five-seed-spread`  
-**Base SHA (wave 1):** `9f6c49616a154de80f855e503906fcc2b38ad811`  
+**Base SHA (wave 1):** `afd063f15d11412bcf7f5abaea0118131897796b`  
 **Parent plan:** `.scratch/handoffs/raid-scoped-pool-plan.md`  
 **Date:** 2026-07-28  
 **Status:** Wave 1 in progress (sub-phases 1 + 3 parallel; 2 after 3)

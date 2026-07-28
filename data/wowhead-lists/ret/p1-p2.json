@@ -1,0 +1,871 @@
+{
+  "spec": "ret",
+  "stage": "p1-p2",
+  "sourceUrl": "https://www.wowhead.com/tbc/guide/classes/paladin/retribution/dps-bis-gear-pve-phase-2",
+  "collectedDate": "2026-07-28",
+  "collectedBy": "delegator-agent",
+  "pageAuthor": "Surveillant",
+  "pageUpdated": "2026/06/18",
+  "entries": [
+    {
+      "itemId": 32461,
+      "itemName": "Furious Gizmatic Goggles",
+      "rankLabel": "Best: Hit",
+      "section": "headline",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Engineering (Bind on Pickup)"
+    },
+    {
+      "itemId": 30131,
+      "itemName": "Crystalforge War-Helm",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "head",
+      "viaTokenId": 30242,
+      "viaTokenName": "Helm of the Vanquished Champion",
+      "wowheadSourceText": "Drop: Lady Vashj (Serpentshrine Cavern)(via Helm of the Vanquished Champion)"
+    },
+    {
+      "itemId": 32041,
+      "itemName": "Merciless Gladiator's Scaled Helm",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "PvP: 1875x Arena Points"
+    },
+    {
+      "itemId": 29073,
+      "itemName": "Justicar Crown",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "head",
+      "viaTokenId": 29760,
+      "viaTokenName": "Helm of the Fallen Champion",
+      "wowheadSourceText": "Drop: Prince Malchezaar (Karazhan)(via Helm of the Fallen Champion)"
+    },
+    {
+      "itemId": 32087,
+      "itemName": "Mask of the Deceiver",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "50x Badge of Justice"
+    },
+    {
+      "itemId": 30055,
+      "itemName": "Shoulderpads of the Stranger",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30133,
+      "itemName": "Crystalforge Shoulderbraces",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "shoulder",
+      "viaTokenId": 30248,
+      "viaTokenName": "Pauldrons of the Vanquished Champion",
+      "wowheadSourceText": "Drop: Void Reaver (Tempest Keep)(via Pauldrons of the Vanquished Champion)"
+    },
+    {
+      "itemId": 30053,
+      "itemName": "Pauldrons of the Wardancer",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30085,
+      "itemName": "Mantle of the Tireless Tracker",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Morogrim Tidewalker (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30740,
+      "itemName": "Ripfiend Shoulderplates",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Doom Lord Kazzak (World Boss)"
+    },
+    {
+      "itemId": 30098,
+      "itemName": "Razor-Scale Battlecloak",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Morogrim Tidewalker (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29994,
+      "itemName": "Thalassian Wildercloak",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)"
+    },
+    {
+      "itemId": 30729,
+      "itemName": "Black-Iron Battlecloak",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Doomwalker (World Boss)"
+    },
+    {
+      "itemId": 24259,
+      "itemName": "Vengeance Wrap",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Tailoring (Bind on Equip)"
+    },
+    {
+      "itemId": 28672,
+      "itemName": "Drape of the Dark Reavers",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Shade of Aran (Karazhan)"
+    },
+    {
+      "itemId": 28485,
+      "itemName": "Bulwark of the Ancient Kings",
+      "rankLabel": "Best: Armorsmith",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Blacksmithing (Bind on Pickup)(requires Armorsmithing)"
+    },
+    {
+      "itemId": 30129,
+      "itemName": "Crystalforge Breastplate",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": 30236,
+      "viaTokenName": "Chestguard of the Vanquished Champion",
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)(via Chestguard of the Vanquished Champion)"
+    },
+    {
+      "itemId": 30102,
+      "itemName": "Krakken-Heart Breastplate",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Lady Vashj (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30054,
+      "itemName": "Ranger-General's Chestguard",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30101,
+      "itemName": "Bloodsea Brigand's Vest",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Fathom-Lord Karathress (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30730,
+      "itemName": "Terrorweave Tunic",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Doomwalker (World Boss)"
+    },
+    {
+      "itemId": 28795,
+      "itemName": "Bladespire Warbands",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High King Maulgar (Gruul's Lair)"
+    },
+    {
+      "itemId": 30057,
+      "itemName": "Bracers of Eradication",
+      "rankLabel": "Best: Hit",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Lurker Below (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29966,
+      "itemName": "Vambraces of Ending",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High Astromancer Solarian (Tempest Keep)"
+    },
+    {
+      "itemId": 30091,
+      "itemName": "True-Aim Stalker Bands",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Leotheras the Blind (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30026,
+      "itemName": "Bands of the Celestial Archer",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Trash Mobs (Tempest Keep)"
+    },
+    {
+      "itemId": 23537,
+      "itemName": "Black Felsteel Bracers",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Blacksmithing (Bind on Equip)"
+    },
+    {
+      "itemId": 29947,
+      "itemName": "Gloves of the Searing Grip",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Al'ar (Tempest Keep)"
+    },
+    {
+      "itemId": 30644,
+      "itemName": "Grips of Deftness",
+      "rankLabel": "Near Best",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Trash Mobs (Karazhan)"
+    },
+    {
+      "itemId": 30341,
+      "itemName": "Flesh Handler's Gauntlets",
+      "rankLabel": "Near Best",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest: The Flesh Lies..."
+    },
+    {
+      "itemId": 28824,
+      "itemName": "Gauntlets of Martial Perfection",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Gruul the Dragonkiller (Gruul's Lair)"
+    },
+    {
+      "itemId": 30130,
+      "itemName": "Crystalforge Gauntlets",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "hands",
+      "viaTokenId": 30239,
+      "viaTokenName": "Gloves of the Vanquished Champion",
+      "wowheadSourceText": "Drop: Leotheras the Blind (Serpentshrine Cavern)(via Gloves of the Vanquished Champion)"
+    },
+    {
+      "itemId": 28776,
+      "itemName": "Liar's Tongue Gloves",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Magtheridon (Magtheridon's Lair)"
+    },
+    {
+      "itemId": 30106,
+      "itemName": "Belt of One-Hundred Deaths",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Lady Vashj (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30032,
+      "itemName": "Red Belt of Battle",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Blacksmithing (Bind on Equip)"
+    },
+    {
+      "itemId": 28779,
+      "itemName": "Girdle of the Endless Pit",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Magtheridon (Magtheridon's Lair)"
+    },
+    {
+      "itemId": 30040,
+      "itemName": "Belt of Deep Shadow",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Leatherworking (Bind on Equip)"
+    },
+    {
+      "itemId": 30046,
+      "itemName": "Belt of the Black Eagle",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafted: Leatherworking (Bind on Equip)"
+    },
+    {
+      "itemId": 28828,
+      "itemName": "Gronn-Stitched Girdle",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Gruul the Dragonkiller (Gruul's Lair)"
+    },
+    {
+      "itemId": 30257,
+      "itemName": "Shattrath Leggings",
+      "rankLabel": "Best: non-Human",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest: Special Delivery to Shattrath City"
+    },
+    {
+      "itemId": 31544,
+      "itemName": "Clefthoof Hide Leggings",
+      "rankLabel": "Best: non-Human",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest: ShowdownQuest: Showdown"
+    },
+    {
+      "itemId": 29995,
+      "itemName": "Leggings of Murderous Intent",
+      "rankLabel": "Best: Human",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)"
+    },
+    {
+      "itemId": 30132,
+      "itemName": "Crystalforge Greaves",
+      "rankLabel": "Best: Human",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": 30245,
+      "viaTokenName": "Leggings of the Vanquished Champion",
+      "wowheadSourceText": "Drop: Fathom-Lord Karathress (Serpentshrine Cavern)(via Leggings of the Vanquished Champion)"
+    },
+    {
+      "itemId": 29950,
+      "itemName": "Greaves of the Bloodwarder",
+      "rankLabel": "Near Best: Human",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High Astromancer Solarian (Tempest Keep)"
+    },
+    {
+      "itemId": 30739,
+      "itemName": "Scaled Greaves of the Marksman",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Doom Lord Kazzak (World Boss)"
+    },
+    {
+      "itemId": 29074,
+      "itemName": "Justicar Greaves",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "legs",
+      "viaTokenId": 29766,
+      "viaTokenName": "Leggings of the Fallen Champion",
+      "wowheadSourceText": "Drop: Gruul the Dragonkiller (Gruul's Lair)(via Leggings of the Fallen Champion)"
+    },
+    {
+      "itemId": 28741,
+      "itemName": "Skulker's Greaves",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Netherspite (Karazhan)"
+    },
+    {
+      "itemId": 30104,
+      "itemName": "Cobra-Lash Boots",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Lady Vashj (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29951,
+      "itemName": "Star-Strider Boots",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High Astromancer Solarian (Tempest Keep)"
+    },
+    {
+      "itemId": 30081,
+      "itemName": "Warboots of Obliteration",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Morogrim Tidewalker (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 28608,
+      "itemName": "Ironstriders of Urgency",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Nightbane (Karazhan)"
+    },
+    {
+      "itemId": 28545,
+      "itemName": "Edgewalker Longboots",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Moroes (Karazhan)"
+    },
+    {
+      "itemId": 30022,
+      "itemName": "Pendant of the Perilous",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Trash Mobs (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30017,
+      "itemName": "Telonicus's Pendant of Mayhem",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": 32405,
+      "viaTokenName": "Verdant Sphere",
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)(via Verdant Sphere)"
+    },
+    {
+      "itemId": 29381,
+      "itemName": "Choker of Vile Intent",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "25x Badge of Justice"
+    },
+    {
+      "itemId": 28509,
+      "itemName": "Worgen Claw Necklace",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Attumen the Huntsman (Karazhan)"
+    },
+    {
+      "itemId": 28745,
+      "itemName": "Mithril Chain of Heroism",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Chess Event (Karazhan)"
+    },
+    {
+      "itemId": 29119,
+      "itemName": "Haramad's Bargain",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Exalted with The Consortium"
+    },
+    {
+      "itemId": 30834,
+      "itemName": "Shapeshifter's Signet",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Exalted with Lower City"
+    },
+    {
+      "itemId": 30061,
+      "itemName": "Ancestral Ring of Conquest",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Lurker Below (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29997,
+      "itemName": "Band of the Ranger-General",
+      "rankLabel": "Best: Hit",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)"
+    },
+    {
+      "itemId": 30052,
+      "itemName": "Ring of Lethality",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 28757,
+      "itemName": "Ring of a Thousand Marks",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Prince Malchezaar (Karazhan)"
+    },
+    {
+      "itemId": 28730,
+      "itemName": "Mithril Band of the Unscarred",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Netherspite (Karazhan)"
+    },
+    {
+      "itemId": 31920,
+      "itemName": "Shaffar's Band of Brutality",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Yor (Heroic Mana-Tombs)"
+    },
+    {
+      "itemId": 30738,
+      "itemName": "Ring of Reciprocity",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Doom Lord Kazzak (World Boss)"
+    },
+    {
+      "itemId": 28830,
+      "itemName": "Dragonspine Trophy",
+      "rankLabel": "Best: Passive",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Gruul the Dragonkiller (Gruul's Lair)"
+    },
+    {
+      "itemId": 29383,
+      "itemName": "Bloodlust Brooch",
+      "rankLabel": "Best: Active",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "41x Badge of Justice"
+    },
+    {
+      "itemId": 28288,
+      "itemName": "Abacus of Violent Odds",
+      "rankLabel": "Best: Active",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Pathaleon the Calculator (The Mechanar)"
+    },
+    {
+      "itemId": 19343,
+      "itemName": "Scrolls of Blinding Light",
+      "rankLabel": "Best: Active",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Firemaw (Blackwing Lair)"
+    },
+    {
+      "itemId": 31856,
+      "itemName": "Darkmoon Card: Crusade",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": 31890,
+      "viaTokenName": "Blessings Deck",
+      "wowheadSourceText": "Quest: Darkmoon Blessings Deck (Bind on Equip)(via Blessings Deck)"
+    },
+    {
+      "itemId": 23206,
+      "itemName": "Mark of the Champion",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": 22520,
+      "viaTokenName": "The Phylactery of Kel'Thuzad",
+      "wowheadSourceText": "Quest: The Fall of Kel'Thuzad - Kel'Thuzad (Naxxramas)(via The Phylactery of Kel'Thuzad)"
+    },
+    {
+      "itemId": 30627,
+      "itemName": "Tsunami Talisman",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Leotheras the Blind (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 28034,
+      "itemName": "Hourglass of the Unraveller",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Temporus (The Black Morass)"
+    },
+    {
+      "itemId": 28430,
+      "itemName": "Lionheart Executioner",
+      "rankLabel": "Best: Swordsmith",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafting: Blacksmithing (Bind on Pickup)(requires Master Swordsmithing)"
+    },
+    {
+      "itemId": 29993,
+      "itemName": "Twinblade of the Phoenix",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep)"
+    },
+    {
+      "itemId": 28442,
+      "itemName": "Stormherald",
+      "rankLabel": "Optional",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Crafting: Blacksmithing (Bind on Pickup)(requires Master Hammersmithing)"
+    },
+    {
+      "itemId": 30090,
+      "itemName": "World Breaker",
+      "rankLabel": "Optional",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Fathom-Lord Karathress (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 31984,
+      "itemName": "Merciless Gladiator's Greatsword",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "PvP: 3750x Arena Points"
+    },
+    {
+      "itemId": 28800,
+      "itemName": "Hammer of the Naaru",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High King Maulgar (Gruul's Lair)"
+    },
+    {
+      "itemId": 28773,
+      "itemName": "Gorehowl",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Prince Malchezaar (Karazhan)"
+    },
+    {
+      "itemId": 28774,
+      "itemName": "Glaive of the Pit",
+      "rankLabel": null,
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Magtheridon (Magtheridon's Lair)"
+    },
+    {
+      "itemId": 27484,
+      "itemName": "Libram of Avengement",
+      "rankLabel": "Best",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Maker (Blood Furnace - Heroic)"
+    },
+    {
+      "itemId": 31033,
+      "itemName": "Libram of Righteous Power",
+      "rankLabel": "Good",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest: News of VictoryQuest: News of Victory"
+    },
+    {
+      "itemId": 22401,
+      "itemName": "Libram of Hope",
+      "rankLabel": "Optional",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Isalien (Dire Maul East)"
+    },
+    {
+      "itemId": 23203,
+      "itemName": "Libram of Fervor",
+      "rankLabel": "Optional",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "World Drop - Azeroth"
+    }
+  ]
+}
