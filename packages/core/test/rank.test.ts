@@ -161,6 +161,14 @@ describe("rankUpgrades", () => {
     });
     expect(ranking.cutoff).toEqual(CUTOFF);
     expect(ranking.items).toEqual([]);
+    expect(ranking.assumptions.standing.map((s) => s.id)).toEqual([
+      "race",
+      "talents-apl-buffs-consumes-encounter",
+      "professions-excluded",
+      "weapon-imbue-omitted",
+    ]);
+    expect(ranking.assumptions.race).toBe("RaceHuman");
+    expect(ranking.substitutions).toEqual([]);
     expect(stages).toEqual([
       "resolving",
       "reading-gear",

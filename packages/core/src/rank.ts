@@ -5,6 +5,12 @@
 
 import { compose } from "./compose.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
+import {
+  buildStandingAssumptions,
+  substitutionsFromMetaRepair,
+  type Assumptions,
+  type Substitution,
+} from "./disclosure.js";
 import { gemsForPhase, type GemEntry } from "./gems.js";
 import { isEnchantable } from "./items.js";
 import {
@@ -14,6 +20,7 @@ import {
 import {
   MetaUnsolvableError,
   repairMeta,
+  type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
 import {
@@ -107,6 +114,8 @@ export type Ranking = {
   contentHash: string;
   cutoff: Cutoff;
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
+  assumptions: Assumptions;
+  substitutions: Substitution[];
   items: RankedItem[];
 };
 
@@ -139,6 +148,7 @@ export async function rankUpgrades(
   const race = input.race ?? "RaceHuman";
   let socketed: SocketedItem[] = socketedItemsFromLoggedGear(logged);
   let metaAdjusted = false;
+  let metaSwaps: MetaRepairSwap[] = [];
   try {
     const repaired = repairMeta({
       items: socketed,
@@ -147,6 +157,7 @@ export async function rankUpgrades(
     });
     socketed = repaired.items;
     metaAdjusted = repaired.metaAdjusted;
+    metaSwaps = repaired.swaps;
   } catch (err) {
     if (err instanceof MetaUnsolvableError) {
       throw new RankError("meta-unsolvable", err.message);
@@ -282,6 +293,15 @@ export async function rankUpgrades(
       stdev: observation.stdev,
       metaAdjusted,
     },
+    assumptions: {
+      maxPhase: input.maxPhase,
+      seeds,
+      iterations,
+      race,
+      presetId: "ret/p2.raid-sim-skeleton",
+      standing: buildStandingAssumptions(race),
+    },
+    substitutions: substitutionsFromMetaRepair(metaSwaps),
     items: ranked,
   };
 }

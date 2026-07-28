@@ -1,7 +1,7 @@
 {
   "spec": "ret",
   "epPreset": "data/presets/ret/p2.ep-weights.json",
-  "note": "Phase≤2 starter curation. Sources filled from db.json where present, else hand-mapped for the ranking loop. Still thin vs ~8/slot target — expand and diff against ret.generated.json next.",
+  "note": "Phase\u22642 curation: generated top-N per slot with sources from db.json or hand map. Null-source leftovers omitted.",
   "entries": [
     {
       "itemId": 30102,
@@ -21,7 +21,11 @@
       "slot": "head",
       "phase": 2,
       "ep": 144.38,
-      "source": { "kind": "raid", "zone": "Tempest Keep", "boss": "Al'ar" }
+      "source": {
+        "kind": "raid",
+        "zone": "Tempest Keep",
+        "boss": "Al'ar"
+      }
     },
     {
       "itemId": 30009,
@@ -33,6 +37,64 @@
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Fathom-Lord Karathress"
+      }
+    },
+    {
+      "itemId": 23541,
+      "name": "Khorium Champion",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 129.55,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 28485,
+      "name": "Bulwark of the Ancient Kings",
+      "slot": "chest",
+      "phase": 2,
+      "ep": 125.32,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 29137,
+      "name": "Hellscream's Will",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 124.74,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 29138,
+      "name": "Arechron's Gift",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 124.74,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 30132,
+      "name": "Crystalforge Greaves",
+      "slot": "legs",
+      "phase": 2,
+      "ep": 124.4,
+      "source": {
+        "kind": "token",
+        "zone": "Tempest Keep",
+        "token": "Greaves of the Fallen Champion"
       }
     },
     {
@@ -48,6 +110,75 @@
       }
     },
     {
+      "itemId": 29074,
+      "name": "Justicar Greaves",
+      "slot": "legs",
+      "phase": 1,
+      "ep": 120.45,
+      "source": {
+        "kind": "token",
+        "zone": "Karazhan",
+        "token": "Justicar Greaves"
+      }
+    },
+    {
+      "itemId": 31298,
+      "name": "Legguards of the Shattered Hand",
+      "slot": "legs",
+      "phase": 1,
+      "ep": 114.6,
+      "source": {
+        "kind": "rep",
+        "faction": "Shattered Hand",
+        "standing": "Exalted"
+      }
+    },
+    {
+      "itemId": 28484,
+      "name": "Bulwark of Kings",
+      "slot": "chest",
+      "phase": 1,
+      "ep": 112.94,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 32461,
+      "name": "Furious Gizmatic Goggles",
+      "slot": "head",
+      "phase": 2,
+      "ep": 105.21,
+      "source": {
+        "kind": "crafted",
+        "profession": "4"
+      }
+    },
+    {
+      "itemId": 30032,
+      "name": "Red Belt of Battle",
+      "slot": "waist",
+      "phase": 2,
+      "ep": 89.58,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 30740,
+      "name": "Ripfiend Shoulderplates",
+      "slot": "shoulder",
+      "phase": 1,
+      "ep": 83.89,
+      "source": {
+        "kind": "raid",
+        "zone": "Magtheridon's Lair",
+        "boss": "Magtheridon"
+      }
+    },
+    {
       "itemId": 29997,
       "name": "Band of the Ranger-General",
       "slot": "finger",
@@ -57,6 +188,18 @@
         "kind": "raid",
         "zone": "Tempest Keep",
         "boss": "Kael'thas Sunstrider"
+      }
+    },
+    {
+      "itemId": 29075,
+      "name": "Justicar Shoulderplates",
+      "slot": "shoulder",
+      "phase": 1,
+      "ep": 80.15,
+      "source": {
+        "kind": "token",
+        "zone": "Karazhan",
+        "token": "Justicar Shoulderplates"
       }
     },
     {
@@ -84,12 +227,99 @@
       }
     },
     {
+      "itemId": 29283,
+      "name": "Violet Signet of the Master Assassin",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 76.71,
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Nightbane"
+      }
+    },
+    {
+      "itemId": 28757,
+      "name": "Ring of a Thousand Marks",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 76.6,
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Prince Malchezaar"
+      }
+    },
+    {
+      "itemId": 29023,
+      "name": "Warbringer Shoulderplates",
+      "slot": "shoulder",
+      "phase": 1,
+      "ep": 76.45,
+      "source": {
+        "kind": "token",
+        "zone": "Karazhan",
+        "token": "Warbringer Shoulderplates"
+      }
+    },
+    {
       "itemId": 28579,
       "name": "Romulo's Poison Vial",
       "slot": "trinket",
       "phase": 1,
       "ep": 75.25,
-      "source": { "kind": "raid", "zone": "Karazhan", "boss": "Opera Event" }
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Opera Event"
+      }
+    },
+    {
+      "itemId": 29282,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 72.92,
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Nightbane"
+      }
+    },
+    {
+      "itemId": 31920,
+      "name": "Shaffar's Band of Brutality",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 72.65,
+      "source": {
+        "kind": "heroic",
+        "dungeon": "Mana-Tombs"
+      }
+    },
+    {
+      "itemId": 30738,
+      "name": "Ring of Reciprocity",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 72.3,
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Netherspite"
+      }
+    },
+    {
+      "itemId": 30375,
+      "name": "Gauntlets of the Vanquisher",
+      "slot": "hands",
+      "phase": 1,
+      "ep": 71.35,
+      "source": {
+        "kind": "raid",
+        "zone": "Tempest Keep",
+        "boss": "Void Reaver"
+      }
     },
     {
       "itemId": 29381,
@@ -97,7 +327,34 @@
       "slot": "neck",
       "phase": 1,
       "ep": 70.92,
-      "source": { "kind": "badge", "cost": 25 }
+      "source": {
+        "kind": "badge",
+        "cost": 25
+      }
+    },
+    {
+      "itemId": 31180,
+      "name": "Gauntlets of the Skullsplitter",
+      "slot": "hands",
+      "phase": 1,
+      "ep": 70.3,
+      "source": {
+        "kind": "raid",
+        "zone": "Shadowmoon Valley",
+        "boss": "world"
+      }
+    },
+    {
+      "itemId": 28649,
+      "name": "Garona's Signet Ring",
+      "slot": "finger",
+      "phase": 1,
+      "ep": 70.1,
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Opera Event"
+      }
     },
     {
       "itemId": 28509,
@@ -117,7 +374,23 @@
       "slot": "back",
       "phase": 1,
       "ep": 68.49,
-      "source": { "kind": "raid", "zone": "Karazhan", "boss": "Nightbane" }
+      "source": {
+        "kind": "raid",
+        "zone": "Karazhan",
+        "boss": "Nightbane"
+      }
+    },
+    {
+      "itemId": 23219,
+      "name": "Girdle of the Mentor",
+      "slot": "waist",
+      "phase": 1,
+      "ep": 68.28,
+      "source": {
+        "kind": "raid",
+        "zone": "Naxxramas",
+        "boss": "Instructor Razuvious"
+      }
     },
     {
       "itemId": 30081,
@@ -129,6 +402,100 @@
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Hydross the Unstable"
+      }
+    },
+    {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "phase": 1,
+      "ep": 64.44,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "phase": 1,
+      "ep": 63.35,
+      "source": {
+        "kind": "raid",
+        "zone": "Blade's Edge",
+        "boss": "world"
+      }
+    },
+    {
+      "itemId": 29335,
+      "name": "Talon Lord's Collar",
+      "slot": "neck",
+      "phase": 1,
+      "ep": 60.73,
+      "source": {
+        "kind": "raid",
+        "zone": "Auchindoun",
+        "boss": "Exarch Maladaar"
+      }
+    },
+    {
+      "itemId": 27779,
+      "name": "Bone Chain Necklace",
+      "slot": "neck",
+      "phase": 1,
+      "ep": 56.96,
+      "source": {
+        "kind": "raid",
+        "zone": "Auchindoun",
+        "boss": "Shirrak the Dead Watcher"
+      }
+    },
+    {
+      "itemId": 23537,
+      "name": "Black Felsteel Bracers",
+      "slot": "wrist",
+      "phase": 1,
+      "ep": 42.94,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 29151,
+      "name": "Veteran's Musket",
+      "slot": "ranged",
+      "phase": 1,
+      "ep": 41.67,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 29152,
+      "name": "Marksman's Bow",
+      "slot": "ranged",
+      "phase": 1,
+      "ep": 41.67,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 30022,
+      "name": "Pendant of the Perilous",
+      "slot": "neck",
+      "phase": 2,
+      "ep": 0,
+      "source": {
+        "kind": "raid",
+        "zone": "Serpentshrine Cavern",
+        "boss": "Lady Vashj"
       }
     },
     {
@@ -149,34 +516,9 @@
       "slot": "trinket",
       "phase": 1,
       "ep": 0,
-      "source": { "kind": "badge", "cost": 41 }
-    },
-    {
-      "itemId": 28485,
-      "name": "Bulwark of the Ancient Kings",
-      "slot": "chest",
-      "phase": 2,
-      "ep": 125.32,
-      "source": { "kind": "crafted", "profession": "2" }
-    },
-    {
-      "itemId": 23541,
-      "name": "Khorium Champion",
-      "slot": "weapon",
-      "phase": 1,
-      "ep": 129.55,
-      "source": { "kind": "crafted", "profession": "2" }
-    },
-    {
-      "itemId": 30022,
-      "name": "Pendant of the Perilous",
-      "slot": "neck",
-      "phase": 2,
-      "ep": 0,
       "source": {
-        "kind": "raid",
-        "zone": "Serpentshrine Cavern",
-        "boss": "Lady Vashj"
+        "kind": "badge",
+        "cost": 41
       }
     }
   ]

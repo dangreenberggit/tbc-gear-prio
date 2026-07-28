@@ -161,6 +161,16 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
+    console.log("assumptions:");
+    for (const a of ranking.assumptions.standing) {
+      console.log(`  - [${a.id}] ${a.detail}`);
+    }
+    if (ranking.substitutions.length > 0) {
+      console.log("substitutions:");
+      for (const s of ranking.substitutions) {
+        console.log(`  - ${s.field}: ${s.detail}`);
+      }
+    }
     for (const item of ranking.items) {
       const mark = item.belowCutoff ? "  (below cutoff)" : "";
       const rankLabel = item.rank == null ? "-" : String(item.rank);

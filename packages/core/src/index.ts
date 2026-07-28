@@ -11,6 +11,14 @@ export {
   type Ranking,
 } from "./rank.js";
 export {
+  buildStandingAssumptions,
+  substitutionsFromMetaRepair,
+  type Assumptions,
+  type StandingAssumption,
+  type StandingAssumptionId,
+  type Substitution,
+} from "./disclosure.js";
+export {
   filterPoolByPhase,
   simSlotsForPoolSlot,
   type ItemSource,

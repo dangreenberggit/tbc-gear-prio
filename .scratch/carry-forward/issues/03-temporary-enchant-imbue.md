@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: docs/reviews/phase-0-close-gates.md
 Blocks: phase-1
@@ -27,9 +27,11 @@ already not the player's (preset professions, assumed race).
 ## Done when
 
 - R7 disclosure drawer lists weapon imbue omission under **standing
-  assumptions** (alongside professions / assumed race).
+  assumptions** (alongside professions / assumed race). ✅
+  `Ranking.assumptions.standing` includes `weapon-imbue-omitted`
+  (`packages/core/src/disclosure.ts`); CLI prints it.
 - Normalize/compose keep omitting `temporaryEnchant` until an external
-  effectId→itemId source is pinned — do not wire a guessed mapping.
+  effectId→itemId source is pinned — do not wire a guessed mapping. ✅
 - Optional later: find/pin that source and apply imbues symmetrically.
 
 ## Not done when

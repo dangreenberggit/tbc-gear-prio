@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: docs/reviews/phase-0-close-gates.md
 Blocks: phase-1
@@ -21,18 +21,15 @@ Phase 0's 2042.85 DPS proves "logged gear sims," not "legal gemming."
 - `data/presets/ret/p2.ep-weights.json` — pinned P2 EP from wowsims presets.ts.
 - Slamaltman Relentless is **active**; repair tests use a stripped-yellow
   variant and a constructed R4 bonus-forfeit case.
+- Disclosure: `Ranking.substitutions` via `substitutionsFromMetaRepair`.
 
-## Still open
+## Follow-up (not blocking this ticket)
 
-- Wire recorded slamaltman fixture pack into the offline CLI (rankUpgrades
-  baseline path works in tests; CLI still has empty recordings).
 - Find or build a real inactive-meta character fixture (PLAN §16).
-- Candidate pool / ranking loop beyond baseline.
 
 ## Done when
 
 - Baseline path records meta active/inactive. ✅ (`baseline.metaAdjusted`)
 - Inactive meta is repaired at minimum EP loss (PLAN §9), disclosed as a
-  substitution — not silently simmed as-is for rankings users act on.
-  _(repair ✅; disclosure drawer / Substitution[] still open)_
+  substitution — not silently simmed as-is for rankings users act on. ✅
 - A repair that would break a socket bonus picks the other move (§9 R4). ✅
