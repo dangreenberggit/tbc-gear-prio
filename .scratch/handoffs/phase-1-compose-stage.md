@@ -8,21 +8,21 @@
 
 ## Status
 
-partial — compose, meta activation/repair, offline baseline path, and a first
-ret pool generator are green. Tip: `60298e9`. `pnpm verify`: 54 tests +
+partial — compose, meta activation/repair, offline baseline path, pool
+generator, **candidate ranking loop**, and a thin curated `data/pools/ret.json`
+are green. Tip: check `git log -1 --oneline`. `pnpm verify`: 56 tests +
 `skeleton:check`. Offline
 `pnpm rank --region US --realm dreamscythe --character slamaltman --offline`
-prints **baseline 2042.85** (metaAdjusted=false).
+prints **baseline 2042.85** and ranks pool swaps (e.g. Band of the
+Ranger-General above cutoff).
 
-**Done this sitting:** §4 APL finding, design C, compose oracle, Stat/epScore,
-meta conditions + min-EP repair (R4), `rankUpgrades` baseline
-(resolve→gear→compose→sim) with `baseline.metaAdjusted`, offline slamaltman
-CLI via CliSimRunner, `pnpm pool:generate` → `data/pools/ret.generated.json`
-(168 entries, curation still required for sources).
+**Done this sitting (continued):** session-focus rule in AGENTS.md; ranking
+loop (single-item swaps + cutoff); starter curated pool with sources; maxPhase
+filter test.
 
-**Still open:** curate `data/pools/ret.json` (fill sources, trim to ~8/slot),
-ranking loop over candidates, disclosure / Substitution[] (tickets 03/04),
-ticket 05 proto drift, pool generate diff-against-curated mode.
+**Still open:** thicken `data/pools/ret.json` toward ~8/slot, EP prefilter,
+disclosure / Substitution[] (tickets 03/04), ticket 05 proto drift, pool
+generate diff-against-curated mode.
 
 **Paused:** yes — do not land to `dev` unless the user explicitly asks after a
 `pre-merge-review` has been written and seen
