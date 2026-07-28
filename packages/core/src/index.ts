@@ -81,6 +81,14 @@ export type {
 } from "./types.js";
 export { fillCandidateGems, gemEp, gemFillWeights } from "./candidate-gems.js";
 export {
+  SLOT_ORDER,
+  formatItemSource,
+  groupBySlot,
+  partitionShortlist,
+  renderRankHtml,
+  type RankReportMeta,
+} from "./rank-report.js";
+export {
   gemPalette,
   gemsForPhase,
   getGem,

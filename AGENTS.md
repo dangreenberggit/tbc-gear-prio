@@ -10,6 +10,14 @@ Local markdown under `.scratch/`. Solo project — no external tracker, no triag
 
 Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root, created lazily as needed. See `docs/agents/domain.md`.
 
+### SME rank review
+
+For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-review` skill. Audience is the **engineering team** (gate and bugs), not player loot advice. Sharp lane.
+
+### Editing skills
+
+Before adding anything to a skill file, ask: does this belong to **this skill’s job and nature**? A skill has a personality (e.g. game-domain SME vs pipeline debugging vs TDD). Do not dump related-but-wrong material into it — put engineering rules in engineering skills/docs, game rules in game skills, and so on. If it does not fit, write it elsewhere or leave it out. See also `writing-great-skills` (relevance) and `dont-be-stupid`.
+
 ## Engineering workflow
 
 Full process detail is in [`docs/workflow.md`](docs/workflow.md). This section is the summary every session should internalize before touching code.
