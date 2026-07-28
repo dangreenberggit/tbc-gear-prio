@@ -3,6 +3,7 @@
  * Stages land behind this; callers only see RankInput → Ranking.
  */
 
+import { fillCandidateGems } from "./candidate-gems.js";
 import { compose } from "./compose.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import {
@@ -167,6 +168,9 @@ export async function rankUpgrades(
     throw err;
   }
 
+  const palette = deps.gemPalette ?? gemsForPhase(input.maxPhase);
+  const epWeightRecord = weightRecord(deps.epWeights);
+
   const equipment = applyRepairedGems(
     equipmentFromLoggedGear(logged),
     socketed
@@ -221,7 +225,14 @@ export async function rankUpgrades(
       const slotName = slotNames[s]!;
       const slotIndex = SIM_ORDER.indexOf(slotName);
       if (slotIndex < 0) continue;
-      const swapped = swapItemAt(equipment, slotIndex, entry.itemId);
+      const swapped = equipmentForCandidateSwap(
+        equipment,
+        slotIndex,
+        entry.itemId,
+        palette,
+        epWeightRecord,
+        deps.epWeights
+      );
       const candReq = compose(deps.raidSimSkeleton, {
         name: input.character.name.toLowerCase(),
         race,
@@ -318,6 +329,19 @@ export async function rankUpgrades(
   };
 }
 
+function weightRecord(
+  weights: Readonly<Record<string, number>> | readonly number[]
+): Readonly<Record<string, number>> {
+  if (Array.isArray(weights)) {
+    const out: Record<string, number> = {};
+    for (let i = 0; i < weights.length; i++) {
+      out[String(i)] = weights[i] ?? 0;
+    }
+    return out;
+  }
+  return weights as Readonly<Record<string, number>>;
+}
+
 function meetsCutoff(
   deltaDps: number,
   deltaPct: number,
@@ -326,14 +350,54 @@ function meetsCutoff(
   return deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
 }
 
+function equipmentForCandidateSwap(
+  equipment: readonly SimItemSpec[],
+  slotIndex: number,
+  itemId: number,
+  palette: readonly GemEntry[],
+  epWeightRecord: Readonly<Record<string, number>>,
+  epWeights: Readonly<Record<string, number>> | readonly number[]
+): SimItemSpec[] {
+  const swapped = swapItemAt(
+    equipment,
+    slotIndex,
+    itemId,
+    palette,
+    epWeightRecord
+  );
+  const socketed: SocketedItem[] = swapped.map((spec) => ({
+    itemId: spec.id ?? 0,
+    gems: [...spec.gems],
+  }));
+  let repaired;
+  try {
+    repaired = repairMeta({
+      items: socketed,
+      epWeights,
+      palette,
+    });
+  } catch (err) {
+    if (err instanceof MetaUnsolvableError) {
+      throw new RankError("meta-unsolvable", err.message);
+    }
+    throw err;
+  }
+  return applyRepairedGems(swapped, repaired.items);
+}
+
 function swapItemAt(
   equipment: readonly SimItemSpec[],
   slotIndex: number,
-  itemId: number
+  itemId: number,
+  palette: readonly GemEntry[],
+  epWeights: Readonly<Record<string, number>>
 ): SimItemSpec[] {
   return equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
-    const out: SimItemSpec = { id: itemId, gems: [] };
+    const out: SimItemSpec = {
+      id: itemId,
+      gems: fillCandidateGems(itemId, palette, epWeights),
+    };
     if (spec.enchant && isEnchantable(itemId)) {
       out.enchant = spec.enchant;
     }
@@ -342,9 +406,9 @@ function swapItemAt(
 }
 
 function applyRepairedGems(
-  equipment: ReturnType<typeof equipmentFromLoggedGear>,
+  equipment: readonly SimItemSpec[],
   socketed: SocketedItem[]
-): ReturnType<typeof equipmentFromLoggedGear> {
+): SimItemSpec[] {
   return equipment.map((spec, i) => {
     const repaired = socketed[i];
     if (!repaired || !spec.id) return spec;

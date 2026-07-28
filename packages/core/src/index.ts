@@ -79,6 +79,7 @@ export type {
   Region,
   SpecId,
 } from "./types.js";
+export { fillCandidateGems, gemEp, gemFillWeights } from "./candidate-gems.js";
 export {
   gemPalette,
   gemsForPhase,
