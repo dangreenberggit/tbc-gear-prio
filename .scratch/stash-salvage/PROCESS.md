@@ -1,7 +1,7 @@
 # Stash salvage — fan-out process
 
 **Feature branch:** `phase-1/five-seed-spread`  
-**Base SHA:** `2d0741efc4b1225fb8a1309b4bbee0e28d011c3e`  
+**Base SHA:** `25de532f3a5001344494ed74e550d9ef3550c6cc`  
 **Date:** 2026-07-28  
 **Stash frozen refs:** see `.scratch/stash-salvage/stash0-refs.txt`  
 **Do not drop `stash@{0}`.** Prefer reading frozen SHA / `inbox/` copies.
