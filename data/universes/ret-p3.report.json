@@ -1,0 +1,65 @@
+{
+  "maxPhase": 3,
+  "carryoverPolicy": "union",
+  "phaseZones": [
+    "Black Temple",
+    "Gruul's Lair",
+    "Hyjal Summit",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep"
+  ],
+  "d7EligibleTotal": 4212,
+  "excludedNoSource": 2322,
+  "universeTotal": 347,
+  "listOnlyMembership": 21,
+  "perSlot": {
+    "back": 26,
+    "chest": 27,
+    "feet": 35,
+    "finger": 30,
+    "hands": 25,
+    "head": 23,
+    "legs": 20,
+    "neck": 22,
+    "ranged": 3,
+    "shoulder": 25,
+    "trinket": 28,
+    "waist": 36,
+    "weapon": 14,
+    "wrist": 33
+  },
+  "sourceRecordAdds": {
+    "db": 1857,
+    "atlasloot": 357,
+    "two-hop": 18,
+    "wowhead": 62
+  },
+  "membershipByOrigin": {
+    "listOnly": 21,
+    "itemHasOrigin:db": 323,
+    "itemHasOrigin:wowhead": 42,
+    "zoneMatch": 326,
+    "itemHasOrigin:atlasloot": 40,
+    "itemHasOrigin:two-hop": 15
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 323,
+    "two-hop": 15,
+    "wowhead-only": 9
+  },
+  "tierPiecesExpected": 15,
+  "tierPiecesPresent": 15,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 347,
+    "casterOnlyReject": 114,
+    "epFloorReject": 16,
+    "combinedReject": 130,
+    "combinedKeep": 217,
+    "casterRejectPct": 32.9,
+    "combinedRejectPct": 37.5
+  },
+  "wowheadListIds": 123
+}

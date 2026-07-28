@@ -1,0 +1,570 @@
+#!/usr/bin/env python3
+"""
+assemble_universe.py — build phase-scoped ret candidate universes (sub-phase 4).
+
+Merges db.json sources, AtlasLoot parse, two-hop token map, and Wowhead ret lists.
+D7 eligibility is implemented here — generate_pool.ret_equippable() is still
+plate-only on armor slots and must not be used for universe sizing.
+
+    python scripts/assemble_universe.py --max-phase 2
+    python scripts/assemble_universe.py --max-phase 3 --out data/universes/ret-p3.json
+
+Exit 0 ok, 2 missing inputs.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from collections import Counter, defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DB = ROOT / "vendor/wowsims/db.json"
+EP_WEIGHTS = ROOT / "data/presets/ret/p2.ep-weights.json"
+PHASE_RAIDS = ROOT / "data/phase_raids.json"
+ATLASLOOT = ROOT / "data/atlasloot_sources.json"
+TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
+WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
+DEFAULT_OUT_DIR = ROOT / "data/universes"
+
+# Slot map shared with generate_pool.py
+ITEM_TYPE_SLOT = {
+    1: "head",
+    2: "neck",
+    3: "shoulder",
+    4: "back",
+    5: "chest",
+    6: "wrist",
+    7: "hands",
+    8: "waist",
+    9: "legs",
+    10: "feet",
+    11: "finger",
+    12: "trinket",
+    13: "weapon",
+    14: "ranged",
+}
+
+ARMOR_LEATHER = 2
+ARMOR_MAIL = 3
+ARMOR_PLATE = 4
+WEAPON_POLEARM = 6
+WEAPON_STAFF = 8
+HAND_TYPE_TWO_HAND = 4
+RANGED_LIBRAM = 7
+MIN_QUALITY = 3
+
+KAEL_TEMP_LEGENDARY_IDS = frozenset(
+    {30318, 30313, 30316, 30317, 30312, 30311, 30314}
+)
+
+RET_TIER_PIECE_IDS = frozenset(
+    {
+        29073,
+        29075,
+        29071,
+        29072,
+        29074,
+        30131,
+        30133,
+        30129,
+        30130,
+        30132,
+        30989,
+        30997,
+        30990,
+        30982,
+        30993,
+        34431,
+        34485,
+        34561,
+    }
+)
+
+# Wowhead list files included when assembling up to maxPhase N.
+WOWHEAD_STAGE_FOR_MAX_PHASE: dict[int, list[str]] = {
+    2: ["p1-p2"],
+    3: ["p1-p2", "p3"],
+    4: ["p1-p2", "p3", "p4"],
+    5: ["p1-p2", "p3", "p4", "p5"],
+}
+
+DROP_RE = re.compile(r"Drop:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
+BADGE_RE = re.compile(
+    r"(\d+)\s*(?:x\s*)?Badges?\s+of\s+Justice|(\d+)x\s*Badge\s+of\s+Justice",
+    re.IGNORECASE,
+)
+CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNORECASE)
+
+CASTER_ONLY_STATS = frozenset({3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
+MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
+SLOTS_WITH_EP_SIGNAL = frozenset({"weapon", "feet", "waist", "hands", "wrist"})
+
+
+def load_json(path: Path) -> object:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def ret_eligible_d7(it: dict) -> bool:
+    """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable()."""
+    if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
+        return False
+    t = it.get("type")
+    if t is None:
+        return False
+    slot = ITEM_TYPE_SLOT.get(t)
+    if slot is None:
+        return False
+    if (it.get("quality") or 0) < MIN_QUALITY:
+        return False
+    if slot in {
+        "head",
+        "shoulder",
+        "chest",
+        "wrist",
+        "hands",
+        "waist",
+        "legs",
+        "feet",
+    }:
+        return it.get("armorType") in (ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE)
+    if slot == "weapon":
+        if it.get("handType") != HAND_TYPE_TWO_HAND:
+            return False
+        if it.get("weaponType") in (WEAPON_POLEARM, WEAPON_STAFF):
+            return False
+        return True
+    if slot == "ranged":
+        return it.get("rangedWeaponType") == RANGED_LIBRAM
+    return True
+
+
+def item_stats(it: dict) -> list[float]:
+    scaling = (it.get("scalingOptions") or {}).get("0") or {}
+    raw_map = scaling.get("stats")
+    if isinstance(raw_map, dict) and raw_map:
+        out = [0.0] * 42
+        for k, v in raw_map.items():
+            i = int(k)
+            if 0 <= i < len(out):
+                out[i] = float(v)
+        return out
+    arr = it.get("stats") or []
+    return [float(x) for x in arr]
+
+
+def ep_score(stats: list[float], weights: dict[str, float]) -> float:
+    total = 0.0
+    for k, w in weights.items():
+        i = int(k)
+        if i < len(stats):
+            total += stats[i] * w
+    return total
+
+
+def map_db_source(
+    raw: object,
+    *,
+    zones_by_id: dict[int, str],
+    npcs_by_id: dict[int, str],
+) -> dict | None:
+    """db.json sources[] → ItemSource (same logic as generate_pool.map_source)."""
+    if not isinstance(raw, list) or not raw:
+        return None
+    first = raw[0]
+    if not isinstance(first, dict):
+        return None
+    if "crafted" in first:
+        prof = (first["crafted"] or {}).get("profession")
+        return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
+    if "drop" in first:
+        drop = first["drop"] or {}
+        zone = (
+            drop.get("zone")
+            or drop.get("zoneName")
+            or zones_by_id.get(drop.get("zoneId"))
+        )
+        boss = drop.get("npcName") or npcs_by_id.get(drop.get("npcId"))
+        if zone:
+            out: dict = {"kind": "raid", "zone": str(zone)}
+            if boss:
+                out["boss"] = str(boss)
+            return out
+    if "rep" in first:
+        rep = first["rep"] or {}
+        faction = rep.get("factionName") or rep.get("faction") or "unknown"
+        standing = rep.get("standing") or rep.get("rank") or "unknown"
+        return {"kind": "rep", "faction": str(faction), "standing": str(standing)}
+    if "faction" in first:
+        return {"kind": "rep", "faction": "unknown", "standing": "unknown"}
+    return None
+
+
+def source_zones(source: dict) -> set[str]:
+    kind = source.get("kind")
+    if kind in ("raid", "token", "heroic"):
+        z = source.get("zone") or source.get("dungeon")
+        return {z} if z else set()
+    return set()
+
+
+def parse_wowhead_source(text: str | None) -> list[dict]:
+    if not text:
+        return []
+    out: list[dict] = []
+    m = DROP_RE.search(text)
+    if m:
+        boss = m.group(1).strip()
+        zone = m.group(2).strip()
+        if zone.endswith("(via"):
+            zone = zone.split("(via")[0].strip()
+        src: dict = {"kind": "raid", "zone": zone}
+        if boss and boss.lower() != "unknown":
+            src["boss"] = boss
+        out.append(src)
+    bm = BADGE_RE.search(text)
+    if bm:
+        cost = int(next(g for g in bm.groups() if g))
+        out.append({"kind": "badge", "cost": cost})
+    lower = text.lower()
+    if "arena points" in lower or ("pvp:" in lower and "arena" in lower):
+        out.append({"kind": "pvp", "via": "arena"})
+    elif "honor points" in lower or ("pvp:" in lower and "honor" in lower):
+        out.append({"kind": "pvp", "via": "honor"})
+    cm = CRAFTED_RE.search(text)
+    if cm:
+        prof = (cm.group(1) or cm.group(2) or "").strip()
+        if prof:
+            out.append({"kind": "crafted", "profession": prof})
+    return out
+
+
+def is_list_only_source(source: dict) -> bool:
+    """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
+    return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+
+
+def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
+    zones: set[str] = set()
+    for row in phase_raids.get("zones") or []:
+        if isinstance(row, dict) and row.get("phase", 99) <= max_phase:
+            zones.add(str(row["name"]))
+    return zones
+
+
+def wowhead_lists_for_phase(max_phase: int) -> list[tuple[str, dict]]:
+    stages = WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, [])
+    out: list[tuple[str, dict]] = []
+    for stage in stages:
+        path = WOWHEAD_DIR / f"{stage}.json"
+        if path.is_file():
+            data = load_json(path)
+            assert isinstance(data, dict)
+            out.append((stage, data))
+    return out
+
+
+def item_stat_map(it: dict) -> dict[int, float]:
+    scaling = (it.get("scalingOptions") or {}).get("0") or {}
+    raw = scaling.get("stats")
+    if not isinstance(raw, dict):
+        return {}
+    return {int(k): float(v) for k, v in raw.items()}
+
+
+def is_caster_junk(slot: str, stats: dict[int, float]) -> bool:
+    if slot in ("ranged", "trinket"):
+        return False
+    if not stats:
+        return False
+    has_melee = any(k in MELEE_STATS for k in stats)
+    has_caster = any(k in CASTER_ONLY_STATS for k in stats)
+    return has_caster and not has_melee
+
+
+def build_percentiles(entries: list[dict]) -> dict[int, float]:
+    by_slot: dict[str, list[dict]] = defaultdict(list)
+    for e in entries:
+        by_slot[e["slot"]].append(e)
+    pct: dict[int, float] = {}
+    for slot_entries in by_slot.values():
+        sorted_entries = sorted(slot_entries, key=lambda e: e["ep"])
+        n = len(sorted_entries)
+        for i, e in enumerate(sorted_entries):
+            pct[e["itemId"]] = i / (n - 1) if n > 1 else 1.0
+    return pct
+
+
+def measure_junk_filter(entries: list[dict], db_by_id: dict[int, dict]) -> dict:
+    pct = build_percentiles(entries)
+    caster_rejects = []
+    ep_floor_rejects = []
+    for e in entries:
+        stats = item_stat_map(db_by_id[e["itemId"]])
+        if is_caster_junk(e["slot"], stats):
+            caster_rejects.append(e)
+            continue
+        if e["slot"] in SLOTS_WITH_EP_SIGNAL and pct.get(e["itemId"], 1.0) < 0.10:
+            ep_floor_rejects.append(e)
+    combined = [
+        e
+        for e in entries
+        if e not in caster_rejects and e not in ep_floor_rejects
+    ]
+    return {
+        "total": len(entries),
+        "casterOnlyReject": len(caster_rejects),
+        "epFloorReject": len(ep_floor_rejects),
+        "combinedReject": len(entries) - len(combined),
+        "combinedKeep": len(combined),
+        "casterRejectPct": round(100 * len(caster_rejects) / len(entries), 1)
+        if entries
+        else 0,
+        "combinedRejectPct": round(100 * (len(entries) - len(combined)) / len(entries), 1)
+        if entries
+        else 0,
+    }
+
+
+def assemble(max_phase: int) -> tuple[dict, dict]:
+    if not DB.is_file():
+        print(f"missing {DB} — run pnpm sync:wowsims", file=sys.stderr)
+        sys.exit(2)
+
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    phase_raids = load_json(PHASE_RAIDS)
+    assert isinstance(phase_raids, dict)
+    atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
+    two_hop = load_json(TWO_HOP) if TWO_HOP.is_file() else {}
+    weights_raw = load_json(EP_WEIGHTS)
+    assert isinstance(weights_raw, dict)
+    w = weights_raw["weights"]
+    assert isinstance(w, dict)
+
+    zones_by_id = {
+        int(z["id"]): str(z["name"])
+        for z in (db.get("zones") or [])
+        if isinstance(z, dict) and "id" in z and "name" in z
+    }
+    npcs_by_id = {
+        int(n["id"]): str(n["name"])
+        for n in (db.get("npcs") or [])
+        if isinstance(n, dict) and "id" in n and "name" in n
+    }
+    db_by_id = {int(it["id"]): it for it in db["items"]}
+
+    phase_zones = zones_for_max_phase(max_phase, phase_raids)
+
+    # itemId -> list of (source, origin)
+    source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
+    origin_counter: Counter[str] = Counter()
+
+    def add_source(item_id: int, source: dict | None, origin: str) -> None:
+        if not source:
+            return
+        key = json.dumps(source, sort_keys=True)
+        existing = {json.dumps(s, sort_keys=True) for s, _ in source_acc[item_id]}
+        if key not in existing:
+            source_acc[item_id].append((source, origin))
+            origin_counter[origin] += 1
+
+    # db + atlasloot for all D7-eligible items
+    for it in db["items"]:
+        if not ret_eligible_d7(it):
+            continue
+        iid = int(it["id"])
+        db_src = map_db_source(
+            it.get("sources"), zones_by_id=zones_by_id, npcs_by_id=npcs_by_id
+        )
+        add_source(iid, db_src, "db")
+        for raw in (atlasloot.get(str(iid)) or []):
+            if isinstance(raw, dict):
+                add_source(iid, raw, "atlasloot")
+
+    # two-hop tokens
+    for entry in (two_hop.get("entries") or []) if isinstance(two_hop, dict) else []:
+        if not isinstance(entry, dict):
+            continue
+        piece_id = int(entry["pieceId"])
+        token_src: dict = {
+            "kind": "token",
+            "zone": entry["zone"],
+            "token": entry["tokenName"],
+        }
+        if entry.get("boss"):
+            token_src["boss"] = entry["boss"]
+        add_source(piece_id, token_src, "two-hop")
+
+    # wowhead lists for this maxPhase
+    wowhead_list_ids: set[int] = set()
+    wowhead_list_only: set[int] = set()
+    for stage, doc in wowhead_lists_for_phase(max_phase):
+        for row in doc.get("entries") or []:
+            if not isinstance(row, dict):
+                continue
+            iid = int(row["itemId"])
+            wowhead_list_ids.add(iid)
+            for src in parse_wowhead_source(row.get("wowheadSourceText")):
+                add_source(iid, src, "wowhead")
+            # Items on list with only non-zone sources count as list-only membership.
+            parsed = parse_wowhead_source(row.get("wowheadSourceText"))
+            if parsed and all(is_list_only_source(s) for s in parsed):
+                wowhead_list_only.add(iid)
+
+    eligible_count = sum(1 for it in db["items"] if ret_eligible_d7(it))
+
+    entries: list[dict] = []
+    membership_stats = Counter()
+    list_only_count = 0
+    no_zone_excluded = 0
+
+    for it in db["items"]:
+        if not ret_eligible_d7(it):
+            continue
+        iid = int(it["id"])
+        pairs = source_acc.get(iid) or []
+        if not pairs:
+            no_zone_excluded += 1
+            continue
+
+        sources = [s for s, _ in pairs]
+        origins_for_item = {o for _, o in pairs}
+        zones_hit = set()
+        for s in sources:
+            zones_hit |= source_zones(s)
+
+        in_phase = bool(zones_hit & phase_zones)
+        list_only = iid in wowhead_list_only and iid in wowhead_list_ids
+        if not in_phase and not list_only:
+            continue
+
+        if list_only and not in_phase:
+            list_only_count += 1
+            membership_stats["listOnly"] += 1
+        elif in_phase:
+            membership_stats["zoneMatch"] += 1
+
+        slot = ITEM_TYPE_SLOT[it["type"]]
+        stats = item_stats(it)
+        entry = {
+            "itemId": iid,
+            "name": it["name"],
+            "slot": slot,
+            "armorType": it.get("armorType"),
+            "handType": it.get("handType"),
+            "quality": it.get("quality"),
+            "phase": it.get("phase"),
+            "sources": sources,
+            "ep": round(ep_score(stats, w), 3),
+        }
+        entries.append(entry)
+
+        for origin in origins_for_item:
+            membership_stats[f"itemHasOrigin:{origin}"] += 1
+
+    entries.sort(key=lambda e: (e["slot"], -e["ep"], e["itemId"]))
+
+    # Every row must have non-empty sources (build failure).
+    if any(not e["sources"] for e in entries):
+        print("assembly error: row with empty sources", file=sys.stderr)
+        sys.exit(2)
+
+    tier_present = {e["itemId"] for e in entries} & RET_TIER_PIECE_IDS
+    tier_expected: set[int] = set()
+    for entry in (two_hop.get("entries") or []) if isinstance(two_hop, dict) else []:
+        if not isinstance(entry, dict):
+            continue
+        piece_id = int(entry["pieceId"])
+        if piece_id not in RET_TIER_PIECE_IDS:
+            continue
+        if str(entry.get("zone")) in phase_zones:
+            tier_expected.add(piece_id)
+
+    per_slot = Counter(e["slot"] for e in entries)
+    junk = measure_junk_filter(entries, db_by_id)
+
+    # Primary origin: first contributing pipeline per item (for exclusive counts).
+    exclusive_origin: Counter[str] = Counter()
+    for e in entries:
+        iid = e["itemId"]
+        origins = {o for _, o in source_acc.get(iid, [])}
+        if "two-hop" in origins:
+            exclusive_origin["two-hop"] += 1
+        elif "wowhead" in origins and not (origins & {"db", "atlasloot"}):
+            exclusive_origin["wowhead-only"] += 1
+        elif "atlasloot" in origins and "db" not in origins:
+            exclusive_origin["atlasloot-only"] += 1
+        elif "db" in origins:
+            exclusive_origin["db"] += 1
+        else:
+            exclusive_origin["other"] += 1
+
+    report = {
+        "maxPhase": max_phase,
+        "carryoverPolicy": "union",
+        "phaseZones": sorted(phase_zones),
+        "d7EligibleTotal": eligible_count,
+        "excludedNoSource": no_zone_excluded,
+        "universeTotal": len(entries),
+        "listOnlyMembership": list_only_count,
+        "perSlot": dict(sorted(per_slot.items())),
+        "sourceRecordAdds": dict(origin_counter),
+        "membershipByOrigin": dict(membership_stats),
+        "exclusivePrimaryOrigin": dict(exclusive_origin),
+        "tierPiecesExpected": len(tier_expected),
+        "tierPiecesPresent": len(tier_present & tier_expected),
+        "tierPiecesMissing": sorted(tier_expected - tier_present),
+        "junkFilter": junk,
+        "wowheadListIds": len(wowhead_list_ids),
+    }
+
+    payload = {
+        "spec": "ret",
+        "maxPhase": max_phase,
+        "carryoverPolicy": "union",
+        "generatedBy": "scripts/assemble_universe.py",
+        "d7Note": (
+            "D7 eligibility implemented in assemble_universe.py; "
+            "generate_pool.ret_equippable() remains plate-only."
+        ),
+        "entries": entries,
+    }
+    return payload, report
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--max-phase", type=int, required=True, choices=[2, 3, 4, 5])
+    ap.add_argument(
+        "--out",
+        type=Path,
+        help="Output path (default data/universes/ret-p{N}.json)",
+    )
+    ap.add_argument(
+        "--report",
+        type=Path,
+        help="Optional JSON measurement sidecar",
+    )
+    args = ap.parse_args()
+
+    out_path = args.out or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.json"
+    payload, report = assemble(args.max_phase)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+    report_path = args.report or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.report.json"
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+    print(f"wrote {out_path.relative_to(ROOT)} — {len(payload['entries'])} entries")
+    print(f"wrote {report_path.relative_to(ROOT)}")
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
