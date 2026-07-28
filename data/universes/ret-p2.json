@@ -20,7 +20,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 68.49
+      "curationHint": 68.49
     },
     {
       "itemId": 28529,
@@ -37,7 +37,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 60.4
+      "curationHint": 60.4
     },
     {
       "itemId": 30098,
@@ -54,7 +54,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 50.25
+      "curationHint": 50.25
     },
     {
       "itemId": 29994,
@@ -71,7 +71,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 48.88
+      "curationHint": 48.88
     },
     {
       "itemId": 28777,
@@ -88,7 +88,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 41.44
+      "curationHint": 41.44
     },
     {
       "itemId": 24259,
@@ -108,7 +108,7 @@
           "profession": "Tailoring"
         }
       ],
-      "ep": 39.03
+      "curationHint": 39.03
     },
     {
       "itemId": 28764,
@@ -125,7 +125,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 28.7
+      "curationHint": 28.7
     },
     {
       "itemId": 29992,
@@ -142,7 +142,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 7.48
+      "curationHint": 7.48
     },
     {
       "itemId": 28570,
@@ -159,7 +159,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 6.12
+      "curationHint": 6.12
     },
     {
       "itemId": 28766,
@@ -176,7 +176,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 5.1
+      "curationHint": 5.1
     },
     {
       "itemId": 28797,
@@ -193,7 +193,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 4.76
+      "curationHint": 4.76
     },
     {
       "itemId": 29989,
@@ -210,7 +210,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 4.42
+      "curationHint": 4.42
     },
     {
       "itemId": 28765,
@@ -227,7 +227,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 3.06
+      "curationHint": 3.06
     },
     {
       "itemId": 28582,
@@ -244,7 +244,7 @@
           "boss": "The Big Bad Wolf"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28653,
@@ -261,7 +261,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 28660,
@@ -278,7 +278,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 29925,
@@ -295,7 +295,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30642,
@@ -316,7 +316,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30102,
@@ -333,7 +333,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 157.75
+      "curationHint": 157.75
     },
     {
       "itemId": 28485,
@@ -353,7 +353,7 @@
           "profession": "Blacksmithing"
         }
       ],
-      "ep": 125.32
+      "curationHint": 125.32
     },
     {
       "itemId": 30101,
@@ -370,7 +370,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 123.49
+      "curationHint": 123.49
     },
     {
       "itemId": 30129,
@@ -393,7 +393,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 121.62
+      "curationHint": 121.62
     },
     {
       "itemId": 28601,
@@ -410,7 +410,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 111.95
+      "curationHint": 111.95
     },
     {
       "itemId": 30054,
@@ -427,7 +427,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 73.86
+      "curationHint": 73.86
     },
     {
       "itemId": 29071,
@@ -445,7 +445,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 61.25
+      "curationHint": 61.25
     },
     {
       "itemId": 28599,
@@ -462,7 +462,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 51.28
+      "curationHint": 51.28
     },
     {
       "itemId": 30075,
@@ -479,7 +479,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 6.29
+      "curationHint": 6.29
     },
     {
       "itemId": 28662,
@@ -496,7 +496,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 5.1
+      "curationHint": 5.1
     },
     {
       "itemId": 28735,
@@ -513,7 +513,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 4.93
+      "curationHint": 4.93
     },
     {
       "itemId": 29921,
@@ -530,7 +530,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 4.59
+      "curationHint": 4.59
     },
     {
       "itemId": 28600,
@@ -547,7 +547,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 4.42
+      "curationHint": 4.42
     },
     {
       "itemId": 30065,
@@ -564,7 +564,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 3.06
+      "curationHint": 3.06
     },
     {
       "itemId": 28597,
@@ -581,7 +581,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 28746,
@@ -602,7 +602,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 69.99
+      "curationHint": 69.99
     },
     {
       "itemId": 30081,
@@ -619,7 +619,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 67.87
+      "curationHint": 67.87
     },
     {
       "itemId": 28545,
@@ -636,7 +636,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 67.74
+      "curationHint": 67.74
     },
     {
       "itemId": 30060,
@@ -653,7 +653,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 55.28
+      "curationHint": 55.28
     },
     {
       "itemId": 30674,
@@ -674,7 +674,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 55.0
+      "curationHint": 55.0
     },
     {
       "itemId": 28669,
@@ -691,7 +691,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 52.1
+      "curationHint": 52.1
     },
     {
       "itemId": 29951,
@@ -708,7 +708,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 51.81
+      "curationHint": 51.81
     },
     {
       "itemId": 30104,
@@ -725,7 +725,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 51.81
+      "curationHint": 51.81
     },
     {
       "itemId": 28608,
@@ -742,7 +742,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 48.0
+      "curationHint": 48.0
     },
     {
       "itemId": 28610,
@@ -759,7 +759,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 36.1
+      "curationHint": 36.1
     },
     {
       "itemId": 28747,
@@ -780,7 +780,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 18.0
+      "curationHint": 18.0
     },
     {
       "itemId": 28810,
@@ -797,7 +797,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 6.63
+      "curationHint": 6.63
     },
     {
       "itemId": 30027,
@@ -818,7 +818,7 @@
           "zone": "Serpentshrine Cavern"
         }
       ],
-      "ep": 5.1
+      "curationHint": 5.1
     },
     {
       "itemId": 30092,
@@ -835,7 +835,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 28569,
@@ -852,7 +852,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 3.23
+      "curationHint": 3.23
     },
     {
       "itemId": 28752,
@@ -873,7 +873,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 3.23
+      "curationHint": 3.23
     },
     {
       "itemId": 30066,
@@ -890,7 +890,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 2.89
+      "curationHint": 2.89
     },
     {
       "itemId": 30641,
@@ -911,7 +911,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30681,
@@ -928,7 +928,7 @@
           "boss": "Shadikith the Glider"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30682,
@@ -945,7 +945,7 @@
           "boss": "Shadikith the Glider"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30683,
@@ -962,7 +962,7 @@
           "boss": "Shadikith the Glider"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 32267,
@@ -979,7 +979,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 29997,
@@ -996,7 +996,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 83.22
+      "curationHint": 83.22
     },
     {
       "itemId": 30052,
@@ -1013,7 +1013,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 79.35
+      "curationHint": 79.35
     },
     {
       "itemId": 28757,
@@ -1030,7 +1030,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 76.6
+      "curationHint": 76.6
     },
     {
       "itemId": 28649,
@@ -1047,7 +1047,7 @@
           "boss": "The Curator"
         }
       ],
-      "ep": 70.1
+      "curationHint": 70.1
     },
     {
       "itemId": 30061,
@@ -1064,7 +1064,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 47.75
+      "curationHint": 47.75
     },
     {
       "itemId": 28730,
@@ -1081,7 +1081,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 42.94
+      "curationHint": 42.94
     },
     {
       "itemId": 33055,
@@ -1098,7 +1098,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 20.5
+      "curationHint": 20.5
     },
     {
       "itemId": 29922,
@@ -1115,7 +1115,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 6.29
+      "curationHint": 6.29
     },
     {
       "itemId": 30109,
@@ -1132,7 +1132,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 6.29
+      "curationHint": 6.29
     },
     {
       "itemId": 28753,
@@ -1153,7 +1153,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 5.44
+      "curationHint": 5.44
     },
     {
       "itemId": 28510,
@@ -1170,7 +1170,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 4.93
+      "curationHint": 4.93
     },
     {
       "itemId": 30110,
@@ -1187,7 +1187,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 33054,
@@ -1204,7 +1204,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 28763,
@@ -1221,7 +1221,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 3.91
+      "curationHint": 3.91
     },
     {
       "itemId": 29920,
@@ -1238,7 +1238,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 3.23
+      "curationHint": 3.23
     },
     {
       "itemId": 33058,
@@ -1255,7 +1255,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28661,
@@ -1272,7 +1272,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 2.55
+      "curationHint": 2.55
     },
     {
       "itemId": 28675,
@@ -1289,7 +1289,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30028,
@@ -1310,7 +1310,7 @@
           "zone": "Tempest Keep"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30083,
@@ -1327,7 +1327,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30667,
@@ -1348,7 +1348,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 29947,
@@ -1365,7 +1365,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 90.33
+      "curationHint": 90.33
     },
     {
       "itemId": 30644,
@@ -1391,7 +1391,7 @@
           "boss": "Trash Mobs"
         }
       ],
-      "ep": 78.45
+      "curationHint": 78.45
     },
     {
       "itemId": 30130,
@@ -1414,7 +1414,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 62.75
+      "curationHint": 62.75
     },
     {
       "itemId": 29072,
@@ -1432,7 +1432,7 @@
           "boss": "The Curator"
         }
       ],
-      "ep": 56.48
+      "curationHint": 56.48
     },
     {
       "itemId": 28824,
@@ -1449,7 +1449,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 53.71
+      "curationHint": 53.71
     },
     {
       "itemId": 28776,
@@ -1466,7 +1466,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 49.54
+      "curationHint": 49.54
     },
     {
       "itemId": 28506,
@@ -1483,7 +1483,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 43.47
+      "curationHint": 43.47
     },
     {
       "itemId": 28827,
@@ -1500,7 +1500,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 37.68
+      "curationHint": 37.68
     },
     {
       "itemId": 28519,
@@ -1517,7 +1517,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 34.41
+      "curationHint": 34.41
     },
     {
       "itemId": 30112,
@@ -1534,7 +1534,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 4.59
+      "curationHint": 4.59
     },
     {
       "itemId": 29976,
@@ -1551,7 +1551,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 30029,
@@ -1572,7 +1572,7 @@
           "zone": "Tempest Keep"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 28521,
@@ -1589,7 +1589,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28505,
@@ -1606,7 +1606,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 3.57
+      "curationHint": 3.57
     },
     {
       "itemId": 28520,
@@ -1623,7 +1623,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 3.57
+      "curationHint": 3.57
     },
     {
       "itemId": 28518,
@@ -1640,7 +1640,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 29998,
@@ -1657,7 +1657,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 29983,
@@ -1674,7 +1674,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 144.38
+      "curationHint": 144.38
     },
     {
       "itemId": 28796,
@@ -1691,7 +1691,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 133.43
+      "curationHint": 133.43
     },
     {
       "itemId": 28732,
@@ -1708,7 +1708,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 118.1
+      "curationHint": 118.1
     },
     {
       "itemId": 32461,
@@ -1728,7 +1728,7 @@
           "profession": "Engineering"
         }
       ],
-      "ep": 105.21
+      "curationHint": 105.21
     },
     {
       "itemId": 32087,
@@ -1744,7 +1744,7 @@
           "cost": 50
         }
       ],
-      "ep": 84.64
+      "curationHint": 84.64
     },
     {
       "itemId": 28775,
@@ -1761,7 +1761,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 82.25
+      "curationHint": 82.25
     },
     {
       "itemId": 30131,
@@ -1784,7 +1784,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 74.0
+      "curationHint": 74.0
     },
     {
       "itemId": 28801,
@@ -1801,7 +1801,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 67.6
+      "curationHint": 67.6
     },
     {
       "itemId": 32041,
@@ -1817,7 +1817,7 @@
           "via": "arena"
         }
       ],
-      "ep": 64.86
+      "curationHint": 64.86
     },
     {
       "itemId": 29073,
@@ -1840,7 +1840,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 59.5
+      "curationHint": 59.5
     },
     {
       "itemId": 28671,
@@ -1857,7 +1857,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 52.42
+      "curationHint": 52.42
     },
     {
       "itemId": 28593,
@@ -1884,7 +1884,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 31.0
+      "curationHint": 31.0
     },
     {
       "itemId": 28583,
@@ -1901,7 +1901,7 @@
           "boss": "The Big Bad Wolf"
         }
       ],
-      "ep": 7.99
+      "curationHint": 7.99
     },
     {
       "itemId": 30048,
@@ -1918,7 +1918,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 5.78
+      "curationHint": 5.78
     },
     {
       "itemId": 28803,
@@ -1935,7 +1935,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 5.27
+      "curationHint": 5.27
     },
     {
       "itemId": 30132,
@@ -1958,7 +1958,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 124.4
+      "curationHint": 124.4
     },
     {
       "itemId": 29074,
@@ -1981,7 +1981,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 120.45
+      "curationHint": 120.45
     },
     {
       "itemId": 28741,
@@ -1998,7 +1998,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 110.44
+      "curationHint": 110.44
     },
     {
       "itemId": 29995,
@@ -2015,7 +2015,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 99.96
+      "curationHint": 99.96
     },
     {
       "itemId": 29950,
@@ -2032,7 +2032,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 72.87
+      "curationHint": 72.87
     },
     {
       "itemId": 29985,
@@ -2049,7 +2049,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 63.83
+      "curationHint": 63.83
     },
     {
       "itemId": 28740,
@@ -2066,7 +2066,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 44.52
+      "curationHint": 44.52
     },
     {
       "itemId": 28621,
@@ -2083,7 +2083,7 @@
           "boss": "The Curator"
         }
       ],
-      "ep": 24.0
+      "curationHint": 24.0
     },
     {
       "itemId": 29991,
@@ -2100,7 +2100,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 6.12
+      "curationHint": 6.12
     },
     {
       "itemId": 28751,
@@ -2121,7 +2121,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 5.1
+      "curationHint": 5.1
     },
     {
       "itemId": 28591,
@@ -2148,7 +2148,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 4.59
+      "curationHint": 4.59
     },
     {
       "itemId": 28748,
@@ -2169,7 +2169,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 29381,
@@ -2185,7 +2185,7 @@
           "cost": 25
         }
       ],
-      "ep": 70.92
+      "curationHint": 70.92
     },
     {
       "itemId": 28509,
@@ -2202,7 +2202,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 68.77
+      "curationHint": 68.77
     },
     {
       "itemId": 30022,
@@ -2228,7 +2228,7 @@
           "boss": "Trash Mobs"
         }
       ],
-      "ep": 49.71
+      "curationHint": 49.71
     },
     {
       "itemId": 30017,
@@ -2245,7 +2245,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 48.95
+      "curationHint": 48.95
     },
     {
       "itemId": 28745,
@@ -2266,7 +2266,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 44.5
+      "curationHint": 44.5
     },
     {
       "itemId": 30059,
@@ -2283,7 +2283,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 43.95
+      "curationHint": 43.95
     },
     {
       "itemId": 30099,
@@ -2300,7 +2300,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 38.7
+      "curationHint": 38.7
     },
     {
       "itemId": 28674,
@@ -2317,7 +2317,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 34.61
+      "curationHint": 34.61
     },
     {
       "itemId": 30008,
@@ -2334,7 +2334,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 6.12
+      "curationHint": 6.12
     },
     {
       "itemId": 28762,
@@ -2351,7 +2351,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 4.76
+      "curationHint": 4.76
     },
     {
       "itemId": 28530,
@@ -2368,7 +2368,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 4.42
+      "curationHint": 4.42
     },
     {
       "itemId": 28609,
@@ -2385,7 +2385,7 @@
           "boss": "Nightbane"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28731,
@@ -2402,7 +2402,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28822,
@@ -2419,7 +2419,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28516,
@@ -2436,7 +2436,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30666,
@@ -2457,7 +2457,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 28592,
@@ -2484,7 +2484,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30063,
@@ -2501,7 +2501,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30055,
@@ -2518,7 +2518,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 83.07
+      "curationHint": 83.07
     },
     {
       "itemId": 29075,
@@ -2536,7 +2536,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 80.15
+      "curationHint": 80.15
     },
     {
       "itemId": 30085,
@@ -2553,7 +2553,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 68.15
+      "curationHint": 68.15
     },
     {
       "itemId": 28755,
@@ -2574,7 +2574,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 67.9
+      "curationHint": 67.9
     },
     {
       "itemId": 30053,
@@ -2591,7 +2591,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 60.33
+      "curationHint": 60.33
     },
     {
       "itemId": 30133,
@@ -2614,7 +2614,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 57.32
+      "curationHint": 57.32
     },
     {
       "itemId": 28589,
@@ -2641,7 +2641,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 36.86
+      "curationHint": 36.86
     },
     {
       "itemId": 28743,
@@ -2658,7 +2658,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 21.0
+      "curationHint": 21.0
     },
     {
       "itemId": 30111,
@@ -2675,7 +2675,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 5.78
+      "curationHint": 5.78
     },
     {
       "itemId": 30084,
@@ -2692,7 +2692,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 30097,
@@ -2709,7 +2709,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 28631,
@@ -2726,7 +2726,7 @@
           "boss": "The Curator"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28647,
@@ -2743,7 +2743,7 @@
           "boss": "The Curator"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28666,
@@ -2760,7 +2760,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 3.23
+      "curationHint": 3.23
     },
     {
       "itemId": 28579,
@@ -2777,7 +2777,7 @@
           "boss": "Romulo and Julianne"
         }
       ],
-      "ep": 75.25
+      "curationHint": 75.25
     },
     {
       "itemId": 30627,
@@ -2794,7 +2794,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 50.76
+      "curationHint": 50.76
     },
     {
       "itemId": 30450,
@@ -2811,7 +2811,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 45.15
+      "curationHint": 45.15
     },
     {
       "itemId": 29383,
@@ -2827,7 +2827,7 @@
           "cost": 41
         }
       ],
-      "ep": 29.52
+      "curationHint": 29.52
     },
     {
       "itemId": 28830,
@@ -2844,7 +2844,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 16.4
+      "curationHint": 16.4
     },
     {
       "itemId": 28789,
@@ -2861,7 +2861,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 9.18
+      "curationHint": 9.18
     },
     {
       "itemId": 30449,
@@ -2878,7 +2878,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 8.16
+      "curationHint": 8.16
     },
     {
       "itemId": 28590,
@@ -2905,7 +2905,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 30665,
@@ -2922,7 +2922,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28823,
@@ -2939,7 +2939,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 2.55
+      "curationHint": 2.55
     },
     {
       "itemId": 28528,
@@ -2956,7 +2956,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 28727,
@@ -2973,7 +2973,7 @@
           "boss": "Shade of Aran"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 28785,
@@ -2990,7 +2990,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30446,
@@ -3007,7 +3007,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30447,
@@ -3024,7 +3024,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30448,
@@ -3041,7 +3041,7 @@
           "boss": "Al'ar"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30619,
@@ -3058,7 +3058,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30620,
@@ -3079,7 +3079,7 @@
           "zone": "Serpentshrine Cavern"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30621,
@@ -3096,7 +3096,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30626,
@@ -3113,7 +3113,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30629,
@@ -3130,7 +3130,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30663,
@@ -3147,7 +3147,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30664,
@@ -3164,7 +3164,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30720,
@@ -3181,7 +3181,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30106,
@@ -3198,7 +3198,7 @@
           "boss": "Lady Vashj"
         }
       ],
-      "ep": 105.59
+      "curationHint": 105.59
     },
     {
       "itemId": 30040,
@@ -3218,7 +3218,7 @@
           "profession": "Leatherworking"
         }
       ],
-      "ep": 89.76
+      "curationHint": 89.76
     },
     {
       "itemId": 30032,
@@ -3238,7 +3238,7 @@
           "profession": "Blacksmithing"
         }
       ],
-      "ep": 89.58
+      "curationHint": 89.58
     },
     {
       "itemId": 28656,
@@ -3255,7 +3255,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 74.98
+      "curationHint": 74.98
     },
     {
       "itemId": 30068,
@@ -3272,7 +3272,7 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "ep": 60.41
+      "curationHint": 60.41
     },
     {
       "itemId": 28779,
@@ -3289,7 +3289,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 55.56
+      "curationHint": 55.56
     },
     {
       "itemId": 30046,
@@ -3309,7 +3309,7 @@
           "profession": "Leatherworking"
         }
       ],
-      "ep": 52.9
+      "curationHint": 52.9
     },
     {
       "itemId": 28828,
@@ -3326,7 +3326,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 48.77
+      "curationHint": 48.77
     },
     {
       "itemId": 28750,
@@ -3347,7 +3347,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 37.28
+      "curationHint": 37.28
     },
     {
       "itemId": 28778,
@@ -3364,7 +3364,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "ep": 34.21
+      "curationHint": 34.21
     },
     {
       "itemId": 30643,
@@ -3385,7 +3385,7 @@
           "zone": "Karazhan"
         }
       ],
-      "ep": 17.22
+      "curationHint": 17.22
     },
     {
       "itemId": 28566,
@@ -3402,7 +3402,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 16.0
+      "curationHint": 16.0
     },
     {
       "itemId": 29965,
@@ -3419,7 +3419,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 4.42
+      "curationHint": 4.42
     },
     {
       "itemId": 29984,
@@ -3436,7 +3436,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 30030,
@@ -3457,7 +3457,7 @@
           "zone": "Tempest Keep"
         }
       ],
-      "ep": 4.25
+      "curationHint": 4.25
     },
     {
       "itemId": 28655,
@@ -3474,7 +3474,7 @@
           "boss": "Terestian Illhoof"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28733,
@@ -3491,7 +3491,7 @@
           "boss": "Netherspite"
         }
       ],
-      "ep": 3.74
+      "curationHint": 3.74
     },
     {
       "itemId": 28567,
@@ -3508,7 +3508,7 @@
           "boss": "Moroes"
         }
       ],
-      "ep": 3.4
+      "curationHint": 3.4
     },
     {
       "itemId": 30096,
@@ -3525,7 +3525,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30676,
@@ -3542,7 +3542,7 @@
           "boss": "Hyakiss the Lurker"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30677,
@@ -3559,7 +3559,7 @@
           "boss": "Hyakiss the Lurker"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30678,
@@ -3576,7 +3576,7 @@
           "boss": "Hyakiss the Lurker"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 31984,
@@ -3592,7 +3592,7 @@
           "via": "arena"
         }
       ],
-      "ep": 113.04
+      "curationHint": 113.04
     },
     {
       "itemId": 28773,
@@ -3609,7 +3609,7 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "ep": 81.25
+      "curationHint": 81.25
     },
     {
       "itemId": 29993,
@@ -3626,7 +3626,7 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "ep": 73.59
+      "curationHint": 73.59
     },
     {
       "itemId": 28587,
@@ -3643,7 +3643,7 @@
           "boss": "The Wizard of Oz"
         }
       ],
-      "ep": 62.8
+      "curationHint": 62.8
     },
     {
       "itemId": 28573,
@@ -3660,7 +3660,7 @@
           "boss": "Romulo and Julianne"
         }
       ],
-      "ep": 52.0
+      "curationHint": 52.0
     },
     {
       "itemId": 28794,
@@ -3677,7 +3677,7 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "ep": 50.84
+      "curationHint": 50.84
     },
     {
       "itemId": 30090,
@@ -3694,7 +3694,7 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "ep": 50.0
+      "curationHint": 50.0
     },
     {
       "itemId": 28800,
@@ -3711,7 +3711,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 44.0
+      "curationHint": 44.0
     },
     {
       "itemId": 30057,
@@ -3728,7 +3728,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 80.03
+      "curationHint": 80.03
     },
     {
       "itemId": 30026,
@@ -3754,7 +3754,7 @@
           "boss": "Trash Mobs"
         }
       ],
-      "ep": 45.52
+      "curationHint": 45.52
     },
     {
       "itemId": 23537,
@@ -3774,7 +3774,7 @@
           "profession": "Blacksmithing"
         }
       ],
-      "ep": 42.94
+      "curationHint": 42.94
     },
     {
       "itemId": 29966,
@@ -3791,7 +3791,7 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "ep": 39.32
+      "curationHint": 39.32
     },
     {
       "itemId": 30091,
@@ -3808,7 +3808,7 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "ep": 38.98
+      "curationHint": 38.98
     },
     {
       "itemId": 28795,
@@ -3825,7 +3825,7 @@
           "boss": "High King Maulgar"
         }
       ],
-      "ep": 38.48
+      "curationHint": 38.48
     },
     {
       "itemId": 28514,
@@ -3842,7 +3842,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 37.44
+      "curationHint": 37.44
     },
     {
       "itemId": 28454,
@@ -3859,7 +3859,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 33.79
+      "curationHint": 33.79
     },
     {
       "itemId": 28453,
@@ -3876,7 +3876,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 4.42
+      "curationHint": 4.42
     },
     {
       "itemId": 30062,
@@ -3893,7 +3893,7 @@
           "boss": "The Lurker Below"
         }
       ],
-      "ep": 3.91
+      "curationHint": 3.91
     },
     {
       "itemId": 30047,
@@ -3910,7 +3910,7 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "ep": 3.57
+      "curationHint": 3.57
     },
     {
       "itemId": 28503,
@@ -3927,7 +3927,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28512,
@@ -3944,7 +3944,7 @@
           "boss": "Maiden of Virtue"
         }
       ],
-      "ep": 2.72
+      "curationHint": 2.72
     },
     {
       "itemId": 28502,
@@ -3961,7 +3961,7 @@
           "boss": "Attumen the Huntsman"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30685,
@@ -3978,7 +3978,7 @@
           "boss": "Rokad the Ravager"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30686,
@@ -3995,7 +3995,7 @@
           "boss": "Rokad the Ravager"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 30687,
@@ -4012,7 +4012,7 @@
           "boss": "Rokad the Ravager"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     },
     {
       "itemId": 32515,
@@ -4029,7 +4029,7 @@
           "boss": "Void Reaver"
         }
       ],
-      "ep": 0.0
+      "curationHint": 0.0
     }
   ]
 }

@@ -14,18 +14,24 @@ import {
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
-import type { PoolEntry } from "./pool.js";
+import {
+  filterByZone,
+  poolFromUniverse,
+  zonesInPool,
+  type PoolEntry,
+  type UniverseEntry,
+} from "./pool.js";
 import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
-import type { Region } from "./types.js";
+import type { ContentPhase, Region } from "./types.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -36,13 +42,17 @@ function parseArgs(argv: string[]): {
   realm: string;
   character: string;
   offline: boolean;
+  maxPhase: ContentPhase;
+  raid?: string;
 } {
   const out: {
     region?: Region;
     realm?: string;
     character?: string;
     offline: boolean;
-  } = { offline: false };
+    maxPhase: ContentPhase;
+    raid?: string;
+  } = { offline: false, maxPhase: 2 };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -66,6 +76,16 @@ function parseArgs(argv: string[]): {
       i++;
       continue;
     }
+    if (arg === "--max-phase" && next) {
+      out.maxPhase = Number(next) as ContentPhase;
+      i++;
+      continue;
+    }
+    if (arg === "--raid" && next) {
+      out.raid = next;
+      i++;
+      continue;
+    }
     usage();
   }
 
@@ -75,11 +95,28 @@ function parseArgs(argv: string[]): {
     realm: out.realm,
     character: out.character,
     offline: out.offline,
+    maxPhase: out.maxPhase,
+    raid: out.raid,
   };
 }
 
 function loadJson<T>(rel: string): T {
   return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
+}
+
+function loadUniversePool(maxPhase: ContentPhase): PoolEntry[] {
+  const rel = `data/universes/ret-p${maxPhase}.json`;
+  const path = join(root, rel);
+  if (!existsSync(path)) {
+    console.error(`missing universe file ${rel}`);
+    console.error(
+      "generate: python scripts/assemble_universe.py --max-phase N"
+    );
+    process.exit(2);
+    throw new Error("unreachable");
+  }
+  const data = loadJson<{ entries: UniverseEntry[] }>(rel);
+  return poolFromUniverse(data);
 }
 
 function resolveWowsimcli(): string {
@@ -105,7 +142,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       name: args.character,
     },
     spec: "ret",
-    maxPhase: 2,
+    maxPhase: args.maxPhase,
   };
 
   const skeleton = loadJson<RaidSimRequest>(
@@ -114,8 +151,19 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   const epWeights = loadJson<{ weights: Record<string, number> }>(
     "data/presets/ret/p2.ep-weights.json"
   ).weights;
-  const poolFile = loadJson<{ entries: PoolEntry[] }>("data/pools/ret.json");
-  const pool = poolFile.entries;
+  const pool = loadUniversePool(args.maxPhase);
+
+  if (args.raid) {
+    const known = zonesInPool(pool);
+    if (!known.includes(args.raid)) {
+      console.error(`unknown raid zone: ${args.raid}`);
+      console.error("known zones:");
+      for (const zone of known) {
+        console.error(`  ${zone}`);
+      }
+      return 2;
+    }
+  }
 
   const isSlamaltman =
     args.region === SLAMALTMAN_REF.region &&
@@ -136,8 +184,9 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   }
   const sim: SimRunner = new CliSimRunner(binary);
 
+  const raidNote = args.raid ? ` raid=${args.raid}` : "";
   console.log(
-    `rank ${args.character}@${args.realm}-${args.region} (offline) cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}% pool=${pool.length}`
+    `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
   );
 
   try {
@@ -158,6 +207,10 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         }
       }
     );
+    const items = args.raid
+      ? filterByZone(ranking.items, args.raid)
+      : ranking.items;
+
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
@@ -171,7 +224,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         console.log(`  - ${s.field}: ${s.detail}`);
       }
     }
-    for (const item of ranking.items) {
+    for (const item of items) {
       const mark = item.belowCutoff ? "  (below cutoff)" : "";
       const rankLabel = item.rank == null ? "-" : String(item.rank);
       console.log(

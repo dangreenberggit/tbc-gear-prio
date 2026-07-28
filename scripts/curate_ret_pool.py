@@ -158,7 +158,7 @@ def main() -> int:
                 "name": e["name"],
                 "slot": e["slot"],
                 "phase": e["phase"],
-                "ep": e["ep"],
+                "curationHint": e.get("curationHint", e.get("ep")),
                 "source": src,
             }
         )

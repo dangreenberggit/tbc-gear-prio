@@ -3,23 +3,37 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { gemsForPhase } from "../src/gems.js";
-import { filterPoolByPhase, type PoolEntry } from "../src/pool.js";
+import {
+  filterPoolByPhase,
+  poolFromUniverse,
+  type PoolEntry,
+} from "../src/pool.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const curated = JSON.parse(
   readFileSync(join(root, "data/pools/ret.json"), "utf8")
-) as { entries: PoolEntry[] };
+) as { entries: Array<PoolEntry & { ep?: number }> };
+
+const curatedEntries: PoolEntry[] = curated.entries.map((e) => ({
+  itemId: e.itemId,
+  name: e.name,
+  slot: e.slot,
+  phase: e.phase,
+  source: e.source,
+  curationHint: e.curationHint ?? e.ep,
+  bisTags: e.bisTags,
+}));
 
 describe("data/pools/ret.json", () => {
   it("ships no null sources and stays dense (~12/slot)", () => {
-    expect(curated.entries.length).toBeGreaterThanOrEqual(112); // 14×8
-    for (const e of curated.entries) {
+    expect(curatedEntries.length).toBeGreaterThanOrEqual(112); // 14×8
+    for (const e of curatedEntries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();
     }
     const bySlot = new Map<string, number>();
-    for (const e of curated.entries) {
+    for (const e of curatedEntries) {
       bySlot.set(e.slot, (bySlot.get(e.slot) ?? 0) + 1);
     }
     for (const [slot, n] of bySlot) {
@@ -30,8 +44,8 @@ describe("data/pools/ret.json", () => {
 
 describe("maxPhase filters pool and gem palette together", () => {
   it("raises maxPhase to admit higher-phase pool rows and gems", () => {
-    const at1 = filterPoolByPhase(curated.entries, 1);
-    const at2 = filterPoolByPhase(curated.entries, 2);
+    const at1 = filterPoolByPhase(curatedEntries, 1);
+    const at2 = filterPoolByPhase(curatedEntries, 2);
     expect(at2.length).toBeGreaterThan(at1.length);
     expect(at1.every((e) => e.phase <= 1)).toBe(true);
     expect(at2.every((e) => e.phase <= 2)).toBe(true);

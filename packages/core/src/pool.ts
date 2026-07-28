@@ -4,7 +4,6 @@
  */
 
 import type { ItemSlot } from "./items.js";
-import type { ContentPhase } from "./types.js";
 
 export type ItemSource =
   | { kind: "raid"; zone: string; boss?: string }
@@ -22,32 +21,77 @@ export type PoolEntry = {
   slot: ItemSlot;
   phase: number;
   source: ItemSource;
+  /**
+   * Unvalidated ordering hint for curation scripts only — not a measured
+   * quantity and not used by rankUpgrades. Libram values are hand-typed.
+   */
+  curationHint?: number;
+  bisTags?: Array<"BiS" | "Alt" | "Realistic">;
+};
+
+/** Row shape from `data/universes/ret-p*.json` before normalization. */
+export type UniverseEntry = {
+  itemId: number;
+  name: string;
+  slot: ItemSlot;
+  phase: number;
+  sources: ItemSource[];
+  curationHint?: number;
+  /** @deprecated JSON key from pre-rename generators; mapped to curationHint */
   ep?: number;
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
 };
 
+export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
+  const source = entry.sources[0];
+  if (!source) {
+    throw new Error(`universe row ${entry.itemId} has no sources`);
+  }
+  return {
+    itemId: entry.itemId,
+    name: entry.name,
+    slot: entry.slot,
+    phase: entry.phase,
+    source,
+    curationHint: entry.curationHint ?? entry.ep,
+    bisTags: entry.bisTags,
+  };
+}
+
+export function poolFromUniverse(data: {
+  entries: readonly UniverseEntry[];
+}): PoolEntry[] {
+  return data.entries.map(poolEntryFromUniverse);
+}
+
 /** Inclusive maxPhase filter (PLAN.md §4 / R2). */
 export function filterPoolByPhase(
   pool: readonly PoolEntry[],
-  maxPhase: ContentPhase
+  maxPhase: number
 ): PoolEntry[] {
   return pool.filter((e) => e.phase <= maxPhase);
 }
 
-/**
- * Rank-time EP prefilter (PLAN.md §8.3.3). Sim the top ~80 by pool EP.
- * Uses the generator's reference EP today; player-aware hit/expertise clipping
- * needs item stats on the index (not yet shipped) — `fullPool` bypasses this.
- */
-export const EP_PREFILTER_LIMIT = 80;
+export function filterByZone<T extends { source: ItemSource }>(
+  entries: readonly T[],
+  zone: string
+): T[] {
+  return entries.filter((e) => "zone" in e.source && e.source.zone === zone);
+}
 
-export function prefilterPool(
+export function filterPoolByZone(
   pool: readonly PoolEntry[],
-  opts: { fullPool?: boolean; limit?: number } = {}
+  zone: string
 ): PoolEntry[] {
-  const limit = opts.limit ?? EP_PREFILTER_LIMIT;
-  if (opts.fullPool || pool.length <= limit) return [...pool];
-  return [...pool].sort((a, b) => (b.ep ?? 0) - (a.ep ?? 0)).slice(0, limit);
+  return filterByZone(pool, zone);
+}
+
+export function zonesInPool(pool: readonly PoolEntry[]): string[] {
+  const zones = new Set<string>();
+  for (const e of pool) {
+    if ("zone" in e.source) zones.add(e.source.zone);
+  }
+  return [...zones].sort();
 }
 
 /**

@@ -23,9 +23,9 @@ import {
   type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
+import { isKaelTempLegendary } from "./kael-temp.js";
 import {
   filterPoolByPhase,
-  prefilterPool,
   simSlotsForPoolSlot,
   type ItemSource,
   type PoolEntry,
@@ -51,7 +51,6 @@ export type RankInput = {
   race?: Race;
   iterations?: number;
   seeds?: number[];
-  fullPool?: boolean;
 };
 
 export type Deps = {
@@ -187,9 +186,8 @@ export async function rankUpgrades(
   const equippedIds = new Set(
     equipment.map((s) => s.id).filter((id): id is number => !!id)
   );
-  const candidates = prefilterPool(
-    filterPoolByPhase(deps.pool ?? [], input.maxPhase),
-    input.fullPool ? { fullPool: true } : {}
+  const candidates = filterPoolByPhase(deps.pool ?? [], input.maxPhase).filter(
+    (e) => !isKaelTempLegendary(e.itemId)
   );
 
   const totalSims = 1 + candidates.length;

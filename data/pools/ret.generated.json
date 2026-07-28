@@ -8,1663 +8,1663 @@
       "name": "Cloak of Unforgivable Sin",
       "slot": "back",
       "phase": 5,
-      "ep": 86.46,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Kil'jaeden"
-      }
+      },
+      "curationHint": 86.46
     },
     {
       "itemId": 32323,
       "name": "Shadowmoon Destroyer's Drape",
       "slot": "back",
       "phase": 3,
-      "ep": 84.55,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Teron Gorefiend"
-      }
+      },
+      "curationHint": 84.55
     },
     {
       "itemId": 28672,
       "name": "Drape of the Dark Reavers",
       "slot": "back",
       "phase": 1,
-      "ep": 68.49,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Shade of Aran"
-      }
+      },
+      "curationHint": 68.49
     },
     {
       "itemId": 33590,
       "name": "Cloak of Fiends",
       "slot": "back",
       "phase": 4,
-      "ep": 63.11,
       "source": {
         "kind": "raid",
         "zone": "Zul'Aman"
-      }
+      },
+      "curationHint": 63.11
     },
     {
       "itemId": 27878,
       "name": "Auchenai Death Shroud",
       "slot": "back",
       "phase": 1,
-      "ep": 62.56,
       "source": {
         "kind": "raid",
         "zone": "Auchenai Crypts",
         "boss": "Avatar of the Martyred"
-      }
+      },
+      "curationHint": 62.56
     },
     {
       "itemId": 34708,
       "name": "Cloak of the Coming Night",
       "slot": "back",
       "phase": 5,
-      "ep": 62.44,
       "source": {
         "kind": "raid",
         "zone": "Magisters' Terrace",
         "boss": "Vexallus"
-      }
+      },
+      "curationHint": 62.44
     },
     {
       "itemId": 27892,
       "name": "Cloak of the Inciter",
       "slot": "back",
       "phase": 1,
-      "ep": 60.56,
       "source": {
         "kind": "raid",
         "zone": "Shadow Labyrinth",
         "boss": "Blackheart the Inciter"
-      }
+      },
+      "curationHint": 60.56
     },
     {
       "itemId": 28529,
       "name": "Royal Cloak of Arathi Kings",
       "slot": "back",
       "phase": 1,
-      "ep": 60.4,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Moroes"
-      }
+      },
+      "curationHint": 60.4
     },
     {
       "itemId": 34190,
       "name": "Crimson Paragon's Cover",
       "slot": "back",
       "phase": 5,
-      "ep": 59.92,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Eredar Twins"
-      }
+      },
+      "curationHint": 59.92
     },
     {
       "itemId": 31255,
       "name": "Cloak of the Craft",
       "slot": "back",
       "phase": 1,
-      "ep": 54.9,
-      "source": null
+      "source": null,
+      "curationHint": 54.9
     },
     {
       "itemId": 34010,
       "name": "Pepe's Shroud of Pacification",
       "slot": "back",
       "phase": 3,
-      "ep": 53.75,
       "source": {
         "kind": "raid",
         "zone": "Hyjal Summit"
-      }
+      },
+      "curationHint": 53.75
     },
     {
       "itemId": 28031,
       "name": "Nomad's Woven Cloak",
       "slot": "back",
       "phase": 1,
-      "ep": 52.45,
-      "source": null
+      "source": null,
+      "curationHint": 52.45
     },
     {
       "itemId": 32365,
       "name": "Heartshatter Breastplate",
       "slot": "chest",
       "phase": 3,
-      "ep": 161.38,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Mother Shahraz"
-      }
+      },
+      "curationHint": 161.38
     },
     {
       "itemId": 30102,
       "name": "Krakken-Heart Breastplate",
       "slot": "chest",
       "phase": 2,
-      "ep": 157.75,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Lady Vashj"
-      }
+      },
+      "curationHint": 157.75
     },
     {
       "itemId": 34215,
       "name": "Warharness of Reckless Fury",
       "slot": "chest",
       "phase": 5,
-      "ep": 130.01,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "M'uru"
-      }
+      },
+      "curationHint": 130.01
     },
     {
       "itemId": 35066,
       "name": "Brutal Gladiator's Plate Chestpiece",
       "slot": "chest",
       "phase": 5,
-      "ep": 126.75,
-      "source": null
+      "source": null,
+      "curationHint": 126.75
     },
     {
       "itemId": 30975,
       "name": "Onslaught Breastplate",
       "slot": "chest",
       "phase": 3,
-      "ep": 125.5,
-      "source": null
+      "source": null,
+      "curationHint": 125.5
     },
     {
       "itemId": 28485,
       "name": "Bulwark of the Ancient Kings",
       "slot": "chest",
       "phase": 2,
-      "ep": 125.32,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 125.32
     },
     {
       "itemId": 30990,
       "name": "Lightbringer Breastplate",
       "slot": "chest",
       "phase": 3,
-      "ep": 125.02,
-      "source": null
+      "source": null,
+      "curationHint": 125.02
     },
     {
       "itemId": 30129,
       "name": "Crystalforge Breastplate",
       "slot": "chest",
       "phase": 2,
-      "ep": 121.62,
-      "source": null
+      "source": null,
+      "curationHint": 121.62
     },
     {
       "itemId": 34377,
       "name": "Hard Khorium Battleplate",
       "slot": "chest",
       "phase": 5,
-      "ep": 120.57,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 120.57
     },
     {
       "itemId": 35088,
       "name": "Brutal Gladiator's Scaled Chestpiece",
       "slot": "chest",
       "phase": 5,
-      "ep": 114.12,
-      "source": null
+      "source": null,
+      "curationHint": 114.12
     },
     {
       "itemId": 28484,
       "name": "Bulwark of Kings",
       "slot": "chest",
       "phase": 1,
-      "ep": 112.94,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 112.94
     },
     {
       "itemId": 34942,
       "name": "Breastplate of Ire",
       "slot": "chest",
       "phase": 5,
-      "ep": 111.67,
-      "source": null
+      "source": null,
+      "curationHint": 111.67
     },
     {
       "itemId": 34569,
       "name": "Onslaught Treads",
       "slot": "feet",
       "phase": 5,
-      "ep": 160.57,
-      "source": null
+      "source": null,
+      "curationHint": 160.57
     },
     {
       "itemId": 34561,
       "name": "Lightbringer Boots",
       "slot": "feet",
       "phase": 5,
-      "ep": 145.05,
-      "source": null
+      "source": null,
+      "curationHint": 145.05
     },
     {
       "itemId": 32345,
       "name": "Dreadboots of the Legion",
       "slot": "feet",
       "phase": 3,
-      "ep": 99.8,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Reliquary of the Lost"
-      }
+      },
+      "curationHint": 99.8
     },
     {
       "itemId": 35146,
       "name": "Guardian's Plate Greaves",
       "slot": "feet",
       "phase": 5,
-      "ep": 70.8,
-      "source": null
+      "source": null,
+      "curationHint": 70.8
     },
     {
       "itemId": 30081,
       "name": "Warboots of Obliteration",
       "slot": "feet",
       "phase": 2,
-      "ep": 67.87,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Morogrim Tidewalker"
-      }
+      },
+      "curationHint": 67.87
     },
     {
       "itemId": 35148,
       "name": "Guardian's Scaled Greaves",
       "slot": "feet",
       "phase": 5,
-      "ep": 67.87,
-      "source": null
+      "source": null,
+      "curationHint": 67.87
     },
     {
       "itemId": 27788,
       "name": "Bloodsworn Warboots",
       "slot": "feet",
       "phase": 1,
-      "ep": 67.55,
       "source": {
         "kind": "raid",
         "zone": "The Blood Furnace",
         "boss": "Keli'dan the Breaker"
-      }
+      },
+      "curationHint": 67.55
     },
     {
       "itemId": 33812,
       "name": "Vindicator's Plate Greaves",
       "slot": "feet",
       "phase": 3,
-      "ep": 61.95,
-      "source": null
+      "source": null,
+      "curationHint": 61.95
     },
     {
       "itemId": 33911,
       "name": "Vindicator's Scaled Greaves",
       "slot": "feet",
       "phase": 3,
-      "ep": 60.79,
-      "source": null
+      "source": null,
+      "curationHint": 60.79
     },
     {
       "itemId": 19387,
       "name": "Chromatic Boots",
       "slot": "feet",
       "phase": 1,
-      "ep": 56.5,
       "source": {
         "kind": "raid",
         "zone": "Blackwing Lair",
         "boss": "Chromaggus"
-      }
+      },
+      "curationHint": 56.5
     },
     {
       "itemId": 34568,
       "name": "Onslaught Boots",
       "slot": "feet",
       "phase": 5,
-      "ep": 55.64,
-      "source": null
+      "source": null,
+      "curationHint": 55.64
     },
     {
       "itemId": 32793,
       "name": "Veteran's Plate Greaves",
       "slot": "feet",
       "phase": 2,
-      "ep": 54.87,
-      "source": null
+      "source": null,
+      "curationHint": 54.87
     },
     {
       "itemId": 32497,
       "name": "Stormrage Signet Ring",
       "slot": "finger",
       "phase": 3,
-      "ep": 104.16,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Illidan Stormrage"
-      }
+      },
+      "curationHint": 104.16
     },
     {
       "itemId": 29997,
       "name": "Band of the Ranger-General",
       "slot": "finger",
       "phase": 2,
-      "ep": 83.22,
       "source": {
         "kind": "raid",
         "zone": "Tempest Keep",
         "boss": "Kael'thas Sunstrider"
-      }
+      },
+      "curationHint": 83.22
     },
     {
       "itemId": 32266,
       "name": "Ring of Deceitful Intent",
       "slot": "finger",
       "phase": 3,
-      "ep": 80.38,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Shade of Akama"
-      }
+      },
+      "curationHint": 80.38
     },
     {
       "itemId": 30052,
       "name": "Ring of Lethality",
       "slot": "finger",
       "phase": 2,
-      "ep": 79.35,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Hydross the Unstable"
-      }
+      },
+      "curationHint": 79.35
     },
     {
       "itemId": 34361,
       "name": "Hard Khorium Band",
       "slot": "finger",
       "phase": 5,
-      "ep": 79.04,
       "source": {
         "kind": "crafted",
         "profession": "7"
-      }
+      },
+      "curationHint": 79.04
     },
     {
       "itemId": 29283,
       "name": "Violet Signet of the Master Assassin",
       "slot": "finger",
       "phase": 1,
-      "ep": 76.71,
-      "source": null
+      "source": null,
+      "curationHint": 76.71
     },
     {
       "itemId": 28757,
       "name": "Ring of a Thousand Marks",
       "slot": "finger",
       "phase": 1,
-      "ep": 76.6,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Prince Malchezaar"
-      }
+      },
+      "curationHint": 76.6
     },
     {
       "itemId": 29282,
       "name": "Violet Signet",
       "slot": "finger",
       "phase": 1,
-      "ep": 72.92,
-      "source": null
+      "source": null,
+      "curationHint": 72.92
     },
     {
       "itemId": 31920,
       "name": "Shaffar's Band of Brutality",
       "slot": "finger",
       "phase": 1,
-      "ep": 72.65,
       "source": {
         "kind": "raid",
         "zone": "Mana-Tombs",
         "boss": "Yor <Void Hound of Shaffar>"
-      }
+      },
+      "curationHint": 72.65
     },
     {
       "itemId": 30738,
       "name": "Ring of Reciprocity",
       "slot": "finger",
       "phase": 1,
-      "ep": 72.3,
-      "source": null
+      "source": null,
+      "curationHint": 72.3
     },
     {
       "itemId": 28649,
       "name": "Garona's Signet Ring",
       "slot": "finger",
       "phase": 1,
-      "ep": 70.1,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "The Curator"
-      }
+      },
+      "curationHint": 70.1
     },
     {
       "itemId": 29281,
       "name": "Violet Signet",
       "slot": "finger",
       "phase": 1,
-      "ep": 67.8,
-      "source": null
+      "source": null,
+      "curationHint": 67.8
     },
     {
       "itemId": 34378,
       "name": "Hard Khorium Battlefists",
       "slot": "hands",
       "phase": 5,
-      "ep": 136.57,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 136.57
     },
     {
       "itemId": 32608,
       "name": "Pillager's Gauntlets",
       "slot": "hands",
       "phase": 3,
-      "ep": 121.16,
       "source": {
         "kind": "raid",
         "zone": "Black Temple"
-      }
+      },
+      "curationHint": 121.16
     },
     {
       "itemId": 34341,
       "name": "Borderland Paingrips",
       "slot": "hands",
       "phase": 5,
-      "ep": 93.13,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Kil'jaeden"
-      }
+      },
+      "curationHint": 93.13
     },
     {
       "itemId": 29020,
       "name": "Warbringer Gauntlets",
       "slot": "hands",
       "phase": 1,
-      "ep": 89.95,
-      "source": null
+      "source": null,
+      "curationHint": 89.95
     },
     {
       "itemId": 32278,
       "name": "Grips of Silent Justice",
       "slot": "hands",
       "phase": 3,
-      "ep": 89.75,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Shade of Akama"
-      }
+      },
+      "curationHint": 89.75
     },
     {
       "itemId": 33512,
       "name": "Furious Deathgrips",
       "slot": "hands",
       "phase": 4,
-      "ep": 87.75,
-      "source": null
+      "source": null,
+      "curationHint": 87.75
     },
     {
       "itemId": 30969,
       "name": "Onslaught Gauntlets",
       "slot": "hands",
       "phase": 3,
-      "ep": 72.6,
-      "source": null
+      "source": null,
+      "curationHint": 72.6
     },
     {
       "itemId": 30375,
       "name": "Gauntlets of the Vanquisher",
       "slot": "hands",
       "phase": 1,
-      "ep": 71.35,
-      "source": null
+      "source": null,
+      "curationHint": 71.35
     },
     {
       "itemId": 35067,
       "name": "Brutal Gladiator's Plate Gauntlets",
       "slot": "hands",
       "phase": 5,
-      "ep": 70.49,
-      "source": null
+      "source": null,
+      "curationHint": 70.49
     },
     {
       "itemId": 31180,
       "name": "Gauntlets of the Skullsplitter",
       "slot": "hands",
       "phase": 1,
-      "ep": 70.3,
-      "source": null
+      "source": null,
+      "curationHint": 70.3
     },
     {
       "itemId": 21581,
       "name": "Gauntlets of Annihilation",
       "slot": "hands",
       "phase": 1,
-      "ep": 67.28,
       "source": {
         "kind": "raid",
         "zone": "Ahn'Qiraj",
         "boss": "C'Thun"
-      }
+      },
+      "curationHint": 67.28
     },
     {
       "itemId": 30119,
       "name": "Destroyer Gauntlets",
       "slot": "hands",
       "phase": 2,
-      "ep": 67.1,
-      "source": null
+      "source": null,
+      "curationHint": 67.1
     },
     {
       "itemId": 34354,
       "name": "Mayhem Projection Goggles",
       "slot": "head",
       "phase": 5,
-      "ep": 157.17,
       "source": {
         "kind": "crafted",
         "profession": "4"
-      }
+      },
+      "curationHint": 157.17
     },
     {
       "itemId": 32373,
       "name": "Helm of the Illidari Shatterer",
       "slot": "head",
       "phase": 3,
-      "ep": 156.44,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "The Illidari Council"
-      }
+      },
+      "curationHint": 156.44
     },
     {
       "itemId": 29983,
       "name": "Fel-Steel Warhelm",
       "slot": "head",
       "phase": 2,
-      "ep": 144.38,
       "source": {
         "kind": "raid",
         "zone": "Tempest Keep",
         "boss": "Void Reaver"
-      }
+      },
+      "curationHint": 144.38
     },
     {
       "itemId": 35068,
       "name": "Brutal Gladiator's Plate Helm",
       "slot": "head",
       "phase": 5,
-      "ep": 123.67,
-      "source": null
+      "source": null,
+      "curationHint": 123.67
     },
     {
       "itemId": 30120,
       "name": "Destroyer Battle-Helm",
       "slot": "head",
       "phase": 2,
-      "ep": 119.87,
-      "source": null
+      "source": null,
+      "curationHint": 119.87
     },
     {
       "itemId": 33810,
       "name": "Amani Mask of Death",
       "slot": "head",
       "phase": 4,
-      "ep": 116.95,
-      "source": null
+      "source": null,
+      "curationHint": 116.95
     },
     {
       "itemId": 34345,
       "name": "Crown of Anasterian",
       "slot": "head",
       "phase": 5,
-      "ep": 114.9,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Kil'jaeden"
-      }
+      },
+      "curationHint": 114.9
     },
     {
       "itemId": 35090,
       "name": "Brutal Gladiator's Scaled Helm",
       "slot": "head",
       "phase": 5,
-      "ep": 113.96,
-      "source": null
+      "source": null,
+      "curationHint": 113.96
     },
     {
       "itemId": 32461,
       "name": "Furious Gizmatic Goggles",
       "slot": "head",
       "phase": 2,
-      "ep": 105.21,
       "source": {
         "kind": "crafted",
         "profession": "4"
-      }
+      },
+      "curationHint": 105.21
     },
     {
       "itemId": 33730,
       "name": "Vengeful Gladiator's Plate Helm",
       "slot": "head",
       "phase": 3,
-      "ep": 100.15,
-      "source": null
+      "source": null,
+      "curationHint": 100.15
     },
     {
       "itemId": 30972,
       "name": "Onslaught Battle-Helm",
       "slot": "head",
       "phase": 3,
-      "ep": 95.25,
-      "source": null
+      "source": null,
+      "curationHint": 95.25
     },
     {
       "itemId": 33751,
       "name": "Vengeful Gladiator's Scaled Helm",
       "slot": "head",
       "phase": 3,
-      "ep": 94.36,
-      "source": null
+      "source": null,
+      "curationHint": 94.36
     },
     {
       "itemId": 34943,
       "name": "Legplates of Unending Fury",
       "slot": "legs",
       "phase": 5,
-      "ep": 156.06,
-      "source": null
+      "source": null,
+      "curationHint": 156.06
     },
     {
       "itemId": 30903,
       "name": "Legguards of Endless Rage",
       "slot": "legs",
       "phase": 3,
-      "ep": 146.27,
       "source": {
         "kind": "raid",
         "zone": "Hyjal Summit",
         "boss": "Archimonde"
-      }
+      },
+      "curationHint": 146.27
     },
     {
       "itemId": 34180,
       "name": "Felfury Legplates",
       "slot": "legs",
       "phase": 5,
-      "ep": 145.68,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Brutallus"
-      }
+      },
+      "curationHint": 145.68
     },
     {
       "itemId": 35069,
       "name": "Brutal Gladiator's Plate Legguards",
       "slot": "legs",
       "phase": 5,
-      "ep": 144.91,
-      "source": null
+      "source": null,
+      "curationHint": 144.91
     },
     {
       "itemId": 30977,
       "name": "Onslaught Greaves",
       "slot": "legs",
       "phase": 3,
-      "ep": 133.35,
-      "source": null
+      "source": null,
+      "curationHint": 133.35
     },
     {
       "itemId": 33501,
       "name": "Bloodthirster's Wargreaves",
       "slot": "legs",
       "phase": 4,
-      "ep": 127.7,
-      "source": null
+      "source": null,
+      "curationHint": 127.7
     },
     {
       "itemId": 35091,
       "name": "Brutal Gladiator's Scaled Legguards",
       "slot": "legs",
       "phase": 5,
-      "ep": 127.12,
-      "source": null
+      "source": null,
+      "curationHint": 127.12
     },
     {
       "itemId": 30132,
       "name": "Crystalforge Greaves",
       "slot": "legs",
       "phase": 2,
-      "ep": 124.4,
-      "source": null
+      "source": null,
+      "curationHint": 124.4
     },
     {
       "itemId": 30121,
       "name": "Destroyer Greaves",
       "slot": "legs",
       "phase": 2,
-      "ep": 123.94,
-      "source": null
+      "source": null,
+      "curationHint": 123.94
     },
     {
       "itemId": 33731,
       "name": "Vengeful Gladiator's Plate Legguards",
       "slot": "legs",
       "phase": 3,
-      "ep": 121.39,
-      "source": null
+      "source": null,
+      "curationHint": 121.39
     },
     {
       "itemId": 29074,
       "name": "Justicar Greaves",
       "slot": "legs",
       "phase": 1,
-      "ep": 120.45,
-      "source": null
+      "source": null,
+      "curationHint": 120.45
     },
     {
       "itemId": 31298,
       "name": "Legguards of the Shattered Hand",
       "slot": "legs",
       "phase": 1,
-      "ep": 114.6,
-      "source": null
+      "source": null,
+      "curationHint": 114.6
     },
     {
       "itemId": 32260,
       "name": "Choker of Endless Nightmares",
       "slot": "neck",
       "phase": 3,
-      "ep": 95.46,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Supremus"
-      }
+      },
+      "curationHint": 95.46
     },
     {
       "itemId": 33296,
       "name": "Brooch of Deftness",
       "slot": "neck",
       "phase": 4,
-      "ep": 92.24,
-      "source": null
+      "source": null,
+      "curationHint": 92.24
     },
     {
       "itemId": 34177,
       "name": "Clutch of Demise",
       "slot": "neck",
       "phase": 5,
-      "ep": 80.09,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Brutallus"
-      }
+      },
+      "curationHint": 80.09
     },
     {
       "itemId": 278827,
       "name": "Amulet of Bitter Hatred",
       "slot": "neck",
       "phase": 2,
-      "ep": 79.18,
-      "source": null
+      "source": null,
+      "curationHint": 79.18
     },
     {
       "itemId": 34358,
       "name": "Hard Khorium Choker",
       "slot": "neck",
       "phase": 5,
-      "ep": 72.71,
       "source": {
         "kind": "crafted",
         "profession": "7"
-      }
+      },
+      "curationHint": 72.71
     },
     {
       "itemId": 29381,
       "name": "Choker of Vile Intent",
       "slot": "neck",
       "phase": 1,
-      "ep": 70.92,
-      "source": null
+      "source": null,
+      "curationHint": 70.92
     },
     {
       "itemId": 28509,
       "name": "Worgen Claw Necklace",
       "slot": "neck",
       "phase": 1,
-      "ep": 68.77,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Attumen the Huntsman"
-      }
+      },
+      "curationHint": 68.77
     },
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve",
       "slot": "neck",
       "phase": 5,
-      "ep": 66.47,
-      "source": null
+      "source": null,
+      "curationHint": 66.47
     },
     {
       "itemId": 31275,
       "name": "Necklace of Trophies",
       "slot": "neck",
       "phase": 1,
-      "ep": 63.35,
-      "source": null
+      "source": null,
+      "curationHint": 63.35
     },
     {
       "itemId": 34178,
       "name": "Collar of the Pit Lord",
       "slot": "neck",
       "phase": 5,
-      "ep": 62.06,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Brutallus"
-      }
+      },
+      "curationHint": 62.06
     },
     {
       "itemId": 29335,
       "name": "Talon Lord's Collar",
       "slot": "neck",
       "phase": 1,
-      "ep": 60.73,
-      "source": null
+      "source": null,
+      "curationHint": 60.73
     },
     {
       "itemId": 27779,
       "name": "Bone Chain Necklace",
       "slot": "neck",
       "phase": 1,
-      "ep": 56.96,
       "source": {
         "kind": "raid",
         "zone": "The Underbog",
         "boss": "The Black Stalker"
-      }
+      },
+      "curationHint": 56.96
     },
     {
       "itemId": 34892,
       "name": "Crossbow of Relentless Strikes",
       "slot": "ranged",
       "phase": 5,
-      "ep": 57.08,
-      "source": null
+      "source": null,
+      "curationHint": 57.08
     },
     {
       "itemId": 29949,
       "name": "Arcanite Steam-Pistol",
       "slot": "ranged",
       "phase": 2,
-      "ep": 55.85,
       "source": {
         "kind": "raid",
         "zone": "Tempest Keep",
         "boss": "Al'ar"
-      }
+      },
+      "curationHint": 55.85
     },
     {
       "itemId": 34334,
       "name": "Thori'dal, the Stars' Fury",
       "slot": "ranged",
       "phase": 5,
-      "ep": 50.21,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Kil'jaeden"
-      }
+      },
+      "curationHint": 50.21
     },
     {
       "itemId": 28504,
       "name": "Steelhawk Crossbow",
       "slot": "ranged",
       "phase": 1,
-      "ep": 46.7,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Attumen the Huntsman"
-      }
+      },
+      "curationHint": 46.7
     },
     {
       "itemId": 34196,
       "name": "Golden Bow of Quel'Thalas",
       "slot": "ranged",
       "phase": 5,
-      "ep": 44.94,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Eredar Twins"
-      }
+      },
+      "curationHint": 44.94
     },
     {
       "itemId": 34783,
       "name": "Nightstrike",
       "slot": "ranged",
       "phase": 5,
-      "ep": 42.9,
       "source": {
         "kind": "raid",
         "zone": "Magisters' Terrace",
         "boss": "Priestess Delrissa"
-      }
+      },
+      "curationHint": 42.9
     },
     {
       "itemId": 29151,
       "name": "Veteran's Musket",
       "slot": "ranged",
       "phase": 1,
-      "ep": 41.67,
       "source": {
         "kind": "rep",
         "faction": "unknown",
         "standing": "unknown"
-      }
+      },
+      "curationHint": 41.67
     },
     {
       "itemId": 29152,
       "name": "Marksman's Bow",
       "slot": "ranged",
       "phase": 1,
-      "ep": 41.67,
       "source": {
         "kind": "rep",
         "faction": "unknown",
         "standing": "unknown"
-      }
+      },
+      "curationHint": 41.67
     },
     {
       "itemId": 28659,
       "name": "Xavian Stiletto",
       "slot": "ranged",
       "phase": 1,
-      "ep": 41.2,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Terestian Illhoof"
-      }
+      },
+      "curationHint": 41.2
     },
     {
       "itemId": 30025,
       "name": "Serpentshrine Shuriken",
       "slot": "ranged",
       "phase": 2,
-      "ep": 41.2,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern"
-      }
+      },
+      "curationHint": 41.2
     },
     {
       "itemId": 27526,
       "name": "Skyfire Hawk-Bow",
       "slot": "ranged",
       "phase": 1,
-      "ep": 40.76,
       "source": {
         "kind": "raid",
         "zone": "The Shattered Halls",
         "boss": "Warbringer O'mrogg"
-      }
+      },
+      "curationHint": 40.76
     },
     {
       "itemId": 30318,
       "name": "Netherstrand Longbow",
       "slot": "ranged",
       "phase": 2,
-      "ep": 38.5,
       "source": {
         "kind": "raid",
         "zone": "Tempest Keep"
-      }
+      },
+      "curationHint": 38.5
     },
     {
       "itemId": 32570,
       "name": "Swiftsteel Shoulders",
       "slot": "shoulder",
       "phase": 3,
-      "ep": 128.8,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 128.8
     },
     {
       "itemId": 30866,
       "name": "Blood-stained Pauldrons",
       "slot": "shoulder",
       "phase": 3,
-      "ep": 121.09,
       "source": {
         "kind": "raid",
         "zone": "Hyjal Summit",
         "boss": "Rage Winterchill"
-      }
+      },
+      "curationHint": 121.09
     },
     {
       "itemId": 33514,
       "name": "Pauldrons of Gruesome Fate",
       "slot": "shoulder",
       "phase": 4,
-      "ep": 106.85,
-      "source": null
+      "source": null,
+      "curationHint": 106.85
     },
     {
       "itemId": 34388,
       "name": "Pauldrons of Berserking",
       "slot": "shoulder",
       "phase": 5,
-      "ep": 99.69,
-      "source": null
+      "source": null,
+      "curationHint": 99.69
     },
     {
       "itemId": 30122,
       "name": "Destroyer Shoulderblades",
       "slot": "shoulder",
       "phase": 2,
-      "ep": 90.1,
-      "source": null
+      "source": null,
+      "curationHint": 90.1
     },
     {
       "itemId": 30740,
       "name": "Ripfiend Shoulderplates",
       "slot": "shoulder",
       "phase": 1,
-      "ep": 83.89,
-      "source": null
+      "source": null,
+      "curationHint": 83.89
     },
     {
       "itemId": 29075,
       "name": "Justicar Shoulderplates",
       "slot": "shoulder",
       "phase": 1,
-      "ep": 80.15,
-      "source": null
+      "source": null,
+      "curationHint": 80.15
     },
     {
       "itemId": 30979,
       "name": "Onslaught Shoulderblades",
       "slot": "shoulder",
       "phase": 3,
-      "ep": 77.35,
-      "source": null
+      "source": null,
+      "curationHint": 77.35
     },
     {
       "itemId": 29023,
       "name": "Warbringer Shoulderplates",
       "slot": "shoulder",
       "phase": 1,
-      "ep": 76.45,
-      "source": null
+      "source": null,
+      "curationHint": 76.45
     },
     {
       "itemId": 35070,
       "name": "Brutal Gladiator's Plate Shoulders",
       "slot": "shoulder",
       "phase": 5,
-      "ep": 64.95,
-      "source": null
+      "source": null,
+      "curationHint": 64.95
     },
     {
       "itemId": 30997,
       "name": "Lightbringer Shoulderbraces",
       "slot": "shoulder",
       "phase": 3,
-      "ep": 64.63,
-      "source": null
+      "source": null,
+      "curationHint": 64.63
     },
     {
       "itemId": 33173,
       "name": "Ragesteel Shoulders",
       "slot": "shoulder",
       "phase": 1,
-      "ep": 64.44,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 64.44
     },
     {
       "itemId": 34428,
       "name": "Steely Naaru Sliver",
       "slot": "trinket",
       "phase": 5,
-      "ep": 115.56,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "M'uru"
-      }
+      },
+      "curationHint": 115.56
     },
     {
       "itemId": 34472,
       "name": "Shard of Contempt",
       "slot": "trinket",
       "phase": 5,
-      "ep": 94.16,
       "source": {
         "kind": "raid",
         "zone": "Magisters' Terrace",
         "boss": "Priestess Delrissa"
-      }
+      },
+      "curationHint": 94.16
     },
     {
       "itemId": 32505,
       "name": "Madness of the Betrayer",
       "slot": "trinket",
       "phase": 3,
-      "ep": 77.44,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "The Illidari Council"
-      }
+      },
+      "curationHint": 77.44
     },
     {
       "itemId": 28579,
       "name": "Romulo's Poison Vial",
       "slot": "trinket",
       "phase": 1,
-      "ep": 75.25,
       "source": {
         "kind": "raid",
         "zone": "Karazhan",
         "boss": "Romulo and Julianne"
-      }
+      },
+      "curationHint": 75.25
     },
     {
       "itemId": 19406,
       "name": "Drake Fang Talisman",
       "slot": "trinket",
       "phase": 1,
-      "ep": 65.96,
       "source": {
         "kind": "raid",
         "zone": "Blackwing Lair",
         "boss": "Ebonroc"
-      }
+      },
+      "curationHint": 65.96
     },
     {
       "itemId": 28121,
       "name": "Icon of Unyielding Courage",
       "slot": "trinket",
       "phase": 1,
-      "ep": 64.5,
       "source": {
         "kind": "raid",
         "zone": "The Blood Furnace",
         "boss": "Keli'dan the Breaker"
-      }
+      },
+      "curationHint": 64.5
     },
     {
       "itemId": 34427,
       "name": "Blackened Naaru Sliver",
       "slot": "trinket",
       "phase": 5,
-      "ep": 63.18,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "M'uru"
-      }
+      },
+      "curationHint": 63.18
     },
     {
       "itemId": 30627,
       "name": "Tsunami Talisman",
       "slot": "trinket",
       "phase": 2,
-      "ep": 50.76,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "Leotheras the Blind"
-      }
+      },
+      "curationHint": 50.76
     },
     {
       "itemId": 30450,
       "name": "Warp-Spring Coil",
       "slot": "trinket",
       "phase": 2,
-      "ep": 45.15,
       "source": {
         "kind": "raid",
         "zone": "Tempest Keep",
         "boss": "Void Reaver"
-      }
+      },
+      "curationHint": 45.15
     },
     {
       "itemId": 35751,
       "name": "Assassin's Alchemist Stone",
       "slot": "trinket",
       "phase": 5,
-      "ep": 44.28,
       "source": {
         "kind": "crafted",
         "profession": "1"
-      }
+      },
+      "curationHint": 44.28
     },
     {
       "itemId": 18465,
       "name": "Royal Seal of Eldre'Thalas",
       "slot": "trinket",
       "phase": 1,
-      "ep": 43.0,
-      "source": null
+      "source": null,
+      "curationHint": 43.0
     },
     {
       "itemId": 33831,
       "name": "Berserker's Call",
       "slot": "trinket",
       "phase": 4,
-      "ep": 36.9,
       "source": {
         "kind": "raid",
         "zone": "Zul'Aman",
         "boss": "Zul'jin"
-      }
+      },
+      "curationHint": 36.9
     },
     {
       "itemId": 34485,
       "name": "Lightbringer Girdle",
       "slot": "waist",
       "phase": 5,
-      "ep": 163.77,
-      "source": null
+      "source": null,
+      "curationHint": 163.77
     },
     {
       "itemId": 34546,
       "name": "Onslaught Belt",
       "slot": "waist",
       "phase": 5,
-      "ep": 159.86,
-      "source": null
+      "source": null,
+      "curationHint": 159.86
     },
     {
       "itemId": 34941,
       "name": "Girdle of the Fearless",
       "slot": "waist",
       "phase": 5,
-      "ep": 96.53,
-      "source": null
+      "source": null,
+      "curationHint": 96.53
     },
     {
       "itemId": 30915,
       "name": "Belt of Seething Fury",
       "slot": "waist",
       "phase": 3,
-      "ep": 92.46,
       "source": {
         "kind": "raid",
         "zone": "Hyjal Summit",
         "boss": "Kaz'rogal"
-      }
+      },
+      "curationHint": 92.46
     },
     {
       "itemId": 30032,
       "name": "Red Belt of Battle",
       "slot": "waist",
       "phase": 2,
-      "ep": 89.58,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 89.58
     },
     {
       "itemId": 32606,
       "name": "Girdle of the Lightbearer",
       "slot": "waist",
       "phase": 3,
-      "ep": 86.44,
       "source": {
         "kind": "raid",
         "zone": "Black Temple"
-      }
+      },
+      "curationHint": 86.44
     },
     {
       "itemId": 33331,
       "name": "Chain of Unleashed Rage",
       "slot": "waist",
       "phase": 4,
-      "ep": 79.5,
-      "source": null
+      "source": null,
+      "curationHint": 79.5
     },
     {
       "itemId": 34944,
       "name": "Girdle of Seething Rage",
       "slot": "waist",
       "phase": 5,
-      "ep": 75.1,
-      "source": null
+      "source": null,
+      "curationHint": 75.1
     },
     {
       "itemId": 35161,
       "name": "Guardian's Plate Belt",
       "slot": "waist",
       "phase": 5,
-      "ep": 70.8,
-      "source": null
+      "source": null,
+      "curationHint": 70.8
     },
     {
       "itemId": 23219,
       "name": "Girdle of the Mentor",
       "slot": "waist",
       "phase": 1,
-      "ep": 68.28,
       "source": {
         "kind": "raid",
         "zone": "Naxxramas",
         "boss": "Instructor Razuvious"
-      }
+      },
+      "curationHint": 68.28
     },
     {
       "itemId": 35163,
       "name": "Guardian's Scaled Belt",
       "slot": "waist",
       "phase": 5,
-      "ep": 67.87,
-      "source": null
+      "source": null,
+      "curationHint": 67.87
     },
     {
       "itemId": 19137,
       "name": "Onslaught Girdle",
       "slot": "waist",
       "phase": 1,
-      "ep": 63.28,
       "source": {
         "kind": "raid",
         "zone": "Molten Core",
         "boss": "Ragnaros"
-      }
+      },
+      "curationHint": 63.28
     },
     {
       "itemId": 34891,
       "name": "The Blade of Harbingers",
       "slot": "weapon",
       "phase": 5,
-      "ep": 148.64,
-      "source": null
+      "source": null,
+      "curationHint": 148.64
     },
     {
       "itemId": 30009,
       "name": "The Burning Crusader",
       "slot": "weapon",
       "phase": 1,
-      "ep": 139.53,
-      "source": null
+      "source": null,
+      "curationHint": 139.53
     },
     {
       "itemId": 34989,
       "name": "Brutal Gladiator's Bonegrinder",
       "slot": "weapon",
       "phase": 5,
-      "ep": 139.15,
-      "source": null
+      "source": null,
+      "curationHint": 139.15
     },
     {
       "itemId": 35015,
       "name": "Brutal Gladiator's Greatsword",
       "slot": "weapon",
       "phase": 5,
-      "ep": 139.15,
-      "source": null
+      "source": null,
+      "curationHint": 139.15
     },
     {
       "itemId": 32332,
       "name": "Torch of the Damned",
       "slot": "weapon",
       "phase": 3,
-      "ep": 138.76,
       "source": {
         "kind": "raid",
         "zone": "Black Temple",
         "boss": "Reliquary of the Lost"
-      }
+      },
+      "curationHint": 138.76
     },
     {
       "itemId": 34997,
       "name": "Brutal Gladiator's Decapitator",
       "slot": "weapon",
       "phase": 5,
-      "ep": 130.15,
-      "source": null
+      "source": null,
+      "curationHint": 130.15
     },
     {
       "itemId": 23541,
       "name": "Khorium Champion",
       "slot": "weapon",
       "phase": 1,
-      "ep": 129.55,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 129.55
     },
     {
       "itemId": 29137,
       "name": "Hellscream's Will",
       "slot": "weapon",
       "phase": 1,
-      "ep": 124.74,
       "source": {
         "kind": "rep",
         "faction": "unknown",
         "standing": "unknown"
-      }
+      },
+      "curationHint": 124.74
     },
     {
       "itemId": 29138,
       "name": "Arechron's Gift",
       "slot": "weapon",
       "phase": 1,
-      "ep": 124.74,
       "source": {
         "kind": "rep",
         "faction": "unknown",
         "standing": "unknown"
-      }
+      },
+      "curationHint": 124.74
     },
     {
       "itemId": 33663,
       "name": "Vengeful Gladiator's Bonegrinder",
       "slot": "weapon",
       "phase": 3,
-      "ep": 123.47,
-      "source": null
+      "source": null,
+      "curationHint": 123.47
     },
     {
       "itemId": 33688,
       "name": "Vengeful Gladiator's Greatsword",
       "slot": "weapon",
       "phase": 3,
-      "ep": 123.47,
-      "source": null
+      "source": null,
+      "curationHint": 123.47
     },
     {
       "itemId": 34247,
       "name": "Apolyon, the Soul-Render",
       "slot": "weapon",
       "phase": 5,
-      "ep": 121.44,
       "source": {
         "kind": "raid",
         "zone": "Sunwell Plateau",
         "boss": "Kil'jaeden"
-      }
+      },
+      "curationHint": 121.44
     },
     {
       "itemId": 34431,
       "name": "Lightbringer Bands",
       "slot": "wrist",
       "phase": 5,
-      "ep": 110.23,
-      "source": null
+      "source": null,
+      "curationHint": 110.23
     },
     {
       "itemId": 34441,
       "name": "Onslaught Bracers",
       "slot": "wrist",
       "phase": 5,
-      "ep": 104.5,
-      "source": null
+      "source": null,
+      "curationHint": 104.5
     },
     {
       "itemId": 30057,
       "name": "Bracers of Eradication",
       "slot": "wrist",
       "phase": 2,
-      "ep": 80.03,
       "source": {
         "kind": "raid",
         "zone": "Serpentshrine Cavern",
         "boss": "The Lurker Below"
-      }
+      },
+      "curationHint": 80.03
     },
     {
       "itemId": 32568,
       "name": "Swiftsteel Bracers",
       "slot": "wrist",
       "phase": 3,
-      "ep": 66.59,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 66.59
     },
     {
       "itemId": 30861,
       "name": "Furious Shackles",
       "slot": "wrist",
       "phase": 3,
-      "ep": 49.63,
       "source": {
         "kind": "raid",
         "zone": "Hyjal Summit",
         "boss": "Rage Winterchill"
-      }
+      },
+      "curationHint": 49.63
     },
     {
       "itemId": 33516,
       "name": "Bracers of the Ancient Phalanx",
       "slot": "wrist",
       "phase": 4,
-      "ep": 47.08,
-      "source": null
+      "source": null,
+      "curationHint": 47.08
     },
     {
       "itemId": 33513,
       "name": "Eternium Rage-shackles",
       "slot": "wrist",
       "phase": 4,
-      "ep": 47.0,
-      "source": null
+      "source": null,
+      "curationHint": 47.0
     },
     {
       "itemId": 35176,
       "name": "Guardian's Plate Bracers",
       "slot": "wrist",
       "phase": 5,
-      "ep": 46.48,
-      "source": null
+      "source": null,
+      "curationHint": 46.48
     },
     {
       "itemId": 35178,
       "name": "Guardian's Scaled Bracers",
       "slot": "wrist",
       "phase": 5,
-      "ep": 45.86,
-      "source": null
+      "source": null,
+      "curationHint": 45.86
     },
     {
       "itemId": 23537,
       "name": "Black Felsteel Bracers",
       "slot": "wrist",
       "phase": 1,
-      "ep": 42.94,
       "source": {
         "kind": "crafted",
         "profession": "2"
-      }
+      },
+      "curationHint": 42.94
     },
     {
       "itemId": 33813,
       "name": "Vindicator's Plate Bracers",
       "slot": "wrist",
       "phase": 3,
-      "ep": 41.17,
-      "source": null
+      "source": null,
+      "curationHint": 41.17
     },
     {
       "itemId": 33910,
       "name": "Vindicator's Scaled Bracers",
       "slot": "wrist",
       "phase": 3,
-      "ep": 40.55,
-      "source": null
+      "source": null,
+      "curationHint": 40.55
     }
   ]
 }

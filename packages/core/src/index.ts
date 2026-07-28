@@ -19,13 +19,18 @@ export {
   type Substitution,
 } from "./disclosure.js";
 export {
+  filterByZone,
   filterPoolByPhase,
-  prefilterPool,
-  EP_PREFILTER_LIMIT,
+  filterPoolByZone,
+  poolEntryFromUniverse,
+  poolFromUniverse,
   simSlotsForPoolSlot,
+  zonesInPool,
   type ItemSource,
   type PoolEntry,
+  type UniverseEntry,
 } from "./pool.js";
+export { isKaelTempLegendary } from "./kael-temp.js";
 export {
   RecordedGearSource,
   characterFightKey,

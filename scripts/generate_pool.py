@@ -183,7 +183,7 @@ def generate(spec: str) -> dict:
             "name": it["name"],
             "slot": slot,
             "phase": it.get("phase"),
-            "ep": round(score, 3),
+            "curationHint": round(score, 3),
             "source": map_source(
                 it.get("sources"),
                 zones_by_id=zones_by_id,
@@ -194,7 +194,7 @@ def generate(spec: str) -> dict:
 
     pool: list[dict] = []
     for slot, entries in sorted(by_slot.items()):
-        entries.sort(key=lambda e: e["ep"], reverse=True)
+        entries.sort(key=lambda e: e["curationHint"], reverse=True)
         pool.extend(entries[:TOP_N])
 
     return {

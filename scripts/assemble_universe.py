@@ -291,7 +291,7 @@ def build_percentiles(entries: list[dict]) -> dict[int, float]:
         by_slot[e["slot"]].append(e)
     pct: dict[int, float] = {}
     for slot_entries in by_slot.values():
-        sorted_entries = sorted(slot_entries, key=lambda e: e["ep"])
+        sorted_entries = sorted(slot_entries, key=lambda e: e["curationHint"])
         n = len(sorted_entries)
         for i, e in enumerate(sorted_entries):
             pct[e["itemId"]] = i / (n - 1) if n > 1 else 1.0
@@ -459,14 +459,14 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
             "quality": it.get("quality"),
             "phase": it.get("phase"),
             "sources": sources,
-            "ep": round(ep_score(stats, w), 3),
+            "curationHint": round(ep_score(stats, w), 3),
         }
         entries.append(entry)
 
         for origin in origins_for_item:
             membership_stats[f"itemHasOrigin:{origin}"] += 1
 
-    entries.sort(key=lambda e: (e["slot"], -e["ep"], e["itemId"]))
+    entries.sort(key=lambda e: (e["slot"], -e["curationHint"], e["itemId"]))
 
     # Every row must have non-empty sources (build failure).
     if any(not e["sources"] for e in entries):

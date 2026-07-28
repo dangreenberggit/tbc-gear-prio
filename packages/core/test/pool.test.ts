@@ -1,9 +1,17 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
+  filterByZone,
   filterPoolByPhase,
-  prefilterPool,
+  filterPoolByZone,
+  poolFromUniverse,
+  zonesInPool,
   type PoolEntry,
 } from "../src/pool.js";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const pool: PoolEntry[] = [
   {
@@ -11,7 +19,7 @@ const pool: PoolEntry[] = [
     name: "P1",
     slot: "neck",
     phase: 1,
-    ep: 10,
+    curationHint: 10,
     source: { kind: "raid", zone: "Karazhan" },
   },
   {
@@ -19,37 +27,121 @@ const pool: PoolEntry[] = [
     name: "P2",
     slot: "neck",
     phase: 2,
-    ep: 50,
-    source: { kind: "raid", zone: "SSC" },
+    curationHint: 50,
+    source: { kind: "raid", zone: "Serpentshrine Cavern" },
   },
   {
     itemId: 3,
     name: "P3",
     slot: "neck",
     phase: 3,
-    ep: 100,
-    source: { kind: "raid", zone: "BT" },
+    curationHint: 100,
+    source: { kind: "raid", zone: "Black Temple" },
+  },
+  {
+    itemId: 4,
+    name: "Badge",
+    slot: "finger",
+    phase: 1,
+    source: { kind: "badge", cost: 25 },
   },
 ];
 
 describe("filterPoolByPhase", () => {
   it("keeps entries with phase <= maxPhase (inclusive)", () => {
-    expect(filterPoolByPhase(pool, 1).map((e) => e.itemId)).toEqual([1]);
-    expect(filterPoolByPhase(pool, 2).map((e) => e.itemId)).toEqual([1, 2]);
-    expect(filterPoolByPhase(pool, 3).map((e) => e.itemId)).toEqual([1, 2, 3]);
+    expect(filterPoolByPhase(pool, 1).map((e) => e.itemId)).toEqual([1, 4]);
+    expect(filterPoolByPhase(pool, 2).map((e) => e.itemId)).toEqual([1, 2, 4]);
+    expect(filterPoolByPhase(pool, 3).map((e) => e.itemId)).toEqual([
+      1, 2, 3, 4,
+    ]);
   });
 });
 
-describe("prefilterPool", () => {
-  it("keeps the highest-EP entries up to the limit", () => {
-    expect(prefilterPool(pool, { limit: 2 }).map((e) => e.itemId)).toEqual([
-      3, 2,
+describe("filterPoolByZone", () => {
+  it("keeps only entries whose source carries the requested zone", () => {
+    expect(filterPoolByZone(pool, "Karazhan").map((e) => e.itemId)).toEqual([
+      1,
     ]);
+    expect(filterPoolByZone(pool, "Black Temple").map((e) => e.itemId)).toEqual(
+      [3]
+    );
+    expect(filterPoolByZone(pool, "Serpentshrine Cavern")).toHaveLength(1);
   });
 
-  it("skips the limit when fullPool is set", () => {
-    expect(
-      prefilterPool(pool, { fullPool: true, limit: 1 }).map((e) => e.itemId)
-    ).toEqual([1, 2, 3]);
+  it("drops entries without a zone on the source (badge, pvp, etc.)", () => {
+    expect(filterPoolByZone(pool, "Karazhan")).not.toContainEqual(
+      expect.objectContaining({ itemId: 4 })
+    );
+  });
+});
+
+describe("filterByZone", () => {
+  it("works on any object with a source field", () => {
+    const ranked = pool.map((e) => ({ ...e, deltaDps: 1 }));
+    expect(filterByZone(ranked, "Karazhan")).toHaveLength(1);
+  });
+});
+
+describe("zonesInPool", () => {
+  it("returns sorted unique zone names from pool sources", () => {
+    expect(zonesInPool(pool)).toEqual([
+      "Black Temple",
+      "Karazhan",
+      "Serpentshrine Cavern",
+    ]);
+  });
+});
+
+describe("poolFromUniverse", () => {
+  it("maps universe rows to PoolEntry with a primary source", () => {
+    const entries = poolFromUniverse({
+      entries: [
+        {
+          itemId: 28672,
+          name: "Drape of the Dark Reavers",
+          slot: "back",
+          phase: 1,
+          curationHint: 68.49,
+          sources: [{ kind: "raid", zone: "Karazhan", boss: "Shade of Aran" }],
+        },
+      ],
+    });
+    expect(entries[0]).toMatchObject({
+      itemId: 28672,
+      source: { kind: "raid", zone: "Karazhan", boss: "Shade of Aran" },
+      curationHint: 68.49,
+    });
+  });
+
+  it("accepts legacy ep key from assembled universe JSON", () => {
+    const entries = poolFromUniverse({
+      entries: [
+        {
+          itemId: 1,
+          name: "Legacy",
+          slot: "neck",
+          phase: 1,
+          ep: 42,
+          sources: [{ kind: "raid", zone: "Karazhan" }],
+        },
+      ],
+    });
+    expect(entries[0]!.curationHint).toBe(42);
+  });
+});
+
+describe("data/universes/ret-p2.json", () => {
+  it("loads as a non-empty pool with resolvable sources", () => {
+    const data = JSON.parse(
+      readFileSync(join(root, "data/universes/ret-p2.json"), "utf8")
+    ) as { entries: unknown[] };
+    const entries = poolFromUniverse(
+      data as Parameters<typeof poolFromUniverse>[0]
+    );
+    expect(entries.length).toBe(224);
+    for (const e of entries) {
+      expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
+      expect(e.source.kind).toBeTruthy();
+    }
   });
 });
