@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { filterPoolByPhase, type PoolEntry } from "../src/pool.js";
+import {
+  filterPoolByPhase,
+  prefilterPool,
+  type PoolEntry,
+} from "../src/pool.js";
 
 const pool: PoolEntry[] = [
   {
@@ -7,6 +11,7 @@ const pool: PoolEntry[] = [
     name: "P1",
     slot: "neck",
     phase: 1,
+    ep: 10,
     source: { kind: "raid", zone: "Karazhan" },
   },
   {
@@ -14,6 +19,7 @@ const pool: PoolEntry[] = [
     name: "P2",
     slot: "neck",
     phase: 2,
+    ep: 50,
     source: { kind: "raid", zone: "SSC" },
   },
   {
@@ -21,6 +27,7 @@ const pool: PoolEntry[] = [
     name: "P3",
     slot: "neck",
     phase: 3,
+    ep: 100,
     source: { kind: "raid", zone: "BT" },
   },
 ];
@@ -30,5 +37,19 @@ describe("filterPoolByPhase", () => {
     expect(filterPoolByPhase(pool, 1).map((e) => e.itemId)).toEqual([1]);
     expect(filterPoolByPhase(pool, 2).map((e) => e.itemId)).toEqual([1, 2]);
     expect(filterPoolByPhase(pool, 3).map((e) => e.itemId)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("prefilterPool", () => {
+  it("keeps the highest-EP entries up to the limit", () => {
+    expect(prefilterPool(pool, { limit: 2 }).map((e) => e.itemId)).toEqual([
+      3, 2,
+    ]);
+  });
+
+  it("skips the limit when fullPool is set", () => {
+    expect(
+      prefilterPool(pool, { fullPool: true, limit: 1 }).map((e) => e.itemId)
+    ).toEqual([1, 2, 3]);
   });
 });

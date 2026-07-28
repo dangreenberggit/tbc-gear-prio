@@ -25,6 +25,7 @@ import {
 } from "./meta-repair.js";
 import {
   filterPoolByPhase,
+  prefilterPool,
   simSlotsForPoolSlot,
   type ItemSource,
   type PoolEntry,
@@ -184,7 +185,10 @@ export async function rankUpgrades(
   const equippedIds = new Set(
     equipment.map((s) => s.id).filter((id): id is number => !!id)
   );
-  const candidates = filterPoolByPhase(deps.pool ?? [], input.maxPhase);
+  const candidates = prefilterPool(
+    filterPoolByPhase(deps.pool ?? [], input.maxPhase),
+    { fullPool: input.fullPool }
+  );
 
   const totalSims = 1 + candidates.length;
   onProgress?.({ stage: "simming", done: 0, total: totalSims });
@@ -283,7 +287,6 @@ export async function rankUpgrades(
 
   void deps.store;
   void deps.clock;
-  void input.fullPool;
 
   return {
     contentHash: `phase1-baseline:${input.character.name.toLowerCase()}`,

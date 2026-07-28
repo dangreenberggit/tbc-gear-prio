@@ -35,6 +35,22 @@ export function filterPoolByPhase(
 }
 
 /**
+ * Rank-time EP prefilter (PLAN.md §8.3.3). Sim the top ~80 by pool EP.
+ * Uses the generator's reference EP today; player-aware hit/expertise clipping
+ * needs item stats on the index (not yet shipped) — `fullPool` bypasses this.
+ */
+export const EP_PREFILTER_LIMIT = 80;
+
+export function prefilterPool(
+  pool: readonly PoolEntry[],
+  opts: { fullPool?: boolean; limit?: number } = {}
+): PoolEntry[] {
+  const limit = opts.limit ?? EP_PREFILTER_LIMIT;
+  if (opts.fullPool || pool.length <= limit) return [...pool];
+  return [...pool].sort((a, b) => (b.ep ?? 0) - (a.ep ?? 0)).slice(0, limit);
+}
+
+/**
  * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; ret
  * two-handers land in mainhand.
  */

@@ -20,6 +20,8 @@ export {
 } from "./disclosure.js";
 export {
   filterPoolByPhase,
+  prefilterPool,
+  EP_PREFILTER_LIMIT,
   simSlotsForPoolSlot,
   type ItemSource,
   type PoolEntry,
