@@ -55,6 +55,10 @@ Where the ladder decides _how far down_ a piece sits, **co-location** decides _w
 Keep each meaning in a **single source of truth**: one authoritative place, so changing the behaviour is a one-place edit.
 
 Check every line for **relevance**: does it still bear on what the skill does?
+Before *adding* a line, also check **fit**: does this match the skill’s nature
+(who it is for, what kind of knowledge it holds)? Related material that belongs
+to a different personality (e.g. pipeline rules in a game-SME skill) goes
+elsewhere — see `AGENTS.md` § Editing skills.
 
 Then hunt **no-ops** sentence by sentence, not just line by line: run the no-op test on each sentence in isolation, and when one fails, delete the whole sentence rather than trim words from it. Be aggressive — most prose that fails should go, not be rewritten.
 

@@ -60,7 +60,7 @@ When a phase or feature branch has **independent** slices (different kinds of wo
 
 ### Models and walls
 
-**Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute. On **Cursor**, sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug). On **Claude Code**, sharp Opus work defaults to **effort `medium`** (not a model slug — set Opus and `/effort medium`); reserve effort `high`+ for niche cases like a single adversarial review axis. Prefer Sonnet/Terra workhorse and sol/`codex` sharp elsewhere when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
+**Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute for a _sharp_ job. On **Cursor**: workhorse = **Composer** (simple/mechanical Task spawns); sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Cursor manager fan-out). On **Claude Code**, sharp Opus work defaults to **effort `medium`** (not a model slug — set Opus and `/effort medium`); reserve effort `high`+ for niche cases like a single adversarial review axis. Prefer Sonnet/Terra workhorse and sol/`codex` sharp elsewhere when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 

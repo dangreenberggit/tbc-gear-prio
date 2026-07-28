@@ -2,6 +2,15 @@
 
 Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when running inside Cursor; fall back to agnostic git anytime.
 
+## Models (Task / in-session subagents)
+
+Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+
+- **Workhorse / simple:** **Composer** (`composer-2.5-fast` or current slug) — parallel implement workers, mechanical edits.
+- **Sharp:** **Grok high** — design, review, hard judgment. Do not open fan-out with Sol/Opus “for quality.”
+
+If a **manager** agent must spawn design/review workers and then compile: do not `run_in_background` + end turn “waiting.” Either keep ownership through fan-in, or write a `PROCESS.md` handoff naming the next spawn for the parent. Background completions notify the parent session, not a dead manager.
+
 ## Isolate
 
 - **IDE / Agents Window:** start or move the worker into a **worktree** so it does not share the main checkout. Base from the feature branch.
