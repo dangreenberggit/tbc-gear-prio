@@ -267,4 +267,97 @@ describe("rankUpgrades", () => {
       boss: "Nightbane",
     });
   });
+
+  it("returns identical deltas for the same seed and recordings", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const baselineReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(baselineReq, "v0.0.101", opts);
+    const upgradedEquipment = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: 29381, gems: [] as number[] } : spec
+    );
+    const upgradedKey = simCacheKey(
+      compose(skeleton, {
+        name: "slamaltman",
+        race: "RaceHuman",
+        equipment: upgradedEquipment,
+      }),
+      "v0.0.101",
+      opts
+    );
+    const pool = [
+      {
+        itemId: 29381,
+        name: "Choker of Vile Intent",
+        slot: "neck" as const,
+        phase: 1,
+        source: { kind: "badge" as const, cost: 25 },
+      },
+      {
+        itemId: 30102,
+        name: "Krakken-Heart Breastplate",
+        slot: "chest" as const,
+        phase: 2,
+        source: {
+          kind: "raid" as const,
+          zone: "Magtheridon's Lair",
+          boss: "Magtheridon",
+        },
+      },
+    ];
+    const deps = {
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", logged]]),
+      }),
+      sim: new RecordedSimRunner(
+        "v0.0.101",
+        new Map([
+          [
+            baselineKey,
+            {
+              dps: 2042.85,
+              stdev: 91.9,
+              iterationsDone: 3000,
+              simVersion: "v0.0.101",
+            },
+          ],
+          [
+            upgradedKey,
+            {
+              dps: 2050.0,
+              stdev: 92.0,
+              iterationsDone: 3000,
+              simVersion: "v0.0.101",
+            },
+          ],
+        ])
+      ),
+      store: new MemoryStore(),
+      clock: () => new Date("2026-07-26T12:00:00.000Z"),
+      raidSimSkeleton: skeleton,
+      epWeights,
+      pool,
+    };
+    const input = {
+      character: CHAR,
+      spec: "ret" as const,
+      maxPhase: 1 as const,
+      iterations: 3000,
+      seeds: [42],
+    };
+
+    const a = await rankUpgrades(input, deps);
+    const b = await rankUpgrades(input, deps);
+    expect(a.items.map((i) => [i.itemId, i.deltaDps])).toEqual(
+      b.items.map((i) => [i.itemId, i.deltaDps])
+    );
+    // maxPhase 1 must drop the phase-2 chest even though it is in the pool file.
+    expect(a.items.map((i) => i.itemId)).toEqual([29381]);
+  });
 });

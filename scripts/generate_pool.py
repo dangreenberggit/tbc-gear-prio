@@ -81,7 +81,12 @@ def ep_score(stats: list[float], weights: dict[str, float]) -> float:
     return total
 
 
-def map_source(raw: object) -> dict | None:
+def map_source(
+    raw: object,
+    *,
+    zones_by_id: dict[int, str],
+    npcs_by_id: dict[int, str],
+) -> dict | None:
     """Best-effort db.json sources[] → ItemSource. Unresolved → None."""
     if not isinstance(raw, list) or not raw:
         return None
@@ -93,10 +98,23 @@ def map_source(raw: object) -> dict | None:
         return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
     if "drop" in first:
         drop = first["drop"] or {}
-        zone = drop.get("zone") or drop.get("zoneName")
+        zone = (
+            drop.get("zone")
+            or drop.get("zoneName")
+            or zones_by_id.get(drop.get("zoneId"))
+        )
+        boss = drop.get("npcName") or npcs_by_id.get(drop.get("npcId"))
         if zone:
-            return {"kind": "raid", "zone": str(zone), "boss": drop.get("npcName")}
-    if "rep" in first or "faction" in first:
+            out: dict = {"kind": "raid", "zone": str(zone)}
+            if boss:
+                out["boss"] = str(boss)
+            return out
+    if "rep" in first:
+        rep = first["rep"] or {}
+        faction = rep.get("factionName") or rep.get("faction") or "unknown"
+        standing = rep.get("standing") or rep.get("rank") or "unknown"
+        return {"kind": "rep", "faction": str(faction), "standing": str(standing)}
+    if "faction" in first:
         return {"kind": "rep", "faction": "unknown", "standing": "unknown"}
     return None
 
@@ -136,6 +154,16 @@ def generate(spec: str) -> dict:
         sys.exit(2)
     db = load_json(DB)
     assert isinstance(db, dict)
+    zones_by_id = {
+        int(z["id"]): str(z["name"])
+        for z in (db.get("zones") or [])
+        if isinstance(z, dict) and "id" in z and "name" in z
+    }
+    npcs_by_id = {
+        int(n["id"]): str(n["name"])
+        for n in (db.get("npcs") or [])
+        if isinstance(n, dict) and "id" in n and "name" in n
+    }
     weights = load_json(EP_WEIGHTS)
     assert isinstance(weights, dict)
     w = weights["weights"]
@@ -156,7 +184,11 @@ def generate(spec: str) -> dict:
             "slot": slot,
             "phase": it.get("phase"),
             "ep": round(score, 3),
-            "source": map_source(it.get("sources")),
+            "source": map_source(
+                it.get("sources"),
+                zones_by_id=zones_by_id,
+                npcs_by_id=npcs_by_id,
+            ),
         }
         by_slot[slot].append(entry)
 
