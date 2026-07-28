@@ -35,10 +35,10 @@ type TwoHopEntry = {
   tokenName: string;
 };
 
+const hasWowsimsVendor = existsSync(wowsimsDbPath);
+
 function loadWowsimsDbById(): Map<number, WowsimsDbItem> {
-  if (!existsSync(wowsimsDbPath)) {
-    throw new Error(`missing ${wowsimsDbPath} — run pnpm sync:wowsims`);
-  }
+  if (!hasWowsimsVendor) return new Map();
   const db = JSON.parse(readFileSync(wowsimsDbPath, "utf8")) as WowsimsDb;
   return new Map((db.items ?? []).map((it) => [it.id, it]));
 }
@@ -170,14 +170,22 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
-  it("loads wowsims curated gear sets from vendor and admits measured IDs", () => {
-    const wowsimsIds = wowsimsCuratedItemIds();
-    expect(wowsimsIds.size).toBe(36);
+  it("admits measured wowsims curated IDs in the p3 universe", () => {
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
-      expect(wowsimsIds.has(id), `fixture id ${id}`).toBe(true);
       expect(poolIds.has(id), `missing admitted wowsims id ${id}`).toBe(true);
     }
   });
+
+  it.skipIf(!hasWowsimsVendor)(
+    "loads wowsims curated gear sets from vendor (36 IDs)",
+    () => {
+      const wowsimsIds = wowsimsCuratedItemIds();
+      expect(wowsimsIds.size).toBe(36);
+      for (const id of WOWSIMS_ADMITTED_IN_P3) {
+        expect(wowsimsIds.has(id), `fixture id ${id}`).toBe(true);
+      }
+    }
+  );
 
   it.todo(
     "admits all 36 wowsims curated ret gear-set items — blocked: " +
@@ -185,7 +193,7 @@ describe("data/universes/ret-p3.json hardening", () => {
       " lack resolvable sources or fail D7/quality (06-hardening §2.1)"
   );
 
-  it("ranged slot is librams only", () => {
+  it.skipIf(!hasWowsimsVendor)("ranged slot is librams only", () => {
     const ranged = universeP3.filter((e) => e.slot === "ranged");
     expect(ranged.length).toBeGreaterThan(0);
     for (const e of ranged) {
@@ -206,36 +214,33 @@ describe("data/universes/ret-p3.json hardening", () => {
     expect(poolIds.has(29993)).toBe(true);
   });
 
-  it("includes leather and mail body-slot examples with correct armor types", () => {
-    const leatherMail: Array<{ id: number; armor: ArmorType; label: string }> =
-      [
-        {
-          id: 30106,
-          armor: ArmorType.ArmorTypeLeather,
-          label: "Belt of One-Hundred Deaths",
-        },
-        {
-          id: 30104,
-          armor: ArmorType.ArmorTypeMail,
-          label: "Cobra-Lash Boots",
-        },
-      ];
-    for (const { id, armor, label } of leatherMail) {
-      expect(poolIds.has(id), label).toBe(true);
-      expect(byId.get(id)?.armorType, label).toBe(armor);
-      const entry = universeP3.find((e) => e.itemId === id);
-      expect(entry?.slot).toMatch(/waist|feet/);
-    }
+  it("includes leather and mail body-slot examples", () => {
+    expect(poolIds.has(30106), "Belt of One-Hundred Deaths").toBe(true);
+    expect(poolIds.has(30104), "Cobra-Lash Boots").toBe(true);
+    expect(universeP3.find((e) => e.itemId === 30106)?.slot).toMatch(
+      /waist|feet/
+    );
+    expect(universeP3.find((e) => e.itemId === 30104)?.slot).toMatch(
+      /waist|feet/
+    );
   });
+
+  it.skipIf(!hasWowsimsVendor)(
+    "leather/mail examples have correct armor types in wowsims db",
+    () => {
+      expect(byId.get(30106)?.armorType).toBe(ArmorType.ArmorTypeLeather);
+      expect(byId.get(30104)?.armorType).toBe(ArmorType.ArmorTypeMail);
+    }
+  );
 
   it.todo(
     "includes Shattrath Leggings (30257, leather legs) — blocked: no db/atlasloot/wowhead source (06-hardening §2.4)"
   );
 
   it("includes all tier pieces through phase 3 with token zone attribution", () => {
-    const tierItemIds = [...byId.values()]
-      .filter((it) => it.setId != null && RET_TIER_SET_IDS.has(it.setId))
-      .map((it) => it.id);
+    // two-hop map is the committed source of truth for ret tier piece IDs;
+    // wowsims setId scan is a local cross-check only (vendor is gitignored).
+    const tierItemIds = twoHop.entries.map((e) => e.pieceId);
     expect(tierItemIds.length).toBe(18);
 
     const expectedInP3 = tierItemIds.filter(
@@ -261,4 +266,18 @@ describe("data/universes/ret-p3.json hardening", () => {
       ).toBe(false);
     }
   });
+
+  it.skipIf(!hasWowsimsVendor)(
+    "wowsims db setIds match the two-hop ret tier map",
+    () => {
+      const fromDb = [...byId.values()]
+        .filter((it) => it.setId != null && RET_TIER_SET_IDS.has(it.setId))
+        .map((it) => it.id)
+        .sort((a, b) => a - b);
+      const fromTwoHop = twoHop.entries
+        .map((e) => e.pieceId)
+        .sort((a, b) => a - b);
+      expect(fromDb).toEqual(fromTwoHop);
+    }
+  );
 });
