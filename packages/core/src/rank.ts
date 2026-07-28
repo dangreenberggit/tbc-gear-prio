@@ -6,6 +6,7 @@
 import { compose } from "./compose.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import { gemsForPhase, type GemEntry } from "./gems.js";
+import { isEnchantable } from "./items.js";
 import {
   equipmentFromLoggedGear,
   socketedItemsFromLoggedGear,
@@ -15,9 +16,16 @@ import {
   repairMeta,
   type SocketedItem,
 } from "./meta-repair.js";
+import {
+  filterPoolByPhase,
+  simSlotsForPoolSlot,
+  type ItemSource,
+  type PoolEntry,
+} from "./pool.js";
 import type { GearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
+import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
   ContentPhase,
@@ -48,6 +56,8 @@ export type Deps = {
   epWeights: Readonly<Record<string, number>> | readonly number[];
   /** Optional override; defaults to gemsForPhase(input.maxPhase). */
   gemPalette?: readonly GemEntry[];
+  /** Curated (or test) candidate pool — filtered by maxPhase inside. */
+  pool?: readonly PoolEntry[];
 };
 
 export type Progress =
@@ -77,10 +87,27 @@ export class RankError extends Error {
   }
 }
 
+export type RankedItem = {
+  rank: number | null;
+  itemId: number;
+  name: string;
+  slot: PoolEntry["slot"];
+  slotChoice?: "a" | "b";
+  source: ItemSource;
+  deltaDps: number;
+  deltaPct: number;
+  se: number;
+  seMethod: "independent" | "paired-replicate";
+  bisTags: Array<"BiS" | "Alt" | "Realistic">;
+  owned?: boolean;
+  belowCutoff: boolean;
+};
+
 export type Ranking = {
   contentHash: string;
   cutoff: Cutoff;
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
+  items: RankedItem[];
 };
 
 const DEFAULT_ITERATIONS = 3000;
@@ -140,22 +167,112 @@ export async function rankUpgrades(
   const iterations = input.iterations ?? DEFAULT_ITERATIONS;
   const seeds = input.seeds ?? DEFAULT_SEEDS;
   const seed = seeds[0] ?? DEFAULT_SEEDS[0]!;
+  const runOpts = { seed, iterations };
 
-  onProgress?.({ stage: "simming", done: 0, total: 1 });
+  onProgress?.({ stage: "building-pool" });
+  const equippedIds = new Set(
+    equipment.map((s) => s.id).filter((id): id is number => !!id)
+  );
+  const candidates = filterPoolByPhase(deps.pool ?? [], input.maxPhase);
+
+  const totalSims = 1 + candidates.length;
+  onProgress?.({ stage: "simming", done: 0, total: totalSims });
   let observation;
   try {
-    observation = await deps.sim.run(request, { seed, iterations });
+    observation = await deps.sim.run(request, runOpts);
   } catch (err) {
     throw new RankError(
       "sim-failed",
       err instanceof Error ? err.message : String(err)
     );
   }
-  onProgress?.({ stage: "simming", done: 1, total: 1 });
+  onProgress?.({ stage: "simming", done: 1, total: totalSims });
+
+  const baselineDps = observation.dps;
+  const ranked: RankedItem[] = [];
+  let done = 1;
+
+  for (const entry of candidates) {
+    const owned = equippedIds.has(entry.itemId);
+    const slotNames = simSlotsForPoolSlot(entry.slot);
+    let best: {
+      deltaDps: number;
+      stdev: number;
+      slotChoice?: "a" | "b";
+    } | null = null;
+
+    for (let s = 0; s < slotNames.length; s++) {
+      const slotName = slotNames[s]!;
+      const slotIndex = SIM_ORDER.indexOf(slotName);
+      if (slotIndex < 0) continue;
+      const swapped = swapItemAt(equipment, slotIndex, entry.itemId);
+      const candReq = compose(deps.raidSimSkeleton, {
+        name: input.character.name.toLowerCase(),
+        race,
+        equipment: swapped,
+      });
+      let candObs;
+      try {
+        candObs = await deps.sim.run(candReq, runOpts);
+      } catch (err) {
+        throw new RankError(
+          "sim-failed",
+          err instanceof Error ? err.message : String(err)
+        );
+      }
+      const deltaDps = candObs.dps - baselineDps;
+      if (!best || deltaDps > best.deltaDps) {
+        best = {
+          deltaDps,
+          stdev: candObs.stdev,
+        };
+        if (slotNames.length > 1) {
+          best.slotChoice = s === 0 ? "a" : "b";
+        }
+      }
+    }
+
+    done += 1;
+    onProgress?.({ stage: "simming", done, total: totalSims });
+
+    if (!best) continue;
+
+    const deltaPct =
+      baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
+    const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, CUTOFF);
+    const item: RankedItem = {
+      rank: null,
+      itemId: entry.itemId,
+      name: entry.name,
+      slot: entry.slot,
+      source: entry.source,
+      deltaDps: best.deltaDps,
+      deltaPct,
+      se: best.stdev,
+      seMethod: "independent",
+      bisTags: entry.bisTags ?? [],
+      belowCutoff,
+    };
+    if (best.slotChoice) item.slotChoice = best.slotChoice;
+    if (owned) item.owned = true;
+    ranked.push(item);
+  }
+
   onProgress?.({ stage: "ranking" });
+  ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+  let rank = 1;
+  for (const item of ranked) {
+    if (item.belowCutoff) {
+      item.rank = null;
+    } else {
+      item.rank = rank;
+      rank += 1;
+    }
+  }
 
   void deps.store;
   void deps.clock;
+  void input.fullPool;
 
   return {
     contentHash: `phase1-baseline:${input.character.name.toLowerCase()}`,
@@ -165,7 +282,31 @@ export async function rankUpgrades(
       stdev: observation.stdev,
       metaAdjusted,
     },
+    items: ranked,
   };
+}
+
+function meetsCutoff(
+  deltaDps: number,
+  deltaPct: number,
+  cutoff: Cutoff
+): boolean {
+  return deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
+}
+
+function swapItemAt(
+  equipment: readonly SimItemSpec[],
+  slotIndex: number,
+  itemId: number
+): SimItemSpec[] {
+  return equipment.map((spec, i) => {
+    if (i !== slotIndex) return spec;
+    const out: SimItemSpec = { id: itemId, gems: [] };
+    if (spec.enchant && isEnchantable(itemId)) {
+      out.enchant = spec.enchant;
+    }
+    return out;
+  });
 }
 
 function applyRepairedGems(

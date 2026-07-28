@@ -37,6 +37,7 @@ export default tseslint.config(
       "vendor/**",
       ".agents/**",
       ".claude/**",
+      ".scratch/**",
       "packages/core/src/proto/**",
     ],
   },

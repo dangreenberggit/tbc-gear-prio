@@ -160,13 +160,103 @@ describe("rankUpgrades", () => {
       metaAdjusted: false,
     });
     expect(ranking.cutoff).toEqual(CUTOFF);
+    expect(ranking.items).toEqual([]);
     expect(stages).toEqual([
       "resolving",
       "reading-gear",
       "composing",
+      "building-pool",
       "simming",
       "simming",
       "ranking",
     ]);
+  });
+
+  it("ranks a single-item neck swap by deltaDps against the baseline", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const baselineReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(baselineReq, "v0.0.101", opts);
+
+    const upgradedEquipment = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: 29381, gems: [] as number[] } : spec
+    );
+    const upgradedReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment: upgradedEquipment,
+    });
+    const upgradedKey = simCacheKey(upgradedReq, "v0.0.101", opts);
+
+    const pool = [
+      {
+        itemId: 29381,
+        name: "Choker of Vile Intent",
+        slot: "neck" as const,
+        phase: 1,
+        source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
+      },
+    ];
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: new RecordedSimRunner(
+          "v0.0.101",
+          new Map([
+            [
+              baselineKey,
+              {
+                dps: 2042.85,
+                stdev: 91.9,
+                iterationsDone: 3000,
+                simVersion: "v0.0.101",
+              },
+            ],
+            [
+              upgradedKey,
+              {
+                dps: 2050.0,
+                stdev: 92.0,
+                iterationsDone: 3000,
+                simVersion: "v0.0.101",
+              },
+            ],
+          ])
+        ),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool,
+      }
+    );
+
+    expect(ranking.items).toHaveLength(1);
+    const top = ranking.items[0]!;
+    expect(top.itemId).toBe(29381);
+    expect(top.deltaDps).toBeCloseTo(7.15, 5);
+    expect(top.rank).toBe(1);
+    expect(top.belowCutoff).toBe(false);
+    expect(top.source).toEqual({
+      kind: "raid",
+      zone: "Karazhan",
+      boss: "Nightbane",
+    });
   });
 });

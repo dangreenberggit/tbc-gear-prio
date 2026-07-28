@@ -1,0 +1,132 @@
+{
+  "spec": "ret",
+  "epPreset": "data/presets/ret/p2.ep-weights.json",
+  "note": "Starter curation: phase<=2 entries that already had db.json sources. Fill remaining nulls later; ranking loop skips nothing here.",
+  "entries": [
+    {
+      "itemId": 28485,
+      "name": "Bulwark of the Ancient Kings",
+      "slot": "chest",
+      "phase": 2,
+      "ep": 125.32,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 28484,
+      "name": "Bulwark of Kings",
+      "slot": "chest",
+      "phase": 1,
+      "ep": 112.94,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 32461,
+      "name": "Furious Gizmatic Goggles",
+      "slot": "head",
+      "phase": 2,
+      "ep": 105.21,
+      "source": {
+        "kind": "crafted",
+        "profession": "4"
+      }
+    },
+    {
+      "itemId": 29151,
+      "name": "Veteran's Musket",
+      "slot": "ranged",
+      "phase": 1,
+      "ep": 41.67,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 29152,
+      "name": "Marksman's Bow",
+      "slot": "ranged",
+      "phase": 1,
+      "ep": 41.67,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "phase": 1,
+      "ep": 64.44,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 30032,
+      "name": "Red Belt of Battle",
+      "slot": "waist",
+      "phase": 2,
+      "ep": 89.58,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 23541,
+      "name": "Khorium Champion",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 129.55,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    },
+    {
+      "itemId": 29137,
+      "name": "Hellscream's Will",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 124.74,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 29138,
+      "name": "Arechron's Gift",
+      "slot": "weapon",
+      "phase": 1,
+      "ep": 124.74,
+      "source": {
+        "kind": "rep",
+        "faction": "unknown",
+        "standing": "unknown"
+      }
+    },
+    {
+      "itemId": 23537,
+      "name": "Black Felsteel Bracers",
+      "slot": "wrist",
+      "phase": 1,
+      "ep": 42.94,
+      "source": {
+        "kind": "crafted",
+        "profession": "2"
+      }
+    }
+  ]
+}

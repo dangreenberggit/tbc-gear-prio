@@ -14,6 +14,7 @@ import {
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
+import type { PoolEntry } from "./pool.js";
 import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
@@ -113,6 +114,8 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   const epWeights = loadJson<{ weights: Record<string, number> }>(
     "data/presets/ret/p2.ep-weights.json"
   ).weights;
+  const poolFile = loadJson<{ entries: PoolEntry[] }>("data/pools/ret.json");
+  const pool = poolFile.entries;
 
   const isSlamaltman =
     args.region === SLAMALTMAN_REF.region &&
@@ -134,21 +137,37 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   const sim: SimRunner = new CliSimRunner(binary);
 
   console.log(
-    `rank ${args.character}@${args.realm}-${args.region} (offline) cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
+    `rank ${args.character}@${args.realm}-${args.region} (offline) cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}% pool=${pool.length}`
   );
 
   try {
-    const ranking = await rankUpgrades(input, {
-      gear: new RecordedGearSource(gearData),
-      sim,
-      store: new MemoryStore(),
-      clock: () => new Date(),
-      raidSimSkeleton: skeleton,
-      epWeights,
-    });
+    const ranking = await rankUpgrades(
+      input,
+      {
+        gear: new RecordedGearSource(gearData),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date(),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool,
+      },
+      (p) => {
+        if (p.stage === "simming") {
+          console.log(`simming ${p.done}/${p.total}`);
+        }
+      }
+    );
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
+    for (const item of ranking.items) {
+      const mark = item.belowCutoff ? "  (below cutoff)" : "";
+      const rankLabel = item.rank == null ? "-" : String(item.rank);
+      console.log(
+        `#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}`
+      );
+    }
   } catch (err) {
     if (err instanceof RankError) {
       console.error(`${err.kind}: ${err.message}`);

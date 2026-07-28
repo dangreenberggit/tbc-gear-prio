@@ -7,8 +7,15 @@ export {
   type Progress,
   type RankErrorKind,
   type RankInput,
+  type RankedItem,
   type Ranking,
 } from "./rank.js";
+export {
+  filterPoolByPhase,
+  simSlotsForPoolSlot,
+  type ItemSource,
+  type PoolEntry,
+} from "./pool.js";
 export {
   RecordedGearSource,
   characterFightKey,
