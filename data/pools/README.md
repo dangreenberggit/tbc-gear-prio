@@ -1,8 +1,9 @@
 # data/pools/
 
-**Not the ranking membership path.** `pnpm rank` loads
-`data/universes/ret-p*.json` (built by `scripts/assemble_universe.py`).
+**Removed.** Ranking membership is only `data/universes/ret-p*.json`
+(built by `pnpm universe:assemble` / `scripts/assemble_universe.py`).
 
-`ret.json` / `ret.generated.json` are leftover from the EP top-N curation era.
-`scripts/generate_pool.py` and `scripts/curate_ret_pool.py` are deprecated
-archaeology tools — do not use them to decide what enters a ranking.
+The old EP top-N files (`ret.json`, `ret.generated.json`) and
+`scripts/generate_pool.py` / `curate_ret_pool.py` were deleted after a
+detached plan review found the curated file shipped bows/guns and a
+Kael’thas temp legendary while tests only guarded the universe path.

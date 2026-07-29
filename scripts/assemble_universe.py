@@ -3,8 +3,7 @@
 assemble_universe.py — build phase-scoped ret candidate universes (sub-phase 4).
 
 Merges db.json sources, AtlasLoot parse, two-hop token map, and Wowhead ret lists.
-D7 eligibility is implemented here — generate_pool.ret_equippable() is still
-plate-only on armor slots and must not be used for universe sizing.
+D7 eligibility is implemented here (leather/mail/librams allowed; not plate-only).
 
     python scripts/assemble_universe.py --max-phase 2
     python scripts/assemble_universe.py --max-phase 3 --out data/universes/ret-p3.json
@@ -30,7 +29,7 @@ TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
 WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 
-# Slot map shared with generate_pool.py
+# db.json item type → our pool slot name
 ITEM_TYPE_SLOT = {
     1: "head",
     2: "neck",
@@ -527,10 +526,7 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
-        "d7Note": (
-            "D7 eligibility implemented in assemble_universe.py; "
-            "generate_pool.ret_equippable() remains plate-only."
-        ),
+        "d7Note": "D7 eligibility implemented in assemble_universe.py.",
         "entries": entries,
     }
     return payload, report

@@ -27,3 +27,6 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   only empty sockets. Filed 15 (enchantAppliesToItem parity).
 - 2026-07-28 — Resolved 16: race defaults from raid-sim skeleton (ret P2
   Blood Elf), not hardcoded Human. Dig: sim-settings-gap-dig.md.
+- 2026-07-28 — Planner review of raid-scoped impl: deleted legacy EP pool
+  files/scripts (defects 1–2; finishes 11). Filed 17 (phase-2+ no-source
+  gap) and 18 (universe recall / junk-filter measurement).
