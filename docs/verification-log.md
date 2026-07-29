@@ -601,3 +601,46 @@ than loosened.
 Badge and reputation vendors are not covered. Per the user, badge items matter at
 P1 (heavily non-raid) and possibly P4, not P3, so this is not blocking. Every ret
 libram and most badge/rep trinkets remain absent — see ticket 17.
+
+---
+
+## 2026-07-28 — Wowhead "Best" recall: the right yardstick
+
+The 123-entry aggregate recall (63.4% held out) understates the pipeline badly,
+because the P3 list is a *guide*, not a BiS set: 89 P3 rows plus carried stages,
+covering headline picks, alternatives, hit-variants, PvP options and old tier.
+Missing "PVP Option" or "Old Tier" is not a defect.
+
+Scoring only what Wowhead actually recommends — the `Best`-family `rankLabel`
+rows (`Best`, `Best - Hit`, `Best - Crafted`, `Best - No Expertise`, …), 21 of
+them:
+
+| | with list as input | **held out** |
+|---|---|---|
+| Best-family recalled | 19/21 | **15/21** |
+| **raid-sourced Best only** | 14/14 | **14/14** |
+
+**Every raid-sourced Best pick is recalled independently — 14/14, zero misses.**
+All six held-out misses are non-raid by category, and each is a source the
+pipeline deliberately does not cover:
+
+| Item | Slot | Source |
+|---|---|---|
+| Swiftstrike Shoulders | shoulder | Leatherworking |
+| Cloak of Darkness | back | Leatherworking |
+| Bindings of Lightning Reflexes | wrist | Leatherworking |
+| Shapeshifter's Signet | finger | Lower City exalted |
+| Bloodlust Brooch | trinket | G'eras, 41 Badges of Justice |
+| Libram of Avengement | ranged | Heroic Blood Furnace |
+
+Three crafted, one reputation, one badge, one heroic dungeon. Zero raid misses.
+
+**Reading.** The raid-scoped universe does what it claims. The recall gap is
+entirely the non-raid source categories that are known, deferred, and tracked —
+badge/rep vendors (ticket 17; user scoped these to P1 and possibly P4, not P3)
+and crafting (ticket 13, `13-raid-recipe-crafts.md`). This is the measurement the
+Phase 1 gate box asks for, and it passes on the axis the design targets.
+
+Quote **14/14 raid-sourced**, or **15/21 Best-family held out** if a single
+headline number is wanted. Do not quote 63.4% as a quality figure — that grades
+the pipeline against content it was never built to cover.
