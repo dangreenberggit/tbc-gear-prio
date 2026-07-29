@@ -328,7 +328,7 @@ def measure_junk_filter(entries: list[dict], db_by_id: dict[int, dict]) -> dict:
     }
 
 
-def assemble(max_phase: int) -> tuple[dict, dict]:
+def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict]:
     if not DB.is_file():
         print(f"missing {DB} — run pnpm sync:wowsims", file=sys.stderr)
         sys.exit(2)
@@ -399,6 +399,12 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
         add_source(piece_id, token_src, "two-hop")
 
     # wowhead lists for this maxPhase
+    #
+    # Under hold-out the list is still read — it is the answer key we grade
+    # recall against — but it contributes neither sources nor membership, so
+    # the universe is built only from db / atlasloot / two-hop / zone match.
+    # Grading against a list that also populated the universe is circular for
+    # exactly the items it added; see ticket 18.
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
     for stage, doc in wowhead_lists_for_phase(max_phase):
@@ -407,6 +413,8 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
                 continue
             iid = int(row["itemId"])
             wowhead_list_ids.add(iid)
+            if hold_out_wowhead:
+                continue
             for src in parse_wowhead_source(row.get("wowheadSourceText")):
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
@@ -502,6 +510,32 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
         else:
             exclusive_origin["other"] += 1
 
+    universe_ids = {int(e["itemId"]) for e in entries}
+    recalled = wowhead_list_ids & universe_ids
+    missed = wowhead_list_ids - universe_ids
+    wowhead_recall = {
+        "heldOut": hold_out_wowhead,
+        "listTotal": len(wowhead_list_ids),
+        "recalled": len(recalled),
+        "missed": len(missed),
+        "recallPct": (
+            round(100.0 * len(recalled) / len(wowhead_list_ids), 1)
+            if wowhead_list_ids
+            else None
+        ),
+        "missedItems": [
+            {
+                "itemId": iid,
+                "name": (db_by_id.get(iid) or {}).get("name"),
+                "slot": ITEM_TYPE_SLOT.get((db_by_id.get(iid) or {}).get("type")),
+                "d7Eligible": bool(
+                    db_by_id.get(iid) and ret_eligible_d7(db_by_id[iid])
+                ),
+            }
+            for iid in sorted(missed)
+        ],
+    }
+
     report = {
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
@@ -519,6 +553,7 @@ def assemble(max_phase: int) -> tuple[dict, dict]:
         "tierPiecesMissing": sorted(tier_expected - tier_present),
         "junkFilter": junk,
         "wowheadListIds": len(wowhead_list_ids),
+        "wowheadRecall": wowhead_recall,
     }
 
     payload = {
@@ -545,10 +580,22 @@ def main() -> int:
         type=Path,
         help="Optional JSON measurement sidecar",
     )
+    ap.add_argument(
+        "--hold-out-wowhead",
+        action="store_true",
+        help=(
+            "Diagnostic: build the universe without letting the Wowhead lists "
+            "contribute sources or membership, then grade recall against them. "
+            "Requires --out/--report; refuses to overwrite the shipping files."
+        ),
+    )
     args = ap.parse_args()
 
+    if args.hold_out_wowhead and not (args.out and args.report):
+        ap.error("--hold-out-wowhead requires explicit --out and --report paths")
+
     out_path = args.out or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.json"
-    payload, report = assemble(args.max_phase)
+    payload, report = assemble(args.max_phase, hold_out_wowhead=args.hold_out_wowhead)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

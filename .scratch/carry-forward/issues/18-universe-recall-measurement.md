@@ -36,3 +36,29 @@ affordable.
 - Do not apply the junk filter in `assemble_universe.py` until this passes.
 - Prefer slamaltman (or another fixed offline character) for comparability
   with existing rank reports.
+
+## Progress 2026-07-28 — membership recall measured (sim recall still open)
+
+`--hold-out-wowhead` added to `assemble_universe.py`; measurement recorded in
+`docs/verification-log.md`. Wowhead is both a curation input (PLAN.md §530) and
+the gate's yardstick (§14), so recall against it was partly self-graded.
+
+Held out, **P3 recall is 58.5% (72/123)** vs 76.4% with Wowhead as an input.
+Universe 325 vs 347. Tier coverage 15/15 either way.
+
+Two ownable buckets fall out, both entirely `d7Eligible` (source resolution, not
+eligibility filtering):
+
+- **22 carried only by Wowhead** — crafted / PvP / BoE: Lionheart Executioner,
+  Stormherald, Red Belt of Battle, Swiftstrike Shoulders, Gladiator sets,
+  Furious Gizmatic Goggles, Mask of the Deceiver.
+- **29 missed by everything** — trinket 9, ranged 4, legs 3, finger 3. Every ret
+  libram (Avengement, Fervor, Hope) and most badge/rep trinkets (Hourglass of
+  the Unraveller, Abacus of Violent Odds, Mark of the Champion, Slayer's Crest).
+
+This covers *membership* recall only. The **sim-based** false-negative check this
+ticket asks for — would a junk-filtered item have been an above-cutoff upgrade —
+is still not done, so the junk filter stays off.
+
+Overlaps ticket 17 (`excludedNoSource`): the 29 persistent misses are the
+concrete, ret-relevant subset of that gap and are the better place to start.

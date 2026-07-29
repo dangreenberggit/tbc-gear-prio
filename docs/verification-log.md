@@ -453,3 +453,71 @@ Ticket 18 (recall measurement, junk filter stays off until it passes) is the
 instrument for answering it. `junkFilter` on the p3 universe currently reports
 `casterOnlyReject` 114 of 347 (32.9%) — unvalidated against sim, which is
 precisely why the filter is not applied.
+
+---
+
+## 2026-07-28 — Held-out Wowhead recall (ticket 18 instrument)
+
+PLAN.md §14's Phase 1 gate asks that top items survive a check against
+"Wowhead's per-tier ret guide". But PLAN.md §530 also has Wowhead as a *curation
+input*, and `assemble_universe.py` consumes `data/wowhead-lists/ret/*.json` as a
+membership origin. Grading recall against a list that also populates the universe
+is circular for exactly the items it added.
+
+`--hold-out-wowhead` builds the universe from db / AtlasLoot / two-hop / zone
+match only, still reading the list purely as an answer key. It refuses to run
+without explicit `--out`/`--report` so a diagnostic can never overwrite the
+shipping universe.
+
+Reproduce (paths must be absolute — `--out` under a relative path trips a
+pre-existing `relative_to` bug in the script's final print):
+
+```
+python scripts/assemble_universe.py --max-phase 3 \
+  --out <abs>/.scratch/heldout/p3-normal.json \
+  --report <abs>/.scratch/heldout/p3-normal.report.json
+
+python scripts/assemble_universe.py --max-phase 3 --hold-out-wowhead \
+  --out <abs>/.scratch/heldout/p3-heldout.json \
+  --report <abs>/.scratch/heldout/p3-heldout.report.json
+```
+
+| | Wowhead as input | Held out |
+|---|---|---|
+| universe total | 347 | 325 |
+| `listOnlyMembership` | 21 | 0 |
+| Wowhead P3 BiS recall | 94/123 (**76.4%**) | 72/123 (**58.5%**) |
+| tier pieces present | 15/15 | 15/15 |
+
+**The headline number is 58.5%, not 76.4%.** Roughly a fifth of the apparent
+recall is the answer key grading itself. The baseline run reproduces the
+shipping universe exactly (347 entries), so the flag does not perturb assembly.
+
+### What the independent sources cannot find
+
+22 items are recalled *only* because Wowhead named them — all `d7Eligible`, so
+these are source-resolution gaps, not eligibility filtering. They cluster in
+crafted / PvP / BoE territory that db sources and AtlasLoot do not cover:
+Lionheart Executioner, Stormherald, Bulwark of the Ancient Kings, Red Belt of
+Battle, Swiftstrike Shoulders, the Merciless/Vengeful Gladiator pieces,
+Furious Gizmatic Goggles (engineering), Mask of the Deceiver.
+
+A further **29 are missed in both runs** — Wowhead never rescued them either,
+so they are unowned gaps. By slot: trinket 9, ranged 4, legs 3, finger 3, then a
+tail. The trinket and ranged/libram concentration is the standout: those are
+badge, reputation, and world-drop items whose sources our pipeline resolves
+worst. Persistent misses include Bloodlust Brooch's peers — Hourglass of the
+Unraveller, Abacus of Violent Odds, Mark of the Champion, Slayer's Crest — and
+every ret libram (Avengement, Fervor, Hope).
+
+### Reading
+
+This does **not** say the shipping universe should drop Wowhead — losing those
+22 items would be a real recall regression for users. Keep it as an input for
+what ships; use the held-out number as the diagnostic. Two runs, one to ship and
+one to grade.
+
+It does say the Phase 1 gate box cannot be closed by quoting 76.4%. The honest
+figure for "would our pipeline find the right items on its own" is 58.5%, and
+the trinket/libram gap is a concrete, ownable defect rather than a vague recall
+worry. Ticket 18 now has its instrument and its first measurement.
