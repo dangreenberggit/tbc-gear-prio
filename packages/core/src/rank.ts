@@ -151,7 +151,9 @@ export async function rankUpgrades(
   const logged = await deps.gear.readGear(fight);
 
   onProgress?.({ stage: "composing" });
-  const race = input.race ?? "RaceHuman";
+  // PLAN.md §8.2 / race standing assumption: default to the preset skeleton's
+  // race (ret P2 is Blood Elf), not a hardcoded Human — WCL does not carry race.
+  const race = input.race ?? raceFromSkeleton(deps.raidSimSkeleton);
   let socketed: SocketedItem[] = socketedItemsFromLoggedGear(logged);
   let metaAdjusted = false;
   let metaSwaps: MetaRepairSwap[] = [];
@@ -332,6 +334,31 @@ export async function rankUpgrades(
     substitutions: substitutionsFromMetaRepair(metaSwaps),
     items: ranked,
   };
+}
+
+function raceFromSkeleton(skeleton: RaidSimRequest): Race {
+  const raw = (
+    skeleton as {
+      raid?: { parties?: Array<{ players?: Array<{ race?: string }> }> };
+    }
+  ).raid?.parties?.[0]?.players?.[0]?.race;
+  if (raw && isRace(raw)) return raw;
+  return "RaceHuman";
+}
+
+function isRace(value: string): value is Race {
+  return (
+    value === "RaceHuman" ||
+    value === "RaceDwarf" ||
+    value === "RaceNightElf" ||
+    value === "RaceGnome" ||
+    value === "RaceDraenei" ||
+    value === "RaceOrc" ||
+    value === "RaceUndead" ||
+    value === "RaceTauren" ||
+    value === "RaceTroll" ||
+    value === "RaceBloodElf"
+  );
 }
 
 function weightRecord(

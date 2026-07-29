@@ -25,3 +25,5 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   user review of post gem-preserve P3 rank.
 - 2026-07-28 — Candidate swaps migrate worn gems (UI-style) then EP-fill
   only empty sockets. Filed 15 (enchantAppliesToItem parity).
+- 2026-07-28 — Resolved 16: race defaults from raid-sim skeleton (ret P2
+  Blood Elf), not hardcoded Human. Dig: sim-settings-gap-dig.md.

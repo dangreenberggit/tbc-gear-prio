@@ -200,6 +200,7 @@ describe("rankUpgrades", () => {
         maxPhase: 2,
         iterations: 3000,
         seeds: [42],
+        race: "RaceHuman",
       },
       {
         gear: new RecordedGearSource({
@@ -244,6 +245,55 @@ describe("rankUpgrades", () => {
     expect(ranking.substitutions).toEqual([]);
   });
 
+  it("defaults race from the raid-sim skeleton when RankInput.race is omitted", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const request = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceBloodElf",
+      equipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const key = simCacheKey(request, "v0.0.101", opts);
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: new RecordedSimRunner(
+          "v0.0.101",
+          new Map([
+            [
+              key,
+              {
+                dps: 2003.26,
+                stdev: 91.9,
+                iterationsDone: 3000,
+                simVersion: "v0.0.101",
+              },
+            ],
+          ])
+        ),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+      }
+    );
+
+    expect(ranking.assumptions.race).toBe("RaceBloodElf");
+    expect(ranking.baseline.dps).toBe(2003.26);
+  });
+
   it("ranks a single-item neck swap by deltaDps against the baseline", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
@@ -282,6 +332,7 @@ describe("rankUpgrades", () => {
         maxPhase: 2,
         iterations: 3000,
         seeds: [42],
+        race: "RaceHuman",
       },
       {
         gear: new RecordedGearSource({
@@ -416,6 +467,7 @@ describe("rankUpgrades", () => {
       maxPhase: 1 as const,
       iterations: 3000,
       seeds: [42],
+      race: "RaceHuman" as const,
     };
 
     const a = await rankUpgrades(input, deps);
@@ -509,6 +561,7 @@ describe("rankUpgrades", () => {
         maxPhase: 3,
         iterations: 3000,
         seeds: [42],
+        race: "RaceHuman",
       },
       {
         gear: new RecordedGearSource({
@@ -579,6 +632,7 @@ describe("rankUpgrades", () => {
         maxPhase: 2,
         iterations: 3000,
         seeds: [42],
+        race: "RaceHuman",
       },
       {
         gear: new RecordedGearSource({

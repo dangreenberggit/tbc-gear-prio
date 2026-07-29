@@ -36,7 +36,7 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
   return [
     {
       id: "race",
-      detail: `Race assumed ${race} (not readable from WCL); override via RankInput.race.`,
+      detail: `Race assumed ${race} from the pinned preset (not readable from WCL); override via RankInput.race.`,
     },
     {
       id: "talents-apl-buffs-consumes-encounter",
