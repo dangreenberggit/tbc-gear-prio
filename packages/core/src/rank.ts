@@ -3,7 +3,10 @@
  * Stages land behind this; callers only see RankInput → Ranking.
  */
 
-import { fillEmptyCandidateGems } from "./candidate-gems.js";
+import {
+  fillEmptyCandidateGems,
+  type FillEmptyOpts,
+} from "./candidate-gems.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
 import { compose } from "./compose.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
@@ -13,7 +16,7 @@ import {
   type Assumptions,
   type Substitution,
 } from "./disclosure.js";
-import { gemsForPhase, type GemEntry } from "./gems.js";
+import { gemsForPhase, getGem, type GemEntry } from "./gems.js";
 import { isEnchantable } from "./items.js";
 import {
   equipmentFromLoggedGear,
@@ -26,6 +29,7 @@ import {
   type SocketedItem,
 } from "./meta-repair.js";
 import { isKaelTempLegendary } from "./kael-temp.js";
+import { GemColor } from "./proto/common_pb.js";
 import {
   filterPoolByPhase,
   simSlotsForPoolSlot,
@@ -433,7 +437,8 @@ function swapItemAt(
           itemId,
           migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
           palette,
-          epWeights
+          epWeights,
+          fillOptsForSwap(equipment, slotIndex)
         );
     const out: SimItemSpec = { id: itemId, gems };
     // Bare worn slot → no enchant on the candidate (do not invent one).
@@ -442,6 +447,35 @@ function swapItemAt(
     }
     return out;
   });
+}
+
+function fillOptsForSwap(
+  equipment: readonly SimItemSpec[],
+  slotIndex: number
+): FillEmptyOpts {
+  const usedUnique = new Set<number>();
+  const otherGemIds: number[] = [];
+  for (let i = 0; i < equipment.length; i++) {
+    if (i === slotIndex) continue;
+    for (const id of equipment[i]?.gems ?? []) {
+      if (!(id > 0)) continue;
+      otherGemIds.push(id);
+      if (getGem(id)?.unique) usedUnique.add(id);
+    }
+  }
+  const wornGems = (equipment[slotIndex]?.gems ?? []).filter((id) => id > 0);
+  const metaId = findMetaGemId([...otherGemIds, ...wornGems]);
+  return {
+    usedUnique,
+    ...(metaId !== undefined ? { meta: { metaId, otherGemIds } } : {}),
+  };
+}
+
+function findMetaGemId(gemIds: readonly number[]): number | undefined {
+  for (const id of gemIds) {
+    if (getGem(id)?.colour === GemColor.GemColorMeta) return id;
+  }
+  return undefined;
 }
 
 function applyRepairedGems(

@@ -3,15 +3,33 @@
  * palette. Chooses between colour-matched (keeps socket bonus) and unrestricted
  * layouts using gem-fill weights that zero softcapped ratings — uncapped hit
  * EP otherwise prefers Glinting over Bold on sets that are already hit-capped.
+ *
+ * Empty-fill also respects set-wide unique gems and, when meta context is
+ * provided, prefers near-EP gems that reduce meta deficit (avoids fill→repair
+ * thrash). See `.scratch/handoffs/gem-optimizer-comparison.md`.
  */
 
 import { getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
-import { gemColorMatchesSocket } from "./meta.js";
+import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat } from "./stats.js";
 
 type EpWeights = Readonly<Record<string, number>>;
+
+/** Absolute EP slack for meta-aware near-ties (fill weights). */
+const META_NEAR_EP = 1.0;
+
+export type FillEmptyOpts = {
+  /** Unique gem ids already socketed elsewhere on the set. */
+  usedUnique?: ReadonlySet<number>;
+  /**
+   * Meta gem + gems on **other slots only**. Gems kept on the piece under fill
+   * are contributed by the fill itself — listing them here double-counts their
+   * colour and can zero the deficit before any candidate is scored.
+   */
+  meta?: { metaId: number; otherGemIds: readonly number[] };
+};
 
 export function fillCandidateGems(
   itemId: number,
@@ -22,8 +40,8 @@ export function fillCandidateGems(
   if (sockets.length === 0) return [];
 
   const weights = gemFillWeights(epWeights);
-  const matched = fillSockets(sockets, palette, weights, true);
-  const free = fillSockets(sockets, palette, weights, false);
+  const matched = fillSockets(sockets, palette, weights, true, new Set());
+  const free = fillSockets(sockets, palette, weights, false, new Set());
   const matchedScore = layoutScore(itemId, sockets, matched, weights);
   const freeScore = layoutScore(itemId, sockets, free, weights);
   return freeScore > matchedScore ? free : matched;
@@ -36,18 +54,20 @@ export function fillEmptyCandidateGems(
   itemId: number,
   gems: readonly number[],
   palette: readonly GemEntry[],
-  epWeights: EpWeights
+  epWeights: EpWeights,
+  opts: FillEmptyOpts = {}
 ): number[] {
   const sockets = socketsFor(itemId);
   if (sockets.length === 0) return [];
 
-  const filled = fillCandidateGems(itemId, palette, epWeights);
-  const out: number[] = [];
-  for (let i = 0; i < sockets.length; i++) {
-    const kept = gems[i] ?? 0;
-    out.push(kept > 0 ? kept : (filled[i] ?? 0));
-  }
-  return out;
+  const weights = gemFillWeights(epWeights);
+  const base = sockets.map((_, i) => gems[i] ?? 0);
+  const matched = fillEmpties(sockets, base, palette, weights, true, opts);
+  const free = fillEmpties(sockets, base, palette, weights, false, opts);
+  return layoutScore(itemId, sockets, free, weights) >
+    layoutScore(itemId, sockets, matched, weights)
+    ? free
+    : matched;
 }
 
 /**
@@ -61,26 +81,70 @@ export function gemFillWeights(epWeights: EpWeights): Record<string, number> {
   return out;
 }
 
+function fillEmpties(
+  sockets: readonly number[],
+  base: readonly number[],
+  palette: readonly GemEntry[],
+  epWeights: EpWeights,
+  matchColors: boolean,
+  opts: FillEmptyOpts
+): number[] {
+  const out = [...base];
+  const usedUnique = new Set(opts.usedUnique ?? []);
+  for (const id of out) {
+    const g = getGem(id);
+    if (g?.unique) usedUnique.add(id);
+  }
+
+  for (let i = 0; i < sockets.length; i++) {
+    if ((out[i] ?? 0) > 0) continue;
+    const placed = out.filter((id) => id > 0);
+    const pick = bestGemForSocket(
+      sockets[i]!,
+      palette,
+      epWeights,
+      usedUnique,
+      matchColors,
+      opts.meta
+        ? {
+            metaId: opts.meta.metaId,
+            setGemIds: [...opts.meta.otherGemIds, ...placed],
+          }
+        : undefined
+    );
+    if (pick) {
+      out[i] = pick.id;
+      if (pick.unique) usedUnique.add(pick.id);
+    } else {
+      out[i] = 0;
+    }
+  }
+
+  return out;
+}
+
 function fillSockets(
   sockets: readonly number[],
   palette: readonly GemEntry[],
   epWeights: EpWeights,
-  matchColors: boolean
+  matchColors: boolean,
+  usedUnique: ReadonlySet<number>
 ): number[] {
   const gems: number[] = [];
-  const usedUnique = new Set<number>();
+  const used = new Set(usedUnique);
 
   for (const socket of sockets) {
     const pick = bestGemForSocket(
       socket,
       palette,
       epWeights,
-      usedUnique,
-      matchColors
+      used,
+      matchColors,
+      undefined
     );
     if (pick) {
       gems.push(pick.id);
-      if (pick.unique) usedUnique.add(pick.id);
+      if (pick.unique) used.add(pick.id);
     } else {
       gems.push(0);
     }
@@ -94,10 +158,10 @@ function bestGemForSocket(
   palette: readonly GemEntry[],
   epWeights: EpWeights,
   usedUnique: ReadonlySet<number>,
-  matchColors: boolean
+  matchColors: boolean,
+  metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined
 ): GemEntry | undefined {
-  let best: GemEntry | undefined;
-  let bestEp = -Infinity;
+  const eligible: { gem: GemEntry; ep: number }[] = [];
 
   for (const gem of palette) {
     if (gem.unique && usedUnique.has(gem.id)) continue;
@@ -110,14 +174,39 @@ function bestGemForSocket(
       continue;
     }
 
-    const ep = epScore(gem.stats, epWeights);
-    if (ep > bestEp) {
-      bestEp = ep;
-      best = gem;
+    eligible.push({ gem, ep: epScore(gem.stats, epWeights) });
+  }
+
+  if (eligible.length === 0) return undefined;
+
+  let bestEp = -Infinity;
+  for (const e of eligible) {
+    if (e.ep > bestEp) bestEp = e.ep;
+  }
+
+  const near = eligible.filter((e) => bestEp - e.ep <= META_NEAR_EP);
+  const pool = near.length > 0 ? near : eligible;
+
+  if (!metaCtx) {
+    return pool.reduce((a, b) => (b.ep > a.ep ? b : a)).gem;
+  }
+
+  let best: { gem: GemEntry; ep: number; deficit: number } | undefined;
+  for (const e of pool) {
+    const afterDeficit = metaDeficit(
+      metaCtx.metaId,
+      gemColorCounts([...metaCtx.setGemIds, e.gem.id])
+    );
+    if (
+      !best ||
+      afterDeficit < best.deficit ||
+      (afterDeficit === best.deficit && e.ep > best.ep)
+    ) {
+      best = { gem: e.gem, ep: e.ep, deficit: afterDeficit };
     }
   }
 
-  return best;
+  return best?.gem;
 }
 
 function layoutScore(

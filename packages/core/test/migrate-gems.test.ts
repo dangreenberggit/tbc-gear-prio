@@ -1,8 +1,22 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { fillEmptyCandidateGems } from "../src/candidate-gems.js";
-import { gemsForPhase } from "../src/gems.js";
+import { gemsForPhase, getGem } from "../src/gems.js";
 import { migrateGemsToItem } from "../src/migrate-gems.js";
 import { GemColor } from "../src/proto/common_pb.js";
+import { Stat } from "../src/stats.js";
+
+const retEpWeights = JSON.parse(
+  readFileSync(
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      "../../../data/presets/ret/p2.ep-weights.json"
+    ),
+    "utf8"
+  )
+).weights as Record<string, number>;
 
 describe("migrateGemsToItem", () => {
   it("moves colour-matched gems onto the new item's sockets", () => {
@@ -38,6 +52,52 @@ describe("fillEmptyCandidateGems", () => {
     expect(out[0]).toBe(24027);
     expect(out[1]).toBeGreaterThan(0);
     expect(out[1]).not.toBe(24027);
+  });
+
+  it("skips set-wide unique gems already used on another piece", () => {
+    // Restrict palette so the unique green is the unconstrained pick for the
+    // empty blue socket; a stam blue is the only fallback when unique is taken.
+    const palette = gemsForPhase(3).filter((g) =>
+      [30546, 24033].includes(g.id)
+    );
+    const unconstrained = fillEmptyCandidateGems(
+      30106,
+      [32193, 0],
+      palette,
+      retEpWeights
+    );
+    expect(unconstrained[1]).toBe(30546);
+    expect(getGem(30546)?.unique).toBe(true);
+
+    const blocked = fillEmptyCandidateGems(
+      30106,
+      [32193, 0],
+      palette,
+      retEpWeights,
+      { usedUnique: new Set([30546]) }
+    );
+    expect(blocked[1]).toBe(24033);
+  });
+
+  it("among near-EP picks, prefers a gem that reduces meta deficit", () => {
+    // Red socket empty; Relentless short one blue. Bold (10 str) vs Sovereign
+    // purple (5 str + stam). Under strength+stam weights they are within 1 EP;
+    // purple activates meta, Bold does not.
+    const palette = gemsForPhase(3).filter((g) =>
+      [32193, 32211].includes(g.id)
+    );
+    const ep = {
+      [String(Stat.StatStrength)]: 1,
+      [String(Stat.StatStamina)]: 0.7,
+    };
+    // Other slots only — the kept 32200 below belongs to the piece under fill
+    // and must not be counted here as well.
+    const otherGemIds = [32409, 32193, 32193, 32205, 32205];
+    // Endless Pit (28779) is red+blue — fill the red (index 0), keep the blue.
+    const out = fillEmptyCandidateGems(28779, [0, 32200], palette, ep, {
+      meta: { metaId: 32409, otherGemIds },
+    });
+    expect(out[0]).toBe(32211);
   });
 });
 
