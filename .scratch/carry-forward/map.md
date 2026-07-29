@@ -21,3 +21,7 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   `.scratch/carry-forward/issues/` (no nested worktree copies).
 - 2026-07-28 — Resolved 05: CI run 30409397254 showed Linux vs Windows
   empty-JSDoc trailing-space drift; normalize after `buf generate`.
+- 2026-07-28 — Filed 14 (carry missing enchant on candidate swap) from
+  user review of post gem-preserve P3 rank.
+- 2026-07-28 — Candidate swaps migrate worn gems (UI-style) then EP-fill
+  only empty sockets. Filed 15 (enchantAppliesToItem parity).

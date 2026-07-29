@@ -3,7 +3,8 @@
  * Stages land behind this; callers only see RankInput → Ranking.
  */
 
-import { fillCandidateGems } from "./candidate-gems.js";
+import { fillEmptyCandidateGems } from "./candidate-gems.js";
+import { migrateGemsToItem } from "./migrate-gems.js";
 import { compose } from "./compose.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import {
@@ -399,12 +400,16 @@ function swapItemAt(
   return equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
     const sameItem = spec.id === itemId;
-    const out: SimItemSpec = {
-      id: itemId,
-      gems: sameItem
-        ? [...(spec.gems ?? [])]
-        : fillCandidateGems(itemId, palette, epWeights),
-    };
+    const gems = sameItem
+      ? [...(spec.gems ?? [])]
+      : fillEmptyCandidateGems(
+          itemId,
+          migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
+          palette,
+          epWeights
+        );
+    const out: SimItemSpec = { id: itemId, gems };
+    // Bare worn slot → no enchant on the candidate (do not invent one).
     if (spec.enchant && isEnchantable(itemId)) {
       out.enchant = spec.enchant;
     }

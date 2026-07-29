@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillCandidateGems } from "../src/candidate-gems.js";
+import { fillEmptyCandidateGems } from "../src/candidate-gems.js";
+import { migrateGemsToItem } from "../src/migrate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase } from "../src/gems.js";
@@ -113,7 +114,7 @@ class CapturingSimRunner implements SimRunner {
   }
 }
 
-/** Mirror rank.ts candidate swap: fill sockets then repair meta on the full set. */
+/** Mirror rank.ts candidate swap: migrate gems, fill empties, repair meta. */
 function candidateEquipmentForTest(
   equipment: SimItemSpec[],
   slotName: (typeof SIM_ORDER)[number],
@@ -126,12 +127,15 @@ function candidateEquipmentForTest(
   const swapped = equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
     const sameItem = spec.id === itemId;
-    const out: SimItemSpec = {
-      id: itemId,
-      gems: sameItem
-        ? [...(spec.gems ?? [])]
-        : fillCandidateGems(itemId, palette, epWeights),
-    };
+    const gems = sameItem
+      ? [...(spec.gems ?? [])]
+      : fillEmptyCandidateGems(
+          itemId,
+          migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
+          palette,
+          epWeights
+        );
+    const out: SimItemSpec = { id: itemId, gems };
     if (spec.enchant && isEnchantable(itemId)) {
       out.enchant = spec.enchant;
     }
@@ -423,11 +427,15 @@ describe("rankUpgrades", () => {
     expect(a.items.map((i) => i.itemId)).toEqual([29381]);
   });
 
-  it("gem-fills socketed candidates before simming", async () => {
+  it("migrates worn gems onto socketed candidates before simming", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
-    // Not currently worn — proves fill on a true swap (waist is Endless Pit).
+    // Not currently worn — waist is Endless Pit with gems that should migrate.
     const beltId = 30106; // Belt of One-Hundred Deaths
+    const waistIdx = SIM_ORDER.indexOf("waist");
+    const wornWaistGems = [...(equipment[waistIdx]!.gems ?? [])];
+    expect(wornWaistGems.some((id) => id > 0)).toBe(true);
+
     const upgradedEquipment = candidateEquipmentForTest(
       equipment,
       "waist",
@@ -435,9 +443,12 @@ describe("rankUpgrades", () => {
       3,
       epWeights
     );
-    const waistIdx = SIM_ORDER.indexOf("waist");
     expect(upgradedEquipment[waistIdx]!.gems.length).toBeGreaterThan(0);
     expect(upgradedEquipment[waistIdx]!.gems.every((id) => id > 0)).toBe(true);
+    // At least one worn gem should survive onto the new belt (UI-style migrate).
+    expect(
+      upgradedEquipment[waistIdx]!.gems.some((id) => wornWaistGems.includes(id))
+    ).toBe(true);
 
     const baselineReq = compose(skeleton, {
       name: "slamaltman",

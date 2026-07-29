@@ -30,6 +30,27 @@ export function fillCandidateGems(
 }
 
 /**
+ * Keep already-placed gems; EP-fill only empty sockets (after UI-style migrate).
+ */
+export function fillEmptyCandidateGems(
+  itemId: number,
+  gems: readonly number[],
+  palette: readonly GemEntry[],
+  epWeights: EpWeights
+): number[] {
+  const sockets = socketsFor(itemId);
+  if (sockets.length === 0) return [];
+
+  const filled = fillCandidateGems(itemId, palette, epWeights);
+  const out: number[] = [];
+  for (let i = 0; i < sockets.length; i++) {
+    const kept = gems[i] ?? 0;
+    out.push(kept > 0 ? kept : (filled[i] ?? 0));
+  }
+  return out;
+}
+
+/**
  * Softcaps: melee hit / expertise EP overstates gems on capped raid sets.
  * Used only for candidate socket fills — meta-repair keeps full EP weights.
  */

@@ -79,7 +79,13 @@ export type {
   Region,
   SpecId,
 } from "./types.js";
-export { fillCandidateGems, gemEp, gemFillWeights } from "./candidate-gems.js";
+export {
+  fillCandidateGems,
+  fillEmptyCandidateGems,
+  gemEp,
+  gemFillWeights,
+} from "./candidate-gems.js";
+export { migrateGemsToItem, gemEligibleForSocket } from "./migrate-gems.js";
 export {
   SLOT_ORDER,
   formatItemSource,
