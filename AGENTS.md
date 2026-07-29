@@ -58,6 +58,10 @@ the eight stages must stay reorganisable without touching a test.
 
 When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
 
+### Parking WIP
+
+When you stash WIP, say what you parked and what tip is missing because of it. Name the important pieces (files or jobs), not a vibe. If tip still needs any of that to be correct or complete, write that down before you start the next work. “Restore later if needed” is not enough.
+
 ### Models and walls
 
 **Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute for a _sharp_ job. On **Cursor**: workhorse = **Composer** (simple/mechanical Task spawns); sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Cursor manager fan-out). On **Claude Code**, sharp Opus work defaults to **effort `medium`** (not a model slug — set Opus and `/effort medium`); reserve effort `high`+ for niche cases like a single adversarial review axis. Prefer Sonnet/Terra workhorse and sol/`codex` sharp elsewhere when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).

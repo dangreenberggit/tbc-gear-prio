@@ -22,7 +22,9 @@ empty `//` comment lines in `data/proto`. Normalization is warranted.
 
 **Fix:** `scripts/normalize_proto_gen.py` runs after `buf generate` (wired in
 `pnpm proto:generate`). Committed generated output matches the Linux/CI bytes.
-Re-run evidence: subsequent CI on the fix commit.
+Re-run evidence: CI
+[30409562894](https://github.com/dangreenberggit/tbc-gear-prio/actions/runs/30409562894)
+green through `proto:generate` + `git diff --exit-code`.
 
 ## Problem (historical)
 
