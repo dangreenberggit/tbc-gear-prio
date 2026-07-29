@@ -133,7 +133,10 @@ def ret_eligible_d7(it: dict) -> bool:
     if slot == "weapon":
         if it.get("handType") != HAND_TYPE_TWO_HAND:
             return False
-        if it.get("weaponType") in (WEAPON_POLEARM, WEAPON_STAFF):
+        # Paladins can wield polearms but not staves — the two are not
+        # interchangeable here. wowsims ui/core/player_classes/paladin.ts lists
+        # Polearm with canUseTwoHand: true and omits Staff entirely.
+        if it.get("weaponType") == WEAPON_STAFF:
             return False
         return True
     if slot == "ranged":

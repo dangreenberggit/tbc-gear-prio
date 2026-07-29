@@ -1,9 +1,10 @@
 {
-  "specNote": "Phase → raid zone mapping for raid-scoped pool membership. Zone names are canonical db.json zones[].name strings. Carryover policy: union of all raids with phase <= maxPhase (sub-phase 0 D1).",
+  "specNote": "Phase → raid zone mapping for raid-scoped pool membership. Zone names are canonical db.json zones[].name strings, except \"World Bosses\" (zoneId null): Doomwalker and Doom Lord Kazzak are outdoor, absent from db.json zones/npcs/sources entirely, and reach the universe only via AtlasLoot's WorldBossesBC block. Carryover policy: union of all raids with phase <= maxPhase (sub-phase 0 D1).",
   "zones": [
     { "phase": 1, "name": "Karazhan", "zoneId": 3457 },
     { "phase": 1, "name": "Gruul's Lair", "zoneId": 3923 },
     { "phase": 1, "name": "Magtheridon's Lair", "zoneId": 3836 },
+    { "phase": 1, "name": "World Bosses", "zoneId": null },
     { "phase": 2, "name": "Serpentshrine Cavern", "zoneId": 3607 },
     { "phase": 2, "name": "Tempest Keep", "zoneId": 3845 },
     { "phase": 3, "name": "Black Temple", "zoneId": 3959 },

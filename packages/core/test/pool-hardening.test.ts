@@ -3,7 +3,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { KAEL_TEMP_LEGENDARY_IDS } from "../src/kael-temp.js";
-import { ArmorType, RangedWeaponType } from "../src/proto/common_pb.js";
+import {
+  ArmorType,
+  RangedWeaponType,
+  WeaponType,
+} from "../src/proto/common_pb.js";
 import {
   filterByZone,
   filterPoolByPhase,
@@ -23,6 +27,7 @@ type WowsimsDbItem = {
   setId?: number;
   armorType?: number;
   rangedWeaponType?: number;
+  weaponType?: number;
   phase?: number;
 };
 
@@ -160,7 +165,12 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it("ships no empty sources on any row", () => {
-    expect(universeP3.length).toBe(347);
+    // 347 -> 349: the D7 weapon rule stopped rejecting polearms alongside
+    // staves (paladins can wield polearms) — +28774 Glaive of the Pit,
+    // +32248 Halberd of Desolation.
+    // 349 -> 362: AtlasLoot's WorldBossesBC block now resolves, admitting the
+    // 13 Doomwalker / Doom Lord Kazzak drops that db.json has no sources for.
+    expect(universeP3.length).toBe(362);
     for (const e of raw.entries) {
       expect(e.sources.length, `${e.itemId} ${e.name}`).toBeGreaterThan(0);
     }
@@ -236,6 +246,39 @@ describe("data/universes/ret-p3.json hardening", () => {
   it.todo(
     "includes Shattrath Leggings (30257, leather legs) — blocked: no db/atlasloot/wowhead source (06-hardening §2.4)"
   );
+
+  it("admits world boss drops via AtlasLoot", () => {
+    // db.json has no sources, npcs or outdoor zones for Doomwalker and Doom
+    // Lord Kazzak, so AtlasLoot's WorldBossesBC block is the only path in.
+    for (const [id, name] of [
+      [30729, "Black-Iron Battlecloak"],
+      [30730, "Terrorweave Tunic"],
+      [30738, "Ring of Reciprocity"],
+      [30739, "Scaled Greaves of the Marksman"],
+      [30740, "Ripfiend Shoulderplates"],
+    ] as const) {
+      expect(poolIds.has(id), `${id} ${name}`).toBe(true);
+      const entry = universeP3.find((e) => e.itemId === id)!;
+      expect(entry.source.zone, `${id} ${name}`).toBe("World Bosses");
+    }
+  });
+
+  it("admits two-hand polearms but never staves", () => {
+    // Paladins can wield polearms; staves they cannot. The D7 rule once
+    // rejected both in one condition, which hid Glaive of the Pit (a
+    // Magtheridon drop) from the universe.
+    expect(poolIds.has(28774), "Glaive of the Pit (polearm)").toBe(true);
+    expect(poolIds.has(32248), "Halberd of Desolation (polearm)").toBe(true);
+  });
+
+  it.skipIf(!hasWowsimsVendor)("no staff ever enters the universe", () => {
+    for (const e of universeP3) {
+      const dbItem = byId.get(e.itemId);
+      expect(dbItem?.weaponType, `${e.itemId} ${e.name} is a staff`).not.toBe(
+        WeaponType.WeaponTypeStaff
+      );
+    }
+  });
 
   it("includes all tier pieces through phase 3 with token zone attribution", () => {
     // two-hop map is the committed source of truth for ret tier piece IDs;

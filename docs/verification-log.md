@@ -521,3 +521,83 @@ It does say the Phase 1 gate box cannot be closed by quoting 76.4%. The honest
 figure for "would our pipeline find the right items on its own" is 58.5%, and
 the trinket/libram gap is a concrete, ownable defect rather than a vague recall
 worry. Ticket 18 now has its instrument and its first measurement.
+
+---
+
+## 2026-07-28 — Two membership bugs: polearms and world bosses
+
+Both found by reading the held-out recall misses (previous entry) against the
+design intent, which is **raid zone drops**. Most of the 29 persistent misses
+turned out to be *correct* exclusions — vanilla raids, heroic 5-mans, quests,
+world drops. Two were real defects.
+
+### Polearms were rejected alongside staves
+
+`ret_eligible_d7` rejected `WEAPON_POLEARM` and `WEAPON_STAFF` in one condition.
+Paladins can wield polearms; staves they cannot. Authority is wowsims'
+`ui/core/player_classes/paladin.ts`, which lists Polearm with
+`canUseTwoHand: true` and omits Staff entirely:
+
+```
+static weaponTypes: EligibleWeaponType[] = [
+    { weaponType: WeaponType.WeaponTypeAxe, canUseTwoHand: true },
+    { weaponType: WeaponType.WeaponTypeMace, canUseTwoHand: true },
+    { weaponType: WeaponType.WeaponTypeOffHand },
+    { weaponType: WeaponType.WeaponTypePolearm, canUseTwoHand: true },
+    { weaponType: WeaponType.WeaponTypeShield },
+    { weaponType: WeaponType.WeaponTypeSword, canUseTwoHand: true },
+];
+```
+
+Blast radius is small: of 57 two-hand polearms in `db.json`, only three have a
+source resolving to a phase≤3 raid zone. **+28774 Glaive of the Pit**
+(Magtheridon, admitted at p2 and p3) and **+32248 Halberd of Desolation** (Black
+Temple, p3 only). 34183 Shivering Felspine is Sunwell, correctly still out. No
+caster polearm exists at quality ≥ 3, so nothing embarrassing entered.
+
+### World boss drops were unreachable by design
+
+Doomwalker and Doom Lord Kazzak drops carry **no `sources` key at all** in
+`db.json` — not an empty array, the key is absent. `db.zones` (74 entries) holds
+only instanced content, no outdoor zones, and `db.npcs` has no record for either
+boss. So no `data/phase_raids.json` row could ever have matched them, whatever
+the zone was called.
+
+AtlasLoot *does* carry both loot tables (`WorldBossesBC`, 20 items, with
+npcIDs), but `parse_atlasloot.py` dropped the block: it has no `MapID` and had no
+`INSTANCE_ZONE_ALIASES` entry, so `resolve_zone` returned `None`. Adding the
+alias plus a `{"phase": 1, "name": "World Bosses", "zoneId": null}` row admits
+13 ret-eligible drops.
+
+### Net effect
+
+| | before | after |
+|---|---|---|
+| `ret-p2.json` | 224 | **238** |
+| `ret-p3.json` | 347 | **362** |
+| Wowhead recall (list as input) | 94/123 (76.4%) | **100/123 (81.3%)** |
+| Wowhead recall (**held out**) | 72/123 (58.5%) | **78/123 (63.4%)** |
+| caster reject rate | 32.9% | 32.9% |
+
+Nothing was removed from either universe. The caster reject rate is unchanged, so
+the additions did not skew the population. Tier coverage stays 15/15.
+
+Some admitted world-boss items are caster gear (Ancient Spellcloak of the
+Highborne, Ring of Flowing Light). That is expected and pre-existing: cloaks,
+rings and necks have no armor-type gate in D7, and the caster junk filter is
+deliberately **off** pending ticket 18's sim measurement.
+
+### Guards added
+
+`pool-hardening.test.ts` now asserts polearms are admitted, that **no** staff
+ever enters the universe, and that the five Wowhead-named world-boss items carry
+`source.zone === "World Bosses"`. Two hard-coded universe counts (349→362 in
+`pool-hardening`, 224→238 in `pool.test.ts`) caught both membership changes
+before commit — they are working as intended and were updated with reasons rather
+than loosened.
+
+### Still non-raid, still out (deliberate)
+
+Badge and reputation vendors are not covered. Per the user, badge items matter at
+P1 (heavily non-raid) and possibly P4, not P3, so this is not blocking. Every ret
+libram and most badge/rep trinkets remain absent — see ticket 17.

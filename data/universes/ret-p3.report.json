@@ -8,44 +8,46 @@
     "Karazhan",
     "Magtheridon's Lair",
     "Serpentshrine Cavern",
-    "Tempest Keep"
+    "Tempest Keep",
+    "World Bosses"
   ],
-  "d7EligibleTotal": 4212,
-  "excludedNoSource": 2322,
-  "universeTotal": 347,
+  "d7EligibleTotal": 4251,
+  "excludedNoSource": 2333,
+  "universeTotal": 362,
   "listOnlyMembership": 21,
   "perSlot": {
-    "back": 26,
-    "chest": 27,
-    "feet": 35,
-    "finger": 30,
-    "hands": 25,
-    "head": 23,
-    "legs": 20,
-    "neck": 22,
+    "back": 28,
+    "chest": 28,
+    "feet": 36,
+    "finger": 32,
+    "hands": 26,
+    "head": 25,
+    "legs": 21,
+    "neck": 23,
     "ranged": 3,
-    "shoulder": 25,
+    "shoulder": 26,
     "trinket": 28,
     "waist": 36,
-    "weapon": 14,
+    "weapon": 17,
     "wrist": 33
   },
   "sourceRecordAdds": {
-    "db": 1857,
-    "atlasloot": 357,
+    "db": 1877,
+    "atlasloot": 373,
     "two-hop": 18,
-    "wowhead": 62
+    "wowhead": 61
   },
   "membershipByOrigin": {
     "listOnly": 21,
-    "itemHasOrigin:db": 323,
-    "itemHasOrigin:wowhead": 42,
-    "zoneMatch": 326,
-    "itemHasOrigin:atlasloot": 40,
+    "itemHasOrigin:db": 325,
+    "itemHasOrigin:wowhead": 47,
+    "zoneMatch": 341,
+    "itemHasOrigin:atlasloot": 53,
     "itemHasOrigin:two-hop": 15
   },
   "exclusivePrimaryOrigin": {
-    "db": 323,
+    "db": 325,
+    "atlasloot-only": 13,
     "two-hop": 15,
     "wowhead-only": 9
   },
@@ -53,13 +55,160 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 347,
-    "casterOnlyReject": 114,
-    "epFloorReject": 16,
-    "combinedReject": 130,
-    "combinedKeep": 217,
+    "total": 362,
+    "casterOnlyReject": 119,
+    "epFloorReject": 17,
+    "combinedReject": 136,
+    "combinedKeep": 226,
     "casterRejectPct": 32.9,
-    "combinedRejectPct": 37.5
+    "combinedRejectPct": 37.6
   },
-  "wowheadListIds": 123
+  "wowheadListIds": 123,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 123,
+    "recalled": 100,
+    "missed": 23,
+    "recallPct": 81.3,
+    "missedItems": [
+      {
+        "itemId": 18823,
+        "name": "Aged Core Leather Gloves",
+        "slot": "hands",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 19343,
+        "name": "Scrolls of Blinding Light",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 19406,
+        "name": "Drake Fang Talisman",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 22401,
+        "name": "Libram of Hope",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 22954,
+        "name": "Kiss of the Spider",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23041,
+        "name": "Slayer's Crest",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23203,
+        "name": "Libram of Fervor",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23206,
+        "name": "Mark of the Champion",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27484,
+        "name": "Libram of Avengement",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27878,
+        "name": "Auchenai Death Shroud",
+        "slot": "back",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29119,
+        "name": "Haramad's Bargain",
+        "slot": "neck",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29247,
+        "name": "Girdle of the Deathdealer",
+        "slot": "waist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30257,
+        "name": "Shattrath Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30341,
+        "name": "Flesh Handler's Gauntlets",
+        "slot": "hands",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 30834,
+        "name": "Shapeshifter's Signet",
+        "slot": "finger",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31033,
+        "name": "Libram of Righteous Power",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31275,
+        "name": "Necklace of Trophies",
+        "slot": "neck",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31544,
+        "name": "Clefthoof Hide Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31856,
+        "name": "Darkmoon Card: Crusade",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31920,
+        "name": "Shaffar's Band of Brutality",
+        "slot": "finger",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 38287,
+        "name": "Empty Mug of Direbrew",
+        "slot": "trinket",
+        "d7Eligible": true
+      }
+    ]
+  }
 }

@@ -42,6 +42,11 @@ INSTANCE_ZONE_ALIASES: dict[str, str] = {
     "BlackTemple": "Black Temple",
     "SunwellPlateau": "Sunwell Plateau",
     "ZulAman": "Zul'Aman",
+    # Doomwalker and Doom Lord Kazzak are outdoor, so they have no MapID and
+    # wowsims' db.json carries no sources for their drops at all. AtlasLoot is
+    # the only place their loot tables exist, and this alias is what lets them
+    # resolve — without it the whole block is dropped as zone-unresolved.
+    "WorldBossesBC": "World Bosses",
 }
 
 DATA_BLOCK_RE = re.compile(r'^data\["([^"]+)"\]\s*=\s*\{', re.MULTILINE)

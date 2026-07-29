@@ -3,7 +3,7 @@
   "maxPhase": 2,
   "carryoverPolicy": "union",
   "generatedBy": "scripts/assemble_universe.py",
-  "d7Note": "D7 eligibility implemented in assemble_universe.py; generate_pool.ret_equippable() remains plate-only.",
+  "d7Note": "D7 eligibility implemented in assemble_universe.py.",
   "entries": [
     {
       "itemId": 28672,
@@ -72,6 +72,28 @@
         }
       ],
       "curationHint": 48.88
+    },
+    {
+      "itemId": 30729,
+      "name": "Black-Iron Battlecloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        },
+        {
+          "kind": "raid",
+          "zone": "World Boss",
+          "boss": "Doomwalker"
+        }
+      ],
+      "curationHint": 47.7
     },
     {
       "itemId": 28777,
@@ -157,6 +179,23 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Moroes"
+        }
+      ],
+      "curationHint": 6.12
+    },
+    {
+      "itemId": 30735,
+      "name": "Ancient Spellcloak of the Highborne",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
         }
       ],
       "curationHint": 6.12
@@ -411,6 +450,28 @@
         }
       ],
       "curationHint": 111.95
+    },
+    {
+      "itemId": 30730,
+      "name": "Terrorweave Tunic",
+      "slot": "chest",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        },
+        {
+          "kind": "raid",
+          "zone": "World Boss",
+          "boss": "Doomwalker"
+        }
+      ],
+      "curationHint": 103.76
     },
     {
       "itemId": 30054,
@@ -821,6 +882,23 @@
       "curationHint": 5.1
     },
     {
+      "itemId": 30737,
+      "name": "Gold-Leaf Wildboots",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 4.93
+    },
+    {
       "itemId": 30092,
       "name": "Orca-Hide Boots",
       "slot": "feet",
@@ -1033,6 +1111,28 @@
       "curationHint": 76.6
     },
     {
+      "itemId": 30738,
+      "name": "Ring of Reciprocity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
+        },
+        {
+          "kind": "raid",
+          "zone": "World Boss",
+          "boss": "Doom Lord Kazzak"
+        }
+      ],
+      "curationHint": 72.3
+    },
+    {
       "itemId": 28649,
       "name": "Garona's Signet Ring",
       "slot": "finger",
@@ -1185,6 +1285,23 @@
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
           "boss": "Lady Vashj"
+        }
+      ],
+      "curationHint": 4.25
+    },
+    {
+      "itemId": 30736,
+      "name": "Ring of Flowing Light",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
         }
       ],
       "curationHint": 4.25
@@ -1660,6 +1777,23 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 30741,
+      "name": "Topaz-Studded Battlegrips",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 29983,
       "name": "Fel-Steel Warhelm",
       "slot": "head",
@@ -1904,6 +2038,23 @@
       "curationHint": 7.99
     },
     {
+      "itemId": 30728,
+      "name": "Fathom-Helm of the Deeps",
+      "slot": "head",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 6.12
+    },
+    {
       "itemId": 30048,
       "name": "Brighthelm of Justice",
       "slot": "head",
@@ -1936,6 +2087,23 @@
         }
       ],
       "curationHint": 5.27
+    },
+    {
+      "itemId": 30731,
+      "name": "Faceguard of the Endless Watch",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 30132,
@@ -2016,6 +2184,28 @@
         }
       ],
       "curationHint": 99.96
+    },
+    {
+      "itemId": 30739,
+      "name": "Scaled Greaves of the Marksman",
+      "slot": "legs",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
+        },
+        {
+          "kind": "raid",
+          "zone": "World Boss",
+          "boss": "Doom Lord Kazzak"
+        }
+      ],
+      "curationHint": 93.31
     },
     {
       "itemId": 29950,
@@ -2371,6 +2561,23 @@
       "curationHint": 4.42
     },
     {
+      "itemId": 30726,
+      "name": "Archaic Charm of Presence",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 4.25
+    },
+    {
       "itemId": 28609,
       "name": "Emberspur Talisman",
       "slot": "neck",
@@ -2502,6 +2709,28 @@
         }
       ],
       "curationHint": 0.0
+    },
+    {
+      "itemId": 30740,
+      "name": "Ripfiend Shoulderplates",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses"
+        },
+        {
+          "kind": "raid",
+          "zone": "World Boss",
+          "boss": "Doom Lord Kazzak"
+        }
+      ],
+      "curationHint": 83.89
     },
     {
       "itemId": 30055,
@@ -3629,6 +3858,23 @@
       "curationHint": 73.59
     },
     {
+      "itemId": 30722,
+      "name": "Ethereum Nexus-Reaver",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 73.1
+    },
+    {
       "itemId": 28587,
       "name": "Legacy",
       "slot": "weapon",
@@ -3712,6 +3958,23 @@
         }
       ],
       "curationHint": 44.0
+    },
+    {
+      "itemId": 28774,
+      "name": "Glaive of the Pit",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 30057,

@@ -169,7 +169,10 @@ describe("data/universes/ret-p2.json", () => {
     const entries = poolFromUniverse(
       data as Parameters<typeof poolFromUniverse>[0]
     );
-    expect(entries.length).toBe(224);
+    // 224 -> 238: +28774 Glaive of the Pit (polearms are paladin-equippable,
+    // the D7 rule used to reject them alongside staves) and the 13 Doomwalker /
+    // Doom Lord Kazzak drops now resolving through AtlasLoot's WorldBossesBC.
+    expect(entries.length).toBe(238);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();
