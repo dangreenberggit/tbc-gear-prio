@@ -125,9 +125,12 @@ function candidateEquipmentForTest(
   const palette = gemsForPhase(maxPhase);
   const swapped = equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
+    const sameItem = spec.id === itemId;
     const out: SimItemSpec = {
       id: itemId,
-      gems: fillCandidateGems(itemId, palette, epWeights),
+      gems: sameItem
+        ? [...(spec.gems ?? [])]
+        : fillCandidateGems(itemId, palette, epWeights),
     };
     if (spec.enchant && isEnchantable(itemId)) {
       out.enchant = spec.enchant;
@@ -423,17 +426,18 @@ describe("rankUpgrades", () => {
   it("gem-fills socketed candidates before simming", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
-    const headId = 32461; // Furious Gizmatic Goggles — three sockets
+    // Not currently worn — proves fill on a true swap (waist is Endless Pit).
+    const beltId = 30106; // Belt of One-Hundred Deaths
     const upgradedEquipment = candidateEquipmentForTest(
       equipment,
-      "head",
-      headId,
-      2,
+      "waist",
+      beltId,
+      3,
       epWeights
     );
-    const headIdx = SIM_ORDER.indexOf("head");
-    expect(upgradedEquipment[headIdx]!.gems.length).toBeGreaterThan(0);
-    expect(upgradedEquipment[headIdx]!.gems.every((id) => id > 0)).toBe(true);
+    const waistIdx = SIM_ORDER.indexOf("waist");
+    expect(upgradedEquipment[waistIdx]!.gems.length).toBeGreaterThan(0);
+    expect(upgradedEquipment[waistIdx]!.gems.every((id) => id > 0)).toBe(true);
 
     const baselineReq = compose(skeleton, {
       name: "slamaltman",
@@ -475,14 +479,14 @@ describe("rankUpgrades", () => {
 
     const pool = [
       {
-        itemId: headId,
-        name: "Furious Gizmatic Goggles",
-        slot: "head" as const,
+        itemId: beltId,
+        name: "Belt of One-Hundred Deaths",
+        slot: "waist" as const,
         phase: 2,
         source: {
           kind: "raid" as const,
-          zone: "Tempest Keep",
-          boss: "Void Reaver",
+          zone: "Serpentshrine Cavern",
+          boss: "Lady Vashj",
         },
       },
     ];
@@ -491,7 +495,7 @@ describe("rankUpgrades", () => {
       {
         character: CHAR,
         spec: "ret",
-        maxPhase: 2,
+        maxPhase: 3,
         iterations: 3000,
         seeds: [42],
       },
@@ -521,9 +525,92 @@ describe("rankUpgrades", () => {
           }>;
         }
       ).parties[0]?.players[0]?.equipment.items ?? [];
-    const headItem = items[headIdx]!;
-    expect(headItem.id).toBe(headId);
-    expect(headItem.gems.length).toBeGreaterThan(0);
-    expect(headItem.gems.every((id) => id > 0)).toBe(true);
+    const waistItem = items[waistIdx]!;
+    expect(waistItem.id).toBe(beltId);
+    expect(waistItem.gems.length).toBeGreaterThan(0);
+    expect(waistItem.gems.every((id) => id > 0)).toBe(true);
+  });
+
+  it("preserves worn gems when ranking an already-equipped item", async () => {
+    // Diagnosis: .scratch/handoffs/same-item-delta-diagnosis.md —
+    // re-filling Gizmatic wiped Relentless Earthstorm and simmed −35 DPS.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const headIdx = SIM_ORDER.indexOf("head");
+    const headId = equipment[headIdx]!.id!;
+    const wornGems = [...(equipment[headIdx]!.gems ?? [])];
+    expect(headId).toBe(32461);
+    expect(wornGems).toEqual([32409, 24054]);
+
+    const baselineReq = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(baselineReq, "v0.0.101", opts);
+    const obs = {
+      dps: 2042.85,
+      stdev: 91.9,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    };
+
+    const sim = new CapturingSimRunner(
+      "v0.0.101",
+      new Map([[baselineKey, obs]])
+    );
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          {
+            itemId: headId,
+            name: "Furious Gizmatic Goggles",
+            slot: "head",
+            phase: 2,
+            source: {
+              kind: "raid",
+              zone: "Tempest Keep",
+              boss: "Void Reaver",
+            },
+          },
+        ],
+      }
+    );
+
+    // Same-item candidate must reuse the baseline request (identical gems).
+    expect(sim.requests).toHaveLength(2);
+    expect(simCacheKey(sim.requests[1]!, "v0.0.101", opts)).toBe(baselineKey);
+    const items =
+      (
+        sim.requests[1]!.raid as {
+          parties: Array<{
+            players: Array<{
+              equipment: { items: Array<{ id: number; gems: number[] }> };
+            }>;
+          }>;
+        }
+      ).parties[0]?.players[0]?.equipment.items ?? [];
+    expect(items[headIdx]!.gems).toEqual(wornGems);
+    expect(ranking.items).toHaveLength(1);
+    expect(ranking.items[0]!.owned).toBe(true);
+    expect(ranking.items[0]!.deltaDps).toBe(0);
   });
 });

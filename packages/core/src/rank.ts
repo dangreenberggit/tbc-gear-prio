@@ -398,9 +398,12 @@ function swapItemAt(
 ): SimItemSpec[] {
   return equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
+    const sameItem = spec.id === itemId;
     const out: SimItemSpec = {
       id: itemId,
-      gems: fillCandidateGems(itemId, palette, epWeights),
+      gems: sameItem
+        ? [...(spec.gems ?? [])]
+        : fillCandidateGems(itemId, palette, epWeights),
     };
     if (spec.enchant && isEnchantable(itemId)) {
       out.enchant = spec.enchant;
