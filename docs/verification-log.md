@@ -322,3 +322,134 @@ Reproduce (pinned `wowsimcli` v0.0.101, fixture request, 3000 iter, seed 42):
 Compose / the skeleton generator must merge the pinned APL; `type`+`simple`
 alone is wrong. PLAN.md §8.2 updated to the build-time generator + golden
 skeleton shape (design C).
+
+---
+
+## 2026-07-28 — Phase 1 gate reconciliation (audit, no new engine work)
+
+The Phase 1 gate in PLAN.md §14 showed 2 of 10 boxes checked. Several were
+already met by code on `phase-1/five-seed-spread` but had never been written
+down. This sitting audits each box against what exists today. **No box below is
+closed by new implementation** — only by recording evidence that already passes,
+or by measuring a committed artifact.
+
+### ☑ Same input, same seed, same deltas across runs
+
+`packages/core/test/rank.test.ts` — "returns identical deltas for the same seed
+and recordings" calls `rankUpgrades` **twice** against one shared `deps`
+(`RecordedGearSource` / `RecordedSimRunner` / `MemoryStore`, `seed: 42`,
+`seeds: [42]`) and compares `[itemId, deltaDps]` pairs.
+
+Scope of the claim: this is determinism **of the engine at the `rankUpgrades`
+seam**, which is what the gate asks for. It is *not* a claim that the live
+`wowsimcli` binary is deterministic across two real spawns — `RecordedSimRunner`
+replays by `simCacheKey`, and `cli-sim-runner.test.ts` (the only real-binary
+test) runs the binary once and skips where `vendor/` is absent.
+
+Reproduce: `pnpm exec vitest run packages/core/test/rank.test.ts` (8 passed).
+
+### ☑ The full engine runs offline from fixtures in a unit test
+
+Same file. Every test in `rank.test.ts` drives the real exported `rankUpgrades`
+(PLAN.md §4 public entry point) through recorded adapters at all three §5 seams —
+no network, no binary spawn. `RecordedSimRunner.run` throws when no recording
+matches, so a green run proves execution stayed inside the fixture set.
+
+**Correction worth recording:** `packages/core/test/slamaltman-offline.test.ts`
+is *not* evidence for this box despite its name. It calls only
+`slamaltmanOfflineRecordings(raw)` and asserts on loaded `GearSource` shape; it
+never composes a request, never calls `sim.run`, never touches `Store`. Cite
+`rank.test.ts` for this box.
+
+### ☑ No pool entry ships with `source: null` (§8.3.2)
+
+Measured on the committed universes (the only ranking membership that ships —
+`data/pools/` was deleted, see its README):
+
+| Universe | entries | entries with empty/missing `sources` |
+|---|---|---|
+| `data/universes/ret-p2.json` | 224 | **0** |
+| `data/universes/ret-p3.json` | 347 | **0** |
+
+Tier coverage is also complete in both: p2 10/10 expected tier pieces present,
+p3 15/15, `tierPiecesMissing: []`.
+
+Note the schema is `sources` (an array of `{kind, zone, boss}` rows), not a
+scalar `source`. A first probe reading `.source` reported 224/224 null and was
+wrong; the corrected probe reads `sources`.
+
+**This box is about what ships, and what ships is clean.** It is *not* the same
+question as ticket 17: the report's `excludedNoSource` (2326 at p2, 2322 at p3,
+against `d7EligibleTotal` 4212) counts items dropped *during assembly* for having
+no resolvable source. Those never reach the universe, so they cannot violate this
+gate — but the phase≥2 remainder among them is a real recall concern and stays
+owned by `.scratch/carry-forward/issues/17-phase2-plus-no-source-gap.md`.
+
+### ☑ A known set-break case shows an explanatory `setBonusNote`
+
+`setBreakNote` (`packages/core/src/set-bonus.ts`) detects dropping below a 2pc/4pc
+threshold and returns e.g. `breaks 2-piece set 629 (below 4)`. It is wired
+through `rank.ts` onto the ranked item's `setBonusNote` field and rendered by
+both `rank-report.ts` and `cli.ts` — so the note reaches a human, which is the
+point of the box.
+
+`packages/core/test/set-bonus.test.ts` covers the break case and the silent case.
+The fixture uses **real** items, verified against `data/items/index.json`:
+30129 Crystalforge Breastplate, `setId` 629, the Paladin T5 chest; the swap-in
+30102 Krakken-Heart Breastplate has `setId: null`. Sibling pieces 30130/30131/
+30132 share `setId` 629.
+
+Reproduce: `pnpm exec vitest run packages/core/test/set-bonus.test.ts` (2 passed).
+
+### ☐ `maxPhase` changes the candidate set and the gem palette TOGETHER — still open
+
+Both halves work **in isolation**, and each is tested:
+
+- Candidate set: `filterPoolByPhase` (`pool.ts`) is inclusive-filtered and called
+  from `rankUpgrades`; `rank.test.ts` asserts a phase-2 chest is dropped at
+  `maxPhase: 1`.
+- Gem palette: `gemsForPhase` (`gems.ts`) is called from `rank.ts`;
+  `items-gems.test.ts` asserts phase-3 epic gems stay out of a maxPhase-2
+  palette (by inspecting palette metadata, not by diffing two `gemsForPhase`
+  calls).
+
+**What does not exist** is the comparison the box actually names: "run the same
+character at 1 and at 2 and diff". No test runs `rankUpgrades` twice at two
+`maxPhase` values and shows both axes moving together. Every phase test checks a
+single phase against a fixed expectation.
+
+Leaving this box **open**. Closing it is one test in `rank.test.ts`: same
+character and deps, two `rankUpgrades` calls at `maxPhase` 1 and 2, asserting the
+candidate id set differs *and* the gems placed on candidates differ. That is
+small, but it is new test code and this sitting was scoped to recording what
+already passes.
+
+### Housekeeping — stale memory corrected
+
+The assistant's cross-session memory carried "only 2/16 wowsims BiS items survive
+the generator; two separate fatal causes (EP rank-out, plate-only armor filter)".
+That measurement described `scripts/generate_pool.py` / `curate_ret_pool.py`,
+both **deleted** in `88465cf` along with every `data/pools/ret*.json`. Neither
+cause can still fire against `assemble_universe.py`. The memory is now marked
+superseded, pointing at tickets 17 and 18 for what actually remains.
+
+### Where this leaves Phase 1
+
+Gate now stands at **7 of 10** recorded, up from 2 — six boxes were already
+satisfied and merely unwritten, one (`source: null`) was closed by measuring the
+shipping artifact.
+
+Remaining, in the order they should be attacked:
+
+| Box | Why it is still open |
+|---|---|
+| `maxPhase` A/B diff | needs one new test (above). Cheapest of the three |
+| top items survive a human check vs wowsims BiS / Wowhead | needs the shortlist compared against a curated set; the substantive one |
+| a ranking **you would act on tonight** | the judgment box; depends on the one above and on ticket 17's recall gap |
+
+The last two are the same question wearing different hats: whether the
+raid-scoped universe recalls the items a geared ret paladin would actually want.
+Ticket 18 (recall measurement, junk filter stays off until it passes) is the
+instrument for answering it. `junkFilter` on the p3 universe currently reports
+`casterOnlyReject` 114 of 347 (32.9%) — unvalidated against sim, which is
+precisely why the filter is not applied.
