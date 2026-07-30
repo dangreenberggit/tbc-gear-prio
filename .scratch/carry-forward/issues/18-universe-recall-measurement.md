@@ -1,8 +1,11 @@
-Status: open
+Status: closed
 Type: task
 Origin: `.scratch/handoffs/raid-scoped-pool-implementation-review.md` “Not yet done”
 Blocks: none
 Blocked by: none
+Resolution: measured 2026-07-30 — zero false negatives on p2 and p3; filter
+  shipped behind --apply-junk-filter (off by default). See
+  docs/verification-log.md and .scratch/ticket-18/.
 
 # Recall measurement on the raid-scoped universe (junk-filter gate)
 
@@ -93,3 +96,26 @@ but note what that means: the old rule would have dropped exactly one real ret
 item. Pinned by a test in `pool-hardening.test.ts`. The rest of this ticket —
 the **sim-based** false-negative check — is still open, and the junk filter
 stays off.
+
+## Closed 2026-07-30 — sim-based check done, filter cleared
+
+The false-negative check this ticket gated on:
+
+```
+python .scratch/ticket-18/measure_junk_false_negatives.py   --universe data/universes/ret-p3.json   --report .scratch/rank-reports/slamaltman-p3-postfix.json   --db vendor/wowsims/db.json
+```
+
+| universe | rejects | above cutoff |
+|---|---|---|
+| `ret-p3` (362) | 136 | **0** |
+| `ret-p2` (238) | 85 | **0** |
+
+Best-simming reject is -19.16 dps against a +3.4 cutoff — a 22.6 dps margin,
+~10x the per-item standard error. Tier coverage stays 15/15 filtered.
+
+**Go**, with one scope limit: measured on slamaltman only, who is already well
+geared. Whether a weaker character flips a reject above cutoff is **untested**.
+
+The filter ships as `--apply-junk-filter`, **off by default**, so the committed
+universes and the Phase 1 gate figures stay unfiltered. Turning it on by
+default is a separate decision and is not taken here.

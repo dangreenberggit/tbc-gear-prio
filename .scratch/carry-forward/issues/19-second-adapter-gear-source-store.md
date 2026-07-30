@@ -1,8 +1,12 @@
-Status: open
+Status: closed
 Type: task
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Spec finding 1
 Blocks: phase-2
 Blocked by: none
+Resolution: third option taken —
+  `docs/adr/0016-second-adapters-for-gearsource-and-store-move-to-phase-2.md`
+  records the deferral. The §5 two-adapter rule stands; only the phase moves,
+  and Phase 2 is not complete until both adapters exist. 2026-07-30.
 
 # Two of three seams ship with one adapter
 

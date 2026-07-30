@@ -1,6 +1,6 @@
-Status: open
+Status: closed
 Type: task
-Progress: duplication removed 2026-07-29; the coverage half is the real work
+Progress: duplication removed 2026-07-29; coverage half resolved by decision 2026-07-30
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Adversarial findings A2, A4
 Blocks: phase-2
 Blocked by: none
@@ -84,3 +84,32 @@ candidate whose best fill would reuse it — not a tweak to the existing one.
 Worth asking first whether the unique-tracking feature earns its keep, given it
 appears unreachable under production weights; if it does not, deleting it is a
 better outcome than testing it.
+
+## Decision 2026-07-30 — keep `usedUnique`, do not build the fixture
+
+User call, after the measurement above was put to them.
+
+Two corrections to how this ticket framed the question:
+
+1. `fillOptsForSwap` returns **two** things — `usedUnique` and the `meta`
+   context. Only `usedUnique` was shown inert. The `meta` half feeds the
+   meta-activation condition and is exactly the path ticket 20 concerns, so
+   "delete the feature" could never have meant deleting `fillOptsForSwap`.
+2. Neutering it to `return {}` tested both halves at once. All 10 tests still
+   passing shows the **tests** cover neither, not that both are inert.
+
+`usedUnique` stays. It is ~20 lines guarding a silent, wrong-answer-shaped
+failure — recommending a candidate gemmed with a unique gem already worn
+elsewhere, an illegal configuration whose predicted DPS is unachievable. That
+it never fires today is a property of current ret weights and the current gem
+pool, not a guarantee.
+
+No purpose-built fixture: a synthetic character wearing a non-meta unique gem
+would test a path production cannot reach, defending the fixture rather than
+the behaviour.
+
+Remaining coverage work worth doing is on the **`meta` half**, which is
+reachable — tracked in ticket 20.
+
+The count-assertion item from "Done when" (pair `toBe(362)` / `toBe(238)` with
+membership assertions) is **not** done and is folded into ticket 24.
