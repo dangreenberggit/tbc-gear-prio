@@ -30,3 +30,14 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
 - 2026-07-28 — Planner review of raid-scoped impl: deleted legacy EP pool
   files/scripts (defects 1–2; finishes 11). Filed 17 (phase-2+ no-source
   gap) and 18 (universe recall / junk-filter measurement).
+- 2026-07-29 — Pre-merge review of phase-1/five-seed-spread (4 axes, Opus, fresh
+  context). Fixed in review: silent candidate-sim swallow now disclosed as
+  Substitution rows; Google Fonts removed from the "self-contained" HTML report;
+  two durable-claim comments given re-runnable commands. Filed 19 (second
+  adapter for GearSource/Store — PLAN §5 two-adapter rule unmet), 20 (meta gems
+  ranked by EP but their stats are effect-blind), 21 (world-boss zone strings not
+  canonicalised, wrong boss on 30730), 22 (rank.test.ts duplicates production and
+  skips fillOptsForSwap), 23 (spec drift: fullPool, Deps shape, per-tier
+  universes, setBonusNote), 24 (standards smells). Appended a blocker to 18
+  (CASTER_ONLY_STATS includes SpellDamage, which ret EP prices at 0.17).
+  PLAN §14 box 8 amended from "at 1 and at 2" to "two maxPhase values".

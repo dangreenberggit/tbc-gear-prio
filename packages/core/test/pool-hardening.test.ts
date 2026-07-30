@@ -165,6 +165,8 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it("ships no empty sources on any row", () => {
+    // Regenerate with `python scripts/assemble_universe.py --max-phase 3` to
+    // re-derive this count.
     // 347 -> 349: the D7 weapon rule stopped rejecting polearms alongside
     // staves (paladins can wield polearms) — +28774 Glaive of the Pit,
     // +32248 Halberd of Desolation.

@@ -62,3 +62,18 @@ is still not done, so the junk filter stays off.
 
 Overlaps ticket 17 (`excludedNoSource`): the 29 persistent misses are the
 concrete, ret-relevant subset of that gap and are the better place to start.
+
+## Blocker found in pre-merge review 2026-07-29 — fix before applying the filter
+
+`CASTER_ONLY_STATS` (`scripts/assemble_universe.py:101`) includes stat **5**
+(`StatSpellDamage`), but this repo's own ret weights value it:
+`data/presets/ret/p2.ep-weights.json` has `"5": 0.17`. Ret scales with spell
+power in 2.4.3 — Seal/Judgement of Blood, Judgement of Command and Crusader
+Strike all carry spell-power coefficients.
+
+So `is_caster_junk` currently classifies a stat the EP model prices as a reason
+to call an item junk. Harmless today because `measure_junk_filter` only counts
+and never removes — but the counts it reports (32.9% `casterOnlyReject`) are the
+input to this ticket's go/no-go, and they are wrong on that axis. **Fix the stat
+set before trusting any junk-filter measurement, and certainly before applying
+the filter.**

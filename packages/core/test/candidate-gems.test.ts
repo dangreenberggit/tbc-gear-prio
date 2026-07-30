@@ -36,8 +36,11 @@ describe("fillCandidateGems", () => {
   });
 
   it("prefers strength reds over hit orange on Belt of One-Hundred Deaths under ret EP", () => {
-    // Live wowsimcli: two Bold Crimson Spinels beat Glinting+Sovereign on this
-    // set even though uncapped hit EP ranks the orange higher.
+    // Two Bold Crimson Spinels beat Glinting+Sovereign on this set even though
+    // uncapped hit EP ranks the orange higher — which is why gemFillWeights
+    // zeroes hit. Measured against live wowsimcli; re-run with
+    // `pnpm rank --region US --realm dreamscythe --character slamaltman
+    //  --offline --max-phase 3` and compare the waist row.
     const gems = fillCandidateGems(30106, gemsForPhase(3), retEpWeights);
     expect(gems).toEqual([32193, 32193]);
     expect(getGem(gems[0]!)?.colour).toBe(GemColor.GemColorRed);

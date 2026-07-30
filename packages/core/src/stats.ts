@@ -11,7 +11,6 @@ import { Stat } from "./proto/common_pb.js";
 
 export { Stat };
 
-/** Read one stat from a dense wowsims stats array. Missing/short → 0. */
 export function statAt(stats: readonly number[], stat: Stat): number {
   return stats[stat] ?? 0;
 }

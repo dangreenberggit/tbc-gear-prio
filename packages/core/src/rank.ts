@@ -218,6 +218,12 @@ export async function rankUpgrades(
 
   const baselineDps = observation.dps;
   const ranked: RankedItem[] = [];
+  const simSkips: {
+    itemId: number;
+    name: string;
+    slot: string;
+    reason: string;
+  }[] = [];
   let done = 1;
 
   for (const entry of candidates) {
@@ -250,9 +256,17 @@ export async function rankUpgrades(
       let candObs;
       try {
         candObs = await deps.sim.run(candReq, runOpts);
-      } catch {
+      } catch (err) {
         // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
-        // wowsimcli when equipped on ret — skip this slot attempt.
+        // wowsimcli when equipped on ret — skip this slot attempt. Recorded
+        // rather than swallowed: a candidate that never simmed must not be
+        // indistinguishable from one that simmed badly.
+        simSkips.push({
+          itemId: entry.itemId,
+          name: entry.name,
+          slot: slotName,
+          reason: err instanceof Error ? err.message : String(err),
+        });
         continue;
       }
       const deltaDps = candObs.dps - baselineDps;
@@ -335,7 +349,13 @@ export async function rankUpgrades(
       presetId: "ret/p2.raid-sim-skeleton",
       standing: buildStandingAssumptions(race),
     },
-    substitutions: substitutionsFromMetaRepair(metaSwaps),
+    substitutions: [
+      ...substitutionsFromMetaRepair(metaSwaps),
+      ...simSkips.map((s) => ({
+        field: `candidate ${s.itemId} (${s.slot})`,
+        detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
+      })),
+    ],
     items: ranked,
   };
 }

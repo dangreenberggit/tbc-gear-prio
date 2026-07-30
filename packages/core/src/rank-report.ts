@@ -263,9 +263,6 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${esc(title)} — gear rank</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root {
     --ink: #1a2430;
@@ -283,9 +280,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     --down-bg: #f3e0e0;
     --hit-glow: #fff6ef;
     --radius: 14px;
-    --font-display: "Syne", sans-serif;
-    --font-body: "Manrope", sans-serif;
-    --font-mono: "IBM Plex Mono", monospace;
+    /* System stacks only — the report must render identically offline, which
+       a webfont link cannot promise. */
+    --font-display: "Syne", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
