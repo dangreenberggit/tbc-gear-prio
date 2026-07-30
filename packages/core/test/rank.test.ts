@@ -2,15 +2,15 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillEmptyCandidateGems } from "../src/candidate-gems.js";
-import { migrateGemsToItem } from "../src/migrate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase } from "../src/gems.js";
-import { isEnchantable } from "../src/items.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
-import { repairMeta } from "../src/meta-repair.js";
-import { RankError, rankUpgrades } from "../src/rank.js";
+import {
+  equipmentForCandidateSwap,
+  RankError,
+  rankUpgrades,
+} from "../src/rank.js";
 import {
   RecordedGearSource,
   type FightSummary,
@@ -115,6 +115,13 @@ class CapturingSimRunner implements SimRunner {
 }
 
 /** Mirror rank.ts candidate swap: migrate gems, fill empties, repair meta. */
+/**
+ * Thin wrapper over the production swap path — never a reimplementation of it.
+ * The previous hand-copy drifted: it called `fillEmptyCandidateGems` without
+ * `fillOptsForSwap`, so no test exercised set-wide uniques or meta-aware fill
+ * through `rankUpgrades`. Delegating means the expected sim key is derived from
+ * the same code the engine runs, so that class of drift cannot recur.
+ */
 function candidateEquipmentForTest(
   equipment: SimItemSpec[],
   slotName: (typeof SIM_ORDER)[number],
@@ -122,35 +129,14 @@ function candidateEquipmentForTest(
   maxPhase: 1 | 2 | 3 | 4 | 5,
   epWeights: Record<string, number>
 ): SimItemSpec[] {
-  const slotIndex = SIM_ORDER.indexOf(slotName);
-  const palette = gemsForPhase(maxPhase);
-  const swapped = equipment.map((spec, i) => {
-    if (i !== slotIndex) return spec;
-    const sameItem = spec.id === itemId;
-    const gems = sameItem
-      ? [...(spec.gems ?? [])]
-      : fillEmptyCandidateGems(
-          itemId,
-          migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
-          palette,
-          epWeights
-        );
-    const out: SimItemSpec = { id: itemId, gems };
-    if (spec.enchant && isEnchantable(itemId)) {
-      out.enchant = spec.enchant;
-    }
-    return out;
-  });
-  const socketed = swapped.map((spec) => ({
-    itemId: spec.id ?? 0,
-    gems: [...spec.gems],
-  }));
-  const repaired = repairMeta({ items: socketed, epWeights, palette });
-  return swapped.map((spec, i) => {
-    const row = repaired.items[i];
-    if (!row || !spec.id) return spec;
-    return { ...spec, gems: [...row.gems] };
-  });
+  return equipmentForCandidateSwap(
+    equipment,
+    SIM_ORDER.indexOf(slotName),
+    itemId,
+    gemsForPhase(maxPhase),
+    epWeights,
+    epWeights
+  );
 }
 
 describe("CUTOFF", () => {

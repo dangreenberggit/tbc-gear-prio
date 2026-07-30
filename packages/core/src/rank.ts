@@ -406,7 +406,13 @@ function meetsCutoff(
   return deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
 }
 
-function equipmentForCandidateSwap(
+/**
+ * Exported for tests: they must exercise *this* function rather than a copy.
+ * A hand-duplicated swap path in the test file silently dropped the
+ * `fillOptsForSwap` argument and hid the whole unique/meta gem feature from
+ * the suite — see `.scratch/carry-forward/issues/22-…`.
+ */
+export function equipmentForCandidateSwap(
   equipment: readonly SimItemSpec[],
   slotIndex: number,
   itemId: number,
