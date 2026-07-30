@@ -81,7 +81,10 @@ the filter.**
 **Resolved 2026-07-29.** Stat 5 removed from `CASTER_ONLY_STATS`. The reported
 counts are **unchanged** (119 caster-only rejects, 32.9%) because only one item
 in the universe has SpellDamage as its sole caster-flagged stat: **30449 Void
-Star Talisman** (+48 spell damage, nothing else) — a trinket ret genuinely uses.
+Star Talisman** (+48 spell damage, nothing else). **Untested:** whether ret
+actually equips this trinket in practice was never verified — the argument for
+keeping it rests only on the EP model pricing stat 5 at 0.17, not on a claim
+about real-world usage.
 Every other spell-damage item also carries Int or Spirit, so it was already
 being rejected for those.
 

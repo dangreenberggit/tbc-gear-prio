@@ -253,9 +253,9 @@ describe("data/universes/ret-p3.json hardening", () => {
     "does not treat spell damage as a caster-only stat",
     () => {
       // Void Star Talisman is +48 spell damage and nothing else — the only item
-      // in the universe whose sole caster-flagged stat is SpellDamage. Ret
-      // scales with spell power in 2.4.3 and the ret weights price stat 5 at
-      // 0.17, so a junk filter calling it caster-only is wrong about the game.
+      // in the universe whose sole caster-flagged stat is SpellDamage. The ret
+      // weights in data/presets/ret/p2.ep-weights.json price stat 5 at 0.17, so
+      // treating it as caster-only would contradict this repo's own EP model.
       expect(poolIds.has(30449), "Void Star Talisman").toBe(true);
 
       const stats = (
