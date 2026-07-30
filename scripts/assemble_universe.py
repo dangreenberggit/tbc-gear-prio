@@ -103,7 +103,11 @@ BADGE_RE = re.compile(
 )
 CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNORECASE)
 
-CASTER_ONLY_STATS = frozenset({3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
+# Stat 5 (SpellDamage) is deliberately NOT here: ret scales with spell power in
+# 2.4.3 via Seal/Judgement of Blood, Judgement of Command and Crusader Strike,
+# and data/presets/ret/p2.ep-weights.json prices it at 0.17. Calling it
+# caster-only would let the junk filter reject items the EP model values.
+CASTER_ONLY_STATS = frozenset({3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
 SLOTS_WITH_EP_SIGNAL = frozenset({"weapon", "feet", "waist", "hands", "wrist"})
 

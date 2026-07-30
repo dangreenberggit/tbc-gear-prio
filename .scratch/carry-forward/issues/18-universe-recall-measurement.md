@@ -77,3 +77,16 @@ and never removes — but the counts it reports (32.9% `casterOnlyReject`) are t
 input to this ticket's go/no-go, and they are wrong on that axis. **Fix the stat
 set before trusting any junk-filter measurement, and certainly before applying
 the filter.**
+
+**Resolved 2026-07-29.** Stat 5 removed from `CASTER_ONLY_STATS`. The reported
+counts are **unchanged** (119 caster-only rejects, 32.9%) because only one item
+in the universe has SpellDamage as its sole caster-flagged stat: **30449 Void
+Star Talisman** (+48 spell damage, nothing else) — a trinket ret genuinely uses.
+Every other spell-damage item also carries Int or Spirit, so it was already
+being rejected for those.
+
+The measurement blocker is therefore cleared and the headline percentage stands,
+but note what that means: the old rule would have dropped exactly one real ret
+item. Pinned by a test in `pool-hardening.test.ts`. The rest of this ticket —
+the **sim-based** false-negative check — is still open, and the junk filter
+stays off.

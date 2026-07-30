@@ -37,8 +37,8 @@
   },
   "membershipByOrigin": {
     "listOnly": 12,
-    "itemHasOrigin:wowhead": 23,
     "itemHasOrigin:db": 209,
+    "itemHasOrigin:wowhead": 23,
     "zoneMatch": 226,
     "itemHasOrigin:atlasloot": 41,
     "itemHasOrigin:two-hop": 10

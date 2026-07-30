@@ -249,6 +249,24 @@ describe("data/universes/ret-p3.json hardening", () => {
     "includes Shattrath Leggings (30257, leather legs) — blocked: no db/atlasloot/wowhead source (06-hardening §2.4)"
   );
 
+  it.skipIf(!hasWowsimsVendor)(
+    "does not treat spell damage as a caster-only stat",
+    () => {
+      // Void Star Talisman is +48 spell damage and nothing else — the only item
+      // in the universe whose sole caster-flagged stat is SpellDamage. Ret
+      // scales with spell power in 2.4.3 and the ret weights price stat 5 at
+      // 0.17, so a junk filter calling it caster-only is wrong about the game.
+      expect(poolIds.has(30449), "Void Star Talisman").toBe(true);
+
+      const stats = (
+        byId.get(30449) as {
+          scalingOptions?: Record<string, { stats?: object }>;
+        }
+      )?.scalingOptions?.["0"]?.stats;
+      expect(Object.keys(stats ?? {})).toEqual(["5"]);
+    }
+  );
+
   it("admits world boss drops via AtlasLoot", () => {
     // db.json has no sources, npcs or outdoor zones for Doomwalker and Doom
     // Lord Kazzak, so AtlasLoot's WorldBossesBC block is the only path in.
