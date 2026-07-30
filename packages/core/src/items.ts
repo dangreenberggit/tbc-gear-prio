@@ -53,6 +53,8 @@ export type ItemEntry = {
    */
   enchantable: boolean;
   setId: number | null;
+  /** Display name for `setId`; null on items wowsims ships without one. */
+  setName: string | null;
   phase: number;
   unique: boolean;
   /** Numeric profession id if this item requires one to use, else null. */

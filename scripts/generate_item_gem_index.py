@@ -119,6 +119,7 @@ def build_items_index(db: dict) -> dict[str, dict]:
             "socketBonus": it.get("socketBonus") or [],
             "enchantable": slot not in NOT_ENCHANTABLE_SLOTS,
             "setId": it.get("setId"),
+            "setName": it.get("setName"),
             "phase": it.get("phase"),
             "unique": bool(it.get("unique")),
             "requiredProfession": it.get("requiredProfession"),

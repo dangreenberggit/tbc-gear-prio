@@ -17,6 +17,16 @@ function setCounts(equipment: readonly SimItemSpec[]): Map<number, number> {
   return counts;
 }
 
+/** Falls back to the raw id: a bare number still beats an empty phrase. */
+function setLabel(equipment: readonly SimItemSpec[], setId: number): string {
+  for (const spec of equipment) {
+    if (!spec.id) continue;
+    const item = getItem(spec.id);
+    if (item?.setId === setId && item.setName) return item.setName;
+  }
+  return `set ${setId}`;
+}
+
 /**
  * If replacing `equipment[slotIndex]` with `newItemId` drops below a 2- or
  * 4-piece threshold for some set, return a short explanation; else undefined.
@@ -36,10 +46,11 @@ export function setBreakNote(
   for (const [setId, prev] of before) {
     const next = after.get(setId) ?? 0;
     if (next >= prev) continue;
+    const label = setLabel(equipment, setId);
     if (prev >= 4 && next < 4) {
-      notes.push(`breaks ${prev}-piece set ${setId} (below 4)`);
+      notes.push(`breaks ${prev}-piece ${label} (below 4)`);
     } else if (prev >= 2 && next < 2) {
-      notes.push(`breaks ${prev}-piece set ${setId} (below 2)`);
+      notes.push(`breaks ${prev}-piece ${label} (below 2)`);
     }
   }
   return notes.length > 0 ? notes.join("; ") : undefined;
