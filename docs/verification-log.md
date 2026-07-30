@@ -707,3 +707,67 @@ than a defect.
 **Nothing Wowhead calls Best is missing from the ranking.** Combined with the
 14/14 held-out raid-sourced membership result, the two human-check gate boxes are
 answered on the axis the design targets.
+
+---
+
+## 2026-07-29 — `maxPhase` A/B: the last Phase 1 gate box
+
+Two tests in `packages/core/test/rank.test.ts`, because one phase pair could not
+carry the whole claim.
+
+### 1 → 2 — both axes wired to the same `maxPhase`
+
+One character, one `deps`, two `rankUpgrades` calls differing only in
+`maxPhase`. Candidate set: `[29381]` at 1 versus `[30101, 29381]` at 2, so the
+phase-2 chest appears only at 2. Palette: `gemsForPhase(2)` adds exactly
+32634–32639 over `gemsForPhase(1)` (156 → 162 entries).
+
+**Limitation, measured not assumed.** All six gems phase 2 adds are EP-dominated
+by a phase-1 gem of their own colour under ret P2 fill weights — the strongest,
+32637 at 6.36 EP, loses to phase-1 30584 at 8.08. Running
+`fillEmptyCandidateGems` at palette 1 vs 2 over all 1498 socketed items in
+`data/items/index.json` gives **zero** differences. So at 1→2 the palette
+genuinely changes but the fill output cannot, and the second axis is asserted on
+`gemsForPhase` directly.
+
+### 2 → 3 — the palette change reaching the sim request
+
+Phase 3's epic gems do win, so this pair closes the stricter reading of the box.
+Candidate **30104 Cobra-Lash Boots** against slamaltman's worn boots (30081,
+ungemmed, so every candidate socket arrives empty and the fill must consult the
+palette):
+
+| maxPhase | gems sent to the sim |
+|---|---|
+| 2 | `[28362, 30584]` |
+| 3 | `[32193, 32193]` |
+
+Same character, same seed, same item — only `maxPhase` differs, and the gems the
+engine actually put in the `RaidSimRequest` differ.
+
+Choosing the fixture took two attempts. A phase-2 chest (30101) fails: the rank
+path is migrate-then-fill-empties, so a candidate whose sockets the worn gems
+already cover never consults the palette, and the request located was the
+baseline's worn chest (`[24027, 24058, 24058]` = Crystalforge Breastplate).
+118 universe items do differ on the real rank path at 2 vs 3; boots were picked
+because the worn item is ungemmed.
+
+**Mutation-tested, not merely green.** Neutering `gemsForPhase` to
+`PALETTE.filter(() => true)` fails the 2→3 test
+(`expected [32193, 32193] to not deeply equal [32193, 32193]`); neutering
+`filterPoolByPhase` fails the 1→2 candidate-set assertion. `gems.ts` restored;
+`git diff packages/core/src/` clean.
+
+### Phase 1 gate: 10 of 10
+
+All boxes are now checked. `pnpm verify` green at this tip.
+
+### Incident note — repo damage from a host freeze
+
+The machine froze mid-session and corrupted two git refs, both zero-filled
+(41 and 40 null bytes) rather than missing:
+`refs/heads/phase-1/five-seed-spread` and `refs/stash`. No commit objects were
+lost — the tip (`22687ca`) was recovered from `.git/logs/HEAD` and the branch
+rewritten with `git update-ref`'s file equivalent. The stash refs were
+lint-staged's transient backups, each already auto-restored after its commit, so
+deleting them cost nothing. `git fsck` is clean.

@@ -479,6 +479,309 @@ describe("rankUpgrades", () => {
     expect(a.items.map((i) => i.itemId)).toEqual([29381]);
   });
 
+  it("maxPhase changes the candidate set and the gem palette together", async () => {
+    // PLAN.md §14 Phase 1 gate: one character, two maxPhase values, both axes
+    // diffed in one place. Gem axis note — every gem phase 2 adds (32634-32639)
+    // is EP-dominated by a phase-1 gem of its colour under ret P2 weights, so
+    // no socketed item in data/items/index.json fills differently at 1 vs 2.
+    // The palette move is therefore asserted on gemsForPhase directly, and the
+    // socketed candidate below pins what the palette actually produced.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, {
+        name: "slamaltman",
+        race: "RaceHuman",
+        equipment,
+      }),
+      "v0.0.101",
+      opts
+    );
+
+    const neckId = 29381; // phase 1 — in the candidate set at both maxPhases
+    const chestId = 30101; // phase 2 — only survives filterPoolByPhase at 2
+    const chestIdx = SIM_ORDER.indexOf("chest");
+
+    const neckKey = simCacheKey(
+      compose(skeleton, {
+        name: "slamaltman",
+        race: "RaceHuman",
+        equipment: equipment.map((spec, i) =>
+          SIM_ORDER[i] === "neck" ? { id: neckId, gems: [] as number[] } : spec
+        ),
+      }),
+      "v0.0.101",
+      opts
+    );
+    const chestKey = simCacheKey(
+      compose(skeleton, {
+        name: "slamaltman",
+        race: "RaceHuman",
+        equipment: candidateEquipmentForTest(
+          equipment,
+          "chest",
+          chestId,
+          2,
+          epWeights
+        ),
+      }),
+      "v0.0.101",
+      opts
+    );
+
+    const obs = (dps: number) => ({
+      dps,
+      stdev: 92.0,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+
+    const pool = [
+      {
+        itemId: neckId,
+        name: "Choker of Vile Intent",
+        slot: "neck" as const,
+        phase: 1,
+        source: { kind: "badge" as const, cost: 25 },
+      },
+      {
+        itemId: chestId,
+        name: "Bloodsea Brigand's Vest",
+        slot: "chest" as const,
+        phase: 2,
+        source: {
+          kind: "raid" as const,
+          zone: "Serpentshrine Cavern",
+          boss: "Lady Vashj",
+        },
+      },
+    ];
+
+    const runAt = async (maxPhase: 1 | 2) => {
+      const sim = new CapturingSimRunner(
+        "v0.0.101",
+        new Map([
+          [baselineKey, obs(2042.85)],
+          [neckKey, obs(2050.0)],
+          [chestKey, obs(2075.0)],
+        ])
+      );
+      const ranking = await rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim,
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+          pool,
+        }
+      );
+      return { ranking, sim };
+    };
+
+    const at1 = await runAt(1);
+    const at2 = await runAt(2);
+
+    // Axis 1 — candidate set.
+    const ids1 = at1.ranking.items.map((i) => i.itemId);
+    const ids2 = at2.ranking.items.map((i) => i.itemId);
+    expect(ids1).not.toEqual(ids2);
+    expect(ids1).toEqual([neckId]);
+    expect(ids2).toEqual([chestId, neckId]);
+    expect(ids1).not.toContain(chestId);
+    expect(ids2).toContain(chestId);
+
+    // Axis 2 — gem palette. Phase 2 admits six gems phase 1 does not.
+    const palette1 = gemsForPhase(1).map((g) => g.id);
+    const palette2 = gemsForPhase(2).map((g) => g.id);
+    expect(palette2).not.toEqual(palette1);
+    expect(palette2.filter((id) => !palette1.includes(id))).toEqual([
+      32634, 32635, 32636, 32637, 32638, 32639,
+    ]);
+    for (const id of [32634, 32635, 32636, 32637, 32638, 32639]) {
+      expect(palette1).not.toContain(id);
+    }
+
+    // The maxPhase-2 palette is what socketed the phase-2 candidate: every gem
+    // the fill placed must be admissible at 2 and none may be a later phase.
+    const chestReq = at2.sim.requests.find((req) => {
+      const items =
+        (
+          req.raid as {
+            parties: Array<{
+              players: Array<{
+                equipment: { items: Array<{ id: number; gems: number[] }> };
+              }>;
+            }>;
+          }
+        ).parties[0]?.players[0]?.equipment.items ?? [];
+      return items[chestIdx]?.id === chestId;
+    });
+    expect(chestReq).toBeDefined();
+    const chestGems =
+      (
+        chestReq!.raid as {
+          parties: Array<{
+            players: Array<{
+              equipment: { items: Array<{ id: number; gems: number[] }> };
+            }>;
+          }>;
+        }
+      ).parties[0]?.players[0]?.equipment.items[chestIdx]?.gems ?? [];
+    expect(chestGems.length).toBeGreaterThan(0);
+    for (const id of chestGems) {
+      expect(palette2).toContain(id);
+    }
+  });
+
+  it("maxPhase 2 vs 3 moves the palette all the way into the sim request", async () => {
+    // The 1->2 case above proves the two axes are wired to the same maxPhase,
+    // but phase 2's six additions are all EP-dominated by phase-1 gems, so the
+    // fill output is identical and the palette move never reaches the request.
+    // Phase 3's epic gems do win, so this is where "the gem palette changed"
+    // is observable end to end rather than asserted on gemsForPhase alone.
+    //
+    // The candidate must also leave the fill something to do: the rank path is
+    // migrate-then-fill-empties, so a candidate whose sockets the worn gems
+    // fully cover never consults the palette. Slamaltman's worn boots (30081)
+    // are ungemmed, so every socket on the candidate arrives empty.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+
+    const bootId = 30104; // phase 2 — in the candidate set at both 2 and 3
+    const bootIdx = SIM_ORDER.indexOf("feet");
+    expect(equipment[bootIdx]!.gems ?? []).toEqual([]);
+    const gemsAt = (maxPhase: 2 | 3) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: candidateEquipmentForTest(
+            equipment,
+            "feet",
+            bootId,
+            maxPhase,
+            epWeights
+          ),
+        }),
+        "v0.0.101",
+        opts
+      );
+
+    const obs = (dps: number) => ({
+      dps,
+      stdev: 92.0,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+
+    const pool = [
+      {
+        itemId: bootId,
+        name: "Cobra-Lash Boots",
+        slot: "feet" as const,
+        phase: 2,
+        source: {
+          kind: "raid" as const,
+          zone: "Serpentshrine Cavern",
+          boss: "Lady Vashj",
+        },
+      },
+    ];
+
+    const socketedBootGems = async (maxPhase: 2 | 3) => {
+      const sim = new CapturingSimRunner(
+        "v0.0.101",
+        new Map([
+          [baselineKey, obs(2042.85)],
+          [gemsAt(maxPhase), obs(2075.0)],
+        ])
+      );
+      await rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim,
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+          pool,
+        }
+      );
+      const req = sim.requests.find((r) => {
+        const items =
+          (
+            r.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number; gems: number[] }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        return items[bootIdx]?.id === bootId;
+      });
+      expect(req).toBeDefined();
+      return (
+        (
+          req!.raid as {
+            parties: Array<{
+              players: Array<{
+                equipment: { items: Array<{ id: number; gems: number[] }> };
+              }>;
+            }>;
+          }
+        ).parties[0]?.players[0]?.equipment.items[bootIdx]?.gems ?? []
+      );
+    };
+
+    const gems2 = await socketedBootGems(2);
+    const gems3 = await socketedBootGems(3);
+
+    expect(gems2.length).toBeGreaterThan(0);
+    expect(gems3.length).toBe(gems2.length);
+    // Same item, same character, same seed — only maxPhase differs, and the
+    // gems the engine actually sent to the sim are different.
+    expect(gems3).not.toEqual(gems2);
+
+    const palette2 = gemsForPhase(2).map((g) => g.id);
+    const palette3 = gemsForPhase(3).map((g) => g.id);
+    for (const id of gems2) expect(palette2).toContain(id);
+    for (const id of gems3) expect(palette3).toContain(id);
+    // At least one placed gem is one phase 3 unlocked.
+    expect(gems3.some((id) => !palette2.includes(id))).toBe(true);
+  });
+
   it("migrates worn gems onto socketed candidates before simming", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
