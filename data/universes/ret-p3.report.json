@@ -32,18 +32,18 @@
     "wrist": 33
   },
   "sourceRecordAdds": {
-    "db": 1877,
     "atlasloot": 373,
+    "db": 1877,
     "two-hop": 18,
     "wowhead": 54
   },
   "membershipByOrigin": {
-    "listOnly": 21,
-    "itemHasOrigin:wowhead": 42,
-    "itemHasOrigin:db": 325,
-    "zoneMatch": 341,
     "itemHasOrigin:atlasloot": 53,
-    "itemHasOrigin:two-hop": 15
+    "itemHasOrigin:db": 325,
+    "itemHasOrigin:two-hop": 15,
+    "itemHasOrigin:wowhead": 42,
+    "listOnly": 21,
+    "zoneMatch": 341
   },
   "exclusivePrimaryOrigin": {
     "db": 325,
@@ -61,7 +61,8 @@
     "combinedReject": 136,
     "combinedKeep": 226,
     "casterRejectPct": 32.9,
-    "combinedRejectPct": 37.6
+    "combinedRejectPct": 37.6,
+    "applied": false
   },
   "wowheadListIds": 123,
   "wowheadRecall": {

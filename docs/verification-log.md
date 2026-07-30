@@ -771,3 +771,53 @@ lost — the tip (`22687ca`) was recovered from `.git/logs/HEAD` and the branch
 rewritten with `git update-ref`'s file equivalent. The stash refs were
 lint-staged's transient backups, each already auto-restored after its commit, so
 deleting them cost nothing. `git fsck` is clean.
+
+## Ticket 18 — junk-filter false negatives, sim-based (2026-07-30)
+
+The go/no-go this ticket gated on. The junk filter's reject set was
+cross-referenced against a completed full-universe sim run, asking directly:
+would applying the filter have dropped an item the sim ranked above cutoff?
+
+Re-run with:
+
+```
+python .scratch/ticket-18/measure_junk_false_negatives.py \
+  --universe data/universes/ret-p3.json \
+  --report .scratch/rank-reports/slamaltman-p3-postfix.json \
+  --db vendor/wowsims/db.json
+```
+
+The script imports `is_caster_junk` / `build_percentiles` / `item_stat_map` from
+`scripts/assemble_universe.py` rather than reimplementing them, so it measures
+the filter that would actually ship.
+
+Report: `slamaltman-p3-postfix.json` (baseline 2003.26 dps, cutoff
+`{absDps: 3.4, pct: 0.15}`, 357 ranked, 43 above cutoff).
+
+| universe | rejects | caster-only | EP-floor | above cutoff | unranked |
+|---|---|---|---|---|---|
+| `ret-p3` (362) | 136 | 119 | 17 | **0** | 0 |
+| `ret-p2` (238) | 85 | 74 | 11 | **0** | 0 |
+
+**Zero false negatives on both.** The P3 caster-only count (119, 32.9%) matches
+the figure the report already emitted.
+
+The margin is not marginal. Ranked by `deltaDps`, the *best*-simming rejected
+item is **-19.16 dps** (Drape of the Righteous) — a downgrade — against a
++3.4 dps cutoff. That is a 22.6 dps empty band, ~10x the per-item standard
+error (~2.15). The three lowest above-cutoff survivors (Lightbringer
+Breastplate +3.11, Softstep Boots of Tracking +3.29, Ring of Deceitful Intent
++3.30) all clear via the percentage arm of the OR-cutoff, and all survive the
+filter.
+
+P2 was measured against the same P3 sim results: `ret-p2` is a subset of
+`ret-p3`, same character and baseline, and every P2 reject resolved to a ranked
+item (`unranked: 0`). `build_percentiles` is computed per-universe, so the
+EP-floor arm was recomputed against P2 membership rather than reused.
+
+**Scope limit:** one character (slamaltman), who is already well geared, so
+"below cutoff" partly reflects that baseline. The 22.6 dps margin is wide enough
+that a different character seems unlikely to flip the verdict, but that is
+**untested** — no second character has been simmed against the reject set.
+
+**Go.** The junk filter is cleared to be applied.

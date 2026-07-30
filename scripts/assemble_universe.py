@@ -324,7 +324,15 @@ def build_percentiles(entries: list[dict]) -> dict[int, float]:
     return pct
 
 
-def measure_junk_filter(entries: list[dict], db_by_id: dict[int, dict]) -> dict:
+def measure_junk_filter(
+    entries: list[dict], db_by_id: dict[int, dict]
+) -> tuple[dict, list[dict]]:
+    """Measure the junk filter and return (report, surviving entries).
+
+    Callers decide whether to *apply* the survivors — see `--apply-junk-filter`.
+    The report is emitted either way, so the measured reject rate stays
+    observable even when the filter is off.
+    """
     pct = build_percentiles(entries)
     caster_rejects = []
     ep_floor_rejects = []
@@ -335,11 +343,10 @@ def measure_junk_filter(entries: list[dict], db_by_id: dict[int, dict]) -> dict:
             continue
         if e["slot"] in SLOTS_WITH_EP_SIGNAL and pct.get(e["itemId"], 1.0) < 0.10:
             ep_floor_rejects.append(e)
-    combined = [
-        e
-        for e in entries
-        if e not in caster_rejects and e not in ep_floor_rejects
-    ]
+    reject_ids = {e["itemId"] for e in caster_rejects} | {
+        e["itemId"] for e in ep_floor_rejects
+    }
+    combined = [e for e in entries if e["itemId"] not in reject_ids]
     return {
         "total": len(entries),
         "casterOnlyReject": len(caster_rejects),
@@ -352,10 +359,14 @@ def measure_junk_filter(entries: list[dict], db_by_id: dict[int, dict]) -> dict:
         "combinedRejectPct": round(100 * (len(entries) - len(combined)) / len(entries), 1)
         if entries
         else 0,
-    }
+    }, combined
 
 
-def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict]:
+def assemble(
+    max_phase: int,
+    hold_out_wowhead: bool = False,
+    apply_junk_filter: bool = False,
+) -> tuple[dict, dict]:
     if not DB.is_file():
         print(f"missing {DB} — run pnpm sync:wowsims", file=sys.stderr)
         sys.exit(2)
@@ -510,7 +521,10 @@ def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict
         }
         entries.append(entry)
 
-        for origin in origins_for_item:
+        # Sorted: set iteration order over strings varies per process, which
+        # reordered this counter's keys between runs and produced spurious
+        # diffs on the committed report.
+        for origin in sorted(origins_for_item):
             membership_stats[f"itemHasOrigin:{origin}"] += 1
 
     entries.sort(key=lambda e: (e["slot"], -e["curationHint"], e["itemId"]))
@@ -519,6 +533,14 @@ def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict
     if any(not e["sources"] for e in entries):
         print("assembly error: row with empty sources", file=sys.stderr)
         sys.exit(2)
+
+    # Measured on the unfiltered universe, then optionally applied. Everything
+    # downstream (tier coverage, per-slot, recall) must describe the universe
+    # that actually ships, so this runs before those are computed.
+    junk, junk_survivors = measure_junk_filter(entries, db_by_id)
+    if apply_junk_filter:
+        entries = junk_survivors
+    junk["applied"] = apply_junk_filter
 
     tier_present = {e["itemId"] for e in entries} & RET_TIER_PIECE_IDS
     tier_expected: set[int] = set()
@@ -532,7 +554,6 @@ def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict
             tier_expected.add(piece_id)
 
     per_slot = Counter(e["slot"] for e in entries)
-    junk = measure_junk_filter(entries, db_by_id)
 
     # Primary origin: first contributing pipeline per item (for exclusive counts).
     exclusive_origin: Counter[str] = Counter()
@@ -585,8 +606,8 @@ def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict
         "universeTotal": len(entries),
         "listOnlyMembership": list_only_count,
         "perSlot": dict(sorted(per_slot.items())),
-        "sourceRecordAdds": dict(origin_counter),
-        "membershipByOrigin": dict(membership_stats),
+        "sourceRecordAdds": dict(sorted(origin_counter.items())),
+        "membershipByOrigin": dict(sorted(membership_stats.items())),
         "exclusivePrimaryOrigin": dict(exclusive_origin),
         "tierPiecesExpected": len(tier_expected),
         "tierPiecesPresent": len(tier_present & tier_expected),
@@ -629,13 +650,26 @@ def main() -> int:
             "Requires --out/--report; refuses to overwrite the shipping files."
         ),
     )
+    ap.add_argument(
+        "--apply-junk-filter",
+        action="store_true",
+        help=(
+            "Drop the caster-only / EP-floor rejects from the universe instead "
+            "of only measuring them. Off by default: the committed universes "
+            "and the Phase 1 gate figures are built unfiltered."
+        ),
+    )
     args = ap.parse_args()
 
     if args.hold_out_wowhead and not (args.out and args.report):
         ap.error("--hold-out-wowhead requires explicit --out and --report paths")
 
     out_path = args.out or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.json"
-    payload, report = assemble(args.max_phase, hold_out_wowhead=args.hold_out_wowhead)
+    payload, report = assemble(
+        args.max_phase,
+        hold_out_wowhead=args.hold_out_wowhead,
+        apply_junk_filter=args.apply_junk_filter,
+    )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -643,8 +677,15 @@ def main() -> int:
     report_path = args.report or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.report.json"
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
-    print(f"wrote {out_path.relative_to(ROOT)} — {len(payload['entries'])} entries")
-    print(f"wrote {report_path.relative_to(ROOT)}")
+    def display(p: Path) -> Path:
+        # --out may point outside the repo (diagnostic runs); relative_to raises.
+        try:
+            return p.relative_to(ROOT)
+        except ValueError:
+            return p
+
+    print(f"wrote {display(out_path)} — {len(payload['entries'])} entries")
+    print(f"wrote {display(report_path)}")
     print(json.dumps(report, indent=2))
     return 0
 
