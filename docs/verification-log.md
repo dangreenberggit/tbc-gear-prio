@@ -644,3 +644,66 @@ Phase 1 gate box asks for, and it passes on the axis the design targets.
 Quote **14/14 raid-sourced**, or **15/21 Best-family held out** if a single
 headline number is wanted. Do not quote 63.4% as a quality figure — that grades
 the pipeline against content it was never built to cover.
+
+---
+
+## 2026-07-28 — Fresh P3 ranking on the fixed universe
+
+The committed rank report predated the polearm and world-boss fixes, so it was
+re-run against the 362-entry universe.
+
+```
+pnpm rank --region US --realm dreamscythe --character slamaltman \
+  --offline --max-phase 3 --report .scratch/rank-reports/slamaltman-p3-postfix.html
+```
+
+Baseline 2003.26 DPS, 362 pool / 357 ranked, **43 above cutoff**
+(`{absDps: 3.4, pct: 0.15}`). Artifacts: `.scratch/rank-reports/slamaltman-p3-postfix.{html,json,run.log}`.
+
+### Top of the shortlist
+
+| Δ DPS | Item | Slot |
+|---|---|---|
+| +47.94 | Belt of One-Hundred Deaths | waist |
+| +43.64 | Torch of the Damned | weapon |
+| +26.34 | Cataclysm's Edge | weapon |
+| +22.57 | Band of Devastation | finger |
+| +20.34 | Unstoppable Aggressor's Ring | finger |
+| +19.75 | Cursed Vision of Sargeras | head |
+
+These are recognisable ret BiS-tier items, in a plausible order.
+
+### The caster-admission worry did not materialise
+
+Admitting world bosses brought in caster gear (cloaks, rings and necks have no
+armor-type gate, and the junk filter is off pending ticket 18). **The sim sorts
+them out unaided** — every one lands well below cutoff: Ancient Spellcloak of the
+Highborne −22.77, Ring of Flowing Light −27.27, Topaz-Studded Battlegrips −56.80,
+Faceguard of the Endless Watch −94.20.
+
+Of the 15 items admitted today, only two clear the cutoff, both legitimately:
+**Black-Iron Battlecloak +13.40 (rank 19)** and **Ring of Reciprocity +3.77
+(rank 38)**. Both are Doomwalker/Kazzak drops that were unreachable before.
+
+The polearms rank below cutoff (Glaive of the Pit −103.91, Halberd of Desolation
+−33.49). That is correct for *this* character — he wields a strong sword and both
+polearms are stat-less proc weapons — and does not argue against admitting them,
+since they are real options for a differently geared paladin.
+
+### Against Wowhead's Best-family picks, controlling for worn gear
+
+| | count |
+|---|---|
+| already worn (correctly Δ0) | 7 |
+| above cutoff | 11 |
+| below cutoff | 3 |
+| absent from the ranking | **0** |
+
+The three below-cutoff picks are marginal: Swiftstrike Shoulders +1.98, Midnight
+Chestguard +1.87, Choker of Endless Nightmares +0.41 — all positive, all under a
+3.4 DPS cutoff, which is the expected shape for a well-geared character rather
+than a defect.
+
+**Nothing Wowhead calls Best is missing from the ranking.** Combined with the
+14/14 held-out raid-sourced membership result, the two human-check gate boxes are
+answered on the axis the design targets.
