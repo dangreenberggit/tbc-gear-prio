@@ -265,6 +265,23 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
+  it("attributes each world boss drop to exactly one correct boss", () => {
+    // Wowhead's free text spells the zone three ways and names the wrong boss
+    // on some rows; AtlasLoot's per-NPC tables own the attribution.
+    for (const [id, boss] of [
+      [30729, "Doomwalker"],
+      [30730, "Doomwalker"],
+      [30738, "Doom Lord Kazzak"],
+      [30739, "Doom Lord Kazzak"],
+      [30740, "Doom Lord Kazzak"],
+    ] as const) {
+      const entry = raw.entries.find((e) => e.itemId === id)!;
+      const worldBoss = entry.sources.filter((s) => s.zone === "World Bosses");
+      expect(worldBoss.length, `${id} world-boss source count`).toBe(1);
+      expect(worldBoss[0]!.boss, `${id} boss`).toBe(boss);
+    }
+  });
+
   it("admits two-hand polearms but never staves", () => {
     // Paladins can wield polearms; staves they cannot. The D7 rule once
     // rejected both in one condition, which hid Glaive of the Pit (a

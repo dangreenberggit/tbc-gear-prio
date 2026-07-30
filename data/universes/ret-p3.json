@@ -124,11 +124,6 @@
           "boss": "Doomwalker",
           "kind": "raid",
           "zone": "World Bosses"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss",
-          "boss": "Doomwalker"
         }
       ],
       "curationHint": 47.7
@@ -703,16 +698,6 @@
           "boss": "Doomwalker",
           "kind": "raid",
           "zone": "World Bosses"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss",
-          "boss": "Doomwalker"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss in Hellfire Peninsula",
-          "boss": "Doom Lord Kazzak"
         }
       ],
       "curationHint": 103.76
@@ -1775,16 +1760,6 @@
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
           "zone": "World Bosses"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss",
-          "boss": "Doom Lord Kazzak"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss in Hellfire Peninsula",
-          "boss": "Doom Lord Kazzak"
         }
       ],
       "curationHint": 72.3
@@ -3353,11 +3328,6 @@
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
           "zone": "World Bosses"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss",
-          "boss": "Doom Lord Kazzak"
         }
       ],
       "curationHint": 93.31
@@ -4137,11 +4107,6 @@
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
           "zone": "World Bosses"
-        },
-        {
-          "kind": "raid",
-          "zone": "World Boss",
-          "boss": "Doom Lord Kazzak"
         }
       ],
       "curationHint": 83.89

@@ -1,5 +1,7 @@
-Status: open
+Status: closed
 Type: bug
+Closed: 2026-07-29 — canonical_zone() folds world-boss spellings; AtlasLoot owns
+the boss attribution for that zone. Test in pool-hardening.test.ts.
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Domain finding 3
 Blocks: none
 Blocked by: none

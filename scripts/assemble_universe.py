@@ -29,6 +29,11 @@ TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
 WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 
+# Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
+# alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
+# the only thing tying their drops to a phase.
+WORLD_BOSS_ZONE = "World Bosses"
+
 # db.json item type → our pool slot name
 ITEM_TYPE_SLOT = {
     1: "head",
@@ -213,6 +218,19 @@ def source_zones(source: dict) -> set[str]:
     return set()
 
 
+def canonical_zone(zone: str) -> str:
+    """
+    Wowhead writes outdoor bosses as free text ("World Boss", "World Boss in
+    Hellfire Peninsula") where AtlasLoot has one canonical "World Bosses" zone.
+    Without folding these together `add_source` keeps each spelling as a
+    separate row, which is how Terrorweave Tunic ended up listing both its real
+    boss and an unrelated one.
+    """
+    if zone.lower().startswith("world boss"):
+        return WORLD_BOSS_ZONE
+    return zone
+
+
 def parse_wowhead_source(text: str | None) -> list[dict]:
     if not text:
         return []
@@ -223,7 +241,7 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         zone = m.group(2).strip()
         if zone.endswith("(via"):
             zone = zone.split("(via")[0].strip()
-        src: dict = {"kind": "raid", "zone": zone}
+        src: dict = {"kind": "raid", "zone": canonical_zone(zone)}
         if boss and boss.lower() != "unknown":
             src["boss"] = boss
         out.append(src)
@@ -367,6 +385,19 @@ def assemble(max_phase: int, hold_out_wowhead: bool = False) -> tuple[dict, dict
 
     def add_source(item_id: int, source: dict | None, origin: str) -> None:
         if not source:
+            return
+        # AtlasLoot's world-boss tables are per-NPC and complete, so they own the
+        # boss attribution for that zone. Wowhead's free text names the wrong
+        # boss on some rows (30730 Terrorweave Tunic reads as Kazzak; it drops
+        # from Doomwalker), and a second boss for the same zone is always that
+        # mistake rather than a genuine second drop source.
+        if (
+            origin == "wowhead"
+            and source.get("zone") == WORLD_BOSS_ZONE
+            and any(
+                s.get("zone") == WORLD_BOSS_ZONE for s, _ in source_acc[item_id]
+            )
+        ):
             return
         key = json.dumps(source, sort_keys=True)
         existing = {json.dumps(s, sort_keys=True) for s, _ in source_acc[item_id]}
