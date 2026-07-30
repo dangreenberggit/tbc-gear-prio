@@ -1,6 +1,7 @@
 Status: open
 Type: bug
 Origin: found while deduping pinned-fetch logic (ticket 24), 2026-07-30
+Note: renumbered 25 -> 26; 25 was already taken by classallowlist-never-enforced
 Blocks: none
 Blocked by: none
 
