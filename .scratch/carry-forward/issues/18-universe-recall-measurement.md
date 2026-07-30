@@ -110,11 +110,21 @@ python .scratch/ticket-18/measure_junk_false_negatives.py   --universe data/univ
 | `ret-p3` (362) | 136 | **0** |
 | `ret-p2` (238) | 85 | **0** |
 
-Best-simming reject is -19.16 dps against a +3.4 cutoff — a 22.6 dps margin,
-~10x the per-item standard error. Tier coverage stays 15/15 filtered.
+Tier coverage stays 15/15 filtered.
 
-**Go**, with one scope limit: measured on slamaltman only, who is already well
-geared. Whether a weaker character flips a reject above cutoff is **untested**.
+**The margin argument first offered here is withdrawn** — a gap measured
+against one character's baseline says nothing about a different baseline, which
+was the question. See the correction in `docs/verification-log.md`.
+
+**Go on rule 1 (caster-only) only.** An SME review
+(`.scratch/handoffs/sme-junk-filter-judgment.md`) found the EP-floor rule was
+unsound for weapons: `ep_score` cannot see weapon damage, so Glaive of the Pit
+scored 0.00 (last of 17) on an empty stat map while swinging 119.7 weapon dps
+with three sockets. `weapon` is now out of `SLOTS_WITH_EP_SIGNAL`; the
+underlying scoring gap is ticket 27.
+
+Counts after the fix: p3 134 rejects (119 caster + 15 EP-floor), p2 84 — still
+zero above cutoff.
 
 The filter ships as `--apply-junk-filter`, **off by default**, so the committed
 universes and the Phase 1 gate figures stay unfiltered. Turning it on by

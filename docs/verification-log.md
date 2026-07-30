@@ -821,3 +821,56 @@ that a different character seems unlikely to flip the verdict, but that is
 **untested** — no second character has been simmed against the reject set.
 
 **Go.** The junk filter is cleared to be applied.
+
+### Correction (2026-07-30) — the margin argument was wrong, and so was the weapon rule
+
+The entry above justified the junk filter partly on the size of the gap between
+the best-simming reject (-19.16 dps) and the cutoff (+3.4). **That reasoning is
+withdrawn.** A margin is measured against one character's baseline; change the
+baseline and every number in it moves, which is the exact concern it was
+offered to answer. It should not be quoted.
+
+An SME review (`.scratch/handoffs/sme-junk-filter-judgment.md`) then found a
+real defect behind the weapon rejections.
+
+`ep_score` (`scripts/assemble_universe.py`) sums `stats[i] * weight[i]`. Weapon
+damage is not in the stats map — it is `scalingOptions.0.weaponDamageMin/Max` —
+and the ret EP weights have no weapon-damage term. So `curationHint` ranked
+two-handers blind to their largest damage contribution, and the EP-floor rule
+was applied to the `weapon` slot on that ranking.
+
+Verify:
+
+```
+python -c "import json;d=json.load(open('vendor/wowsims/db.json'));\
+i=[x for x in d['items'] if x['id']==28774][0];\
+print(i['scalingOptions']['0'])"
+```
+
+Glaive of the Pit (28774) scored `curationHint` **0.00**, last of 17 weapons,
+on an empty stat map — while carrying 354-532 damage at 3.7 speed
+(**119.7 weapon dps, within 5.7% of the worn Lionheart Executioner**), three
+gem sockets and a 1.33 PPM proc. Hammer of the Naaru (28800) is 119.9 weapon
+dps with three sockets against the worn weapon's zero.
+
+This is the same blind spot the `ranged` / `trinket` exemptions already work
+around: the three P3 librams also have empty stat maps and would all be
+rejected without their exemption.
+
+**Fix:** `weapon` removed from `SLOTS_WITH_EP_SIGNAL`. Re-measured, still zero
+false negatives, with the two weapons no longer rejected:
+
+| universe | caster-only | EP-floor | combined | above cutoff |
+|---|---|---|---|---|
+| `ret-p3` (362) | 119 | 15 (was 17) | 134 (was 136) | **0** |
+| `ret-p2` (238) | 74 | 10 (was 11) | 84 (was 85) | **0** |
+
+The sim did rank both weapons as downgrades for this character (-70.51,
+-103.91), which is expected against a stronger worn weapon — but that is not
+what rejected them. `curationHint` dropped them before the sim was consulted.
+
+Rule 1 (caster-only) is unaffected: it is a stat-*presence* test, never a
+magnitude test, so it does not depend on `ep_score` at all.
+
+Filed as ticket 27 (`ep_score` blind to weapon damage) — the underlying scoring
+gap is still there for any future use of `curationHint` on weapons.

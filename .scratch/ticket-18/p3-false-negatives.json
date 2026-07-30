@@ -26,18 +26,18 @@
     },
     {
       "label": "epFloor",
-      "rejected": 17,
+      "rejected": 15,
       "aboveCutoff": 0,
-      "belowCutoff": 17,
+      "belowCutoff": 15,
       "unranked": 0,
       "falseNegatives": [],
       "unrankedItems": []
     },
     {
       "label": "combined",
-      "rejected": 136,
+      "rejected": 134,
       "aboveCutoff": 0,
-      "belowCutoff": 136,
+      "belowCutoff": 134,
       "unranked": 0,
       "falseNegatives": [],
       "unrankedItems": []

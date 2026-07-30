@@ -57,11 +57,11 @@
   "junkFilter": {
     "total": 362,
     "casterOnlyReject": 119,
-    "epFloorReject": 17,
-    "combinedReject": 136,
-    "combinedKeep": 226,
+    "epFloorReject": 15,
+    "combinedReject": 134,
+    "combinedKeep": 228,
     "casterRejectPct": 32.9,
-    "combinedRejectPct": 37.6,
+    "combinedRejectPct": 37.0,
     "applied": false
   },
   "wowheadListIds": 123,

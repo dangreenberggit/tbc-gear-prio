@@ -111,7 +111,15 @@ CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNO
 # is sufficient reason.)
 CASTER_ONLY_STATS = frozenset({3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
-SLOTS_WITH_EP_SIGNAL = frozenset({"weapon", "feet", "waist", "hands", "wrist"})
+# `weapon` is deliberately absent. ep_score sums stats*weights, and weapon
+# damage is not in the stats map (it is scalingOptions.0.weaponDamageMin/Max)
+# nor in the ret EP weights, so curationHint ranks two-handers blind to their
+# largest damage contribution. Glaive of the Pit scored 0.00 -- last of 17 --
+# on an empty stat map while swinging 119.7 weapon dps with three sockets.
+# Same blind spot the ranged/trinket exemptions below already work around
+# (librams have empty stat maps too). See
+# .scratch/carry-forward/issues/27-ep-score-blind-to-weapon-damage.md
+SLOTS_WITH_EP_SIGNAL = frozenset({"feet", "waist", "hands", "wrist"})
 
 
 def load_json(path: Path) -> object:
