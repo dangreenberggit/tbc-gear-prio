@@ -35,6 +35,20 @@ describe("fillCandidateGems", () => {
     expect(fillCandidateGems(28757, gemsForPhase(2), epWeights)).toEqual([]);
   });
 
+  it("puts Relentless in an empty meta socket, not the higher-EP Swift Skyfire", () => {
+    // Stat EP ranks Swift Skyfire 9.84 over Relentless 9.00, because
+    // Relentless's +3% crit damage is a multiplier and additive EP cannot see
+    // it. All three upstream wowsims ret gear presets use Relentless.
+    const headId = 32461; // Furious Gizmatic Goggles
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    expect(metaIdx).toBeGreaterThanOrEqual(0);
+
+    const gems = fillCandidateGems(headId, gemsForPhase(3), retEpWeights);
+    expect(gems[metaIdx]).toBe(32409);
+    expect(getGem(gems[metaIdx]!)?.colour).toBe(GemColor.GemColorMeta);
+  });
+
   it("prefers strength reds over hit orange on Belt of One-Hundred Deaths under ret EP", () => {
     // Two Bold Crimson Spinels beat Glinting+Sovereign on this set even though
     // uncapped hit EP ranks the orange higher — which is why gemFillWeights

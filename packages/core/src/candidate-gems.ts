@@ -20,6 +20,32 @@ type EpWeights = Readonly<Record<string, number>>;
 /** Absolute EP slack for meta-aware near-ties (fill weights). */
 const META_NEAR_EP = 1.0;
 
+/**
+ * Stat EP cannot rank meta gems: their headline effects are not stats. Nine of
+ * the eighteen TBC metas score exactly 0.00 against ret weights, and the two
+ * that matter here invert — Swift Skyfire's flat +24 AP scores 9.84 while
+ * Relentless scores 9.00 on +12 Agi alone, because its +3% critical damage is
+ * a multiplier (`CritDamageMultiplier *= 1.03` in wowsims
+ * `sim/core/item_effects.go`) and additive EP cannot see it.
+ *
+ * The effect enters average damage as `crit * (critDmgMult - 1)`
+ * (`sim/core/spell_outcome.go`), so its absolute value scales with crit and is
+ * **not** a constant — roughly 0.6% of damage at 10% crit up to 2.4% at 40%.
+ * The *ordering* is what is durable: against Swift Skyfire's +24 AP,
+ * Relentless leads by ~7x at 10% crit and ~28x at 40%, so it never flips in
+ * any realistic ret range.
+ *
+ * Ret's meta is Relentless Earthstorm Diamond in all three upstream wowsims
+ * ret gear presets (preraid, p1, p2 under
+ * `ui/paladin/retribution/gear_sets/`), which carry no other meta.
+ *
+ * Activation is deliberately not checked. Relentless requires 2 red / 2 yellow
+ * / 2 blue elsewhere, and a player who slots a meta arranges their other gems
+ * to switch it on. Gating on the colours they happen to wear today would
+ * understate a genuine upgrade.
+ */
+const PREFERRED_META_IDS: readonly number[] = [32409];
+
 export type FillEmptyOpts = {
   /** Unique gem ids already socketed elsewhere on the set. */
   usedUnique?: ReadonlySet<number>;
@@ -178,6 +204,13 @@ function bestGemForSocket(
   }
 
   if (eligible.length === 0) return undefined;
+
+  if (socket === GemColor.GemColorMeta) {
+    for (const preferred of PREFERRED_META_IDS) {
+      const hit = eligible.find((e) => e.gem.id === preferred);
+      if (hit) return hit.gem;
+    }
+  }
 
   let bestEp = -Infinity;
   for (const e of eligible) {
