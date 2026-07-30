@@ -10,7 +10,15 @@ Judgement calls from the pre-merge review's Standards axis. None is a
 correctness risk; each is a refactor with its own blast radius, so they were
 deferred rather than done mid-review. Grouped roughly by value.
 
-## Duplicated pinned-fetch logic
+## Duplicated pinned-fetch logic — DONE 2026-07-30 (`d4ae638`)
+
+`scripts/pinned_fetch.py` now carries `fetch`, `digest`, `lock_entry` and
+`verify`; all three scripts delegate. Each keeps its own REPO, lockfile and
+layout. Verified with `pnpm fetch:protos:check` and
+`python scripts/sync_atlasloot.py --check` (both "in sync.") plus direct calls
+over a known sha256 vector.
+
+Original text:
 
 `scripts/sync_atlasloot.py`, `scripts/sync_wowsims.py` and
 `scripts/fetch_protos.py` each carry their own `fetch(sha, path)` with
@@ -67,3 +75,11 @@ template vs. rules, not extracting a stylesheet.
 "a" | "b"` don't reveal which ring or trinket is meant. `simSlotsForPoolSlot`
 already returns `["finger1", "finger2"]`, so `"finger1" | "finger2"` would be
 honest.
+
+## Added 2026-07-30 — folded in from ticket 22
+
+Pair the hard-coded universe counts with membership assertions:
+`pool-hardening.test.ts` (`toBe(362)`) and `pool.test.ts` (`toBe(238)`) detect
+*change*, not correctness — a regression admitting 10 junk items while dropping
+10 real ones keeps the count and passes. Wants a sampled set of ids that must
+be present and a set that must be absent alongside the count tripwire.
