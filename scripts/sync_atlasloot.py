@@ -14,12 +14,14 @@ Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
 """
 
 import argparse
-import hashlib
 import json
 import os
 import subprocess
 import sys
-import urllib.request
+
+from pinned_fetch import digest as sha256_of
+from pinned_fetch import fetch as pinned_fetch
+from pinned_fetch import lock_entry
 
 REPO = "Hoizame/AtlasLootClassic"
 LOCKFILE = "data/atlasloot.lock.json"
@@ -28,9 +30,6 @@ VENDOR = "vendor/atlasloot"
 TRACKED = {
     "data-tbc.lua": "AtlasLootClassic_DungeonsAndRaids/data-tbc.lua",
 }
-
-RAW = "https://raw.githubusercontent.com/{repo}/{sha}/{path}"
-
 
 def gh(*args):
     out = subprocess.run(["gh", "api", *args], capture_output=True, text=True)
@@ -58,9 +57,7 @@ def default_branch_commit():
 
 
 def fetch(sha, path):
-    url = RAW.format(repo=REPO, sha=sha, path=path)
-    with urllib.request.urlopen(url, timeout=120) as r:
-        return r.read()
+    return pinned_fetch(REPO, sha, path)
 
 
 def load_lock():
@@ -96,9 +93,9 @@ def do_update(tag):
         dest = os.path.join(VENDOR, local)
         with open(dest, "wb") as fh:
             fh.write(blob)
-        digest = hashlib.sha256(blob).hexdigest()
-        files[local] = {"path": path, "sha256": digest, "bytes": len(blob)}
-        print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}")
+        entry = lock_entry(path, blob)
+        files[local] = entry
+        print(f"    {local:<26} {len(blob):>9,} bytes  {entry['sha256'][:12]}")
 
     lock = {
         "repo": REPO,
@@ -144,7 +141,7 @@ def do_check():
             drift.append(f"missing locally: {path} (run --update)")
             continue
         with open(path, "rb") as fh:
-            if hashlib.sha256(fh.read()).hexdigest() != meta["sha256"]:
+            if sha256_of(fh.read()) != meta["sha256"]:
                 drift.append(f"checksum mismatch: {path}")
 
     print()

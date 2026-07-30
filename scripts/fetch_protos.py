@@ -20,17 +20,18 @@ types, so there's no guessing here.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
-import urllib.request
 from pathlib import Path
+
+from pinned_fetch import digest as sha256_of
+from pinned_fetch import fetch as pinned_fetch
+from pinned_fetch import lock_entry
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCKFILE = ROOT / "data/wowsims.lock.json"
 DEST = ROOT / "data/proto"
 REPO = "wowsims/tbc-new"
-RAW = "https://raw.githubusercontent.com/{repo}/{sha}/{path}"
 
 # proto/*.proto at the pinned commit, upstream path -> local filename (same).
 # ui.proto (IndividualSimSettings) imports api.proto (RaidSimRequest), apl.proto,
@@ -64,9 +65,7 @@ def load_lock() -> dict:
 
 
 def fetch(sha: str, path: str) -> bytes:
-    url = RAW.format(repo=REPO, sha=sha, path=f"proto/{path}")
-    with urllib.request.urlopen(url, timeout=120) as r:
-        return r.read()
+    return pinned_fetch(REPO, sha, f"proto/{path}")
 
 
 def do_fetch(lock: dict) -> int:
@@ -78,9 +77,9 @@ def do_fetch(lock: dict) -> int:
     for name in PROTO_FILES:
         blob = fetch(sha, name)
         (DEST / name).write_bytes(blob)
-        digest = hashlib.sha256(blob).hexdigest()
-        files[name] = {"path": f"proto/{name}", "sha256": digest, "bytes": len(blob)}
-        print(f"    {name:<16} {len(blob):>6,} bytes  {digest[:12]}")
+        entry = lock_entry(f"proto/{name}", blob)
+        files[name] = entry
+        print(f"    {name:<16} {len(blob):>6,} bytes  {entry['sha256'][:12]}")
 
     proto_lock["commit"] = sha
     LOCKFILE.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
@@ -107,8 +106,7 @@ def do_check(lock: dict) -> int:
         if not path.exists():
             drift.append(f"missing locally: {path.relative_to(ROOT)} (run fetch_protos.py)")
             continue
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        if digest != meta["sha256"]:
+        if sha256_of(path.read_bytes()) != meta["sha256"]:
             drift.append(f"checksum mismatch: {path.relative_to(ROOT)}")
 
     missing_from_lock = set(PROTO_FILES) - set(proto_lock.get("files", {}))

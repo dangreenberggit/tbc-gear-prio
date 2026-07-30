@@ -27,13 +27,16 @@ Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
 """
 
 import argparse
-import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
-import urllib.request
+
+from pinned_fetch import digest as sha256_of
+from pinned_fetch import fetch as pinned_fetch
+from pinned_fetch import lock_entry
+from pinned_fetch import verify as verify_blob
 
 REPO = "wowsims/tbc-new"
 LOCKFILE = "data/wowsims.lock.json"
@@ -60,9 +63,6 @@ TRACKED = {
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
 }
 
-RAW = "https://raw.githubusercontent.com/{repo}/{sha}/{path}"
-
-
 def gh(*args):
     """Call gh api. Kept as a subprocess so this stays stdlib-only and reuses
     whatever auth the developer already has."""
@@ -84,9 +84,7 @@ def tag_sha(tag):
 
 
 def fetch(sha, path):
-    url = RAW.format(repo=REPO, sha=sha, path=path)
-    with urllib.request.urlopen(url, timeout=120) as r:
-        return r.read()
+    return pinned_fetch(REPO, sha, path)
 
 
 def parse_current_phase(ts_source):
@@ -135,8 +133,9 @@ def do_update(tag):
         dest = os.path.join(VENDOR, local)
         with open(dest, "wb") as fh:
             fh.write(blob)
-        digest = hashlib.sha256(blob).hexdigest()
-        files[local] = {"path": path, "sha256": digest, "bytes": len(blob)}
+        entry = lock_entry(path, blob)
+        files[local] = entry
+        digest = entry["sha256"]
         print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}")
         if local == "constants_other.ts":
             current_phase = parse_current_phase(blob.decode("utf-8"))
@@ -198,8 +197,7 @@ def do_restore():
     errors = []
     for local, meta in files.items():
         path = meta.get("path")
-        expect = meta.get("sha256")
-        if not path or not expect:
+        if not path or not meta.get("sha256"):
             errors.append(f"{local}: lock entry missing path/sha256")
             continue
         try:
@@ -207,11 +205,9 @@ def do_restore():
         except Exception as e:
             errors.append(f"{local}: fetch failed: {e}")
             continue
-        digest = hashlib.sha256(blob).hexdigest()
-        if digest != expect:
-            errors.append(
-                f"{local}: sha256 mismatch (got {digest[:12]}, lock {expect[:12]})"
-            )
+        reason = verify_blob(blob, meta)
+        if reason:
+            errors.append(f"{local}: {reason}")
             continue
         dest = os.path.join(VENDOR, local)
         with open(dest, "wb") as fh:
@@ -258,7 +254,7 @@ def do_check():
             drift.append(f"missing locally: {path} (run --restore or --update)")
             continue
         with open(path, "rb") as fh:
-            if hashlib.sha256(fh.read()).hexdigest() != meta["sha256"]:
+            if sha256_of(fh.read()) != meta["sha256"]:
                 drift.append(f"checksum mismatch: {path}")
 
     print()
