@@ -26,6 +26,7 @@ from pathlib import Path
 
 from pinned_fetch import digest as sha256_of
 from pinned_fetch import fetch as pinned_fetch
+from pinned_fetch import is_crlf_drift
 from pinned_fetch import lock_entry
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,8 +107,16 @@ def do_check(lock: dict) -> int:
         if not path.exists():
             drift.append(f"missing locally: {path.relative_to(ROOT)} (run fetch_protos.py)")
             continue
-        if sha256_of(path.read_bytes()) != meta["sha256"]:
-            drift.append(f"checksum mismatch: {path.relative_to(ROOT)}")
+        blob = path.read_bytes()
+        if sha256_of(blob) != meta["sha256"]:
+            rel = path.relative_to(ROOT)
+            if is_crlf_drift(blob, meta):
+                drift.append(
+                    f"line-ending drift (CRLF), not a content mismatch: {rel} -- "
+                    f"re-checkout: rm -f data/proto/*.proto && git checkout -- data/proto/"
+                )
+            else:
+                drift.append(f"checksum mismatch: {rel}")
 
     missing_from_lock = set(PROTO_FILES) - set(proto_lock.get("files", {}))
     if missing_from_lock:

@@ -1,9 +1,10 @@
-Status: open
+Status: closed
 Type: bug
 Origin: found while deduping pinned-fetch logic (ticket 24), 2026-07-30
 Note: renumbered 25 -> 26; 25 was already taken by classallowlist-never-enforced
 Blocks: none
 Blocked by: none
+Resolution: fixed -- fetch_protos.py --check now names CRLF drift instead of reporting a bare checksum mismatch
 
 # A stale `data/proto/` worktree fails `fetch:protos:check` on Windows
 
@@ -75,3 +76,46 @@ someone having read the docs.
 - A CRLF-stale `data/proto/` produces a message naming line endings as the
   cause, not a bare checksum mismatch.
 - The distinction is covered by a test or a documented manual reproduction.
+
+## Closed 2026-07-30
+
+Took the recommended first fix. `scripts/pinned_fetch.py` gained
+`is_crlf_drift(blob, meta)`: returns True when the LF-normalised digest
+(`blob.replace(b"\r\n", b"\n")`) matches the lock but the raw digest does not.
+`scripts/fetch_protos.py`'s `do_check` calls it on a digest mismatch and, when
+true, reports `line-ending drift (CRLF), not a content mismatch: <path> --
+re-checkout: rm -f data/proto/*.proto && git checkout -- data/proto/` instead
+of `checksum mismatch: <path>`. A genuine content mismatch (neither raw nor
+LF-normalised digest matches) still falls through to the original
+`checksum mismatch:` message unchanged.
+
+Checked `scripts/sync_wowsims.py` and `scripts/sync_atlasloot.py` for the same
+exposure: both verify files under `vendor/` (gitignored), which is populated
+purely by `pinned_fetch.fetch` over the network -- never by `git checkout` --
+and `.gitattributes` has no `text eol=lf` rule for `vendor/**`. There is no
+"worktree checked out before the rule applied" path for those files, so the
+same failure is not reachable there. Left them unchanged.
+
+Verified manually (no Python test suite in this repo):
+
+```
+pnpm fetch:protos:check                          # in sync. (baseline, before and after)
+
+python -c "import pathlib; p = pathlib.Path('data/proto/ui.proto'); \
+  p.write_bytes(p.read_bytes().replace(b'\n', b'\r\n'))"
+pnpm fetch:protos:check
+# DRIFT: line-ending drift (CRLF), not a content mismatch: data\proto\ui.proto --
+#   re-checkout: rm -f data/proto/*.proto && git checkout -- data/proto/
+git checkout -- data/proto/
+pnpm fetch:protos:check                          # in sync.
+
+python -c "import pathlib; p = pathlib.Path('data/proto/ui.proto'); \
+  p.write_bytes(p.read_bytes() + b'x')"
+pnpm fetch:protos:check
+# DRIFT: checksum mismatch: data\proto\ui.proto
+git checkout -- data/proto/
+pnpm fetch:protos:check                          # in sync.
+```
+
+`git status` on `data/proto/` was clean after each restore. `pnpm verify` is
+green on the change.
