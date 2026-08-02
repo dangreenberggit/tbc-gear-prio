@@ -175,8 +175,28 @@ describe("data/universes/ret-p3.json hardening", () => {
     // 362 -> 354: classAllowlist is enforced, evicting 8 class-specific SSC/TK
     // trinkets a paladin cannot equip (ticket 25).
     expect(universeP3.length).toBe(354);
+    // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
+    // callers switch on `kind`, so a row whose source cannot be discriminated
+    // is as unusable as one with no source. assemble_universe.py fails the
+    // build on both (PLAN.md §8.3.2); this pins the shipped artifact.
+    const ITEM_SOURCE_KINDS = new Set([
+      "raid",
+      "token",
+      "badge",
+      "crafted",
+      "rep",
+      "heroic",
+      "pvp",
+      "world",
+    ]);
     for (const e of raw.entries) {
       expect(e.sources.length, `${e.itemId} ${e.name}`).toBeGreaterThan(0);
+      for (const [i, s] of e.sources.entries()) {
+        expect(
+          ITEM_SOURCE_KINDS.has(s.kind),
+          `${e.itemId} ${e.name} sources[${i}] kind ${String(s.kind)}`
+        ).toBe(true);
+      }
     }
     for (const e of universeP3) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
@@ -296,7 +316,7 @@ describe("data/universes/ret-p3.json hardening", () => {
       const ClassPaladin = 2;
       for (const id of [
         30446, 30448, 30449, 30450, 30663, 30664, 30665, 30720,
-      ]) {
+      ] as const) {
         expect(poolIds.has(id), `${id} is class-restricted`).toBe(false);
       }
       for (const e of universeP3) {

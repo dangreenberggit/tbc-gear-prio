@@ -122,6 +122,11 @@ CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNO
 # is sufficient reason.)
 # common.proto Class enum: ClassPaladin = 2.
 CLASS_PALADIN = 2
+# Mirrors the ItemSource union in packages/core/src/pool.ts. A kind this file
+# emits but that file cannot parse is a build failure, not a runtime surprise.
+ITEM_SOURCE_KINDS = frozenset(
+    {"raid", "token", "badge", "crafted", "rep", "heroic", "pvp", "world"}
+)
 CASTER_ONLY_STATS = frozenset({3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
 # `weapon` is deliberately absent. ep_score sums stats*weights, and weapon
@@ -574,9 +579,32 @@ def assemble(
 
     entries.sort(key=lambda e: (e["slot"], -e["curationHint"], e["itemId"]))
 
-    # Every row must have non-empty sources (build failure).
-    if any(not e["sources"] for e in entries):
-        print("assembly error: row with empty sources", file=sys.stderr)
+    # PLAN.md §8.3.2: "A null source is a build-time failure for a pool that
+    # ships, not a runtime shrug." Checking non-emptiness alone would let a row
+    # ship a source the reader cannot discriminate — pool.ts picks sources[0]
+    # and switches on `kind`, so a missing or unknown kind is as unusable as no
+    # source at all.
+    source_errors: list[str] = []
+    for e in entries:
+        if not e["sources"]:
+            source_errors.append(f"{e['itemId']} {e['name']}: no sources")
+            continue
+        for i, s in enumerate(e["sources"]):
+            if not isinstance(s, dict) or not s.get("kind"):
+                source_errors.append(f"{e['itemId']} {e['name']}: sources[{i}] has no kind")
+            elif s["kind"] not in ITEM_SOURCE_KINDS:
+                source_errors.append(
+                    f"{e['itemId']} {e['name']}: sources[{i}] unknown kind {s['kind']!r}"
+                )
+    if source_errors:
+        print(
+            f"assembly error: {len(source_errors)} unusable source rows",
+            file=sys.stderr,
+        )
+        for msg in source_errors[:20]:
+            print(f"  {msg}", file=sys.stderr)
+        if len(source_errors) > 20:
+            print(f"  ... and {len(source_errors) - 20} more", file=sys.stderr)
         sys.exit(2)
 
     # Measured on the unfiltered universe, then optionally applied. Everything

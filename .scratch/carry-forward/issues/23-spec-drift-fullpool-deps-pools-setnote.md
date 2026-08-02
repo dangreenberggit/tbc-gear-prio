@@ -21,7 +21,7 @@ a recorded decision, not silent drift.
 dropped"*. It exists nowhere. Without it the prefilter cannot be audited from
 the public interface — which is exactly the audit ticket 18 needs.
 
-## 2. `source: null` is measured, not gated (§8.3.2)
+## 2. `source: null` is measured, not gated (§8.3.2) — RESOLVED 2026-07-30
 
 > A `null` source is a **build-time failure for a pool that ships**, not a
 > runtime shrug.
@@ -30,6 +30,33 @@ No assertion in src, tests or scripts enforces this. The gate box was closed by
 measuring the committed artifact (0/238, 0/362), which is true today but would
 not catch a regression. Needs a real build-time guard in
 `assemble_universe.py`, plus a test.
+
+**Resolved.** Two parts were already covered and one was not, so the ticket was
+partly stale:
+
+- `add_source` already refuses a falsy source, and `poolEntryFromUniverse`
+  already throws on an empty `sources` list. The "no source at all" path was
+  gated.
+- What was **not** gated is a source that exists but cannot be discriminated.
+  `pool.ts` takes `sources[0]` and callers switch on `kind`, so a row with a
+  missing or unknown `kind` is as unusable as one with no source.
+
+`assemble_universe.py` now validates every source on every row against
+`ITEM_SOURCE_KINDS` (mirroring the `ItemSource` union in `pool.ts`) and exits
+2 listing the offending rows. `pool-hardening.test.ts` pins the same invariant
+on the shipped artifact.
+
+Mutation-checked both branches by editing the raid-source constructor and
+regenerating:
+
+```
+"kind": "raaid"        -> assembly error: 304 unusable source rows
+                          32323 ...: sources[0] unknown kind 'raaid'   exit=2
+{"zone": str(zone)}    -> assembly error: 304 unusable source rows
+                          32323 ...: sources[0] has no kind            exit=2
+```
+
+Real data is unaffected: regenerating p3 still writes 354 entries, exit 0.
 
 ## 3. `Deps` grew four fields beyond the spec (§4)
 
