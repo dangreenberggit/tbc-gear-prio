@@ -11,7 +11,7 @@ each is either a missing affordance or an undocumented architectural change. The
 resolution for several may legitimately be "amend the plan" — but that has to be
 a recorded decision, not silent drift.
 
-## 1. `fullPool` is not implemented (§4, §8.3.3)
+## 1. `fullPool` is not implemented (§4, §8.3.3) — RESOLVED 2026-07-30
 
 §4 lists it on `RankInput`:
 
@@ -20,6 +20,23 @@ a recorded decision, not silent drift.
 §8.3.3 calls it *"the escape hatch when you want to check what the filter
 dropped"*. It exists nowhere. Without it the prefilter cannot be audited from
 the public interface — which is exactly the audit ticket 18 needs.
+
+**Resolved:** `docs/adr/0018-no-rank-time-ep-prefilter-so-no-fullpool-flag.md`.
+
+The finding is bigger than the missing flag: **the prefilter it escapes was
+never built either.** `rank.ts:202` selects candidates by phase and Kael temp
+legendary only — no EP scoring, no cap-clipped weights, no top-N.
+`grep -rn "prefilter\|topN\|EP_TOP_N" packages/core/src/` returns nothing.
+The engine already behaves as `fullPool: true`: the P3 run sims 357 of a
+362-row universe, and the 5-row gap is worn items.
+
+So implementing the flag would ship a parameter that skips nothing while
+reading as an audit capability. Deferred with the prefilter; they land
+together or not at all.
+
+Correction to this ticket's framing: ticket 18's audit did **not** need
+`fullPool`. It compared a universe-assembly filter against a full sim of the
+universe, which the current engine provides for free.
 
 ## 2. `source: null` is measured, not gated (§8.3.2) — RESOLVED 2026-07-30
 
