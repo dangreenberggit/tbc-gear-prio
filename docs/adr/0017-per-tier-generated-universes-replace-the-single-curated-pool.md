@@ -13,7 +13,11 @@ spec:
 > `pools/ret.json` — candidate pool — ONE FILE PER SPEC, not per tier (R2).
 > … Curation accumulates instead of being redone [each tier].
 
-and §14 pins it as planned ADR #9: _"pools are per-spec, not per-tier."_
+and PLAN.md's "ADRs to write on approval" list pins it as item 9: _"Content
+tier is a user input (`maxPhase`, inclusive), never a build target; pools are
+per-spec, not per-tier."_ (That list is §17 as of this writing and was §16
+before the "Open plans" section was inserted, so find it by title rather than
+by number.)
 
 The shipped engine reads `data/universes/ret-p2.json` and
 `data/universes/ret-p3.json` — per tier, the shape R2 explicitly argued
