@@ -11,9 +11,9 @@
     "Tempest Keep",
     "World Bosses"
   ],
-  "d7EligibleTotal": 4251,
-  "excludedNoSource": 2333,
-  "universeTotal": 362,
+  "d7EligibleTotal": 3140,
+  "excludedNoSource": 1366,
+  "universeTotal": 354,
   "listOnlyMembership": 21,
   "perSlot": {
     "back": 28,
@@ -26,27 +26,27 @@
     "neck": 23,
     "ranged": 3,
     "shoulder": 26,
-    "trinket": 28,
+    "trinket": 20,
     "waist": 36,
     "weapon": 17,
     "wrist": 33
   },
   "sourceRecordAdds": {
     "atlasloot": 373,
-    "db": 1877,
+    "db": 1733,
     "two-hop": 18,
     "wowhead": 54
   },
   "membershipByOrigin": {
     "itemHasOrigin:atlasloot": 53,
-    "itemHasOrigin:db": 325,
+    "itemHasOrigin:db": 317,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 42,
     "listOnly": 21,
-    "zoneMatch": 341
+    "zoneMatch": 333
   },
   "exclusivePrimaryOrigin": {
-    "db": 325,
+    "db": 317,
     "atlasloot-only": 13,
     "two-hop": 15,
     "wowhead-only": 9
@@ -55,13 +55,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 362,
+    "total": 354,
     "casterOnlyReject": 119,
     "epFloorReject": 15,
     "combinedReject": 134,
-    "combinedKeep": 228,
-    "casterRejectPct": 32.9,
-    "combinedRejectPct": 37.0,
+    "combinedKeep": 220,
+    "casterRejectPct": 33.6,
+    "combinedRejectPct": 37.9,
     "applied": false
   },
   "wowheadListIds": 123,

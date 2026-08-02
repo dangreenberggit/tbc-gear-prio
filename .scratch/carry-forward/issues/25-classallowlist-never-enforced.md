@@ -1,8 +1,10 @@
-Status: open
+Status: closed
 Type: task
 Origin: `.scratch/handoffs/telephone-postmortem-findings.md`
 Blocks: phase-1
 Blocked by: none
+Resolution: classAllowlist enforced in ret_eligible_d7; 8 items evicted from both
+  universes. 2026-07-30.
 
 # `classAllowlist` is never enforced — class-illegal items sit in the shipping universes
 
@@ -93,3 +95,40 @@ Also check `classDenylist` if `db.json` carries one — the same audit applies.
   is unquantified.
 - Target class for ret is `2` (Paladin). 337 `db.json` items are allowlisted to
   class 2, so the field is well populated and usable as a positive filter too.
+
+## Closed 2026-07-30
+
+`ret_eligible_d7` in `scripts/assemble_universe.py` now rejects any item whose
+non-empty `classAllowlist` omits `CLASS_PALADIN` (2, confirmed against the
+`Class` enum in `packages/core/src/proto/common_pb.ts`, not from memory).
+
+Exactly the 8 predicted items left both universes and nothing else moved:
+
+```
+ret-p2: 238 -> 230 | removed 8 | class-illegal remaining 0
+ret-p3: 362 -> 354 | removed 8 | class-illegal remaining 0
+```
+
+Re-derive with the reproduce command above after
+`python scripts/assemble_universe.py --max-phase {2,3} --out <ABS> --report <ABS>`.
+
+`classDenylist` was checked and no item in `db.json` carries one.
+
+Tests:
+- Counts updated (362 -> 354, 238 -> 230) with the reason recorded inline.
+- New `pool-hardening` test names all 8 evicted ids **and** sweeps the universe
+  for any allowlist omitting Paladin, so a regression swapping one illegal item
+  for another still fails. This is the count-plus-membership pairing ticket 24
+  asks for, applied to this rule.
+- The "does not treat spell damage as a caster-only stat" test no longer
+  asserts pool membership for 30449 Void Star Talisman. That item is
+  `classAllowlist [9]` (Warlock), so its absence is now correct; the test's real
+  subject is the stat set, which it still checks directly against `db.json`.
+
+Mutation-checked: removing the allowlist branch and regenerating fails both the
+count assertion (`expected 362 to be 354`) and the named-item assertion
+(`30446 is class-restricted`).
+
+Settles an open question from an earlier session: whether ret "genuinely uses"
+Void Star Talisman was previously hedged as untested. It is Warlock-only, so
+the answer is no — a paladin cannot equip it at all.

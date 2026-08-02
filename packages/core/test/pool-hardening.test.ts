@@ -172,7 +172,9 @@ describe("data/universes/ret-p3.json hardening", () => {
     // +32248 Halberd of Desolation.
     // 349 -> 362: AtlasLoot's WorldBossesBC block now resolves, admitting the
     // 13 Doomwalker / Doom Lord Kazzak drops that db.json has no sources for.
-    expect(universeP3.length).toBe(362);
+    // 362 -> 354: classAllowlist is enforced, evicting 8 class-specific SSC/TK
+    // trinkets a paladin cannot equip (ticket 25).
+    expect(universeP3.length).toBe(354);
     for (const e of raw.entries) {
       expect(e.sources.length, `${e.itemId} ${e.name}`).toBeGreaterThan(0);
     }
@@ -204,6 +206,18 @@ describe("data/universes/ret-p3.json hardening", () => {
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
       " lack resolvable sources or fail D7/quality (06-hardening §2.1)"
   );
+
+  it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
+    // 30098 Razor-Scale Battlecloak: verified present in vendor/wowsims/ret_p2.gear.json
+    // and carrying bisTags in the regenerated data/universes/ret-p3.json.
+    const razorScale = raw.entries.find((e) => e.itemId === 30098);
+    expect(razorScale?.bisTags).toEqual(["BiS"]);
+
+    for (const id of WOWSIMS_ADMITTED_IN_P3) {
+      const entry = raw.entries.find((e) => e.itemId === id);
+      expect(entry?.bisTags, `${id} should carry a BiS tag`).toEqual(["BiS"]);
+    }
+  });
 
   it.skipIf(!hasWowsimsVendor)("ranged slot is librams only", () => {
     const ranged = universeP3.filter((e) => e.slot === "ranged");
@@ -252,18 +266,45 @@ describe("data/universes/ret-p3.json hardening", () => {
   it.skipIf(!hasWowsimsVendor)(
     "does not treat spell damage as a caster-only stat",
     () => {
-      // Void Star Talisman is +48 spell damage and nothing else — the only item
-      // in the universe whose sole caster-flagged stat is SpellDamage. The ret
-      // weights in data/presets/ret/p2.ep-weights.json price stat 5 at 0.17, so
-      // treating it as caster-only would contradict this repo's own EP model.
-      expect(poolIds.has(30449), "Void Star Talisman").toBe(true);
-
+      // Void Star Talisman is +48 spell damage and nothing else, which makes it
+      // the sharpest probe for the stat set: if SpellDamage were treated as
+      // caster-only, an item carrying nothing else would be junk-rejected. The
+      // ret weights in data/presets/ret/p2.ep-weights.json price stat 5 at
+      // 0.17, so that would contradict this repo's own EP model.
+      //
+      // Deliberately NOT asserted via pool membership. The item is
+      // classAllowlist [9] (Warlock) and a paladin cannot equip it, so it is
+      // correctly absent from the universe — see ticket 25. Membership would
+      // pin the wrong fact; the stat set is what this test is about.
       const stats = (
         byId.get(30449) as {
           scalingOptions?: Record<string, { stats?: object }>;
         }
       )?.scalingOptions?.["0"]?.stats;
       expect(Object.keys(stats ?? {})).toEqual(["5"]);
+    }
+  );
+
+  it.skipIf(!hasWowsimsVendor)(
+    "ships no item whose classAllowlist excludes Paladin",
+    () => {
+      // A non-empty classAllowlist is a hard equip restriction. These 8
+      // class-specific SSC/TK trinkets sat in both universes until the rule was
+      // enforced (ticket 25); they cannot be worn and would consume trinket
+      // candidate budget. Named rather than counted so a regression that swaps
+      // one illegal item for another still fails.
+      const ClassPaladin = 2;
+      for (const id of [
+        30446, 30448, 30449, 30450, 30663, 30664, 30665, 30720,
+      ]) {
+        expect(poolIds.has(id), `${id} is class-restricted`).toBe(false);
+      }
+      for (const e of universeP3) {
+        const allow = (byId.get(e.itemId) as { classAllowlist?: number[] })
+          ?.classAllowlist;
+        if (!allow?.length) continue;
+        expect(allow, `${e.itemId} ${e.name}`).toContain(ClassPaladin);
+      }
     }
   );
 

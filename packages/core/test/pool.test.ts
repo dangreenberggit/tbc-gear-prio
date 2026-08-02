@@ -172,7 +172,9 @@ describe("data/universes/ret-p2.json", () => {
     // 224 -> 238: +28774 Glaive of the Pit (polearms are paladin-equippable,
     // the D7 rule used to reject them alongside staves) and the 13 Doomwalker /
     // Doom Lord Kazzak drops now resolving through AtlasLoot's WorldBossesBC.
-    expect(entries.length).toBe(238);
+    // 238 -> 230: classAllowlist is enforced, evicting 8 class-specific SSC/TK
+    // trinkets a paladin cannot equip (ticket 25).
+    expect(entries.length).toBe(230);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

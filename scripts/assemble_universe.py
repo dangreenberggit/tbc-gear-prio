@@ -25,6 +25,17 @@ DB = ROOT / "vendor/wowsims/db.json"
 EP_WEIGHTS = ROOT / "data/presets/ret/p2.ep-weights.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
+
+# Pinned wowsims ret gear-set presets (vendor/wowsims/ret_*.gear.json — see
+# packages/core/test/pool-hardening.test.ts's wowsimsCuratedItemIds for the
+# same file list). Upstream tbc-new only ships one curated set per stage for
+# retribution (no BiS/Alt/Realistic split like some other specs), so any item
+# id that appears in one of these files is tagged "BiS".
+WOWSIMS_GEAR_SETS = [
+    ROOT / "vendor/wowsims/ret_preraid.gear.json",
+    ROOT / "vendor/wowsims/ret_p1.gear.json",
+    ROOT / "vendor/wowsims/ret_p2.gear.json",
+]
 TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
 WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
@@ -109,6 +120,8 @@ CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNO
 # attributed that weight to ret's spell-power coefficients on Seal/Judgement of
 # Blood and Crusader Strike — plausible, but untested here; the EP weight alone
 # is sufficient reason.)
+# common.proto Class enum: ClassPaladin = 2.
+CLASS_PALADIN = 2
 CASTER_ONLY_STATS = frozenset({3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
 # `weapon` is deliberately absent. ep_score sums stats*weights, and weapon
@@ -126,9 +139,30 @@ def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def wowsims_curated_item_ids() -> set[int]:
+    """Union of item ids across the pinned ret gear-set presets (§bisTags)."""
+    ids: set[int] = set()
+    for path in WOWSIMS_GEAR_SETS:
+        if not path.is_file():
+            continue
+        doc = load_json(path)
+        assert isinstance(doc, dict)
+        for item in doc.get("items") or []:
+            if isinstance(item, dict) and item.get("id") is not None:
+                ids.add(int(item["id"]))
+    return ids
+
+
 def ret_eligible_d7(it: dict) -> bool:
     """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable()."""
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
+        return False
+    # A non-empty classAllowlist is a hard equip restriction, so an item that
+    # omits Paladin cannot be worn by this character at all. db.json carries
+    # the field on 2006 items and nothing read it, which let 8 class-specific
+    # SSC/TK trinkets into both shipping universes.
+    allowlist = it.get("classAllowlist")
+    if allowlist and CLASS_PALADIN not in allowlist:
         return False
     t = it.get("type")
     if t is None:
@@ -401,6 +435,7 @@ def assemble(
         if isinstance(n, dict) and "id" in n and "name" in n
     }
     db_by_id = {int(it["id"]): it for it in db["items"]}
+    bis_ids = wowsims_curated_item_ids()
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
 
@@ -527,6 +562,8 @@ def assemble(
             "sources": sources,
             "curationHint": round(ep_score(stats, w), 3),
         }
+        if iid in bis_ids:
+            entry["bisTags"] = ["BiS"]
         entries.append(entry)
 
         # Sorted: set iteration order over strings varies per process, which

@@ -54,7 +54,10 @@
           "boss": "Morogrim Tidewalker"
         }
       ],
-      "curationHint": 50.25
+      "curationHint": 50.25,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29994,
@@ -125,7 +128,10 @@
           "profession": "Tailoring"
         }
       ],
-      "curationHint": 39.03
+      "curationHint": 39.03,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28764,
@@ -427,7 +433,10 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "curationHint": 121.62
+      "curationHint": 121.62,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28601,
@@ -496,7 +505,10 @@
           "boss": "Magtheridon"
         }
       ],
-      "curationHint": 61.25
+      "curationHint": 61.25,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28599,
@@ -776,7 +788,10 @@
           "boss": "Lady Vashj"
         }
       ],
-      "curationHint": 51.81
+      "curationHint": 51.81,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28608,
@@ -793,7 +808,10 @@
           "boss": "Nightbane"
         }
       ],
-      "curationHint": 48.0
+      "curationHint": 48.0,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28610,
@@ -1098,7 +1116,10 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "curationHint": 76.6
+      "curationHint": 76.6,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30738,
@@ -1149,7 +1170,10 @@
           "boss": "The Lurker Below"
         }
       ],
-      "curationHint": 47.75
+      "curationHint": 47.75,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28730,
@@ -1467,7 +1491,10 @@
           "boss": "Al'ar"
         }
       ],
-      "curationHint": 90.33
+      "curationHint": 90.33,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30644,
@@ -1493,7 +1520,10 @@
           "boss": "Trash Mobs"
         }
       ],
-      "curationHint": 78.45
+      "curationHint": 78.45,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30130,
@@ -1847,7 +1877,10 @@
           "profession": "Engineering"
         }
       ],
-      "curationHint": 105.21
+      "curationHint": 105.21,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 32087,
@@ -1863,7 +1896,10 @@
           "cost": 50
         }
       ],
-      "curationHint": 84.64
+      "curationHint": 84.64,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28775,
@@ -1959,7 +1995,10 @@
           "boss": "Prince Malchezaar"
         }
       ],
-      "curationHint": 59.5
+      "curationHint": 59.5,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28671,
@@ -2398,7 +2437,10 @@
           "boss": "Trash Mobs"
         }
       ],
-      "curationHint": 49.71
+      "curationHint": 49.71,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30017,
@@ -2436,7 +2478,10 @@
           "zone": "Karazhan"
         }
       ],
-      "curationHint": 44.5
+      "curationHint": 44.5,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30059,
@@ -2722,7 +2767,10 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "curationHint": 83.07
+      "curationHint": 83.07,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29075,
@@ -2740,7 +2788,10 @@
           "boss": "High King Maulgar"
         }
       ],
-      "curationHint": 80.15
+      "curationHint": 80.15,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30085,
@@ -3001,23 +3052,6 @@
       "curationHint": 50.76
     },
     {
-      "itemId": 30450,
-      "name": "Warp-Spring Coil",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver"
-        }
-      ],
-      "curationHint": 45.15
-    },
-    {
       "itemId": 29383,
       "name": "Bloodlust Brooch",
       "slot": "trinket",
@@ -3031,7 +3065,10 @@
           "cost": 41
         }
       ],
-      "curationHint": 29.52
+      "curationHint": 29.52,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28830,
@@ -3048,7 +3085,10 @@
           "boss": "Gruul the Dragonkiller"
         }
       ],
-      "curationHint": 16.4
+      "curationHint": 16.4,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28789,
@@ -3066,23 +3106,6 @@
         }
       ],
       "curationHint": 9.18
-    },
-    {
-      "itemId": 30449,
-      "name": "Void Star Talisman",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
-        }
-      ],
-      "curationHint": 8.16
     },
     {
       "itemId": 28590,
@@ -3110,23 +3133,6 @@
         }
       ],
       "curationHint": 4.25
-    },
-    {
-      "itemId": 30665,
-      "name": "Earring of Soulful Meditation",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
-        }
-      ],
-      "curationHint": 3.74
     },
     {
       "itemId": 28823,
@@ -3197,42 +3203,8 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 30446,
-      "name": "Solarian's Sapphire",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 30447,
       "name": "Tome of Fiery Redemption",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Al'ar"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30448,
-      "name": "Talon of Al'ar",
       "slot": "trinket",
       "armorType": null,
       "handType": null,
@@ -3337,57 +3309,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 30663,
-      "name": "Fathom-Brooch of the Tidewalker",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30664,
-      "name": "Living Root of the Wildheart",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30720,
-      "name": "Serpent-Coil Braid",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 30106,
       "name": "Belt of One-Hundred Deaths",
       "slot": "waist",
@@ -3402,7 +3323,10 @@
           "boss": "Lady Vashj"
         }
       ],
-      "curationHint": 105.59
+      "curationHint": 105.59,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30040,
@@ -3493,7 +3417,10 @@
           "boss": "Magtheridon"
         }
       ],
-      "curationHint": 55.56
+      "curationHint": 55.56,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30046,
@@ -4012,7 +3939,10 @@
           "profession": "Blacksmithing"
         }
       ],
-      "curationHint": 42.94
+      "curationHint": 42.94,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29966,
@@ -4063,7 +3993,10 @@
           "boss": "High King Maulgar"
         }
       ],
-      "curationHint": 38.48
+      "curationHint": 38.48,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28514,
