@@ -74,6 +74,12 @@ Sharp model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/mo
   items.
 - Flag **already-worn gear** shown as an upgrade or as a large loss — that
   fails a basic sanity check in-game.
+- **An empty stat line never means a weak item.** For a weapon, weapon damage
+  is the dominant term and lives outside the stat map
+  (`scalingOptions.0.weaponDamageMin`/`Max`, plus speed); sockets and procs are
+  budget too. Librams and trinkets carry empty stat maps for the same reason —
+  their value is the effect. Judge such an item by what it actually does, and
+  never call one "no stats, therefore not competitive".
 - Flag results that contradict well-known tier expectations when you are
   confident; say when you are unsure.
 - Soft ordering when gains are tiny is fine to note as “not worth arguing
