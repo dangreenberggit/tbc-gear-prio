@@ -75,7 +75,7 @@ regenerating:
 
 Real data is unaffected: regenerating p3 still writes 354 entries, exit 0.
 
-## 3. `Deps` grew four fields beyond the spec (§4)
+## 3. `Deps` grew four fields beyond the spec (§4) — PARTLY RESOLVED, rest deferred
 
 §4 fixes `Deps` at `{ gear, sim, store, clock }`. Shipped adds
 `raidSimSkeleton`, `epWeights`, `gemPalette?`, `pool?`. `pool` and `gemPalette`
@@ -87,6 +87,48 @@ universe.
 
 Either fold these into `RankInput` (they are inputs and they are hashed), or
 amend §4 to describe the real shape.
+
+### What this actually costs, examined 2026-07-30
+
+`Deps` was meant to carry only the three seams — the swappable connections to
+the outside world (fetch gear, run sim, store results) that let the engine run
+offline from fixtures. It now also carries plain **data**: `pool` (the
+candidate items) and `gemPalette` (which gems exist). Data is not a connection
+to anything, so it does not need a port.
+
+Two consequences were claimed. Only one is real today.
+
+**Real — the test hazard.** Because the candidate list arrives through
+`deps.pool`, a test can substitute any list it likes. The maxPhase gate test in
+`rank.test.ts` passes a hand-built two-item pool (29381 neck, 30101 chest), so
+it proves `filterPoolByPhase` works *on that fixture* and asserts nothing about
+the 354-row artifact that ships. **Fixed** by a new test in `pool.test.ts` that
+gates the real `ret-p2.json`: 142 rows at maxPhase 1, all 230 at maxPhase 2,
+with a phase-1 item surviving both and a phase-2 item only surviving the
+second. Mutation-checked — changing `<=` to `===` fails it with
+`expected 88 to be greater than 142`.
+
+Note that moving `pool` into `RankInput` would **not** have fixed this. A test
+could pass a two-item list there just as easily. The fix was a test against the
+shipping artifact, not a different home for the field.
+
+**Not real yet — the hashing argument.** "They are inputs and they are hashed"
+does not hold: `contentHash` in `rank.ts` is currently the literal placeholder
+`` `phase1-baseline:${character}` ``, not a hash of anything. Nothing is hashed,
+so nothing is missing from the hash. When `contentHash` is implemented, the
+candidate pool genuinely must be part of it — change the pool and the numbers
+change, so a cache keyed without it would serve stale rankings.
+
+### Deferred, deliberately
+
+Moving `pool` / `gemPalette` to `RankInput` now would touch `rank.ts`,
+`cli.ts` and every test that builds `Deps`, on a branch that is otherwise
+land-ready, to satisfy a hash that does not exist. **Revisit when
+`contentHash` is implemented** — at that point the field's home determines
+whether the cache is correct, and the change pays for itself.
+
+`raidSimSkeleton` and `epWeights` are not in question: both are per-spec
+configuration the engine cannot synthesise, and neither is a port.
 
 ## 4. Per-tier universes replaced the single accumulating pool (§5.1, §8.3) — RESOLVED 2026-07-30
 

@@ -55,6 +55,33 @@ describe("filterPoolByPhase", () => {
       1, 2, 3, 4,
     ]);
   });
+
+  it("gates the shipping universe, not just a hand-built pool", () => {
+    // rank.test.ts's maxPhase gate injects a two-item pool through deps.pool,
+    // so it proves the filter works on a fixture and says nothing about the
+    // artifact that ships. This pins the real one (ticket 23 item 3).
+    const universe = poolFromUniverse(
+      JSON.parse(
+        readFileSync(join(root, "data/universes/ret-p2.json"), "utf8")
+      ) as Parameters<typeof poolFromUniverse>[0]
+    );
+    const atOne = filterPoolByPhase(universe, 1);
+    const atTwo = filterPoolByPhase(universe, 2);
+
+    expect(atOne.length).toBeGreaterThan(0);
+    expect(atTwo.length).toBeGreaterThan(atOne.length);
+    expect(atTwo.length).toBe(universe.length);
+    expect(atOne.every((e) => e.phase <= 1)).toBe(true);
+
+    // Inclusive means a phase-1 item survives maxPhase 2 — the property R2
+    // called load-bearing, since a per-tier gate would strand Karazhan gear.
+    const chokerOfVileIntent = 29381; // phase 1
+    const bloodseaBrigandsVest = 30101; // phase 2
+    expect(atOne.some((e) => e.itemId === chokerOfVileIntent)).toBe(true);
+    expect(atTwo.some((e) => e.itemId === chokerOfVileIntent)).toBe(true);
+    expect(atOne.some((e) => e.itemId === bloodseaBrigandsVest)).toBe(false);
+    expect(atTwo.some((e) => e.itemId === bloodseaBrigandsVest)).toBe(true);
+  });
 });
 
 describe("filterPoolByZone", () => {
