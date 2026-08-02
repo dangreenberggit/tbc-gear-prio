@@ -44,7 +44,7 @@ universe.
 Either fold these into `RankInput` (they are inputs and they are hashed), or
 amend §4 to describe the real shape.
 
-## 4. Per-tier universes replaced the single accumulating pool (§5.1, §8.3)
+## 4. Per-tier universes replaced the single accumulating pool (§5.1, §8.3) — RESOLVED 2026-07-30
 
 > `data/pools/ret.json` — ONE FILE PER SPEC, not per tier (R2). … Curation
 > accumulates instead of being redone every tier.
@@ -55,6 +55,15 @@ loop is gone. This is a real architectural substitution made during the
 raid-scoped redesign, and it is defensible (the universe is generated, not
 curated, so there is no curation to lose). **It needs an ADR**, which the repo
 has no `docs/adr/` entries for yet.
+
+**Resolved:** `docs/adr/0017-per-tier-generated-universes-replace-the-single-curated-pool.md`.
+R2's argument rested on *curation accumulating*; the raid-scoped redesign made
+the universe fully generated, so there is no curation to lose and the premise no
+longer holds. R2's load-bearing rule — tier is a user input, filtered
+**inclusively** at rank time — is unaffected and still enforced in
+`packages/core/src/pool.ts`. Planned ADR #9's second clause is superseded; its
+first stands. The tier-4/5 gap noted below is called out in the ADR as a real
+open cost and stays on this ticket.
 
 Related: `data/universes/` holds only p2 and p3, while `cli.ts` builds
 `ret-p${maxPhase}` for any phase and `phase_raids.json` advertises 4 and 5.
