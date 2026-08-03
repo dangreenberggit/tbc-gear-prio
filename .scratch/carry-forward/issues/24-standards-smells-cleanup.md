@@ -10,17 +10,16 @@ Judgement calls from the pre-merge review's Standards axis. None is a
 correctness risk; each is a refactor with its own blast radius, so they were
 deferred rather than done mid-review. Grouped roughly by value.
 
-**Status 2026-08-03.** The two items the post-phase-1 handoff listed as
-outstanding — `ITEM_SOURCE_KINDS` duplicated three ways, and the `GemContext`
-grouping — are both done. What remains are two items that were never on that
-list and that each defer to something else:
+**Status 2026-08-03.** Everything here is done except one item, which is
+blocked rather than forgotten:
 
 - **Unused `Deps` breadth** — its own text says resolve alongside tickets 19
   and 23, and ticket 23's `Deps` item is itself waiting on `contentHash`
-  becoming real. Blocked, not forgotten.
-- **`rank-report.ts` divergent change** — a template-vs-rules split of a
-  588-line file. Self-contained, no dependency, but a large enough refactor to
-  want its own branch rather than a cleanup pass.
+  becoming real. **This is the only thing left on this ticket.**
+
+Closed this round: `ITEM_SOURCE_KINDS` duplicated three ways, the `GemContext`
+grouping, the JSON-widening trap behind both of them, and the
+`rank-report.ts` split.
 
 Nothing here blocks a phase gate.
 
@@ -259,13 +258,35 @@ orchestration, and moving it to `gems.ts` would invert the dependency (gem
 data importing the equipment shape). The clean version of this is the
 `GemContext` grouping listed under "Data clumps" above, which is still open.
 
-## `rank-report.ts` divergent change
+## `rank-report.ts` divergent change — DONE 2026-08-03 (`95ff955`, `ab4e261`)
 
-588 lines holding slot ordering, source formatting, shortlist partitioning, HTML
-structure and ~260 lines of inline CSS. Restyling and changing shortlist rules
-edit the same file for unrelated reasons. Note the inline CSS is deliberate and
-must stay inline — the report is self-contained by design — so the split is
-template vs. rules, not extracting a stylesheet.
+Split along the axis this ticket named:
+
+| file | lines | holds |
+|---|---:|---|
+| `rank-report-rules.ts` | 101 | `SLOT_ORDER`, `partitionShortlist`, `groupBySlot` |
+| `rank-report.ts` | 274 | escaping, formatting, document structure |
+| `rank-report-css.ts` | 277 | the stylesheet |
+
+591 → 274 for the part you edit when changing markup.
+
+**The stylesheet still ships inline**, as the ticket required: the report is
+written to `.scratch/rank-reports/` and opened straight from disk, so it must
+be one self-contained artifact with no sibling assets. `REPORT_CSS` is
+interpolated back into the same `<style>` element — it moved out of the
+template's way, not out of the document.
+
+The seam was already in the code: the three rules are pure, carry no HTML, and
+were exactly the functions with their own unit tests. Moving them left two
+imports unreachable in the template file, which lint caught — the tell that
+the move was complete rather than cosmetic.
+
+**How it was made safe.** Every existing case in `rank-report.test.ts` asserts
+on a substring, so all twelve would pass while the markup or CSS silently
+changed. `1e93c8e` added a full-document sha256 first; it never moved across
+either half of the split, so the emitted report is byte-identical. Public API
+verified by compiling a probe against every name `index.ts` re-exports, rather
+than by eyeballing the export list.
 
 ## Mysterious names — DONE 2026-08-02
 
