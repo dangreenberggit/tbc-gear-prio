@@ -155,6 +155,31 @@ Related: `data/universes/` holds only p2 and p3, while `cli.ts` builds
 `ret-p${maxPhase}` for any phase and `phase_raids.json` advertises 4 and 5.
 `--max-phase 1`, `4` or `5` fails to load.
 
+**Tier gap closed 2026-08-02.** `ret-p4.json` (401 rows) and `ret-p5.json`
+(467 rows) are generated and committed, so every tier `phase_raids.json`
+advertises now loads. Both come from the same assembler with no new flags:
+p4 adds Zul'Aman, p5 adds Sunwell Plateau.
+
+Checked before committing them, since a bad universe is worse than a missing
+one:
+
+- Each tier is a strict **superset** of the one below (230 → 354 → 401 → 467),
+  which is R2's inclusive-filtering rule.
+- Every row's `phase <= maxPhase`, and all 14 slots are populated at both
+  tiers.
+- p5's 30 rows carrying a `zone: null` source looked wrong but are not — they
+  are `crafted`/`pvp`/`badge`, kinds that have no raid zone by definition. The
+  shipped universes already do this (12 rows at p2, 21 at p3).
+
+`--max-phase 1` is **out of scope, not broken**: `assemble_universe.py`
+accepts only 2..5 because the Wowhead list stages begin at `p1-p2`. The CLI
+still exits 2 with the regeneration hint, which is the right failure.
+
+Pinned in `pool-file.test.ts`: every advertised tier ≥2 loads through
+`poolFromUniverse`, and each tier is a superset of the one below.
+Mutation-checked — deleting one p3 item from p4 fails with
+`p4 drops items p3 admitted: expected [ 32323 ] to deeply equal []`.
+
 ## 5. `setBonusNote` is not explanatory (§14 gate)
 
 The gate asks for an *"explanatory `setBonusNote`"*. `setBreakNote` emits:
