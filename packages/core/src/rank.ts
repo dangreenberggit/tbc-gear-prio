@@ -34,6 +34,7 @@ import {
   simSlotsForPoolSlot,
   type ItemSource,
   type PoolEntry,
+  type SimSlotName,
 } from "./pool.js";
 import type { GearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
@@ -111,7 +112,7 @@ export type RankedItem = {
    * that leaves the reader guessing which ring is meant. Absent for
    * single-slot items.
    */
-  slotChoice?: string;
+  slotChoice?: SimSlotName;
   source: ItemSource;
   /** Full provenance when the pool row carried multiple sources. */
   sources?: ItemSource[];
@@ -237,7 +238,7 @@ export async function rankUpgrades(
     let best: {
       deltaDps: number;
       stdev: number;
-      slotChoice?: string;
+      slotChoice?: SimSlotName;
       setBonusNote?: string;
     } | null = null;
 
@@ -290,7 +291,7 @@ export async function rankUpgrades(
         const next: {
           deltaDps: number;
           stdev: number;
-          slotChoice?: string;
+          slotChoice?: SimSlotName;
           setBonusNote?: string;
         } = {
           deltaDps,

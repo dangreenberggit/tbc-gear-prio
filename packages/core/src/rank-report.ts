@@ -4,7 +4,7 @@
  */
 
 import type { ItemSlot } from "./items.js";
-import type { ItemSource } from "./pool.js";
+import type { ItemSource, SimSlotName } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export const SLOT_ORDER: readonly ItemSlot[] = [
@@ -34,7 +34,7 @@ type ReportItem = RankedItem & {
   };
   alternateSlot?: {
     /** Sim slot name, same vocabulary as `RankedItem.slotChoice`. */
-    choice: string;
+    choice: SimSlotName;
     deltaDps: number;
     deltaPct: number;
     replacesName: string;

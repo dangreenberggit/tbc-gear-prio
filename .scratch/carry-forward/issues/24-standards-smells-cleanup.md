@@ -68,7 +68,7 @@ type and one shared `EpWeights`.
 
 ## Slot names as bare strings — PARTLY RESOLVED 2026-07-30
 
-`SIM_ORDER`, `simSlotsForPoolSlot(): readonly string[]` and `LoggedItem.slot`
+`SIM_ORDER`, `simSlotsForPoolSlot()` (then `readonly string[]`) and `LoggedItem.slot`
 use `string` while `ItemSlot` is a proper union next door. The cost is real:
 `SIM_ORDER.indexOf(slotName)` returns `-1` on a typo and the guarded `continue`
 silently drops the candidate rather than failing loudly.
@@ -86,15 +86,23 @@ fails with `weapon -> twohand: expected [...] to include 'twohand'`. Note
 `rank.test.ts` does **not** catch that mutation — its fixtures carry no weapon
 candidate — which is why the mapping needed its own test.
 
-**Still open:** the typing half. `simSlotsForPoolSlot` still returns
-`readonly string[]` rather than a union of sim slot names. Deriving one from
-the table (`(typeof SIM_ORDER)[number]`) does **not** work: `resolveJsonModule`
-widens JSON array elements to `string`, so the derived type accepts any string
-and would be decorative — verified by assigning `"not-a-real-slot"` to it and
-getting no error. A hand-written union would type-check but could drift from
-`slots-table.json`, which is worse than none. Would need the table emitted as a
-`.ts` const with `as const`, or a generated union — a codegen change, not a
-type annotation.
+**RESOLVED 2026-08-02.** `simSlotsForPoolSlot` now returns
+`readonly SimSlotName[]`.
+
+The earlier text here concluded this "would need the table emitted as a `.ts`
+const with `as const`, or a generated union — a codegen change." **That was
+wrong, and it is the mistake worth remembering:** the `resolveJsonModule`
+finding is true (deriving `(typeof SIM_ORDER)[number]` really does widen to
+`string`, and really would be decorative), but `simSlotsForPoolSlot` never
+touches `slots-table.json`. It is a hand-written `switch` over string
+literals, so its own arms give the union for free. I measured one approach,
+found it blocked, and wrote down "impossible" instead of "that approach is
+blocked."
+
+The drift worry ("a hand-written union could drift from `slots-table.json`")
+is handled where it always was — `pool.test.ts` asserts every `ItemSlot` maps
+onto a name present in `SIM_ORDER`, so a union that drifts from the table
+fails a test rather than type-checking quietly.
 
 ## Unused `Deps` breadth
 
@@ -144,10 +152,27 @@ slot name (`finger1` / `trinket2`) instead of `"a" | "b"`. The value was
 already in scope — `slotName`, from the loop over `simSlotsForPoolSlot` — so
 this reads the real name rather than re-deriving one from the index.
 
-Typed as `string`, not a union: the honest union would come from
-`simSlotsForPoolSlot`, which still returns `readonly string[]` for the
-codegen reason recorded under "Slot names as bare strings" above. Narrowing
-here would be decorative while its source stays wide.
+**Corrected 2026-08-02 after pre-merge review.** This section first said the
+field was typed `string` because "the honest union would come from
+`simSlotsForPoolSlot`, which still returns `readonly string[]` for the codegen
+reason recorded above." **That reasoning was false**, and both the Standards
+and Spec axes caught it independently.
+
+The `resolveJsonModule` problem is real but irrelevant here:
+`simSlotsForPoolSlot` never reads `slots-table.json`. It is a hand-written
+`switch` returning string literals (`pool.ts`), so a union follows directly
+from its own arms — no JSON, no codegen. I cited a true fact about an
+approach nobody needed.
+
+Now typed `SimSlotName`, exported from `pool.ts`:
+`Exclude<ItemSlot, "finger" | "trinket" | "weapon"> | "finger1" | "finger2" |
+"trinket1" | "trinket2" | "mainhand"`. Verified it is not decorative —
+assigning `"not-a-real-slot"` fails with TS2322, which is exactly what the
+JSON-derived version could not do.
+
+`PLAN.md` §4 pinned `'a' | 'b'`, so it is amended in place with the reason
+(the branch wrote ADRs for comparable drift; this one is a rename of the same
+fact, not a new decision).
 
 **This was user-visible.** `fmtSlotChoice` falls back to `slotChoice` when
 there is no worn item to name — i.e. when the paired slot is empty — so a

@@ -187,7 +187,8 @@ export type RankedItem = {
   rank: number | null                // null when below cutoff. ALWAYS absolute — never
                                      // renumbered inside a filtered view (§12)
   itemId: number; name: string; slot: SlotId
-  slotChoice?: 'a' | 'b'             // which ring/trinket slot won
+  slotChoice?: SimSlotName           // which ring/trinket slot won, by name
+                                     // ('finger2', not 'b') — amended 2026-08-02
   source: ItemSource                 // required, curated (§8.3). Drives the raid filter
   deltaDps: number; deltaPct: number
   se: number; seMethod: 'independent' | 'paired-replicate'
@@ -199,6 +200,13 @@ export type RankedItem = {
   owned?: boolean                    // already equipped in the logged set (§8.3)
   belowCutoff: boolean
 }
+
+// Amended 2026-08-02 (pre-merge review, Spec S1). `slotChoice` was `'a' | 'b'`. Neither
+// the report nor a caller can tell which ring 'a' is, and the value leaked into the HTML
+// verbatim when the paired slot was empty and there was no worn item to name. It is now
+// the sim slot name, which `simSlotsForPoolSlot` already returns — a rename of the same
+// fact, not a new one. `SimSlotName` is a real union (pool.ts) that rejects an unknown
+// name; verified by assigning "not-a-real-slot" and getting TS2322.
 
 // Review R8. Ret's dominant gearing constraint is the 9% yellow hit cap (~142 rating:
 // 8% base miss vs a level 73 boss, plus 1% suppression). Stat value is DISCONTINUOUS

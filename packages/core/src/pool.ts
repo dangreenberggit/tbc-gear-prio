@@ -119,10 +119,26 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
 }
 
 /**
+ * A sim equipment slot name, as `SIM_ORDER` spells it.
+ *
+ * Written out rather than derived from `slots-table.json`: that file is
+ * imported under `resolveJsonModule`, which widens its array elements to
+ * `string`, so a derived type would accept anything. `pool.test.ts` pins
+ * every value here against `SIM_ORDER`, which is what keeps the two honest.
+ */
+export type SimSlotName =
+  | Exclude<ItemSlot, "finger" | "trinket" | "weapon">
+  | "finger1"
+  | "finger2"
+  | "trinket1"
+  | "trinket2"
+  | "mainhand";
+
+/**
  * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; ret
  * two-handers land in mainhand.
  */
-export function simSlotsForPoolSlot(slot: ItemSlot): readonly string[] {
+export function simSlotsForPoolSlot(slot: ItemSlot): readonly SimSlotName[] {
   switch (slot) {
     case "finger":
       return ["finger1", "finger2"];
