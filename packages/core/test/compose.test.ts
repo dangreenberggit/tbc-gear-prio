@@ -49,6 +49,52 @@ describe("compose", () => {
     expect(got).not.toHaveProperty("simOptions");
     expect(got).not.toHaveProperty("requestId");
   });
+
+  // Ticket 14 supposed a bare worn slot could still sim *with* an enchant,
+  // via the skeleton's own. It cannot: compose replaces equipment wholesale
+  // rather than merging into it. The skeleton really does carry enchants in
+  // nine slots, so this asserts the replacement, not a vacuous case.
+  it("does not leak the skeleton's enchants onto bare worn slots", () => {
+    const skeleton = loadJson(
+      "data/presets/ret/p2.raid-sim-skeleton.json"
+    ) as RaidSimRequest;
+    const skeletonItems = (
+      skeleton as unknown as {
+        raid: {
+          parties: Array<{
+            players: Array<{
+              equipment: { items: Array<{ enchant?: number }> };
+            }>;
+          }>;
+        };
+      }
+    ).raid.parties[0]!.players[0]!.equipment.items;
+
+    const enchantedSlots = skeletonItems
+      .map((it, i) => (it?.enchant ? i : -1))
+      .filter((i) => i >= 0);
+    expect(enchantedSlots.length).toBeGreaterThan(0);
+
+    const worn = skeletonItems.map((_, i) =>
+      i === enchantedSlots[0] ? { id: 28430, gems: [] } : { gems: [] }
+    );
+
+    const got = compose(skeleton, {
+      name: "probe",
+      race: "RaceHuman",
+      equipment: worn,
+    }) as unknown as {
+      raid: {
+        parties: Array<{
+          players: Array<{ equipment: { items: Array<{ enchant?: number }> } }>;
+        }>;
+      };
+    };
+
+    const composed = got.raid.parties[0]!.players[0]!.equipment.items;
+    expect(composed.filter((it) => it?.enchant)).toEqual([]);
+    expect(composed[enchantedSlots[0]!]).toEqual({ id: 28430 });
+  });
 });
 
 describe("ret P2 preset ↔ skeleton mappings", () => {
