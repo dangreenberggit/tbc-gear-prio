@@ -37,13 +37,13 @@
     "atlasloot": 373,
     "db": 1733,
     "two-hop": 18,
-    "wowhead": 72
+    "wowhead": 71
   },
   "membershipByOrigin": {
     "itemHasOrigin:atlasloot": 69,
     "itemHasOrigin:db": 424,
     "itemHasOrigin:two-hop": 18,
-    "itemHasOrigin:wowhead": 59,
+    "itemHasOrigin:wowhead": 58,
     "listOnly": 30,
     "zoneMatch": 437
   },

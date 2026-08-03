@@ -7067,11 +7067,6 @@
           "kind": "raid",
           "zone": "Magtheridon's Lair",
           "boss": "Magtheridon"
-        },
-        {
-          "kind": "raid",
-          "zone": "Maghteridon's Lair",
-          "boss": "Magtheridon"
         }
       ],
       "curationHint": 55.56,

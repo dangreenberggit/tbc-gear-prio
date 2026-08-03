@@ -308,6 +308,16 @@ def source_zones(source: dict) -> set[str]:
     return set()
 
 
+# Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
+# zone is not merely cosmetic: it never matches a zone-keyed lookup, so the
+# item advertises a raid that does not exist, and add_source keeps it as a
+# second row beside the correct one.
+ZONE_SPELLING_FIXES = {
+    "maghteridon's lair": "Magtheridon's Lair",
+
+}
+
+
 def canonical_zone(zone: str) -> str:
     """
     Wowhead writes outdoor bosses as free text ("World Boss", "World Boss in
@@ -318,7 +328,7 @@ def canonical_zone(zone: str) -> str:
     """
     if zone.lower().startswith("world boss"):
         return WORLD_BOSS_ZONE
-    return zone
+    return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
 
 
 def parse_wowhead_source(text: str | None) -> list[dict]:
@@ -659,6 +669,9 @@ def assemble(
     # ship a source the reader cannot discriminate — pool.ts picks sources[0]
     # and switches on `kind`, so a missing or unknown kind is as unusable as no
     # source at all.
+    known_zones = {
+        str(z["name"]) for z in (phase_raids.get("zones") or []) if z.get("name")
+    }
     source_errors: list[str] = []
     for e in entries:
         if not e["sources"]:
@@ -670,6 +683,14 @@ def assemble(
             elif s["kind"] not in ITEM_SOURCE_KINDS:
                 source_errors.append(
                     f"{e['itemId']} {e['name']}: sources[{i}] unknown kind {s['kind']!r}"
+                )
+            # A raid/token zone that phase_raids.json does not list can never
+            # match a zone-keyed lookup, so the row advertises a raid the rest
+            # of the engine cannot find. "Maghteridon's Lair" shipped this way.
+            elif s["kind"] in ("raid", "token") and s.get("zone") not in known_zones:
+                source_errors.append(
+                    f"{e['itemId']} {e['name']}: sources[{i}] zone "
+                    f"{s.get('zone')!r} is not in phase_raids.json"
                 )
     if source_errors:
         print(
