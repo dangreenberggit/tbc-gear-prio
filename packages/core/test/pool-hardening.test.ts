@@ -291,10 +291,14 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   );
 
+  // Ticket 17's triage measured all 12: every one is phase 1, and none is a
+  // drop in a phase_raids.json zone. They are dungeon/crafted/rep/pre-raid
+  // items outside a raid-scoped universe by design, so this is scope rather
+  // than a source-coverage gap to close.
   it.todo(
-    "admits all 36 wowsims curated ret gear-set items — blocked: " +
+    "admits all 36 wowsims curated ret gear-set items — out of scope, not blocked: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
-      " lack resolvable sources or fail D7/quality (06-hardening §2.1)"
+      " are all phase 1 and non-raid-sourced (ticket 17 triage)"
   );
 
   it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
@@ -350,7 +354,9 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it.todo(
-    "includes Shattrath Leggings (30257, leather legs) — blocked: no db/atlasloot/wowhead source (06-hardening §2.4)"
+    "includes Shattrath Leggings (30257, leather legs) — out of scope, not blocked: " +
+      "phase 1 pre-raid item, and db.json gives it sources: null so no " +
+      "AtlasLoot/Wowhead coverage resolves it (ticket 17 triage)"
   );
 
   it.skipIf(!hasWowsimsVendor)(
