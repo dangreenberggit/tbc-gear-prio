@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run mirrors:check",
+    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run mirrors:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -29,7 +29,9 @@
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",
     "issues:open": "python scripts/check_merge_ready.py --list-only",
-    "mirrors:check": "python scripts/check_skill_mirrors.py"
+    "mirrors:check": "python scripts/check_skill_mirrors.py",
+    "codegen:json-types": "python scripts/generate_json_literal_types.py",
+    "codegen:json-types:check": "python scripts/generate_json_literal_types.py --check"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.72.0",

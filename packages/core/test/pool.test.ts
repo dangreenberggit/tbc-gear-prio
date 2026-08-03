@@ -233,14 +233,15 @@ describe("poolFromUniverse", () => {
 });
 
 describe("item-source-kinds.json", () => {
-  // The shared list crosses a language boundary: assemble_universe.py
-  // validates every emitted source against it and refuses the build on an
-  // unknown kind. If it drifts from the ItemSource union, Python happily
-  // writes a row TypeScript cannot discriminate.
+  // The union/generated-list agreement is enforced at compile time in pool.ts
+  // (`_JsonCoversUnion` / `_UnionCoversJson`), which is possible now that the
+  // list comes from generated `as const` code rather than a JSON import.
   //
-  // This is a runtime check on purpose. resolveJsonModule widens
-  // `kinds` to string[], so a type-level `extends` assertion against it
-  // passes vacuously — the trap ticket 24 already recorded once.
+  // This stays as a second, independent check because the compile-time one
+  // compares the union against the *generated file*, while Python reads the
+  // *JSON*. `pnpm codegen:json-types:check` ties those two together, so this
+  // test is what fails loudly if someone regenerates from a JSON that no
+  // longer says what the union says.
   it("matches the ItemSource union exactly", () => {
     // Exhaustive by construction: this object is typed by the union, so
     // adding a variant to ItemSource without adding it here fails typecheck,
@@ -255,9 +256,19 @@ describe("item-source-kinds.json", () => {
       pvp: true,
       world: true,
     };
-    expect([...ITEM_SOURCE_KINDS].sort()).toEqual(
-      Object.keys(everyUnionKind).sort()
-    );
+    // Read the JSON off disk rather than the generated re-export: that is the
+    // file Python opens, and checking the generated copy would only prove the
+    // generator is self-consistent.
+    const fromJson = (
+      JSON.parse(
+        readFileSync(
+          join(root, "packages/core/src/item-source-kinds.json"),
+          "utf8"
+        )
+      ) as { kinds: string[] }
+    ).kinds;
+    expect([...fromJson].sort()).toEqual(Object.keys(everyUnionKind).sort());
+    expect([...ITEM_SOURCE_KINDS].sort()).toEqual([...fromJson].sort());
   });
 
   it("is the list assemble_universe.py validates against", () => {

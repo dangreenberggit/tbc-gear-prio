@@ -5,10 +5,11 @@
  * Drop shirt/tabard, then reorder — filter-only mis-slots 11/17 positions.
  */
 
-import table from "./slots-table.json" with { type: "json" };
+import { SIM_ORDER } from "./slots-sim-order.generated.js";
+import { WCL_ORDER } from "./slots-wcl-order.generated.js";
 
-export const WCL_ORDER = table.wclOrder;
-export const SIM_ORDER = table.simOrder;
+export { SIM_ORDER, type SimOrderName } from "./slots-sim-order.generated.js";
+export { WCL_ORDER, type WclOrderName } from "./slots-wcl-order.generated.js";
 
 export type WclGearEntry = {
   id?: number | null;
