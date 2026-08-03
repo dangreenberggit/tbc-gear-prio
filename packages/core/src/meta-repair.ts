@@ -16,7 +16,7 @@ import {
   type GemColorCounts,
 } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
-import { epScore } from "./stats.js";
+import { epScore, type EpWeights } from "./stats.js";
 
 export type SocketedItem = {
   itemId: number;
@@ -44,8 +44,6 @@ export class MetaUnsolvableError extends Error {
     this.name = "MetaUnsolvableError";
   }
 }
-
-type EpWeights = Readonly<Record<string, number>> | readonly number[];
 
 export function repairMeta(opts: {
   items: readonly SocketedItem[];

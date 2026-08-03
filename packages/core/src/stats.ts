@@ -16,13 +16,19 @@ export function statAt(stats: readonly number[], stat: Stat): number {
 }
 
 /**
+ * `epScore`'s weights: sparse (`{"17": 0.41}`) or dense (index-aligned array).
+ * Callers that only ever hold the sparse record form should use a
+ * `Readonly<Record<string, number>>` annotation directly rather than this
+ * union — narrowing to the union there would accept arrays the call site
+ * never produces and silently drop that guarantee.
+ */
+export type EpWeights = Readonly<Record<string, number>> | readonly number[];
+
+/**
  * EP of a dense stats array under sparse (`{"17": 0.41}`) or dense weights.
  * Missing weight → 0.
  */
-export function epScore(
-  stats: readonly number[],
-  weights: Readonly<Record<string, number>> | readonly number[]
-): number {
+export function epScore(stats: readonly number[], weights: EpWeights): number {
   if (Array.isArray(weights)) {
     let total = 0;
     for (let i = 0; i < weights.length; i++) {

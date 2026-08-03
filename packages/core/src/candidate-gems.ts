@@ -15,7 +15,12 @@ import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat } from "./stats.js";
 
-type EpWeights = Readonly<Record<string, number>>;
+/**
+ * Record-only weights. Narrower than `stats.ts`'s `EpWeights` union — this
+ * module never receives the dense-array form, so keep the record shape
+ * explicit here rather than importing the wider union.
+ */
+type EpWeightRecord = Readonly<Record<string, number>>;
 
 /** Absolute EP slack for meta-aware near-ties (fill weights). */
 const META_NEAR_EP = 1.0;
@@ -60,7 +65,7 @@ export type FillEmptyOpts = {
 export function fillCandidateGems(
   itemId: number,
   palette: readonly GemEntry[],
-  epWeights: EpWeights
+  epWeights: EpWeightRecord
 ): number[] {
   const sockets = socketsFor(itemId);
   if (sockets.length === 0) return [];
@@ -80,7 +85,7 @@ export function fillEmptyCandidateGems(
   itemId: number,
   gems: readonly number[],
   palette: readonly GemEntry[],
-  epWeights: EpWeights,
+  epWeights: EpWeightRecord,
   opts: FillEmptyOpts = {}
 ): number[] {
   const sockets = socketsFor(itemId);
@@ -100,7 +105,9 @@ export function fillEmptyCandidateGems(
  * Softcaps: melee hit / expertise EP overstates gems on capped raid sets.
  * Used only for candidate socket fills — meta-repair keeps full EP weights.
  */
-export function gemFillWeights(epWeights: EpWeights): Record<string, number> {
+export function gemFillWeights(
+  epWeights: EpWeightRecord
+): Record<string, number> {
   const out: Record<string, number> = { ...epWeights };
   out[String(Stat.StatMeleeHitRating)] = 0;
   out[String(Stat.StatExpertiseRating)] = 0;
@@ -111,7 +118,7 @@ function fillEmpties(
   sockets: readonly number[],
   base: readonly number[],
   palette: readonly GemEntry[],
-  epWeights: EpWeights,
+  epWeights: EpWeightRecord,
   matchColors: boolean,
   opts: FillEmptyOpts
 ): number[] {
@@ -152,7 +159,7 @@ function fillEmpties(
 function fillSockets(
   sockets: readonly number[],
   palette: readonly GemEntry[],
-  epWeights: EpWeights,
+  epWeights: EpWeightRecord,
   matchColors: boolean,
   usedUnique: ReadonlySet<number>
 ): number[] {
@@ -182,7 +189,7 @@ function fillSockets(
 function bestGemForSocket(
   socket: number,
   palette: readonly GemEntry[],
-  epWeights: EpWeights,
+  epWeights: EpWeightRecord,
   usedUnique: ReadonlySet<number>,
   matchColors: boolean,
   metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined
@@ -246,7 +253,7 @@ function layoutScore(
   itemId: number,
   sockets: readonly number[],
   gemIds: readonly number[],
-  epWeights: EpWeights
+  epWeights: EpWeightRecord
 ): number {
   let score = 0;
   for (const id of gemIds) {
@@ -284,10 +291,7 @@ function allSocketsMatched(
 }
 
 /** Test helper — resolve palette gem by id after fill. */
-export function gemEp(
-  gemId: number,
-  epWeights: Readonly<Record<string, number>>
-): number {
+export function gemEp(gemId: number, epWeights: EpWeightRecord): number {
   const gem = getGem(gemId);
   return gem ? epScore(gem.stats, epWeights) : 0;
 }

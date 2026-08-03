@@ -28,7 +28,35 @@ shared `scripts/pinned_fetch.py` would carry all three. Highest value of the
 group: three implementations of "download and verify against a pin" is three
 places for a supply-chain check to rot.
 
-## Data clumps and duplicate `EpWeights`
+## Data clumps and duplicate `EpWeights` — DONE 2026-07-30 (`EpWeights` half only)
+
+Checked actual usage before merging: `candidate-gems.ts`'s `EpWeights`
+(`Readonly<Record<string, number>>`) never receives the array form anywhere in
+its call graph — every caller into `fillCandidateGems` /
+`fillEmptyCandidateGems` / `gemFillWeights` passes the record shape, confirmed
+by reading `rank.ts`'s call sites. `meta-repair.ts`'s `EpWeights` genuinely
+needs the union because it forwards `opts.epWeights` straight into `stats.ts`'s
+`epScore(stats, weights: Record | number[])`. These were never the same type —
+one is a strict subset of the other wearing the same name.
+
+Resolved by **renaming, not merging**: moved the wide union to `stats.ts` as
+the exported `EpWeights` (the module that owns `epScore` and already declared
+this exact union inline), and imported it into `meta-repair.ts`. Renamed
+`candidate-gems.ts`'s local record-only type to `EpWeightRecord` (kept local,
+not exported — only that module uses it) so it stops colliding with the wider
+name while keeping its narrower guarantee. `grep -rn "type EpWeights"
+packages/core/src/` now shows exactly one declaration
+(`packages/core/src/stats.ts`). Types-only change; `pnpm verify` (including
+existing `candidate-gems.test.ts`, `meta-repair.test.ts`, `stats.test.ts`,
+`rank.test.ts`) is green — typecheck is the actual evidence here since no test
+can distinguish a type-only refactor.
+
+The `(palette, epWeightRecord, epWeights)` data-clump / `GemContext` framing
+and `rank.ts`/`slots.ts` changes are **not** done — out of scope for this pass
+(another agent owns those two files concurrently). Re-open a follow-up ticket
+if that grouping is still wanted.
+
+Original text:
 
 `(palette, epWeightRecord, epWeights)` travel together through `rank.ts`'s
 `equipmentForCandidateSwap` → `swapItemAt` → `fillOptsForSwap`, and `epWeights`
