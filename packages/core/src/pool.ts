@@ -9,7 +9,17 @@ export type ItemSource =
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "token"; zone: string; boss?: string; token: string }
   | { kind: "badge"; cost: number }
-  | { kind: "crafted"; profession: string }
+  /**
+   * `recipeZone` is set only when the recipe itself drops in a raid, so raid
+   * views can attribute the craft to that raid's shopping list. Absent for
+   * vendor/reputation/world-drop recipes — see .scratch/carry-forward/issues/13.
+   */
+  | {
+      kind: "crafted";
+      profession: string;
+      recipeZone?: string;
+      recipeBoss?: string;
+    }
   | { kind: "rep"; faction: string; standing: string }
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }

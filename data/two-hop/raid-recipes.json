@@ -1,0 +1,894 @@
+{
+  "kind": "raid-recipe-map",
+  "generatedBy": "scripts/parse_atlasloot.py",
+  "notes": [
+    "Recipe\u2192product join comes from the trailing comment on each AtlasLoot loot row; the product name is resolved to an id via vendor/wowsims/db.json items[].name.",
+    "Only recipes dropping in a data/phase_raids.json zone are kept."
+  ],
+  "entries": [
+    {
+      "productId": 21864,
+      "productName": "Soulcloth Shoulders",
+      "recipeId": 21903,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 21865,
+      "productName": "Soulcloth Vest",
+      "recipeId": 21904,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30031,
+      "productName": "Red Havoc Boots",
+      "recipeId": 30324,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30032,
+      "productName": "Red Belt of Battle",
+      "recipeId": 30322,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30033,
+      "productName": "Boots of the Protector",
+      "recipeId": 30323,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30034,
+      "productName": "Belt of the Guardian",
+      "recipeId": 30321,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30035,
+      "productName": "Boots of the Long Road",
+      "recipeId": 30283,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30036,
+      "productName": "Belt of the Long Road",
+      "recipeId": 30281,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30037,
+      "productName": "Boots of Blasting",
+      "recipeId": 30282,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30038,
+      "productName": "Belt of Blasting",
+      "recipeId": 30280,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30039,
+      "productName": "Boots of Utter Darkness",
+      "recipeId": 30306,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30040,
+      "productName": "Belt of Deep Shadow",
+      "recipeId": 30302,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30041,
+      "productName": "Boots of Natural Grace",
+      "recipeId": 30305,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30042,
+      "productName": "Belt of Natural Power",
+      "recipeId": 30301,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30043,
+      "productName": "Hurricane Boots",
+      "recipeId": 30308,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30044,
+      "productName": "Monsoon Belt",
+      "recipeId": 30304,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30045,
+      "productName": "Boots of the Crimson Hawk",
+      "recipeId": 30307,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 30046,
+      "productName": "Belt of the Black Eagle",
+      "recipeId": 30303,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Trash"
+        },
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 32568,
+      "productName": "Swiftsteel Bracers",
+      "recipeId": 32736,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32570,
+      "productName": "Swiftsteel Shoulders",
+      "recipeId": 32737,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32571,
+      "productName": "Dawnsteel Bracers",
+      "recipeId": 32738,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32573,
+      "productName": "Dawnsteel Shoulders",
+      "recipeId": 32739,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32574,
+      "productName": "Bindings of Lightning Reflexes",
+      "recipeId": 32748,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32575,
+      "productName": "Shoulders of Lightning Reflexes",
+      "recipeId": 32749,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32577,
+      "productName": "Living Earth Bindings",
+      "recipeId": 32750,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32579,
+      "productName": "Living Earth Shoulders",
+      "recipeId": 32751,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32580,
+      "productName": "Swiftstrike Bracers",
+      "recipeId": 32746,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32581,
+      "productName": "Swiftstrike Shoulders",
+      "recipeId": 32747,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32582,
+      "productName": "Bracers of Renewed Life",
+      "recipeId": 32744,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32583,
+      "productName": "Shoulderpads of Renewed Life",
+      "recipeId": 32745,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32584,
+      "productName": "Swiftheal Wraps",
+      "recipeId": 32752,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32585,
+      "productName": "Swiftheal Mantle",
+      "recipeId": 32753,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32586,
+      "productName": "Bracers of Nimble Thought",
+      "recipeId": 32754,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 32587,
+      "productName": "Mantle of Nimble Thought",
+      "recipeId": 32755,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34353,
+      "productName": "Quad Deathblow X44 Goggles",
+      "recipeId": 35197,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34354,
+      "productName": "Mayhem Projection Goggles",
+      "recipeId": 35195,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34355,
+      "productName": "Lightning Etched Specs",
+      "recipeId": 35193,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34356,
+      "productName": "Surestrike Goggles v3.0",
+      "recipeId": 35194,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34357,
+      "productName": "Hard Khorium Goggles",
+      "recipeId": 35196,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34358,
+      "productName": "Hard Khorium Choker",
+      "recipeId": 35203,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34359,
+      "productName": "Pendant of Sunfire",
+      "recipeId": 35201,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34360,
+      "productName": "Amulet of Flowing Life",
+      "recipeId": 35202,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34361,
+      "productName": "Hard Khorium Band",
+      "recipeId": 35200,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34362,
+      "productName": "Loop of Forged Power",
+      "recipeId": 35198,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34363,
+      "productName": "Ring of Flowing Life",
+      "recipeId": 35199,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34364,
+      "productName": "Sunfire Robe",
+      "recipeId": 35206,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34365,
+      "productName": "Robe of Eternal Light",
+      "recipeId": 35207,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34366,
+      "productName": "Sunfire Handwraps",
+      "recipeId": 35204,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34367,
+      "productName": "Hands of Eternal Light",
+      "recipeId": 35205,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34369,
+      "productName": "Carapace of Sun and Shadow",
+      "recipeId": 35218,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34370,
+      "productName": "Gloves of Immortal Dusk",
+      "recipeId": 35214,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34371,
+      "productName": "Leather Chestguard of the Sun",
+      "recipeId": 35216,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34372,
+      "productName": "Leather Gauntlets of the Sun",
+      "recipeId": 35212,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34373,
+      "productName": "Embrace of the Phoenix",
+      "recipeId": 35217,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34374,
+      "productName": "Fletcher's Gloves of the Phoenix",
+      "recipeId": 35213,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34375,
+      "productName": "Sun-Drenched Scale Chestguard",
+      "recipeId": 35219,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34376,
+      "productName": "Sun-Drenched Scale Gloves",
+      "recipeId": 35215,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 34377,
+      "productName": "Hard Khorium Battleplate",
+      "recipeId": 35211,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 34378,
+      "productName": "Hard Khorium Battlefists",
+      "recipeId": 35209,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 34379,
+      "productName": "Sunblessed Breastplate",
+      "recipeId": 35210,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 34380,
+      "productName": "Sunblessed Gauntlets",
+      "recipeId": 35208,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Trash"
+        }
+      ]
+    },
+    {
+      "productId": 34847,
+      "productName": "Annihilator Holo-Gogs",
+      "recipeId": 35186,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 35181,
+      "productName": "Powerheal 9000 Lens",
+      "recipeId": 35189,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 35182,
+      "productName": "Hyper-Magnified Moon Specs",
+      "recipeId": 35190,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 35183,
+      "productName": "Wonderheal XT68 Shades",
+      "recipeId": 35191,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 35184,
+      "productName": "Primal-Attuned Goggles",
+      "recipeId": 35192,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    },
+    {
+      "productId": 35185,
+      "productName": "Justicebringer 3000 Specs",
+      "recipeId": 35187,
+      "zones": [
+        {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Patterns"
+        }
+      ]
+    }
+  ]
+}

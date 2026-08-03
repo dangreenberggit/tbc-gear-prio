@@ -248,6 +248,51 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
+  // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that
+  // raid's shopping list. The join is name-based (AtlasLoot records the
+  // product only in a trailing Lua comment), so it is fragile in one specific
+  // direction — a silent miss, never a wrong zone. These pins catch the miss.
+  it("attributes raid-dropped recipes to the raid that drops them", () => {
+    const expected = new Map([
+      [32568, "Black Temple"], // Plans: Swiftsteel Bracers
+      [32574, "Black Temple"], // Pattern: Bindings of Lightning Reflexes
+      [32581, "Black Temple"], // Pattern: Swiftstrike Shoulders
+      [30032, "Serpentshrine Cavern"], // Plans: Red Belt of Battle (also TK)
+      [30040, "Serpentshrine Cavern"], // Pattern: Belt of Deep Shadow (also TK)
+      [30046, "Serpentshrine Cavern"], // Pattern: Belt of the Black Eagle (also TK)
+    ]);
+    for (const [itemId, zone] of expected) {
+      const entry = raw.entries.find((e) => e.itemId === itemId);
+      expect(entry, `${itemId} missing from p3 universe`).toBeTruthy();
+      const zones = (entry?.sources ?? [])
+        .filter((s) => s.kind === "crafted")
+        .map((s) => (s as { recipeZone?: string }).recipeZone)
+        .filter(Boolean);
+      expect(
+        zones,
+        `${itemId} ${entry?.name} should carry recipeZone ${zone}`
+      ).toContain(zone);
+    }
+    // The recipe zone must agree with the phase the item already sits at,
+    // otherwise the join found the wrong recipe.
+    const zonePhase = new Map([
+      ["Serpentshrine Cavern", 2],
+      ["Tempest Keep", 2],
+      ["Black Temple", 3],
+    ]);
+    for (const e of raw.entries) {
+      for (const s of e.sources) {
+        if (s.kind !== "crafted") continue;
+        const rz = (s as { recipeZone?: string }).recipeZone;
+        if (!rz) continue;
+        expect(
+          zonePhase.get(rz),
+          `${e.itemId} ${e.name} recipeZone ${rz} phase vs item phase`
+        ).toBe(e.phase);
+      }
+    }
+  });
+
   it("admits measured wowsims curated IDs in the p3 universe", () => {
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
       expect(poolIds.has(id), `missing admitted wowsims id ${id}`).toBe(true);

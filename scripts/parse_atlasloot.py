@@ -31,6 +31,20 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LUA = ROOT / "vendor" / "atlasloot" / "data-tbc.lua"
 DEFAULT_DB = ROOT / "vendor" / "wowsims" / "db.json"
 DEFAULT_OUT = ROOT / "data" / "atlasloot_sources.json"
+DEFAULT_RECIPES_OUT = ROOT / "data" / "two-hop" / "raid-recipes.json"
+
+# AtlasLoot stores only the recipe's *item* id in the loot table; the crafted
+# product it teaches appears nowhere in the data structures. The trailing
+# comment ("-- Pattern: Swiftstrike Shoulders") is the only place upstream
+# records the product, so this two-hop joins on the product *name* and then
+# resolves that name to an id via db.json. Weaker than the id joins used
+# elsewhere — a comment typo or a rename upstream silently drops a row, which
+# is why the generated file is committed and row-count asserted rather than
+# rebuilt implicitly at assemble time.
+RECIPE_COMMENT_RE = re.compile(
+    r"\{\s*\d+\s*,\s*(\d+)[^}]*\}\s*,\s*--\s*"
+    r"(?:Plans|Pattern|Schematic|Recipe|Design|Formula|Manual|Technique)\s*:\s*(.+)"
+)
 
 INSTANCE_ZONE_ALIASES: dict[str, str] = {
     "Karazhan": "Karazhan",
@@ -283,11 +297,56 @@ def load_db(path: Path) -> dict:
         return json.load(fh)
 
 
+def parse_raid_recipes(
+    lua_text: str,
+    sources: dict,
+    *,
+    item_ids_by_name: dict[str, int],
+    raid_zones: set[str],
+) -> tuple[list[dict], dict]:
+    """Recipe-item drops → crafted-product rows, for recipes that drop in a raid."""
+    stats: dict = defaultdict(int)
+    rows: dict[int, dict] = {}
+    for recipe_id_raw, product_name_raw in RECIPE_COMMENT_RE.findall(lua_text):
+        recipe_id = int(recipe_id_raw)
+        product_name = product_name_raw.strip()
+        stats["recipe_comments"] += 1
+        product_id = item_ids_by_name.get(product_name)
+        if product_id is None:
+            # Enchants, gems and consumables are taught by raid recipes too, but
+            # they are not equippable items and never enter the gear universe.
+            stats["product_not_an_item"] += 1
+            continue
+        raid_drops = [
+            src
+            for src in (sources.get(str(recipe_id)) or [])
+            if src.get("kind") == "raid" and src.get("zone") in raid_zones
+        ]
+        if not raid_drops:
+            stats["recipe_not_raid_dropped"] += 1
+            continue
+        existing = rows.get(product_id)
+        zones = existing["zones"] if existing else []
+        for src in raid_drops:
+            if src not in zones:
+                zones.append(src)
+        if existing is None:
+            rows[product_id] = {
+                "productId": product_id,
+                "productName": product_name,
+                "recipeId": recipe_id,
+                "zones": zones,
+            }
+            stats["raid_recipe_products"] += 1
+    return [rows[k] for k in sorted(rows)], dict(stats)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lua", type=Path, default=DEFAULT_LUA)
     ap.add_argument("--db", type=Path, default=DEFAULT_DB)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--recipes-out", type=Path, default=DEFAULT_RECIPES_OUT)
     args = ap.parse_args()
 
     if not args.lua.is_file():
@@ -327,6 +386,42 @@ def main() -> int:
     print(f"  wrote {len(sources)} item keys -> {args.out}")
     for key in sorted(stats):
         print(f"  {key}: {stats[key]}")
+
+    item_ids_by_name: dict[str, int] = {}
+    for it in db.get("items") or []:
+        if isinstance(it, dict) and "id" in it and "name" in it:
+            item_ids_by_name.setdefault(str(it["name"]), int(it["id"]))
+    phase_raids = json.loads(
+        (ROOT / "data" / "phase_raids.json").read_text(encoding="utf-8")
+    )
+    raid_zones = {str(z["name"]) for z in phase_raids.get("zones") or []}
+    recipe_rows, recipe_stats = parse_raid_recipes(
+        lua_text,
+        sources,
+        item_ids_by_name=item_ids_by_name,
+        raid_zones=raid_zones,
+    )
+    args.recipes_out.parent.mkdir(parents=True, exist_ok=True)
+    with args.recipes_out.open("w", encoding="utf-8") as fh:
+        json.dump(
+            {
+                "kind": "raid-recipe-map",
+                "generatedBy": "scripts/parse_atlasloot.py",
+                "notes": [
+                    "Recipe→product join comes from the trailing comment on each "
+                    "AtlasLoot loot row; the product name is resolved to an id via "
+                    "vendor/wowsims/db.json items[].name.",
+                    "Only recipes dropping in a data/phase_raids.json zone are kept.",
+                ],
+                "entries": recipe_rows,
+            },
+            fh,
+            indent=2,
+        )
+        fh.write("\n")
+    print(f"  wrote {len(recipe_rows)} raid-recipe products -> {args.recipes_out}")
+    for key in sorted(recipe_stats):
+        print(f"  {key}: {recipe_stats[key]}")
     return 0
 
 

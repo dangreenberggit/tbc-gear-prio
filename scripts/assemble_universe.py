@@ -37,6 +37,7 @@ WOWSIMS_GEAR_SETS = [
     ROOT / "vendor/wowsims/ret_p2.gear.json",
 ]
 TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
+RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 
@@ -460,6 +461,32 @@ def assemble(
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
     two_hop = load_json(TWO_HOP) if TWO_HOP.is_file() else {}
+    raid_recipes = load_json(RAID_RECIPES) if RAID_RECIPES.is_file() else {}
+
+    # A recipe can drop in several zones (the SSC/TK belt patterns drop in
+    # both). Attribute to the earliest-phase one so the craft appears on the
+    # first shopping list that can actually produce it; ties break on name to
+    # keep the artifact byte-stable.
+    phase_of_zone = {
+        str(z["name"]): int(z.get("phase", 99))
+        for z in (phase_raids.get("zones") or [])
+        if isinstance(z, dict) and "name" in z
+    }
+    raid_recipe_by_product: dict[int, dict] = {}
+    for entry in (raid_recipes.get("entries") or []):
+        if not isinstance(entry, dict):
+            continue
+        zones = [z for z in (entry.get("zones") or []) if isinstance(z, dict)]
+        if not zones:
+            continue
+        best = min(
+            zones,
+            key=lambda z: (phase_of_zone.get(str(z.get("zone")), 99), str(z.get("zone"))),
+        )
+        raid_recipe_by_product[int(entry["productId"])] = {
+            "zone": str(best["zone"]),
+            "boss": best.get("boss"),
+        }
     weights_raw = load_json(EP_WEIGHTS)
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
@@ -489,6 +516,14 @@ def assemble(
     def add_source(item_id: int, source: dict | None, origin: str) -> None:
         if not source:
             return
+        # Applied here rather than at each construction site so crafted sources
+        # get the same attribution whichever input produced them (db.json and
+        # Wowhead free text both emit them).
+        recipe = raid_recipe_by_product.get(item_id)
+        if recipe and source.get("kind") == "crafted":
+            source = {**source, "recipeZone": recipe["zone"]}
+            if recipe.get("boss"):
+                source["recipeBoss"] = recipe["boss"]
         # AtlasLoot's world-boss tables are per-NPC and complete, so they own the
         # boss attribution for that zone. Wowhead's free text names the wrong
         # boss on some rows (30730 Terrorweave Tunic reads as Kazzak; it drops

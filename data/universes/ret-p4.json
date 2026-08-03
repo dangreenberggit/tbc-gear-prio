@@ -4718,11 +4718,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "8",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         },
         {
           "kind": "crafted",
-          "profession": "Leatherworking"
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         }
       ],
       "curationHint": 96.55
@@ -5793,11 +5797,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "8",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         },
         {
           "kind": "crafted",
-          "profession": "Leatherworking"
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         }
       ],
       "curationHint": 89.76
@@ -5813,11 +5821,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "2",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         },
         {
           "kind": "crafted",
-          "profession": "Blacksmithing"
+          "profession": "Blacksmithing",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         }
       ],
       "curationHint": 89.58
@@ -5947,11 +5959,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "8",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         },
         {
           "kind": "crafted",
-          "profession": "Leatherworking"
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash"
         }
       ],
       "curationHint": 52.9
@@ -6802,11 +6818,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "8",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         },
         {
           "kind": "crafted",
-          "profession": "Leatherworking"
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         }
       ],
       "curationHint": 70.3
@@ -6822,11 +6842,15 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "2",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         },
         {
           "kind": "crafted",
-          "profession": "Blacksmithing"
+          "profession": "Blacksmithing",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns"
         }
       ],
       "curationHint": 66.59
