@@ -11,6 +11,12 @@ each is either a missing affordance or an undocumented architectural change. The
 resolution for several may legitimately be "amend the plan" — but that has to be
 a recorded decision, not silent drift.
 
+**Status 2026-08-03: items 1, 2, 4 and 5 are resolved.** Only item 3 (`Deps`
+shape) is outstanding, and it is deferred on purpose — it should be revisited
+when `contentHash` stops being a placeholder, because that is when the field's
+home decides whether the cache is correct. Nothing here is actionable until
+then; the ticket stays open to hold that trigger.
+
 ## 1. `fullPool` is not implemented (§4, §8.3.3) — RESOLVED 2026-07-30
 
 §4 lists it on `RankInput`:
@@ -188,7 +194,29 @@ Tracked as `.scratch/carry-forward/issues/28-p5-bis-outside-raid-zones.md`.
 "Tier gap closed" here means the file exists and loads, not that a p5 run
 gives good advice.
 
-## 5. `setBonusNote` is not explanatory (§14 gate)
+## 5. `setBonusNote` is not explanatory (§14 gate) — ALREADY RESOLVED, ticket text was stale
+
+**No work was needed. This was fixed on 2026-07-30 by `4a9e715` ("Name the set
+a swap breaks instead of printing its id"), four days before the post-merge
+handoff still listed it as open.** Verified 2026-08-03 by calling
+`setBreakNote` directly:
+
+```
+4pc break: breaks 4-piece Crystalforge Battlegear (below 4)
+2pc break: breaks 2-piece Crystalforge Battlegear (below 2)
+```
+
+`set-bonus.ts`'s `setLabel` resolves `item.setName`, and `items.ts` carries the
+field. All **299** sets in `data/items/index.json` have a `setName` on at least
+one member, so the `set ${setId}` fallback is unreachable — `set-bonus.test.ts`
+already pins both the exact string and that unreachability.
+
+The ticket's example output (`breaks 2-piece set 629 (below 4)`) describes the
+pre-`4a9e715` behaviour and should not be quoted as current. Its own
+parenthetical — that the originating review wrongly claimed a malformed
+`(below 4)` on the 2pc branch — remains correct.
+
+Original text:
 
 The gate asks for an *"explanatory `setBonusNote`"*. `setBreakNote` emits:
 
