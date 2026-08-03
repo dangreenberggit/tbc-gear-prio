@@ -96,6 +96,7 @@ export {
 } from "./rank-report.js";
 export {
   gemPalette,
+  findMetaGemId,
   gemsForPhase,
   getGem,
   type GemColour,

@@ -11,6 +11,7 @@
  */
 
 import rawPalette from "../../../data/gems/palette.json" with { type: "json" };
+import { GemColor } from "./proto/common_pb.js";
 
 export type GemColour = number;
 
@@ -36,4 +37,18 @@ export function getGem(gemId: number): GemEntry | undefined {
 
 export function gemsForPhase(maxPhase: number): GemEntry[] {
   return PALETTE.filter((g) => g.phase <= maxPhase);
+}
+
+/**
+ * The meta gem among `gemIds`, if any. A character can only have one, so the
+ * first match wins.
+ *
+ * Lives here rather than in the ranking orchestrator: deciding what counts as
+ * a meta gem is a fact about gem data, not about how a swap is scored.
+ */
+export function findMetaGemId(gemIds: readonly number[]): number | undefined {
+  for (const id of gemIds) {
+    if (getGem(id)?.colour === GemColor.GemColorMeta) return id;
+  }
+  return undefined;
 }

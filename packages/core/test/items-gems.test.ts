@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { gemPalette, getGem } from "../src/gems.js";
+import { findMetaGemId, gemPalette, getGem } from "../src/gems.js";
 import { getItem, isEnchantable, socketsFor } from "../src/items.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -147,5 +147,38 @@ describe("gem palette", () => {
       expect(entry).not.toHaveProperty("color");
       expect(entry).toHaveProperty("colour");
     }
+  });
+});
+
+// Moved out of rank.ts, where it walked gem data from the ranking
+// orchestrator (ticket 24, feature envy). Nothing tested it there.
+describe("findMetaGemId", () => {
+  const META = 25890; // Chaotic Skyfire Diamond, GemColorMeta
+  const OTHER_META = 25893;
+  const RED = 23094;
+  const BLUE = 23096;
+
+  it("finds the meta gem among a mixed set", () => {
+    expect(findMetaGemId([RED, META, BLUE])).toBe(META);
+  });
+
+  it("returns undefined when none is a meta", () => {
+    expect(findMetaGemId([RED, BLUE])).toBeUndefined();
+    expect(findMetaGemId([])).toBeUndefined();
+  });
+
+  it("ignores ids absent from the palette", () => {
+    expect(findMetaGemId([999999, RED])).toBeUndefined();
+    expect(findMetaGemId([999999, META])).toBe(META);
+  });
+
+  // A character can only wear one meta, so order is the tiebreak.
+  it("takes the first meta when given more than one", () => {
+    expect(findMetaGemId([OTHER_META, META])).toBe(OTHER_META);
+  });
+
+  it("agrees with the palette on what a meta is", () => {
+    expect(getGem(META)?.colour).toBe(1);
+    expect(getGem(RED)?.colour).not.toBe(1);
   });
 });

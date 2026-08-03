@@ -105,12 +105,29 @@ no consumer. The seams themselves are fixed at three by AGENTS.md and are not in
 question — it is the unused breadth that reads speculative. Overlaps ticket 19
 (second adapter) and ticket 23 (Deps shape); resolve alongside those.
 
-## Feature envy in `fillOptsForSwap`
+## Feature envy in `fillOptsForSwap` — PARTLY RESOLVED 2026-08-02
 
 `rank.ts`'s `fillOptsForSwap` and `findMetaGemId` walk `equipment[i].gems` and
 call `getGem(...).unique` / `.colour` throughout. That reasoning belongs next to
 the gem data (`candidate-gems.ts` or `gems.ts`), not in the ranking
 orchestrator.
+
+**`findMetaGemId` moved to `gems.ts`** — it was pure gem reasoning ("which of
+these ids is a meta") with no reference to equipment or ranking, and `gems.ts`
+already owns `getGem`. `rank.ts` no longer imports `GemColor` at all, which is
+the tell that the move was complete rather than cosmetic (lint caught the
+now-unused import).
+
+Nothing tested it in its old home. It is a pure function, so it is now unit
+tested directly per AGENTS.md — 5 cases in `items-gems.test.ts` covering the
+mixed set, no-meta, ids absent from the palette, and the multi-meta tiebreak.
+
+**`fillOptsForSwap` itself stays in `rank.ts`.** Its remaining envy is the
+`getGem(id)?.unique` lookup, but the function's actual job is walking
+*equipment* to build `FillEmptyOpts` for one swap — that is ranking
+orchestration, and moving it to `gems.ts` would invert the dependency (gem
+data importing the equipment shape). The clean version of this is the
+`GemContext` grouping listed under "Data clumps" above, which is still open.
 
 ## `rank-report.ts` divergent change
 

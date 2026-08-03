@@ -16,7 +16,7 @@ import {
   type Assumptions,
   type Substitution,
 } from "./disclosure.js";
-import { gemsForPhase, getGem, type GemEntry } from "./gems.js";
+import { findMetaGemId, gemsForPhase, getGem, type GemEntry } from "./gems.js";
 import { enchantAppliesToItem } from "./enchants.js";
 import {
   equipmentFromLoggedGear,
@@ -29,7 +29,6 @@ import {
   type SocketedItem,
 } from "./meta-repair.js";
 import { isKaelTempLegendary } from "./kael-temp.js";
-import { GemColor } from "./proto/common_pb.js";
 import {
   filterPoolByPhase,
   simSlotsForPoolSlot,
@@ -513,13 +512,6 @@ function fillOptsForSwap(
     usedUnique,
     ...(metaId !== undefined ? { meta: { metaId, otherGemIds } } : {}),
   };
-}
-
-function findMetaGemId(gemIds: readonly number[]): number | undefined {
-  for (const id of gemIds) {
-    if (getGem(id)?.colour === GemColor.GemColorMeta) return id;
-  }
-  return undefined;
 }
 
 function applyRepairedGems(
