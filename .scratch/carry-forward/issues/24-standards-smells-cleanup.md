@@ -120,17 +120,53 @@ edit the same file for unrelated reasons. Note the inline CSS is deliberate and
 must stay inline — the report is self-contained by design — so the split is
 template vs. rules, not extracting a stylesheet.
 
-## Mysterious names
+## Mysterious names — DONE 2026-08-02
 
-`ReportItem.alternateSlot.choice: "a" | "b"` and `RankedItem.slotChoice?:
-"a" | "b"` don't reveal which ring or trinket is meant. `simSlotsForPoolSlot`
-already returns `["finger1", "finger2"]`, so `"finger1" | "finger2"` would be
-honest.
+`RankedItem.slotChoice` and `ReportItem.alternateSlot.choice` are now the sim
+slot name (`finger1` / `trinket2`) instead of `"a" | "b"`. The value was
+already in scope — `slotName`, from the loop over `simSlotsForPoolSlot` — so
+this reads the real name rather than re-deriving one from the index.
 
-## Added 2026-07-30 — folded in from ticket 22
+Typed as `string`, not a union: the honest union would come from
+`simSlotsForPoolSlot`, which still returns `readonly string[]` for the
+codegen reason recorded under "Slot names as bare strings" above. Narrowing
+here would be decorative while its source stays wide.
+
+**This was user-visible.** `fmtSlotChoice` falls back to `slotChoice` when
+there is no worn item to name — i.e. when the paired slot is empty — so a
+bare `a` reached the HTML report. It now renders `Into finger2`; a bare sim
+slot name is jargon on its own.
+
+Covered by a new `rank-report.test.ts` case for the no-equipped-item path,
+which nothing exercised before (the existing test only asserted `a` must
+*not* appear, which passed vacuously once the value was reachable).
+Mutation-checked by reverting the formatter: `expected ... to contain 'Into
+finger2'`.
+
+## Added 2026-07-30 — folded in from ticket 22 — DONE 2026-08-02
 
 Pair the hard-coded universe counts with membership assertions:
 `pool-hardening.test.ts` (`toBe(362)`) and `pool.test.ts` (`toBe(238)`) detect
 *change*, not correctness — a regression admitting 10 junk items while dropping
 10 real ones keeps the count and passes. Wants a sampled set of ids that must
 be present and a set that must be absent alongside the count tripwire.
+
+**Done.** The must-be-present half already existed
+(`WOWSIMS_ADMITTED_IN_P3`, 24 ids). Added `MUST_BE_ABSENT_FROM_P3`, five ids
+each naming the rule that excludes it, so a failure says *which* rule broke:
+
+- **30115 / 30118 / 30121 Destroyer** — Warrior T5. Phase 2, epic, plate, in
+  body slots ret uses; only `classAllowlist: [1]` keeps them out, which is
+  exactly the ticket-25 regression.
+- **30318 Netherstrand Longbow** — Kael temp legendary.
+- **34431 Lightbringer Bands** — a *paladin* item, excluded purely by phase
+  (5 > 3), so it covers the phase gate rather than the class gate.
+
+Absence assertions pass just as well when the item was never a candidate, so
+a second test pins that all five are real, at-least-rare db items — otherwise
+a typo'd id would make the test permanently, silently green.
+
+Mutation-checked against the exact scenario the ticket describes: swapping a
+real row for Destroyer Breastplate keeps the count at 354 and still fails —
+`30118 Destroyer Breastplate should be excluded: classAllowlist is [1]
+(warrior)`.

@@ -106,7 +106,13 @@ export type RankedItem = {
   itemId: number;
   name: string;
   slot: PoolEntry["slot"];
-  slotChoice?: "a" | "b";
+  /**
+   * Which sim slot the best delta came from, for the paired slots — the
+   * `finger1` / `trinket2` name from `simSlotsForPoolSlot`, not an "a"/"b"
+   * that leaves the reader guessing which ring is meant. Absent for
+   * single-slot items.
+   */
+  slotChoice?: string;
   source: ItemSource;
   /** Full provenance when the pool row carried multiple sources. */
   sources?: ItemSource[];
@@ -232,7 +238,7 @@ export async function rankUpgrades(
     let best: {
       deltaDps: number;
       stdev: number;
-      slotChoice?: "a" | "b";
+      slotChoice?: string;
       setBonusNote?: string;
     } | null = null;
 
@@ -285,14 +291,14 @@ export async function rankUpgrades(
         const next: {
           deltaDps: number;
           stdev: number;
-          slotChoice?: "a" | "b";
+          slotChoice?: string;
           setBonusNote?: string;
         } = {
           deltaDps,
           stdev: candObs.stdev,
         };
         if (slotNames.length > 1) {
-          next.slotChoice = s === 0 ? "a" : "b";
+          next.slotChoice = slotName;
         }
         if (note) next.setBonusNote = note;
         best = next;

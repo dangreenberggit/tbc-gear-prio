@@ -33,7 +33,8 @@ type ReportItem = RankedItem & {
     name: string;
   };
   alternateSlot?: {
-    choice: "a" | "b";
+    /** Sim slot name, same vocabulary as `RankedItem.slotChoice`. */
+    choice: string;
     deltaDps: number;
     deltaPct: number;
     replacesName: string;
@@ -133,7 +134,9 @@ function fmtSlotChoice(item: ReportItem): string {
   if (item.replacesEquipped) {
     return `Replaces ${item.replacesEquipped.name}`;
   }
-  return item.slotChoice ?? "";
+  // A bare sim slot name reads as jargon on its own; the empty slot is why
+  // there is no item to name here.
+  return item.slotChoice ? `Into ${item.slotChoice}` : "";
 }
 
 function fmtAlternateSlot(item: ReportItem): string {

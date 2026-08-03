@@ -29,6 +29,7 @@ type WowsimsDbItem = {
   rangedWeaponType?: number;
   weaponType?: number;
   phase?: number;
+  quality?: number;
   weaponSpeed?: number;
   scalingOptions?: Record<
     string,
@@ -91,6 +92,44 @@ const WOWSIMS_ADMITTED_IN_P3 = [
 const WOWSIMS_NOT_YET_ADMITTED = [
   23522, 27484, 27985, 28176, 28288, 28429, 29119, 29177, 30257, 30341, 30834,
   33173,
+] as const;
+
+/**
+ * Must stay OUT, each for a different enforced rule. The count assertion
+ * below only detects *change*: swapping ten real items for ten junk ones
+ * keeps it at 354 and passes (ticket 24, folded in from 22). These name the
+ * rules, so a regression says which one broke.
+ *
+ * Destroyer is the Warrior T5 set — phase 2, epic, plate, in body slots ret
+ * uses. Nothing but `classAllowlist` keeps it out, which is what made it the
+ * regression in ticket 25.
+ */
+const MUST_BE_ABSENT_FROM_P3 = [
+  {
+    id: 30115,
+    name: "Destroyer Greathelm",
+    why: "classAllowlist is [1] (warrior)",
+  },
+  {
+    id: 30118,
+    name: "Destroyer Breastplate",
+    why: "classAllowlist is [1] (warrior)",
+  },
+  {
+    id: 30121,
+    name: "Destroyer Greaves",
+    why: "classAllowlist is [1] (warrior)",
+  },
+  {
+    id: 30318,
+    name: "Netherstrand Longbow",
+    why: "Kael temp legendary (also classAllowlist [3])",
+  },
+  {
+    id: 34431,
+    name: "Lightbringer Bands",
+    why: "phase 5 ret tier, above maxPhase 3",
+  },
 ] as const;
 
 const RET_TIER_SET_IDS = new Set([626, 629, 680]);
@@ -214,6 +253,32 @@ describe("data/universes/ret-p3.json hardening", () => {
       expect(poolIds.has(id), `missing admitted wowsims id ${id}`).toBe(true);
     }
   });
+
+  // Pairs the count above with membership. The count alone cannot tell a
+  // clean universe from one that swapped real items for junk.
+  it("keeps out items each enforced rule should exclude", () => {
+    for (const { id, name, why } of MUST_BE_ABSENT_FROM_P3) {
+      expect(poolIds.has(id), `${id} ${name} should be excluded: ${why}`).toBe(
+        false
+      );
+    }
+  });
+
+  it.skipIf(!hasWowsimsVendor)(
+    "excludes those for the stated reason, not by accident",
+    () => {
+      // A test that an item is absent passes just as well when the item was
+      // never a candidate. Assert the property that does the excluding.
+      for (const { id, name } of MUST_BE_ABSENT_FROM_P3) {
+        const item = byId.get(id);
+        expect(item, `${id} ${name} missing from wowsims db`).toBeTruthy();
+        expect(
+          (item?.quality ?? 0) >= 3,
+          `${id} ${name} is at least rare`
+        ).toBe(true);
+      }
+    }
+  );
 
   it.skipIf(!hasWowsimsVendor)(
     "loads wowsims curated gear sets from vendor (36 IDs)",

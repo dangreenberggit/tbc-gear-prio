@@ -16,7 +16,7 @@ type TestItem = RankedItem & {
     name: string;
   };
   alternateSlot?: {
-    choice: "a" | "b";
+    choice: string;
     deltaDps: number;
     deltaPct: number;
     replacesName: string;
@@ -218,14 +218,14 @@ describe("rank-report", () => {
             slot: "finger",
             deltaDps: 20.68,
             belowCutoff: false,
-            slotChoice: "a",
+            slotChoice: "finger1",
             replacesEquipped: {
               slot: "finger1",
               itemId: 28757,
               name: "Ring of a Thousand Marks",
             },
             alternateSlot: {
-              choice: "b",
+              choice: "finger2",
               deltaDps: 8,
               deltaPct: 0.39,
               replacesName: "Shapeshifter's Signet",
@@ -243,6 +243,35 @@ describe("rank-report", () => {
     expect(html).toContain("Replaces Ring of a Thousand Marks");
     expect(html).not.toContain('<span class="choice">a</span>');
     expect(html).toContain("Also +8.00 if replacing Shapeshifter's Signet");
+  });
+
+  // When the paired slot is empty there is no worn item to name, so
+  // slotChoice is what the reader gets. It used to be a bare "a".
+  it("names the sim slot when nothing is being replaced", () => {
+    const html = renderRankHtml(
+      {
+        contentHash: "test",
+        cutoff: { absDps: 5, pct: 0.5 },
+        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
+        assumptions: { standing: [] },
+        substitutions: [],
+        items: [
+          item({
+            rank: 1,
+            itemId: 32526,
+            name: "Band of Devastation",
+            slot: "finger",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            slotChoice: "finger2",
+            source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("Into finger2");
+    expect(html).not.toMatch(/<span class="choice">[ab]<\/span>/);
   });
 
   it("describes universe pool scope in the lede", () => {
