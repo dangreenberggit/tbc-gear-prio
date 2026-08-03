@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { gemContext } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase } from "../src/gems.js";
@@ -133,9 +134,7 @@ function candidateEquipmentForTest(
     equipment,
     SIM_ORDER.indexOf(slotName),
     itemId,
-    gemsForPhase(maxPhase),
-    epWeights,
-    epWeights
+    gemContext(gemsForPhase(maxPhase), epWeights)
   );
 }
 

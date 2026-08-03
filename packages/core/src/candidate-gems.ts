@@ -13,7 +13,7 @@ import { getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
 import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
-import { epScore, Stat } from "./stats.js";
+import { epScore, Stat, type EpWeights } from "./stats.js";
 
 /**
  * Record-only weights. Narrower than `stats.ts`'s `EpWeights` union — this
@@ -21,6 +21,39 @@ import { epScore, Stat } from "./stats.js";
  * explicit here rather than importing the wider union.
  */
 type EpWeightRecord = Readonly<Record<string, number>>;
+
+/**
+ * The three values every gem decision needs, which previously travelled as
+ * separate parameters through the whole candidate-swap chain (ticket 24's
+ * data clump).
+ *
+ * `weights` and `weightRecord` are the *same* weights in the two shapes the
+ * code below needs: `epScore` in `stats.ts` accepts the dense-array form, the
+ * gem fillers only ever want the record. Deriving the record once at
+ * construction is why this is a context object and not just a tuple — callers
+ * previously had to remember to pass both, in the right order, and nothing
+ * stopped them passing weights that disagreed.
+ */
+export type GemContext = {
+  readonly palette: readonly GemEntry[];
+  readonly weights: EpWeights;
+  readonly weightRecord: EpWeightRecord;
+};
+
+export function gemContext(
+  palette: readonly GemEntry[],
+  weights: EpWeights
+): GemContext {
+  return { palette, weights, weightRecord: toWeightRecord(weights) };
+}
+
+/** Dense-array weights are index-keyed; the record form keys by the same index. */
+function toWeightRecord(weights: EpWeights): EpWeightRecord {
+  if (!Array.isArray(weights)) return weights as EpWeightRecord;
+  const out: Record<string, number> = {};
+  for (let i = 0; i < weights.length; i++) out[String(i)] = weights[i] ?? 0;
+  return out;
+}
 
 /** Absolute EP slack for meta-aware near-ties (fill weights). */
 const META_NEAR_EP = 1.0;
