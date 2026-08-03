@@ -69,8 +69,8 @@ Workers get their own worktree or clone; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
 then `pre-merge-review`, then **ask** before `pnpm land` into `dev`. The
-skill is harness-agnostic: plain git plus optional Cursor / Claude Code /
-Codex adapters. See
+skill is harness-agnostic: plain git plus optional Claude Code / Codex /
+Cursor adapters. See
 [`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
 
 ## Gates — what's enforced vs. advisory

@@ -15,7 +15,7 @@ picker. If a worker logs `Switched to grok-4.5…` and still `status: error`,
 treat it as a hard fail and respawn on Composer (or serialise) — not as a
 successful Grok handoff.
 
-If a **manager** agent must spawn design/review workers and then compile: do not `run_in_background` + end turn “waiting.” Either keep ownership through fan-in, or write a `PROCESS.md` handoff naming the next spawn for the parent. Background completions notify the parent session, not a dead manager.
+Cursor Task managers hit the background-then-end-turn fan-in loss described in SKILL.md “When to fan out” — the rule there applies here unchanged.
 
 ## Isolate
 

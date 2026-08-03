@@ -2,6 +2,13 @@
 
 Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when running under Codex; fall back to agnostic git anytime.
 
+## Models
+
+Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+
+- **Workhorse / simple:** mid tier — parallel implement workers, mechanical edits.
+- **Sharp:** top tier / `codex exec` — design, review, hard judgment. No plan-specific spawn-death quirks are recorded for Codex in this repo; if you hit one, record it in the model policy.
+
 ## Isolate
 
 - Give each worker its own **cwd** that is a git worktree (create with the agnostic `git worktree add` recipe).

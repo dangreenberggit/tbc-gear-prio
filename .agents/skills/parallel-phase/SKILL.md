@@ -5,13 +5,15 @@ description: Fan-out parallel independent slices on a feature branch. Use when t
 
 # Parallel phase
 
-Fan out independent slices to isolated workers, merge them back onto the **feature branch**, then keep the normal land loop. Harness-agnostic: the contract is git + handoffs; Cursor / Claude / Codex are adapters.
+Fan out independent slices to isolated workers, merge them back onto the **feature branch**, then keep the normal land loop. Harness-agnostic: the contract is git + handoffs; Claude Code / Codex / Cursor are adapters.
 
 ## When to fan out
 
 Fan out only when slices are **mostly independent**: different kinds of work, and mostly different files or clear regions of a file. If two slices would thrash the same module, keep them sequential.
 
-Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** model lane — do not fan out a swarm of high-ticket sharp models (Opus at effort `high`+, Fable, Sol); on **Cursor Pro** pin **Composer** (not Terra/Other-pool). See [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md). On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
+Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** model lane — do not fan out a swarm of high-ticket sharp models (Opus at effort `high`+, Fable, Sol, Grok high). Which model fills the workhorse lane is per-harness; your [adapter](adapters/) names it, and [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) has the reasoning. On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
+
+**If you are a manager spawning workers and then running fan-in,** do not background the workers and end your turn "waiting" — background completions notify the parent session, not a finished manager, and fan-in is simply lost. Either hold ownership through fan-in, or write a `PROCESS.md` handoff naming the exact next spawn before you end. This is not harness-specific.
 
 ## Roles
 
@@ -82,6 +84,6 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 | Harness | File |
 | --- | --- |
 | Plain git / unknown | [adapters/agnostic.md](adapters/agnostic.md) |
-| Cursor | [adapters/cursor.md](adapters/cursor.md) |
 | Claude Code | [adapters/claude-code.md](adapters/claude-code.md) |
 | Codex | [adapters/codex.md](adapters/codex.md) |
+| Cursor | [adapters/cursor.md](adapters/cursor.md) |
