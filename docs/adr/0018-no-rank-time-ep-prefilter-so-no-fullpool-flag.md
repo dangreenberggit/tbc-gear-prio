@@ -61,7 +61,10 @@ too much, so ~80 had to be chosen well. Two things changed:
 - The candidate set is now a generated per-tier universe (ADR-0017), 354 rows
   at p3 after `classAllowlist` enforcement.
 - A full P3 run sims all of them in roughly 15 minutes offline, which is
-  tolerable for the CLI.
+  tolerable for the CLI. **Untested as written** — that figure is carried from
+  a handoff note, not from a measured run recorded here. Re-derive with
+  `pnpm rank --region US --realm dreamscythe --character slamaltman --offline
+--max-phase 3` before relying on it.
 
 So the cost the prefilter existed to avoid is currently being paid, and the
 product still works. The prefilter becomes necessary when the web path (Phase

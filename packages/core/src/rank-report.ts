@@ -283,8 +283,9 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     --down-bg: #f3e0e0;
     --hit-glow: #fff6ef;
     --radius: 14px;
-    /* System stacks only — the report must render identically offline, which
-       a webfont link cannot promise. */
+    /* No webfont link: the report must render offline, so the named faces are
+       used only if already installed and every stack falls back to a system
+       one. */
     --font-display: "Syne", "Segoe UI", system-ui, sans-serif;
     --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
