@@ -1,58 +1,31 @@
 /**
- * Slot-grouped HTML report for human review of a Ranking.
- * Self-contained: one file, no build step, open in any browser.
+ * The rank report's HTML template: escaping, number/label formatting, and
+ * document structure. What to show and in what order lives in
+ * `rank-report-rules.ts`; the stylesheet lives in `rank-report-css.ts`.
+ *
+ * Self-contained output by design: one file, no build step, no sibling
+ * assets, open in any browser.
  */
 
-import type { ItemSlot } from "./items.js";
-import type { ItemSource, SimSlotName } from "./pool.js";
+import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
+import {
+  groupBySlot,
+  partitionShortlist,
+  SLOT_ORDER,
+  type ReportItem,
+  type RankReportMeta,
+} from "./rank-report-rules.js";
 
-export const SLOT_ORDER: readonly ItemSlot[] = [
-  "head",
-  "neck",
-  "shoulder",
-  "back",
-  "chest",
-  "wrist",
-  "hands",
-  "waist",
-  "legs",
-  "feet",
-  "finger",
-  "trinket",
-  "weapon",
-  "ranged",
-] as const;
-
-/** Optional enrichments the renderer understands when present on ranked items. */
-type ReportItem = RankedItem & {
-  magnitudeWarning?: boolean;
-  replacesEquipped?: {
-    slot: string;
-    itemId: number;
-    name: string;
-  };
-  alternateSlot?: {
-    /** Sim slot name, same vocabulary as `RankedItem.slotChoice`. */
-    choice: SimSlotName;
-    deltaDps: number;
-    deltaPct: number;
-    replacesName: string;
-  };
-};
-
-export type RankReportMeta = {
-  character: string;
-  realm: string;
-  region: string;
-  spec: string;
-  maxPhase: number;
-  poolSize: number;
-  generatedAt: string;
-  /** Report-time zone filter (CLI `--raid`); not applied during rank. */
-  raid?: string;
-};
+// Re-exported so `rank-report.js` stays the one import site for the report,
+// as index.ts and the CLI already use it.
+export {
+  groupBySlot,
+  partitionShortlist,
+  SLOT_ORDER,
+  type RankReportMeta,
+} from "./rank-report-rules.js";
 
 export function formatItemSource(source: ItemSource): string {
   switch (source.kind) {
@@ -79,20 +52,6 @@ export function formatItemSource(source: ItemSource): string {
   }
 }
 
-export function partitionShortlist(items: RankedItem[]): {
-  raid: RankedItem[];
-  pvp: RankedItem[];
-} {
-  const reportItems = items as ReportItem[];
-  const above = reportItems.filter(
-    (i) => !i.belowCutoff && !i.magnitudeWarning
-  );
-  return {
-    raid: above.filter((i) => i.source.kind !== "pvp"),
-    pvp: above.filter((i) => i.source.kind === "pvp"),
-  };
-}
-
 function renderShortlistChips(items: RankedItem[]): string {
   return items
     .slice()
@@ -102,20 +61,6 @@ function renderShortlistChips(items: RankedItem[]): string {
         `<a class="chip" href="#slot-${i.slot}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d">${fmtDelta(i.deltaDps)}</span></a>`
     )
     .join("\n");
-}
-
-export function groupBySlot(items: RankedItem[]): Map<ItemSlot, RankedItem[]> {
-  const map = new Map<ItemSlot, RankedItem[]>();
-  for (const slot of SLOT_ORDER) map.set(slot, []);
-  for (const item of items) {
-    const list = map.get(item.slot);
-    if (list) list.push(item);
-    else map.set(item.slot, [item]);
-  }
-  for (const list of map.values()) {
-    list.sort((a, b) => b.deltaDps - a.deltaDps);
-  }
-  return map;
 }
 
 function esc(s: string): string {
