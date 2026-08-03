@@ -137,26 +137,37 @@ def build_items_index(db: dict) -> dict[str, dict]:
     return out
 
 
-def build_enchants_index(db: dict) -> dict[str, dict]:
+def build_enchants_index(db: dict) -> dict[str, list[dict]]:
     """Keyed by effectId -- the id WCL reports as `permanentEnchant`.
 
     Verified against test/fixtures/slamaltman.raw.json: 64 of the 65 distinct
     permanentEnchant values there resolve as effectId and 0 resolve as
     spellId, so effectId is the join key the rest of the engine already uses.
 
-    `enchantType` is absent on 131 of 141 records (meaning Normal / 0); only
-    the two-hand and shield enchants carry it.
+    **The value is a list because effectId is not unique**: 141 records carry
+    137 distinct ids. The four collisions each pair enchants for different
+    slots (2564 is both Gloves - Superior Agility and Weapon - Agility), and
+    three of them are worn in the fixture, so keying one-to-one silently kept
+    the wrong slot's record. Readers disambiguate on the item's own slot.
+
+    `enchantType` is absent on 127 of 141 records (meaning Normal / 0); only
+    the two-hand and shield enchants carry it. `extraTypes` is the additional
+    slots an enchant also applies to -- armor kits carry it, and the UI's
+    applicability rule unions it with `type`.
     """
-    out: dict[str, dict] = {}
+    out: dict[str, list[dict]] = {}
     for e in db.get("enchants", []):
         effect_id = e.get("effectId")
         if effect_id is None:
             continue
-        out[str(effect_id)] = {
-            "name": e.get("name"),
-            "type": e.get("type"),
-            "enchantType": e.get("enchantType") or 0,
-        }
+        out.setdefault(str(effect_id), []).append(
+            {
+                "name": e.get("name"),
+                "type": e.get("type"),
+                "enchantType": e.get("enchantType") or 0,
+                "extraTypes": e.get("extraTypes") or [],
+            }
+        )
     return out
 
 
@@ -220,7 +231,14 @@ def main() -> int:
         json.dump(enchants_index, fh, indent=2, sort_keys=True)
         fh.write("\n")
 
-    print(f"  {ENCHANTS_OUT.relative_to(ROOT)}: {len(enchants_index)} enchants")
+    # Print both counts, not just the key count: they differ only because
+    # effectId collides, and reporting the smaller number alone is what let
+    # four dropped records look like a clean build.
+    enchant_records = sum(len(v) for v in enchants_index.values())
+    print(
+        f"  {ENCHANTS_OUT.relative_to(ROOT)}: {enchant_records} enchants "
+        f"under {len(enchants_index)} effectIds"
+    )
     print(f"  {ITEMS_OUT.relative_to(ROOT)}: {len(items_index)} equippable items")
     print(f"  {GEMS_OUT.relative_to(ROOT)}: {len(gem_palette)} gems "
           f"({len(db['gems']) - len(gem_palette)} JC-restricted excluded)")

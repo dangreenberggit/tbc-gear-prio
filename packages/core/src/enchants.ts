@@ -42,12 +42,45 @@ export type EnchantEntry = {
   /** Slot this enchant applies to, in the same enum as `ItemEntry.itemType`. */
   type: number | null;
   enchantType: number;
+  /**
+   * Further slots the same enchant also applies to. Armor kits carry it —
+   * Heavy Knothide is `type: 1` with `extraTypes: [3, 5, 7, 9, 10]` — and
+   * upstream's rule unions the two rather than testing `type` alone.
+   */
+  extraTypes: number[];
 };
 
-const INDEX = rawEnchants as Record<string, EnchantEntry>;
+/**
+ * `effectId` is not unique: 141 records share 137 ids. Each entry is the list
+ * of records for that id, disambiguated against the item's own slot.
+ */
+const INDEX = rawEnchants as Record<string, EnchantEntry[]>;
 
-export function getEnchant(effectId: number): EnchantEntry | undefined {
-  return INDEX[String(effectId)];
+export function getEnchants(effectId: number): EnchantEntry[] {
+  return INDEX[String(effectId)] ?? [];
+}
+
+/** Every slot this enchant applies to, `type` unioned with `extraTypes`. */
+function eligibleSlots(enchant: EnchantEntry): number[] {
+  return enchant.type == null
+    ? [...enchant.extraTypes]
+    : [enchant.type, ...enchant.extraTypes];
+}
+
+/**
+ * The record for `effectId` that fits `itemType`, or undefined.
+ *
+ * With a colliding id the slot is what tells the two apart — 2564 is both
+ * Gloves - Superior Agility and Weapon - Agility, and only one of those can
+ * be the enchant on a given item.
+ */
+export function getEnchant(
+  effectId: number,
+  itemType?: number
+): EnchantEntry | undefined {
+  const records = getEnchants(effectId);
+  if (itemType === undefined) return records[0];
+  return records.find((e) => eligibleSlots(e).includes(itemType));
 }
 
 /**
@@ -67,13 +100,17 @@ export function enchantAppliesToItem(
   effectId: number,
   itemId: number
 ): boolean {
-  const enchant = getEnchant(effectId);
   const item = getItem(itemId);
-  if (!enchant || !item) return false;
+  if (!item) return false;
 
-  // Slot intersection. Upstream compares expanded ItemSlot lists; ours is a
-  // single slot per side, both drawn from the same wowsims ItemType enum.
-  if (enchant.type == null || enchant.type !== item.itemType) return false;
+  // Slot intersection, and the reason getEnchant needs the item's slot: an
+  // effectId can name two enchants for different slots, and only the one
+  // matching this item can be the enchant it carries. Upstream unions
+  // `type` with `extraTypes` here (getEligibleEnchantSlots) -- armor kits
+  // are `type: 1` with `extraTypes: [3, 5, 7, 9, 10]`, so testing `type`
+  // alone would strip a Knothide kit off every non-head slot it sits on.
+  const enchant = getEnchant(effectId, item.itemType);
+  if (!enchant) return false;
 
   if (
     enchant.enchantType === ENCHANT_TYPE_TWO_HAND &&
