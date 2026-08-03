@@ -17,6 +17,13 @@ when `contentHash` stops being a placeholder, because that is when the field's
 home decides whether the cache is correct. Nothing here is actionable until
 then; the ticket stays open to hold that trigger.
 
+**Handed off 2026-08-03:** `.scratch/handoffs/contenthash-and-deps-shape.md`
+briefs a fresh agent on implementing `contentHash` first and settling this item
+as a consequence. It also records that PLAN.md §7's field list is partly stale
+(it names `poolId`/`poolVersion`, superseded by ADR-0017, and
+`epVersion`/`fullPool`, which reference the prefilter ADR-0018 says was never
+built), so §7 cannot be implemented literally.
+
 ## 1. `fullPool` is not implemented (§4, §8.3.3) — RESOLVED 2026-07-30
 
 §4 lists it on `RankInput`:

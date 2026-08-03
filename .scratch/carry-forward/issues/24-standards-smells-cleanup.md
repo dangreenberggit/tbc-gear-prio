@@ -16,6 +16,11 @@ blocked rather than forgotten:
 - **Unused `Deps` breadth** — its own text says resolve alongside tickets 19
   and 23, and ticket 23's `Deps` item is itself waiting on `contentHash`
   becoming real. **This is the only thing left on this ticket.**
+  **Handed off** in `.scratch/handoffs/contenthash-and-deps-shape.md`:
+  implementing the ranking cache gives `deps.store` its first production
+  consumer, which retires `void deps.store; void deps.clock;` as a side effect
+  rather than as its own refactor. Note the pointer to ticket **19 is stale** —
+  19 is closed, deferred to Phase 2 by ADR-0016.
 
 Closed this round: `ITEM_SOURCE_KINDS` duplicated three ways, the `GemContext`
 grouping, the JSON-widening trap behind both of them, and the
