@@ -16,3 +16,8 @@ vendor/
 # (see vitest.config.ts). Tracked here so every clone gets it — .git/info/exclude
 # is per-checkout only.
 .claude/worktrees/
+
+# Embedded clones/worktrees under .scratch — reference checkouts, never ours to commit.
+# wowsims-tbc-new-src is the game-mechanics authority (see AGENTS.md).
+.scratch/wowsims-tbc-new-src/
+.scratch/wt-*/
