@@ -41,11 +41,13 @@ Workhorse jobs **may** retry on a peer workhorse if one mid-tier is
 exhausted; they still must not jump to a toy model for implementation
 correctness without the user saying so.
 
-**Neither lane is a two-way choice.** There are at least three harnesses
-(Claude Code, Codex, Cursor) plus external hand-off sessions. When one
-harness’s sharp lane is walled, moving the _brief_ to another harness is a
-first-class option, not a fallback — that is what the handoff files under
-`.scratch/handoffs/` are for.
+**Read only your own harness’s section below.** The others exist because
+this repo gets worked on from more than one, not because an agent chooses
+between them mid-task — you cannot switch harness, only the user can.
+So when the sharp lane is walled and waiting or serialising has not
+cleared it, the move is to **say so and stop**, optionally leaving a brief
+under `.scratch/handoffs/` the user can run elsewhere. Do not substitute a
+weaker model to keep going.
 
 ## Parallelism vs serial
 
