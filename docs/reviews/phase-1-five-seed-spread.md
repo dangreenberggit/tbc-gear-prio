@@ -166,25 +166,25 @@ demonstrate.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                        |
-| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/20-meta-gem-ep-model-blind-to-proc-effects.md` — reproduced; severity downgraded, mechanism corrected |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/22-rank-test-duplicates-production-swap.md`                                                           |
-| A3  | Adversarial | fixed       | Skipped candidates now recorded as `Substitution` rows instead of a bare `catch {}`                                                  |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/22-rank-test-duplicates-production-swap.md`                                                           |
-| A5  | Adversarial | wontfix     | Already documented in-code and in the log; `--hold-out-wowhead` is the answer and is used                                            |
-| A6  | Adversarial | wontfix     | Float tie-break nit; both functions currently agree                                                                                  |
-| D1  | Domain      | defer       | `.scratch/carry-forward/issues/20-meta-gem-ep-model-blind-to-proc-effects.md`                                                        |
-| D2  | Domain      | defer       | Appended as a blocker to `.scratch/carry-forward/issues/18-universe-recall-measurement.md`                                           |
-| D3  | Domain      | defer       | `.scratch/carry-forward/issues/21-world-boss-zone-strings-not-canonicalised.md`                                                      |
-| ST1 | Standards   | fixed       | `stats.ts` restating comment deleted                                                                                                 |
-| ST2 | Standards   | fixed       | Durable-claim commands added in `candidate-gems.test.ts` and `pool-hardening.test.ts`                                                |
-| ST3 | Standards   | fixed       | Google Fonts removed from `rank-report.ts`; system stacks, genuinely self-contained                                                  |
-| ST4 | Standards   | defer       | `.scratch/carry-forward/issues/24-standards-smells-cleanup.md`                                                                       |
-| S1  | Spec        | defer       | `.scratch/carry-forward/issues/19-second-adapter-gear-source-store.md`                                                               |
-| S2  | Spec        | fixed       | PLAN.md §14 box 8 amended to "two `maxPhase` values" with reasoning recorded                                                         |
-| S3  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                         |
-| S4  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                         |
-| S5  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                         |
-| S6  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                         |
-| S7  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md` — partially wrong as filed; `(below 2)` is correct      |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                            |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `.scratch/carry-forward/issues/20-meta-gem-ep-model-blind-to-proc-effects.md` (closed 2026-07-30) — reproduced; severity downgraded, mechanism corrected |
+| A2  | Adversarial | fixed       | `.scratch/carry-forward/issues/22-rank-test-duplicates-production-swap.md` (closed — `f814885`)                                                          |
+| A3  | Adversarial | fixed       | Skipped candidates now recorded as `Substitution` rows instead of a bare `catch {}`                                                                      |
+| A4  | Adversarial | fixed       | `.scratch/carry-forward/issues/22-rank-test-duplicates-production-swap.md` (closed — `f814885`)                                                          |
+| A5  | Adversarial | wontfix     | Already documented in-code and in the log; `--hold-out-wowhead` is the answer and is used                                                                |
+| A6  | Adversarial | wontfix     | Float tie-break nit; both functions currently agree                                                                                                      |
+| D1  | Domain      | fixed       | `.scratch/carry-forward/issues/20-meta-gem-ep-model-blind-to-proc-effects.md` (closed 2026-07-30)                                                        |
+| D2  | Domain      | fixed       | `.scratch/carry-forward/issues/18-universe-recall-measurement.md` (closed 2026-07-30 — sim-based check done)                                             |
+| D3  | Domain      | fixed       | `.scratch/carry-forward/issues/21-world-boss-zone-strings-not-canonicalised.md` (closed — `3af4c24`)                                                     |
+| ST1 | Standards   | fixed       | `stats.ts` restating comment deleted                                                                                                                     |
+| ST2 | Standards   | fixed       | Durable-claim commands added in `candidate-gems.test.ts` and `pool-hardening.test.ts`                                                                    |
+| ST3 | Standards   | fixed       | Google Fonts removed from `rank-report.ts`; system stacks, genuinely self-contained                                                                      |
+| ST4 | Standards   | defer       | `.scratch/carry-forward/issues/24-standards-smells-cleanup.md`                                                                                           |
+| S1  | Spec        | fixed       | `.scratch/carry-forward/issues/19-second-adapter-gear-source-store.md` (closed — ADR-0016, `f0df5c7`)                                                    |
+| S2  | Spec        | fixed       | PLAN.md §14 box 8 amended to "two `maxPhase` values" with reasoning recorded                                                                             |
+| S3  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                                             |
+| S4  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                                             |
+| S5  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                                             |
+| S6  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md`                                                                             |
+| S7  | Spec        | defer       | `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md` — partially wrong as filed; `(below 2)` is correct                          |
