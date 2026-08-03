@@ -131,6 +131,44 @@ is a separate question and is not part of this.
 Only a **p5** run is affected today; p2/p3 are unchanged. Re-derive with the
 p4/p5 stage-list intersection described above.
 
+## Update 2026-08-03 — the phase-5 half is closed, and the heroic path now exists
+
+Ticket 28 landed (`3106bb5`). The five phase-5 items are in `ret-p5.json`, and
+re-running the intersection above now gives **69 missing at both p4 and p5,
+all phase 1, zero BiS-labelled at phase ≥ 2**. (76 → 69 at p5: the five from
+28, plus 29119 and 30834, two rep rewards a new Wowhead parser branch
+resolves.)
+
+What that leaves on this ticket is the phase-1 pre-raid remainder, unchanged.
+
+**The mechanism this ticket said was missing now exists.** `assemble_universe.py`
+reads `sources[].drop.difficulty` and emits `kind: "heroic"`, keyed by
+`PHASE_HEROIC_DUNGEONS`. That map deliberately lists **only Magisters'
+Terrace at phase 5**.
+
+Measured while doing 28, and directly relevant here: the other **15 heroic
+dungeons carry 284 ret-eligible items, every one of them phase 1** —
+
+```
+Mana-Tombs 25, The Botanica 23, The Underbog 23, Hellfire Ramparts 21,
+The Blood Furnace 20, Old Hillsbrad Foothills 20, The Steamvault 18,
+The Black Morass 18, The Slave Pens 18, The Mechanar 18, The Arcatraz 18,
+The Shattered Halls 17, Shadow Labyrinth 16, Sethekk Halls 16,
+Auchenai Crypts 13
+```
+
+So admitting heroic dungeons broadly is now a **one-line change** to that map
+plus a re-measure — the plumbing, the source kind, the `pool.ts` variant, the
+report formatting and the validation guard are all in place, and admission is
+already gated on the item's own phase so nothing leaks upward into p2+.
+
+Flagged by the user as wanted eventually, **lowest priority**: it would rewrite
+the phase-1 end of every tier, so it needs its own before/after measurement of
+what a pre-raid shopping list should contain, not a drive-by.
+
+Note this does not by itself resolve 30257 Shattrath Leggings — that one has
+`sources: null` in db.json, so no difficulty-based path reaches it.
+
 ## Done when
 
 - A short inventory (script or report section) lists phase≥2 `excludedNoSource`

@@ -1,6 +1,7 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 17 triage + pre-merge review (Domain finding 2), 2026-08-02
+Closed: 2026-08-03 (`3106bb5`)
 Blocks: none
 Blocked by: none
 
@@ -76,3 +77,65 @@ Watch the zone guard added in `d9dee9f`: source validation now rejects any
 `raid`/`token` zone absent from `phase_raids.json`. A heroic dungeon is a
 different `kind`, so it is not caught by that rule — but whatever admits it
 should get an equivalent guard rather than none.
+
+## Resolved 2026-08-03 (`3106bb5`)
+
+All five items are in `ret-p5.json` with real, discriminable sources. Two of
+this ticket's premises were wrong, and both corrections are worth keeping.
+
+**The root cause was narrower than "nothing emits a heroic source."** Nothing
+read `sources[].drop.difficulty` either, so `map_db_source` labelled every
+heroic drop `kind: "raid"` carrying a dungeon name, which membership then
+tested against `phase_raids.json`. 34472 did not look excluded — it looked
+like a raid drop from a raid that does not exist. Wowhead's own text hit the
+same trap one layer up: `"Drop: Priestess Delrissa (Heroic Magisters'
+Terrace)"` parsed to a `raid` row with zone `"Heroic Magisters' Terrace"`,
+which would have tripped the `d9dee9f` guard had the item ever been admitted.
+
+`difficulty == 2` turned out to be a clean discriminator — all 472 such drops
+in the pinned db sit in the 16 five-man zones, none in a raid — so no zone
+list is needed to tell heroic from raid.
+
+**The "phase → heroic-dungeon map" this ticket asked for is deliberately
+minimal.** Item `phase` already separates the tiers: 15 of the 16 heroics drop
+phase-1 items only (284 ret-eligible, measured), and Magisters' Terrace drops
+phase-5. `PHASE_HEROIC_DUNGEONS` therefore lists MT alone, and admission is
+still gated on the item's own phase, so the map can grow later without
+leaking phase-1 gear into a p2 list. Broadening it to the other 15 dungeons is
+ticket 17's pre-raid question — noted as wanted eventually, lowest priority.
+
+**The four `sources: null` items are not badge/craft/rep.** Per the Wowhead p5
+list, 34388/34392/34397 are Sunwell Plateau raid drops (34192/34195/34211,
+themselves already in the universe) upgraded via a **Sunmote** at vendor Yrma.
+That is two-hop in exactly the sense the engine already models, so they got a
+real source rather than the force-include this ticket proposed. They live in
+`data/two-hop/ret-sunmote-upgrades.json` rather than `ret-tokens.json`,
+because the latter is the ret **tier set** map and `pool-hardening.test.ts`
+pins it against wowsims db `setId`s — adding non-set pieces there fails that
+test, correctly. Only 34679 is a rep reward; the Wowhead parser simply had no
+rep branch, so the text was discarded.
+
+Membership: p2 230 unchanged, p3 354 → 356, p4 401 → 403, p5 467 → 484. The
+p3/p4 additions are 29119 Haramad's Bargain and 30834 Shapeshifter's Signet,
+two rep rewards the new parser branch resolves — both were already entitled to
+membership through the existing list-only path. Each tier is still a strict
+superset of the one below.
+
+The `it.todo` is now a real test asserting the source **kind** per item rather
+than mere presence, since the mechanism is what was broken in each case.
+Mutation-checked three ways — emptying `PHASE_HEROIC_DUNGEONS`, disabling the
+rep branch, and breaking the Sunmote file path each fail it naming the item
+and the reason.
+
+Ticket-17 intersection re-run afterwards: p4 and p5 both leave **69 missing,
+all phase 1**, and **zero BiS-labelled items at phase ≥ 2** outside either
+universe. Previously p5 left 76 (71 phase-1 + the 5 here).
+
+### One thing fixed in passing
+
+`map_db_source` was manufacturing `{"kind": "rep", "faction": "unknown",
+"standing": "unknown"}` for rows keyed only by `repFactionId`. db.json ships
+no faction table, so that row can never be resolved, and because `pool.ts`
+reads `sources[0]` it displaced the real Wowhead-derived source on 29119. It
+now returns `None` when both fields are unresolvable. Partially-resolved rows
+are untouched.
