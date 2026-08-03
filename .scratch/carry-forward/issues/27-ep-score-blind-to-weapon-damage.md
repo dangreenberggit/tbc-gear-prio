@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: SME review of the junk filter, `.scratch/handoffs/sme-junk-filter-judgment.md`, 2026-07-30
 Blocks: none
@@ -86,6 +86,85 @@ empty stat maps and would all be rejected without the exemption.
   sits at the bottom on an empty stat line.
 - Ideally sockets contribute too, at least as a flat per-socket estimate.
 - Decide whether `weapon` can then return to `SLOTS_WITH_EP_SIGNAL`.
+
+## Resolved 2026-08-02
+
+**The weight was not missing upstream — it was dropped in transcription.**
+`ui/paladin/retribution/presets.ts` `P2_EP_PRESET` carries a second
+`Stats.fromMap` argument, the pseudo-stat block, holding
+`PseudoStatMainHandDps: 5.34`. Our `p2.ep-weights.json` copied all nine stat
+terms from the first argument and none of the second. So this is a restored
+upstream term, not a locally-invented approximation.
+
+Checked against the wowsims clone before implementing:
+
+- **Weapon DPS is a PseudoStat, not `StatPhysicalDamage`.** Stat 41 is a flat
+  per-hit physical bonus from gems/enchants (`sim/core/spell_result.go`
+  `BonusDamage`; the metagem at `sim/common/tbc/metagems.go` grants 3). It is
+  never populated from item base stats — `MapBonusStatIndexToStat` in
+  `tools/database/dbc/maps.go` has no case for it. Routing weapon damage
+  through index 41 would double-count against presets that weight both.
+- **Formula, copied exactly** from `ui/core/proto_utils/equipped_item.ts`
+  `getWeaponDPS`: `(weaponDamageMin + weaponDamageMax) / 2 / weaponSpeed`.
+- **It is slot-dependent upstream** (MH/OH/Ranged are separate pseudo-stats
+  with separate weights). Our `weapon` slot is two-handers only, so main-hand
+  is the only applicable one; `ep_score` applies it only for `slot == "weapon"`.
+- Confirmed `weapon_damage_min/max` are siblings of the `stats` map in
+  `ScalingItemProperties` (`proto/common.proto`), never inside it — so the
+  original diagnosis was right about the mechanism.
+
+`PseudoStatMainHandDps = 0` verified against the committed
+`data/proto/common.proto`, not just the clone.
+
+### Result
+
+`pseudoWeights` is a new sibling key in `p2.ep-weights.json`. Every existing
+consumer reads `.weights` (the stat record) and is untouched — checked
+`cli.ts:191` and the five tests. That is deliberate: gems grant no weapon
+damage, so the gem/sim path must not pick this term up.
+
+Regenerated both universes. **Membership is unchanged** — 230 (p2) and 354
+(p3), identical id sets, and *only* `curationHint` on the 10/17 weapon rows
+differs. The pinned counts in `pool.test.ts` and `pool-hardening.test.ts`
+stay valid.
+
+P3 weapon ordering, before → after:
+
+| was | now | wdps | name |
+|---:|---:|---:|---|
+| 0.00 (17th) | 639.36 | 119.7 | Glaive of the Pit |
+| 108.50 (6th) | 845.42 (1st) | 138.0 | Cataclysm's Edge |
+| 73.59 | 770.01 | 130.4 | Twinblade of the Phoenix |
+| 138.76 | 835.07 | 130.4 | Torch of the Damned |
+
+Torch and Twinblade swing identically and now score within 8% of each other
+(was 138.76 vs 73.59).
+
+### `weapon` stays out of `SLOTS_WITH_EP_SIGNAL`
+
+Measured rather than assumed. The EP-floor rule drops the bottom 10% *within
+a slot*, which presumes the bottom is junk. Across the 17 P3 two-handers the
+corrected scores span 639–845 — a 1.3x spread — so re-enabling it would evict
+**Glaive of the Pit and Despair**, at 114–120 weapon dps. The comment at
+`SLOTS_WITH_EP_SIGNAL` now records this instead of the old blind-spot reason.
+
+### Sockets — still open, deliberately
+
+`ep_score` still ignores `gemSockets`; Glaive and Hammer of the Naaru have
+three each. Not folded in here because a per-socket estimate is a magnitude
+this ticket has no measurement for, and handoff ground-rule 4 says not to
+encode magnitudes that cannot be defended. It is the remaining half of the
+"lower priority" item in the original text.
+
+### Tests
+
+Three in `pool-hardening.test.ts`, asserting the *ordering* property rather
+than magnitudes so regeneration under different weights does not re-pin them:
+every weapon scores above zero; the lowest-scoring weapon is within 20% of
+the best weapon dps; and hint-order vs dps-order has Spearman > 0.5.
+
+Mutation-checked — disabling the weapon term and regenerating fails with
+`28774 Glaive of the Pit: expected 0 to be greater than 0`.
 
 ## Notes
 

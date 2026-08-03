@@ -127,16 +127,18 @@ CLASS_PALADIN = 2
 ITEM_SOURCE_KINDS = frozenset(
     {"raid", "token", "badge", "crafted", "rep", "heroic", "pvp", "world"}
 )
+# common.proto PseudoStat enum: PseudoStatMainHandDps = 0. A separate index
+# space from the Stat enum -- upstream weights both, and they are unrelated
+# quantities (Stat 41 PhysicalDamage is a flat per-hit bonus from gems and
+# enchants, never weapon damage).
+PSEUDO_MAIN_HAND_DPS = 0
 CASTER_ONLY_STATS = frozenset({3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
 MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
-# `weapon` is deliberately absent. ep_score sums stats*weights, and weapon
-# damage is not in the stats map (it is scalingOptions.0.weaponDamageMin/Max)
-# nor in the ret EP weights, so curationHint ranks two-handers blind to their
-# largest damage contribution. Glaive of the Pit scored 0.00 -- last of 17 --
-# on an empty stat map while swinging 119.7 weapon dps with three sockets.
-# Same blind spot the ranged/trinket exemptions below already work around
-# (librams have empty stat maps too). See
-# .scratch/carry-forward/issues/27-ep-score-blind-to-weapon-damage.md
+# `weapon` stays absent even though ep_score can now see weapon damage. The
+# rule drops the bottom 10% *within a slot*, which assumes the bottom is junk;
+# across 17 P3 two-handers the scores span only 639-845 (1.3x), so it would
+# evict Glaive of the Pit and Despair at 114-120 weapon dps. Sockets are still
+# unscored, and Glaive has three. Re-measure before adding `weapon` back.
 SLOTS_WITH_EP_SIGNAL = frozenset({"feet", "waist", "hands", "wrist"})
 
 
@@ -216,12 +218,46 @@ def item_stats(it: dict) -> list[float]:
     return [float(x) for x in arr]
 
 
-def ep_score(stats: list[float], weights: dict[str, float]) -> float:
+def weapon_dps(it: dict) -> float:
+    """Average weapon damage per second, upstream's formula.
+
+    ui/core/proto_utils/equipped_item.ts getWeaponDPS:
+    (weaponDamageMin + weaponDamageMax) / 2 / weaponSpeed. These live beside
+    the stats map in scalingOptions, never inside it, so ep_score cannot see
+    them without this.
+    """
+    scaling = (it.get("scalingOptions") or {}).get("0") or {}
+    lo = float(scaling.get("weaponDamageMin") or 0.0)
+    hi = float(scaling.get("weaponDamageMax") or 0.0)
+    speed = float(it.get("weaponSpeed") or 0.0)
+    if speed <= 0 or (lo <= 0 and hi <= 0):
+        return 0.0
+    return (lo + hi) / 2 / speed
+
+
+def ep_score(
+    stats: list[float],
+    weights: dict[str, float],
+    *,
+    item: dict | None = None,
+    slot: str | None = None,
+    pseudo_weights: dict[str, float] | None = None,
+) -> float:
     total = 0.0
     for k, w in weights.items():
         i = int(k)
         if i < len(stats):
             total += stats[i] * w
+    # Weapon damage is the dominant term for a ret two-hander (seals,
+    # judgements and Crusader Strike all scale off it) but is not a stat, so
+    # a weapon scored on its stat line alone ranks near-arbitrarily -- Glaive
+    # of the Pit scored 0.00, last of 17, on an empty stat map. Upstream
+    # carries this as PseudoStatMainHandDps, weighted separately from the
+    # stats array; ret's P2 preset prices it at 5.34.
+    if item is not None and slot == "weapon" and pseudo_weights:
+        mh = pseudo_weights.get(str(PSEUDO_MAIN_HAND_DPS))
+        if mh:
+            total += weapon_dps(item) * mh
     return total
 
 
@@ -428,6 +464,8 @@ def assemble(
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
     assert isinstance(w, dict)
+    pw = weights_raw.get("pseudoWeights") or {}
+    assert isinstance(pw, dict)
 
     zones_by_id = {
         int(z["id"]): str(z["name"])
@@ -565,7 +603,9 @@ def assemble(
             "quality": it.get("quality"),
             "phase": it.get("phase"),
             "sources": sources,
-            "curationHint": round(ep_score(stats, w), 3),
+            "curationHint": round(
+                ep_score(stats, w, item=it, slot=slot, pseudo_weights=pw), 3
+            ),
         }
         if iid in bis_ids:
             entry["bisTags"] = ["BiS"]

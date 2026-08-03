@@ -3723,24 +3723,7 @@
           "via": "arena"
         }
       ],
-      "curationHint": 113.04
-    },
-    {
-      "itemId": 28773,
-      "name": "Gorehowl",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
-        }
-      ],
-      "curationHint": 81.25
+      "curationHint": 790.923
     },
     {
       "itemId": 29993,
@@ -3757,28 +3740,11 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "curationHint": 73.59
+      "curationHint": 770.015
     },
     {
-      "itemId": 30722,
-      "name": "Ethereum Nexus-Reaver",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "boss": "Doomwalker",
-          "kind": "raid",
-          "zone": "World Bosses"
-        }
-      ],
-      "curationHint": 73.1
-    },
-    {
-      "itemId": 28587,
-      "name": "Legacy",
+      "itemId": 28773,
+      "name": "Gorehowl",
       "slot": "weapon",
       "armorType": null,
       "handType": 4,
@@ -3788,44 +3754,10 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "Prince Malchezaar"
         }
       ],
-      "curationHint": 62.8
-    },
-    {
-      "itemId": 28573,
-      "name": "Despair",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Romulo and Julianne"
-        }
-      ],
-      "curationHint": 52.0
-    },
-    {
-      "itemId": 28794,
-      "name": "Axe of the Gronn Lords",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
-        }
-      ],
-      "curationHint": 50.84
+      "curationHint": 721.308
     },
     {
       "itemId": 30090,
@@ -3842,7 +3774,41 @@
           "boss": "Fathom-Lord Karathress"
         }
       ],
-      "curationHint": 50.0
+      "curationHint": 720.386
+    },
+    {
+      "itemId": 30722,
+      "name": "Ethereum Nexus-Reaver",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses"
+        }
+      ],
+      "curationHint": 697.303
+    },
+    {
+      "itemId": 28794,
+      "name": "Axe of the Gronn Lords",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "Gruul the Dragonkiller"
+        }
+      ],
+      "curationHint": 690.898
     },
     {
       "itemId": 28800,
@@ -3859,7 +3825,41 @@
           "boss": "High King Maulgar"
         }
       ],
-      "curationHint": 44.0
+      "curationHint": 684.058
+    },
+    {
+      "itemId": 28587,
+      "name": "Legacy",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Wizard of Oz"
+        }
+      ],
+      "curationHint": 671.56
+    },
+    {
+      "itemId": 28573,
+      "name": "Despair",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Romulo and Julianne"
+        }
+      ],
+      "curationHint": 660.76
     },
     {
       "itemId": 28774,
@@ -3876,7 +3876,7 @@
           "boss": "Magtheridon"
         }
       ],
-      "curationHint": 0.0
+      "curationHint": 639.357
     },
     {
       "itemId": 30057,

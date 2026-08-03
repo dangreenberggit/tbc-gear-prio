@@ -29,6 +29,11 @@ type WowsimsDbItem = {
   rangedWeaponType?: number;
   weaponType?: number;
   phase?: number;
+  weaponSpeed?: number;
+  scalingOptions?: Record<
+    string,
+    { weaponDamageMin?: number; weaponDamageMax?: number }
+  >;
 };
 
 type WowsimsDb = { items?: WowsimsDbItem[] };
@@ -421,4 +426,66 @@ describe("data/universes/ret-p3.json hardening", () => {
       expect(fromDb).toEqual(fromTwoHop);
     }
   );
+
+  // Weapon damage is the dominant ret term and is not a stat, so a
+  // curationHint blind to it ranked two-handers near-arbitrarily -- Glaive of
+  // the Pit scored 0.00, last of 17, on an empty stat map while swinging
+  // 119.7 dps. Assert the ordering property rather than a magnitude, so
+  // regenerating with different weights does not re-pin this test.
+  describe("curationHint values weapon damage (issue 27)", () => {
+    const weaponDps = (it: WowsimsDbItem): number => {
+      const scaling = it.scalingOptions?.["0"];
+      const lo = scaling?.weaponDamageMin ?? 0;
+      const hi = scaling?.weaponDamageMax ?? 0;
+      const speed = it.weaponSpeed ?? 0;
+      return speed > 0 ? (lo + hi) / 2 / speed : 0;
+    };
+
+    const weapons = () =>
+      raw.entries
+        .filter((e) => e.slot === "weapon")
+        .map((e) => ({
+          ...e,
+          dps: weaponDps(byId.get(e.itemId)!),
+          hint: e.curationHint ?? 0,
+        }));
+
+    it.skipIf(!hasWowsimsVendor)("scores every weapon above zero", () => {
+      for (const w of weapons()) {
+        expect(w.hint, `${w.itemId} ${w.name}`).toBeGreaterThan(0);
+      }
+    });
+
+    it.skipIf(!hasWowsimsVendor)(
+      "does not rank a competitive weapon last on an empty stat line",
+      () => {
+        const ranked = weapons().sort((a, b) => a.hint - b.hint);
+        const worst = ranked[0]!;
+        const best = ranked[ranked.length - 1]!;
+        // Glaive of the Pit is within 15% of the best weapon dps in the P3
+        // field, so nothing about its swing justifies scoring last.
+        expect(worst.dps).toBeGreaterThan(best.dps * 0.8);
+      }
+    );
+
+    it.skipIf(!hasWowsimsVendor)(
+      "orders weapons broadly by what they swing",
+      () => {
+        const ws = weapons();
+        const byHint = [...ws].sort((a, b) => b.hint - a.hint);
+        const byDps = [...ws].sort((a, b) => b.dps - a.dps);
+        // Rank correlation, not identity: stats legitimately reorder
+        // neighbours. Before the fix this was strongly negative.
+        const rankOf = new Map(byDps.map((w, i) => [w.itemId, i]));
+        const n = ws.length;
+        let d2 = 0;
+        byHint.forEach((w, i) => {
+          const d = i - rankOf.get(w.itemId)!;
+          d2 += d * d;
+        });
+        const spearman = 1 - (6 * d2) / (n * (n * n - 1));
+        expect(spearman).toBeGreaterThan(0.5);
+      }
+    );
+  });
 });
