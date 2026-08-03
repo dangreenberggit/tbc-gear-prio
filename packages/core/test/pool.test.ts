@@ -2,14 +2,17 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import type { ItemSlot } from "../src/items.js";
 import {
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
   poolFromUniverse,
+  simSlotsForPoolSlot,
   zonesInPool,
   type PoolEntry,
 } from "../src/pool.js";
+import { SIM_ORDER } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -81,6 +84,45 @@ describe("filterPoolByPhase", () => {
     expect(atTwo.some((e) => e.itemId === chokerOfVileIntent)).toBe(true);
     expect(atOne.some((e) => e.itemId === bloodseaBrigandsVest)).toBe(false);
     expect(atTwo.some((e) => e.itemId === bloodseaBrigandsVest)).toBe(true);
+  });
+});
+
+describe("simSlotsForPoolSlot", () => {
+  it("maps every ItemSlot onto slots the sim actually has", () => {
+    // rank.ts looks each name up with SIM_ORDER.indexOf. A name that is not
+    // there used to `continue`, dropping the candidate from the ranking with
+    // no error and no substitution row — an item silently missing from the
+    // shortlist. rank.ts now throws instead; this pins that the throw is
+    // unreachable, which is the part that actually protects the ranking.
+    const allSlots: ItemSlot[] = [
+      "head",
+      "neck",
+      "shoulder",
+      "back",
+      "chest",
+      "wrist",
+      "hands",
+      "waist",
+      "legs",
+      "feet",
+      "finger",
+      "trinket",
+      "weapon",
+      "ranged",
+    ];
+    for (const slot of allSlots) {
+      const names = simSlotsForPoolSlot(slot);
+      expect(names.length, `${slot} maps to nothing`).toBeGreaterThan(0);
+      for (const name of names) {
+        expect(SIM_ORDER, `${slot} -> ${name}`).toContain(name);
+      }
+    }
+  });
+
+  it("sends paired slots to both positions and two-handers to mainhand", () => {
+    expect(simSlotsForPoolSlot("finger")).toEqual(["finger1", "finger2"]);
+    expect(simSlotsForPoolSlot("trinket")).toEqual(["trinket1", "trinket2"]);
+    expect(simSlotsForPoolSlot("weapon")).toEqual(["mainhand"]);
   });
 });
 

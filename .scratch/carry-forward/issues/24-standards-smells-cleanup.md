@@ -66,12 +66,35 @@ declared independently in `candidate-gems.ts`
 `readonly number[]`) — same concept, two definitions. Wants one `GemContext`
 type and one shared `EpWeights`.
 
-## Slot names as bare strings
+## Slot names as bare strings — PARTLY RESOLVED 2026-07-30
 
 `SIM_ORDER`, `simSlotsForPoolSlot(): readonly string[]` and `LoggedItem.slot`
 use `string` while `ItemSlot` is a proper union next door. The cost is real:
 `SIM_ORDER.indexOf(slotName)` returns `-1` on a typo and the guarded `continue`
 silently drops the candidate rather than failing loudly.
+
+**The silent drop is fixed** (`rank.ts`): the `continue` is now a throw naming
+the slot, the mapped name and the item. An unmapped slot was never a fact about
+the character's gear — it means `simSlotsForPoolSlot` and `slots-table.json`
+disagree, i.e. a table bug — so failing loudly is right.
+
+`pool.test.ts` now pins the invariant that makes the throw unreachable: all 14
+`ItemSlot` values map onto names present in `SIM_ORDER`, plus the paired-slot
+and two-hander cases. Nothing tested the mapping before, which is how the trap
+survived. Mutation-checked: changing `weapon -> ["mainhand"]` to `["twohand"]`
+fails with `weapon -> twohand: expected [...] to include 'twohand'`. Note
+`rank.test.ts` does **not** catch that mutation — its fixtures carry no weapon
+candidate — which is why the mapping needed its own test.
+
+**Still open:** the typing half. `simSlotsForPoolSlot` still returns
+`readonly string[]` rather than a union of sim slot names. Deriving one from
+the table (`(typeof SIM_ORDER)[number]`) does **not** work: `resolveJsonModule`
+widens JSON array elements to `string`, so the derived type accepts any string
+and would be decorative — verified by assigning `"not-a-real-slot"` to it and
+getting no error. A hand-written union would type-check but could drift from
+`slots-table.json`, which is worse than none. Would need the table emitted as a
+`.ts` const with `as const`, or a generated union — a codegen change, not a
+type annotation.
 
 ## Unused `Deps` breadth
 

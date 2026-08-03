@@ -239,7 +239,17 @@ export async function rankUpgrades(
     for (let s = 0; s < slotNames.length; s++) {
       const slotName = slotNames[s]!;
       const slotIndex = SIM_ORDER.indexOf(slotName);
-      if (slotIndex < 0) continue;
+      // `continue` here would drop the candidate from the ranking silently —
+      // the item just never appears, with no error and no substitution row.
+      // Every ItemSlot resolves today, so reaching this means the mapping in
+      // simSlotsForPoolSlot and slots-table.json disagree, which is a bug in
+      // the table rather than anything about this character's gear.
+      if (slotIndex < 0) {
+        throw new Error(
+          `slot mapping bug: ${entry.slot} -> ${slotName} is not in SIM_ORDER ` +
+            `(item ${entry.itemId} ${entry.name})`
+        );
+      }
       const swapped = equipmentForCandidateSwap(
         equipment,
         slotIndex,
