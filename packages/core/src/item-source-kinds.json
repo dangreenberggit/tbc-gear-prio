@@ -1,0 +1,13 @@
+{
+  "note": "Discriminants of the ItemSource union in pool.ts. Shared because assemble_universe.py validates every emitted source against this list and pool-hardening.test.ts pins the shipped artifact against it \u2014 a kind Python emits that TypeScript cannot parse is a build failure, not a runtime surprise. The per-kind field shapes live in pool.ts; only the kind names are shared.",
+  "kinds": [
+    "raid",
+    "token",
+    "badge",
+    "crafted",
+    "rep",
+    "heroic",
+    "pvp",
+    "world"
+  ]
+}

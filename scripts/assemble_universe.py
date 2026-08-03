@@ -154,10 +154,13 @@ REP_RE = re.compile(
 # is sufficient reason.)
 # common.proto Class enum: ClassPaladin = 2.
 CLASS_PALADIN = 2
-# Mirrors the ItemSource union in packages/core/src/pool.ts. A kind this file
-# emits but that file cannot parse is a build failure, not a runtime surprise.
+# Shared with the ItemSource union in packages/core/src/pool.ts, which imports
+# the same file. A kind this script emits but that module cannot parse is a
+# build failure, not a runtime surprise — so the list is loaded rather than
+# retyped. pool.test.ts pins the JSON against the union.
+ITEM_SOURCE_KINDS_JSON = ROOT / "packages/core/src/item-source-kinds.json"
 ITEM_SOURCE_KINDS = frozenset(
-    {"raid", "token", "badge", "crafted", "rep", "heroic", "pvp", "world"}
+    json.loads(ITEM_SOURCE_KINDS_JSON.read_text(encoding="utf-8"))["kinds"]
 )
 # common.proto PseudoStat enum: PseudoStatMainHandDps = 0. A separate index
 # space from the Stat enum -- upstream weights both, and they are unrelated

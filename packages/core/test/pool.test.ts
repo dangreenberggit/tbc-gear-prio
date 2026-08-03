@@ -7,9 +7,11 @@ import {
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
+  ITEM_SOURCE_KINDS,
   poolFromUniverse,
   simSlotsForPoolSlot,
   zonesInPool,
+  type ItemSourceKind,
   type PoolEntry,
 } from "../src/pool.js";
 import { SIM_ORDER } from "../src/slots.js";
@@ -227,6 +229,40 @@ describe("poolFromUniverse", () => {
       ],
     });
     expect(entries[0]!.curationHint).toBe(42);
+  });
+});
+
+describe("item-source-kinds.json", () => {
+  // The shared list crosses a language boundary: assemble_universe.py
+  // validates every emitted source against it and refuses the build on an
+  // unknown kind. If it drifts from the ItemSource union, Python happily
+  // writes a row TypeScript cannot discriminate.
+  //
+  // This is a runtime check on purpose. resolveJsonModule widens
+  // `kinds` to string[], so a type-level `extends` assertion against it
+  // passes vacuously — the trap ticket 24 already recorded once.
+  it("matches the ItemSource union exactly", () => {
+    // Exhaustive by construction: this object is typed by the union, so
+    // adding a variant to ItemSource without adding it here fails typecheck,
+    // and the assertion below then catches a JSON that was not updated too.
+    const everyUnionKind: Record<ItemSourceKind, true> = {
+      raid: true,
+      token: true,
+      badge: true,
+      crafted: true,
+      rep: true,
+      heroic: true,
+      pvp: true,
+      world: true,
+    };
+    expect([...ITEM_SOURCE_KINDS].sort()).toEqual(
+      Object.keys(everyUnionKind).sort()
+    );
+  });
+
+  it("is the list assemble_universe.py validates against", () => {
+    const py = readFileSync(join(root, "scripts/assemble_universe.py"), "utf8");
+    expect(py).toContain("item-source-kinds.json");
   });
 });
 

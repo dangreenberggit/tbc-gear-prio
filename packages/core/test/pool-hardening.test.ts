@@ -12,6 +12,7 @@ import {
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
+  ITEM_SOURCE_KINDS,
   poolFromUniverse,
   type PoolEntry,
   type UniverseEntry,
@@ -227,21 +228,12 @@ describe("data/universes/ret-p3.json hardening", () => {
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
     // build on both (PLAN.md §8.3.2); this pins the shipped artifact.
-    const ITEM_SOURCE_KINDS = new Set([
-      "raid",
-      "token",
-      "badge",
-      "crafted",
-      "rep",
-      "heroic",
-      "pvp",
-      "world",
-    ]);
+    const knownKinds = new Set<string>(ITEM_SOURCE_KINDS);
     for (const e of raw.entries) {
       expect(e.sources.length, `${e.itemId} ${e.name}`).toBeGreaterThan(0);
       for (const [i, s] of e.sources.entries()) {
         expect(
-          ITEM_SOURCE_KINDS.has(s.kind),
+          knownKinds.has(s.kind),
           `${e.itemId} ${e.name} sources[${i}] kind ${String(s.kind)}`
         ).toBe(true);
       }

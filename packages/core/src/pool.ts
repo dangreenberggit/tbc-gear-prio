@@ -5,6 +5,15 @@
 
 import type { ItemSlot } from "./items.js";
 
+import itemSourceKinds from "./item-source-kinds.json" with { type: "json" };
+
+/**
+ * The discriminants only — `assemble_universe.py` validates against the same
+ * JSON, so the list cannot drift across the language boundary. The per-kind
+ * field shapes stay in the `ItemSource` union below, which JSON cannot express.
+ */
+export const ITEM_SOURCE_KINDS: readonly string[] = itemSourceKinds.kinds;
+
 export type ItemSource =
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "token"; zone: string; boss?: string; token: string }
@@ -24,6 +33,15 @@ export type ItemSource =
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
   | { kind: "world" };
+
+/**
+ * The union is the source of truth for *shape*; the JSON is what crosses the
+ * language boundary. Keeping them in step is a runtime check in
+ * `pool.test.ts`, deliberately not a type-level one: `resolveJsonModule`
+ * widens `itemSourceKinds.kinds` to `string[]`, so any `extends` assertion
+ * against it passes vacuously and would assert nothing while looking rigorous.
+ */
+export type ItemSourceKind = ItemSource["kind"];
 
 export type PoolEntry = {
   itemId: number;
