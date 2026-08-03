@@ -513,7 +513,7 @@ Generate-then-curate:
 
 **[R11] Equippability cannot come from `classAllowlist`** — it is empty on essentially all items in the database. Step 1's "every equippable item" must derive equippability from **armor type + weapon type**. For ret specifically: plate, and paladins cannot use staves. While paladins can train polearms, ret polearms are excluded from the pool as a deliberate *product* choice — there are no ret-itemized polearms worth ranking in TBC; the ones that exist are hunter/druid stat sticks. A naive "two-handed weapon" filter happily includes both and puts a hunter polearm at the top of the shortlist.
 
-BiS tags are imported from **wowsims' own curated gear sets** (`ui/<class>/<spec>/gear_sets/*.gear.json`, which carry `BiS` / `Alt` / `Realistic` variants), spot-checked against current community lists before they're allowed on screen (2021–22 lists go stale), and used only for display and tiebreaks. **They must degrade to empty rather than block a ranking:** ret's curated sets in `tbc-new` stop at P2, so there is no tag source above `maxPhase: 2` yet. (The older `wowsims/tbc` repo has complete P1–P5 sets for all sixteen specs, but they are four years old and encode 2021-era understanding — a starting point, not truth. And see R14/§16 on its enchant ID scheme before borrowing anything from it.)
+BiS tags are imported from **wowsims' own curated gear sets** (`ui/<class>/<spec>/gear_sets/*.gear.json`, which carry `BiS` / `Alt` / `Realistic` variants), spot-checked against current community lists before they're allowed on screen (2021–22 lists go stale), and used only for display and tiebreaks. **They must degrade to empty rather than block a ranking:** ret's curated sets in `tbc-new` stop at P2, so there is no tag source above `maxPhase: 2` yet. (The older `wowsims/tbc` repo has complete P1–P5 sets for all sixteen specs, but they are four years old and encode 2021-era understanding — a starting point, not truth. And see R14/§17 on its enchant ID scheme before borrowing anything from it.)
 
 #### 8.3.1 Why `source` is the one field we cannot derive
 
@@ -575,7 +575,7 @@ That's My BiS is **not** a data source here and is never read from. It has no pu
 
 ### 8.4 The 19 → 17 slot reconciliation is a mapping table, not a filter
 
-Phase 0 logged this as "slot-count reconciliation … a manual TODO" (§17). It is less open than it looks, and more dangerous. WoW's equipment array is 19 entries, 0-indexed:
+Phase 0 logged this as "slot-count reconciliation … a manual TODO" (§18). It is less open than it looks, and more dangerous. WoW's equipment array is 19 entries, 0-indexed:
 
 ```
  0 head    1 neck     2 shoulder   3 SHIRT     4 chest     5 waist    6 legs
@@ -875,7 +875,87 @@ Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guil
 
 ---
 
-## 16. ADRs to write on approval
+## 16. Open plans — learning from wowsims' web app
+
+Three findings from an audit of `wowsims/tbc-new` beyond `wowsimcli` (the `ui/`,
+`sim/wasm/` and `tools/` trees). Each has a standalone plan file under
+`docs/plans/`. All three are **proposals** — nothing in them is implemented, and
+each specifies edits to this document that have **not** been applied. Where a
+plan contradicts a section below, the plan is the newer thinking and this
+section is the pointer; the contradiction is called out per row.
+
+| Plan | Finding | Sections it would amend |
+|---|---|---|
+| [`docs/plans/compute-topology.md`](docs/plans/compute-topology.md) | Upstream compiles the *same* Go sim to WebAssembly (`sim/wasm/main.go`) and runs it in the browser, with an HTTP sim server as an alternate backend behind one worker interface. §1.1's "needs process spawn and multiple cores" is an artifact of choosing the **CLI adapter**, not a constraint | §1.1 (Runtime row), §5.3, §7, §13 |
+| [`docs/plans/upstream-data-redundancy.md`](docs/plans/upstream-data-redundancy.md) | `db.json` already carries `phase` on all 8257 items and 7 encounter presets we ignore. Our zone→phase derivation duplicates upstream and is *less* complete | §8.3, §8.5, §14 (boss filter) |
+| [`docs/plans/ep-weights-from-sim.md`](docs/plans/ep-weights-from-sim.md) | A `StatWeights` RPC exists in the proto but is **unreachable** through the pinned CLI. Our static EP file is a **lossy** transcription of upstream's preset | §9, §8.3.3 |
+
+**First, the thing that makes the rest legible: there is one simulator, not
+three.** The engine is the Go source under `sim/`. Upstream compiles it three
+ways, and each is a shell around identical combat code:
+
+| Build | Entry point | Used by |
+|---|---|---|
+| CLI binary | `cmd/wowsimcli/` | **us, today** — `CliSimRunner` spawns it per candidate |
+| WASM | `sim/wasm/main.go` | wowsims' site, in the visitor's browser |
+| HTTP server | same sim, served | wowsims' `net_worker.ts` / `local_worker.ts` fallback |
+
+So this is **not** "CLI versus WASM" — it is one engine behind three doors, and
+`sim/wasm/main.go` is a thin glue layer hanging the same functions off JS
+globals. Two consequences that are easy to get backwards:
+
+- **The CLI is a real dependency, not prototyping scaffolding.** Every DPS number
+  we ship comes out of it. It stays useful for server-side runs, batch jobs and
+  CI fixtures even after a browser adapter exists. A `WasmSimRunner` is an
+  *additional* adapter; read "replaces" in the topology plan as "replaces **for
+  the client bundle**", not "retires".
+- **What leaked into §1.1 is a fact about the CLI wrapper, not the simulator.**
+  "Needs process spawn and multiple cores" describes the adapter we happened to
+  pick first. The WASM build is the disproof.
+
+**Then the three things worth knowing without opening a file:**
+
+1. **The `SimRunner` seam holds.** §5.3's port has no `fs`, `spawn`, or path
+   vocabulary in its signature, so a `WasmSimRunner` is a *third adapter*, not a
+   replan. Three leaks to fix: `simCacheKey` imports `node:crypto` in the **port**
+   file (moving to `SubtleCrypto` makes it async and ripples to every caller),
+   there is no `AbortSignal`, and `CliSimRunner.run()` re-spawns `version()` per
+   candidate. What actually pins us to a server is **WCL credentials, not the
+   sim** — so the target is hybrid, not "everything client-side."
+
+2. **§5.3's `SIM_CONCURRENCY` default is wrong and must not be implemented as
+   written.** `wowsimcli sim` already calls `RunRaidSimConcurrentAsync` and splits
+   on `runtime.NumCPU()`, so one invocation saturates every core. The promised
+   `cores - 1` *processes* would oversubscribe ~20×. The real bottleneck is the
+   serial `for` loop at `packages/core/src/rank.ts:258`; correct concurrency is
+   2–4, and it must be measured before it is set. This is the cheap near-term win
+   and it is **not** a topology change — it does not block on plan 1.
+
+3. **`data/presets/ret/p2.ep-weights.json` is missing its largest term.**
+   Upstream's `P2_EP_PRESET` passes a *second* map to `Stats.fromMap` carrying
+   `PseudoStatMainHandDps: 5.34`; we transcribed only the nine `Stat` entries.
+   Verify with:
+
+   ```bash
+   gh api "repos/wowsims/tbc-new/contents/ui/paladin/retribution/presets.ts?ref=8aa378b3671a0923fd11fb34b4b3753e53f20c9b" --jq '.content' | base64 -d | sed -n '62,80p'
+   ```
+
+   Blast radius is bounded and should not be overstated: EP does **not** enter the
+   headline deltas (those are simmed at `rank.ts:210`/`:258` and differenced at
+   `:272`). It enters gem fill, meta-repair cost, and `curationHint` pool
+   membership for four slots — so bad EP yields under-gemmed candidates that then
+   sim honestly-but-low, plus a biased baseline. Serious, not fabricated numbers.
+
+**Cross-cutting caveat.** Sim output is **not** bit-reproducible across core
+counts: shard seeds derive from a split on `runtime.NumCPU()`. Measured spread at
+20/4/2 cores was ~1.4e-12 DPS — ~12 orders of magnitude under the 3.4 DPS cutoff
+(§10), so §2's reproducibility claim survives *numerically* but not as
+byte-equality. Live-binary float assertions need `toBeCloseTo`. **WASM-vs-native
+agreement is untested** and is a gate on plan 1.
+
+---
+
+## 17. ADRs to write on approval
 
 Decisions here that a future architecture review must not re-litigate:
 
@@ -897,11 +977,11 @@ Decisions here that a future architecture review must not re-litigate:
 
 ---
 
-## 17. Still open for you
+## 18. Still open for you
 
 - **Content hash `engineVersion` bumps** — manual, or derived from a hash of `packages/core/src`? Manual is simpler and lets you decide what's a semantic change; derived is safer and noisier. I'd go manual with a CI reminder on `stages/**` changes.
 - **Fixture character** — ~~Phase 0 needs one~~ **[P0] Have two**: `slamaltman` (paladin) and `shredzepelin` (warrior), both Dreamscythe-US, both Hydross in SSC/TK. Still wanted: one with an *inactive* meta so the solver has something to repair on day one, and a **third sample on a different encounter/tier** — both probe runs landed on the same fight, so slot-eligibility logic is verified broadly but not across content.
-- **`data/` in git** — presets and pools are small and diffable, so yes. **[P0] The item-DB line was wrong**: `wowsimcli` has three subcommands (`sim`, `decodelink`, `version`) and no dump mode, so `--tags=with_db` gives the *simulator* item lookup and gives us nothing. `db.json` is a pinned **build input**; what we commit is the generated `data/items/index.json` (§5.1), not the DB itself. §17's intent survives, its mechanism doesn't.
+- **`data/` in git** — presets and pools are small and diffable, so yes. **[P0] The item-DB line was wrong**: `wowsimcli` has three subcommands (`sim`, `decodelink`, `version`) and no dump mode, so `--tags=with_db` gives the *simulator* item lookup and gives us nothing. `db.json` is a pinned **build input**; what we commit is the generated `data/items/index.json` (§5.1), not the DB itself. §18's intent survives, its mechanism doesn't.
 
 **[P0] Resolved since the last revision — no longer open:**
 
