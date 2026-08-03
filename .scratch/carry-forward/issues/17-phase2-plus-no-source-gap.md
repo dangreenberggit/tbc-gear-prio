@@ -99,7 +99,10 @@ These are not marginal. Measured from db.json:
 - **34472 Shard of Contempt** — `stats {24: 44}`, i.e. **44 expertise
   rating**, the second-heaviest term in the ret EP model at 2.14. Drops in
   Magisters' Terrace at `difficulty: 2` (heroic).
-- **34388 / 34392 / 34397** — ilvl **159**, two or three sockets each, on
+- **34388 / 34392 / 34397** — ilvl **159** each (the pre-merge domain review
+  claimed 154 for the first two; `scalingOptions.0.ilvl` in the pinned db.json
+  says 159 for all three — re-check before "correcting" this), two or three
+  sockets each, on
   plate/leather body slots. For comparison the shipped p5 universe's raid
   gear tops out around the same ilvl.
 - **34679 Shattered Sun Pendant of Might** — 64 AP, 18 Agi, a rep reward.

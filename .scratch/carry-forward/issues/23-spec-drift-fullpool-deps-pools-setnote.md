@@ -180,6 +180,14 @@ Pinned in `pool-file.test.ts`: every advertised tier ≥2 loads through
 Mutation-checked — deleting one p3 item from p4 fails with
 `p4 drops items p3 admitted: expected [ 32323 ] to deeply equal []`.
 
+**The tier now loads, but p5's contents are not yet right.** Shipping
+`ret-p5.json` made a defect reachable that did not exist before: five phase-5
+items the Wowhead ret list names — four BiS-labelled, including Shard of
+Contempt at 44 expertise — are absent because membership gates on raid zones.
+Tracked as `.scratch/carry-forward/issues/28-p5-bis-outside-raid-zones.md`.
+"Tier gap closed" here means the file exists and loads, not that a p5 run
+gives good advice.
+
 ## 5. `setBonusNote` is not explanatory (§14 gate)
 
 The gate asks for an *"explanatory `setBonusNote`"*. `setBreakNote` emits:

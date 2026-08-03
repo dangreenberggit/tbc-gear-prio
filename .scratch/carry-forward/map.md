@@ -41,3 +41,4 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
   universes, setBonusNote), 24 (standards smells). Appended a blocker to 18
   (CASTER_ONLY_STATS includes SpellDamage, which ret EP prices at 0.17).
   PLAN §14 box 8 amended from "at 1 and at 2" to "two maxPhase values".
+- 28 — p5 BiS items outside raid zones (Shard of Contempt et al); mechanism half-built, nothing emits a heroic source
