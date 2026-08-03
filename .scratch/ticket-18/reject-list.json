@@ -1,0 +1,1248 @@
+{
+ "casterOnly": [
+  {
+   "itemId": 30642,
+   "name": "Drape of the Righteous",
+   "slot": "back",
+   "deltaDps": -19.16,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Trash"
+   ]
+  },
+  {
+   "itemId": 32527,
+   "name": "Ring of Ancient Knowledge",
+   "slot": "finger",
+   "deltaDps": -20.46,
+   "sources": [
+    "raid:Black Temple/",
+    "raid:Black Temple/Trash"
+   ]
+  },
+  {
+   "itemId": 29992,
+   "name": "Royal Cloak of the Sunstriders",
+   "slot": "back",
+   "deltaDps": -21.48,
+   "sources": [
+    "raid:Tempest Keep/Kael'thas Sunstrider"
+   ]
+  },
+  {
+   "itemId": 32331,
+   "name": "Cloak of the Illidari Council",
+   "slot": "back",
+   "deltaDps": -21.99,
+   "sources": [
+    "raid:Black Temple/The Illidari Council"
+   ]
+  },
+  {
+   "itemId": 34012,
+   "name": "Shroud of the Final Stand",
+   "slot": "back",
+   "deltaDps": -22.3,
+   "sources": [
+    "raid:Black Temple/",
+    "raid:Black Temple/Trash"
+   ]
+  },
+  {
+   "itemId": 28570,
+   "name": "Shadow-Cloak of Dalaran",
+   "slot": "back",
+   "deltaDps": -22.7,
+   "sources": [
+    "raid:Karazhan/Moroes"
+   ]
+  },
+  {
+   "itemId": 30735,
+   "name": "Ancient Spellcloak of the Highborne",
+   "slot": "back",
+   "deltaDps": -22.77,
+   "sources": [
+    "raid:World Bosses/Doom Lord Kazzak"
+   ]
+  },
+  {
+   "itemId": 28765,
+   "name": "Stainless Cloak of the Pure Hearted",
+   "slot": "back",
+   "deltaDps": -22.9,
+   "sources": [
+    "raid:Karazhan/Prince Malchezaar"
+   ]
+  },
+  {
+   "itemId": 28582,
+   "name": "Red Riding Hood's Cloak",
+   "slot": "back",
+   "deltaDps": -23.19,
+   "sources": [
+    "raid:Karazhan/The Big Bad Wolf"
+   ]
+  },
+  {
+   "itemId": 28766,
+   "name": "Ruby Drape of the Mysticant",
+   "slot": "back",
+   "deltaDps": -23.5,
+   "sources": [
+    "raid:Karazhan/Prince Malchezaar"
+   ]
+  },
+  {
+   "itemId": 32337,
+   "name": "Shroud of Forgiveness",
+   "slot": "back",
+   "deltaDps": -23.62,
+   "sources": [
+    "raid:Black Temple/Gurtogg Bloodboil"
+   ]
+  },
+  {
+   "itemId": 29989,
+   "name": "Sunshower Light Cloak",
+   "slot": "back",
+   "deltaDps": -23.74,
+   "sources": [
+    "raid:Tempest Keep/Kael'thas Sunstrider"
+   ]
+  },
+  {
+   "itemId": 32528,
+   "name": "Blessed Band of Karabor",
+   "slot": "finger",
+   "deltaDps": -23.94,
+   "sources": [
+    "raid:Black Temple/",
+    "raid:Black Temple/Trash"
+   ]
+  },
+  {
+   "itemId": 28797,
+   "name": "Brute Cloak of the Ogre-Magi",
+   "slot": "back",
+   "deltaDps": -23.99,
+   "sources": [
+    "raid:Gruul's Lair/High King Maulgar"
+   ]
+  },
+  {
+   "itemId": 32524,
+   "name": "Shroud of the Highborne",
+   "slot": "back",
+   "deltaDps": -24.09,
+   "sources": [
+    "raid:Black Temple/Illidan Stormrage"
+   ]
+  },
+  {
+   "itemId": 28763,
+   "name": "Jade Ring of the Everliving",
+   "slot": "finger",
+   "deltaDps": -24.82,
+   "sources": [
+    "raid:Karazhan/Prince Malchezaar"
+   ]
+  },
+  {
+   "itemId": 32247,
+   "name": "Ring of Captured Storms",
+   "slot": "finger",
+   "deltaDps": -24.92,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 28653,
+   "name": "Shadowvine Cloak of Infusion",
+   "slot": "back",
+   "deltaDps": -25.26,
+   "sources": [
+    "raid:Karazhan/Terestian Illhoof"
+   ]
+  },
+  {
+   "itemId": 30109,
+   "name": "Ring of Endless Coils",
+   "slot": "finger",
+   "deltaDps": -25.49,
+   "sources": [
+    "raid:Serpentshrine Cavern/Lady Vashj"
+   ]
+  },
+  {
+   "itemId": 29922,
+   "name": "Band of Al'ar",
+   "slot": "finger",
+   "deltaDps": -25.51,
+   "sources": [
+    "raid:Tempest Keep/Al'ar"
+   ]
+  },
+  {
+   "itemId": 29920,
+   "name": "Phoenix-Ring of Rebirth",
+   "slot": "finger",
+   "deltaDps": -25.66,
+   "sources": [
+    "raid:Tempest Keep/Al'ar"
+   ]
+  },
+  {
+   "itemId": 28753,
+   "name": "Ring of Recurrence",
+   "slot": "finger",
+   "deltaDps": -26.37,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Chess Event"
+   ]
+  },
+  {
+   "itemId": 28510,
+   "name": "Spectral Band of Innervation",
+   "slot": "finger",
+   "deltaDps": -26.66,
+   "sources": [
+    "raid:Karazhan/Attumen the Huntsman"
+   ]
+  },
+  {
+   "itemId": 30110,
+   "name": "Coral Band of the Revived",
+   "slot": "finger",
+   "deltaDps": -26.81,
+   "sources": [
+    "raid:Serpentshrine Cavern/Lady Vashj"
+   ]
+  },
+  {
+   "itemId": 33054,
+   "name": "The Seal of Danzalar",
+   "slot": "finger",
+   "deltaDps": -27.16,
+   "sources": [
+    "raid:Serpentshrine Cavern/The Lurker Below"
+   ]
+  },
+  {
+   "itemId": 30736,
+   "name": "Ring of Flowing Light",
+   "slot": "finger",
+   "deltaDps": -27.27,
+   "sources": [
+    "raid:World Bosses/Doom Lord Kazzak"
+   ]
+  },
+  {
+   "itemId": 32238,
+   "name": "Ring of Calming Waves",
+   "slot": "finger",
+   "deltaDps": -27.83,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 32590,
+   "name": "Nethervoid Cloak",
+   "slot": "back",
+   "deltaDps": -27.86,
+   "sources": [
+    "raid:Hyjal Summit/",
+    "raid:Hyjal Summit/Trash"
+   ]
+  },
+  {
+   "itemId": 28661,
+   "name": "Mender's Heart-Ring",
+   "slot": "finger",
+   "deltaDps": -28.38,
+   "sources": [
+    "raid:Karazhan/Terestian Illhoof"
+   ]
+  },
+  {
+   "itemId": 33058,
+   "name": "Band of the Vigilant",
+   "slot": "finger",
+   "deltaDps": -28.61,
+   "sources": [
+    "raid:Serpentshrine Cavern/Morogrim Tidewalker"
+   ]
+  },
+  {
+   "itemId": 30667,
+   "name": "Ring of Unrelenting Storms",
+   "slot": "finger",
+   "deltaDps": -30.96,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Trash"
+   ]
+  },
+  {
+   "itemId": 32352,
+   "name": "Naturewarden's Treads",
+   "slot": "feet",
+   "deltaDps": -32.11,
+   "sources": [
+    "raid:Black Temple/Reliquary of the Lost"
+   ]
+  },
+  {
+   "itemId": 32349,
+   "name": "Translucent Spellthread Necklace",
+   "slot": "neck",
+   "deltaDps": -36.33,
+   "sources": [
+    "raid:Black Temple/Reliquary of the Lost"
+   ]
+  },
+  {
+   "itemId": 30737,
+   "name": "Gold-Leaf Wildboots",
+   "slot": "feet",
+   "deltaDps": -36.53,
+   "sources": [
+    "raid:World Bosses/Doom Lord Kazzak"
+   ]
+  },
+  {
+   "itemId": 32370,
+   "name": "Nadina's Pendant of Purity",
+   "slot": "neck",
+   "deltaDps": -36.53,
+   "sources": [
+    "raid:Black Temple/Mother Shahraz"
+   ]
+  },
+  {
+   "itemId": 32245,
+   "name": "Tide-stomper's Greaves",
+   "slot": "feet",
+   "deltaDps": -36.59,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 30092,
+   "name": "Orca-Hide Boots",
+   "slot": "feet",
+   "deltaDps": -37.1,
+   "sources": [
+    "raid:Serpentshrine Cavern/Leotheras the Blind"
+   ]
+  },
+  {
+   "itemId": 28609,
+   "name": "Emberspur Talisman",
+   "slot": "neck",
+   "deltaDps": -37.13,
+   "sources": [
+    "raid:Karazhan/Nightbane"
+   ]
+  },
+  {
+   "itemId": 30869,
+   "name": "Howling Wind Bracers",
+   "slot": "wrist",
+   "deltaDps": -37.59,
+   "sources": [
+    "raid:Hyjal Summit/Rage Winterchill"
+   ]
+  },
+  {
+   "itemId": 30008,
+   "name": "Pendant of the Lost Ages",
+   "slot": "neck",
+   "deltaDps": -37.67,
+   "sources": [
+    "raid:Serpentshrine Cavern/Morogrim Tidewalker"
+   ]
+  },
+  {
+   "itemId": 28822,
+   "name": "Teeth of Gruul",
+   "slot": "neck",
+   "deltaDps": -38.0,
+   "sources": [
+    "raid:Gruul's Lair/Gruul the Dragonkiller"
+   ]
+  },
+  {
+   "itemId": 28752,
+   "name": "Forestlord Striders",
+   "slot": "feet",
+   "deltaDps": -38.02,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Chess Event"
+   ]
+  },
+  {
+   "itemId": 32351,
+   "name": "Elunite Empowered Bracers",
+   "slot": "wrist",
+   "deltaDps": -38.64,
+   "sources": [
+    "raid:Black Temple/Reliquary of the Lost"
+   ]
+  },
+  {
+   "itemId": 30868,
+   "name": "Rejuvenating Bracers",
+   "slot": "wrist",
+   "deltaDps": -38.92,
+   "sources": [
+    "raid:Hyjal Summit/Rage Winterchill"
+   ]
+  },
+  {
+   "itemId": 28762,
+   "name": "Adornment of Stolen Souls",
+   "slot": "neck",
+   "deltaDps": -39.01,
+   "sources": [
+    "raid:Karazhan/Prince Malchezaar"
+   ]
+  },
+  {
+   "itemId": 28530,
+   "name": "Brooch of Unquenchable Fury",
+   "slot": "neck",
+   "deltaDps": -39.1,
+   "sources": [
+    "raid:Karazhan/Moroes"
+   ]
+  },
+  {
+   "itemId": 30047,
+   "name": "Blackfathom Warbands",
+   "slot": "wrist",
+   "deltaDps": -39.18,
+   "sources": [
+    "raid:Serpentshrine Cavern/Hydross the Unstable"
+   ]
+  },
+  {
+   "itemId": 30726,
+   "name": "Archaic Charm of Presence",
+   "slot": "neck",
+   "deltaDps": -39.23,
+   "sources": [
+    "raid:World Bosses/Doomwalker"
+   ]
+  },
+  {
+   "itemId": 30862,
+   "name": "Blessed Adamantite Bracers",
+   "slot": "wrist",
+   "deltaDps": -40.0,
+   "sources": [
+    "raid:Hyjal Summit/Rage Winterchill"
+   ]
+  },
+  {
+   "itemId": 28731,
+   "name": "Shining Chain of the Afterworld",
+   "slot": "neck",
+   "deltaDps": -40.23,
+   "sources": [
+    "raid:Karazhan/Netherspite"
+   ]
+  },
+  {
+   "itemId": 32259,
+   "name": "Bands of the Coming Storm",
+   "slot": "wrist",
+   "deltaDps": -40.91,
+   "sources": [
+    "raid:Black Temple/Supremus"
+   ]
+  },
+  {
+   "itemId": 28503,
+   "name": "Whirlwind Bracers",
+   "slot": "wrist",
+   "deltaDps": -41.03,
+   "sources": [
+    "raid:Karazhan/Attumen the Huntsman"
+   ]
+  },
+  {
+   "itemId": 28453,
+   "name": "Bracers of the White Stag",
+   "slot": "wrist",
+   "deltaDps": -41.61,
+   "sources": [
+    "raid:Karazhan/Attumen the Huntsman"
+   ]
+  },
+  {
+   "itemId": 30062,
+   "name": "Grove-Bands of Remulos",
+   "slot": "wrist",
+   "deltaDps": -41.97,
+   "sources": [
+    "raid:Serpentshrine Cavern/The Lurker Below"
+   ]
+  },
+  {
+   "itemId": 32279,
+   "name": "The Seeker's Wristguards",
+   "slot": "wrist",
+   "deltaDps": -42.39,
+   "sources": [
+    "raid:Black Temple/Shade of Akama"
+   ]
+  },
+  {
+   "itemId": 30666,
+   "name": "Ritssyn's Lost Pendant",
+   "slot": "neck",
+   "deltaDps": -42.77,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Trash"
+   ]
+  },
+  {
+   "itemId": 32589,
+   "name": "Hellfire-Encased Pendant",
+   "slot": "neck",
+   "deltaDps": -42.85,
+   "sources": [
+    "raid:Hyjal Summit/",
+    "raid:Hyjal Summit/Trash"
+   ]
+  },
+  {
+   "itemId": 30030,
+   "name": "Girdle of Fallen Stars",
+   "slot": "waist",
+   "deltaDps": -43.42,
+   "sources": [
+    "raid:Tempest Keep/",
+    "raid:Tempest Keep/Trash"
+   ]
+  },
+  {
+   "itemId": 28512,
+   "name": "Bracers of Justice",
+   "slot": "wrist",
+   "deltaDps": -43.44,
+   "sources": [
+    "raid:Karazhan/Maiden of Virtue"
+   ]
+  },
+  {
+   "itemId": 32342,
+   "name": "Girdle of Mighty Resolve",
+   "slot": "waist",
+   "deltaDps": -45.03,
+   "sources": [
+    "raid:Black Temple/Gurtogg Bloodboil"
+   ]
+  },
+  {
+   "itemId": 29984,
+   "name": "Girdle of Zaetar",
+   "slot": "waist",
+   "deltaDps": -45.45,
+   "sources": [
+    "raid:Tempest Keep/Void Reaver"
+   ]
+  },
+  {
+   "itemId": 30897,
+   "name": "Girdle of Hope",
+   "slot": "waist",
+   "deltaDps": -45.56,
+   "sources": [
+    "raid:Hyjal Summit/Azgalor"
+   ]
+  },
+  {
+   "itemId": 32328,
+   "name": "Botanist's Gloves of Growth",
+   "slot": "hands",
+   "deltaDps": -48.05,
+   "sources": [
+    "raid:Black Temple/Teron Gorefiend"
+   ]
+  },
+  {
+   "itemId": 32276,
+   "name": "Flashfire Girdle",
+   "slot": "waist",
+   "deltaDps": -48.54,
+   "sources": [
+    "raid:Black Temple/Shade of Akama"
+   ]
+  },
+  {
+   "itemId": 32242,
+   "name": "Boots of Oceanic Fury",
+   "slot": "feet",
+   "deltaDps": -50.1,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 32271,
+   "name": "Kilt of Immortal Nature",
+   "slot": "legs",
+   "deltaDps": -50.28,
+   "sources": [
+    "raid:Black Temple/Shade of Akama"
+   ]
+  },
+  {
+   "itemId": 30893,
+   "name": "Sun-touched Chain Leggings",
+   "slot": "legs",
+   "deltaDps": -50.4,
+   "sources": [
+    "raid:Hyjal Summit/Kaz'rogal"
+   ]
+  },
+  {
+   "itemId": 29991,
+   "name": "Sunhawk Leggings",
+   "slot": "legs",
+   "deltaDps": -50.91,
+   "sources": [
+    "raid:Tempest Keep/Kael'thas Sunstrider"
+   ]
+  },
+  {
+   "itemId": 32258,
+   "name": "Naturalist's Preserving Cinch",
+   "slot": "waist",
+   "deltaDps": -50.93,
+   "sources": [
+    "raid:Black Temple/Supremus"
+   ]
+  },
+  {
+   "itemId": 32339,
+   "name": "Belt of Primal Majesty",
+   "slot": "waist",
+   "deltaDps": -50.93,
+   "sources": [
+    "raid:Black Temple/Gurtogg Bloodboil"
+   ]
+  },
+  {
+   "itemId": 32243,
+   "name": "Pearl Inlaid Boots",
+   "slot": "feet",
+   "deltaDps": -51.28,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 29976,
+   "name": "Worldstorm Gauntlets",
+   "slot": "hands",
+   "deltaDps": -51.37,
+   "sources": [
+    "raid:Tempest Keep/High Astromancer Solarian"
+   ]
+  },
+  {
+   "itemId": 30873,
+   "name": "Stillwater Boots",
+   "slot": "feet",
+   "deltaDps": -51.42,
+   "sources": [
+    "raid:Hyjal Summit/Rage Winterchill"
+   ]
+  },
+  {
+   "itemId": 30914,
+   "name": "Belt of the Crescent Moon",
+   "slot": "waist",
+   "deltaDps": -51.58,
+   "sources": [
+    "raid:Hyjal Summit/Kaz'rogal"
+   ]
+  },
+  {
+   "itemId": 30112,
+   "name": "Glorious Gauntlets of Crestfall",
+   "slot": "hands",
+   "deltaDps": -52.2,
+   "sources": [
+    "raid:Serpentshrine Cavern/Lady Vashj"
+   ]
+  },
+  {
+   "itemId": 28810,
+   "name": "Windshear Boots",
+   "slot": "feet",
+   "deltaDps": -52.36,
+   "sources": [
+    "raid:Gruul's Lair/Gruul the Dragonkiller"
+   ]
+  },
+  {
+   "itemId": 28751,
+   "name": "Heart-Flame Leggings",
+   "slot": "legs",
+   "deltaDps": -52.53,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Chess Event"
+   ]
+  },
+  {
+   "itemId": 28591,
+   "name": "Earthsoul Leggings",
+   "slot": "legs",
+   "deltaDps": -52.6,
+   "sources": [
+    "raid:Karazhan/The Wizard of Oz",
+    "raid:Karazhan/The Big Bad Wolf"
+   ]
+  },
+  {
+   "itemId": 28505,
+   "name": "Gauntlets of Renewed Hope",
+   "slot": "hands",
+   "deltaDps": -52.65,
+   "sources": [
+    "raid:Karazhan/Attumen the Huntsman"
+   ]
+  },
+  {
+   "itemId": 28748,
+   "name": "Legplates of the Innocent",
+   "slot": "legs",
+   "deltaDps": -52.95,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Chess Event"
+   ]
+  },
+  {
+   "itemId": 28520,
+   "name": "Gloves of Centering",
+   "slot": "hands",
+   "deltaDps": -52.99,
+   "sources": [
+    "raid:Karazhan/Maiden of Virtue"
+   ]
+  },
+  {
+   "itemId": 32512,
+   "name": "Girdle of Lordaeron's Fallen",
+   "slot": "waist",
+   "deltaDps": -53.07,
+   "sources": [
+    "raid:Black Temple/Teron Gorefiend"
+   ]
+  },
+  {
+   "itemId": 28521,
+   "name": "Mitts of the Treemender",
+   "slot": "hands",
+   "deltaDps": -53.2,
+   "sources": [
+    "raid:Karazhan/Maiden of Virtue"
+   ]
+  },
+  {
+   "itemId": 30066,
+   "name": "Tempest-Strider Boots",
+   "slot": "feet",
+   "deltaDps": -53.31,
+   "sources": [
+    "raid:Serpentshrine Cavern/The Lurker Below"
+   ]
+  },
+  {
+   "itemId": 30886,
+   "name": "Enchanted Leather Sandals",
+   "slot": "feet",
+   "deltaDps": -53.35,
+   "sources": [
+    "raid:Hyjal Summit/Anetheron"
+   ]
+  },
+  {
+   "itemId": 30027,
+   "name": "Boots of Courage Unending",
+   "slot": "feet",
+   "deltaDps": -53.74,
+   "sources": [
+    "raid:Serpentshrine Cavern/",
+    "raid:Serpentshrine Cavern/Trash"
+   ]
+  },
+  {
+   "itemId": 28655,
+   "name": "Cord of Nature's Sustenance",
+   "slot": "waist",
+   "deltaDps": -54.57,
+   "sources": [
+    "raid:Karazhan/Terestian Illhoof"
+   ]
+  },
+  {
+   "itemId": 28733,
+   "name": "Girdle of Truth",
+   "slot": "waist",
+   "deltaDps": -54.69,
+   "sources": [
+    "raid:Karazhan/Netherspite"
+   ]
+  },
+  {
+   "itemId": 28567,
+   "name": "Belt of Gale Force",
+   "slot": "waist",
+   "deltaDps": -54.75,
+   "sources": [
+    "raid:Karazhan/Moroes"
+   ]
+  },
+  {
+   "itemId": 28569,
+   "name": "Boots of Valiance",
+   "slot": "feet",
+   "deltaDps": -55.31,
+   "sources": [
+    "raid:Karazhan/Moroes"
+   ]
+  },
+  {
+   "itemId": 30878,
+   "name": "Glimmering Steel Mantle",
+   "slot": "shoulder",
+   "deltaDps": -55.87,
+   "sources": [
+    "raid:Hyjal Summit/Anetheron"
+   ]
+  },
+  {
+   "itemId": 29965,
+   "name": "Girdle of the Righteous Path",
+   "slot": "waist",
+   "deltaDps": -56.37,
+   "sources": [
+    "raid:Tempest Keep/High Astromancer Solarian"
+   ]
+  },
+  {
+   "itemId": 30097,
+   "name": "Coral-Barbed Shoulderpads",
+   "slot": "shoulder",
+   "deltaDps": -56.4,
+   "sources": [
+    "raid:Serpentshrine Cavern/Leotheras the Blind"
+   ]
+  },
+  {
+   "itemId": 32241,
+   "name": "Helm of Soothing Currents",
+   "slot": "head",
+   "deltaDps": -60.05,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 32240,
+   "name": "Guise of the Tidal Lurker",
+   "slot": "head",
+   "deltaDps": -61.17,
+   "sources": [
+    "raid:Black Temple/High Warlord Naj'entus"
+   ]
+  },
+  {
+   "itemId": 32354,
+   "name": "Crown of Empowered Fate",
+   "slot": "head",
+   "deltaDps": -63.09,
+   "sources": [
+    "raid:Black Temple/Reliquary of the Lost"
+   ]
+  },
+  {
+   "itemId": 32275,
+   "name": "Spiritwalker Gauntlets",
+   "slot": "hands",
+   "deltaDps": -64.74,
+   "sources": [
+    "raid:Black Temple/Shade of Akama"
+   ]
+  },
+  {
+   "itemId": 30029,
+   "name": "Bark-Gloves of Ancient Wisdom",
+   "slot": "hands",
+   "deltaDps": -69.09,
+   "sources": [
+    "raid:Tempest Keep/",
+    "raid:Tempest Keep/Trash"
+   ]
+  },
+  {
+   "itemId": 32517,
+   "name": "The Wavemender's Mantle",
+   "slot": "shoulder",
+   "deltaDps": -69.72,
+   "sources": [
+    "raid:Black Temple/Reliquary of the Lost"
+   ]
+  },
+  {
+   "itemId": 30111,
+   "name": "Runetotem's Mantle",
+   "slot": "shoulder",
+   "deltaDps": -70.06,
+   "sources": [
+    "raid:Serpentshrine Cavern/Lady Vashj"
+   ]
+  },
+  {
+   "itemId": 32518,
+   "name": "Veil of Turning Leaves",
+   "slot": "shoulder",
+   "deltaDps": -70.78,
+   "sources": [
+    "raid:Black Temple/The Illidari Council"
+   ]
+  },
+  {
+   "itemId": 30084,
+   "name": "Pauldrons of the Argent Sentinel",
+   "slot": "shoulder",
+   "deltaDps": -71.55,
+   "sources": [
+    "raid:Serpentshrine Cavern/Morogrim Tidewalker"
+   ]
+  },
+  {
+   "itemId": 28647,
+   "name": "Forest Wind Shoulderpads",
+   "slot": "shoulder",
+   "deltaDps": -71.86,
+   "sources": [
+    "raid:Karazhan/The Curator"
+   ]
+  },
+  {
+   "itemId": 28631,
+   "name": "Dragon-Quake Shoulderguards",
+   "slot": "shoulder",
+   "deltaDps": -72.66,
+   "sources": [
+    "raid:Karazhan/The Curator"
+   ]
+  },
+  {
+   "itemId": 28666,
+   "name": "Pauldrons of the Justice-Seeker",
+   "slot": "shoulder",
+   "deltaDps": -72.73,
+   "sources": [
+    "raid:Karazhan/Shade of Aran"
+   ]
+  },
+  {
+   "itemId": 32592,
+   "name": "Chestguard of Relentless Storms",
+   "slot": "chest",
+   "deltaDps": -86.19,
+   "sources": [
+    "raid:Hyjal Summit/",
+    "raid:Hyjal Summit/Trash"
+   ]
+  },
+  {
+   "itemId": 30728,
+   "name": "Fathom-Helm of the Deeps",
+   "slot": "head",
+   "deltaDps": -87.36,
+   "sources": [
+    "raid:World Bosses/Doomwalker"
+   ]
+  },
+  {
+   "itemId": 30887,
+   "name": "Golden Links of Restoration",
+   "slot": "chest",
+   "deltaDps": -88.57,
+   "sources": [
+    "raid:Hyjal Summit/Anetheron"
+   ]
+  },
+  {
+   "itemId": 29921,
+   "name": "Fire Crest Breastplate",
+   "slot": "chest",
+   "deltaDps": -89.8,
+   "sources": [
+    "raid:Tempest Keep/Al'ar"
+   ]
+  },
+  {
+   "itemId": 28662,
+   "name": "Breastplate of the Lightbinder",
+   "slot": "chest",
+   "deltaDps": -90.09,
+   "sources": [
+    "raid:Karazhan/Terestian Illhoof"
+   ]
+  },
+  {
+   "itemId": 28600,
+   "name": "Stonebough Jerkin",
+   "slot": "chest",
+   "deltaDps": -90.12,
+   "sources": [
+    "raid:Karazhan/Nightbane"
+   ]
+  },
+  {
+   "itemId": 28735,
+   "name": "Earthblood Chestguard",
+   "slot": "chest",
+   "deltaDps": -90.15,
+   "sources": [
+    "raid:Karazhan/Netherspite"
+   ]
+  },
+  {
+   "itemId": 30899,
+   "name": "Don Rodrigo's Poncho",
+   "slot": "chest",
+   "deltaDps": -90.48,
+   "sources": [
+    "raid:Hyjal Summit/Azgalor"
+   ]
+  },
+  {
+   "itemId": 30075,
+   "name": "Gnarled Chestpiece of the Ancients",
+   "slot": "chest",
+   "deltaDps": -90.74,
+   "sources": [
+    "raid:Serpentshrine Cavern/Morogrim Tidewalker"
+   ]
+  },
+  {
+   "itemId": 30065,
+   "name": "Glowing Breastplate of Truth",
+   "slot": "chest",
+   "deltaDps": -91.14,
+   "sources": [
+    "raid:Serpentshrine Cavern/The Lurker Below"
+   ]
+  },
+  {
+   "itemId": 30904,
+   "name": "Savior's Grasp",
+   "slot": "chest",
+   "deltaDps": -91.47,
+   "sources": [
+    "raid:Hyjal Summit/Archimonde"
+   ]
+  },
+  {
+   "itemId": 30048,
+   "name": "Brighthelm of Justice",
+   "slot": "head",
+   "deltaDps": -107.55,
+   "sources": [
+    "raid:Serpentshrine Cavern/Hydross the Unstable"
+   ]
+  },
+  {
+   "itemId": 28583,
+   "name": "Big Bad Wolf's Head",
+   "slot": "head",
+   "deltaDps": -107.71,
+   "sources": [
+    "raid:Karazhan/The Big Bad Wolf"
+   ]
+  },
+  {
+   "itemId": 28803,
+   "name": "Cowl of Nature's Breath",
+   "slot": "head",
+   "deltaDps": -109.42,
+   "sources": [
+    "raid:Gruul's Lair/Gruul the Dragonkiller"
+   ]
+  }
+ ],
+ "epFloor": [
+  {
+   "itemId": 28502,
+   "name": "Vambraces of Courage",
+   "slot": "wrist",
+   "deltaDps": -42.75,
+   "sources": [
+    "raid:Karazhan/Attumen the Huntsman"
+   ]
+  },
+  {
+   "itemId": 30685,
+   "name": "Ravager's Wrist-Wraps",
+   "slot": "wrist",
+   "deltaDps": -45.57,
+   "sources": [
+    "raid:Karazhan/Rokad the Ravager"
+   ]
+  },
+  {
+   "itemId": 30686,
+   "name": "Ravager's Bands",
+   "slot": "wrist",
+   "deltaDps": -45.57,
+   "sources": [
+    "raid:Karazhan/Rokad the Ravager"
+   ]
+  },
+  {
+   "itemId": 30687,
+   "name": "Ravager's Bracers",
+   "slot": "wrist",
+   "deltaDps": -45.57,
+   "sources": [
+    "raid:Karazhan/Rokad the Ravager"
+   ]
+  },
+  {
+   "itemId": 30096,
+   "name": "Girdle of the Invulnerable",
+   "slot": "waist",
+   "deltaDps": -49.33,
+   "sources": [
+    "raid:Serpentshrine Cavern/Leotheras the Blind"
+   ]
+  },
+  {
+   "itemId": 28518,
+   "name": "Iron Gauntlets of the Maiden",
+   "slot": "hands",
+   "deltaDps": -56.8,
+   "sources": [
+    "raid:Karazhan/Maiden of Virtue"
+   ]
+  },
+  {
+   "itemId": 29998,
+   "name": "Royal Gauntlets of Silvermoon",
+   "slot": "hands",
+   "deltaDps": -56.8,
+   "sources": [
+    "raid:Tempest Keep/Kael'thas Sunstrider"
+   ]
+  },
+  {
+   "itemId": 30741,
+   "name": "Topaz-Studded Battlegrips",
+   "slot": "hands",
+   "deltaDps": -56.8,
+   "sources": [
+    "raid:World Bosses/Doom Lord Kazzak"
+   ]
+  },
+  {
+   "itemId": 30641,
+   "name": "Boots of Elusion",
+   "slot": "feet",
+   "deltaDps": -57.77,
+   "sources": [
+    "raid:Karazhan/",
+    "raid:Karazhan/Trash"
+   ]
+  },
+  {
+   "itemId": 30681,
+   "name": "Glider's Boots",
+   "slot": "feet",
+   "deltaDps": -57.79,
+   "sources": [
+    "raid:Karazhan/Shadikith the Glider"
+   ]
+  },
+  {
+   "itemId": 30682,
+   "name": "Glider's Sabatons",
+   "slot": "feet",
+   "deltaDps": -57.79,
+   "sources": [
+    "raid:Karazhan/Shadikith the Glider"
+   ]
+  },
+  {
+   "itemId": 30683,
+   "name": "Glider's Greaves",
+   "slot": "feet",
+   "deltaDps": -57.79,
+   "sources": [
+    "raid:Karazhan/Shadikith the Glider"
+   ]
+  },
+  {
+   "itemId": 30676,
+   "name": "Lurker's Grasp",
+   "slot": "waist",
+   "deltaDps": -59.9,
+   "sources": [
+    "raid:Karazhan/Hyakiss the Lurker"
+   ]
+  },
+  {
+   "itemId": 30677,
+   "name": "Lurker's Belt",
+   "slot": "waist",
+   "deltaDps": -59.9,
+   "sources": [
+    "raid:Karazhan/Hyakiss the Lurker"
+   ]
+  },
+  {
+   "itemId": 30678,
+   "name": "Lurker's Girdle",
+   "slot": "waist",
+   "deltaDps": -59.9,
+   "sources": [
+    "raid:Karazhan/Hyakiss the Lurker"
+   ]
+  },
+  {
+   "itemId": 28800,
+   "name": "Hammer of the Naaru",
+   "slot": "weapon",
+   "deltaDps": -70.51,
+   "sources": [
+    "raid:Gruul's Lair/High King Maulgar"
+   ]
+  },
+  {
+   "itemId": 28774,
+   "name": "Glaive of the Pit",
+   "slot": "weapon",
+   "deltaDps": -103.91,
+   "sources": [
+    "raid:Magtheridon's Lair/Magtheridon"
+   ]
+  }
+ ]
+}

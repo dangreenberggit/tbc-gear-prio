@@ -1,0 +1,7 @@
+.agents/skills/sme-rank-review/SKILL.md
+.claude/skills/sme-rank-review/SKILL.md
+packages/core/src/candidate-gems.ts
+packages/core/src/kael-temp.ts
+packages/core/src/rank-report.ts
+packages/core/test/candidate-gems.test.ts
+packages/core/test/rank-report.test.ts

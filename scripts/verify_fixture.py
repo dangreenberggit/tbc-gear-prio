@@ -26,23 +26,14 @@ import json
 import os
 import sys
 from collections import Counter
+from pathlib import Path
 
 DB = "vendor/wowsims/db.json"
 
-# PLAN.md 8.4's claim, stated here so the script can DISAGREE with it rather than
-# quietly confirm whatever it finds.
-CLAIMED_WCL_ORDER = [
-    "head", "neck", "shoulder", "SHIRT", "chest", "waist", "legs",
-    "feet", "wrist", "hands", "finger1", "finger2", "trinket1", "trinket2",
-    "back", "mainhand", "offhand", "ranged", "TABARD",
-]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from slots import load_slot_orders  # noqa: E402
 
-# The sim's 17-entry equipment order (PLAN.md 8.4).
-SIM_ORDER = [
-    "head", "neck", "shoulder", "back", "chest", "wrist", "hands", "waist",
-    "legs", "feet", "finger1", "finger2", "trinket1", "trinket2",
-    "mainhand", "offhand", "ranged",
-]
+CLAIMED_WCL_ORDER, SIM_ORDER = load_slot_orders()
 
 # wowsims ItemType enum -> readable slot. From sim/core/proto/common.proto.
 ITEM_TYPE = {

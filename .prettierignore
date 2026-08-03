@@ -14,6 +14,11 @@ docs/phase0-probe-summaries/
 
 pnpm-lock.yaml
 
+# buf generate output (PLAN.md §8.1) — reformatting would fight the codegen's
+# own output on every regen, and idempotency (the CI check) compares generator
+# output to generator output, not to prettier's opinion of it.
+packages/core/src/proto/
+
 # Hand-tuned planning prose predating this harness — reformatting would
 # rewrite hundreds of lines of tables/code-fences with no behavioral upside.
 # New docs written after this commit are expected to pass format:check.

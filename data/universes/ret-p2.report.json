@@ -1,0 +1,177 @@
+{
+  "maxPhase": 2,
+  "carryoverPolicy": "union",
+  "phaseZones": [
+    "Gruul's Lair",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep",
+    "World Bosses"
+  ],
+  "d7EligibleTotal": 3140,
+  "excludedNoSource": 1370,
+  "universeTotal": 230,
+  "listOnlyMembership": 12,
+  "perSlot": {
+    "back": 20,
+    "chest": 16,
+    "feet": 23,
+    "finger": 23,
+    "hands": 18,
+    "head": 17,
+    "legs": 13,
+    "neck": 17,
+    "ranged": 2,
+    "shoulder": 15,
+    "trinket": 16,
+    "waist": 22,
+    "weapon": 10,
+    "wrist": 18
+  },
+  "sourceRecordAdds": {
+    "atlasloot": 373,
+    "db": 1733,
+    "two-hop": 18,
+    "wowhead": 26
+  },
+  "membershipByOrigin": {
+    "itemHasOrigin:atlasloot": 41,
+    "itemHasOrigin:db": 201,
+    "itemHasOrigin:two-hop": 10,
+    "itemHasOrigin:wowhead": 23,
+    "listOnly": 12,
+    "zoneMatch": 218
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 201,
+    "atlasloot-only": 13,
+    "two-hop": 10,
+    "wowhead-only": 6
+  },
+  "tierPiecesExpected": 10,
+  "tierPiecesPresent": 10,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 230,
+    "casterOnlyReject": 74,
+    "epFloorReject": 10,
+    "combinedReject": 84,
+    "combinedKeep": 146,
+    "casterRejectPct": 32.2,
+    "combinedRejectPct": 36.5,
+    "applied": false
+  },
+  "wowheadListIds": 86,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 86,
+    "recalled": 69,
+    "missed": 17,
+    "recallPct": 80.2,
+    "missedItems": [
+      {
+        "itemId": 19343,
+        "name": "Scrolls of Blinding Light",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 22401,
+        "name": "Libram of Hope",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23203,
+        "name": "Libram of Fervor",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23206,
+        "name": "Mark of the Champion",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27484,
+        "name": "Libram of Avengement",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28430,
+        "name": "Lionheart Executioner",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28442,
+        "name": "Stormherald",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29119,
+        "name": "Haramad's Bargain",
+        "slot": "neck",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30257,
+        "name": "Shattrath Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30341,
+        "name": "Flesh Handler's Gauntlets",
+        "slot": "hands",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 30834,
+        "name": "Shapeshifter's Signet",
+        "slot": "finger",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31033,
+        "name": "Libram of Righteous Power",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31544,
+        "name": "Clefthoof Hide Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31856,
+        "name": "Darkmoon Card: Crusade",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31920,
+        "name": "Shaffar's Band of Brutality",
+        "slot": "finger",
+        "d7Eligible": true
+      }
+    ]
+  }
+}

@@ -49,7 +49,9 @@ PLAN.md §1.2 arbitrates the first-spec choice partly on the claim that "WCL's s
 - `CombatantInfo.specID` — a numeric spec identifier, present on every combatant event in both test runs.
 - `CombatantInfo.talentTree` and the `talents` array (see §5) — the actual talent point allocation, from which spec can be derived by whichever tree has the plurality of points.
 
-**Implication:** ret still doesn't need the uptime/cast-based disambiguation heuristics that feral needs (per §5.4 of the plan) — that part of the arbitration still stands. But "no disambiguation layer at all" undersells it: even ret needs to read `specID` (or classify from `talentTree`/`talents`) rather than trusting a ready-made spec string from the actor list, because no such string exists at that level. This is a small correction to the resolve/normalize stages, not a structural problem.
+**Implication:** ret still doesn't need the uptime/cast-based disambiguation heuristics that feral needs (per §5.4 of the plan) — that part of the arbitration still stands. But "no disambiguation layer at all" undersells it: even ret needs to read talent points rather than trusting a ready-made spec string from the actor list, because no such string exists at that level. This is a small correction to the resolve/normalize stages, not a structural problem.
+
+**Update (ticket 01):** `specID` is not a usable signal on TBC Anniversary. In `test/fixtures/slamaltman.raw.json`, **every** combatant has `specID: 0`, including Slamaltman (talent plurality `5/11/45` → Ret). Talent-tree plurality is the only classifier (`classifySpec` in `packages/core/src/spec.ts`); `specID` is documented noise on this game version unless a re-probe shows otherwise.
 
 ## 5. Talents — different shape than assumed
 

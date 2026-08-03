@@ -27,7 +27,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REVIEWS = ROOT / "docs" / "reviews"
 CARRY = ROOT / ".scratch" / "carry-forward" / "issues"
-SCRATCH = ROOT / ".scratch"
 
 DISPOSITION_RE = re.compile(
     r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
@@ -35,6 +34,7 @@ DISPOSITION_RE = re.compile(
 )
 STATUS_RE = re.compile(r"(?im)^\s*Status:\s*(\S+)")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
+BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
 
 
@@ -89,9 +89,10 @@ def read_status(path: Path) -> str | None:
 
 
 def iter_issue_files() -> list[Path]:
-    if not SCRATCH.is_dir():
+    """Only carry-forward tickets — not nested worktree / scratch copies."""
+    if not CARRY.is_dir():
         return []
-    return sorted(SCRATCH.glob("**/issues/*.md"))
+    return sorted(CARRY.glob("*.md"))
 
 
 def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
@@ -116,7 +117,7 @@ def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
     return found
 
 
-def list_open_carry_forward() -> list[tuple[Path, str, str]]:
+def list_open_carry_forward() -> list[tuple[Path, str, str, str]]:
     out = []
     if not CARRY.is_dir():
         return out
@@ -127,7 +128,9 @@ def list_open_carry_forward() -> list[tuple[Path, str, str]]:
         text = path.read_text(encoding="utf-8")
         blocks_m = BLOCKS_RE.search(text)
         blocks = blocks_m.group(1).strip() if blocks_m else "(none)"
-        out.append((path, status, blocks))
+        blocked_m = BLOCKED_BY_RE.search(text)
+        blocked_by = blocked_m.group(1).strip() if blocked_m else "(unset)"
+        out.append((path, status, blocks, blocked_by))
     return out
 
 
@@ -235,9 +238,14 @@ def main() -> int:
         if not rows:
             print("no open carry-forward tickets")
             return 0
-        print(f"{'status':<10} {'blocks':<20} path")
-        for path, status, blocks in rows:
-            print(f"{status:<10} {blocks:<20} {path.relative_to(ROOT).as_posix()}")
+        print(f"{'status':<10} {'blocks':<12} {'blocked by':<40} path")
+        for path, status, blocks, blocked_by in rows:
+            # Keep the table readable: truncate long Blocked by lines.
+            bb = blocked_by if len(blocked_by) <= 40 else blocked_by[:37] + "..."
+            print(
+                f"{status:<10} {blocks:<12} {bb:<40} "
+                f"{path.relative_to(ROOT).as_posix()}"
+            )
         return 0
 
     return check(

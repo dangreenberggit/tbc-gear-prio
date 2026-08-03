@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "data/wowsims.lock.json"
 FIXTURE = ROOT / "test/fixtures/slamaltman.raw.json"
-SKELETON = ROOT / "test/fixtures/ret-p2.raid-sim-skeleton.json"
+SKELETON = ROOT / "data/presets/ret/p2.raid-sim-skeleton.json"
 OUT_REQ = ROOT / "test/fixtures/slamaltman.raid-sim-request.json"
 OUT_RES = ROOT / "test/fixtures/slamaltman.raid-sim-result.json"
 
@@ -37,53 +37,13 @@ CLI_BINARIES = {
     "linux-x64": "wowsimcli",
 }
 
-# WCL client order (19). Indices 3 and 18 are shirt/tabard — dropped.
-WCL_ORDER = [
-    "head",
-    "neck",
-    "shoulder",
-    "SHIRT",
-    "chest",
-    "waist",
-    "legs",
-    "feet",
-    "wrist",
-    "hands",
-    "finger1",
-    "finger2",
-    "trinket1",
-    "trinket2",
-    "back",
-    "mainhand",
-    "offhand",
-    "ranged",
-    "TABARD",
-]
-
-# Sim equipment order (17). Not WCL order — back is the famous reordering.
-SIM_ORDER = [
-    "head",
-    "neck",
-    "shoulder",
-    "back",
-    "chest",
-    "wrist",
-    "hands",
-    "waist",
-    "legs",
-    "feet",
-    "finger1",
-    "finger2",
-    "trinket1",
-    "trinket2",
-    "mainhand",
-    "offhand",
-    "ranged",
-]
-
 # Probe knobs — enough for a plausible DPS, short enough for a sitting.
 ITERATIONS = 3000
 RANDOM_SEED = "42"
+
+# Shared 19→17 table — packages/core/src/slots-table.json (via scripts/slots.py).
+sys.path.insert(0, str(ROOT / "scripts"))
+from slots import map_wcl_gear_to_sim  # noqa: E402
 
 
 def resolve_cli() -> Path:
@@ -114,20 +74,7 @@ def wcl_to_item_spec(slot: dict) -> dict:
 
 
 def map_equipment(wcl_gear: list) -> list:
-    by_slot = {}
-    for idx, name in enumerate(WCL_ORDER):
-        if name in ("SHIRT", "TABARD"):
-            continue
-        by_slot[name] = wcl_to_item_spec(wcl_gear[idx])
-    items = [by_slot[name] for name in SIM_ORDER]
-    # Prove we didn't silently filter-only: back must be WCL index 14's item.
-    assert items[3]["id"] == wcl_gear[14]["id"], (
-        f"back slot wrong: sim[3]={items[3]!r} wcl[14]={wcl_gear[14]!r}"
-    )
-    assert items[0]["id"] == wcl_gear[0]["id"]
-    assert items[14]["id"] == wcl_gear[15]["id"]
-    return items
-
+    return map_wcl_gear_to_sim(wcl_gear, wcl_to_item=wcl_to_item_spec)
 
 def slim_distribution(d: dict | None) -> dict | None:
     if not d:
@@ -168,7 +115,7 @@ def main() -> int:
         print(f"missing skeleton RaidSimRequest at {SKELETON}", file=sys.stderr)
         print(
             "re-export: wowsims.com ret P2 → Export → CLI → "
-            "test/fixtures/ret-p2.raid-sim-skeleton.json",
+            "data/presets/ret/p2.raid-sim-skeleton.json",
             file=sys.stderr,
         )
         return 2

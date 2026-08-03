@@ -1,0 +1,1170 @@
+{
+  "1071": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Major Stamina",
+      "type": 13
+    }
+  ],
+  "1144": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Major Spirit",
+      "type": 5
+    }
+  ],
+  "1257": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Greater Arcane Resistance",
+      "type": 4
+    }
+  ],
+  "1441": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Greater Shadow Resistance",
+      "type": 4
+    }
+  ],
+  "1593": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Assault",
+      "type": 6
+    }
+  ],
+  "1594": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Assault",
+      "type": 7
+    }
+  ],
+  "1888": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Resistance",
+      "type": 13
+    }
+  ],
+  "1891": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Stats",
+      "type": 6
+    }
+  ],
+  "1897": [
+    {
+      "enchantType": 1,
+      "extraTypes": [],
+      "name": "Enchant 2H Weapon - Impact",
+      "type": 13
+    }
+  ],
+  "1898": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Major Spirit",
+      "type": 13
+    }
+  ],
+  "1900": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Crusader",
+      "type": 13
+    }
+  ],
+  "1950": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Defense",
+      "type": 5
+    }
+  ],
+  "2322": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Major Healing",
+      "type": 7
+    }
+  ],
+  "2343": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Major Healing",
+      "type": 13
+    }
+  ],
+  "2463": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Fire Resistance",
+      "type": 4
+    }
+  ],
+  "2523": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Biznicks 247x128 Accurascope",
+      "type": 14
+    }
+  ],
+  "2564": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Superior Agility",
+      "type": 7
+    },
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Agility",
+      "type": 13
+    }
+  ],
+  "2583": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        9
+      ],
+      "name": "Presence of Might",
+      "type": 1
+    }
+  ],
+  "2588": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        9
+      ],
+      "name": "Presence of Sight",
+      "type": 1
+    }
+  ],
+  "2604": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Zandalar Signet of Serenity",
+      "type": 3
+    }
+  ],
+  "2605": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Zandalar Signet of Mojo",
+      "type": 3
+    }
+  ],
+  "2606": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Zandalar Signet of Might",
+      "type": 3
+    }
+  ],
+  "2613": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Threat",
+      "type": 7
+    }
+  ],
+  "2614": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Shadow Power",
+      "type": 7
+    }
+  ],
+  "2615": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Frost Power",
+      "type": 7
+    }
+  ],
+  "2616": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Fire Power",
+      "type": 7
+    }
+  ],
+  "2617": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Superior Healing",
+      "type": 6
+    },
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Healing Power",
+      "type": 7
+    }
+  ],
+  "2619": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Greater Fire Resistance",
+      "type": 4
+    }
+  ],
+  "2620": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Greater Nature Resistance",
+      "type": 4
+    }
+  ],
+  "2621": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Subtlety",
+      "type": 4
+    }
+  ],
+  "2622": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Dodge",
+      "type": 4
+    }
+  ],
+  "2646": [
+    {
+      "enchantType": 1,
+      "extraTypes": [],
+      "name": "Enchant 2H Weapon - Agility",
+      "type": 13
+    }
+  ],
+  "2647": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Brawn",
+      "type": 6
+    }
+  ],
+  "2648": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Steelweave",
+      "type": 4
+    },
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Major Defense",
+      "type": 6
+    }
+  ],
+  "2649": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Fortitude",
+      "type": 6
+    },
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Fortitude",
+      "type": 10
+    }
+  ],
+  "2650": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Spellpower",
+      "type": 6
+    }
+  ],
+  "2653": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Tough Shield",
+      "type": 13
+    }
+  ],
+  "2654": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Intellect",
+      "type": 13
+    }
+  ],
+  "2655": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Shield Block",
+      "type": 13
+    }
+  ],
+  "2656": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Vitality",
+      "type": 10
+    }
+  ],
+  "2657": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Dexterity",
+      "type": 10
+    }
+  ],
+  "2658": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Surefooted",
+      "type": 10
+    }
+  ],
+  "2659": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Exceptional Health",
+      "type": 5
+    }
+  ],
+  "2660": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Exceptional Mana",
+      "type": 5
+    }
+  ],
+  "2661": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Exceptional Stats",
+      "type": 5
+    }
+  ],
+  "2662": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Major Armor",
+      "type": 4
+    }
+  ],
+  "2664": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Major Resistance",
+      "type": 4
+    }
+  ],
+  "2666": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Major Intellect",
+      "type": 13
+    }
+  ],
+  "2667": [
+    {
+      "enchantType": 1,
+      "extraTypes": [],
+      "name": "Enchant 2H Weapon - Savagery",
+      "type": 13
+    }
+  ],
+  "2668": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Potency",
+      "type": 13
+    }
+  ],
+  "2669": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Major Spellpower",
+      "type": 13
+    }
+  ],
+  "2670": [
+    {
+      "enchantType": 1,
+      "extraTypes": [],
+      "name": "Enchant 2H Weapon - Major Agility",
+      "type": 13
+    }
+  ],
+  "2671": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Sunfire",
+      "type": 13
+    }
+  ],
+  "2672": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Soulfrost",
+      "type": 13
+    }
+  ],
+  "2673": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Mongoose",
+      "type": 13
+    }
+  ],
+  "2674": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Spellsurge",
+      "type": 13
+    }
+  ],
+  "2675": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Battlemaster",
+      "type": 13
+    }
+  ],
+  "2679": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Restore Mana Prime",
+      "type": 6
+    }
+  ],
+  "2681": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        9
+      ],
+      "name": "Savage Guard",
+      "type": 1
+    }
+  ],
+  "2682": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        9
+      ],
+      "name": "Ice Guard",
+      "type": 1
+    }
+  ],
+  "2683": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        9
+      ],
+      "name": "Shadow Guard",
+      "type": 1
+    }
+  ],
+  "2714": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Felsteel Shield Spike",
+      "type": null
+    }
+  ],
+  "2715": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Resilience of the Scourge",
+      "type": 3
+    }
+  ],
+  "2716": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Fortitude of the Scourge",
+      "type": 3
+    }
+  ],
+  "2717": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Might of the Scourge",
+      "type": 3
+    }
+  ],
+  "2721": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Power of the Scourge",
+      "type": 3
+    }
+  ],
+  "2722": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Adamantite Scope",
+      "type": 14
+    }
+  ],
+  "2723": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Khorium Scope",
+      "type": 14
+    }
+  ],
+  "2724": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Stabilitzed Eternium Scope",
+      "type": 14
+    }
+  ],
+  "2745": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Silver Spellthread",
+      "type": 9
+    }
+  ],
+  "2746": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Golden Spellthread",
+      "type": 9
+    }
+  ],
+  "2747": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Mystic Spellthread",
+      "type": 9
+    }
+  ],
+  "2748": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Runic Spellthread",
+      "type": 9
+    }
+  ],
+  "2792": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Knothide Armor Kit",
+      "type": 5
+    }
+  ],
+  "2793": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Vindicator's Armor Kit",
+      "type": 5
+    }
+  ],
+  "2794": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Magister's Armor Kit",
+      "type": 5
+    }
+  ],
+  "2841": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        3,
+        5,
+        7,
+        9,
+        10
+      ],
+      "name": "Heavy Knothide Armor Kit",
+      "type": 1
+    }
+  ],
+  "2928": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Ring - Spellpower",
+      "type": 11
+    }
+  ],
+  "2929": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Ring - Striking",
+      "type": 11
+    }
+  ],
+  "2930": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Ring - Healing Power",
+      "type": 11
+    }
+  ],
+  "2931": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Ring - Stats",
+      "type": 11
+    }
+  ],
+  "2933": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Major Resilience",
+      "type": 5
+    }
+  ],
+  "2934": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Blasting",
+      "type": 7
+    }
+  ],
+  "2935": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Spell Strike",
+      "type": 7
+    }
+  ],
+  "2937": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Major Spellpower",
+      "type": 7
+    }
+  ],
+  "2938": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Spell Penetration",
+      "type": 4
+    }
+  ],
+  "2939": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Cat's Swiftness",
+      "type": 10
+    }
+  ],
+  "2940": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Boots - Boar's Speed",
+      "type": 10
+    }
+  ],
+  "2977": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of Warding",
+      "type": 3
+    }
+  ],
+  "2978": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of Warding",
+      "type": 3
+    }
+  ],
+  "2979": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of Faith",
+      "type": 3
+    }
+  ],
+  "2980": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of Faith",
+      "type": 3
+    }
+  ],
+  "2981": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of Discipline",
+      "type": 3
+    }
+  ],
+  "2982": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of Discipline",
+      "type": 3
+    }
+  ],
+  "2983": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of Vengeance",
+      "type": 3
+    }
+  ],
+  "2984": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Shadow Armor Kit",
+      "type": 5
+    }
+  ],
+  "2985": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Flame Armor Kit",
+      "type": 5
+    }
+  ],
+  "2986": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of Vengeance",
+      "type": 3
+    }
+  ],
+  "2987": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Frost Armor Kit",
+      "type": 5
+    }
+  ],
+  "2988": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Nature Armor Kit",
+      "type": 5
+    }
+  ],
+  "2989": [
+    {
+      "enchantType": 0,
+      "extraTypes": [
+        7,
+        9,
+        10
+      ],
+      "name": "Arcane Armor Kit",
+      "type": 5
+    }
+  ],
+  "2990": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of the Knight",
+      "type": 3
+    }
+  ],
+  "2991": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of the Knight",
+      "type": 3
+    }
+  ],
+  "2992": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of the Oracle",
+      "type": 3
+    }
+  ],
+  "2993": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of the Oracle",
+      "type": 3
+    }
+  ],
+  "2994": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of the Orb",
+      "type": 3
+    }
+  ],
+  "2995": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of the Orb",
+      "type": 3
+    }
+  ],
+  "2996": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of the Blade",
+      "type": 3
+    }
+  ],
+  "2997": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Greater Inscription of the Blade",
+      "type": 3
+    }
+  ],
+  "2998": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Inscription of Endurance",
+      "type": 3
+    }
+  ],
+  "2999": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of the Defender",
+      "type": 1
+    }
+  ],
+  "3000": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of the Wild",
+      "type": 1
+    }
+  ],
+  "3001": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Renewal",
+      "type": 1
+    }
+  ],
+  "3002": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Power",
+      "type": 1
+    }
+  ],
+  "3003": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Ferocity",
+      "type": 1
+    }
+  ],
+  "3004": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of the Gladiator",
+      "type": 1
+    }
+  ],
+  "3005": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Nature Warding",
+      "type": 1
+    }
+  ],
+  "3006": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Arcane Warding",
+      "type": 1
+    }
+  ],
+  "3007": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Fire Warding",
+      "type": 1
+    }
+  ],
+  "3008": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Frost Warding",
+      "type": 1
+    }
+  ],
+  "3009": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Shadow Warding",
+      "type": 1
+    }
+  ],
+  "3010": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Cobrahide Leg Armor",
+      "type": 9
+    }
+  ],
+  "3011": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Clefthide Leg Armor",
+      "type": 9
+    }
+  ],
+  "3012": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Nethercobra Leg Armor",
+      "type": 9
+    }
+  ],
+  "3013": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Nethercleft Leg Armor",
+      "type": 9
+    }
+  ],
+  "3095": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of Chromatic Warding",
+      "type": 1
+    }
+  ],
+  "3096": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glyph of the Outcast",
+      "type": 1
+    }
+  ],
+  "3150": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Chest - Restore Mana Prime",
+      "type": 5
+    }
+  ],
+  "3222": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Greater Agility",
+      "type": 13
+    }
+  ],
+  "3223": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Adamantite Weapon Chain",
+      "type": 13
+    }
+  ],
+  "3225": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Executioner",
+      "type": 13
+    }
+  ],
+  "3229": [
+    {
+      "enchantType": 2,
+      "extraTypes": [],
+      "name": "Enchant Shield - Resilience",
+      "type": 13
+    }
+  ],
+  "3260": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Glove Reinforcements",
+      "type": 7
+    }
+  ],
+  "3273": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Deathfrost",
+      "type": 13
+    }
+  ],
+  "368": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Greater Agility",
+      "type": 4
+    }
+  ],
+  "369": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Bracer - Major Intellect",
+      "type": 6
+    }
+  ],
+  "684": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Gloves - Major Strength",
+      "type": 7
+    }
+  ]
+}

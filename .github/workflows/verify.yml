@@ -25,4 +25,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # vendor/ is gitignored; skeleton:check needs the pinned APL (and
+      # hardening soft-checks use db.json). Restore from data/wowsims.lock.json
+      # without rewriting the lock.
+      - run: pnpm run sync:wowsims:restore
+
       - run: pnpm run verify
+
+      # PLAN.md §8.1: regenerating packages/core/src/proto/ from the pinned
+      # data/proto/*.proto must reproduce the committed output exactly. A diff
+      # here means either the generator drifted or someone hand-edited
+      # generated code — both are bugs, not things to merge.
+      - run: pnpm run proto:generate
+      - run: git diff --exit-code -- packages/core/src/proto data/proto

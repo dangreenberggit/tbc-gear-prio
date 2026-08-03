@@ -18,7 +18,8 @@ people who track it for a living. It is the source of DEFAULT_MAX_PHASE (PLAN.md
 1.1). We do NOT infer the tier from whatever raid a player's most recent log
 happens to be in -- a guild farming Karazhan for badges would read as P1.
 
-    python scripts/sync_wowsims.py --check     # drift report, no writes. CI-friendly.
+    python scripts/sync_wowsims.py --check     # drift report, no writes
+    python scripts/sync_wowsims.py --restore  # fetch lock pin into vendor/ (CI / fresh tree)
     python scripts/sync_wowsims.py --update    # fetch latest tag, rewrite lockfile
     python scripts/sync_wowsims.py --update --tag v0.0.101
 
@@ -26,13 +27,16 @@ Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
 """
 
 import argparse
-import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
-import urllib.request
+
+from pinned_fetch import digest as sha256_of
+from pinned_fetch import fetch as pinned_fetch
+from pinned_fetch import lock_entry
+from pinned_fetch import verify as verify_blob
 
 REPO = "wowsims/tbc-new"
 LOCKFILE = "data/wowsims.lock.json"
@@ -40,6 +44,16 @@ VENDOR = "vendor/wowsims"
 
 # Everything we consume from upstream. Adding a file here and re-running --update
 # is the whole process for taking on a new upstream input.
+#
+# Per-phase refresh runbook (manual — not automated in CI):
+# - wowsims gear-set files stop at P2 upstream; new phase gear sets require a
+#   hand edit to TRACKED after checking the pinned tag in data/wowsims.lock.json.
+# - Pool membership refreshes from AtlasLoot (data/atlasloot_sources.json),
+#   Wowhead ret lists (data/wowhead-lists/ret/), and the tier token map
+#   (data/two-hop/ret-tokens.json) — not from wowsims curated gear sets
+#   (those are bisTags/display input only).
+# - Each new tier needs token-to-piece verification against Wowhead before
+#   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
 TRACKED = {
     "db.json": "assets/database/db.json",
     "constants_other.ts": "ui/core/constants/other.ts",
@@ -48,9 +62,6 @@ TRACKED = {
     "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
 }
-
-RAW = "https://raw.githubusercontent.com/{repo}/{sha}/{path}"
-
 
 def gh(*args):
     """Call gh api. Kept as a subprocess so this stays stdlib-only and reuses
@@ -73,9 +84,7 @@ def tag_sha(tag):
 
 
 def fetch(sha, path):
-    url = RAW.format(repo=REPO, sha=sha, path=path)
-    with urllib.request.urlopen(url, timeout=120) as r:
-        return r.read()
+    return pinned_fetch(REPO, sha, path)
 
 
 def parse_current_phase(ts_source):
@@ -124,8 +133,9 @@ def do_update(tag):
         dest = os.path.join(VENDOR, local)
         with open(dest, "wb") as fh:
             fh.write(blob)
-        digest = hashlib.sha256(blob).hexdigest()
-        files[local] = {"path": path, "sha256": digest, "bytes": len(blob)}
+        entry = lock_entry(path, blob)
+        files[local] = entry
+        digest = entry["sha256"]
         print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}")
         if local == "constants_other.ts":
             current_phase = parse_current_phase(blob.decode("utf-8"))
@@ -164,6 +174,54 @@ def do_update(tag):
     return 0
 
 
+def do_restore():
+    """Fetch pinned files into vendor/ from the lock commit. Does not rewrite the lock.
+
+    CI and fresh worktrees need this — vendor/ is gitignored, and --update would
+    chase latest and rewrite data/wowsims.lock.json.
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+
+    sha = lock["commit"]
+    files = lock.get("files") or {}
+    if not files:
+        print(f"  {LOCKFILE} has no files map", file=sys.stderr)
+        return 2
+
+    print(f"  restoring {lock['repo']} @ {lock['tag']} ({sha[:12]}) -> {VENDOR}")
+    os.makedirs(VENDOR, exist_ok=True)
+
+    errors = []
+    for local, meta in files.items():
+        path = meta.get("path")
+        if not path or not meta.get("sha256"):
+            errors.append(f"{local}: lock entry missing path/sha256")
+            continue
+        try:
+            blob = fetch(sha, path)
+        except Exception as e:
+            errors.append(f"{local}: fetch failed: {e}")
+            continue
+        reason = verify_blob(blob, meta)
+        if reason:
+            errors.append(f"{local}: {reason}")
+            continue
+        dest = os.path.join(VENDOR, local)
+        with open(dest, "wb") as fh:
+            fh.write(blob)
+        print(f"    {local:<26} {len(blob):>9,} bytes")
+
+    if errors:
+        for e in errors:
+            print(f"  !! {e}", file=sys.stderr)
+        return 2
+    print("  restore ok.")
+    return 0
+
+
 def do_check():
     lock = load_lock()
     if not lock:
@@ -193,10 +251,10 @@ def do_check():
     for local, meta in lock.get("files", {}).items():
         path = os.path.join(VENDOR, local)
         if not os.path.exists(path):
-            drift.append(f"missing locally: {path} (run --update)")
+            drift.append(f"missing locally: {path} (run --restore or --update)")
             continue
         with open(path, "rb") as fh:
-            if hashlib.sha256(fh.read()).hexdigest() != meta["sha256"]:
+            if sha256_of(fh.read()) != meta["sha256"]:
                 drift.append(f"checksum mismatch: {path}")
 
     print()
@@ -212,11 +270,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
     ap.add_argument("--update", action="store_true", help="fetch and rewrite the lockfile")
+    ap.add_argument(
+        "--restore",
+        action="store_true",
+        help="fetch pinned files into vendor/ from the lock (no lock rewrite)",
+    )
     ap.add_argument("--tag", help="pin a specific tag instead of the latest")
     args = ap.parse_args()
 
     if args.update:
         sys.exit(do_update(args.tag))
+    elif args.restore:
+        sys.exit(do_restore())
     elif args.check:
         sys.exit(do_check())
     else:

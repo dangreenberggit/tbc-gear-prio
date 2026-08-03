@@ -1,0 +1,46 @@
+{
+  "universe": "data/universes/ret-p2.json",
+  "report": ".scratch/rank-reports/slamaltman-p3-postfix.json",
+  "maxPhase": 2,
+  "universeSize": 238,
+  "rankedSize": 357,
+  "cutoff": {
+    "absDps": 3.4,
+    "pct": 0.15
+  },
+  "baseline": {
+    "dps": 2003.2586106429671,
+    "stdev": 119.22038158810746,
+    "metaAdjusted": false
+  },
+  "aboveCutoffTotal": 43,
+  "buckets": [
+    {
+      "label": "casterOnly",
+      "rejected": 74,
+      "aboveCutoff": 0,
+      "belowCutoff": 74,
+      "unranked": 0,
+      "falseNegatives": [],
+      "unrankedItems": []
+    },
+    {
+      "label": "epFloor",
+      "rejected": 10,
+      "aboveCutoff": 0,
+      "belowCutoff": 10,
+      "unranked": 0,
+      "falseNegatives": [],
+      "unrankedItems": []
+    },
+    {
+      "label": "combined",
+      "rejected": 84,
+      "aboveCutoff": 0,
+      "belowCutoff": 84,
+      "unranked": 0,
+      "falseNegatives": [],
+      "unrankedItems": []
+    }
+  ]
+}

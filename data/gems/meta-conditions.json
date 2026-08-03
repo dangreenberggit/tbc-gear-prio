@@ -1,0 +1,124 @@
+[
+  {
+    "id": 25899,
+    "description": "Requires at least 2 Red Gems, at least 2 Yellow Gems, and at least 2 Blue Gems.",
+    "minRed": 2,
+    "minYellow": 2,
+    "minBlue": 2
+  },
+  {
+    "id": 34220,
+    "description": "Requires at least 2 Blue Gems.",
+    "minRed": 0,
+    "minYellow": 0,
+    "minBlue": 2
+  },
+  {
+    "id": 25890,
+    "description": "Requires at least 2 Red Gems, at least 2 Yellow Gems, and at least 2 Blue Gems.",
+    "minRed": 2,
+    "minYellow": 2,
+    "minBlue": 2
+  },
+  {
+    "id": 35503,
+    "description": "Requires at least 3 Red Gems.",
+    "minRed": 3,
+    "minYellow": 0,
+    "minBlue": 0
+  },
+  {
+    "id": 35501,
+    "description": "Requires at least 2 Blue Gems and at least 1 Yellow Gem.",
+    "minRed": 0,
+    "minYellow": 1,
+    "minBlue": 2
+  },
+  {
+    "id": 32641,
+    "description": "Requires at least 3 Yellow Gems.",
+    "minRed": 0,
+    "minYellow": 3,
+    "minBlue": 0
+  },
+  {
+    "id": 25901,
+    "description": "Requires at least 2 Red Gems, at least 2 Yellow Gems, and at least 2 Blue Gems.",
+    "minRed": 2,
+    "minYellow": 2,
+    "minBlue": 2
+  },
+  {
+    "id": 25896,
+    "description": "Requires at least 3 Blue Gems.",
+    "minRed": 0,
+    "minYellow": 0,
+    "minBlue": 3
+  },
+  {
+    "id": 32409,
+    "description": "Requires at least 2 Red Gems, at least 2 Yellow Gems, and at least 2 Blue Gems.",
+    "minRed": 2,
+    "minYellow": 2,
+    "minBlue": 2
+  },
+  {
+    "id": 25894,
+    "description": "Requires at least 2 Yellow Gems and at least 1 Red Gem.",
+    "minRed": 1,
+    "minYellow": 2,
+    "minBlue": 0
+  },
+  {
+    "id": 28557,
+    "description": "Requires at least 2 Yellow Gems and at least 1 Red Gem.",
+    "minRed": 1,
+    "minYellow": 2,
+    "minBlue": 0
+  },
+  {
+    "id": 28556,
+    "description": "Requires at least 2 Yellow Gems and at least 1 Red Gem.",
+    "minRed": 1,
+    "minYellow": 2,
+    "minBlue": 0
+  },
+  {
+    "id": 25898,
+    "description": "Requires at least 5 Blue Gems.",
+    "minRed": 0,
+    "minYellow": 0,
+    "minBlue": 5
+  },
+  {
+    "id": 32410,
+    "description": "Requires at least 2 Red Gems, at least 2 Yellow Gems, and at least 2 Blue Gems.",
+    "minRed": 2,
+    "minYellow": 2,
+    "minBlue": 2
+  },
+  {
+    "id": 25897,
+    "description": "Requires more Red Gems than Blue Gems.",
+    "compareGreater": 2,
+    "compareLesser": 3
+  },
+  {
+    "id": 25895,
+    "description": "Requires more Red Gems than Yellow Gems.",
+    "compareGreater": 2,
+    "compareLesser": 4
+  },
+  {
+    "id": 25893,
+    "description": "Requires more Blue Gems than Yellow Gems.",
+    "compareGreater": 3,
+    "compareLesser": 4
+  },
+  {
+    "id": 32640,
+    "description": "Requires more Blue Gems than Yellow Gems.",
+    "compareGreater": 3,
+    "compareLesser": 4
+  }
+]

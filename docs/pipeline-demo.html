@@ -1,0 +1,973 @@
+<!doctype html>
+<!--
+  Pipeline snapshot — NOT live. Every figure is frozen from one P3 run of
+  slamaltman on the 362-entry universe (branch phase-1/five-seed-spread,
+  tip 52ee3b0, 2026-07-29). Regenerate the underlying numbers with:
+
+    pnpm rank --region US --realm dreamscythe --character slamaltman \
+      --offline --max-phase 3 --report .scratch/rank-reports/<name>.html
+    python scripts/assemble_universe.py --max-phase 3
+
+  Self-contained by construction: no external fonts, scripts or images, so it
+  renders identically offline. Keep it that way if you edit it.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TBC Gear Priority Pipeline</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #21262d;
+        --text-primary: #c9d1d9;
+        --text-secondary: #8b949e;
+        --text-muted: #6e7681;
+        --accent-success: #3fb950;
+        --accent-gold: #d29922;
+        --accent-amber: #d97706;
+        --border-color: #30363d;
+        --border-subtle: #21262d;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        padding: 2rem 1rem;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem 0.5rem;
+        }
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      header {
+        margin-bottom: 3rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+      }
+
+      .metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .metadata-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .metadata-label {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .metadata-value {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      /* Section spacing */
+      section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+      }
+
+      /* Pipeline stages */
+      .pipeline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: space-around;
+        margin-bottom: 2rem;
+        padding: 2rem 1rem;
+        background-color: var(--bg-tertiary);
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+      }
+
+      @media (max-width: 768px) {
+        .pipeline {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+
+      .stage {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+      }
+
+      .stage-box {
+        padding: 0.75rem 1rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.3rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        text-align: center;
+        flex: 1;
+        min-width: 100px;
+      }
+
+      .stage-arrow {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      @media (max-width: 768px) {
+        .stage-arrow {
+          display: none;
+        }
+      }
+
+      .pipeline-note {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--bg-tertiary);
+        border-left: 3px solid var(--text-secondary);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        border-radius: 0.25rem;
+      }
+
+      /* Funnel chart */
+      .funnel {
+        margin-bottom: 2rem;
+      }
+
+      .funnel-stage {
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .funnel-bar-container {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .funnel-bar {
+        height: 40px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-gold),
+          var(--accent-success)
+        );
+        border-radius: 0.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #000;
+        transition: opacity 0.3s ease;
+      }
+
+      .funnel-bar:hover {
+        opacity: 0.85;
+      }
+
+      .funnel-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        min-width: 200px;
+      }
+
+      .funnel-tier {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--bg-tertiary);
+        border-left: 3px solid var(--accent-gold);
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+      }
+
+      /* Per-slot chart */
+      .per-slot {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+      }
+
+      .slot-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .slot-name {
+        min-width: 100px;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-align: right;
+      }
+
+      .slot-bar-container {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .slot-bar {
+        height: 28px;
+        background-color: var(--accent-success);
+        border-radius: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 0.5rem;
+        color: #000;
+        font-weight: 600;
+        font-size: 0.85rem;
+        font-family: ui-monospace, Consolas, monospace;
+        transition: background-color 0.3s ease;
+      }
+
+      .slot-bar:hover {
+        background-color: var(--accent-gold);
+      }
+
+      .slot-note {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: var(--bg-tertiary);
+        border-left: 3px solid var(--text-secondary);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        border-radius: 0.25rem;
+      }
+
+      /* Results section */
+      .results-header {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        padding: 1.5rem;
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--accent-gold);
+        font-family: ui-monospace, Consolas, monospace;
+      }
+
+      .stat-secondary {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+      }
+
+      /* Results table */
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+        overflow-x: auto;
+        display: block;
+      }
+
+      .results-table-wrapper {
+        overflow-x: auto;
+        border-radius: 0.5rem;
+        border: 1px solid var(--border-color);
+      }
+
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .results-table thead {
+        background-color: var(--bg-tertiary);
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .results-table th {
+        padding: 1rem;
+        text-align: left;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-family: ui-monospace, Consolas, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .results-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-subtle);
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .results-table tbody tr:hover {
+        background-color: var(--bg-tertiary);
+      }
+
+      .rank-cell {
+        font-family: ui-monospace, Consolas, monospace;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: center;
+        width: 50px;
+      }
+
+      .name-cell {
+        font-weight: 500;
+      }
+
+      .slot-cell {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .delta-cell {
+        font-family: ui-monospace, Consolas, monospace;
+        font-weight: 600;
+        color: var(--accent-gold);
+        width: 80px;
+        text-align: right;
+      }
+
+      .pct-cell {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: right;
+        width: 60px;
+      }
+
+      .se-cell {
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: right;
+        width: 50px;
+      }
+
+      .source-cell {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .delta-bar {
+        height: 24px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-success),
+          var(--accent-gold)
+        );
+        border-radius: 0.25rem;
+        display: inline-block;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+      }
+
+      /* Caveats panel */
+      .caveats {
+        background-color: #3d2f1f;
+        border: 1px solid #6b5444;
+        border-left: 4px solid var(--accent-amber);
+        border-radius: 0.5rem;
+        padding: 2rem;
+      }
+
+      .caveats h2 {
+        color: var(--accent-amber);
+        margin-bottom: 1.5rem;
+      }
+
+      .caveat-item {
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: #e5d5c0;
+      }
+
+      .caveat-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .caveat-label {
+        display: inline-block;
+        background-color: var(--accent-amber);
+        color: #000;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .caveat-item p {
+        display: inline;
+      }
+
+      /* Footer */
+      footer {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      /* Responsive improvements */
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .metadata {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        section {
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .results-table-wrapper {
+          font-size: 0.75rem;
+        }
+
+        .results-table th,
+        .results-table td {
+          padding: 0.75rem 0.5rem;
+        }
+
+        .stat-value {
+          font-size: 1.4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <h1>TBC Gear Priority</h1>
+        <p class="subtitle">
+          Ranked single-item upgrades for retribution paladins
+        </p>
+
+        <div class="metadata">
+          <div class="metadata-item">
+            <span class="metadata-label">Character</span>
+            <span class="metadata-value">slamaltman</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Realm / Region</span>
+            <span class="metadata-value">dreamscythe / US</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Spec</span>
+            <span class="metadata-value">Retribution</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Max Phase</span>
+            <span class="metadata-value">3</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Pool Size</span>
+            <span class="metadata-value">362 items</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Generated</span>
+            <span class="metadata-value">2026-07-29</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Pipeline section -->
+      <section>
+        <h2>The Pipeline</h2>
+        <div class="pipeline">
+          <div class="stage">
+            <div class="stage-box">Resolve</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Extract</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Normalize</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Compose</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Pool</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Generate</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Execute</div>
+            <div class="stage-arrow">→</div>
+          </div>
+          <div class="stage">
+            <div class="stage-box">Rank</div>
+          </div>
+        </div>
+        <div class="pipeline-note">
+          All 8 stages are unified behind a single
+          <code>rankUpgrades()</code> function. The engine runs fully offline
+          from recorded fixtures.
+        </div>
+      </section>
+
+      <!-- Funnel section -->
+      <section>
+        <h2>The Funnel</h2>
+        <p style="margin-bottom: 1.5rem; color: var(--text-secondary)">
+          How 4251 D7-eligible items narrow to a 362-item candidate universe
+        </p>
+
+        <div class="funnel">
+          <div class="funnel-stage">
+            <div class="funnel-label">D7-Eligible Items</div>
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: 100%">4,251</div>
+            </div>
+          </div>
+
+          <div class="funnel-stage">
+            <div class="funnel-label">Excluded (no source)</div>
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: 54.8%; background: #6e7681">
+                −2,333
+              </div>
+            </div>
+          </div>
+
+          <div class="funnel-stage">
+            <div class="funnel-label">Candidate Universe</div>
+            <div class="funnel-bar-container">
+              <div class="funnel-bar" style="width: 8.5%">362</div>
+            </div>
+          </div>
+
+          <div class="funnel-tier">
+            <strong>Tier composition:</strong> 15/15 tier pieces present
+          </div>
+        </div>
+      </section>
+
+      <!-- Per-slot breakdown -->
+      <section>
+        <h2>Candidate Universe by Slot</h2>
+        <div class="per-slot">
+          <div class="slot-row">
+            <div class="slot-name">back</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 48.9%">28</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">chest</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 48.9%">28</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">feet</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 62.7%">36</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">finger</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 55.8%">32</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">hands</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 45.3%">26</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">head</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 43.4%">25</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">legs</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 36.6%">21</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">neck</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 40.1%">23</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">ranged</div>
+            <div class="slot-bar-container">
+              <div
+                class="slot-bar"
+                style="width: 5.2%; background-color: #d97706"
+              >
+                3
+              </div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">shoulder</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 45.3%">26</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">trinket</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 48.9%">28</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">waist</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 62.7%">36</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">weapon</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 29.6%">17</div>
+            </div>
+          </div>
+          <div class="slot-row">
+            <div class="slot-name">wrist</div>
+            <div class="slot-bar-container">
+              <div class="slot-bar" style="width: 57.5%">33</div>
+            </div>
+          </div>
+        </div>
+        <div class="slot-note">
+          Note: <strong>ranged</strong> (librams) shows only 3 items due to
+          limited raid sources. This is a known gap.
+        </div>
+      </section>
+
+      <!-- Results section -->
+      <section>
+        <h2>Ranking Results</h2>
+
+        <div class="results-header">
+          <div class="stat-card">
+            <div class="stat-label">Baseline DPS</div>
+            <div class="stat-value">2003.3</div>
+            <div class="stat-secondary">current gear</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cutoff</div>
+            <div class="stat-value">3.4 DPS</div>
+            <div class="stat-secondary">0.15% of baseline</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ranked</div>
+            <div class="stat-value">357</div>
+            <div class="stat-secondary">of 362 candidates</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Above Cutoff</div>
+            <div class="stat-value">43</div>
+            <div class="stat-secondary">meaningful upgrades</div>
+          </div>
+        </div>
+
+        <div class="results-table-wrapper">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Item Name</th>
+                <th>Slot</th>
+                <th>ΔDps</th>
+                <th>Δ%</th>
+                <th>SE</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="rank-cell">1</td>
+                <td class="name-cell">Belt of One-Hundred Deaths</td>
+                <td class="slot-cell">waist</td>
+                <td class="delta-cell">+47.9</td>
+                <td class="pct-cell">2.39%</td>
+                <td class="se-cell">2.17</td>
+                <td class="source-cell">Serpentshrine Cavern / Lady Vashj</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">2</td>
+                <td class="name-cell">Torch of the Damned</td>
+                <td class="slot-cell">weapon</td>
+                <td class="delta-cell">+43.6</td>
+                <td class="pct-cell">2.18%</td>
+                <td class="se-cell">2.23</td>
+                <td class="source-cell">
+                  Black Temple / Reliquary of the Lost
+                </td>
+              </tr>
+              <tr>
+                <td class="rank-cell">3</td>
+                <td class="name-cell">Cataclysm's Edge</td>
+                <td class="slot-cell">weapon</td>
+                <td class="delta-cell">+26.3</td>
+                <td class="pct-cell">1.31%</td>
+                <td class="se-cell">2.15</td>
+                <td class="source-cell">Hyjal Summit / Archimonde</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">4</td>
+                <td class="name-cell">Band of Devastation</td>
+                <td class="slot-cell">finger</td>
+                <td class="delta-cell">+22.6</td>
+                <td class="pct-cell">1.13%</td>
+                <td class="se-cell">2.16</td>
+                <td class="source-cell">Black Temple</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">5</td>
+                <td class="name-cell">Unstoppable Aggressor's Ring</td>
+                <td class="slot-cell">finger</td>
+                <td class="delta-cell">+20.3</td>
+                <td class="pct-cell">1.02%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Black Temple / Gurtogg Bloodboil</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">6</td>
+                <td class="name-cell">Cursed Vision of Sargeras</td>
+                <td class="slot-cell">head</td>
+                <td class="delta-cell">+19.8</td>
+                <td class="pct-cell">0.99%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Black Temple / Illidan Stormrage</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">7</td>
+                <td class="name-cell">Shadow-walker's Cord</td>
+                <td class="slot-cell">waist</td>
+                <td class="delta-cell">+19.2</td>
+                <td class="pct-cell">0.96%</td>
+                <td class="se-cell">2.21</td>
+                <td class="source-cell">Black Temple / Shade of Akama</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">8</td>
+                <td class="name-cell">Bow-stitched Leggings</td>
+                <td class="slot-cell">legs</td>
+                <td class="delta-cell">+18.1</td>
+                <td class="pct-cell">0.90%</td>
+                <td class="se-cell">2.30</td>
+                <td class="source-cell">Hyjal Summit / Azgalor</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">9</td>
+                <td class="name-cell">Shadowmaster's Boots</td>
+                <td class="slot-cell">feet</td>
+                <td class="delta-cell">+17.5</td>
+                <td class="pct-cell">0.87%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Black Temple / Mother Shahraz</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">10</td>
+                <td class="name-cell">Cloak of Darkness</td>
+                <td class="slot-cell">back</td>
+                <td class="delta-cell">+16.5</td>
+                <td class="pct-cell">0.82%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Crafted</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">11</td>
+                <td class="name-cell">Valestalker Girdle</td>
+                <td class="slot-cell">waist</td>
+                <td class="delta-cell">+16.0</td>
+                <td class="pct-cell">0.80%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Hyjal Summit / Kaz'rogal</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">12</td>
+                <td class="name-cell">Razor-Scale Battlecloak</td>
+                <td class="slot-cell">back</td>
+                <td class="delta-cell">+15.8</td>
+                <td class="pct-cell">0.79%</td>
+                <td class="se-cell">2.19</td>
+                <td class="source-cell">
+                  Serpentshrine Cavern / Morogrim Tidewalker
+                </td>
+              </tr>
+              <tr>
+                <td class="rank-cell">13</td>
+                <td class="name-cell">Bulwark of the Ancient Kings</td>
+                <td class="slot-cell">chest</td>
+                <td class="delta-cell">+15.2</td>
+                <td class="pct-cell">0.76%</td>
+                <td class="se-cell">2.21</td>
+                <td class="source-cell">Crafted</td>
+              </tr>
+              <tr>
+                <td class="rank-cell">14</td>
+                <td class="name-cell">Belt of Seething Fury</td>
+                <td class="slot-cell">waist</td>
+                <td class="delta-cell">+14.5</td>
+                <td class="pct-cell">0.72%</td>
+                <td class="se-cell">2.20</td>
+                <td class="source-cell">Hyjal Summit / Kaz'rogal</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Caveats section -->
+      <section class="caveats">
+        <h2>Honest Caveats</h2>
+
+        <div class="caveat-item">
+          <span class="caveat-label">Recall (Input)</span>
+          <p>
+            <strong>100/123 (81.3%)</strong> — measured against the Wowhead P3
+            BiS guide when that guide is used as a pipeline input source.
+          </p>
+        </div>
+
+        <div class="caveat-item">
+          <span class="caveat-label">Recall (Held-Out)</span>
+          <p>
+            <strong>78/123 (63.4%)</strong> — the same Wowhead guide held out
+            and used purely as an answer key. This is the honest accuracy
+            ceiling given scope and data.
+          </p>
+        </div>
+
+        <div class="caveat-item">
+          <span class="caveat-label">Junk Filter</span>
+          <p>
+            A junk filter has been measured but is
+            <strong>deliberately NOT applied</strong> at runtime. It would
+            reject 119 of 362 items as caster-only (32.9%). It stays off until
+            that rejection rate is validated against simulated results, to avoid
+            hiding errors in the filter itself.
+          </p>
+        </div>
+
+        <div class="caveat-item">
+          <span class="caveat-label">Scope</span>
+          <p>
+            Non-raid sources (badge vendors, reputation, crafting, heroic
+            dungeons) are deliberately out of scope. This is why the
+            ranged/libram slot shows only 3 items—most ret librams drop outside
+            raids or are quest rewards.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        <p>TBC Gear Priority • Pipeline visualization</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -2,16 +2,20 @@
 
 Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when running inside Cursor; fall back to agnostic git anytime.
 
-## Models (workers)
+## Models (Task / in-session subagents)
 
-Pin **Composer** for Task / `best-of-n-runner` / parallel workers
-(`composer-2.5-fast` if that is the only Task slug). Do **not** request
-Terra/Sol/Other-pool models for N-way fan-out on Pro — they often die at
-spawn with a usage wall even though they appear in the picker. Sharp review
-stays **Grok high** (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)).
-If a worker logs `Switched to grok-4.5…` and still `status: error`, treat it
-as a hard fail and respawn on Composer (or serialise) — not as a successful
-Grok handoff.
+Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+
+- **Workhorse / simple:** **Composer** (`composer-2.5-fast` or current slug) — parallel implement workers, mechanical edits.
+- **Sharp:** **Grok high** — design, review, hard judgment. Do not open fan-out with Sol/Opus “for quality.”
+
+Do **not** request Terra/Sol/Other-pool models for N-way fan-out on Pro —
+they often die at spawn with a usage wall even though they appear in the
+picker. If a worker logs `Switched to grok-4.5…` and still `status: error`,
+treat it as a hard fail and respawn on Composer (or serialise) — not as a
+successful Grok handoff.
+
+If a **manager** agent must spawn design/review workers and then compile: do not `run_in_background` + end turn “waiting.” Either keep ownership through fan-in, or write a `PROCESS.md` handoff naming the next spawn for the parent. Background completions notify the parent session, not a dead manager.
 
 ## Isolate
 

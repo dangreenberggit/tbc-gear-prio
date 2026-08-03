@@ -1,0 +1,174 @@
+{
+  "spec": "ret",
+  "kind": "token-map",
+  "collectedDate": "2026-07-28",
+  "notes": [
+    "Zones/bosses come from AtlasLoot parse of token drop IDs (data/atlasloot_sources.json).",
+    "Piece↔token IDs verified against Wowhead item pages / BiS guide rows.",
+    "Wowhead Phase 3 BiS guide mislabels Lightbringer Breastplate token as Chestguard of the Vanquished Champion; corrected to Forgotten Conqueror (31089) via item page + AtlasLoot Illidan BT drop."
+  ],
+  "entries": [
+    {
+      "pieceId": 29073,
+      "pieceName": "Justicar Crown",
+      "tokenId": 29760,
+      "tokenName": "Helm of the Fallen Champion",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29075,
+      "pieceName": "Justicar Shoulderplates",
+      "tokenId": 29763,
+      "tokenName": "Pauldrons of the Fallen Champion",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29071,
+      "pieceName": "Justicar Breastplate",
+      "tokenId": 29754,
+      "tokenName": "Chestguard of the Fallen Champion",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29072,
+      "pieceName": "Justicar Gauntlets",
+      "tokenId": 29757,
+      "tokenName": "Gloves of the Fallen Champion",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29074,
+      "pieceName": "Justicar Greaves",
+      "tokenId": 29766,
+      "tokenName": "Leggings of the Fallen Champion",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30131,
+      "pieceName": "Crystalforge War-Helm",
+      "tokenId": 30242,
+      "tokenName": "Helm of the Vanquished Champion",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30133,
+      "pieceName": "Crystalforge Shoulderbraces",
+      "tokenId": 30248,
+      "tokenName": "Pauldrons of the Vanquished Champion",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30129,
+      "pieceName": "Crystalforge Breastplate",
+      "tokenId": 30236,
+      "tokenName": "Chestguard of the Vanquished Champion",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30130,
+      "pieceName": "Crystalforge Gauntlets",
+      "tokenId": 30239,
+      "tokenName": "Gloves of the Vanquished Champion",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30132,
+      "pieceName": "Crystalforge Greaves",
+      "tokenId": 30245,
+      "tokenName": "Leggings of the Vanquished Champion",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30989,
+      "pieceName": "Lightbringer War-Helm",
+      "tokenId": 31097,
+      "tokenName": "Helm of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Archimonde",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30997,
+      "pieceName": "Lightbringer Shoulderbraces",
+      "tokenId": 31101,
+      "tokenName": "Pauldrons of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30990,
+      "pieceName": "Lightbringer Breastplate",
+      "tokenId": 31089,
+      "tokenName": "Chestguard of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Illidan Stormrage",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30982,
+      "pieceName": "Lightbringer Gauntlets",
+      "tokenId": 31092,
+      "tokenName": "Gloves of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Azgalor",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30993,
+      "pieceName": "Lightbringer Greaves",
+      "tokenId": 31098,
+      "tokenName": "Leggings of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34431,
+      "pieceName": "Lightbringer Bands",
+      "tokenId": 34848,
+      "tokenName": "Bracers of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Kalecgos",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34485,
+      "pieceName": "Lightbringer Girdle",
+      "tokenId": 34853,
+      "tokenName": "Belt of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Brutallus",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34561,
+      "pieceName": "Lightbringer Boots",
+      "tokenId": 34856,
+      "tokenName": "Boots of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Felmyst",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}

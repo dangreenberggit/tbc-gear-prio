@@ -1,0 +1,225 @@
+/**
+ * Minimum-EP-loss meta repair (PLAN.md §9 / R4).
+ *
+ * Recolour non-meta sockets until the meta condition is met. Cost of a swap:
+ *   EP(old gem) − EP(new gem) + EP(socket bonus) if the swap breaks a match.
+ * Never re-optimizes the whole layout — stays recognisably the player's gems.
+ */
+
+import { getGem, type GemEntry } from "./gems.js";
+import { getItem } from "./items.js";
+import {
+  gemColorCounts,
+  gemColorMatchesSocket,
+  metaDeficit,
+  metaStatus,
+  type GemColorCounts,
+} from "./meta.js";
+import { GemColor } from "./proto/common_pb.js";
+import { epScore, type EpWeights } from "./stats.js";
+
+export type SocketedItem = {
+  itemId: number;
+  /** One entry per socket; 0 means empty. */
+  gems: number[];
+};
+
+export type MetaRepairSwap = {
+  itemId: number;
+  socketIndex: number;
+  from: number;
+  to: number;
+  cost: number;
+};
+
+export type MetaRepairResult = {
+  items: SocketedItem[];
+  metaAdjusted: boolean;
+  swaps: MetaRepairSwap[];
+};
+
+export class MetaUnsolvableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MetaUnsolvableError";
+  }
+}
+
+export function repairMeta(opts: {
+  items: readonly SocketedItem[];
+  epWeights: EpWeights;
+  palette: readonly GemEntry[];
+}): MetaRepairResult {
+  const items = opts.items.map((it) => ({
+    itemId: it.itemId,
+    gems: [...it.gems],
+  }));
+
+  const head = items[0];
+  if (!head) {
+    return { items, metaAdjusted: false, swaps: [] };
+  }
+  const headItem = getItem(head.itemId);
+  if (!headItem?.sockets.includes(GemColor.GemColorMeta)) {
+    return { items, metaAdjusted: false, swaps: [] };
+  }
+
+  const initial = metaStatus(headItem.sockets, allGemIds(items));
+  if (initial.kind !== "inactive") {
+    return { items, metaAdjusted: false, swaps: [] };
+  }
+
+  const swaps: MetaRepairSwap[] = [];
+  const maxSteps = 32;
+
+  for (let step = 0; step < maxSteps; step++) {
+    const status = metaStatus(headItem.sockets, allGemIds(items));
+    if (status.kind === "active") {
+      return { items, metaAdjusted: swaps.length > 0, swaps };
+    }
+    if (status.kind !== "inactive") {
+      throw new MetaUnsolvableError(`unexpected meta status ${status.kind}`);
+    }
+
+    const move = bestRepairMove(items, status.metaId, status.counts, opts);
+    if (!move) {
+      throw new MetaUnsolvableError(
+        `no legal recolour activates meta ${status.metaId} (${status.description})`
+      );
+    }
+
+    const slot = items[move.itemIndex]!;
+    slot.gems[move.socketIndex] = move.to;
+    swaps.push({
+      itemId: slot.itemId,
+      socketIndex: move.socketIndex,
+      from: move.from,
+      to: move.to,
+      cost: move.cost,
+    });
+  }
+
+  throw new MetaUnsolvableError("meta repair exceeded step budget");
+}
+
+function allGemIds(items: readonly SocketedItem[]): number[] {
+  const ids: number[] = [];
+  for (const it of items) {
+    for (const g of it.gems) {
+      if (g) ids.push(g);
+    }
+  }
+  return ids;
+}
+
+function socketsMatch(itemId: number, gems: readonly number[]): boolean {
+  const item = getItem(itemId);
+  if (!item || item.sockets.length === 0) return true;
+  if (gems.length < item.sockets.length) return false;
+  for (let i = 0; i < item.sockets.length; i++) {
+    const gemId = gems[i] ?? 0;
+    if (!gemId) return false;
+    const gem = getGem(gemId);
+    if (!gem) return false;
+    if (!gemColorMatchesSocket(gem.colour, item.sockets[i]!)) return false;
+  }
+  return true;
+}
+
+function gemEp(gemId: number, weights: EpWeights): number {
+  if (!gemId) return 0;
+  const gem = getGem(gemId);
+  if (!gem) return 0;
+  return epScore(gem.stats, weights);
+}
+
+function socketBonusEp(itemId: number, weights: EpWeights): number {
+  const item = getItem(itemId);
+  if (!item) return 0;
+  return epScore(item.socketBonus, weights);
+}
+
+type Move = {
+  itemIndex: number;
+  socketIndex: number;
+  from: number;
+  to: number;
+  cost: number;
+};
+
+function bestRepairMove(
+  items: SocketedItem[],
+  metaId: number,
+  beforeCounts: GemColorCounts,
+  opts: { epWeights: EpWeights; palette: readonly GemEntry[] }
+): Move | null {
+  const beforeDeficit = metaDeficit(metaId, beforeCounts);
+  let best: Move | null = null;
+
+  for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+    const slot = items[itemIndex]!;
+    const item = getItem(slot.itemId);
+    if (!item) continue;
+
+    for (
+      let socketIndex = 0;
+      socketIndex < item.sockets.length;
+      socketIndex++
+    ) {
+      const socketColor = item.sockets[socketIndex]!;
+      if (socketColor === GemColor.GemColorMeta) continue;
+
+      const from = slot.gems[socketIndex] ?? 0;
+      const matchedBefore = socketsMatch(slot.itemId, slot.gems);
+
+      for (const candidate of opts.palette) {
+        if (candidate.colour === GemColor.GemColorMeta) continue;
+        if (candidate.unique && alreadyHasUnique(items, candidate.id, from)) {
+          continue;
+        }
+        if (candidate.id === from) continue;
+
+        const trialGems = [...slot.gems];
+        while (trialGems.length < item.sockets.length) trialGems.push(0);
+        trialGems[socketIndex] = candidate.id;
+
+        const trialItems = items.map((it, i) =>
+          i === itemIndex ? { itemId: it.itemId, gems: trialGems } : it
+        );
+        const afterCounts = gemColorCounts(allGemIds(trialItems));
+        const afterDeficit = metaDeficit(metaId, afterCounts);
+        if (afterDeficit >= beforeDeficit) continue;
+
+        let cost =
+          gemEp(from, opts.epWeights) - gemEp(candidate.id, opts.epWeights);
+        if (matchedBefore && !socketsMatch(slot.itemId, trialGems)) {
+          cost += socketBonusEp(slot.itemId, opts.epWeights);
+        }
+
+        const move: Move = {
+          itemIndex,
+          socketIndex,
+          from,
+          to: candidate.id,
+          cost,
+        };
+        if (!best || move.cost < best.cost) best = move;
+      }
+    }
+  }
+
+  return best;
+}
+
+function alreadyHasUnique(
+  items: readonly SocketedItem[],
+  gemId: number,
+  replacing: number
+): boolean {
+  for (const it of items) {
+    for (const g of it.gems) {
+      if (g === gemId && g !== replacing) return true;
+    }
+  }
+  return false;
+}

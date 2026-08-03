@@ -1,0 +1,2439 @@
+{
+  "generatedFor": "ticket 17 \u2014 excludedNoSource triage vs ret-relevant lists",
+  "method": "union(wowsims ret gear sets [p3 only], wowhead ret lists for stages <= tier) minus shipped universe",
+  "headline": "no excluded item is a drop in a phase_raids.json raid zone at any tier",
+  "tiers": {
+    "p3": {
+      "universeTotal": 354,
+      "retRelevantIds": 171,
+      "excluded": 71,
+      "byPhase": {
+        "1": 71
+      },
+      "excludedInRaidZone": 0,
+      "entries": [
+        {
+          "itemId": 18823,
+          "name": "Aged Core Leather Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "drop:Molten Core"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19343,
+          "name": "Scrolls of Blinding Light",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Short Fight",
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19406,
+          "name": "Drake Fang Talisman",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22401,
+          "name": "Libram of Hope",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "drop:Dire Maul"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22954,
+          "name": "Kiss of the Spider",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23041,
+          "name": "Slayer's Crest",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23203,
+          "name": "Libram of Fervor",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23206,
+          "name": "Mark of the Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23520,
+          "name": "Ragesteel Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23522,
+          "name": "Ragesteel Breastplate",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23541,
+          "name": "Khorium Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24396,
+          "name": "Vest of Vengeance",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24550,
+          "name": "Gladiator's Greatsword",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: non-BS",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25685,
+          "name": "Fel Leather Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25686,
+          "name": "Fel Leather Boots",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25697,
+          "name": "Felstalker Bracers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27434,
+          "name": "Mantle of Perenolde",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27484,
+          "name": "Libram of Avengement",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27497,
+          "name": "Doomplate Gauntlets",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27755,
+          "name": "Girdle of Gallantry",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27760,
+          "name": "Dunewind Sash",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27771,
+          "name": "Doomplate Shoulderguards",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27776,
+          "name": "Shoulderpads of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27797,
+          "name": "Wastewalker Shoulderpads",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27867,
+          "name": "Boots of the Unjust",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27878,
+          "name": "Auchenai Death Shroud",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27892,
+          "name": "Cloak of the Inciter",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Shadow Labyrinth"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27918,
+          "name": "Bands of Syth",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27985,
+          "name": "Deathforge Girdle",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28034,
+          "name": "Hourglass of the Unraveller",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28176,
+          "name": "Sha'tari Wrought Greaves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28182,
+          "name": "Helm of the Claw",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28224,
+          "name": "Wastewalker Helm",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28249,
+          "name": "Capacitus' Cloak of Calibration",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28288,
+          "name": "Abacus of Violent Odds",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28318,
+          "name": "Obsidian Clodstompers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Botanica"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28403,
+          "name": "Doomplate Chestguard",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28414,
+          "name": "Helm of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28429,
+          "name": "Lionheart Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Swordsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28441,
+          "name": "Deep Thunder",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hammersmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28484,
+          "name": "Bulwark of Kings",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Armorsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28645,
+          "name": "General's Scaled Greaves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28646,
+          "name": "General's Scaled Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29119,
+          "name": "Haramad's Bargain",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "rep"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29177,
+          "name": "A'dal's Command",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29246,
+          "name": "Nightfall Wristguards",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29247,
+          "name": "Girdle of the Deathdealer",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29349,
+          "name": "Adamantine Chain of the Unbroken",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Slave Pens"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29356,
+          "name": "Quantum Blade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29382,
+          "name": "Blood Knight War Cloak",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29509,
+          "name": "Windstrike Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29516,
+          "name": "Ebon Netherscale Belt",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29517,
+          "name": "Ebon Netherscale Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29776,
+          "name": "Core of Ar'kelos",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30257,
+          "name": "Shattrath Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30341,
+          "name": "Flesh Handler's Gauntlets",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30365,
+          "name": "Overseer's Signet",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great: Aldor",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30533,
+          "name": "Vanquisher's Legplates",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30834,
+          "name": "Shapeshifter's Signet",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31033,
+          "name": "Libram of Righteous Power",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31105,
+          "name": "Overlord's Helmet of Second Sight",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31275,
+          "name": "Necklace of Trophies",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31318,
+          "name": "Singing Crystal Axe",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31322,
+          "name": "The Hammer of Destiny",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31380,
+          "name": "Acrobat's Mark of the Sha'tar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31544,
+          "name": "Clefthoof Hide Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31694,
+          "name": "Natasha's Pack Collar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31856,
+          "name": "Darkmoon Card: Crusade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31920,
+          "name": "Shaffar's Band of Brutality",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:Mana-Tombs"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 33173,
+          "name": "Ragesteel Shoulders",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 38287,
+          "name": "Empty Mug of Direbrew",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        }
+      ]
+    },
+    "p4": {
+      "universeTotal": 401,
+      "retRelevantIds": 178,
+      "excluded": 71,
+      "byPhase": {
+        "1": 71
+      },
+      "excludedInRaidZone": 0,
+      "entries": [
+        {
+          "itemId": 18823,
+          "name": "Aged Core Leather Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "drop:Molten Core"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19343,
+          "name": "Scrolls of Blinding Light",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Short Fight",
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19406,
+          "name": "Drake Fang Talisman",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22401,
+          "name": "Libram of Hope",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "drop:Dire Maul"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22954,
+          "name": "Kiss of the Spider",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23041,
+          "name": "Slayer's Crest",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23203,
+          "name": "Libram of Fervor",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23206,
+          "name": "Mark of the Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23520,
+          "name": "Ragesteel Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23522,
+          "name": "Ragesteel Breastplate",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23541,
+          "name": "Khorium Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24396,
+          "name": "Vest of Vengeance",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24550,
+          "name": "Gladiator's Greatsword",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: non-BS",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25685,
+          "name": "Fel Leather Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25686,
+          "name": "Fel Leather Boots",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25697,
+          "name": "Felstalker Bracers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27434,
+          "name": "Mantle of Perenolde",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27484,
+          "name": "Libram of Avengement",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27497,
+          "name": "Doomplate Gauntlets",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27755,
+          "name": "Girdle of Gallantry",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27760,
+          "name": "Dunewind Sash",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27771,
+          "name": "Doomplate Shoulderguards",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27776,
+          "name": "Shoulderpads of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27797,
+          "name": "Wastewalker Shoulderpads",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27867,
+          "name": "Boots of the Unjust",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27878,
+          "name": "Auchenai Death Shroud",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27892,
+          "name": "Cloak of the Inciter",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Shadow Labyrinth"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27918,
+          "name": "Bands of Syth",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27985,
+          "name": "Deathforge Girdle",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28034,
+          "name": "Hourglass of the Unraveller",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28176,
+          "name": "Sha'tari Wrought Greaves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28182,
+          "name": "Helm of the Claw",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28224,
+          "name": "Wastewalker Helm",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28249,
+          "name": "Capacitus' Cloak of Calibration",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28288,
+          "name": "Abacus of Violent Odds",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28318,
+          "name": "Obsidian Clodstompers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Botanica"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28403,
+          "name": "Doomplate Chestguard",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28414,
+          "name": "Helm of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28429,
+          "name": "Lionheart Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Swordsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28441,
+          "name": "Deep Thunder",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hammersmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28484,
+          "name": "Bulwark of Kings",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Armorsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28645,
+          "name": "General's Scaled Greaves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28646,
+          "name": "General's Scaled Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29119,
+          "name": "Haramad's Bargain",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "rep"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29177,
+          "name": "A'dal's Command",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29246,
+          "name": "Nightfall Wristguards",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29247,
+          "name": "Girdle of the Deathdealer",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29349,
+          "name": "Adamantine Chain of the Unbroken",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Slave Pens"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29356,
+          "name": "Quantum Blade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29382,
+          "name": "Blood Knight War Cloak",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29509,
+          "name": "Windstrike Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29516,
+          "name": "Ebon Netherscale Belt",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29517,
+          "name": "Ebon Netherscale Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29776,
+          "name": "Core of Ar'kelos",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30257,
+          "name": "Shattrath Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30341,
+          "name": "Flesh Handler's Gauntlets",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30365,
+          "name": "Overseer's Signet",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great: Aldor",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30533,
+          "name": "Vanquisher's Legplates",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30834,
+          "name": "Shapeshifter's Signet",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31033,
+          "name": "Libram of Righteous Power",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31105,
+          "name": "Overlord's Helmet of Second Sight",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31275,
+          "name": "Necklace of Trophies",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31318,
+          "name": "Singing Crystal Axe",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31322,
+          "name": "The Hammer of Destiny",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31380,
+          "name": "Acrobat's Mark of the Sha'tar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31544,
+          "name": "Clefthoof Hide Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31694,
+          "name": "Natasha's Pack Collar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31856,
+          "name": "Darkmoon Card: Crusade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31920,
+          "name": "Shaffar's Band of Brutality",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:Mana-Tombs"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 33173,
+          "name": "Ragesteel Shoulders",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 38287,
+          "name": "Empty Mug of Direbrew",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        }
+      ]
+    },
+    "p5": {
+      "universeTotal": 467,
+      "retRelevantIds": 208,
+      "excluded": 76,
+      "byPhase": {
+        "1": 71,
+        "5": 5
+      },
+      "excludedInRaidZone": 0,
+      "entries": [
+        {
+          "itemId": 18823,
+          "name": "Aged Core Leather Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "drop:Molten Core"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19343,
+          "name": "Scrolls of Blinding Light",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Short Fight",
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 19406,
+          "name": "Drake Fang Talisman",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "drop:Blackwing Lair"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22401,
+          "name": "Libram of Hope",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "drop:Dire Maul"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 22954,
+          "name": "Kiss of the Spider",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23041,
+          "name": "Slayer's Crest",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Naxxramas"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23203,
+          "name": "Libram of Fervor",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Optional",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23206,
+          "name": "Mark of the Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23520,
+          "name": "Ragesteel Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23522,
+          "name": "Ragesteel Breastplate",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 23541,
+          "name": "Khorium Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24396,
+          "name": "Vest of Vengeance",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 24550,
+          "name": "Gladiator's Greatsword",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: non-BS",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25685,
+          "name": "Fel Leather Gloves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25686,
+          "name": "Fel Leather Boots",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 25697,
+          "name": "Felstalker Bracers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27434,
+          "name": "Mantle of Perenolde",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27484,
+          "name": "Libram of Avengement",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27497,
+          "name": "Doomplate Gauntlets",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Blood Furnace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27755,
+          "name": "Girdle of Gallantry",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27760,
+          "name": "Dunewind Sash",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27771,
+          "name": "Doomplate Shoulderguards",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Underbog"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27776,
+          "name": "Shoulderpads of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27797,
+          "name": "Wastewalker Shoulderpads",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27867,
+          "name": "Boots of the Unjust",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27878,
+          "name": "Auchenai Death Shroud",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Auchenai Crypts"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27892,
+          "name": "Cloak of the Inciter",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Shadow Labyrinth"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27918,
+          "name": "Bands of Syth",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 27985,
+          "name": "Deathforge Girdle",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:Sethekk Halls"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28034,
+          "name": "Hourglass of the Unraveller",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28176,
+          "name": "Sha'tari Wrought Greaves",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28182,
+          "name": "Helm of the Claw",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28224,
+          "name": "Wastewalker Helm",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28249,
+          "name": "Capacitus' Cloak of Calibration",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28288,
+          "name": "Abacus of Violent Odds",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28318,
+          "name": "Obsidian Clodstompers",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Botanica"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28403,
+          "name": "Doomplate Chestguard",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Near Best: Set",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28414,
+          "name": "Helm of Assassination",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Arcatraz"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28429,
+          "name": "Lionheart Champion",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Swordsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28441,
+          "name": "Deep Thunder",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hammersmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28484,
+          "name": "Bulwark of Kings",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Armorsmith",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28645,
+          "name": "General's Scaled Greaves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 28646,
+          "name": "General's Scaled Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Near Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29119,
+          "name": "Haramad's Bargain",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "rep"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29177,
+          "name": "A'dal's Command",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29246,
+          "name": "Nightfall Wristguards",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:Old Hillsbrad Foothills"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29247,
+          "name": "Girdle of the Deathdealer",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29349,
+          "name": "Adamantine Chain of the Unbroken",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Slave Pens"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29356,
+          "name": "Quantum Blade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "drop:The Black Morass"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29382,
+          "name": "Blood Knight War Cloak",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29509,
+          "name": "Windstrike Gloves",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29516,
+          "name": "Ebon Netherscale Belt",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29517,
+          "name": "Ebon Netherscale Bracers",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 29776,
+          "name": "Core of Ar'kelos",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30257,
+          "name": "Shattrath Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30341,
+          "name": "Flesh Handler's Gauntlets",
+          "phase": 1,
+          "quality": 2,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30365,
+          "name": "Overseer's Signet",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great: Aldor",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30533,
+          "name": "Vanquisher's Legplates",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Good",
+          "dbSources": [
+            "drop:The Mechanar"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 30834,
+          "name": "Shapeshifter's Signet",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31033,
+          "name": "Libram of Righteous Power",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31105,
+          "name": "Overlord's Helmet of Second Sight",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31275,
+          "name": "Necklace of Trophies",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31318,
+          "name": "Singing Crystal Axe",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31322,
+          "name": "The Hammer of Destiny",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31380,
+          "name": "Acrobat's Mark of the Sha'tar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Great",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31544,
+          "name": "Clefthoof Hide Leggings",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31694,
+          "name": "Natasha's Pack Collar",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Good",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31856,
+          "name": "Darkmoon Card: Crusade",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 31920,
+          "name": "Shaffar's Band of Brutality",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": "Best: Hit",
+          "dbSources": [
+            "drop:Mana-Tombs"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 33173,
+          "name": "Ragesteel Shoulders",
+          "phase": 1,
+          "quality": 3,
+          "listLabel": "Best: Set",
+          "dbSources": [
+            "crafted"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 34388,
+          "name": "Pauldrons of Berserking",
+          "phase": 5,
+          "quality": 4,
+          "listLabel": "P5 BIS - 48 hit",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 34392,
+          "name": "Demontooth Shoulderpads",
+          "phase": 5,
+          "quality": 4,
+          "listLabel": "P5 BIS - 48 hit",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 34397,
+          "name": "Bladed Chaos Tunic",
+          "phase": 5,
+          "quality": 4,
+          "listLabel": "P5 BIS - Contested",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 34472,
+          "name": "Shard of Contempt",
+          "phase": 5,
+          "quality": 4,
+          "listLabel": "Absolute BIS",
+          "dbSources": [
+            "drop:Magisters' Terrace"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 34679,
+          "name": "Shattered Sun Pendant of Might",
+          "phase": 5,
+          "quality": 4,
+          "listLabel": "Rep Option",
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        },
+        {
+          "itemId": 38287,
+          "name": "Empty Mug of Direbrew",
+          "phase": 1,
+          "quality": 4,
+          "listLabel": null,
+          "dbSources": [
+            "<none>"
+          ],
+          "inRaidZone": false
+        }
+      ]
+    }
+  }
+}
