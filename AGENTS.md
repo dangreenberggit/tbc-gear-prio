@@ -38,6 +38,10 @@ Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBu
 
 **A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a sharp question (does this measurement support this conclusion?) still needs a sharp model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
 
+### Types from JSON
+
+**Never derive a TypeScript type from a JSON import.** `resolveJsonModule` widens every string to `string`, and `as const` cannot be applied to a JSON import (TS1355), so `(typeof json.list)[number]` is `string` and any `extends` assertion against it **passes vacuously** — a check that reads as rigour and proves nothing. This repo has hit it twice; both times the wrong conclusion ("impossible, needs codegen") was written down as fact. JSON is a **value** source of truth, never a **type** one. Shared lists go through `scripts/generate_json_literal_types.py`, which emits committed `as const` code gated by `pnpm verify`. See [`docs/workflow.md`](docs/workflow.md#never-derive-a-type-from-a-json-import).
+
 ### Testing
 
 Invoke the `tdd` skill for any red/green work. Note the word **seam** means two

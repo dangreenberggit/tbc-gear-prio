@@ -54,20 +54,63 @@ literal is gone.
 Only the **kind names** are shared. The per-kind field shapes (`zone` vs
 `dungeon` vs `cost`) cannot be expressed in JSON and stay in the union.
 
-**The interesting part is how the JSON is kept honest.** The obvious move is a
-type-level `extends` assertion in both directions. One of those is rejected by
-typecheck and the other **passes vacuously** — `resolveJsonModule` widens
-`kinds` to `string[]`, so `(typeof kinds)[number]` is `string` and asserting
-against it proves nothing while looking rigorous. That is the same trap this
-ticket already recorded once under "Slot names as bare strings", hit again
-from the other side, so the reasoning is now a comment beside the code.
+**The interesting part is how the JSON is kept honest**, and the first attempt
+got it wrong in the way this ticket had already recorded once.
 
-The real check is in `pool.test.ts`: a `Record<ItemSourceKind, true>` object
-literal, which is exhaustive by construction — a new union variant fails
-typecheck until it is listed there, and the assertion then catches a JSON that
-was not updated. Mutation-checked both ways: adding `"vendor"` to the JSON
-fails the test; removing `"heroic"` makes `assemble_universe.py` reject its own
-Magisters' Terrace rows and exit 2.
+The obvious move is a type-level `extends` assertion in both directions. One
+is rejected by typecheck and the other **passes vacuously** —
+`resolveJsonModule` widens `kinds` to `string[]`, so `(typeof kinds)[number]`
+is `string` and asserting against it proves nothing while looking rigorous.
+Same trap as "Slot names as bare strings" below, hit from the other side.
+
+That was first shipped as a runtime test plus a comment explaining the
+widening. **A comment is not a guard**, and the trap had now bitten twice, so
+it was fixed properly in `d1ba49b` — see the next section.
+
+## The JSON-widening trap, fixed at the root — DONE 2026-08-03 (`d1ba49b`)
+
+This ticket recorded the trap twice and drew the wrong conclusion the first
+time ("would need the table emitted as a `.ts` const … a codegen change",
+filed under impossible). It is not impossible. It is exactly the fix, and it
+is now in place.
+
+Measured with a standalone compiler probe rather than repeating the received
+explanation:
+
+- `(typeof jsonImport.list)[number]` really is `string` — assigning
+  `"not-a-kind"` to it compiles clean.
+- `as const` on a JSON import is **TS1355**, so it cannot rescue the type.
+- Every other route either casts (a lie) or reintroduces the third copy inside
+  the validator.
+
+So the JSON stays the **value** source of truth and
+`scripts/generate_json_literal_types.py` derives the **type** as committed
+`as const` code. No typed module imports those JSON files any more — the
+widening has nowhere to happen.
+
+**Audited all six `with { type: "json" }` imports in `packages/core` first.**
+No vacuous assertion had shipped, but `SimSlotName` was a second live instance
+of the same shape: `SIM_ORDER` widened to `string[]`, the union hand-written
+next to it, held together only by a runtime test. Now
+`Extract<SimOrderName, …>` — still hand-written, because it is a deliberate
+*subset* (`SIM_ORDER` carries `offhand`, which ret never fills), but now
+constrained against the real list.
+
+Three drift directions, each mutation-checked:
+
+| mutation | caught by |
+|---|---|
+| JSON edited, generated file stale | `codegen:json-types:check` (new first step of `verify`) |
+| JSON has a kind the union lacks | TS2344 at `_JsonCoversUnion` |
+| union has a kind the JSON lacks | TS2344 at `_UnionCoversJson`, plus a missing-return in `rank-report.ts` |
+
+The generator pipes output through the repo's Prettier (`--stdin-filepath`);
+without that, codegen and `format:check` disagree forever. Confirmed
+idempotent.
+
+The rule is now written down in `docs/workflow.md` and `AGENTS.md` rather than
+living as a comment in one file — comments were what failed the first two
+times.
 
 ## Data clumps and duplicate `EpWeights` — DONE 2026-07-30 (`EpWeights` half only)
 
@@ -168,6 +211,20 @@ The drift worry ("a hand-written union could drift from `slots-table.json`")
 is handled where it always was — `pool.test.ts` asserts every `ItemSlot` maps
 onto a name present in `SIM_ORDER`, so a union that drifts from the table
 fails a test rather than type-checking quietly.
+
+**Amended 2026-08-03 (`d1ba49b`).** The paragraph above is right that
+`simSlotsForPoolSlot` never reads the JSON, so its own arms gave the union.
+But "a codegen change" was dismissed as though it were out of reach, and the
+drift was left to a runtime test. Codegen is now in place
+(`scripts/generate_json_literal_types.py`), `SIM_ORDER` is `as const`, and
+`SimSlotName` is `Extract<SimOrderName, …>` — so a member that is not a real
+sim slot is a compile error rather than a test failure. The runtime assertion
+stays as a second check on the values.
+
+The lesson stands and gets sharper: the first version measured one approach,
+found it blocked, and wrote "impossible"; the second version found the right
+scope but treated the blocked approach as permanently unavailable instead of
+asking what it would cost. It cost one script.
 
 ## Unused `Deps` breadth
 
