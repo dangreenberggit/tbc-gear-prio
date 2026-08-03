@@ -10,6 +10,20 @@ Judgement calls from the pre-merge review's Standards axis. None is a
 correctness risk; each is a refactor with its own blast radius, so they were
 deferred rather than done mid-review. Grouped roughly by value.
 
+**Status 2026-08-03.** The two items the post-phase-1 handoff listed as
+outstanding — `ITEM_SOURCE_KINDS` duplicated three ways, and the `GemContext`
+grouping — are both done. What remains are two items that were never on that
+list and that each defer to something else:
+
+- **Unused `Deps` breadth** — its own text says resolve alongside tickets 19
+  and 23, and ticket 23's `Deps` item is itself waiting on `contentHash`
+  becoming real. Blocked, not forgotten.
+- **`rank-report.ts` divergent change** — a template-vs-rules split of a
+  588-line file. Self-contained, no dependency, but a large enough refactor to
+  want its own branch rather than a cleanup pass.
+
+Nothing here blocks a phase gate.
+
 ## Duplicated pinned-fetch logic — DONE 2026-07-30 (`d4ae638`)
 
 `scripts/pinned_fetch.py` now carries `fetch`, `digest`, `lock_entry` and
@@ -27,6 +41,33 @@ check, and the same `{"path":…, "sha256":…, "bytes":…}` lock-entry shape. 
 shared `scripts/pinned_fetch.py` would carry all three. Highest value of the
 group: three implementations of "download and verify against a pin" is three
 places for a supply-chain check to rot.
+
+## `ITEM_SOURCE_KINDS` duplicated three ways — DONE 2026-08-03 (`93cbb02`)
+
+The list existed as a Python `frozenset`, a `Set` literal in
+`pool-hardening.test.ts`, and implicitly in `pool.ts`'s `ItemSource` union.
+Cross-language, so the fix is a shared JSON as this ticket predicted:
+`packages/core/src/item-source-kinds.json`, following the `slots-table.json`
+precedent — TypeScript imports it, `assemble_universe.py` reads it, the test
+literal is gone.
+
+Only the **kind names** are shared. The per-kind field shapes (`zone` vs
+`dungeon` vs `cost`) cannot be expressed in JSON and stay in the union.
+
+**The interesting part is how the JSON is kept honest.** The obvious move is a
+type-level `extends` assertion in both directions. One of those is rejected by
+typecheck and the other **passes vacuously** — `resolveJsonModule` widens
+`kinds` to `string[]`, so `(typeof kinds)[number]` is `string` and asserting
+against it proves nothing while looking rigorous. That is the same trap this
+ticket already recorded once under "Slot names as bare strings", hit again
+from the other side, so the reasoning is now a comment beside the code.
+
+The real check is in `pool.test.ts`: a `Record<ItemSourceKind, true>` object
+literal, which is exhaustive by construction — a new union variant fails
+typecheck until it is listed there, and the assertion then catches a JSON that
+was not updated. Mutation-checked both ways: adding `"vendor"` to the JSON
+fails the test; removing `"heroic"` makes `assemble_universe.py` reject its own
+Magisters' Terrace rows and exit 2.
 
 ## Data clumps and duplicate `EpWeights` — DONE 2026-07-30 (`EpWeights` half only)
 
@@ -55,6 +96,30 @@ The `(palette, epWeightRecord, epWeights)` data-clump / `GemContext` framing
 and `rank.ts`/`slots.ts` changes are **not** done — out of scope for this pass
 (another agent owns those two files concurrently). Re-open a follow-up ticket
 if that grouping is still wanted.
+
+### `GemContext` — DONE 2026-08-03 (`c644776`)
+
+`GemContext` lives in `candidate-gems.ts`, not `rank.ts`: it is gem
+vocabulary, and that module already owned `EpWeightRecord`.
+`equipmentForCandidateSwap` and `swapItemAt` now take one context instead of
+three parameters, and `rank.ts`'s `weightRecord()` helper is deleted — its
+logic is the context's constructor.
+
+The two weight fields were never independent inputs; `epWeightRecord` was
+always `weightRecord(epWeights)` computed at the call site. Nothing stopped a
+caller passing shapes that disagreed, and `rank.test.ts` demonstrated the
+failure mode by passing `epWeights, epWeights` — correct only because its
+fixture weights are already a record. That is no longer expressible.
+
+Behaviour unchanged: `rank.test.ts` still pins `deltaDps` to 7.15 at 5
+decimals through the recorded adapters.
+
+**Found a genuinely untested branch on the way.** No test fed dense-array
+weights through a candidate swap, so deleting the array→record conversion
+passed all 158 tests. Three direct cases now pin it (`candidate-gems.test.ts`),
+and deleting the conversion fails two. The gap predates this change — the code
+moved rather than appeared — but naming the function is what made it cheap to
+test.
 
 Original text:
 
