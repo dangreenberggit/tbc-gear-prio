@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-generate_item_gem_index.py -- build data/items/index.json and data/gems/palette.json
-from the pinned vendor/wowsims/db.json (PLAN.md 5.1, 8.3, 9).
+generate_item_gem_index.py -- build data/items/index.json, data/gems/palette.json
+and data/enchants/index.json from the pinned vendor/wowsims/db.json
+(PLAN.md 5.1, 8.3, 9).
 
-Both outputs are GENERATED, committed, and never read at runtime from db.json
+All outputs are GENERATED, committed, and never read at runtime from db.json
 itself -- db.json is a build input only (PLAN.md 8.3 [P0]). Re-run this after
 `pnpm sync:wowsims` moves the pin.
 
@@ -23,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
 ITEMS_OUT = ROOT / "data/items/index.json"
 GEMS_OUT = ROOT / "data/gems/palette.json"
+ENCHANTS_OUT = ROOT / "data/enchants/index.json"
 
 # wowsims ItemType enum -> readable slot name, matching this repo's sim-slot
 # vocabulary (packages/core/src/slots-table.json: "waist" not "belt", "wrist"
@@ -123,8 +125,38 @@ def build_items_index(db: dict) -> dict[str, dict]:
             "phase": it.get("phase"),
             "unique": bool(it.get("unique")),
             "requiredProfession": it.get("requiredProfession"),
+            # `enchantable` is a slot-level fact; these three are what the
+            # UI's enchantAppliesToItem needs to decide whether a *specific*
+            # enchant fits this *specific* item (2H Savagery onto a 1H, say).
+            "itemType": item_type,
+            "handType": it.get("handType"),
+            "weaponType": it.get("weaponType"),
+            "rangedWeaponType": it.get("rangedWeaponType"),
         }
         out[str(it["id"])] = entry
+    return out
+
+
+def build_enchants_index(db: dict) -> dict[str, dict]:
+    """Keyed by effectId -- the id WCL reports as `permanentEnchant`.
+
+    Verified against test/fixtures/slamaltman.raw.json: 64 of the 65 distinct
+    permanentEnchant values there resolve as effectId and 0 resolve as
+    spellId, so effectId is the join key the rest of the engine already uses.
+
+    `enchantType` is absent on 131 of 141 records (meaning Normal / 0); only
+    the two-hand and shield enchants carry it.
+    """
+    out: dict[str, dict] = {}
+    for e in db.get("enchants", []):
+        effect_id = e.get("effectId")
+        if effect_id is None:
+            continue
+        out[str(effect_id)] = {
+            "name": e.get("name"),
+            "type": e.get("type"),
+            "enchantType": e.get("enchantType") or 0,
+        }
     return out
 
 
@@ -170,9 +202,11 @@ def main() -> int:
 
     items_index = build_items_index(db)
     gem_palette = build_gem_palette(db)
+    enchants_index = build_enchants_index(db)
 
     ITEMS_OUT.parent.mkdir(parents=True, exist_ok=True)
     GEMS_OUT.parent.mkdir(parents=True, exist_ok=True)
+    ENCHANTS_OUT.parent.mkdir(parents=True, exist_ok=True)
 
     with open(ITEMS_OUT, "w", encoding="utf-8") as fh:
         json.dump(items_index, fh, indent=2, sort_keys=True)
@@ -182,6 +216,11 @@ def main() -> int:
         json.dump(gem_palette, fh, indent=2)
         fh.write("\n")
 
+    with open(ENCHANTS_OUT, "w", encoding="utf-8") as fh:
+        json.dump(enchants_index, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+    print(f"  {ENCHANTS_OUT.relative_to(ROOT)}: {len(enchants_index)} enchants")
     print(f"  {ITEMS_OUT.relative_to(ROOT)}: {len(items_index)} equippable items")
     print(f"  {GEMS_OUT.relative_to(ROOT)}: {len(gem_palette)} gems "
           f"({len(db['gems']) - len(gem_palette)} JC-restricted excluded)")

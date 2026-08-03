@@ -17,7 +17,7 @@ import {
   type Substitution,
 } from "./disclosure.js";
 import { gemsForPhase, getGem, type GemEntry } from "./gems.js";
-import { isEnchantable } from "./items.js";
+import { enchantAppliesToItem } from "./enchants.js";
 import {
   equipmentFromLoggedGear,
   socketedItemsFromLoggedGear,
@@ -477,8 +477,10 @@ function swapItemAt(
           fillOptsForSwap(equipment, slotIndex)
         );
     const out: SimItemSpec = { id: itemId, gems };
-    // Bare worn slot → no enchant on the candidate (do not invent one).
-    if (spec.enchant && isEnchantable(itemId)) {
+    // Bare worn slot → no enchant on the candidate (do not invent one), and
+    // carry one only where the UI would: isEnchantable is slot-level, so on
+    // its own it moves a 2H-only enchant onto a one-hander.
+    if (spec.enchant && enchantAppliesToItem(spec.enchant, itemId)) {
       out.enchant = spec.enchant;
     }
     return out;

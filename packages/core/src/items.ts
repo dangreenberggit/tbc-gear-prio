@@ -59,6 +59,17 @@ export type ItemEntry = {
   unique: boolean;
   /** Numeric profession id if this item requires one to use, else null. */
   requiredProfession: number | null;
+  /**
+   * wowsims ItemType — the slot enum shared with `EnchantEntry.type`.
+   * `enchantable` above is a slot-level fact; these four are what
+   * `enchantAppliesToItem` needs to judge a *specific* enchant against a
+   * *specific* item (2H Savagery onto a one-hander). Null on items where
+   * the concept does not apply — only weapons carry `handType`/`weaponType`.
+   */
+  itemType: number;
+  handType: number | null;
+  weaponType: number | null;
+  rangedWeaponType: number | null;
 };
 
 // The generated file is keyed by item id as a string (JSON object keys are
