@@ -32,7 +32,11 @@ In **committed or dispatched** artifacts (commit messages, tickets, ADRs, tracke
 
 When changing committed **generated** artifacts: regenerate from the committed sources with the pinned toolchain; the working tree must match `HEAD` (or you must document which side is wrong) before commit. For CI byte-compare gates, read a real CI run — do not predict from a local story about another OS.
 
-Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs. Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBuiltDependencies`. A permission denial is evidence about that call, not a capability model — if a fan-out or land precondition cannot be established, stop and report the exact blocked command rather than silently dropping or rewriting the plan.
+Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs.
+
+Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBuiltDependencies`. A permission denial is evidence about that call, not a capability model — if a fan-out or land precondition cannot be established, stop and report the exact blocked command rather than silently dropping or rewriting the plan.
+
+**A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a sharp question (does this measurement support this conclusion?) still needs a sharp model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
 
 ### Testing
 
