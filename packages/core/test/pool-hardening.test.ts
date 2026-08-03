@@ -291,14 +291,15 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   );
 
-  // Ticket 17's triage measured all 12: every one is phase 1, and none is a
-  // drop in a phase_raids.json zone. They are dungeon/crafted/rep/pre-raid
-  // items outside a raid-scoped universe by design, so this is scope rather
-  // than a source-coverage gap to close.
+  // Ticket 17's triage measured all 12 as phase 1, appearing on the Wowhead
+  // *pre-raid* stage list — BiS before you raid, which is why a P2+ universe
+  // omitting them is defensible. Deliberately not "they are dungeon/crafted
+  // so they are out of scope": content type is not the test, power at the
+  // tier is (see the ticket's 2026-08-02 correction).
   it.todo(
-    "admits all 36 wowsims curated ret gear-set items — out of scope, not blocked: " +
+    "admits all 36 wowsims curated ret gear-set items — deferred: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
-      " are all phase 1 and non-raid-sourced (ticket 17 triage)"
+      " are phase 1 pre-raid-stage items (ticket 17 triage)"
   );
 
   it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
@@ -354,9 +355,24 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it.todo(
-    "includes Shattrath Leggings (30257, leather legs) — out of scope, not blocked: " +
-      "phase 1 pre-raid item, and db.json gives it sources: null so no " +
+    "includes Shattrath Leggings (30257, leather legs) — deferred: phase 1 " +
+      "pre-raid-stage item, and db.json gives it sources: null so no " +
       "AtlasLoot/Wowhead coverage resolves it (ticket 17 triage)"
+  );
+
+  // ret-p5.json omits five items the Wowhead p5 list names, four of them
+  // "P5 BIS"/"Absolute BIS" — at the tier that file exists to serve. Shard of
+  // Contempt is 44 expertise (weighted 2.14, second-heaviest ret term) and
+  // drops in Magisters' Terrace at difficulty 2; the other four are Shattered
+  // Sun badge/craft/rep rewards db.json gives `sources: null`.
+  //
+  // ITEM_SOURCE_KINDS and source_zones() already handle a "heroic" kind, but
+  // nothing emits one and membership gates on phase_raids.json zones, which
+  // are raids only. Needs a phase -> heroic-dungeon map plus a source path
+  // for the sourceless four.
+  it.todo(
+    "admits the phase-5 BiS items outside raid zones — 34472 Shard of " +
+      "Contempt, 34388, 34392, 34397, 34679 (ticket 17)"
   );
 
   it.skipIf(!hasWowsimsVendor)(

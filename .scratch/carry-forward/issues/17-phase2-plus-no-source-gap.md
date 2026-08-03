@@ -42,22 +42,35 @@ survive intersecting with what ret actually wants: the phase-2+ remainder
 contains no item that any ret source lists. The 1366 `excludedNoSource` rows
 at p3 are real, but the ret-relevant slice of them is empty above phase 1.
 
-This is the raid-scoped design working as intended, not a defect — heroic
-dungeon drops, crafted gear, rep and pre-raid items are deliberately out of a
-raid-zone-scoped universe (the previous handoff's "things that look like bugs
-but are not").
+### Corrected 2026-08-02 — "out of raid scope" is the wrong test
 
-### Per-bucket decision
+An earlier revision of this section called the whole remainder "the
+raid-scoped design working as intended." That reasoning does not hold up, and
+the correction matters for the p5 finding below.
 
-- **Dungeon drops, crafted, rep, pre-raid (70)** — accept the exclusion. All
-  phase 1, all outside raid scope by design. Admitting them is the pre-raid /
-  non-raid-sources feature, not a source-coverage bug.
-- **30257 Shattrath Leggings** — `sources` is literally `null` in db.json, so
-  no amount of AtlasLoot/Wowhead coverage resolves it from the current inputs;
-  it needs a force-include with a documented source. It is **phase 1** and a
-  pre-raid item, so it does not belong in a p2/p3 raid universe anyway. Left
-  out, and the `it.todo` should say "phase 1, out of raid scope" rather than
-  implying a coverage gap.
+**Whether an item belongs in a tier's universe is about its power at that
+tier, not about which content type drops it.** If a heroic dungeon drops
+something that is BiS at phase 5, a phase-5 shopping list that omits it is
+wrong, regardless of the zone it came from. Content type is a fact about
+where you go to get an item; it is not a reason to hide the item.
+
+Note also that badge vendors being absent at P2/P3 was a **convenience
+shortcut**, not a scoping decision. It should not be cited as intent.
+
+So the remainder splits by *what the list is advising*, not by source kind:
+
+- **26 phase-1 items labelled "Best"/"Near Best", all from the `pre-raid`
+  stage list** — these are BiS *before you raid*. A P2+ universe omitting
+  them is defensible: the guide itself scopes them to pre-raid.
+- **The 5 phase-5 items below** — labelled BiS *at the top tier*, which is
+  precisely the tier `ret-p5.json` exists to serve. Omitting these is a real
+  defect, not scope.
+
+- **30257 Shattrath Leggings** — `sources` is `null` in db.json, so no
+  AtlasLoot/Wowhead coverage resolves it from current inputs; it needs a
+  force-include with a documented source. It is phase 1 and pre-raid stage,
+  so it stays out of a p2/p3 universe on the pre-raid argument above — not
+  on a content-type argument.
 
 ### Re-run at p4 and p5 — one real finding, left for a decision
 
@@ -81,18 +94,39 @@ items the Wowhead ret list names that the universe does not carry:**
 | 34472 | Shard of Contempt | **Absolute BIS** | drop: Magisters' Terrace |
 | 34679 | Shattered Sun Pendant of Might | Rep Option | *none* |
 
-Four have no db source at all; Shard of Contempt drops in Magisters' Terrace,
-a **heroic dungeon**, not a raid zone. These are the Sunwell-era badge /
-craft / rep tier — the same class of item as the phase-1 remainder, just at
-the top of the game.
+These are not marginal. Measured from db.json:
 
-**Deliberately not acted on.** Admitting them means either widening past raid
-zones or a force-include list, and the user scoped badge vendors to P1 and
-possibly P4 — not P3, and this was never scoped at all. Flagging for a
-decision rather than widening unasked.
+- **34472 Shard of Contempt** — `stats {24: 44}`, i.e. **44 expertise
+  rating**, the second-heaviest term in the ret EP model at 2.14. Drops in
+  Magisters' Terrace at `difficulty: 2` (heroic).
+- **34388 / 34392 / 34397** — ilvl **159**, two or three sockets each, on
+  plate/leather body slots. For comparison the shipped p5 universe's raid
+  gear tops out around the same ilvl.
+- **34679 Shattered Sun Pendant of Might** — 64 AP, 18 Agi, a rep reward.
 
-Note this only bites a **p5** run, which became reachable the same day
-`ret-p5.json` was first shipped. It does not affect p2/p3.
+So the p5 universe is missing four "P5 BIS"/"Absolute BIS" items and a named
+rep option, at the exact tier that file exists to serve. **This is a defect
+to fix, not scope to accept** (see the correction above).
+
+### The mechanism is already there, just unwired
+
+`ITEM_SOURCE_KINDS` in `assemble_universe.py` already includes `"heroic"`,
+and `source_zones()` already treats `heroic` like `raid`/`token` for zone
+attribution. But **nothing emits a `heroic` source** — the shipped p5
+universe contains only `raid` (514), `crafted` (39), `token` (18), `pvp` (6)
+and `badge` (6). Membership is gated on the source's zone appearing in
+`phase_raids.json`, which lists raid zones only.
+
+So admitting these needs: a phase→heroic-dungeon mapping (or an equivalent
+inclusion rule) plus a source path for the four with `sources: null`, which
+are Shattered Sun badge/craft/rep rewards that db.json does not attribute.
+
+**Scope of the fix is small and bounded**: intersecting the p4/p5 stage lists
+with `ret-p5.json` leaves exactly **5 items**. The phase-1 pre-raid remainder
+is a separate question and is not part of this.
+
+Only a **p5** run is affected today; p2/p3 are unchanged. Re-derive with the
+p4/p5 stage-list intersection described above.
 
 ## Done when
 
