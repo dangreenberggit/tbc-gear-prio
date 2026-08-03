@@ -1,0 +1,37 @@
+{
+  "spec": "ret",
+  "kind": "sunmote-upgrade-map",
+  "collectedDate": "2026-08-03",
+  "notes": [
+    "Sunwell Plateau's Sunmote upgrade path: vendor Yrma exchanges a base raid drop plus a Sunmote for the upgraded piece. Two-hop in the same sense the tier tokens are — the piece comes from a named raid boss via an intermediary — but these are NOT class tier set pieces, so they deliberately live outside data/two-hop/ret-tokens.json, which pool-hardening.test.ts pins against wowsims db setIds.",
+    "Sunmote itself is not an item in the pinned vendor/wowsims/db.json, so there is no token item id to record.",
+    "baseId is the pre-upgrade drop; all three are already admitted to ret-p5 on their own. Zones and bosses are db.json's own attribution for baseId (sources[0].drop), not the Wowhead guide's — the guide writes the Eredar Twins encounter as 'Lady Sacrolash'.",
+    "Item ids and the upgrade pairings come from the Wowhead ret P5 BiS list (data/wowhead-lists/ret/p5.json wowheadSourceText), which names the base item for each."
+  ],
+  "entries": [
+    {
+      "pieceId": 34388,
+      "pieceName": "Pauldrons of Berserking",
+      "baseId": 34192,
+      "baseName": "Pauldrons of Perseverance",
+      "zone": "Sunwell Plateau",
+      "boss": "Eredar Twins"
+    },
+    {
+      "pieceId": 34392,
+      "pieceName": "Demontooth Shoulderpads",
+      "baseId": 34195,
+      "baseName": "Shoulderpads of Vehemence",
+      "zone": "Sunwell Plateau",
+      "boss": "Eredar Twins"
+    },
+    {
+      "pieceId": 34397,
+      "pieceName": "Bladed Chaos Tunic",
+      "baseId": 34211,
+      "baseName": "Harness of Carnal Instinct",
+      "zone": "Sunwell Plateau",
+      "boss": "M'uru"
+    }
+  ]
+}

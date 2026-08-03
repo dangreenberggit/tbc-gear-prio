@@ -1824,6 +1824,26 @@
       "curationHint": 63.33
     },
     {
+      "itemId": 30834,
+      "name": "Shapeshifter's Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Lower City",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 61.55,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 32335,
       "name": "Unstoppable Aggressor's Ring",
       "slot": "finger",
@@ -3714,6 +3734,26 @@
         }
       ],
       "curationHint": 46.2
+    },
+    {
+      "itemId": 29119,
+      "name": "Haramad's Bargain",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 44.75,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28745,

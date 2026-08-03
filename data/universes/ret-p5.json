@@ -734,6 +734,24 @@
       "curationHint": 137.51
     },
     {
+      "itemId": 34397,
+      "name": "Bladed Chaos Tunic",
+      "slot": "chest",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Sunwell Plateau",
+          "token": "Sunmote + Harness of Carnal Instinct",
+          "boss": "M'uru"
+        }
+      ],
+      "curationHint": 130.96
+    },
+    {
       "itemId": 34215,
       "name": "Warharness of Reckless Fury",
       "slot": "chest",
@@ -861,6 +879,22 @@
         }
       ],
       "curationHint": 111.95
+    },
+    {
+      "itemId": 34615,
+      "name": "Netherforce Chestplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 105.8
     },
     {
       "itemId": 34211,
@@ -1013,6 +1047,22 @@
         }
       ],
       "curationHint": 89.05
+    },
+    {
+      "itemId": 34614,
+      "name": "Tunic of the Ranger Lord",
+      "slot": "chest",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 87.54
     },
     {
       "itemId": 30054,
@@ -1300,6 +1350,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Terestian Illhoof"
+        }
+      ],
+      "curationHint": 5.1
+    },
+    {
+      "itemId": 34605,
+      "name": "Breastplate of Fierce Survival",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
         }
       ],
       "curationHint": 5.1
@@ -2013,6 +2079,22 @@
       "curationHint": 3.23
     },
     {
+      "itemId": 34612,
+      "name": "Greaves of the Penitent Knight",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 3.23
+    },
+    {
       "itemId": 30066,
       "name": "Tempest-Strider Boots",
       "slot": "feet",
@@ -2323,6 +2405,26 @@
         }
       ],
       "curationHint": 63.33
+    },
+    {
+      "itemId": 30834,
+      "name": "Shapeshifter's Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Lower City",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 61.55,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 32335,
@@ -5094,6 +5196,26 @@
       "curationHint": 45.34
     },
     {
+      "itemId": 29119,
+      "name": "Haramad's Bargain",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 44.75,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 28745,
       "name": "Mithril Chain of Heroism",
       "slot": "neck",
@@ -5150,6 +5272,23 @@
         }
       ],
       "curationHint": 43.0
+    },
+    {
+      "itemId": 34679,
+      "name": "Shattered Sun Pendant of Might",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Shattered Sun Offensive",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 39.74
     },
     {
       "itemId": 30099,
@@ -5638,6 +5777,40 @@
       "curationHint": 111.25
     },
     {
+      "itemId": 34613,
+      "name": "Shoulderpads of the Silvermoon Retainer",
+      "slot": "shoulder",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 101.12
+    },
+    {
+      "itemId": 34388,
+      "name": "Pauldrons of Berserking",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Sunwell Plateau",
+          "token": "Sunmote + Pauldrons of Perseverance",
+          "boss": "Eredar Twins"
+        }
+      ],
+      "curationHint": 99.69
+    },
+    {
       "itemId": 32581,
       "name": "Swiftstrike Shoulders",
       "slot": "shoulder",
@@ -5660,6 +5833,24 @@
         }
       ],
       "curationHint": 96.55
+    },
+    {
+      "itemId": 34392,
+      "name": "Demontooth Shoulderpads",
+      "slot": "shoulder",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Sunwell Plateau",
+          "token": "Sunmote + Shoulderpads of Vehemence",
+          "boss": "Eredar Twins"
+        }
+      ],
+      "curationHint": 92.4
     },
     {
       "itemId": 33206,
@@ -5931,6 +6122,22 @@
         }
       ],
       "curationHint": 57.32
+    },
+    {
+      "itemId": 34601,
+      "name": "Shoulderplates of Everlasting Pain",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 54.57
     },
     {
       "itemId": 28589,
@@ -6287,6 +6494,22 @@
       "curationHint": 115.56
     },
     {
+      "itemId": 34472,
+      "name": "Shard of Contempt",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 94.16
+    },
+    {
       "itemId": 32505,
       "name": "Madness of the Betrayer",
       "slot": "trinket",
@@ -6485,6 +6708,22 @@
         }
       ],
       "curationHint": 9.01
+    },
+    {
+      "itemId": 34470,
+      "name": "Timbal's Focusing Crystal",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 7.48
     },
     {
       "itemId": 34430,
@@ -6802,6 +7041,38 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 34471,
+      "name": "Vial of the Sunwell",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 34473,
+      "name": "Commendation of Kael'thas",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
         }
       ],
       "curationHint": 0.0
@@ -8414,6 +8685,22 @@
         }
       ],
       "curationHint": 3.57
+    },
+    {
+      "itemId": 34602,
+      "name": "Eversong Cuffs",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "heroic",
+          "dungeon": "Magisters' Terrace"
+        }
+      ],
+      "curationHint": 2.89
     },
     {
       "itemId": 28503,
