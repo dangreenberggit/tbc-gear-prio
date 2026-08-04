@@ -255,178 +255,190 @@ export async function rankUpgrades(
   const job = await deps.store.job.create({ contentHash, input });
   await deps.store.job.update(job.id, { status: "running" });
 
-  const totalSims = 1 + candidates.length;
-  onProgress?.({ stage: "simming", done: 0, total: totalSims });
-  let observation;
+  // One catch for every exit after the row exists, rather than one per throw
+  // site: a stranded `running` row is a job the Phase 2 API would attach to
+  // and wait on forever, and per-site handling means the next throw added
+  // below re-opens that hole silently (ticket 29).
   try {
-    observation = await deps.sim.run(request, runOpts);
+    return await rankAfterJobCreated();
   } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    // Without this the row is stranded `running`, and a dedupe that attaches
-    // to it would wait on a job that already died.
     await deps.store.job.update(job.id, {
       status: "error",
-      errorKind: "sim-failed",
-      errorDetail: detail,
+      errorKind: err instanceof RankError ? err.kind : "sim-failed",
+      errorDetail: err instanceof Error ? err.message : String(err),
     });
-    throw new RankError("sim-failed", detail);
+    throw err;
   }
-  onProgress?.({ stage: "simming", done: 1, total: totalSims });
 
-  const baselineDps = observation.dps;
-  const ranked: RankedItem[] = [];
-  const simSkips: {
-    itemId: number;
-    name: string;
-    slot: string;
-    reason: string;
-  }[] = [];
-  let done = 1;
-
-  for (const entry of candidates) {
-    const owned = equippedIds.has(entry.itemId);
-    const slotNames = simSlotsForPoolSlot(entry.slot);
-    let best: {
-      deltaDps: number;
-      stdev: number;
-      slotChoice?: SimSlotName;
-      setBonusNote?: string;
-    } | null = null;
-
-    for (let s = 0; s < slotNames.length; s++) {
-      const slotName = slotNames[s]!;
-      const slotIndex = SIM_ORDER.indexOf(slotName);
-      // `continue` here would drop the candidate from the ranking silently —
-      // the item just never appears, with no error and no substitution row.
-      // Every ItemSlot resolves today, so reaching this means the mapping in
-      // simSlotsForPoolSlot and slots-table.json disagree, which is a bug in
-      // the table rather than anything about this character's gear.
-      if (slotIndex < 0) {
-        throw new Error(
-          `slot mapping bug: ${entry.slot} -> ${slotName} is not in SIM_ORDER ` +
-            `(item ${entry.itemId} ${entry.name})`
-        );
-      }
-      const swapped = equipmentForCandidateSwap(
-        equipment,
-        slotIndex,
-        entry.itemId,
-        gems
+  async function rankAfterJobCreated(): Promise<Ranking> {
+    const totalSims = 1 + candidates.length;
+    onProgress?.({ stage: "simming", done: 0, total: totalSims });
+    let observation;
+    try {
+      observation = await deps.sim.run(request, runOpts);
+    } catch (err) {
+      throw new RankError(
+        "sim-failed",
+        err instanceof Error ? err.message : String(err)
       );
-      const candReq = compose(deps.raidSimSkeleton, {
-        name: input.character.name.toLowerCase(),
-        race,
-        equipment: swapped,
-      });
-      let candObs;
-      try {
-        candObs = await deps.sim.run(candReq, runOpts);
-      } catch (err) {
-        // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
-        // wowsimcli when equipped on ret — skip this slot attempt. Recorded
-        // rather than swallowed: a candidate that never simmed must not be
-        // indistinguishable from one that simmed badly.
-        simSkips.push({
-          itemId: entry.itemId,
-          name: entry.name,
-          slot: slotName,
-          reason: err instanceof Error ? err.message : String(err),
-        });
-        continue;
-      }
-      const deltaDps = candObs.dps - baselineDps;
-      const note = setBreakNote(equipment, slotIndex, entry.itemId);
-      if (!best || deltaDps > best.deltaDps) {
-        const next: {
-          deltaDps: number;
-          stdev: number;
-          slotChoice?: SimSlotName;
-          setBonusNote?: string;
-        } = {
-          deltaDps,
-          stdev: candObs.stdev,
-        };
-        if (slotNames.length > 1) {
-          next.slotChoice = slotName;
+    }
+    onProgress?.({ stage: "simming", done: 1, total: totalSims });
+
+    const baselineDps = observation.dps;
+    const ranked: RankedItem[] = [];
+    const simSkips: {
+      itemId: number;
+      name: string;
+      slot: string;
+      reason: string;
+    }[] = [];
+    let done = 1;
+
+    for (const entry of candidates) {
+      const owned = equippedIds.has(entry.itemId);
+      const slotNames = simSlotsForPoolSlot(entry.slot);
+      let best: {
+        deltaDps: number;
+        stdev: number;
+        slotChoice?: SimSlotName;
+        setBonusNote?: string;
+      } | null = null;
+
+      for (let s = 0; s < slotNames.length; s++) {
+        const slotName = slotNames[s]!;
+        const slotIndex = SIM_ORDER.indexOf(slotName);
+        // `continue` here would drop the candidate from the ranking silently —
+        // the item just never appears, with no error and no substitution row.
+        // Every ItemSlot resolves today, so reaching this means the mapping in
+        // simSlotsForPoolSlot and slots-table.json disagree, which is a bug in
+        // the table rather than anything about this character's gear.
+        if (slotIndex < 0) {
+          throw new Error(
+            `slot mapping bug: ${entry.slot} -> ${slotName} is not in SIM_ORDER ` +
+              `(item ${entry.itemId} ${entry.name})`
+          );
         }
-        if (note) next.setBonusNote = note;
-        best = next;
+        const swapped = equipmentForCandidateSwap(
+          equipment,
+          slotIndex,
+          entry.itemId,
+          gems
+        );
+        const candReq = compose(deps.raidSimSkeleton, {
+          name: input.character.name.toLowerCase(),
+          race,
+          equipment: swapped,
+        });
+        let candObs;
+        try {
+          candObs = await deps.sim.run(candReq, runOpts);
+        } catch (err) {
+          // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
+          // wowsimcli when equipped on ret — skip this slot attempt. Recorded
+          // rather than swallowed: a candidate that never simmed must not be
+          // indistinguishable from one that simmed badly.
+          simSkips.push({
+            itemId: entry.itemId,
+            name: entry.name,
+            slot: slotName,
+            reason: err instanceof Error ? err.message : String(err),
+          });
+          continue;
+        }
+        const deltaDps = candObs.dps - baselineDps;
+        const note = setBreakNote(equipment, slotIndex, entry.itemId);
+        if (!best || deltaDps > best.deltaDps) {
+          const next: {
+            deltaDps: number;
+            stdev: number;
+            slotChoice?: SimSlotName;
+            setBonusNote?: string;
+          } = {
+            deltaDps,
+            stdev: candObs.stdev,
+          };
+          if (slotNames.length > 1) {
+            next.slotChoice = slotName;
+          }
+          if (note) next.setBonusNote = note;
+          best = next;
+        }
+      }
+
+      done += 1;
+      onProgress?.({ stage: "simming", done, total: totalSims });
+
+      if (!best) continue;
+
+      const deltaPct =
+        baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
+      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, CUTOFF);
+      const item: RankedItem = {
+        rank: null,
+        itemId: entry.itemId,
+        name: entry.name,
+        slot: entry.slot,
+        source: entry.source,
+        deltaDps: best.deltaDps,
+        deltaPct,
+        // PLAN.md §10 Phase 1: independent SE of the mean = stdev / √n
+        se: best.stdev / Math.sqrt(iterations),
+        seMethod: "independent",
+        bisTags: entry.bisTags ?? [],
+        belowCutoff,
+      };
+      if (entry.sources) item.sources = entry.sources;
+      if (best.slotChoice) item.slotChoice = best.slotChoice;
+      if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
+      if (owned) item.owned = true;
+      ranked.push(item);
+    }
+
+    onProgress?.({ stage: "ranking" });
+    ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+    let rank = 1;
+    for (const item of ranked) {
+      if (item.belowCutoff) {
+        item.rank = null;
+      } else {
+        item.rank = rank;
+        rank += 1;
       }
     }
 
-    done += 1;
-    onProgress?.({ stage: "simming", done, total: totalSims });
-
-    if (!best) continue;
-
-    const deltaPct =
-      baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
-    const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, CUTOFF);
-    const item: RankedItem = {
-      rank: null,
-      itemId: entry.itemId,
-      name: entry.name,
-      slot: entry.slot,
-      source: entry.source,
-      deltaDps: best.deltaDps,
-      deltaPct,
-      // PLAN.md §10 Phase 1: independent SE of the mean = stdev / √n
-      se: best.stdev / Math.sqrt(iterations),
-      seMethod: "independent",
-      bisTags: entry.bisTags ?? [],
-      belowCutoff,
+    const ranking: Ranking = {
+      contentHash,
+      cutoff: CUTOFF,
+      baseline: {
+        dps: observation.dps,
+        stdev: observation.stdev,
+        metaAdjusted,
+      },
+      assumptions: {
+        maxPhase: input.maxPhase,
+        seeds,
+        iterations,
+        race,
+        presetId: PRESET_ID,
+        standing: buildStandingAssumptions(race),
+      },
+      substitutions: [
+        ...substitutionsFromMetaRepair(metaSwaps),
+        ...simSkips.map((s) => ({
+          field: `candidate ${s.itemId} (${s.slot})`,
+          detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
+        })),
+      ],
+      items: ranked,
     };
-    if (entry.sources) item.sources = entry.sources;
-    if (best.slotChoice) item.slotChoice = best.slotChoice;
-    if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
-    if (owned) item.owned = true;
-    ranked.push(item);
+
+    await deps.store.put(rankingCacheKey(contentHash), ranking);
+    await deps.store.job.update(job.id, {
+      status: "done",
+      result: ranking,
+    });
+    return ranking;
   }
-
-  onProgress?.({ stage: "ranking" });
-  ranked.sort((a, b) => b.deltaDps - a.deltaDps);
-  let rank = 1;
-  for (const item of ranked) {
-    if (item.belowCutoff) {
-      item.rank = null;
-    } else {
-      item.rank = rank;
-      rank += 1;
-    }
-  }
-
-  const ranking: Ranking = {
-    contentHash,
-    cutoff: CUTOFF,
-    baseline: {
-      dps: observation.dps,
-      stdev: observation.stdev,
-      metaAdjusted,
-    },
-    assumptions: {
-      maxPhase: input.maxPhase,
-      seeds,
-      iterations,
-      race,
-      presetId: PRESET_ID,
-      standing: buildStandingAssumptions(race),
-    },
-    substitutions: [
-      ...substitutionsFromMetaRepair(metaSwaps),
-      ...simSkips.map((s) => ({
-        field: `candidate ${s.itemId} (${s.slot})`,
-        detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
-      })),
-    ],
-    items: ranked,
-  };
-
-  await deps.store.put(rankingCacheKey(contentHash), ranking);
-  await deps.store.job.update(job.id, {
-    status: "done",
-    result: ranking,
-  });
-  return ranking;
 }
 
 /** Namespaced so a ranking blob cannot collide with another content-addressed value. */
