@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Spec findings S3–S7
 Blocks: phase-2
@@ -11,18 +11,24 @@ each is either a missing affordance or an undocumented architectural change. The
 resolution for several may legitimately be "amend the plan" — but that has to be
 a recorded decision, not silent drift.
 
-**Status 2026-08-03: items 1, 2, 4 and 5 are resolved.** Only item 3 (`Deps`
-shape) is outstanding, and it is deferred on purpose — it should be revisited
-when `contentHash` stops being a placeholder, because that is when the field's
-home decides whether the cache is correct. Nothing here is actionable until
-then; the ticket stays open to hold that trigger.
+**Status 2026-08-03: all five items are resolved.** Item 3 was the last one
+open, waiting on `contentHash`; that trigger has fired — see below.
 
-**Handed off 2026-08-03:** `.scratch/handoffs/contenthash-and-deps-shape.md`
-briefs a fresh agent on implementing `contentHash` first and settling this item
-as a consequence. It also records that PLAN.md §7's field list is partly stale
-(it names `poolId`/`poolVersion`, superseded by ADR-0017, and
-`epVersion`/`fullPool`, which reference the prefilter ADR-0018 says was never
-built), so §7 cannot be implemented literally.
+**Item 3 resolved 2026-08-03 by ADR-0019.** `contentHash` is implemented, and
+the trigger this ticket was holding for produced the *opposite* answer to the
+one it predicted. The ticket argued `pool`/`gemPalette` belong on `RankInput`
+*"because they are inputs and they are hashed."* They are now genuinely hashed
+— as `candidateItemIds` and `gemPaletteIds` — **and the inference still does
+not follow.** `rankUpgrades` reads both `input` and `deps` and hashes from
+both, so cache correctness depends on a field being *in the hash*, not on which
+parameter declares it. The stale-ranking failure this item feared is prevented
+by hashing; relocation prevents nothing.
+
+Decision: `pool` and `gemPalette` **stay on `Deps`**, and PLAN.md §4 is amended
+to describe the real shape — `Deps` carries the three seams plus per-spec
+configuration the engine cannot synthesise. Note `raidSimSkeleton` and
+`epWeights` are data too and would have stayed regardless, so moving the other
+two would only partly have restored §5's "three and only three".
 
 ## 1. `fullPool` is not implemented (§4, §8.3.3) — RESOLVED 2026-07-30
 
@@ -88,7 +94,7 @@ regenerating:
 
 Real data is unaffected: regenerating p3 still writes 354 entries, exit 0.
 
-## 3. `Deps` grew four fields beyond the spec (§4) — PARTLY RESOLVED, rest deferred
+## 3. `Deps` grew four fields beyond the spec (§4) — RESOLVED 2026-08-03 (ADR-0019)
 
 §4 fixes `Deps` at `{ gear, sim, store, clock }`. Shipped adds
 `raidSimSkeleton`, `epWeights`, `gemPalette?`, `pool?`. `pool` and `gemPalette`
@@ -132,7 +138,20 @@ so nothing is missing from the hash. When `contentHash` is implemented, the
 candidate pool genuinely must be part of it — change the pool and the numbers
 change, so a cache keyed without it would serve stale rankings.
 
-### Deferred, deliberately
+### Settled 2026-08-03, once the hash was real
+
+The deferral below was right to wait, and wrong about what it would find. It
+assumed *"the field's home determines whether the cache is correct."* It does
+not — the hash's **contents** determine that, and `contentHash` hashes from
+`deps` as readily as from `input`. With `candidateItemIds` and `gemPaletteIds`
+in the payload (both mutation-tested in `content-hash.test.ts`), the cache is
+correct with the fields where they are.
+
+So the change would not have paid for itself: it is a wide mechanical refactor
+across `rank.ts`, `cli.ts` and every `Deps`-building test that leaves the
+guarantee identical. Recorded in ADR-0019 and PLAN.md §4 instead.
+
+Original deferral:
 
 Moving `pool` / `gemPalette` to `RankInput` now would touch `rank.ts`,
 `cli.ts` and every test that builds `Deps`, on a branch that is otherwise

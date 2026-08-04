@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Standards finding ST4
 Blocks: none
@@ -10,17 +10,18 @@ Judgement calls from the pre-merge review's Standards axis. None is a
 correctness risk; each is a refactor with its own blast radius, so they were
 deferred rather than done mid-review. Grouped roughly by value.
 
-**Status 2026-08-03.** Everything here is done except one item, which is
-blocked rather than forgotten:
+**Status 2026-08-03: everything on this ticket is done.** The last item closed
+as predicted:
 
-- **Unused `Deps` breadth** — its own text says resolve alongside tickets 19
-  and 23, and ticket 23's `Deps` item is itself waiting on `contentHash`
-  becoming real. **This is the only thing left on this ticket.**
-  **Handed off** in `.scratch/handoffs/contenthash-and-deps-shape.md`:
-  implementing the ranking cache gives `deps.store` its first production
-  consumer, which retires `void deps.store; void deps.clock;` as a side effect
-  rather than as its own refactor. Note the pointer to ticket **19 is stale** —
-  19 is closed, deferred to Phase 2 by ADR-0016.
+- **Unused `Deps` breadth — RESOLVED 2026-08-03 (ADR-0019).** The ranking
+  cache gave both ports their first production consumer, so
+  `void deps.store; void deps.clock;` is gone rather than refactored away.
+  `deps.store` holds the ranking blob at `ranking:<contentHash>` and writes
+  the job row (`create` → `running` → `done`, `error` on a failed sim);
+  `deps.clock` timestamps those rows through `MemoryStore`. The `Store.job`
+  surface that read as speculative is now the dedupe handle PLAN.md §7's
+  second payoff needs. Ticket **19 was stale** in the pointer below — it is
+  closed, deferred to Phase 2 by ADR-0016.
 
 Closed this round: `ITEM_SOURCE_KINDS` duplicated three ways, the `GemContext`
 grouping, the JSON-widening trap behind both of them, and the
@@ -230,7 +231,10 @@ found it blocked, and wrote "impossible"; the second version found the right
 scope but treated the blocked approach as permanently unavailable instead of
 asking what it would cost. It cost one script.
 
-## Unused `Deps` breadth
+## Unused `Deps` breadth — RESOLVED 2026-08-03 (ADR-0019)
+
+Closed by the ranking cache, which consumes both ports in production. See the
+status note at the top of this ticket. Original text:
 
 `rank.ts` ends with `void deps.store; void deps.clock;`. Both ports are required
 by callers and unused by `rankUpgrades`; `Store`'s full `job.create/update/read`
