@@ -14,38 +14,108 @@ Assessed on `dev` @ `23c3291`.
 
 ---
 
-## 1. Warcraft Logs client — the biggest gap
+## 1. Warcraft Logs client — reference only, NOT a take
+
+> **CORRECTED 2026-08-04.** An earlier revision of this section called upstream's
+> importer "the biggest gap" and the clearest take-don't-build item in the repo.
+> **That was wrong**, and it was wrong in a way that would have cost time: their
+> classifier throws on our data. The investigation below is the correction. The
+> underlying observation that we have written _no_ live WCL client still stands
+> — see [`README.md`](README.md) — but upstream is not the answer to it.
 
 **Upstream:** `ui/raid/components/importers/raid_wcl_importer.tsx`, 776 lines.
+**Ours:** `PLAN.md` §5.2 specifies `WclGearSource` in detail, with [P0]-verified
+endpoints and a classifier. Unbuilt, but specified.
 
-**Ours:** nothing. See [`README.md`](README.md) — `gear-source.ts` is an
-interface plus a fixture replayer.
+**Verdict: take ~nothing. Read it as a reference for the report-scoped GraphQL
+query shapes, and for the gear-field mapping. PLAN.md §5.2 wins on facts.**
 
-What theirs covers:
+### 1.1 Their spec classifier cannot run on our data
 
-| Piece                    | Detail                                                                               |
-| ------------------------ | ------------------------------------------------------------------------------------ |
-| OAuth                    | client-credentials against `classic.warcraftlogs.com/oauth/token`                    |
-| GraphQL transport        | query builder, error handling, response unwrapping                                   |
-| Point-cost awareness     | their code comments that WCL bills 1 point per subquery, and batches accordingly     |
-| `CombatantInfo` parsing  | the event our whole gear read depends on                                             |
-| `gear[] → ItemSpec`      | `id`, `permanentEnchant`, `gems[].id` — the same namespace we verified independently |
-| Spec classification      | from the WCL icon string                                                             |
-| Talent → preset matching | picks a sim preset from logged talents                                               |
+Upstream classifies at line 63: `const wclSpec = data.icon.split('-')[1]`,
+expecting `"Paladin-Justicar"`. Our Anniversary fixture has **no `icon` field on
+actors at all**:
 
-**Take:** the query shapes, the point-batching approach, and the gear mapping.
+```bash
+python -c "
+import json; d=json.load(open('test/fixtures/slamaltman.raw.json'))
+def w(o):
+    if isinstance(o,dict):
+        if 'actors' in o and isinstance(o['actors'],list):
+            a=o['actors']; print('actors:',len(a),'keys:',sorted(a[0].keys()))
+            print('with icon:',sum(1 for x in a if 'icon' in x))
+        [w(v) for v in o.values()]
+    elif isinstance(o,list): [w(v) for v in o[:3]]
+w(d)"
+# actors: 74 keys: ['id', 'name', 'server', 'subType']
+# with icon: 0
+```
 
-**Do not take:** the credentials. Upstream hardcodes a shared `Basic` auth pair
-in the browser bundle (in `getWCLBearerToken`). We want our own, and cloning a
-shared rate-limited budget into a second deployment is a bad idea regardless of
-where our app is hosted.
+`subType` is class-level only (`Paladin`, never `Retribution`). On our data
+`data.icon.split('-')[1]` is `undefined`, `fullType` becomes
+`"Paladinundefined"`, and their constructor throws `Player type not implemented`.
 
-**Still ours to write — the smaller half.** Their importer starts from a report
-URL plus a fight id and builds all 25 raiders. Ours starts from a _character
-name_ and must find the most recent qualifying kill. That selection policy has no
-upstream equivalent. Their spec classification is also icon-string-based, while
-ours is talent-tree plurality — we verified upstream's approach agrees, but ours
-was chosen for a reason (P0: no spec label exists at actor level) and should stay.
+This is not a stylistic difference. **§5.2's [P0] talent-plurality classifier is
+the only one that works here**, and `packages/core/src/spec.ts` already
+implements it correctly.
+
+### 1.2 They embody the [R18] trap
+
+§5.2's [R18] warns that `talents[].id` means _points spent_, not talent ids.
+Confirmed in our fixture — the `id` values sum to exactly **61** for all 25
+combatants, the level-70 TBC talent budget:
+
+```bash
+python -c "
+import json; d=json.load(open('test/fixtures/slamaltman.raw.json')); f=[]
+def w(o):
+    if isinstance(o,dict):
+        if isinstance(o.get('talents'),list) and o['talents']: f.append(o['talents'])
+        [w(v) for v in o.values()]
+    elif isinstance(o,list): [w(v) for v in o]
+w(d); print('combatants:',len(f)); print('first:',f[0])
+print('id-sums:',sorted({sum(t.get('id',0) for t in x) for x in f}))"
+# combatants: 25
+# first: [{'id': 21, ...}, {'id': 40, ...}, {'id': 0, ...}]
+# id-sums: [61]
+```
+
+Upstream reads `talents[i]?.guid` (line 121) and treats it as points-spent for
+preset matching — the right _reading_, but our field is named `id`, not `guid`.
+On our shape theirs is `undefined`, `Math.abs(undefined - n)` is `NaN`, and the
+distance comparison silently selects preset index 0 instead of erroring.
+
+### 1.3 The half we need most is absent
+
+Theirs parses `classic.warcraftlogs.com/reports/ID#fight=N` and queries
+`report(code:)`. §5.2 needs `findFights(character, spec)` — character-first
+discovery via `encounterRankings` / `recentReports`. Grep their file for
+`encounterRankings|recentReports|zoneRankings|characterData`: **zero hits.**
+There is no counterpart to lift.
+
+### 1.4 What is actually reusable
+
+Roughly **60–90 lines of 776 (~10%)**: the GraphQL string literals (~lines
+463–540, report-scoped) and a trivial field rename. The remainder is bound to
+upstream's `Player` / `simUI` / `TypedEvent` / `RaidSimPreset` objects —
+`eventID` appears 26×, `simUI` 12×. "Porting" it means rewriting it.
+
+The one genuine borrow: their gear shape (`id`, `permanentEnchant`, `gems[].id`)
+maps cleanly onto our `LoggedItem`, confirming the `effectId` enchant namespace
+we verified independently.
+
+**Do not take the credentials.** Upstream hardcodes a shared `Basic` auth pair in
+the browser bundle (`getWCLBearerToken`). We want our own (`WCL_CLIENT_ID` /
+`WCL_CLIENT_SECRET`, PLAN.md §13).
+
+### 1.5 Open: the OAuth host
+
+Upstream uses `classic.warcraftlogs.com/oauth/token`; §5.2 [P0] records
+`www.warcraftlogs.com/oauth/token` and says "_not_ a classic-specific one".
+`wcl_probe.py` tries `www` first and records its success — that is a
+first-success record, **not** evidence that `classic` fails. **Hypothesis,
+untested:** both work and share one OAuth host. Settling it needs credentials:
+`python wcl_probe.py`. Not worth blocking on; the GraphQL URL is not in dispute.
 
 ---
 

@@ -41,26 +41,32 @@ That is the seam working as designed — the engine runs offline and
 deterministically. But the "fetch real gear from WCL" box is **empty**. Type a
 character name for real and nothing answers.
 
-So "take their importer" means **filling an empty box**, not replacing our
-implementation with theirs. An earlier note in this folder implied we had
-duplicated their work; we had not, and the correction runs the other way — we
-have not yet built the thing they already have.
+So the box is empty rather than duplicated — an earlier note in this folder
+implied we had rebuilt their importer, and we had not.
+
+**But do not conclude "so take theirs" — that was this folder's second wrong
+answer, corrected 2026-08-04.** Their importer classifies spec from an `icon`
+dash-suffix that is **absent from our Anniversary fixtures**, so it throws on our
+data; it is report+fightID-first with no character discovery; and only ~10% of
+its 776 lines is framework-independent. `PLAN.md` §5.2 already specifies our own
+adapter with [P0]-verified endpoints and a working classifier, and it wins on
+facts. Evidence and repro commands: [`take-list.md`](take-list.md) §1.
 
 ---
 
 ## Findings at a glance
 
-| Upstream piece                                                             | Our state            | Verdict                                                                |
-| -------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------- |
-| `raid_wcl_importer.tsx` — OAuth, GraphQL, `CombatantInfo`, gear→ItemSpec   | **unbuilt**          | **Take.** Biggest single win                                           |
-| `constants/mechanics.ts` — hit/crit/haste/expertise rating conversions     | **unbuilt**          | **Take.** Hand-deriving these invites silent error                     |
-| `gear_picker.tsx`, `database.ts`, `wowhead.ts` — pickers, lookup, tooltips | **unbuilt**          | **Take** if any UI is built                                            |
-| The sim (CLI / WASM / HTTP — one engine)                                   | using CLI            | Already ours; see [`../compute-topology.md`](../compute-topology.md)   |
-| `db.json` item `phase`, encounter presets                                  | partly duplicated    | See [`../upstream-data-redundancy.md`](../upstream-data-redundancy.md) |
-| `proto_utils/gems.ts` meta conditions                                      | ported (204 lines)   | **Keep ours** — behaviourally equivalent, wants a tripwire test        |
-| `tools/database/atlasloot.go`                                              | ours is TBC-specific | **Keep ours** — theirs reads MoP URLs only                             |
-| Fight _selection_ ("last qualifying kill for a character")                 | ours                 | **Ours.** Theirs takes a report URL                                    |
-| Ranked single-item upgrades vs logged gear                                 | **built**            | **Ours.** Not in their app; this is the product                        |
+| Upstream piece                                                             | Our state            | Verdict                                                                 |
+| -------------------------------------------------------------------------- | -------------------- | ----------------------------------------------------------------------- |
+| `raid_wcl_importer.tsx` — OAuth, GraphQL, `CombatantInfo`, gear→ItemSpec   | **unbuilt**          | **Reference only** — their classifier throws on our data (take-list §1) |
+| `constants/mechanics.ts` — hit/crit/haste/expertise rating conversions     | **unbuilt**          | **Take.** Hand-deriving these invites silent error                      |
+| `gear_picker.tsx`, `database.ts`, `wowhead.ts` — pickers, lookup, tooltips | **unbuilt**          | **Take** if any UI is built                                             |
+| The sim (CLI / WASM / HTTP — one engine)                                   | using CLI            | Already ours; see [`../compute-topology.md`](../compute-topology.md)    |
+| `db.json` item `phase`, encounter presets                                  | partly duplicated    | See [`../upstream-data-redundancy.md`](../upstream-data-redundancy.md)  |
+| `proto_utils/gems.ts` meta conditions                                      | ported (204 lines)   | **Keep ours** — behaviourally equivalent, wants a tripwire test         |
+| `tools/database/atlasloot.go`                                              | ours is TBC-specific | **Keep ours** — theirs reads MoP URLs only                              |
+| Fight _selection_ ("last qualifying kill for a character")                 | ours                 | **Ours.** Theirs takes a report URL                                     |
+| Ranked single-item upgrades vs logged gear                                 | **built**            | **Ours.** Not in their app; this is the product                         |
 
 **On volume:** our whole domain layer is ~1,066 lines against upstream
 counterparts of 9 KB and 54 KB for the same concepts. Confirmed overlap is ~250
