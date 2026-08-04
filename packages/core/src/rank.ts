@@ -223,7 +223,6 @@ export async function rankUpgrades(
   // Hashed here rather than at entry because the logged gear is the largest
   // input to every delta, and it is not known until readGear resolves. The
   // check still lands before the sim loop, which is the expensive part.
-  const palette = deps.gemPalette ?? gemsForPhase(input.maxPhase);
   const contentHash = contentHashOf({
     character: input.character,
     spec: input.spec,
@@ -231,10 +230,11 @@ export async function rankUpgrades(
     race,
     fight,
     gear: { items: logged.items as readonly HashedGearItem[] },
-    candidateItemIds: candidates.map((e) => e.itemId),
-    gemPaletteIds: palette.map((g) => g.id),
+    candidates: candidates.map((e) => ({ itemId: e.itemId, slot: e.slot })),
+    gemPaletteIds: gems.palette.map((g) => g.id),
     epWeights: deps.epWeights,
     presetId: PRESET_ID,
+    skeleton: deps.raidSimSkeleton,
     iterations,
     seeds,
     simVersion: await deps.sim.version(),

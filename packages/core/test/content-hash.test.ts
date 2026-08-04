@@ -55,10 +55,17 @@ const BASE = {
   gear: {
     items: [{ id: 29996, slot: "head", enchant: 3004, gems: [24028, 24033] }],
   },
-  candidateItemIds: [30101, 29381],
+  candidates: [
+    { itemId: 30101, slot: "chest" },
+    { itemId: 29381, slot: "neck" },
+  ],
   gemPaletteIds: [24028, 24033],
   epWeights: { sp: 1, crit: 0.7 },
   presetId: "ret/p2.raid-sim-skeleton",
+  skeleton: {
+    raid: { buffs: { bloodlust: true } },
+    encounter: { duration: 180 },
+  },
   iterations: 3000,
   seeds: [42],
   simVersion: "v0.0.101",
@@ -72,10 +79,14 @@ describe("contentHashOf", () => {
       simVersion: BASE.simVersion,
       seeds: BASE.seeds,
       iterations: BASE.iterations,
+      skeleton: {
+        encounter: { duration: 180 },
+        raid: { buffs: { bloodlust: true } },
+      },
       presetId: BASE.presetId,
       epWeights: { crit: 0.7, sp: 1 },
       gemPaletteIds: BASE.gemPaletteIds,
-      candidateItemIds: BASE.candidateItemIds,
+      candidates: BASE.candidates,
       gear: BASE.gear,
       fight: BASE.fight,
       race: BASE.race,
@@ -111,7 +122,7 @@ describe("contentHashOf", () => {
     ["engineVersion", { engineVersion: 2 }],
     ["presetId", { presetId: "ret/p3.raid-sim-skeleton" }],
     ["epWeights", { epWeights: { sp: 1, crit: 0.8 } }],
-    ["candidateItemIds", { candidateItemIds: [30101] }],
+    ["candidates", { candidates: [{ itemId: 30101, slot: "chest" }] }],
     ["gemPaletteIds", { gemPaletteIds: [24028] }],
     [
       "gear",
@@ -119,6 +130,40 @@ describe("contentHashOf", () => {
     ],
   ])("changes when %s changes", (_field, patch) => {
     expect(contentHashOf({ ...BASE, ...patch })).not.toBe(contentHashOf(BASE));
+  });
+
+  it.each([
+    [
+      "a raid buff is dropped",
+      { raid: { buffs: {} }, encounter: { duration: 180 } },
+    ],
+    [
+      "the encounter duration changes",
+      { raid: { buffs: { bloodlust: true } }, encounter: { duration: 300 } },
+    ],
+  ])("changes when the sim skeleton changes — %s", (_case, skeleton) => {
+    // The skeleton carries buffs, debuffs, talents, encounter and the APL
+    // rotation, all under a presetId that never varies. Stripping
+    // prepullActions measured 789.02 DPS against a 2042.85 baseline
+    // (docs/verification-log.md, 2026-07-27), so hashing the label alone
+    // would serve those pre-edit deltas from cache.
+    expect(contentHashOf({ ...BASE, skeleton })).not.toBe(contentHashOf(BASE));
+  });
+
+  it("changes when a candidate is re-slotted but keeps its item id", () => {
+    // `slot` picks the sim slots the swap is tried in (simSlotsForPoolSlot):
+    // `finger` runs two comparisons, `neck` one, so the slot decides deltaDps
+    // and slotChoice. A pool regeneration that corrects a mis-slotted item
+    // must not be served the old, wrong deltas.
+    expect(
+      contentHashOf({
+        ...BASE,
+        candidates: [
+          { itemId: 30101, slot: "chest" },
+          { itemId: 29381, slot: "finger" },
+        ],
+      })
+    ).not.toBe(contentHashOf(BASE));
   });
 
   it("changes when a logged gem changes but the item does not", () => {

@@ -66,10 +66,24 @@ export type ContentHashInput = {
   race: string;
   fight: { reportCode: string; fightId: number };
   gear: { items: readonly HashedGearItem[] };
-  candidateItemIds: readonly number[];
+  /**
+   * Item id **and slot**. The slot picks which sim slots the swap is tried in
+   * (`simSlotsForPoolSlot`), so it decides `deltaDps` and `slotChoice` — id
+   * alone would serve stale deltas after a pool regeneration re-slots an item.
+   */
+  candidates: readonly { itemId: number; slot: string }[];
   gemPaletteIds: readonly number[];
   epWeights: Readonly<Record<string, number>> | readonly number[];
   presetId: string;
+  /**
+   * Hashed by value, not by `presetId`. The skeleton carries raid buffs,
+   * debuffs, talents, encounter duration and the APL rotation — all live DPS
+   * inputs under a `presetId` that never varies. Stripping `prepullActions`
+   * measured 789.02 DPS against a 2042.85 baseline
+   * (`docs/verification-log.md`, 2026-07-27), so a label-only hash would serve
+   * those pre-edit deltas from cache.
+   */
+  skeleton: Readonly<Record<string, unknown>>;
   iterations: number;
   seeds: readonly number[];
   simVersion: string;
@@ -108,10 +122,21 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
       .sort((a, b) =>
         a.slot < b.slot ? -1 : a.slot > b.slot ? 1 : a.id - b.id
       ),
-    candidateItemIds: [...input.candidateItemIds].sort((a, b) => a - b),
+    candidates: [...input.candidates]
+      .map((c) => ({ itemId: c.itemId, slot: c.slot }))
+      .sort((a, b) =>
+        a.itemId !== b.itemId
+          ? a.itemId - b.itemId
+          : a.slot < b.slot
+            ? -1
+            : a.slot > b.slot
+              ? 1
+              : 0
+      ),
     gemPaletteIds: [...input.gemPaletteIds].sort((a, b) => a - b),
     epWeights: input.epWeights,
     presetId: input.presetId,
+    skeleton: input.skeleton,
     iterations: input.iterations,
     seeds: [...input.seeds],
     simVersion: input.simVersion,

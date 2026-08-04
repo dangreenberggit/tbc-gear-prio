@@ -604,6 +604,45 @@ describe("rankUpgrades", () => {
       expect(second.contentHash).not.toBe(first.contentHash);
     });
 
+    it("re-sims when the sim skeleton changes under an unchanged presetId", async () => {
+      // presetId is a module constant, so an edited skeleton — buffs,
+      // encounter duration, APL — would otherwise hash identically. This
+      // repo measured stripping prepullActions at 789.02 DPS against a
+      // 2042.85 baseline (docs/verification-log.md), so a stale hit here
+      // serves a 61%-wrong answer with no error anywhere.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const edited = {
+        ...deps,
+        raidSimSkeleton: {
+          ...skeleton,
+          encounter: { ...(skeleton.encounter ?? {}), duration: 999 },
+        },
+      };
+      const second = await rankUpgrades(input, edited);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("re-sims when a candidate is re-slotted but keeps its item id", async () => {
+      // `slot` picks the sim slots the swap is tried in, so it changes the
+      // deltas. A pool regeneration that corrects a mis-slotted item must
+      // not be served the old numbers.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const reslotted = {
+        ...deps,
+        pool: cachePool.map((e) => ({ ...e, slot: "finger" as const })),
+      };
+      const second = await rankUpgrades(input, reslotted);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
     it("does not collide across characters", async () => {
       const { deps } = cacheDeps();
       const mine = await rankUpgrades(input, deps);
