@@ -55,12 +55,40 @@ One `catch` around the whole post-create body, as suggested above, marking
 existing per-site `catch` on the baseline sim collapsed into it.
 
 **The per-site shape was the actual defect**, not just the one missed path: it
-leaves the next throw added below the row to re-open the hole silently. The
-wrapper covers every exit by construction.
+leaves the next throw added below the row to re-open the hole silently.
 
-Test is at the `rankUpgrades` seam (`rank.test.ts`, "errors the job row when
-the run throws after the row is created"). It throws from `Store.put`, which
-runs after every sim, so the run is otherwise complete and only the exit path
-is under test — the meta-unsolvable throw leaves by the same route, without
-needing a palette rigged to be unsolvable. Mutation-checked: deleting the
-`job.update` fails it with `expected 'running' to be 'error'`.
+**Two limits on "every exit", stated because the first draft of this note
+overclaimed.** The wrapper covers every exit *from `rankAfterJobCreated`*:
+
+1. The `job.update(status: "running")` immediately after `job.create` is
+   **outside** the try. A store that throws there leaves the row `queued`, not
+   `running` — not a stranded attach target, so the Phase 2 hazard does not
+   apply, but it is not "by construction" either.
+2. Recording the failure is **best-effort**. If the store is itself what
+   broke, the error-path `job.update` fails too; that error is swallowed so the
+   caller still sees the original failure rather than the bookkeeping one.
+
+Tests at the `rankUpgrades` seam in `rank.test.ts`:
+
+- *"errors the job row when the run throws after the row is created"* — throws
+  from `Store.put`, which runs after every sim, so the run is otherwise
+  complete and only the exit path is under test. The meta-unsolvable throw
+  leaves by the same route, without needing a palette rigged to be unsolvable.
+  Asserts `status`, `errorKind` and `errorDetail`, and that the original error
+  message propagates.
+- *"keeps the original error when the store cannot record the failure"* —
+  pins limit 2.
+
+Re-run:
+
+```
+pnpm vitest run packages/core/test/rank.test.ts -t "job row"
+```
+
+Mutation-checked, both directions:
+
+| mutation | result |
+|---|---|
+| delete the error-path `job.update` | `expected 'running' to be 'error'` |
+| `errorKind` back to `"sim-failed"` | `expected 'sim-failed' to be 'internal'` |
+| remove the best-effort inner `catch` | `expected [Function] to throw error including 'blob write exploded' but got 'job table is on fire'` |

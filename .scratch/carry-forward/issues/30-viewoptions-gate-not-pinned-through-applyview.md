@@ -10,7 +10,15 @@ Blocked by: none
 That was wrong twice over, and the correction is the useful part:
 
 - The box lives on the **Phase 2** gate (PLAN.md §14), not Phase 1. The Phase 1
-  gate is nine boxes, all `☑`, closed 2026-07-28/29.
+  gate is fully closed: `docs/verification-log.md` heads its 2026-07-29 entry
+  **"Phase 1 gate: 10 of 10"**, "All boxes are now checked."
+
+  A bookkeeping discrepancy worth knowing, since an earlier draft of this
+  ticket asserted the wrong number: PLAN.md §14's Phase 1 line renders **9**
+  `☑` boxes, not 10. The 2026-07-29 amendment rewrote the `maxPhase` box
+  (PLAN.md records the rewording inline), which is the likely merge point.
+  Both sources agree the gate is **closed**; only the count drifted. Cite the
+  log's wording rather than a box count until §14 is reconciled.
 - It reads as a missing *test*. It is not — `applyView` has **no
   implementation**. `grep -rn "applyView" packages/ --include=*.ts` (excluding
   `dist/`) returns nothing.
