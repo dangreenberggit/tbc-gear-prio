@@ -37,6 +37,10 @@ WOWSIMS_GEAR_SETS = [
     ROOT / "vendor/wowsims/ret_p2.gear.json",
 ]
 TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
+# Kept out of TWO_HOP because that file is the ret *tier set* map and
+# pool-hardening.test.ts pins it against wowsims db setIds; Sunmote upgrades
+# are raid drops exchanged at a vendor, not set pieces.
+SUNMOTE_UPGRADES = ROOT / "data/two-hop/ret-sunmote-upgrades.json"
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
@@ -45,6 +49,26 @@ DEFAULT_OUT_DIR = ROOT / "data/universes"
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
 # the only thing tying their drops to a phase.
 WORLD_BOSS_ZONE = "World Bosses"
+
+# db.json `sources[].drop.difficulty`: 1 = normal, 2 = heroic. Nothing else
+# appears in the pinned db, and the 472 difficulty-2 drops sit entirely in the
+# 16 five-man zones below — no raid zone carries one, so this discriminates
+# heroic drops from raid drops without consulting the zone at all.
+DROP_DIFFICULTY_HEROIC = 2
+
+# Heroic dungeons whose drops are worth a shopping list at a given phase, keyed
+# the same way phase_raids.json keys raids: union of everything with
+# phase <= maxPhase.
+#
+# Only Magisters' Terrace is listed, and that is a scope decision rather than a
+# statement about the game. Every other heroic in the pinned db drops phase-1
+# items (measured: 284 ret-eligible items across 15 dungeons); admitting them
+# would rewrite the phase-1 end of every tier, which belongs to ticket 17's
+# pre-raid question, not here. MT is the one heroic that drops phase-5 gear —
+# including 34472 Shard of Contempt — so it is the whole of ticket 28.
+PHASE_HEROIC_DUNGEONS: dict[str, int] = {
+    "Magisters' Terrace": 5,
+}
 
 # db.json item type → our pool slot name
 ITEM_TYPE_SLOT = {
@@ -114,6 +138,13 @@ BADGE_RE = re.compile(
     re.IGNORECASE,
 )
 CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNORECASE)
+WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
+# "Requires Exalted with Shattered Sun Offensive". The standing and faction are
+# both named, so this stays a parse rather than a lookup table.
+REP_RE = re.compile(
+    r"Requires\s+(Friendly|Honored|Revered|Exalted)\s+with\s+([^(\n]+)",
+    re.IGNORECASE,
+)
 
 # Stat 5 (SpellDamage) is deliberately NOT here: data/presets/ret/p2.ep-weights
 # .json prices it at 0.17, so calling it caster-only would let the junk filter
@@ -123,10 +154,13 @@ CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNO
 # is sufficient reason.)
 # common.proto Class enum: ClassPaladin = 2.
 CLASS_PALADIN = 2
-# Mirrors the ItemSource union in packages/core/src/pool.ts. A kind this file
-# emits but that file cannot parse is a build failure, not a runtime surprise.
+# Shared with the ItemSource union in packages/core/src/pool.ts, which imports
+# the same file. A kind this script emits but that module cannot parse is a
+# build failure, not a runtime surprise — so the list is loaded rather than
+# retyped. pool.test.ts pins the JSON against the union.
+ITEM_SOURCE_KINDS_JSON = ROOT / "packages/core/src/item-source-kinds.json"
 ITEM_SOURCE_KINDS = frozenset(
-    {"raid", "token", "badge", "crafted", "rep", "heroic", "pvp", "world"}
+    json.loads(ITEM_SOURCE_KINDS_JSON.read_text(encoding="utf-8"))["kinds"]
 )
 # common.proto PseudoStat enum: PseudoStatMainHandDps = 0. A separate index
 # space from the Stat enum -- upstream weights both, and they are unrelated
@@ -286,26 +320,56 @@ def map_db_source(
         )
         boss = drop.get("npcName") or npcs_by_id.get(drop.get("npcId"))
         if zone:
+            # Without this the heroic drops were labelled `raid` and then
+            # dropped at membership for naming a zone phase_raids.json has
+            # never listed -- the item did not look excluded, it looked like a
+            # raid drop from a raid that does not exist.
+            if drop.get("difficulty") == DROP_DIFFICULTY_HEROIC:
+                # The ItemSource `heroic` variant carries no boss field, so the
+                # npc is deliberately not forwarded here.
+                return {"kind": "heroic", "dungeon": str(zone)}
             out: dict = {"kind": "raid", "zone": str(zone)}
             if boss:
                 out["boss"] = str(boss)
             return out
     if "rep" in first:
         rep = first["rep"] or {}
-        faction = rep.get("factionName") or rep.get("faction") or "unknown"
-        standing = rep.get("standing") or rep.get("rank") or "unknown"
-        return {"kind": "rep", "faction": str(faction), "standing": str(standing)}
+        faction = rep.get("factionName") or rep.get("faction")
+        standing = rep.get("standing") or rep.get("rank")
+        # db.json ships no faction table, so a row keyed only by repFactionId
+        # resolves to "unknown with unknown" — a source that names nothing and
+        # cannot be acted on. Returning None lets the Wowhead "Requires Exalted
+        # with X" text supply the real one instead of being appended behind it,
+        # which matters because pool.ts reads sources[0]. Haramad's Bargain
+        # (29119) is the only affected row in the shipped tiers.
+        if faction is None and standing is None:
+            return None
+        return {
+            "kind": "rep",
+            "faction": str(faction or "unknown"),
+            "standing": str(standing or "unknown"),
+        }
     if "faction" in first:
-        return {"kind": "rep", "faction": "unknown", "standing": "unknown"}
+        return None
     return None
 
 
 def source_zones(source: dict) -> set[str]:
+    """Raid-zone attribution only. Heroic dungeons are keyed by a separate map
+    (PHASE_HEROIC_DUNGEONS), so folding them in here would test a dungeon name
+    against phase_raids.json and never match."""
     kind = source.get("kind")
-    if kind in ("raid", "token", "heroic"):
-        z = source.get("zone") or source.get("dungeon")
+    if kind in ("raid", "token"):
+        z = source.get("zone")
         return {z} if z else set()
     return set()
+
+
+def source_heroic_dungeons(source: dict) -> set[str]:
+    if source.get("kind") != "heroic":
+        return set()
+    d = source.get("dungeon")
+    return {d} if d else set()
 
 
 # Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
@@ -341,10 +405,17 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         zone = m.group(2).strip()
         if zone.endswith("(via"):
             zone = zone.split("(via")[0].strip()
-        src: dict = {"kind": "raid", "zone": canonical_zone(zone)}
-        if boss and boss.lower() != "unknown":
-            src["boss"] = boss
-        out.append(src)
+        # Wowhead writes the difficulty into the zone parenthetical ("Heroic
+        # Magisters' Terrace"). Left alone that becomes a `raid` row naming a
+        # zone that exists nowhere, which the phase_raids.json guard rejects.
+        heroic_m = WOWHEAD_HEROIC_ZONE_RE.match(zone)
+        if heroic_m:
+            out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
+        else:
+            src: dict = {"kind": "raid", "zone": canonical_zone(zone)}
+            if boss and boss.lower() != "unknown":
+                src["boss"] = boss
+            out.append(src)
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
@@ -359,12 +430,26 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         prof = (cm.group(1) or cm.group(2) or "").strip()
         if prof:
             out.append({"kind": "crafted", "profession": prof})
+    rm = REP_RE.search(text)
+    if rm:
+        out.append(
+            {
+                "kind": "rep",
+                "faction": rm.group(2).strip(),
+                "standing": rm.group(1).strip().capitalize(),
+            }
+        )
     return out
 
 
 def is_list_only_source(source: dict) -> bool:
     """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
     return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+
+
+def heroic_dungeons_for_max_phase(max_phase: int) -> set[str]:
+    """Same carryover policy as raid zones: everything with phase <= maxPhase."""
+    return {d for d, phase in PHASE_HEROIC_DUNGEONS.items() if phase <= max_phase}
 
 
 def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
@@ -471,6 +556,7 @@ def assemble(
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
     two_hop = load_json(TWO_HOP) if TWO_HOP.is_file() else {}
+    sunmote = load_json(SUNMOTE_UPGRADES) if SUNMOTE_UPGRADES.is_file() else {}
     raid_recipes = load_json(RAID_RECIPES) if RAID_RECIPES.is_file() else {}
 
     # A recipe can drop in several zones (the SSC/TK belt patterns drop in
@@ -518,6 +604,7 @@ def assemble(
     bis_ids = wowsims_curated_item_ids()
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
+    phase_heroics = heroic_dungeons_for_max_phase(max_phase)
 
     # itemId -> list of (source, origin)
     source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
@@ -580,6 +667,21 @@ def assemble(
             token_src["boss"] = entry["boss"]
         add_source(piece_id, token_src, "two-hop")
 
+    # Sunmote upgrades. Same `token` shape -- the piece is obtained from a
+    # named raid boss via an intermediary -- with the base item named as the
+    # token, since that is what the player actually trades in.
+    for entry in (sunmote.get("entries") or []) if isinstance(sunmote, dict) else []:
+        if not isinstance(entry, dict):
+            continue
+        sunmote_src: dict = {
+            "kind": "token",
+            "zone": entry["zone"],
+            "token": f"Sunmote + {entry['baseName']}",
+        }
+        if entry.get("boss"):
+            sunmote_src["boss"] = entry["boss"]
+        add_source(int(entry["pieceId"]), sunmote_src, "sunmote")
+
     # wowhead lists for this maxPhase
     #
     # Under hold-out the list is still read — it is the answer key we grade
@@ -623,19 +725,29 @@ def assemble(
         sources = [s for s, _ in pairs]
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
+        heroics_hit = set()
         for s in sources:
             zones_hit |= source_zones(s)
+            heroics_hit |= source_heroic_dungeons(s)
 
+        # An admitted heroic dungeon still only contributes the items whose own
+        # phase reaches this tier -- MT drops phase-5 gear, but the same guard
+        # is what stops a future phase-1 dungeon leaking into a p2 list.
+        in_heroic = bool(heroics_hit & phase_heroics) and int(
+            it.get("phase") or 99
+        ) <= max_phase
         in_phase = bool(zones_hit & phase_zones)
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
-        if not in_phase and not list_only:
+        if not in_phase and not in_heroic and not list_only:
             continue
 
-        if list_only and not in_phase:
+        if in_phase:
+            membership_stats["zoneMatch"] += 1
+        elif in_heroic:
+            membership_stats["heroicMatch"] += 1
+        elif list_only:
             list_only_count += 1
             membership_stats["listOnly"] += 1
-        elif in_phase:
-            membership_stats["zoneMatch"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
@@ -691,6 +803,14 @@ def assemble(
                 source_errors.append(
                     f"{e['itemId']} {e['name']}: sources[{i}] zone "
                     f"{s.get('zone')!r} is not in phase_raids.json"
+                )
+            # The same trap one kind over: a heroic naming a dungeon the phase
+            # map does not carry can never match a tier, so it would ship as a
+            # source the reader cannot act on.
+            elif s["kind"] == "heroic" and s.get("dungeon") not in PHASE_HEROIC_DUNGEONS:
+                source_errors.append(
+                    f"{e['itemId']} {e['name']}: sources[{i}] dungeon "
+                    f"{s.get('dungeon')!r} is not in PHASE_HEROIC_DUNGEONS"
                 )
     if source_errors:
         print(

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import {
@@ -278,6 +279,22 @@ describe("rank-report", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     expect(html).toContain("Universe pool (ret-p3).");
     expect(html).not.toContain("EP prefilter");
+  });
+
+  // The other cases here assert on fragments, so a change to the surrounding
+  // markup or CSS passes them all. This pins the whole document, which is what
+  // makes a pure restructure of this module provable: split the file, move the
+  // template, extract the styles — if a single byte of output moves, this
+  // fails. Update the hash only when the rendered report is *meant* to change,
+  // and say so in the commit.
+  it("renders a byte-identical document for a fixed ranking", () => {
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    const digest = createHash("sha256").update(html, "utf8").digest("hex");
+    expect({ digest, length: html.length }).toEqual({
+      digest:
+        "e8c594b6c29cf7bb5776f19ba2b1437c482bf9f2838ef6be88b8cff0d51ff78b",
+      length: 10626,
+    });
   });
 });
 

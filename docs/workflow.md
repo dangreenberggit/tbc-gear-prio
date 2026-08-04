@@ -69,8 +69,8 @@ Workers get their own worktree or clone; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
 then `pre-merge-review`, then **ask** before `pnpm land` into `dev`. The
-skill is harness-agnostic: plain git plus optional Cursor / Claude Code /
-Codex adapters. See
+skill is harness-agnostic: plain git plus optional Claude Code / Codex /
+Cursor adapters. See
 [`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
 
 ## Gates — what's enforced vs. advisory
@@ -116,6 +116,33 @@ of the three seams (`GearSource`, `SimRunner`, `Store`). This is what makes
 the fixture-replay test possible at all: if I/O could leak in anywhere,
 "runs offline from fixtures" would need auditing on every change instead of
 being true by construction.
+
+## Never derive a type from a JSON import
+
+**A JSON import always widens to `string`.** Under `resolveJsonModule`,
+`import k from "./k.json"` types `k.kinds` as `string[]`, never a literal
+union, and `as const` cannot rescue it (TS1355 — a JSON import is not a
+literal). So this type-checks and asserts nothing:
+
+```ts
+type Kind = (typeof k.kinds)[number]; // = string
+const bad: Kind = "not-a-kind"; // compiles clean
+```
+
+Any `extends` assertion written against such a type passes vacuously. **This
+is worse than no check**, because it reads as rigour. The repo hit it twice —
+concluding `SimSlotName` "would need codegen, impossible" (ticket 24), then
+writing a union/JSON assertion where one direction was silently meaningless
+(ticket 28 follow-up).
+
+**The rule: JSON is a value source of truth, never a type source of truth.**
+When a list must be shared with the Python scripts _and_ typed in TypeScript,
+add it to `scripts/generate_json_literal_types.py`, which emits committed
+`as const` code. Typed code imports the generated `.ts`, Python reads the
+JSON, and `pnpm verify` fails if they drift.
+
+If you find yourself writing a comment explaining why an assertion is safe
+despite the widening, generate the type instead.
 
 ## CI
 

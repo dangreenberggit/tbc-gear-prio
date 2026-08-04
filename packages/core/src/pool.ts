@@ -3,7 +3,14 @@
  * Pool files are loaded by the CLI and injected via Deps — core stays pure.
  */
 
+import type { ItemSourceKindName } from "./item-source-kinds.generated.js";
 import type { ItemSlot } from "./items.js";
+import type { SimOrderName } from "./slots-sim-order.generated.js";
+
+export {
+  ITEM_SOURCE_KINDS,
+  type ItemSourceKindName,
+} from "./item-source-kinds.generated.js";
 
 export type ItemSource =
   | { kind: "raid"; zone: string; boss?: string }
@@ -24,6 +31,24 @@ export type ItemSource =
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
   | { kind: "world" };
+
+export type ItemSourceKind = ItemSource["kind"];
+
+/**
+ * The union owns the per-kind *shape*; the JSON owns the list that crosses to
+ * `assemble_universe.py`. These two lines are what keep them from drifting,
+ * and they are a real check only because `ItemSourceKindName` comes from
+ * generated `as const` code rather than the JSON import it replaced — that
+ * import widened to `string[]`, so the same assertions passed vacuously.
+ *
+ * Adding a variant above without regenerating (or vice versa) is now a
+ * compile error naming the missing kind. `pnpm verify` separately fails if the
+ * generated file is stale against the JSON.
+ */
+type Assert<_ extends true> = true;
+type Extends<A, B> = [A] extends [B] ? true : false;
+type _JsonCoversUnion = Assert<Extends<ItemSourceKind, ItemSourceKindName>>;
+type _UnionCoversJson = Assert<Extends<ItemSourceKindName, ItemSourceKind>>;
 
 export type PoolEntry = {
   itemId: number;
@@ -121,18 +146,31 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
 /**
  * A sim equipment slot name, as `SIM_ORDER` spells it.
  *
- * Written out rather than derived from `slots-table.json`: that file is
- * imported under `resolveJsonModule`, which widens its array elements to
- * `string`, so a derived type would accept anything. `pool.test.ts` pins
- * every value here against `SIM_ORDER`, which is what keeps the two honest.
+ * The comment that used to sit here said this had to be written out because
+ * `slots-table.json` widens to `string` under `resolveJsonModule` — true of
+ * the JSON import, but `SimOrderName` now comes from generated `as const`
+ * code, so constraining against it is a real check. This stays a hand-written
+ * union because it is a *subset*: `SIM_ORDER` also carries `offhand`, which
+ * ret never fills and no pool slot maps onto.
  */
-export type SimSlotName =
+export type SimSlotName = Extract<
+  SimOrderName,
   | Exclude<ItemSlot, "finger" | "trinket" | "weapon">
   | "finger1"
   | "finger2"
   | "trinket1"
   | "trinket2"
-  | "mainhand";
+  | "mainhand"
+>;
+
+/**
+ * `Extract` yields `never` for a member absent from `SIM_ORDER`, which would
+ * turn a typo into a quietly-narrower type rather than an error. These pin the
+ * two shapes that would go missing first; `pool.test.ts` still checks every
+ * value against `SIM_ORDER` at runtime.
+ */
+type _SimSlotNameKeepsWeapon = Assert<Extends<"mainhand", SimSlotName>>;
+type _SimSlotNameKeepsRings = Assert<Extends<"finger2", SimSlotName>>;
 
 /**
  * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; ret

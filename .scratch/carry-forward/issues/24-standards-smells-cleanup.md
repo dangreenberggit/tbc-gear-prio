@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: `docs/reviews/phase-1-five-seed-spread.md` Standards finding ST4
 Blocks: none
@@ -9,6 +9,37 @@ Blocked by: none
 Judgement calls from the pre-merge review's Standards axis. None is a
 correctness risk; each is a refactor with its own blast radius, so they were
 deferred rather than done mid-review. Grouped roughly by value.
+
+**Status 2026-08-03: everything on this ticket is done.** The last item closed
+as predicted:
+
+- **Unused `Deps` breadth — RESOLVED 2026-08-03 (ADR-0019).** The ranking
+  cache gave `deps.store` its first production consumer, so
+  `void deps.store; void deps.clock;` is gone rather than refactored away.
+  `deps.store` holds the ranking blob at `ranking:<contentHash>` and writes
+  the job row (`create` → `running` → `done`, `error` on a failed sim).
+
+  **Two corrections to an earlier version of this note**, both caught in the
+  pre-merge review of `feat/content-hash`:
+
+  - It claimed *"`deps.clock` timestamps those rows through `MemoryStore`."*
+    **False.** `rankUpgrades` never reads `deps.clock`; `MemoryStore`
+    timestamps from its own constructor-injected clock. The port is consumed
+    only because `cli.ts` now passes the same function to both. The engine
+    writes no timestamp of its own.
+  - It claimed the `Store.job` surface *"is now the dedupe handle §7's second
+    payoff needs."* Overstated — it is the handle, not the payoff. There is no
+    `findByContentHash`, so two concurrent identical calls still both sim.
+    Attaching to a running job is Phase 2 work.
+
+  Ticket **19 was stale** in the pointer below — it is closed, deferred to
+  Phase 2 by ADR-0016.
+
+Closed this round: `ITEM_SOURCE_KINDS` duplicated three ways, the `GemContext`
+grouping, the JSON-widening trap behind both of them, and the
+`rank-report.ts` split.
+
+Nothing here blocks a phase gate.
 
 ## Duplicated pinned-fetch logic — DONE 2026-07-30 (`d4ae638`)
 
@@ -27,6 +58,76 @@ check, and the same `{"path":…, "sha256":…, "bytes":…}` lock-entry shape. 
 shared `scripts/pinned_fetch.py` would carry all three. Highest value of the
 group: three implementations of "download and verify against a pin" is three
 places for a supply-chain check to rot.
+
+## `ITEM_SOURCE_KINDS` duplicated three ways — DONE 2026-08-03 (`93cbb02`)
+
+The list existed as a Python `frozenset`, a `Set` literal in
+`pool-hardening.test.ts`, and implicitly in `pool.ts`'s `ItemSource` union.
+Cross-language, so the fix is a shared JSON as this ticket predicted:
+`packages/core/src/item-source-kinds.json`, following the `slots-table.json`
+precedent — TypeScript imports it, `assemble_universe.py` reads it, the test
+literal is gone.
+
+Only the **kind names** are shared. The per-kind field shapes (`zone` vs
+`dungeon` vs `cost`) cannot be expressed in JSON and stay in the union.
+
+**The interesting part is how the JSON is kept honest**, and the first attempt
+got it wrong in the way this ticket had already recorded once.
+
+The obvious move is a type-level `extends` assertion in both directions. One
+is rejected by typecheck and the other **passes vacuously** —
+`resolveJsonModule` widens `kinds` to `string[]`, so `(typeof kinds)[number]`
+is `string` and asserting against it proves nothing while looking rigorous.
+Same trap as "Slot names as bare strings" below, hit from the other side.
+
+That was first shipped as a runtime test plus a comment explaining the
+widening. **A comment is not a guard**, and the trap had now bitten twice, so
+it was fixed properly in `d1ba49b` — see the next section.
+
+## The JSON-widening trap, fixed at the root — DONE 2026-08-03 (`d1ba49b`)
+
+This ticket recorded the trap twice and drew the wrong conclusion the first
+time ("would need the table emitted as a `.ts` const … a codegen change",
+filed under impossible). It is not impossible. It is exactly the fix, and it
+is now in place.
+
+Measured with a standalone compiler probe rather than repeating the received
+explanation:
+
+- `(typeof jsonImport.list)[number]` really is `string` — assigning
+  `"not-a-kind"` to it compiles clean.
+- `as const` on a JSON import is **TS1355**, so it cannot rescue the type.
+- Every other route either casts (a lie) or reintroduces the third copy inside
+  the validator.
+
+So the JSON stays the **value** source of truth and
+`scripts/generate_json_literal_types.py` derives the **type** as committed
+`as const` code. No typed module imports those JSON files any more — the
+widening has nowhere to happen.
+
+**Audited all six `with { type: "json" }` imports in `packages/core` first.**
+No vacuous assertion had shipped, but `SimSlotName` was a second live instance
+of the same shape: `SIM_ORDER` widened to `string[]`, the union hand-written
+next to it, held together only by a runtime test. Now
+`Extract<SimOrderName, …>` — still hand-written, because it is a deliberate
+*subset* (`SIM_ORDER` carries `offhand`, which ret never fills), but now
+constrained against the real list.
+
+Three drift directions, each mutation-checked:
+
+| mutation | caught by |
+|---|---|
+| JSON edited, generated file stale | `codegen:json-types:check` (new first step of `verify`) |
+| JSON has a kind the union lacks | TS2344 at `_JsonCoversUnion` |
+| union has a kind the JSON lacks | TS2344 at `_UnionCoversJson`, plus a missing-return in `rank-report.ts` |
+
+The generator pipes output through the repo's Prettier (`--stdin-filepath`);
+without that, codegen and `format:check` disagree forever. Confirmed
+idempotent.
+
+The rule is now written down in `docs/workflow.md` and `AGENTS.md` rather than
+living as a comment in one file — comments were what failed the first two
+times.
 
 ## Data clumps and duplicate `EpWeights` — DONE 2026-07-30 (`EpWeights` half only)
 
@@ -55,6 +156,30 @@ The `(palette, epWeightRecord, epWeights)` data-clump / `GemContext` framing
 and `rank.ts`/`slots.ts` changes are **not** done — out of scope for this pass
 (another agent owns those two files concurrently). Re-open a follow-up ticket
 if that grouping is still wanted.
+
+### `GemContext` — DONE 2026-08-03 (`c644776`)
+
+`GemContext` lives in `candidate-gems.ts`, not `rank.ts`: it is gem
+vocabulary, and that module already owned `EpWeightRecord`.
+`equipmentForCandidateSwap` and `swapItemAt` now take one context instead of
+three parameters, and `rank.ts`'s `weightRecord()` helper is deleted — its
+logic is the context's constructor.
+
+The two weight fields were never independent inputs; `epWeightRecord` was
+always `weightRecord(epWeights)` computed at the call site. Nothing stopped a
+caller passing shapes that disagreed, and `rank.test.ts` demonstrated the
+failure mode by passing `epWeights, epWeights` — correct only because its
+fixture weights are already a record. That is no longer expressible.
+
+Behaviour unchanged: `rank.test.ts` still pins `deltaDps` to 7.15 at 5
+decimals through the recorded adapters.
+
+**Found a genuinely untested branch on the way.** No test fed dense-array
+weights through a candidate swap, so deleting the array→record conversion
+passed all 158 tests. Three direct cases now pin it (`candidate-gems.test.ts`),
+and deleting the conversion fails two. The gap predates this change — the code
+moved rather than appeared — but naming the function is what made it cheap to
+test.
 
 Original text:
 
@@ -104,7 +229,24 @@ is handled where it always was — `pool.test.ts` asserts every `ItemSlot` maps
 onto a name present in `SIM_ORDER`, so a union that drifts from the table
 fails a test rather than type-checking quietly.
 
-## Unused `Deps` breadth
+**Amended 2026-08-03 (`d1ba49b`).** The paragraph above is right that
+`simSlotsForPoolSlot` never reads the JSON, so its own arms gave the union.
+But "a codegen change" was dismissed as though it were out of reach, and the
+drift was left to a runtime test. Codegen is now in place
+(`scripts/generate_json_literal_types.py`), `SIM_ORDER` is `as const`, and
+`SimSlotName` is `Extract<SimOrderName, …>` — so a member that is not a real
+sim slot is a compile error rather than a test failure. The runtime assertion
+stays as a second check on the values.
+
+The lesson stands and gets sharper: the first version measured one approach,
+found it blocked, and wrote "impossible"; the second version found the right
+scope but treated the blocked approach as permanently unavailable instead of
+asking what it would cost. It cost one script.
+
+## Unused `Deps` breadth — RESOLVED 2026-08-03 (ADR-0019)
+
+Closed by the ranking cache, which consumes both ports in production. See the
+status note at the top of this ticket. Original text:
 
 `rank.ts` ends with `void deps.store; void deps.clock;`. Both ports are required
 by callers and unused by `rankUpgrades`; `Store`'s full `job.create/update/read`
@@ -137,13 +279,35 @@ orchestration, and moving it to `gems.ts` would invert the dependency (gem
 data importing the equipment shape). The clean version of this is the
 `GemContext` grouping listed under "Data clumps" above, which is still open.
 
-## `rank-report.ts` divergent change
+## `rank-report.ts` divergent change — DONE 2026-08-03 (`95ff955`, `ab4e261`)
 
-588 lines holding slot ordering, source formatting, shortlist partitioning, HTML
-structure and ~260 lines of inline CSS. Restyling and changing shortlist rules
-edit the same file for unrelated reasons. Note the inline CSS is deliberate and
-must stay inline — the report is self-contained by design — so the split is
-template vs. rules, not extracting a stylesheet.
+Split along the axis this ticket named:
+
+| file | lines | holds |
+|---|---:|---|
+| `rank-report-rules.ts` | 101 | `SLOT_ORDER`, `partitionShortlist`, `groupBySlot` |
+| `rank-report.ts` | 274 | escaping, formatting, document structure |
+| `rank-report-css.ts` | 277 | the stylesheet |
+
+591 → 274 for the part you edit when changing markup.
+
+**The stylesheet still ships inline**, as the ticket required: the report is
+written to `.scratch/rank-reports/` and opened straight from disk, so it must
+be one self-contained artifact with no sibling assets. `REPORT_CSS` is
+interpolated back into the same `<style>` element — it moved out of the
+template's way, not out of the document.
+
+The seam was already in the code: the three rules are pure, carry no HTML, and
+were exactly the functions with their own unit tests. Moving them left two
+imports unreachable in the template file, which lint caught — the tell that
+the move was complete rather than cosmetic.
+
+**How it was made safe.** Every existing case in `rank-report.test.ts` asserts
+on a substring, so all twelve would pass while the markup or CSS silently
+changed. `1e93c8e` added a full-document sha256 first; it never moved across
+either half of the split, so the emitted report is byte-identical. Public API
+verified by compiling a probe against every name `index.ts` re-exports, rather
+than by eyeballing the export list.
 
 ## Mysterious names — DONE 2026-08-02
 

@@ -2,6 +2,13 @@
 
 Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when running inside Claude Code; fall back to agnostic git anytime.
 
+## Models (subagents)
+
+Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+
+- **Workhorse / simple:** Sonnet-class — parallel implement workers, mechanical edits.
+- **Sharp:** Opus at **effort `medium`** — design, review, hard judgment. Effort is a separate control from the model, not a slug; reserve `high`+ for a single narrow adversarial axis, and never fan out N sharp workers.
+
 ## Isolate
 
 - Session: `claude --worktree <name>` (or `-w`) so the session has its own checkout.

@@ -142,10 +142,14 @@ export type RankInput = {
 }
 
 export type Deps = {
-  gear: GearSource
+  gear: GearSource                   // the three seams (§5)
   sim: SimRunner
   store: Store
   clock: () => Date
+  raidSimSkeleton: RaidSimRequest    // per-spec configuration the engine cannot
+  epWeights: EpWeights               // synthesise. Data, not ports — see ADR-0019
+  gemPalette?: readonly GemEntry[]
+  pool?: readonly PoolEntry[]
 }
 
 export type Progress =
@@ -158,7 +162,8 @@ export type Progress =
 
 Everything a caller must know, stated as part of the interface:
 
-- **Idempotent by content.** Two calls whose `contentHash` matches (§7) return the same `Ranking`, from cache, without spawning a sim. Cache hits fire `onProgress` once and resolve.
+- **Idempotent by content.** Two calls whose `contentHash` matches (§7) return the same `Ranking`, from cache, without spawning a sim. **[ADR-0019]** A hit still resolves the fight and reads gear — the hash covers the logged gear, which is not known until then — so it fires `resolving`, `reading-gear`, `composing`, `building-pool`, `ranking`, not once. What is guaranteed: **no sim runs, and the last event is `ranking`**, so a caller that opened a progress view always gets an event to close it.
+- **`Deps` carries the three seams plus per-spec configuration** — `raidSimSkeleton`, `epWeights`, `gemPalette`, `pool`. The last two are data rather than ports, and are hashed into `contentHash` from `deps`; cache correctness comes from a field being *in the hash*, not from which parameter declares it (**[ADR-0019]**, ticket 23 item 3).
 - **Ordering.** None. There is one entry point.
 - **`maxPhase` is inclusive, and inclusive is the load-bearing word** (review R2). `poolItems.filter(i => i.phase <= input.maxPhase)`. At `maxPhase: 2` the player still sees Karazhan drops and Badge of Justice gear, much of which is still competitive at T5; a per-tier pool would have wrongly excluded all of it. The same filter applies to the gem palette (§9), so a user simming at 2 is never told to socket an epic gem. It is in `contentHash` and in `assumptions`, displayed as *"candidates: phase ≤ 2"*.
 - **Display options are not inputs.** Pinning, filtering, grouping and hiding-owned live in `ViewOptions` (§4.1), never here. Anything on `RankInput` changes a number and forces a re-sim; anything on `ViewOptions` cannot and does not.
@@ -445,6 +450,13 @@ Stage-level tests exist only where the logic is genuinely intricate and independ
 ## 7. One hash, three payoffs
 
 Draft 1 proposed `dedupeHash` over (gear + settings + pool). Draft 2 proposed idempotent job creation on a normalized input hash, and separately a sim cache keyed on the request hash. These are the same idea at two altitudes. Collapse them:
+
+> **[ADR-0019] The field list below is superseded — the three payoffs are not.**
+> `poolId`/`poolVersion` describe the pool architecture ADR-0017 replaced, and
+> `epVersion`/`fullPool` describe the rank-time prefilter ADR-0018 records as
+> never built, so this list cannot be implemented literally. The shipped rule is
+> **"if this value changes, do the numbers change?"** See ADR-0019 for the
+> field-by-field mapping and `packages/core/src/content-hash.ts` for the payload.
 
 ```ts
 contentHash = sha256(canonicalJson({

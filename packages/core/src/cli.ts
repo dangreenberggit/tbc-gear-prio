@@ -229,14 +229,18 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
   );
 
+  // One time source for the run: the store's job rows, the engine and the
+  // report footer should not be able to disagree about when this happened.
+  const clock = () => new Date();
+
   try {
     const ranking = await rankUpgrades(
       input,
       {
         gear: new RecordedGearSource(gearData),
         sim,
-        store: new MemoryStore(),
-        clock: () => new Date(),
+        store: new MemoryStore(clock),
+        clock,
         raidSimSkeleton: skeleton,
         epWeights,
         pool,

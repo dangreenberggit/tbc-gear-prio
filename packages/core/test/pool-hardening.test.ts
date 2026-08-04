@@ -12,6 +12,7 @@ import {
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
+  ITEM_SOURCE_KINDS,
   poolFromUniverse,
   type PoolEntry,
   type UniverseEntry,
@@ -218,26 +219,21 @@ describe("data/universes/ret-p3.json hardening", () => {
     // 13 Doomwalker / Doom Lord Kazzak drops that db.json has no sources for.
     // 362 -> 354: classAllowlist is enforced, evicting 8 class-specific SSC/TK
     // trinkets a paladin cannot equip (ticket 25).
-    expect(universeP3.length).toBe(354);
+    // 354 -> 356: the Wowhead source parser learned "Requires <standing> with
+    // <faction>", which it previously dropped on the floor — +29119 Haramad's
+    // Bargain, +30834 Shapeshifter's Signet, both rep rewards on the p3 list
+    // admitted through the existing list-only path (ticket 28).
+    expect(universeP3.length).toBe(356);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
     // build on both (PLAN.md §8.3.2); this pins the shipped artifact.
-    const ITEM_SOURCE_KINDS = new Set([
-      "raid",
-      "token",
-      "badge",
-      "crafted",
-      "rep",
-      "heroic",
-      "pvp",
-      "world",
-    ]);
+    const knownKinds = new Set<string>(ITEM_SOURCE_KINDS);
     for (const e of raw.entries) {
       expect(e.sources.length, `${e.itemId} ${e.name}`).toBeGreaterThan(0);
       for (const [i, s] of e.sources.entries()) {
         expect(
-          ITEM_SOURCE_KINDS.has(s.kind),
+          knownKinds.has(s.kind),
           `${e.itemId} ${e.name} sources[${i}] kind ${String(s.kind)}`
         ).toBe(true);
       }
@@ -405,20 +401,70 @@ describe("data/universes/ret-p3.json hardening", () => {
       "AtlasLoot/Wowhead coverage resolves it (ticket 17 triage)"
   );
 
-  // ret-p5.json omits five items the Wowhead p5 list names, four of them
-  // "P5 BIS"/"Absolute BIS" — at the tier that file exists to serve. Shard of
-  // Contempt is 44 expertise (weighted 2.14, second-heaviest ret term) and
-  // drops in Magisters' Terrace at difficulty 2; the other four are Shattered
-  // Sun badge/craft/rep rewards db.json gives `sources: null`.
+  // Ticket 28. These five are named by the Wowhead p5 list — four as "P5
+  // BIS"/"Absolute BIS" — at the tier ret-p5.json exists to serve, and each
+  // was previously excluded for a different reason. Asserting the source kind
+  // rather than mere presence is the point: presence alone would pass again if
+  // an item slipped in through some unrelated path, and it is the *mechanism*
+  // that was broken in each case.
   //
-  // ITEM_SOURCE_KINDS and source_zones() already handle a "heroic" kind, but
-  // nothing emits one and membership gates on phase_raids.json zones, which
-  // are raids only. Needs a phase -> heroic-dungeon map plus a source path
-  // for the sourceless four.
-  it.todo(
-    "admits the phase-5 BiS items outside raid zones — 34472 Shard of " +
-      "Contempt, 34388, 34392, 34397, 34679 (ticket 17)"
-  );
+  // Note the ticket predicted the last four were "Shattered Sun
+  // badge/craft/rep rewards". Three are actually Sunwell Plateau raid drops
+  // upgraded via a Sunmote at vendor Yrma; only 34679 is a rep reward.
+  const P5_ADMITTED_BY = [
+    {
+      id: 34472,
+      name: "Shard of Contempt",
+      kind: "heroic",
+      why: "drops in Magisters' Terrace at db difficulty 2; before the heroic path it was labelled a raid drop from a zone phase_raids.json does not list",
+    },
+    {
+      id: 34388,
+      name: "Pauldrons of Berserking",
+      kind: "token",
+      why: "Sunmote upgrade of 34192, an Eredar Twins drop",
+    },
+    {
+      id: 34392,
+      name: "Demontooth Shoulderpads",
+      kind: "token",
+      why: "Sunmote upgrade of 34195, an Eredar Twins drop",
+    },
+    {
+      id: 34397,
+      name: "Bladed Chaos Tunic",
+      kind: "token",
+      why: "Sunmote upgrade of 34211, an M'uru drop",
+    },
+    {
+      id: 34679,
+      name: "Shattered Sun Pendant of Might",
+      kind: "rep",
+      why: "Exalted with the Shattered Sun Offensive; the Wowhead parser had no rep branch at all",
+    },
+  ] as const;
+
+  it("admits the phase-5 BiS items that drop outside a raid zone", () => {
+    const { pool: universeP5 } = loadUniverse("data/universes/ret-p5.json");
+    const byItemId = new Map(universeP5.map((e) => [e.itemId, e] as const));
+
+    for (const { id, name, kind, why } of P5_ADMITTED_BY) {
+      const entry = byItemId.get(id);
+      expect(entry, `${id} ${name} missing from ret-p5: ${why}`).toBeTruthy();
+      expect(entry!.source.kind, `${id} ${name} (${why})`).toBe(kind);
+    }
+  });
+
+  it("keeps the heroic path out of the tiers below Magisters' Terrace", () => {
+    // The phase map admits MT at 5 only. A heroic source appearing at p3 would
+    // mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
+    for (const entry of universeP3) {
+      expect(
+        entry.source.kind,
+        `${entry.itemId} ${entry.name} carries a heroic source at maxPhase 3`
+      ).not.toBe("heroic");
+    }
+  });
 
   it.skipIf(!hasWowsimsVendor)(
     "does not treat spell damage as a caster-only stat",

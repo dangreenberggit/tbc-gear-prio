@@ -34,22 +34,22 @@ means there's nothing to review, not three empty reports.
 Reviewers are on the **sharp** model lane — see
 [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
 
-**Cursor ceiling vs wall:** If Cursor refuses Sol/Opus and only offers Grok
-high, that is the sharp lane here — note it in the dispatch line and
-continue on Grok high (prefer non-fast; else `…-high-fast`). That is not
-a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure (or
-a swap to something *below* Grok high on Cursor / below the harness top
-elsewhere) — then wait, serialise, or hand off; do not invent a weaker
-model to finish.
+**Ceiling vs wall:** A **ceiling** is the harness declining a model above its
+own sharp lane — e.g. Cursor refusing Sol/Opus and offering Grok high. Run on
+the harness's sharp lane, note it in the dispatch line, and continue; that is
+not a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
+a swap to something *below* the harness's sharp lane — then wait, serialise,
+or hand off; do not invent a weaker model to finish.
 
 Try in order:
 
 1. **`codex exec`**, if the binary is on `PATH` — cross-vendor sharp review.
    Pipe the brief + diff to it directly.
-2. **Fresh subagents on a sharp model** (explicit id). On **Cursor**: Grok
-   high (prefer non-fast; else the current `…-high-fast` slug). Elsewhere:
-   Opus-class / GPT high/sol-class / top reasoning tier. Prefer all three
-   axes in one parallel batch when the harness is healthy.
+2. **Fresh subagents on a sharp model** (explicit id) — Claude Code: Opus at
+   effort `medium`; Codex: top tier; Cursor: Grok high (prefer non-fast; else
+   the current `…-high-fast` slug); anywhere else: the top reasoning tier the
+   harness will actually run. Prefer all three axes in one parallel batch when
+   the harness is healthy.
 3. **On a wall** (see above):
    - Retry once after a short wait on the **same sharp class**.
    - Then run axes **one at a time** (adversarial → domain → code-review),

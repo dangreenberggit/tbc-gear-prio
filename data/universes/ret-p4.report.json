@@ -13,18 +13,18 @@
     "Zul'Aman"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1364,
-  "universeTotal": 401,
-  "listOnlyMembership": 23,
+  "excludedNoSource": 1397,
+  "universeTotal": 403,
+  "listOnlyMembership": 25,
   "perSlot": {
     "back": 31,
     "chest": 35,
     "feet": 39,
-    "finger": 38,
+    "finger": 39,
     "hands": 26,
     "head": 31,
     "legs": 23,
-    "neck": 27,
+    "neck": 28,
     "ranged": 4,
     "shoulder": 31,
     "trinket": 25,
@@ -33,45 +33,46 @@
     "wrist": 33
   },
   "sourceRecordAdds": {
-    "atlasloot": 373,
-    "db": 1733,
+    "atlasloot": 196,
+    "db": 1695,
+    "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 57
+    "wowhead": 56
   },
   "membershipByOrigin": {
     "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:db": 362,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 45,
-    "listOnly": 23,
+    "itemHasOrigin:wowhead": 47,
+    "listOnly": 25,
     "zoneMatch": 378
   },
   "exclusivePrimaryOrigin": {
     "db": 362,
     "atlasloot-only": 13,
     "two-hop": 15,
-    "wowhead-only": 11
+    "wowhead-only": 13
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 401,
+    "total": 403,
     "casterOnlyReject": 138,
     "epFloorReject": 15,
     "combinedReject": 153,
-    "combinedKeep": 248,
-    "casterRejectPct": 34.4,
-    "combinedRejectPct": 38.2,
+    "combinedKeep": 250,
+    "casterRejectPct": 34.2,
+    "combinedRejectPct": 38.0,
     "applied": false
   },
   "wowheadListIds": 130,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 130,
-    "recalled": 107,
-    "missed": 23,
-    "recallPct": 82.3,
+    "recalled": 109,
+    "missed": 21,
+    "recallPct": 83.8,
     "missedItems": [
       {
         "itemId": 18823,
@@ -146,12 +147,6 @@
         "d7Eligible": true
       },
       {
-        "itemId": 29119,
-        "name": "Haramad's Bargain",
-        "slot": "neck",
-        "d7Eligible": true
-      },
-      {
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
@@ -168,12 +163,6 @@
         "name": "Flesh Handler's Gauntlets",
         "slot": "hands",
         "d7Eligible": false
-      },
-      {
-        "itemId": 30834,
-        "name": "Shapeshifter's Signet",
-        "slot": "finger",
-        "d7Eligible": true
       },
       {
         "itemId": 31033,

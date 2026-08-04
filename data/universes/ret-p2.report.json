@@ -10,7 +10,7 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1370,
+  "excludedNoSource": 1405,
   "universeTotal": 230,
   "listOnlyMembership": 12,
   "perSlot": {
@@ -30,10 +30,11 @@
     "wrist": 18
   },
   "sourceRecordAdds": {
-    "atlasloot": 373,
-    "db": 1733,
+    "atlasloot": 196,
+    "db": 1695,
+    "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 26
+    "wowhead": 25
   },
   "membershipByOrigin": {
     "itemHasOrigin:atlasloot": 41,

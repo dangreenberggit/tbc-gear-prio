@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillCandidateGems } from "../src/candidate-gems.js";
+import { fillCandidateGems, gemContext } from "../src/candidate-gems.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { socketsFor } from "../src/items.js";
 import { isKaelTempLegendary } from "../src/kael-temp.js";
@@ -67,5 +67,40 @@ describe("Kael temp legendaries", () => {
     expect(isKaelTempLegendary(30318)).toBe(true);
     expect(isKaelTempLegendary(29993)).toBe(false);
     expect(isKaelTempLegendary(32332)).toBe(false);
+  });
+});
+
+describe("gemContext", () => {
+  // `epScore` accepts weights as a dense array or a record; the gem fillers
+  // only take the record. gemContext is the single place that reconciles them,
+  // so the array branch needs its own case -- nothing else in the suite feeds
+  // dense-array weights through a candidate swap, which let a mutation that
+  // skipped the conversion entirely pass the whole suite.
+  it("indexes dense-array weights by position", () => {
+    const ctx = gemContext([], [0, 0, 0, 1.5]);
+    expect(ctx.weightRecord).toEqual({ "0": 0, "1": 0, "2": 0, "3": 1.5 });
+  });
+
+  it("passes a record through unchanged and keeps both shapes in step", () => {
+    const weights = { "21": 1, "24": 2.14 };
+    const ctx = gemContext([], weights);
+    expect(ctx.weightRecord).toEqual(weights);
+    // The whole point of the context: the two fields are never independent
+    // inputs that a caller could disagree on.
+    expect(ctx.weights).toBe(weights);
+  });
+
+  it("treats a hole in the array as zero rather than undefined", () => {
+    // `new Array(3)` has no element at index 1, so the `?? 0` in
+    // toWeightRecord is what keeps the record numeric. Written this way rather
+    // than as a sparse literal, which no-sparse-arrays rejects.
+    const holed = Array.from({ length: 3 }) as unknown as number[];
+    holed[0] = 1;
+    holed[2] = 3;
+    expect(gemContext([], holed).weightRecord).toEqual({
+      "0": 1,
+      "1": 0,
+      "2": 3,
+    });
   });
 });

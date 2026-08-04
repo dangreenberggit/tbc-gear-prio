@@ -5,10 +5,17 @@
 
 import {
   fillEmptyCandidateGems,
+  gemContext,
   type FillEmptyOpts,
+  type GemContext,
 } from "./candidate-gems.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
 import { compose } from "./compose.js";
+import {
+  contentHashOf,
+  ENGINE_VERSION,
+  type HashedGearItem,
+} from "./content-hash.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
@@ -137,6 +144,8 @@ export type Ranking = {
 
 const DEFAULT_ITERATIONS = 3000;
 const DEFAULT_SEEDS = [42];
+/** Hashed and disclosed from one place, so the two cannot drift apart. */
+const PRESET_ID = "ret/p2.raid-sim-skeleton";
 
 export async function rankUpgrades(
   input: RankInput,
@@ -183,8 +192,10 @@ export async function rankUpgrades(
     throw err;
   }
 
-  const palette = deps.gemPalette ?? gemsForPhase(input.maxPhase);
-  const epWeightRecord = weightRecord(deps.epWeights);
+  const gems = gemContext(
+    deps.gemPalette ?? gemsForPhase(input.maxPhase),
+    deps.epWeights
+  );
 
   const equipment = applyRepairedGems(
     equipmentFromLoggedGear(logged),
@@ -209,16 +220,56 @@ export async function rankUpgrades(
     (e) => !isKaelTempLegendary(e.itemId)
   );
 
+  // Hashed here rather than at entry because the logged gear is the largest
+  // input to every delta, and it is not known until readGear resolves. The
+  // check still lands before the sim loop, which is the expensive part.
+  const contentHash = contentHashOf({
+    character: input.character,
+    spec: input.spec,
+    maxPhase: input.maxPhase,
+    race,
+    fight,
+    gear: { items: logged.items as readonly HashedGearItem[] },
+    candidates: candidates.map((e) => ({ itemId: e.itemId, slot: e.slot })),
+    gemPaletteIds: gems.palette.map((g) => g.id),
+    epWeights: deps.epWeights,
+    presetId: PRESET_ID,
+    skeleton: deps.raidSimSkeleton,
+    iterations,
+    seeds,
+    simVersion: await deps.sim.version(),
+    engineVersion: ENGINE_VERSION,
+  });
+
+  const cached = await deps.store.get<Ranking>(rankingCacheKey(contentHash));
+  if (cached) {
+    // A hit runs no sim, and ends here so a caller that opened a progress view
+    // always gets a terminal event (PLAN.md §4 as amended by ADR-0019 — the
+    // original "fires once" assumed a hash computable before the gear read).
+    onProgress?.({ stage: "ranking" });
+    return cached;
+  }
+
+  // Dedupe handle for the job API (PLAN.md §7 payoff 2): the row is keyed by
+  // the same hash, so a second caller can attach rather than start a rival run.
+  const job = await deps.store.job.create({ contentHash, input });
+  await deps.store.job.update(job.id, { status: "running" });
+
   const totalSims = 1 + candidates.length;
   onProgress?.({ stage: "simming", done: 0, total: totalSims });
   let observation;
   try {
     observation = await deps.sim.run(request, runOpts);
   } catch (err) {
-    throw new RankError(
-      "sim-failed",
-      err instanceof Error ? err.message : String(err)
-    );
+    const detail = err instanceof Error ? err.message : String(err);
+    // Without this the row is stranded `running`, and a dedupe that attaches
+    // to it would wait on a job that already died.
+    await deps.store.job.update(job.id, {
+      status: "error",
+      errorKind: "sim-failed",
+      errorDetail: detail,
+    });
+    throw new RankError("sim-failed", detail);
   }
   onProgress?.({ stage: "simming", done: 1, total: totalSims });
 
@@ -260,9 +311,7 @@ export async function rankUpgrades(
         equipment,
         slotIndex,
         entry.itemId,
-        palette,
-        epWeightRecord,
-        deps.epWeights
+        gems
       );
       const candReq = compose(deps.raidSimSkeleton, {
         name: input.character.name.toLowerCase(),
@@ -346,11 +395,8 @@ export async function rankUpgrades(
     }
   }
 
-  void deps.store;
-  void deps.clock;
-
-  return {
-    contentHash: `phase1-baseline:${input.character.name.toLowerCase()}`,
+  const ranking: Ranking = {
+    contentHash,
     cutoff: CUTOFF,
     baseline: {
       dps: observation.dps,
@@ -362,7 +408,7 @@ export async function rankUpgrades(
       seeds,
       iterations,
       race,
-      presetId: "ret/p2.raid-sim-skeleton",
+      presetId: PRESET_ID,
       standing: buildStandingAssumptions(race),
     },
     substitutions: [
@@ -374,6 +420,18 @@ export async function rankUpgrades(
     ],
     items: ranked,
   };
+
+  await deps.store.put(rankingCacheKey(contentHash), ranking);
+  await deps.store.job.update(job.id, {
+    status: "done",
+    result: ranking,
+  });
+  return ranking;
+}
+
+/** Namespaced so a ranking blob cannot collide with another content-addressed value. */
+function rankingCacheKey(contentHash: string): string {
+  return `ranking:${contentHash}`;
 }
 
 function raceFromSkeleton(skeleton: RaidSimRequest): Race {
@@ -401,19 +459,6 @@ function isRace(value: string): value is Race {
   );
 }
 
-function weightRecord(
-  weights: Readonly<Record<string, number>> | readonly number[]
-): Readonly<Record<string, number>> {
-  if (Array.isArray(weights)) {
-    const out: Record<string, number> = {};
-    for (let i = 0; i < weights.length; i++) {
-      out[String(i)] = weights[i] ?? 0;
-    }
-    return out;
-  }
-  return weights as Readonly<Record<string, number>>;
-}
-
 function meetsCutoff(
   deltaDps: number,
   deltaPct: number,
@@ -432,17 +477,9 @@ export function equipmentForCandidateSwap(
   equipment: readonly SimItemSpec[],
   slotIndex: number,
   itemId: number,
-  palette: readonly GemEntry[],
-  epWeightRecord: Readonly<Record<string, number>>,
-  epWeights: Readonly<Record<string, number>> | readonly number[]
+  gems: GemContext
 ): SimItemSpec[] {
-  const swapped = swapItemAt(
-    equipment,
-    slotIndex,
-    itemId,
-    palette,
-    epWeightRecord
-  );
+  const swapped = swapItemAt(equipment, slotIndex, itemId, gems);
   const socketed: SocketedItem[] = swapped.map((spec) => ({
     itemId: spec.id ?? 0,
     gems: [...spec.gems],
@@ -451,8 +488,8 @@ export function equipmentForCandidateSwap(
   try {
     repaired = repairMeta({
       items: socketed,
-      epWeights,
-      palette,
+      epWeights: gems.weights,
+      palette: gems.palette,
     });
   } catch (err) {
     if (err instanceof MetaUnsolvableError) {
@@ -467,8 +504,7 @@ function swapItemAt(
   equipment: readonly SimItemSpec[],
   slotIndex: number,
   itemId: number,
-  palette: readonly GemEntry[],
-  epWeights: Readonly<Record<string, number>>
+  gemCtx: GemContext
 ): SimItemSpec[] {
   return equipment.map((spec, i) => {
     if (i !== slotIndex) return spec;
@@ -478,8 +514,8 @@ function swapItemAt(
       : fillEmptyCandidateGems(
           itemId,
           migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
-          palette,
-          epWeights,
+          gemCtx.palette,
+          gemCtx.weightRecord,
           fillOptsForSwap(equipment, slotIndex)
         );
     const out: SimItemSpec = { id: itemId, gems };

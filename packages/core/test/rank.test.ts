@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { gemContext } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase } from "../src/gems.js";
@@ -133,9 +134,7 @@ function candidateEquipmentForTest(
     equipment,
     SIM_ORDER.indexOf(slotName),
     itemId,
-    gemsForPhase(maxPhase),
-    epWeights,
-    epWeights
+    gemContext(gemsForPhase(maxPhase), epWeights)
   );
 }
 
@@ -463,6 +462,196 @@ describe("rankUpgrades", () => {
     );
     // maxPhase 1 must drop the phase-2 chest even though it is in the pool file.
     expect(a.items.map((i) => i.itemId)).toEqual([29381]);
+  });
+
+  describe("the ranking cache", () => {
+    /** Counts runs so "without spawning a sim" is asserted, not assumed. */
+    class CountingSimRunner implements SimRunner {
+      runs = 0;
+      constructor(private readonly inner: SimRunner) {}
+      version(): Promise<string> {
+        return this.inner.version();
+      }
+      run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
+        this.runs += 1;
+        return this.inner.run(req, opts);
+      }
+    }
+
+    const cachePool = [
+      {
+        itemId: 29381,
+        name: "Choker of Vile Intent",
+        slot: "neck" as const,
+        phase: 1,
+        source: { kind: "badge" as const, cost: 25 },
+      },
+    ];
+
+    /**
+     * Answers any request rather than replaying pinned keys: these tests vary
+     * gear and iterations on purpose, so a key-matched recording would fail
+     * for the wrong reason. Deltas are irrelevant here — only the run count is
+     * asserted.
+     */
+    function respondingSim(): SimRunner {
+      return {
+        version: async () => "v0.0.101",
+        run: async (_req: RaidSimRequest, opts: SimRunOpts) => ({
+          dps: 2042.85,
+          stdev: 91.9,
+          iterationsDone: opts.iterations,
+          simVersion: "v0.0.101",
+        }),
+      };
+    }
+
+    function cacheDeps(gear: LoggedGear = slamaltmanLoggedGear()) {
+      const sim = new CountingSimRunner(respondingSim());
+      return {
+        sim,
+        deps: {
+          gear: new RecordedGearSource({
+            fights: new Map([
+              ["US|dreamscythe|slamaltman|ret", [SUMMARY]],
+              ["US|dreamscythe|someoneelse|ret", [SUMMARY]],
+            ]),
+            gear: new Map([["abc123|7", gear]]),
+          }),
+          sim: sim as SimRunner,
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+          pool: cachePool,
+        },
+      };
+    }
+
+    const input = {
+      character: CHAR,
+      spec: "ret" as const,
+      maxPhase: 1 as const,
+      iterations: 3000,
+      seeds: [42],
+      race: "RaceHuman" as const,
+    };
+
+    it("serves the second identical call from the store without simming", async () => {
+      const { sim, deps } = cacheDeps();
+
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+      expect(afterFirst).toBeGreaterThan(0);
+
+      const second = await rankUpgrades(input, deps);
+      expect(sim.runs).toBe(afterFirst);
+      expect(second).toEqual(first);
+      expect(second.contentHash).toBe(first.contentHash);
+    });
+
+    it("reports no simming stage on a cache hit and ends on ranking", async () => {
+      // PLAN.md §4 line 161 says a hit fires onProgress *once*. That assumed a
+      // hash computable before any I/O; hashing the logged gear (ADR-0019)
+      // means a hit still resolves and reads gear, so those stages fire. What
+      // the caller is actually promised — no sim, and a terminal event to
+      // close a progress view — is what this asserts. Amended in ADR-0019.
+      const { deps } = cacheDeps();
+      await rankUpgrades(input, deps);
+
+      const stages: string[] = [];
+      await rankUpgrades(input, deps, (p) => stages.push(p.stage));
+      expect(stages).not.toContain("simming");
+      expect(stages.at(-1)).toBe("ranking");
+    });
+
+    it("re-sims when a hashed input changes", async () => {
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const second = await rankUpgrades({ ...input, iterations: 2000 }, deps);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("re-sims when the logged gear changes but the character does not", async () => {
+      // The stale-ranking regression: same character and same request, a
+      // re-gemmed set. A hash that missed gear would serve the old numbers.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const base = slamaltmanLoggedGear();
+      const regemmed: LoggedGear = {
+        ...base,
+        items: base.items.map((item, i) =>
+          i === 0 ? { ...item, gems: [24028, 24028] } : item
+        ),
+      };
+      // Same store and same counting runner — only the gear differs, so a
+      // hash that ignored gems would hit the first entry and run nothing.
+      const regemmedDeps = {
+        ...deps,
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", regemmed]]),
+        }),
+      };
+
+      const second = await rankUpgrades(input, regemmedDeps);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("re-sims when the sim skeleton changes under an unchanged presetId", async () => {
+      // presetId is a module constant, so an edited skeleton — buffs,
+      // encounter duration, APL — would otherwise hash identically. This
+      // repo measured stripping prepullActions at 789.02 DPS against a
+      // 2042.85 baseline (docs/verification-log.md), so a stale hit here
+      // serves a 61%-wrong answer with no error anywhere.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const edited = {
+        ...deps,
+        raidSimSkeleton: {
+          ...skeleton,
+          encounter: { ...(skeleton.encounter ?? {}), duration: 999 },
+        },
+      };
+      const second = await rankUpgrades(input, edited);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("re-sims when a candidate is re-slotted but keeps its item id", async () => {
+      // `slot` picks the sim slots the swap is tried in, so it changes the
+      // deltas. A pool regeneration that corrects a mis-slotted item must
+      // not be served the old numbers.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const reslotted = {
+        ...deps,
+        pool: cachePool.map((e) => ({ ...e, slot: "finger" as const })),
+      };
+      const second = await rankUpgrades(input, reslotted);
+      expect(sim.runs).toBeGreaterThan(afterFirst);
+      expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("does not collide across characters", async () => {
+      const { deps } = cacheDeps();
+      const mine = await rankUpgrades(input, deps);
+      const theirs = await rankUpgrades(
+        { ...input, character: { ...CHAR, name: "someoneelse" } },
+        deps
+      );
+      expect(theirs.contentHash).not.toBe(mine.contentHash);
+    });
   });
 
   it("maxPhase changes the candidate set and the gem palette together", async () => {

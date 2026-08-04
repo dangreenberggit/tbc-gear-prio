@@ -43,6 +43,23 @@ export default tseslint.config(
     ],
   },
   {
+    // Compile-time assertions (`type _Foo = Assert<...>`) exist only for the
+    // error they raise when an invariant breaks, so they are unused by
+    // construction. Leading underscore marks that intent; the rule still
+    // catches ordinary dead code, which is what it is for.
+    files: ["packages/core/src/**/*.ts", "packages/core/test/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
     files: ["packages/core/src/**/*.ts"],
     ignores: ["packages/core/src/seams/**", "packages/core/src/cli.ts"],
     rules: {

@@ -38,6 +38,10 @@ Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBu
 
 **A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a sharp question (does this measurement support this conclusion?) still needs a sharp model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
 
+### Types from JSON
+
+**Never derive a TypeScript type from a JSON import.** `resolveJsonModule` widens every string to `string`, and `as const` cannot be applied to a JSON import (TS1355), so `(typeof json.list)[number]` is `string` and any `extends` assertion against it **passes vacuously** — a check that reads as rigour and proves nothing. This repo has hit it twice; both times the wrong conclusion ("impossible, needs codegen") was written down as fact. JSON is a **value** source of truth, never a **type** one. Shared lists go through `scripts/generate_json_literal_types.py`, which emits committed `as const` code gated by `pnpm verify`. See [`docs/workflow.md`](docs/workflow.md#never-derive-a-type-from-a-json-import).
+
 ### Testing
 
 Invoke the `tdd` skill for any red/green work. Note the word **seam** means two
@@ -60,7 +64,7 @@ the eight stages must stay reorganisable without touching a test.
 
 ### Parallel agents
 
-When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Cursor/Claude/Codex adapters).
+When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
 
@@ -70,7 +74,7 @@ When you stash WIP, say what you parked and what tip is missing because of it. N
 
 ### Models and walls
 
-**Workhorse** for implementation / parallel workers; **sharp** for pre-merge review — go slower or serial on walls; never invent a weaker substitute for a _sharp_ job. On **Cursor**: workhorse = **Composer** (simple/mechanical Task spawns; on Pro the Other-pool Terra/Sol models often die at spawn, which is why this is pinned rather than preferred); sharp = **Grok high** (prefer non-fast when available; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Cursor manager fan-out). On **Claude Code**, sharp Opus work defaults to **effort `medium`** (not a model slug — set Opus and `/effort medium`); reserve effort `high`+ for niche cases like a single adversarial review axis. Prefer Sonnet/Terra workhorse and sol/`codex` sharp elsewhere when the harness allows. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
+Two lanes, every harness: **workhorse** for implementation / parallel workers, **sharp** for pre-merge review. Go slower or serial on walls; never invent a weaker substitute for a _sharp_ job — if waiting and serialising both fail, stop and say so rather than downgrading. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Manager / multi-step fan-out). Filling the lanes: on **Claude Code**, Sonnet-class workhorse and sharp Opus at **effort `medium`** (not a model slug — set Opus and `/effort medium`), reserving effort `high`+ for niche cases like a single adversarial review axis; on **Codex**, mid tier for workers and `codex exec` / top tier for review; on **Cursor**, workhorse = **Composer** (pinned, not merely preferred, because on Pro the Other-pool Terra/Sol models often die at spawn) and sharp = **Grok high** (prefer non-fast; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 
