@@ -96,7 +96,14 @@ export type RankErrorKind =
   | "meta-unsolvable"
   | "sim-failed"
   | "wcl-budget-exhausted"
-  | "not-implemented";
+  | "not-implemented"
+  /**
+   * A fault in our own code or in a dependency, rather than in the character,
+   * the log or the sim: a slot-mapping disagreement, a store write that
+   * failed. Distinct because reporting these as `sim-failed` tells an operator
+   * the sim is broken and sends them to the wrong place.
+   */
+  | "internal";
 
 export class RankError extends Error {
   readonly kind: RankErrorKind;
@@ -262,11 +269,18 @@ export async function rankUpgrades(
   try {
     return await rankAfterJobCreated();
   } catch (err) {
-    await deps.store.job.update(job.id, {
-      status: "error",
-      errorKind: err instanceof RankError ? err.kind : "sim-failed",
-      errorDetail: err instanceof Error ? err.message : String(err),
-    });
+    // Best-effort: if the store is the thing that is broken, this update fails
+    // too. Swallowing its error keeps the original failure — the one that
+    // explains what actually went wrong — as what the caller sees.
+    try {
+      await deps.store.job.update(job.id, {
+        status: "error",
+        errorKind: err instanceof RankError ? err.kind : "internal",
+        errorDetail: err instanceof Error ? err.message : String(err),
+      });
+    } catch {
+      // deliberately ignored — see above
+    }
     throw err;
   }
 

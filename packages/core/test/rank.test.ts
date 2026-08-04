@@ -25,7 +25,7 @@ import {
   type SimRunOpts,
   type SimRunner,
 } from "../src/seams/sim-runner.js";
-import { MemoryStore } from "../src/seams/store.js";
+import { MemoryStore, type Store } from "../src/seams/store.js";
 import {
   mapWclGearToSim,
   SIM_ORDER,
@@ -644,15 +644,10 @@ describe("rankUpgrades", () => {
     });
 
     it("errors the job row when the run throws after the row is created", async () => {
-      // Ticket 29. Every exit after job.create must complete or error the
-      // row: once the Phase 2 job API attaches to a `running` row, a stranded
-      // one is a job that never finishes and never fails, so the caller waits
-      // forever. A non-RankError from deep in the candidate loop stands in for
-      // the meta-unsolvable path, which escapes the same way.
-      // Throwing from `put` is the cleanest post-create escape: it runs after
-      // every sim, so the run is otherwise complete and only the exit path is
-      // under test. `equipmentForCandidateSwap`'s meta-unsolvable throw leaves
-      // by the same route.
+      // Ticket 29: once the Phase 2 job API attaches to a `running` row, a
+      // stranded one is a job that never finishes and never fails, so the
+      // caller waits forever. `equipmentForCandidateSwap`'s meta-unsolvable
+      // throw escapes by this same route.
       class ExplodingBlobStore extends MemoryStore {
         override async put(): Promise<void> {
           throw new Error("blob write exploded");
@@ -661,11 +656,48 @@ describe("rankUpgrades", () => {
       const store = new ExplodingBlobStore();
       const deps = { ...cacheDeps().deps, store };
 
-      await expect(rankUpgrades(input, deps)).rejects.toThrow();
+      // The original failure must survive, not be replaced by whatever the
+      // error path does on its way out.
+      await expect(rankUpgrades(input, deps)).rejects.toThrow(
+        "blob write exploded"
+      );
 
       const row = await store.job.read("job_1");
       expect(row?.status).toBe("error");
-      expect(row?.status).not.toBe("running");
+      expect(row?.errorDetail).toBe("blob write exploded");
+      // A store fault is not a sim fault. Labelling it `sim-failed` sends an
+      // operator to the wrong subsystem.
+      expect(row?.errorKind).toBe("internal");
+    });
+
+    it("keeps the original error when the store cannot record the failure", async () => {
+      // The invariant is best-effort, not absolute: if the store itself is
+      // broken it cannot write its own tombstone. What must not happen is the
+      // bookkeeping error masking the real one.
+      // Only the *error-path* update fails. The `running` update before the
+      // try must still succeed, or the run never reaches the code under test.
+      const inner = new MemoryStore();
+      let updates = 0;
+      const store: Store = {
+        get: (k) => inner.get(k),
+        put: async () => {
+          throw new Error("blob write exploded");
+        },
+        job: {
+          create: (i) => inner.job.create(i),
+          read: (id) => inner.job.read(id),
+          update: async (id, patch) => {
+            updates += 1;
+            if (updates > 1) throw new Error("job table is on fire");
+            return inner.job.update(id, patch);
+          },
+        },
+      };
+      const deps = { ...cacheDeps().deps, store };
+
+      await expect(rankUpgrades(input, deps)).rejects.toThrow(
+        "blob write exploded"
+      );
     });
 
     it("does not collide across characters", async () => {
