@@ -40,13 +40,12 @@ in the browser bundle (in `getWCLBearerToken`). We want our own, and cloning a
 shared rate-limited budget into a second deployment is a bad idea regardless of
 where our app is hosted.
 
-**Still ours to write — the smaller half.** Their importer starts from a *report
-
-- fight URL* and builds all 25 raiders. Ours starts from a _character name_ and
-  must find the most recent qualifying kill. That selection policy has no upstream
-  equivalent. Their spec classification is also icon-string-based, while ours is
-  talent-tree plurality — we verified upstream's approach agrees, but ours was
-  chosen for a reason (P0: no spec label exists at actor level) and should stay.
+**Still ours to write — the smaller half.** Their importer starts from a report
+URL plus a fight id and builds all 25 raiders. Ours starts from a _character
+name_ and must find the most recent qualifying kill. That selection policy has no
+upstream equivalent. Their spec classification is also icon-string-based, while
+ours is talent-tree plurality — we verified upstream's approach agrees, but ours
+was chosen for a reason (P0: no spec label exists at actor level) and should stay.
 
 ---
 
