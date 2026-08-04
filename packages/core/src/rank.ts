@@ -11,6 +11,11 @@ import {
 } from "./candidate-gems.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
 import { compose } from "./compose.js";
+import {
+  contentHashOf,
+  ENGINE_VERSION,
+  type HashedGearItem,
+} from "./content-hash.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
@@ -139,6 +144,8 @@ export type Ranking = {
 
 const DEFAULT_ITERATIONS = 3000;
 const DEFAULT_SEEDS = [42];
+/** Hashed and disclosed from one place, so the two cannot drift apart. */
+const PRESET_ID = "ret/p2.raid-sim-skeleton";
 
 export async function rankUpgrades(
   input: RankInput,
@@ -213,16 +220,55 @@ export async function rankUpgrades(
     (e) => !isKaelTempLegendary(e.itemId)
   );
 
+  // Hashed here rather than at entry because the logged gear is the largest
+  // input to every delta, and it is not known until readGear resolves. The
+  // check still lands before the sim loop, which is the expensive part.
+  const palette = deps.gemPalette ?? gemsForPhase(input.maxPhase);
+  const contentHash = contentHashOf({
+    character: input.character,
+    spec: input.spec,
+    maxPhase: input.maxPhase,
+    race,
+    fight,
+    gear: { items: logged.items as readonly HashedGearItem[] },
+    candidateItemIds: candidates.map((e) => e.itemId),
+    gemPaletteIds: palette.map((g) => g.id),
+    epWeights: deps.epWeights,
+    presetId: PRESET_ID,
+    iterations,
+    seeds,
+    simVersion: await deps.sim.version(),
+    engineVersion: ENGINE_VERSION,
+  });
+
+  const cached = await deps.store.get<Ranking>(rankingCacheKey(contentHash));
+  if (cached) {
+    // PLAN.md §4: cache hits fire onProgress once and resolve, so a caller
+    // that opened a progress view always gets an event to close it.
+    onProgress?.({ stage: "ranking" });
+    return cached;
+  }
+
+  // Dedupe handle for the job API (PLAN.md §7 payoff 2): the row is keyed by
+  // the same hash, so a second caller can attach rather than start a rival run.
+  const job = await deps.store.job.create({ contentHash, input });
+  await deps.store.job.update(job.id, { status: "running" });
+
   const totalSims = 1 + candidates.length;
   onProgress?.({ stage: "simming", done: 0, total: totalSims });
   let observation;
   try {
     observation = await deps.sim.run(request, runOpts);
   } catch (err) {
-    throw new RankError(
-      "sim-failed",
-      err instanceof Error ? err.message : String(err)
-    );
+    const detail = err instanceof Error ? err.message : String(err);
+    // Without this the row is stranded `running`, and a dedupe that attaches
+    // to it would wait on a job that already died.
+    await deps.store.job.update(job.id, {
+      status: "error",
+      errorKind: "sim-failed",
+      errorDetail: detail,
+    });
+    throw new RankError("sim-failed", detail);
   }
   onProgress?.({ stage: "simming", done: 1, total: totalSims });
 
@@ -348,11 +394,8 @@ export async function rankUpgrades(
     }
   }
 
-  void deps.store;
-  void deps.clock;
-
-  return {
-    contentHash: `phase1-baseline:${input.character.name.toLowerCase()}`,
+  const ranking: Ranking = {
+    contentHash,
     cutoff: CUTOFF,
     baseline: {
       dps: observation.dps,
@@ -364,7 +407,7 @@ export async function rankUpgrades(
       seeds,
       iterations,
       race,
-      presetId: "ret/p2.raid-sim-skeleton",
+      presetId: PRESET_ID,
       standing: buildStandingAssumptions(race),
     },
     substitutions: [
@@ -376,6 +419,18 @@ export async function rankUpgrades(
     ],
     items: ranked,
   };
+
+  await deps.store.put(rankingCacheKey(contentHash), ranking);
+  await deps.store.job.update(job.id, {
+    status: "done",
+    result: ranking,
+  });
+  return ranking;
+}
+
+/** Namespaced so a ranking blob cannot collide with another content-addressed value. */
+function rankingCacheKey(contentHash: string): string {
+  return `ranking:${contentHash}`;
 }
 
 function raceFromSkeleton(skeleton: RaidSimRequest): Race {
