@@ -14,14 +14,26 @@ deferred rather than done mid-review. Grouped roughly by value.
 as predicted:
 
 - **Unused `Deps` breadth — RESOLVED 2026-08-03 (ADR-0019).** The ranking
-  cache gave both ports their first production consumer, so
+  cache gave `deps.store` its first production consumer, so
   `void deps.store; void deps.clock;` is gone rather than refactored away.
   `deps.store` holds the ranking blob at `ranking:<contentHash>` and writes
-  the job row (`create` → `running` → `done`, `error` on a failed sim);
-  `deps.clock` timestamps those rows through `MemoryStore`. The `Store.job`
-  surface that read as speculative is now the dedupe handle PLAN.md §7's
-  second payoff needs. Ticket **19 was stale** in the pointer below — it is
-  closed, deferred to Phase 2 by ADR-0016.
+  the job row (`create` → `running` → `done`, `error` on a failed sim).
+
+  **Two corrections to an earlier version of this note**, both caught in the
+  pre-merge review of `feat/content-hash`:
+
+  - It claimed *"`deps.clock` timestamps those rows through `MemoryStore`."*
+    **False.** `rankUpgrades` never reads `deps.clock`; `MemoryStore`
+    timestamps from its own constructor-injected clock. The port is consumed
+    only because `cli.ts` now passes the same function to both. The engine
+    writes no timestamp of its own.
+  - It claimed the `Store.job` surface *"is now the dedupe handle §7's second
+    payoff needs."* Overstated — it is the handle, not the payoff. There is no
+    `findByContentHash`, so two concurrent identical calls still both sim.
+    Attaching to a running job is Phase 2 work.
+
+  Ticket **19 was stale** in the pointer below — it is closed, deferred to
+  Phase 2 by ADR-0016.
 
 Closed this round: `ITEM_SOURCE_KINDS` duplicated three ways, the `GemContext`
 grouping, the JSON-widening trap behind both of them, and the

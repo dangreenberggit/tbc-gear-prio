@@ -54,25 +54,35 @@ not §7's enumeration. Hashed, each with a mutation test in
 ```
 character (case-normalised), spec, maxPhase, race, fight,
 gear { id, slot, enchant, gems },
-candidateItemIds, gemPaletteIds, epWeights,
-presetId, iterations, seeds, simVersion, engineVersion
+candidates [{ itemId, slot }], gemPaletteIds, epWeights,
+presetId, skeleton (by value), iterations, seeds, simVersion, engineVersion
 ```
 
 Mapping to §7:
 
 - `gearSnapshot` → **`gear`**, the logged items with enchants and gems. The
   largest input to every delta, and the one the placeholder missed.
-- `poolId`/`poolVersion` → **`candidateItemIds`**, the post-filter candidate
-  id list. ADR-0017 removed the identifiers §7 named; the set itself is what
-  changes the numbers, so the set is hashed.
+- `poolId`/`poolVersion` → **`candidates`**, the post-filter candidate list as
+  `{ itemId, slot }` pairs. ADR-0017 removed the identifiers §7 named; the set
+  itself is what changes the numbers, so the set is hashed. The **slot** is
+  hashed alongside the id — also a review catch — because `simSlotsForPoolSlot`
+  uses it to pick which sim slots the swap is tried in (`finger` runs two
+  comparisons, `neck` one), so it decides `deltaDps` and `slotChoice`. Ids
+  alone served stale deltas after a pool regeneration re-slotted an item.
 - `epVersion` → **`epWeights`**, hashed by value. §7 tied this to the rank-time
   prefilter (ADR-0018: never built), but the weights are _not_ dead — they
   drive meta repair and candidate gem fill, so they move numbers today.
 - `fullPool` → **dropped.** ADR-0018.
-- `encounterProfile` → **`presetId`**, which identifies the skeleton the
-  encounter comes from. One hoisted constant (`PRESET_ID` in `rank.ts`) feeds
-  both the hash and `assumptions`, so the stamp cannot disagree with the
-  disclosure.
+- `encounterProfile` → **`skeleton`**, the `RaidSimRequest` hashed **by value**,
+  plus `presetId` as a label. Hashing the label alone was a bug caught in
+  pre-merge review: `PRESET_ID` is a module constant that never varies, while
+  the skeleton arrives through `deps.raidSimSkeleton` carrying raid buffs,
+  debuffs, talents, encounter duration and the APL rotation. Editing that file
+  left the hash unchanged, and `docs/verification-log.md` (2026-07-27) measured
+  stripping `prepullActions` at 789.02 DPS against a 2042.85 baseline — a 61%
+  swing served from cache with no error anywhere, which is PLAN.md's stated
+  worst case. `presetId` stays because it feeds `assumptions` from the same
+  constant, so the disclosure cannot drift from the hash.
 - `presetVersion` → **dropped.** No such field exists; `presetId` names a
   committed file, and `engineVersion` covers deliberate invalidation.
 - **`gemPaletteIds`** added. Not in §7, but the palette decides how every
@@ -131,8 +141,17 @@ synthesise.** PLAN.md §4 is amended to say so.
   `ranking:<hash>`, namespaced so it cannot collide with another
   content-addressed value.
 - **Job rows are written on the miss path** — `create` → `running` → `done`,
-  keyed by the same hash, which is the dedupe handle §7's second payoff needs.
-  A failed sim marks the row `error` rather than stranding it `running`.
+  keyed by the same hash. A failed sim marks the row `error` rather than
+  stranding it `running`. This is the **handle** §7's second payoff needs, not
+  the payoff: `Store.job` exposes only `create`/`update`/`read`-by-id, so there
+  is no `findByContentHash` and two concurrent identical calls still both sim.
+  Attaching to a running job is Phase 2 web-path work.
+- **`rankUpgrades` still does not read `deps.clock`.** An earlier draft of this
+  ADR claimed it did; that was false. `MemoryStore` timestamps from its own
+  constructor-injected clock, so the port is consumed only because `cli.ts` now
+  passes the same function to both (`new MemoryStore(clock)`). The engine
+  itself writes no timestamp of its own — if it ever needs one, it must take it
+  from `deps.clock` rather than `new Date()`.
 - **`canonicalJson` is stricter than `JSON.stringify`.** Keys sorted,
   `undefined` treated as absent, `undefined` array elements preserved as
   `null`, non-finite numbers refused rather than silently becoming `null`.

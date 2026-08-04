@@ -243,8 +243,9 @@ export async function rankUpgrades(
 
   const cached = await deps.store.get<Ranking>(rankingCacheKey(contentHash));
   if (cached) {
-    // PLAN.md §4: cache hits fire onProgress once and resolve, so a caller
-    // that opened a progress view always gets an event to close it.
+    // A hit runs no sim, and ends here so a caller that opened a progress view
+    // always gets a terminal event (PLAN.md §4 as amended by ADR-0019 — the
+    // original "fires once" assumed a hash computable before the gear read).
     onProgress?.({ stage: "ranking" });
     return cached;
   }
