@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: `docs/reviews/feat-content-hash.md` Adversarial finding A3
 Blocks: none
@@ -47,3 +47,20 @@ and rethrows, rather than one `catch` per throw site.
 Test: a `rankUpgrades` call whose gem palette makes the meta unsolvable leaves
 its row `error`, not `running`. `meta-repair.test.ts` already has palettes that
 trigger `MetaUnsolvableError`.
+
+## Resolved 2026-08-04
+
+One `catch` around the whole post-create body, as suggested above, marking
+`error` with `err.kind` when it is a `RankError` and rethrowing unchanged. The
+existing per-site `catch` on the baseline sim collapsed into it.
+
+**The per-site shape was the actual defect**, not just the one missed path: it
+leaves the next throw added below the row to re-open the hole silently. The
+wrapper covers every exit by construction.
+
+Test is at the `rankUpgrades` seam (`rank.test.ts`, "errors the job row when
+the run throws after the row is created"). It throws from `Store.put`, which
+runs after every sim, so the run is otherwise complete and only the exit path
+is under test — the meta-unsolvable throw leaves by the same route, without
+needing a palette rigged to be unsolvable. Mutation-checked: deleting the
+`job.update` fails it with `expected 'running' to be 'error'`.
