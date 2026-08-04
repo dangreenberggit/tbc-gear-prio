@@ -10,11 +10,10 @@ better in functionality or performance.
 
 Upstream pin: `wowsims/tbc-new` @ `8aa378b3671a0923fd11fb34b4b3753e53f20c9b`.
 
-| File                                         | What it covers                                                                  |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| [`take-list.md`](take-list.md)               | The audit: every upstream piece worth taking, what it gives us, what stays ours |
-| [`standalone-app.md`](standalone-app.md)     | The two functionalities, current build status, the shell-stack decision         |
-| [`fork-wowsims-app.md`](fork-wowsims-app.md) | Superseded first sketch. Kept for the record; its errors are named at the top   |
+| File                                     | What it covers                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| [`take-list.md`](take-list.md)           | The audit: every upstream piece worth taking, what it gives us, what stays ours |
+| [`standalone-app.md`](standalone-app.md) | The two functionalities, current build status, the shell-stack decision         |
 
 Related, outside this folder:
 [`../compute-topology.md`](../compute-topology.md) (the sim: CLI vs WASM vs HTTP),
@@ -45,12 +44,11 @@ So the box is empty rather than duplicated — an earlier note in this folder
 implied we had rebuilt their importer, and we had not.
 
 **But do not conclude "so take theirs" — that was this folder's second wrong
-answer, corrected 2026-08-04.** Their importer classifies spec from an `icon`
-dash-suffix that is **absent from our Anniversary fixtures**, so it throws on our
-data; it is report+fightID-first with no character discovery; and only ~10% of
-its 776 lines is framework-independent. `PLAN.md` §5.2 already specifies our own
-adapter with [P0]-verified endpoints and a working classifier, and it wins on
-facts. Evidence and repro commands: [`take-list.md`](take-list.md) §1.
+answer, corrected 2026-08-04.** Their importer throws on our fixtures, and
+`PLAN.md` §5.2 already specifies our own adapter. Reasons and repro commands live
+in one place: [`take-list.md`](take-list.md) §1. Do not restate them here — this
+fact already appears in more files than is comfortable, and one copy drifted
+before the branch landed.
 
 ---
 

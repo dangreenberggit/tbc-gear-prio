@@ -43,8 +43,11 @@ exists upstream.
 
 ## Build order (dependency, not priority)
 
-1. **WCL client** — port from upstream, add our own credentials and our
-   fight-selection policy. Turns the tool from fixture-replay into something
+1. **WCL client** — build it per `PLAN.md` §5.2. **Do not port upstream's
+   importer**: its classifier reads an `icon` dash-suffix absent from our
+   fixtures and throws on our data, and it has no character-first discovery to
+   lift ([`take-list.md`](take-list.md) §1). Read it for the report-scoped
+   GraphQL query shapes only. Turns the tool from fixture-replay into something
    that answers for a real character.
 2. **Mechanics constants** — take upstream's; unblocks `CapState`.
 3. **Sim throughput** — the per-candidate loop in `rank.ts` is serial. See

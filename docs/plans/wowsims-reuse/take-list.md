@@ -10,7 +10,9 @@ Re-check any upstream file with:
 gh api "repos/wowsims/tbc-new/contents/<path>?ref=8aa378b3671a0923fd11fb34b4b3753e53f20c9b" --jq '.content' | base64 -d
 ```
 
-Assessed on `dev` @ `23c3291`.
+Assessed against `dev` @ `23c3291`, on Windows 11 / PowerShell — the only
+environment observed. Every causal claim below either carries a command a reader
+can re-run, or is labelled **hypothesis** / **untested** in the same sentence.
 
 ---
 
