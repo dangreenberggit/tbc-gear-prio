@@ -17,6 +17,7 @@ Exit codes: 0 on success, 2 if vendor/wowsims/db.json is missing (run
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -82,6 +83,34 @@ ITEM_TYPE_SLOT = {
 # in the handoff; PLAN.md 9's text should be corrected to match.
 NOT_ENCHANTABLE_SLOTS = {"neck", "waist", "trinket"}
 
+# Dense stat-array length. Read from the proto rather than hardcoded so that a
+# Stat enum gaining a member cannot silently leave item and gem arrays at
+# different lengths -- `epScore` indexes both by proto.Stat ordinal.
+COMMON_PROTO = ROOT / "data/proto/common.proto"
+
+
+def stat_array_len() -> int:
+    """`NextIndex` from the proto's Stat enum -- upstream's own declaration of
+    the array width, cross-checked against the members actually defined."""
+    text = COMMON_PROTO.read_text(encoding="utf-8")
+    enum = re.search(r"//\s*NextIndex:\s*(\d+);\s*enum Stat \{(.*?)\n\}", text, re.S)
+    if not enum:
+        raise SystemExit(
+            f"could not find the Stat enum and its NextIndex in {COMMON_PROTO}"
+        )
+    declared = int(enum.group(1))
+    members = [int(m) for m in re.findall(r"^\tStat\w+ = (\d+);", enum.group(2), re.M)]
+    if not members or max(members) != declared - 1:
+        raise SystemExit(
+            f"{COMMON_PROTO} Stat enum declares NextIndex {declared} but its "
+            f"highest member is {max(members) if members else 'none'} -- "
+            "reconcile the proto rather than guessing the array width."
+        )
+    return declared
+
+
+STAT_ARRAY_LEN = stat_array_len()
+
 
 def enchantable_types_from_db(db: dict) -> set[int]:
     return {e["type"] for e in db.get("enchants", []) if e.get("type") is not None}
@@ -97,6 +126,29 @@ def load_db() -> dict:
         sys.exit(2)
     with open(DB, encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def item_stats(it: dict) -> list[int]:
+    """Dense stat array, same shape and length as db.json's gems[].stats.
+
+    Item stats are stored differently from gem stats: gems carry a dense
+    42-long list, items carry a sparse index->value map under
+    `scalingOptions["0"].stats`. Densify so both sides of `epScore` and the
+    cap sum see one shape. Every item in the pinned db has exactly the "0"
+    scaling key, and the highest index observed is 41.
+    """
+    scaling = (it.get("scalingOptions") or {}).get("0") or {}
+    sparse = scaling.get("stats") or {}
+    dense = [0] * STAT_ARRAY_LEN
+    for index, value in sparse.items():
+        slot = int(index)
+        if slot >= STAT_ARRAY_LEN:
+            raise ValueError(
+                f"item {it['id']} ({it.get('name')!r}) has stat index {slot}, "
+                f"beyond STAT_ARRAY_LEN={STAT_ARRAY_LEN} -- proto.Stat grew"
+            )
+        dense[slot] = value
+    return dense
 
 
 def build_items_index(db: dict) -> dict[str, dict]:
@@ -118,6 +170,7 @@ def build_items_index(db: dict) -> dict[str, dict]:
             "name": it["name"],
             "slot": slot,
             "sockets": gem_sockets,
+            "stats": item_stats(it),
             "socketBonus": it.get("socketBonus") or [],
             "enchantable": slot not in NOT_ENCHANTABLE_SLOTS,
             "setId": it.get("setId"),
