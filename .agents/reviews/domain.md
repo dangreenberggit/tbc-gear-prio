@@ -28,9 +28,14 @@ general knowledge wasn't.
   `ReportActor` fields, `CombatantInfo`, `Character.gameData`, and the Buffs
   table (R8). Any code that infers race, or treats a missing race as an
   error rather than a standing assumption with user override, is wrong.
-- **Spec is classified from `CombatantInfo.specID` / talent-tree point
-  distribution, never from a WCL spec-name string** — no such string exists
-  at the actor level, for any class.
+- **Spec is classified from talent-tree point plurality, and from nothing
+  else.** There is no WCL spec-name string at actor level for any class
+  (`subType` is class-level only), and **`CombatantInfo.specID` is unusable** —
+  [P0] every combatant reads `specID: 0` on TBC Anniversary, including confirmed
+  Ret (`docs/phase0-findings.md`, PLAN.md §5.2). Treating `0` as a real spec
+  mis-specs the whole raid. The points live in `CombatantInfo.talents[].id`,
+  which is **points spent, not a talent id** ([R18]) — `[{id:21},{id:40},{id:0}]`
+  reads 21/40/0, and the three sum to 61 at level 70.
 - **Content tier (`currentPhase`) comes from upstream's own
   `CURRENT_PHASE`** (`data/wowsims.lock.json`, synced via
   `scripts/sync_wowsims.py`), never inferred from a player's most recent

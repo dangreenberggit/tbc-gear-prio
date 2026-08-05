@@ -235,6 +235,8 @@ export type CapState = {
 
 `substitutions`, `assumptions` and `caps` are **required**, not optional. A `Ranking` you can't audit is not a `Ranking` — making them non-nullable puts that in the type system rather than in a code review checklist.
 
+**Take the rating conversions from upstream rather than deriving them.** `ui/core/constants/mechanics.ts` (at the pinned commit) carries `PHYSICAL_HIT_RATING_PER_HIT_PERCENT = 15.769233` and the crit/haste/expertise equivalents; none of these constants currently exist in `packages/core/src`. They corroborate this section exactly — `9 × 15.769233 = 141.92`, i.e. the ~142 cap above, and 1% ≈ 15.77, i.e. `capUncertainty: 16`. Copy the values with the pin SHA in a comment rather than importing across the vendor boundary: that file is level-scoped (`CHARACTER_LEVEL = 70`, `BOSS_LEVEL = 73`) and would silently change meaning if the pin ever moved to a later-expansion upstream. Note also that `SPELL_HIT_RATING_PER_HIT_PERCENT` (12.615385) differs from the physical constant — a ret hit cap must use the physical one. See [`docs/plans/wowsims-reuse/take-list.md`](docs/plans/wowsims-reuse/take-list.md) §2.
+
 **[R8, P0] The hit cap moves with race — and race is NOT retrievable from Warcraft Logs.** This was probed properly and the answer is a clean no: no race field on `ReportActor`, none on the `CombatantInfo` event, and `Character.gameData` returns *"This game does not support cached game data."*
 
 The promising fallback also failed, and it's worth recording why, because it would have been *better* than race. TBC's *Heroic Presence* is a **party-wide** +1% hit aura — so a non-Draenei grouped with a Draenei still gets it, and reading race alone gives the wrong answer in both directions. The buff is the ground truth that race only proxies for. It is **not tracked**: absent from 6/6 reports across two zones, while the same tables carry 163 auras including passive party auras of identical shape (*Blood Pact*, *Unleashed Rage*). And the sample isn't ambiguous — both fixture characters are **Alliance**, every Alliance shaman in TBC is a Draenei, and those raids are full of shaman auras. There were Draenei present. The aura still never appears.
@@ -375,6 +377,8 @@ Per review R7, the field on `LoggedGear` is named **`talentPointsByTree: [number
 **[R8, P0] `race` is NOT here, because WCL does not have it.** Probed and settled — see §4 and [`docs/verification-log.md`](docs/verification-log.md). `LoggedGear` must not carry a `race` field at all, not even an optional one: the whole lesson of R18 is that a field which *looks* readable will be read, and a silently-wrong race shifts every hit-adjacent ranking. Race enters through `RankInput`, where its status as an assumption is explicit.
 
 > **Caution on `specID`.** TBC has no native client specialization ID. On Anniversary logs the field is present but **always 0** in captured fixtures, so it is not even a useful cross-check today. **Talent-tree plurality is the only classifier.**
+
+**Upstream has a WCL importer — read it, don't port it.** `ui/raid/components/importers/raid_wcl_importer.tsx` (at the pinned commit) is a working 776-line WCL client, and it is worth reading for the report-scoped GraphQL query shapes and the `gear[] → ItemSpec` field mapping. It is **not** a shortcut past this section: it is report+fightID-first with no character-first discovery (`encounterRankings`/`recentReports` appear nowhere in it), and it classifies spec from an `icon` dash-suffix that is **absent from our Anniversary fixtures** — on our data it throws. Its talent handling also reads `talents[].guid` where our shape carries `id`, i.e. the [R18] trap below, silently. Only ~10% of it is framework-independent. **Everything decided above stands**; see [`docs/plans/wowsims-reuse/take-list.md`](docs/plans/wowsims-reuse/take-list.md) §1 for the fixture evidence and repro commands.
 
 - `WclGearSource` — production. Also **records** every response to `test/fixtures/` when `RECORD_FIXTURES=1`.
 - `RecordedGearSource` — replays those fixtures. Used by every test and by `pnpm rank --offline`.
@@ -897,18 +901,20 @@ Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guil
 
 ## 16. Open plans — learning from wowsims' web app
 
-Three findings from an audit of `wowsims/tbc-new` beyond `wowsimcli` (the `ui/`,
-`sim/wasm/` and `tools/` trees). Each has a standalone plan file under
-`docs/plans/`. All three are **proposals** — nothing in them is implemented, and
-each specifies edits to this document that have **not** been applied. Where a
-plan contradicts a section below, the plan is the newer thinking and this
-section is the pointer; the contradiction is called out per row.
+Findings from an audit of `wowsims/tbc-new` beyond `wowsimcli` (the `ui/`,
+`sim/wasm/` and `tools/` trees), each with a file under `docs/plans/`. **Nothing
+in them is implemented.** The first three are **proposals** that specify edits to
+this document which have **not** been applied; where one contradicts a section
+below, it is the newer thinking and the contradiction is called out per row. The
+fourth is **reference material, not a proposal** — it overturns nothing here, and
+the sections it matters to (§4, §5.2) carry their own pointers to it.
 
 | Plan | Finding | Sections it would amend |
 |---|---|---|
 | [`docs/plans/compute-topology.md`](docs/plans/compute-topology.md) | Upstream compiles the *same* Go sim to WebAssembly (`sim/wasm/main.go`) and runs it in the browser, with an HTTP sim server as an alternate backend behind one worker interface. §1.1's "needs process spawn and multiple cores" is an artifact of choosing the **CLI adapter**, not a constraint | §1.1 (Runtime row), §5.3, §7, §13 |
 | [`docs/plans/upstream-data-redundancy.md`](docs/plans/upstream-data-redundancy.md) | `db.json` already carries `phase` on all 8257 items and 7 encounter presets we ignore. Our zone→phase derivation duplicates upstream and is *less* complete | §8.3, §8.5, §14 (boss filter) |
 | [`docs/plans/ep-weights-from-sim.md`](docs/plans/ep-weights-from-sim.md) | A `StatWeights` RPC exists in the proto but is **unreachable** through the pinned CLI. Our static EP file is a **lossy** transcription of upstream's preset | §9, §8.3.3 |
+| [`docs/plans/wowsims-reuse/`](docs/plans/wowsims-reuse/README.md) | Reference notes: for each piece of this plan, whether upstream already has it. **Take** the mechanics constants (§4); **read but do not port** their WCL importer (§5.2 — its classifier throws on our fixtures); their display layer is worth taking if any UI is built. Amends nothing — it routes *into* the sections above rather than overturning them | none (pointers added in §4 and §5.2) |
 
 **First, the thing that makes the rest legible: there is one simulator, not
 three.** The engine is the Go source under `sim/`. Upstream compiles it three
