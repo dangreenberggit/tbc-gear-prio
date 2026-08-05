@@ -73,7 +73,15 @@ would be.
   — the phase-1 pre-raid / heroic-dungeon remainder. It carries `Blocks: none`,
   sits on no Phase 2 gate box, and the ticket records it as lowest priority
   needing its own before/after measurement. It stays open as carry-forward.
-  No Phase 2 branch should touch `data/universes/*.json`.
+
+  **This is a scope boundary about the *ret* universes, not about the directory.**
+  An earlier revision of this file said "no Phase 2 branch should touch
+  `data/universes/*.json`", which was wrong: ticket 05 must **add**
+  `feral-p*.json`, and that is not ticket 17's work. The boundary that actually
+  holds is that no Phase 2 branch **re-generates or edits the existing
+  `ret-p*.json`** — feral adds files beside them and leaves their bytes alone.
+  If feral's work does change a `ret-p*.json` byte, that is a finding to report,
+  not a scope creep to absorb quietly.
 - The web shell (§12) — Phase 3. `applyView` lands here, but nothing that
   renders it does.
 - SQLite as the deployed store — Phase 4. Ticket 01 builds the adapter and its
