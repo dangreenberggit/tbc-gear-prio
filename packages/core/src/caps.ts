@@ -166,8 +166,14 @@ const HIT_DRIVEN_SHARE = 0.5;
  */
 export function isHitDriven(
   statDelta: Readonly<Record<number, number>>,
-  hit: { gap: number }
+  hit: { gap: number },
+  candidate: { deltaDps: number }
 ): boolean {
+  // A loss has no gain to be driven by, and the warning this flag gives —
+  // "this stops being an upgrade past the cap" — says nothing about an item
+  // that is not an upgrade now. Without this, below-cutoff items with negative
+  // deltas get labelled as hit-driven gains.
+  if (candidate.deltaDps <= 0) return false;
   if (hit.gap <= 0) return false;
   let hitGain = 0;
   let totalGain = 0;

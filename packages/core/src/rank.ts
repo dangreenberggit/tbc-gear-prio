@@ -418,7 +418,8 @@ export async function rankUpgrades(
             stdev: candObs.stdev,
             hitDriven: isHitDriven(
               statDeltaBetween(equipment, swapped),
-              caps.hit
+              caps.hit,
+              { deltaDps }
             ),
           };
           if (slotNames.length > 1) {

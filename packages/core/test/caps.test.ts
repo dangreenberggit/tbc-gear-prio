@@ -85,12 +85,23 @@ describe("capStateFrom", () => {
 describe("isHitDriven", () => {
   it("flags a gain that is mostly hit while under the cap", () => {
     const under = { ...zero(), [Stat.StatMeleeHitRating]: 20 };
-    expect(isHitDriven(under, { gap: 40 })).toBe(true);
+    expect(isHitDriven(under, { gap: 40 }, { deltaDps: 12 })).toBe(true);
   });
 
   it("does not flag once the player is at or over the cap", () => {
     const under = { ...zero(), [Stat.StatMeleeHitRating]: 20 };
-    expect(isHitDriven(under, { gap: 0 })).toBe(false);
+    expect(isHitDriven(under, { gap: 0 }, { deltaDps: 12 })).toBe(false);
+  });
+
+  it("does not flag an item that is a DPS loss", () => {
+    // Observed on a real run: two below-cutoff items with negative deltas were
+    // labelled "most of this gain is hit rating". A loss has no gain to be
+    // driven by, and the warning the flag exists to give — this stops being an
+    // upgrade past the cap — is meaningless for something that is not one.
+    const under = { ...zero(), [Stat.StatMeleeHitRating]: 20 };
+    expect(isHitDriven(under, { gap: 40 }, { deltaDps: -3.56 })).toBe(false);
+    expect(isHitDriven(under, { gap: 40 }, { deltaDps: 0 })).toBe(false);
+    expect(isHitDriven(under, { gap: 40 }, { deltaDps: 12 })).toBe(true);
   });
 
   it("does not flag a gain that is mostly not hit", () => {
@@ -99,7 +110,7 @@ describe("isHitDriven", () => {
       [Stat.StatMeleeHitRating]: 2,
       [Stat.StatAttackPower]: 60,
     };
-    expect(isHitDriven(mixed, { gap: 40 })).toBe(false);
+    expect(isHitDriven(mixed, { gap: 40 }, { deltaDps: 12 })).toBe(false);
   });
 });
 

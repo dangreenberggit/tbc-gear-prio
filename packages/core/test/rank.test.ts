@@ -394,6 +394,103 @@ describe("rankUpgrades", () => {
     });
   });
 
+  it("flags a hit-only gain as hitDriven, and never a loss", async () => {
+    // Romulo's Poison Vial is the only item in the P2 universe whose stats are
+    // 100% melee hit rating, which makes it the honest fixture for this flag.
+    // Driven through rankUpgrades rather than asserted on isHitDriven alone:
+    // the unit test proves the predicate, this proves it is actually wired to
+    // a real stat delta. A first cut flagged this same item at Δ-44.70 as a
+    // "gain", so both directions are asserted here.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+
+    const pool = [
+      {
+        itemId: 28579,
+        name: "Romulo's Poison Vial",
+        slot: "trinket" as const,
+        phase: 2,
+        source: { kind: "raid" as const, zone: "Karazhan", boss: "Opera" },
+      },
+    ];
+
+    async function rankWith(candidateDps: number) {
+      const sims = new Map([
+        [
+          baselineKey,
+          {
+            dps: 2000,
+            stdev: 90,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          },
+        ],
+      ]);
+      // Trinket is a paired slot: key both placements so whichever the engine
+      // picks is recorded, rather than depending on which one it tries first.
+      for (const slot of ["trinket1", "trinket2"] as const) {
+        const swapped = equipment.map((spec, i) =>
+          SIM_ORDER[i] === slot ? { id: 28579, gems: [] as number[] } : spec
+        );
+        sims.set(
+          simCacheKey(
+            compose(skeleton, {
+              name: "slamaltman",
+              race: "RaceHuman",
+              equipment: swapped,
+            }),
+            "v0.0.101",
+            opts
+          ),
+          {
+            dps: candidateDps,
+            stdev: 90,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          }
+        );
+      }
+      return rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase: 2,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner("v0.0.101", sims),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+          pool,
+        }
+      );
+    }
+
+    // slamaltman sits well under the cap, so a pure-hit gain must be flagged.
+    const gain = await rankWith(2050);
+    expect(gain.caps.hit.gap).toBeGreaterThan(0);
+    expect(gain.items[0]!.deltaDps).toBeGreaterThan(0);
+    expect(gain.items[0]!.hitDriven).toBe(true);
+
+    const loss = await rankWith(1955.3);
+    expect(loss.items[0]!.deltaDps).toBeLessThan(0);
+    expect(loss.items[0]!.hitDriven).toBeUndefined();
+  });
+
   it("returns identical deltas for the same seed and recordings", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
