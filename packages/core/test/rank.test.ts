@@ -13,8 +13,10 @@ import {
   rankUpgrades,
 } from "../src/rank.js";
 import {
+  CachingGearSource,
   RecordedGearSource,
   type FightSummary,
+  type GearSource,
   type LoggedGear,
 } from "../src/seams/gear-source.js";
 import {
@@ -32,8 +34,18 @@ import {
   type SimItemSpec,
   type WclGearEntry,
 } from "../src/slots.js";
+import type { CharacterRef, FightRef, SpecId } from "../src/types.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+/**
+ * Accepts writes and forgets them, so every sim request reaches the runner.
+ * For tests that inspect the requests rankUpgrades composes; the job half is
+ * untouched, so job-row behaviour stays real.
+ */
+class NonRetainingStore extends MemoryStore {
+  override async put(): Promise<void> {}
+}
 
 const CHAR = {
   region: "US" as const,
@@ -478,6 +490,19 @@ describe("rankUpgrades", () => {
       }
     }
 
+    /** Counts WCL gear reads so "zero reads" is asserted, not assumed. */
+    class CountingGearSource implements GearSource {
+      reads = 0;
+      constructor(private readonly inner: GearSource) {}
+      findFights(c: CharacterRef, spec: SpecId): Promise<FightSummary[]> {
+        return this.inner.findFights(c, spec);
+      }
+      readGear(f: FightRef): Promise<LoggedGear> {
+        this.reads += 1;
+        return this.inner.readGear(f);
+      }
+    }
+
     const cachePool = [
       {
         itemId: 29381,
@@ -641,6 +666,88 @@ describe("rankUpgrades", () => {
       const second = await rankUpgrades(input, reslotted);
       expect(sim.runs).toBeGreaterThan(afterFirst);
       expect(second.contentHash).not.toBe(first.contentHash);
+    });
+
+    it("fetches gear once across runs whose ranking hash differs", async () => {
+      // The gate box's "hits cache" half, at the level where WCL points are
+      // actually spent (ticket 01 scope 1). The identical-re-run case above
+      // returns at the ranking cache before gear is consulted, so it passes
+      // with no gear cache at all — only a *hash miss* reaches the gear read
+      // and can tell the two apart. maxPhase moves the hash while leaving the
+      // resolved fight, and so the snapshot, identical.
+      const { deps } = cacheDeps();
+      const fetches = new CountingGearSource(deps.gear);
+      const counted = {
+        ...deps,
+        gear: new CachingGearSource(fetches, deps.store, CHAR, "ret"),
+      };
+
+      await rankUpgrades(input, counted);
+      expect(fetches.reads).toBe(1);
+
+      await rankUpgrades({ ...input, maxPhase: 2 as const }, counted);
+      expect(fetches.reads).toBe(1);
+    });
+
+    it("reuses a cached sim result when only the candidate pool grows", async () => {
+      // The sim-result cache (ticket 01 scope 2, PLAN.md §11's "a sim result
+      // for a given request + version can never change"). Adding a candidate
+      // changes the ranking hash, so the whole run re-executes — but the
+      // baseline request and the first candidate's request are byte-identical
+      // to the first run's, and must be served from kv rather than re-simmed.
+      const { sim, deps } = cacheDeps();
+      const first = await rankUpgrades(input, deps);
+      const afterFirst = sim.runs;
+
+      const grown = {
+        ...deps,
+        pool: [
+          ...cachePool,
+          {
+            itemId: 28530,
+            name: "Mithril Band of the Unscarred",
+            slot: "finger" as const,
+            phase: 1,
+            source: { kind: "badge" as const, cost: 25 },
+          },
+        ],
+      };
+      const second = await rankUpgrades(input, grown);
+
+      // Two new sims: the added ring is tried in finger1 and finger2. The
+      // baseline and the neck candidate are cache hits. Without the sim
+      // cache this is afterFirst + 4.
+      expect(sim.runs).toBe(afterFirst + 2);
+
+      // The "deltas stable" half of the gate box, and the half with teeth: the
+      // neck candidate was served from kv rather than re-simmed, so if the
+      // cache returned a mismatched observation — a key collision, a lossy
+      // round-trip — every number on this row would move and the run-count
+      // assertion above would still pass.
+      const before = first.items.find((i) => i.itemId === 29381);
+      const after = second.items.find((i) => i.itemId === 29381);
+      expect(after).toEqual(before);
+    });
+
+    it("reports a failing cache read as internal, not as a sim failure", async () => {
+      // A failing kv read is not a failing sim. Inside the wowsimcli-panic
+      // catch it would push a simSkips row blaming the sim, drop the item, and
+      // return a ranking one place short with no error at all; inside the
+      // baseline's catch it would surface as `sim-failed` and send an operator
+      // to the wrong subsystem.
+      class UnreadableStore extends MemoryStore {
+        override async get<T>(key: string): Promise<T | undefined> {
+          if (key.startsWith("sim:")) throw new Error("kv read exploded");
+          return super.get<T>(key);
+        }
+      }
+      const { deps } = cacheDeps();
+      await expect(
+        rankUpgrades(input, { ...deps, store: new UnreadableStore() })
+      ).rejects.toMatchObject({
+        name: "RankError",
+        kind: "internal",
+      } satisfies Partial<RankError>);
     });
 
     it("errors the job row when the run throws after the row is created", async () => {
@@ -1175,7 +1282,10 @@ describe("rankUpgrades", () => {
           gear: new Map([["abc123|7", logged]]),
         }),
         sim,
-        store: new MemoryStore(),
+        // This candidate is byte-identical to the baseline (asserted below),
+        // so the sim cache would serve it and leave the runner nothing to
+        // inspect. Under test here is what rankUpgrades composes, not caching.
+        store: new NonRetainingStore(),
         clock: () => new Date("2026-07-26T12:00:00.000Z"),
         raidSimSkeleton: skeleton,
         epWeights,

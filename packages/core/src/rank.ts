@@ -44,7 +44,13 @@ import {
   type SimSlotName,
 } from "./pool.js";
 import type { GearSource } from "./seams/gear-source.js";
-import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
+import {
+  simCacheKey,
+  type RaidSimRequest,
+  type SimObservation,
+  type SimRunOpts,
+  type SimRunner,
+} from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
 import { setBreakNote } from "./set-bonus.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
@@ -174,6 +180,8 @@ export async function rankUpgrades(
   }
 
   onProgress?.({ stage: "reading-gear" });
+  // Never a cache read here — ADR-0019 hashes what this returns. The point
+  // budget is defended one layer down; see CachingGearSource.
   const logged = await deps.gear.readGear(fight);
 
   onProgress?.({ stage: "composing" });
@@ -227,6 +235,10 @@ export async function rankUpgrades(
     (e) => !isKaelTempLegendary(e.itemId)
   );
 
+  // Read once and shared with the sim cache below, so the version a result is
+  // filed under is always the version it was hashed with.
+  const simVersion = await deps.sim.version();
+
   // Hashed here rather than at entry because the logged gear is the largest
   // input to every delta, and it is not known until readGear resolves. The
   // check still lands before the sim loop, which is the expensive part.
@@ -244,7 +256,7 @@ export async function rankUpgrades(
     skeleton: deps.raidSimSkeleton,
     iterations,
     seeds,
-    simVersion: await deps.sim.version(),
+    simVersion,
     engineVersion: ENGINE_VERSION,
   });
 
@@ -287,14 +299,20 @@ export async function rankUpgrades(
   async function rankAfterJobCreated(): Promise<Ranking> {
     const totalSims = 1 + candidates.length;
     onProgress?.({ stage: "simming", done: 0, total: totalSims });
-    let observation;
-    try {
-      observation = await deps.sim.run(request, runOpts);
-    } catch (err) {
-      throw new RankError(
-        "sim-failed",
-        err instanceof Error ? err.message : String(err)
-      );
+    // Only `deps.sim.run` belongs inside this catch. A store read or write
+    // that fails is an `internal` fault, and labelling it `sim-failed` sends
+    // an operator to the wrong subsystem.
+    let observation = await readCachedSim(deps, request, simVersion, runOpts);
+    if (!observation) {
+      try {
+        observation = await deps.sim.run(request, runOpts);
+      } catch (err) {
+        throw new RankError(
+          "sim-failed",
+          err instanceof Error ? err.message : String(err)
+        );
+      }
+      await cacheSimResult(deps, request, simVersion, runOpts, observation);
     }
     onProgress?.({ stage: "simming", done: 1, total: totalSims });
 
@@ -343,21 +361,28 @@ export async function rankUpgrades(
           race,
           equipment: swapped,
         });
-        let candObs;
-        try {
-          candObs = await deps.sim.run(candReq, runOpts);
-        } catch (err) {
-          // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
-          // wowsimcli when equipped on ret — skip this slot attempt. Recorded
-          // rather than swallowed: a candidate that never simmed must not be
-          // indistinguishable from one that simmed badly.
-          simSkips.push({
-            itemId: entry.itemId,
-            name: entry.name,
-            slot: slotName,
-            reason: err instanceof Error ? err.message : String(err),
-          });
-          continue;
+        // Outside the catch below: only a failing *sim* may skip a candidate.
+        // A failing store read routed in there would push a simSkips row
+        // blaming the sim, drop the item, and return a ranking one place
+        // short with no error anywhere.
+        let candObs = await readCachedSim(deps, candReq, simVersion, runOpts);
+        if (!candObs) {
+          try {
+            candObs = await deps.sim.run(candReq, runOpts);
+          } catch (err) {
+            // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
+            // wowsimcli when equipped on ret — skip this slot attempt. Recorded
+            // rather than swallowed: a candidate that never simmed must not be
+            // indistinguishable from one that simmed badly.
+            simSkips.push({
+              itemId: entry.itemId,
+              name: entry.name,
+              slot: slotName,
+              reason: err instanceof Error ? err.message : String(err),
+            });
+            continue;
+          }
+          await cacheSimResult(deps, candReq, simVersion, runOpts, candObs);
         }
         const deltaDps = candObs.dps - baselineDps;
         const note = setBreakNote(equipment, slotIndex, entry.itemId);
@@ -458,6 +483,68 @@ export async function rankUpgrades(
 /** Namespaced so a ranking blob cannot collide with another content-addressed value. */
 function rankingCacheKey(contentHash: string): string {
   return `ranking:${contentHash}`;
+}
+
+/**
+ * PLAN.md §11: a sim result for a given request + version can never change.
+ * simCacheKey already folds in seed and iterations, so two runs that differ
+ * only in which candidates they consider share every request they have in
+ * common — which is what makes a partial re-run cheap.
+ */
+async function readCachedSim(
+  deps: Deps,
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts
+): Promise<SimObservation | undefined> {
+  return asInternal(() =>
+    deps.store.get<SimObservation>(simStoreKey(req, simVersion, opts))
+  );
+}
+
+/** Namespaced, and built in one place so the read and the write cannot drift. */
+function simStoreKey(
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts
+): string {
+  return `sim:${simCacheKey(req, simVersion, opts)}`;
+}
+
+/**
+ * Split from the read so the caller can keep `deps.sim.run` inside its
+ * sim-failed catch while this stays outside it: a failing store write is an
+ * `internal` fault, and reporting it as `sim-failed` sends an operator to the
+ * wrong subsystem.
+ */
+async function cacheSimResult(
+  deps: Deps,
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts,
+  observation: SimObservation
+): Promise<void> {
+  await asInternal(() =>
+    deps.store.put(simStoreKey(req, simVersion, opts), observation)
+  );
+}
+
+/**
+ * The store is ours, not the character's, the log's or the sim's, so its
+ * failures carry the one kind that says so. Without this they escape as bare
+ * `Error`s, miss the CLI's `instanceof RankError` branch (`cli.ts`), and print
+ * a stack trace where an operator expects `internal: …` — which is why the
+ * kind was declared but never constructed.
+ */
+async function asInternal<T>(op: () => Promise<T>): Promise<T> {
+  try {
+    return await op();
+  } catch (err) {
+    throw new RankError(
+      "internal",
+      err instanceof Error ? err.message : String(err)
+    );
+  }
 }
 
 function raceFromSkeleton(skeleton: RaidSimRequest): Race {

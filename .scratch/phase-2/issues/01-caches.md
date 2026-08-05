@@ -32,6 +32,20 @@ the primary defence of the point budget.
    is not knowable until the read happens. The cache to add is one level down:
    the **gear snapshot for a resolved (reportCode, fightId, character)** is
    immutable and must be served from `kv` without a WCL call on the second run.
+
+   **It belongs in a `GearSource` decorator, not in `rankUpgrades`.** Building
+   it inside `rankUpgrades` first was wrong and the test suite caught it: the
+   existing "re-sims when the logged gear changes but the character does not"
+   case went red, because a `kv` hit made the source's fresh gear unreachable,
+   so the hash matched and last run's numbers were served for a re-gemmed set —
+   exactly the staleness ADR-0019 exists to prevent. `rankUpgrades` must always
+   call `deps.gear.readGear` and hash what comes back. The fetch that spends
+   points happens in the WCL adapter, so that is where the cache wraps
+   (`CachingGearSource`), and it is also why `RecordedGearSource` stays
+   uncached and the offline tests keep their meaning.
+
+   `findFights` is deliberately **not** cached: a fight list grows as a
+   character raids, so it is not immutable. §12 gives it a TTL in Phase 3.
 2. **Sim-result cache** under the content address of the `RaidSimRequest` +
    `simVersion`, per §11's "a sim result for a given request + version can never
    change". This is what makes a partial re-run cheap when only some candidates
@@ -58,6 +72,31 @@ Two halves, and the second is the one that has teeth:
 - **deltas stable** — assert the second `Ranking`'s `items` are deep-equal to
   the first's, not merely that it returned. A cache that returns a
   *differently-ordered* ranking passes a naive check and fails the user.
+
+### The identical-re-run test cannot close this box on its own
+
+Measured, not predicted: `rank.test.ts`'s "serves the second identical call
+from the store without simming" **already passed before any of this ticket was
+built**, and still does with the gear and sim caches reverted. A second
+identical call returns at the ranking cache (`rank.ts:270`) before gear is read
+or a sim is spawned, so "zero reads, zero runs" is satisfied by the Phase 1
+ranking cache alone.
+
+So the evidence for this box is the **hash-miss** case, where the ranking cache
+misses and execution actually reaches the two new caches:
+
+- `fetches gear once across runs whose ranking hash differs` — `maxPhase`
+  changes the hash while the resolved fight, and so the snapshot, stays the
+  same. Fails without `CachingGearSource` (`CachingGearSource is not a
+  constructor`), passes with it.
+- `reuses a cached sim result when only the candidate pool grows` — adding one
+  candidate re-runs the ranking but leaves the baseline and the first
+  candidate's requests byte-identical. Fails without the sim cache
+  (`expected 6 to be 4`), passes with it.
+
+Both were confirmed to fail by stashing `rank.ts` and `gear-source.ts` and
+re-running them; a test that cannot fail is precisely the trap the
+"deltas stable" half warns about.
 
 ## Testing
 
