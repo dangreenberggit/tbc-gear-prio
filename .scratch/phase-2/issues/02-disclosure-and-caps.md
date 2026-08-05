@@ -28,6 +28,16 @@ rather than being retrofitted.
    across `packages/core/src` returns nothing outside a comment in
    `candidate-gems.ts`. §4 defines `caps` as a **required** field on `Ranking`
    — "a `Ranking` you can't audit is not a `Ranking`". Build it:
+
+   > **2026-08-05 — the rating was not reachable when this ticket was written.**
+   > See `02-blocker-item-stats.md`. `data/items/index.json` carried no `stats`
+   > field (the generator emitted them for gems only), `RaidSimResult` has no
+   > stats field, and the pinned wowsimcli exposes no `ComputeStats` RPC.
+   > Resolved by extending `scripts/generate_item_gem_index.py` to emit a dense
+   > per-item `stats` array and regenerating the index. **Consequence to carry
+   > forward:** the resulting figure is **gear-only** — talents and buffs are
+   > not counted, so it reads low (slamaltman: 72 of ~142). §4.3's uncertainty
+   > band is doing real work here, not decoration.
    - `hit: { rating, capRating, gap, assumedRace, capUncertainty }` and
      `expertise: { rating, capRating, gap }`.
    - Take the rating conversions **from upstream rather than deriving them**
@@ -50,15 +60,24 @@ rather than being retrofitted.
 4. **The hit-cap banner** in CLI output, phrased to carry the uncertainty:
    *"~20 rating under the hit cap, assuming no Heroic Presence in your party"* —
    never a precise figure (§4.3).
-5. **Socket-bonus pricing inside the meta-repair cost function** (§9 R4):
+5. ~~**Socket-bonus pricing inside the meta-repair cost function** (§9 R4)~~ —
+   **already done, verified 2026-08-05.** The ticket asked to "verify whether
+   `meta-repair.ts` prices it today"; it does. The forfeit is added inside the
+   cost function at `meta-repair.ts:195-197`, not post-hoc:
+
+   ```ts
+   let cost = gemEp(from, …) - gemEp(candidate.id, …);
+   if (matchedBefore && !socketsMatch(slot.itemId, trialGems)) {
+     cost += socketBonusEp(slot.itemId, …);
+   }
    ```
-   cost(recolour) = ΔEP(gem) + EP(socket bonus forfeited, if this recolour breaks the match)
-   ```
-   §9 is emphatic that this must be **inside** the cost function — "a post-hoc
-   check picks the wrong move and then notices, which is worse than not
-   checking, because the disclosure now describes a decision that was
-   avoidable." Verify whether `meta-repair.ts` prices it today; if it does not,
-   this is the substantive code change in this ticket.
+
+   The constructed conflict fixture this ticket calls for **also already
+   exists**: `meta-repair.test.ts:94` ("prices socket-bonus forfeiture inside
+   the cost") builds a strength-only-weights case where gem-EP alone ties at 0
+   and only the bonus forfeit breaks the tie, then asserts the solver picks the
+   non-breaking recolour. So the second gate box was closed before this ticket
+   started. No code change here.
 
 ## Gate boxes owned
 
