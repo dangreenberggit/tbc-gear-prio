@@ -35,9 +35,11 @@ rather than being retrofitted.
    > stats field, and the pinned wowsimcli exposes no `ComputeStats` RPC.
    > Resolved by extending `scripts/generate_item_gem_index.py` to emit a dense
    > per-item `stats` array and regenerating the index. **Consequence to carry
-   > forward:** the resulting figure is **gear-only** — talents and buffs are
-   > not counted, so it reads low (slamaltman: 72 of ~142). §4.3's uncertainty
-   > band is doing real work here, not decoration.
+   > forward:** the resulting figure is **gear-only**. Measured, not assumed:
+   > the pinned preset takes 3/3 Precision (~47 rating), so slamaltman reads 72
+   > from gear but sits near 119 of ~142 — the banner understates the shortfall
+   > by ~2.5×. Filed as carry-forward ticket 33. Note Precision is a
+   > *Protection* talent, not a ret one; the Retribution tree has no hit talent.
    - `hit: { rating, capRating, gap, assumedRace, capUncertainty }` and
      `expertise: { rating, capRating, gap }`.
    - Take the rating conversions **from upstream rather than deriving them**
@@ -59,7 +61,7 @@ rather than being retrofitted.
    expanded. Build for **five substitutions on a clean run, not zero**.
 4. **The hit-cap banner** in CLI output, phrased to carry the uncertainty:
    *"~20 rating under the hit cap, assuming no Heroic Presence in your party"* —
-   never a precise figure (§4.3).
+   never a precise figure (§4 (R8)).
 5. ~~**Socket-bonus pricing inside the meta-repair cost function** (§9 R4)~~ —
    **already done, verified 2026-08-05.** The ticket asked to "verify whether
    `meta-repair.ts` prices it today"; it does. The forfeit is added inside the

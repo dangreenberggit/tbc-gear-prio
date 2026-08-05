@@ -1,24 +1,35 @@
 /**
- * Hit / expertise cap state (PLAN.md §4, §4.3).
+ * Hit / expertise cap state (PLAN.md §4 R8).
  *
  * §4 makes `caps` a required field on `Ranking` — "a Ranking you can't audit
  * is not a Ranking". This module is pure: it sums the rating the player's
  * *gear* carries and compares it to the cap.
  *
- * What this deliberately does not know: talents, raid buffs, consumes. The sim
- * knows all three, but nothing it returns carries them — `RaidSimResult`
- * (proto/api.proto) has no stats field, and the pinned wowsimcli exposes only
- * `sim`, not the `ComputeStats` RPC whose `PlayerStats.final_stats` would have
- * been the right number. So this is a gear-only floor and reads low for any
- * spec with talent hit. That is why §4.3 forbids presenting a precise figure
- * and requires the uncertainty band to be spoken aloud.
+ * What this does not know: talents, raid buffs, consumes. Nothing the sim
+ * returns carries them — `RaidSimResult` (proto/api.proto) has no stats field,
+ * and the pinned wowsimcli exposes only `sim`, not the `ComputeStats` RPC
+ * whose `PlayerStats.final_stats` would have been the right number.
+ *
+ * The talent half of that gap is measurable and large, so do not read the
+ * gear-only figure as "roughly right". The pinned ret P2 preset's talent
+ * string (`5-053201-…`) takes **3/3 Precision** — a Protection talent this
+ * build cross-specs into, worth 3% hit ≈ 47 rating. The Retribution tree
+ * itself (paladin.proto 43-64) has no hit talent at all, so Precision is the
+ * whole talent contribution and it is not small: the fixture character reads
+ * 72 from gear against a 142 cap, but sits near 119 once Precision lands.
+ *
+ * No TBC raid buff grants melee hit; Heroic Presence (Draenei, party-scoped,
+ * +1%) is the only other source and is unreadable from WCL, which is what
+ * HIT_CAP_UNCERTAINTY stands for. Both unknowns move the same way — they only
+ * ever *reduce* the shortfall — so the banner must state the direction rather
+ * than dress a one-sided gap up as symmetric noise.
  */
 
 import { getItem } from "./items.js";
 import { getGem } from "./gems.js";
 import type { SimItemSpec } from "./slots.js";
 import type { SocketedItem } from "./meta-repair.js";
-import { Stat } from "./stats.js";
+import { Stat, statAt } from "./stats.js";
 import type { Race } from "./types.js";
 
 /**
@@ -45,20 +56,23 @@ export const HIT_CAP_RATING =
  */
 export const HIT_CAP_UNCERTAINTY = PHYSICAL_HIT_RATING_PER_HIT_PERCENT;
 
-/**
- * Expertise is reported in rating here rather than converted to dodge/parry
- * reduction: the useful cap depends on weapon skill and racial weapon bonuses,
- * neither of which is readable from a log. Surfacing the raw rating with no
- * cap claim is honest; inventing a cap is not.
- */
 export type CapEntry = {
   rating: number;
-  capRating: number;
-  /** Positive when under the cap, negative when over. */
-  gap: number;
+  /**
+   * `null` when no honest cap can be stated. Not 0: a consumer applying the
+   * natural `gap <= 0 ? "capped" : "under"` test would report a player with
+   * zero expertise as *at cap*, which is the most confident possible reading
+   * of the least known number.
+   */
+  capRating: number | null;
+  /** Positive when under the cap, negative when over. `null` with no cap. */
+  gap: number | null;
 };
 
+/** Hit always has a known cap, so it narrows both nullable fields back out. */
 export type HitCapEntry = CapEntry & {
+  capRating: number;
+  gap: number;
   assumedRace?: Race;
   capUncertainty: number;
 };
@@ -68,10 +82,6 @@ export type CapState = {
   expertise: CapEntry;
 };
 
-function statFrom(stats: readonly number[] | undefined, stat: Stat): number {
-  return stats?.[stat] ?? 0;
-}
-
 /**
  * Sum a stat across equipped items and their socketed gems.
  *
@@ -79,6 +89,13 @@ function statFrom(stats: readonly number[] | undefined, stat: Stat): number {
  * because meta repair rewrites gems after the equipment list is built, and the
  * repaired layout is the one the sim ran. When it is empty the equipment's own
  * gems are used.
+ *
+ * Both arrays are indexed **positionally** by SIM_ORDER slot, which is how
+ * `applyRepairedGems` reads `socketed[i]`. Keying gems by item id instead
+ * looks equivalent and is not: two identical rings or trinkets collapse to one
+ * map entry, so the last one wins and is then applied to both slots. Measured
+ * on two Bands of Accuria with one +8 hit gem, ground truth 48 — the id-keyed
+ * version returned 40 or 56 depending purely on array order.
  */
 function sumStat(
   equipment: readonly SimItemSpec[],
@@ -86,17 +103,18 @@ function sumStat(
   stat: Stat
 ): number {
   let total = 0;
-  const gemsByItem = new Map<number, readonly number[]>();
-  for (const it of socketed) {
-    if (it.itemId) gemsByItem.set(it.itemId, it.gems);
-  }
 
-  for (const spec of equipment) {
+  for (let i = 0; i < equipment.length; i++) {
+    const spec = equipment[i]!;
     if (!spec.id) continue;
-    total += statFrom(getItem(spec.id)?.stats, stat);
-    for (const gemId of gemsByItem.get(spec.id) ?? spec.gems) {
+    total += statAt(getItem(spec.id)?.stats ?? [], stat);
+
+    const repaired = socketed[i];
+    const gems =
+      repaired && repaired.itemId === spec.id ? repaired.gems : spec.gems;
+    for (const gemId of gems) {
       if (!gemId) continue;
-      total += statFrom(getGem(gemId)?.stats, stat);
+      total += statAt(getGem(gemId)?.stats ?? [], stat);
     }
   }
   return total;
@@ -126,9 +144,14 @@ export function capStateFrom(
     hit,
     expertise: {
       rating: expertiseRating,
-      // No honest expertise cap without weapon skill; see CapEntry.
-      capRating: 0,
-      gap: 0,
+      // The dodge cap is ~410 rating (6.5% boss dodge ÷ 0.25% per expertise
+      // point × 3.942308 rating per point), but the requirement moves with
+      // weapon skill — Human/Dwarf racials give +5 skill on specific weapon
+      // types — and neither weapon skill nor the equipped weapon's type is
+      // readable from a log. Stating a cap we cannot compute per character is
+      // worse than declining to; see CapEntry on why this is null, not 0.
+      capRating: null,
+      gap: null,
     },
   };
 }
@@ -152,11 +175,49 @@ export function statDeltaBetween(
   return delta;
 }
 
-/** Dense stat-array width; see scripts/generate_item_gem_index.py. */
-const STAT_COUNT = 42;
+/**
+ * Dense stat-array width, derived from the generated `Stat` enum rather than
+ * hardcoded. `scripts/generate_item_gem_index.py` parses `NextIndex` out of
+ * common.proto and refuses to run if the enum grew; hardcoding 42 here would
+ * re-introduce on the TS side exactly the drift the generator now rejects —
+ * a grown enum would fail loudly in Python and silently truncate this loop.
+ */
+const STAT_COUNT =
+  Math.max(
+    ...Object.values(Stat).filter((v): v is Stat => typeof v === "number")
+  ) + 1;
 
-/** A gain is hit-driven when most of it is hit rating and the player is under cap. */
+/**
+ * Simple majority. Nothing in TBC makes 0.5 special — it is the threshold that
+ * needs no defending, and the flag is advisory rather than load-bearing on the
+ * ranking, so a sharper number would imply precision this does not have.
+ */
 const HIT_DRIVEN_SHARE = 0.5;
+
+/**
+ * Survival stats are excluded from the share, not merely down-weighted.
+ *
+ * Armour dwarfs every damage stat on an armoured slot: Crystalforge
+ * Breastplate's delta is `{str 56, sta 40, int 20, hit 23, crit 21, armor
+ * 1668}`, so counting armour puts hit at 1.3% of the "gain" and the flag can
+ * never fire outside a zero-armour trinket. Excluding it puts hit at 14%,
+ * which is a number about damage — the only thing this flag claims to describe.
+ */
+const SURVIVAL_STATS = new Set<number>([
+  Stat.StatStamina,
+  Stat.StatArmor,
+  Stat.StatBonusArmor,
+  Stat.StatHealth,
+  Stat.StatDefenseRating,
+  Stat.StatDodgeRating,
+  Stat.StatParryRating,
+  Stat.StatBlockRating,
+  Stat.StatBlockValue,
+  Stat.StatResilienceRating,
+]);
+
+const CONTRIBUTES_TO_DAMAGE = (stat: number): boolean =>
+  !SURVIVAL_STATS.has(stat);
 
 /**
  * §4 is explicit that not modelling stat combinations is *correct* per §2's
@@ -179,6 +240,7 @@ export function isHitDriven(
   let totalGain = 0;
   for (const [index, value] of Object.entries(statDelta)) {
     if (value <= 0) continue;
+    if (!CONTRIBUTES_TO_DAMAGE(Number(index))) continue;
     totalGain += value;
     if (Number(index) === Stat.StatMeleeHitRating) hitGain += value;
   }

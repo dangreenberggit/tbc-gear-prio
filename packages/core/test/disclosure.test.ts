@@ -46,7 +46,7 @@ function subs(n: number): Substitution[] {
 }
 
 describe("hitCapBanner", () => {
-  it("never states a precise figure (§4.3)", () => {
+  it("never states a precise figure (§4 (R8))", () => {
     const line = hitCapBanner({
       rating: 72,
       gap: HIT_CAP_RATING - 72,
@@ -64,7 +64,20 @@ describe("hitCapBanner", () => {
       capUncertainty: HIT_CAP_UNCERTAINTY,
     });
     expect(line).toContain("Heroic Presence");
-    expect(line).toContain("±16");
+    expect(line).toContain("16");
+  });
+
+  it("states which way the error runs instead of a symmetric band", () => {
+    // Both unknowns are one-sided: uncounted talent hit only adds, and Heroic
+    // Presence only lowers the cap. A "±16" reads as noise that might push
+    // either way, which overstates the shortfall while looking careful.
+    const line = hitCapBanner({
+      rating: 72,
+      gap: 69.92,
+      capUncertainty: HIT_CAP_UNCERTAINTY,
+    });
+    expect(line).not.toContain("±");
+    expect(line).toContain("smaller");
   });
 
   it("says gear alone, since talents and buffs are not counted", () => {

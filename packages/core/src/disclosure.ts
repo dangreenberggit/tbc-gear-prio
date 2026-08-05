@@ -57,13 +57,17 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
 }
 
 /**
- * The hit-cap line (§4.3).
+ * The hit-cap line (§4, R8).
  *
- * Never states a precise figure. The gap is gear-only — talents and buffs are
- * not visible to `capStateFrom` — and Heroic Presence is not readable from
- * WCL, so the sentence has to carry both caveats or it overclaims. §4.3 is
- * explicit that "~20 rating under the cap, assuming no Heroic Presence" is the
- * shape, not "you are 20 under".
+ * Never states a precise figure: §4's shape is "~20 rating under the cap,
+ * assuming no Heroic Presence in your party", not "you are 20 under".
+ *
+ * Both unknowns point the **same way**, which is why this does not render a ±
+ * band. Talent hit is uncounted and only ever adds (the pinned ret preset
+ * takes 3/3 Precision, ~47 rating — see carry-forward ticket 33), and Heroic
+ * Presence, unreadable from WCL, only ever lowers the cap. A symmetric ±
+ * dressed a one-sided overstatement up as noise; saying which direction the
+ * error runs is the honest version and costs nothing.
  */
 export function hitCapBanner(hit: {
   rating: number;
@@ -74,13 +78,17 @@ export function hitCapBanner(hit: {
   const band = Math.round(hit.capUncertainty);
   if (hit.gap > 0) {
     return (
-      `~${rounded} rating under the hit cap from gear alone ` +
-      `(±${band}, assuming no Heroic Presence in your party; talents and buffs not counted).`
+      `~${rounded} rating under the hit cap counting gear alone — ` +
+      `talents and raid buffs are not counted and only ever add hit, and ` +
+      `Heroic Presence in your party would lower the cap by ~${band}. ` +
+      `The real shortfall is smaller than this, likely much smaller.`
     );
   }
   return (
-    `~${rounded} rating over the hit cap from gear alone ` +
-    `(±${band}, assuming no Heroic Presence in your party).`
+    `~${rounded} rating over the hit cap counting gear alone — ` +
+    `talents and raid buffs are not counted and only ever add hit, and ` +
+    `Heroic Presence in your party would lower the cap by ~${band}. ` +
+    `You are over by at least this much.`
   );
 }
 

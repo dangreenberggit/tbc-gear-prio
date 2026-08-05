@@ -99,7 +99,9 @@ def stat_array_len() -> int:
             f"could not find the Stat enum and its NextIndex in {COMMON_PROTO}"
         )
     declared = int(enum.group(1))
-    members = [int(m) for m in re.findall(r"^\tStat\w+ = (\d+);", enum.group(2), re.M)]
+    members = [
+        int(m) for m in re.findall(r"^\s+Stat\w+ = (\d+);", enum.group(2), re.M)
+    ]
     if not members or max(members) != declared - 1:
         raise SystemExit(
             f"{COMMON_PROTO} Stat enum declares NextIndex {declared} but its "

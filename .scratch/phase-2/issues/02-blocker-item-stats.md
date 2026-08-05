@@ -56,10 +56,33 @@ new pure `caps.ts`. This is a **generated-artifact change**: it grows
 with the pinned toolchain and the working tree must match `HEAD` before commit
 (AGENTS.md § Durable claims).
 
-**Untested hypothesis:** that gear-summed rating alone is close enough to be
-worth showing. It excludes talents and raid buffs, which `final_stats` would
-have included — for ret, Precision-style talent hit is exactly the sort of thing
-that would make a gear-only figure read low. §4.3 already forbids presenting a
-precise figure and requires the uncertainty band, which softens but does not
-remove this. Measure a gear-only sum against a known-good figure before
-believing the banner.
+**Measured 2026-08-05 — the hypothesis was right, the reasoning was wrong.**
+
+The original claim here was that "for ret, Precision-style talent hit" makes a
+gear-only figure read low. Precision is **not** a Retribution talent: it is a
+*Protection* talent (`proto/paladin.proto:33`, `int32 precision = 23`, inside
+the `// Protection` block at lines 30-52). The Retribution tree (43-64) has no
+hit talent at all.
+
+That does not rescue the figure — it makes the gap concrete. The pinned ret P2
+preset cross-specs into Protection and takes **3/3 Precision**:
+
+```bash
+python -c "import json;d=json.load(open('data/presets/ret/p2.raid-sim-skeleton.json'));\
+print([v for k,v in __import__('itertools').chain.from_iterable([]) ] or 'see talentsString')"
+# talentsString: 5-053201-0523005120033125331051
+# Protection block '053201'; Precision is proto 23, block starts at 21 -> index 2 -> 3 points
+```
+
+3% hit ≈ 3 × 15.769233 ≈ **47 rating**. The same string is in the simmed
+request (`test/fixtures/slamaltman.raid-sim-request.json`), so the sim applies
+it. slamaltman therefore sits near **119 of 142**, not the 72 the gear-only sum
+reports — the banner's shortfall is roughly 2.5× the real one.
+
+No TBC raid buff grants melee hit, so Precision plus Heroic Presence is the
+whole invisible remainder. Both only ever *reduce* the shortfall, which is why
+the banner states the direction instead of a symmetric ± band.
+
+**Still open:** wiring the talent contribution in. `talentsString` is already in
+the composed request the engine holds, so the talent half is reachable today
+without a new seam — see ticket 33.
