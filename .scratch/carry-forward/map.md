@@ -44,3 +44,5 @@ List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
 - 28 — p5 BiS items outside raid zones (Shard of Contempt et al); mechanism half-built, nothing emits a heroic source
 - 29 — a `meta-unsolvable` throw strands its job row `running`; CLOSED 2026-08-04, one catch around the whole post-create body
 - 30 — the §14 ViewOptions gate box; re-filed 2026-08-04 `Blocks: phase-2` (it is a Phase 2 box, and `applyView` is unimplemented — not a missing test)
+- 31 — `SqliteStore` job ids from `SELECT COUNT(*)` race two writers and reuse ids after a delete; `kv` omits §11's `created_at`. Filed 2026-08-05 from the `phase-2/caches` review, `Blocks: phase-4` — ticket 01 scoped the adapter without deployment, and `MemoryStore` is still the only adapter with a production call site
+- 32 — nothing reads `rateLimitData`, so §14 Phase 4's "point budget survives expected concurrency" box has no instrument behind it. Filed 2026-08-05 from the `phase-2/caches` review; blocked in practice on the WCL adapter existing (§5.1)

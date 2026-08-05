@@ -729,6 +729,27 @@ describe("rankUpgrades", () => {
       expect(after).toEqual(before);
     });
 
+    it("reports a failing cache read as internal, not as a sim failure", async () => {
+      // A failing kv read is not a failing sim. Inside the wowsimcli-panic
+      // catch it would push a simSkips row blaming the sim, drop the item, and
+      // return a ranking one place short with no error at all; inside the
+      // baseline's catch it would surface as `sim-failed` and send an operator
+      // to the wrong subsystem.
+      class UnreadableStore extends MemoryStore {
+        override async get<T>(key: string): Promise<T | undefined> {
+          if (key.startsWith("sim:")) throw new Error("kv read exploded");
+          return super.get<T>(key);
+        }
+      }
+      const { deps } = cacheDeps();
+      await expect(
+        rankUpgrades(input, { ...deps, store: new UnreadableStore() })
+      ).rejects.toMatchObject({
+        name: "RankError",
+        kind: "internal",
+      } satisfies Partial<RankError>);
+    });
+
     it("errors the job row when the run throws after the row is created", async () => {
       // Ticket 29: once the Phase 2 job API attaches to a `running` row, a
       // stranded one is a job that never finishes and never fails, so the
