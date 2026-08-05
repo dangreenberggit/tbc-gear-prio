@@ -52,6 +52,7 @@ export {
 export { CliSimRunner } from "./seams/cli-sim-runner.js";
 export {
   MemoryStore,
+  SqliteStore,
   type Job,
   type JobCreateInput,
   type JobStatus,
