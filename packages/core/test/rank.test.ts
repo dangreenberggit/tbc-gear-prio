@@ -240,6 +240,18 @@ describe("rankUpgrades", () => {
     ]);
     expect(ranking.assumptions.race).toBe("RaceHuman");
     expect(ranking.substitutions).toEqual([]);
+
+    // §4 makes caps required, and it must describe the gear that was actually
+    // simmed — a real geared ret carries hit, so a 0 here means the sum never
+    // reached the item stats rather than that this player has no hit.
+    expect(ranking.caps.hit.rating).toBeGreaterThan(0);
+    expect(Math.round(ranking.caps.hit.capRating)).toBe(142);
+    expect(ranking.caps.hit.gap).toBeCloseTo(
+      ranking.caps.hit.capRating - ranking.caps.hit.rating,
+      6
+    );
+    expect(ranking.caps.hit.assumedRace).toBe("RaceHuman");
+    expect(ranking.caps.expertise.rating).toBeGreaterThanOrEqual(0);
   });
 
   it("defaults race from the raid-sim skeleton when RankInput.race is omitted", async () => {
@@ -380,6 +392,173 @@ describe("rankUpgrades", () => {
       zone: "Karazhan",
       boss: "Nightbane",
     });
+  });
+
+  it("auto-repairs an inactive meta and discloses it as a run substitution", async () => {
+    // The gate box wants the repair *and* its disclosure proven through
+    // rankUpgrades. repairMeta and substitutionsFromMetaRepair are each unit
+    // tested, but that pair passing says nothing about whether the engine
+    // actually wires one to the other.
+    //
+    // Same lever as meta-repair.test.ts: the chest's two orange gems are the
+    // whole yellow count, so recolouring them red makes the meta inactive.
+    const logged = slamaltmanLoggedGear();
+    const chest = logged.items.find((it) => it.id === 30129)!;
+    expect(chest.gems).toEqual([24027, 24058, 24058]);
+    chest.gems = [24027, 24027, 24027];
+
+    // The composed request is whatever the repair produces, so the recorded
+    // runner is keyed off the request rankUpgrades builds rather than one
+    // guessed here — an AnySimRunner keeps the test about disclosure.
+    let composed: RaidSimRequest | undefined;
+    const sim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (req) => {
+        composed = req;
+        return {
+          dps: 2000,
+          stdev: 90,
+          iterationsDone: 3000,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+      }
+    );
+
+    expect(composed).toBeDefined();
+    expect(ranking.baseline.metaAdjusted).toBe(true);
+
+    // Disclosed as a this-run substitution, not silently swallowed.
+    const repair = ranking.substitutions.find(
+      (s) => s.field === "gems.meta-repair"
+    );
+    expect(repair).toBeDefined();
+    expect(repair!.detail).toContain("Meta inactive");
+    expect(repair!.detail).toMatch(/\d+→\d+@item \d+/);
+
+    // And it is a run substitution rather than a standing assumption — the
+    // two tiers must not blur (§9 R7).
+    expect(ranking.assumptions.standing.map((s) => s.id)).not.toContain(
+      "gems.meta-repair"
+    );
+  });
+
+  it("flags a hit-only gain as hitDriven, and never a loss", async () => {
+    // Romulo's Poison Vial is the only item in the P2 universe whose stats are
+    // 100% melee hit rating, which makes it the honest fixture for this flag.
+    // Driven through rankUpgrades rather than asserted on isHitDriven alone:
+    // the unit test proves the predicate, this proves it is actually wired to
+    // a real stat delta. A first cut flagged this same item at Δ-44.70 as a
+    // "gain", so both directions are asserted here.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+
+    const pool = [
+      {
+        itemId: 28579,
+        name: "Romulo's Poison Vial",
+        slot: "trinket" as const,
+        phase: 2,
+        source: { kind: "raid" as const, zone: "Karazhan", boss: "Opera" },
+      },
+    ];
+
+    async function rankWith(candidateDps: number) {
+      const sims = new Map([
+        [
+          baselineKey,
+          {
+            dps: 2000,
+            stdev: 90,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          },
+        ],
+      ]);
+      // Trinket is a paired slot: key both placements so whichever the engine
+      // picks is recorded, rather than depending on which one it tries first.
+      for (const slot of ["trinket1", "trinket2"] as const) {
+        const swapped = equipment.map((spec, i) =>
+          SIM_ORDER[i] === slot ? { id: 28579, gems: [] as number[] } : spec
+        );
+        sims.set(
+          simCacheKey(
+            compose(skeleton, {
+              name: "slamaltman",
+              race: "RaceHuman",
+              equipment: swapped,
+            }),
+            "v0.0.101",
+            opts
+          ),
+          {
+            dps: candidateDps,
+            stdev: 90,
+            iterationsDone: 3000,
+            simVersion: "v0.0.101",
+          }
+        );
+      }
+      return rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase: 2,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner("v0.0.101", sims),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+          pool,
+        }
+      );
+    }
+
+    // slamaltman sits well under the cap, so a pure-hit gain must be flagged.
+    const gain = await rankWith(2050);
+    expect(gain.caps.hit.gap).toBeGreaterThan(0);
+    expect(gain.items[0]!.deltaDps).toBeGreaterThan(0);
+    expect(gain.items[0]!.hitDriven).toBe(true);
+
+    const loss = await rankWith(1955.3);
+    expect(loss.items[0]!.deltaDps).toBeLessThan(0);
+    expect(loss.items[0]!.hitDriven).toBeUndefined();
   });
 
   it("returns identical deltas for the same seed and recordings", async () => {

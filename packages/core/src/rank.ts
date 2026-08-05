@@ -16,6 +16,12 @@ import {
   ENGINE_VERSION,
   type HashedGearItem,
 } from "./content-hash.js";
+import {
+  capStateFrom,
+  isHitDriven,
+  statDeltaBetween,
+  type CapState,
+} from "./caps.js";
 import { CUTOFF, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
@@ -141,6 +147,13 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
+  /**
+   * Most of this item's stat gain is hit rating, and the player is under the
+   * hit cap. Not modelling stat combinations is correct per §2's scoping rule
+   * (§4); this flag is here because correct-but-misleading is still
+   * misleading — the item stops being an upgrade once the cap is crossed.
+   */
+  hitDriven?: boolean;
   setBonusNote?: string;
   owned?: boolean;
   belowCutoff: boolean;
@@ -152,6 +165,8 @@ export type Ranking = {
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
   substitutions: Substitution[];
+  /** Required by §4 — a Ranking you can't audit is not a Ranking. */
+  caps: CapState;
   items: RankedItem[];
 };
 
@@ -326,6 +341,10 @@ export async function rankUpgrades(
     }[] = [];
     let done = 1;
 
+    // From the repaired layout, which is what the sim actually ran. Hoisted
+    // above the loop because `hitDriven` prices each candidate against it.
+    const caps = capStateFrom(equipment, socketed, { assumedRace: race });
+
     for (const entry of candidates) {
       const owned = equippedIds.has(entry.itemId);
       const slotNames = simSlotsForPoolSlot(entry.slot);
@@ -334,6 +353,7 @@ export async function rankUpgrades(
         stdev: number;
         slotChoice?: SimSlotName;
         setBonusNote?: string;
+        hitDriven: boolean;
       } | null = null;
 
       for (let s = 0; s < slotNames.length; s++) {
@@ -392,9 +412,15 @@ export async function rankUpgrades(
             stdev: number;
             slotChoice?: SimSlotName;
             setBonusNote?: string;
+            hitDriven: boolean;
           } = {
             deltaDps,
             stdev: candObs.stdev,
+            hitDriven: isHitDriven(
+              statDeltaBetween(equipment, swapped),
+              caps.hit,
+              { deltaDps }
+            ),
           };
           if (slotNames.length > 1) {
             next.slotChoice = slotName;
@@ -427,6 +453,7 @@ export async function rankUpgrades(
         belowCutoff,
       };
       if (entry.sources) item.sources = entry.sources;
+      if (best.hitDriven) item.hitDriven = true;
       if (best.slotChoice) item.slotChoice = best.slotChoice;
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
       if (owned) item.owned = true;
@@ -461,6 +488,7 @@ export async function rankUpgrades(
         presetId: PRESET_ID,
         standing: buildStandingAssumptions(race),
       },
+      caps,
       substitutions: [
         ...substitutionsFromMetaRepair(metaSwaps),
         ...simSkips.map((s) => ({
