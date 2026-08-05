@@ -850,6 +850,8 @@ Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tag
 
 **And feral cat** — which is the real gate. Adding a spec should be a preset JSON plus the disambiguation confidence field, and nothing else.
 
+**Decomposed into five subplans, 2026-08-04.** This phase is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` lands on `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
+
 **Gate:** ☐ re-run hits cache; deltas stable ☐ inactive-meta baseline auto-repaired and disclosed ☐ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☐ ≥3 real characters produce believable shortlists ☐ fallback route exercised on a character with no ranked kills ☐ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☐ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☐ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Phase 3
 
 ### Phase 3 — Web shell

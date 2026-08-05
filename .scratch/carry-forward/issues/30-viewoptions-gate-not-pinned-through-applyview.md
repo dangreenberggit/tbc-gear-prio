@@ -67,3 +67,11 @@ the system, because there is no view layer to drive.
 
 `applyView` is listed in AGENTS.md § Testing as one of the four pure functions
 unit-tested directly, so its own tests need no new seam agreement.
+
+## Comments
+
+**2026-08-04 — superseded by a Phase 2 subplan.** The implementation half of
+this ticket is now `.scratch/phase-2/issues/03-apply-view.md`, on branch
+`phase-2/apply-view`. Close this ticket when that branch lands; the analysis
+above (especially "what `feat/content-hash` closed" and the altitude the gate
+box actually needs) is carried into that subplan rather than restated here.

@@ -39,6 +39,7 @@ vendor/
 # genuinely disposable — if you want it to survive, commit it or archive it.
 .scratch/*
 !.scratch/carry-forward/
+!.scratch/phase-2/
 !.scratch/archive/
 !.scratch/handoffs/
 !.scratch/phase0-close/
