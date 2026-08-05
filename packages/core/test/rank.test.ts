@@ -394,6 +394,76 @@ describe("rankUpgrades", () => {
     });
   });
 
+  it("auto-repairs an inactive meta and discloses it as a run substitution", async () => {
+    // The gate box wants the repair *and* its disclosure proven through
+    // rankUpgrades. repairMeta and substitutionsFromMetaRepair are each unit
+    // tested, but that pair passing says nothing about whether the engine
+    // actually wires one to the other.
+    //
+    // Same lever as meta-repair.test.ts: the chest's two orange gems are the
+    // whole yellow count, so recolouring them red makes the meta inactive.
+    const logged = slamaltmanLoggedGear();
+    const chest = logged.items.find((it) => it.id === 30129)!;
+    expect(chest.gems).toEqual([24027, 24058, 24058]);
+    chest.gems = [24027, 24027, 24027];
+
+    // The composed request is whatever the repair produces, so the recorded
+    // runner is keyed off the request rankUpgrades builds rather than one
+    // guessed here — an AnySimRunner keeps the test about disclosure.
+    let composed: RaidSimRequest | undefined;
+    const sim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (req) => {
+        composed = req;
+        return {
+          dps: 2000,
+          stdev: 90,
+          iterationsDone: 3000,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+      }
+    );
+
+    expect(composed).toBeDefined();
+    expect(ranking.baseline.metaAdjusted).toBe(true);
+
+    // Disclosed as a this-run substitution, not silently swallowed.
+    const repair = ranking.substitutions.find(
+      (s) => s.field === "gems.meta-repair"
+    );
+    expect(repair).toBeDefined();
+    expect(repair!.detail).toContain("Meta inactive");
+    expect(repair!.detail).toMatch(/\d+→\d+@item \d+/);
+
+    // And it is a run substitution rather than a standing assumption — the
+    // two tiers must not blur (§9 R7).
+    expect(ranking.assumptions.standing.map((s) => s.id)).not.toContain(
+      "gems.meta-repair"
+    );
+  });
+
   it("flags a hit-only gain as hitDriven, and never a loss", async () => {
     // Romulo's Poison Vial is the only item in the P2 universe whose stats are
     // 100% melee hit rating, which makes it the honest fixture for this flag.
