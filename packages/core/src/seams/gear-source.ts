@@ -4,6 +4,7 @@
  */
 
 import type { CharacterRef, FightRef, SpecId } from "../types.js";
+import type { Store } from "./store.js";
 
 export type FightSummary = {
   reportCode: string;
@@ -54,6 +55,49 @@ export function characterFightKey(c: CharacterRef, spec: SpecId): string {
 
 export function fightGearKey(f: FightRef): string {
   return `${f.reportCode}|${f.fightId}`;
+}
+
+/**
+ * Serves a fight's gear from the Store instead of re-fetching it (PLAN.md §11,
+ * "the gear cache is the primary defence of the WCL point budget").
+ *
+ * It wraps the *fetching* source — the WCL adapter — rather than sitting inside
+ * `rankUpgrades`, and the distinction is load-bearing. A cache above
+ * `rankUpgrades` would decide the content hash from a previously stored
+ * snapshot, so a character whose gear changed between runs would be served the
+ * old numbers (ADR-0019). Here the only thing skipped is the HTTP call that
+ * costs points; whatever gear comes back still reaches the hash.
+ *
+ * `findFights` is deliberately not cached: a fight list grows as a character
+ * raids, so it is not immutable. PLAN.md §12 gives it a short TTL in Phase 3.
+ */
+export class CachingGearSource implements GearSource {
+  constructor(
+    private readonly inner: GearSource,
+    private readonly store: Pick<Store, "get" | "put">
+  ) {}
+
+  findFights(c: CharacterRef, spec: SpecId): Promise<FightSummary[]> {
+    return this.inner.findFights(c, spec);
+  }
+
+  async readGear(f: FightRef): Promise<LoggedGear> {
+    const key = gearCacheKey(f);
+    const cached = await this.store.get<LoggedGear>(key);
+    if (cached) return cached;
+    const logged = await this.inner.readGear(f);
+    await this.store.put(key, logged);
+    return logged;
+  }
+}
+
+/**
+ * A completed fight's logged gear never changes, so the fight is the whole
+ * address. Built from fightGearKey so it cannot drift from the key
+ * RecordedGearSource replays.
+ */
+export function gearCacheKey(f: FightRef): string {
+  return `gear:${fightGearKey(f)}`;
 }
 
 export class RecordedGearSource implements GearSource {

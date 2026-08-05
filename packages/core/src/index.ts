@@ -32,9 +32,11 @@ export {
 } from "./pool.js";
 export { isKaelTempLegendary, KAEL_TEMP_LEGENDARY_IDS } from "./kael-temp.js";
 export {
+  CachingGearSource,
   RecordedGearSource,
   characterFightKey,
   fightGearKey,
+  gearCacheKey,
   type FightSummary,
   type GearSource,
   type LoggedGear,

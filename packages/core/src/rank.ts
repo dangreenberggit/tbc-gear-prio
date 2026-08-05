@@ -44,7 +44,13 @@ import {
   type SimSlotName,
 } from "./pool.js";
 import type { GearSource } from "./seams/gear-source.js";
-import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
+import {
+  simCacheKey,
+  type RaidSimRequest,
+  type SimObservation,
+  type SimRunOpts,
+  type SimRunner,
+} from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
 import { setBreakNote } from "./set-bonus.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
@@ -174,6 +180,11 @@ export async function rankUpgrades(
   }
 
   onProgress?.({ stage: "reading-gear" });
+  // Always the source, never a cache read here: ADR-0019 hashes the gear this
+  // returns, so short-circuiting it would let a stale snapshot decide the hash
+  // and serve last run's numbers for a re-gemmed set. The WCL point budget is
+  // defended one layer down, in CachingGearSource, which is where the fetch
+  // that costs points actually happens (PLAN.md §11).
   const logged = await deps.gear.readGear(fight);
 
   onProgress?.({ stage: "composing" });
@@ -227,6 +238,10 @@ export async function rankUpgrades(
     (e) => !isKaelTempLegendary(e.itemId)
   );
 
+  // Read once and shared with the sim cache below, so the version a result is
+  // filed under is always the version it was hashed with.
+  const simVersion = await deps.sim.version();
+
   // Hashed here rather than at entry because the logged gear is the largest
   // input to every delta, and it is not known until readGear resolves. The
   // check still lands before the sim loop, which is the expensive part.
@@ -244,7 +259,7 @@ export async function rankUpgrades(
     skeleton: deps.raidSimSkeleton,
     iterations,
     seeds,
-    simVersion: await deps.sim.version(),
+    simVersion,
     engineVersion: ENGINE_VERSION,
   });
 
@@ -288,13 +303,19 @@ export async function rankUpgrades(
     const totalSims = 1 + candidates.length;
     onProgress?.({ stage: "simming", done: 0, total: totalSims });
     let observation;
+    let baselineWasCached;
     try {
-      observation = await deps.sim.run(request, runOpts);
+      const result = await runSimCached(deps, request, simVersion, runOpts);
+      observation = result.observation;
+      baselineWasCached = result.cached;
     } catch (err) {
       throw new RankError(
         "sim-failed",
         err instanceof Error ? err.message : String(err)
       );
+    }
+    if (!baselineWasCached) {
+      await cacheSimResult(deps, request, simVersion, runOpts, observation);
     }
     onProgress?.({ stage: "simming", done: 1, total: totalSims });
 
@@ -344,8 +365,11 @@ export async function rankUpgrades(
           equipment: swapped,
         });
         let candObs;
+        let candWasCached;
         try {
-          candObs = await deps.sim.run(candReq, runOpts);
+          const result = await runSimCached(deps, candReq, simVersion, runOpts);
+          candObs = result.observation;
+          candWasCached = result.cached;
         } catch (err) {
           // Class-locked item effects (e.g. hunter set bonuses on mail) can panic
           // wowsimcli when equipped on ret — skip this slot attempt. Recorded
@@ -358,6 +382,9 @@ export async function rankUpgrades(
             reason: err instanceof Error ? err.message : String(err),
           });
           continue;
+        }
+        if (!candWasCached) {
+          await cacheSimResult(deps, candReq, simVersion, runOpts, candObs);
         }
         const deltaDps = candObs.dps - baselineDps;
         const note = setBreakNote(equipment, slotIndex, entry.itemId);
@@ -458,6 +485,43 @@ export async function rankUpgrades(
 /** Namespaced so a ranking blob cannot collide with another content-addressed value. */
 function rankingCacheKey(contentHash: string): string {
   return `ranking:${contentHash}`;
+}
+
+/**
+ * PLAN.md §11: a sim result for a given request + version can never change.
+ * simCacheKey already folds in seed and iterations, so two runs that differ
+ * only in which candidates they consider share every request they have in
+ * common — which is what makes a partial re-run cheap.
+ */
+async function runSimCached(
+  deps: Deps,
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts
+): Promise<{ observation: SimObservation; cached: boolean }> {
+  const key = `sim:${simCacheKey(req, simVersion, opts)}`;
+  const cached = await deps.store.get<SimObservation>(key);
+  if (cached) return { observation: cached, cached: true };
+  return { observation: await deps.sim.run(req, opts), cached: false };
+}
+
+/**
+ * Split from the read so the caller can keep `deps.sim.run` inside its
+ * sim-failed catch while this stays outside it: a failing store write is an
+ * `internal` fault, and reporting it as `sim-failed` sends an operator to the
+ * wrong subsystem.
+ */
+async function cacheSimResult(
+  deps: Deps,
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts,
+  observation: SimObservation
+): Promise<void> {
+  await deps.store.put(
+    `sim:${simCacheKey(req, simVersion, opts)}`,
+    observation
+  );
 }
 
 function raceFromSkeleton(skeleton: RaidSimRequest): Race {
