@@ -56,6 +56,63 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
   ];
 }
 
+/**
+ * The hit-cap line (§4.3).
+ *
+ * Never states a precise figure. The gap is gear-only — talents and buffs are
+ * not visible to `capStateFrom` — and Heroic Presence is not readable from
+ * WCL, so the sentence has to carry both caveats or it overclaims. §4.3 is
+ * explicit that "~20 rating under the cap, assuming no Heroic Presence" is the
+ * shape, not "you are 20 under".
+ */
+export function hitCapBanner(hit: {
+  rating: number;
+  gap: number;
+  capUncertainty: number;
+}): string {
+  const rounded = Math.round(Math.abs(hit.gap));
+  const band = Math.round(hit.capUncertainty);
+  if (hit.gap > 0) {
+    return (
+      `~${rounded} rating under the hit cap from gear alone ` +
+      `(±${band}, assuming no Heroic Presence in your party; talents and buffs not counted).`
+    );
+  }
+  return (
+    `~${rounded} rating over the hit cap from gear alone ` +
+    `(±${band}, assuming no Heroic Presence in your party).`
+  );
+}
+
+/**
+ * §9 R7's two tiers. Standing assumptions are always true and collapse behind
+ * a count; this-run substitutions are rare and are always expanded — a run
+ * that silently substituted five things must not look like a clean one.
+ */
+export function renderDisclosure(opts: {
+  standing: readonly StandingAssumption[];
+  substitutions: readonly Substitution[];
+  expandStanding?: boolean;
+}): string[] {
+  const lines: string[] = [];
+  const { standing, substitutions } = opts;
+
+  if (opts.expandStanding) {
+    lines.push(`assumptions (${standing.length}):`);
+    for (const a of standing) lines.push(`  - [${a.id}] ${a.detail}`);
+  } else if (standing.length > 0) {
+    lines.push(
+      `assumptions: ${standing.length} standing (--assumptions to expand)`
+    );
+  }
+
+  if (substitutions.length > 0) {
+    lines.push(`substitutions this run (${substitutions.length}):`);
+    for (const s of substitutions) lines.push(`  - ${s.field}: ${s.detail}`);
+  }
+  return lines;
+}
+
 export function substitutionsFromMetaRepair(
   swaps: readonly MetaRepairSwap[]
 ): Substitution[] {

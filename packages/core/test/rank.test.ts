@@ -240,6 +240,18 @@ describe("rankUpgrades", () => {
     ]);
     expect(ranking.assumptions.race).toBe("RaceHuman");
     expect(ranking.substitutions).toEqual([]);
+
+    // §4 makes caps required, and it must describe the gear that was actually
+    // simmed — a real geared ret carries hit, so a 0 here means the sum never
+    // reached the item stats rather than that this player has no hit.
+    expect(ranking.caps.hit.rating).toBeGreaterThan(0);
+    expect(Math.round(ranking.caps.hit.capRating)).toBe(142);
+    expect(ranking.caps.hit.gap).toBeCloseTo(
+      ranking.caps.hit.capRating - ranking.caps.hit.rating,
+      6
+    );
+    expect(ranking.caps.hit.assumedRace).toBe("RaceHuman");
+    expect(ranking.caps.expertise.rating).toBeGreaterThanOrEqual(0);
   });
 
   it("defaults race from the raid-sim skeleton when RankInput.race is omitted", async () => {

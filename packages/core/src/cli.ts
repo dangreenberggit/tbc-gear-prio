@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
+import { hitCapBanner, renderDisclosure } from "./disclosure.js";
 import {
   slamaltmanOfflineRecordings,
   SLAMALTMAN_REF,
@@ -53,7 +54,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -65,6 +66,7 @@ function parseArgs(argv: string[]): {
   character: string;
   offline: boolean;
   maxPhase: ContentPhase;
+  assumptions: boolean;
   raid?: string;
   report?: string;
 } {
@@ -74,14 +76,23 @@ function parseArgs(argv: string[]): {
     character?: string;
     offline: boolean;
     maxPhase: ContentPhase;
+    assumptions: boolean;
     raid?: string;
     report?: string;
-  } = { offline: false, maxPhase: defaultMaxPhaseFromLock() };
+  } = {
+    offline: false,
+    assumptions: false,
+    maxPhase: defaultMaxPhaseFromLock(),
+  };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--offline") {
       out.offline = true;
+      continue;
+    }
+    if (arg === "--assumptions") {
+      out.assumptions = true;
       continue;
     }
     const next = argv[i + 1];
@@ -129,6 +140,7 @@ function parseArgs(argv: string[]): {
     character: out.character,
     offline: out.offline,
     maxPhase: out.maxPhase,
+    assumptions: out.assumptions,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
   };
@@ -258,15 +270,13 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
-    console.log("assumptions:");
-    for (const a of ranking.assumptions.standing) {
-      console.log(`  - [${a.id}] ${a.detail}`);
-    }
-    if (ranking.substitutions.length > 0) {
-      console.log("substitutions:");
-      for (const s of ranking.substitutions) {
-        console.log(`  - ${s.field}: ${s.detail}`);
-      }
+    console.log(hitCapBanner(ranking.caps.hit));
+    for (const line of renderDisclosure({
+      standing: ranking.assumptions.standing,
+      substitutions: ranking.substitutions,
+      expandStanding: args.assumptions,
+    })) {
+      console.log(line);
     }
     for (const item of items) {
       const mark = item.belowCutoff ? "  (below cutoff)" : "";
@@ -274,6 +284,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       console.log(
         `#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}`
       );
+      if (item.hitDriven) {
+        console.log(
+          "    hit-driven: most of this gain is hit rating, and you are under the cap"
+        );
+      }
       if (item.setBonusNote) {
         console.log(`    set: ${item.setBonusNote}`);
       }

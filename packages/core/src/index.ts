@@ -11,7 +11,20 @@ export {
   type Ranking,
 } from "./rank.js";
 export {
+  capStateFrom,
+  isHitDriven,
+  statDeltaBetween,
+  HIT_CAP_RATING,
+  HIT_CAP_UNCERTAINTY,
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  type CapEntry,
+  type CapState,
+  type HitCapEntry,
+} from "./caps.js";
+export {
   buildStandingAssumptions,
+  hitCapBanner,
+  renderDisclosure,
   substitutionsFromMetaRepair,
   type Assumptions,
   type StandingAssumption,
