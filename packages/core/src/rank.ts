@@ -180,11 +180,8 @@ export async function rankUpgrades(
   }
 
   onProgress?.({ stage: "reading-gear" });
-  // Always the source, never a cache read here: ADR-0019 hashes the gear this
-  // returns, so short-circuiting it would let a stale snapshot decide the hash
-  // and serve last run's numbers for a re-gemmed set. The WCL point budget is
-  // defended one layer down, in CachingGearSource, which is where the fetch
-  // that costs points actually happens (PLAN.md §11).
+  // Never a cache read here — ADR-0019 hashes what this returns. The point
+  // budget is defended one layer down; see CachingGearSource.
   const logged = await deps.gear.readGear(fight);
 
   onProgress?.({ stage: "composing" });
@@ -499,10 +496,20 @@ async function runSimCached(
   simVersion: string,
   opts: SimRunOpts
 ): Promise<{ observation: SimObservation; cached: boolean }> {
-  const key = `sim:${simCacheKey(req, simVersion, opts)}`;
-  const cached = await deps.store.get<SimObservation>(key);
+  const cached = await deps.store.get<SimObservation>(
+    simStoreKey(req, simVersion, opts)
+  );
   if (cached) return { observation: cached, cached: true };
   return { observation: await deps.sim.run(req, opts), cached: false };
+}
+
+/** Namespaced, and built in one place so the read and the write cannot drift. */
+function simStoreKey(
+  req: RaidSimRequest,
+  simVersion: string,
+  opts: SimRunOpts
+): string {
+  return `sim:${simCacheKey(req, simVersion, opts)}`;
 }
 
 /**
@@ -518,10 +525,7 @@ async function cacheSimResult(
   opts: SimRunOpts,
   observation: SimObservation
 ): Promise<void> {
-  await deps.store.put(
-    `sim:${simCacheKey(req, simVersion, opts)}`,
-    observation
-  );
+  await deps.store.put(simStoreKey(req, simVersion, opts), observation);
 }
 
 function raceFromSkeleton(skeleton: RaidSimRequest): Race {

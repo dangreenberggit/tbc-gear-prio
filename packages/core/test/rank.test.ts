@@ -679,7 +679,7 @@ describe("rankUpgrades", () => {
       const fetches = new CountingGearSource(deps.gear);
       const counted = {
         ...deps,
-        gear: new CachingGearSource(fetches, deps.store),
+        gear: new CachingGearSource(fetches, deps.store, CHAR, "ret"),
       };
 
       await rankUpgrades(input, counted);
@@ -696,7 +696,7 @@ describe("rankUpgrades", () => {
       // baseline request and the first candidate's request are byte-identical
       // to the first run's, and must be served from kv rather than re-simmed.
       const { sim, deps } = cacheDeps();
-      await rankUpgrades(input, deps);
+      const first = await rankUpgrades(input, deps);
       const afterFirst = sim.runs;
 
       const grown = {
@@ -712,12 +712,21 @@ describe("rankUpgrades", () => {
           },
         ],
       };
-      await rankUpgrades(input, grown);
+      const second = await rankUpgrades(input, grown);
 
       // Two new sims: the added ring is tried in finger1 and finger2. The
       // baseline and the neck candidate are cache hits. Without the sim
       // cache this is afterFirst + 4.
       expect(sim.runs).toBe(afterFirst + 2);
+
+      // The "deltas stable" half of the gate box, and the half with teeth: the
+      // neck candidate was served from kv rather than re-simmed, so if the
+      // cache returned a mismatched observation — a key collision, a lossy
+      // round-trip — every number on this row would move and the run-count
+      // assertion above would still pass.
+      const before = first.items.find((i) => i.itemId === 29381);
+      const after = second.items.find((i) => i.itemId === 29381);
+      expect(after).toEqual(before);
     });
 
     it("errors the job row when the run throws after the row is created", async () => {
@@ -1252,13 +1261,9 @@ describe("rankUpgrades", () => {
           gear: new Map([["abc123|7", logged]]),
         }),
         sim,
-        // Non-retaining on purpose. This candidate *is* the equipped head with
-        // the same gems, so its request is byte-identical to the baseline's
-        // (asserted below) and the sim cache would rightly serve it from kv —
-        // leaving the runner with one request and nothing to inspect. What is
-        // under test here is what rankUpgrades composes, not whether it
-        // caches, so the cache is taken out of the picture rather than the
-        // assertion weakened.
+        // This candidate is byte-identical to the baseline (asserted below),
+        // so the sim cache would serve it and leave the runner nothing to
+        // inspect. Under test here is what rankUpgrades composes, not caching.
         store: new NonRetainingStore(),
         clock: () => new Date("2026-07-26T12:00:00.000Z"),
         raidSimSkeleton: skeleton,

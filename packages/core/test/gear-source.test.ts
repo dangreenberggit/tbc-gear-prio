@@ -85,7 +85,7 @@ describe("CachingGearSource", () => {
 
   it("fetches a fight once and serves the rest from the store", async () => {
     const inner = new CountingGearSource(new Map([["abc123|7", GEAR]]));
-    const gear = new CachingGearSource(inner, new MemoryStore());
+    const gear = new CachingGearSource(inner, new MemoryStore(), CHAR, "ret");
 
     expect(await gear.readGear(FIGHT)).toEqual(GEAR);
     expect(await gear.readGear(FIGHT)).toEqual(GEAR);
@@ -100,11 +100,42 @@ describe("CachingGearSource", () => {
         ["abc123|9", GEAR],
       ])
     );
-    const gear = new CachingGearSource(inner, new MemoryStore());
+    const gear = new CachingGearSource(inner, new MemoryStore(), CHAR, "ret");
 
     await gear.readGear(FIGHT);
     await gear.readGear(other);
     expect(inner.reads).toBe(2);
+  });
+
+  it("does not serve one raider's gear to another in the same fight", async () => {
+    // docs/phase0-findings.md §11: this repo already quoted a warrior's gear
+    // for a slamaltman run, because a fight holds all 25 raiders. A cache
+    // keyed on (reportCode, fightId) alone would make that permanent — the
+    // second character asked for would get the first one's 17 slots, with no
+    // error and no TTL to age it out.
+    const hagguth: CharacterRef = { ...CHAR, name: "hagguth" };
+    const warriorGear: LoggedGear = {
+      ...GEAR,
+      items: [{ id: 30120, slot: "head" }],
+      provenance: { ...GEAR.provenance, sourceID: 3 },
+    };
+
+    const store = new MemoryStore();
+    const slam = new CachingGearSource(
+      new CountingGearSource(new Map([["abc123|7", GEAR]])),
+      store,
+      CHAR,
+      "ret"
+    );
+    const warrior = new CachingGearSource(
+      new CountingGearSource(new Map([["abc123|7", warriorGear]])),
+      store,
+      hagguth,
+      "ret"
+    );
+
+    expect(await slam.readGear(FIGHT)).toEqual(GEAR);
+    expect(await warrior.readGear(FIGHT)).toEqual(warriorGear);
   });
 
   it("survives a new instance over the same store", async () => {
@@ -113,16 +144,16 @@ describe("CachingGearSource", () => {
     const store = new MemoryStore();
     const inner = new CountingGearSource(new Map([["abc123|7", GEAR]]));
 
-    await new CachingGearSource(inner, store).readGear(FIGHT);
-    expect(await new CachingGearSource(inner, store).readGear(FIGHT)).toEqual(
-      GEAR
-    );
+    await new CachingGearSource(inner, store, CHAR, "ret").readGear(FIGHT);
+    expect(
+      await new CachingGearSource(inner, store, CHAR, "ret").readGear(FIGHT)
+    ).toEqual(GEAR);
     expect(inner.reads).toBe(1);
   });
 
   it("does not cache the fight list", async () => {
     // A fight list grows as a character raids, so it is not immutable the way
-    // a completed fight's gear is (PLAN.md §12 gives it a TTL in Phase 3).
+    // a completed fight's gear is. PLAN.md §12 [R9] calls it a live query.
     const inner = new CountingGearSource(new Map());
     let calls = 0;
     const counted: GearSource = {
@@ -132,7 +163,7 @@ describe("CachingGearSource", () => {
       },
       readGear: (f) => inner.readGear(f),
     };
-    const gear = new CachingGearSource(counted, new MemoryStore());
+    const gear = new CachingGearSource(counted, new MemoryStore(), CHAR, "ret");
 
     await gear.findFights(CHAR, "ret");
     await gear.findFights(CHAR, "ret");

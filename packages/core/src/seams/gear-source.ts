@@ -68,13 +68,23 @@ export function fightGearKey(f: FightRef): string {
  * old numbers (ADR-0019). Here the only thing skipped is the HTTP call that
  * costs points; whatever gear comes back still reaches the hash.
  *
+ * Scoped to one character because `readGear` takes only a `FightRef`, and a
+ * fight is a raid rather than a player: 25 people share one (reportCode,
+ * fightId). This repo has already been bitten by that ambiguity once — the
+ * `events[0]` footgun in docs/phase0-findings.md §11, where a warrior's gear
+ * was reported for a slamaltman run — and a cache keyed on the fight alone
+ * would make it permanent instead of merely wrong once.
+ *
  * `findFights` is deliberately not cached: a fight list grows as a character
- * raids, so it is not immutable. PLAN.md §12 gives it a short TTL in Phase 3.
+ * raids, so it is not immutable. PLAN.md §12 [R9] calls it a live query and
+ * wants a short TTL *and* per-IP rate limiting, both Phase 3.
  */
 export class CachingGearSource implements GearSource {
   constructor(
     private readonly inner: GearSource,
-    private readonly store: Pick<Store, "get" | "put">
+    private readonly store: Pick<Store, "get" | "put">,
+    private readonly character: CharacterRef,
+    private readonly spec: SpecId
   ) {}
 
   findFights(c: CharacterRef, spec: SpecId): Promise<FightSummary[]> {
@@ -82,7 +92,7 @@ export class CachingGearSource implements GearSource {
   }
 
   async readGear(f: FightRef): Promise<LoggedGear> {
-    const key = gearCacheKey(f);
+    const key = gearCacheKey(f, this.character, this.spec);
     const cached = await this.store.get<LoggedGear>(key);
     if (cached) return cached;
     const logged = await this.inner.readGear(f);
@@ -92,12 +102,17 @@ export class CachingGearSource implements GearSource {
 }
 
 /**
- * A completed fight's logged gear never changes, so the fight is the whole
- * address. Built from fightGearKey so it cannot drift from the key
- * RecordedGearSource replays.
+ * A completed fight's logged gear never changes, so no TTL — but the fight is
+ * only half the address. The character is the other half, because one fight
+ * holds every raider's gear (phase0-findings §11). Built from the two existing
+ * key helpers so it cannot drift from what RecordedGearSource replays.
  */
-export function gearCacheKey(f: FightRef): string {
-  return `gear:${fightGearKey(f)}`;
+export function gearCacheKey(
+  f: FightRef,
+  c: CharacterRef,
+  spec: SpecId
+): string {
+  return `gear:${fightGearKey(f)}|${characterFightKey(c, spec)}`;
 }
 
 export class RecordedGearSource implements GearSource {
