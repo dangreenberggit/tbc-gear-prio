@@ -118,6 +118,19 @@ separate them. §14's phrasing — *"a preset JSON plus the disambiguation
 confidence field"* — is pointing at this. Decide and record how a low-confidence
 classification surfaces rather than silently guessing cat.
 
+**A neighbouring gap this ticket does not own, but composes with:** nothing on
+the resolution path calls `classifySpec` at all, so the engine can pick a fight
+the character played in a *different* spec and sim it against the requested
+spec's preset — ticket 04's first capture was a ret paladin's protection night,
+scored as ret. That is
+`.scratch/carry-forward/issues/40-fight-resolution-is-not-spec-aware.md`.
+
+The two are the same question at two levels: 40 is "is this fight the spec you
+asked for" (talent plurality, §5.4 level 1), this ticket is "which feral is it"
+(form uptime, level 2). A druid can fail either. Whatever `confidence` shape
+you land on here should be the one 40 reads — `FightSummary.confidence` is
+currently decorative, and feral is the first thing that gives it meaning.
+
 ## Gate boxes owned
 
 > ☐ **feral shipped without a structural change to `rankUpgrades` or its seams**

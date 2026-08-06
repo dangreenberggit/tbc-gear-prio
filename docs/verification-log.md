@@ -954,6 +954,16 @@ now reads `talents` from the capture and throws when it cannot, and
 fallback baseline is **2003.26** — identical to the ranked fixture, which is the
 right answer for the same character's same gear.
 
+**The fixture was fixed; the engine gap was not.** Nothing on the resolution
+path calls `classifySpec`, so any character who tanks or off-specs on some
+nights can still resolve to a fight they played in another spec and be simmed
+against the wrong preset and EP weights. That is
+`.scratch/carry-forward/issues/40-fight-resolution-is-not-spec-aware.md`, and it
+carries an open product decision: preferring a spec-matching fight is
+uncontroversial, but the fallback when none exists ("assume their last fight is
+their spec") only produces a right answer once the tool can sim that other spec,
+which needs more than the one shipped spec.
+
 Check which report a fresh worktree's fixture actually holds, and that it is
 ret, without spending points:
 
