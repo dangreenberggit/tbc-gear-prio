@@ -191,7 +191,7 @@ PARTIAL** and is the reason this branch is not gate-complete.
 | A4  | Adversarial | fixed       | 5 regression tests in `pool-hardening.test.ts`; verified red without the fix                                                                                              |
 | A5  | Adversarial | defer       | `.scratch/carry-forward/issues/44-sources0-order-is-arbitrary.md`                                                                                                         |
 | D1  | Domain      | wontfix     | `feral-tokens.json` slot-join already self-declares the gap per durable-claims                                                                                            |
-| D2  | Domain      | defer       | Feral has no pre-raid list; folded into ticket 45                                                                                                                         |
+| D2  | Domain      | defer       | `.scratch/carry-forward/issues/45-unparsed-wowhead-prose-and-unknown-bucket.md` — feral has no pre-raid list, recorded there                                              |
 | S1  | Standards   | fixed       | Ticket 41 `Status:` restored to `open`; `Blocked by:` header added; confirmed visible in `pnpm issues:open`                                                               |
 | S2  | Standards   | wontfix     | `DRUID_TREE_SPEC` empty map is load-bearing — key presence is the supported-class test                                                                                    |
 | P1  | Spec        | fixed       | Ticket 05 gate box updated with what changed and why it stays PARTIAL                                                                                                     |
