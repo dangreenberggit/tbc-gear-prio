@@ -155,31 +155,59 @@ const POOL: PoolEntry[] = [
   },
 ];
 
+const INPUT = {
+  character: CHAR,
+  spec: "ret" as const,
+  maxPhase: 2 as const,
+  iterations: 3000,
+  seeds: [42],
+  race: "RaceHuman" as const,
+};
+
+/**
+ * Counts entries into the engine, which a sim counter cannot do.
+ *
+ * `rankUpgrades` caches sim results through the `Store`, so a caller that
+ * re-ranked identical input would run **zero** extra sims and leave a sim
+ * counter untouched — the caching is correct and it is exactly what makes the
+ * sim count blind to the regression this box is about. `findFights` is
+ * deliberately uncached (`gear-source.ts:78`) and is the engine's first call,
+ * so counting it counts entries.
+ */
+function newGearSource(): CountingGearSource {
+  return new CountingGearSource({
+    fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+    gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+  });
+}
+
+class CountingGearSource extends RecordedGearSource {
+  entries = 0;
+
+  override findFights(
+    c: Parameters<RecordedGearSource["findFights"]>[0],
+    spec: Parameters<RecordedGearSource["findFights"]>[1]
+  ) {
+    this.entries += 1;
+    return super.findFights(c, spec);
+  }
+}
+
+function depsFor(sim: CountingSimRunner, gear = newGearSource()) {
+  return {
+    gear,
+    sim,
+    store: new MemoryStore(),
+    clock: () => new Date("2026-07-26T12:00:00.000Z"),
+    raidSimSkeleton: skeleton,
+    epWeights,
+    pool: POOL,
+  };
+}
+
 async function rankOnce() {
-  const logged = slamaltmanLoggedGear();
   const sim = new CountingSimRunner();
-  const ranking = await rankUpgrades(
-    {
-      character: CHAR,
-      spec: "ret",
-      maxPhase: 2,
-      iterations: 3000,
-      seeds: [42],
-      race: "RaceHuman",
-    },
-    {
-      gear: new RecordedGearSource({
-        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
-        gear: new Map([["abc123|7", logged]]),
-      }),
-      sim,
-      store: new MemoryStore(),
-      clock: () => new Date("2026-07-26T12:00:00.000Z"),
-      raidSimSkeleton: skeleton,
-      epWeights,
-      pool: POOL,
-    }
-  );
+  const ranking = await rankUpgrades(INPUT, depsFor(sim));
   return { ranking, sim };
 }
 
@@ -219,8 +247,42 @@ describe("Phase 2 gate: ViewOptions never changes a number", () => {
     for (const view of VIEWS) {
       applyView(ranking, view);
       expect(ranking.contentHash).toBe(hashAfterRank);
+      // Note this half cannot fail while `applyView` holds no SimRunner — see
+      // the caller-loop test below, which is what actually closes "or trigger
+      // a sim". Kept as a tripwire on a future `applyView(r, v, deps)`.
       expect(sim.runs).toBe(runsAfterRank);
     }
+  });
+
+  /**
+   * The "or trigger a sim" half of the gate box, at the only altitude where it
+   * can fail.
+   *
+   * `applyView` is pure and never receives a `SimRunner`, so asserting on the
+   * counter *inside* the view call is trivially true. The claim the box makes
+   * is about the **caller's** loop: one `rankUpgrades`, then N re-renders. A
+   * caller that re-ranked to serve a view change would satisfy every
+   * pure-function test in this file and still violate the box, so the sim
+   * budget has to be observed across the whole session.
+   */
+  it("serves every view change from one ranking, without re-entering the engine", async () => {
+    const sim = new CountingSimRunner();
+    const gear = newGearSource();
+
+    // The session: rank once, then answer fourteen view requests.
+    const ranking = await rankUpgrades(INPUT, depsFor(sim, gear));
+    expect(sim.runs).toBeGreaterThan(0);
+    expect(gear.entries).toBe(1);
+
+    const rendered = VIEWS.map((view) => applyView(ranking, view));
+    expect(rendered).toHaveLength(VIEWS.length);
+
+    // Fourteen views served, still one entry into the engine. A caller that
+    // re-ranked per view change would read 15 here — and would *not* be caught
+    // by the sim counter, because identical input hits the result cache and
+    // costs zero sims.
+    expect(gear.entries).toBe(1);
+    expect(sim.runs).toBeGreaterThan(0);
   });
 
   it("keeps the ranking's own rows and deltas intact across every view", async () => {
