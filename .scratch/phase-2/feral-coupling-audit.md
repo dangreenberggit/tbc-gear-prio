@@ -208,3 +208,49 @@ than worked around.
 
 The stale claim in `PLAN.md:881` that shredzepelin is a **warrior** is wrong;
 he is a druid, and the Phase 0 table in `docs/phase0-findings.md:69` repeats it.
+
+**Resolved 2026-08-06.** `nexess` (Dreamscythe-US, WCL `classID` 2 = Druid) is
+the third character — feral cat, 96.6% cat form on Fathom-Lord Karathress,
+captured to `test/fixtures/nexess.raw.json`. Three rankable characters now
+exist across two specs.
+
+## 6. Outcome of the generator work
+
+The seven hard-codings became `SpecProfile`. Six were paths and moved without
+argument; `CLASS_PALADIN` plus `ret_eligible_d7` were logic, and became
+`eligible_d7(it, profile)` driven by `armor_types`, `ranged_type`,
+`allow_one_hand` and `excluded_weapon_types`.
+
+```bash
+for n in 2 3 4 5; do python scripts/assemble_universe.py --max-phase $n; done
+git diff --stat data/universes/   # ret-p*.json: no diff
+python scripts/assemble_universe.py --max-phase 2 --spec feral
+```
+
+Ret regenerates byte-identically across all four universes, so the refactor is
+behaviour-preserving and `data/universes/` shows **additions only** — the
+condition ticket 05 named as its reportable-defect check.
+
+`feral-p2.json` holds 225 entries against ret's 230, overlapping on 120. The
+new equip rules demonstrably fire: the ranged slot holds two idols and no
+librams, zero mail or plate leaked in, and 8 staves and 36 one-handers are
+present — every one of which ret's filter would have rejected.
+
+Tier: `tierPiecesExpected` 10, `tierPiecesPresent` 10, none missing, all of
+them Harness, no Regalia or Raiment leaked in.
+
+### Known limits, not defects
+
+- **Feral has no vendored wowsims gear sets.** `sync_wowsims.py` `TRACKED`
+  pulls only `ret_*.gear.json`, so `bis_ids` is empty for feral and every entry
+  is untagged rather than falsely "BiS". Fixing this means adding feral entries
+  to `TRACKED` and choosing among the 16 upstream cat sets (§1).
+- **The token map is not Wowhead-verified**, unlike ret's. The piece↔token join
+  is by armour slot within a tier because no committed source states the
+  redemption pairing. The slot join is sound; "Defender is the druid token"
+  is the assumption that still wants a human check.
+- **No feral Wowhead lists**, so feral gets no `wowhead` origin and no recall
+  grading. `--hold-out-wowhead` exists precisely because the universe builds
+  without them, so this costs quality rather than correctness.
+- **Feral tier stops at T5.** No T6 Thunderheart rows, so `maxPhase` 3+ has no
+  feral tier coverage.
