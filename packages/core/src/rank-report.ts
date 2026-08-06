@@ -49,6 +49,8 @@ export function formatItemSource(source: ItemSource): string {
         : `PvP · ${source.via}`;
     case "world":
       return "World drop";
+    case "unknown":
+      return "Source not recorded";
   }
 }
 

@@ -814,6 +814,24 @@
       ]
     },
     {
+      "itemId": 28176,
+      "name": "Sha'tari Wrought Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 39.75,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 28610,
       "name": "Ferocious Swift-Kickers",
       "slot": "feet",
@@ -1156,6 +1174,24 @@
       "curationHint": 70.1
     },
     {
+      "itemId": 30834,
+      "name": "Shapeshifter's Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 61.55,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 30061,
       "name": "Ancestral Ring of Conquest",
       "slot": "finger",
@@ -1191,6 +1227,24 @@
         }
       ],
       "curationHint": 42.94
+    },
+    {
+      "itemId": 29177,
+      "name": "A'dal's Command",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 41.0,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 33055,
@@ -2193,6 +2247,24 @@
       "curationHint": 110.44
     },
     {
+      "itemId": 30257,
+      "name": "Shattrath Leggings",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 100.83,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 29995,
       "name": "Leggings of Murderous Intent",
       "slot": "legs",
@@ -2458,6 +2530,24 @@
         }
       ],
       "curationHint": 48.95
+    },
+    {
+      "itemId": 29119,
+      "name": "Haramad's Bargain",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 44.75,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28745,

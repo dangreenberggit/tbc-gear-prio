@@ -12,17 +12,17 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1399,
-  "universeTotal": 356,
+  "excludedNoSource": 1396,
+  "universeTotal": 359,
   "listOnlyMembership": 23,
   "perSlot": {
     "back": 28,
     "chest": 28,
-    "feet": 36,
-    "finger": 33,
+    "feet": 37,
+    "finger": 34,
     "hands": 26,
     "head": 25,
-    "legs": 21,
+    "legs": 22,
     "neck": 24,
     "ranged": 3,
     "shoulder": 26,
@@ -33,13 +33,16 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 196,
+    "curated": 3,
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
     "wowhead": 52
   },
   "membershipByOrigin": {
+    "curated": 3,
     "itemHasOrigin:atlasloot": 53,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 317,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 43,
@@ -50,28 +53,29 @@
     "db": 317,
     "atlasloot-only": 13,
     "two-hop": 15,
-    "wowhead-only": 11
+    "wowhead-only": 11,
+    "other": 3
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 356,
+    "total": 359,
     "casterOnlyReject": 119,
     "epFloorReject": 15,
     "combinedReject": 134,
-    "combinedKeep": 222,
-    "casterRejectPct": 33.4,
-    "combinedRejectPct": 37.6,
+    "combinedKeep": 225,
+    "casterRejectPct": 33.1,
+    "combinedRejectPct": 37.3,
     "applied": false
   },
   "wowheadListIds": 123,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 123,
-    "recalled": 102,
-    "missed": 21,
-    "recallPct": 82.9,
+    "recalled": 103,
+    "missed": 20,
+    "recallPct": 83.7,
     "missedItems": [
       {
         "itemId": 18823,
@@ -149,12 +153,6 @@
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
         "d7Eligible": true
       },
       {

@@ -14,17 +14,17 @@
     "Zul'Aman"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1395,
-  "universeTotal": 484,
+  "excludedNoSource": 1392,
+  "universeTotal": 487,
   "listOnlyMembership": 33,
   "perSlot": {
     "back": 35,
     "chest": 46,
-    "feet": 41,
-    "finger": 48,
+    "feet": 42,
+    "finger": 49,
     "hands": 34,
     "head": 38,
-    "legs": 29,
+    "legs": 30,
     "neck": 37,
     "ranged": 4,
     "shoulder": 41,
@@ -35,14 +35,17 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 196,
+    "curated": 3,
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
     "wowhead": 70
   },
   "membershipByOrigin": {
+    "curated": 3,
     "heroicMatch": 11,
     "itemHasOrigin:atlasloot": 69,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 435,
     "itemHasOrigin:sunmote": 3,
     "itemHasOrigin:two-hop": 18,
@@ -53,7 +56,7 @@
   "exclusivePrimaryOrigin": {
     "db": 435,
     "atlasloot-only": 13,
-    "other": 3,
+    "other": 6,
     "two-hop": 18,
     "wowhead-only": 15
   },
@@ -61,12 +64,12 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 484,
+    "total": 487,
     "casterOnlyReject": 167,
-    "epFloorReject": 16,
-    "combinedReject": 183,
-    "combinedKeep": 301,
-    "casterRejectPct": 34.5,
+    "epFloorReject": 17,
+    "combinedReject": 184,
+    "combinedKeep": 303,
+    "casterRejectPct": 34.3,
     "combinedRejectPct": 37.8,
     "applied": false
   },
@@ -74,9 +77,9 @@
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 160,
-    "recalled": 139,
-    "missed": 21,
-    "recallPct": 86.9,
+    "recalled": 140,
+    "missed": 20,
+    "recallPct": 87.5,
     "missedItems": [
       {
         "itemId": 18823,
@@ -154,12 +157,6 @@
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
         "d7Eligible": true
       },
       {

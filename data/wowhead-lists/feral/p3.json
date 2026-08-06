@@ -1,0 +1,881 @@
+{
+  "spec": "feral",
+  "stage": "p3",
+  "sourceUrl": "https://www.wowhead.com/tbc/guide/feral-druid-dps-bt-hyjal-phase-3-best-in-slot-gear-burning-crusade",
+  "collectedDate": "2026-08-06",
+  "collectedBy": "claude-opus-5",
+  "pageAuthor": "NerdEgghead",
+  "pageUpdated": "2026/07/31",
+  "entries": [
+    {
+      "itemId": 8345,
+      "itemName": "Wolfshead Helm",
+      "rankLabel": "BiS",
+      "section": "headline",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 32235,
+      "itemName": "Cursed Vision of Sargeras",
+      "rankLabel": "Option (with 2pT6)",
+      "section": "headline",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Illidan Stormrage (Black Temple)"
+    },
+    {
+      "itemId": 33672,
+      "itemName": "Vengeful Gladiator's Dragonhide Helm",
+      "rankLabel": "Option (with 2pT6)",
+      "section": "headline",
+      "slot": "head",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 3)"
+    },
+    {
+      "itemId": 31048,
+      "itemName": "Thunderheart Pauldrons",
+      "rankLabel": "BiS (with 4pT6)",
+      "section": "headline",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Mother Shahraz (Black Temple)"
+    },
+    {
+      "itemId": 29100,
+      "itemName": "Mantle of Malorne",
+      "rankLabel": "Option (with 2pT4)",
+      "section": "headline",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High King Maulgar (Gruul's Lair)"
+    },
+    {
+      "itemId": 30230,
+      "itemName": "Nordrassil Feral-Mantle",
+      "rankLabel": "Option (with 4pT5)",
+      "section": "headline",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Void Reaver (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 30055,
+      "itemName": "Shoulderpads of the Stranger",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 33674,
+      "itemName": "Vengeful Gladiator's Dragonhide Spaulders",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "shoulder",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 3)"
+    },
+    {
+      "itemId": 32323,
+      "itemName": "Shadowmoon Destroyer's Drape",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Teron Gorefiend (Black Temple)"
+    },
+    {
+      "itemId": 29994,
+      "itemName": "Thalassian Wildercloak",
+      "rankLabel": "BiS when Hit Capped",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 28672,
+      "itemName": "Drape of the Dark Reavers",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Shade of Aran (Karazhan)"
+    },
+    {
+      "itemId": 30098,
+      "itemName": "Razor-Scale Battlecloak",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Morogrim Tidewalker (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 31255,
+      "itemName": "Cloak of the Craft",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: World Drop"
+    },
+    {
+      "itemId": 33122,
+      "itemName": "Cloak of Darkness",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 24259,
+      "itemName": "Vengeance Wrap",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "back",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Tailoring - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 32252,
+      "itemName": "Nether Shadow Tunic",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Supremus (Black Temple)"
+    },
+    {
+      "itemId": 31042,
+      "itemName": "Thunderheart Chestguard",
+      "rankLabel": "BiS with 4pT6 Bonus",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Illidan Stormrage (Black Temple)"
+    },
+    {
+      "itemId": 29096,
+      "itemName": "Breastplate of Malorne",
+      "rankLabel": "Option (with 2pT4)",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Magtheridon (Magtheridon's Lair)"
+    },
+    {
+      "itemId": 30222,
+      "itemName": "Nordrassil Chestplate",
+      "rankLabel": "Option (with 4pT5)",
+      "section": "headline",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 30905,
+      "itemName": "Midnight Chestguard",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Archimonde (Hyjal Summit)"
+    },
+    {
+      "itemId": 33675,
+      "itemName": "Vengeful Gladiator's Dragonhide Tunic",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "chest",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 3)"
+    },
+    {
+      "itemId": 32324,
+      "itemName": "Insidious Bands",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Teron Gorefiend (Black Temple)"
+    },
+    {
+      "itemId": 33881,
+      "itemName": "Vindicator's Dragonhide Bracers",
+      "rankLabel": "BiS when Hit Capped",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Honor Points (Season 3)"
+    },
+    {
+      "itemId": 30863,
+      "itemName": "Deadly Cuffs",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Rage Winterchill (Hyjal Summit)"
+    },
+    {
+      "itemId": 33893,
+      "itemName": "Vindicator's Leather Bracers",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Honor Points (Season 3)"
+    },
+    {
+      "itemId": 29966,
+      "itemName": "Vambraces of Ending",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: High Astromancer Solarian (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 32580,
+      "itemName": "Swiftstrike Bracers",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "wrist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 29947,
+      "itemName": "Gloves of the Searing Grip",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Al'ar (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 31034,
+      "itemName": "Thunderheart Gauntlets",
+      "rankLabel": "BiS with 2pT6 Bonus",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Azgalor (Hyjal Summit)"
+    },
+    {
+      "itemId": 28506,
+      "itemName": "Gloves of Dexterous Manipulation",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Attumen the Huntsman (Karazhan)"
+    },
+    {
+      "itemId": 30223,
+      "itemName": "Nordrassil Handgrips",
+      "rankLabel": "Option (with 4pT5)",
+      "section": "headline",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Leotheras the Blind (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 32347,
+      "itemName": "Grips of Damnation",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Essence of Anger (Black Temple)"
+    },
+    {
+      "itemId": 25685,
+      "itemName": "Fel Leather Gloves",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "hands",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 30106,
+      "itemName": "Belt of One-Hundred Deaths",
+      "rankLabel": "BiS",
+      "section": "headline",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Lady Vashj (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 30040,
+      "itemName": "Belt of Deep Shadow",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 30879,
+      "itemName": "Don Alejandro's Money Belt",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Anetheron (Hyjal Summit)"
+    },
+    {
+      "itemId": 32265,
+      "itemName": "Shadow-walker's Cord",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Shade of Akama (Black Temple)"
+    },
+    {
+      "itemId": 33879,
+      "itemName": "Vindicator's Dragonhide Belt",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Honor Points (Season 3)"
+    },
+    {
+      "itemId": 29247,
+      "itemName": "Girdle of the Deathdealer",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "waist",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Aeonus (Heroic The Black Morass)"
+    },
+    {
+      "itemId": 31044,
+      "itemName": "Thunderheart Leggings",
+      "rankLabel": "BiS",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Illidari Council (Black Temple)"
+    },
+    {
+      "itemId": 28741,
+      "itemName": "Skulker's Greaves",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Netherspite (Karazhan)"
+    },
+    {
+      "itemId": 30898,
+      "itemName": "Shady Dealer's Pantaloons",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Azgalor (Hyjal Summit)"
+    },
+    {
+      "itemId": 29995,
+      "itemName": "Leggings of Murderous Intent",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 30229,
+      "itemName": "Nordrassil Feral-Kilt",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Fathom-Lord Karathress (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 33673,
+      "itemName": "Vengeful Gladiator's Dragonhide Legguards",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "legs",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 3)"
+    },
+    {
+      "itemId": 32366,
+      "itemName": "Shadowmaster's Boots",
+      "rankLabel": "BiS",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Mother Shahraz (Black Temple)"
+    },
+    {
+      "itemId": 28545,
+      "itemName": "Edgewalker Longboots",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Moroes (Karazhan)"
+    },
+    {
+      "itemId": 25686,
+      "itemName": "Fel Leather Boots",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 33880,
+      "itemName": "Vindicator's Dragonhide Boots",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Honor Points (Season 3)"
+    },
+    {
+      "itemId": 30039,
+      "itemName": "Boots of Utter Darkness",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - BoP only"
+    },
+    {
+      "itemId": 30041,
+      "itemName": "Boots of Natural Grace",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "feet",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Leatherworking - BoP only"
+    },
+    {
+      "itemId": 32260,
+      "itemName": "Choker of Endless Nightmares",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Supremus (Black Temple)"
+    },
+    {
+      "itemId": 30017,
+      "itemName": "Telonicus's Pendant of Mayhem",
+      "rankLabel": "BiS in 6% Hit Set",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 32591,
+      "itemName": "Choker of Serrated Blades",
+      "rankLabel": "BiS in 6% Hit Set",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Trash Mobs (Black Temple / Hyjal Summit)"
+    },
+    {
+      "itemId": 24114,
+      "itemName": "Braided Eternium Chain",
+      "rankLabel": "BiS for Raid DPS",
+      "section": "headline",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Profession: Jewelcrafting - can be purchased on the Auction House"
+    },
+    {
+      "itemId": 29381,
+      "itemName": "Choker of Vile Intent",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: G'eras (Badges of Justice)"
+    },
+    {
+      "itemId": 28509,
+      "itemName": "Worgen Claw Necklace",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "neck",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Attumen the Huntsman (Karazhan)"
+    },
+    {
+      "itemId": 32497,
+      "itemName": "Stormrage Signet Ring",
+      "rankLabel": "BiS Individually",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Illidan Stormrage (Black Temple)"
+    },
+    {
+      "itemId": 29301,
+      "itemName": "Band of the Eternal Champion",
+      "rankLabel": "BiS when Hit Capped",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest:  Champion's Covenant (The Scale of the Sands Exalted)"
+    },
+    {
+      "itemId": 30052,
+      "itemName": "Ring of Lethality",
+      "rankLabel": "Option in 9% Hit Set",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Hydross the Unstable (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 32335,
+      "itemName": "Unstoppable Aggressor's Ring",
+      "rankLabel": "Option in 6% Hit Set",
+      "section": "headline",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Gurtogg Bloodboil (Black Temple)"
+    },
+    {
+      "itemId": 30834,
+      "itemName": "Shapeshifter's Signet",
+      "rankLabel": "Option in 6% Hit Set",
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Nakodu (Lower City Exalted)"
+    },
+    {
+      "itemId": 32266,
+      "itemName": "Ring of Deceitful Intent",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Shade of Akama (Black Temple)"
+    },
+    {
+      "itemId": 30061,
+      "itemName": "Ancestral Ring of Conquest",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Lurker Below (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29997,
+      "itemName": "Band of the Ranger-General",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "finger",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Kael'thas Sunstrider (Tempest Keep: The Eye)"
+    },
+    {
+      "itemId": 30627,
+      "itemName": "Tsunami Talisman",
+      "rankLabel": "BiS Overall",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Leotheras the Blind (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 32505,
+      "itemName": "Madness of the Betrayer",
+      "rankLabel": "BiS in 9% Hit Set",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: The Illidari Council (Black Temple)"
+    },
+    {
+      "itemId": 23206,
+      "itemName": "Mark of the Champion",
+      "rankLabel": "BiS in 6% Hit Set (against Undead / Demons)",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest:  The Fall of Kel'Thuzad (Classic - Naxxramas)"
+    },
+    {
+      "itemId": 29383,
+      "itemName": "Bloodlust Brooch",
+      "rankLabel": "BiS in 6% Hit Set (with Wolfshead)",
+      "section": "headline",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: G'eras (Badges of Justice)"
+    },
+    {
+      "itemId": 28830,
+      "itemName": "Dragonspine Trophy",
+      "rankLabel": "Option in 6% Hit Set (without Wolfshead)",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Gruul the Dragonkiller (Gruul's Lair)"
+    },
+    {
+      "itemId": 28121,
+      "itemName": "Icon of Unyielding Courage",
+      "rankLabel": "Option in 9% Hit Set",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Keli'dan the Breaker (Heroic The Blood Furnace)"
+    },
+    {
+      "itemId": 38287,
+      "itemName": "Empty Mug of Direbrew",
+      "rankLabel": "Option in 6% Hit Set (with Wolfshead)",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Coren Direbrew (Brewfest Seasonal Event)"
+    },
+    {
+      "itemId": 19406,
+      "itemName": "Drake Fang Talisman",
+      "rankLabel": "Option in 9% Hit Set",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Ebonroc (Classic - Blackwing Lair)"
+    },
+    {
+      "itemId": 28034,
+      "itemName": "Hourglass of the Unraveller",
+      "rankLabel": "Option in 6% Hit Set",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Temporus (The Black Morass)"
+    },
+    {
+      "itemId": 32658,
+      "itemName": "Badge of Tenacity",
+      "rankLabel": "Option in 6% Hit Set",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Zone Drop:  Depleted Badge (Blade's Edge Mountains) & 50x  Apexis Shard"
+    },
+    {
+      "itemId": 32654,
+      "itemName": "Crystalforged Trinket",
+      "rankLabel": "Option in 6% Hit Set",
+      "section": "alternative",
+      "slot": "trinket",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Jho'nass (Ogri'la Revered)"
+    },
+    {
+      "itemId": 33716,
+      "itemName": "Vengeful Gladiator's Staff",
+      "rankLabel": "BiS",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 3)"
+    },
+    {
+      "itemId": 32014,
+      "itemName": "Merciless Gladiator's Maul",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Arena Points (Season 2)"
+    },
+    {
+      "itemId": 30883,
+      "itemName": "Pillar of Ferocity",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Anetheron (Hyjal Summit)"
+    },
+    {
+      "itemId": 28658,
+      "itemName": "Terestian's Stranglestaff",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Terestian Illhoof (Karazhan)"
+    },
+    {
+      "itemId": 28476,
+      "itemName": "Gladiator's Maul",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: Honor Points (Season 1)"
+    },
+    {
+      "itemId": 30021,
+      "itemName": "Wildfury Greatstaff",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "weapon",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Trash Mobs (Serpentshrine Cavern)"
+    },
+    {
+      "itemId": 29390,
+      "itemName": "Everbloom Idol",
+      "rankLabel": "BiS for Personal DPS",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Vendor: G'eras (Badges of Justice)"
+    },
+    {
+      "itemId": 32387,
+      "itemName": "Idol of the Raven Goddess",
+      "rankLabel": "BiS for Raid DPS",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest:  Vanquish the Raven God (Heroic Sethekk Halls)"
+    },
+    {
+      "itemId": 32257,
+      "itemName": "Idol of the White Stag",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Supremus (Black Temple)"
+    },
+    {
+      "itemId": 28372,
+      "itemName": "Idol of Feral Shadows",
+      "rankLabel": "Option",
+      "section": "headline",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Drop: Zereketh the Unbound (The Arcatraz)"
+    },
+    {
+      "itemId": 28064,
+      "itemName": "Idol of the Wild",
+      "rankLabel": "Option",
+      "section": "alternative",
+      "slot": "ranged",
+      "viaTokenId": null,
+      "viaTokenName": null,
+      "wowheadSourceText": "Quest:  Colossal Menace"
+    }
+  ]
+}

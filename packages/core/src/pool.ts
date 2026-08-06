@@ -30,7 +30,18 @@ export type ItemSource =
   | { kind: "rep"; faction: string; standing: string }
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
-  | { kind: "world" };
+  | { kind: "world" }
+  /**
+   * Origin not recorded by any input. Membership came from the wowsims curated
+   * gear sets, which equip the item on this spec without saying where it comes
+   * from — mostly badge and reputation gear that persists across phases.
+   *
+   * Deliberately carries no fields: `badge` needs a cost and `rep` needs a
+   * faction, and inventing either would be a false provenance claim. Having no
+   * `zone` is what keeps these out of every raid and boss filter (`view.ts`
+   * `matchesZone`), which is the behaviour we actually need from them.
+   */
+  | { kind: "unknown" };
 
 export type ItemSourceKind = ItemSource["kind"];
 

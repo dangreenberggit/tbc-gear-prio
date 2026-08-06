@@ -491,7 +491,9 @@ def source_heroic_dungeons(source: dict) -> set[str]:
 # second row beside the correct one.
 ZONE_SPELLING_FIXES = {
     "maghteridon's lair": "Magtheridon's Lair",
-
+    # The feral guide writes the full instance name where the ret guide writes
+    # the short one; phase_raids.json carries only "Tempest Keep".
+    "tempest keep: the eye": "Tempest Keep",
 }
 
 
@@ -525,10 +527,18 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         if heroic_m:
             out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
         else:
-            src: dict = {"kind": "raid", "zone": canonical_zone(zone)}
-            if boss and boss.lower() != "unknown":
-                src["boss"] = boss
-            out.append(src)
+            # Trash that drops in more than one raid is written as one row with
+            # the zones slashed together ("Black Temple / Hyjal Summit"), which
+            # as a single zone name matches nothing and fails the
+            # phase_raids.json guard. Each side is a real, separate source.
+            for one in zone.split("/"):
+                one = one.strip()
+                if not one:
+                    continue
+                src: dict = {"kind": "raid", "zone": canonical_zone(one)}
+                if boss and boss.lower() != "unknown":
+                    src["boss"] = boss
+                out.append(src)
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
@@ -831,6 +841,25 @@ def assemble(
             if parsed and all(is_list_only_source(s) for s in parsed):
                 wowhead_list_only.add(iid)
 
+    # The curated gear sets are wowsims equipping an item on this spec, which is
+    # a membership claim in its own right and the only one some items have:
+    # Everbloom Idol and Bloodlust Brooch carry no db source, no AtlasLoot row,
+    # and Wowhead prose our parser cannot read. Previously `bis_ids` was used
+    # only to *label* rows that had already got in by another route, so an item
+    # wowsims explicitly equips was dropped and the label never applied.
+    #
+    # `unknown` rather than a guessed badge cost or faction: the origin really
+    # is unrecorded, and carrying no zone is what keeps these out of the raid
+    # and boss filters, which is the behaviour these items need.
+    curated_unsourced: set[int] = set()
+    for iid in sorted(bis_ids):
+        it = db_by_id.get(iid)
+        if it is None or not eligible_d7(it, profile):
+            continue
+        if not source_acc.get(iid):
+            add_source(iid, {"kind": "unknown"}, "curated")
+            curated_unsourced.add(iid)
+
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
     )
@@ -865,7 +894,15 @@ def assemble(
         ) <= max_phase
         in_phase = bool(zones_hit & phase_zones)
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
-        if not in_phase and not in_heroic and not list_only:
+        # No phase guard: these are persistent non-raid items whose own phase is
+        # not the interesting fact about them. Everbloom Idol is phase 1 and
+        # still what a cat wants at phase 2.
+        # Only the ones with no recorded origin at all. A curated item that
+        # *does* have a db source keeps whatever scope rules that source implies
+        # -- several point at five-man dungeons outside PHASE_HEROIC_DUNGEONS,
+        # and admitting those is ticket 17's question, not this one.
+        curated = iid in curated_unsourced
+        if not in_phase and not in_heroic and not list_only and not curated:
             continue
 
         if in_phase:
@@ -875,6 +912,8 @@ def assemble(
         elif list_only:
             list_only_count += 1
             membership_stats["listOnly"] += 1
+        elif curated:
+            membership_stats["curated"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)

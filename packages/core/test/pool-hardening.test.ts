@@ -223,7 +223,13 @@ describe("data/universes/ret-p3.json hardening", () => {
     // <faction>", which it previously dropped on the floor — +29119 Haramad's
     // Bargain, +30834 Shapeshifter's Signet, both rep rewards on the p3 list
     // admitted through the existing list-only path (ticket 28).
-    expect(universeP3.length).toBe(356);
+    // 356 -> 359: the wowsims curated gear sets now grant membership rather
+    // than only labelling rows admitted by another route (ticket 41).
+    // +28176 Sha'tari Wrought Greaves, +29177 A'dal's Command, +30257
+    // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
+    // and so never appears in a raid-filtered view. Haramad's Bargain and
+    // Shapeshifter's Signet were already here via the rep path above.
+    expect(universeP3.length).toBe(359);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the

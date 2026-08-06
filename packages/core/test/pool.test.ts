@@ -255,6 +255,7 @@ describe("item-source-kinds.json", () => {
       heroic: true,
       pvp: true,
       world: true,
+      unknown: true,
     };
     // Read the JSON off disk rather than the generated re-export: that is the
     // file Python opens, and checking the generated copy would only prove the
@@ -290,7 +291,11 @@ describe("data/universes/ret-p2.json", () => {
     // Doom Lord Kazzak drops now resolving through AtlasLoot's WorldBossesBC.
     // 238 -> 230: classAllowlist is enforced, evicting 8 class-specific SSC/TK
     // trinkets a paladin cannot equip (ticket 25).
-    expect(entries.length).toBe(230);
+    // 230 -> 235: the wowsims curated gear sets now grant membership rather
+    // than only labelling rows that got in some other way, admitting the 5
+    // curated ret items with no recorded origin (ticket 41). They carry
+    // `{kind: "unknown"}` and so are filtered out of every raid view.
+    expect(entries.length).toBe(235);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

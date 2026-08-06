@@ -1,8 +1,10 @@
 {
-  "maxPhase": 2,
+  "maxPhase": 3,
   "carryoverPolicy": "union",
   "phaseZones": [
+    "Black Temple",
     "Gruul's Lair",
+    "Hyjal Summit",
     "Karazhan",
     "Magtheridon's Lair",
     "Serpentshrine Cavern",
@@ -10,69 +12,69 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1620,
-  "universeTotal": 247,
-  "listOnlyMembership": 14,
+  "excludedNoSource": 1606,
+  "universeTotal": 374,
+  "listOnlyMembership": 25,
   "perSlot": {
-    "back": 21,
-    "chest": 12,
-    "feet": 19,
-    "finger": 25,
-    "hands": 16,
-    "head": 12,
-    "legs": 11,
-    "neck": 18,
-    "ranged": 4,
-    "shoulder": 10,
-    "trinket": 16,
-    "waist": 16,
-    "weapon": 55,
-    "wrist": 12
+    "back": 29,
+    "chest": 20,
+    "feet": 29,
+    "finger": 34,
+    "hands": 20,
+    "head": 17,
+    "legs": 18,
+    "neck": 24,
+    "ranged": 5,
+    "shoulder": 18,
+    "trinket": 20,
+    "waist": 25,
+    "weapon": 92,
+    "wrist": 23
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
-    "curated": 8,
+    "curated": 7,
     "db": 1807,
     "two-hop": 10,
-    "wowhead": 24
+    "wowhead": 45
   },
   "membershipByOrigin": {
-    "curated": 8,
-    "itemHasOrigin:atlasloot": 39,
-    "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 212,
+    "curated": 7,
+    "itemHasOrigin:atlasloot": 54,
+    "itemHasOrigin:curated": 7,
+    "itemHasOrigin:db": 326,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 22,
-    "listOnly": 14,
-    "zoneMatch": 225
+    "itemHasOrigin:wowhead": 40,
+    "listOnly": 25,
+    "zoneMatch": 342
   },
   "exclusivePrimaryOrigin": {
-    "db": 212,
+    "db": 326,
     "atlasloot-only": 14,
-    "other": 8,
-    "two-hop": 10,
-    "wowhead-only": 3
+    "other": 7,
+    "wowhead-only": 17,
+    "two-hop": 10
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 247,
-    "casterOnlyReject": 114,
+    "total": 374,
+    "casterOnlyReject": 177,
     "epFloorReject": 0,
-    "combinedReject": 114,
-    "combinedKeep": 133,
-    "casterRejectPct": 46.2,
-    "combinedRejectPct": 46.2,
+    "combinedReject": 177,
+    "combinedKeep": 197,
+    "casterRejectPct": 47.3,
+    "combinedRejectPct": 47.3,
     "applied": false
   },
-  "wowheadListIds": 79,
+  "wowheadListIds": 115,
   "wowheadRecall": {
     "heldOut": false,
-    "listTotal": 79,
-    "recalled": 55,
-    "missed": 24,
-    "recallPct": 69.6,
+    "listTotal": 115,
+    "recalled": 89,
+    "missed": 26,
+    "recallPct": 77.4,
     "missedItems": [
       {
         "itemId": 19406,
@@ -159,6 +161,12 @@
         "d7Eligible": true
       },
       {
+        "itemId": 29301,
+        "name": "Band of the Eternal Champion",
+        "slot": "finger",
+        "d7Eligible": true
+      },
+      {
         "itemId": 29359,
         "name": "Feral Staff of Lashing",
         "slot": "weapon",
@@ -209,6 +217,12 @@
       {
         "itemId": 32654,
         "name": "Crystalforged Trinket",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 32658,
+        "name": "Badge of Tenacity",
         "slot": "trinket",
         "d7Eligible": true
       },
