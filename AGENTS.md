@@ -18,6 +18,12 @@ For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-re
 
 Before adding anything to a skill file, ask: does this belong to **this skill’s job and nature**? A skill has a personality (e.g. game-domain SME vs pipeline debugging vs TDD). Do not dump related-but-wrong material into it — put engineering rules in engineering skills/docs, game rules in game skills, and so on. If it does not fit, write it elsewhere or leave it out. See also `writing-great-skills` (relevance) and `dont-be-stupid`.
 
+### Writing for agents
+
+Review with the `writing-for-agents` skill before calling any agent-facing document done: a **plan** (PLAN.md, `.scratch/**` specs and tickets), a **skill** file, `AGENTS.md` / `CLAUDE.md`, or a tracked doc an agent is pointed at. A plan counts because an agent executes it.
+
+Review means a second pass over your finished draft, revising it against the skill — the skill is the rubric, and citing it is not the same as having applied it.
+
 ## Engineering workflow
 
 Full process detail is in [`docs/workflow.md`](docs/workflow.md). This section is the summary every session should internalize before touching code.
