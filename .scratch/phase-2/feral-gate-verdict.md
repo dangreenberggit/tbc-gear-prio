@@ -90,10 +90,17 @@ staff, so those are his genuinely weak slots.
 
 What it found, filed as
 [`carry-forward/issues/41`](../carry-forward/issues/41-ranged-slot-thin-and-worn-item-uncomparable.md):
-the ranged slot offers two items, **the idol he is wearing is not one of them**
-(Everbloom Idol has no source records in the pinned db, so it cannot enter the
-pool), and the best cat idol for the tier drops in a five-man and is excluded by
-raid scoping. A player would notice this immediately.
+the ranged slot offers two items and **the idol he is wearing is not one of
+them**. A player would notice immediately.
+
+The cause first recorded in 41 was wrong, and the correction matters more than
+the finding — see
+[`../handoffs/feral-wowhead-lists-and-nonraid-sources.md`](../handoffs/feral-wowhead-lists-and-nonraid-sources.md).
+Feral has **no Wowhead list**, and those lists are how badge, quest, vendor and
+crafted items reach a pool at all: ret's carry 26 vendor, 29 quest, 18 badge and
+13 arena rows, and name 73 of its universe. Everbloom Idol is a Badge of Justice
+item. Much of what players wear at any phase is not current-tier raid loot, so a
+raid-only pool omits ordinary gear by construction.
 
 **Ret has the identical two-item ranged slot**, so this is a standing pool
 property that feral made visible, not a feral regression. That is why the box is

@@ -5,6 +5,18 @@ Blocks: none
 
 # The ranged slot offers two items, and the worn one is not among them
 
+> **The causal analysis below is wrong. Read
+> [`../../handoffs/feral-wowhead-lists-and-nonraid-sources.md`](../../handoffs/feral-wowhead-lists-and-nonraid-sources.md)
+> first; its §4 says which claims to delete and why.**
+>
+> In short: "no db source records" is a symptom, not the cause — 29 rows in the
+> shipping ret universe have none either. The real cause is that
+> `data/wowhead-lists/feral/` does not exist, so feral's pool gets no badge,
+> quest, vendor or crafted items. The claim that Idol of Feral Shadows is what a
+> cat wants at P2 was asserted without checking and is also wrong.
+>
+> What survives: **a worn item should be comparable in every slot.**
+
 Found by `sme-rank-review` on shredzepelin's feral cat shortlist
 (`.scratch/handoffs/sme-rank-judgment-feral-shredzepelin.md`). It is a **pool**
 problem, not a feral problem — ret has the same shape — so it is filed as

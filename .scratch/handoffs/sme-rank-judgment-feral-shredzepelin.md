@@ -29,10 +29,16 @@ enough to call the whole output untrustworthy.
 Only two idols are offered for the whole phase: Idol of the Avian Heart
 (Moroes, Karazhan) and Idol of the Crescent Goddess (Hydross, SSC).
 
-For a cat at this tier the idol that matters most is **Idol of Feral Shadows**,
-which boosts Rip. It is missing. It drops in **The Arcatraz**, a five-man
-dungeon, and the pool as built is raid-scoped — so the miss is a consequence of
-where loot is being drawn from, not of anything about druids.
+Idols that a cat would actually consider at this tier are missing.
+
+> **Correction, 2026-08-06.** This section originally named **Idol of Feral
+> Shadows** as "the idol that matters most" and blamed five-man scoping. Both
+> were wrong — see
+> [`feral-wowhead-lists-and-nonraid-sources.md`](feral-wowhead-lists-and-nonraid-sources.md)
+> §1 and §4. Feral Shadows is not the best cat idol here, another druid idol is
+> a quest reward, and the real cause is that feral has no Wowhead list, so
+> badge, quest and vendor items never reach its pool at all. The **observation**
+> below stands; the diagnosis did not.
 
 Worse for the player: **the idol he is actually wearing, Everbloom Idol, is not
 in the pool at all.** The engine cannot tell him whether either offered idol is
@@ -96,8 +102,8 @@ What must be true before an unqualified yes:
 ## Notes for engineering
 
 - Everbloom Idol is worn but never compared — the player cannot see if the
-  offered idols beat it. In the pinned item database this item carries **no
-  source records at all**, which is likely why it cannot enter the pool.
+  offered idols beat it. It is a Badge of Justice vendor item, and feral has no
+  Wowhead list, so badge items never reach its pool.
 - Ret's ranged slot has the same two-item shape, so this is a standing pool
   property rather than a feral regression.
 - Idol of Feral Shadows drops in The Arcatraz (a five-man), so a raid-only pool
