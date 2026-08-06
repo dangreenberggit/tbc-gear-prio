@@ -102,14 +102,18 @@ export {
   type WclGearEntry,
 } from "./slots.js";
 export {
+  classifyFeralForm,
   classifySpec,
   talentPointsFromWclTalents,
+  type FeralFormClassification,
+  type FormUptime,
   type SpecClassification,
   type TalentPointsByTree,
 } from "./spec.js";
 export type {
   CharacterRef,
   ContentPhase,
+  DetectedSpecId,
   FightRef,
   Race,
   Region,
