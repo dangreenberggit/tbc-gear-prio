@@ -288,6 +288,65 @@ describe("applyView", () => {
     });
   });
 
+  /**
+   * §10's constraint on the below-cutoff expand is **hidden, never deleted**.
+   * So this is a second projection of `rows` rather than a filter over them:
+   * `rows` stays whole and stays the payload, and `shortlist` is what a
+   * default view displays. A caller that renders `rows` is unaffected.
+   */
+  describe("shortlist (below-cutoff expand)", () => {
+    const r = () =>
+      ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
+        item({ itemId: 2, deltaDps: 20, deltaPct: 1 }),
+        item({ itemId: 3, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
+      ]);
+
+    it("drops below-cutoff rows from the shortlist and keeps them in rows", () => {
+      const view = applyView(r());
+      expect(view.rows.map((x) => x.itemId)).toEqual([1, 2, 3]);
+      expect(view.shortlist.map((x) => x.itemId)).toEqual([1, 2]);
+    });
+
+    it("counts what it hid, so a caller can offer the expand", () => {
+      expect(applyView(r()).belowCutoffCount).toBe(1);
+    });
+
+    it("is measured on belowCutoffInView, not on the ranking's own flag", () => {
+      // The two agree today (§12, and `belowCutoffInView`'s own comment), but
+      // the shortlist is a property of the *view* — reading `belowCutoff`
+      // here would silently stop tracking if ticket 36 ever makes the
+      // in-view cutoff relative to the filtered set.
+      const view = applyView(r());
+      const hidden = view.rows.filter((x) => x.belowCutoffInView);
+      expect(hidden.map((x) => x.itemId)).toEqual([3]);
+      expect(view.shortlist).toHaveLength(
+        view.rows.length - view.belowCutoffCount
+      );
+    });
+
+    it("is empty rather than undefined when every row is below cutoff", () => {
+      const allBelow = ranking([
+        item({ itemId: 9, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
+      ]);
+      const view = applyView(allBelow);
+      expect(view.shortlist).toEqual([]);
+      expect(view.rows).toHaveLength(1);
+      expect(view.belowCutoffCount).toBe(1);
+    });
+
+    it("composes with a filter — the shortlist is of the filtered rows", () => {
+      const mixed = ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5, owned: true }),
+        item({ itemId: 2, deltaDps: 20, deltaPct: 1 }),
+        item({ itemId: 3, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
+      ]);
+      const view = applyView(mixed, { hideOwned: true });
+      expect(view.rows.map((x) => x.itemId)).toEqual([2, 3]);
+      expect(view.shortlist.map((x) => x.itemId)).toEqual([2]);
+    });
+  });
+
   describe("groupBy", () => {
     it("buckets by slot, each bucket still delta-ordered", () => {
       const r = ranking([

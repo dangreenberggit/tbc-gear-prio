@@ -54,7 +54,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -67,6 +67,7 @@ function parseArgs(argv: string[]): {
   offline: boolean;
   maxPhase: ContentPhase;
   assumptions: boolean;
+  showBelowCutoff: boolean;
   raid?: string;
   report?: string;
   view: ViewOptions;
@@ -78,12 +79,14 @@ function parseArgs(argv: string[]): {
     offline: boolean;
     maxPhase: ContentPhase;
     assumptions: boolean;
+    showBelowCutoff: boolean;
     raid?: string;
     report?: string;
     view: ViewOptions;
   } = {
     offline: false,
     assumptions: false,
+    showBelowCutoff: false,
     maxPhase: defaultMaxPhaseFromLock(),
     view: {},
   };
@@ -104,6 +107,10 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--hide-owned") {
       out.view.hideOwned = true;
+      continue;
+    }
+    if (arg === "--show-below-cutoff") {
+      out.showBelowCutoff = true;
       continue;
     }
     const next = argv[i + 1];
@@ -164,6 +171,7 @@ function parseArgs(argv: string[]): {
     offline: out.offline,
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
+    showBelowCutoff: out.showBelowCutoff,
     view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
@@ -291,7 +299,10 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer lands in Phase 2 rather than in the web shell.
     const view = applyView(ranking, args.view);
-    const items = view.rows;
+    // The default run is the shortlist (§10, ticket 04). `view.rows` still
+    // holds every row and the report below still writes them, so this hides
+    // rather than deletes — `--show-below-cutoff` is the expand.
+    const items = args.showBelowCutoff ? view.rows : view.shortlist;
 
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
@@ -329,23 +340,43 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     };
 
     if (view.groups) {
+      // Grouped output takes the same shortlist default, so `--group-by` and
+      // the flat listing agree about what a default run shows. A group whose
+      // rows were all below cutoff prints nothing rather than an empty header.
+      const shown = new Set(items.map((i) => i.itemId));
       for (const group of view.groups) {
-        console.log(`${group.key} (${group.rows.length})`);
-        for (const item of group.rows) printRow(item, "  ");
+        const rows = group.rows.filter((r) => shown.has(r.itemId));
+        if (rows.length === 0) continue;
+        console.log(`${group.key} (${rows.length})`);
+        for (const item of rows) printRow(item, "  ");
       }
     } else {
       for (const item of items) printRow(item, "");
     }
 
+    if (!args.showBelowCutoff && view.belowCutoffCount > 0) {
+      // Hidden, never deleted (§10) — and the user is told where they went,
+      // rather than being left to wonder why the list is short.
+      console.log(
+        `${view.belowCutoffCount} row(s) below cutoff hidden; --show-below-cutoff to list them`
+      );
+    }
+
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
-      // The report shows exactly the rows the terminal showed, so `meta` has
-      // to name every filter that shaped them — reporting only `raid` while
-      // `--boss` or `--hide-owned` had also cut rows is a quietly wrong
-      // artifact, and these files get read long after the command is forgotten.
+      // The report carries every row the *filters* left, so `meta` has to name
+      // every filter that shaped them — reporting only `raid` while `--boss`
+      // or `--hide-owned` had also cut rows is a quietly wrong artifact, and
+      // these files get read long after the command is forgotten.
+      //
+      // `view.rows` rather than the terminal's `items`: `--show-below-cutoff`
+      // is a terminal display choice, and the report already partitions
+      // below-cutoff itself (`partitionShortlist`, the noise note). Handing it
+      // the shortlist would delete from the artifact rows the renderer expects
+      // to hold — the opposite of §10's "hidden, never deleted".
       const viewed = Object.keys(args.view).length > 0;
-      const reportRanking = viewed ? { ...ranking, items } : ranking;
+      const reportRanking = viewed ? { ...ranking, items: view.rows } : ranking;
       mkdirSync(dirname(reportPath), { recursive: true });
       const meta = {
         character: args.character,
