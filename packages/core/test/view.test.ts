@@ -326,6 +326,32 @@ describe("applyView", () => {
   });
 
   describe("tie groups (§10)", () => {
+    it("does not chain a long ladder into one undifferentiated group", () => {
+      // Regression. Found by running the real ret P2 Karazhan ranking, where
+      // reported SE is ~2.18 DPS and adjacent deltas differ by far less: a
+      // walk that extends the group against its running bounds instead of its
+      // leader marked items 20+ DPS apart as tied, collapsing all 100 rows
+      // into one group. Each step here overlaps its neighbour by 1 DPS while
+      // the ends are 30 DPS apart, so a transitive walk yields one group.
+      const r = ranking(
+        Array.from({ length: 16 }, (_, i) =>
+          item({
+            itemId: i + 1,
+            deltaDps: 30 - i * 2,
+            deltaPct: (30 - i * 2) / 20,
+            se: 1.5,
+          })
+        )
+      );
+      const { rows } = applyView(r);
+      const groups = new Set(
+        rows.map((x) => x.tieGroupId).filter((g) => g !== undefined)
+      );
+      expect(groups.size).toBeGreaterThan(1);
+      // The extremes must never share a group: 30 vs 0 DPS is not a tie.
+      expect(rows[0]!.tieGroupId).not.toBe(rows[rows.length - 1]!.tieGroupId);
+    });
+
     it("groups rows whose SE intervals overlap", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 20, deltaPct: 1, se: 2 }),

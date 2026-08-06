@@ -17,12 +17,12 @@ import {
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
-  filterByZone,
   poolFromUniverse,
   zonesInPool,
   type PoolEntry,
   type UniverseEntry,
 } from "./pool.js";
+import { applyView, type ViewOptions } from "./view.js";
 import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
@@ -54,7 +54,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -69,6 +69,7 @@ function parseArgs(argv: string[]): {
   assumptions: boolean;
   raid?: string;
   report?: string;
+  view: ViewOptions;
 } {
   const out: {
     region?: Region;
@@ -79,10 +80,12 @@ function parseArgs(argv: string[]): {
     assumptions: boolean;
     raid?: string;
     report?: string;
+    view: ViewOptions;
   } = {
     offline: false,
     assumptions: false,
     maxPhase: defaultMaxPhaseFromLock(),
+    view: {},
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -93,6 +96,14 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--assumptions") {
       out.assumptions = true;
+      continue;
+    }
+    if (arg === "--pin-bis") {
+      out.view.pinBis = true;
+      continue;
+    }
+    if (arg === "--hide-owned") {
+      out.view.hideOwned = true;
       continue;
     }
     const next = argv[i + 1];
@@ -118,6 +129,18 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--raid" && next) {
       out.raid = next;
+      out.view.raid = next;
+      i++;
+      continue;
+    }
+    if (arg === "--boss" && next) {
+      out.view.boss = next;
+      i++;
+      continue;
+    }
+    if (arg === "--group-by" && next) {
+      if (next !== "rank" && next !== "slot" && next !== "raid") usage();
+      out.view.groupBy = next;
       i++;
       continue;
     }
@@ -141,6 +164,7 @@ function parseArgs(argv: string[]): {
     offline: out.offline,
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
+    view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
   };
@@ -263,9 +287,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         }
       }
     );
-    const items = args.raid
-      ? filterByZone(ranking.items, args.raid)
-      : ranking.items;
+    // Through applyView (§4.1) rather than a second filter implementation —
+    // the CLI exercising every ViewOptions field is the stated reason the view
+    // layer lands in Phase 2 rather than in the web shell.
+    const view = applyView(ranking, args.view);
+    const items = view.rows;
 
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
@@ -278,20 +304,37 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     })) {
       console.log(line);
     }
-    for (const item of items) {
-      const mark = item.belowCutoff ? "  (below cutoff)" : "";
+    if (args.view.pinBis === true && !view.pinBisAvailable) {
+      // Disabled, not silently inert (§4.1): ret's curated sets stop at P2.
+      console.log(
+        `note: --pin-bis has no curated BiS data at maxPhase=${args.maxPhase}; showing the unpinned order`
+      );
+    }
+
+    const printRow = (item: (typeof items)[number], indent: string) => {
+      const mark = item.belowCutoffInView ? "  (below cutoff)" : "";
+      const tie = item.tieGroupId ? "  (tied)" : "";
       const rankLabel = item.rank == null ? "-" : String(item.rank);
       console.log(
-        `#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}`
+        `${indent}#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}${tie}`
       );
       if (item.hitDriven) {
         console.log(
-          "    hit-driven: most of this gain is hit rating, and you are under the cap"
+          `${indent}    hit-driven: most of this gain is hit rating, and you are under the cap`
         );
       }
       if (item.setBonusNote) {
-        console.log(`    set: ${item.setBonusNote}`);
+        console.log(`${indent}    set: ${item.setBonusNote}`);
       }
+    };
+
+    if (view.groups) {
+      for (const group of view.groups) {
+        console.log(`${group.key} (${group.rows.length})`);
+        for (const item of group.rows) printRow(item, "  ");
+      }
+    } else {
+      for (const item of items) printRow(item, "");
     }
 
     if (args.report !== undefined) {

@@ -98,14 +98,19 @@ function tagRichness(item: RankedItem): number {
 }
 
 /**
- * Rows whose SE intervals overlap are one tie group (§10). Walks the
- * delta-ordered list and extends the current group while the next row's upper
- * bound reaches the group's running lower bound — so a group is a genuine chain
- * of overlaps rather than only a pairwise comparison against its neighbour.
+ * Rows whose SE intervals overlap are one tie group (§10).
+ *
+ * Every row is compared against the group's **leader**, not against the
+ * running union of the group's bounds. Chaining on the union is the obvious
+ * implementation and it is wrong at this SE scale: measured on the ret P2
+ * Karazhan ranking, reported SE is ~2.18 DPS while adjacent deltas differ by
+ * far less, so a transitive walk merges the entire hundred-row list into one
+ * group and the tool reads as broken — the precise failure §10 warns about.
+ * Leader-anchored groups stay bounded at 2×SE wide, so a tie means "these
+ * could genuinely be each other's equal", which is the claim being made.
  */
 function assignTieGroups(rows: ViewRow[]): void {
   let groupStart = 0;
-  let groupLow = Number.POSITIVE_INFINITY;
   let groupId = 0;
 
   const flush = (end: number) => {
@@ -116,23 +121,16 @@ function assignTieGroups(rows: ViewRow[]): void {
     }
   };
 
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i]!;
-    const low = row.deltaDps - row.se;
-    const high = row.deltaDps + row.se;
-    if (i === groupStart) {
-      groupLow = low;
-      continue;
-    }
-    if (high >= groupLow) {
-      groupLow = Math.min(groupLow, low);
-    } else {
+  for (let i = 1; i <= rows.length; i += 1) {
+    const leader = rows[groupStart]!;
+    const row = rows[i];
+    const overlapsLeader =
+      row !== undefined && row.deltaDps + row.se >= leader.deltaDps - leader.se;
+    if (!overlapsLeader) {
       flush(i);
       groupStart = i;
-      groupLow = low;
     }
   }
-  flush(rows.length);
 }
 
 /**
