@@ -1086,13 +1086,25 @@ since there is no UI until Phase 3.
 
 ### Where this leaves the Phase 2 gate
 
-**6 of 8 boxes** now recorded, up from 1. The two remaining are both owned by
-`.scratch/phase-2/issues/05-feral.md`, the last slice:
+**6 of 8 boxes** recorded by this sitting, up from 1. The other two are owned by
+`.scratch/phase-2/issues/05-feral.md`, the last slice, which merged into
+`phase-2/trust` at `e841a67` after this entry was written. Ticket 05 is closed
+and carries a verdict for both — **one PASS, one PARTIAL** — in
+[`.scratch/phase-2/feral-gate-verdict.md`](../.scratch/phase-2/feral-gate-verdict.md),
+with the coupling evidence in `.scratch/phase-2/feral-coupling-audit.md`:
 
-| Box | Why it is still open |
+| Box | Verdict |
 |---|---|
-| ≥3 real characters produce believable shortlists | needs feral; three ret characters would be less informative than a cross-spec check |
-| feral shipped without a structural change to `rankUpgrades` or its seams | the falsification test for the seams — deliberately last, so the four trust slices have already applied whatever pressure they were going to apply |
+| feral shipped without a structural change to `rankUpgrades` or its seams | **PASS** |
+| ≥3 real characters produce believable shortlists | **PARTIAL** — `sme-rank-review` returned trust-with-caveats and filed carry-forward 41 |
+
+**Those two boxes are deliberately not written up here.** This sitting was scoped
+to the five closed by `caches` / `disclosure-and-caps` / `apply-view`, and a gate
+box is closed by the slice that owns it recording its own evidence — not by a
+neighbouring entry summarising a verdict file. Until they are written, **the
+Phase 2 gate is not fully recorded**, and §14's "no phase starts until the
+previous gate is written into `docs/verification-log.md`" still binds Phase 3.
+The PARTIAL box in particular is a live decision, not a formality.
 
 ---
 
