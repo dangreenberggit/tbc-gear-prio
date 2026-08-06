@@ -877,6 +877,225 @@ gap is still there for any future use of `curationHint` on weapons.
 
 ---
 
+## 2026-08-06 — Phase 2 gate: the five boxes closed by the merged slices
+
+Five gate boxes were closed by work already merged into `phase-2/trust`
+(`caches`, `disclosure-and-caps`, `apply-view`) but never written into this log.
+This sitting is **transcription of existing evidence**, not new implementation —
+no source file changed, and every claim below is a test that passes at the
+integrated tip.
+
+Reproduce all five at once:
+
+```bash
+pnpm exec vitest run packages/core/test/rank.test.ts packages/core/test/view-gate.test.ts packages/core/test/meta-repair.test.ts packages/core/test/store-contract.test.ts packages/core/test/content-hash.test.ts packages/core/test/view.test.ts
+```
+
+Run on 2026-08-06 at `42db95a`: **6 files, 124 tests, all passing.**
+
+### ☑ Re-run hits cache; deltas stable
+
+Owned by `.scratch/phase-2/issues/01-caches.md`.
+
+**The obvious test does not close this box, and the ticket says so from
+measurement rather than suspicion.** `rank.test.ts`'s "serves the second
+identical call from the store without simming" passed *before* either new cache
+existed and still passes with both reverted: a second identical call returns at
+the Phase 1 ranking cache before gear is read or a sim is spawned, so "zero
+reads, zero runs" is satisfied without any of this ticket's work.
+
+The evidence is therefore the two **hash-miss** cases, where the ranking cache
+misses and execution actually reaches the new caches:
+
+| Test (`rank.test.ts`) | What moves the hash | Assertion | Fails without |
+|---|---|---|---|
+| `fetches gear once across runs whose ranking hash differs` | `maxPhase` 1→2, same resolved fight | `fetches.reads` stays **1** across both runs | `CachingGearSource is not a constructor` |
+| `reuses a cached sim result when only the candidate pool grows` | one candidate added | `sim.runs === afterFirst + 2`, not +4 | `expected 6 to be 4` |
+
+Both were confirmed to fail by stashing `rank.ts` / `gear-source.ts` — a test
+that cannot fail is exactly the trap the "deltas stable" half warns about.
+
+**Where the cache lives matters and the first attempt was wrong.** Building the
+gear cache inside `rankUpgrades` went red on the pre-existing "re-sims when the
+logged gear changes but the character does not" case: a `kv` hit made the
+source's fresh gear unreachable, so the hash matched and last run's numbers were
+served for a re-gemmed set — the staleness ADR-0019 exists to prevent.
+`rankUpgrades` always calls `deps.gear.readGear` and hashes what comes back; the
+cache wraps the WCL adapter (`CachingGearSource`), which is why
+`RecordedGearSource` stays uncached and the offline tests keep their meaning.
+`findFights` is deliberately **not** cached — a fight list grows as a character
+raids, so it is not immutable.
+
+**"Deltas stable" had teeth only after the review.** The pre-merge review found
+the sole deep-equal sat inside the identical-re-run test, i.e. it covered the
+Phase 1 ranking cache and not the new ones — a sim cache returning a mismatched
+observation would have moved every `deltaDps` while the run-count assertions
+still passed. The pool-grows test now deep-equals the cached candidate's
+`RankedItem` across runs; the assertion entered in `8ca148c` (whose subject
+line, "Key the gear cache by character, not by fight alone", describes the other
+change it carried — `git log -S "expect(after).toEqual(before)"` locates it).
+
+`SqliteStore` (`node:sqlite`) and `MemoryStore` pass one shared contract suite —
+25 tests across both halves of the `Store` interface, plus a persistence test
+that reads a blob back through a second connection to the same file.
+
+**Scope limit:** `SqliteStore` has **zero production call sites**; `cli.ts` still
+constructs `MemoryStore`. Deployment is Phase 4. Two defects are known and
+deferred to `.scratch/carry-forward/issues/31-sqlitestore-job-ids-and-kv-created-at.md`
+(`Blocks: phase-4`): `kv` omits §11's `created_at`, and job ids from
+`SELECT COUNT(*)` race two writers and reuse ids after a delete. Neither can
+bite until something deploys it with more than one writer.
+
+### ☑ Inactive-meta baseline auto-repaired and disclosed
+
+Owned by `.scratch/phase-2/issues/02-disclosure-and-caps.md`.
+
+Two altitudes, because the unit tests passing says nothing about whether the
+engine wires one to the other.
+
+**The unit level** — `meta-repair.test.ts`, on slamaltman's real logged gear:
+
+- `leaves an already-active slamaltman layout alone` — his actual layout is
+  `active`, and repair returns `metaAdjusted: false`, `swaps: []`. A repairer
+  that fires on a healthy set would be worse than none.
+- `repairs slamaltman when yellow contribution is stripped` — the lever is real
+  gear: Crystalforge Breastplate (30129) carries `[24027, 24058, 24058]`, and
+  its two orange gems are the entire yellow count. Recolouring them red drives
+  `gemColorCounts(...).yellow` to 0 and the meta to `inactive`; repair returns
+  it to `active`.
+
+**Through `rankUpgrades`** — `rank.test.ts`'s "auto-repairs an inactive meta and
+discloses it as a run substitution", same lever, driving the real engine:
+
+| Assertion | Value |
+|---|---|
+| `ranking.baseline.metaAdjusted` | `true` |
+| substitution present | `field === "gems.meta-repair"` |
+| detail shape | contains `Meta inactive`, matches `/\d+→\d+@item \d+/` |
+| tier | **not** in `assumptions.standing` |
+
+That last row is the one worth keeping: §9 R7's two tiers must not blur, so a
+run substitution appearing among standing assumptions is a failure even though
+the repair itself worked.
+
+### ☑ A meta repair that would break a socket bonus picks the other move (§9, R4)
+
+Same ticket. **Closed by pre-existing work, and the honest thing is to say so:**
+both the pricing rule (`meta-repair.ts:193-197`) and its fixture
+(`meta-repair.test.ts:94`) predate the `disclosure-and-caps` branch, which is
+what the branch's own review independently confirmed.
+
+The rule is that the socket-bonus forfeit is priced **inside** the move's cost,
+not checked afterwards:
+
+```ts
+let cost = gemEp(from, opts.epWeights) - gemEp(candidate.id, opts.epWeights);
+if (matchedBefore && !socketsMatch(slot.itemId, trialGems)) {
+  cost += socketBonusEp(slot.itemId, opts.epWeights);
+}
+```
+
+The fixture is constructed so that the gem-only cost **ties**, which is the only
+way to prove the bonus term is what decides. Under strength-only weights, yellow
+and blue/green gems all score 0, so yellow→green and yellow→blue cost the same
+on gems alone; the chest's +4 str socket bonus is the entire difference. The
+test asserts the repair recolours to a gem that satisfies yellow *and*
+contributes blue — colour 5 (Green) or 8 (Prismatic) — rather than a pure blue
+that would activate the meta just as well while forfeiting the bonus.
+
+Both moves fix the meta. Only one of them is free. The test fails if the
+repairer picks the other.
+
+### ☑ A raid filter on a tier-token slot returns the tier piece (§8.3.2)
+
+Owned by `.scratch/phase-2/issues/03-apply-view.md` (closed). This is §15's
+quiet failure mode: a "Karazhan" filter that silently omits every T4 piece,
+because the tier piece reaches its zone only through `ItemSource`
+`kind: 'token'` — a two-hop resolution the filter must follow.
+
+`view-gate.test.ts`, three tests, all through a real `rankUpgrades` ranking:
+
+| Test | Filter | Rows |
+|---|---|---|
+| returns the token-sourced T4 piece | `raid: "Karazhan"` | `[28530, 29072]` — 29072's `source.kind === "token"` |
+| scopes a boss filter through the token hop too | `+ boss: "The Curator"` | `[29072]` only |
+| does not return the tier piece under a different raid | `raid: "Tempest Keep"` | `[30129]`, no 29072 |
+
+The premise is guarded first (`expect(ranking.items...).toContain(29072)`), so a
+pass cannot come from the item being absent from the ranking entirely. The
+Curator case matters independently: the boss filter has to follow the *token
+source's own boss* and must not sweep in Moroes' neck. The Tempest Keep case
+makes the filter discriminating rather than merely empty — TK has its own token
+piece, which is what comes back.
+
+**Mutation-checked, not merely green:** matching only the `raid` hop instead of
+the `token` hop fails a named test, per ticket 03's outcome.
+
+**Deferred:** `.scratch/carry-forward/issues/37-token-boss-unguarded-and-fixtures-bypass-the-map.md`
+— 45 hand-written `ItemSource` literals across the test suite, none cross-checked
+against the committed universe. They are correctly *typed*, so ticket 34 (tests
+are never typechecked) would not catch them either.
+
+### ☑ Toggling any `ViewOptions` field does not change `contentHash` or trigger a sim
+
+Same ticket. Ticket 30 named the right altitude for this box and it is **not**
+the pure-function level — that is why the box outlived the `content-hash` branch.
+
+`content-hash.test.ts` already proved the hash *function* ignores
+ViewOptions-shaped fields (mutation-checked: `hashPayload` builds its object
+field by field, and the test fails if that becomes a spread). That is half the
+box at the wrong altitude, and it cannot reach "or trigger a sim" at all.
+
+`view-gate.test.ts` drives 14 `ViewOptions` combinations against a ranking
+produced by `rankUpgrades` with a counting `SimRunner` and a counting
+`GearSource`:
+
+| Test | Claim |
+|---|---|
+| `toggling any ViewOptions field changes neither contentHash nor the sim count` | `contentHash` identical across all 14; sim count unchanged |
+| `serves every view change from one ranking, without re-entering the engine` | 14 views rendered, `gear.entries` stays **1** |
+| `keeps the ranking's own rows and deltas intact across every view` | `ranking.items` deep-equal to a `structuredClone` taken before |
+
+**The middle test is the one that closes the box, and the reason is recorded in
+the test itself.** `applyView` is pure and never receives a `SimRunner`, so
+asserting on the sim counter *inside* the view call is trivially true — the
+first test says as much and keeps the assertion only as a tripwire on a future
+`applyView(r, v, deps)`. The claim the box actually makes is about the
+**caller's** loop: one `rankUpgrades`, then N re-renders. A caller that re-ranked
+to serve a view change would satisfy every pure-function test in the file and
+still violate the box — and would *not* be caught by the sim counter either,
+because identical input hits the ranking cache and costs zero sims. Counting
+**gear entries** is what discriminates: a re-ranking caller reads 15.
+
+Each run's `sim.runs > 0` is asserted before the loop, so "count unchanged" is
+never vacuously true against a ranking that never simmed.
+
+**One real bug this branch found by running the CLI rather than the unit tests,**
+worth recording because the unit tests were green throughout: tie grouping
+originally extended each group against its running bounds, so on the actual ret
+P2 Karazhan ranking (reported SE ~2.18 DPS, adjacent deltas much smaller) the
+overlaps chained and all 100 rows collapsed into one tie group — items 20+ DPS
+apart marked as tied, the exact "reads as broken" failure §10 warns about.
+Groups are now leader-anchored and bounded at 2×SE, with a regression test
+(`does not chain a long ladder into one undifferentiated group`).
+
+**Deferred:** `groupBy: 'raid'` keys off the first zone-bearing source, arbitrary
+for a multi-zone item (ticket 35); the below-cutoff expand is modelled as data
+(`belowCutoffInView`, hidden never deleted) rather than as a UI affordance,
+since there is no UI until Phase 3.
+
+### Where this leaves the Phase 2 gate
+
+**6 of 8 boxes** now recorded, up from 1. The two remaining are both owned by
+`.scratch/phase-2/issues/05-feral.md`, the last slice:
+
+| Box | Why it is still open |
+|---|---|
+| ≥3 real characters produce believable shortlists | needs feral; three ret characters would be less informative than a cross-spec check |
+| feral shipped without a structural change to `rankUpgrades` or its seams | the falsification test for the seams — deliberately last, so the four trust slices have already applied whatever pressure they were going to apply |
+
+---
+
 ## 2026-08-05 — Phase 2 gate: the report-events fallback route
 
 Closes:
