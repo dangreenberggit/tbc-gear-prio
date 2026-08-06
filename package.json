@@ -24,7 +24,7 @@
     "proto:generate": "buf generate data/proto --template buf.gen.yaml && python scripts/normalize_proto_gen.py",
     "data:items:generate": "python scripts/generate_item_gem_index.py",
     "experiment:five-seed": "python scripts/five_seed_spread.py",
-    "skeleton:check": "python scripts/check_raid_sim_skeleton.py",
+    "skeleton:check": "python scripts/check_raid_sim_skeleton.py && python scripts/check_raid_sim_skeleton.py --spec feral",
     "universe:assemble": "python scripts/assemble_universe.py",
     "land": "python scripts/land.py",
     "merge-ready": "python scripts/check_merge_ready.py",

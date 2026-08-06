@@ -224,8 +224,20 @@ type BestSwap = {
 
 const DEFAULT_ITERATIONS = 3000;
 const DEFAULT_SEEDS = [42];
-/** Hashed and disclosed from one place, so the two cannot drift apart. */
-const PRESET_ID = "ret/p2.raid-sim-skeleton";
+/**
+ * Hashed and disclosed from one place, so the two cannot drift apart. Now
+ * per-spec, which keeps that property: both call sites read this one function,
+ * so a spec added here reaches the content hash and the assumptions drawer
+ * together or not at all.
+ */
+const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
+  ret: "ret/p2.raid-sim-skeleton",
+  feral: "feral/p2.raid-sim-skeleton",
+};
+
+function presetIdFor(spec: SpecId): string {
+  return PRESET_ID_BY_SPEC[spec];
+}
 
 export async function rankUpgrades(
   input: RankInput,
@@ -329,7 +341,7 @@ export async function rankUpgrades(
     candidates: candidates.map((e) => ({ itemId: e.itemId, slot: e.slot })),
     gemPaletteIds: gems.palette.map((g) => g.id),
     epWeights: deps.epWeights,
-    presetId: PRESET_ID,
+    presetId: presetIdFor(input.spec),
     skeleton: deps.raidSimSkeleton,
     iterations,
     seeds,
@@ -567,7 +579,7 @@ export async function rankUpgrades(
         seeds,
         iterations,
         race,
-        presetId: PRESET_ID,
+        presetId: presetIdFor(input.spec),
         standing: buildStandingAssumptions(race),
       },
       caps,

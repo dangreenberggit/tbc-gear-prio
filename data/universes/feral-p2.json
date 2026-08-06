@@ -20,7 +20,10 @@
           "boss": "Shade of Aran"
         }
       ],
-      "curationHint": 57.08
+      "curationHint": 57.08,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29994,
@@ -37,7 +40,10 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "curationHint": 56.28
+      "curationHint": 56.28,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30098,
@@ -417,7 +423,10 @@
           "boss": "Magtheridon"
         }
       ],
-      "curationHint": 65.18
+      "curationHint": 65.18,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28578,
@@ -553,7 +562,10 @@
           "boss": "Moroes"
         }
       ],
-      "curationHint": 62.3
+      "curationHint": 62.3,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30674,
@@ -816,7 +828,10 @@
           "boss": "Hydross the Unstable"
         }
       ],
-      "curationHint": 64.72
+      "curationHint": 64.72,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29997,
@@ -833,7 +848,10 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "curationHint": 59.52
+      "curationHint": 59.52,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28649,
@@ -1219,7 +1237,10 @@
           "boss": "Al'ar"
         }
       ],
-      "curationHint": 79.74
+      "curationHint": 79.74,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30644,
@@ -1664,7 +1685,10 @@
           "boss": "Kael'thas Sunstrider"
         }
       ],
-      "curationHint": 112.89
+      "curationHint": 112.89,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 30229,
@@ -1699,7 +1723,10 @@
           "boss": "Netherspite"
         }
       ],
-      "curationHint": 88.08
+      "curationHint": 88.08,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29099,
@@ -2210,7 +2237,10 @@
           "boss": "High King Maulgar"
         }
       ],
-      "curationHint": 57.06
+      "curationHint": 57.06,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28755,
@@ -2354,7 +2384,10 @@
           "boss": "Leotheras the Blind"
         }
       ],
-      "curationHint": 39.46
+      "curationHint": 39.46,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28579,
@@ -2623,7 +2656,10 @@
           "boss": "Lady Vashj"
         }
       ],
-      "curationHint": 85.04
+      "curationHint": 85.04,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28828,
@@ -3786,7 +3822,10 @@
           "boss": "High Astromancer Solarian"
         }
       ],
-      "curationHint": 46.04
+      "curationHint": 46.04,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 28514,

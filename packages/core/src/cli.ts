@@ -18,6 +18,12 @@ import {
   reportEventsOfflineRecordings,
   type ReportEventsRawFixture,
 } from "./fixtures/report-events-offline.js";
+import {
+  feralOfflineRecordings,
+  NEXESS_REF,
+  SHREDZEPELIN_REF,
+  type FeralRawFixture,
+} from "./fixtures/feral-offline.js";
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
@@ -31,7 +37,7 @@ import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
-import type { ContentPhase, Region } from "./types.js";
+import type { CharacterRef, ContentPhase, Region, SpecId } from "./types.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -69,6 +75,7 @@ function parseArgs(argv: string[]): {
   realm: string;
   character: string;
   offline: boolean;
+  spec: SpecId;
   maxPhase: ContentPhase;
   assumptions: boolean;
   showBelowCutoff: boolean;
@@ -82,6 +89,7 @@ function parseArgs(argv: string[]): {
     realm?: string;
     character?: string;
     offline: boolean;
+    spec: SpecId;
     maxPhase: ContentPhase;
     assumptions: boolean;
     showBelowCutoff: boolean;
@@ -91,6 +99,7 @@ function parseArgs(argv: string[]): {
     view: ViewOptions;
   } = {
     offline: false,
+    spec: "ret",
     assumptions: false,
     showBelowCutoff: false,
     reportEvents: false,
@@ -140,6 +149,15 @@ function parseArgs(argv: string[]): {
       i++;
       continue;
     }
+    if (arg === "--spec" && next) {
+      if (next !== "ret" && next !== "feral") {
+        console.error(`unknown spec: ${next} (known: ret, feral)`);
+        process.exit(2);
+      }
+      out.spec = next;
+      i++;
+      continue;
+    }
     if (arg === "--max-phase" && next) {
       out.maxPhase = Number(next) as ContentPhase;
       i++;
@@ -180,6 +198,7 @@ function parseArgs(argv: string[]): {
     realm: out.realm,
     character: out.character,
     offline: out.offline,
+    spec: out.spec,
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
     showBelowCutoff: out.showBelowCutoff,
@@ -200,13 +219,13 @@ function defaultReportPath(args: {
   return join(root, ".scratch", "rank-reports", name);
 }
 
-function loadUniversePool(maxPhase: ContentPhase): PoolEntry[] {
-  const rel = `data/universes/ret-p${maxPhase}.json`;
+function loadUniversePool(maxPhase: ContentPhase, spec: SpecId): PoolEntry[] {
+  const rel = `data/universes/${spec}-p${maxPhase}.json`;
   const path = join(root, rel);
   if (!existsSync(path)) {
     console.error(`missing universe file ${rel}`);
     console.error(
-      "generate: python scripts/assemble_universe.py --max-phase N"
+      `generate: python scripts/assemble_universe.py --max-phase ${maxPhase} --spec ${spec}`
     );
     process.exit(2);
     throw new Error("unreachable");
@@ -237,17 +256,21 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       realm: args.realm,
       name: args.character,
     },
-    spec: "ret",
+    spec: args.spec,
     maxPhase: args.maxPhase,
   };
 
+  // Feral's EP preset is named p1 because upstream ships no p2 one for it;
+  // data/presets/feral/p1.ep-weights.json records why.
   const skeleton = loadJson<RaidSimRequest>(
-    "data/presets/ret/p2.raid-sim-skeleton.json"
+    `data/presets/${args.spec}/p2.raid-sim-skeleton.json`
   );
   const epWeights = loadJson<{ weights: Record<string, number> }>(
-    "data/presets/ret/p2.ep-weights.json"
+    args.spec === "feral"
+      ? "data/presets/feral/p1.ep-weights.json"
+      : "data/presets/ret/p2.ep-weights.json"
   ).weights;
-  const pool = loadUniversePool(args.maxPhase);
+  const pool = loadUniversePool(args.maxPhase, args.spec);
 
   if (args.raid) {
     const known = zonesInPool(pool);
@@ -270,6 +293,20 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   // his gear. Slamaltman has ten SSC kills and zero encounterRankings, so the
   // fallback capture is a real resolve rather than a simulated one — see
   // docs/verification-log.md, 2026-08-05.
+  // Feral captures, keyed by character. Each is one kill from one raid night;
+  // `confidence` is measured from form uptime by feralOfflineRecordings rather
+  // than assumed, because cat and bear are the same talents.
+  const FERAL_FIXTURES: ReadonlyArray<readonly [CharacterRef, string]> = [
+    [SHREDZEPELIN_REF, "test/fixtures/shredzepelin.raw.json"],
+    [NEXESS_REF, "test/fixtures/nexess.raw.json"],
+  ];
+  const feralMatch = FERAL_FIXTURES.find(
+    ([ref]) =>
+      args.region === ref.region &&
+      args.realm.toLowerCase() === ref.realm &&
+      args.character.toLowerCase() === ref.name
+  );
+
   const gearData = isSlamaltman
     ? args.reportEvents
       ? reportEventsOfflineRecordings(
@@ -280,7 +317,12 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       : slamaltmanOfflineRecordings(
           loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
         )
-    : { fights: new Map(), gear: new Map() };
+    : feralMatch
+      ? feralOfflineRecordings(
+          loadJson<FeralRawFixture>(feralMatch[1]),
+          feralMatch[0]
+        )
+      : { fights: new Map(), gear: new Map() };
 
   const binary = resolveWowsimcli();
   if (!existsSync(binary)) {

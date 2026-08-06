@@ -207,10 +207,15 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         "feral",
         # Phase 1, because upstream ships no P2 EP preset for feral cat.
         ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
-        # Not yet vendored: sync_wowsims.py TRACKED pulls only ret_*.gear.json,
-        # so feral has no curated-set input and every entry lands untagged
-        # rather than "BiS". Recorded as a known limit rather than faked.
-        gear_sets=[],
+        # Upstream ships sixteen curated cat sets against ret's three, split
+        # BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus.
+        # Only the p2 pair plus pre-raid is vendored, so "BiS" here means
+        # "in an upstream p2 or pre-raid cat set" rather than a single verdict.
+        gear_sets=[
+            ROOT / "vendor/wowsims/feral_preraid.gear.json",
+            ROOT / "vendor/wowsims/feral_p2_6p.gear.json",
+            ROOT / "vendor/wowsims/feral_p2_9p.gear.json",
+        ],
         wowhead_dir=ROOT / "data/wowhead-lists/feral",
         two_hop=ROOT / "data/two-hop/feral-tokens.json",
         # No feral Sunmote map collected yet.
