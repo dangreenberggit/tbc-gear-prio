@@ -34,8 +34,9 @@ export function usesPairedReplication(seeds: readonly number[]): boolean {
 
 /**
  * Every seed must be distinct, and the reason is measured rather than assumed:
- * our shared-seed arm of the §10 experiment repeated **bit-identical** (0.00
- * spread, not R5's 0.06). So replicating one seed five times yields
+ * the shared-seed arm of the §10 five-seed experiment repeated
+ * **bit-identical** — 0.00 spread, recorded in `docs/verification-log.md` and
+ * `docs/five-seed-spread.json`. So replicating one seed five times yields
  * `sd(deltas) = 0` and an SE of zero — a plausible-looking number that is
  * entirely an artifact, and worse than no number at all because it reads as
  * precision. Fail loudly instead of reporting it.

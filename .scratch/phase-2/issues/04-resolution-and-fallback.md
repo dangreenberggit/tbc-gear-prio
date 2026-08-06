@@ -107,6 +107,14 @@ than judged:
   `seeds: [11, 22, 33, 44, 55]` shows `seMethod: 'paired-replicate'` on exactly
   the top 8 rows and `'independent'` below them, and each of those 8 reports
   `se > 0` derived from `sd(deltas) / sqrt(5)`.
+
+  **Deviation, recorded rather than left implicit:** the top 8 is taken from
+  **above-cutoff** rows, not as a positional slice of the whole sorted list.
+  A character whose best upgrade is under the 3.4 DPS cutoff would otherwise
+  spend the entire 5× budget on rows the cutoff hides and the default CLI run
+  no longer prints — the opposite of §10's purpose, which is separating the
+  contested top of the *shortlist*. So when every row is below cutoff, zero
+  rows are replicated. Raised by the adversarial axis (A3).
 - **Five identical seeds fail loudly.** `seeds: [42, 42, 42, 42, 42]` raises
   `RankError` of kind `internal` naming the degenerate input, keeping the
   artifact SE described above off any report. `internal` because the other kinds

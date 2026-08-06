@@ -5,7 +5,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
 import { hitCapBanner, renderDisclosure } from "./disclosure.js";
@@ -370,12 +370,14 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     };
 
     if (view.groups) {
-      // Grouped output takes the same shortlist default, so `--group-by` and
-      // the flat listing agree about what a default run shows. A group whose
-      // rows were all below cutoff prints nothing rather than an empty header.
-      const shown = new Set(items.map((i) => i.itemId));
+      // Grouped output takes the same shortlist default as the flat listing,
+      // read off each row's own `belowCutoffInView` — `applyView` owns that
+      // answer, and reconstructing it here from an id set would be a second
+      // implementation of the cutoff to keep in step.
       for (const group of view.groups) {
-        const rows = group.rows.filter((r) => shown.has(r.itemId));
+        const rows = args.showBelowCutoff
+          ? group.rows
+          : group.rows.filter((r) => !r.belowCutoffInView);
         if (rows.length === 0) continue;
         console.log(`${group.key} (${rows.length})`);
         for (const item of rows) printRow(item, "  ");
@@ -439,5 +441,13 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   return 0;
 }
 
-const code = await main();
-process.exit(code);
+// Only when run as the program. Without this the module cannot be imported —
+// importing it would run a full ranking and then exit the process — which is
+// why the CLI's own output rules had no test.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const code = await main();
+  process.exit(code);
+}

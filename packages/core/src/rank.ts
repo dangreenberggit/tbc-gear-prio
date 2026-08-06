@@ -169,9 +169,6 @@ export type RankedItem = {
 /**
  * Which fight answered this run, and by which route (PLAN.md §4).
  *
- * Named `fight` rather than `source`: that name belongs to `ItemSource`, and
- * two `source` fields on one screen is exactly the confusion to avoid.
- *
  * `route` is the part with teeth. A caller cannot otherwise tell a ranked
  * resolve from the report-events fallback, and the two carry different
  * confidence — the fallback walks a report's fights rather than a ranked
@@ -181,7 +178,8 @@ export type RankedItem = {
 export type ResolvedFight = {
   reportCode: string;
   fightId: number;
-  encounterName: string;
+  /** Absent when the source did not describe this fight — see `killedAt`. */
+  encounterName?: string;
   /**
    * Absent when the capture cannot supply one. Optional rather than `""`,
    * because an empty string is indistinguishable from a real value that
@@ -208,11 +206,7 @@ export type Ranking = {
   items: RankedItem[];
 };
 
-/**
- * The best of a candidate's slot attempts, before it becomes a `RankedItem`.
- * Named rather than repeated inline because `request` made a third copy of the
- * same shape, and three copies is where they start to disagree.
- */
+/** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
 type BestSwap = {
   deltaDps: number;
   stdev: number;
@@ -388,8 +382,7 @@ export async function rankUpgrades(
   }
 
   async function rankAfterJobCreated(): Promise<Ranking> {
-    // Replication is a third of the wall time on a small pool, so it is
-    // counted here rather than left to run past a progress bar that already
+    // Counted here rather than left to run past a progress bar that already
     // said "done". The extra seeds re-sim the top N *and* the baseline; the
     // first seed's runs are cache hits, which is why it is `seeds.length - 1`.
     const replicaSims = usesPairedReplication(seeds)
@@ -597,34 +590,16 @@ export async function rankUpgrades(
   }
 
   /**
-   * PLAN.md §10 Phase 2: replicate the top ~8 across the seeds and report
-   * `SE = sd(deltas) / sqrt(n)`, marked `paired-replicate`.
+   * PLAN.md §10 Phase 2, with the method's rationale in `se.ts`.
    *
-   * Two properties are the whole method, and both are structural here rather
-   * than asserted in a comment:
+   * Three constraints that are easy to break and silent when broken:
    *
-   * 1. **Each seed's baseline and candidate share that seed.** The delta is
-   *    measured within a seed and only then does the spread across seeds mean
-   *    anything. Pairing across seeds would fold baseline wobble into the
-   *    spread and inflate the SE.
-   * 2. **Seeds are distinct**, enforced up front by `assertUsableSeeds` — a
-   *    shared seed repeats bit-identical, so a repeat drives `sd` to a false 0.
-   *
-   * Rows below the top N keep their `independent` SE. That is the cost
-   * argument in §10: 5× sims on 8 items rather than on 180, buying resolution
-   * where the ordering is contested and nowhere else.
-   *
-   * **The replicated mean replaces `deltaDps`.** An SE built from five deltas
-   * describes the *mean* of those five, so leaving the point estimate at the
-   * first seed's draw would attach an error bar to a number it does not
-   * describe — a plausible-looking DPS with a confidence interval centred
-   * somewhere else. The caller re-sorts afterwards, because these are the rows
-   * whose ordering the refinement exists to change.
-   *
-   * **The top N is taken from above-cutoff rows.** A positional slice over the
-   * whole list spends the entire 5× budget on rows the cutoff hides and the
-   * default CLI view does not print, which is the opposite of §10's purpose:
-   * separating the contested top of the *shortlist*.
+   * - Each seed's baseline and candidate must share that seed; pairing across
+   *   seeds folds baseline wobble into the spread.
+   * - `deltaDps` becomes the replicated mean, because that is what this SE
+   *   describes. The caller re-sorts afterwards.
+   * - The top N comes from above-cutoff rows, not a positional slice, so the
+   *   5× budget lands on the shortlist rather than on rows the cutoff hides.
    */
   async function replicateTopItems(
     ranked: RankedItem[],
@@ -750,7 +725,6 @@ export function resolveFight(
       ? summaryToResolved(match)
       : {
           ...requested,
-          encounterName: "",
           // A caller-named fight the summary list does not describe was not
           // reached through a ranking, so calling it `ranked` would overstate
           // what we know about it.
@@ -766,7 +740,7 @@ function summaryToResolved(f: FightSummary): ResolvedFight {
   return {
     reportCode: f.reportCode,
     fightId: f.fightId,
-    encounterName: f.encounterName,
+    ...(f.encounterName ? { encounterName: f.encounterName } : {}),
     ...(f.killedAt ? { killedAt: f.killedAt } : {}),
     route: f.route,
   };
