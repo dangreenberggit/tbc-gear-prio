@@ -12,6 +12,7 @@ import {
   RankError,
   rankUpgrades,
 } from "../src/rank.js";
+import { pairedReplicateSe } from "../src/se.js";
 import {
   CachingGearSource,
   RecordedGearSource,
@@ -1501,5 +1502,274 @@ describe("rankUpgrades", () => {
     expect(ranking.items).toHaveLength(1);
     expect(ranking.items[0]!.owned).toBe(true);
     expect(ranking.items[0]!.deltaDps).toBe(0);
+  });
+});
+
+/**
+ * Paired-replicate SE (PLAN.md §10, Phase 2).
+ *
+ * Driven through `rankUpgrades` rather than only against `pairedReplicateSe`,
+ * because the arithmetic passing says nothing about the two things that make
+ * the method correct here: that each seed's baseline and candidate are simmed
+ * under *that same seed*, and that only the top 8 pay the 5× cost.
+ */
+describe("rankUpgrades paired-replicate SE", () => {
+  const SEEDS = [11, 22, 33, 44, 55];
+
+  /**
+   * DPS as a function of (which item sits in `neck`, seed). Deterministic and
+   * seed-dependent, which is what lets the test assert a *specific* SE: a
+   * runner that ignored the seed would return sd = 0 and pass a weaker
+   * assertion while hiding the pairing bug this exists to catch.
+   */
+  function neckIdOf(req: RaidSimRequest): number {
+    const items = (
+      req.raid as {
+        parties: Array<{
+          players: Array<{
+            equipment: { items: Array<{ id?: number }> };
+          }>;
+        }>;
+      }
+    ).parties[0]?.players[0]?.equipment.items;
+    return items?.[SIM_ORDER.indexOf("neck")]?.id ?? 0;
+  }
+
+  /** Baseline DPS wobbles per seed; each candidate adds its own fixed gain. */
+  const BASELINE_BY_SEED: Record<number, number> = {
+    11: 2000,
+    22: 2010,
+    33: 1990,
+    44: 2020,
+    55: 1980,
+  };
+
+  /** Slamaltman's worn neck in the fixture — the baseline's own item. */
+  const WORN_NECK_ID = 30022;
+
+  /**
+   * Per-seed gain for the item under test, so sd(deltas) is non-zero.
+   *
+   * The mean (36) is deliberately *not* seed 11's draw (40). An earlier
+   * version of this fixture averaged to exactly the first seed's value, which
+   * made `deltaDps: firstSeedDraw` and `deltaDps: mean(deltas)` numerically
+   * identical — the test passed either way and hid a real defect.
+   */
+  const NECK_GAIN_BY_SEED: Record<number, number> = {
+    11: 40,
+    22: 44,
+    33: 26,
+    44: 50,
+    55: 20,
+  };
+
+  class SeedAwareSimRunner implements SimRunner {
+    readonly calls: Array<{ neckId: number; seed: number }> = [];
+
+    async version(): Promise<string> {
+      return "v0.0.101";
+    }
+
+    async run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
+      const neckId = neckIdOf(req);
+      const seed = opts.seed;
+      this.calls.push({ neckId, seed });
+      const base = BASELINE_BY_SEED[seed] ?? 2000;
+      // Every pool candidate must clear the cutoff (3.4 DPS), because
+      // replication is spent on the top of the *shortlist* — a pool of
+      // below-cutoff rows would correctly get no replication at all and the
+      // top-8 boundary would go untested. Descending by id so the ordering is
+      // determinate, with 29381 (the item under test) on top and seed-varying.
+      // The worn neck composes the baseline request and must gain nothing —
+      // it is the reference every delta is measured against.
+      const gain =
+        neckId === 29381
+          ? (NECK_GAIN_BY_SEED[seed] ?? 0)
+          : neckId >= 30017 && neckId <= 30025 && neckId !== WORN_NECK_ID
+            ? 25 - (neckId - 30017)
+            : 0;
+      return {
+        dps: base + gain,
+        stdev: 90,
+        iterationsDone: 3000,
+        simVersion: "v0.0.101",
+      };
+    }
+  }
+
+  /**
+   * Nine neck candidates, so "top 8 only" has a ninth row to exclude.
+   *
+   * None may be slamaltman's worn neck (30022): a candidate sharing the worn
+   * id composes the same request as the baseline, which would make the two
+   * indistinguishable in `sim.calls` and quietly weaken the pairing test below.
+   */
+  function neckPool() {
+    const ids = [29381, 30017, 30018, 30019, 30020, 30021, 30023, 30024, 30025];
+    return ids.map((itemId, i) => ({
+      itemId,
+      name: `neck-${i}`,
+      slot: "neck" as const,
+      phase: 1,
+      source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
+    }));
+  }
+
+  async function rankWithSeeds(seeds: number[], sim: SimRunner) {
+    const logged = slamaltmanLoggedGear();
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds,
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: neckPool(),
+      }
+    );
+  }
+
+  it("marks the top 8 paired-replicate and leaves the rest independent", async () => {
+    const ranking = await rankWithSeeds(SEEDS, new SeedAwareSimRunner());
+
+    expect(ranking.items).toHaveLength(9);
+    const methods = ranking.items.map((i) => i.seMethod);
+    expect(methods.slice(0, 8)).toEqual(Array(8).fill("paired-replicate"));
+    expect(methods[8]).toBe("independent");
+  });
+
+  it("derives the top item's SE from sd(deltas) over the five seeds", async () => {
+    const ranking = await rankWithSeeds(SEEDS, new SeedAwareSimRunner());
+
+    const top = ranking.items.find((i) => i.itemId === 29381)!;
+    expect(top.seMethod).toBe("paired-replicate");
+
+    // The deltas the engine must have measured: candidate minus baseline at
+    // the *same* seed. Pairing across different seeds would fold the baseline
+    // wobble into the spread and give a visibly larger SE.
+    const deltas = SEEDS.map((s) => NECK_GAIN_BY_SEED[s]!);
+    expect(top.se).toBeCloseTo(pairedReplicateSe(deltas), 10);
+    expect(top.se).toBeGreaterThan(0);
+  });
+
+  it("sims each replicated candidate against a baseline sharing its seed", async () => {
+    const sim = new SeedAwareSimRunner();
+    await rankWithSeeds(SEEDS, sim);
+
+    // For every seed a replicated candidate was run under, the *baseline* was
+    // run under that same seed too. This is the property that makes the deltas
+    // paired rather than two independent draws.
+    //
+    // The baseline is identified as the worn neck — not as "anything that is
+    // not the candidate". The nine pool candidates are all `neckId !== 29381`
+    // too, so that weaker test would pass even if the baseline were never
+    // re-simmed at all, as long as some other candidate happened to run.
+    const poolIds = new Set(neckPool().map((e) => e.itemId));
+    const candidateSeeds = new Set(
+      sim.calls.filter((c) => c.neckId === 29381).map((c) => c.seed)
+    );
+    const baselineSeeds = new Set(
+      sim.calls.filter((c) => !poolIds.has(c.neckId)).map((c) => c.seed)
+    );
+    expect([...candidateSeeds].sort((a, b) => a - b)).toEqual(SEEDS);
+    expect(baselineSeeds.size).toBeGreaterThan(0);
+    for (const seed of candidateSeeds) {
+      expect(baselineSeeds.has(seed)).toBe(true);
+    }
+  });
+
+  it("keeps independent SE and one seed's worth of sims for a single seed", async () => {
+    const sim = new SeedAwareSimRunner();
+    const ranking = await rankWithSeeds([42], sim);
+
+    expect(ranking.items.every((i) => i.seMethod === "independent")).toBe(true);
+    expect(new Set(sim.calls.map((c) => c.seed))).toEqual(new Set([42]));
+    const top = ranking.items.find((i) => i.itemId === 29381)!;
+    expect(top.se).toBeCloseTo(90 / Math.sqrt(3000), 10);
+  });
+
+  /**
+   * The point estimate and its error bar must describe the same thing. An SE
+   * built from five deltas describes the *mean* of those five, so leaving
+   * `deltaDps` at the first seed's draw would attach a confidence interval to
+   * a number centred somewhere else.
+   */
+  it("reports the replicated mean as deltaDps, not the first seed's draw", async () => {
+    const ranking = await rankWithSeeds(SEEDS, new SeedAwareSimRunner());
+    const top = ranking.items.find((i) => i.itemId === 29381)!;
+
+    const deltas = SEEDS.map((s) => NECK_GAIN_BY_SEED[s]!);
+    const mean = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+    expect(top.deltaDps).toBeCloseTo(mean, 10);
+    // 40 is seed 11's draw. The fixture is chosen so the two differ.
+    expect(mean).not.toBe(NECK_GAIN_BY_SEED[11]);
+    expect(top.deltaPct).toBeCloseTo((mean / ranking.baseline.dps) * 100, 10);
+  });
+
+  it("orders and ranks on the replicated deltas, not the pre-replication ones", async () => {
+    const ranking = await rankWithSeeds(SEEDS, new SeedAwareSimRunner());
+    const deltas = ranking.items.map((i) => i.deltaDps);
+    expect([...deltas].sort((a, b) => b - a)).toEqual(deltas);
+
+    const above = ranking.items.filter((i) => !i.belowCutoff);
+    expect(above.map((i) => i.rank)).toEqual(above.map((_, idx) => idx + 1));
+  });
+
+  /**
+   * §10 spends replication on the contested top of the *shortlist*. A
+   * positional slice over the whole sorted list would burn the entire 5×
+   * budget on rows the cutoff hides and the default CLI view never prints.
+   */
+  it("does not spend replication on below-cutoff rows", async () => {
+    class FlatRunner extends SeedAwareSimRunner {
+      override async run(
+        req: RaidSimRequest,
+        opts: SimRunOpts
+      ): Promise<SimObservation> {
+        await super.run(req, opts);
+        // Every candidate lands 1 DPS up — under the 3.4 cutoff.
+        const neckId = neckIdOf(req);
+        const base = BASELINE_BY_SEED[opts.seed] ?? 2000;
+        const isCandidate =
+          neckId !== WORN_NECK_ID && neckId > 0 && neckId !== 0;
+        return {
+          dps: base + (isCandidate ? 1 : 0),
+          stdev: 90,
+          iterationsDone: 3000,
+          simVersion: "v0.0.101",
+        };
+      }
+    }
+
+    const ranking = await rankWithSeeds(SEEDS, new FlatRunner());
+    expect(ranking.items.every((i) => i.belowCutoff)).toBe(true);
+    expect(ranking.items.every((i) => i.seMethod === "independent")).toBe(true);
+  });
+
+  it("rejects five identical seeds as internal rather than reporting SE 0", async () => {
+    // The artifact this guards: a shared seed repeats bit-identical, so
+    // sd(deltas) is 0 and the SE reads as precision that was never measured.
+    await expect(
+      rankWithSeeds([42, 42, 42, 42, 42], new SeedAwareSimRunner())
+    ).rejects.toMatchObject({
+      name: "RankError",
+      kind: "internal",
+    } satisfies Partial<RankError>);
+
+    await expect(
+      rankWithSeeds([42, 42, 42, 42, 42], new SeedAwareSimRunner())
+    ).rejects.toThrow(/42/);
   });
 });

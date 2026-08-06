@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: PLAN.md §14 Phase 2, §10, §5.2
 Blocks: none
@@ -22,15 +22,9 @@ view layer sitting on top of it is fixed and tested.
 > refinement, not a fix, and it should not be pulled forward at the expense of
 > the gate items above it.
 
-Today the ranking loop hardcodes `seMethod: "independent"` at the one site that
-builds a `RankedItem`; the union member `'paired-replicate'` exists on the type
-and is never produced. Find both with:
-
-```bash
-grep -n "seMethod" packages/core/src/rank.ts
-```
-
-(Line numbers are deliberately absent — ticket 03 moved them once already.)
+The ranking loop used to hardcode `seMethod: "independent"`, leaving the union
+member `'paired-replicate'` declared and never produced. Both now live in
+`packages/core/src/rank.ts`, with the arithmetic in `packages/core/src/se.ts`.
 
 Why it matters, from §10: reported independent SE is on the ~1.5 DPS scale
 (measured mean 1.678), while the derived cutoff is `{ absDps: 3.4, pct: 0.15 }`.
@@ -54,20 +48,22 @@ switch.
 `FightSummary.route` is declared `"ranked" | "report-events"` in
 `packages/core/src/seams/gear-source.ts`, and `findFights` returns it.
 
-**Two things an earlier draft of this ticket got wrong, both verified 2026-08-05
-— check these before planning against them:**
+Two things an earlier draft of this ticket got wrong, both since built
+(2026-08-05):
 
-- **`Ranking` has no `fight` field**, so nothing carries the route out to a
-  caller today. `RankInput.fight` exists and is a bare `FightRef`
-  (`reportCode` + `fightId`, no route). Surfacing which route answered the run
-  is therefore new work in this ticket, not plumbing that already exists.
-- **No `report-events` fixture exists.** `grep -rl "report-events" test/` returns
-  nothing, and `test/fixtures/` holds only slamaltman. Capturing one is the
-  first step here, not an afterthought — the gate box cannot close without it.
+- **`Ranking` had no `fight` field**, so nothing carried the route out to a
+  caller. Surfacing which route answered was new work here, not plumbing that
+  already existed. Now `Ranking.fight: ResolvedFight` (PLAN.md §4).
+- **No `report-events` fixture existed.** Captured live to
+  `test/fixtures/slamaltman-report-events.raw.json`; the capture command and
+  its cost are in `docs/verification-log.md`, 2026-08-05.
 
-The behaviour to build: a character with no ranked kills resolves through the
-report-events route and returns a `Ranking`, where today `findFights` returning
-no `route: "ranked"` summary reaches `throw new RankError("no-qualifying-fight")`.
+**What "no ranked kills" turned out to mean.** Not a wipe-only report — all 25
+of slamaltman's recent reports contain kills. It is about a ranked *parse*:
+`encounterRankings` returns zero for him on encounters he has ten kills on,
+controlled against a leaderboard character who returns 19. So slamaltman is
+himself the character the gate box asks for. Re-check with
+`python scripts/probe_ranked_route.py --name slamaltman --server-slug dreamscythe --region US`.
 
 ## Below-cutoff expand
 
@@ -75,21 +71,22 @@ The remaining Phase 2 §14 line item not owned elsewhere. `belowCutoff` and
 `rank: null` are computed, and ticket 03 added `belowCutoffInView` plus a
 `(below cutoff)` marker on every CLI row.
 
-**Ticket 03's review (S2) left the affordance itself open, deliberately:** "an
-expand" is a UI control and there is no UI until Phase 3, so the rows are
-currently flagged inline rather than collapsed. Settle the CLI's answer here.
-The §10 constraint that binds either way is **hidden, never deleted** — the rows
-stay in the payload and stay reachable.
+Ticket 03's review (S2) left the affordance itself open, deliberately: "an
+expand" is a UI control and there is no UI until Phase 3. The §10 constraint
+that binds either way is **hidden, never deleted** — the rows stay in the
+payload and stay reachable.
 
-Cheapest shape that satisfies it: print above-cutoff rows by default and put the
-rest behind a flag (`--show-below-cutoff`), so the default output is the
-shortlist and nothing is lost. Pick that or state what you picked instead.
+**Settled as proposed:** above-cutoff rows print by default, the rest sit behind
+`--show-below-cutoff`. `applyView` gained `shortlist` and `belowCutoffCount` as
+a second projection of `rows` rather than a filter over them, so `rows` stays
+the whole payload and an expand is a choice of which array to render.
 
 ## Gate box owned
 
-> ☐ fallback route exercised on a character with no ranked kills
+> ☑ fallback route exercised on a character with no ranked kills
 
-Closing this box starts with capturing the fixture named above.
+Closed 2026-08-05 against the captured fixture; evidence in
+`docs/verification-log.md`. Ticked in PLAN.md §14.
 
 The paired-replicate work has no gate box of its own; it is a §14 line item and
 its evidence is the SE method appearing on the top 8 with a non-zero
@@ -110,6 +107,14 @@ than judged:
   `seeds: [11, 22, 33, 44, 55]` shows `seMethod: 'paired-replicate'` on exactly
   the top 8 rows and `'independent'` below them, and each of those 8 reports
   `se > 0` derived from `sd(deltas) / sqrt(5)`.
+
+  **Deviation, recorded rather than left implicit:** the top 8 is taken from
+  **above-cutoff** rows, not as a positional slice of the whole sorted list.
+  A character whose best upgrade is under the 3.4 DPS cutoff would otherwise
+  spend the entire 5× budget on rows the cutoff hides and the default CLI run
+  no longer prints — the opposite of §10's purpose, which is separating the
+  contested top of the *shortlist*. So when every row is below cutoff, zero
+  rows are replicated. Raised by the adversarial axis (A3).
 - **Five identical seeds fail loudly.** `seeds: [42, 42, 42, 42, 42]` raises
   `RankError` of kind `internal` naming the degenerate input, keeping the
   artifact SE described above off any report. `internal` because the other kinds

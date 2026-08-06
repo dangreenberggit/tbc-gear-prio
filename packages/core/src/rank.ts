@@ -49,7 +49,7 @@ import {
   type PoolEntry,
   type SimSlotName,
 } from "./pool.js";
-import type { GearSource } from "./seams/gear-source.js";
+import type { FightSummary, GearSource } from "./seams/gear-source.js";
 import {
   simCacheKey,
   type RaidSimRequest,
@@ -58,6 +58,13 @@ import {
   type SimRunner,
 } from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
+import {
+  assertUsableSeeds,
+  DegenerateSeedsError,
+  pairedReplicateSe,
+  PAIRED_REPLICATE_TOP_N,
+  usesPairedReplication,
+} from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
@@ -159,15 +166,60 @@ export type RankedItem = {
   belowCutoff: boolean;
 };
 
+/**
+ * Which fight answered this run, and by which route (PLAN.md §4).
+ *
+ * `route` is the part with teeth. A caller cannot otherwise tell a ranked
+ * resolve from the report-events fallback, and the two carry different
+ * confidence — the fallback walks a report's fights rather than a ranked
+ * parse, so it can land on a fight the character performed unusually in.
+ * Surfacing it is what lets a UI say which one it got.
+ */
+export type ResolvedFight = {
+  reportCode: string;
+  fightId: number;
+  /** Absent when the source did not describe this fight — see `killedAt`. */
+  encounterName?: string;
+  /**
+   * Absent when the capture cannot supply one. Optional rather than `""`,
+   * because an empty string is indistinguishable from a real value that
+   * failed to format, and a UI rendering it would print a blank where it
+   * meant "unknown". A raw report carries fight times as offsets from the
+   * report's own start, so deriving a wall clock needs a field
+   * `wcl_probe.py --raw-out` does not persist — inventing one would put a
+   * fabricated date on a fixture whose whole job is being real.
+   */
+  killedAt?: string;
+  route: FightSummary["route"];
+};
+
 export type Ranking = {
   contentHash: string;
   cutoff: Cutoff;
+  /** Which fight answered, and by which route. */
+  fight: ResolvedFight;
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
   substitutions: Substitution[];
   /** Required by §4 — a Ranking you can't audit is not a Ranking. */
   caps: CapState;
   items: RankedItem[];
+};
+
+/** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
+type BestSwap = {
+  deltaDps: number;
+  stdev: number;
+  /**
+   * The winning slot's composed request, kept so paired replication can re-sim
+   * *this* candidate under further seeds without recomposing the swap.
+   * Recomposing is a second construction of the same object, and a chance for
+   * the replicated arm to measure something the ranked delta never came from.
+   */
+  request: RaidSimRequest;
+  slotChoice?: SimSlotName;
+  setBonusNote?: string;
+  hitDriven: boolean;
 };
 
 const DEFAULT_ITERATIONS = 3000;
@@ -182,17 +234,17 @@ export async function rankUpgrades(
 ): Promise<Ranking> {
   onProgress?.({ stage: "resolving" });
   const fights = await deps.gear.findFights(input.character, input.spec);
-  const fight =
-    input.fight ??
-    (fights[0]
-      ? { reportCode: fights[0].reportCode, fightId: fights[0].fightId }
-      : undefined);
-  if (!fight) {
+  const maybeResolved = resolveFight(fights, input.fight);
+  if (!maybeResolved) {
     throw new RankError(
       "no-qualifying-fight",
       `no qualifying fights for ${input.character.name}`
     );
   }
+  // Rebound non-optional: the guard above narrows `maybeResolved`, but that
+  // narrowing does not reach the nested closure that builds the `Ranking`.
+  const resolved: ResolvedFight = maybeResolved;
+  const fight = { reportCode: resolved.reportCode, fightId: resolved.fightId };
 
   onProgress?.({ stage: "reading-gear" });
   // Never a cache read here — ADR-0019 hashes what this returns. The point
@@ -239,6 +291,16 @@ export async function rankUpgrades(
 
   const iterations = input.iterations ?? DEFAULT_ITERATIONS;
   const seeds = input.seeds ?? DEFAULT_SEEDS;
+  // Before the job row and before any sim: a caller's bad seeds are not worth
+  // a stranded `running` row or a wasted baseline run.
+  try {
+    assertUsableSeeds(seeds);
+  } catch (err) {
+    if (err instanceof DegenerateSeedsError) {
+      throw new RankError("internal", err.message);
+    }
+    throw err;
+  }
   const seed = seeds[0] ?? DEFAULT_SEEDS[0]!;
   const runOpts = { seed, iterations };
 
@@ -284,6 +346,14 @@ export async function rankUpgrades(
     return cached;
   }
 
+  /**
+   * Sims completed so far. Shared by the candidate loop and the replication
+   * pass, which are sibling closures — a second counter would let the two
+   * halves of one progress bar disagree.
+   */
+  let simsDone = 0;
+  let totalSimsForProgress = 0;
+
   // Dedupe handle for the job API (PLAN.md §7 payoff 2): the row is keyed by
   // the same hash, so a second caller can attach rather than start a rival run.
   const job = await deps.store.job.create({ contentHash, input });
@@ -312,7 +382,15 @@ export async function rankUpgrades(
   }
 
   async function rankAfterJobCreated(): Promise<Ranking> {
-    const totalSims = 1 + candidates.length;
+    // Counted here rather than left to run past a progress bar that already
+    // said "done". The extra seeds re-sim the top N *and* the baseline; the
+    // first seed's runs are cache hits, which is why it is `seeds.length - 1`.
+    const replicaSims = usesPairedReplication(seeds)
+      ? (seeds.length - 1) *
+        (1 + Math.min(PAIRED_REPLICATE_TOP_N, candidates.length))
+      : 0;
+    const totalSims = 1 + candidates.length + replicaSims;
+    totalSimsForProgress = totalSims;
     onProgress?.({ stage: "simming", done: 0, total: totalSims });
     // Only `deps.sim.run` belongs inside this catch. A store read or write
     // that fails is an `internal` fault, and labelling it `sim-failed` sends
@@ -329,17 +407,23 @@ export async function rankUpgrades(
       }
       await cacheSimResult(deps, request, simVersion, runOpts, observation);
     }
-    onProgress?.({ stage: "simming", done: 1, total: totalSims });
+    simsDone = 1;
+    onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
     const baselineDps = observation.dps;
     const ranked: RankedItem[] = [];
+    /**
+     * The request behind each ranked row's delta, keyed by item id. Paired
+     * replication re-runs exactly these under the remaining seeds; sorting
+     * `ranked` reorders the rows but never this association.
+     */
+    const winningRequests = new Map<number, RaidSimRequest>();
     const simSkips: {
       itemId: number;
       name: string;
       slot: string;
       reason: string;
     }[] = [];
-    let done = 1;
 
     // From the repaired layout, which is what the sim actually ran. Hoisted
     // above the loop because `hitDriven` prices each candidate against it.
@@ -348,13 +432,7 @@ export async function rankUpgrades(
     for (const entry of candidates) {
       const owned = equippedIds.has(entry.itemId);
       const slotNames = simSlotsForPoolSlot(entry.slot);
-      let best: {
-        deltaDps: number;
-        stdev: number;
-        slotChoice?: SimSlotName;
-        setBonusNote?: string;
-        hitDriven: boolean;
-      } | null = null;
+      let best: BestSwap | null = null;
 
       for (let s = 0; s < slotNames.length; s++) {
         const slotName = slotNames[s]!;
@@ -407,15 +485,10 @@ export async function rankUpgrades(
         const deltaDps = candObs.dps - baselineDps;
         const note = setBreakNote(equipment, slotIndex, entry.itemId);
         if (!best || deltaDps > best.deltaDps) {
-          const next: {
-            deltaDps: number;
-            stdev: number;
-            slotChoice?: SimSlotName;
-            setBonusNote?: string;
-            hitDriven: boolean;
-          } = {
+          const next: BestSwap = {
             deltaDps,
             stdev: candObs.stdev,
+            request: candReq,
             hitDriven: isHitDriven(
               statDeltaBetween(equipment, swapped),
               caps.hit,
@@ -430,8 +503,8 @@ export async function rankUpgrades(
         }
       }
 
-      done += 1;
-      onProgress?.({ stage: "simming", done, total: totalSims });
+      simsDone += 1;
+      onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
       if (!best) continue;
 
@@ -458,10 +531,18 @@ export async function rankUpgrades(
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
       if (owned) item.owned = true;
       ranked.push(item);
+      winningRequests.set(entry.itemId, best.request);
     }
 
     onProgress?.({ stage: "ranking" });
+    // Sorted first so replication can pick the contested top of the list, then
+    // sorted again below — replication rewrites the very `deltaDps` this order
+    // is built from, so ranking before it would freeze the ordering the
+    // refinement exists to correct.
     ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+    await replicateTopItems(ranked, winningRequests, baselineDps);
+    ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+
     let rank = 1;
     for (const item of ranked) {
       if (item.belowCutoff) {
@@ -475,6 +556,7 @@ export async function rankUpgrades(
     const ranking: Ranking = {
       contentHash,
       cutoff: CUTOFF,
+      fight: resolved,
       baseline: {
         dps: observation.dps,
         stdev: observation.stdev,
@@ -506,6 +588,162 @@ export async function rankUpgrades(
     });
     return ranking;
   }
+
+  /**
+   * PLAN.md §10 Phase 2, with the method's rationale in `se.ts`.
+   *
+   * Three constraints that are easy to break and silent when broken:
+   *
+   * - Each seed's baseline and candidate must share that seed; pairing across
+   *   seeds folds baseline wobble into the spread.
+   * - `deltaDps` becomes the replicated mean, because that is what this SE
+   *   describes. The caller re-sorts afterwards.
+   * - The top N comes from above-cutoff rows, not a positional slice, so the
+   *   5× budget lands on the shortlist rather than on rows the cutoff hides.
+   */
+  async function replicateTopItems(
+    ranked: RankedItem[],
+    winningRequests: ReadonlyMap<number, RaidSimRequest>,
+    baselineDps: number
+  ): Promise<void> {
+    if (!usesPairedReplication(seeds)) return;
+
+    const top = ranked
+      .filter((item) => !item.belowCutoff)
+      .slice(0, PAIRED_REPLICATE_TOP_N);
+    if (top.length === 0) return;
+    // Baseline once per seed, shared by every replicated candidate under that
+    // seed — the pairing, and also what keeps this 5×(8+1) sims rather than
+    // 5×8 baselines on top.
+    const baselineBySeed = new Map<number, number>();
+    for (const s of seeds) {
+      baselineBySeed.set(s, (await simFor(request, s)).dps);
+      bumpProgress(s);
+    }
+
+    for (const item of top) {
+      const candReq = winningRequests.get(item.itemId);
+      // A ranked row always has a winning request; a missing one would mean
+      // `ranked` and `winningRequests` fell out of step, which is our bug and
+      // not something to paper over with an `independent` SE that reads as a
+      // deliberate choice.
+      if (!candReq) {
+        throw new RankError(
+          "internal",
+          `no recorded request for ranked item ${item.itemId} (${item.name}); ` +
+            `paired replication cannot re-sim it`
+        );
+      }
+      const deltas: number[] = [];
+      for (const s of seeds) {
+        const obs = await simFor(candReq, s);
+        deltas.push(obs.dps - baselineBySeed.get(s)!);
+        bumpProgress(s);
+      }
+      item.se = pairedReplicateSe(deltas);
+      item.seMethod = "paired-replicate";
+      item.deltaDps = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+      item.deltaPct =
+        baselineDps === 0 ? 0 : (item.deltaDps / baselineDps) * 100;
+      // Re-evaluated against the mean rather than left at the first seed's
+      // verdict: a row whose replicated estimate crosses the cutoff must not
+      // keep a `belowCutoff` computed from a number no longer reported.
+      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, CUTOFF);
+    }
+  }
+
+  /**
+   * The first seed's re-runs are cache hits the candidate loop already counted,
+   * so only the additional seeds advance the bar — otherwise `done` overshoots
+   * the `total` computed from `seeds.length - 1`.
+   */
+  function bumpProgress(seedForRun: number): void {
+    if (seedForRun === seeds[0]) return;
+    simsDone += 1;
+    onProgress?.({
+      stage: "simming",
+      done: simsDone,
+      total: totalSimsForProgress,
+    });
+  }
+
+  /** One sim at one seed, through the same cache-then-run path as the loop. */
+  async function simFor(
+    req: RaidSimRequest,
+    seedForRun: number
+  ): Promise<SimObservation> {
+    const opts = { seed: seedForRun, iterations };
+    const cached = await readCachedSim(deps, req, simVersion, opts);
+    if (cached) return cached;
+    let obs: SimObservation;
+    try {
+      obs = await deps.sim.run(req, opts);
+    } catch (err) {
+      throw new RankError(
+        "sim-failed",
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+    await cacheSimResult(deps, req, simVersion, opts, obs);
+    return obs;
+  }
+}
+
+/**
+ * Which fight answers this run (PLAN.md §5.2, §10 fallback route).
+ *
+ * Ranked kills win when there are any: a ranked parse is a fight the character
+ * was measured on, so it is the better sample of how they play. Only when
+ * there is no ranked kill does the run fall through to a `report-events`
+ * summary — gear read by walking a report's fights, which is how a character
+ * who has never ranked gets an answer at all instead of
+ * `RankError('no-qualifying-fight')`.
+ *
+ * That fallback is not hypothetical. `slamaltman` has ten kills on the SSC
+ * encounters and **zero** `encounterRankings` entries, verified 2026-08-05
+ * against the live API; the same query returns 19 ranks for a leaderboard
+ * character, so the empty result is this character rather than a broken query.
+ * Re-check with `.scratch/` probes recorded in docs/verification-log.md.
+ *
+ * An explicit `RankInput.fight` overrides both — a caller naming a fight has
+ * already made this choice — and its route is reported as whatever the summary
+ * list says about that fight, or `report-events` when the list does not
+ * describe it. Exported for direct unit testing: the preference order is the
+ * whole behaviour, and it is invisible from a `Ranking` that only ever holds
+ * the winner.
+ */
+export function resolveFight(
+  fights: readonly FightSummary[],
+  requested?: FightRef
+): ResolvedFight | undefined {
+  if (requested) {
+    const match = fights.find(
+      (f) =>
+        f.reportCode === requested.reportCode && f.fightId === requested.fightId
+    );
+    return match
+      ? summaryToResolved(match)
+      : {
+          ...requested,
+          // A caller-named fight the summary list does not describe was not
+          // reached through a ranking, so calling it `ranked` would overstate
+          // what we know about it.
+          route: "report-events",
+        };
+  }
+  const ranked = fights.find((f) => f.route === "ranked");
+  const chosen = ranked ?? fights[0];
+  return chosen ? summaryToResolved(chosen) : undefined;
+}
+
+function summaryToResolved(f: FightSummary): ResolvedFight {
+  return {
+    reportCode: f.reportCode,
+    fightId: f.fightId,
+    ...(f.encounterName ? { encounterName: f.encounterName } : {}),
+    ...(f.killedAt ? { killedAt: f.killedAt } : {}),
+    route: f.route,
+  };
 }
 
 /** Namespaced so a ranking blob cannot collide with another content-addressed value. */

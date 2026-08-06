@@ -5,7 +5,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
 import { hitCapBanner, renderDisclosure } from "./disclosure.js";
@@ -14,6 +14,10 @@ import {
   SLAMALTMAN_REF,
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
+import {
+  reportEventsOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./fixtures/report-events-offline.js";
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
@@ -54,7 +58,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--report-events] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -67,6 +71,8 @@ function parseArgs(argv: string[]): {
   offline: boolean;
   maxPhase: ContentPhase;
   assumptions: boolean;
+  showBelowCutoff: boolean;
+  reportEvents: boolean;
   raid?: string;
   report?: string;
   view: ViewOptions;
@@ -78,12 +84,16 @@ function parseArgs(argv: string[]): {
     offline: boolean;
     maxPhase: ContentPhase;
     assumptions: boolean;
+    showBelowCutoff: boolean;
+    reportEvents: boolean;
     raid?: string;
     report?: string;
     view: ViewOptions;
   } = {
     offline: false,
     assumptions: false,
+    showBelowCutoff: false,
+    reportEvents: false,
     maxPhase: defaultMaxPhaseFromLock(),
     view: {},
   };
@@ -104,6 +114,14 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--hide-owned") {
       out.view.hideOwned = true;
+      continue;
+    }
+    if (arg === "--show-below-cutoff") {
+      out.showBelowCutoff = true;
+      continue;
+    }
+    if (arg === "--report-events") {
+      out.reportEvents = true;
       continue;
     }
     const next = argv[i + 1];
@@ -164,6 +182,8 @@ function parseArgs(argv: string[]): {
     offline: out.offline,
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
+    showBelowCutoff: out.showBelowCutoff,
+    reportEvents: out.reportEvents,
     view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
@@ -246,10 +266,20 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
     args.character.toLowerCase() === SLAMALTMAN_REF.name;
 
+  // Two recordings of the same character, differing in the route that reached
+  // his gear. Slamaltman has ten SSC kills and zero encounterRankings, so the
+  // fallback capture is a real resolve rather than a simulated one — see
+  // docs/verification-log.md, 2026-08-05.
   const gearData = isSlamaltman
-    ? slamaltmanOfflineRecordings(
-        loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
-      )
+    ? args.reportEvents
+      ? reportEventsOfflineRecordings(
+          loadJson<ReportEventsRawFixture>(
+            "test/fixtures/slamaltman-report-events.raw.json"
+          )
+        )
+      : slamaltmanOfflineRecordings(
+          loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
+        )
     : { fights: new Map(), gear: new Map() };
 
   const binary = resolveWowsimcli();
@@ -290,8 +320,19 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer lands in Phase 2 rather than in the web shell.
+    if (ranking.fight.route === "report-events") {
+      // §5.2: the fallback walks a report's fights rather than a ranked parse,
+      // so it can land on a fight the character performed unusually in. Said
+      // out loud rather than left to look identical to a ranked resolve.
+      console.log(
+        `note: no ranked kill for this character; gear read through the report-events route (${ranking.fight.reportCode} fight ${ranking.fight.fightId})`
+      );
+    }
     const view = applyView(ranking, args.view);
-    const items = view.rows;
+    // The default run is the shortlist (§10, ticket 04). `view.rows` still
+    // holds every row and the report below still writes them, so this hides
+    // rather than deletes — `--show-below-cutoff` is the expand.
+    const items = args.showBelowCutoff ? view.rows : view.shortlist;
 
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
@@ -329,23 +370,45 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     };
 
     if (view.groups) {
+      // Grouped output takes the same shortlist default as the flat listing,
+      // read off each row's own `belowCutoffInView` — `applyView` owns that
+      // answer, and reconstructing it here from an id set would be a second
+      // implementation of the cutoff to keep in step.
       for (const group of view.groups) {
-        console.log(`${group.key} (${group.rows.length})`);
-        for (const item of group.rows) printRow(item, "  ");
+        const rows = args.showBelowCutoff
+          ? group.rows
+          : group.rows.filter((r) => !r.belowCutoffInView);
+        if (rows.length === 0) continue;
+        console.log(`${group.key} (${rows.length})`);
+        for (const item of rows) printRow(item, "  ");
       }
     } else {
       for (const item of items) printRow(item, "");
     }
 
+    if (!args.showBelowCutoff && view.belowCutoffCount > 0) {
+      // Hidden, never deleted (§10) — and the user is told where they went,
+      // rather than being left to wonder why the list is short.
+      console.log(
+        `${view.belowCutoffCount} row(s) below cutoff hidden; --show-below-cutoff to list them`
+      );
+    }
+
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
-      // The report shows exactly the rows the terminal showed, so `meta` has
-      // to name every filter that shaped them — reporting only `raid` while
-      // `--boss` or `--hide-owned` had also cut rows is a quietly wrong
-      // artifact, and these files get read long after the command is forgotten.
+      // The report carries every row the *filters* left, so `meta` has to name
+      // every filter that shaped them — reporting only `raid` while `--boss`
+      // or `--hide-owned` had also cut rows is a quietly wrong artifact, and
+      // these files get read long after the command is forgotten.
+      //
+      // `view.rows` rather than the terminal's `items`: `--show-below-cutoff`
+      // is a terminal display choice, and the report already partitions
+      // below-cutoff itself (`partitionShortlist`, the noise note). Handing it
+      // the shortlist would delete from the artifact rows the renderer expects
+      // to hold — the opposite of §10's "hidden, never deleted".
       const viewed = Object.keys(args.view).length > 0;
-      const reportRanking = viewed ? { ...ranking, items } : ranking;
+      const reportRanking = viewed ? { ...ranking, items: view.rows } : ranking;
       mkdirSync(dirname(reportPath), { recursive: true });
       const meta = {
         character: args.character,
@@ -378,5 +441,13 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   return 0;
 }
 
-const code = await main();
-process.exit(code);
+// Only when run as the program. Without this the module cannot be imported —
+// importing it would run a full ranking and then exit the process — which is
+// why the CLI's own output rules had no test.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const code = await main();
+  process.exit(code);
+}

@@ -1,6 +1,13 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
 export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
 export {
+  DegenerateSeedsError,
+  PAIRED_REPLICATE_TOP_N,
+  assertUsableSeeds,
+  pairedReplicateSe,
+  usesPairedReplication,
+} from "./se.js";
+export {
   applyView,
   type ViewOptions,
   type ViewResult,
@@ -9,13 +16,20 @@ export {
 export {
   RankError,
   rankUpgrades,
+  resolveFight,
   type Deps,
   type Progress,
   type RankErrorKind,
   type RankInput,
   type RankedItem,
   type Ranking,
+  type ResolvedFight,
 } from "./rank.js";
+export {
+  REPORT_EVENTS_REF,
+  reportEventsOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./fixtures/report-events-offline.js";
 export {
   capStateFrom,
   isHitDriven,

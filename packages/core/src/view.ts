@@ -58,6 +58,20 @@ export type ViewRow = RankedItem & {
 export type ViewResult = {
   rows: ViewRow[];
   /**
+   * `rows` without the ones the cutoff hides — the default display, and the
+   * below-cutoff expand's "collapsed" half (§10, ticket 04).
+   *
+   * A second projection rather than a filter over `rows`, because §10's
+   * constraint is **hidden, never deleted**: `rows` stays whole and stays the
+   * payload, so an expand is a choice of which array to render and never a
+   * re-run. Measured on `belowCutoffInView` — the view's own answer — so it
+   * keeps tracking if carry-forward ticket 36 ever makes that cutoff relative
+   * to the filtered set.
+   */
+  shortlist: ViewRow[];
+  /** How many rows the shortlist hides, so a caller can label the expand. */
+  belowCutoffCount: number;
+  /**
    * Whether a `pinBis` toggle has anything to act on. The Phase 3 gate box
    * "the pin control is hidden, not inert, where no curated set exists" needs
    * this answerable here — ret's curated sets stop at P2, so above
@@ -200,7 +214,13 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   assignTieGroups(rows);
 
   const pinBisAvailable = r.items.some((i) => i.bisTags.includes("BiS"));
-  const result: ViewResult = { rows, pinBisAvailable };
+  const shortlist = rows.filter((row) => !row.belowCutoffInView);
+  const result: ViewResult = {
+    rows,
+    shortlist,
+    belowCutoffCount: rows.length - shortlist.length,
+    pinBisAvailable,
+  };
 
   if (v.groupBy === "slot" || v.groupBy === "raid") {
     const keyOf = v.groupBy === "slot" ? (i: ViewRow) => i.slot : zoneKeyOf;

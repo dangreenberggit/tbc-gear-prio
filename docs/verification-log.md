@@ -874,3 +874,119 @@ magnitude test, so it does not depend on `ep_score` at all.
 
 Filed as ticket 27 (`ep_score` blind to weapon damage) — the underlying scoring
 gap is still there for any future use of `curationHint` on weapons.
+
+---
+
+## 2026-08-05 — Phase 2 gate: the report-events fallback route
+
+Closes:
+
+> ☑ fallback route exercised on a character with no ranked kills
+
+Owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`.
+
+### "No ranked kills" is about a ranked parse, not about whether the boss died
+
+The ticket asked for a character with no ranked kills, and the obvious reading —
+find a wipe-only report — is the wrong one. All three parts below are one
+committed script, so this is re-runnable from a fresh worktree:
+
+```bash
+python scripts/probe_ranked_route.py --name slamaltman --server-slug dreamscythe --region US
+```
+
+**Part 1, kills.** Every one of slamaltman's 25 most recent reports contains
+kills — 25/25 had at least one, and the SSC / TK reports run 10 kills out of 11
+boss fights. There was no wipe-only report to capture. (Skip this part with
+`--skip-kills`; it is the expensive one, one query per report.)
+
+**Part 2, ranks.** The distinction that matters is `encounterRankings`, which is
+what the `ranked` route resolves through. Slamaltman returns
+`totalKills=None, ranks=0` on encounters 623 (Hydross), 624 (The Lurker Below)
+and 625 (Leotheras) — encounters he has ten kills on. The encounter IDs were
+confirmed against `worldData.zones` (zone 1010, SSC / TK) before being trusted,
+because a wrong id returns the same empty result as an unranked character.
+
+**Part 3, control** — because zero ranks only means "no ranked kills" if the
+query is capable of returning a non-zero. Hydross has 100 ranked characters; the
+top of that leaderboard (Seonsu @ Herod) returns `totalKills=19, ranks=19` from
+the *same* query shape. The query works; slamaltman is genuinely unranked.
+
+Verdict line from the run on 2026-08-05:
+
+```
+  slamaltman has NO ranked kills -- the 'report-events' fallback
+  is the only route that reaches this character's gear.
+```
+
+So slamaltman is himself the character the gate box asks for, and the fixture is
+a real capture rather than a contrived one.
+
+### The capture
+
+```bash
+python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US \
+  --report-code VGjFb3mtX9xHgyav \
+  --raw-out test/fixtures/slamaltman-report-events.raw.json
+```
+
+~12.62 points against the 3,600/hour budget. Written: 25 combatants, 19 gear
+entries for slamaltman, plus the buffs table — committed.
+
+The captured fight is Hydross the Unstable with `kill: true`. That is not a
+contradiction and the test asserts it on purpose: the route is `report-events`
+because the character has no ranked *parse*, not because the boss lived.
+
+**The first capture was wrong, and the way it was wrong is the lesson.** It came
+from report `mKTA9V7Lx4Ck2DXf` (Magtheridon), which is slamaltman's one
+**protection** night among his recent reports — talents 0/44/17, 17,192 armour,
+a shield in the off-hand. Nothing objected, because the fixture builder
+hardcoded ret's `[5, 11, 45]` on the false claim that `--raw-out` does not
+persist tree points. It does. Every downstream number was ret EP weights and
+the ret P2 preset applied to a tank set, and the only visible symptom was a
+baseline of 758.98 DPS against the ranked fixture's 2003.26 — which reads as a
+plausible "different report, different gear" until you resolve the items.
+
+Caught by the domain axis of the pre-merge review, not by any test. The builder
+now reads `talents` from the capture and throws when it cannot, and
+`packages/core/test/report-events-fallback.test.ts` asserts the build is ret
+(retribution plurality, empty off-hand). Re-captured from a ret fight, the
+fallback baseline is **2003.26** — identical to the ranked fixture, which is the
+right answer for the same character's same gear.
+
+**The fixture was fixed; the engine gap was not.** Nothing on the resolution
+path calls `classifySpec`, so any character who tanks or off-specs on some
+nights can still resolve to a fight they played in another spec and be simmed
+against the wrong preset and EP weights. That is
+`.scratch/carry-forward/issues/40-fight-resolution-is-not-spec-aware.md`, and it
+carries an open product decision: preferring a spec-matching fight is
+uncontroversial, but the fallback when none exists ("assume their last fight is
+their spec") only produces a right answer once the tool can sim that other spec,
+which needs more than the one shipped spec.
+
+Check which report a fresh worktree's fixture actually holds, and that it is
+ret, without spending points:
+
+```bash
+python -c "import json; d=json.load(open('test/fixtures/slamaltman-report-events.raw.json')); a={x['id']:x['name'] for x in d['actors']}; e=[v for v in d['combatant_info_events'] if a.get(v['sourceID'],'').lower()=='slamaltman'][0]; print(d['report_code'], d['fight']['name'], [t['id'] for t in e['talents']], 'offhand=', e['gear'][16]['id'])"
+```
+
+Expected: `VGjFb3mtX9xHgyav Hydross the Unstable [5, 11, 45] offhand= 0`.
+
+### The behaviour
+
+`Ranking` had no `fight` field, so nothing carried the route out to a caller.
+Added `Ranking.fight: ResolvedFight` (reportCode, fightId, encounterName,
+killedAt, route) per PLAN.md §4, and `resolveFight` now prefers a ranked
+summary and falls through to report-events rather than depending on list order.
+
+```bash
+pnpm vitest run packages/core/test/report-events-fallback.test.ts
+```
+
+11 passing: the fixture loads to 17 sim slots from 19 WCL entries, `rankUpgrades`
+returns a `Ranking` for a character who previously reached
+`RankError('no-qualifying-fight')`, `ranking.fight.route` reads `report-events`,
+and the throw still happens when neither route has a fight.
+
+`pnpm verify` green on the branch.
