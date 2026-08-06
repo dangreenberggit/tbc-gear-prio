@@ -22,27 +22,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
-EP_WEIGHTS = ROOT / "data/presets/ret/p2.ep-weights.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 
-# Pinned wowsims ret gear-set presets (vendor/wowsims/ret_*.gear.json — see
-# packages/core/test/pool-hardening.test.ts's wowsimsCuratedItemIds for the
-# same file list). Upstream tbc-new only ships one curated set per stage for
-# retribution (no BiS/Alt/Realistic split like some other specs), so any item
-# id that appears in one of these files is tagged "BiS".
-WOWSIMS_GEAR_SETS = [
-    ROOT / "vendor/wowsims/ret_preraid.gear.json",
-    ROOT / "vendor/wowsims/ret_p1.gear.json",
-    ROOT / "vendor/wowsims/ret_p2.gear.json",
-]
-TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
-# Kept out of TWO_HOP because that file is the ret *tier set* map and
-# pool-hardening.test.ts pins it against wowsims db setIds; Sunmote upgrades
-# are raid drops exchanged at a vendor, not set pieces.
-SUNMOTE_UPGRADES = ROOT / "data/two-hop/ret-sunmote-upgrades.json"
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
-WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
@@ -88,12 +71,14 @@ ITEM_TYPE_SLOT = {
     14: "ranged",
 }
 
+ARMOR_CLOTH = 1
 ARMOR_LEATHER = 2
 ARMOR_MAIL = 3
 ARMOR_PLATE = 4
 WEAPON_POLEARM = 6
 WEAPON_STAFF = 8
 HAND_TYPE_TWO_HAND = 4
+RANGED_IDOL = 6
 RANGED_LIBRAM = 7
 MIN_QUALITY = 3
 
@@ -124,6 +109,107 @@ RET_TIER_PIECE_IDS = frozenset(
     }
 )
 
+# common.proto Class enum. These are wowsims ids and are NOT WCL's class ids:
+# WCL numbers Druid 2 and Warrior 11, which is the reverse reading of the same
+# two numbers. Anything crossing between the two needs an explicit map.
+CLASS_PALADIN = 2
+CLASS_DRUID = 11
+
+
+class SpecProfile:
+    """Everything assemble_universe needs that differs per spec.
+
+    Split deliberately into *paths* (which files to read) and *equip rules*
+    (what the class can wear). The paths were always per-spec; the equip rules
+    were hidden inside a function named for ret, and they are the part that is
+    genuinely different rather than merely relocated — a druid is not a paladin
+    with different filenames. See .scratch/phase-2/feral-coupling-audit.md.
+    """
+
+    def __init__(
+        self,
+        spec: str,
+        *,
+        ep_weights: Path,
+        gear_sets: list[Path],
+        wowhead_dir: Path,
+        two_hop: Path | None,
+        sunmote_upgrades: Path | None,
+        tier_piece_ids: frozenset[int],
+        class_id: int,
+        armor_types: frozenset[int],
+        ranged_type: int,
+        allow_one_hand: bool,
+        excluded_weapon_types: frozenset[int],
+    ):
+        self.spec = spec
+        self.ep_weights = ep_weights
+        self.gear_sets = gear_sets
+        self.wowhead_dir = wowhead_dir
+        self.two_hop = two_hop
+        self.sunmote_upgrades = sunmote_upgrades
+        self.tier_piece_ids = tier_piece_ids
+        self.class_id = class_id
+        self.armor_types = armor_types
+        self.ranged_type = ranged_type
+        self.allow_one_hand = allow_one_hand
+        self.excluded_weapon_types = excluded_weapon_types
+
+
+SPEC_PROFILES: dict[str, SpecProfile] = {
+    "ret": SpecProfile(
+        "ret",
+        ep_weights=ROOT / "data/presets/ret/p2.ep-weights.json",
+        # Upstream tbc-new ships one curated set per stage for retribution --
+        # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
+        # Feral cat does have that split; see its own entry below.
+        gear_sets=[
+            ROOT / "vendor/wowsims/ret_preraid.gear.json",
+            ROOT / "vendor/wowsims/ret_p1.gear.json",
+            ROOT / "vendor/wowsims/ret_p2.gear.json",
+        ],
+        wowhead_dir=ROOT / "data/wowhead-lists/ret",
+        two_hop=ROOT / "data/two-hop/ret-tokens.json",
+        # Kept out of two_hop because that file is the tier *set* map and
+        # pool-hardening.test.ts pins it against wowsims db setIds; Sunmote
+        # upgrades are raid drops exchanged at a vendor, not set pieces.
+        sunmote_upgrades=ROOT / "data/two-hop/ret-sunmote-upgrades.json",
+        tier_piece_ids=RET_TIER_PIECE_IDS,
+        class_id=CLASS_PALADIN,
+        armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
+        ranged_type=RANGED_LIBRAM,
+        allow_one_hand=False,
+        # Paladins wield polearms but not staves. wowsims
+        # ui/core/player_classes/paladin.ts lists Polearm with
+        # canUseTwoHand: true and omits Staff entirely.
+        excluded_weapon_types=frozenset({WEAPON_STAFF}),
+    ),
+    "feral": SpecProfile(
+        "feral",
+        # Phase 1, because upstream ships no P2 EP preset for feral cat.
+        ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
+        # Not yet vendored: sync_wowsims.py TRACKED pulls only ret_*.gear.json,
+        # so feral has no curated-set input and every entry lands untagged
+        # rather than "BiS". Recorded as a known limit rather than faked.
+        gear_sets=[],
+        wowhead_dir=ROOT / "data/wowhead-lists/feral",
+        two_hop=ROOT / "data/two-hop/feral-tokens.json",
+        # No feral Sunmote map collected yet.
+        sunmote_upgrades=None,
+        tier_piece_ids=frozenset(),
+        class_id=CLASS_DRUID,
+        # Druid is Leather + Cloth, per wowsims
+        # ui/core/player_classes/druid.ts. Not a subset of ret's set either
+        # way: druids take cloth, and never mail or plate.
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
+        ranged_type=RANGED_IDOL,
+        # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
+        # one-handers are eligible and staves are the signature weapon.
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(),
+    ),
+}
+
 # Wowhead list files included when assembling up to maxPhase N.
 WOWHEAD_STAGE_FOR_MAX_PHASE: dict[int, list[str]] = {
     2: ["p1-p2"],
@@ -152,8 +238,6 @@ REP_RE = re.compile(
 # attributed that weight to ret's spell-power coefficients on Seal/Judgement of
 # Blood and Crusader Strike — plausible, but untested here; the EP weight alone
 # is sufficient reason.)
-# common.proto Class enum: ClassPaladin = 2.
-CLASS_PALADIN = 2
 # Shared with the ItemSource union in packages/core/src/pool.ts, which imports
 # the same file. A kind this script emits but that module cannot parse is a
 # build failure, not a runtime surprise — so the list is loaded rather than
@@ -181,10 +265,14 @@ def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def wowsims_curated_item_ids() -> set[int]:
-    """Union of item ids across the pinned ret gear-set presets (§bisTags)."""
+def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
+    """Union of item ids across the pinned gear-set presets (§bisTags).
+
+    Empty for a spec with no vendored gear sets, which makes every entry
+    untagged rather than falsely "BiS".
+    """
     ids: set[int] = set()
-    for path in WOWSIMS_GEAR_SETS:
+    for path in profile.gear_sets:
         if not path.is_file():
             continue
         doc = load_json(path)
@@ -195,16 +283,26 @@ def wowsims_curated_item_ids() -> set[int]:
     return ids
 
 
-def ret_eligible_d7(it: dict) -> bool:
-    """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable()."""
+ARMOR_SLOTS = frozenset(
+    {"head", "shoulder", "chest", "wrist", "hands", "waist", "legs", "feet"}
+)
+
+
+def eligible_d7(it: dict, profile: SpecProfile) -> bool:
+    """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable().
+
+    Previously `ret_eligible_d7`, whose name was honest: four of these rules
+    are class-specific, so they now come from `profile` rather than from
+    module constants.
+    """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
     # A non-empty classAllowlist is a hard equip restriction, so an item that
-    # omits Paladin cannot be worn by this character at all. db.json carries
+    # omits this class cannot be worn by this character at all. db.json carries
     # the field on 2006 items and nothing read it, which let 8 class-specific
     # SSC/TK trinkets into both shipping universes.
     allowlist = it.get("classAllowlist")
-    if allowlist and CLASS_PALADIN not in allowlist:
+    if allowlist and profile.class_id not in allowlist:
         return False
     t = it.get("type")
     if t is None:
@@ -214,28 +312,19 @@ def ret_eligible_d7(it: dict) -> bool:
         return False
     if (it.get("quality") or 0) < MIN_QUALITY:
         return False
-    if slot in {
-        "head",
-        "shoulder",
-        "chest",
-        "wrist",
-        "hands",
-        "waist",
-        "legs",
-        "feet",
-    }:
-        return it.get("armorType") in (ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE)
+    if slot in ARMOR_SLOTS:
+        return it.get("armorType") in profile.armor_types
     if slot == "weapon":
-        if it.get("handType") != HAND_TYPE_TWO_HAND:
+        if (
+            not profile.allow_one_hand
+            and it.get("handType") != HAND_TYPE_TWO_HAND
+        ):
             return False
-        # Paladins can wield polearms but not staves — the two are not
-        # interchangeable here. wowsims ui/core/player_classes/paladin.ts lists
-        # Polearm with canUseTwoHand: true and omits Staff entirely.
-        if it.get("weaponType") == WEAPON_STAFF:
+        if it.get("weaponType") in profile.excluded_weapon_types:
             return False
         return True
     if slot == "ranged":
-        return it.get("rangedWeaponType") == RANGED_LIBRAM
+        return it.get("rangedWeaponType") == profile.ranged_type
     return True
 
 
@@ -460,11 +549,13 @@ def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
     return zones
 
 
-def wowhead_lists_for_phase(max_phase: int) -> list[tuple[str, dict]]:
+def wowhead_lists_for_phase(
+    max_phase: int, profile: SpecProfile
+) -> list[tuple[str, dict]]:
     stages = WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, [])
     out: list[tuple[str, dict]] = []
     for stage in stages:
-        path = WOWHEAD_DIR / f"{stage}.json"
+        path = profile.wowhead_dir / f"{stage}.json"
         if path.is_file():
             data = load_json(path)
             assert isinstance(data, dict)
@@ -545,9 +636,11 @@ def assemble(
     max_phase: int,
     hold_out_wowhead: bool = False,
     apply_junk_filter: bool = False,
+    spec: str = "ret",
 ) -> tuple[dict, dict]:
+    profile = SPEC_PROFILES[spec]
     if not DB.is_file():
-        print(f"missing {DB} — run pnpm sync:wowsims", file=sys.stderr)
+        print(f"missing {DB} — run pnpm sync:wowsims:restore", file=sys.stderr)
         sys.exit(2)
 
     db = load_json(DB)
@@ -555,8 +648,16 @@ def assemble(
     phase_raids = load_json(PHASE_RAIDS)
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
-    two_hop = load_json(TWO_HOP) if TWO_HOP.is_file() else {}
-    sunmote = load_json(SUNMOTE_UPGRADES) if SUNMOTE_UPGRADES.is_file() else {}
+    two_hop = (
+        load_json(profile.two_hop)
+        if profile.two_hop and profile.two_hop.is_file()
+        else {}
+    )
+    sunmote = (
+        load_json(profile.sunmote_upgrades)
+        if profile.sunmote_upgrades and profile.sunmote_upgrades.is_file()
+        else {}
+    )
     raid_recipes = load_json(RAID_RECIPES) if RAID_RECIPES.is_file() else {}
 
     # A recipe can drop in several zones (the SSC/TK belt patterns drop in
@@ -583,7 +684,7 @@ def assemble(
             "zone": str(best["zone"]),
             "boss": best.get("boss"),
         }
-    weights_raw = load_json(EP_WEIGHTS)
+    weights_raw = load_json(profile.ep_weights)
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
     assert isinstance(w, dict)
@@ -601,7 +702,7 @@ def assemble(
         if isinstance(n, dict) and "id" in n and "name" in n
     }
     db_by_id = {int(it["id"]): it for it in db["items"]}
-    bis_ids = wowsims_curated_item_ids()
+    bis_ids = wowsims_curated_item_ids(profile)
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
@@ -642,7 +743,7 @@ def assemble(
 
     # db + atlasloot for all D7-eligible items
     for it in db["items"]:
-        if not ret_eligible_d7(it):
+        if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
         db_src = map_db_source(
@@ -691,7 +792,7 @@ def assemble(
     # exactly the items it added; see ticket 18.
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
-    for stage, doc in wowhead_lists_for_phase(max_phase):
+    for stage, doc in wowhead_lists_for_phase(max_phase, profile):
         for row in doc.get("entries") or []:
             if not isinstance(row, dict):
                 continue
@@ -706,7 +807,9 @@ def assemble(
             if parsed and all(is_list_only_source(s) for s in parsed):
                 wowhead_list_only.add(iid)
 
-    eligible_count = sum(1 for it in db["items"] if ret_eligible_d7(it))
+    eligible_count = sum(
+        1 for it in db["items"] if eligible_d7(it, profile)
+    )
 
     entries: list[dict] = []
     membership_stats = Counter()
@@ -714,7 +817,7 @@ def assemble(
     no_zone_excluded = 0
 
     for it in db["items"]:
-        if not ret_eligible_d7(it):
+        if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
         pairs = source_acc.get(iid) or []
@@ -831,13 +934,13 @@ def assemble(
         entries = junk_survivors
     junk["applied"] = apply_junk_filter
 
-    tier_present = {e["itemId"] for e in entries} & RET_TIER_PIECE_IDS
+    tier_present = {e["itemId"] for e in entries} & profile.tier_piece_ids
     tier_expected: set[int] = set()
     for entry in (two_hop.get("entries") or []) if isinstance(two_hop, dict) else []:
         if not isinstance(entry, dict):
             continue
         piece_id = int(entry["pieceId"])
-        if piece_id not in RET_TIER_PIECE_IDS:
+        if piece_id not in profile.tier_piece_ids:
             continue
         if str(entry.get("zone")) in phase_zones:
             tier_expected.add(piece_id)
@@ -879,7 +982,7 @@ def assemble(
                 "name": (db_by_id.get(iid) or {}).get("name"),
                 "slot": ITEM_TYPE_SLOT.get((db_by_id.get(iid) or {}).get("type")),
                 "d7Eligible": bool(
-                    db_by_id.get(iid) and ret_eligible_d7(db_by_id[iid])
+                    db_by_id.get(iid) and eligible_d7(db_by_id[iid], profile)
                 ),
             }
             for iid in sorted(missed)
@@ -907,7 +1010,7 @@ def assemble(
     }
 
     payload = {
-        "spec": "ret",
+        "spec": profile.spec,
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
@@ -921,9 +1024,15 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-phase", type=int, required=True, choices=[2, 3, 4, 5])
     ap.add_argument(
+        "--spec",
+        default="ret",
+        choices=sorted(SPEC_PROFILES),
+        help="Which spec profile to build for (default ret)",
+    )
+    ap.add_argument(
         "--out",
         type=Path,
-        help="Output path (default data/universes/ret-p{N}.json)",
+        help="Output path (default data/universes/{spec}-p{N}.json)",
     )
     ap.add_argument(
         "--report",
@@ -953,17 +1062,23 @@ def main() -> int:
     if args.hold_out_wowhead and not (args.out and args.report):
         ap.error("--hold-out-wowhead requires explicit --out and --report paths")
 
-    out_path = args.out or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.json"
+    out_path = (
+        args.out or DEFAULT_OUT_DIR / f"{args.spec}-p{args.max_phase}.json"
+    )
     payload, report = assemble(
         args.max_phase,
         hold_out_wowhead=args.hold_out_wowhead,
         apply_junk_filter=args.apply_junk_filter,
+        spec=args.spec,
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    report_path = args.report or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.report.json"
+    report_path = (
+        args.report
+        or DEFAULT_OUT_DIR / f"{args.spec}-p{args.max_phase}.report.json"
+    )
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     def display(p: Path) -> Path:

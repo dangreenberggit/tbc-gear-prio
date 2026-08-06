@@ -1,0 +1,67 @@
+{
+  "maxPhase": 2,
+  "carryoverPolicy": "union",
+  "phaseZones": [
+    "Gruul's Lair",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep",
+    "World Bosses"
+  ],
+  "d7EligibleTotal": 3463,
+  "excludedNoSource": 1642,
+  "universeTotal": 215,
+  "listOnlyMembership": 0,
+  "perSlot": {
+    "back": 19,
+    "chest": 9,
+    "feet": 16,
+    "finger": 23,
+    "hands": 12,
+    "head": 9,
+    "legs": 9,
+    "neck": 15,
+    "ranged": 2,
+    "shoulder": 8,
+    "trinket": 15,
+    "waist": 14,
+    "weapon": 53,
+    "wrist": 11
+  },
+  "sourceRecordAdds": {
+    "atlasloot": 213,
+    "db": 1807
+  },
+  "membershipByOrigin": {
+    "itemHasOrigin:atlasloot": 39,
+    "itemHasOrigin:db": 201,
+    "zoneMatch": 215
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 201,
+    "atlasloot-only": 14
+  },
+  "tierPiecesExpected": 0,
+  "tierPiecesPresent": 0,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 215,
+    "casterOnlyReject": 113,
+    "epFloorReject": 0,
+    "combinedReject": 113,
+    "combinedKeep": 102,
+    "casterRejectPct": 52.6,
+    "combinedRejectPct": 52.6,
+    "applied": false
+  },
+  "wowheadListIds": 0,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 0,
+    "recalled": 0,
+    "missed": 0,
+    "recallPct": null,
+    "missedItems": []
+  }
+}
