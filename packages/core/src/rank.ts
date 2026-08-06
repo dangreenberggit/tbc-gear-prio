@@ -182,7 +182,16 @@ export type ResolvedFight = {
   reportCode: string;
   fightId: number;
   encounterName: string;
-  killedAt: string;
+  /**
+   * Absent when the capture cannot supply one. Optional rather than `""`,
+   * because an empty string is indistinguishable from a real value that
+   * failed to format, and a UI rendering it would print a blank where it
+   * meant "unknown". A raw report carries fight times as offsets from the
+   * report's own start, so deriving a wall clock needs a field
+   * `wcl_probe.py --raw-out` does not persist — inventing one would put a
+   * fabricated date on a fixture whose whole job is being real.
+   */
+  killedAt?: string;
   route: FightSummary["route"];
 };
 
@@ -742,7 +751,6 @@ export function resolveFight(
       : {
           ...requested,
           encounterName: "",
-          killedAt: "",
           // A caller-named fight the summary list does not describe was not
           // reached through a ranking, so calling it `ranked` would overstate
           // what we know about it.
@@ -759,7 +767,7 @@ function summaryToResolved(f: FightSummary): ResolvedFight {
     reportCode: f.reportCode,
     fightId: f.fightId,
     encounterName: f.encounterName,
-    killedAt: f.killedAt,
+    ...(f.killedAt ? { killedAt: f.killedAt } : {}),
     route: f.route,
   };
 }

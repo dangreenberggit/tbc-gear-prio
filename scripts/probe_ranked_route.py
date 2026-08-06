@@ -18,10 +18,18 @@ This script answers the question directly, in three parts:
   2. RANKS      -- what does encounterRankings return for this character?
   3. CONTROL    -- does the same query return ranks for SOMEBODY?
 
-Part 3 is not optional. Zero ranks only means "unranked" if the query is
-capable of returning a non-zero, so the control pulls a character off the
-encounter leaderboard and re-asks about them. Without it, a broken query and an
-unranked character look identical.
+Part 3 is not optional, and it is what carries the conclusion. Zero ranks only
+means "unranked" if the query is capable of returning a non-zero, so the control
+pulls a character off the encounter leaderboard and re-asks about them. Without
+it, a broken query and an unranked character look identical.
+
+SCOPE LIMIT, so this is not over-read: parts 1 and 2 do NOT join. A report's
+fight carries `encounterID` in a prefixed namespace (Hydross is 100623 in
+test/fixtures/*.raw.json), while `encounterRankings` and `worldData.encounter`
+take the unprefixed id (623). Part 1 counts kills across whatever bosses a
+report contains; part 2 asks about three named encounters. So "ten kills on
+encounters with zero ranks" is a conclusion the reader draws across both, not
+one this script establishes. The control is what makes it sound.
 
 Read-only: issues GraphQL queries and writes nothing. Costs WCL points.
 
@@ -40,9 +48,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from wcl_probe import Probe, authenticate, gql, load_env  # noqa: E402
 
-# Encounters to ask about. Zone 1010 (SSC / TK) on TBC Anniversary; confirmed
-# against worldData.zones rather than assumed, since a wrong id returns the
-# same empty result as an unranked character.
+# Encounters to ask about, in the UNPREFIXED namespace that encounterRankings
+# and worldData.encounter take -- not the 100623-style id a report's fight
+# carries. Zone 1010 (SSC / TK) on TBC Anniversary; confirmed against
+# worldData.zones rather than assumed, since a wrong id returns the same empty
+# result as an unranked character.
 DEFAULT_ENCOUNTERS = [
     (623, "Hydross the Unstable"),
     (624, "The Lurker Below"),

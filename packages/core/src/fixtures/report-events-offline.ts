@@ -28,6 +28,8 @@ export type ReportEventsRawFixture = {
   combatant_info_events: Array<{
     sourceID: number;
     gear: WclGearEntry[];
+    /** Points spent per tree, in WCL's order — never a talent id (R18). */
+    talents?: Array<{ id: number }>;
   }>;
 };
 
@@ -35,7 +37,7 @@ export type ReportEventsRawFixture = {
  * Slamaltman resolves through this route, and not for a contrived reason:
  * he has ten kills on the SSC encounters and **zero** `encounterRankings`
  * entries. "No ranked kills" is about a ranked parse, not about whether the
- * boss died — this fixture's own fight is a Magtheridon *kill*.
+ * boss died — this fixture's own fight is a Hydross *kill*.
  */
 export const REPORT_EVENTS_REF: CharacterRef = {
   region: "US",
@@ -44,12 +46,31 @@ export const REPORT_EVENTS_REF: CharacterRef = {
 };
 
 /**
- * Talent plurality for the captured character. Read from the fixture's own
- * talents payload would be better, but `wcl_probe.py --raw-out` does not
- * persist the parsed tree points — only the gear array it printed. Stated
- * here rather than silently defaulted, and it is ret's 5/11/45 either way.
+ * Points spent per tree, read from the capture rather than assumed.
+ *
+ * An earlier version of this file hardcoded ret's `[5, 11, 45]` on the claim
+ * that `--raw-out` does not persist tree points. That claim was false — the
+ * raw payload carries `talents` verbatim — and the first capture it was
+ * applied to was a **protection** set (0/44/17, 17k armour, an off-hand
+ * shield), so the fixture asserted a ret build the payload contradicted.
+ * Reading the real value is what makes that class of mislabelling impossible
+ * rather than merely unlikely.
+ *
+ * `talents[].id` is points spent, not a talent id (PLAN.md §5.2 / R18).
  */
-const TALENT_POINTS: LoggedGear["talentPointsByTree"] = [5, 11, 45];
+function talentPointsFrom(
+  ev: ReportEventsRawFixture["combatant_info_events"][number],
+  character: CharacterRef
+): LoggedGear["talentPointsByTree"] {
+  const points = (ev.talents ?? []).map((t) => t.id);
+  if (points.length !== 3) {
+    throw new Error(
+      `${character.name}'s CombatantInfo carries ${points.length} talent trees, ` +
+        `expected 3 — the capture cannot classify a spec`
+    );
+  }
+  return [points[0]!, points[1]!, points[2]!];
+}
 
 export function reportEventsOfflineRecordings(
   raw: ReportEventsRawFixture,
@@ -72,7 +93,7 @@ export function reportEventsOfflineRecordings(
         if (spec.enchant) item.enchant = spec.enchant;
         return item;
       }),
-      talentPointsByTree: TALENT_POINTS,
+      talentPointsByTree: talentPointsFrom(ev, character),
       provenance: {
         reportCode: raw.report_code,
         fightId: raw.fight.id,
@@ -95,9 +116,9 @@ export function reportEventsOfflineRecordings(
     reportCode: raw.report_code,
     fightId: raw.fight.id,
     encounterName: raw.fight.name,
-    // The capture does not carry a wall-clock kill time, and inventing one
-    // would be a fabricated field in a fixture whose whole job is being real.
-    killedAt: "",
+    // No wall-clock kill time: the raw payload carries fight times as offsets
+    // from the report's own start, and `--raw-out` does not persist that start.
+    // Omitted rather than "" — see ResolvedFight.killedAt.
     route: "report-events",
     /**
      * Below the ranked route's 1. §5.4 ties confidence to how sure we are

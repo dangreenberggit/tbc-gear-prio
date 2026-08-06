@@ -95,6 +95,61 @@ describe("report-events fixture", () => {
     expect(fights[0]!.route).toBe("report-events");
   });
 
+  /**
+   * The guard that would have caught a real mis-capture. The first capture
+   * taken for this ticket was slamaltman's **protection** night — 0/44/17,
+   * 17k armour, an off-hand shield — and nothing in the pipeline objected,
+   * because the builder hardcoded ret's talent split instead of reading it.
+   * Every number downstream is scored with ret EP weights and the ret P2
+   * preset, so a non-ret capture makes the whole ranking meaningless while
+   * still looking like a passing test.
+   */
+  it("captures a retribution build, which is what the ret preset scores", () => {
+    const data = reportEventsOfflineRecordings(rawFixture());
+    const fights = data.fights.get(
+      characterFightKey(REPORT_EVENTS_REF, "ret")
+    )!;
+    const gear = data.gear.get(
+      `${fights[0]!.reportCode}|${fights[0]!.fightId}`
+    )!;
+
+    // Points spent per tree (R18), Holy / Protection / Retribution.
+    const [holy, prot, ret] = gear.talentPointsByTree;
+    expect(ret).toBeGreaterThan(holy);
+    expect(ret).toBeGreaterThan(prot);
+
+    // A ret paladin swings a two-hander, so the off-hand slot is empty. The
+    // protection capture had a shield here, which is the cheapest structural
+    // tell that the set is not ret.
+    const offHand = gear.items.find((i) => i.slot === "off-hand");
+    expect(offHand?.id ?? 0).toBe(0);
+  });
+
+  it("reads talent points from the capture rather than assuming them", () => {
+    const raw = rawFixture();
+    raw.combatant_info_events = raw.combatant_info_events.map((ev) => ({
+      ...ev,
+      talents: [{ id: 9 }, { id: 9 }, { id: 43 }],
+    }));
+    const data = reportEventsOfflineRecordings(raw);
+    const fights = data.fights.get(
+      characterFightKey(REPORT_EVENTS_REF, "ret")
+    )!;
+    const gear = data.gear.get(
+      `${fights[0]!.reportCode}|${fights[0]!.fightId}`
+    )!;
+    expect(gear.talentPointsByTree).toEqual([9, 9, 43]);
+  });
+
+  it("refuses a capture whose talent payload cannot classify a spec", () => {
+    const raw = rawFixture();
+    raw.combatant_info_events = raw.combatant_info_events.map((ev) => ({
+      ...ev,
+      talents: [],
+    }));
+    expect(() => reportEventsOfflineRecordings(raw)).toThrow(/expected 3/);
+  });
+
   it("rejects a fixture that does not contain the character", () => {
     const raw = rawFixture();
     expect(() =>

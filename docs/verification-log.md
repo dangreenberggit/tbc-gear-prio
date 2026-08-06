@@ -926,22 +926,42 @@ a real capture rather than a contrived one.
 
 ```bash
 python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US \
-  --report-code mKTA9V7Lx4Ck2DXf \
+  --report-code VGjFb3mtX9xHgyav \
   --raw-out test/fixtures/slamaltman-report-events.raw.json
 ```
 
-Cost ~12.62 points against the 3,600/hour budget. Written: 25 combatants, 19
-gear entries for slamaltman, plus the buffs table — 328 KB, committed.
+~12.62 points against the 3,600/hour budget. Written: 25 combatants, 19 gear
+entries for slamaltman, plus the buffs table — committed.
 
-The captured fight is Magtheridon with `kill: true`. That is not a contradiction
-and the test asserts it on purpose: the route is `report-events` because the
-character has no ranked *parse*, not because the boss lived.
+The captured fight is Hydross the Unstable with `kill: true`. That is not a
+contradiction and the test asserts it on purpose: the route is `report-events`
+because the character has no ranked *parse*, not because the boss lived.
 
-Re-verify the fixture is the one described, without spending points:
+**The first capture was wrong, and the way it was wrong is the lesson.** It came
+from report `mKTA9V7Lx4Ck2DXf` (Magtheridon), which is slamaltman's one
+**protection** night among his recent reports — talents 0/44/17, 17,192 armour,
+a shield in the off-hand. Nothing objected, because the fixture builder
+hardcoded ret's `[5, 11, 45]` on the false claim that `--raw-out` does not
+persist tree points. It does. Every downstream number was ret EP weights and
+the ret P2 preset applied to a tank set, and the only visible symptom was a
+baseline of 758.98 DPS against the ranked fixture's 2003.26 — which reads as a
+plausible "different report, different gear" until you resolve the items.
+
+Caught by the domain axis of the pre-merge review, not by any test. The builder
+now reads `talents` from the capture and throws when it cannot, and
+`packages/core/test/report-events-fallback.test.ts` asserts the build is ret
+(retribution plurality, empty off-hand). Re-captured from a ret fight, the
+fallback baseline is **2003.26** — identical to the ranked fixture, which is the
+right answer for the same character's same gear.
+
+Check which report a fresh worktree's fixture actually holds, and that it is
+ret, without spending points:
 
 ```bash
-python -c "import json; d=json.load(open('test/fixtures/slamaltman-report-events.raw.json')); print(d['report_code'], d['fight'])"
+python -c "import json; d=json.load(open('test/fixtures/slamaltman-report-events.raw.json')); a={x['id']:x['name'] for x in d['actors']}; e=[v for v in d['combatant_info_events'] if a.get(v['sourceID'],'').lower()=='slamaltman'][0]; print(d['report_code'], d['fight']['name'], [t['id'] for t in e['talents']], 'offhand=', e['gear'][16]['id'])"
 ```
+
+Expected: `VGjFb3mtX9xHgyav Hydross the Unstable [5, 11, 45] offhand= 0`.
 
 ### The behaviour
 

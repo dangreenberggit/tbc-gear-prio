@@ -10,7 +10,8 @@ export type FightSummary = {
   reportCode: string;
   fightId: number;
   encounterName: string;
-  killedAt: string;
+  /** Absent when the source cannot supply one — see ResolvedFight.killedAt. */
+  killedAt?: string;
   route: "ranked" | "report-events";
   /** Spec confidence 0–1; feral form uptime may lower this (PLAN.md §5.4). */
   confidence: number;
