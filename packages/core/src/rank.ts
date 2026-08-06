@@ -343,6 +343,14 @@ export async function rankUpgrades(
     return cached;
   }
 
+  /**
+   * Sims completed so far. Shared by the candidate loop and the replication
+   * pass, which are sibling closures — a second counter would let the two
+   * halves of one progress bar disagree.
+   */
+  let simsDone = 0;
+  let totalSimsForProgress = 0;
+
   // Dedupe handle for the job API (PLAN.md §7 payoff 2): the row is keyed by
   // the same hash, so a second caller can attach rather than start a rival run.
   const job = await deps.store.job.create({ contentHash, input });
@@ -371,7 +379,16 @@ export async function rankUpgrades(
   }
 
   async function rankAfterJobCreated(): Promise<Ranking> {
-    const totalSims = 1 + candidates.length;
+    // Replication is a third of the wall time on a small pool, so it is
+    // counted here rather than left to run past a progress bar that already
+    // said "done". The extra seeds re-sim the top N *and* the baseline; the
+    // first seed's runs are cache hits, which is why it is `seeds.length - 1`.
+    const replicaSims = usesPairedReplication(seeds)
+      ? (seeds.length - 1) *
+        (1 + Math.min(PAIRED_REPLICATE_TOP_N, candidates.length))
+      : 0;
+    const totalSims = 1 + candidates.length + replicaSims;
+    totalSimsForProgress = totalSims;
     onProgress?.({ stage: "simming", done: 0, total: totalSims });
     // Only `deps.sim.run` belongs inside this catch. A store read or write
     // that fails is an `internal` fault, and labelling it `sim-failed` sends
@@ -388,7 +405,8 @@ export async function rankUpgrades(
       }
       await cacheSimResult(deps, request, simVersion, runOpts, observation);
     }
-    onProgress?.({ stage: "simming", done: 1, total: totalSims });
+    simsDone = 1;
+    onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
     const baselineDps = observation.dps;
     const ranked: RankedItem[] = [];
@@ -404,7 +422,6 @@ export async function rankUpgrades(
       slot: string;
       reason: string;
     }[] = [];
-    let done = 1;
 
     // From the repaired layout, which is what the sim actually ran. Hoisted
     // above the loop because `hitDriven` prices each candidate against it.
@@ -484,8 +501,8 @@ export async function rankUpgrades(
         }
       }
 
-      done += 1;
-      onProgress?.({ stage: "simming", done, total: totalSims });
+      simsDone += 1;
+      onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
       if (!best) continue;
 
@@ -516,7 +533,14 @@ export async function rankUpgrades(
     }
 
     onProgress?.({ stage: "ranking" });
+    // Sorted first so replication can pick the contested top of the list, then
+    // sorted again below — replication rewrites the very `deltaDps` this order
+    // is built from, so ranking before it would freeze the ordering the
+    // refinement exists to correct.
     ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+    await replicateTopItems(ranked, winningRequests, baselineDps);
+    ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+
     let rank = 1;
     for (const item of ranked) {
       if (item.belowCutoff) {
@@ -526,8 +550,6 @@ export async function rankUpgrades(
         rank += 1;
       }
     }
-
-    await replicateTopItems(ranked, winningRequests);
 
     const ranking: Ranking = {
       contentHash,
@@ -582,20 +604,37 @@ export async function rankUpgrades(
    * Rows below the top N keep their `independent` SE. That is the cost
    * argument in §10: 5× sims on 8 items rather than on 180, buying resolution
    * where the ordering is contested and nowhere else.
+   *
+   * **The replicated mean replaces `deltaDps`.** An SE built from five deltas
+   * describes the *mean* of those five, so leaving the point estimate at the
+   * first seed's draw would attach an error bar to a number it does not
+   * describe — a plausible-looking DPS with a confidence interval centred
+   * somewhere else. The caller re-sorts afterwards, because these are the rows
+   * whose ordering the refinement exists to change.
+   *
+   * **The top N is taken from above-cutoff rows.** A positional slice over the
+   * whole list spends the entire 5× budget on rows the cutoff hides and the
+   * default CLI view does not print, which is the opposite of §10's purpose:
+   * separating the contested top of the *shortlist*.
    */
   async function replicateTopItems(
     ranked: RankedItem[],
-    winningRequests: ReadonlyMap<number, RaidSimRequest>
+    winningRequests: ReadonlyMap<number, RaidSimRequest>,
+    baselineDps: number
   ): Promise<void> {
     if (!usesPairedReplication(seeds)) return;
 
-    const top = ranked.slice(0, PAIRED_REPLICATE_TOP_N);
+    const top = ranked
+      .filter((item) => !item.belowCutoff)
+      .slice(0, PAIRED_REPLICATE_TOP_N);
+    if (top.length === 0) return;
     // Baseline once per seed, shared by every replicated candidate under that
     // seed — the pairing, and also what keeps this 5×(8+1) sims rather than
     // 5×8 baselines on top.
     const baselineBySeed = new Map<number, number>();
     for (const s of seeds) {
       baselineBySeed.set(s, (await simFor(request, s)).dps);
+      bumpProgress(s);
     }
 
     for (const item of top) {
@@ -615,10 +654,33 @@ export async function rankUpgrades(
       for (const s of seeds) {
         const obs = await simFor(candReq, s);
         deltas.push(obs.dps - baselineBySeed.get(s)!);
+        bumpProgress(s);
       }
       item.se = pairedReplicateSe(deltas);
       item.seMethod = "paired-replicate";
+      item.deltaDps = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+      item.deltaPct =
+        baselineDps === 0 ? 0 : (item.deltaDps / baselineDps) * 100;
+      // Re-evaluated against the mean rather than left at the first seed's
+      // verdict: a row whose replicated estimate crosses the cutoff must not
+      // keep a `belowCutoff` computed from a number no longer reported.
+      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, CUTOFF);
     }
+  }
+
+  /**
+   * The first seed's re-runs are cache hits the candidate loop already counted,
+   * so only the additional seeds advance the bar — otherwise `done` overshoots
+   * the `total` computed from `seeds.length - 1`.
+   */
+  function bumpProgress(seedForRun: number): void {
+    if (seedForRun === seeds[0]) return;
+    simsDone += 1;
+    onProgress?.({
+      stage: "simming",
+      done: simsDone,
+      total: totalSimsForProgress,
+    });
   }
 
   /** One sim at one seed, through the same cache-then-run path as the loop. */
