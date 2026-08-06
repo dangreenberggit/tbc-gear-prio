@@ -248,6 +248,32 @@ BADGE_RE = re.compile(
     re.IGNORECASE,
 )
 CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNORECASE)
+# The badge vendor named without a price: "Vendor: G'eras (Badges of Justice)".
+# BADGE_RE cannot match this -- its count group is mandatory -- so before this
+# existed the row parsed to nothing and the item was recorded as having no
+# origin at all. Cost 0 is a deliberate "unpriced": the guide states the
+# currency but not the amount, and inventing a number would be a false claim.
+BADGE_VENDOR_RE = re.compile(r"Badges?\s+of\s+Justice", re.IGNORECASE)
+# Reputation vendors, in the three phrasings the collected guides actually use:
+#   "Vendor: Nakodu (Lower City Exalted)"      -- npc named, faction in parens
+#   "Vendor: Exalted with The Consortium"      -- standing first, no parens
+# REP_RE already covers the third ("Requires Exalted with X"). All three name a
+# faction and a standing, so each stays a parse rather than a lookup table.
+VENDOR_REP_RE = re.compile(
+    r"Vendor:[^(\n]*\(\s*(.+?)\s+(Friendly|Honored|Revered|Exalted)\s*\)",
+    re.IGNORECASE,
+)
+VENDOR_STANDING_FIRST_RE = re.compile(
+    r"Vendor:\s*(Friendly|Honored|Revered|Exalted)\s+with\s+([^(\n]+)",
+    re.IGNORECASE,
+)
+# "Quest: Kael'thas and the Verdant Sphere (Tempest Keep: The Eye)". A quest
+# reward that names a zone is obtained there, so the zone is a real source and
+# the row belongs in that raid's view -- DROP_RE cannot see it because the text
+# says Quest, not Drop. Quests naming no zone stay unparsed by design: there is
+# no `quest` ItemSource variant, and inventing a zone would be worse than the
+# curated-set fallback that already covers those rows.
+QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
 # "Requires Exalted with Shattered Sun Offensive". The standing and faction are
 # both named, so this stays a parse rather than a lookup table.
@@ -510,39 +536,50 @@ def canonical_zone(zone: str) -> str:
     return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
 
 
+def zone_sources(zone: str, boss: str) -> list[dict]:
+    """One Wowhead zone parenthetical → the sources it names.
+
+    Wowhead writes the difficulty into the parenthetical ("Heroic Magisters'
+    Terrace"), and writes content dropping in more than one place as a single
+    slashed row ("Black Temple / Hyjal Summit"). Split first, then classify
+    each side: the other order leaves "Heroic A / B" as one bogus dungeon,
+    because the heroic prefix only ever fronts the first name.
+    """
+    out: list[dict] = []
+    if zone.endswith("(via"):
+        zone = zone.split("(via")[0].strip()
+    for one in zone.split("/"):
+        one = one.strip()
+        if not one:
+            continue
+        heroic_m = WOWHEAD_HEROIC_ZONE_RE.match(one)
+        if heroic_m:
+            out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
+            continue
+        src: dict = {"kind": "raid", "zone": canonical_zone(one)}
+        if boss and boss.lower() != "unknown":
+            src["boss"] = boss
+        out.append(src)
+    return out
+
+
 def parse_wowhead_source(text: str | None) -> list[dict]:
     if not text:
         return []
     out: list[dict] = []
     m = DROP_RE.search(text)
     if m:
-        boss = m.group(1).strip()
-        zone = m.group(2).strip()
-        if zone.endswith("(via"):
-            zone = zone.split("(via")[0].strip()
-        # Wowhead writes the difficulty into the zone parenthetical ("Heroic
-        # Magisters' Terrace"). Left alone that becomes a `raid` row naming a
-        # zone that exists nowhere, which the phase_raids.json guard rejects.
-        heroic_m = WOWHEAD_HEROIC_ZONE_RE.match(zone)
-        if heroic_m:
-            out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
-        else:
-            # Trash that drops in more than one raid is written as one row with
-            # the zones slashed together ("Black Temple / Hyjal Summit"), which
-            # as a single zone name matches nothing and fails the
-            # phase_raids.json guard. Each side is a real, separate source.
-            for one in zone.split("/"):
-                one = one.strip()
-                if not one:
-                    continue
-                src: dict = {"kind": "raid", "zone": canonical_zone(one)}
-                if boss and boss.lower() != "unknown":
-                    src["boss"] = boss
-                out.append(src)
+        out.extend(zone_sources(m.group(2).strip(), m.group(1).strip()))
+    else:
+        qm = QUEST_ZONE_RE.search(text)
+        if qm:
+            out.extend(zone_sources(qm.group(2).strip(), ""))
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
         out.append({"kind": "badge", "cost": cost})
+    elif BADGE_VENDOR_RE.search(text):
+        out.append({"kind": "badge", "cost": 0})
     lower = text.lower()
     if "arena points" in lower or ("pvp:" in lower and "arena" in lower):
         out.append({"kind": "pvp", "via": "arena"})
@@ -562,6 +599,26 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
                 "standing": rm.group(1).strip().capitalize(),
             }
         )
+    else:
+        vm = VENDOR_REP_RE.search(text)
+        if vm:
+            out.append(
+                {
+                    "kind": "rep",
+                    "faction": vm.group(1).strip(),
+                    "standing": vm.group(2).strip().capitalize(),
+                }
+            )
+        else:
+            sm = VENDOR_STANDING_FIRST_RE.search(text)
+            if sm:
+                out.append(
+                    {
+                        "kind": "rep",
+                        "faction": sm.group(2).strip(),
+                        "standing": sm.group(1).strip().capitalize(),
+                    }
+                )
     return out
 
 

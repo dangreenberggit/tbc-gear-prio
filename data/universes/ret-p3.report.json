@@ -12,7 +12,7 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1396,
+  "excludedNoSource": 1394,
   "universeTotal": 359,
   "listOnlyMembership": 23,
   "perSlot": {
@@ -37,7 +37,7 @@
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 52
+    "wowhead": 54
   },
   "membershipByOrigin": {
     "curated": 3,

@@ -1,7 +1,12 @@
-Status: partly fixed — see "What was fixed" below; the remainder stays open
+Status: open
 Type: bug
 Origin: sme-rank-review on phase-2/feral (ticket 05, gate box 2)
 Blocks: none
+Blocked by: none
+
+**Partly fixed on `phase-2/feral` (2026-08-06)** — the ranged slot recovered and
+the worn-absent count fell 24 → 14. See "What was fixed" and "What remains
+open" below. The ticket stays `open` for the remainder.
 
 # The ranged slot offers two items, and the worn one is not among them
 

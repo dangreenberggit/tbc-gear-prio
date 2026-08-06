@@ -10,9 +10,9 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1620,
-  "universeTotal": 247,
-  "listOnlyMembership": 14,
+  "excludedNoSource": 1614,
+  "universeTotal": 250,
+  "listOnlyMembership": 21,
   "perSlot": {
     "back": 21,
     "chest": 12,
@@ -21,58 +21,58 @@
     "hands": 16,
     "head": 12,
     "legs": 11,
-    "neck": 18,
-    "ranged": 4,
+    "neck": 19,
+    "ranged": 3,
     "shoulder": 10,
-    "trinket": 16,
+    "trinket": 17,
     "waist": 16,
-    "weapon": 55,
-    "wrist": 12
+    "weapon": 56,
+    "wrist": 13
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
-    "curated": 8,
+    "curated": 3,
     "db": 1807,
     "two-hop": 10,
-    "wowhead": 24
+    "wowhead": 35
   },
   "membershipByOrigin": {
-    "curated": 8,
+    "curated": 3,
     "itemHasOrigin:atlasloot": 39,
-    "itemHasOrigin:curated": 8,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 212,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 22,
-    "listOnly": 14,
-    "zoneMatch": 225
+    "itemHasOrigin:wowhead": 30,
+    "listOnly": 21,
+    "zoneMatch": 226
   },
   "exclusivePrimaryOrigin": {
     "db": 212,
     "atlasloot-only": 14,
-    "other": 8,
+    "other": 3,
     "two-hop": 10,
-    "wowhead-only": 3
+    "wowhead-only": 11
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 247,
+    "total": 250,
     "casterOnlyReject": 114,
     "epFloorReject": 0,
     "combinedReject": 114,
-    "combinedKeep": 133,
-    "casterRejectPct": 46.2,
-    "combinedRejectPct": 46.2,
+    "combinedKeep": 136,
+    "casterRejectPct": 45.6,
+    "combinedRejectPct": 45.6,
     "applied": false
   },
   "wowheadListIds": 79,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 79,
-    "recalled": 55,
-    "missed": 24,
-    "recallPct": 69.6,
+    "recalled": 58,
+    "missed": 21,
+    "recallPct": 73.4,
     "missedItems": [
       {
         "itemId": 19406,
@@ -147,12 +147,6 @@
         "d7Eligible": true
       },
       {
-        "itemId": 29171,
-        "name": "Earthwarden",
-        "slot": "weapon",
-        "d7Eligible": true
-      },
-      {
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
@@ -162,12 +156,6 @@
         "itemId": 29359,
         "name": "Feral Staff of Lashing",
         "slot": "weapon",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 29381,
-        "name": "Choker of Vile Intent",
-        "slot": "neck",
         "d7Eligible": true
       },
       {
@@ -201,15 +189,9 @@
         "d7Eligible": true
       },
       {
-        "itemId": 32647,
-        "name": "Shard-bound Bracers",
-        "slot": "wrist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 32654,
-        "name": "Crystalforged Trinket",
-        "slot": "trinket",
+        "itemId": 32387,
+        "name": "Idol of the Raven Goddess",
+        "slot": "ranged",
         "d7Eligible": true
       },
       {

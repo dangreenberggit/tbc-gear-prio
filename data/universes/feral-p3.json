@@ -1574,7 +1574,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "rep",
+          "faction": "Lower City",
+          "standing": "Exalted"
         }
       ],
       "curationHint": 49.4,
@@ -3066,6 +3068,22 @@
       "curationHint": 67.41
     },
     {
+      "itemId": 29381,
+      "name": "Choker of Vile Intent",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "badge",
+          "cost": 0
+        }
+      ],
+      "curationHint": 56.26
+    },
+    {
       "itemId": 30017,
       "name": "Telonicus's Pendant of Mayhem",
       "slot": "neck",
@@ -3074,6 +3092,10 @@
       "quality": 4,
       "phase": 2,
       "sources": [
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep"
+        },
         {
           "kind": "raid",
           "zone": "Tempest Keep",
@@ -3530,7 +3552,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "badge",
+          "cost": 0
         }
       ],
       "curationHint": 0.0,
@@ -3571,24 +3594,6 @@
         }
       ],
       "curationHint": 0.0
-    },
-    {
-      "itemId": 32387,
-      "name": "Idol of the Raven Goddess",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 3,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown"
-        }
-      ],
-      "curationHint": 0.0,
-      "bisTags": [
-        "BiS"
-      ]
     },
     {
       "itemId": 30055,
@@ -3982,13 +3987,31 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "badge",
+          "cost": 0
         }
       ],
       "curationHint": 25.2,
       "bisTags": [
         "BiS"
       ]
+    },
+    {
+      "itemId": 32654,
+      "name": "Crystalforged Trinket",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Revered"
+        }
+      ],
+      "curationHint": 21.91
     },
     {
       "itemId": 28830,
@@ -4843,6 +4866,23 @@
         }
       ],
       "curationHint": 347.2
+    },
+    {
+      "itemId": 29171,
+      "name": "Earthwarden",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 273.68
     },
     {
       "itemId": 32248,
@@ -6464,6 +6504,23 @@
         }
       ],
       "curationHint": 38.29
+    },
+    {
+      "itemId": 32647,
+      "name": "Shard-bound Bracers",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Exalted"
+        }
+      ],
+      "curationHint": 37.9
     },
     {
       "itemId": 28514,

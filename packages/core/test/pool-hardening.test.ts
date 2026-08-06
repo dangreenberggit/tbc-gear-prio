@@ -681,3 +681,67 @@ describe("data/universes/ret-p3.json hardening", () => {
     );
   });
 });
+
+describe("an item's source does not depend on which tier is assembled", () => {
+  // The universes are cumulative: a p3 build reads the p1-p2 Wowhead list as
+  // well as the p3 one. When the two guides phrase the same item differently
+  // and only the later phrasing parsed, the item shipped with a real `raid`
+  // source at p3 and a zoneless `{kind:"unknown"}` at p2 — so `matchesZone`
+  // dropped it from its own raid's view at the earlier tier, silently and with
+  // no error. 30017 Telonicus's Pendant of Mayhem is a Kael'thas drop written
+  // "Quest: … (Tempest Keep: The Eye)" on the feral p1-p2 page and "Drop: …"
+  // on the p3 page; 30834 and 29119 are rep rewards written three different
+  // ways across the ret guides.
+  //
+  // This asserts the property rather than those rows: any item in both tiers
+  // must carry the same sources in both.
+  for (const [lo, hi] of [
+    ["data/universes/feral-p2.json", "data/universes/feral-p3.json"],
+    ["data/universes/ret-p2.json", "data/universes/ret-p3.json"],
+    ["data/universes/ret-p3.json", "data/universes/ret-p4.json"],
+    ["data/universes/ret-p4.json", "data/universes/ret-p5.json"],
+  ] as const) {
+    it(`${lo} and ${hi} agree on every shared item`, () => {
+      const a = loadUniverse(lo).raw.entries;
+      const b = new Map(
+        loadUniverse(hi).raw.entries.map((e) => [e.itemId, e] as const)
+      );
+      for (const e of a) {
+        const other = b.get(e.itemId);
+        if (!other) continue;
+        // A later tier may *add* a source (a p3 boss drop for an item already
+        // buyable at p2); what it must never do is disagree about the ones the
+        // earlier tier already recorded.
+        for (const s of e.sources) {
+          expect(
+            other.sources,
+            `${e.itemId} ${e.name}: ${lo} has ${JSON.stringify(s)}, ${hi} has ${JSON.stringify(other.sources)}`
+          ).toContainEqual(s);
+        }
+      }
+    });
+  }
+
+  it("reserves kind:unknown for items no input mentions at all", () => {
+    // `unknown` is an honest "origin not recorded", so it must never sit on an
+    // item some input could actually place. If a Wowhead list names the item,
+    // the parser is expected to have read it.
+    const listed = new Set<number>();
+    for (const rel of [
+      "data/wowhead-lists/feral/p1-p2.json",
+      "data/wowhead-lists/feral/p3.json",
+    ]) {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: { itemId: number }[];
+      };
+      for (const row of doc.entries) listed.add(row.itemId);
+    }
+    for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
+      if (!e.sources.some((s) => s.kind === "unknown")) continue;
+      expect(
+        listed.has(e.itemId),
+        `${e.itemId} ${e.name} is on a Wowhead list but shipped as kind:unknown — the parser dropped its prose`
+      ).toBe(false);
+    }
+  });
+});

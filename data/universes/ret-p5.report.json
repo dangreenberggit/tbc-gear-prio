@@ -14,7 +14,7 @@
     "Zul'Aman"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1392,
+  "excludedNoSource": 1390,
   "universeTotal": 487,
   "listOnlyMembership": 33,
   "perSlot": {
@@ -39,7 +39,7 @@
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 70
+    "wowhead": 72
   },
   "membershipByOrigin": {
     "curated": 3,

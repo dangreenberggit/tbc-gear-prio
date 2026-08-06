@@ -21,6 +21,15 @@ Blocked by: 04
   filed as carry-forward 41 — the ranged slot offers two items and the worn
   idol is not comparable. Ret has the same shape, so it is a standing pool
   property rather than a feral regression.
+
+  **Updated 2026-08-06.** The defect behind the caveat is largely fixed: the
+  ranged slot now carries 4 idols including the two the review said were
+  missing, and worn items absent from their own universe fell 24 → 14 across
+  the three characters (ticket 41 records both counts and a re-runnable
+  command). The box still reads **PARTIAL**, for a reason that has not
+  changed: only shredzepelin was ever SME-reviewed, so "believable" is
+  unevidenced for the other two. Closing it needs a domain pass on slamaltman
+  and nexess, not more pool work.
 - **Generator coupling reported separately**, per this ticket: 6 of 7 named
   hard-codings were paths, `CLASS_PALADIN` and `ret_eligible_d7` were logic.
 - Ret universes regenerate byte-identically; `data/universes/` gained files

@@ -1183,7 +1183,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "rep",
+          "faction": "Lower City",
+          "standing": "Exalted"
         }
       ],
       "curationHint": 61.55,
@@ -2541,7 +2543,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted"
         }
       ],
       "curationHint": 44.75,
