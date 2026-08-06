@@ -881,7 +881,7 @@ gap is still there for any future use of `curationHint` on weapons.
 
 Closes:
 
-> ☐ fallback route exercised on a character with no ranked kills
+> ☑ fallback route exercised on a character with no ranked kills
 
 Owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`.
 
