@@ -1,6 +1,13 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
 export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
 export {
+  DegenerateSeedsError,
+  PAIRED_REPLICATE_TOP_N,
+  assertUsableSeeds,
+  pairedReplicateSe,
+  usesPairedReplication,
+} from "./se.js";
+export {
   applyView,
   type ViewOptions,
   type ViewResult,

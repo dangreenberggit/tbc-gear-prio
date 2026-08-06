@@ -58,6 +58,13 @@ import {
   type SimRunner,
 } from "./seams/sim-runner.js";
 import type { Store } from "./seams/store.js";
+import {
+  assertUsableSeeds,
+  DegenerateSeedsError,
+  pairedReplicateSe,
+  PAIRED_REPLICATE_TOP_N,
+  usesPairedReplication,
+} from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
@@ -170,6 +177,26 @@ export type Ranking = {
   items: RankedItem[];
 };
 
+/**
+ * The best of a candidate's slot attempts, before it becomes a `RankedItem`.
+ * Named rather than repeated inline because `request` made a third copy of the
+ * same shape, and three copies is where they start to disagree.
+ */
+type BestSwap = {
+  deltaDps: number;
+  stdev: number;
+  /**
+   * The winning slot's composed request, kept so paired replication can re-sim
+   * *this* candidate under further seeds without recomposing the swap.
+   * Recomposing is a second construction of the same object, and a chance for
+   * the replicated arm to measure something the ranked delta never came from.
+   */
+  request: RaidSimRequest;
+  slotChoice?: SimSlotName;
+  setBonusNote?: string;
+  hitDriven: boolean;
+};
+
 const DEFAULT_ITERATIONS = 3000;
 const DEFAULT_SEEDS = [42];
 /** Hashed and disclosed from one place, so the two cannot drift apart. */
@@ -239,6 +266,16 @@ export async function rankUpgrades(
 
   const iterations = input.iterations ?? DEFAULT_ITERATIONS;
   const seeds = input.seeds ?? DEFAULT_SEEDS;
+  // Before the job row and before any sim: a caller's bad seeds are not worth
+  // a stranded `running` row or a wasted baseline run.
+  try {
+    assertUsableSeeds(seeds);
+  } catch (err) {
+    if (err instanceof DegenerateSeedsError) {
+      throw new RankError("internal", err.message);
+    }
+    throw err;
+  }
   const seed = seeds[0] ?? DEFAULT_SEEDS[0]!;
   const runOpts = { seed, iterations };
 
@@ -333,6 +370,12 @@ export async function rankUpgrades(
 
     const baselineDps = observation.dps;
     const ranked: RankedItem[] = [];
+    /**
+     * The request behind each ranked row's delta, keyed by item id. Paired
+     * replication re-runs exactly these under the remaining seeds; sorting
+     * `ranked` reorders the rows but never this association.
+     */
+    const winningRequests = new Map<number, RaidSimRequest>();
     const simSkips: {
       itemId: number;
       name: string;
@@ -348,13 +391,7 @@ export async function rankUpgrades(
     for (const entry of candidates) {
       const owned = equippedIds.has(entry.itemId);
       const slotNames = simSlotsForPoolSlot(entry.slot);
-      let best: {
-        deltaDps: number;
-        stdev: number;
-        slotChoice?: SimSlotName;
-        setBonusNote?: string;
-        hitDriven: boolean;
-      } | null = null;
+      let best: BestSwap | null = null;
 
       for (let s = 0; s < slotNames.length; s++) {
         const slotName = slotNames[s]!;
@@ -407,15 +444,10 @@ export async function rankUpgrades(
         const deltaDps = candObs.dps - baselineDps;
         const note = setBreakNote(equipment, slotIndex, entry.itemId);
         if (!best || deltaDps > best.deltaDps) {
-          const next: {
-            deltaDps: number;
-            stdev: number;
-            slotChoice?: SimSlotName;
-            setBonusNote?: string;
-            hitDriven: boolean;
-          } = {
+          const next: BestSwap = {
             deltaDps,
             stdev: candObs.stdev,
+            request: candReq,
             hitDriven: isHitDriven(
               statDeltaBetween(equipment, swapped),
               caps.hit,
@@ -458,6 +490,7 @@ export async function rankUpgrades(
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
       if (owned) item.owned = true;
       ranked.push(item);
+      winningRequests.set(entry.itemId, best.request);
     }
 
     onProgress?.({ stage: "ranking" });
@@ -471,6 +504,8 @@ export async function rankUpgrades(
         rank += 1;
       }
     }
+
+    await replicateTopItems(ranked, winningRequests);
 
     const ranking: Ranking = {
       contentHash,
@@ -505,6 +540,83 @@ export async function rankUpgrades(
       result: ranking,
     });
     return ranking;
+  }
+
+  /**
+   * PLAN.md §10 Phase 2: replicate the top ~8 across the seeds and report
+   * `SE = sd(deltas) / sqrt(n)`, marked `paired-replicate`.
+   *
+   * Two properties are the whole method, and both are structural here rather
+   * than asserted in a comment:
+   *
+   * 1. **Each seed's baseline and candidate share that seed.** The delta is
+   *    measured within a seed and only then does the spread across seeds mean
+   *    anything. Pairing across seeds would fold baseline wobble into the
+   *    spread and inflate the SE.
+   * 2. **Seeds are distinct**, enforced up front by `assertUsableSeeds` — a
+   *    shared seed repeats bit-identical, so a repeat drives `sd` to a false 0.
+   *
+   * Rows below the top N keep their `independent` SE. That is the cost
+   * argument in §10: 5× sims on 8 items rather than on 180, buying resolution
+   * where the ordering is contested and nowhere else.
+   */
+  async function replicateTopItems(
+    ranked: RankedItem[],
+    winningRequests: ReadonlyMap<number, RaidSimRequest>
+  ): Promise<void> {
+    if (!usesPairedReplication(seeds)) return;
+
+    const top = ranked.slice(0, PAIRED_REPLICATE_TOP_N);
+    // Baseline once per seed, shared by every replicated candidate under that
+    // seed — the pairing, and also what keeps this 5×(8+1) sims rather than
+    // 5×8 baselines on top.
+    const baselineBySeed = new Map<number, number>();
+    for (const s of seeds) {
+      baselineBySeed.set(s, (await simFor(request, s)).dps);
+    }
+
+    for (const item of top) {
+      const candReq = winningRequests.get(item.itemId);
+      // A ranked row always has a winning request; a missing one would mean
+      // `ranked` and `winningRequests` fell out of step, which is our bug and
+      // not something to paper over with an `independent` SE that reads as a
+      // deliberate choice.
+      if (!candReq) {
+        throw new RankError(
+          "internal",
+          `no recorded request for ranked item ${item.itemId} (${item.name}); ` +
+            `paired replication cannot re-sim it`
+        );
+      }
+      const deltas: number[] = [];
+      for (const s of seeds) {
+        const obs = await simFor(candReq, s);
+        deltas.push(obs.dps - baselineBySeed.get(s)!);
+      }
+      item.se = pairedReplicateSe(deltas);
+      item.seMethod = "paired-replicate";
+    }
+  }
+
+  /** One sim at one seed, through the same cache-then-run path as the loop. */
+  async function simFor(
+    req: RaidSimRequest,
+    seedForRun: number
+  ): Promise<SimObservation> {
+    const opts = { seed: seedForRun, iterations };
+    const cached = await readCachedSim(deps, req, simVersion, opts);
+    if (cached) return cached;
+    let obs: SimObservation;
+    try {
+      obs = await deps.sim.run(req, opts);
+    } catch (err) {
+      throw new RankError(
+        "sim-failed",
+        err instanceof Error ? err.message : String(err)
+      );
+    }
+    await cacheSimResult(deps, req, simVersion, opts, obs);
+    return obs;
   }
 }
 
