@@ -96,18 +96,18 @@ would be.
 would imply a gate that does not exist, so these use `Blocks: none` and rely on
 `Blocked by:` for ordering, which is convention rather than a gate in any case.
 
-The one ticket that *does* gate Phase 2 is carry-forward 30, which is correctly
-filed under `carry-forward/` with `Blocks: phase-2`. Verified by calling the
-gate's own detector:
+Carry-forward 30 was the one ticket that gated Phase 2 (`Blocks: phase-2`, filed
+under `carry-forward/`), and ticket 03 closed it on 2026-08-05. Read the current
+blocker list from the gate's own detector rather than from this paragraph:
 
 ```bash
 python -c "import sys; sys.path.insert(0,'scripts'); import check_merge_ready as m; print(m.open_blockers_for_phase('phase-2'))"
 ```
 
-It returns ticket 30 and none of the five subplan tickets. So `pnpm land` on
-`phase-2/trust` will refuse while 30 is open — which is the desired behaviour,
-since ticket 03 is what closes it. (Note the review-file check runs first, so a
-land attempt fails on the missing review before it ever reports the blocker.)
+It returns `[]` today, so no open blocker stands between `phase-2/trust` and
+`dev`. The tickets 03 filed on its way out (35, 36, 37) all carry `Blocks: none`
+by design and do not gate the phase. (The review-file check runs first in any
+case, so a land attempt fails on a missing review before it reports blockers.)
 
 ## Verification
 
