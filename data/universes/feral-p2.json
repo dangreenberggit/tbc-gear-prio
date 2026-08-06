@@ -384,6 +384,42 @@
       "curationHint": 74.27
     },
     {
+      "itemId": 30222,
+      "name": "Nordrassil Chestplate",
+      "slot": "chest",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Tempest Keep",
+          "token": "Chestguard of the Vanquished Defender",
+          "boss": "Kael'thas Sunstrider"
+        }
+      ],
+      "curationHint": 70.68
+    },
+    {
+      "itemId": 29096,
+      "name": "Breastplate of Malorne",
+      "slot": "chest",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Magtheridon's Lair",
+          "token": "Chestguard of the Fallen Defender",
+          "boss": "Magtheridon"
+        }
+      ],
+      "curationHint": 65.18
+    },
+    {
       "itemId": 28578,
       "name": "Masquerade Gown",
       "slot": "chest",
@@ -1207,6 +1243,24 @@
       "curationHint": 69.94
     },
     {
+      "itemId": 30223,
+      "name": "Nordrassil Handgrips",
+      "slot": "hands",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Serpentshrine Cavern",
+          "token": "Gloves of the Vanquished Defender",
+          "boss": "Leotheras the Blind"
+        }
+      ],
+      "curationHint": 58.62
+    },
+    {
       "itemId": 28506,
       "name": "Gloves of Dexterous Manipulation",
       "slot": "hands",
@@ -1222,6 +1276,24 @@
         }
       ],
       "curationHint": 55.3
+    },
+    {
+      "itemId": 29097,
+      "name": "Gauntlets of Malorne",
+      "slot": "hands",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Karazhan",
+          "token": "Gloves of the Fallen Defender",
+          "boss": "The Curator"
+        }
+      ],
+      "curationHint": 52.8
     },
     {
       "itemId": 28776,
@@ -1419,6 +1491,42 @@
       "curationHint": 93.36
     },
     {
+      "itemId": 30228,
+      "name": "Nordrassil Headdress",
+      "slot": "head",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Serpentshrine Cavern",
+          "token": "Helm of the Vanquished Defender",
+          "boss": "Lady Vashj"
+        }
+      ],
+      "curationHint": 74.16
+    },
+    {
+      "itemId": 29098,
+      "name": "Stag-Helm of Malorne",
+      "slot": "head",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Karazhan",
+          "token": "Helm of the Fallen Defender",
+          "boss": "Prince Malchezaar"
+        }
+      ],
+      "curationHint": 70.26
+    },
+    {
       "itemId": 28586,
       "name": "Wicked Witch's Hat",
       "slot": "head",
@@ -1559,6 +1667,24 @@
       "curationHint": 112.89
     },
     {
+      "itemId": 30229,
+      "name": "Nordrassil Feral-Kilt",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Serpentshrine Cavern",
+          "token": "Leggings of the Vanquished Defender",
+          "boss": "Fathom-Lord Karathress"
+        }
+      ],
+      "curationHint": 97.16
+    },
+    {
       "itemId": 28741,
       "name": "Skulker's Greaves",
       "slot": "legs",
@@ -1574,6 +1700,24 @@
         }
       ],
       "curationHint": 88.08
+    },
+    {
+      "itemId": 29099,
+      "name": "Greaves of Malorne",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Gruul's Lair",
+          "token": "Leggings of the Fallen Defender",
+          "boss": "Gruul the Dragonkiller"
+        }
+      ],
+      "curationHint": 69.88
     },
     {
       "itemId": 28591,
@@ -2031,6 +2175,42 @@
         }
       ],
       "curationHint": 81.8
+    },
+    {
+      "itemId": 30230,
+      "name": "Nordrassil Feral-Mantle",
+      "slot": "shoulder",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Tempest Keep",
+          "token": "Pauldrons of the Vanquished Defender",
+          "boss": "Void Reaver"
+        }
+      ],
+      "curationHint": 66.74
+    },
+    {
+      "itemId": 29100,
+      "name": "Mantle of Malorne",
+      "slot": "shoulder",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Gruul's Lair",
+          "token": "Pauldrons of the Fallen Defender",
+          "boss": "High King Maulgar"
+        }
+      ],
+      "curationHint": 57.06
     },
     {
       "itemId": 28755,

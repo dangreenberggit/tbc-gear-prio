@@ -109,6 +109,25 @@ RET_TIER_PIECE_IDS = frozenset(
     }
 )
 
+# Malorne Harness (T4) and Nordrassil Harness (T5) — the feral variant of
+# druid tier. Harness rather than Regalia or Raiment is confirmed on stats
+# from the pinned db, not on the name: see data/two-hop/feral-tokens.json.
+# T6 (Thunderheart) is absent, so feral tier coverage stops at T5.
+FERAL_TIER_PIECE_IDS = frozenset(
+    {
+        29096,
+        29097,
+        29098,
+        29099,
+        29100,
+        30222,
+        30223,
+        30228,
+        30229,
+        30230,
+    }
+)
+
 # common.proto Class enum. These are wowsims ids and are NOT WCL's class ids:
 # WCL numbers Druid 2 and Warrior 11, which is the reverse reading of the same
 # two numbers. Anything crossing between the two needs an explicit map.
@@ -196,7 +215,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         two_hop=ROOT / "data/two-hop/feral-tokens.json",
         # No feral Sunmote map collected yet.
         sunmote_upgrades=None,
-        tier_piece_ids=frozenset(),
+        tier_piece_ids=FERAL_TIER_PIECE_IDS,
         class_id=CLASS_DRUID,
         # Druid is Leather + Cloth, per wowsims
         # ui/core/player_classes/druid.ts. Not a subset of ret's set either

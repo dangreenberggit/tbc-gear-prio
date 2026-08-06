@@ -1,0 +1,103 @@
+{
+  "spec": "feral",
+  "kind": "token-map",
+  "collectedDate": "2026-08-06",
+  "notes": [
+    "Feral cat wears the HARNESS variant of druid tier. Druid tier splits three ways by role and the split is confirmed on stats from the pinned db, not on names: Malorne Harness chest 29096 carries Str 33 / Agi 34, while Regalia 29091 and Raiment 29087 carry Int/Spirit/SpellDamage. Upstream's own feral cat p2 gear set uses 29096 and 29100.",
+    "Token IDs come from the AtlasLoot loot tables in vendor/atlasloot/data-tbc.lua, which name each token in a trailing comment; druid uses the 'Defender' token of each drop triple, the sibling of the 'Champion' token ret uses. Zones and bosses come from data/atlasloot_sources.json and match ret-tokens.json boss-for-boss.",
+    "UNVERIFIED against Wowhead, unlike ret-tokens.json. The piece-to-token join here is by armour SLOT within a tier, because no committed source states the redemption pairing: db.json carries setName and classAllowlist but no token link, and AtlasLoot lists the tokens without the pieces they buy. Repeated Wowhead fetches did not return the redemption list. The slot join is sound for the slot, and 'Defender is the druid/warrior/priest token' is the assumption that still needs a human check.",
+    "T6 (Thunderheart) is absent: the ret map covers p3-p5 and this one stops at T5, so feral maxPhase 3+ has no tier coverage yet."
+  ],
+  "entries": [
+    {
+      "pieceId": 29096,
+      "pieceName": "Breastplate of Malorne",
+      "tokenId": 29753,
+      "tokenName": "Chestguard of the Fallen Defender",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29097,
+      "pieceName": "Gauntlets of Malorne",
+      "tokenId": 29758,
+      "tokenName": "Gloves of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29098,
+      "pieceName": "Stag-Helm of Malorne",
+      "tokenId": 29761,
+      "tokenName": "Helm of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29100,
+      "pieceName": "Mantle of Malorne",
+      "tokenId": 29764,
+      "tokenName": "Pauldrons of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29099,
+      "pieceName": "Greaves of Malorne",
+      "tokenId": 29767,
+      "tokenName": "Leggings of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30222,
+      "pieceName": "Nordrassil Chestplate",
+      "tokenId": 30237,
+      "tokenName": "Chestguard of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30223,
+      "pieceName": "Nordrassil Handgrips",
+      "tokenId": 30240,
+      "tokenName": "Gloves of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30228,
+      "pieceName": "Nordrassil Headdress",
+      "tokenId": 30243,
+      "tokenName": "Helm of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30229,
+      "pieceName": "Nordrassil Feral-Kilt",
+      "tokenId": 30246,
+      "tokenName": "Leggings of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30230,
+      "pieceName": "Nordrassil Feral-Mantle",
+      "tokenId": 30249,
+      "tokenName": "Pauldrons of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}
