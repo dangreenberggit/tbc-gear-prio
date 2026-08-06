@@ -374,6 +374,22 @@ Measured on the committed universes (the only ranking membership that ships —
 Tier coverage is also complete in both: p2 10/10 expected tier pieces present,
 p3 15/15, `tierPiecesMissing: []`.
 
+> **Counts restated 2026-08-06 on `phase-2/feral`.** The property still holds —
+> zero empty-source rows, tier coverage still complete — but the totals grew and
+> two more universes now ship:
+>
+> | Universe | entries | empty `sources` | tier |
+> |---|---|---|---|
+> | `ret-p2.json` | 235 | **0** | 10/10 |
+> | `ret-p3.json` | 359 | **0** | 15/15 |
+> | `feral-p2.json` | 250 | **0** | 10/10 |
+> | `feral-p3.json` | 377 | **0** | 10/10 |
+>
+> Feral tier coverage stops at T5 by construction: T6 Thunderheart is absent
+> from `FERAL_TIER_PIECE_IDS`, so 10/10 is the whole expected set, not a
+> shortfall. Ret grew because the wowsims curated gear sets now grant
+> membership; feral is new.
+
 Note the schema is `sources` (an array of `{kind, zone, boss}` rows), not a
 scalar `source`. A first probe reading `.source` reported 224/224 null and was
 wrong; the corrected probe reads `sources`.
@@ -521,6 +537,28 @@ It does say the Phase 1 gate box cannot be closed by quoting 76.4%. The honest
 figure for "would our pipeline find the right items on its own" is 58.5%, and
 the trinket/libram gap is a concrete, ownable defect rather than a vague recall
 worry. Ticket 18 now has its instrument and its first measurement.
+
+> **Re-measured 2026-08-06 on `phase-2/feral`**, same two commands, same `--max-phase 3`:
+>
+> | | Wowhead as input | Held out |
+> |---|---|---|
+> | universe total | 347 → **359** | 325 → **339** |
+> | `listOnlyMembership` | 21 → **23** | 0 |
+> | Wowhead P3 BiS recall | 76.4% → **83.7%** (103/123) | 58.5% → **67.5%** (83/123) |
+> | tier pieces present | 15/15 | 15/15 |
+>
+> The held-out figure is the one that matters, and **58.5% → 67.5%** is a real
+> improvement in what the pipeline finds *without* the answer key: that branch
+> taught `parse_wowhead_source` the badge-vendor, reputation-vendor (both word
+> orders) and quest-with-zone phrasings, so rows whose prose was previously
+> discarded now resolve to a source from db/AtlasLoot corroboration rather than
+> depending on the list.
+>
+> The reading above is unchanged. Keep Wowhead as a shipping input; use the
+> held-out number as the diagnostic. The remaining gap is still concentrated in
+> badge, reputation and world-drop items — see
+> `.scratch/carry-forward/issues/45-unparsed-wowhead-prose-and-unknown-bucket.md`
+> for the 87-of-627 rows that still parse to nothing.
 
 ---
 
@@ -990,3 +1028,114 @@ returns a `Ranking` for a character who previously reached
 and the throw still happens when neither route has a fight.
 
 `pnpm verify` green on the branch.
+
+---
+
+## 2026-08-06 — Phase 2, ticket 05: feral as the second spec (gate boxes)
+
+Branch `phase-2/feral`, merged into `phase-2/trust` as `e841a67`. Full verdict
+in `.scratch/phase-2/feral-gate-verdict.md`, measurements in
+`.scratch/phase-2/feral-coupling-audit.md`, review in
+`docs/reviews/phase-2-feral.md`.
+
+### ☑ Box — feral shipped without a structural change to `rankUpgrades` or its seams
+
+The §14 box is a falsification test, and the claim survived.
+
+The box asks what **feral** forced, so the diff is the feral slice against the
+integration branch it branched from — not against `dev`, which would fold in
+the four trust slices that ran first and *did* touch `seams/`:
+
+```bash
+# merge-base of the feral slice, i.e. phase-2/trust before this merge
+git diff phase-2/trust~1...phase-2/feral --stat -- \
+  packages/core/src/rank.ts packages/core/src/seams/ \
+  packages/core/src/compose.ts
+# => packages/core/src/rank.ts | 20 ++++++++++++++++----
+```
+
+`seams/` and `compose.ts` do not appear: **0 lines**. No fourth port, no port
+signature changed. `rankUpgrades`'s signature, `Deps`, `RankInput` and `Ranking` are
+unchanged; `rank.ts` moved 20 lines turning `PRESET_ID` into a per-spec lookup.
+`spec.ts` did change shape (+95) to carry `DetectedSpecId` and form-uptime
+disambiguation, which §14 anticipated in the words "plus the disambiguation
+confidence field".
+
+That `Deps` already carried `raidSimSkeleton`, `epWeights`, `gemPalette` and
+`pool` as **data rather than ports** (ADR-0019) is what made this cheap, and is
+the thing the box was really testing.
+
+**Reported separately, per ticket 05:** `scripts/assemble_universe.py` *did*
+need a parameterisation pass. Six of its seven named hard-codings were paths;
+`CLASS_PALADIN` and `ret_eligible_d7` were logic. The generator is a build-time
+script producing one of the `Deps` data fields, so it is outside the box as
+written — but it is a genuine spec-coupling surface the box does not name, and
+saying so is part of the deliverable.
+
+### ☐ Box — ≥3 real characters produce believable shortlists (PARTIAL)
+
+Three characters rank end to end: slamaltman (ret), shredzepelin and nexess
+(feral cat), from committed fixtures under `test/fixtures/`.
+
+**The box does not close.** "Believable" is a domain judgment, and only
+shredzepelin was ever put through `sme-rank-review` — it returned
+**trust-with-caveats** and found a real defect (carry-forward 41). The
+remaining work is a domain pass on slamaltman and nexess, not more pipeline
+work.
+
+The defect behind the caveat is largely fixed. Worn items absent from their own
+universe, all three characters, before and after:
+
+```bash
+# ticket 41 carries the full script and both counts
+```
+
+| character | before | after |
+|---|---|---|
+| slamaltman | 6 | **4** |
+| shredzepelin | 12 | **8** |
+| nexess | 6 | **2** |
+
+The feral ranged slot went from 2 idols to 4, admitting Everbloom Idol and Idol
+of the Raven Goddess — the two the SME review said were missing. Cause was not
+"no db source records" (29 shipping ret rows have none either) but that
+`wowsims_curated_item_ids()` was read only to *label* rows already admitted,
+never to grant membership.
+
+### What shipped alongside
+
+- `data/wowhead-lists/feral/{p1-p2,p3}.json` — 166 hand-collected rows. The
+  pre-merge domain axis validated every one against the pinned db: all ids
+  exist, names byte-identical, slots match `ITEM_TYPE_SLOT[type]`.
+- `data/universes/feral-p{2,3}.json` — feral's first candidate universes.
+- A new `{kind:"unknown"}` `ItemSource` for items with no recorded origin. It
+  carries no fields, so nothing is invented, and having no `zone` keeps it out
+  of every raid and boss filter.
+
+`data/universes/ret-p*.json` grew by additions only — p2 +5, p3/p4/p5 +3, zero
+deletions, no existing row altered — which is what the phase-2 spec's boundary
+actually requires. All 8 are wowsims-curated ret items that were being dropped
+in silence.
+
+### A silent wrong answer, caught by review and fixed
+
+Worth logging because it is the failure mode PLAN.md names as this project's
+worst case. Universes are cumulative, so a p3 build also reads the p1-p2
+Wowhead list. Where two guides phrased the same item differently and only the
+later phrasing parsed, the item shipped a real `raid` source at p3 and a
+zoneless `{kind:"unknown"}` at p2 — and `matchesZone` requires a zone, so at p2
+the item silently vanished from its own raid's view with no error.
+
+30017 Telonicus's Pendant of Mayhem is a Kael'thas drop, written
+`Quest: … (Tempest Keep: The Eye)` on the feral p1-p2 page. Fixed by teaching
+the parser that shape plus the two vendor phrasings; pinned by four cross-tier
+source-stability tests and one asserting a Wowhead-listed item never ships as
+`unknown`, each verified to fail without the fix.
+
+`pnpm verify` green on the merged tip: **357 tests, 32 files**.
+
+### Where this leaves Phase 2
+
+Seven of the eight §14 Phase 2 boxes are closed by their owning tickets. The
+open one is **"≥3 real characters produce believable shortlists"**, above, and
+it needs a human/SME reading of two shortlists rather than code.
