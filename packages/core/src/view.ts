@@ -38,13 +38,18 @@ export type ViewRow = RankedItem & {
   /**
    * Whether the cutoff hides this row, evaluated after filtering.
    *
-   * §12's rule is "filter first, then apply the cutoff within the filtered
-   * view", and this branch implements the ordering but not a *relative*
-   * cutoff: `CUTOFF` is absolute, so this always equals `belowCutoff` today.
-   * The value of the ordering is that filtering never *deletes* a row — a 2
-   * DPS gain that is the best thing in one raid still appears there, flagged,
-   * rather than the view answering "nothing". Whether §12 also wants the
-   * threshold itself recomputed per filter is
+   * §12 says "filter first, then apply the cutoff within the filtered view".
+   * This implements the ordering, and the ordering is the part that matters:
+   * filtering never *deletes* a row, so a 2 DPS gain that is the best thing in
+   * one raid still appears under that raid's filter — flagged, not absent.
+   *
+   * The recomputation itself is currently a no-op, and honestly so: `CUTOFF`
+   * is a pair of constants (§10) and `meetsCutoff` reads only those plus this
+   * row's own `deltaDps`/`deltaPct`, none of which filtering changes. So this
+   * always equals `belowCutoff`. Whether §12 instead wants the *threshold*
+   * derived from the filtered set — which would make one item read as an
+   * upgrade in one filter and noise in another, against §2's "no view changes
+   * a number" — is
    * `.scratch/carry-forward/issues/36-relative-cutoff-within-a-filtered-view.md`.
    */
   belowCutoffInView: boolean;
