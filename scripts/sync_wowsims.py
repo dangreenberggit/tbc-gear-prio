@@ -54,6 +54,12 @@ VENDOR = "vendor/wowsims"
 #   (those are bisTags/display input only).
 # - Each new tier needs token-to-piece verification against Wowhead before
 #   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
+#
+# Feral cat is not shaped like ret upstream. Retribution ships one curated set
+# per stage; feral cat ships sixteen, split BiS/Alt/Realistic and again by
+# 6-piece against 9-piece tier bonus. Only the p2 pair is tracked here — the
+# stage this repo defaults to — so `bisTags` has a defensible input without
+# this file becoming a mirror of upstream's whole catalogue.
 TRACKED = {
     "db.json": "assets/database/db.json",
     "constants_other.ts": "ui/core/constants/other.ts",
@@ -61,6 +67,10 @@ TRACKED = {
     "ret_p2.gear.json": "ui/paladin/retribution/gear_sets/p2.gear.json",
     "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
+    "feral_p2_6p.gear.json": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
+    "feral_p2_9p.gear.json": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
+    "feral_preraid.gear.json": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
+    "feral_default.apl.json": "ui/druid/feralcat/apls/default.apl.json",
 }
 
 def gh(*args):

@@ -10,18 +10,18 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1405,
-  "universeTotal": 230,
-  "listOnlyMembership": 12,
+  "excludedNoSource": 1398,
+  "universeTotal": 235,
+  "listOnlyMembership": 14,
   "perSlot": {
     "back": 20,
     "chest": 16,
-    "feet": 23,
-    "finger": 23,
+    "feet": 24,
+    "finger": 25,
     "hands": 18,
     "head": 17,
-    "legs": 13,
-    "neck": 17,
+    "legs": 14,
+    "neck": 18,
     "ranged": 2,
     "shoulder": 15,
     "trinket": 16,
@@ -31,45 +31,49 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 196,
+    "curated": 3,
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 25
+    "wowhead": 29
   },
   "membershipByOrigin": {
+    "curated": 3,
     "itemHasOrigin:atlasloot": 41,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 201,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 23,
-    "listOnly": 12,
+    "itemHasOrigin:wowhead": 25,
+    "listOnly": 14,
     "zoneMatch": 218
   },
   "exclusivePrimaryOrigin": {
     "db": 201,
     "atlasloot-only": 13,
     "two-hop": 10,
-    "wowhead-only": 6
+    "other": 3,
+    "wowhead-only": 8
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 230,
+    "total": 235,
     "casterOnlyReject": 74,
     "epFloorReject": 10,
     "combinedReject": 84,
-    "combinedKeep": 146,
-    "casterRejectPct": 32.2,
-    "combinedRejectPct": 36.5,
+    "combinedKeep": 151,
+    "casterRejectPct": 31.5,
+    "combinedRejectPct": 35.7,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 69,
-    "missed": 17,
-    "recallPct": 80.2,
+    "recalled": 72,
+    "missed": 14,
+    "recallPct": 83.7,
     "missedItems": [
       {
         "itemId": 19343,
@@ -126,28 +130,10 @@
         "d7Eligible": true
       },
       {
-        "itemId": 29119,
-        "name": "Haramad's Bargain",
-        "slot": "neck",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
-        "d7Eligible": true
-      },
-      {
         "itemId": 30341,
         "name": "Flesh Handler's Gauntlets",
         "slot": "hands",
         "d7Eligible": false
-      },
-      {
-        "itemId": 30834,
-        "name": "Shapeshifter's Signet",
-        "slot": "finger",
-        "d7Eligible": true
       },
       {
         "itemId": 31033,

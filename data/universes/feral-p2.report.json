@@ -1,0 +1,205 @@
+{
+  "maxPhase": 2,
+  "carryoverPolicy": "union",
+  "phaseZones": [
+    "Gruul's Lair",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep",
+    "World Bosses"
+  ],
+  "d7EligibleTotal": 3463,
+  "excludedNoSource": 1614,
+  "universeTotal": 250,
+  "listOnlyMembership": 21,
+  "perSlot": {
+    "back": 21,
+    "chest": 12,
+    "feet": 19,
+    "finger": 25,
+    "hands": 16,
+    "head": 12,
+    "legs": 11,
+    "neck": 19,
+    "ranged": 3,
+    "shoulder": 10,
+    "trinket": 17,
+    "waist": 16,
+    "weapon": 56,
+    "wrist": 13
+  },
+  "sourceRecordAdds": {
+    "atlasloot": 213,
+    "curated": 3,
+    "db": 1807,
+    "two-hop": 10,
+    "wowhead": 35
+  },
+  "membershipByOrigin": {
+    "curated": 3,
+    "itemHasOrigin:atlasloot": 39,
+    "itemHasOrigin:curated": 3,
+    "itemHasOrigin:db": 212,
+    "itemHasOrigin:two-hop": 10,
+    "itemHasOrigin:wowhead": 30,
+    "listOnly": 21,
+    "zoneMatch": 226
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 212,
+    "atlasloot-only": 14,
+    "other": 3,
+    "two-hop": 10,
+    "wowhead-only": 11
+  },
+  "tierPiecesExpected": 10,
+  "tierPiecesPresent": 10,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 250,
+    "casterOnlyReject": 114,
+    "epFloorReject": 0,
+    "combinedReject": 114,
+    "combinedKeep": 136,
+    "casterRejectPct": 45.6,
+    "combinedRejectPct": 45.6,
+    "applied": false
+  },
+  "wowheadListIds": 79,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 79,
+    "recalled": 58,
+    "missed": 21,
+    "recallPct": 73.4,
+    "missedItems": [
+      {
+        "itemId": 19406,
+        "name": "Drake Fang Talisman",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23206,
+        "name": "Mark of the Champion",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 25790,
+        "name": "Expedition Scout's Epaulets",
+        "slot": "shoulder",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27837,
+        "name": "Wastewalker Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27877,
+        "name": "Draenic Wildstaff",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27878,
+        "name": "Auchenai Death Shroud",
+        "slot": "back",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28064,
+        "name": "Idol of the Wild",
+        "slot": "ranged",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 28121,
+        "name": "Icon of Unyielding Courage",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28171,
+        "name": "Spymistress's Wristguards",
+        "slot": "wrist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28372,
+        "name": "Idol of Feral Shadows",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29247,
+        "name": "Girdle of the Deathdealer",
+        "slot": "waist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29359,
+        "name": "Feral Staff of Lashing",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30372,
+        "name": "Socrethar's Girdle",
+        "slot": "waist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31255,
+        "name": "Cloak of the Craft",
+        "slot": "back",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31275,
+        "name": "Necklace of Trophies",
+        "slot": "neck",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31334,
+        "name": "Staff of Natural Fury",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31544,
+        "name": "Clefthoof Hide Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 32387,
+        "name": "Idol of the Raven Goddess",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 38287,
+        "name": "Empty Mug of Direbrew",
+        "slot": "trinket",
+        "d7Eligible": true
+      }
+    ]
+  }
+}

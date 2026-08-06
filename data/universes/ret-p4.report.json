@@ -13,17 +13,17 @@
     "Zul'Aman"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1397,
-  "universeTotal": 403,
+  "excludedNoSource": 1392,
+  "universeTotal": 406,
   "listOnlyMembership": 25,
   "perSlot": {
     "back": 31,
     "chest": 35,
-    "feet": 39,
-    "finger": 39,
+    "feet": 40,
+    "finger": 40,
     "hands": 26,
     "head": 31,
-    "legs": 23,
+    "legs": 24,
     "neck": 28,
     "ranged": 4,
     "shoulder": 31,
@@ -34,13 +34,16 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 196,
+    "curated": 3,
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 56
+    "wowhead": 58
   },
   "membershipByOrigin": {
+    "curated": 3,
     "itemHasOrigin:atlasloot": 65,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 362,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 47,
@@ -51,28 +54,29 @@
     "db": 362,
     "atlasloot-only": 13,
     "two-hop": 15,
-    "wowhead-only": 13
+    "wowhead-only": 13,
+    "other": 3
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 403,
+    "total": 406,
     "casterOnlyReject": 138,
     "epFloorReject": 15,
     "combinedReject": 153,
-    "combinedKeep": 250,
-    "casterRejectPct": 34.2,
-    "combinedRejectPct": 38.0,
+    "combinedKeep": 253,
+    "casterRejectPct": 34.0,
+    "combinedRejectPct": 37.7,
     "applied": false
   },
   "wowheadListIds": 130,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 130,
-    "recalled": 109,
-    "missed": 21,
-    "recallPct": 83.8,
+    "recalled": 110,
+    "missed": 20,
+    "recallPct": 84.6,
     "missedItems": [
       {
         "itemId": 18823,
@@ -150,12 +154,6 @@
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
         "d7Eligible": true
       },
       {

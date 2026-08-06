@@ -1308,6 +1308,24 @@
       ]
     },
     {
+      "itemId": 28176,
+      "name": "Sha'tari Wrought Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 39.75,
+      "bisTags": [
+        "BiS"
+      ]
+    },
+    {
       "itemId": 32268,
       "name": "Myrmidon's Treads",
       "slot": "feet",
@@ -1913,6 +1931,24 @@
         }
       ],
       "curationHint": 42.94
+    },
+    {
+      "itemId": 29177,
+      "name": "A'dal's Command",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 41.0,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 33055,
@@ -3316,6 +3352,24 @@
         }
       ],
       "curationHint": 110.44
+    },
+    {
+      "itemId": 30257,
+      "name": "Shattrath Leggings",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown"
+        }
+      ],
+      "curationHint": 100.83,
+      "bisTags": [
+        "BiS"
+      ]
     },
     {
       "itemId": 29995,
