@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: PLAN.md §14 Phase 2, §4.1, §12; carry-forward ticket 30
 Blocks: none
@@ -93,3 +93,29 @@ above additionally needs the `rankUpgrades` altitude.
 - Both gate boxes closed at the altitudes named.
 - Ticket 30 closed with a pointer here.
 - `pnpm verify` green; review at `docs/reviews/phase-2-apply-view.md`.
+
+## Outcome (2026-08-05)
+
+All five `ViewOptions` fields implemented in `packages/core/src/view.ts`, with
+the three easy-to-reverse properties mutation-checked rather than merely
+asserted: renumbering `rank` inside a filter, and matching only the `raid` hop
+instead of the `token` hop, each fail a named test.
+
+`meetsCutoff` moved from `rank.ts` to `cutoff.ts` — `applyView` re-applies it
+within the filtered view (§12), and a copy is how two altitudes drift apart.
+
+**One real bug found by running the CLI, not by the unit tests.** Tie grouping
+originally extended each group against its running bounds. On the actual ret P2
+Karazhan ranking (reported SE ~2.18 DPS, adjacent deltas much smaller) the
+overlaps chained and all 100 rows collapsed into a single tie group — items 20+
+DPS apart marked as tied, the exact "reads as broken" failure §10 warns about.
+Groups are now leader-anchored and bounded at 2×SE. Regression test:
+`does not chain a long ladder into one undifferentiated group`.
+
+The CLI now calls `applyView` instead of its own `filterByZone`, and gained
+`--boss`, `--group-by`, `--pin-bis`, `--hide-owned`.
+
+**Deferred:** the below-cutoff expand is modelled as data (`belowCutoffInView`,
+hidden never deleted) rather than as a UI affordance — there is no UI until
+Phase 3. `groupBy: 'raid'` keys off the first zone-bearing source, which is
+arbitrary for a multi-zone item; filed as a carry-forward ticket.

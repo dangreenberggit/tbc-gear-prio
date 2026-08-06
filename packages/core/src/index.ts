@@ -1,5 +1,11 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
-export { CUTOFF, type Cutoff } from "./cutoff.js";
+export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+export {
+  applyView,
+  type ViewOptions,
+  type ViewResult,
+  type ViewRow,
+} from "./view.js";
 export {
   RankError,
   rankUpgrades,

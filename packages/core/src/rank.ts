@@ -22,7 +22,7 @@ import {
   statDeltaBetween,
   type CapState,
 } from "./caps.js";
-import { CUTOFF, type Cutoff } from "./cutoff.js";
+import { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
   substitutionsFromMetaRepair,
@@ -598,14 +598,6 @@ function isRace(value: string): value is Race {
     value === "RaceTroll" ||
     value === "RaceBloodElf"
   );
-}
-
-function meetsCutoff(
-  deltaDps: number,
-  deltaPct: number,
-  cutoff: Cutoff
-): boolean {
-  return deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
 }
 
 /**

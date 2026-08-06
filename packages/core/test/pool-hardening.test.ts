@@ -581,6 +581,14 @@ describe("data/universes/ret-p3.json hardening", () => {
       const entry = universeP3.find((e) => e.itemId === id)!;
       expect(entry.source.kind, `${id} ${entry.name}`).toBe("token");
       expect(entry.source.zone, `${id} ${entry.name}`).toBe(map!.zone);
+      // Boss and token name too, not just zone. The raid *and* boss filters
+      // are shipped ViewOptions controls, so a regeneration that scrambled
+      // bosses within the right zone would silently answer the boss filter
+      // wrongly — and zone-only attribution would not notice.
+      expect(entry.source.boss, `${id} ${entry.name} boss`).toBe(map!.boss);
+      expect(entry.source.token, `${id} ${entry.name} token`).toBe(
+        map!.tokenName
+      );
     }
 
     for (const id of SUNWELL_TIER_PIECE_IDS) {
