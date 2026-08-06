@@ -36,10 +36,16 @@ export type ViewRow = RankedItem & {
    */
   tieGroupId?: string;
   /**
-   * Recomputed within the filtered view, because filter composes *before* the
-   * cutoff (§12): a 2 DPS gain may be the best thing available in one specific
-   * raid, and hiding it there would answer the user's question with "nothing".
-   * Hidden behind an expand, never deleted.
+   * Whether the cutoff hides this row, evaluated after filtering.
+   *
+   * §12's rule is "filter first, then apply the cutoff within the filtered
+   * view", and this branch implements the ordering but not a *relative*
+   * cutoff: `CUTOFF` is absolute, so this always equals `belowCutoff` today.
+   * The value of the ordering is that filtering never *deletes* a row — a 2
+   * DPS gain that is the best thing in one raid still appears there, flagged,
+   * rather than the view answering "nothing". Whether §12 also wants the
+   * threshold itself recomputed per filter is
+   * `.scratch/carry-forward/issues/36-relative-cutoff-within-a-filtered-view.md`.
    */
   belowCutoffInView: boolean;
 };
@@ -89,27 +95,35 @@ function zoneKeyOf(item: RankedItem): string {
 }
 
 /**
- * BiS-tag richness, the first tiebreak within a tie group (§10). More curated
- * memberships is the stronger claim; item id settles the rest so the order is
- * total and stable.
- */
-function tagRichness(item: RankedItem): number {
-  return item.bisTags.length;
-}
-
-/**
  * Rows whose SE intervals overlap are one tie group (§10).
  *
- * Every row is compared against the group's **leader**, not against the
- * running union of the group's bounds. Chaining on the union is the obvious
- * implementation and it is wrong at this SE scale: measured on the ret P2
- * Karazhan ranking, reported SE is ~2.18 DPS while adjacent deltas differ by
- * far less, so a transitive walk merges the entire hundred-row list into one
- * group and the tool reads as broken — the precise failure §10 warns about.
- * Leader-anchored groups stay bounded at 2×SE wide, so a tie means "these
- * could genuinely be each other's equal", which is the claim being made.
+ * Three things here are each a bug someone already shipped:
+ *
+ * 1. **Grouped on delta order, never on display order.** A tie is a claim
+ *    about two numbers, so it cannot depend on how the list is sorted. Doing
+ *    this on the pinned order let a pinned −8 DPS row lead the list and swallow
+ *    every positive row behind it, displaying a downgrade as tied with a +40
+ *    upgrade.
+ * 2. **Membership is measured on the *narrower* of the two SEs.** Testing only
+ *    `row.high >= leader.low` lets one wide-SE row bridge a gap its partner's
+ *    own interval never spans — with SEs of 0.01 and 60, deltas 100 and 50 came
+ *    out tied while 50 and 49 did not.
+ * 3. **Anchored to the leader, not to the running union.** Chaining on the
+ *    union is the obvious implementation and collapses the whole list at the
+ *    SE scale this tool actually reports — §10's "reads as broken" failure.
+ *    Observed on the ret P2 Karazhan ranking at 3,000 iterations, where
+ *    reported SE runs a little over 2 DPS while adjacent deltas differ by far
+ *    less; §10 records 1.678 DPS at 5,000 iterations, and SE grows as
+ *    iterations fall. Re-measure with:
+ *
+ *      pnpm rank --region US --realm dreamscythe --character slamaltman \
+ *        --offline --max-phase 2 --raid Karazhan --report <path>.html
+ *
+ *    then read `se` from the emitted `.json`. The conclusion needs only
+ *    SE ≳ adjacent-delta spacing, not the exact figure.
  */
 function assignTieGroups(rows: ViewRow[]): void {
+  const byDelta = [...rows].sort((a, b) => b.deltaDps - a.deltaDps);
   let groupStart = 0;
   let groupId = 0;
 
@@ -117,15 +131,18 @@ function assignTieGroups(rows: ViewRow[]): void {
     if (end - groupStart > 1) {
       groupId += 1;
       const id = `tie-${groupId}`;
-      for (let i = groupStart; i < end; i += 1) rows[i]!.tieGroupId = id;
+      for (let i = groupStart; i < end; i += 1) byDelta[i]!.tieGroupId = id;
     }
   };
 
-  for (let i = 1; i <= rows.length; i += 1) {
-    const leader = rows[groupStart]!;
-    const row = rows[i];
+  for (let i = 1; i <= byDelta.length; i += 1) {
+    const leader = byDelta[groupStart]!;
+    const row = byDelta[i];
+    // The narrower of the two SEs, so one wide-SE row cannot reach across a
+    // gap its partner's own interval never spans.
     const overlapsLeader =
-      row !== undefined && row.deltaDps + row.se >= leader.deltaDps - leader.se;
+      row !== undefined &&
+      leader.deltaDps - row.deltaDps <= Math.min(row.se, leader.se) * 2;
     if (!overlapsLeader) {
       flush(i);
       groupStart = i;
@@ -134,13 +151,13 @@ function assignTieGroups(rows: ViewRow[]): void {
 }
 
 /**
- * `sortKey = [pinBis && bisTags.includes('BiS') ? 0 : 1, -deltaDps]` (§4.1).
- *
  * The pinned group stays `deltaDps`-ordered: wowsims' curated sets are 17
  * entries in fixed *slot* order carrying no ranking information, so slot order
- * is membership data and must never leak into display order. Pinned rows will
- * sometimes show negative deltas and that is correct — an item is BiS as a
- * member of a whole optimized set, and `setBonusNote` explains the common case.
+ * is membership data and must never leak into display order (§4.1). Pinned
+ * rows will sometimes show negative deltas and that is correct — an item is
+ * BiS as a member of a whole optimized set, and `setBonusNote` explains the
+ * common case. Ties break on BiS-tag richness then item id, so the order is
+ * total and stable rather than dependent on the input's order.
  */
 function compareRows(a: ViewRow, b: ViewRow, pinBis: boolean): number {
   if (pinBis) {
@@ -149,7 +166,7 @@ function compareRows(a: ViewRow, b: ViewRow, pinBis: boolean): number {
     if (ap !== bp) return ap - bp;
   }
   if (a.deltaDps !== b.deltaDps) return b.deltaDps - a.deltaDps;
-  const richness = tagRichness(b) - tagRichness(a);
+  const richness = b.bisTags.length - a.bisTags.length;
   if (richness !== 0) return richness;
   return a.itemId - b.itemId;
 }

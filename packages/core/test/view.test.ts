@@ -189,7 +189,7 @@ describe("applyView", () => {
     const token: ItemSource = {
       kind: "token",
       zone: "Karazhan",
-      boss: "Prince Malchezaar",
+      boss: "The Curator",
       token: "Gloves of the Fallen Champion",
     };
 
@@ -352,6 +352,71 @@ describe("applyView", () => {
       expect(rows[0]!.tieGroupId).not.toBe(rows[rows.length - 1]!.tieGroupId);
     });
 
+    it("does not tie a pinned negative row with the upgrades behind it", () => {
+      // Regression, pre-merge review (adversarial A1 / spec S4, converged).
+      // Tie grouping ran over the *pin-sorted* list, so a pinned BiS row at
+      // -8 DPS became the group leader and every positive row behind it
+      // "overlapped" it — displaying a downgrade as tied with a +40 upgrade.
+      // A tie is a claim about two numbers and cannot depend on sort order.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: -8,
+          deltaPct: -0.4,
+          se: 1,
+          bisTags: ["BiS"],
+        }),
+        item({ itemId: 2, deltaDps: 40, deltaPct: 2, se: 1 }),
+        item({ itemId: 3, deltaDps: 39, deltaPct: 1.95, se: 1 }),
+      ]);
+      const { rows } = applyView(r, { pinBis: true });
+      expect(rows[0]!.itemId).toBe(1);
+      expect(rows[0]!.tieGroupId).toBeUndefined();
+      // +40 and +39 genuinely do overlap, and must still read as a tie.
+      expect(rows[1]!.tieGroupId).toBeDefined();
+      expect(rows[1]!.tieGroupId).toBe(rows[2]!.tieGroupId);
+    });
+
+    it("assigns identical groups whether or not the view is pinned", () => {
+      const items = [
+        item({
+          itemId: 1,
+          deltaDps: -8,
+          deltaPct: -0.4,
+          se: 1,
+          bisTags: ["BiS"],
+        }),
+        item({ itemId: 2, deltaDps: 40, deltaPct: 2, se: 1 }),
+        item({ itemId: 3, deltaDps: 39, deltaPct: 1.95, se: 1 }),
+      ];
+      const groupsBy = (pinBis: boolean) =>
+        new Map(
+          applyView(ranking(items), { pinBis }).rows.map((x) => [
+            x.itemId,
+            x.tieGroupId,
+          ])
+        );
+      expect(groupsBy(true)).toEqual(groupsBy(false));
+    });
+
+    it("does not let one wide-SE row bridge rows that do not overlap", () => {
+      // Regression, pre-merge review (adversarial A2). Testing only
+      // `row.high >= leader.low` made the group as wide as its widest member:
+      // 100 and 50 tied through a row with se 60, while 50 and 49 did not.
+      const r = ranking([
+        item({ itemId: 10, deltaDps: 100, deltaPct: 5, se: 0.01 }),
+        item({ itemId: 11, deltaDps: 50, deltaPct: 2.5, se: 60 }),
+        item({ itemId: 12, deltaDps: 49, deltaPct: 2.45, se: 0.01 }),
+      ]);
+      const { rows } = applyView(r);
+      // 100 vs 50 is a 50 DPS gap; no pair here may share a group.
+      expect(rows.map((x) => x.tieGroupId)).toEqual([
+        undefined,
+        undefined,
+        undefined,
+      ]);
+    });
+
     it("groups rows whose SE intervals overlap", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 20, deltaPct: 1, se: 2 }),
@@ -384,8 +449,12 @@ describe("applyView", () => {
       item({ itemId: 2, deltaDps: 40, deltaPct: 2 }),
     ];
     const r = ranking(items);
+    const before = structuredClone(r.items);
     applyView(r, { pinBis: true, hideOwned: true, raid: "Karazhan" });
-    expect(r.items.map((x) => x.itemId)).toEqual([1, 2]);
+    // Deep, not just top-level key absence: `{ ...item }` is a shallow copy,
+    // so `bisTags` and `sources` are shared with the caller's Ranking and a
+    // future push into either would not be caught by a key check.
+    expect(r.items).toEqual(before);
     expect(r.items[0]).not.toHaveProperty("tieGroupId");
     expect(r.items[0]).not.toHaveProperty("belowCutoffInView");
   });

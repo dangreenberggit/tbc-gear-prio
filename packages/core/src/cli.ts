@@ -340,7 +340,12 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
-      const reportRanking = args.raid ? { ...ranking, items } : ranking;
+      // The report shows exactly the rows the terminal showed, so `meta` has
+      // to name every filter that shaped them — reporting only `raid` while
+      // `--boss` or `--hide-owned` had also cut rows is a quietly wrong
+      // artifact, and these files get read long after the command is forgotten.
+      const viewed = Object.keys(args.view).length > 0;
+      const reportRanking = viewed ? { ...ranking, items } : ranking;
       mkdirSync(dirname(reportPath), { recursive: true });
       const meta = {
         character: args.character,
@@ -351,6 +356,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         poolSize: pool.length,
         generatedAt: new Date().toISOString(),
         ...(args.raid !== undefined ? { raid: args.raid } : {}),
+        ...(viewed ? { view: args.view } : {}),
       };
       writeFileSync(reportPath, renderRankHtml(reportRanking, meta), "utf8");
       const jsonPath = reportPath.replace(/\.html$/i, ".json");

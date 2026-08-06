@@ -10,6 +10,7 @@
 
 import type { ItemSlot } from "./items.js";
 import type { SimSlotName } from "./pool.js";
+import type { ViewOptions } from "./view.js";
 import type { RankedItem } from "./rank.js";
 
 /** Display order for slot sections; also seeds `groupBySlot`'s empty buckets. */
@@ -57,6 +58,13 @@ export type RankReportMeta = {
   generatedAt: string;
   /** Report-time zone filter (CLI `--raid`); not applied during rank. */
   raid?: string;
+  /**
+   * Every view control that shaped the rows in this report (§4.1). Recorded
+   * because the rows are a filtered re-render: a report that names only
+   * `raid` while `--boss` or `--hide-owned` also cut rows misdescribes itself,
+   * and these files outlive the command that made them.
+   */
+  view?: ViewOptions;
 };
 
 /**

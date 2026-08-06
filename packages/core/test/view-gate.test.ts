@@ -106,10 +106,20 @@ class CountingSimRunner implements SimRunner {
 }
 
 /**
- * A Karazhan T4 piece reachable *only* through `kind: 'token'`, alongside two
- * ordinary raid drops in another zone. 29072 is token-sourced only in
- * `data/universes/ret-p2.json`, which is what makes it the §15 risk-table case:
- * a Karazhan filter that follows just the `raid` hop returns nothing here.
+ * Every `source` below is copied verbatim from `data/universes/ret-p2.json` —
+ * a fixture that invents a boss or a zone can pass while proving nothing about
+ * the data that ships. Re-check with:
+ *
+ *   python -c "
+ *   import json
+ *   d=json.load(open('data/universes/ret-p2.json'))
+ *   print([ (e['itemId'], e['sources']) for e in d['entries']
+ *           if e['itemId'] in (29072,30129,28530) ])"
+ *
+ * 29072 Justicar Gauntlets is token-sourced *only*, which is what makes it the
+ * §15 risk-table case: a Karazhan filter that follows just the `raid` hop
+ * returns nothing here. 30129 puts a second token piece in a different zone so
+ * the filter has to discriminate rather than pass everything through.
  */
 const POOL: PoolEntry[] = [
   {
@@ -120,23 +130,28 @@ const POOL: PoolEntry[] = [
     source: {
       kind: "token",
       zone: "Karazhan",
-      boss: "Prince Malchezaar",
+      boss: "The Curator",
       token: "Gloves of the Fallen Champion",
     },
   },
   {
-    itemId: 29381,
-    name: "Choker of Vile Intent",
-    slot: "neck",
+    itemId: 30129,
+    name: "Crystalforge Breastplate",
+    slot: "chest",
     phase: 1,
-    source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
+    source: {
+      kind: "token",
+      zone: "Tempest Keep",
+      boss: "Kael'thas Sunstrider",
+      token: "Chestguard of the Vanquished Champion",
+    },
   },
   {
     itemId: 28530,
     name: "Brooch of Unquenchable Fury",
     slot: "neck",
     phase: 1,
-    source: { kind: "raid", zone: "Tempest Keep", boss: "Al'ar" },
+    source: { kind: "raid", zone: "Karazhan", boss: "Moroes" },
   },
 ];
 
@@ -176,8 +191,8 @@ const VIEWS: ViewOptions[] = [
   { raid: "Karazhan" },
   { raid: "Tempest Keep" },
   { raid: "all" },
-  { raid: "Tempest Keep", boss: "Al'ar" },
-  { boss: "Void Reaver" },
+  { raid: "Karazhan", boss: "Moroes" },
+  { boss: "Kael'thas Sunstrider" },
   { groupBy: "rank" },
   { groupBy: "slot" },
   { groupBy: "raid" },
@@ -185,8 +200,8 @@ const VIEWS: ViewOptions[] = [
   { hideOwned: false },
   {
     pinBis: true,
-    raid: "Tempest Keep",
-    boss: "Al'ar",
+    raid: "Karazhan",
+    boss: "Moroes",
     groupBy: "slot",
     hideOwned: true,
   },
@@ -224,16 +239,20 @@ describe("Phase 2 gate: a raid filter on a tier-token slot returns the tier piec
     expect(ranking.items.map((i) => i.itemId)).toContain(29072);
 
     const { rows } = applyView(ranking, { raid: "Karazhan" });
-    expect(rows.map((i) => i.itemId)).toEqual([29072]);
-    expect(rows[0]!.source.kind).toBe("token");
+    // 28530 is the ordinary Karazhan drop; 29072 reaches the zone only through
+    // the token hop, and it is the one that would go missing.
+    expect(rows.map((i) => i.itemId).sort()).toEqual([28530, 29072]);
+    expect(rows.find((i) => i.itemId === 29072)!.source.kind).toBe("token");
   });
 
   it("scopes a boss filter through the token hop too", async () => {
     const { ranking } = await rankOnce();
     const { rows } = applyView(ranking, {
       raid: "Karazhan",
-      boss: "Prince Malchezaar",
+      boss: "The Curator",
     });
+    // The Curator drops the gloves token, so the boss filter has to follow the
+    // token source's own boss — and must not sweep in Moroes' neck.
     expect(rows.map((i) => i.itemId)).toEqual([29072]);
   });
 
@@ -241,5 +260,8 @@ describe("Phase 2 gate: a raid filter on a tier-token slot returns the tier piec
     const { ranking } = await rankOnce();
     const { rows } = applyView(ranking, { raid: "Tempest Keep" });
     expect(rows.map((i) => i.itemId)).not.toContain(29072);
+    // Tempest Keep has its own token piece, so this is a discriminating
+    // filter rather than an empty one.
+    expect(rows.map((i) => i.itemId)).toEqual([30129]);
   });
 });
