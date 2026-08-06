@@ -16,13 +16,20 @@ export {
 export {
   RankError,
   rankUpgrades,
+  resolveFight,
   type Deps,
   type Progress,
   type RankErrorKind,
   type RankInput,
   type RankedItem,
   type Ranking,
+  type ResolvedFight,
 } from "./rank.js";
+export {
+  REPORT_EVENTS_REF,
+  reportEventsOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./fixtures/report-events-offline.js";
 export {
   capStateFrom,
   isHitDriven,

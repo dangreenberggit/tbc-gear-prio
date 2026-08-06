@@ -874,3 +874,89 @@ magnitude test, so it does not depend on `ep_score` at all.
 
 Filed as ticket 27 (`ep_score` blind to weapon damage) — the underlying scoring
 gap is still there for any future use of `curationHint` on weapons.
+
+---
+
+## 2026-08-05 — Phase 2 gate: the report-events fallback route
+
+Closes:
+
+> ☐ fallback route exercised on a character with no ranked kills
+
+Owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`.
+
+### "No ranked kills" is about a ranked parse, not about whether the boss died
+
+The ticket asked for a character with no ranked kills, and the obvious reading —
+find a wipe-only report — is the wrong one. All three parts below are one
+committed script, so this is re-runnable from a fresh worktree:
+
+```bash
+python scripts/probe_ranked_route.py --name slamaltman --server-slug dreamscythe --region US
+```
+
+**Part 1, kills.** Every one of slamaltman's 25 most recent reports contains
+kills — 25/25 had at least one, and the SSC / TK reports run 10 kills out of 11
+boss fights. There was no wipe-only report to capture. (Skip this part with
+`--skip-kills`; it is the expensive one, one query per report.)
+
+**Part 2, ranks.** The distinction that matters is `encounterRankings`, which is
+what the `ranked` route resolves through. Slamaltman returns
+`totalKills=None, ranks=0` on encounters 623 (Hydross), 624 (The Lurker Below)
+and 625 (Leotheras) — encounters he has ten kills on. The encounter IDs were
+confirmed against `worldData.zones` (zone 1010, SSC / TK) before being trusted,
+because a wrong id returns the same empty result as an unranked character.
+
+**Part 3, control** — because zero ranks only means "no ranked kills" if the
+query is capable of returning a non-zero. Hydross has 100 ranked characters; the
+top of that leaderboard (Seonsu @ Herod) returns `totalKills=19, ranks=19` from
+the *same* query shape. The query works; slamaltman is genuinely unranked.
+
+Verdict line from the run on 2026-08-05:
+
+```
+  slamaltman has NO ranked kills -- the 'report-events' fallback
+  is the only route that reaches this character's gear.
+```
+
+So slamaltman is himself the character the gate box asks for, and the fixture is
+a real capture rather than a contrived one.
+
+### The capture
+
+```bash
+python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US \
+  --report-code mKTA9V7Lx4Ck2DXf \
+  --raw-out test/fixtures/slamaltman-report-events.raw.json
+```
+
+Cost ~12.62 points against the 3,600/hour budget. Written: 25 combatants, 19
+gear entries for slamaltman, plus the buffs table — 328 KB, committed.
+
+The captured fight is Magtheridon with `kill: true`. That is not a contradiction
+and the test asserts it on purpose: the route is `report-events` because the
+character has no ranked *parse*, not because the boss lived.
+
+Re-verify the fixture is the one described, without spending points:
+
+```bash
+python -c "import json; d=json.load(open('test/fixtures/slamaltman-report-events.raw.json')); print(d['report_code'], d['fight'])"
+```
+
+### The behaviour
+
+`Ranking` had no `fight` field, so nothing carried the route out to a caller.
+Added `Ranking.fight: ResolvedFight` (reportCode, fightId, encounterName,
+killedAt, route) per PLAN.md §4, and `resolveFight` now prefers a ranked
+summary and falls through to report-events rather than depending on list order.
+
+```bash
+pnpm vitest run packages/core/test/report-events-fallback.test.ts
+```
+
+11 passing: the fixture loads to 17 sim slots from 19 WCL entries, `rankUpgrades`
+returns a `Ranking` for a character who previously reached
+`RankError('no-qualifying-fight')`, `ranking.fight.route` reads `report-events`,
+and the throw still happens when neither route has a fight.
+
+`pnpm verify` green on the branch.

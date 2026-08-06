@@ -49,7 +49,7 @@ import {
   type PoolEntry,
   type SimSlotName,
 } from "./pool.js";
-import type { GearSource } from "./seams/gear-source.js";
+import type { FightSummary, GearSource } from "./seams/gear-source.js";
 import {
   simCacheKey,
   type RaidSimRequest,
@@ -166,9 +166,31 @@ export type RankedItem = {
   belowCutoff: boolean;
 };
 
+/**
+ * Which fight answered this run, and by which route (PLAN.md §4).
+ *
+ * Named `fight` rather than `source`: that name belongs to `ItemSource`, and
+ * two `source` fields on one screen is exactly the confusion to avoid.
+ *
+ * `route` is the part with teeth. A caller cannot otherwise tell a ranked
+ * resolve from the report-events fallback, and the two carry different
+ * confidence — the fallback walks a report's fights rather than a ranked
+ * parse, so it can land on a fight the character performed unusually in.
+ * Surfacing it is what lets a UI say which one it got.
+ */
+export type ResolvedFight = {
+  reportCode: string;
+  fightId: number;
+  encounterName: string;
+  killedAt: string;
+  route: FightSummary["route"];
+};
+
 export type Ranking = {
   contentHash: string;
   cutoff: Cutoff;
+  /** Which fight answered, and by which route. */
+  fight: ResolvedFight;
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
   substitutions: Substitution[];
@@ -209,17 +231,17 @@ export async function rankUpgrades(
 ): Promise<Ranking> {
   onProgress?.({ stage: "resolving" });
   const fights = await deps.gear.findFights(input.character, input.spec);
-  const fight =
-    input.fight ??
-    (fights[0]
-      ? { reportCode: fights[0].reportCode, fightId: fights[0].fightId }
-      : undefined);
-  if (!fight) {
+  const maybeResolved = resolveFight(fights, input.fight);
+  if (!maybeResolved) {
     throw new RankError(
       "no-qualifying-fight",
       `no qualifying fights for ${input.character.name}`
     );
   }
+  // Rebound non-optional: the guard above narrows `maybeResolved`, but that
+  // narrowing does not reach the nested closure that builds the `Ranking`.
+  const resolved: ResolvedFight = maybeResolved;
+  const fight = { reportCode: resolved.reportCode, fightId: resolved.fightId };
 
   onProgress?.({ stage: "reading-gear" });
   // Never a cache read here — ADR-0019 hashes what this returns. The point
@@ -510,6 +532,7 @@ export async function rankUpgrades(
     const ranking: Ranking = {
       contentHash,
       cutoff: CUTOFF,
+      fight: resolved,
       baseline: {
         dps: observation.dps,
         stdev: observation.stdev,
@@ -618,6 +641,65 @@ export async function rankUpgrades(
     await cacheSimResult(deps, req, simVersion, opts, obs);
     return obs;
   }
+}
+
+/**
+ * Which fight answers this run (PLAN.md §5.2, §10 fallback route).
+ *
+ * Ranked kills win when there are any: a ranked parse is a fight the character
+ * was measured on, so it is the better sample of how they play. Only when
+ * there is no ranked kill does the run fall through to a `report-events`
+ * summary — gear read by walking a report's fights, which is how a character
+ * who has never ranked gets an answer at all instead of
+ * `RankError('no-qualifying-fight')`.
+ *
+ * That fallback is not hypothetical. `slamaltman` has ten kills on the SSC
+ * encounters and **zero** `encounterRankings` entries, verified 2026-08-05
+ * against the live API; the same query returns 19 ranks for a leaderboard
+ * character, so the empty result is this character rather than a broken query.
+ * Re-check with `.scratch/` probes recorded in docs/verification-log.md.
+ *
+ * An explicit `RankInput.fight` overrides both — a caller naming a fight has
+ * already made this choice — and its route is reported as whatever the summary
+ * list says about that fight, or `report-events` when the list does not
+ * describe it. Exported for direct unit testing: the preference order is the
+ * whole behaviour, and it is invisible from a `Ranking` that only ever holds
+ * the winner.
+ */
+export function resolveFight(
+  fights: readonly FightSummary[],
+  requested?: FightRef
+): ResolvedFight | undefined {
+  if (requested) {
+    const match = fights.find(
+      (f) =>
+        f.reportCode === requested.reportCode && f.fightId === requested.fightId
+    );
+    return match
+      ? summaryToResolved(match)
+      : {
+          ...requested,
+          encounterName: "",
+          killedAt: "",
+          // A caller-named fight the summary list does not describe was not
+          // reached through a ranking, so calling it `ranked` would overstate
+          // what we know about it.
+          route: "report-events",
+        };
+  }
+  const ranked = fights.find((f) => f.route === "ranked");
+  const chosen = ranked ?? fights[0];
+  return chosen ? summaryToResolved(chosen) : undefined;
+}
+
+function summaryToResolved(f: FightSummary): ResolvedFight {
+  return {
+    reportCode: f.reportCode,
+    fightId: f.fightId,
+    encounterName: f.encounterName,
+    killedAt: f.killedAt,
+    route: f.route,
+  };
 }
 
 /** Namespaced so a ranking blob cannot collide with another content-addressed value. */

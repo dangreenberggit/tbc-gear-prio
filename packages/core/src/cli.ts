@@ -14,6 +14,10 @@ import {
   SLAMALTMAN_REF,
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
+import {
+  reportEventsOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./fixtures/report-events-offline.js";
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
@@ -54,7 +58,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--report-events] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -68,6 +72,7 @@ function parseArgs(argv: string[]): {
   maxPhase: ContentPhase;
   assumptions: boolean;
   showBelowCutoff: boolean;
+  reportEvents: boolean;
   raid?: string;
   report?: string;
   view: ViewOptions;
@@ -80,6 +85,7 @@ function parseArgs(argv: string[]): {
     maxPhase: ContentPhase;
     assumptions: boolean;
     showBelowCutoff: boolean;
+    reportEvents: boolean;
     raid?: string;
     report?: string;
     view: ViewOptions;
@@ -87,6 +93,7 @@ function parseArgs(argv: string[]): {
     offline: false,
     assumptions: false,
     showBelowCutoff: false,
+    reportEvents: false,
     maxPhase: defaultMaxPhaseFromLock(),
     view: {},
   };
@@ -111,6 +118,10 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--show-below-cutoff") {
       out.showBelowCutoff = true;
+      continue;
+    }
+    if (arg === "--report-events") {
+      out.reportEvents = true;
       continue;
     }
     const next = argv[i + 1];
@@ -172,6 +183,7 @@ function parseArgs(argv: string[]): {
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
     showBelowCutoff: out.showBelowCutoff,
+    reportEvents: out.reportEvents,
     view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
@@ -254,10 +266,20 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
     args.character.toLowerCase() === SLAMALTMAN_REF.name;
 
+  // Two recordings of the same character, differing in the route that reached
+  // his gear. Slamaltman has ten SSC kills and zero encounterRankings, so the
+  // fallback capture is a real resolve rather than a simulated one — see
+  // docs/verification-log.md, 2026-08-05.
   const gearData = isSlamaltman
-    ? slamaltmanOfflineRecordings(
-        loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
-      )
+    ? args.reportEvents
+      ? reportEventsOfflineRecordings(
+          loadJson<ReportEventsRawFixture>(
+            "test/fixtures/slamaltman-report-events.raw.json"
+          )
+        )
+      : slamaltmanOfflineRecordings(
+          loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
+        )
     : { fights: new Map(), gear: new Map() };
 
   const binary = resolveWowsimcli();
@@ -298,6 +320,14 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer lands in Phase 2 rather than in the web shell.
+    if (ranking.fight.route === "report-events") {
+      // §5.2: the fallback walks a report's fights rather than a ranked parse,
+      // so it can land on a fight the character performed unusually in. Said
+      // out loud rather than left to look identical to a ranked resolve.
+      console.log(
+        `note: no ranked kill for this character; gear read through the report-events route (${ranking.fight.reportCode} fight ${ranking.fight.fightId})`
+      );
+    }
     const view = applyView(ranking, args.view);
     // The default run is the shortlist (§10, ticket 04). `view.rows` still
     // holds every row and the report below still writes them, so this hides
