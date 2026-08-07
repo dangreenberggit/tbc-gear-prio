@@ -1,14 +1,19 @@
 /**
- * Build RecordedGearSourceData from a raw fixture captured through the
- * **report-events** route (PLAN.md §5.2, §10 fallback).
+ * Build RecordedGearSourceData from a raw WCL capture, for either offline
+ * route (PLAN.md §5.2, §10 fallback).
  *
- * The route is the whole point of this module. `slamaltman-offline.ts` builds
- * a `route: "ranked"` summary; this one builds `route: "report-events"`, so
- * the fallback can be exercised through `rankUpgrades` against a real payload
- * rather than a hand-written one.
+ * `slamaltman-offline.ts` and this module used to be two near-identical
+ * builders that differed in `route`, `confidence`, and (until the fix
+ * recorded in carry-forward ticket 38) whether `talentPointsByTree` was read
+ * from the capture or hardcoded. That last difference was not a design
+ * choice, it was a bug: the ranked builder's hardcoded `[5, 11, 45]` happened
+ * to match slamaltman's own ret capture, but nothing would have caught it
+ * silently scoring the wrong build the way the report-events builder's
+ * hardcode once did (docs/verification-log.md, 2026-08-05). Both routes now
+ * share `buildOfflineRecordings` below and always read talents from the
+ * payload — see ticket 38's Closed section for the reproduction.
  *
- * Pure — callers load the JSON (CLI / tests), same contract as the ranked
- * builder.
+ * Pure — callers load the JSON (CLI / tests).
  */
 
 import {
@@ -48,18 +53,18 @@ export const REPORT_EVENTS_REF: CharacterRef = {
 /**
  * Points spent per tree, read from the capture rather than assumed.
  *
- * An earlier version of this file hardcoded ret's `[5, 11, 45]` on the claim
- * that `--raw-out` does not persist tree points. That claim was false — the
- * raw payload carries `talents` verbatim — and the first capture it was
- * applied to was a **protection** set (0/44/17, 17k armour, an off-hand
- * shield), so the fixture asserted a ret build the payload contradicted.
- * Reading the real value is what makes that class of mislabelling impossible
- * rather than merely unlikely.
+ * An earlier version of the report-events builder hardcoded ret's
+ * `[5, 11, 45]` on the claim that `--raw-out` does not persist tree points.
+ * That claim was false — the raw payload carries `talents` verbatim — and the
+ * first capture it was applied to was a **protection** set (0/44/17, 17k
+ * armour, an off-hand shield), so the fixture asserted a ret build the
+ * payload contradicted. Reading the real value is what makes that class of
+ * mislabelling impossible rather than merely unlikely.
  *
  * `talents[].id` is points spent, not a talent id (PLAN.md §5.2 / R18).
  */
 function talentPointsFrom(
-  ev: ReportEventsRawFixture["combatant_info_events"][number],
+  ev: { talents?: Array<{ id: number }> },
   character: CharacterRef
 ): LoggedGear["talentPointsByTree"] {
   const points = (ev.talents ?? []).map((t) => t.id);
@@ -72,10 +77,33 @@ function talentPointsFrom(
   return [points[0]!, points[1]!, points[2]!];
 }
 
-export function reportEventsOfflineRecordings(
-  raw: ReportEventsRawFixture,
-  character: CharacterRef = REPORT_EVENTS_REF,
-  spec: SpecId = "ret"
+/** The shape both raw fixture types have in common — what the shared walk needs. */
+type OfflineRawFixture = {
+  report_code: string;
+  fight: { id: number; name: string };
+  actors: Array<{ id: number; name: string }>;
+  combatant_info_events: Array<{
+    sourceID: number;
+    gear: WclGearEntry[];
+    talents?: Array<{ id: number }>;
+  }>;
+};
+
+/**
+ * Shared body of both offline recording builders. `route` and `confidence`
+ * are the one real remaining difference between the ranked and report-events
+ * fixtures (PLAN.md §5.4); everything else — walking `combatant_info_events`,
+ * matching the character through `actors`, mapping gear, and reading
+ * talents — is identical between them.
+ */
+export function buildOfflineRecordings(
+  raw: OfflineRawFixture,
+  character: CharacterRef,
+  spec: SpecId,
+  route: FightSummary["route"],
+  confidence: number,
+  notFoundMessage: (character: CharacterRef, raw: OfflineRawFixture) => string,
+  killedAt?: string
 ): RecordedGearSourceData {
   const actors = new Map(raw.actors.map((a) => [a.id, a]));
   const wanted = character.name.toLowerCase();
@@ -102,35 +130,47 @@ export function reportEventsOfflineRecordings(
     };
     break;
   }
-  // One fight holds every raider's gear (phase0-findings §11), so a fixture
-  // that does not contain *this* character is a mis-capture rather than a
-  // character with no gear — say so instead of returning an empty recording
-  // that would surface later as an unrelated `no-qualifying-fight`.
   if (!logged) {
-    throw new Error(
-      `${character.name} not found in report-events fixture ${raw.report_code}`
-    );
+    throw new Error(notFoundMessage(character, raw));
   }
 
   const summary: FightSummary = {
     reportCode: raw.report_code,
     fightId: raw.fight.id,
     encounterName: raw.fight.name,
-    // No wall-clock kill time: the raw payload carries fight times as offsets
-    // from the report's own start, and `--raw-out` does not persist that start.
-    // Omitted rather than "" — see ResolvedFight.killedAt.
-    route: "report-events",
-    /**
-     * Below the ranked route's 1. §5.4 ties confidence to how sure we are
-     * that this fight is representative of the character's spec and play,
-     * and a fight reached by walking a report is a weaker signal than a
-     * ranked parse: nothing measured it against anything.
-     */
-    confidence: 0.5,
+    route,
+    confidence,
+    ...(killedAt ? { killedAt } : {}),
   };
 
   return {
     fights: new Map([[characterFightKey(character, spec), [summary]]]),
     gear: new Map([[fightGearKey(summary), logged]]),
   };
+}
+
+export function reportEventsOfflineRecordings(
+  raw: ReportEventsRawFixture,
+  character: CharacterRef = REPORT_EVENTS_REF,
+  spec: SpecId = "ret"
+): RecordedGearSourceData {
+  return buildOfflineRecordings(
+    raw,
+    character,
+    spec,
+    "report-events",
+    /**
+     * Below the ranked route's 1. §5.4 ties confidence to how sure we are
+     * that this fight is representative of the character's spec and play,
+     * and a fight reached by walking a report is a weaker signal than a
+     * ranked parse: nothing measured it against anything.
+     */
+    0.5,
+    // One fight holds every raider's gear (phase0-findings §11), so a
+    // fixture that does not contain *this* character is a mis-capture rather
+    // than a character with no gear — say so instead of returning an empty
+    // recording that would surface later as an unrelated
+    // `no-qualifying-fight`.
+    (c, r) => `${c.name} not found in report-events fixture ${r.report_code}`
+  );
 }

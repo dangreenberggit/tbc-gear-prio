@@ -1,27 +1,23 @@
 /**
- * Build RecordedGearSourceData from the Phase 0 slamaltman raw fixture.
- * Pure — callers load the JSON (CLI / tests).
+ * Build RecordedGearSourceData from the Phase 0 slamaltman raw fixture, via
+ * the **ranked** route.
+ *
+ * The shared walk — actors, gear mapping, talent reading — lives in
+ * `buildOfflineRecordings` in `report-events-offline.ts`; this module supplies
+ * only what actually differs for the ranked route: `route` itself,
+ * `confidence: 1` (a ranked parse is the strongest signal, PLAN.md §5.4), and
+ * a fixed `killedAt` the report-events fixture cannot supply (see that
+ * module's summary construction). Pure — callers load the JSON (CLI / tests).
  */
 
 import {
-  characterFightKey,
-  fightGearKey,
-  type FightSummary,
-  type LoggedGear,
-  type RecordedGearSourceData,
-} from "../seams/gear-source.js";
-import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../slots.js";
+  buildOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./report-events-offline.js";
+import type { RecordedGearSourceData } from "../seams/gear-source.js";
 import type { CharacterRef } from "../types.js";
 
-export type SlamaltmanRawFixture = {
-  report_code: string;
-  fight: { id: number; name: string };
-  actors: Array<{ id: number; name: string }>;
-  combatant_info_events: Array<{
-    sourceID: number;
-    gear: WclGearEntry[];
-  }>;
-};
+export type SlamaltmanRawFixture = ReportEventsRawFixture;
 
 export const SLAMALTMAN_REF: CharacterRef = {
   region: "US",
@@ -32,45 +28,13 @@ export const SLAMALTMAN_REF: CharacterRef = {
 export function slamaltmanOfflineRecordings(
   raw: SlamaltmanRawFixture
 ): RecordedGearSourceData {
-  const actors = new Map(raw.actors.map((a) => [a.id, a]));
-  let logged: LoggedGear | undefined;
-  for (const ev of raw.combatant_info_events) {
-    if (actors.get(ev.sourceID)?.name.toLowerCase() !== "slamaltman") continue;
-    const mapped = mapWclGearToSim(ev.gear);
-    logged = {
-      items: mapped.map((spec, i) => {
-        const item: LoggedGear["items"][number] = {
-          id: spec.id ?? 0,
-          slot: SIM_ORDER[i]!,
-          gems: spec.gems,
-        };
-        if (spec.enchant) item.enchant = spec.enchant;
-        return item;
-      }),
-      talentPointsByTree: [5, 11, 45],
-      provenance: {
-        reportCode: raw.report_code,
-        fightId: raw.fight.id,
-        sourceID: ev.sourceID,
-      },
-    };
-    break;
-  }
-  if (!logged) {
-    throw new Error("slamaltman not found in raw fixture");
-  }
-
-  const summary: FightSummary = {
-    reportCode: raw.report_code,
-    fightId: raw.fight.id,
-    encounterName: raw.fight.name,
-    killedAt: "2026-07-01T00:00:00.000Z",
-    route: "ranked",
-    confidence: 1,
-  };
-
-  return {
-    fights: new Map([[characterFightKey(SLAMALTMAN_REF, "ret"), [summary]]]),
-    gear: new Map([[fightGearKey(summary), logged]]),
-  };
+  return buildOfflineRecordings(
+    raw,
+    SLAMALTMAN_REF,
+    "ret",
+    "ranked",
+    1,
+    () => "slamaltman not found in raw fixture",
+    "2026-07-01T00:00:00.000Z"
+  );
 }
