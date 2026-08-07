@@ -127,10 +127,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "11"
-        },
-        {
-          "kind": "crafted",
           "profession": "Tailoring"
         }
       ],
@@ -391,10 +387,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"
@@ -1965,10 +1957,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "4"
-        },
-        {
-          "kind": "crafted",
           "profession": "Engineering"
         }
       ],
@@ -3519,12 +3507,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
@@ -3541,12 +3523,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -3619,12 +3595,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Leatherworking",
@@ -4122,10 +4092,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"

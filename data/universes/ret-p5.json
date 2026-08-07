@@ -203,10 +203,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking"
         }
       ],
@@ -238,10 +234,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "11"
-        },
         {
           "kind": "crafted",
           "profession": "Tailoring"
@@ -659,12 +651,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -784,10 +770,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"
@@ -2333,12 +2315,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Jewelcrafting",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3237,12 +3213,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3834,12 +3804,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "4",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Engineering",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3997,10 +3961,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "4"
-        },
         {
           "kind": "crafted",
           "profession": "Engineering"
@@ -5133,12 +5093,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Jewelcrafting",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -5934,12 +5888,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Black Temple",
           "recipeBoss": "Patterns"
@@ -6729,10 +6677,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7"
-        },
-        {
-          "kind": "crafted",
           "profession": "Jewelcrafting"
         }
       ],
@@ -7339,12 +7283,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
@@ -7361,12 +7299,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -7494,12 +7426,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Leatherworking",
@@ -8158,7 +8084,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "Blacksmithing"
         },
         {
           "kind": "crafted",
@@ -8187,7 +8113,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "Blacksmithing"
         },
         {
           "kind": "crafted",
@@ -8438,12 +8364,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Black Temple",
           "recipeBoss": "Patterns"
@@ -8460,12 +8380,6 @@
       "quality": 4,
       "phase": 3,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -8544,10 +8458,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"

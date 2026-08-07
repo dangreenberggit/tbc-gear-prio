@@ -171,7 +171,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -191,7 +191,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "11"
+          "profession": "Tailoring"
         },
         {
           "kind": "crafted",
@@ -622,10 +622,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking"
         }
       ],
@@ -953,7 +949,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -977,7 +973,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -1105,7 +1101,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -2182,7 +2178,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -2260,7 +2256,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -2578,7 +2574,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -3346,7 +3342,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7"
+          "profession": "Jewelcrafting"
         },
         {
           "kind": "crafted",
@@ -4444,7 +4440,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -4518,7 +4514,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -6562,7 +6558,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Black Temple",
           "recipeBoss": "Patterns"
         },

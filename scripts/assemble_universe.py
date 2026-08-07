@@ -27,6 +27,7 @@ ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
+COMMON_PROTO = ROOT / "data/proto/common.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -509,6 +510,24 @@ def ep_score(
     return total
 
 
+def profession_names_from_proto() -> dict[int, str]:
+    """common.proto Profession enum, ordinal -> name. db.json's
+    `crafted.profession` is this enum's number, not a name (ticket 42) --
+    parsed from the proto rather than hand-typed so a member added upstream
+    cannot silently mismatch a hardcoded table."""
+    text = COMMON_PROTO.read_text(encoding="utf-8")
+    enum = re.search(r"enum Profession \{(.*?)\n\}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the Profession enum in {COMMON_PROTO}")
+    members = re.findall(r"^\s+(\w+) = (\d+);", enum.group(1), re.M)
+    if not members:
+        raise SystemExit(f"Profession enum in {COMMON_PROTO} has no members")
+    return {int(num): name for name, num in members}
+
+
+PROFESSION_NAMES = profession_names_from_proto()
+
+
 def map_db_source(
     raw: object,
     *,
@@ -523,7 +542,10 @@ def map_db_source(
         return None
     if "crafted" in first:
         prof = (first["crafted"] or {}).get("profession")
-        return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
+        if prof is None:
+            return None
+        name = PROFESSION_NAMES.get(prof, str(prof))
+        return {"kind": "crafted", "profession": name}
     if "drop" in first:
         drop = first["drop"] or {}
         zone = (
