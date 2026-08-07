@@ -450,12 +450,6 @@
           "token": "Chestguard of the Vanquished Champion",
           "boss": "Kael'thas Sunstrider",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 121.62,
@@ -1741,12 +1735,6 @@
           "token": "Gloves of the Vanquished Champion",
           "boss": "Leotheras the Blind",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 62.75
@@ -2160,12 +2148,6 @@
           "token": "Helm of the Vanquished Champion",
           "boss": "Lady Vashj",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 74.0
@@ -2220,12 +2202,6 @@
           "token": "Helm of the Fallen Champion",
           "boss": "Prince Malchezaar",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Prince Malchezaar",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 59.5,
@@ -2386,12 +2362,6 @@
           "token": "Leggings of the Vanquished Champion",
           "boss": "Fathom-Lord Karathress",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 124.4
@@ -2411,12 +2381,6 @@
           "token": "Leggings of the Fallen Champion",
           "boss": "Gruul the Dragonkiller",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 120.45
@@ -3246,12 +3210,6 @@
           "token": "Pauldrons of the Vanquished Champion",
           "boss": "Void Reaver",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 57.32

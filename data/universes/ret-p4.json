@@ -719,12 +719,6 @@
           "token": "Chestguard of the Forgotten Conqueror",
           "boss": "Illidan Stormrage",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Illidan Stormrage",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 125.02
@@ -762,12 +756,6 @@
           "token": "Chestguard of the Vanquished Champion",
           "boss": "Kael'thas Sunstrider",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 121.62,
@@ -995,12 +983,6 @@
           "token": "Chestguard of the Fallen Champion",
           "boss": "Magtheridon",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 61.25,
@@ -3043,12 +3025,6 @@
           "token": "Gloves of the Vanquished Champion",
           "boss": "Leotheras the Blind",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 62.75
@@ -3588,12 +3564,6 @@
           "token": "Helm of the Forgotten Conqueror",
           "boss": "Archimonde",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Hyjal Summit",
-          "boss": "Archimonde",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 78.71
@@ -3613,12 +3583,6 @@
           "token": "Helm of the Vanquished Champion",
           "boss": "Lady Vashj",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 74.0
@@ -3691,12 +3655,6 @@
           "token": "Helm of the Fallen Champion",
           "boss": "Prince Malchezaar",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Prince Malchezaar",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 59.5,
@@ -4019,12 +3977,6 @@
           "token": "Leggings of the Vanquished Champion",
           "boss": "Fathom-Lord Karathress",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 124.4
@@ -4044,12 +3996,6 @@
           "token": "Leggings of the Fallen Champion",
           "boss": "Gruul the Dragonkiller",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 120.45
@@ -4150,12 +4096,6 @@
           "token": "Leggings of the Forgotten Conqueror",
           "boss": "The Illidari Council",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "The Illidari Council",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 97.26
@@ -5295,12 +5235,6 @@
           "token": "Pauldrons of the Fallen Champion",
           "boss": "High King Maulgar",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "High King Maulgar",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 80.15,
@@ -5400,12 +5334,6 @@
           "token": "Pauldrons of the Forgotten Conqueror",
           "boss": "Mother Shahraz",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Mother Shahraz",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 64.63
@@ -5481,12 +5409,6 @@
           "token": "Pauldrons of the Vanquished Champion",
           "boss": "Void Reaver",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 57.32

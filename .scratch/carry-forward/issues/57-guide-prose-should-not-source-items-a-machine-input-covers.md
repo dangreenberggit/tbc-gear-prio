@@ -1,8 +1,15 @@
-Status: open
+Status: done
 Type: task
 Origin: scrapeability investigation on fix/carry-forward-backlog, 2026-08-07
 Blocks: none
 Blocked by: none
+
+Landed 2026-08-07. Suppression lives in `assemble_universe.build` keyed on
+`carries_locus`; gated by `scripts/check_wowhead_prose_suppression.py`
+(`pnpm wowhead-prose:check`). Measured after: 61 source rows removed from the
+six universes, 0 without a same-zone non-wowhead sibling, pool membership
+unchanged in every file. One correction to the plan below — see "How it was
+actually keyed".
 
 # Stop sourcing zone/boss from guide prose where a machine input already covers it
 
@@ -116,21 +123,66 @@ zone. They are display-visible via `formatItemSource`.
 
 ## Done when
 
-- Re-running `57-impact.py` after the change reports **0** suppressible rows —
-  every one of the 148 is gone from the emitted universes.
-- The 94 kept sources still emit: `crafted` 29, `pvp` 20, `heroic` 13, `raid` 11,
-  `badge` 8, `rep` 7, `world` 6. A drop in `heroic` means the
-  presence-vs-supplies trap above was hit.
+> Measured outcome, 2026-08-07. Note `57-impact.py` **cannot** verify this: it
+> runs `parse_wowhead_source` standalone, so it reports the same 148/94/11
+> before and after the change and is a planning instrument only. The two
+> scripts that do see the change are `57-orphan-check.py` (61 → 0) and
+> `57-removal-check.py` (61 rows removed, 0 without a same-zone non-wowhead
+> sibling). `57-emitted-check.py` prints the surviving wowhead rows per
+> universe.
+
+- ~~Re-running `57-impact.py` after the change reports **0** suppressible
+  rows~~ — see the note above; use `57-orphan-check.py`, which went 61 → 0.
+- The kept kinds still emit. The 29/20/13/11/8/7/6 split above is *parser*
+  output across all seven lists, not emitted rows, so it is not the thing to
+  assert against — the universes dedupe and only carry items that made the pool
+  for that phase. What the six universes actually keep on the `wowhead` origin:
+  `pvp` 36, `crafted` 31, `badge` 23, `rep` 17, `world` 13, `raid` 11 (131
+  rows), from `57-emitted-check.py`. Heroic coverage is unchanged at 11 `db`
+  rows; no wowhead-origin `heroic` row was ever in the shipped universes, so
+  the presence-vs-supplies trap does not show up here — see the note in "How it
+  was actually keyed" about why only a constructed case can catch it.
 - All six universes regenerated, and every removed row has
   `origin: "wowhead"` and a surviving same-zone row from another origin. Any
   removal failing that pair is a real loss of coverage, not a redundancy.
-- Two tests, both mutation-verified: an item with a machine-supplied zone gains
-  no `origin: wowhead` raid row from prose; an item without one still does.
+  **Measured: 61 removed, 0 failing the pair.** Pool membership is identical in
+  every file (240/364/411/492/253/380 items before and after) and no item was
+  left sourceless.
+- Two checks, both mutation-verified, in
+  `scripts/check_wowhead_prose_suppression.py`: `carries_locus` pinned on
+  constructed sources (locus kinds trip it, the kept kinds do not), and no
+  emitted `origin: wowhead` locus row on an item another origin also places.
+  Mutating away the heroic-`dungeon` branch fails the first and *not* the
+  second; mutating `crafted` into a locus kind fails both.
 - The four Thunderheart rows still appear — they are prose-only until the feral
   T6 map lands (see
   [[54-transcribed-inputs-are-the-defect-source-and-cross-checks-are-the-only-detector]]),
   so `KNOWN_UNCORROBORATED` stays at 5 entries.
 - `pnpm verify` green on Node 22.
+
+## How it was actually keyed
+
+Two things the plan above did not anticipate.
+
+**The machine-coverage set must be frozen before the list loop**, not read from
+`source_acc` per row. `source_acc` is the accumulator the wowhead loop is itself
+writing into, so a per-row read also sees wowhead rows added by an *earlier*
+list, and an item on two lists suppresses its own second row. 30017
+(Telonicus's Pendant of Mayhem) does exactly that — a zone-only quest row on
+feral p1-p2, a zone+boss drop row on feral p3 — and it is one of the 11
+prose-only items, so the first cut silently deleted a claim from an item whose
+only witness is prose. `KNOWN_UNCORROBORATED` allowlists it, so the existing
+gate would not have caught it either.
+
+**The trap is real but unexercised by current data, so no data-driven check can
+detect it.** Keying on presence (`set(source_acc)`) instead of on supplied locus
+produces *byte-identical* universes today: 668 ids are present-without-locus,
+but none of them carries a Wowhead locus row. Both keys were run to confirm.
+That is why `check_wowhead_prose_suppression.py` pins `carries_locus` on
+constructed sources rather than only asserting over the emitted files — the
+emitted half stays green under the wrong key, and only the constructed half
+fails. If AtlasLoot coverage later changes, the two keys diverge and the
+constructed half is what will have been holding the line.
 
 ## Relationship to ticket 45 (unparsed prose)
 

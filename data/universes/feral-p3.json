@@ -753,12 +753,6 @@
           "token": "Chestguard of the Vanquished Defender",
           "boss": "Kael'thas Sunstrider",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 70.68
@@ -778,12 +772,6 @@
           "token": "Chestguard of the Fallen Defender",
           "boss": "Magtheridon",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 65.18,
@@ -2350,12 +2338,6 @@
           "token": "Gloves of the Vanquished Defender",
           "boss": "Leotheras the Blind",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 58.62
@@ -3050,12 +3032,6 @@
           "token": "Leggings of the Vanquished Defender",
           "boss": "Fathom-Lord Karathress",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 97.16
@@ -4029,12 +4005,6 @@
           "token": "Pauldrons of the Vanquished Defender",
           "boss": "Void Reaver",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 66.74
@@ -4054,12 +4024,6 @@
           "token": "Pauldrons of the Fallen Defender",
           "boss": "High King Maulgar",
           "origin": "two-hop"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "High King Maulgar",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 57.06,

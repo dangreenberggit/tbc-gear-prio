@@ -612,6 +612,22 @@ def source_heroic_dungeons(source: dict) -> set[str]:
     return {d} if d else set()
 
 
+def carries_locus(source: dict) -> bool:
+    """Does this source place the item somewhere -- a boss, or a raid/dungeon?
+
+    The question both halves of the wowhead-suppression test ask: of a machine
+    source, "do you already know where this drops"; of a Wowhead row, "are you
+    about to restate that". `token` counts because the two-hop maps name a raid
+    and a boss, and `heroic` because its locus rides in `dungeon` rather than
+    `zone`.
+    """
+    if source.get("boss"):
+        return True
+    if source.get("kind") in ("raid", "dungeon", "token") and source.get("zone"):
+        return True
+    return bool(source.get("kind") == "heroic" and source.get("dungeon"))
+
+
 # Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
 # zone is not merely cosmetic: it never matches a zone-keyed lookup, so the
 # item advertises a raid that does not exist, and add_source keeps it as a
@@ -1050,6 +1066,31 @@ def assemble(
     # the universe is built only from db / atlasloot / two-hop / zone match.
     # Grading against a list that also populated the universe is circular for
     # exactly the items it added; see ticket 18.
+    #
+    # Ticket 57. The guides are an *editorial* input -- which items matter for
+    # this spec, an opinion no database carries. Their Source cell is the author
+    # restating drop facts db.json / AtlasLoot / the token maps already hold
+    # machine-parsed, and every defect in tickets 48-52 was in that restatement
+    # rather than in the underlying fact. So where a machine input already
+    # places an item, the prose does not get to speak about where it drops.
+    #
+    # The test is "does a machine source actually supply a locus for this id",
+    # never "is this id known to a machine input": AtlasLoot carries heroic
+    # dungeon drops with an *empty* zone list, and the looser test would strike
+    # those items' only zone claim.
+    #
+    # Frozen before the loop rather than read from source_acc inside it. Only
+    # db / atlasloot / two-hop / sunmote have written by now, which is exactly
+    # the machine-input set; computing it per row would also count wowhead rows
+    # added by an earlier list, so an item appearing on two lists would suppress
+    # its own second row. 30017 does exactly that -- a zone-only quest row on
+    # p1-p2 and a zone+boss drop row on p3 -- and prose is all it has.
+    machine_locus_ids = {
+        iid
+        for iid, pairs in source_acc.items()
+        if any(carries_locus(s) for s, _ in pairs)
+    }
+
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
     for stage, doc in wowhead_lists_for_phase(max_phase, profile):
@@ -1060,7 +1101,13 @@ def assemble(
             wowhead_list_ids.add(iid)
             if hold_out_wowhead:
                 continue
+            machine_locus = iid in machine_locus_ids
             for src in parse_wowhead_source(row.get("wowheadSourceText")):
+                # Non-locus kinds (crafted/pvp/badge/rep/world) always survive:
+                # AtlasLoot does not cover vendor and quest items, so the guide
+                # is the only witness for many of them.
+                if machine_locus and carries_locus(src):
+                    continue
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
             parsed = parse_wowhead_source(row.get("wowheadSourceText"))

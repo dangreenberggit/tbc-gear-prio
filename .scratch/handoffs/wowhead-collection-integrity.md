@@ -90,7 +90,34 @@ Consequences:
   the page does carry labels. That is real data loss, and the opposite of the
   paraphrase story.
 
-## Ticket 57 (new) — the structural fix
+## Ticket 57 — LANDED 2026-08-07
+
+Suppression is in `assemble_universe.build`, keyed on a new module-level
+`carries_locus`, and gated by `scripts/check_wowhead_prose_suppression.py`
+(`pnpm wowhead-prose:check`, wired into `verify`). 61 source rows left the six
+universes; 0 lacked a same-zone non-wowhead sibling; pool membership and all
+recall figures are unchanged. `pnpm verify` green, 425 passed, Node v22.16.0.
+
+Two corrections to the plan, both written up in the ticket:
+
+- The machine-coverage set is frozen **before** the list loop. Reading
+  `source_acc` per row also sees wowhead rows from an earlier list, so an item
+  on two lists suppresses its own second row — 30017 does exactly that, and it
+  is one of the prose-only 11.
+- Keying on presence rather than supplied-locus produces byte-identical
+  universes on today's data (668 ids are present-without-locus; none carries a
+  wowhead locus row). So the trap the ticket warns about **cannot** be caught by
+  any check over the shipped files. That is why the gate pins `carries_locus`
+  on constructed sources as well as asserting over the emitted universes.
+
+Also note `57-impact.py` runs the parser standalone and so reports the same
+148/94/11 before and after — it is a planning instrument, not a verification.
+Use `57-orphan-check.py` (61 → 0) and the new `57-removal-check.py`.
+
+Ticket 45 can now be re-scoped: 40 of its 72 unparsed rows are moot. The parser
+junk under "Ticket 56" below is untouched — still worth fixing.
+
+## Ticket 57 (original) — the structural fix
 
 Filed as
 `57-guide-prose-should-not-source-items-a-machine-input-covers.md`. The guides
