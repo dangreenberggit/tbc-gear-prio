@@ -656,6 +656,100 @@ describe("rankUpgrades", () => {
     expect(a.items.map((i) => i.itemId)).toEqual([29381]);
   });
 
+  it("never ranks a worn ring as a gain by duplicating it into the other finger", async () => {
+    // Carry-forward 46, found by sme-rank-review on two characters at once.
+    // slamaltman wears Ring of a Thousand Marks (28757) in finger1 and the
+    // stronger Shapeshifter's Signet (30834) in finger2. Both fingers are
+    // tried and the best swap wins, so the engine happily placed a *second*
+    // copy of 30834 over the weaker finger1 ring and sold the result as a
+    // +22.40 DPS upgrade for a ring already on his hand. The game does not
+    // allow two copies; the only honest number for a worn item is 0.
+    //
+    // The recordings below deliberately make the duplicate lucrative: if the
+    // engine ever swaps into finger1 again, it scores +50 and this fails.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+
+    const sims = new Map([
+      [
+        baselineKey,
+        { dps: 2000, stdev: 90, iterationsDone: 3000, simVersion: "v0.0.101" },
+      ],
+    ]);
+    for (const slot of ["finger1", "finger2"] as const) {
+      const swapped = candidateEquipmentForTest(
+        equipment,
+        slot,
+        30834,
+        2,
+        epWeights
+      );
+      sims.set(
+        simCacheKey(
+          compose(skeleton, {
+            name: "slamaltman",
+            race: "RaceHuman",
+            equipment: swapped,
+          }),
+          "v0.0.101",
+          opts
+        ),
+        {
+          // finger2 is where he already wears it: an identity swap, so 0.
+          // finger1 is the duplicate the engine must never price.
+          dps: slot === "finger2" ? 2000 : 2050,
+          stdev: 90,
+          iterationsDone: 3000,
+          simVersion: "v0.0.101",
+        }
+      );
+    }
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: new RecordedSimRunner("v0.0.101", sims),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          {
+            itemId: 30834,
+            name: "Shapeshifter's Signet",
+            slot: "finger" as const,
+            phase: 2,
+            source: { kind: "rep" as const },
+          },
+        ],
+      }
+    );
+
+    const worn = ranking.items.find((i) => i.itemId === 30834);
+    expect(worn).toBeDefined();
+    expect(worn!.owned).toBe(true);
+    expect(worn!.deltaDps).toBe(0);
+    expect(worn!.slotChoice).toBe("finger2");
+    expect(worn!.belowCutoff).toBe(true);
+  });
+
   describe("the ranking cache", () => {
     /** Counts runs so "without spawning a sim" is asserted, not assumed. */
     class CountingSimRunner implements SimRunner {

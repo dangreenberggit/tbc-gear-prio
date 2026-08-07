@@ -460,6 +460,16 @@ export async function rankUpgrades(
               `(item ${entry.itemId} ${entry.name})`
           );
         }
+        // A paired slot tries both placements and keeps the better one, so
+        // without this an item already worn in finger2 gets swapped over
+        // finger1 as well — pricing a *second copy* the game will not equip,
+        // and shipping it as an upgrade for gear the player already has on
+        // (carry-forward 46). Skipping leaves the identity swap as the only
+        // outcome for a worn item, which is what every unpaired slot already
+        // does. Written against the equipment array rather than special-cased
+        // to fingers so trinkets and any later paired slot inherit it.
+        const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
+        if (wornAt >= 0 && wornAt !== slotIndex) continue;
         const swapped = equipmentForCandidateSwap(
           equipment,
           slotIndex,
