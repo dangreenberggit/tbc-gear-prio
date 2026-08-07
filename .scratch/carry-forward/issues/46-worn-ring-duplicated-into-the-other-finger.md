@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: sme-rank-review on phase-2/trust (PLAN.md §14 Phase 2, gate box "≥3 real characters produce believable shortlists")
 Blocks: phase-2
@@ -105,6 +105,42 @@ Note that a delta of exactly `0.00` for a worn item is also not ideal as
 *advice* — "your own ring is a 0 DPS upgrade" is a strange row to print — but
 that is a presentation question and is out of scope here. This ticket is about
 the number being **wrong**.
+
+## Fixed 2026-08-06 on `phase-2/trust`
+
+`3c18776` (guard + regression test) and `4bde8f2` (`ENGINE_VERSION` bump).
+
+The guard sits in the candidate loop, before the swap is composed: if the item
+is already worn at a *different* slot index, that placement is skipped, leaving
+the identity swap as the only outcome. It reads off the equipment array rather
+than naming fingers, so trinkets and any later paired slot inherit it.
+
+**`ENGINE_VERSION` 1 → 2 was part of the fix, not housekeeping.** The change
+moves our own arithmetic and no hashed input, so `contentHash` was byte-identical
+before and after — confirmed on both re-ranked characters. Without the bump a
+cached ranking would serve the false row forever, which is precisely what that
+constant's comment warns about.
+
+Re-ranked both characters offline from the committed fixtures. Exactly **one row
+changed on each**, and every other delta is bit-identical:
+
+| character | row | before | after |
+|---|---|---|---|
+| slamaltman | Shapeshifter's Signet (was #2) | +22.40 | **0** |
+| nexess | Ring of Lethality (was #12) | +8.48 | **0** |
+
+Both now resolve to the finger they are actually worn in (`slotChoice:
+"finger2"`) and fall below the cutoff, so neither appears on the shortlist.
+slamaltman's shortlist went 13 → 12 rows, nexess's 15 → 14. Baselines unmoved.
+
+`pnpm verify` green: **358 tests, 32 files**.
+
+Verification command from "Reproduce" above now prints nothing for both
+characters.
+
+**The two do-not-trust verdicts are not lifted by this.** Each review raised
+findings beyond the ring — see ticket 47 — so the "≥3 real characters produce
+believable shortlists" gate box stays open pending a re-review.
 
 ## Done when
 
