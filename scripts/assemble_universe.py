@@ -1119,7 +1119,14 @@ def assemble(
             no_zone_excluded += 1
             continue
 
-        sources = [s for s, _ in pairs]
+        # `origin` rides on the row rather than staying an aggregate report
+        # count. Every defect in carry-forward 48-53 entered through the
+        # `wowhead` path -- an agent transcribing a rendered page -- and the
+        # only checks that ever caught one worked by disagreeing with a second
+        # input. Which claims rest on a single transcription is therefore a
+        # question worth being able to ask of the shipped data, not one to
+        # reconstruct by re-joining the inputs. See carry-forward 54.
+        sources = [{**s, "origin": o} for s, o in pairs]
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
         heroics_hit = set()

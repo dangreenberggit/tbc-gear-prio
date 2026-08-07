@@ -225,7 +225,14 @@ describe("realPoolEntry (test helper, carry-forward 37)", () => {
   it("returns the item's real source from the committed universe", () => {
     const entry = realPoolEntry(29381);
     expect(entry.name).toBe("Choker of Vile Intent");
-    expect(entry.source).toEqual({ kind: "badge", cost: 25 });
+    // `origin` is part of the real row: the helper's whole purpose is to hand
+    // back what actually shipped, so asserting it here keeps the helper honest
+    // rather than letting it drift from the committed data (carry-forward 54).
+    expect(entry.source).toEqual({
+      kind: "badge",
+      cost: 25,
+      origin: "wowhead",
+    });
   });
 
   it("throws rather than silently returning a fixture for an id not in the universe", () => {
