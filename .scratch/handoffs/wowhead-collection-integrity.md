@@ -1,14 +1,17 @@
 # Handoff: what is left after the tier-source work
 
-For whoever picks up tickets 53, 54, 55, 56 or 57 on `fix/carry-forward-backlog`.
+For whoever picks up tickets 53, 54 or 56 on `fix/carry-forward-backlog`.
+**Tickets 55 and 57 are closed** — do not start them.
 
 Originally written 2026-08-07 on `830dae0`. **Substantially revised the same day
 after fetching the live pages** — several claims in the first version were
-wrong and are corrected below. The branch is still **unreviewed and unlanded**.
+wrong and are corrected below. Revised again on `424c5a4` after 55 and 57
+closed. The branch is still **unreviewed and unlanded**.
 
 ## What already landed (do not redo)
 
-Five commits, `c3f5b97` → `830dae0`. Tickets 48, 49, 50, 51 and 52 are closed.
+Eight commits, `c3f5b97` → `424c5a4`. Tickets 48, 49, 50, 51, 52, 55 and 57 are
+closed.
 
 | Commit | What |
 |---|---|
@@ -17,8 +20,16 @@ Five commits, `c3f5b97` → `830dae0`. Tickets 48, 49, 50, 51 and 52 are closed.
 | `37b8c46` | per-row `origin` on every source |
 | `8bdfd3f` | witness gates — including ones `37b8c46`'s message wrongly claimed |
 | `830dae0` | **diagnosis now known to be wrong — see below**; paraphrase gate |
+| `a17e351` | `ret-tokens.json` note rescoped per page |
+| `530711f` | paraphrase gate **deleted**, ticket 55 closed, 49/50 rewritten per page |
+| `424c5a4` | ticket 57 — prose suppression + `check_wowhead_prose_suppression.py` |
 
-`pnpm verify` on `830dae0`: 425 passed, 32 files, Node v22.16.0.
+`pnpm verify` on `424c5a4`: **418 passed**, 32 files, Node v22.16.0, and
+`wowhead-prose:check` green. The 425 → 418 drop is the seven deleted
+`SINGLETON_BUDGET` cases, one per gated file — not a regression.
+
+Two agents worked this branch in parallel; `424c5a4` rebased onto `530711f`, so
+history is linear and the working tree is clean.
 
 ## The pages are scrapeable, and that answered several open questions
 
@@ -67,7 +78,7 @@ already known broken*, so the sample proves much less than it appears to. The
 durable point is narrower: prose is a weaker witness than a structured id, and
 the way to know is to check a machine source.
 
-## Correction: ticket 55 is empty
+## Correction: ticket 55 is empty (closed — background only)
 
 Ticket 55 lists 14 p4 rows with "paraphrased" rank labels. Measured against the
 page: **13 match the page text exactly.** The 14th (`32581`) differs only
@@ -79,16 +90,33 @@ singletons**. `Old Tier`, `T6 Option`, `Tier Option`, `Optional - tier` and
 `Optional - Tier` are all real page text; the last two are the author's own
 inconsistent capitalisation, not two spellings of an invented idea.
 
-Consequences:
+Consequences — **all three actioned in `530711f`, nothing to do here**:
 
-- Ticket 55 should close as *measured, premise false*, not be worked.
+- Ticket 55 closed as *measured, premise false*. Its original text is preserved
+  under a closing note that records the measurement.
 - The `SINGLETON_BUDGET` gate in `pool-hardening.test.ts` ("rankLabel is copied,
-  not paraphrased") is measuring page vocabulary, not collection defects. A
-  faithful scraper reproduces all 23 p4 singletons and the gate reads that as
-  regression. It should be deleted, not lowered.
-- Our p4 file has `rankLabel: null` for the 41 `alternative`-section rows where
-  the page does carry labels. That is real data loss, and the opposite of the
-  paraphrase story.
+  not paraphrased") was **deleted**, not lowered. It measured page vocabulary,
+  not collection defects. It was also *inverted*: our p4 file has
+  `rankLabel: null` on the 40 `alternative`-section rows the page does label, so
+  a faithful re-scrape restores those labels, adds singletons, and fails the
+  gate — it penalised fixing the real defect. A comment at its old site records
+  why, so it does not get reintroduced.
+- The dropped-label data loss is the real defect and now belongs to ticket 56.
+
+The premise is checkable in one command — the p4 singletons include
+`'Optional - Human'`, `'Undead Only & Demons'`, `'Best - No Expertise'` and
+`'Optional-Crafted'`, which are race and mechanic specifics no summariser
+invents:
+
+```bash
+python -c "
+import json
+from collections import Counter
+d=json.load(open('data/wowhead-lists/ret/p4.json',encoding='utf-8'))
+c=Counter(e['rankLabel'] for e in d['entries'] if e.get('rankLabel'))
+print(sorted(l for l,n in c.items() if n==1))
+"
+```
 
 ## Ticket 57 — LANDED 2026-08-07
 
@@ -96,7 +124,9 @@ Suppression is in `assemble_universe.build`, keyed on a new module-level
 `carries_locus`, and gated by `scripts/check_wowhead_prose_suppression.py`
 (`pnpm wowhead-prose:check`, wired into `verify`). 61 source rows left the six
 universes; 0 lacked a same-zone non-wowhead sibling; pool membership and all
-recall figures are unchanged. `pnpm verify` green, 425 passed, Node v22.16.0.
+recall figures are unchanged. `pnpm verify` green, 425 passed, Node v22.16.0
+— that count predates the rebase onto `530711f`; on the integrated tip it is
+**418**, because the paraphrase gate's seven cases are gone.
 
 Two corrections to the plan, both written up in the ticket:
 
@@ -147,47 +177,71 @@ Ticket 57 does **not** fix it, because `crafted` is a kept kind.
   ids and 4 of the 11 prose-only locus claims. Closing this removes them from
   `KNOWN_UNCORROBORATED`, and the companion test will fail until you do —
   intended.
-- **Write down the "prefer the machine source over guide prose" rule.** Ticket
-  57 is the mechanised version of it. If 57 lands, the rule is enforced by the
-  pipeline rather than by memory, which is better than a doc line.
+- ~~**Write down the "prefer the machine source over guide prose" rule.**~~
+  **Done by 57 landing** — the pipeline enforces it and
+  `pnpm wowhead-prose:check` gates it, which beats a doc line. Do not also
+  write the doc line.
 - **Fixture-authoring guidance** (do not author fixtures from shipped data).
   Still unwritten; still an AGENTS.md change, so it needs proposing in chat.
 
+One caveat worth carrying, from the 30129 case in ticket 50: the p4/p5 pages
+give a **structured** `[npc=21213]` that is factually wrong. A machine-readable
+id is a *stronger* witness than prose, not an infallible one. Do not over-read
+57's rule as "ids are always right".
+
 ## Ticket 56 — the scraper
 
-Now **smaller**. The scrapeability question is answered (yes, no browser). If 57
-lands, the scraper needs only the item id and rank label, both structured on the
-page as `[item=NNNNN]` and a plain `[td]` — not the Source prose. Land 57 first.
+Now **smaller**, and **unblocked** — 57 has landed. The scrapeability question
+is answered (yes, no browser). The scraper needs only the item id and rank
+label, both structured on the page as `[item=NNNNN]` and a plain `[td]` — not
+the Source prose.
+
+Fold in the dropped-label defect inherited from ticket 55: our p4 file has
+`rankLabel: null` on the 40 `alternative`-section rows the page does label. A
+faithful scrape fixes that, and there is no longer a singleton gate to fight.
 
 Parser junk worth fixing while nearby, exposed by the 57 measurement:
 `31856 Darkmoon Card: Crusade` → `zone: "Bind on Equip"`;
 `32658 Badge of Tenacity` → `boss: "Depleted Badge"`;
 `29301 Band of the Eternal Champion` → `zone: "The Scale of the Sands Exalted"`.
 
-## Records cleanup (separate task, not started)
+## Records cleanup — one item left
 
-Independent of 57 and safe to do in parallel — it touches no pipeline code:
+An earlier version of this doc numbered these 1–4, which collided with the
+ticket numbers and confused two sessions. Don't reintroduce the numbering; the
+tickets are the only numbered things here.
 
-1. `data/two-hop/ret-tokens.json`'s note was rewritten by `830dae0` to say the
-   guide is correct. For p4/p5 it is not. Restore the substance of the original
-   note, scoped per page.
-2. `wowheadSourceText` should hold **what the page says**; corrections belong
-   alongside, not overwritten into it. `c3f5b97` overwrote it for 30990/30129/
-   30993 (it did record `corrections[]`, which is why this is recoverable).
-   Constraint: `assemble_universe.py` reads `wowheadSourceText` directly, so
-   restoring verbatim prose without a second field would feed the wrong boss
-   into the universe. Two shapes were discussed — add a corrected field the
-   parser prefers, or keep the parser on the existing field and put verbatim
-   text in a new one. **Undecided; ask before picking.** If 57 lands first this
-   gets easier, since prose stops being a locus input for these items anyway.
-3. Delete the `SINGLETON_BUDGET` / paraphrase gate; close ticket 55.
-4. Rewrite tickets 49 and 50 to the per-page story above.
+Three are done (`a17e351`, `530711f`): the `ret-tokens.json` note is rescoped
+per page, the paraphrase gate is deleted with 55 closed, and 49/50 carry the
+per-page story. **One remains, and it needs a decision from the user before any
+code:**
+
+**`wowheadSourceText` should hold what the page says.** Corrections belong
+alongside it, not overwritten into it. `c3f5b97` overwrote it for
+30990/30129/30993 (it did record `corrections[]`, which is why this is
+recoverable).
+
+Constraint: `assemble_universe.py` reads `wowheadSourceText` directly, so
+restoring verbatim prose without a second field would feed the wrong boss into
+the universe. Two shapes were discussed — add a corrected field the parser
+prefers, or keep the parser on the existing field and put verbatim text in a
+new one. **Undecided; ask before picking.**
+
+57 landing makes this easier but does **not** remove the constraint: prose is
+no longer a locus input *for items a machine input covers*, which includes all
+three of these, but `assemble_universe.py` still reads the field for the 94
+load-bearing rows. Re-measure rather than assuming the field is now inert.
 
 ## Process notes that cost time
 
 - **`git checkout <file>` reverts uncommitted work in that file.** It silently
   ate a gate once. **Read the commit back** —
   `git show <sha>:<path> | grep -c <marker>` — for anything a message claims.
+- **Two agents shared this branch, and the second rebased onto the first.** If
+  you are handed a sha, confirm it still exists (`git cat-file -e <sha>`) before
+  reasoning about it — 57's work was `f072468` pre-rebase and `424c5a4` after,
+  and a session that cached the old sha drew a wrong conclusion from it. Check
+  worktree state at the moment you need it, not from earlier in your session.
 - **Regenerate universes after any `git checkout data/universes/`.**
 - Regen loop is per spec and phase; `data/universes/` has six files:
   ```bash
