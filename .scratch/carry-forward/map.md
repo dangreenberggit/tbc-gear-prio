@@ -3,6 +3,8 @@
 Tickets deferred from a feature-branch review so they survive the merge.
 Convention: [`docs/agents/issue-tracker.md`](../../docs/agents/issue-tracker.md).
 List: `pnpm issues:open`. Gate: `pnpm merge-ready`.
+Handing the open ones to workers: [`DELEGATION.md`](DELEGATION.md) — waves,
+file contention, worker prompt. This file stays the chronological log.
 
 ## Decisions-so-far
 
