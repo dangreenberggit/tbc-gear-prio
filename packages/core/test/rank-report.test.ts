@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { CUTOFF } from "../src/cutoff.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import {
   formatItemSource,
@@ -37,6 +38,34 @@ function item(
     bisTags: [],
     belowCutoff: true,
     ...partial,
+  };
+}
+
+/**
+ * A real `Ranking`, not a cast — these tests render one, so a cast fixture
+ * would stop catching shape changes the renderer has to keep up with. Rows
+ * carry their own `belowCutoff`; the renderer never re-applies `cutoff`.
+ */
+function ranking(items: RankedItem[]): Ranking {
+  return {
+    contentHash: "test",
+    cutoff: CUTOFF,
+    fight: { reportCode: "test", fightId: 1, route: "ranked" },
+    baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
+    assumptions: {
+      maxPhase: 2,
+      seeds: [42],
+      iterations: 3000,
+      race: "RaceBloodElf",
+      presetId: "ret/p2.raid-sim-skeleton",
+      standing: [],
+    },
+    substitutions: [],
+    caps: {
+      hit: { rating: 100, capRating: 142, gap: 42, capUncertainty: 0 },
+      expertise: { rating: 0, capRating: null, gap: null },
+    },
+    items,
   };
 }
 
@@ -125,29 +154,22 @@ describe("rank-report", () => {
 
   it("shows magnitude warning pill on flagged weapons", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: null,
-            itemId: 28773,
-            name: "Gorehowl",
-            slot: "weapon",
-            deltaDps: -103.9,
-            belowCutoff: true,
-            magnitudeWarning: true,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: null,
+          itemId: 28773,
+          name: "Gorehowl",
+          slot: "weapon",
+          deltaDps: -103.9,
+          belowCutoff: true,
+          magnitudeWarning: true,
+          source: {
+            kind: "raid",
+            zone: "Karazhan",
+            boss: "Prince Malchezaar",
+          },
+        }),
+      ]),
       meta()
     );
     expect(html).toContain('<span class="pill warn">sim magnitude</span>');
@@ -156,42 +178,35 @@ describe("rank-report", () => {
 
   it("excludes magnitude-flagged weapons from Act on tonight", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 1,
-            itemId: 32332,
-            name: "Torch of the Damned",
-            slot: "weapon",
-            deltaDps: 82,
-            belowCutoff: false,
-            source: {
-              kind: "raid",
-              zone: "Black Temple",
-              boss: "Reliquary of Souls",
-            },
-          }),
-          item({
-            rank: null,
-            itemId: 28773,
-            name: "Gorehowl",
-            slot: "weapon",
-            deltaDps: -103.9,
-            belowCutoff: true,
-            magnitudeWarning: true,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 1,
+          itemId: 32332,
+          name: "Torch of the Damned",
+          slot: "weapon",
+          deltaDps: 82,
+          belowCutoff: false,
+          source: {
+            kind: "raid",
+            zone: "Black Temple",
+            boss: "Reliquary of Souls",
+          },
+        }),
+        item({
+          rank: null,
+          itemId: 28773,
+          name: "Gorehowl",
+          slot: "weapon",
+          deltaDps: -103.9,
+          belowCutoff: true,
+          magnitudeWarning: true,
+          source: {
+            kind: "raid",
+            zone: "Karazhan",
+            boss: "Prince Malchezaar",
+          },
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Act on tonight");
@@ -205,40 +220,33 @@ describe("rank-report", () => {
 
   it("shows which ring is replaced instead of bare slot choice", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 3.4, pct: 0.15 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 4,
-            itemId: 32526,
-            name: "Band of Devastation",
-            slot: "finger",
-            deltaDps: 20.68,
-            belowCutoff: false,
-            slotChoice: "finger1",
-            replacesEquipped: {
-              slot: "finger1",
-              itemId: 28757,
-              name: "Ring of a Thousand Marks",
-            },
-            alternateSlot: {
-              choice: "finger2",
-              deltaDps: 8,
-              deltaPct: 0.39,
-              replacesName: "Shapeshifter's Signet",
-            },
-            source: {
-              kind: "raid",
-              zone: "Black Temple",
-              boss: "Illidan Stormrage",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 4,
+          itemId: 32526,
+          name: "Band of Devastation",
+          slot: "finger",
+          deltaDps: 20.68,
+          belowCutoff: false,
+          slotChoice: "finger1",
+          replacesEquipped: {
+            slot: "finger1",
+            itemId: 28757,
+            name: "Ring of a Thousand Marks",
+          },
+          alternateSlot: {
+            choice: "finger2",
+            deltaDps: 8,
+            deltaPct: 0.39,
+            replacesName: "Shapeshifter's Signet",
+          },
+          source: {
+            kind: "raid",
+            zone: "Black Temple",
+            boss: "Illidan Stormrage",
+          },
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Replaces Ring of a Thousand Marks");
@@ -250,25 +258,18 @@ describe("rank-report", () => {
   // slotChoice is what the reader gets. It used to be a bare "a".
   it("names the sim slot when nothing is being replaced", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 1,
-            itemId: 32526,
-            name: "Band of Devastation",
-            slot: "finger",
-            deltaDps: 20.68,
-            belowCutoff: false,
-            slotChoice: "finger2",
-            source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 1,
+          itemId: 32526,
+          name: "Band of Devastation",
+          slot: "finger",
+          deltaDps: 20.68,
+          belowCutoff: false,
+          slotChoice: "finger2",
+          source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Into finger2");
@@ -339,16 +340,17 @@ describe("rank-report", () => {
   it("renders a byte-identical document for a fixed ranking", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     const digest = createHash("sha256").update(html, "utf8").digest("hex");
-    // Repinned for carry-forward 47: the row template gained the two cap
-    // annotations (`hit-note`, and the stage-scoped BiS pill) and the
-    // stylesheet gained `.hit-note`. This fixture has no BiS-tagged and no
-    // hit-flagged row, so the measured delta against the previous pin is the
-    // CSS block alone — the annotations themselves are covered by the
-    // fragment cases above and by caps.test.ts.
+    // Repinned for carry-forward 34: the fixture now builds its `Ranking`
+    // through the shared `ranking()` helper, which uses the real `CUTOFF`
+    // constant (3.4 DPS / 0.15%) instead of the old ad hoc `{ absDps: 5, pct:
+    // 0.5 }` literal — `Cutoff`'s fields are literal-typed, so that literal
+    // could never have satisfied the real type. The rendered "Cutoff 3.4 DPS
+    // / 0.15%" line is longer than "Cutoff 5 DPS / 0.5%", which is the whole
+    // delta against the previous pin.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "9c88e07c01ed6ff0e038092598ccab8803347e8fc0f733fbbf23ac5570373288",
-      length: 10782,
+        "34d6896269904120abced85d1b9591d07be2a63324451f59fdd3d2689afe0546",
+      length: 10785,
     });
   });
 });
@@ -366,29 +368,22 @@ function meta(): RankReportMeta {
 }
 
 function rankingWithPvpWeaponAboveCutoff(): Ranking {
-  return {
-    contentHash: "test",
-    cutoff: { absDps: 5, pct: 0.5 },
-    baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-    assumptions: { standing: [] },
-    substitutions: [],
-    items: [
-      item({
-        rank: 1,
-        name: "Helm of the Illidari Shatterer",
-        slot: "head",
-        deltaDps: 15,
-        belowCutoff: false,
-        source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
-      }),
-      item({
-        rank: 12,
-        name: "Vengeful Gladiator's Bonegrinder",
-        slot: "weapon",
-        deltaDps: 7.6,
-        belowCutoff: false,
-        source: { kind: "pvp", via: "arena", season: 3 },
-      }),
-    ],
-  };
+  return ranking([
+    item({
+      rank: 1,
+      name: "Helm of the Illidari Shatterer",
+      slot: "head",
+      deltaDps: 15,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+    }),
+    item({
+      rank: 12,
+      name: "Vengeful Gladiator's Bonegrinder",
+      slot: "weapon",
+      deltaDps: 7.6,
+      belowCutoff: false,
+      source: { kind: "pvp", via: "arena", season: 3 },
+    }),
+  ]);
 }

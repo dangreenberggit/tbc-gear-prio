@@ -28,6 +28,7 @@ function ranking(items: RankedItem[]): Ranking {
   return {
     contentHash: "sha256:test",
     cutoff: CUTOFF,
+    fight: { reportCode: "test", fightId: 1, route: "ranked" },
     baseline: { dps: 2000, stdev: 90, metaAdjusted: false },
     assumptions: {
       maxPhase: 2,

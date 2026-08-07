@@ -14,9 +14,17 @@ import {
   filterPoolByZone,
   ITEM_SOURCE_KINDS,
   poolFromUniverse,
+  type ItemSource,
   type PoolEntry,
   type UniverseEntry,
 } from "../src/pool.js";
+
+/** `raid` and `token` are the only `ItemSource` variants that carry a zone. */
+function hasZone(
+  source: ItemSource
+): source is Extract<ItemSource, { kind: "raid" | "token" }> {
+  return source.kind === "raid" || source.kind === "token";
+}
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const wowsimsDbPath = join(root, "vendor/wowsims/db.json");
@@ -44,6 +52,7 @@ type TwoHopEntry = {
   pieceId: number;
   pieceName: string;
   zone: string;
+  boss: string;
   tokenName: string;
 };
 
@@ -630,6 +639,8 @@ describe("data/universes/ret-p3.json hardening", () => {
     ] as const) {
       expect(poolIds.has(id), `${id} ${name}`).toBe(true);
       const entry = universeP3.find((e) => e.itemId === id)!;
+      expect(hasZone(entry.source), `${id} ${name} source kind`).toBe(true);
+      if (!hasZone(entry.source)) continue;
       expect(entry.source.zone, `${id} ${name}`).toBe("World Bosses");
     }
   });
@@ -645,7 +656,9 @@ describe("data/universes/ret-p3.json hardening", () => {
       [30740, "Doom Lord Kazzak"],
     ] as const) {
       const entry = raw.entries.find((e) => e.itemId === id)!;
-      const worldBoss = entry.sources.filter((s) => s.zone === "World Bosses");
+      const worldBoss = entry.sources
+        .filter(hasZone)
+        .filter((s) => s.zone === "World Bosses");
       expect(worldBoss.length, `${id} world-boss source count`).toBe(1);
       expect(worldBoss[0]!.boss, `${id} boss`).toBe(boss);
     }
@@ -687,6 +700,7 @@ describe("data/universes/ret-p3.json hardening", () => {
       expect(map, `two-hop map for tier piece ${id}`).toBeTruthy();
       const entry = universeP3.find((e) => e.itemId === id)!;
       expect(entry.source.kind, `${id} ${entry.name}`).toBe("token");
+      if (entry.source.kind !== "token") continue;
       expect(entry.source.zone, `${id} ${entry.name}`).toBe(map!.zone);
       // Boss and token name too, not just zone. The raid *and* boss filters
       // are shipped ViewOptions controls, so a regeneration that scrambled
