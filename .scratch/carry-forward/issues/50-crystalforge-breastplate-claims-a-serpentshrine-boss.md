@@ -113,7 +113,7 @@ for.
 
 The other five universes were swept: zero remaining defects of this class.
 
-## Correction (2026-08-07, same day)
+## Correction (2026-08-07, same day) — itself superseded, see below
 
 **The stated cause above is wrong.** The live P4 page lists Crystalforge
 Breastplate under "Other Chest Armor Recommendations" as
@@ -124,3 +124,35 @@ So this was never an upstream transcription of a wrong guide row. The
 collection step dropped the token, took a boss from elsewhere, and flattened
 the below-the-fold table into `headline`. See
 [[55-wowhead-page-is-correct-transcription-paraphrased-it]].
+
+## Second correction (2026-08-07, same day) — the cause is per page
+
+The correction above is also too broad, and on this item it is simply wrong
+about P4. Checked against the live guide markup, the boss is recorded as a
+structured npc id on the early pages and a *different, wrong* npc id on the
+late ones:
+
+| Page | Boss as recorded | Correct? |
+|---|---|---|
+| p1-p2 | `[npc=19622]` Kael'thas Sunstrider (Tempest Keep) | yes |
+| p3 | `[npc=19622]` Kael'thas Sunstrider (Tempest Keep) | yes |
+| p4 | `[npc=21213]` Morogrim Tidewalker (Serpentshrine Cavern) | **no** |
+| p5 | `[npc=21213]` Morogrim Tidewalker (Serpentshrine Cavern) | **no** |
+
+The Morogrim Tidewalker claim is therefore a **genuine upstream factual
+error**, not something our collection invented — the original cause on this
+ticket was right for P4/P5. Note this one is upstream-wrong even though it is
+a structured `[npc=]` link: a machine-readable id is a *stronger* witness than
+prose, not an infallible one.
+
+What the first correction got right is the shape of the defect on the pages
+that are fine, and the p3 row is still ours to own. What it got wrong is
+asserting the P4 page reads correctly; it does not.
+
+The fix and the item data stand, unchanged through both corrections.
+`data/two-hop/ret-tokens.json`'s note now records this per-page split. See
+[[49-lightbringer-breastplate-names-a-token-paladins-cannot-use]] for the same
+split on 30990 and
+[[57-guide-prose-should-not-source-items-a-machine-input-covers]] for the
+structural fix. [[55-wowhead-page-is-correct-transcription-paraphrased-it]] is
+closed as premise-false.

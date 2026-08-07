@@ -1,10 +1,58 @@
-Status: open
+Status: closed — measured, premise false
 Type: bug
 Origin: user screenshot of the live p4 page, 2026-08-07
 Blocks: none
 Blocked by: none
 
 # The Wowhead page is right; our transcription paraphrased it
+
+> **Closed 2026-08-07 without doing the work: the premise below is false.**
+>
+> This ticket reads a long tail of one-off `rankLabel` values as an agent
+> paraphrasing the page. Measured against the live P4 markup, 13 of the 14
+> suspect rows match the page text exactly; the 14th (`32581`) differs only
+> because the page cell holds a line break (`'Best - \n\nNo Expertise'`) that
+> the collected file sensibly collapses.
+>
+> The p4 Rank column genuinely is long-tailed. Its singletons include
+> `'Optional - Human'`, `'Undead Only & Demons'`, `'Best - No Expertise'` and
+> `'Optional-Crafted'` — race and mechanic specifics no summariser invents — and
+> the `'Optional - tier'` / `'Optional - Tier'` pair is the page author's own
+> inconsistent capitalisation, not two spellings of an invented idea:
+>
+> ```bash
+> python -c "
+> import json
+> from collections import Counter
+> d=json.load(open('data/wowhead-lists/ret/p4.json',encoding='utf-8'))
+> c=Counter(e['rankLabel'] for e in d['entries'] if e.get('rankLabel'))
+> print(sorted(l for l,n in c.items() if n==1))
+> "
+> ```
+>
+> Consequences, all handled:
+>
+> - The `SINGLETON_BUDGET` gate this ticket asked for (suggested work 2) was
+>   built, then **deleted** — it measured page vocabulary, not collection
+>   defects, and was inverted: our p4 file has `rankLabel: null` on the 40
+>   `alternative`-section rows the page does label, so a faithful re-scrape
+>   restores labels, adds singletons, and fails the gate. That dropped-label
+>   data loss is the real defect here, and it is the opposite of the paraphrase
+>   story. It belongs to [[56-scrape-the-wowhead-gear-pages]].
+> - Suggested work 1 (re-check the 14 rows) is the measurement above: empty.
+> - Suggested work 4 (the `ret-tokens.json` note) is done, but **not** as
+>   written here — see below.
+>
+> This ticket's own causal claim is also too broad. It says the page is right
+> and collection introduced the error; that holds for P3 and is wrong for
+> P4/P5, whose pages carry the bad token as bare text. See
+> [[49-lightbringer-breastplate-names-a-token-paladins-cannot-use]] and
+> [[50-crystalforge-breastplate-claims-a-serpentshrine-boss]] for the per-page
+> split. Suggested work 3 (split collection from interpretation) survives all
+> of this and lives on in [[56-scrape-the-wowhead-gear-pages]] and
+> [[57-guide-prose-should-not-source-items-a-machine-input-covers]].
+>
+> Everything below is the original text, preserved for the record.
 
 A screenshot of the live P4 chest table (the `sourceUrl` already recorded in
 `data/wowhead-lists/ret/p4.json`) shows the page states:

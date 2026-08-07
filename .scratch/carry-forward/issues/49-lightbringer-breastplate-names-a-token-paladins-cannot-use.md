@@ -124,7 +124,7 @@ The requested cross-check gate exists — see [[51-tier-source-rows-are-unguarde
 this ticket's own measurement command could not see because it compared only
 the embedded token name. Recorded in ticket 51.
 
-## Correction (2026-08-07, same day)
+## Correction (2026-08-07, same day) — itself superseded, see below
 
 **The stated cause above is wrong.** A screenshot of the live P4 page shows it
 reads `(via Chestguard of the Forgotten Conqueror)` — correct. The page does
@@ -134,3 +134,35 @@ was introduced during collection, not copied from a wrong source.
 The fix stands; only the diagnosis was wrong, and it was wrong in the direction
 that matters — it blamed an upstream we do not control instead of a step we
 own. See [[55-wowhead-page-is-correct-transcription-paraphrased-it]].
+
+## Second correction (2026-08-07, same day) — the cause is per page
+
+The correction above is also too broad. It generalised one screenshot to every
+page; checked against the live guide markup, the pages **disagree with each
+other** on this token:
+
+| Page | How the token is recorded | Correct? |
+|---|---|---|
+| p1-p2 | `[item=30236]` link | yes |
+| p3 | `[item=31089]` link | yes |
+| p4 | bare text "Chestguard of the Vanquished Champion" | **no** |
+| p5 | bare text "Chestguard of the Vanquished Champion" | **no** |
+
+So **both** stories are true, on different pages. P3 links the right token and
+our `p3.json` collection introduced the error — the correction above holds
+there. P4 and P5 type the wrong token as prose, and our collection copied them
+faithfully — the original "wrong upstream" cause holds there.
+
+The `[item=]`/bare-text split is the whole signal: a structured id is a strong
+witness, prose is a weak one. That is the durable lesson, not a verdict about
+which side is usually at fault — these three items were *selected because they
+were already known broken*, so the sample proves less than it looks like it
+does.
+
+The item data is correct and the fix stands, unchanged through both
+corrections. `data/two-hop/ret-tokens.json`'s note now records this per-page
+split. See [[57-guide-prose-should-not-source-items-a-machine-input-covers]],
+which removes prose as a source for items a machine input already covers and
+so makes this class unreachable.
+[[55-wowhead-page-is-correct-transcription-paraphrased-it]] is closed as
+premise-false and should not be read as support for the first correction.
