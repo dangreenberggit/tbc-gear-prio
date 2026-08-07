@@ -1,21 +1,53 @@
 # Handoff: what is left after the tier-source work
 
-For whoever picks up tickets 53, 54 or 56 on `fix/carry-forward-backlog`.
-**Tickets 55 and 57 are closed** — do not start them.
+For whoever picks up **ticket 56** on `fix/carry-forward-backlog`.
+**Tickets 53, 55 and 57 are closed** — do not start them. Ticket 54 is down to
+two items (fixture guidance, and one token's redemption list).
 
-Originally written 2026-08-07 on `830dae0`. **Substantially revised the same day
-after fetching the live pages** — several claims in the first version were
-wrong and are corrected below. Revised again on `424c5a4` after 55 and 57
-closed. The branch is still **unreviewed and unlanded**.
+## Session of 2026-08-07 (second): 53 closed, 54 nearly, records item done
+
+Three commits on top of `14fc241`, branch still **unreviewed and unlanded**:
+
+| Commit | What |
+|---|---|
+| `36957c0` | feral T6 → Vanquisher token, 4 pieces verified per redemption list |
+| `8ecaeb3` | ticket 53 — `profession` canonicalised off the proto enum |
+| `ebc7525` | `wowheadSourceText` verbatim + `correctedSourceText` (option 1) |
+
+`pnpm verify` on `ebc7525`: **425 passed**, 32 files, Node v22.16.0.
+
+Three findings worth carrying, each of which contradicted a plausible guess:
+
+- **The T6 token vocabulary is not a rename of T4/T5.** It is
+  Conqueror/Vanquisher/Protector, and the *class groupings were re-cut*. This
+  map's own note said druid takes the "Defender" token; at T6 Protector is
+  Warrior/Hunter/Shaman and druid is **Vanquisher**. An analogy would have been
+  wrong.
+- **The redemption pairing has a machine source after all.** Each token's
+  Wowhead "Currency for" list names the pieces it buys (vendor Tydormu). Both
+  `feral-tokens.json` and ticket 54 say no committed input states it — true of
+  AtlasLoot and `db.json`, but the page has it. Use it for `31048`.
+- **The pre-correction text in git is identical across p3/p4/p5, and that is a
+  flattening, not a record.** p3's page is right and its old text was our slip;
+  p4/p5's pages are genuinely wrong. Restoring "the original" uniformly would
+  have injected a defect into p3 while claiming faithfulness. Check per page —
+  the same lesson this doc already records, which still nearly bit again.
+
+Page access turned out to be rate-limited, which is why one Thunderheart slot is
+unfinished — see "The pages are scrapeable" below.
+
+Originally written 2026-08-07 on `830dae0` and revised repeatedly the same day —
+several claims in the first version were wrong and are corrected below, so
+prefer a later section over an earlier one where they conflict.
 
 ## What already landed (do not redo)
 
 Eight commits, `c3f5b97` → `424c5a4`. Tickets 48, 49, 50, 51, 52, 55 and 57 are
-closed.
+closed. Three more landed later the same day — see the session note at the top.
 
 | Commit | What |
 |---|---|
-| `c3f5b97` | parser splice fix (48), source-text corrections (49/50), tier cross-check gate (51) |
+| `c3f5b97` | parser splice fix (48), source-text corrections (49/50), tier cross-check gate (51). Its overwrite of `wowheadSourceText` is **partly reverted by `ebc7525`** — p4/p5 now keep the page's words and carry the fix in `correctedSourceText`. |
 | `98bbff6` | boss sub-unit → encounter folding (52), `check_boss_aliases.py` |
 | `37b8c46` | per-row `origin` on every source |
 | `8bdfd3f` | witness gates — including ones `37b8c46`'s message wrongly claimed |
@@ -33,11 +65,19 @@ history is linear and the working tree is clean.
 
 ## The pages are scrapeable, and that answered several open questions
 
-`urllib` with realistic browser headers returns 200 (a bare User-Agent gets
-403). No headless browser needed. **The guide body is not HTML** — it ships as a
-single `WH.markup.printHtml("...")` JS string containing Wowhead's own BBCode:
+**The guide body is not HTML** — it ships as a single
+`WH.markup.printHtml("...")` JS string containing Wowhead's own BBCode:
 `[table]`, `[tr]`, `[td]`, `[item=30905]`, `[npc=17968]`. NPC and item names
 resolve from `WH.Gatherer.addData(...)` payloads in the same response.
+
+**Access is less settled than this section originally claimed.** An earlier pass
+recorded that `urllib` with realistic browser headers returns 200. On
+2026-08-07 that stopped being true from this machine: every URL 403s, including
+one that had worked, so the 200 was a property of that attempt and not a durable
+fact. The in-app browser reads the pages fine but began returning CDN errors
+after roughly eight loads. Treat page access as **rate-limited and unreliable**,
+budget fetches, and do not tune request headers to defeat the block. Ticket 56
+should assume it may need several sessions rather than one clean pass.
 
 Fetch and extraction helper: `.scratch/carry-forward/notes/57-impact.py` is the
 measurement script; the fetch/extract pair used to get the markup is small
@@ -163,20 +203,23 @@ covered items. Read the ticket before starting; it records the one trap
 (suppress on *"the machine input supplies a zone"*, never on *"the item is
 known to a machine input"* — the latter silently deletes heroic dungeon zones).
 
-## Ticket 53 — `profession` carries prose
+## Ticket 53 — CLOSED (`8ecaeb3`)
 
-Unchanged and still real: 12 distinct values for five professions. Note the
-Bulwark case is authentic page text — `Profession: Armorsmithing Blacksmithing
-(BoP)` is what p4 says — so this is a parser problem, not a collection one.
-Ticket 57 does **not** fix it, because `crafted` is a kept kind.
+Detail in the ticket's closing note. One thing worth knowing before you read the
+diff: it is **deletions only**, which looks lossy and is not — the canonicalised
+wowhead row becomes byte-identical to the `db` row already present, so dedup
+collapses the pair onto the machine-origin one. No item lost the `crafted` kind.
 
-## Ticket 54 — remaining items
+## Ticket 54 — two items left
 
-- **Feral T6 has no two-hop map.** `feral-tokens.json` stops at T5. The four
-  Thunderheart pieces (31034, 31042, 31044, 31048) are 4 of the 5 allowlisted
-  ids and 4 of the 11 prose-only locus claims. Closing this removes them from
-  `KNOWN_UNCORROBORATED`, and the companion test will fail until you do —
-  intended.
+- ~~**Feral T6 has no two-hop map.**~~ **Done (`36957c0`)** for four of five
+  slots; uncorroborated locus claims went **11 → 7**.
+- **`31048 Thunderheart Pauldrons` still needs its redemption list.** It is the
+  one remaining Thunderheart id on `KNOWN_UNCORROBORATED`. Read the "Currency
+  for" list on token `31102` and add the row. Establish the pairing from that
+  list: AtlasLoot's Mother Shahraz matches the guide, but all three tokens in a
+  triple drop from the same boss, so that agreement says nothing about which
+  class redeems which piece.
 - ~~**Write down the "prefer the machine source over guide prose" rule.**~~
   **Done by 57 landing** — the pipeline enforces it and
   `pnpm wowhead-prose:check` gates it, which beats a doc line. Do not also
@@ -205,32 +248,17 @@ Parser junk worth fixing while nearby, exposed by the 57 measurement:
 `32658 Badge of Tenacity` → `boss: "Depleted Badge"`;
 `29301 Band of the Eternal Champion` → `zone: "The Scale of the Sands Exalted"`.
 
-## Records cleanup — one item left
+## Records cleanup — DONE (`ebc7525`)
 
 An earlier version of this doc numbered these 1–4, which collided with the
 ticket numbers and confused two sessions. Don't reintroduce the numbering; the
 tickets are the only numbered things here.
 
-Three are done (`a17e351`, `530711f`): the `ret-tokens.json` note is rescoped
-per page, the paraphrase gate is deleted with 55 closed, and 49/50 carry the
-per-page story. **One remains, and it needs a decision from the user before any
-code:**
-
-**`wowheadSourceText` should hold what the page says.** Corrections belong
-alongside it, not overwritten into it. `c3f5b97` overwrote it for
-30990/30129/30993 (it did record `corrections[]`, which is why this is
-recoverable).
-
-Constraint: `assemble_universe.py` reads `wowheadSourceText` directly, so
-restoring verbatim prose without a second field would feed the wrong boss into
-the universe. Two shapes were discussed — add a corrected field the parser
-prefers, or keep the parser on the existing field and put verbatim text in a
-new one. **Undecided; ask before picking.**
-
-57 landing makes this easier but does **not** remove the constraint: prose is
-no longer a locus input *for items a machine input covers*, which includes all
-three of these, but `assemble_universe.py` still reads the field for the 94
-load-bearing rows. Re-measure rather than assuming the field is now inert.
+The last item is closed. **Option 1, chosen by the user:** `wowheadSourceText`
+holds what the page says, `correctedSourceText` sits beside it, and only the
+parser prefers the correction (`source_text_for_parsing`). Applied to p4/p5
+only — p3's page is right, so its value is already faithful. Detail and the
+re-measurement in ticket 54's closing note.
 
 ## Process notes that cost time
 
