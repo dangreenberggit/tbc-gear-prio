@@ -977,6 +977,52 @@ describe("a transcribed row agrees with its own raw text", () => {
   }
 });
 
+describe("rankLabel is copied, not paraphrased", () => {
+  // The live pages use a small Rank vocabulary — a 2026-08-07 screenshot of the
+  // P4 chest table shows "Best" and "Optional". Our collected lists carry those
+  // plus a long tail of labels appearing exactly once ("Optional - tier",
+  // "Optional - Tier", "Old Tier", "T6 Option"), which are the collecting agent
+  // summarising a row instead of copying its Rank cell.
+  //
+  // That matters beyond tidiness: all three defects in carry-forward 49/50/51
+  // sat on singleton-label rows. Paraphrase is where the agent stopped
+  // transcribing, and it is where the facts drifted (carry-forward 55).
+  //
+  // This pins the counts so they can only go down. It is a re-collection
+  // backlog, not a pass/fail on correctness — the rows are suspect, not known
+  // wrong.
+  const SINGLETON_BUDGET: Record<string, number> = {
+    "data/wowhead-lists/ret/p1-p2.json": 5,
+    "data/wowhead-lists/ret/p3.json": 17,
+    "data/wowhead-lists/ret/p4.json": 17,
+    "data/wowhead-lists/ret/p5.json": 27,
+    "data/wowhead-lists/ret/pre-raid.json": 6,
+    "data/wowhead-lists/feral/p1-p2.json": 10,
+    "data/wowhead-lists/feral/p3.json": 10,
+  };
+
+  for (const [rel, budget] of Object.entries(SINGLETON_BUDGET)) {
+    it(`${rel} has at most ${budget} one-off rank labels`, () => {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: Array<{ rankLabel?: string | null }>;
+      };
+      const counts = new Map<string, number>();
+      for (const row of doc.entries) {
+        if (!row.rankLabel) continue;
+        counts.set(row.rankLabel, (counts.get(row.rankLabel) ?? 0) + 1);
+      }
+      const singletons = [...counts.entries()]
+        .filter(([, n]) => n === 1)
+        .map(([label]) => label)
+        .sort();
+      expect(
+        singletons.length,
+        `one-off rank labels (paraphrase, not the page's vocabulary): ${JSON.stringify(singletons)}. If you re-collected this file, lower the budget; if this grew, a new row was summarised rather than copied`
+      ).toBeLessThanOrEqual(budget);
+    });
+  }
+});
+
 describe("zone and boss claims have an independent witness", () => {
   // Every defect in carry-forward 48-53 arrived on the `wowhead` path (an
   // agent transcribing a rendered page) and every one was caught by

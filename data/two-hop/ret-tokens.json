@@ -5,7 +5,7 @@
   "notes": [
     "Zones/bosses come from AtlasLoot parse of token drop IDs (data/atlasloot_sources.json).",
     "Piece↔token IDs verified against Wowhead item pages / BiS guide rows.",
-    "Wowhead Phase 3 BiS guide mislabels Lightbringer Breastplate token as Chestguard of the Vanquished Champion; corrected to Forgotten Conqueror (31089) via item page + AtlasLoot Illidan BT drop."
+    "Lightbringer Breastplate token is Chestguard of the Forgotten Conqueror (31089), confirmed via item page + AtlasLoot Illidan BT drop. An earlier version of this note said the Wowhead BiS guide mislabelled it; a 2026-08-07 screenshot of the live P4 page shows the page is correct and the error was introduced when data/wowhead-lists/ret/p3-p5.json was collected. See .scratch/carry-forward/issues/55."
   ],
   "entries": [
     {

@@ -112,3 +112,15 @@ primary source makes each fail), so they still catch the regression they exist
 for.
 
 The other five universes were swept: zero remaining defects of this class.
+
+## Correction (2026-08-07, same day)
+
+**The stated cause above is wrong.** The live P4 page lists Crystalforge
+Breastplate under "Other Chest Armor Recommendations" as
+`Optional | Drop: Kael'thas Sunstrider (Tempest Keep) (via Chestguard of the
+Vanquished Champion)` — correct, and matching `p1-p2.json` and the two-hop map.
+
+So this was never an upstream transcription of a wrong guide row. The
+collection step dropped the token, took a boss from elsewhere, and flattened
+the below-the-fold table into `headline`. See
+[[55-wowhead-page-is-correct-transcription-paraphrased-it]].

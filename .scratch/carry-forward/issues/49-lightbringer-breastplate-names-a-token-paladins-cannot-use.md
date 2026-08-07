@@ -123,3 +123,14 @@ The requested cross-check gate exists — see [[51-tier-source-rows-are-unguarde
 *token* half only. 30993 had the same class of defect in the *boss* half, which
 this ticket's own measurement command could not see because it compared only
 the embedded token name. Recorded in ticket 51.
+
+## Correction (2026-08-07, same day)
+
+**The stated cause above is wrong.** A screenshot of the live P4 page shows it
+reads `(via Chestguard of the Forgotten Conqueror)` — correct. The page does
+not carry the mislabel that `ret-tokens.json`'s note describes, so the error
+was introduced during collection, not copied from a wrong source.
+
+The fix stands; only the diagnosis was wrong, and it was wrong in the direction
+that matters — it blamed an upstream we do not control instead of a step we
+own. See [[55-wowhead-page-is-correct-transcription-paraphrased-it]].
