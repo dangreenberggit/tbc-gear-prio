@@ -13,6 +13,7 @@ import {
   rankUpgrades,
 } from "../src/rank.js";
 import { pairedReplicateSe } from "../src/se.js";
+import { applyView } from "../src/view.js";
 import { realPoolEntry } from "./real-source.js";
 import {
   CachingGearSource,
@@ -1883,5 +1884,71 @@ describe("rankUpgrades paired-replicate SE", () => {
     await expect(
       rankWithSeeds([42, 42, 42, 42, 42], new SeedAwareSimRunner())
     ).rejects.toThrow(/42/);
+  });
+
+  /**
+   * Ticket 39 (`.scratch/carry-forward/issues/39-belowcutoff-derived-twice-untested.md`):
+   * `rank.ts` sets `RankedItem.belowCutoff` and `applyView` copies it onto
+   * `ViewRow.belowCutoffInView` (ADR-0020 settled that the view carries rather
+   * than re-derives it). Nothing had driven a `Ranking` through `rankUpgrades`
+   * itself and checked the two still agree — the view.test.ts coverage for
+   * this builds `Ranking` fixtures by hand, so it never touches the one place
+   * `belowCutoff` gets written twice: once from the first seed's delta, again
+   * from the paired-replicate mean.
+   */
+  it("keeps belowCutoffInView equal to the ranking's own belowCutoff through paired replication", async () => {
+    // Seed 11 (seeds[0]) drives the pre-replication belowCutoff. The rest of
+    // the neck pool (see `neckPool`/`SeedAwareSimRunner`) gains 17-25 DPS at
+    // every seed, so 29381 needs a seed-11 gain above the pool's floor (17) to
+    // land in the replicated top 8 at all; 26 clears both that floor and
+    // CUTOFF.absDps (3.4), so this item starts life above cutoff. The other
+    // four seeds draw a small gain whose 5-seed mean falls back under 3.4 —
+    // this is the row ticket 39 asks for, one that crosses the cutoff
+    // *because of* replication rather than agreeing with it by construction.
+    const SEED11_GAIN = 26;
+    const OTHER_SEED_GAIN = -5.0;
+    class CrossingRunner extends SeedAwareSimRunner {
+      override async run(
+        req: RaidSimRequest,
+        opts: SimRunOpts
+      ): Promise<SimObservation> {
+        const neckId = neckIdOf(req);
+        if (neckId !== 29381) return super.run(req, opts);
+        this.calls.push({ neckId, seed: opts.seed });
+        const base = BASELINE_BY_SEED[opts.seed] ?? 2000;
+        const gain = opts.seed === 11 ? SEED11_GAIN : OTHER_SEED_GAIN;
+        return {
+          dps: base + gain,
+          stdev: 90,
+          iterationsDone: 3000,
+          simVersion: "v0.0.101",
+        };
+      }
+    }
+
+    const ranking = await rankWithSeeds(SEEDS, new CrossingRunner());
+    const crossed = ranking.items.find((i) => i.itemId === 29381)!;
+
+    // Prove the fixture actually exercises the crossing this test is named
+    // for, not just "some row is below cutoff somewhere".
+    expect(crossed.seMethod).toBe("paired-replicate");
+    const mean =
+      [
+        SEED11_GAIN,
+        OTHER_SEED_GAIN,
+        OTHER_SEED_GAIN,
+        OTHER_SEED_GAIN,
+        OTHER_SEED_GAIN,
+      ].reduce((a, b) => a + b, 0) / 5;
+    expect(crossed.deltaDps).toBeCloseTo(mean, 10);
+    expect(crossed.deltaDps).toBeLessThan(CUTOFF.absDps);
+    expect(crossed.belowCutoff).toBe(true);
+
+    const byId = new Map(ranking.items.map((i) => [i.itemId, i.belowCutoff]));
+    const { rows } = applyView(ranking);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.belowCutoffInView).toBe(byId.get(row.itemId));
+    }
   });
 });
