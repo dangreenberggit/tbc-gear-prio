@@ -2130,11 +2130,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
         }
       ],
       "curationHint": 73.09
@@ -2156,11 +2151,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Karazhan"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 69.94
@@ -3238,16 +3228,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Black Temple"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Trash Mobs"
-        },
-        {
-          "kind": "raid",
-          "zone": "Hyjal Summit",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 52.5
@@ -5006,11 +4986,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Serpentshrine Cavern"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 347.2

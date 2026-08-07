@@ -1619,11 +1619,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Karazhan"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 78.45,
@@ -2564,11 +2559,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Serpentshrine Cavern"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 49.71,
@@ -4172,11 +4162,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Tempest Keep"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 45.52

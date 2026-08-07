@@ -637,6 +637,38 @@ def canonical_zone(zone: str) -> str:
     return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
 
 
+# A TBC "boss" is an *encounter*, which may be several killable units: the
+# Illidari Council is four, the Eredar Twins two, and M'uru/Reliquary of the
+# Lost each transform into a second named unit mid-fight. Wowhead sometimes
+# credits a drop to the unit, AtlasLoot always to the encounter, so the same
+# real drop arrives under two names and `add_source` keeps both -- the item
+# then advertises two bosses in one zone where only one encounter exists.
+#
+# This is the `boss` counterpart of ZONE_SPELLING_FIXES above, and the same
+# reasoning applies: an unfolded alias is a second row, not a cosmetic
+# difference. `boss` is a shipped ViewOptions filter control.
+#
+# Every value here is a name AtlasLoot itself uses and every key is one it does
+# not; `check_boss_aliases.py` re-derives that from data/atlasloot_sources.json
+# and fails if it stops holding, so this table cannot drift into asserting an
+# encounter that no longer exists.
+#
+# The Karazhan Opera variants (Romulo and Julianne / The Big Bad Wolf / The
+# Wizard of Oz) are deliberately NOT folded: AtlasLoot lists all three, so they
+# are three distinct encounters filling one slot, not aliases of each other.
+BOSS_UNIT_TO_ENCOUNTER = {
+    "high nethermancer zerevor": "The Illidari Council",
+    "lady sacrolash": "Eredar Twins",
+    "entropius": "M'uru",
+    "essence of anger": "Reliquary of the Lost",
+    "trash mobs": "Trash",
+}
+
+
+def canonical_boss(boss: str) -> str:
+    return BOSS_UNIT_TO_ENCOUNTER.get(boss.strip().lower(), boss)
+
+
 # Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
 # to land in `boss` -- a shipped ViewOptions filter control listing an item as
 # a boss (carry-forward 48). The token half is dropped rather than emitted:
@@ -943,6 +975,13 @@ def assemble(
             source = {**source, "recipeZone": recipe["zone"]}
             if recipe.get("boss"):
                 source["recipeBoss"] = recipe["boss"]
+        # Same reason as the recipe block above: every input reaches this
+        # funnel, so folding unit names onto their encounter here means the
+        # dedupe below collapses the duplicate row whichever input produced it.
+        if isinstance(source.get("boss"), str):
+            folded = canonical_boss(source["boss"])
+            if folded != source["boss"]:
+                source = {**source, "boss": folded}
         # AtlasLoot's world-boss tables are per-NPC and complete, so they own the
         # boss attribution for that zone. Wowhead's free text names the wrong
         # boss on some rows (30730 Terrorweave Tunic reads as Kazzak; it drops

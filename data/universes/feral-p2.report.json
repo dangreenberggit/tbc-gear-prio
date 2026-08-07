@@ -34,7 +34,7 @@
     "curated": 3,
     "db": 1807,
     "two-hop": 10,
-    "wowhead": 37
+    "wowhead": 35
   },
   "membershipByOrigin": {
     "curated": 3,
@@ -42,7 +42,7 @@
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 212,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 32,
+    "itemHasOrigin:wowhead": 30,
     "listOnly": 24,
     "zoneMatch": 226
   },

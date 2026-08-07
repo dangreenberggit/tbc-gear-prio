@@ -928,6 +928,50 @@ describe("tier piece sources agree with the curated two-hop map", () => {
   }
 });
 
+describe("a boss name is an encounter, not one unit of one", () => {
+  // A TBC encounter can be several killable units — the Illidari Council is
+  // four, M'uru becomes Entropius — and Wowhead sometimes credits a drop to
+  // the unit where AtlasLoot always credits the encounter. Unfolded, one real
+  // drop reaches the universe under two names and the shipped `boss` filter
+  // offers a boss that is not an encounter.
+  //
+  // `scripts/check_boss_aliases.py` owns the alias table and checks it against
+  // AtlasLoot's vocabulary. This states the user-visible half of the same
+  // invariant: within one zone, an item names at most one boss.
+  //
+  // Karazhan's Opera slot is the deliberate exception — Romulo and Julianne /
+  // The Big Bad Wolf / The Wizard of Oz are three distinct encounters that
+  // AtlasLoot lists separately, and an item can drop from more than one.
+  const OPERA = new Set([
+    "Romulo and Julianne",
+    "The Big Bad Wolf",
+    "The Wizard of Oz",
+  ]);
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      for (const e of loadUniverse(rel).raw.entries) {
+        const byZone = new Map<string, Set<string>>();
+        for (const s of e.sources) {
+          if (!("zone" in s) || !("boss" in s) || typeof s.boss !== "string") {
+            continue;
+          }
+          if (OPERA.has(s.boss)) continue;
+          const bosses = byZone.get(s.zone) ?? new Set<string>();
+          bosses.add(s.boss);
+          byZone.set(s.zone, bosses);
+        }
+        for (const [zone, bosses] of byZone) {
+          expect(
+            [...bosses].sort(),
+            `${e.itemId} ${e.name} names ${bosses.size} bosses in ${zone} — a sub-unit name is probably shadowing its encounter`
+          ).toHaveLength(1);
+        }
+      }
+    });
+  }
+});
+
 describe("no boss field carries a spliced item name", () => {
   // Wowhead writes tier drops as `Drop: <Token> - <Boss> (<Zone>)`, and the
   // parser used to put that whole phrase into `boss`. `boss` is a shipped

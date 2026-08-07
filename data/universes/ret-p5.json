@@ -1551,11 +1551,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
         }
       ],
       "curationHint": 99.8
@@ -2403,11 +2398,6 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "Eredar Twins"
-        },
-        {
-          "kind": "raid",
-          "zone": "Sunwell Plateau",
-          "boss": "Lady Sacrolash"
         }
       ],
       "curationHint": 67.8
@@ -3247,11 +3237,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
         }
       ],
       "curationHint": 94.7
@@ -3350,11 +3335,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Karazhan"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 78.45,
@@ -3838,11 +3818,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "The Illidari Council"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "High Nethermancer Zerevor"
         }
       ],
       "curationHint": 156.44
@@ -4004,11 +3979,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "The Illidari Council"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "High Nethermancer Zerevor"
         }
       ],
       "curationHint": 87.9
@@ -5213,11 +5183,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Serpentshrine Cavern"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 49.71,
@@ -5844,11 +5809,6 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "Eredar Twins"
-        },
-        {
-          "kind": "raid",
-          "zone": "Sunwell Plateau",
-          "boss": "Lady Sacrolash"
         }
       ],
       "curationHint": 152.65
@@ -6681,11 +6641,6 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru"
-        },
-        {
-          "kind": "raid",
-          "zone": "Sunwell Plateau",
-          "boss": "Entropius"
         }
       ],
       "curationHint": 63.18
@@ -8051,11 +8006,6 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
         }
       ],
       "curationHint": 835.068
@@ -8518,11 +8468,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Tempest Keep"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 45.52

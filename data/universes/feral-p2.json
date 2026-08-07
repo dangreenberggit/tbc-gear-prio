@@ -1496,11 +1496,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Karazhan"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 69.94
@@ -3549,11 +3544,6 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Serpentshrine Cavern"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Trash Mobs"
         }
       ],
       "curationHint": 347.2
