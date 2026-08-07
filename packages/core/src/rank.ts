@@ -456,7 +456,12 @@ export async function rankUpgrades(
 
     // From the repaired layout, which is what the sim actually ran. Hoisted
     // above the loop because `hitDriven` prices each candidate against it.
-    const caps = capStateFrom(equipment, socketed, { assumedRace: race });
+    const talentsString = talentsStringFromRequest(request);
+    const caps = capStateFrom(equipment, socketed, {
+      assumedRace: race,
+      spec: input.spec,
+      ...(talentsString !== undefined ? { talentsString } : {}),
+    });
 
     for (const entry of candidates) {
       const owned = equippedIds.has(entry.itemId);
@@ -861,6 +866,23 @@ function raceFromSkeleton(skeleton: RaidSimRequest): Race {
   ).raid?.parties?.[0]?.players?.[0]?.race;
   if (raw && isRace(raw)) return raw;
   return "RaceHuman";
+}
+
+/**
+ * `compose` copies race/name/equipment onto the skeleton's player slot but
+ * leaves `talentsString` untouched (compose.ts), so the composed request
+ * still carries whatever the pinned preset skeleton set — this reads that
+ * same field back out for `capStateFrom` (carry-forward 33).
+ */
+function talentsStringFromRequest(request: RaidSimRequest): string | undefined {
+  const raw = (
+    request as {
+      raid?: {
+        parties?: Array<{ players?: Array<{ talentsString?: string }> }>;
+      };
+    }
+  ).raid?.parties?.[0]?.players?.[0]?.talentsString;
+  return typeof raw === "string" ? raw : undefined;
 }
 
 function isRace(value: string): value is Race {

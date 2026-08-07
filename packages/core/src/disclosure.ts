@@ -62,12 +62,16 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
  * Never states a precise figure: §4's shape is "~20 rating under the cap,
  * assuming no Heroic Presence in your party", not "you are 20 under".
  *
- * Both unknowns point the **same way**, which is why this does not render a ±
- * band. Talent hit is uncounted and only ever adds (the pinned ret preset
- * takes 3/3 Precision, ~47 rating — see carry-forward ticket 33), and Heroic
- * Presence, unreadable from WCL, only ever lowers the cap. A symmetric ±
- * dressed a one-sided overstatement up as noise; saying which direction the
- * error runs is the honest version and costs nothing.
+ * `hit.rating`/`hit.gap` already fold in talent-granted hit where
+ * `capStateFrom` was given a `talentsString` and `spec` it recognises (the
+ * pinned ret preset's 3/3 Precision, ~47 rating — carry-forward 33; a
+ * recognised spec with no mapped hit talent, e.g. feral, or a preset this
+ * engine has no mapping for yet, contributes 0 rather than being silently
+ * assumed away). No TBC raid buff grants melee hit, so once talents are
+ * counted, Heroic Presence — unreadable from WCL, party-scoped, only ever
+ * *lowers* the cap — is the only remaining uncounted source. It is one-sided,
+ * which is why this does not render a ± band: a symmetric band would dress a
+ * one-sided overstatement up as noise.
  */
 export function hitCapBanner(hit: {
   rating: number;
@@ -78,15 +82,13 @@ export function hitCapBanner(hit: {
   const band = Math.round(hit.capUncertainty);
   if (hit.gap > 0) {
     return (
-      `~${rounded} rating under the hit cap counting gear alone — ` +
-      `talents and raid buffs are not counted and only ever add hit, and ` +
+      `~${rounded} rating under the hit cap — ` +
       `Heroic Presence in your party would lower the cap by ~${band}. ` +
-      `The real shortfall is smaller than this, likely much smaller.`
+      `The real shortfall may be smaller than this.`
     );
   }
   return (
-    `~${rounded} rating over the hit cap counting gear alone — ` +
-    `talents and raid buffs are not counted and only ever add hit, and ` +
+    `~${rounded} rating over the hit cap — ` +
     `Heroic Presence in your party would lower the cap by ~${band}. ` +
     `You are over by at least this much.`
   );
