@@ -100,6 +100,41 @@ export function classifySpec(
   return { ok: true, spec, treeIndex };
 }
 
+export type SpecMatch =
+  | { matches: true; detected: SpecId }
+  | { matches: false; detected?: DetectedSpecId };
+
+/**
+ * Compares a resolved fight's talent classification to the spec a caller
+ * asked for (carry-forward ticket 40). `classifySpec` already ran; this is
+ * the comparison the resolution path was skipping — nothing called it, so a
+ * character's off-spec night (a ret paladin's one protection kill, report
+ * `mKTA9V7Lx4Ck2DXf`) sailed through and was simmed with ret's preset and EP
+ * weights.
+ *
+ * Anything short of a *confirmed* match reports `matches: false`. That
+ * includes `ambiguous` and `needs-form-uptime` — a tree that cannot yet be
+ * read as anything in particular is not evidence *for* the requested spec,
+ * so it is not a match — and `unsupported-spec` — the fight is provably some
+ * other build (the ticket's protection case) without becoming the false
+ * positive of "detected as ret". `detected` is left absent whenever
+ * `classifySpec` did not land on a genuine spec name (paladin protection is
+ * `unsupported-spec`, an armour tree with no spec home today, not a wrongly
+ * detected one), so a caller can only ever report a spec this module
+ * actually classified.
+ */
+export function matchesRequestedSpec(
+  classification: SpecClassification,
+  requested: SpecId
+): SpecMatch {
+  if (classification.ok) {
+    return classification.spec === requested
+      ? { matches: true, detected: classification.spec }
+      : { matches: false, detected: classification.spec };
+  }
+  return { matches: false };
+}
+
 export type FormUptime = {
   /** Milliseconds in Cat Form. */
   catMs: number;

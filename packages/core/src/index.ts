@@ -105,10 +105,12 @@ export {
 export {
   classifyFeralForm,
   classifySpec,
+  matchesRequestedSpec,
   talentPointsFromWclTalents,
   type FeralFormClassification,
   type FormUptime,
   type SpecClassification,
+  type SpecMatch,
   type TalentPointsByTree,
 } from "./spec.js";
 export type {

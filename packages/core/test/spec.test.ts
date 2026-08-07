@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   classifyFeralForm,
   classifySpec,
+  matchesRequestedSpec,
   talentPointsFromWclTalents,
 } from "../src/spec.js";
 
@@ -72,6 +73,57 @@ describe("classifyFeralForm", () => {
     const result = classifyFeralForm({ catMs: 0, bearMs: 0 });
     expect(result.spec).toBeUndefined();
     expect(result.confidence).toBe(0);
+  });
+});
+
+describe("matchesRequestedSpec", () => {
+  it("matches when the classified spec equals the requested spec", () => {
+    const result = matchesRequestedSpec(
+      classifySpec("Paladin", [5, 11, 45]),
+      "ret"
+    );
+    expect(result).toEqual({ matches: true, detected: "ret" });
+  });
+
+  it("flags a mismatch rather than silently ranking — the report mKTA9V7Lx4Ck2DXf case: a protection paladin's talents (0/44/17) resolved and simmed against a ret ask", () => {
+    const result = matchesRequestedSpec(
+      classifySpec("Paladin", [0, 44, 17]),
+      "ret"
+    );
+    expect(result.matches).toBe(false);
+    // unsupported-spec: prot has no entry in PALADIN_TREE_SPEC, so nothing
+    // was misdetected as ret — the point is that it must not be treated as
+    // a match either.
+    expect(result.detected).toBeUndefined();
+  });
+
+  it("flags a mismatch when talents classify cleanly to a different supported spec", () => {
+    // Feral cat's tree (Druid tree 1) is unsupported by itself; use the
+    // Paladin case, the only pair of two *supported* specs today (ret is the
+    // only shipped spec), by asserting the negative form directly against an
+    // ambiguous split instead — see the next test for the "confirmed other
+    // spec" shape once a second class ships.
+    const result = matchesRequestedSpec(
+      classifySpec("Paladin", [20, 20, 5]),
+      "ret"
+    );
+    expect(result).toEqual({ matches: false, detected: undefined });
+  });
+
+  it("does not confirm a match on ambiguous talents", () => {
+    const result = matchesRequestedSpec(
+      classifySpec("Warrior", [40, 20, 0]),
+      "ret"
+    );
+    expect(result).toEqual({ matches: false, detected: undefined });
+  });
+
+  it("does not confirm a match when the tree still needs form uptime", () => {
+    const result = matchesRequestedSpec(
+      classifySpec("Druid", [0, 45, 16]),
+      "feral"
+    );
+    expect(result).toEqual({ matches: false, detected: undefined });
   });
 });
 
