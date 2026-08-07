@@ -256,6 +256,12 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--ink-soft);
   }
+  .hit-note {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .hit-note.down { color: var(--down); }
   .nums { text-align: right; white-space: nowrap; }
   .delta { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; }
   .delta .unit { font-size: 0.7rem; color: var(--muted); }

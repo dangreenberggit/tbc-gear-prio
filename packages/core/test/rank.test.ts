@@ -562,6 +562,104 @@ describe("rankUpgrades", () => {
     expect(loss.items[0]!.hitDriven).toBeUndefined();
   });
 
+  it("flags an upgrade that costs hit while under the cap", async () => {
+    // carry-forward 47 §2, from slamaltman's real run: the report banners a
+    // hit gap, then recommends Razor-Scale Battlecloak (33 str / 23 agi / 22
+    // sta, no hit) over Drape of the Dark Reavers (which carries 17), moving
+    // him further from the cap the same page just flagged. `isHitDriven` sums
+    // only positive deltas, so it could never describe this — driven through
+    // rankUpgrades to prove the annotation is wired to a real stat delta and
+    // not just to the predicate.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const backIndex = SIM_ORDER.indexOf("back");
+    const wornBack = equipment[backIndex]!.id;
+    const opts = { seed: 42, iterations: 3000 };
+    const sims = new Map([
+      [
+        simCacheKey(
+          compose(skeleton, {
+            name: "slamaltman",
+            race: "RaceHuman",
+            equipment,
+          }),
+          "v0.0.101",
+          opts
+        ),
+        { dps: 2000, stdev: 90, iterationsDone: 3000, simVersion: "v0.0.101" },
+      ],
+    ]);
+    // Built through the engine's own swap so the cache key matches: a
+    // hand-built layout skips gem fill and meta repair, and the recorded sim
+    // is then never found.
+    const swapped = candidateEquipmentForTest(
+      equipment,
+      "back",
+      30098,
+      2,
+      epWeights
+    );
+    sims.set(
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: swapped,
+        }),
+        "v0.0.101",
+        opts
+      ),
+      { dps: 2050, stdev: 90, iterationsDone: 3000, simVersion: "v0.0.101" }
+    );
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: new RecordedSimRunner("v0.0.101", sims),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          {
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back" as const,
+            phase: 2,
+            source: {
+              kind: "raid" as const,
+              zone: "Gruul's Lair",
+              boss: "Gruul",
+            },
+          },
+        ],
+      }
+    );
+
+    // The fixture only means anything if the worn cloak really carries hit and
+    // the candidate really does not — otherwise this would pass vacuously.
+    expect(wornBack).not.toBe(30098);
+    const row = ranking.items[0]!;
+    expect(ranking.caps.hit.gap).toBeGreaterThan(0);
+    expect(row.deltaDps).toBeGreaterThan(0);
+    expect(row.hitDriven).toBeUndefined();
+    expect(row.hitRegression?.lost).toBeGreaterThan(0);
+    expect(row.hitRegression?.gapAfter).toBe(
+      ranking.caps.hit.gap + row.hitRegression!.lost
+    );
+  });
+
   it("returns identical deltas for the same seed and recordings", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);

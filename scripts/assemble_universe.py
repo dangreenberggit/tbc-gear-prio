@@ -320,17 +320,91 @@ def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
 
     Empty for a spec with no vendored gear sets, which makes every entry
     untagged rather than falsely "BiS".
+
+    Membership only. `BiS` itself is phase-scoped -- see
+    `curated_set_phase` and `bis_set_labels_for_max_phase`.
     """
-    ids: set[int] = set()
+    return set(wowsims_curated_sets_by_item(profile))
+
+
+# Upstream names its gear sets by the stage they are BiS *for*: `preraid`
+# before Karazhan, `p1` for T4 content, `p2` for T5. Pre-raid is phase 1 --
+# it is the set you take into a phase-1 raid.
+CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2}
+
+
+def curated_set_phase(label: str) -> int | None:
+    """The phase a curated set is BiS for, or None if unrecognised.
+
+    `feral_p2_6p` / `p2_9p` are the same phase split by tier-bonus count, so
+    the leading `pN` is the phase and the suffix is a variant.
+    """
+    return CURATED_SET_PHASE.get(label.split("_", 1)[0])
+
+
+def bis_set_labels_for_max_phase(
+    sets_by_item: dict[int, list[str]], max_phase: int
+) -> dict[int, list[str]]:
+    """Curated sets that still make a *current* BiS claim at `max_phase`.
+
+    "BiS" is a claim about a stage, exactly as wowsims scopes it -- there is no
+    absolute BiS. A set for an earlier stage says "this was BiS before the
+    content you are now running", which is the opposite of a recommendation.
+    Without this, a phase-5 ret list badged Justicar (T4) chest, boots and
+    crown plus five pre-raid pieces as `BiS`, because the union flattened three
+    stage sets into one verdict (carry-forward 47 §1).
+
+    Upstream vendors no set past `p2`, so beyond phase 2 the newest available
+    stage is used rather than tagging nothing: the claim degrades to "the
+    latest curated set upstream ships", which `curatedSets` then names.
+    """
+    known = {
+        iid: [s for s in labels if curated_set_phase(s) is not None]
+        for iid, labels in sets_by_item.items()
+    }
+    available = {
+        phase
+        for labels in known.values()
+        for phase in (curated_set_phase(s) for s in labels)
+        if phase is not None and phase <= max_phase
+    }
+    if not available:
+        return {}
+    target = max(available)
+    scoped = {
+        iid: sorted(s for s in labels if curated_set_phase(s) == target)
+        for iid, labels in known.items()
+    }
+    return {iid: labels for iid, labels in scoped.items() if labels}
+
+
+def wowsims_curated_sets_by_item(profile: SpecProfile) -> dict[int, list[str]]:
+    """itemId -> the curated set names that equip it, sorted.
+
+    Carried per item rather than flattened to one boolean because the set name
+    is the whole provenance of the claim. A union says only "some upstream
+    preset equipped this", which is what let Shapeshifter's Signet -- 25
+    agility, 18 stamina, 20 expertise, no strength -- ship tagged a flat "BiS"
+    on a retribution list (carry-forward 47 §1). Upstream really does equip it
+    in all three ret sets, so the tag was not a cross-spec leak and not a bug
+    in membership; the defect is that "BiS" asserts a per-item verdict the
+    source never made. Naming the set lets the reader see it is a preset's
+    choice, and lets `curatedSets` outrank a bare label downstream.
+    """
+    by_item: dict[int, list[str]] = {}
     for path in profile.gear_sets:
         if not path.is_file():
             continue
         doc = load_json(path)
         assert isinstance(doc, dict)
+        # `ret_p2.gear.json` -> `p2`: the stem carries the spec prefix, which is
+        # redundant once the row is in a spec's own universe file.
+        label = path.stem.removesuffix(".gear")
+        label = label.split("_", 1)[1] if "_" in label else label
         for item in doc.get("items") or []:
             if isinstance(item, dict) and item.get("id") is not None:
-                ids.add(int(item["id"]))
-    return ids
+                by_item.setdefault(int(item["id"]), []).append(label)
+    return {iid: sorted(set(names)) for iid, names in by_item.items()}
 
 
 ARMOR_SLOTS = frozenset(
@@ -793,7 +867,14 @@ def assemble(
         if isinstance(n, dict) and "id" in n and "name" in n
     }
     db_by_id = {int(it["id"]): it for it in db["items"]}
-    bis_ids = wowsims_curated_item_ids(profile)
+    curated_sets_by_item = wowsims_curated_sets_by_item(profile)
+    # Membership stays the union: an item upstream equips at any stage is still
+    # a real candidate to rank (that is ticket 12's widening). Only the *claim*
+    # narrows to the current stage.
+    bis_ids = set(curated_sets_by_item)
+    bis_sets_at_phase = bis_set_labels_for_max_phase(
+        curated_sets_by_item, max_phase
+    )
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
@@ -988,7 +1069,13 @@ def assemble(
             ),
         }
         if iid in bis_ids:
-            entry["bisTags"] = ["BiS"]
+            # `curatedSets` is the full provenance and stays unscoped: an item
+            # dropped from the current set is still worth showing as having
+            # been curated, it just no longer carries the BiS claim.
+            entry["curatedSets"] = curated_sets_by_item[iid]
+            if iid in bis_sets_at_phase:
+                entry["bisTags"] = ["BiS"]
+                entry["bisSets"] = bis_sets_at_phase[iid]
         entries.append(entry)
 
         # Sorted: set iteration order over strings varies per process, which

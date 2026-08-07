@@ -406,6 +406,12 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
           `${indent}    hit-driven: most of this gain is hit rating, and you are under the cap`
         );
       }
+      if (item.hitRegression) {
+        console.log(
+          `${indent}    costs hit: -${item.hitRegression.lost} hit rating, ` +
+            `widening the gap above to ${item.hitRegression.gapAfter}`
+        );
+      }
       if (item.setBonusNote) {
         console.log(`${indent}    set: ${item.setBonusNote}`);
       }

@@ -75,6 +75,19 @@ export type PoolEntry = {
    */
   curationHint?: number;
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
+  /**
+   * Every pinned upstream gear set that equips this item (e.g. `["p1","p2"]`),
+   * regardless of stage. Full provenance: an item curated only for an earlier
+   * stage keeps this and loses `bisTags`.
+   */
+  curatedSets?: string[];
+  /**
+   * The current-stage sets behind `bisTags`. Present only alongside a `BiS`
+   * tag — "BiS" is a claim about a stage, never absolute, so the row names
+   * which one. See `bis_set_labels_for_max_phase` in
+   * `scripts/assemble_universe.py`.
+   */
+  bisSets?: string[];
 };
 
 /** Row shape from `data/universes/ret-p*.json` before normalization. */
@@ -88,6 +101,8 @@ export type UniverseEntry = {
   /** @deprecated JSON key from pre-rename generators; mapped to curationHint */
   ep?: number;
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
+  curatedSets?: string[];
+  bisSets?: string[];
 };
 
 export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
@@ -105,6 +120,10 @@ export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
     sources: [...entry.sources],
     ...(curationHint !== undefined ? { curationHint } : {}),
     ...(entry.bisTags !== undefined ? { bisTags: entry.bisTags } : {}),
+    ...(entry.curatedSets !== undefined
+      ? { curatedSets: [...entry.curatedSets] }
+      : {}),
+    ...(entry.bisSets !== undefined ? { bisSets: [...entry.bisSets] } : {}),
   };
 }
 

@@ -198,6 +198,95 @@ describe("S6: bisTags do not affect pool membership", () => {
   });
 });
 
+describe("curated BiS tags name their source (carry-forward 47)", () => {
+  const specSets: Record<string, string[]> = {
+    ret: ["ret_preraid.gear.json", "ret_p1.gear.json", "ret_p2.gear.json"],
+    feral: [
+      "feral_preraid.gear.json",
+      "feral_p2_6p.gear.json",
+      "feral_p2_9p.gear.json",
+    ],
+  };
+
+  function curatedIdsFor(spec: string): Set<number> {
+    const ids = new Set<number>();
+    for (const file of specSets[spec]!) {
+      const gear = JSON.parse(
+        readFileSync(join(root, "vendor/wowsims", file), "utf8")
+      ) as { items?: Array<{ id?: number }> };
+      for (const item of gear.items ?? []) {
+        if (item?.id != null) ids.add(item.id);
+      }
+    }
+    return ids;
+  }
+
+  for (const [spec, file] of [
+    ["ret", "data/universes/ret-p3.json"],
+    ["feral", "data/universes/feral-p3.json"],
+  ] as const) {
+    it(`${spec}: every BiS row is equipped by that spec's own curated sets`, () => {
+      // The cross-spec case the ticket asks to pin: a ring curated for feral
+      // must not arrive tagged on a ret rank by way of the other spec's sets.
+      const curated = curatedIdsFor(spec);
+      const tagged = loadUniverse(file).raw.entries.filter((e) =>
+        (e.bisTags ?? []).includes("BiS")
+      );
+      expect(tagged.length).toBeGreaterThan(0);
+      for (const entry of tagged) {
+        expect(curated.has(entry.itemId)).toBe(true);
+      }
+    });
+
+    it(`${spec}: every BiS row names the stage it is BiS for`, () => {
+      // A `BiS` tag with no stage behind it is the absolute claim upstream
+      // never makes, so the two fields travel together.
+      for (const entry of loadUniverse(file).raw.entries) {
+        if (!(entry.bisTags ?? []).includes("BiS")) {
+          expect(entry.bisSets).toBeUndefined();
+          continue;
+        }
+        expect(entry.bisSets?.length ?? 0).toBeGreaterThan(0);
+        expect(entry.curatedSets?.length ?? 0).toBeGreaterThan(0);
+      }
+    });
+  }
+
+  it("does not badge earlier-stage gear as BiS on a later-phase list", () => {
+    // The defect in the round: the union of preraid/p1/p2 flattened three
+    // stage verdicts into one, so a phase-5 ret list badged Justicar (T4) and
+    // pre-raid pieces `BiS`. They stay in the pool and keep `curatedSets` —
+    // only the claim is withdrawn.
+    const p5 = loadUniverse("data/universes/ret-p5.json").raw.entries;
+    const justicarCrown = p5.find((e) => e.name === "Justicar Crown");
+    expect(justicarCrown?.curatedSets).toEqual(["p1"]);
+    expect(justicarCrown?.bisTags).toBeUndefined();
+
+    for (const entry of p5) {
+      if ((entry.bisTags ?? []).includes("BiS")) {
+        expect(entry.bisSets).toEqual(["p2"]);
+      }
+    }
+  });
+
+  it("keeps the ret and feral verdicts on the shared ring distinguishable", () => {
+    // Shapeshifter's Signet is the item that opened the ticket. Upstream
+    // really does equip it in all three ret sets — it was never a cross-spec
+    // leak — so it keeps the tag, but now says which stage vouches for it.
+    // Feral curates it pre-raid only, so at p3 it carries no BiS claim there.
+    const ret = loadUniverse("data/universes/ret-p3.json").raw.entries.find(
+      (e) => e.itemId === 30834
+    );
+    const feral = loadUniverse("data/universes/feral-p3.json").raw.entries.find(
+      (e) => e.itemId === 30834
+    );
+    expect(ret?.curatedSets).toEqual(["p1", "p2", "preraid"]);
+    expect(ret?.bisSets).toEqual(["p2"]);
+    expect(feral?.curatedSets).toEqual(["preraid"]);
+    expect(feral?.bisTags).toBeUndefined();
+  });
+});
+
 describe("data/universes/ret-p3.json hardening", () => {
   const { raw, pool: universeP3 } = loadUniverse("data/universes/ret-p3.json");
   const poolIds = new Set(universeP3.map((e) => e.itemId));
@@ -355,9 +444,21 @@ describe("data/universes/ret-p3.json hardening", () => {
     const razorScale = raw.entries.find((e) => e.itemId === 30098);
     expect(razorScale?.bisTags).toEqual(["BiS"]);
 
+    // Every curated member is still *admitted* — ticket 12's widening is about
+    // membership and is unchanged, which `curatedSets` records. The `BiS`
+    // claim itself is now stage-scoped (carry-forward 47): at p3 the current
+    // curated stage is p2, so a member curated only for pre-raid or p1 keeps
+    // its provenance and drops the badge.
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
       const entry = raw.entries.find((e) => e.itemId === id);
-      expect(entry?.bisTags, `${id} should carry a BiS tag`).toEqual(["BiS"]);
+      expect(
+        entry?.curatedSets?.length ?? 0,
+        `${id} should be recorded as curated`
+      ).toBeGreaterThan(0);
+      const expected = entry?.curatedSets?.includes("p2") ? ["BiS"] : undefined;
+      expect(entry?.bisTags, `${id} BiS tag should follow its stage`).toEqual(
+        expected
+      );
     }
   });
 

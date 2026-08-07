@@ -21,8 +21,14 @@
         }
       ],
       "curationHint": 57.08,
+      "curatedSets": [
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_9p"
       ]
     },
     {
@@ -41,8 +47,14 @@
         }
       ],
       "curationHint": 56.28,
+      "curatedSets": [
+        "p2_6p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p"
       ]
     },
     {
@@ -93,8 +105,8 @@
         }
       ],
       "curationHint": 43.48,
-      "bisTags": [
-        "BiS"
+      "curatedSets": [
+        "preraid"
       ]
     },
     {
@@ -492,8 +504,16 @@
         }
       ],
       "curationHint": 65.18,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -679,8 +699,16 @@
         }
       ],
       "curationHint": 62.3,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -965,8 +993,16 @@
         }
       ],
       "curationHint": 64.72,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -985,8 +1021,16 @@
         }
       ],
       "curationHint": 59.52,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -1056,8 +1100,8 @@
         }
       ],
       "curationHint": 49.4,
-      "bisTags": [
-        "BiS"
+      "curatedSets": [
+        "preraid"
       ]
     },
     {
@@ -1091,8 +1135,8 @@
         }
       ],
       "curationHint": 47.1,
-      "bisTags": [
-        "BiS"
+      "curatedSets": [
+        "preraid"
       ]
     },
     {
@@ -1412,8 +1456,16 @@
         }
       ],
       "curationHint": 79.74,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -1790,8 +1842,17 @@
         }
       ],
       "curationHint": 0.0,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p",
+        "preraid"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -1933,8 +1994,14 @@
         }
       ],
       "curationHint": 112.89,
+      "curatedSets": [
+        "p2_6p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p"
       ]
     },
     {
@@ -1976,8 +2043,14 @@
         }
       ],
       "curationHint": 88.08,
+      "curatedSets": [
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_9p"
       ]
     },
     {
@@ -2168,8 +2241,16 @@
         }
       ],
       "curationHint": 55.82,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -2203,8 +2284,8 @@
         }
       ],
       "curationHint": 49.28,
-      "bisTags": [
-        "BiS"
+      "curatedSets": [
+        "preraid"
       ]
     },
     {
@@ -2509,8 +2590,8 @@
         }
       ],
       "curationHint": 0.0,
-      "bisTags": [
-        "BiS"
+      "curatedSets": [
+        "preraid"
       ]
     },
     {
@@ -2592,8 +2673,16 @@
         }
       ],
       "curationHint": 57.06,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -2739,8 +2828,16 @@
         }
       ],
       "curationHint": 39.46,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -2775,8 +2872,17 @@
         }
       ],
       "curationHint": 25.2,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p",
+        "preraid"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -3047,8 +3153,16 @@
         }
       ],
       "curationHint": 85.04,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -3347,8 +3461,16 @@
         }
       ],
       "curationHint": 436.96,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {
@@ -4318,8 +4440,16 @@
         }
       ],
       "curationHint": 46.04,
+      "curatedSets": [
+        "p2_6p",
+        "p2_9p"
+      ],
       "bisTags": [
         "BiS"
+      ],
+      "bisSets": [
+        "p2_6p",
+        "p2_9p"
       ]
     },
     {

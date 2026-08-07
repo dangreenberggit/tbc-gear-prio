@@ -281,6 +281,55 @@ describe("rank-report", () => {
     expect(html).not.toContain("EP prefilter");
   });
 
+  it("names the stage a BiS badge is BiS for (carry-forward 47)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30834,
+            name: "Shapeshifter's Signet",
+            slot: "finger",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+            bisTags: ["BiS"],
+            bisSets: ["p2"],
+            curatedSets: ["p1", "p2", "preraid"],
+          }),
+        ],
+      },
+      meta()
+    );
+    // The bare pill is what overstated the claim; the stage is the whole fix.
+    expect(html).toContain("p2 BiS");
+    expect(html).not.toMatch(/<span class="pill tag">BiS<\/span>/);
+  });
+
+  it("says when a recommendation costs hit under the cap (carry-forward 47)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            hitRegression: { lost: 17, gapAfter: 87 },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("costs 17 hit rating");
+    expect(html).toContain("widens your gap to 87");
+  });
+
   // The other cases here assert on fragments, so a change to the surrounding
   // markup or CSS passes them all. This pins the whole document, which is what
   // makes a pure restructure of this module provable: split the file, move the
@@ -290,10 +339,16 @@ describe("rank-report", () => {
   it("renders a byte-identical document for a fixed ranking", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     const digest = createHash("sha256").update(html, "utf8").digest("hex");
+    // Repinned for carry-forward 47: the row template gained the two cap
+    // annotations (`hit-note`, and the stage-scoped BiS pill) and the
+    // stylesheet gained `.hit-note`. This fixture has no BiS-tagged and no
+    // hit-flagged row, so the measured delta against the previous pin is the
+    // CSS block alone — the annotations themselves are covered by the
+    // fragment cases above and by caps.test.ts.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "e8c594b6c29cf7bb5776f19ba2b1437c482bf9f2838ef6be88b8cff0d51ff78b",
-      length: 10626,
+        "9c88e07c01ed6ff0e038092598ccab8803347e8fc0f733fbbf23ac5570373288",
+      length: 10782,
     });
   });
 });

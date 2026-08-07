@@ -32,6 +32,7 @@ export {
 } from "./fixtures/report-events-offline.js";
 export {
   capStateFrom,
+  hitRegression,
   isHitDriven,
   statDeltaBetween,
   HIT_CAP_RATING,

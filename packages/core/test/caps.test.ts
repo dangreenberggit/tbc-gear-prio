@@ -4,6 +4,7 @@ import {
   HIT_CAP_UNCERTAINTY,
   PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
   capStateFrom,
+  hitRegression,
   isHitDriven,
 } from "../src/caps.js";
 import { getGem } from "../src/gems.js";
@@ -199,6 +200,41 @@ describe("isHitDriven", () => {
       [Stat.StatAttackPower]: 60,
     };
     expect(isHitDriven(mixed, { gap: 40 }, { deltaDps: 12 })).toBe(false);
+  });
+});
+
+describe("hitRegression", () => {
+  it("reports the loss when a recommendation drops hit while under the cap", () => {
+    // slamaltman's real case (carry-forward 47): the run banners a ~70 rating
+    // gap, then recommends Razor-Scale Battlecloak, which carries no hit, over
+    // a worn cloak carrying 17. `isHitDriven` cannot describe this — it only
+    // counts positive hit deltas — so the page flagged the gap and then widened
+    // it silently.
+    const dropsHit = { ...zero(), [Stat.StatMeleeHitRating]: -17 };
+    expect(hitRegression(dropsHit, { gap: 70 }, { deltaDps: 12 })).toEqual({
+      lost: 17,
+      gapAfter: 87,
+    });
+  });
+
+  it("stays silent once the player is at or over the cap", () => {
+    // Past the cap, dropping hit costs nothing the player needs, so the note
+    // would be noise rather than a warning.
+    const dropsHit = { ...zero(), [Stat.StatMeleeHitRating]: -17 };
+    expect(hitRegression(dropsHit, { gap: 0 }, { deltaDps: 12 })).toBeNull();
+  });
+
+  it("stays silent when the item does not reduce hit", () => {
+    const gainsHit = { ...zero(), [Stat.StatMeleeHitRating]: 20 };
+    expect(hitRegression(gainsHit, { gap: 70 }, { deltaDps: 12 })).toBeNull();
+    expect(hitRegression(zero(), { gap: 70 }, { deltaDps: 12 })).toBeNull();
+  });
+
+  it("stays silent for an item that is not an upgrade", () => {
+    // Mirrors the isHitDriven rule above: the warning is about a trade the
+    // player is being advised to make, and a loss is not being advised.
+    const dropsHit = { ...zero(), [Stat.StatMeleeHitRating]: -17 };
+    expect(hitRegression(dropsHit, { gap: 70 }, { deltaDps: -3.5 })).toBeNull();
   });
 });
 

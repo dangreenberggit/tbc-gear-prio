@@ -247,3 +247,30 @@ export function isHitDriven(
   if (totalGain <= 0) return false;
   return hitGain / totalGain > HIT_DRIVEN_SHARE;
 }
+
+/**
+ * The mirror of `isHitDriven`: a recommendation that *reduces* hit while the
+ * report is telling the player they are short of the cap.
+ *
+ * `isHitDriven` cannot express this — it sums only positive deltas, so an item
+ * carrying no hit over a worn item carrying some scores zero hit gain and is
+ * simply unflagged. That left the shortlist widening the very gap the hit
+ * banner above it had just called the player's main problem, with nothing on
+ * the row saying so (carry-forward 47 §2).
+ *
+ * Advisory only, exactly like `isHitDriven`: the sim result stands, and a
+ * hit-losing item can still be the biggest throughput win. The claim is about
+ * a trade the page was making silently, not about the ranking being wrong.
+ */
+export function hitRegression(
+  statDelta: Readonly<Record<number, number>>,
+  hit: { gap: number },
+  candidate: { deltaDps: number }
+): { lost: number; gapAfter: number } | null {
+  if (candidate.deltaDps <= 0) return null;
+  if (hit.gap <= 0) return null;
+  const delta = statDelta[Stat.StatMeleeHitRating] ?? 0;
+  if (delta >= 0) return null;
+  const lost = -delta;
+  return { lost, gapAfter: hit.gap + lost };
+}

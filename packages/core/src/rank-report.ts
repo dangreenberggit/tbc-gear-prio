@@ -147,6 +147,15 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const set = item.setBonusNote
             ? `<div class="set">${esc(item.setBonusNote)}</div>`
             : "";
+          // The HTML report rendered neither cap annotation, so the page could
+          // banner a hit gap and then recommend an item that widened it with
+          // nothing on the row saying so (carry-forward 47 §2).
+          const hitNote = item.hitDriven
+            ? `<div class="hit-note">most of this gain is hit rating, and you are under the cap</div>`
+            : "";
+          const hitLoss = item.hitRegression
+            ? `<div class="hit-note down">costs ${item.hitRegression.lost} hit rating — widens your gap to ${item.hitRegression.gapAfter}</div>`
+            : "";
           const owned = item.owned
             ? `<span class="pill owned">owned</span>`
             : "";
@@ -157,8 +166,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const magnitude = reportItem.magnitudeWarning
             ? `<span class="pill warn">sim magnitude</span>`
             : "";
+          // "BiS" is a claim about a stage, exactly as upstream scopes it, so
+          // the badge names the stage rather than implying an absolute verdict
+          // (carry-forward 47 §1).
+          const bisSets = item.bisSets;
           const tags = (item.bisTags ?? [])
-            .map((t) => `<span class="pill tag">${esc(t)}</span>`)
+            .map((t) =>
+              t === "BiS" && bisSets?.length
+                ? `<span class="pill tag" title="equipped by the pinned upstream ${bisSets.join(" and ")} gear set${bisSets.length > 1 ? "s" : ""}">${esc(bisSets.join("/"))} BiS</span>`
+                : `<span class="pill tag">${esc(t)}</span>`
+            )
             .join("");
           const deltaCls =
             item.deltaDps > 0
@@ -173,6 +190,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <div class="meta">${esc(formatItemSource(item.source))} ${owned}${pvp}${magnitude}${tags}</div>
     ${alternate}
     ${set}
+    ${hitNote}
+    ${hitLoss}
   </div>
   <div class="nums">
     <div class="${deltaCls}">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>

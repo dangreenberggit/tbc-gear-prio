@@ -1,8 +1,12 @@
-Status: open
+Status: closed
 Type: bug
 Origin: sme-rank-review on phase-2/trust (two characters, both do-not-trust)
 Blocks: none
 Blocked by: none
+Resolution: §1 fixed by scoping `BiS` to the current stage (the union of
+  preraid/p1/p2 was the defect) and naming that stage on the row; §2 fixed by
+  adding `hitRegression`, the mirror of `hitDriven`. §3 items 1, 3 and 4 remain
+  open under their own tickets. 2026-08-06.
 
 # The `BiS` tag and the hit banner both tell the player something false
 
@@ -106,3 +110,59 @@ file.
 - A recommendation that reduces a stat the report flags as capped-short is
   annotated as such, in the same way `hitDriven` already annotates its cases.
 - The profession contradiction is resolved in one direction or the other.
+
+## Closed 2026-08-06
+
+### §1 — the hypothesis in this ticket was wrong, and the real cause is bigger
+
+This ticket guessed the tag came from `wowsims_curated_item_ids()`'s pool-member
+widening letting "curated membership from any spec's set" stamp `bisTags`. That
+is **not** what happened. Measured:
+
+```
+python -c "import json;print([e for e in json.load(open('data/universes/ret-p2.json'))['entries'] if e['itemId']==30834])"
+```
+
+`gear_sets` is per-spec on `SpecProfile`, and the vendored ret files are
+byte-identical to upstream `ui/paladin/retribution/gear_sets/`. Upstream really
+does equip Shapeshifter's Signet in **all three** ret sets — it was never a
+cross-spec leak. The ret P2 set is full of agility/leather (Cobra-Lash Boots,
+Gloves of the Searing Grip, Belt of One-Hundred Deaths), so the SME's "no ret
+BiS list carries it" is true of community lists, not of upstream's sim preset.
+
+The actual defect, raised by the user mid-fix: **`BiS` is a claim about a
+phase, exactly as wowsims scopes it, and this repo flattened three stage sets
+(`preraid` ∪ `p1` ∪ `p2`) into one absolute verdict.** The signet was the
+symptom; the disease was that at `ret-p5` **14 items** wore a `BiS` badge on
+the strength of pre-raid or T4 sets alone — Justicar Crown/Breastplate,
+Ironstriders of Urgency, Mask of the Deceiver and nine more.
+
+Fix: `bis_set_labels_for_max_phase()` narrows the claim to the newest curated
+stage at or below `max_phase`; `curatedSets` keeps the full unscoped provenance
+so a dropped item is still visibly curated. **Membership is deliberately
+unchanged** — ticket 12's widening is about what gets ranked, not what gets
+badged — and the regenerated universes prove it: entry counts identical
+(ret-p3 359 → 359), BiS claims 29 → 15.
+
+Rendered as `p2 BiS` rather than a bare `BiS`, so the badge names the stage it
+is BiS for.
+
+### §2 — `isHitDriven` structurally could not see this case
+
+`isHitDriven` sums only **positive** stat deltas, so an item carrying no hit
+over a worn item carrying 17 scores zero hit gain and goes unflagged. The
+annotation the SME praised was also **never rendered in the HTML report at
+all** — only in the CLI — so the page banner and the shortlist could contradict
+each other with nothing on the row. Added `hitRegression()` as its mirror, wired
+through `rankUpgrades` and rendered in both surfaces.
+
+### Not addressed here
+
+§3's profession contradiction (ticket 42), blank quest/vendor provenance
+(ticket 45), the healing idol on a feral DPS pool, and tie-block presentation
+are untouched — each is its own ticket or its own decision, and none is a
+presentation-assertion bug of the kind this ticket is about.
+
+Verified: `pnpm verify` green (371 passed, 2 todo). The three new universe
+assertions and the `rankUpgrades` hit-regression test were each confirmed red
+against the pre-fix tree by stashing the fix and re-running.

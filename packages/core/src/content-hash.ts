@@ -49,7 +49,7 @@ export function sha256Hex(text: string): string {
  * Without it a bug fix serves stale rankings forever, because none of the
  * other hashed inputs move when only our own arithmetic changes.
  */
-export const ENGINE_VERSION = 2;
+export const ENGINE_VERSION = 3;
 
 export type HashedGearItem = {
   id: number;

@@ -18,6 +18,7 @@ import {
 } from "./content-hash.js";
 import {
   capStateFrom,
+  hitRegression,
   isHitDriven,
   statDeltaBetween,
   type CapState,
@@ -154,6 +155,14 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
+  /** Every pinned upstream gear set equipping this item, any stage. */
+  curatedSets?: string[];
+  /**
+   * The current-stage sets behind a `BiS` tag. Rendered instead of a bare
+   * `BiS` pill so the badge names the stage it is BiS *for* — upstream scopes
+   * BiS per stage and there is no absolute BiS (carry-forward 47 §1).
+   */
+  bisSets?: string[];
   /**
    * Most of this item's stat gain is hit rating, and the player is under the
    * hit cap. Not modelling stat combinations is correct per §2's scoping rule
@@ -161,6 +170,13 @@ export type RankedItem = {
    * misleading — the item stops being an upgrade once the cap is crossed.
    */
   hitDriven?: boolean;
+  /**
+   * This item is an upgrade that nonetheless *loses* hit rating while the
+   * player is under the cap — the mirror of `hitDriven`, and the case the
+   * report used to flag a hit gap and then quietly widen it (carry-forward 47).
+   * `lost` is the rating given up; `gapAfter` is the resulting distance to cap.
+   */
+  hitRegression?: { lost: number; gapAfter: number };
   setBonusNote?: string;
   owned?: boolean;
   belowCutoff: boolean;
@@ -220,6 +236,7 @@ type BestSwap = {
   slotChoice?: SimSlotName;
   setBonusNote?: string;
   hitDriven: boolean;
+  hitRegression: { lost: number; gapAfter: number } | null;
 };
 
 const DEFAULT_ITERATIONS = 3000;
@@ -507,15 +524,13 @@ export async function rankUpgrades(
         const deltaDps = candObs.dps - baselineDps;
         const note = setBreakNote(equipment, slotIndex, entry.itemId);
         if (!best || deltaDps > best.deltaDps) {
+          const statDelta = statDeltaBetween(equipment, swapped);
           const next: BestSwap = {
             deltaDps,
             stdev: candObs.stdev,
             request: candReq,
-            hitDriven: isHitDriven(
-              statDeltaBetween(equipment, swapped),
-              caps.hit,
-              { deltaDps }
-            ),
+            hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
+            hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
           };
           if (slotNames.length > 1) {
             next.slotChoice = slotName;
@@ -545,10 +560,13 @@ export async function rankUpgrades(
         se: best.stdev / Math.sqrt(iterations),
         seMethod: "independent",
         bisTags: entry.bisTags ?? [],
+        ...(entry.curatedSets ? { curatedSets: entry.curatedSets } : {}),
+        ...(entry.bisSets ? { bisSets: entry.bisSets } : {}),
         belowCutoff,
       };
       if (entry.sources) item.sources = entry.sources;
       if (best.hitDriven) item.hitDriven = true;
+      if (best.hitRegression) item.hitRegression = best.hitRegression;
       if (best.slotChoice) item.slotChoice = best.slotChoice;
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
       if (owned) item.owned = true;
