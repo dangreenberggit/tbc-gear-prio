@@ -27,6 +27,7 @@ ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
+COMMON_PROTO = ROOT / "data/proto/common.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -275,6 +276,11 @@ VENDOR_STANDING_FIRST_RE = re.compile(
 # curated-set fallback that already covers those rows.
 QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
+# "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
+# Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
+# name no real zone, so they map to the zone-less `{kind: "world"}` variant
+# rather than a fabricated one (ticket 45 §1).
+WORLD_DROP_RE = re.compile(r"world\s+drop", re.IGNORECASE)
 # "Requires Exalted with Shattered Sun Offensive". The standing and faction are
 # both named, so this stays a parse rather than a lookup table.
 REP_RE = re.compile(
@@ -509,6 +515,24 @@ def ep_score(
     return total
 
 
+def profession_names_from_proto() -> dict[int, str]:
+    """common.proto Profession enum, ordinal -> name. db.json's
+    `crafted.profession` is this enum's number, not a name (ticket 42) --
+    parsed from the proto rather than hand-typed so a member added upstream
+    cannot silently mismatch a hardcoded table."""
+    text = COMMON_PROTO.read_text(encoding="utf-8")
+    enum = re.search(r"enum Profession \{(.*?)\n\}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the Profession enum in {COMMON_PROTO}")
+    members = re.findall(r"^\s+(\w+) = (\d+);", enum.group(1), re.M)
+    if not members:
+        raise SystemExit(f"Profession enum in {COMMON_PROTO} has no members")
+    return {int(num): name for name, num in members}
+
+
+PROFESSION_NAMES = profession_names_from_proto()
+
+
 def map_db_source(
     raw: object,
     *,
@@ -523,7 +547,10 @@ def map_db_source(
         return None
     if "crafted" in first:
         prof = (first["crafted"] or {}).get("profession")
-        return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
+        if prof is None:
+            return None
+        name = PROFESSION_NAMES.get(prof, str(prof))
+        return {"kind": "crafted", "profession": name}
     if "drop" in first:
         drop = first["drop"] or {}
         zone = (
@@ -648,6 +675,8 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         qm = QUEST_ZONE_RE.search(text)
         if qm:
             out.extend(zone_sources(qm.group(2).strip(), ""))
+        elif WORLD_DROP_RE.search(text):
+            out.append({"kind": "world"})
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
@@ -697,8 +726,8 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
 
 
 def is_list_only_source(source: dict) -> bool:
-    """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
-    return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+    """Badge/PvP/crafted/rep/world without a raid zone — list-driven membership."""
+    return source.get("kind") in ("badge", "pvp", "crafted", "rep", "world")
 
 
 def heroic_dungeons_for_max_phase(max_phase: int) -> set[str]:
@@ -990,13 +1019,28 @@ def assemble(
     # is unrecorded, and carrying no zone is what keeps these out of the raid
     # and boss filters, which is the behaviour these items need.
     curated_unsourced: set[int] = set()
+    # A curated item can also have a *real* source that is still list-only
+    # shaped -- e.g. 28430 Lionheart Executioner's db.json source is a genuine
+    # `{kind: "crafted"}` record, not an invented one, but `crafted` carries no
+    # zone and only grants membership today via the Wowhead-list path
+    # (`wowhead_list_only`). Its own Wowhead row reads "Crafting: Blacksmithing
+    # (...)", a prefix `CRAFTED_RE` does not match, so that path never fires
+    # either, and the item is dropped despite wowsims equipping it and db.json
+    # naming a real profession (carry-forward 41). Distinct from ticket 17: a
+    # `raid`/`heroic` source names a real zone outside phase scope, which is a
+    # scoping question this ticket does not touch; `crafted`/`badge`/`rep`/
+    # `pvp`/`world` name no zone at all, so there is no scope to respect.
+    curated_list_only: set[int] = set()
     for iid in sorted(bis_ids):
         it = db_by_id.get(iid)
         if it is None or not eligible_d7(it, profile):
             continue
-        if not source_acc.get(iid):
+        pairs = source_acc.get(iid)
+        if not pairs:
             add_source(iid, {"kind": "unknown"}, "curated")
             curated_unsourced.add(iid)
+        elif all(is_list_only_source(s) for s, _ in pairs):
+            curated_list_only.add(iid)
 
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
@@ -1035,11 +1079,14 @@ def assemble(
         # No phase guard: these are persistent non-raid items whose own phase is
         # not the interesting fact about them. Everbloom Idol is phase 1 and
         # still what a cat wants at phase 2.
-        # Only the ones with no recorded origin at all. A curated item that
-        # *does* have a db source keeps whatever scope rules that source implies
-        # -- several point at five-man dungeons outside PHASE_HEROIC_DUNGEONS,
-        # and admitting those is ticket 17's question, not this one.
-        curated = iid in curated_unsourced
+        # A curated item whose db source names a real zone (raid/heroic) keeps
+        # whatever scope rules that source implies -- several point at
+        # five-man dungeons outside PHASE_HEROIC_DUNGEONS, and admitting those
+        # is ticket 17's question, not this one. `curated_unsourced` (no
+        # source at all) and `curated_list_only` (a real but zone-less source)
+        # are the two shapes where the curated claim itself is what grants
+        # membership.
+        curated = iid in curated_unsourced or iid in curated_list_only
         if not in_phase and not in_heroic and not list_only and not curated:
             continue
 

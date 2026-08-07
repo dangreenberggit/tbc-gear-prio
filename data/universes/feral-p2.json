@@ -75,6 +75,21 @@
       "curationHint": 52.42
     },
     {
+      "itemId": 31255,
+      "name": "Cloak of the Craft",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 49.26
+    },
+    {
       "itemId": 30729,
       "name": "Black-Iron Battlecloak",
       "slot": "back",
@@ -154,7 +169,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "11"
+          "profession": "Tailoring"
         },
         {
           "kind": "crafted",
@@ -416,10 +431,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking"
         }
       ],
@@ -629,7 +640,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -653,7 +664,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -743,7 +754,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -1505,7 +1516,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -1583,7 +1594,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -1834,7 +1845,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
+          "profession": "Leatherworking"
         },
         {
           "kind": "crafted",
@@ -2289,6 +2300,21 @@
       ]
     },
     {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 48.84
+    },
+    {
       "itemId": 28745,
       "name": "Mithril Chain of Heroism",
       "slot": "neck",
@@ -2375,7 +2401,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7"
+          "profession": "Jewelcrafting"
         },
         {
           "kind": "crafted",
@@ -3176,7 +3202,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -3200,7 +3226,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
+          "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
         },
@@ -3531,6 +3557,21 @@
         }
       ],
       "curationHint": 347.2
+    },
+    {
+      "itemId": 31334,
+      "name": "Staff of Natural Fury",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 276.5
     },
     {
       "itemId": 29171,

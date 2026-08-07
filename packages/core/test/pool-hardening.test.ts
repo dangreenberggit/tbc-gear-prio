@@ -327,7 +327,18 @@ describe("data/universes/ret-p3.json hardening", () => {
     // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
     // and so never appears in a raid-filtered view. Haramad's Bargain and
     // Shapeshifter's Signet were already here via the rep path above.
-    expect(universeP3.length).toBe(359);
+    // 359 -> 361: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, admitting +23203 Libram of Fervor and +31275 Necklace of
+    // Trophies via their "World Drop" Wowhead text.
+    // 361 -> 364: `curated_list_only` (ticket 41 remainder) admits a curated
+    // item whose real db source is list-only shaped (crafted, no zone) but
+    // was not independently a member — +23522 Ragesteel Breastplate, +28429
+    // Lionheart Champion, +33173 Ragesteel Shoulders. 28430 Lionheart
+    // Executioner is not a new row here: its p3 Wowhead text reads
+    // "Profession: ..." (parses today), only its p1-p2 text reads
+    // "Crafting: ..." (does not), so it was already a p3 member and only
+    // needed this fix at p2.
+    expect(universeP3.length).toBe(364);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the

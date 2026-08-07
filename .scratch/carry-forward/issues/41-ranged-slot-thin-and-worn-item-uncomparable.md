@@ -1,12 +1,16 @@
 Status: open
+Progress: worn-absent count now 24 -> 14 -> 13 across two fix passes (2026-08-06); remaining 13 are not-in-db (4), PvP (4), ticket 17 five-mans (3), and genuinely sourceless (2) — see "Second remainder, closed 2026-08-06"
 Type: bug
 Origin: sme-rank-review on phase-2/feral (ticket 05, gate box 2)
 Blocks: none
 Blocked by: none
 
 **Partly fixed on `phase-2/feral` (2026-08-06)** — the ranged slot recovered and
-the worn-absent count fell 24 → 14. See "What was fixed" and "What remains
-open" below. The ticket stays `open` for the remainder.
+the worn-absent count fell 24 → 14 → 13 across two fix passes. See "What was
+fixed", "What remains open" and "Second remainder, closed 2026-08-06" below.
+The ticket stays `open` for the remainder: 13 worn items are still
+uncomparable, none closable by a pool change (see the breakdown at the end of
+"Second remainder").
 
 # The ranged slot offers two items, and the worn one is not among them
 
@@ -183,6 +187,102 @@ guaranteed. The remaining options:
 - Emit a low-count warning when a slot has fewer than N candidates, so this is
   caught by the product rather than by a domain review.
 
+## Second remainder, closed 2026-08-06
+
+Re-measured the §3 worn-item table with the same fixture-matching method
+(`combatant_info_events`, matched by actor name against the fixture stem, per
+`scripts/verify_fixture.py`'s convention — matching any other way picks a
+bystander from the captured raid):
+
+```bash
+python -c "
+import json, os
+def load(p):
+    with open(p, encoding='utf-8') as f: return json.load(f)
+def worn_ids(fixture_path):
+    fx = load(fixture_path)
+    events = fx['combatant_info_events']
+    actors = {a['id']: a for a in fx.get('actors', [])}
+    stem = os.path.splitext(os.path.basename(fixture_path))[0]
+    if stem.endswith('.raw'): stem = stem[:-len('.raw')]
+    want = next((ev for ev in events
+                 if (actors.get(ev.get('sourceID')) or {}).get('name','').lower() == stem.lower()), None)
+    return [g.get('id') for g in want['gear'] if g.get('id')]
+for name, fx, uni in [
+    ('slamaltman', 'test/fixtures/slamaltman.raw.json', 'data/universes/ret-p2.json'),
+    ('shredzepelin', 'test/fixtures/shredzepelin.raw.json', 'data/universes/feral-p2.json'),
+    ('nexess', 'test/fixtures/nexess.raw.json', 'data/universes/feral-p2.json'),
+]:
+    worn = set(worn_ids(fx))
+    uids = {int(e['itemId']) for e in load(uni)['entries']}
+    print(name, 'absent', sorted(worn - uids))
+"
+# before this fix: slamaltman absent [3342, 27484, 28430, 28788]
+#                   shredzepelin absent [14617, 28034, 29278, 32790, 32802, 32810, 278823, 278827]
+#                   nexess absent [5976, 27712]
+```
+
+The measurement contradicted the ticket's own "What remains open" breakdown in
+one place: 28430 Lionheart Executioner appeared in slamaltman's absent list,
+but the ticket's cause table above never names it, and ticket 42's own
+reproduction command uses 28430 as its example. Root cause, distinct from every
+category already listed:
+
+**A curated item can carry a *real* db source that is still list-only shaped**
+(no zone — `crafted`, in this case) **and the membership gate never checked
+that.** `is_list_only_source` classifies `crafted`/`badge`/`rep`/`pvp` sources
+as list-driven membership, but that check only ran against **Wowhead-parsed**
+sources (`wowhead_list_only`), never against the **db.json-derived** source
+every D7-eligible item gets unconditionally. 28430's db source
+(`{"kind":"crafted","profession":"Blacksmithing"}`, real, from ticket 42's fix)
+was present but inert; its own Wowhead p1-p2 row reads `"Crafting: Blacksmithing
+(Bind on Pickup)(requires Master Swordsmithing)"`, a `Crafting:` prefix
+`CRAFTED_RE` does not match (one of ticket 45 §1's deliberately-unmodeled
+shapes), so the Wowhead path never granted it membership either. The item
+fell into a gap between "has no source" (which `curated_unsourced` already
+covered) and "has a source that grants membership" (zone/heroic/Wowhead-list) —
+a real source that grants nothing.
+
+Measured the shape's full extent before fixing broadly: admitting *every*
+D7-eligible item with a db-sourced list-only shape (not just curated ones)
+would add 337 items to ret alone — mostly ancient vanilla-WoW crafted gear
+that happens to clear the quality/D7 bar, which is exactly the flood the
+current design avoids by requiring a curated-set or Wowhead-list signal before
+trusting a zone-less source. Narrowing to "curated AND db-sourced-list-only"
+gives 4 items for ret, 0 for feral — confirming this is the same narrow shape
+28430 exhibits, not a broader hole.
+
+Fix: added `curated_list_only` alongside the existing `curated_unsourced` in
+`scripts/assemble_universe.py` — when a curated item's *only* sources are all
+`is_list_only_source`-shaped, it now counts as `curated` in the membership
+gate the same way an unsourced curated item already did. Distinct from ticket
+17: a `raid`/`heroic` source names a real zone outside phase scope (a scoping
+question); `crafted`/`badge`/`rep`/`pvp`/`world` name no zone at all, so there
+is no scope being overridden.
+
+Regenerated all six committed universes. ret gained 4 rows at p2 (23522
+Ragesteel Breastplate, 28429 Lionheart Champion, 28430 Lionheart Executioner,
+33173 Ragesteel Shoulders) and 3 at p3/p4/p5 (28430 was already a p3+ member —
+its p3 Wowhead text reads `"Profession: ..."`, which parses today, so only the
+p1-p2 list needed this fix). feral unchanged (0 in the narrowed measurement).
+Diff is purely additive — `git diff data/universes/*.json | grep '^-' | grep
+-v '^---'` returns nothing.
+
+Effect on the worn-item count (continuing from the "What was fixed" table
+above, whose "after" column — 4 / 8 / 2 — is this section's "before"):
+
+| character | absent before this fix | absent after |
+|---|---|---|
+| slamaltman | 4 | **3** |
+| shredzepelin | 8 | **8** (unchanged — none of its 8 are curated+list-only-sourced) |
+| nexess | 2 | **2** (unchanged — same reason) |
+
+The remaining 13 (3 + 8 + 2) split exactly as the table above already
+documents: not-in-db (4 ids, no pool change admits these), PvP gear (4 ids,
+shredzepelin), five-man drops out of scope (ticket 17, 3 ids), and
+278827/278823 (2 ids, real but sourceless everywhere). No new category
+appeared.
+
 ## Done when
 
 - A character's worn item is comparable in every slot, or there is a recorded
@@ -190,5 +290,6 @@ guaranteed. The remaining options:
 - The ranged slot either carries the tier's real contenders or discloses that it
   does not. ✅
 - The curated-but-missing items are either admitted or each has a recorded
-  reason it is excluded. ✅ (16 admitted; the rest deferred to ticket 17 with
-  the reason recorded above.)
+  reason it is excluded. ✅ (20 admitted total across both fix passes; the
+  remaining 13 are each accounted for above: not-in-db, PvP, ticket 17
+  five-mans, or genuinely sourceless.)

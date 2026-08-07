@@ -14,6 +14,7 @@ import {
   type ItemSourceKind,
   type PoolEntry,
 } from "../src/pool.js";
+import { realPoolEntry } from "./real-source.js";
 import { SIM_ORDER } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -146,27 +147,10 @@ describe("filterPoolByZone", () => {
   });
 
   it("matches any zone in sources[], not only the primary source", () => {
-    const multi: PoolEntry[] = [
-      {
-        itemId: 30129,
-        name: "Crystalforge Breastplate",
-        slot: "chest",
-        phase: 2,
-        source: {
-          kind: "token",
-          zone: "Tempest Keep",
-          token: "Chestguard of the Forgotten Conqueror",
-        },
-        sources: [
-          {
-            kind: "token",
-            zone: "Tempest Keep",
-            token: "Chestguard of the Forgotten Conqueror",
-          },
-          { kind: "raid", zone: "Serpentshrine Cavern", boss: "Lady Vashj" },
-        ],
-      },
-    ];
+    // Crystalforge Breastplate really does carry Tempest Keep (token) and
+    // Serpentshrine Cavern (raid, Morogrim Tidewalker) sources at once, so the
+    // real universe row exercises this without inventing a boss or token name.
+    const multi: PoolEntry[] = [realPoolEntry(30129, "ret-p3")];
     expect(
       filterPoolByZone(multi, "Serpentshrine Cavern").map((e) => e.itemId)
     ).toEqual([30129]);
@@ -229,6 +213,18 @@ describe("poolFromUniverse", () => {
       ],
     });
     expect(entries[0]!.curationHint).toBe(42);
+  });
+});
+
+describe("realPoolEntry (test helper, carry-forward 37)", () => {
+  it("returns the item's real source from the committed universe", () => {
+    const entry = realPoolEntry(29381);
+    expect(entry.name).toBe("Choker of Vile Intent");
+    expect(entry.source).toEqual({ kind: "badge", cost: 25 });
+  });
+
+  it("throws rather than silently returning a fixture for an id not in the universe", () => {
+    expect(() => realPoolEntry(999999)).toThrow(/999999/);
   });
 });
 
@@ -295,7 +291,19 @@ describe("data/universes/ret-p2.json", () => {
     // than only labelling rows that got in some other way, admitting the 5
     // curated ret items with no recorded origin (ticket 41). They carry
     // `{kind: "unknown"}` and so are filtered out of every raid view.
-    expect(entries.length).toBe(235);
+    // 235 -> 236: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, the same way badge/pvp/crafted/rep already did, admitting
+    // 23203 Libram of Fervor via its "World Drop - Azeroth" Wowhead text.
+    // 236 -> 240: a curated item can carry a *real* db source that is still
+    // list-only shaped (no zone) -- `curated_list_only` in
+    // assemble_universe.py now grants membership for that shape the same way
+    // `curated_unsourced` already did for no source at all (ticket 41
+    // remainder). +23522 Ragesteel Breastplate, +28429 Lionheart Champion,
+    // +28430 Lionheart Executioner, +33173 Ragesteel Shoulders — all
+    // `{kind: "crafted"}`, all wowsims-curated, none independently a member
+    // because their own Wowhead row uses "Crafting:" prose the parser does
+    // not read (ticket 45 leaves that prose unmodeled by design).
+    expect(entries.length).toBe(240);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

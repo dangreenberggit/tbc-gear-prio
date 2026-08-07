@@ -127,10 +127,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "11"
-        },
-        {
-          "kind": "crafted",
           "profession": "Tailoring"
         }
       ],
@@ -393,10 +389,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
-        },
-        {
-          "kind": "crafted",
           "profession": "Blacksmithing"
         }
       ],
@@ -501,6 +493,25 @@
         }
       ],
       "curationHint": 73.86
+    },
+    {
+      "itemId": 23522,
+      "name": "Ragesteel Breastplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 72.33,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 29071,
@@ -1965,10 +1976,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "4"
-        },
-        {
-          "kind": "crafted",
           "profession": "Engineering"
         }
       ],
@@ -2845,6 +2852,21 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 23203,
+      "name": "Libram of Fervor",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 28592,
       "name": "Libram of Souls Redeemed",
       "slot": "ranged",
@@ -2989,6 +3011,25 @@
         }
       ],
       "curationHint": 67.9
+    },
+    {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 64.44,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 30053,
@@ -3519,12 +3560,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
@@ -3541,12 +3576,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -3619,12 +3648,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Leatherworking",
@@ -3935,6 +3958,31 @@
       "curationHint": 770.015
     },
     {
+      "itemId": 28430,
+      "name": "Lionheart Executioner",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 762.883,
+      "curatedSets": [
+        "p2"
+      ],
+      "bisTags": [
+        "BiS"
+      ],
+      "bisSets": [
+        "p2"
+      ]
+    },
+    {
       "itemId": 28773,
       "name": "Gorehowl",
       "slot": "weapon",
@@ -3967,6 +4015,26 @@
         }
       ],
       "curationHint": 720.386
+    },
+    {
+      "itemId": 28429,
+      "name": "Lionheart Champion",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 715.383,
+      "curatedSets": [
+        "p1",
+        "preraid"
+      ]
     },
     {
       "itemId": 30722,
@@ -4122,10 +4190,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"

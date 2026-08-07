@@ -203,10 +203,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking"
         }
       ],
@@ -238,10 +234,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "11"
-        },
         {
           "kind": "crafted",
           "profession": "Tailoring"
@@ -659,12 +651,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -784,10 +770,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"
@@ -1110,6 +1092,25 @@
         }
       ],
       "curationHint": 73.1
+    },
+    {
+      "itemId": 23522,
+      "name": "Ragesteel Breastplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 72.33,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 29071,
@@ -2333,12 +2334,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Jewelcrafting",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3237,12 +3232,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3834,12 +3823,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "4",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Engineering",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -3997,10 +3980,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "4"
-        },
         {
           "kind": "crafted",
           "profession": "Engineering"
@@ -5133,12 +5112,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "7",
-          "recipeZone": "Sunwell Plateau",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Jewelcrafting",
           "recipeZone": "Sunwell Plateau",
           "recipeBoss": "Patterns"
@@ -5178,6 +5151,21 @@
         }
       ],
       "curationHint": 68.77
+    },
+    {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 63.35
     },
     {
       "itemId": 34178,
@@ -5757,6 +5745,21 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 23203,
+      "name": "Libram of Fervor",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 28592,
       "name": "Libram of Souls Redeemed",
       "slot": "ranged",
@@ -5932,12 +5935,6 @@
       "quality": 4,
       "phase": 3,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
         {
           "kind": "crafted",
           "profession": "Leatherworking",
@@ -6179,6 +6176,25 @@
         }
       ],
       "curationHint": 64.63
+    },
+    {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 64.44,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 30892,
@@ -6727,10 +6743,6 @@
       "quality": 4,
       "phase": 5,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "7"
-        },
         {
           "kind": "crafted",
           "profession": "Jewelcrafting"
@@ -7339,12 +7351,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash"
@@ -7361,12 +7367,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -7494,12 +7494,6 @@
       "quality": 4,
       "phase": 2,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
         {
           "kind": "crafted",
           "profession": "Leatherworking",
@@ -8158,7 +8152,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "Blacksmithing"
         },
         {
           "kind": "crafted",
@@ -8187,7 +8181,7 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
+          "profession": "Blacksmithing"
         },
         {
           "kind": "crafted",
@@ -8250,6 +8244,26 @@
         }
       ],
       "curationHint": 720.386
+    },
+    {
+      "itemId": 28429,
+      "name": "Lionheart Champion",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 715.383,
+      "curatedSets": [
+        "p1",
+        "preraid"
+      ]
     },
     {
       "itemId": 30722,
@@ -8438,12 +8452,6 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Black Temple",
           "recipeBoss": "Patterns"
@@ -8460,12 +8468,6 @@
       "quality": 4,
       "phase": 3,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing",
@@ -8544,10 +8546,6 @@
       "quality": 4,
       "phase": 1,
       "sources": [
-        {
-          "kind": "crafted",
-          "profession": "2"
-        },
         {
           "kind": "crafted",
           "profession": "Blacksmithing"

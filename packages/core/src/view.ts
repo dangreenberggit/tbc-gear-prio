@@ -101,11 +101,25 @@ function matchesBoss(item: RankedItem, zone: string | undefined, boss: string) {
   );
 }
 
+// Zone-less ItemSource kinds, ticket 45 §3: `--group-by raid` used to fall
+// through to `item.source.kind` verbatim, so an unrecorded-origin item
+// rendered a bucket literally titled "unknown" — honest but not a zone name a
+// player would recognise. Every kind lacking `zone` gets a reader-facing
+// label here instead.
+const ZONELESS_SOURCE_LABELS: Record<string, string> = {
+  badge: "Badge vendor",
+  crafted: "Crafted",
+  rep: "Reputation vendor",
+  pvp: "PvP vendor",
+  world: "World drop",
+  unknown: "Source not recorded",
+};
+
 function zoneKeyOf(item: RankedItem): string {
   for (const s of sourcesOf(item)) {
     if ("zone" in s) return s.zone;
   }
-  return item.source.kind;
+  return ZONELESS_SOURCE_LABELS[item.source.kind] ?? item.source.kind;
 }
 
 /**

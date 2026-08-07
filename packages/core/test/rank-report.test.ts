@@ -9,6 +9,7 @@ import {
   renderRankHtml,
   type RankReportMeta,
 } from "../src/rank-report.js";
+import { realPoolEntry } from "./real-source.js";
 
 type TestItem = RankedItem & {
   magnitudeWarning?: boolean;
@@ -163,11 +164,7 @@ describe("rank-report", () => {
           deltaDps: -103.9,
           belowCutoff: true,
           magnitudeWarning: true,
-          source: {
-            kind: "raid",
-            zone: "Karazhan",
-            boss: "Prince Malchezaar",
-          },
+          source: realPoolEntry(28773).source,
         }),
       ]),
       meta()
@@ -186,11 +183,7 @@ describe("rank-report", () => {
           slot: "weapon",
           deltaDps: 82,
           belowCutoff: false,
-          source: {
-            kind: "raid",
-            zone: "Black Temple",
-            boss: "Reliquary of Souls",
-          },
+          source: realPoolEntry(32332, "ret-p3").source,
         }),
         item({
           rank: null,
@@ -200,11 +193,7 @@ describe("rank-report", () => {
           deltaDps: -103.9,
           belowCutoff: true,
           magnitudeWarning: true,
-          source: {
-            kind: "raid",
-            zone: "Karazhan",
-            boss: "Prince Malchezaar",
-          },
+          source: realPoolEntry(28773).source,
         }),
       ]),
       meta()
@@ -240,11 +229,7 @@ describe("rank-report", () => {
             deltaPct: 0.39,
             replacesName: "Shapeshifter's Signet",
           },
-          source: {
-            kind: "raid",
-            zone: "Black Temple",
-            boss: "Illidan Stormrage",
-          },
+          source: realPoolEntry(32526, "ret-p3").source,
         }),
       ]),
       meta()
@@ -267,7 +252,7 @@ describe("rank-report", () => {
           deltaDps: 20.68,
           belowCutoff: false,
           slotChoice: "finger2",
-          source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+          source: realPoolEntry(32526, "ret-p3").source,
         }),
       ]),
       meta()
@@ -294,7 +279,7 @@ describe("rank-report", () => {
             slot: "finger",
             deltaDps: 20.68,
             belowCutoff: false,
-            source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+            source: realPoolEntry(30834).source,
             bisTags: ["BiS"],
             bisSets: ["p2"],
             curatedSets: ["p1", "p2", "preraid"],
