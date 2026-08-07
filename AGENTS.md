@@ -24,6 +24,8 @@ Review with the `writing-for-agents` skill before calling any agent-facing docum
 
 Review means a second pass over your finished draft, revising it against the skill — the skill is the rubric, and citing it is not the same as having applied it.
 
+Propose changes to `AGENTS.md`, `CLAUDE.md`, and skill files in chat and wait for approval before editing them. These files steer every future session, so a bad line costs more than a bad commit and nothing catches it.
+
 ## Engineering workflow
 
 Full process detail is in [`docs/workflow.md`](docs/workflow.md). This section is the summary every session should internalize before touching code.
@@ -70,7 +72,7 @@ the eight stages must stay reorganisable without touching a test.
 
 ### Parallel agents
 
-When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
+When you will have **two writers running at once** (independent slices — different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
 
