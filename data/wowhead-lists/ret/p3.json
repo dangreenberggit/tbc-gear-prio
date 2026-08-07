@@ -192,8 +192,8 @@
       "rankLabel": "Optional - tier",
       "section": "headline",
       "slot": "chest",
-      "viaTokenId": 30236,
-      "viaTokenName": "Chestguard of the Vanquished Champion",
+      "viaTokenId": 31089,
+      "viaTokenName": "Chestguard of the Forgotten Conqueror",
       "wowheadSourceText": "Drop: Chestguard of the Forgotten Conqueror - Illidan Stormrage (Black Temple)",
       "viaBoss": "Illidan Stormrage",
       "viaZone": "Black Temple"
@@ -439,7 +439,7 @@
       "viaTokenId": 31098,
       "viaTokenName": "Leggings of the Forgotten Conqueror",
       "wowheadSourceText": "Drop: Leggings of the Forgotten Conqueror - The Illidari Council (Black Temple)",
-      "viaBoss": "Gathios the Shatterer",
+      "viaBoss": "The Illidari Council",
       "viaZone": "Black Temple"
     },
     {

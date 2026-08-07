@@ -928,6 +928,131 @@ describe("tier piece sources agree with the curated two-hop map", () => {
   }
 });
 
+describe("a transcribed row agrees with its own raw text", () => {
+  // The Wowhead lists carry both the raw prose (`wowheadSourceText`) and the
+  // agent's structured reading of it (`viaTokenName`, `viaBoss`, `viaZone`).
+  // `assemble_universe.py` reads only the prose, so the structured fields are
+  // an unused second recording of the same claim — a free internal cross-check
+  // that nothing was performing. It is also why nothing noticed when the
+  // carry-forward 49/50/51 corrections updated the prose and left them stale.
+  //
+  // Disagreement means one of the two readings is wrong. It does not say which,
+  // and that is the point: a prompt to go look, not an auto-fix.
+  const listFiles = [
+    "data/wowhead-lists/ret/p1-p2.json",
+    "data/wowhead-lists/ret/p3.json",
+    "data/wowhead-lists/ret/p4.json",
+    "data/wowhead-lists/ret/p5.json",
+    "data/wowhead-lists/ret/pre-raid.json",
+    "data/wowhead-lists/feral/p1-p2.json",
+    "data/wowhead-lists/feral/p3.json",
+  ];
+
+  type ListRow = {
+    itemId: number;
+    itemName: string;
+    wowheadSourceText: string | null;
+    viaTokenName?: string | null;
+    viaBoss?: string | null;
+    viaZone?: string | null;
+  };
+
+  for (const rel of listFiles) {
+    it(`${rel}`, () => {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: ListRow[];
+      };
+      for (const row of doc.entries) {
+        const prose = row.wowheadSourceText ?? "";
+        for (const field of ["viaTokenName", "viaBoss", "viaZone"] as const) {
+          const value = row[field];
+          if (!value) continue;
+          expect(
+            prose,
+            `${row.itemId} ${row.itemName}: ${field} is ${JSON.stringify(value)} but the raw text it was read from does not contain it`
+          ).toContain(value);
+        }
+      }
+    });
+  }
+});
+
+describe("zone and boss claims have an independent witness", () => {
+  // Every defect in carry-forward 48-53 arrived on the `wowhead` path (an
+  // agent transcribing a rendered page) and every one was caught by
+  // disagreeing with a machine-parsed or curated input. A transcription defect
+  // is *well-formed* data — a real boss, a real zone, the wrong pairing — so
+  // no schema or type check can see it. A second witness is the only detector.
+  //
+  // This pins the set of claims that have no second witness. It is not a bug
+  // list: these are probably right. It exists so the set cannot grow silently,
+  // because each addition is a claim nothing can ever contradict.
+  const UNVERIFIED = new Set(["wowhead", "curated"]);
+
+  /** Measured on the ticket 48-54 tip; see carry-forward 54 for the analysis. */
+  const KNOWN_UNCORROBORATED: ReadonlyArray<[number, string]> = [
+    // Wowhead is the only input naming a zone for this item, in all six universes.
+    [30017, "Telonicus's Pendant of Mayhem"],
+    // Druid T6. feral-tokens.json stops at T5 and says so in its own notes, so
+    // these four have no two-hop row to check against.
+    [31034, "Thunderheart Gauntlets"],
+    [31042, "Thunderheart Chestguard"],
+    [31044, "Thunderheart Leggings"],
+    [31048, "Thunderheart Pauldrons"],
+  ];
+  const allowed = new Set(KNOWN_UNCORROBORATED.map(([id]) => id));
+
+  function unwitnessed(entry: UniverseEntry): boolean {
+    for (const s of entry.sources) {
+      const claimsPlace =
+        ("boss" in s && s.boss) || (s.kind === "raid" && "zone" in s);
+      if (!claimsPlace) continue;
+      if (!UNVERIFIED.has(s.origin ?? "")) continue;
+      const corroborated = entry.sources.some(
+        (other) =>
+          !UNVERIFIED.has(other.origin ?? "") &&
+          "zone" in other &&
+          "zone" in s &&
+          other.zone === s.zone
+      );
+      if (!corroborated) return true;
+    }
+    return false;
+  }
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      const offenders = new Set<string>();
+      for (const e of loadUniverse(rel).raw.entries) {
+        if (allowed.has(e.itemId)) continue;
+        if (unwitnessed(e)) offenders.add(`${e.itemId} ${e.name}`);
+      }
+      expect(
+        [...offenders].sort(),
+        "a zone/boss claim rests on transcription alone. Either find a second witness (AtlasLoot, a two-hop map) or add it to KNOWN_UNCORROBORATED with a reason"
+      ).toEqual([]);
+    });
+  }
+
+  it("every known-uncorroborated item is still uncorroborated", () => {
+    // The allowlist must shrink as coverage improves, not linger as a
+    // permanent exemption that hides a regression behind a stale entry.
+    const stillUnwitnessed = new Set<number>();
+    for (const rel of UNIVERSE_FILES) {
+      for (const e of loadUniverse(rel).raw.entries) {
+        if (allowed.has(e.itemId) && unwitnessed(e))
+          stillUnwitnessed.add(e.itemId);
+      }
+    }
+    for (const [id, name] of KNOWN_UNCORROBORATED) {
+      expect(
+        stillUnwitnessed.has(id),
+        `${id} ${name} now has an independent witness — remove it from KNOWN_UNCORROBORATED`
+      ).toBe(true);
+    }
+  });
+});
+
 describe("a boss name is an encounter, not one unit of one", () => {
   // A TBC encounter can be several killable units — the Illidari Council is
   // four, M'uru becomes Entropius — and Wowhead sometimes credits a drop to
