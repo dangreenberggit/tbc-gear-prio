@@ -705,6 +705,35 @@ def drop_boss(phrase: str) -> str:
     return phrase.rsplit(TOKEN_BOSS_SEPARATOR, 1)[1].strip()
 
 
+# The guides write the profession two lossy ways (carry-forward 53): a trailing
+# note off the same " - " splice as ticket 48 ("Leatherworking - BoP only"), and
+# a leading specialisation ("Master Swordsmith Blacksmithing"). Both make a real
+# profession fail equality against itself, which is only display-noise until
+# something groups or filters by it.
+#
+# The specialisation is dropped rather than relocated: no consumer reads it, and
+# db.json's own crafted sources carry the bare enum name with no field for it, so
+# keeping it would mean a field only the prose path can ever populate.
+#
+# Authority is the proto Profession enum, the same closed set map_db_source maps
+# into -- not a hand-typed list, so a profession added upstream cannot silently
+# fall outside the gate.
+CRAFT_PROFESSIONS = frozenset(
+    name for num, name in PROFESSION_NAMES.items() if num != 0
+)
+
+
+def canonical_profession(phrase: str) -> str | None:
+    """Bare profession name from a guide phrase, or None if it names none."""
+    head = phrase.split(TOKEN_BOSS_SEPARATOR, 1)[0].strip()
+    # The specialisation is a prefix, so the profession is the last word.
+    tail = head.split()[-1] if head.split() else ""
+    for known in CRAFT_PROFESSIONS:
+        if tail.lower() == known.lower():
+            return known
+    return None
+
+
 def zone_sources(zone: str, boss: str) -> list[dict]:
     """One Wowhead zone parenthetical → the sources it names.
 
@@ -758,7 +787,7 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.append({"kind": "pvp", "via": "honor"})
     cm = CRAFTED_RE.search(text)
     if cm:
-        prof = (cm.group(1) or cm.group(2) or "").strip()
+        prof = canonical_profession((cm.group(1) or cm.group(2) or "").strip())
         if prof:
             out.append({"kind": "crafted", "profession": prof})
     rm = REP_RE.search(text)

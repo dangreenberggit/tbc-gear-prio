@@ -695,11 +695,6 @@
           "kind": "crafted",
           "profession": "Blacksmithing",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Armorsmithing Blacksmithing",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 125.32
@@ -7089,11 +7084,6 @@
           "kind": "crafted",
           "profession": "Blacksmithing",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Master Swordsmith Blacksmithing",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 762.883,
@@ -7120,11 +7110,6 @@
           "kind": "crafted",
           "profession": "Blacksmithing",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Master Hammersmith Blacksmithing",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 751.539

@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { KAEL_TEMP_LEGENDARY_IDS } from "../src/kael-temp.js";
+import { Profession } from "../src/proto/common_pb.js";
 import {
   ArmorType,
   RangedWeaponType,
@@ -881,6 +882,42 @@ describe("an item's source does not depend on which tier is assembled", () => {
       ).toBe(false);
     }
   });
+});
+
+describe("profession names a real profession (carry-forward 53)", () => {
+  // The guides splice notes and specialisations into the profession phrase
+  // ("Leatherworking - BoP only", "Master Swordsmith Blacksmithing"), which
+  // made one profession fail equality against itself — 12 values for 5 real
+  // professions. Display-only today, a correctness bug the moment anything
+  // groups or filters by it.
+  //
+  // The authority is the generated proto enum, the same one the assembler maps
+  // db.json's numeric `crafted.profession` through, so this cannot drift from a
+  // hand-typed list. ProfessionUnknown is excluded: it is the enum's zero
+  // value, not something a crafted row should ever claim.
+  const REAL = new Set(
+    Object.values(Profession).filter(
+      (v): v is string => typeof v === "string" && v !== "ProfessionUnknown"
+    )
+  );
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel} emits only bare profession names`, () => {
+      const offenders: string[] = [];
+      for (const e of loadUniverse(rel).raw.entries) {
+        for (const s of e.sources) {
+          if (s.kind !== "crafted") continue;
+          const prof = (s as { profession?: unknown }).profession;
+          if (typeof prof === "string" && !REAL.has(prof))
+            offenders.push(`${e.itemId} ${e.name}: ${prof}`);
+        }
+      }
+      expect(
+        offenders,
+        "a crafted row names something that is not a profession — canonical_profession in assemble_universe.py should have reduced it"
+      ).toEqual([]);
+    });
+  }
 });
 
 describe("tier piece sources agree with the curated two-hop map", () => {

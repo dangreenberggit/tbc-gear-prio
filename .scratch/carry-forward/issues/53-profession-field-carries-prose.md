@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: broader sweep after tickets 48-52, 2026-08-07
 Blocks: none
@@ -80,3 +80,36 @@ gate on.
 - Whether the specialisation (`Master Hammersmith`, `Armorsmithing`) is
   preserved elsewhere or deliberately dropped is stated here.
 - Universes regenerate with only the intended diff.
+
+## Closed 2026-08-07
+
+`canonical_profession` in `assemble_universe.py` splits the `" - "` note off and
+takes the last word of the remainder, matched case-insensitively against the
+proto `Profession` enum — the same closed set `map_db_source` already maps
+db.json's numeric `crafted.profession` through. Deriving it from the proto
+rather than typing five names means a profession added upstream cannot fall
+outside the gate silently. A phrase naming no known profession returns `None`
+and emits no crafted row, rather than passing prose through.
+
+**The specialisation is dropped, not relocated.** No consumer reads it, and
+db.json's crafted sources carry the bare enum name with no field for it, so
+keeping it would mean a field only the prose path could ever populate.
+
+Measured on all 12 raw captures across `data/wowhead-lists/**`: 12 distinct
+values → 5 (`Blacksmithing`, `Engineering`, `Jewelcrafting`, `Leatherworking`,
+`Tailoring`), with nothing unmatched.
+
+The universe diff is **deletions only**, which is correct and worth recording
+because it looks alarming: once the wowhead row canonicalises to the bare name
+it becomes byte-identical to the `db` row already present, and dedup collapses
+the pair onto the machine-origin row. Checked explicitly — **no item lost the
+`crafted` kind entirely.**
+
+Gated by `pool-hardening.test.ts` > "profession names a real profession", one
+case per universe, reading the generated proto enum on the TS side so the gate
+and the canonicaliser share an authority instead of restating each other.
+Verified red first: it failed on `Armorsmithing Blacksmithing`,
+`Master Swordsmith Blacksmithing` and `Master Hammersmith Blacksmithing` before
+the fix.
+
+`pnpm verify` green on Node v22.16.0: 424 passed, 32 files.

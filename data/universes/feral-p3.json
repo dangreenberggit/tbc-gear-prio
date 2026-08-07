@@ -197,11 +197,6 @@
           "kind": "crafted",
           "profession": "Leatherworking",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 36.42
@@ -219,11 +214,6 @@
           "kind": "crafted",
           "profession": "Tailoring",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Tailoring - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 35.91
@@ -1018,13 +1008,6 @@
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - BoP only",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 71.2
@@ -1044,13 +1027,6 @@
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - BoP only",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 70.18
@@ -1179,11 +1155,6 @@
           "kind": "crafted",
           "profession": "Leatherworking",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 51.19
@@ -2316,11 +2287,6 @@
           "kind": "crafted",
           "profession": "Leatherworking",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 66.3
@@ -2394,11 +2360,6 @@
           "kind": "crafted",
           "profession": "Leatherworking",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 48.42
@@ -2752,11 +2713,6 @@
           "kind": "crafted",
           "profession": "Leatherworking",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 0.0,
@@ -3572,11 +3528,6 @@
           "kind": "crafted",
           "profession": "Jewelcrafting",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Jewelcrafting - can be purchased on the Auction House",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 37.07
@@ -4730,13 +4681,6 @@
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 78.58
@@ -4809,13 +4753,6 @@
           "recipeZone": "Serpentshrine Cavern",
           "recipeBoss": "Trash",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 45.82
@@ -6994,13 +6931,6 @@
           "recipeZone": "Black Temple",
           "recipeBoss": "Patterns",
           "origin": "db"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking - can be purchased on the Auction House",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 51.77
