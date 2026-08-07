@@ -13,6 +13,7 @@ import {
   rankUpgrades,
 } from "../src/rank.js";
 import { pairedReplicateSe } from "../src/se.js";
+import { realPoolEntry } from "./real-source.js";
 import {
   CachingGearSource,
   RecordedGearSource,
@@ -329,15 +330,7 @@ describe("rankUpgrades", () => {
     });
     const upgradedKey = simCacheKey(upgradedReq, "v0.0.101", opts);
 
-    const pool = [
-      {
-        itemId: 29381,
-        name: "Choker of Vile Intent",
-        slot: "neck" as const,
-        phase: 1,
-        source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
-      },
-    ];
+    const pool = [realPoolEntry(29381)];
 
     const ranking = await rankUpgrades(
       {
@@ -392,11 +385,7 @@ describe("rankUpgrades", () => {
     expect(top.belowCutoff).toBe(false);
     expect(top.seMethod).toBe("independent");
     expect(top.se).toBeCloseTo(92.0 / Math.sqrt(3000), 5);
-    expect(top.source).toEqual({
-      kind: "raid",
-      zone: "Karazhan",
-      boss: "Nightbane",
-    });
+    expect(top.source).toEqual(pool[0]!.source);
   });
 
   it("auto-repairs an inactive meta and discloses it as a run substitution", async () => {
@@ -485,15 +474,7 @@ describe("rankUpgrades", () => {
       opts
     );
 
-    const pool = [
-      {
-        itemId: 28579,
-        name: "Romulo's Poison Vial",
-        slot: "trinket" as const,
-        phase: 2,
-        source: { kind: "raid" as const, zone: "Karazhan", boss: "Opera" },
-      },
-    ];
+    const pool = [realPoolEntry(28579)];
 
     async function rankWith(candidateDps: number) {
       const sims = new Map([
@@ -635,19 +616,7 @@ describe("rankUpgrades", () => {
         clock: () => new Date("2026-07-26T12:00:00.000Z"),
         raidSimSkeleton: skeleton,
         epWeights,
-        pool: [
-          {
-            itemId: 30098,
-            name: "Razor-Scale Battlecloak",
-            slot: "back" as const,
-            phase: 2,
-            source: {
-              kind: "raid" as const,
-              zone: "Gruul's Lair",
-              boss: "Gruul",
-            },
-          },
-        ],
+        pool: [realPoolEntry(30098)],
       }
     );
 
@@ -686,26 +655,7 @@ describe("rankUpgrades", () => {
       "v0.0.101",
       opts
     );
-    const pool = [
-      {
-        itemId: 29381,
-        name: "Choker of Vile Intent",
-        slot: "neck" as const,
-        phase: 1,
-        source: { kind: "badge" as const, cost: 25 },
-      },
-      {
-        itemId: 30102,
-        name: "Krakken-Heart Breastplate",
-        slot: "chest" as const,
-        phase: 2,
-        source: {
-          kind: "raid" as const,
-          zone: "Magtheridon's Lair",
-          boss: "Magtheridon",
-        },
-      },
-    ];
+    const pool = [realPoolEntry(29381), realPoolEntry(30102)];
     const deps = {
       gear: new RecordedGearSource({
         fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
@@ -1083,9 +1033,14 @@ describe("rankUpgrades", () => {
         ...deps,
         pool: [
           ...cachePool,
+          // Synthetic id (999999): only the slot and run-count matter here,
+          // and 28530 is a real neck item (carry-forward 37) — a fixture
+          // naming a real id must match its universe row or use one that
+          // names nothing real, not invent a badge ring the pipeline never
+          // produced.
           {
-            itemId: 28530,
-            name: "Mithril Band of the Unscarred",
+            itemId: 999999,
+            name: "Test Ring",
             slot: "finger" as const,
             phase: 1,
             source: { kind: "badge" as const, cost: 25 },
@@ -1256,26 +1211,7 @@ describe("rankUpgrades", () => {
       simVersion: "v0.0.101",
     });
 
-    const pool = [
-      {
-        itemId: neckId,
-        name: "Choker of Vile Intent",
-        slot: "neck" as const,
-        phase: 1,
-        source: { kind: "badge" as const, cost: 25 },
-      },
-      {
-        itemId: chestId,
-        name: "Bloodsea Brigand's Vest",
-        slot: "chest" as const,
-        phase: 2,
-        source: {
-          kind: "raid" as const,
-          zone: "Serpentshrine Cavern",
-          boss: "Lady Vashj",
-        },
-      },
-    ];
+    const pool = [realPoolEntry(neckId), realPoolEntry(chestId)];
 
     const runAt = async (maxPhase: 1 | 2) => {
       const sim = new CapturingSimRunner(
@@ -1413,19 +1349,7 @@ describe("rankUpgrades", () => {
       simVersion: "v0.0.101",
     });
 
-    const pool = [
-      {
-        itemId: bootId,
-        name: "Cobra-Lash Boots",
-        slot: "feet" as const,
-        phase: 2,
-        source: {
-          kind: "raid" as const,
-          zone: "Serpentshrine Cavern",
-          boss: "Lady Vashj",
-        },
-      },
-    ];
+    const pool = [realPoolEntry(bootId, "ret-p3")];
 
     const socketedBootGems = async (maxPhase: 2 | 3) => {
       const sim = new CapturingSimRunner(
@@ -1562,19 +1486,7 @@ describe("rankUpgrades", () => {
       ])
     );
 
-    const pool = [
-      {
-        itemId: beltId,
-        name: "Belt of One-Hundred Deaths",
-        slot: "waist" as const,
-        phase: 2,
-        source: {
-          kind: "raid" as const,
-          zone: "Serpentshrine Cavern",
-          boss: "Lady Vashj",
-        },
-      },
-    ];
+    const pool = [realPoolEntry(beltId)];
 
     await rankUpgrades(
       {
@@ -1669,19 +1581,7 @@ describe("rankUpgrades", () => {
         clock: () => new Date("2026-07-26T12:00:00.000Z"),
         raidSimSkeleton: skeleton,
         epWeights,
-        pool: [
-          {
-            itemId: headId,
-            name: "Furious Gizmatic Goggles",
-            slot: "head",
-            phase: 2,
-            source: {
-              kind: "raid",
-              zone: "Tempest Keep",
-              boss: "Void Reaver",
-            },
-          },
-        ],
+        pool: [realPoolEntry(headId)],
       }
     );
 
@@ -1785,8 +1685,8 @@ describe("rankUpgrades paired-replicate SE", () => {
       const gain =
         neckId === 29381
           ? (NECK_GAIN_BY_SEED[seed] ?? 0)
-          : neckId >= 30017 && neckId <= 30025 && neckId !== WORN_NECK_ID
-            ? 25 - (neckId - 30017)
+          : neckId >= 900001 && neckId <= 900008
+            ? 25 - (neckId - 900001)
             : 0;
       return {
         dps: base + gain,
@@ -1798,21 +1698,33 @@ describe("rankUpgrades paired-replicate SE", () => {
   }
 
   /**
-   * Nine neck candidates, so "top 8 only" has a ninth row to exclude.
+   * Nine neck candidates, so "top 8 only" has a ninth row to exclude. 29381
+   * is real (Choker of Vile Intent) and mechanically significant — it is
+   * "the item under test" the seed-varying gain above keys off. The other
+   * eight only need to be distinct neck candidates that are not the worn
+   * item, so they use a synthetic id block (900001-900008) rather than real
+   * ids with an invented source (carry-forward 37) — none of 30017-30025
+   * used previously named a neck item that could plausibly share this fake
+   * "Karazhan / Nightbane" source anyway.
    *
    * None may be slamaltman's worn neck (30022): a candidate sharing the worn
    * id composes the same request as the baseline, which would make the two
    * indistinguishable in `sim.calls` and quietly weaken the pairing test below.
    */
   function neckPool() {
-    const ids = [29381, 30017, 30018, 30019, 30020, 30021, 30023, 30024, 30025];
-    return ids.map((itemId, i) => ({
-      itemId,
-      name: `neck-${i}`,
-      slot: "neck" as const,
-      phase: 1,
-      source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
-    }));
+    const synthetic = [
+      900001, 900002, 900003, 900004, 900005, 900006, 900007, 900008,
+    ];
+    return [
+      realPoolEntry(29381),
+      ...synthetic.map((itemId, i) => ({
+        itemId,
+        name: `neck-${i}`,
+        slot: "neck" as const,
+        phase: 1,
+        source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
+      })),
+    ];
   }
 
   async function rankWithSeeds(seeds: number[], sim: SimRunner) {

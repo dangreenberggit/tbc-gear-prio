@@ -14,6 +14,7 @@ import {
   type ItemSourceKind,
   type PoolEntry,
 } from "../src/pool.js";
+import { realPoolEntry } from "./real-source.js";
 import { SIM_ORDER } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -146,27 +147,10 @@ describe("filterPoolByZone", () => {
   });
 
   it("matches any zone in sources[], not only the primary source", () => {
-    const multi: PoolEntry[] = [
-      {
-        itemId: 30129,
-        name: "Crystalforge Breastplate",
-        slot: "chest",
-        phase: 2,
-        source: {
-          kind: "token",
-          zone: "Tempest Keep",
-          token: "Chestguard of the Forgotten Conqueror",
-        },
-        sources: [
-          {
-            kind: "token",
-            zone: "Tempest Keep",
-            token: "Chestguard of the Forgotten Conqueror",
-          },
-          { kind: "raid", zone: "Serpentshrine Cavern", boss: "Lady Vashj" },
-        ],
-      },
-    ];
+    // Crystalforge Breastplate really does carry Tempest Keep (token) and
+    // Serpentshrine Cavern (raid, Morogrim Tidewalker) sources at once, so the
+    // real universe row exercises this without inventing a boss or token name.
+    const multi: PoolEntry[] = [realPoolEntry(30129, "ret-p3")];
     expect(
       filterPoolByZone(multi, "Serpentshrine Cavern").map((e) => e.itemId)
     ).toEqual([30129]);
@@ -229,6 +213,18 @@ describe("poolFromUniverse", () => {
       ],
     });
     expect(entries[0]!.curationHint).toBe(42);
+  });
+});
+
+describe("realPoolEntry (test helper, carry-forward 37)", () => {
+  it("returns the item's real source from the committed universe", () => {
+    const entry = realPoolEntry(29381);
+    expect(entry.name).toBe("Choker of Vile Intent");
+    expect(entry.source).toEqual({ kind: "badge", cost: 25 });
+  });
+
+  it("throws rather than silently returning a fixture for an id not in the universe", () => {
+    expect(() => realPoolEntry(999999)).toThrow(/999999/);
   });
 });
 

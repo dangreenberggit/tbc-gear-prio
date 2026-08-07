@@ -3,6 +3,7 @@ import { CUTOFF } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import { applyView, type ViewOptions } from "../src/view.js";
+import { realPoolEntry } from "./real-source.js";
 
 function item(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
   const base: RankedItem = {
@@ -249,16 +250,20 @@ describe("applyView", () => {
     });
 
     it("matches a zone carried on a secondary source", () => {
+      // 30129 Crystalforge Breastplate really does carry Tempest Keep (its
+      // token source) and Serpentshrine Cavern (a raid drop, Morogrim
+      // Tidewalker) at once — no invented zone needed (carry-forward 37).
+      const crystalforgeBreastplate = realPoolEntry(30129, "ret-p3");
       const r = ranking([
         item({
           itemId: 30129,
           deltaDps: 30,
           deltaPct: 1.5,
-          source: { kind: "raid", zone: "Tempest Keep" },
-          sources: [
-            { kind: "raid", zone: "Tempest Keep" },
-            { ...token, zone: "Serpentshrine Cavern" },
-          ],
+          source: crystalforgeBreastplate.source,
+          // poolEntryFromUniverse always sets `sources` from a universe row's
+          // (non-empty) sources[] — non-null assertion, not a cast, since the
+          // field genuinely is present here.
+          sources: crystalforgeBreastplate.sources!,
         }),
       ]);
       expect(
