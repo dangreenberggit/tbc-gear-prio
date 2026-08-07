@@ -1019,13 +1019,28 @@ def assemble(
     # is unrecorded, and carrying no zone is what keeps these out of the raid
     # and boss filters, which is the behaviour these items need.
     curated_unsourced: set[int] = set()
+    # A curated item can also have a *real* source that is still list-only
+    # shaped -- e.g. 28430 Lionheart Executioner's db.json source is a genuine
+    # `{kind: "crafted"}` record, not an invented one, but `crafted` carries no
+    # zone and only grants membership today via the Wowhead-list path
+    # (`wowhead_list_only`). Its own Wowhead row reads "Crafting: Blacksmithing
+    # (...)", a prefix `CRAFTED_RE` does not match, so that path never fires
+    # either, and the item is dropped despite wowsims equipping it and db.json
+    # naming a real profession (carry-forward 41). Distinct from ticket 17: a
+    # `raid`/`heroic` source names a real zone outside phase scope, which is a
+    # scoping question this ticket does not touch; `crafted`/`badge`/`rep`/
+    # `pvp`/`world` name no zone at all, so there is no scope to respect.
+    curated_list_only: set[int] = set()
     for iid in sorted(bis_ids):
         it = db_by_id.get(iid)
         if it is None or not eligible_d7(it, profile):
             continue
-        if not source_acc.get(iid):
+        pairs = source_acc.get(iid)
+        if not pairs:
             add_source(iid, {"kind": "unknown"}, "curated")
             curated_unsourced.add(iid)
+        elif all(is_list_only_source(s) for s, _ in pairs):
+            curated_list_only.add(iid)
 
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
@@ -1064,11 +1079,14 @@ def assemble(
         # No phase guard: these are persistent non-raid items whose own phase is
         # not the interesting fact about them. Everbloom Idol is phase 1 and
         # still what a cat wants at phase 2.
-        # Only the ones with no recorded origin at all. A curated item that
-        # *does* have a db source keeps whatever scope rules that source implies
-        # -- several point at five-man dungeons outside PHASE_HEROIC_DUNGEONS,
-        # and admitting those is ticket 17's question, not this one.
-        curated = iid in curated_unsourced
+        # A curated item whose db source names a real zone (raid/heroic) keeps
+        # whatever scope rules that source implies -- several point at
+        # five-man dungeons outside PHASE_HEROIC_DUNGEONS, and admitting those
+        # is ticket 17's question, not this one. `curated_unsourced` (no
+        # source at all) and `curated_list_only` (a real but zone-less source)
+        # are the two shapes where the curated claim itself is what grants
+        # membership.
+        curated = iid in curated_unsourced or iid in curated_list_only
         if not in_phase and not in_heroic and not list_only and not curated:
             continue
 

@@ -797,6 +797,25 @@
       "curationHint": 73.1
     },
     {
+      "itemId": 23522,
+      "name": "Ragesteel Breastplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 72.33,
+      "curatedSets": [
+        "preraid"
+      ]
+    },
+    {
       "itemId": 29071,
       "name": "Justicar Breastplate",
       "slot": "chest",
@@ -4469,6 +4488,25 @@
       "curationHint": 64.63
     },
     {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 64.44,
+      "curatedSets": [
+        "preraid"
+      ]
+    },
+    {
       "itemId": 30892,
       "name": "Beast-tamer's Shoulders",
       "slot": "shoulder",
@@ -5969,6 +6007,26 @@
         }
       ],
       "curationHint": 720.386
+    },
+    {
+      "itemId": 28429,
+      "name": "Lionheart Champion",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        }
+      ],
+      "curationHint": 715.383,
+      "curatedSets": [
+        "p1",
+        "preraid"
+      ]
     },
     {
       "itemId": 30722,

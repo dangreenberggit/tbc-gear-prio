@@ -298,7 +298,16 @@ describe("data/universes/ret-p2.json", () => {
     // 235 -> 236: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
     // membership, the same way badge/pvp/crafted/rep already did, admitting
     // 23203 Libram of Fervor via its "World Drop - Azeroth" Wowhead text.
-    expect(entries.length).toBe(236);
+    // 236 -> 240: a curated item can carry a *real* db source that is still
+    // list-only shaped (no zone) -- `curated_list_only` in
+    // assemble_universe.py now grants membership for that shape the same way
+    // `curated_unsourced` already did for no source at all (ticket 41
+    // remainder). +23522 Ragesteel Breastplate, +28429 Lionheart Champion,
+    // +28430 Lionheart Executioner, +33173 Ragesteel Shoulders — all
+    // `{kind: "crafted"}`, all wowsims-curated, none independently a member
+    // because their own Wowhead row uses "Crafting:" prose the parser does
+    // not read (ticket 45 leaves that prose unmodeled by design).
+    expect(entries.length).toBe(240);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();
