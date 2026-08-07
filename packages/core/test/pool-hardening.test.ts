@@ -975,6 +975,11 @@ describe("a transcribed row agrees with its own raw text", () => {
   //
   // Disagreement means one of the two readings is wrong. It does not say which,
   // and that is the point: a prompt to go look, not an auto-fix.
+  //
+  // The comparison is against `correctedSourceText` where present, matching what
+  // the parser reads: `wowheadSourceText` is now a verbatim record of a page we
+  // know is wrong (carry-forward 54), so the structured fields are deliberately
+  // allowed to disagree with it and must agree with the correction instead.
   const listFiles = [
     "data/wowhead-lists/ret/p1-p2.json",
     "data/wowhead-lists/ret/p3.json",
@@ -989,6 +994,7 @@ describe("a transcribed row agrees with its own raw text", () => {
     itemId: number;
     itemName: string;
     wowheadSourceText: string | null;
+    correctedSourceText?: string | null;
     viaTokenName?: string | null;
     viaBoss?: string | null;
     viaZone?: string | null;
@@ -1000,7 +1006,7 @@ describe("a transcribed row agrees with its own raw text", () => {
         entries: ListRow[];
       };
       for (const row of doc.entries) {
-        const prose = row.wowheadSourceText ?? "";
+        const prose = row.correctedSourceText || row.wowheadSourceText || "";
         for (const field of ["viaTokenName", "viaBoss", "viaZone"] as const) {
           const value = row[field];
           if (!value) continue;
@@ -1021,6 +1027,50 @@ describe("a transcribed row agrees with its own raw text", () => {
 // "Optional - Tier" inconsistency). Counting those as paraphrase inverted the
 // gate — a faithful re-scrape restores the 40 labels we currently drop as null,
 // which adds singletons and would fail it. Deleted with carry-forward 55.
+
+describe("a correction never silently becomes the record (carry-forward 54)", () => {
+  // `wowheadSourceText` holds what the page says, so a wrong page stays wrong
+  // there; corrections live alongside in `correctedSourceText`. Overwriting the
+  // record instead made "the page said this" and "we decided this"
+  // indistinguishable, which is what made 49/50 expensive to re-check.
+  //
+  // Today these three rows reach the universe only through their two-hop token
+  // row -- carry-forward 57 suppresses guide prose wherever a machine input
+  // supplies the locus -- so the correction is a safeguard rather than the
+  // active path. That is exactly why it is pinned here: if suppression ever
+  // stops covering them, the verbatim (wrong) boss must not become the answer
+  // by default.
+  const CORRECTED = [
+    ["data/wowhead-lists/ret/p4.json", 30129],
+    ["data/wowhead-lists/ret/p4.json", 30990],
+    ["data/wowhead-lists/ret/p4.json", 30993],
+    ["data/wowhead-lists/ret/p5.json", 30129],
+    ["data/wowhead-lists/ret/p5.json", 30990],
+    ["data/wowhead-lists/ret/p5.json", 30993],
+  ] as const;
+
+  it("every corrected row still disagrees with its verbatim record", () => {
+    for (const [rel, itemId] of CORRECTED) {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: {
+          itemId: number;
+          wowheadSourceText?: string | null;
+          correctedSourceText?: string | null;
+        }[];
+      };
+      const row = doc.entries.find((e) => e.itemId === itemId);
+      expect(row, `${rel} lost item ${itemId}`).toBeDefined();
+      expect(
+        row?.correctedSourceText,
+        `${rel} ${itemId}: correctedSourceText was dropped — the parser would fall back to the verbatim page text, which is known wrong`
+      ).toBeTruthy();
+      expect(
+        row?.correctedSourceText,
+        `${rel} ${itemId}: correction equals the verbatim text, so one of them is no longer doing its job`
+      ).not.toEqual(row?.wowheadSourceText);
+    }
+  });
+});
 
 describe("zone and boss claims have an independent witness", () => {
   // Every defect in carry-forward 48-53 arrived on the `wowhead` path (an

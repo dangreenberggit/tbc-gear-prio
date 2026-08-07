@@ -185,13 +185,61 @@ Both directions mutation-verified: planting a lone `wowhead` raid row on 34241
 fails the first; adding 34241 to the allowlist while it still has a `db`
 witness fails the second.
 
+## Done 2026-08-07: feral T6 mapped, 11 → 7
+
+Four Thunderheart pieces gained two-hop rows. The T6 token vocabulary is
+Conqueror/Vanquisher/Protector and the class groupings were **re-cut**, not
+renamed, so this map's own "druid uses the Defender token" note would have
+produced the wrong answer: Forgotten Protector is Warrior/Hunter/Shaman, and
+druid T6 is the **Vanquisher** token.
+
+The pairing is witnessed rather than slot-inferred. Each token's Wowhead
+"Currency for" list names the Thunderheart pieces it buys (vendor Tydormu) —
+that is the redemption source this map's notes said no committed input states.
+It exists; it is just not in AtlasLoot or `db.json`.
+
+`31048 Thunderheart Pauldrons` is **deliberately still on the allowlist**: the
+fetch was rate-limited before its redemption list could be read. AtlasLoot puts
+its token at Mother Shahraz, matching the guide, but all three tokens in a
+triple drop from the same boss, so that agreement does not establish the
+pairing. Verify the "Currency for" list, then add it.
+
+## Done 2026-08-07: the record/correction split (item from the handoff)
+
+**Decided: option 1.** `wowheadSourceText` is now a verbatim record of what the
+page says; `correctedSourceText` sits alongside it and is what the parser reads
+(`source_text_for_parsing` in `assemble_universe.py`). The field named after the
+page contains what the page said, which is the whole point — option 2 would have
+left a field whose name lies about its contents.
+
+Applied to **p4/p5 only**, and that per-page split is the substance of the
+change, not a detail. The pre-correction text in git is identical across p3, p4
+and p5, but the pages are not: p3 links `[item=31089]` and `[npc=19622]`
+correctly, so its old text was **our** transcription slip and is fixed in place
+with no correction field. p4/p5's pages are genuinely wrong, so they keep the
+verbatim record plus a correction. Restoring the old text to p3 would have
+injected a defect while claiming to be faithful. The `corrections[]` prose on
+all three pages said the page was at fault; that is now rewritten per page.
+
+Re-measured rather than assumed, as the handoff asked: all three items now reach
+the universe **only** through their two-hop token row, because carry-forward 57
+suppresses guide prose wherever a machine input supplies the locus. So the
+universes are byte-identical before and after this change, and the correction is
+a safeguard rather than the active path. `pool-hardening.test.ts` > "a correction
+never silently becomes the record" pins it so that stays true by decision rather
+than by luck — mutation-verified by dropping a correction, which fails it.
+
+The existing "a transcribed row agrees with its own raw text" gate now compares
+against the corrected text, since the structured `via*` fields hold corrected
+values and are *meant* to disagree with a wrong page.
+
 ## Still open
 
-- The "prefer the parsed/curated side on disagreement" rule is written down
-  once, somewhere binding. Three independent confirmations now (49, 50, 52).
-- Whether feral T6 gets a two-hop map (or an explicit "no coverage" marker) is
-  decided — that alone would clear 4 of the 11.
+- The "prefer the parsed/curated side on disagreement" rule — **superseded**:
+  carry-forward 57 landed the pipeline enforcement and `pnpm
+  wowhead-prose:check` gates it, which beats a doc line. Do not also write one.
 - Fixture-authoring guidance (item 4 above) is not yet written anywhere an
   agent will read it. This is the one that bit twice in `pool.test.ts` and
   `view.test.ts`, and it is a `writing-for-agents` / AGENTS.md change, so it
   needs proposing in chat before editing per this repo's own rule.
+- `31048`'s redemption list, per above.

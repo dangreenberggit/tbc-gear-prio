@@ -761,6 +761,22 @@ def zone_sources(zone: str, boss: str) -> list[dict]:
     return out
 
 
+# `wowheadSourceText` is a record of what the page says, so a page that is
+# factually wrong stays wrong there (carry-forward 54). Where we know better,
+# the correction goes in `correctedSourceText` alongside it rather than
+# overwriting the record -- otherwise "the page said this" and "we decided this"
+# become indistinguishable, which is what made tickets 49/50 hard to re-check.
+#
+# Only the parser prefers the correction; the verbatim field stays the thing a
+# human re-reading the page compares against.
+def source_text_for_parsing(row: dict) -> str | None:
+    corrected = row.get("correctedSourceText")
+    if isinstance(corrected, str) and corrected.strip():
+        return corrected
+    text = row.get("wowheadSourceText")
+    return text if isinstance(text, str) else None
+
+
 def parse_wowhead_source(text: str | None) -> list[dict]:
     if not text:
         return []
@@ -1131,7 +1147,8 @@ def assemble(
             if hold_out_wowhead:
                 continue
             machine_locus = iid in machine_locus_ids
-            for src in parse_wowhead_source(row.get("wowheadSourceText")):
+            parsed = parse_wowhead_source(source_text_for_parsing(row))
+            for src in parsed:
                 # Non-locus kinds (crafted/pvp/badge/rep/world) always survive:
                 # AtlasLoot does not cover vendor and quest items, so the guide
                 # is the only witness for many of them.
@@ -1139,7 +1156,6 @@ def assemble(
                     continue
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
-            parsed = parse_wowhead_source(row.get("wowheadSourceText"))
             if parsed and all(is_list_only_source(s) for s in parsed):
                 wowhead_list_only.add(iid)
 
