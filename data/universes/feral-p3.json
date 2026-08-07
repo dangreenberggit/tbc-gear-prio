@@ -712,10 +712,11 @@
       "phase": 3,
       "sources": [
         {
-          "kind": "raid",
+          "kind": "token",
           "zone": "Black Temple",
+          "token": "Chestguard of the Forgotten Vanquisher",
           "boss": "Illidan Stormrage",
-          "origin": "wowhead"
+          "origin": "two-hop"
         }
       ],
       "curationHint": 83.1
@@ -2293,10 +2294,11 @@
       "phase": 3,
       "sources": [
         {
-          "kind": "raid",
+          "kind": "token",
           "zone": "Hyjal Summit",
+          "token": "Gloves of the Forgotten Vanquisher",
           "boss": "Azgalor",
-          "origin": "wowhead"
+          "origin": "two-hop"
         }
       ],
       "curationHint": 67.54
@@ -2681,6 +2683,25 @@
       "curationHint": 93.36
     },
     {
+      "itemId": 31039,
+      "name": "Thunderheart Cover",
+      "slot": "head",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "token",
+          "zone": "Hyjal Summit",
+          "token": "Helm of the Forgotten Vanquisher",
+          "boss": "Archimonde",
+          "origin": "two-hop"
+        }
+      ],
+      "curationHint": 86.58
+    },
+    {
       "itemId": 30228,
       "name": "Nordrassil Headdress",
       "slot": "head",
@@ -2965,10 +2986,11 @@
       "phase": 3,
       "sources": [
         {
-          "kind": "raid",
+          "kind": "token",
           "zone": "Black Temple",
+          "token": "Leggings of the Forgotten Vanquisher",
           "boss": "The Illidari Council",
-          "origin": "wowhead"
+          "origin": "two-hop"
         }
       ],
       "curationHint": 116.44
