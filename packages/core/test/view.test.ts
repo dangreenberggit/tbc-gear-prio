@@ -250,25 +250,28 @@ describe("applyView", () => {
     });
 
     it("matches a zone carried on a secondary source", () => {
-      // 30129 Crystalforge Breastplate really does carry Tempest Keep (its
-      // token source) and Serpentshrine Cavern (a raid drop, Morogrim
-      // Tidewalker) at once — no invented zone needed (carry-forward 37).
-      const crystalforgeBreastplate = realPoolEntry(30129, "ret-p3");
+      // 32590 Nethervoid Cloak is a T6-era trash drop that genuinely drops in
+      // both Hyjal Summit and Black Temple. Its sources[0] is Hyjal Summit, so
+      // matching Black Temple can only come from a secondary source.
+      //
+      // This used to use 30129 and its Serpentshrine Cavern row, which was not
+      // a second true zone but the transcription bug in carry-forward 50.
+      const nethervoidCloak = realPoolEntry(32590, "ret-p3");
       const r = ranking([
         item({
-          itemId: 30129,
+          itemId: 32590,
           deltaDps: 30,
           deltaPct: 1.5,
-          source: crystalforgeBreastplate.source,
+          source: nethervoidCloak.source,
           // poolEntryFromUniverse always sets `sources` from a universe row's
           // (non-empty) sources[] — non-null assertion, not a cast, since the
           // field genuinely is present here.
-          sources: crystalforgeBreastplate.sources!,
+          sources: nethervoidCloak.sources!,
         }),
       ]);
       expect(
-        applyView(r, { raid: "Serpentshrine Cavern" }).rows.map((x) => x.itemId)
-      ).toEqual([30129]);
+        applyView(r, { raid: "Black Temple" }).rows.map((x) => x.itemId)
+      ).toEqual([32590]);
     });
 
     it("scopes the boss filter to the selected raid", () => {

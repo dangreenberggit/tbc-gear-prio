@@ -637,6 +637,26 @@ def canonical_zone(zone: str) -> str:
     return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
 
 
+# Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
+# to land in `boss` -- a shipped ViewOptions filter control listing an item as
+# a boss (carry-forward 48). The token half is dropped rather than emitted:
+# every affected piece already carries a `kind: token` row from the curated
+# data/two-hop/*-tokens.json, which is the side measured to be correct where
+# the two disagree.
+#
+# The separator is the spaced " - " because a bare hyphen would cut
+# `Fathom-Lord Karathress` in half. Measured across 74 distinct boss strings
+# in data/universes/** and .scratch/heldout/**, " - " appeared only in the 10
+# defective rows.
+TOKEN_BOSS_SEPARATOR = " - "
+
+
+def drop_boss(phrase: str) -> str:
+    if TOKEN_BOSS_SEPARATOR not in phrase:
+        return phrase
+    return phrase.rsplit(TOKEN_BOSS_SEPARATOR, 1)[1].strip()
+
+
 def zone_sources(zone: str, boss: str) -> list[dict]:
     """One Wowhead zone parenthetical → the sources it names.
 
@@ -670,7 +690,7 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
     out: list[dict] = []
     m = DROP_RE.search(text)
     if m:
-        out.extend(zone_sources(m.group(2).strip(), m.group(1).strip()))
+        out.extend(zone_sources(m.group(2).strip(), drop_boss(m.group(1).strip())))
     else:
         qm = QUEST_ZONE_RE.search(text)
         if qm:

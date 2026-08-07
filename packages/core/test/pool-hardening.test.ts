@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -57,6 +57,17 @@ type TwoHopEntry = {
 };
 
 const hasWowsimsVendor = existsSync(wowsimsDbPath);
+
+/**
+ * Read from disk rather than hand-listed so a newly assembled universe is
+ * covered by the data gates below without anyone remembering to add it.
+ */
+const UNIVERSE_FILES: readonly string[] = readdirSync(
+  join(root, "data/universes")
+)
+  .filter((f) => f.endsWith(".json") && !f.endsWith(".report.json"))
+  .sort()
+  .map((f) => `data/universes/${f}`);
 
 function loadWowsimsDbById(): Map<number, WowsimsDbItem> {
   if (!hasWowsimsVendor) return new Map();
@@ -870,4 +881,74 @@ describe("an item's source does not depend on which tier is assembled", () => {
       ).toBe(false);
     }
   });
+});
+
+describe("tier piece sources agree with the curated two-hop map", () => {
+  // The ticket-37 guard reads `entry.source`, which `poolFromUniverse` fills
+  // from `sources[0]`. The curated token row sorts first for every tier piece,
+  // so that guard inspects the good row and never sees the rest of the array —
+  // which is where tickets 48, 49 and 50 all lived. This walks *every* row.
+  //
+  // Verified by mutation, not just by passing: planting a junk boss/zone on a
+  // non-first raid row of 30990 across ret-p3/p4/p5 (uniformly, so the
+  // cross-tier consistency test above cannot fire) passed all 386 tests before
+  // this existed, and fails here now.
+  const specs = [
+    { spec: "ret", map: "data/two-hop/ret-tokens.json" },
+    { spec: "feral", map: "data/two-hop/feral-tokens.json" },
+  ] as const;
+
+  for (const { spec, map } of specs) {
+    const twoHopEntries = (
+      JSON.parse(readFileSync(join(root, map), "utf8")) as {
+        entries: TwoHopEntry[];
+      }
+    ).entries;
+    const byPiece = new Map(twoHopEntries.map((e) => [e.pieceId, e] as const));
+
+    const universes = UNIVERSE_FILES.filter((f) =>
+      f.startsWith(`data/universes/${spec}-p`)
+    );
+
+    for (const rel of universes) {
+      it(`${rel}: every raid row of a tier piece names the map's zone and boss`, () => {
+        for (const e of loadUniverse(rel).raw.entries) {
+          const mapped = byPiece.get(e.itemId);
+          if (!mapped) continue;
+          for (const s of e.sources) {
+            if (s.kind !== "raid") continue;
+            expect(
+              { zone: s.zone, boss: s.boss },
+              `${e.itemId} ${e.name} raid row disagrees with ${map}`
+            ).toEqual({ zone: mapped.zone, boss: mapped.boss });
+          }
+        }
+      });
+    }
+  }
+});
+
+describe("no boss field carries a spliced item name", () => {
+  // Wowhead writes tier drops as `Drop: <Token> - <Boss> (<Zone>)`, and the
+  // parser used to put that whole phrase into `boss`. `boss` is a shipped
+  // ViewOptions filter control, so a token name there is a filter entry that
+  // is not a boss.
+  //
+  // `" - "` is the discriminator because it is measurably absent from every
+  // real boss name in this repo: of 74 distinct boss strings, the only hits
+  // were the 10 defective rows. `Fathom-Lord Karathress` is why the check is
+  // the spaced separator and not a bare hyphen.
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      for (const e of loadUniverse(rel).raw.entries) {
+        for (const s of e.sources) {
+          if (!("boss" in s) || typeof s.boss !== "string") continue;
+          expect(
+            s.boss,
+            `${e.itemId} ${e.name} boss contains a token/item name`
+          ).not.toContain(" - ");
+        }
+      }
+    });
+  }
 });

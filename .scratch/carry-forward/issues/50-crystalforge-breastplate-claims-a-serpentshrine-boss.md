@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 44 investigation + `sme-rank-review`, 2026-08-07
 Blocks: none
@@ -79,3 +79,36 @@ not be folded in as an equal alternative.
   just `token` rows) catches this, rather than writing a new gate.
 - The other six ret/feral universes are checked for the same shape of
   disagreement, since this was found by accident and nothing was scanning for it.
+
+## Resolution (2026-08-07)
+
+**The transcription was corrected**, not the pipeline. `p3/p4/p5.json` now
+carry `Drop: Kael'thas Sunstrider (Tempest Keep)`, agreeing with `p1-p2.json`
+and `data/two-hop/ret-tokens.json`, with the reason recorded in a `corrections`
+array in each file.
+
+```bash
+python -c "
+import json
+for e in json.load(open('data/universes/ret-p4.json',encoding='utf-8-sig'))['entries']:
+    if e['itemId']==30129:
+        for s in e['sources']: print(s)
+"
+# {'kind': 'token', 'zone': 'Tempest Keep', 'token': 'Chestguard of the Vanquished Champion', 'boss': \"Kael'thas Sunstrider\"}
+# {'kind': 'raid',  'zone': 'Tempest Keep', 'boss': \"Kael'thas Sunstrider\"}
+```
+
+The Serpentshrine row is gone. Note the edit had to be scoped **by item id**:
+30098 and 30081 are genuine Morogrim Tidewalker drops in the same files, and a
+text-wide replace of that phrase corrupted them on the first attempt.
+
+**Two tests were pinning this bug in place.** `pool.test.ts` and
+`view.test.ts` both used 30129's Serpentshrine row as their multi-zone fixture,
+asserting in a comment that it "really does carry" both zones. Both now use
+32590 Nethervoid Cloak, a T6-era trash drop that genuinely drops in Hyjal
+Summit and Black Temple — the legitimate multi-zone case this ticket named.
+Both were re-verified by mutation (collapsing `sourcesOf`/`filterByZone` to the
+primary source makes each fail), so they still catch the regression they exist
+for.
+
+The other five universes were swept: zero remaining defects of this class.

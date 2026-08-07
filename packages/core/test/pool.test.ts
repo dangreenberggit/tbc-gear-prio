@@ -147,16 +147,21 @@ describe("filterPoolByZone", () => {
   });
 
   it("matches any zone in sources[], not only the primary source", () => {
-    // Crystalforge Breastplate really does carry Tempest Keep (token) and
-    // Serpentshrine Cavern (raid, Morogrim Tidewalker) sources at once, so the
-    // real universe row exercises this without inventing a boss or token name.
-    const multi: PoolEntry[] = [realPoolEntry(30129, "ret-p3")];
+    // 32590 Nethervoid Cloak is a T6-era trash drop that genuinely drops in
+    // both Hyjal Summit and Black Temple, so the real universe row exercises
+    // a secondary-source zone without inventing anything. Its sources[0] is
+    // Hyjal Summit, so a Black Temple match can only come from sources[1..].
+    //
+    // This used to use 30129 and its Serpentshrine Cavern row, which was not a
+    // second true zone but the transcription bug in carry-forward 50 — the
+    // test was pinning the defect in place.
+    const multi: PoolEntry[] = [realPoolEntry(32590, "ret-p3")];
     expect(
-      filterPoolByZone(multi, "Serpentshrine Cavern").map((e) => e.itemId)
-    ).toEqual([30129]);
+      filterPoolByZone(multi, "Black Temple").map((e) => e.itemId)
+    ).toEqual([32590]);
     expect(
-      filterPoolByZone(multi, "Tempest Keep").map((e) => e.itemId)
-    ).toEqual([30129]);
+      filterPoolByZone(multi, "Hyjal Summit").map((e) => e.itemId)
+    ).toEqual([32590]);
   });
 });
 

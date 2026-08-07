@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 44 investigation, 2026-08-07 (measurement, not the ticket's own claim)
 Blocks: none
@@ -98,3 +98,36 @@ new one.
   a `" - "` check is enough, since no real TBC boss name contains that
   separator — verify before relying on it).
 - Universes regenerate with only the intended diff.
+
+## Resolution (2026-08-07)
+
+Fixed in `parse_wowhead_source` via a new `drop_boss` helper that splits on the
+spaced `" - "` separator and keeps the boss half. The token half is dropped
+rather than emitted: every affected piece already carries a correct
+`kind: token` row from the curated two-hop map.
+
+The ticket's hypothesis that a `" - "` check is safe was **verified, not
+assumed**: across 74 distinct boss strings in `data/universes/**` and
+`.scratch/heldout/**`, `" - "` appeared only in the 10 defective rows.
+`Fathom-Lord Karathress` is the one real boss containing a hyphen, and it is
+unspaced — which is why the split uses the spaced separator.
+
+```bash
+python -c "
+import json,glob
+n=0
+for f in glob.glob('data/universes/*-p*.json'):
+    if 'report' in f: continue
+    for e in json.load(open(f,encoding='utf-8-sig'))['entries']:
+        for s in e.get('sources',[]):
+            if ' - ' in (s.get('boss') or ''): n+=1
+print(n)
+"
+# 0
+```
+
+A gate now enforces this: `pool-hardening.test.ts` > "no boss field carries a
+spliced item name", over every universe file. Verified by mutation.
+
+Note 30133 gained a bonus fix: once the token prefix was stripped its row
+deduplicated against the already-correct `Void Reaver` row.

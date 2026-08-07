@@ -678,7 +678,7 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Chestguard of the Vanquished Champion - Illidan Stormrage"
+          "boss": "Illidan Stormrage"
         }
       ],
       "curationHint": 125.02
@@ -719,11 +719,6 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "Kael'thas Sunstrider"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
         }
       ],
       "curationHint": 121.62,
@@ -943,7 +938,7 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Chestguard of the Fallen Champion - Magtheridon"
+          "boss": "Magtheridon"
         }
       ],
       "curationHint": 61.25,
@@ -3402,7 +3397,7 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Helm of the Forgotten Conqueror - Archimonde"
+          "boss": "Archimonde"
         }
       ],
       "curationHint": 78.71
@@ -3929,7 +3924,7 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Leggings of the Forgotten Conqueror - Gathios the Shatterer"
+          "boss": "The Illidari Council"
         }
       ],
       "curationHint": 97.26
@@ -5006,7 +5001,7 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Pauldrons of the Fallen Champion - High King Maulgar"
+          "boss": "High King Maulgar"
         }
       ],
       "curationHint": 80.15,
@@ -5104,7 +5099,7 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Pauldrons of the Forgotten Conqueror - Mother Shahraz"
+          "boss": "Mother Shahraz"
         }
       ],
       "curationHint": 64.63
@@ -5181,11 +5176,6 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "Void Reaver"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Pauldrons of the Vanquished Champion - Void Reaver"
         }
       ],
       "curationHint": 57.32

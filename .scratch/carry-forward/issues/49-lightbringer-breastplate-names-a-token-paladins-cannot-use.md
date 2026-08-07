@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 44 investigation + `sme-rank-review`, 2026-08-07
 Blocks: none
@@ -89,3 +89,37 @@ reached the universe.
   cannot land silently. Prefer this over correcting the one string.
 - Whether the transcription or the pipeline was corrected is stated here, with
   the command that shows the universes agree afterwards.
+
+## Resolution (2026-08-07)
+
+**The transcription was corrected**, not the pipeline.
+
+The ticket asked whether the live Wowhead page or the transcription was wrong.
+That was answerable from the repo without fetching anything:
+`data/two-hop/ret-tokens.json` already records the answer in its own `notes` —
+"Wowhead Phase 3 BiS guide mislabels Lightbringer Breastplate token as
+Chestguard of the Vanquished Champion; corrected to Forgotten Conqueror
+(31089) via item page + AtlasLoot Illidan BT drop."
+
+So the transcription faithfully copied a genuinely-wrong upstream page. The
+correction is now recorded in a `corrections` array in each of
+`data/wowhead-lists/ret/p3.json`, `p4.json` and `p5.json`, so a future
+re-transcription does not silently reintroduce it.
+
+```bash
+python -c "
+import json
+for e in json.load(open('data/universes/ret-p4.json',encoding='utf-8-sig'))['entries']:
+    if e['itemId']==30990:
+        for s in e['sources']: print(s)
+"
+# {'kind': 'token', 'zone': 'Black Temple', 'token': 'Chestguard of the Forgotten Conqueror', 'boss': 'Illidan Stormrage'}
+# {'kind': 'raid',  'zone': 'Black Temple', 'boss': 'Illidan Stormrage'}
+```
+
+The requested cross-check gate exists — see [[51-tier-source-rows-are-unguarded-past-sources0]].
+
+**Correction to this ticket:** "This is the only one of its kind" holds for the
+*token* half only. 30993 had the same class of defect in the *boss* half, which
+this ticket's own measurement command could not see because it compared only
+the embedded token name. Recorded in ticket 51.
