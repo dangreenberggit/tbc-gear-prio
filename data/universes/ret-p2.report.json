@@ -10,9 +10,9 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1398,
-  "universeTotal": 235,
-  "listOnlyMembership": 14,
+  "excludedNoSource": 1397,
+  "universeTotal": 236,
+  "listOnlyMembership": 15,
   "perSlot": {
     "back": 20,
     "chest": 16,
@@ -22,7 +22,7 @@
     "head": 17,
     "legs": 14,
     "neck": 18,
-    "ranged": 2,
+    "ranged": 3,
     "shoulder": 15,
     "trinket": 16,
     "waist": 22,
@@ -35,7 +35,7 @@
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 22
+    "wowhead": 23
   },
   "membershipByOrigin": {
     "curated": 3,
@@ -43,8 +43,8 @@
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 201,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 18,
-    "listOnly": 14,
+    "itemHasOrigin:wowhead": 19,
+    "listOnly": 15,
     "zoneMatch": 218
   },
   "exclusivePrimaryOrigin": {
@@ -52,28 +52,28 @@
     "atlasloot-only": 13,
     "two-hop": 10,
     "other": 3,
-    "wowhead-only": 8
+    "wowhead-only": 9
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 235,
+    "total": 236,
     "casterOnlyReject": 74,
     "epFloorReject": 10,
     "combinedReject": 84,
-    "combinedKeep": 151,
-    "casterRejectPct": 31.5,
-    "combinedRejectPct": 35.7,
+    "combinedKeep": 152,
+    "casterRejectPct": 31.4,
+    "combinedRejectPct": 35.6,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 72,
-    "missed": 14,
-    "recallPct": 83.7,
+    "recalled": 73,
+    "missed": 13,
+    "recallPct": 84.9,
     "missedItems": [
       {
         "itemId": 19343,
@@ -84,12 +84,6 @@
       {
         "itemId": 22401,
         "name": "Libram of Hope",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23203,
-        "name": "Libram of Fervor",
         "slot": "ranged",
         "d7Eligible": true
       },

@@ -10,23 +10,23 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1614,
-  "universeTotal": 250,
-  "listOnlyMembership": 21,
+  "excludedNoSource": 1611,
+  "universeTotal": 253,
+  "listOnlyMembership": 24,
   "perSlot": {
-    "back": 21,
+    "back": 22,
     "chest": 12,
     "feet": 19,
     "finger": 25,
     "hands": 16,
     "head": 12,
     "legs": 11,
-    "neck": 19,
+    "neck": 20,
     "ranged": 3,
     "shoulder": 10,
     "trinket": 17,
     "waist": 16,
-    "weapon": 56,
+    "weapon": 57,
     "wrist": 13
   },
   "sourceRecordAdds": {
@@ -34,7 +34,7 @@
     "curated": 3,
     "db": 1807,
     "two-hop": 10,
-    "wowhead": 34
+    "wowhead": 37
   },
   "membershipByOrigin": {
     "curated": 3,
@@ -42,37 +42,37 @@
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 212,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 29,
-    "listOnly": 21,
+    "itemHasOrigin:wowhead": 32,
+    "listOnly": 24,
     "zoneMatch": 226
   },
   "exclusivePrimaryOrigin": {
     "db": 212,
+    "wowhead-only": 14,
     "atlasloot-only": 14,
     "other": 3,
-    "two-hop": 10,
-    "wowhead-only": 11
+    "two-hop": 10
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 250,
+    "total": 253,
     "casterOnlyReject": 114,
     "epFloorReject": 0,
     "combinedReject": 114,
-    "combinedKeep": 136,
-    "casterRejectPct": 45.6,
-    "combinedRejectPct": 45.6,
+    "combinedKeep": 139,
+    "casterRejectPct": 45.1,
+    "combinedRejectPct": 45.1,
     "applied": false
   },
   "wowheadListIds": 79,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 79,
-    "recalled": 58,
-    "missed": 21,
-    "recallPct": 73.4,
+    "recalled": 61,
+    "missed": 18,
+    "recallPct": 77.2,
     "missedItems": [
       {
         "itemId": 19406,
@@ -162,24 +162,6 @@
         "itemId": 30372,
         "name": "Socrethar's Girdle",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31255,
-        "name": "Cloak of the Craft",
-        "slot": "back",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31275,
-        "name": "Necklace of Trophies",
-        "slot": "neck",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31334,
-        "name": "Staff of Natural Fury",
-        "slot": "weapon",
         "d7Eligible": true
       },
       {

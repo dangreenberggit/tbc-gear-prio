@@ -295,7 +295,10 @@ describe("data/universes/ret-p2.json", () => {
     // than only labelling rows that got in some other way, admitting the 5
     // curated ret items with no recorded origin (ticket 41). They carry
     // `{kind: "unknown"}` and so are filtered out of every raid view.
-    expect(entries.length).toBe(235);
+    // 235 -> 236: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, the same way badge/pvp/crafted/rep already did, admitting
+    // 23203 Libram of Fervor via its "World Drop - Azeroth" Wowhead text.
+    expect(entries.length).toBe(236);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

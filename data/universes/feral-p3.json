@@ -92,6 +92,21 @@
       "curationHint": 52.42
     },
     {
+      "itemId": 31255,
+      "name": "Cloak of the Craft",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 49.26
+    },
+    {
       "itemId": 30729,
       "name": "Black-Iron Battlecloak",
       "slot": "back",
@@ -3256,6 +3271,21 @@
       ]
     },
     {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 48.84
+    },
+    {
       "itemId": 28745,
       "name": "Mithril Chain of Heroism",
       "slot": "neck",
@@ -4984,6 +5014,21 @@
         }
       ],
       "curationHint": 347.2
+    },
+    {
+      "itemId": 31334,
+      "name": "Staff of Natural Fury",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 276.5
     },
     {
       "itemId": 29171,

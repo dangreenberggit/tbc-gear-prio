@@ -5134,6 +5134,21 @@
       "curationHint": 68.77
     },
     {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
+        }
+      ],
+      "curationHint": 63.35
+    },
+    {
       "itemId": 34178,
       "name": "Collar of the Pit Lord",
       "slot": "neck",
@@ -5706,6 +5721,21 @@
           "boss": "Trash",
           "kind": "raid",
           "zone": "Black Temple"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 23203,
+      "name": "Libram of Fervor",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world"
         }
       ],
       "curationHint": 0.0

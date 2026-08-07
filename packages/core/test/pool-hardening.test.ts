@@ -327,7 +327,10 @@ describe("data/universes/ret-p3.json hardening", () => {
     // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
     // and so never appears in a raid-filtered view. Haramad's Bargain and
     // Shapeshifter's Signet were already here via the rep path above.
-    expect(universeP3.length).toBe(359);
+    // 359 -> 361: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, admitting +23203 Libram of Fervor and +31275 Necklace of
+    // Trophies via their "World Drop" Wowhead text.
+    expect(universeP3.length).toBe(361);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the

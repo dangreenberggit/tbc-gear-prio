@@ -420,6 +420,19 @@ describe("applyView", () => {
       const r = ranking([item({ itemId: 1 })]);
       expect(applyView(r, { groupBy: "rank" }).groups).toBeUndefined();
     });
+
+    it("labels a zone-less source with a readable bucket, not the raw kind string (ticket 45 §3)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 30,
+          deltaPct: 1.5,
+          source: { kind: "unknown" },
+        }),
+      ]);
+      const groups = applyView(r, { groupBy: "raid" }).groups!;
+      expect(groups.map((g) => g.key)).toEqual(["Source not recorded"]);
+    });
   });
 
   describe("tie groups (§10)", () => {

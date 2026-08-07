@@ -276,6 +276,11 @@ VENDOR_STANDING_FIRST_RE = re.compile(
 # curated-set fallback that already covers those rows.
 QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
+# "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
+# Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
+# name no real zone, so they map to the zone-less `{kind: "world"}` variant
+# rather than a fabricated one (ticket 45 §1).
+WORLD_DROP_RE = re.compile(r"world\s+drop", re.IGNORECASE)
 # "Requires Exalted with Shattered Sun Offensive". The standing and faction are
 # both named, so this stays a parse rather than a lookup table.
 REP_RE = re.compile(
@@ -670,6 +675,8 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         qm = QUEST_ZONE_RE.search(text)
         if qm:
             out.extend(zone_sources(qm.group(2).strip(), ""))
+        elif WORLD_DROP_RE.search(text):
+            out.append({"kind": "world"})
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
@@ -719,8 +726,8 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
 
 
 def is_list_only_source(source: dict) -> bool:
-    """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
-    return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+    """Badge/PvP/crafted/rep/world without a raid zone — list-driven membership."""
+    return source.get("kind") in ("badge", "pvp", "crafted", "rep", "world")
 
 
 def heroic_dungeons_for_max_phase(max_phase: int) -> set[str]:
