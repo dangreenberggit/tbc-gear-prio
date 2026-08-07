@@ -5,7 +5,9 @@
   "notes": [
     "Zones/bosses come from AtlasLoot parse of token drop IDs (data/atlasloot_sources.json).",
     "Piece↔token IDs verified against Wowhead item pages / BiS guide rows.",
-    "Lightbringer Breastplate token is Chestguard of the Forgotten Conqueror (31089), confirmed via item page + AtlasLoot Illidan BT drop. An earlier version of this note said the Wowhead BiS guide mislabelled it; a 2026-08-07 screenshot of the live P4 page shows the page is correct and the error was introduced when data/wowhead-lists/ret/p3-p5.json was collected. See .scratch/carry-forward/issues/55."
+    "Lightbringer Breastplate token is Chestguard of the Forgotten Conqueror (31089), confirmed via item page + AtlasLoot Illidan BT drop.",
+    "The Wowhead BiS guides disagree with each other on this token, per page — do not generalise one page's verdict to the others. Checked against the live guide markup 2026-08-07: the P1-P2 and P3 pages carry it as a structured [item=] link and are correct (P3 links 31089), so the wrong token recorded in data/wowhead-lists/ret/p3.json was introduced when we collected it. The P4 and P5 pages instead type the token as bare text 'Chestguard of the Vanquished Champion', which is an upstream error we copied faithfully. Same split for 30129 (P1-P2/P3 give [npc=19622] Kael'thas; P4/P5 give [npc=21213] Morogrim Tidewalker, upstream-wrong) and 30993 (P3 links the encounter npc; P4/P5 type the token name).",
+    "An earlier version of this note blamed the P3 guide; a later one blamed our collection for all pages. Both were single-page findings generalised. The durable point is narrower: guide prose is a weaker witness than a structured id, so check a machine source per page. See .scratch/carry-forward/issues/49, /50 and /57."
   ],
   "entries": [
     {
