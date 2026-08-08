@@ -1139,10 +1139,15 @@ with the coupling evidence in `.scratch/phase-2/feral-coupling-audit.md`:
 **Those two boxes are deliberately not written up here.** This sitting was scoped
 to the five closed by `caches` / `disclosure-and-caps` / `apply-view`, and a gate
 box is closed by the slice that owns it recording its own evidence — not by a
-neighbouring entry summarising a verdict file. Until they are written, **the
-Phase 2 gate is not fully recorded**, and §14's "no phase starts until the
-previous gate is written into `docs/verification-log.md`" still binds Phase 3.
-The PARTIAL box in particular is a live decision, not a formality.
+neighbouring entry summarising a verdict file.
+
+> **Superseded 2026-08-07.** Ticket 05's own entry below (2026-08-06, "feral as
+> the second spec") records both boxes against its own evidence, which is what
+> this paragraph was waiting for. The gate now stands at **7 of 8 recorded**,
+> and PLAN.md §14 is ticked to match. The one open box — ≥3 characters produce
+> believable shortlists — remains a live domain decision, not a formality, and
+> §14's "no phase starts until the previous gate is written" still binds Phase 3
+> until it closes.
 
 ---
 
@@ -1370,3 +1375,17 @@ source-stability tests and one asserting a Wowhead-listed item never ships as
 Seven of the eight §14 Phase 2 boxes are closed by their owning tickets. The
 open one is **"≥3 real characters produce believable shortlists"**, above, and
 it needs a human/SME reading of two shortlists rather than code.
+
+**Reconciled into PLAN.md 2026-08-07.** §14's gate line had shown one ☑ against
+seven written-up boxes, because the five from `caches` / `disclosure-and-caps` /
+`apply-view` sat on `claude/verification-log-five-boxes-4c2a8c`, stranded off
+`phase-2/trust` and merged into no branch until then. Ticking the line was the
+whole reconciliation; no box's evidence changed.
+
+**Run the two SME passes after this branch lands on `dev`, not before.** The
+feral universe and the nexess shortlist exist only here — `data/universes/feral-*`
+is absent from `dev` — so a pass run there could not read them. The carry-forward
+work also fixed source data an SME reads first: before it, ret P5 showed
+Crystalforge Breastplate sourced from Morogrim Tidewalker in Serpentshrine (a
+Tempest Keep piece), token names in `boss` fields, and `Crafted · 2` for a
+profession. Reviewing that would have spent a domain pass on known-fixed data.
