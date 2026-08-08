@@ -17,7 +17,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 84.55
@@ -34,7 +35,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 68.49
@@ -50,12 +52,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 63.11
@@ -72,7 +76,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 60.4
@@ -88,12 +93,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 53.75
@@ -110,7 +117,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 50.25,
@@ -136,7 +144,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 48.88
@@ -153,7 +162,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 47.7
@@ -169,11 +179,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking"
+          "profession": "Leatherworking",
+          "origin": "db"
         }
       ],
       "curationHint": 41.48
@@ -190,7 +197,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 41.44
@@ -206,11 +214,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "11"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Tailoring"
+          "profession": "Tailoring",
+          "origin": "db"
         }
       ],
       "curationHint": 39.03,
@@ -231,7 +236,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 28.7
@@ -248,7 +254,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 7.48
@@ -265,7 +272,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "The Illidari Council"
+          "boss": "The Illidari Council",
+          "origin": "db"
         }
       ],
       "curationHint": 7.14
@@ -282,7 +290,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 6.12
@@ -299,7 +308,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 6.12
@@ -316,7 +326,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 5.1
@@ -333,7 +344,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -350,7 +362,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 4.59
@@ -366,12 +379,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.59
@@ -388,7 +403,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 4.42
@@ -405,7 +421,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 3.91
@@ -421,12 +438,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 3.74
@@ -443,7 +462,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 3.06
@@ -460,7 +480,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 2.89
@@ -477,7 +498,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Big Bad Wolf"
+          "boss": "The Big Bad Wolf",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -494,7 +516,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -511,7 +534,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -528,7 +552,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -544,12 +569,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -565,17 +592,20 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "atlasloot"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -592,7 +622,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Mother Shahraz"
+          "boss": "Mother Shahraz",
+          "origin": "db"
         }
       ],
       "curationHint": 161.38
@@ -609,7 +640,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 157.75
@@ -626,7 +658,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Archimonde"
+          "boss": "Archimonde",
+          "origin": "db"
         }
       ],
       "curationHint": 141.23
@@ -643,7 +676,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 137.51
@@ -659,15 +693,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Blacksmithing"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Armorsmithing Blacksmithing"
+          "profession": "Blacksmithing",
+          "origin": "db"
         }
       ],
       "curationHint": 125.32
@@ -685,12 +712,8 @@
           "kind": "token",
           "zone": "Black Temple",
           "token": "Chestguard of the Forgotten Conqueror",
-          "boss": "Illidan Stormrage"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Chestguard of the Vanquished Champion - Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 125.02
@@ -707,7 +730,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
+          "boss": "Fathom-Lord Karathress",
+          "origin": "db"
         }
       ],
       "curationHint": 123.49
@@ -725,17 +749,8 @@
           "kind": "token",
           "zone": "Tempest Keep",
           "token": "Chestguard of the Vanquished Champion",
-          "boss": "Kael'thas Sunstrider"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 121.62,
@@ -761,7 +776,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 111.95
@@ -778,7 +794,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 103.76
@@ -795,7 +812,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Archimonde"
+          "boss": "Archimonde",
+          "origin": "db"
         }
       ],
       "curationHint": 103.36
@@ -812,7 +830,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Jan'alai"
+          "boss": "Jan'alai",
+          "origin": "db"
         }
       ],
       "curationHint": 96.33
@@ -828,7 +847,8 @@
       "sources": [
         {
           "kind": "pvp",
-          "via": "arena"
+          "via": "arena",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 94.52
@@ -845,7 +865,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Jan'alai"
+          "boss": "Jan'alai",
+          "origin": "db"
         }
       ],
       "curationHint": 92.47
@@ -862,7 +883,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 91.06
@@ -879,7 +901,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Akil'zon"
+          "boss": "Akil'zon",
+          "origin": "db"
         }
       ],
       "curationHint": 89.05
@@ -896,7 +919,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 73.86
@@ -913,10 +937,31 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "db"
         }
       ],
       "curationHint": 73.1
+    },
+    {
+      "itemId": 23522,
+      "name": "Ragesteel Breastplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 72.33,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 29071,
@@ -931,12 +976,8 @@
           "kind": "token",
           "zone": "Magtheridon's Lair",
           "token": "Chestguard of the Fallen Champion",
-          "boss": "Magtheridon"
-        },
-        {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Chestguard of the Fallen Champion - Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 61.25,
@@ -956,7 +997,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 55.9
@@ -973,7 +1015,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 51.28
@@ -989,17 +1032,20 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "atlasloot"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 12.58
@@ -1016,7 +1062,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -1033,7 +1080,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Anetheron"
+          "boss": "Anetheron",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -1050,7 +1098,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -1067,7 +1116,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Archimonde"
+          "boss": "Archimonde",
+          "origin": "db"
         }
       ],
       "curationHint": 6.12
@@ -1084,7 +1134,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 6.12
@@ -1101,7 +1152,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 5.78
@@ -1118,7 +1170,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 5.1
@@ -1135,7 +1188,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -1152,7 +1206,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Akil'zon"
+          "boss": "Akil'zon",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -1169,7 +1224,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 4.59
@@ -1186,7 +1242,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 4.42
@@ -1203,7 +1260,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 3.06
@@ -1220,7 +1278,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1237,7 +1296,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 113.28
@@ -1254,7 +1314,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 107.98
@@ -1271,12 +1332,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 99.8
@@ -1293,7 +1350,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Anetheron"
+          "boss": "Anetheron",
+          "origin": "db"
         }
       ],
       "curationHint": 77.03
@@ -1309,12 +1367,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 69.99
@@ -1331,7 +1391,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 67.87
@@ -1348,7 +1409,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 67.74
@@ -1365,7 +1427,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Mother Shahraz"
+          "boss": "Mother Shahraz",
+          "origin": "db"
         }
       ],
       "curationHint": 66.75
@@ -1381,12 +1444,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 62.0
@@ -1402,12 +1467,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 57.06
@@ -1424,7 +1491,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 55.28
@@ -1440,12 +1508,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 55.0
@@ -1462,7 +1532,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 52.33
@@ -1479,7 +1550,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 52.1
@@ -1496,7 +1568,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 51.81
@@ -1513,7 +1586,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 51.81,
@@ -1539,7 +1613,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 48.0,
@@ -1557,7 +1632,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "unknown",
+          "origin": "curated"
         }
       ],
       "curationHint": 39.75,
@@ -1577,7 +1653,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 36.55
@@ -1594,7 +1671,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 36.1
@@ -1610,12 +1688,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 18.0
@@ -1632,7 +1712,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 9.35
@@ -1649,7 +1730,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 7.48
@@ -1666,7 +1748,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 6.63
@@ -1682,12 +1765,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
+          "zone": "Serpentshrine Cavern",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
+          "zone": "Serpentshrine Cavern",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 5.1
@@ -1704,7 +1789,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 5.1
@@ -1721,7 +1807,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.93
@@ -1738,7 +1825,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -1755,7 +1843,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Anetheron"
+          "boss": "Anetheron",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -1772,7 +1861,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -1789,7 +1879,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -1806,7 +1897,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 3.23
@@ -1822,12 +1914,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 3.23
@@ -1844,7 +1938,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 2.89
@@ -1860,12 +1955,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -1882,7 +1979,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shadikith the Glider"
+          "boss": "Shadikith the Glider",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1899,7 +1997,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shadikith the Glider"
+          "boss": "Shadikith the Glider",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1916,7 +2015,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shadikith the Glider"
+          "boss": "Shadikith the Glider",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1933,7 +2033,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1950,7 +2051,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Nalorakk"
+          "boss": "Nalorakk",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -1967,7 +2069,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 104.16
@@ -1984,7 +2087,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 83.22
@@ -2001,7 +2105,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 80.38
@@ -2018,7 +2123,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 79.35
@@ -2035,7 +2141,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 76.6,
@@ -2055,7 +2162,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 72.3
@@ -2072,7 +2180,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Curator"
+          "boss": "The Curator",
+          "origin": "db"
         }
       ],
       "curationHint": 70.1
@@ -2088,12 +2197,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 63.33
@@ -2110,7 +2221,8 @@
         {
           "kind": "rep",
           "faction": "Lower City",
-          "standing": "Exalted"
+          "standing": "Exalted",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 61.55,
@@ -2138,7 +2250,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 59.1
@@ -2154,12 +2267,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 57.38
@@ -2176,7 +2291,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 47.75,
@@ -2202,7 +2318,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 45.15
@@ -2219,7 +2336,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 42.94
@@ -2234,7 +2352,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "unknown",
+          "origin": "curated"
         }
       ],
       "curationHint": 41.0,
@@ -2254,7 +2373,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 20.5
@@ -2271,7 +2391,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 7.14
@@ -2287,12 +2408,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 6.63
@@ -2309,7 +2432,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -2326,7 +2450,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -2342,12 +2467,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 5.78
@@ -2363,12 +2490,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 5.44
@@ -2385,7 +2514,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -2402,7 +2532,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Akil'zon"
+          "boss": "Akil'zon",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -2419,7 +2550,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -2436,7 +2568,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -2452,12 +2585,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -2474,7 +2609,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -2491,7 +2627,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 3.91
@@ -2508,7 +2645,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -2524,12 +2662,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 3.57
@@ -2546,7 +2686,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 3.23
@@ -2563,7 +2704,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -2580,7 +2722,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 2.55
@@ -2597,7 +2740,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -2613,12 +2757,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -2635,7 +2781,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -2651,12 +2798,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -2672,12 +2821,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -2693,12 +2844,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -2714,12 +2867,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 121.16
@@ -2736,12 +2891,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 94.7
@@ -2758,7 +2909,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 93.2
@@ -2775,7 +2927,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 90.33,
@@ -2801,7 +2954,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 89.75
@@ -2817,17 +2971,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
-        },
-        {
-          "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Trash Mobs"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 78.45,
@@ -2848,7 +2999,8 @@
           "kind": "token",
           "zone": "Hyjal Summit",
           "token": "Gloves of the Forgotten Conqueror",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 65.63
@@ -2866,12 +3018,8 @@
           "kind": "token",
           "zone": "Serpentshrine Cavern",
           "token": "Gloves of the Vanquished Champion",
-          "boss": "Leotheras the Blind"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 62.75
@@ -2889,7 +3037,8 @@
           "kind": "token",
           "zone": "Karazhan",
           "token": "Gloves of the Fallen Champion",
-          "boss": "The Curator"
+          "boss": "The Curator",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 56.48
@@ -2906,7 +3055,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 53.71
@@ -2923,7 +3073,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 49.54
@@ -2940,7 +3091,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 44.94
@@ -2957,7 +3109,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 43.47
@@ -2974,7 +3127,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 37.68
@@ -2991,7 +3145,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 34.41
@@ -3008,7 +3163,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -3025,7 +3181,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -3042,7 +3199,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 4.59
@@ -3059,7 +3217,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -3075,12 +3234,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -3097,7 +3258,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -3114,7 +3276,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 3.57
@@ -3131,7 +3294,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 3.57
@@ -3148,7 +3312,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -3165,7 +3330,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -3182,7 +3348,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -3199,12 +3366,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "The Illidari Council"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "High Nethermancer Zerevor"
+          "boss": "The Illidari Council",
+          "origin": "db"
         }
       ],
       "curationHint": 156.44
@@ -3221,7 +3384,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 147.94
@@ -3238,7 +3402,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "db"
         }
       ],
       "curationHint": 144.38
@@ -3255,7 +3420,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "db"
         }
       ],
       "curationHint": 133.43
@@ -3272,7 +3438,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 118.1
@@ -3289,7 +3456,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 115.22
@@ -3305,11 +3473,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "4"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Engineering"
+          "profession": "Engineering",
+          "origin": "db"
         }
       ],
       "curationHint": 105.21,
@@ -3335,12 +3500,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "The Illidari Council"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "High Nethermancer Zerevor"
+          "boss": "The Illidari Council",
+          "origin": "db"
         }
       ],
       "curationHint": 87.9
@@ -3356,7 +3517,8 @@
       "sources": [
         {
           "kind": "badge",
-          "cost": 50
+          "cost": 50,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 84.64,
@@ -3376,7 +3538,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 82.25
@@ -3394,12 +3557,8 @@
           "kind": "token",
           "zone": "Hyjal Summit",
           "token": "Helm of the Forgotten Conqueror",
-          "boss": "Archimonde"
-        },
-        {
-          "kind": "raid",
-          "zone": "Hyjal Summit",
-          "boss": "Helm of the Forgotten Conqueror - Archimonde"
+          "boss": "Archimonde",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 78.71
@@ -3417,12 +3576,8 @@
           "kind": "token",
           "zone": "Serpentshrine Cavern",
           "token": "Helm of the Vanquished Champion",
-          "boss": "Lady Vashj"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 74.0
@@ -3439,7 +3594,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 70.52
@@ -3456,7 +3612,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "db"
         }
       ],
       "curationHint": 67.6
@@ -3472,7 +3629,8 @@
       "sources": [
         {
           "kind": "pvp",
-          "via": "arena"
+          "via": "arena",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 64.86
@@ -3490,12 +3648,8 @@
           "kind": "token",
           "zone": "Karazhan",
           "token": "Helm of the Fallen Champion",
-          "boss": "Prince Malchezaar"
-        },
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 59.5,
@@ -3515,7 +3669,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 52.42
@@ -3532,17 +3687,20 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         },
         {
           "boss": "The Big Bad Wolf",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         },
         {
           "boss": "Romulo and Julianne",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 31.0
@@ -3559,7 +3717,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Big Bad Wolf"
+          "boss": "The Big Bad Wolf",
+          "origin": "db"
         }
       ],
       "curationHint": 7.99
@@ -3576,7 +3735,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -3593,7 +3753,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -3610,7 +3771,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 6.12
@@ -3627,7 +3789,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 5.95
@@ -3644,7 +3807,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 5.78
@@ -3661,7 +3825,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Akil'zon"
+          "boss": "Akil'zon",
+          "origin": "db"
         }
       ],
       "curationHint": 5.61
@@ -3678,7 +3843,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 5.27
@@ -3695,7 +3861,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Nalorakk"
+          "boss": "Nalorakk",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -3712,7 +3879,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Jan'alai"
+          "boss": "Jan'alai",
+          "origin": "db"
         }
       ],
       "curationHint": 4.93
@@ -3729,7 +3897,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -3746,7 +3915,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -3763,7 +3933,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -3780,7 +3951,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Archimonde"
+          "boss": "Archimonde",
+          "origin": "db"
         }
       ],
       "curationHint": 146.27
@@ -3798,12 +3970,8 @@
           "kind": "token",
           "zone": "Serpentshrine Cavern",
           "token": "Leggings of the Vanquished Champion",
-          "boss": "Fathom-Lord Karathress"
-        },
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
+          "boss": "Fathom-Lord Karathress",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 124.4
@@ -3821,12 +3989,8 @@
           "kind": "token",
           "zone": "Gruul's Lair",
           "token": "Leggings of the Fallen Champion",
-          "boss": "Gruul the Dragonkiller"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 120.45
@@ -3843,7 +4007,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 112.95
@@ -3860,7 +4025,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 110.44
@@ -3875,7 +4041,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown"
+          "kind": "unknown",
+          "origin": "curated"
         }
       ],
       "curationHint": 100.83,
@@ -3903,7 +4070,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 99.96
@@ -3921,12 +4089,8 @@
           "kind": "token",
           "zone": "Black Temple",
           "token": "Leggings of the Forgotten Conqueror",
-          "boss": "The Illidari Council"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Leggings of the Forgotten Conqueror - Gathios the Shatterer"
+          "boss": "The Illidari Council",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 97.26
@@ -3943,7 +4107,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "db"
         }
       ],
       "curationHint": 96.82
@@ -3960,7 +4125,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 93.31
@@ -3977,7 +4143,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "db"
         }
       ],
       "curationHint": 87.9
@@ -3994,7 +4161,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 72.87
@@ -4011,7 +4179,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "db"
         }
       ],
       "curationHint": 63.83
@@ -4028,7 +4197,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 44.52
@@ -4045,7 +4215,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 38.7
@@ -4062,7 +4233,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Curator"
+          "boss": "The Curator",
+          "origin": "db"
         }
       ],
       "curationHint": 24.0
@@ -4079,7 +4251,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 7.82
@@ -4095,12 +4268,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 7.82
@@ -4117,7 +4292,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -4134,7 +4310,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -4151,7 +4328,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 6.12
@@ -4167,12 +4345,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 5.1
@@ -4189,17 +4369,20 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         },
         {
           "boss": "The Big Bad Wolf",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         },
         {
           "boss": "Romulo and Julianne",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.59
@@ -4215,12 +4398,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 3.74
@@ -4237,7 +4422,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 95.46
@@ -4253,7 +4439,8 @@
       "sources": [
         {
           "kind": "badge",
-          "cost": 25
+          "cost": 25,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 92.24
@@ -4269,7 +4456,8 @@
       "sources": [
         {
           "kind": "badge",
-          "cost": 25
+          "cost": 25,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 70.92
@@ -4286,10 +4474,27 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 68.77
+    },
+    {
+      "itemId": 31275,
+      "name": "Necklace of Trophies",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world",
+          "origin": "wowhead"
+        }
+      ],
+      "curationHint": 63.35
     },
     {
       "itemId": 33297,
@@ -4303,7 +4508,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 49.75
@@ -4319,17 +4525,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
+          "zone": "Serpentshrine Cavern",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
-        },
-        {
-          "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Trash Mobs"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 49.71,
@@ -4355,7 +4558,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 48.95
@@ -4371,17 +4575,20 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "atlasloot"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 46.2
@@ -4398,7 +4605,8 @@
         {
           "kind": "rep",
           "faction": "The Consortium",
-          "standing": "Exalted"
+          "standing": "Exalted",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 44.75,
@@ -4417,12 +4625,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 44.5,
@@ -4442,7 +4652,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 43.95
@@ -4459,7 +4670,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 43.0
@@ -4476,7 +4688,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
+          "boss": "Fathom-Lord Karathress",
+          "origin": "db"
         }
       ],
       "curationHint": 38.7
@@ -4493,7 +4706,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 34.61
@@ -4510,7 +4724,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 7.82
@@ -4527,7 +4742,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 6.12
@@ -4544,7 +4760,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 5.44
@@ -4561,7 +4778,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -4578,7 +4796,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Mother Shahraz"
+          "boss": "Mother Shahraz",
+          "origin": "db"
         }
       ],
       "curationHint": 4.59
@@ -4595,7 +4814,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 4.42
@@ -4612,7 +4832,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -4629,7 +4850,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Akil'zon"
+          "boss": "Akil'zon",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -4646,7 +4868,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Nightbane"
+          "boss": "Nightbane",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -4663,7 +4886,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -4680,7 +4904,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -4697,7 +4922,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -4713,12 +4939,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -4734,17 +4962,36 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Hyjal Summit"
+          "zone": "Hyjal Summit",
+          "origin": "atlasloot"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 23203,
+      "name": "Libram of Fervor",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "world",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 0.0
@@ -4761,17 +5008,20 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         },
         {
           "boss": "The Big Bad Wolf",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         },
         {
           "boss": "Romulo and Julianne",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -4788,7 +5038,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -4805,7 +5056,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Mother Shahraz"
+          "boss": "Mother Shahraz",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -4821,7 +5073,8 @@
       "sources": [
         {
           "kind": "badge",
-          "cost": 20
+          "cost": 20,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 0.0
@@ -4838,7 +5091,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 121.09
@@ -4855,7 +5109,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 111.25
@@ -4871,15 +5126,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
+          "recipeBoss": "Patterns",
+          "origin": "db"
         }
       ],
       "curationHint": 96.55
@@ -4896,7 +5146,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Nalorakk"
+          "boss": "Nalorakk",
+          "origin": "db"
         }
       ],
       "curationHint": 87.78
@@ -4913,7 +5164,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 87.03
@@ -4930,7 +5182,8 @@
         {
           "boss": "Doom Lord Kazzak",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 83.89
@@ -4947,7 +5200,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 83.07,
@@ -4974,12 +5228,8 @@
           "kind": "token",
           "zone": "Gruul's Lair",
           "token": "Pauldrons of the Fallen Champion",
-          "boss": "High King Maulgar"
-        },
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Pauldrons of the Fallen Champion - High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 80.15,
@@ -4999,7 +5249,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 79.68
@@ -5016,7 +5267,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 69.87
@@ -5033,7 +5285,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 68.15
@@ -5049,12 +5302,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 67.9
@@ -5072,15 +5327,31 @@
           "kind": "token",
           "zone": "Black Temple",
           "token": "Pauldrons of the Forgotten Conqueror",
-          "boss": "Mother Shahraz"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Pauldrons of the Forgotten Conqueror - Mother Shahraz"
+          "boss": "Mother Shahraz",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 64.63
+    },
+    {
+      "itemId": 33173,
+      "name": "Ragesteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 64.44,
+      "curatedSets": [
+        "preraid"
+      ]
     },
     {
       "itemId": 30892,
@@ -5094,7 +5365,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 61.23
@@ -5111,7 +5383,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 60.33
@@ -5129,17 +5402,8 @@
           "kind": "token",
           "zone": "Tempest Keep",
           "token": "Pauldrons of the Vanquished Champion",
-          "boss": "Void Reaver"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver"
-        },
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Pauldrons of the Vanquished Champion - Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "two-hop"
         }
       ],
       "curationHint": 57.32
@@ -5156,17 +5420,20 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         },
         {
           "boss": "The Big Bad Wolf",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         },
         {
           "boss": "Romulo and Julianne",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 36.86
@@ -5183,7 +5450,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 21.0
@@ -5200,7 +5468,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 5.78
@@ -5217,7 +5486,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Anetheron"
+          "boss": "Anetheron",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -5234,7 +5504,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -5251,7 +5522,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "The Illidari Council"
+          "boss": "The Illidari Council",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -5268,7 +5540,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -5285,7 +5558,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -5302,7 +5576,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Curator"
+          "boss": "The Curator",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -5319,7 +5594,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Curator"
+          "boss": "The Curator",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -5336,7 +5612,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Halazzi"
+          "boss": "Halazzi",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -5353,7 +5630,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -5370,7 +5648,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 3.23
@@ -5387,7 +5666,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5403,12 +5683,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -5425,7 +5707,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "The Illidari Council"
+          "boss": "The Illidari Council",
+          "origin": "db"
         }
       ],
       "curationHint": 77.44
@@ -5442,7 +5725,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Romulo and Julianne"
+          "boss": "Romulo and Julianne",
+          "origin": "db"
         }
       ],
       "curationHint": 75.25
@@ -5459,7 +5743,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "db"
         }
       ],
       "curationHint": 50.76
@@ -5476,7 +5761,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 36.9
@@ -5492,7 +5778,8 @@
       "sources": [
         {
           "kind": "badge",
-          "cost": 41
+          "cost": 41,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 29.52,
@@ -5520,7 +5807,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 16.4,
@@ -5547,7 +5835,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 9.35
@@ -5564,7 +5853,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 9.18
@@ -5581,7 +5871,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 9.01
@@ -5598,7 +5889,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Illidan Stormrage"
+          "boss": "Illidan Stormrage",
+          "origin": "db"
         }
       ],
       "curationHint": 6.29
@@ -5615,17 +5907,20 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         },
         {
           "boss": "The Big Bad Wolf",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         },
         {
           "boss": "Romulo and Julianne",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -5642,7 +5937,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 2.55
@@ -5659,7 +5955,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5676,7 +5973,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "boss": "Shade of Aran",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5693,7 +5991,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5710,7 +6009,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Al'ar"
+          "boss": "Al'ar",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5727,7 +6027,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5743,12 +6044,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
+          "zone": "Serpentshrine Cavern",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Serpentshrine Cavern"
+          "zone": "Serpentshrine Cavern",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -5765,7 +6068,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5782,7 +6086,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
+          "boss": "Fathom-Lord Karathress",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5799,7 +6104,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5816,7 +6122,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5833,7 +6140,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5850,7 +6158,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5867,7 +6176,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5884,7 +6194,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 114.69
@@ -5901,7 +6212,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Lady Vashj"
+          "boss": "Lady Vashj",
+          "origin": "db"
         }
       ],
       "curationHint": 105.59,
@@ -5927,7 +6239,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 94.7
@@ -5944,7 +6257,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 93.53
@@ -5961,7 +6275,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 92.46
@@ -5977,15 +6292,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
+          "recipeBoss": "Trash",
+          "origin": "db"
         }
       ],
       "curationHint": 89.76
@@ -6001,15 +6311,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Blacksmithing",
           "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
+          "recipeBoss": "Trash",
+          "origin": "db"
         }
       ],
       "curationHint": 89.58
@@ -6025,12 +6330,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Black Temple"
+          "zone": "Black Temple",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 86.44
@@ -6047,7 +6354,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 74.98
@@ -6064,7 +6372,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Anetheron"
+          "boss": "Anetheron",
+          "origin": "db"
         }
       ],
       "curationHint": 67.54
@@ -6081,7 +6390,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Nalorakk"
+          "boss": "Nalorakk",
+          "origin": "db"
         }
       ],
       "curationHint": 66.4
@@ -6098,7 +6408,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker"
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
         }
       ],
       "curationHint": 60.41
@@ -6115,7 +6426,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 55.56,
@@ -6134,15 +6446,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Serpentshrine Cavern",
-          "recipeBoss": "Trash"
+          "recipeBoss": "Trash",
+          "origin": "db"
         }
       ],
       "curationHint": 52.9
@@ -6159,7 +6466,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 48.77
@@ -6175,12 +6483,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Chess Event",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 37.28
@@ -6197,7 +6507,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 34.21
@@ -6213,12 +6524,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Karazhan"
+          "zone": "Karazhan",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 17.22
@@ -6235,7 +6548,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 16.0
@@ -6252,7 +6566,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Kaz'rogal"
+          "boss": "Kaz'rogal",
+          "origin": "db"
         }
       ],
       "curationHint": 7.48
@@ -6269,7 +6584,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 7.48
@@ -6286,7 +6602,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 5.1
@@ -6303,7 +6620,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Azgalor"
+          "boss": "Azgalor",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -6320,7 +6638,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -6337,7 +6656,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 4.76
@@ -6354,7 +6674,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Hex Lord Malacrass"
+          "boss": "Hex Lord Malacrass",
+          "origin": "db"
         }
       ],
       "curationHint": 4.59
@@ -6371,7 +6692,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 4.42
@@ -6388,7 +6710,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "db"
         }
       ],
       "curationHint": 4.25
@@ -6404,12 +6727,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -6425,12 +6750,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.25
@@ -6447,7 +6774,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 4.08
@@ -6464,7 +6792,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "boss": "Terestian Illhoof",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -6481,7 +6810,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Netherspite"
+          "boss": "Netherspite",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -6498,7 +6828,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Moroes"
+          "boss": "Moroes",
+          "origin": "db"
         }
       ],
       "curationHint": 3.4
@@ -6515,7 +6846,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6532,7 +6864,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Hyakiss the Lurker"
+          "boss": "Hyakiss the Lurker",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6549,7 +6882,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Hyakiss the Lurker"
+          "boss": "Hyakiss the Lurker",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6566,7 +6900,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Hyakiss the Lurker"
+          "boss": "Hyakiss the Lurker",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6583,7 +6918,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Gurtogg Bloodboil"
+          "boss": "Gurtogg Bloodboil",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6600,7 +6936,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Archimonde"
+          "boss": "Archimonde",
+          "origin": "db"
         }
       ],
       "curationHint": 845.42
@@ -6617,7 +6954,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 840.239
@@ -6633,7 +6971,8 @@
       "sources": [
         {
           "kind": "pvp",
-          "via": "arena"
+          "via": "arena",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 839.92
@@ -6650,12 +6989,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
-        },
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Essence of Anger"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 835.068
@@ -6672,7 +7007,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 792.865
@@ -6688,11 +7024,13 @@
       "sources": [
         {
           "kind": "pvp",
-          "via": "arena"
+          "via": "arena",
+          "origin": "wowhead"
         },
         {
           "kind": "pvp",
-          "via": "honor"
+          "via": "honor",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 790.923
@@ -6709,7 +7047,8 @@
         {
           "kind": "raid",
           "zone": "Zul'Aman",
-          "boss": "Zul'jin"
+          "boss": "Zul'jin",
+          "origin": "db"
         }
       ],
       "curationHint": 787.391
@@ -6726,7 +7065,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Kael'thas Sunstrider"
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
         }
       ],
       "curationHint": 770.015
@@ -6742,11 +7082,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Master Swordsmith Blacksmithing"
+          "profession": "Blacksmithing",
+          "origin": "db"
         }
       ],
       "curationHint": 762.883,
@@ -6771,11 +7108,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Master Hammersmith Blacksmithing"
+          "profession": "Blacksmithing",
+          "origin": "db"
         }
       ],
       "curationHint": 751.539
@@ -6791,12 +7125,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "db"
         },
         {
           "boss": "Timed Chest",
           "kind": "raid",
-          "zone": "Zul'Aman"
+          "zone": "Zul'Aman",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 731.582
@@ -6813,7 +7149,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Prince Malchezaar"
+          "boss": "Prince Malchezaar",
+          "origin": "db"
         }
       ],
       "curationHint": 721.308
@@ -6830,10 +7167,32 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Fathom-Lord Karathress"
+          "boss": "Fathom-Lord Karathress",
+          "origin": "db"
         }
       ],
       "curationHint": 720.386
+    },
+    {
+      "itemId": 28429,
+      "name": "Lionheart Champion",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 715.383,
+      "curatedSets": [
+        "p1",
+        "preraid"
+      ]
     },
     {
       "itemId": 30722,
@@ -6847,7 +7206,8 @@
         {
           "boss": "Doomwalker",
           "kind": "raid",
-          "zone": "World Bosses"
+          "zone": "World Bosses",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 697.303
@@ -6864,7 +7224,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller"
+          "boss": "Gruul the Dragonkiller",
+          "origin": "db"
         }
       ],
       "curationHint": 690.898
@@ -6881,7 +7242,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "db"
         }
       ],
       "curationHint": 684.058
@@ -6898,7 +7260,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Wizard of Oz"
+          "boss": "The Wizard of Oz",
+          "origin": "db"
         }
       ],
       "curationHint": 671.56
@@ -6915,7 +7278,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Romulo and Julianne"
+          "boss": "Romulo and Julianne",
+          "origin": "db"
         }
       ],
       "curationHint": 660.76
@@ -6932,7 +7296,8 @@
         {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon"
+          "boss": "Magtheridon",
+          "origin": "db"
         }
       ],
       "curationHint": 639.357
@@ -6949,7 +7314,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 80.03
@@ -6966,7 +7332,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 71.14
@@ -6983,7 +7350,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Teron Gorefiend"
+          "boss": "Teron Gorefiend",
+          "origin": "db"
         }
       ],
       "curationHint": 70.58
@@ -6999,15 +7367,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "8",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Leatherworking",
           "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
+          "recipeBoss": "Patterns",
+          "origin": "db"
         }
       ],
       "curationHint": 70.3
@@ -7023,15 +7386,10 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
-        },
-        {
-          "kind": "crafted",
           "profession": "Blacksmithing",
           "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns"
+          "recipeBoss": "Patterns",
+          "origin": "db"
         }
       ],
       "curationHint": 66.59
@@ -7048,7 +7406,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 51.91
@@ -7065,7 +7424,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 49.63
@@ -7081,17 +7441,14 @@
       "sources": [
         {
           "kind": "raid",
-          "zone": "Tempest Keep"
+          "zone": "Tempest Keep",
+          "origin": "db"
         },
         {
           "boss": "Trash",
           "kind": "raid",
-          "zone": "Tempest Keep"
-        },
-        {
-          "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Trash Mobs"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 45.52
@@ -7107,11 +7464,8 @@
       "sources": [
         {
           "kind": "crafted",
-          "profession": "2"
-        },
-        {
-          "kind": "crafted",
-          "profession": "Blacksmithing"
+          "profession": "Blacksmithing",
+          "origin": "db"
         }
       ],
       "curationHint": 42.94,
@@ -7130,7 +7484,8 @@
       "sources": [
         {
           "kind": "pvp",
-          "via": "arena"
+          "via": "arena",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 40.55
@@ -7147,7 +7502,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "High Astromancer Solarian"
+          "boss": "High Astromancer Solarian",
+          "origin": "db"
         }
       ],
       "curationHint": 39.32
@@ -7164,7 +7520,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Leotheras the Blind"
+          "boss": "Leotheras the Blind",
+          "origin": "db"
         }
       ],
       "curationHint": 38.98
@@ -7181,7 +7538,8 @@
         {
           "kind": "raid",
           "zone": "Gruul's Lair",
-          "boss": "High King Maulgar"
+          "boss": "High King Maulgar",
+          "origin": "db"
         }
       ],
       "curationHint": 38.48,
@@ -7208,7 +7566,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 38.43
@@ -7225,7 +7584,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 37.44
@@ -7242,7 +7602,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 33.79
@@ -7259,7 +7620,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Supremus"
+          "boss": "Supremus",
+          "origin": "db"
         }
       ],
       "curationHint": 5.78
@@ -7276,7 +7638,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Reliquary of the Lost"
+          "boss": "Reliquary of the Lost",
+          "origin": "db"
         }
       ],
       "curationHint": 5.78
@@ -7293,7 +7656,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 4.42
@@ -7310,7 +7674,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below"
+          "boss": "The Lurker Below",
+          "origin": "db"
         }
       ],
       "curationHint": 3.91
@@ -7327,7 +7692,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -7344,7 +7710,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "Shade of Akama"
+          "boss": "Shade of Akama",
+          "origin": "db"
         }
       ],
       "curationHint": 3.74
@@ -7361,7 +7728,8 @@
         {
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable"
+          "boss": "Hydross the Unstable",
+          "origin": "db"
         }
       ],
       "curationHint": 3.57
@@ -7378,7 +7746,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 3.57
@@ -7395,7 +7764,8 @@
         {
           "kind": "raid",
           "zone": "Hyjal Summit",
-          "boss": "Rage Winterchill"
+          "boss": "Rage Winterchill",
+          "origin": "db"
         }
       ],
       "curationHint": 3.57
@@ -7412,7 +7782,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -7429,7 +7800,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Maiden of Virtue"
+          "boss": "Maiden of Virtue",
+          "origin": "db"
         }
       ],
       "curationHint": 2.72
@@ -7446,7 +7818,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "boss": "Attumen the Huntsman",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7463,7 +7836,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Rokad the Ravager"
+          "boss": "Rokad the Ravager",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7480,7 +7854,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Rokad the Ravager"
+          "boss": "Rokad the Ravager",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7497,7 +7872,8 @@
         {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "Rokad the Ravager"
+          "boss": "Rokad the Ravager",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7514,7 +7890,8 @@
         {
           "kind": "raid",
           "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus"
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7531,7 +7908,8 @@
         {
           "kind": "raid",
           "zone": "Tempest Keep",
-          "boss": "Void Reaver"
+          "boss": "Void Reaver",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0

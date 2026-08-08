@@ -27,6 +27,7 @@ ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
+COMMON_PROTO = ROOT / "data/proto/common.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -275,6 +276,11 @@ VENDOR_STANDING_FIRST_RE = re.compile(
 # curated-set fallback that already covers those rows.
 QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
+# "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
+# Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
+# name no real zone, so they map to the zone-less `{kind: "world"}` variant
+# rather than a fabricated one (ticket 45 §1).
+WORLD_DROP_RE = re.compile(r"world\s+drop", re.IGNORECASE)
 # "Requires Exalted with Shattered Sun Offensive". The standing and faction are
 # both named, so this stays a parse rather than a lookup table.
 REP_RE = re.compile(
@@ -509,6 +515,24 @@ def ep_score(
     return total
 
 
+def profession_names_from_proto() -> dict[int, str]:
+    """common.proto Profession enum, ordinal -> name. db.json's
+    `crafted.profession` is this enum's number, not a name (ticket 42) --
+    parsed from the proto rather than hand-typed so a member added upstream
+    cannot silently mismatch a hardcoded table."""
+    text = COMMON_PROTO.read_text(encoding="utf-8")
+    enum = re.search(r"enum Profession \{(.*?)\n\}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the Profession enum in {COMMON_PROTO}")
+    members = re.findall(r"^\s+(\w+) = (\d+);", enum.group(1), re.M)
+    if not members:
+        raise SystemExit(f"Profession enum in {COMMON_PROTO} has no members")
+    return {int(num): name for name, num in members}
+
+
+PROFESSION_NAMES = profession_names_from_proto()
+
+
 def map_db_source(
     raw: object,
     *,
@@ -523,7 +547,10 @@ def map_db_source(
         return None
     if "crafted" in first:
         prof = (first["crafted"] or {}).get("profession")
-        return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
+        if prof is None:
+            return None
+        name = PROFESSION_NAMES.get(prof, str(prof))
+        return {"kind": "crafted", "profession": name}
     if "drop" in first:
         drop = first["drop"] or {}
         zone = (
@@ -585,6 +612,22 @@ def source_heroic_dungeons(source: dict) -> set[str]:
     return {d} if d else set()
 
 
+def carries_locus(source: dict) -> bool:
+    """Does this source place the item somewhere -- a boss, or a raid/dungeon?
+
+    The question both halves of the wowhead-suppression test ask: of a machine
+    source, "do you already know where this drops"; of a Wowhead row, "are you
+    about to restate that". `token` counts because the two-hop maps name a raid
+    and a boss, and `heroic` because its locus rides in `dungeon` rather than
+    `zone`.
+    """
+    if source.get("boss"):
+        return True
+    if source.get("kind") in ("raid", "dungeon", "token") and source.get("zone"):
+        return True
+    return bool(source.get("kind") == "heroic" and source.get("dungeon"))
+
+
 # Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
 # zone is not merely cosmetic: it never matches a zone-keyed lookup, so the
 # item advertises a raid that does not exist, and add_source keeps it as a
@@ -608,6 +651,87 @@ def canonical_zone(zone: str) -> str:
     if zone.lower().startswith("world boss"):
         return WORLD_BOSS_ZONE
     return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
+
+
+# A TBC "boss" is an *encounter*, which may be several killable units: the
+# Illidari Council is four, the Eredar Twins two, and M'uru/Reliquary of the
+# Lost each transform into a second named unit mid-fight. Wowhead sometimes
+# credits a drop to the unit, AtlasLoot always to the encounter, so the same
+# real drop arrives under two names and `add_source` keeps both -- the item
+# then advertises two bosses in one zone where only one encounter exists.
+#
+# This is the `boss` counterpart of ZONE_SPELLING_FIXES above, and the same
+# reasoning applies: an unfolded alias is a second row, not a cosmetic
+# difference. `boss` is a shipped ViewOptions filter control.
+#
+# Every value here is a name AtlasLoot itself uses and every key is one it does
+# not; `check_boss_aliases.py` re-derives that from data/atlasloot_sources.json
+# and fails if it stops holding, so this table cannot drift into asserting an
+# encounter that no longer exists.
+#
+# The Karazhan Opera variants (Romulo and Julianne / The Big Bad Wolf / The
+# Wizard of Oz) are deliberately NOT folded: AtlasLoot lists all three, so they
+# are three distinct encounters filling one slot, not aliases of each other.
+BOSS_UNIT_TO_ENCOUNTER = {
+    "high nethermancer zerevor": "The Illidari Council",
+    "lady sacrolash": "Eredar Twins",
+    "entropius": "M'uru",
+    "essence of anger": "Reliquary of the Lost",
+    "trash mobs": "Trash",
+}
+
+
+def canonical_boss(boss: str) -> str:
+    return BOSS_UNIT_TO_ENCOUNTER.get(boss.strip().lower(), boss)
+
+
+# Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
+# to land in `boss` -- a shipped ViewOptions filter control listing an item as
+# a boss (carry-forward 48). The token half is dropped rather than emitted:
+# every affected piece already carries a `kind: token` row from the curated
+# data/two-hop/*-tokens.json, which is the side measured to be correct where
+# the two disagree.
+#
+# The separator is the spaced " - " because a bare hyphen would cut
+# `Fathom-Lord Karathress` in half. Measured across 74 distinct boss strings
+# in data/universes/** and .scratch/heldout/**, " - " appeared only in the 10
+# defective rows.
+TOKEN_BOSS_SEPARATOR = " - "
+
+
+def drop_boss(phrase: str) -> str:
+    if TOKEN_BOSS_SEPARATOR not in phrase:
+        return phrase
+    return phrase.rsplit(TOKEN_BOSS_SEPARATOR, 1)[1].strip()
+
+
+# The guides write the profession two lossy ways (carry-forward 53): a trailing
+# note off the same " - " splice as ticket 48 ("Leatherworking - BoP only"), and
+# a leading specialisation ("Master Swordsmith Blacksmithing"). Both make a real
+# profession fail equality against itself, which is only display-noise until
+# something groups or filters by it.
+#
+# The specialisation is dropped rather than relocated: no consumer reads it, and
+# db.json's own crafted sources carry the bare enum name with no field for it, so
+# keeping it would mean a field only the prose path can ever populate.
+#
+# Authority is the proto Profession enum, the same closed set map_db_source maps
+# into -- not a hand-typed list, so a profession added upstream cannot silently
+# fall outside the gate.
+CRAFT_PROFESSIONS = frozenset(
+    name for num, name in PROFESSION_NAMES.items() if num != 0
+)
+
+
+def canonical_profession(phrase: str) -> str | None:
+    """Bare profession name from a guide phrase, or None if it names none."""
+    head = phrase.split(TOKEN_BOSS_SEPARATOR, 1)[0].strip()
+    # The specialisation is a prefix, so the profession is the last word.
+    tail = head.split()[-1] if head.split() else ""
+    for known in CRAFT_PROFESSIONS:
+        if tail.lower() == known.lower():
+            return known
+    return None
 
 
 def zone_sources(zone: str, boss: str) -> list[dict]:
@@ -637,17 +761,35 @@ def zone_sources(zone: str, boss: str) -> list[dict]:
     return out
 
 
+# `wowheadSourceText` is a record of what the page says, so a page that is
+# factually wrong stays wrong there (carry-forward 54). Where we know better,
+# the correction goes in `correctedSourceText` alongside it rather than
+# overwriting the record -- otherwise "the page said this" and "we decided this"
+# become indistinguishable, which is what made tickets 49/50 hard to re-check.
+#
+# Only the parser prefers the correction; the verbatim field stays the thing a
+# human re-reading the page compares against.
+def source_text_for_parsing(row: dict) -> str | None:
+    corrected = row.get("correctedSourceText")
+    if isinstance(corrected, str) and corrected.strip():
+        return corrected
+    text = row.get("wowheadSourceText")
+    return text if isinstance(text, str) else None
+
+
 def parse_wowhead_source(text: str | None) -> list[dict]:
     if not text:
         return []
     out: list[dict] = []
     m = DROP_RE.search(text)
     if m:
-        out.extend(zone_sources(m.group(2).strip(), m.group(1).strip()))
+        out.extend(zone_sources(m.group(2).strip(), drop_boss(m.group(1).strip())))
     else:
         qm = QUEST_ZONE_RE.search(text)
         if qm:
             out.extend(zone_sources(qm.group(2).strip(), ""))
+        elif WORLD_DROP_RE.search(text):
+            out.append({"kind": "world"})
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
@@ -661,7 +803,7 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.append({"kind": "pvp", "via": "honor"})
     cm = CRAFTED_RE.search(text)
     if cm:
-        prof = (cm.group(1) or cm.group(2) or "").strip()
+        prof = canonical_profession((cm.group(1) or cm.group(2) or "").strip())
         if prof:
             out.append({"kind": "crafted", "profession": prof})
     rm = REP_RE.search(text)
@@ -697,8 +839,8 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
 
 
 def is_list_only_source(source: dict) -> bool:
-    """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
-    return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+    """Badge/PvP/crafted/rep/world without a raid zone — list-driven membership."""
+    return source.get("kind") in ("badge", "pvp", "crafted", "rep", "world")
 
 
 def heroic_dungeons_for_max_phase(max_phase: int) -> set[str]:
@@ -894,6 +1036,13 @@ def assemble(
             source = {**source, "recipeZone": recipe["zone"]}
             if recipe.get("boss"):
                 source["recipeBoss"] = recipe["boss"]
+        # Same reason as the recipe block above: every input reaches this
+        # funnel, so folding unit names onto their encounter here means the
+        # dedupe below collapses the duplicate row whichever input produced it.
+        if isinstance(source.get("boss"), str):
+            folded = canonical_boss(source["boss"])
+            if folded != source["boss"]:
+                source = {**source, "boss": folded}
         # AtlasLoot's world-boss tables are per-NPC and complete, so they own the
         # boss attribution for that zone. Wowhead's free text names the wrong
         # boss on some rows (30730 Terrorweave Tunic reads as Kazzak; it drops
@@ -962,6 +1111,31 @@ def assemble(
     # the universe is built only from db / atlasloot / two-hop / zone match.
     # Grading against a list that also populated the universe is circular for
     # exactly the items it added; see ticket 18.
+    #
+    # Ticket 57. The guides are an *editorial* input -- which items matter for
+    # this spec, an opinion no database carries. Their Source cell is the author
+    # restating drop facts db.json / AtlasLoot / the token maps already hold
+    # machine-parsed, and every defect in tickets 48-52 was in that restatement
+    # rather than in the underlying fact. So where a machine input already
+    # places an item, the prose does not get to speak about where it drops.
+    #
+    # The test is "does a machine source actually supply a locus for this id",
+    # never "is this id known to a machine input": AtlasLoot carries heroic
+    # dungeon drops with an *empty* zone list, and the looser test would strike
+    # those items' only zone claim.
+    #
+    # Frozen before the loop rather than read from source_acc inside it. Only
+    # db / atlasloot / two-hop / sunmote have written by now, which is exactly
+    # the machine-input set; computing it per row would also count wowhead rows
+    # added by an earlier list, so an item appearing on two lists would suppress
+    # its own second row. 30017 does exactly that -- a zone-only quest row on
+    # p1-p2 and a zone+boss drop row on p3 -- and prose is all it has.
+    machine_locus_ids = {
+        iid
+        for iid, pairs in source_acc.items()
+        if any(carries_locus(s) for s, _ in pairs)
+    }
+
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
     for stage, doc in wowhead_lists_for_phase(max_phase, profile):
@@ -972,10 +1146,17 @@ def assemble(
             wowhead_list_ids.add(iid)
             if hold_out_wowhead:
                 continue
-            for src in parse_wowhead_source(row.get("wowheadSourceText")):
+            machine_locus = iid in machine_locus_ids
+            parsed = parse_wowhead_source(source_text_for_parsing(row))
+            for src in parsed:
+                # Non-locus kinds (crafted/pvp/badge/rep/world) always survive:
+                # vendor/atlasloot/ holds only the addon's instance loot tables,
+                # so the guide is the only witness for many vendor and quest
+                # items here.
+                if machine_locus and carries_locus(src):
+                    continue
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
-            parsed = parse_wowhead_source(row.get("wowheadSourceText"))
             if parsed and all(is_list_only_source(s) for s in parsed):
                 wowhead_list_only.add(iid)
 
@@ -990,13 +1171,28 @@ def assemble(
     # is unrecorded, and carrying no zone is what keeps these out of the raid
     # and boss filters, which is the behaviour these items need.
     curated_unsourced: set[int] = set()
+    # A curated item can also have a *real* source that is still list-only
+    # shaped -- e.g. 28430 Lionheart Executioner's db.json source is a genuine
+    # `{kind: "crafted"}` record, not an invented one, but `crafted` carries no
+    # zone and only grants membership today via the Wowhead-list path
+    # (`wowhead_list_only`). Its own Wowhead row reads "Crafting: Blacksmithing
+    # (...)", a prefix `CRAFTED_RE` does not match, so that path never fires
+    # either, and the item is dropped despite wowsims equipping it and db.json
+    # naming a real profession (carry-forward 41). Distinct from ticket 17: a
+    # `raid`/`heroic` source names a real zone outside phase scope, which is a
+    # scoping question this ticket does not touch; `crafted`/`badge`/`rep`/
+    # `pvp`/`world` name no zone at all, so there is no scope to respect.
+    curated_list_only: set[int] = set()
     for iid in sorted(bis_ids):
         it = db_by_id.get(iid)
         if it is None or not eligible_d7(it, profile):
             continue
-        if not source_acc.get(iid):
+        pairs = source_acc.get(iid)
+        if not pairs:
             add_source(iid, {"kind": "unknown"}, "curated")
             curated_unsourced.add(iid)
+        elif all(is_list_only_source(s) for s, _ in pairs):
+            curated_list_only.add(iid)
 
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
@@ -1016,7 +1212,14 @@ def assemble(
             no_zone_excluded += 1
             continue
 
-        sources = [s for s, _ in pairs]
+        # `origin` rides on the row rather than staying an aggregate report
+        # count. Every defect in carry-forward 48-53 entered through the
+        # `wowhead` path -- an agent transcribing a rendered page -- and the
+        # only checks that ever caught one worked by disagreeing with a second
+        # input. Which claims rest on a single transcription is therefore a
+        # question worth being able to ask of the shipped data, not one to
+        # reconstruct by re-joining the inputs. See carry-forward 54.
+        sources = [{**s, "origin": o} for s, o in pairs]
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
         heroics_hit = set()
@@ -1035,11 +1238,14 @@ def assemble(
         # No phase guard: these are persistent non-raid items whose own phase is
         # not the interesting fact about them. Everbloom Idol is phase 1 and
         # still what a cat wants at phase 2.
-        # Only the ones with no recorded origin at all. A curated item that
-        # *does* have a db source keeps whatever scope rules that source implies
-        # -- several point at five-man dungeons outside PHASE_HEROIC_DUNGEONS,
-        # and admitting those is ticket 17's question, not this one.
-        curated = iid in curated_unsourced
+        # A curated item whose db source names a real zone (raid/heroic) keeps
+        # whatever scope rules that source implies -- several point at
+        # five-man dungeons outside PHASE_HEROIC_DUNGEONS, and admitting those
+        # is ticket 17's question, not this one. `curated_unsourced` (no
+        # source at all) and `curated_list_only` (a real but zone-less source)
+        # are the two shapes where the curated claim itself is what grants
+        # membership.
+        curated = iid in curated_unsourced or iid in curated_list_only
         if not in_phase and not in_heroic and not list_only and not curated:
             continue
 

@@ -69,12 +69,15 @@ function slamaltmanLoggedGear(): LoggedGear {
     if (actors.get(ev.sourceID)?.name.toLowerCase() !== "slamaltman") continue;
     const mapped = mapWclGearToSim(ev.gear);
     return {
-      items: mapped.map((spec, i) => ({
-        id: spec.id ?? 0,
-        slot: SIM_ORDER[i]!,
-        enchant: spec.enchant,
-        gems: spec.gems,
-      })),
+      items: mapped.map((spec, i) => {
+        const item: LoggedGear["items"][number] = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
       talentPointsByTree: [5, 11, 45],
       provenance: {
         reportCode: SUMMARY.reportCode,

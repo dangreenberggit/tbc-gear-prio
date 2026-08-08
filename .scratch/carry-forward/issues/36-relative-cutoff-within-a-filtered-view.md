@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: question
 Origin: `docs/reviews/phase-2-apply-view.md` (adversarial A3), branch `phase-2/apply-view`
 Blocks: none
@@ -80,3 +80,53 @@ Either:
 - a filtered-set-relative threshold is specified — including how it survives
   §2's "no view changes a number" — and implemented with a test showing one row
   above the line in one filter and below it in another.
+
+## Closed 2026-08-06
+
+**Decision: the cutoff stays absolute.** The first branch of "Done when".
+Recorded as
+[ADR-0020](../../../docs/adr/0020-the-cutoff-is-absolute-a-filter-never-moves-the-bar.md),
+which carries the full argument.
+
+Both sides of the ticket's tension were checked rather than taken on faith.
+
+**The "recomputation can never change a value" claim holds.** Three things make
+it true, all re-runnable with
+`grep -rn "absDps\|CUTOFF\|meetsCutoff" packages/core/src/`: `CUTOFF` is the
+only `Cutoff` value constructed in `src/`; `Cutoff` is declared `typeof CUTOFF`,
+so `Ranking.cutoff` is literal-typed and cannot hold another pair; and
+`meetsCutoff` reads its three arguments and nothing else. `rank.ts` and
+`applyView` were calling that function with the same three arguments per row,
+and filtering assigns no row's `deltaDps` or `deltaPct`.
+
+**The collision with §2 is real.** §2's "No view changes a number" is stated
+there as an architectural constraint and names the remedy for a violation —
+*"If a control would change a delta, it belongs on `RankInput` and in
+`contentHash` instead, and the run has to be re-simmed."* A filtered-relative
+bar is exactly that case: `raid` would change the verdict on an unchanged
+`deltaDps`. §4.1's "toggling is instant" and ADR-0019's structural exclusion of
+`ViewOptions` from `contentHash` are the other half of the wall.
+
+A third argument, not in the ticket, weighed as much as either: the cutoff is
+§10's noise floor (`max(3.0, 2 × mean reported SE 1.678)`), so a relative bar
+would print "best in Karazhan" over a delta the sim cannot distinguish from
+zero. Being the largest number in a subset is a fact about the subset.
+
+### Changes
+
+- PLAN.md §12's bullet amended — the "filter first, then apply the cutoff"
+  ordering is all it means; the small-gain worry is answered by filtering never
+  *deleting*, not by moving the bar.
+- `applyView`'s second pass over `rows` deleted; `belowCutoffInView` is carried
+  from `belowCutoff` at the copy site. `view.ts` no longer imports
+  `meetsCutoff`, so `rank.ts` is its only caller. `cutoff.ts`'s docblock, which
+  claimed two callers, corrected.
+- New test in `packages/core/test/view.test.ts` asserts the two flags agree for
+  every row across seven `ViewOptions` combinations:
+  `npx vitest run packages/core/test/view.test.ts -t "agrees with the ranking"`.
+  Not vacuous — flipping the assignment to `!item.belowCutoff` failed 8 tests in
+  that file.
+
+Ticket 39 is narrowed but not closed by this: one derivation path now, and this
+test covers the steady state, but 39's paired-replication case is still its own
+coverage question.

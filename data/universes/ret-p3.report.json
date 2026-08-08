@@ -12,23 +12,23 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1394,
-  "universeTotal": 359,
-  "listOnlyMembership": 23,
+  "excludedNoSource": 1392,
+  "universeTotal": 364,
+  "listOnlyMembership": 25,
   "perSlot": {
     "back": 28,
-    "chest": 28,
+    "chest": 29,
     "feet": 37,
     "finger": 34,
     "hands": 26,
     "head": 25,
     "legs": 22,
-    "neck": 24,
-    "ranged": 3,
-    "shoulder": 26,
+    "neck": 25,
+    "ranged": 4,
+    "shoulder": 27,
     "trinket": 20,
     "waist": 36,
-    "weapon": 17,
+    "weapon": 18,
     "wrist": 33
   },
   "sourceRecordAdds": {
@@ -37,45 +37,45 @@
     "db": 1695,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 54
+    "wowhead": 17
   },
   "membershipByOrigin": {
-    "curated": 3,
+    "curated": 6,
     "itemHasOrigin:atlasloot": 53,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 317,
+    "itemHasOrigin:db": 320,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 43,
-    "listOnly": 23,
+    "itemHasOrigin:wowhead": 13,
+    "listOnly": 25,
     "zoneMatch": 333
   },
   "exclusivePrimaryOrigin": {
-    "db": 317,
+    "db": 320,
     "atlasloot-only": 13,
     "two-hop": 15,
-    "wowhead-only": 11,
+    "wowhead-only": 13,
     "other": 3
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 359,
+    "total": 364,
     "casterOnlyReject": 119,
     "epFloorReject": 15,
     "combinedReject": 134,
-    "combinedKeep": 225,
-    "casterRejectPct": 33.1,
-    "combinedRejectPct": 37.3,
+    "combinedKeep": 230,
+    "casterRejectPct": 32.7,
+    "combinedRejectPct": 36.8,
     "applied": false
   },
   "wowheadListIds": 123,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 123,
-    "recalled": 103,
-    "missed": 20,
-    "recallPct": 83.7,
+    "recalled": 105,
+    "missed": 18,
+    "recallPct": 85.4,
     "missedItems": [
       {
         "itemId": 18823,
@@ -111,12 +111,6 @@
         "itemId": 23041,
         "name": "Slayer's Crest",
         "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23203,
-        "name": "Libram of Fervor",
-        "slot": "ranged",
         "d7Eligible": true
       },
       {
@@ -165,12 +159,6 @@
         "itemId": 31033,
         "name": "Libram of Righteous Power",
         "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31275,
-        "name": "Necklace of Trophies",
-        "slot": "neck",
         "d7Eligible": true
       },
       {

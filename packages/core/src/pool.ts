@@ -12,7 +12,22 @@ export {
   type ItemSourceKindName,
 } from "./item-source-kinds.generated.js";
 
-export type ItemSource =
+/**
+ * Which input asserted a source row.
+ *
+ * Orthogonal to `kind`, so it intersects the union rather than being repeated
+ * on all nine variants. It matters because the inputs are not equally
+ * trustworthy: `db`, `atlasloot` and `two-hop` are machine parses or curated
+ * files with correction notes, while `wowhead` is an agent transcribing a
+ * rendered page. Every defect in carry-forward 48-53 arrived on the `wowhead`
+ * path, and each was caught only by disagreeing with one of the others — so
+ * "how many independent witnesses does this claim have" is the question that
+ * finds this class, and it is unanswerable without this field.
+ */
+export type ItemSourceOrigin =
+  "db" | "atlasloot" | "two-hop" | "wowhead" | "curated" | "sunmote";
+
+export type ItemSource = { origin?: ItemSourceOrigin } & (
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "token"; zone: string; boss?: string; token: string }
   | { kind: "badge"; cost: number }
@@ -41,7 +56,8 @@ export type ItemSource =
    * `zone` is what keeps these out of every raid and boss filter (`view.ts`
    * `matchesZone`), which is the behaviour we actually need from them.
    */
-  | { kind: "unknown" };
+  | { kind: "unknown" }
+);
 
 export type ItemSourceKind = ItemSource["kind"];
 

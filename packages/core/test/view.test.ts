@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
-import { applyView } from "../src/view.js";
+import { applyView, type ViewOptions } from "../src/view.js";
+import { realPoolEntry } from "./real-source.js";
 
 function item(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
   const base: RankedItem = {
@@ -28,6 +29,7 @@ function ranking(items: RankedItem[]): Ranking {
   return {
     contentHash: "sha256:test",
     cutoff: CUTOFF,
+    fight: { reportCode: "test", fightId: 1, route: "ranked" },
     baseline: { dps: 2000, stdev: 90, metaAdjusted: false },
     assumptions: {
       maxPhase: 2,
@@ -110,13 +112,50 @@ describe("applyView", () => {
       expect(rows[0]!.belowCutoffInView).toBe(true);
     });
 
-    it("recomputes the cutoff flag from the row's own delta", () => {
+    it("carries the cutoff flag from the row's own delta", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
         item({ itemId: 2, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
       ]);
       const { rows } = applyView(r);
       expect(rows.map((x) => x.belowCutoffInView)).toEqual([false, true]);
+    });
+
+    // ADR-0020: the cutoff is absolute, so no view moves the bar. This is the
+    // property that lets `applyView` carry `belowCutoff` instead of re-deriving
+    // it; it fails loudly the day a filter is allowed to change the threshold.
+    it("agrees with the ranking's own belowCutoff under every filter", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
+        item({
+          itemId: 2,
+          deltaDps: 2,
+          deltaPct: 0.1,
+          belowCutoff: true,
+          source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+        }),
+        item({ itemId: 3, deltaDps: -8, deltaPct: -0.4, belowCutoff: true }),
+        item({ itemId: 4, deltaDps: 5, deltaPct: 0.25, rank: 2, owned: true }),
+      ]);
+      const views: ViewOptions[] = [
+        {},
+        { raid: "Karazhan" },
+        { raid: "Gruul's Lair" },
+        { raid: "Gruul's Lair", boss: "Gruul" },
+        { hideOwned: true },
+        { pinBis: true },
+        { groupBy: "slot" },
+      ];
+      const byId = new Map(r.items.map((i) => [i.itemId, i.belowCutoff]));
+
+      for (const v of views) {
+        const { rows } = applyView(r, v);
+        // A filter that emptied the list would pass vacuously.
+        expect(rows.length).toBeGreaterThan(0);
+        for (const row of rows) {
+          expect(row.belowCutoffInView).toBe(byId.get(row.itemId));
+        }
+      }
     });
   });
 
@@ -211,21 +250,28 @@ describe("applyView", () => {
     });
 
     it("matches a zone carried on a secondary source", () => {
+      // 32590 Nethervoid Cloak is a T6-era trash drop that genuinely drops in
+      // both Hyjal Summit and Black Temple. Its sources[0] is Hyjal Summit, so
+      // matching Black Temple can only come from a secondary source.
+      //
+      // This used to use 30129 and its Serpentshrine Cavern row, which was not
+      // a second true zone but the transcription bug in carry-forward 50.
+      const nethervoidCloak = realPoolEntry(32590, "ret-p3");
       const r = ranking([
         item({
-          itemId: 30129,
+          itemId: 32590,
           deltaDps: 30,
           deltaPct: 1.5,
-          source: { kind: "raid", zone: "Tempest Keep" },
-          sources: [
-            { kind: "raid", zone: "Tempest Keep" },
-            { ...token, zone: "Serpentshrine Cavern" },
-          ],
+          source: nethervoidCloak.source,
+          // poolEntryFromUniverse always sets `sources` from a universe row's
+          // (non-empty) sources[] — non-null assertion, not a cast, since the
+          // field genuinely is present here.
+          sources: nethervoidCloak.sources!,
         }),
       ]);
       expect(
-        applyView(r, { raid: "Serpentshrine Cavern" }).rows.map((x) => x.itemId)
-      ).toEqual([30129]);
+        applyView(r, { raid: "Black Temple" }).rows.map((x) => x.itemId)
+      ).toEqual([32590]);
     });
 
     it("scopes the boss filter to the selected raid", () => {
@@ -313,10 +359,10 @@ describe("applyView", () => {
     });
 
     it("is measured on belowCutoffInView, not on the ranking's own flag", () => {
-      // The two agree today (§12, and `belowCutoffInView`'s own comment), but
-      // the shortlist is a property of the *view* — reading `belowCutoff`
-      // here would silently stop tracking if ticket 36 ever makes the
-      // in-view cutoff relative to the filtered set.
+      // The two always agree (ADR-0020, and the "agrees with the ranking's own
+      // belowCutoff" test above), but the shortlist is a property of the
+      // *view*, so it reads the row's own display verdict rather than reaching
+      // back into the `Ranking`.
       const view = applyView(r());
       const hidden = view.rows.filter((x) => x.belowCutoffInView);
       expect(hidden.map((x) => x.itemId)).toEqual([3]);
@@ -381,6 +427,19 @@ describe("applyView", () => {
     it("emits no groups for the default rank view", () => {
       const r = ranking([item({ itemId: 1 })]);
       expect(applyView(r, { groupBy: "rank" }).groups).toBeUndefined();
+    });
+
+    it("labels a zone-less source with a readable bucket, not the raw kind string (ticket 45 §3)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 30,
+          deltaPct: 1.5,
+          source: { kind: "unknown" },
+        }),
+      ]);
+      const groups = applyView(r, { groupBy: "raid" }).groups!;
+      expect(groups.map((g) => g.key)).toEqual(["Source not recorded"]);
     });
   });
 

@@ -2,6 +2,8 @@ Status: open
 Type: task
 Origin: `phase-2/resolution-and-fallback` review fallout (domain D1), and user direction 2026-08-06
 Blocks: none
+Blocked by: `LoggedGear` carries no class name — WCL `actors[].subType` has it (PLAN.md §5.1), unthreaded through the gear-source seam
+Progress: `spec.ts` piece landed (see `## Progress 2026-08-06` below); resolution-path wiring in `rank.ts` / `seams/gear-source.ts` / fixtures is still open and out of this dispatch's file scope.
 
 # Fight resolution is not spec-aware: we can pick a fight the character played in another spec
 
@@ -96,3 +98,61 @@ reads it. A spec-aware `findFights` is where it should start meaning something.
   ret-scored ranking for it.
 - Whatever is decided for the "no matching fight" case is written down here
   before it is built.
+
+## Progress 2026-08-06
+
+Reproduced the ticket's core claim before building on it:
+
+```bash
+grep -rn "classifySpec" --include=*.ts packages/core/src | grep -v dist
+```
+
+returned only the `index.ts` re-export and the definition in `spec.ts` —
+confirmed, nothing on the resolution path called it. That claim survived.
+
+This dispatch's slice was scoped to `packages/core/src/spec.ts` only (see
+`.scratch/carry-forward/DELEGATION.md` and `DELEGATION-STATE.md` — wave 1,
+file-disjoint fan-out; `rank.ts`, `seams/gear-source.ts` and the fixture
+builders were other workers' files in the same working tree). What actually
+shipped in this slice:
+
+- `matchesRequestedSpec(classification: SpecClassification, requested: SpecId): SpecMatch`
+  in `spec.ts`, exported from `index.ts`. It compares a `classifySpec` result
+  against the spec a caller asked for and reports `{ matches: true, detected }`
+  only when `classifySpec` landed on a *confirmed* spec equal to what was
+  asked. `ambiguous`, `needs-form-uptime`, and `unsupported-spec` (the
+  ticket's own protection-paladin case, talents `0/44/17`) all report
+  `matches: false`, and `detected` is only ever populated with a spec
+  `classifySpec` actually named — never inferred.
+- Tests in `packages/core/test/spec.test.ts`, driven red-first against the
+  pre-fix tree (the function did not exist; all five new cases failed with
+  `matchesRequestedSpec is not a function`), including a case named directly
+  after the ticket's report (`0/44/17` against a `ret` ask), and the
+  needs-form-uptime / ambiguous / unsupported-spec non-match cases.
+- `pnpm verify` was run from the shared working tree. `spec.ts`, `index.ts`,
+  and `spec.test.ts` are lint-clean, format-clean, and their tests pass
+  (`npx vitest run test/spec.test.ts` — 14/14). The full-repo `pnpm verify`
+  run in this same tree also failed on `packages/core/scratch-repro.mjs`
+  (untracked lint failure, not authored by this slice) and on
+  `caps.test.ts` (`talentHitRatingFromString is not a function`, ticket 33's
+  in-progress `caps.ts` work in the same shared tree) — neither touches
+  `spec.ts` and neither is fixed here per the standing instruction not to
+  edit another worker's file.
+
+What did **not** ship, and is why this ticket stays open rather than closing:
+the "Done when" list needs something on the *resolution path* — inside
+`rankUpgrades`/`resolveFight` in `rank.ts` — to actually call
+`matchesRequestedSpec`, plus a `RankErrorKind` member for the mismatch case,
+plus `resolveFight` preferring a spec-matching fight, plus the integration
+test that drives report `mKTA9V7Lx4Ck2DXf` through `rankUpgrades` asking for
+`ret` and asserts no ret-scored ranking comes back. None of that is reachable
+from `spec.ts` alone: `LoggedGear` (`seams/gear-source.ts`) does not carry a
+class name today (WCL's `actors[].subType` has it; nothing threads it through
+yet), so `rank.ts` cannot even call `classifySpec` without that plumbing
+first. That's a real, separate gap, out of this slice's file scope — flagging
+it rather than reaching into `gear-source.ts`/`rank.ts`/the fixture builders,
+which other workers had open in this same tree.
+
+The "no matching fight" product decision (§ "Decide what happens next") is
+still unwritten — it needs the wiring above to exist before it's meaningfully
+answerable, and it wasn't this slice's job to decide it unasked.

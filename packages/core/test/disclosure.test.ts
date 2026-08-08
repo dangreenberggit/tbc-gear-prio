@@ -68,9 +68,9 @@ describe("hitCapBanner", () => {
   });
 
   it("states which way the error runs instead of a symmetric band", () => {
-    // Both unknowns are one-sided: uncounted talent hit only adds, and Heroic
-    // Presence only lowers the cap. A "±16" reads as noise that might push
-    // either way, which overstates the shortfall while looking careful.
+    // Heroic Presence is one-sided: unreadable from WCL, and it only ever
+    // lowers the cap. A "±16" reads as noise that might push either way,
+    // which overstates the shortfall while looking careful.
     const line = hitCapBanner({
       rating: 72,
       gap: 69.92,
@@ -80,13 +80,18 @@ describe("hitCapBanner", () => {
     expect(line).toContain("smaller");
   });
 
-  it("says gear alone, since talents and buffs are not counted", () => {
+  it("no longer claims talents go uncounted, now that capStateFrom folds them in", () => {
+    // carry-forward 33: hit.rating/hit.gap already include talent-granted hit
+    // where capStateFrom was given a recognised talentsString/spec, so a
+    // banner built from those numbers must not tell the reader talents are
+    // still missing — that was true before the fix and is not true after.
     const line = hitCapBanner({
-      rating: 72,
-      gap: 69.92,
+      rating: 119,
+      gap: 22.92,
       capUncertainty: HIT_CAP_UNCERTAINTY,
     });
-    expect(line).toContain("gear alone");
+    expect(line).not.toContain("gear alone");
+    expect(line).not.toContain("talents");
   });
 
   it("reads as over the cap when the gap is negative", () => {

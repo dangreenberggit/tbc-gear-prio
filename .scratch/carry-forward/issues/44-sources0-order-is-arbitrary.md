@@ -3,6 +3,7 @@ Type: bug
 Origin: pre-merge review of `phase-2/feral` (adversarial A5), 2026-08-06
 Blocks: none
 Blocked by: none
+Progress: measured 2026-08-06 on `fix/carry-forward-backlog` — **the stated cause below is false**; see `## Measured 2026-08-06` at the end. The precedence ladder is unnecessary; what remains is a narrower display question.
 
 # `sources[0]` is whichever pipeline ran first, not the best source
 
@@ -42,7 +43,40 @@ honest but touches every consumer.
 Note ticket 35 (`groupby-raid-picks-an-arbitrary-zone`) is the same root cause
 seen from the view layer; fixing this may close both.
 
+## Measured 2026-08-06
+
+Full plan and re-runnable scripts: `.scratch/carry-forward/ticket-44-plan.md`,
+`.scratch/carry-forward/ticket-44/measure{,2,3}.py`. Each locates the repo root
+from its own path, so the working directory does not matter:
+
+```bash
+python .scratch/carry-forward/ticket-44/measure.py
+```
+
+Across all six committed universes (2114 entry rows):
+
+- Rows where `sources[0].kind` is `rep`/`badge`/`unknown` while a `raid` row
+  exists: **0**. The cross-kind precedence problem this ticket asserts does not
+  occur in the data.
+- The only multi-kind pair that occurs at all is `raid`+`token` (61 rows), which
+  is one fact recorded twice; `sources[0]` is already the `token` row — the more
+  informative one — in all 61.
+- What survives: **7 distinct within-`raid` zone ties** (e.g. 32591 Choker of
+  Serrated Blades, genuinely T6-era trash in both Black Temple and Hyjal
+  Summit). SME review confirms neither zone is more true, so displaying both is
+  the only honest option. `matchesZone`/`matchesBoss` already scan every source,
+  so filtering is correct today — only `zoneKeyOf` and the report's
+  single-source line collapse it.
+
+So the fix is not a precedence ladder. Rescope to the display question, which
+is the same root cause as ticket 35 seen from the pool layer.
+
+The measurement also surfaced 10 tier items whose `raid` row had a token name
+spliced into `boss`; those were filed and fixed separately as tickets 48-52.
+
 ## Done when
 
-- A row's primary source is chosen by a stated rule, not by pipeline order.
-- An item that drops in two raids does not silently claim one of them.
+- The 7 zone-tie combos are displayed honestly (both zones, or one stated rule)
+  rather than collapsing to whichever came first.
+- ~~A row's primary source is chosen by a stated rule, not by pipeline order.~~
+  Withdrawn — measured false, see above.

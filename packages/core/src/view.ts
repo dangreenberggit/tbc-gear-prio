@@ -4,7 +4,6 @@
  * that is the property the Phase 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
-import { meetsCutoff } from "./cutoff.js";
 import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
@@ -36,21 +35,18 @@ export type ViewRow = RankedItem & {
    */
   tieGroupId?: string;
   /**
-   * Whether the cutoff hides this row, evaluated after filtering.
+   * Whether the cutoff hides this row — the view's own copy of `belowCutoff`,
+   * carried rather than recomputed.
    *
-   * §12 says "filter first, then apply the cutoff within the filtered view".
-   * This implements the ordering, and the ordering is the part that matters:
+   * The cutoff is absolute and no view moves it (ADR-0020, amending §12).
+   * "Filter first, then apply the cutoff within the filtered view" fixes the
+   * *ordering* of the two hiding mechanisms, and the ordering is what matters:
    * filtering never *deletes* a row, so a 2 DPS gain that is the best thing in
    * one raid still appears under that raid's filter — flagged, not absent.
    *
-   * The recomputation itself is currently a no-op, and honestly so: `CUTOFF`
-   * is a pair of constants (§10) and `meetsCutoff` reads only those plus this
-   * row's own `deltaDps`/`deltaPct`, none of which filtering changes. So this
-   * always equals `belowCutoff`. Whether §12 instead wants the *threshold*
-   * derived from the filtered set — which would make one item read as an
-   * upgrade in one filter and noise in another, against §2's "no view changes
-   * a number" — is
-   * `.scratch/carry-forward/issues/36-relative-cutoff-within-a-filtered-view.md`.
+   * The field stays because the shortlist is a property of the view, so
+   * `ViewResult` and the CLI read a row's own display verdict rather than
+   * reaching back into the `Ranking`.
    */
   belowCutoffInView: boolean;
 };
@@ -64,9 +60,8 @@ export type ViewResult = {
    * A second projection rather than a filter over `rows`, because §10's
    * constraint is **hidden, never deleted**: `rows` stays whole and stays the
    * payload, so an expand is a choice of which array to render and never a
-   * re-run. Measured on `belowCutoffInView` — the view's own answer — so it
-   * keeps tracking if carry-forward ticket 36 ever makes that cutoff relative
-   * to the filtered set.
+   * re-run. Measured on `belowCutoffInView` — the view's own answer — so the
+   * shortlist stays a view concern rather than the `Ranking`'s.
    */
   shortlist: ViewRow[];
   /** How many rows the shortlist hides, so a caller can label the expand. */
@@ -106,11 +101,25 @@ function matchesBoss(item: RankedItem, zone: string | undefined, boss: string) {
   );
 }
 
+// Zone-less ItemSource kinds, ticket 45 §3: `--group-by raid` used to fall
+// through to `item.source.kind` verbatim, so an unrecorded-origin item
+// rendered a bucket literally titled "unknown" — honest but not a zone name a
+// player would recognise. Every kind lacking `zone` gets a reader-facing
+// label here instead.
+const ZONELESS_SOURCE_LABELS: Record<string, string> = {
+  badge: "Badge vendor",
+  crafted: "Crafted",
+  rep: "Reputation vendor",
+  pvp: "PvP vendor",
+  world: "World drop",
+  unknown: "Source not recorded",
+};
+
 function zoneKeyOf(item: RankedItem): string {
   for (const s of sourcesOf(item)) {
     if ("zone" in s) return s.zone;
   }
-  return item.source.kind;
+  return ZONELESS_SOURCE_LABELS[item.source.kind] ?? item.source.kind;
 }
 
 /**
@@ -205,11 +214,6 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
     .map((item) => ({ ...item, belowCutoffInView: item.belowCutoff }));
 
   rows.sort((a, b) => compareRows(a, b, pinBis));
-
-  // Filter first, then the cutoff within the filtered view (§12).
-  for (const row of rows) {
-    row.belowCutoffInView = !meetsCutoff(row.deltaDps, row.deltaPct, r.cutoff);
-  }
 
   assignTieGroups(rows);
 

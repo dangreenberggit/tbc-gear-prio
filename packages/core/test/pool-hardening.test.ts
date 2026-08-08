@@ -1,8 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { KAEL_TEMP_LEGENDARY_IDS } from "../src/kael-temp.js";
+import { Profession } from "../src/proto/common_pb.js";
 import {
   ArmorType,
   RangedWeaponType,
@@ -14,9 +15,17 @@ import {
   filterPoolByZone,
   ITEM_SOURCE_KINDS,
   poolFromUniverse,
+  type ItemSource,
   type PoolEntry,
   type UniverseEntry,
 } from "../src/pool.js";
+
+/** `raid` and `token` are the only `ItemSource` variants that carry a zone. */
+function hasZone(
+  source: ItemSource
+): source is Extract<ItemSource, { kind: "raid" | "token" }> {
+  return source.kind === "raid" || source.kind === "token";
+}
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const wowsimsDbPath = join(root, "vendor/wowsims/db.json");
@@ -44,10 +53,22 @@ type TwoHopEntry = {
   pieceId: number;
   pieceName: string;
   zone: string;
+  boss: string;
   tokenName: string;
 };
 
 const hasWowsimsVendor = existsSync(wowsimsDbPath);
+
+/**
+ * Read from disk rather than hand-listed so a newly assembled universe is
+ * covered by the data gates below without anyone remembering to add it.
+ */
+const UNIVERSE_FILES: readonly string[] = readdirSync(
+  join(root, "data/universes")
+)
+  .filter((f) => f.endsWith(".json") && !f.endsWith(".report.json"))
+  .sort()
+  .map((f) => `data/universes/${f}`);
 
 function loadWowsimsDbById(): Map<number, WowsimsDbItem> {
   if (!hasWowsimsVendor) return new Map();
@@ -318,7 +339,18 @@ describe("data/universes/ret-p3.json hardening", () => {
     // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
     // and so never appears in a raid-filtered view. Haramad's Bargain and
     // Shapeshifter's Signet were already here via the rep path above.
-    expect(universeP3.length).toBe(359);
+    // 359 -> 361: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, admitting +23203 Libram of Fervor and +31275 Necklace of
+    // Trophies via their "World Drop" Wowhead text.
+    // 361 -> 364: `curated_list_only` (ticket 41 remainder) admits a curated
+    // item whose real db source is list-only shaped (crafted, no zone) but
+    // was not independently a member — +23522 Ragesteel Breastplate, +28429
+    // Lionheart Champion, +33173 Ragesteel Shoulders. 28430 Lionheart
+    // Executioner is not a new row here: its p3 Wowhead text reads
+    // "Profession: ..." (parses today), only its p1-p2 text reads
+    // "Crafting: ..." (does not), so it was already a p3 member and only
+    // needed this fix at p2.
+    expect(universeP3.length).toBe(364);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -630,6 +662,8 @@ describe("data/universes/ret-p3.json hardening", () => {
     ] as const) {
       expect(poolIds.has(id), `${id} ${name}`).toBe(true);
       const entry = universeP3.find((e) => e.itemId === id)!;
+      expect(hasZone(entry.source), `${id} ${name} source kind`).toBe(true);
+      if (!hasZone(entry.source)) continue;
       expect(entry.source.zone, `${id} ${name}`).toBe("World Bosses");
     }
   });
@@ -645,7 +679,9 @@ describe("data/universes/ret-p3.json hardening", () => {
       [30740, "Doom Lord Kazzak"],
     ] as const) {
       const entry = raw.entries.find((e) => e.itemId === id)!;
-      const worldBoss = entry.sources.filter((s) => s.zone === "World Bosses");
+      const worldBoss = entry.sources
+        .filter(hasZone)
+        .filter((s) => s.zone === "World Bosses");
       expect(worldBoss.length, `${id} world-boss source count`).toBe(1);
       expect(worldBoss[0]!.boss, `${id} boss`).toBe(boss);
     }
@@ -687,6 +723,7 @@ describe("data/universes/ret-p3.json hardening", () => {
       expect(map, `two-hop map for tier piece ${id}`).toBeTruthy();
       const entry = universeP3.find((e) => e.itemId === id)!;
       expect(entry.source.kind, `${id} ${entry.name}`).toBe("token");
+      if (entry.source.kind !== "token") continue;
       expect(entry.source.zone, `${id} ${entry.name}`).toBe(map!.zone);
       // Boss and token name too, not just zone. The raid *and* boss filters
       // are shipped ViewOptions controls, so a regeneration that scrambled
@@ -845,4 +882,331 @@ describe("an item's source does not depend on which tier is assembled", () => {
       ).toBe(false);
     }
   });
+});
+
+describe("profession names a real profession (carry-forward 53)", () => {
+  // The guides splice notes and specialisations into the profession phrase
+  // ("Leatherworking - BoP only", "Master Swordsmith Blacksmithing"), which
+  // made one profession fail equality against itself — 12 values for 5 real
+  // professions. Display-only today, a correctness bug the moment anything
+  // groups or filters by it.
+  //
+  // The authority is the generated proto enum, the same one the assembler maps
+  // db.json's numeric `crafted.profession` through, so this cannot drift from a
+  // hand-typed list. ProfessionUnknown is excluded: it is the enum's zero
+  // value, not something a crafted row should ever claim.
+  const REAL = new Set(
+    Object.values(Profession).filter(
+      (v): v is string => typeof v === "string" && v !== "ProfessionUnknown"
+    )
+  );
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel} emits only bare profession names`, () => {
+      const offenders: string[] = [];
+      for (const e of loadUniverse(rel).raw.entries) {
+        for (const s of e.sources) {
+          if (s.kind !== "crafted") continue;
+          const prof = (s as { profession?: unknown }).profession;
+          if (typeof prof === "string" && !REAL.has(prof))
+            offenders.push(`${e.itemId} ${e.name}: ${prof}`);
+        }
+      }
+      expect(
+        offenders,
+        "a crafted row names something that is not a profession — canonical_profession in assemble_universe.py should have reduced it"
+      ).toEqual([]);
+    });
+  }
+});
+
+describe("tier piece sources agree with the curated two-hop map", () => {
+  // The ticket-37 guard reads `entry.source`, which `poolFromUniverse` fills
+  // from `sources[0]`. The curated token row sorts first for every tier piece,
+  // so that guard inspects the good row and never sees the rest of the array —
+  // which is where tickets 48, 49 and 50 all lived. This walks *every* row.
+  //
+  // Verified by mutation, not just by passing: planting a junk boss/zone on a
+  // non-first raid row of 30990 across ret-p3/p4/p5 (uniformly, so the
+  // cross-tier consistency test above cannot fire) passed all 386 tests before
+  // this existed, and fails here now.
+  const specs = [
+    { spec: "ret", map: "data/two-hop/ret-tokens.json" },
+    { spec: "feral", map: "data/two-hop/feral-tokens.json" },
+  ] as const;
+
+  for (const { spec, map } of specs) {
+    const twoHopEntries = (
+      JSON.parse(readFileSync(join(root, map), "utf8")) as {
+        entries: TwoHopEntry[];
+      }
+    ).entries;
+    const byPiece = new Map(twoHopEntries.map((e) => [e.pieceId, e] as const));
+
+    const universes = UNIVERSE_FILES.filter((f) =>
+      f.startsWith(`data/universes/${spec}-p`)
+    );
+
+    for (const rel of universes) {
+      it(`${rel}: every raid row of a tier piece names the map's zone and boss`, () => {
+        for (const e of loadUniverse(rel).raw.entries) {
+          const mapped = byPiece.get(e.itemId);
+          if (!mapped) continue;
+          for (const s of e.sources) {
+            if (s.kind !== "raid") continue;
+            expect(
+              { zone: s.zone, boss: s.boss },
+              `${e.itemId} ${e.name} raid row disagrees with ${map}`
+            ).toEqual({ zone: mapped.zone, boss: mapped.boss });
+          }
+        }
+      });
+    }
+  }
+});
+
+describe("a transcribed row agrees with its own raw text", () => {
+  // The Wowhead lists carry both the raw prose (`wowheadSourceText`) and the
+  // agent's structured reading of it (`viaTokenName`, `viaBoss`, `viaZone`).
+  // `assemble_universe.py` reads only the prose, so the structured fields are
+  // an unused second recording of the same claim — a free internal cross-check
+  // that nothing was performing. It is also why nothing noticed when the
+  // carry-forward 49/50/51 corrections updated the prose and left them stale.
+  //
+  // Disagreement means one of the two readings is wrong. It does not say which,
+  // and that is the point: a prompt to go look, not an auto-fix.
+  //
+  // The comparison is against `correctedSourceText` where present, matching what
+  // the parser reads: `wowheadSourceText` is now a verbatim record of a page we
+  // know is wrong (carry-forward 54), so the structured fields are deliberately
+  // allowed to disagree with it and must agree with the correction instead.
+  const listFiles = [
+    "data/wowhead-lists/ret/p1-p2.json",
+    "data/wowhead-lists/ret/p3.json",
+    "data/wowhead-lists/ret/p4.json",
+    "data/wowhead-lists/ret/p5.json",
+    "data/wowhead-lists/ret/pre-raid.json",
+    "data/wowhead-lists/feral/p1-p2.json",
+    "data/wowhead-lists/feral/p3.json",
+  ];
+
+  type ListRow = {
+    itemId: number;
+    itemName: string;
+    wowheadSourceText: string | null;
+    correctedSourceText?: string | null;
+    viaTokenName?: string | null;
+    viaBoss?: string | null;
+    viaZone?: string | null;
+  };
+
+  for (const rel of listFiles) {
+    it(`${rel}`, () => {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: ListRow[];
+      };
+      for (const row of doc.entries) {
+        const prose = row.correctedSourceText || row.wowheadSourceText || "";
+        for (const field of ["viaTokenName", "viaBoss", "viaZone"] as const) {
+          const value = row[field];
+          if (!value) continue;
+          expect(
+            prose,
+            `${row.itemId} ${row.itemName}: ${field} is ${JSON.stringify(value)} but the raw text it was read from does not contain it`
+          ).toContain(value);
+        }
+      }
+    });
+  }
+});
+
+// A "rankLabel is copied, not paraphrased" gate stood here, capping one-off
+// rank labels per file. Its premise was false: the P4 Rank column really does
+// carry a long tail of author-written labels ("Optional - Human", "Undead Only
+// & Demons", "Best - No Expertise", and the author's own "Optional - tier" /
+// "Optional - Tier" inconsistency). Counting those as paraphrase inverted the
+// gate — a faithful re-scrape restores the 40 labels we currently drop as null,
+// which adds singletons and would fail it. Deleted with carry-forward 55.
+
+describe("a correction never silently becomes the record (carry-forward 54)", () => {
+  // `wowheadSourceText` holds what the page says, so a wrong page stays wrong
+  // there; corrections live alongside in `correctedSourceText`. Overwriting the
+  // record instead made "the page said this" and "we decided this"
+  // indistinguishable, which is what made 49/50 expensive to re-check.
+  //
+  // Today these three rows reach the universe only through their two-hop token
+  // row -- carry-forward 57 suppresses guide prose wherever a machine input
+  // supplies the locus -- so the correction is a safeguard rather than the
+  // active path. That is exactly why it is pinned here: if suppression ever
+  // stops covering them, the verbatim (wrong) boss must not become the answer
+  // by default.
+  const CORRECTED = [
+    ["data/wowhead-lists/ret/p4.json", 30129],
+    ["data/wowhead-lists/ret/p4.json", 30990],
+    ["data/wowhead-lists/ret/p4.json", 30993],
+    ["data/wowhead-lists/ret/p5.json", 30129],
+    ["data/wowhead-lists/ret/p5.json", 30990],
+    ["data/wowhead-lists/ret/p5.json", 30993],
+  ] as const;
+
+  it("every corrected row still disagrees with its verbatim record", () => {
+    for (const [rel, itemId] of CORRECTED) {
+      const doc = JSON.parse(readFileSync(join(root, rel), "utf8")) as {
+        entries: {
+          itemId: number;
+          wowheadSourceText?: string | null;
+          correctedSourceText?: string | null;
+        }[];
+      };
+      const row = doc.entries.find((e) => e.itemId === itemId);
+      expect(row, `${rel} lost item ${itemId}`).toBeDefined();
+      expect(
+        row?.correctedSourceText,
+        `${rel} ${itemId}: correctedSourceText was dropped — the parser would fall back to the verbatim page text, which is known wrong`
+      ).toBeTruthy();
+      expect(
+        row?.correctedSourceText,
+        `${rel} ${itemId}: correction equals the verbatim text, so one of them is no longer doing its job`
+      ).not.toEqual(row?.wowheadSourceText);
+    }
+  });
+});
+
+describe("zone and boss claims have an independent witness", () => {
+  // Every defect in carry-forward 48-53 arrived on the `wowhead` path (an
+  // agent transcribing a rendered page) and every one was caught by
+  // disagreeing with a machine-parsed or curated input. A transcription defect
+  // is *well-formed* data — a real boss, a real zone, the wrong pairing — so
+  // no schema or type check can see it. A second witness is the only detector.
+  //
+  // This pins the set of claims that have no second witness. It is not a bug
+  // list: these are probably right. It exists so the set cannot grow silently,
+  // because each addition is a claim nothing can ever contradict.
+  const UNVERIFIED = new Set(["wowhead", "curated"]);
+
+  /** Measured on the ticket 48-54 tip; see carry-forward 54 for the analysis. */
+  const KNOWN_UNCORROBORATED: ReadonlyArray<[number, string]> = [
+    // Wowhead is the only input naming a zone for this item, in all six universes.
+    [30017, "Telonicus's Pendant of Mayhem"],
+  ];
+  const allowed = new Set(KNOWN_UNCORROBORATED.map(([id]) => id));
+
+  function unwitnessed(entry: UniverseEntry): boolean {
+    for (const s of entry.sources) {
+      const claimsPlace =
+        ("boss" in s && s.boss) || (s.kind === "raid" && "zone" in s);
+      if (!claimsPlace) continue;
+      if (!UNVERIFIED.has(s.origin ?? "")) continue;
+      const corroborated = entry.sources.some(
+        (other) =>
+          !UNVERIFIED.has(other.origin ?? "") &&
+          "zone" in other &&
+          "zone" in s &&
+          other.zone === s.zone
+      );
+      if (!corroborated) return true;
+    }
+    return false;
+  }
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      const offenders = new Set<string>();
+      for (const e of loadUniverse(rel).raw.entries) {
+        if (allowed.has(e.itemId)) continue;
+        if (unwitnessed(e)) offenders.add(`${e.itemId} ${e.name}`);
+      }
+      expect(
+        [...offenders].sort(),
+        "a zone/boss claim rests on transcription alone. Either find a second witness (AtlasLoot, a two-hop map) or add it to KNOWN_UNCORROBORATED with a reason"
+      ).toEqual([]);
+    });
+  }
+
+  it("every known-uncorroborated item is still uncorroborated", () => {
+    // The allowlist must shrink as coverage improves, not linger as a
+    // permanent exemption that hides a regression behind a stale entry.
+    const stillUnwitnessed = new Set<number>();
+    for (const rel of UNIVERSE_FILES) {
+      for (const e of loadUniverse(rel).raw.entries) {
+        if (allowed.has(e.itemId) && unwitnessed(e))
+          stillUnwitnessed.add(e.itemId);
+      }
+    }
+    for (const [id, name] of KNOWN_UNCORROBORATED) {
+      expect(
+        stillUnwitnessed.has(id),
+        `${id} ${name} now has an independent witness — remove it from KNOWN_UNCORROBORATED`
+      ).toBe(true);
+    }
+  });
+});
+
+describe("a boss name is an encounter, not one unit of one", () => {
+  // A TBC encounter can be several killable units — the Illidari Council is
+  // four, M'uru becomes Entropius — and Wowhead sometimes credits a drop to
+  // the unit where AtlasLoot always credits the encounter. Unfolded, one real
+  // drop reaches the universe under two names and the shipped `boss` filter
+  // offers a boss that is not an encounter.
+  //
+  // `scripts/check_boss_aliases.py` owns the alias table and checks it against
+  // AtlasLoot's vocabulary. This states the user-visible half of the same
+  // invariant: within one zone, an item names at most one boss.
+  //
+  // Karazhan's Opera slot is the deliberate exception — Romulo and Julianne /
+  // The Big Bad Wolf / The Wizard of Oz are three distinct encounters that
+  // AtlasLoot lists separately, and an item can drop from more than one.
+  const OPERA = new Set([
+    "Romulo and Julianne",
+    "The Big Bad Wolf",
+    "The Wizard of Oz",
+  ]);
+
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      for (const e of loadUniverse(rel).raw.entries) {
+        const byZone = new Map<string, Set<string>>();
+        for (const s of e.sources) {
+          if (!("zone" in s) || !("boss" in s) || typeof s.boss !== "string") {
+            continue;
+          }
+          if (OPERA.has(s.boss)) continue;
+          const bosses = byZone.get(s.zone) ?? new Set<string>();
+          bosses.add(s.boss);
+          byZone.set(s.zone, bosses);
+        }
+        for (const [zone, bosses] of byZone) {
+          expect(
+            [...bosses].sort(),
+            `${e.itemId} ${e.name} names ${bosses.size} bosses in ${zone} — a sub-unit name is probably shadowing its encounter`
+          ).toHaveLength(1);
+        }
+      }
+    });
+  }
+});
+
+describe("no boss field carries a spliced item name", () => {
+  // Wowhead writes tier drops as `Drop: <Token> - <Boss> (<Zone>)`, and the
+  // parser used to put that whole phrase into `boss`. `boss` is a shipped
+  // ViewOptions filter control, so a token name there is a filter entry that
+  // is not a boss.
+  //
+  // `" - "` is the discriminator because it is measurably absent from every
+  // real boss name in this repo: of 74 distinct boss strings, the only hits
+  // were the 10 defective rows. `Fathom-Lord Karathress` is why the check is
+  // the spaced separator and not a bare hyphen.
+  for (const rel of UNIVERSE_FILES) {
+    it(`${rel}`, () => {
+      for (const e of loadUniverse(rel).raw.entries) {
+        for (const s of e.sources) {
+          if (!("boss" in s) || typeof s.boss !== "string") continue;
+          expect(
+            s.boss,
+            `${e.itemId} ${e.name} boss contains a token/item name`
+          ).not.toContain(" - ");
+        }
+      }
+    });
+  }
 });

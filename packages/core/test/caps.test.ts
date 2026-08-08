@@ -6,6 +6,7 @@ import {
   capStateFrom,
   hitRegression,
   isHitDriven,
+  talentHitRatingFromString,
 } from "../src/caps.js";
 import { getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
@@ -40,6 +41,36 @@ describe("cap constants", () => {
     );
     expect(chest.stats).toHaveLength(widest + 1);
     expect(getGem(24051)!.stats).toHaveLength(widest + 1);
+  });
+});
+
+describe("talentHitRatingFromString", () => {
+  it("reads 3/3 Precision off the pinned ret P2 talent string as ~47 rating", () => {
+    // The pinned preset's string (data/presets/ret/p2.raid-sim-skeleton.json,
+    // also test/fixtures/slamaltman.raid-sim-request.json): tree segments are
+    // "5" (Holy carousel marker — not a tree), "053201" (Protection),
+    // "0523005120033125331051" (Retribution). Protection-tree talent index 2
+    // is Precision (paladin.proto precision = 23; ui/core/talents/trees/
+    // paladin.json lists divineDevotionAura, redoubt, precision in that
+    // order) — local char '3' means 3/3, and Precision grants flat
+    // PhysicalHitPercent (sim/paladin/talents.go applyPrecision), not rating,
+    // so the conversion goes through PHYSICAL_HIT_RATING_PER_HIT_PERCENT.
+    const rating = talentHitRatingFromString(
+      "5-053201-0523005120033125331051",
+      "ret"
+    );
+    expect(rating).toBeCloseTo(3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT, 4);
+    expect(Math.round(rating)).toBe(47);
+  });
+
+  it("returns 0 for a spec with no known hit talent", () => {
+    // Feral's tree (druid.proto) carries no hit talent at all, so this must
+    // not guess — see carry-forward ticket 05 for feral's own gap.
+    expect(talentHitRatingFromString("0-0-0", "feral")).toBe(0);
+  });
+
+  it("returns 0 when the talent string carries no points in Precision's slot", () => {
+    expect(talentHitRatingFromString("5-05-0", "ret")).toBe(0);
   });
 });
 
@@ -142,6 +173,31 @@ describe("capStateFrom", () => {
   it("skips empty slots without throwing", () => {
     const caps = capStateFrom([{ gems: [] }, { id: 30129, gems: [] }], []);
     expect(caps.hit.rating).toBe(23);
+  });
+
+  it("folds talent hit into the total for the pinned ret P2 talent string", () => {
+    // carry-forward 33: on the slamaltman fixture (packages/core/test/
+    // rank.test.ts), gear alone reads 72 against the ~142 cap, but the pinned
+    // ret P2 preset takes 3/3 Precision (~47 rating), so the real total is
+    // ~119. Reproduced here against a smaller synthetic equipment set — same
+    // 23-hit chest as the tests above — since caps.ts must not depend on the
+    // gear-source seam to prove the talent term is additive.
+    const equipment = [{ id: 30129, gems: [] }]; // 23 hit
+    const withoutTalents = capStateFrom(equipment, []);
+    expect(withoutTalents.hit.rating).toBe(23);
+
+    const withTalents = capStateFrom(equipment, [], {
+      talentsString: "5-053201-0523005120033125331051",
+      spec: "ret",
+    });
+    expect(withTalents.hit.rating).toBeCloseTo(
+      23 + 3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
+    expect(withTalents.hit.gap).toBeCloseTo(
+      withoutTalents.hit.gap - 3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
   });
 });
 
