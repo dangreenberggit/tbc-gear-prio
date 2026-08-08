@@ -217,5 +217,5 @@ check unprompted.
 | X2  | Data        | wontfix     | `check_rep_tables.py:135` comment overstates the collision guard's scope; failure mode still covered |
 | S1  | Standards   | defer       | `.scratch/carry-forward/issues/71-atlasloot-parse-writes-its-output-twice.md`                        |
 | S2  | Standards   | wontfix     | `recipeFaction*` data clump; the comment's player-cost justification is accepted                     |
-| S3  | Standards   | defer       | Folded into ticket 70 — same defect class as A1, both `parse_wowhead_source` guard scoping           |
+| S3  | Standards   | defer       | `.scratch/carry-forward/issues/70-wowhead-source-parenthetical-guards-scan-whole-string.md` (§2)     |
 | P1  | Spec        | wontfix     | Ticket 58's body lacks the scope restatement 67 asked for; it exists in 67. Bookkeeping              |
