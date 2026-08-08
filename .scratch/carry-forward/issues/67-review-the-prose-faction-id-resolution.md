@@ -3,11 +3,19 @@ Type: review
 Origin: ticket 66 grew past its own scope; the user asked for the wider change
   to get its own review rather than blocking 66 on it.
 Blocks: none
+Branch: feat/phase-3-vendor-and-craft-coverage (do before merging)
 Blocked by: none
 Relates to: 66 (landed the change), 58 (only AtlasLoot instance tables were
   vendored — this vendors a second module), 65 (established the id space)
 
 # Review the prose→faction-id resolution landed by ticket 66
+
+**Do before merging `feat/phase-3-vendor-and-craft-coverage`** — it reviews a
+change that branch landed, so it is worthless once merged unreviewed. Marked
+with `Branch:` rather than `Blocks:` because `Blocks: phase-N` means a PLAN.md
+delivery phase (Phase 3 = web shell, not started), while this branch's
+"phase-3" is the TBC content tier. Nothing enforces `Branch:` — `pnpm land`
+does not read it.
 
 Ticket 66 was a gate fix. Fixing it properly meant closing the gap underneath:
 prose rep rows carried a display string and no id, so the gate had nothing but
