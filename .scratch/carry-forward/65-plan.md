@@ -218,6 +218,40 @@ prose channel 58 is trying to retire, so it is the worse option.
 Do **not** treat this as done until an admission route exists; the ticket's
 "0 missing gear" criterion is still failing by design.
 
+### Step 2.5 outcome (done) — rep factions grant phase membership
+
+`data/phase_raids.json` gained a `repFactions` array mapping Faction.dbc id ->
+phase, consumed by `rep_factions_for_max_phase` / `source_rep_factions` and a
+new `in_rep_phase` membership route. Phase-guarded like `in_heroic`, so an item
+whose own phase runs ahead of the faction (Sunwell gear behind a BT vendor) is
+not admitted early.
+
+Ticket 66 landed first and made this cheaper than planned: **every** rep row
+now carries a `factionId`, prose rows included, so the map keys on ids and no
+string matching is involved. 66 also vendored the Factions module and emitted
+`data/faction_ids.json` with all 20 ids — which was step 3's infrastructure, so
+step 3 shrinks to parsing the item tables.
+
+Measured: +1 item per universe, zero regressions.
+
+| universe | added |
+| --- | --- |
+| ret-p3 / p4 / p5 | 32489 Ashtongue Talisman of Zeal |
+| feral-p3 | 32486 Ashtongue Talisman of Equilibrium |
+| ret-p2, feral-p2 | none (phase guard holds) |
+
+**One talisman each, not nine** — `classAllowlist` admits only the spec's own
+(paladin is class 2, druid 11). Correcting the plan's earlier claim: ret's is
+**Zeal (32489)**, not Valor (32485), which is the warrior trinket.
+
+The Band of Eternity ladder is still absent: those 16 rings have `sources: null`
+in db.json, so they have no rep source to match on and remain step 3 work,
+exactly as sized.
+
+Factions deliberately left out of the map: Keepers of Time, The Violet Eye and
+Lower City are attunement/dungeon factions whose gear is pre-raid or five-man
+tier. Listing them would admit off-tier items at a raid phase.
+
 ### 3. Vendor the Factions module for Scale of the Sands
 
 Now the actual 58 work, needed because the 16 rings have no DB source. Add

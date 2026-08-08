@@ -350,7 +350,12 @@ describe("data/universes/ret-p3.json hardening", () => {
     // "Profession: ..." (parses today), only its p1-p2 text reads
     // "Crafting: ..." (does not), so it was already a p3 member and only
     // needed this fix at p2.
-    expect(universeP3.length).toBe(364);
+    // 364 -> 365: a rep source carries no zone, so a rep-only item satisfied
+    // no membership route and was absent entirely. phase_raids.json now maps
+    // faction -> phase (ticket 65 step 2.5), admitting +32489 Ashtongue
+    // Talisman of Zeal, the paladin trinket from Black Temple's faction. The
+    // other eight talismans are held out by classAllowlist, not by this route.
+    expect(universeP3.length).toBe(365);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -431,6 +436,29 @@ describe("data/universes/ret-p3.json hardening", () => {
       faction: "Lower City",
       factionId: 1011,
     });
+  });
+
+  // Ticket 65 step 2.5: a rep source names no zone, so the zone-match route
+  // can never see it and a rep-only item reached no universe at all. The
+  // faction→phase map in phase_raids.json is the admission route. Keyed by
+  // Faction.dbc id, never by the display string.
+  it("admits rep-only items whose faction gates that phase's raid tier", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    // Ashtongue Deathsworn is Black Temple's faction, so its Exalted trinket
+    // is a phase-3 item. 32489 is the paladin one (classAllowlist [2]); the
+    // other eight talismans are other classes' and must not be admitted.
+    const zeal = byId.get(32489);
+    expect(zeal?.sources[0]).toMatchObject({
+      kind: "rep",
+      factionId: 1012,
+      standing: "Exalted",
+    });
+
+    const talismans = [
+      32485, 32486, 32487, 32488, 32489, 32490, 32491, 32492, 32493,
+    ].filter((id) => byId.has(id));
+    expect(talismans).toEqual([32489]);
   });
 
   // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that

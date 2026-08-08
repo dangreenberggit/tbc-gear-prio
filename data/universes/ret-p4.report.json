@@ -12,9 +12,13 @@
     "World Bosses",
     "Zul'Aman"
   ],
+  "phaseRepFactions": [
+    990,
+    1012
+  ],
   "d7EligibleTotal": 3140,
   "excludedNoSource": 1353,
-  "universeTotal": 411,
+  "universeTotal": 412,
   "listOnlyMembership": 27,
   "perSlot": {
     "back": 31,
@@ -27,7 +31,7 @@
     "neck": 29,
     "ranged": 5,
     "shoulder": 32,
-    "trinket": 25,
+    "trinket": 26,
     "waist": 39,
     "weapon": 20,
     "wrist": 33
@@ -44,14 +48,15 @@
     "curated": 6,
     "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 366,
+    "itemHasOrigin:db": 367,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 14,
     "listOnly": 27,
+    "repFactionMatch": 1,
     "zoneMatch": 378
   },
   "exclusivePrimaryOrigin": {
-    "db": 366,
+    "db": 367,
     "atlasloot-only": 13,
     "two-hop": 15,
     "wowhead-only": 14,
@@ -61,13 +66,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 411,
+    "total": 412,
     "casterOnlyReject": 138,
     "epFloorReject": 15,
     "combinedReject": 153,
-    "combinedKeep": 258,
-    "casterRejectPct": 33.6,
-    "combinedRejectPct": 37.2,
+    "combinedKeep": 259,
+    "casterRejectPct": 33.5,
+    "combinedRejectPct": 37.1,
     "applied": false
   },
   "wowheadListIds": 130,

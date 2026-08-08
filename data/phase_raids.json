@@ -1,5 +1,11 @@
 {
   "specNote": "Phase → raid zone mapping for raid-scoped pool membership. Zone names are canonical db.json zones[].name strings, except \"World Bosses\" (zoneId null): Doomwalker and Doom Lord Kazzak are outdoor, absent from db.json zones/npcs/sources entirely, and reach the universe only via AtlasLoot's WorldBossesBC block. Carryover policy: union of all raids with phase <= maxPhase (sub-phase 0 D1).",
+  "repFactionNote": "Phase → reputation factions whose vendors gate raid-tier gear for that phase's content. A rep source carries no zone, so it can never satisfy the zone-match membership route; without this map a rep-only item (the Ashtongue talismans, the Band of Eternity ring ladder) reaches no universe at all (ticket 65 step 2.5). Keyed by Faction.dbc id, which is the identity every rep source now carries — ids come from data/faction_ids.json; the names here are comments for humans, never matched on. Deliberately narrow: only factions whose reputation is earned inside a phase's raid and whose vendor sells gear of that raid's tier. Attunement and dungeon factions (Keepers of Time, The Violet Eye, Lower City) are excluded — their gear is pre-raid or five-man tier and already reaches the universe by other routes, so listing them would admit off-tier items at a raid phase.",
+  "repFactions": [
+    { "phase": 3, "factionId": 1012, "name": "Ashtongue Deathsworn" },
+    { "phase": 3, "factionId": 990, "name": "The Scale of the Sands" },
+    { "phase": 5, "factionId": 1077, "name": "Shattered Sun Offensive" }
+  ],
   "zones": [
     { "phase": 1, "name": "Karazhan", "zoneId": 3457 },
     { "phase": 1, "name": "Gruul's Lair", "zoneId": 3923 },

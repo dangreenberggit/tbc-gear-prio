@@ -6113,6 +6113,25 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 32489,
+      "name": "Ashtongue Talisman of Zeal",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Exalted",
+          "factionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32501,
       "name": "Shadowmoon Insignia",
       "slot": "trinket",

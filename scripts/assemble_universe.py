@@ -997,6 +997,33 @@ def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
     return zones
 
 
+def rep_factions_for_max_phase(max_phase: int, phase_raids: dict) -> set[int]:
+    """Faction ids whose vendors gate raid-tier gear at or before `max_phase`.
+
+    Same union carryover as `zones_for_max_phase`: Black Temple's vendor is
+    still worth buying from at phase 5.
+    """
+    factions: set[int] = set()
+    for row in phase_raids.get("repFactions") or []:
+        if isinstance(row, dict) and row.get("phase", 99) <= max_phase:
+            factions.add(int(row["factionId"]))
+    return factions
+
+
+def source_rep_factions(source: dict) -> set[int]:
+    """Faction ids a source attributes an item to, keyed by id not by name.
+
+    Empty for every kind but `rep`, and empty for a `rep` row we could not
+    resolve to an id -- an unresolved row still ships (the guide may be the
+    only witness) but must not grant phase membership on the strength of a
+    display string.
+    """
+    if source.get("kind") != "rep":
+        return set()
+    faction_id = source.get("factionId")
+    return {int(faction_id)} if faction_id is not None else set()
+
+
 def wowhead_lists_for_phase(
     max_phase: int, profile: SpecProfile
 ) -> list[tuple[str, dict]]:
@@ -1161,6 +1188,7 @@ def assemble(
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
+    phase_rep_factions = rep_factions_for_max_phase(max_phase, phase_raids)
 
     # itemId -> list of (source, origin)
     source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
@@ -1364,9 +1392,11 @@ def assemble(
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
         heroics_hit = set()
+        rep_factions_hit = set()
         for s in sources:
             zones_hit |= source_zones(s)
             heroics_hit |= source_heroic_dungeons(s)
+            rep_factions_hit |= source_rep_factions(s)
 
         # An admitted heroic dungeon still only contributes the items whose own
         # phase reaches this tier -- MT drops phase-5 gear, but the same guard
@@ -1375,6 +1405,15 @@ def assemble(
             it.get("phase") or 99
         ) <= max_phase
         in_phase = bool(zones_hit & phase_zones)
+        # A rep source names no zone, so `in_phase` can never see it. Without
+        # this route a rep-only item reaches no universe at all -- the nine
+        # Ashtongue talismans and the Band of Eternity ladder were absent
+        # entirely (ticket 65 step 2.5). Phase-guarded like `in_heroic`: the
+        # faction gates the *tier*, and an item whose own phase runs ahead of
+        # it (Sunwell gear behind a Black Temple vendor) is not a phase-3 item.
+        in_rep_phase = bool(rep_factions_hit & phase_rep_factions) and int(
+            it.get("phase") or 99
+        ) <= max_phase
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
         # No phase guard: these are persistent non-raid items whose own phase is
         # not the interesting fact about them. Everbloom Idol is phase 1 and
@@ -1387,13 +1426,21 @@ def assemble(
         # are the two shapes where the curated claim itself is what grants
         # membership.
         curated = iid in curated_unsourced or iid in curated_list_only
-        if not in_phase and not in_heroic and not list_only and not curated:
+        if (
+            not in_phase
+            and not in_heroic
+            and not in_rep_phase
+            and not list_only
+            and not curated
+        ):
             continue
 
         if in_phase:
             membership_stats["zoneMatch"] += 1
         elif in_heroic:
             membership_stats["heroicMatch"] += 1
+        elif in_rep_phase:
+            membership_stats["repFactionMatch"] += 1
         elif list_only:
             list_only_count += 1
             membership_stats["listOnly"] += 1
@@ -1547,6 +1594,7 @@ def assemble(
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "phaseZones": sorted(phase_zones),
+        "phaseRepFactions": sorted(phase_rep_factions),
         "d7EligibleTotal": eligible_count,
         "excludedNoSource": no_zone_excluded,
         "universeTotal": len(entries),
