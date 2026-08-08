@@ -31,6 +31,15 @@ export type LoggedItem = {
 export type LoggedGear = {
   items: LoggedItem[];
   talentPointsByTree: [number, number, number];
+  /**
+   * WCL `actors[].subType`, which is **class-level only** — `Paladin`, never
+   * `Retribution` (docs/phase0-findings.md). Present because talent plurality
+   * cannot name a spec without it: 45 points in the third tree is ret on a
+   * paladin and nothing of the sort on another class. Optional so a source
+   * that cannot supply it degrades to "cannot classify" rather than throwing
+   * (carry-forward 61).
+   */
+  className?: string;
   /** Raw CombatantInfo.specID when present; classification still uses trees. */
   specIdHint?: number;
   provenance: {

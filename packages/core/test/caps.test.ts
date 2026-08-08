@@ -6,7 +6,6 @@ import {
   capStateFrom,
   hitRegression,
   isHitDriven,
-  talentHitRatingFromString,
 } from "../src/caps.js";
 import { getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
@@ -44,21 +43,21 @@ describe("cap constants", () => {
   });
 });
 
-describe("talentHitRatingFromString", () => {
+describe("talentHitFromString (via capStateFrom)", () => {
   it("reads 3/3 Precision off the pinned ret P2 talent string as ~47 rating", () => {
     // The pinned preset's string (data/presets/ret/p2.raid-sim-skeleton.json,
     // also test/fixtures/slamaltman.raid-sim-request.json): tree segments are
-    // "5" (Holy carousel marker — not a tree), "053201" (Protection),
+    // "5" (Holy), "053201" (Protection),
     // "0523005120033125331051" (Retribution). Protection-tree talent index 2
     // is Precision (paladin.proto precision = 23; ui/core/talents/trees/
     // paladin.json lists divineDevotionAura, redoubt, precision in that
     // order) — local char '3' means 3/3, and Precision grants flat
     // PhysicalHitPercent (sim/paladin/talents.go applyPrecision), not rating,
     // so the conversion goes through PHYSICAL_HIT_RATING_PER_HIT_PERCENT.
-    const rating = talentHitRatingFromString(
-      "5-053201-0523005120033125331051",
-      "ret"
-    );
+    const rating = capStateFrom([], [], {
+      talentsString: "5-053201-0523005120033125331051",
+      spec: "ret",
+    }).hit.rating;
     expect(rating).toBeCloseTo(3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT, 4);
     expect(Math.round(rating)).toBe(47);
   });
@@ -66,11 +65,15 @@ describe("talentHitRatingFromString", () => {
   it("returns 0 for a spec with no known hit talent", () => {
     // Feral's tree (druid.proto) carries no hit talent at all, so this must
     // not guess — see carry-forward ticket 05 for feral's own gap.
-    expect(talentHitRatingFromString("0-0-0", "feral")).toBe(0);
+    expect(
+      capStateFrom([], [], { talentsString: "0-0-0", spec: "feral" }).hit.rating
+    ).toBe(0);
   });
 
   it("returns 0 when the talent string carries no points in Precision's slot", () => {
-    expect(talentHitRatingFromString("5-05-0", "ret")).toBe(0);
+    expect(
+      capStateFrom([], [], { talentsString: "5-05-0", spec: "ret" }).hit.rating
+    ).toBe(0);
   });
 });
 
@@ -198,6 +201,71 @@ describe("capStateFrom", () => {
       withoutTalents.hit.gap - 3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
       4
     );
+  });
+
+  it("reports which talent it assumed, so the banner can disclose it", () => {
+    // carry-forward 60: the talentsString is the preset's, never the logged
+    // character's, so the cap must carry the assumption alongside the number
+    // — the same way it already carries assumedRace.
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: "5-053201-0523005120033125331051",
+      spec: "ret",
+    });
+    expect(caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 3,
+      maxPoints: 3,
+    });
+  });
+
+  it("still assumes the preset's Precision for a character who skipped it", () => {
+    // carry-forward 60's own acceptance case, kept as a *characterisation*
+    // test: this is the shipped behaviour, not the desired one. The talent
+    // string is the preset's, so a character with 0/3 Precision is still
+    // credited ~47 rating — which is exactly why the cap must disclose the
+    // assumption. If someone later threads real per-talent data through, this
+    // test should fail and be rewritten, not deleted.
+    const presetString = "5-053201-0523005120033125331051";
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: presetString,
+      spec: "ret",
+    });
+    expect(caps.hit.rating).toBeCloseTo(
+      23 + 3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
+    expect(caps.hit.talentHitAssumed?.points).toBe(3);
+  });
+
+  it("discloses the preset's actual Precision rank rather than always 3", () => {
+    // The disclosed points are decoded, not hardcoded — a preset carrying
+    // 2/3 must say 2/3, or the banner would misreport a build it did read.
+    // The preset's Protection segment "053201" with Precision (index 2)
+    // dropped 3 -> 2 and the freed point moved to index 1, so the build still
+    // sums to 61 at level 70 rather than being an illegal 60-point string.
+    const twoOfThree = "5-062201-0523005120033125331051";
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: twoOfThree,
+      spec: "ret",
+    });
+    expect(caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 2,
+      maxPoints: 3,
+    });
+    expect(caps.hit.rating).toBeCloseTo(
+      23 + 2 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
+  });
+
+  it("reports no talent assumption for a spec with no mapped hit talent", () => {
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: "-5032003115331051-",
+      spec: "feral",
+    });
+    expect(caps.hit.talentHitAssumed).toBeUndefined();
+    expect(caps.hit.rating).toBe(23);
   });
 });
 

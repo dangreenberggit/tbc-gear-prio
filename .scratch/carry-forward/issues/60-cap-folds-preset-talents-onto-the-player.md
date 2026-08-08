@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/fix-carry-forward-backlog.md (adversarial A2)
 Blocks: none
@@ -83,3 +83,67 @@ compose-stage rewrite this ticket originally implied.
   cap figure does not silently inherit the preset's Precision.
 - The `hitCapBanner` docstring's "only remaining uncounted source" claim is
   corrected if the gap stays two-sided.
+
+## Closed 2026-08-07 — the assumption is kept, and now says so
+
+**User decision:** keep assuming 3/3 Precision rather than thread real talent
+data. A raiding ret paladin almost always takes it, and wowsims defaults the
+same way — hand the user a sane build and let them override it later. So this
+closes on the *second* branch of the first "Done when" (the banner states the
+talent hit is the preset's), not the first.
+
+The number is therefore unchanged. What changed is that it no longer passes
+itself off as read from the character:
+
+- `HitCapEntry.talentHitAssumed?: {talent, points, maxPoints}` — same shape and
+  spirit as the existing `assumedRace`. Absent means nothing was assumed, so
+  feral (no mapped hit talent) is unaffected.
+- The talent name and max points moved into `TALENT_HIT_BY_SPEC` instead of
+  being hardcoded at the banner, and `points` is **decoded from the string**, so
+  a preset carrying 2/3 discloses 2/3 (pinned by a test).
+- `hitCapBanner` appends: *"Assumes 3/3 Precision — your logged build is not
+  read for talents yet."*
+- The `"You are over by at least this much"` floor now only applies when
+  nothing was assumed. With an assumed talent the error runs **both** ways, so
+  the old one-sided claim — and the docstring's "Heroic Presence is the only
+  remaining uncounted source" — were no longer honest and are gone.
+- `cli.ts` passes it through, so this reaches a user rather than only a type.
+
+Also pinned carry-forward **33's** third criterion end to end, which 33 was
+closed without: `ranking.caps.hit.rating` is **119.31** on the slamaltman
+fixture (72 gear + 3 × 15.769233), asserted through `rankUpgrades` against the
+real recording rather than 33's synthetic additivity set.
+
+`pnpm verify` green: 32 files, 434 passed / 2 todo.
+
+## Follow-up, not done here
+
+Letting the user *change* the assumption (a settings surface, or importing a
+wowsims talent string) needs somewhere to put it — there is no settings UI
+until Phase 3. Not filed as its own ticket yet; fold it into the Phase 3 view
+work, where the disclosure string is already the natural anchor.
+
+## Bullet 2, read on the disclosure branch
+
+*"A test pins a character whose talents differ from the preset and shows the
+cap figure does not silently inherit the preset's Precision."*
+
+Worth being precise, since the wording predates the decision to keep the
+assumption. Bullet 1 closed on its *second* branch (disclose rather than
+thread real data), so "does not **silently** inherit" is what bullet 2 can
+mean here — the inheritance stays, the silence goes. Two tests cover that
+reading:
+
+- `caps.test.ts` "still assumes the preset's Precision for a character who
+  skipped it" — a **characterisation** test: it pins the inheritance *and*
+  asserts `talentHitAssumed` is set, i.e. not silent. Labelled in-place as
+  shipped-not-desired, so it fails loudly if someone later threads real data.
+- `caps.test.ts` "discloses the preset's actual Precision rank rather than
+  always 3" — a genuinely differing build (`5-062201-…`, a legal 61-point
+  string with Precision at 2/3) proving the disclosure is decoded, not
+  hardcoded.
+
+What is **not** covered, and cannot be until real talent data is threaded: a
+*logged character* whose talents differ from the preset, because nothing reads
+a logged character's talents into the cap. That is the first branch of bullet
+1, and it is the follow-up recorded below.

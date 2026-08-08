@@ -63,6 +63,22 @@ const CLASS_TREE_SPEC: Record<string, Record<number, SpecId>> = {
   Druid: DRUID_TREE_SPEC,
 };
 
+/**
+ * Tree names in talent-string segment order, for messages a player reads.
+ * Copied from `ui/core/talents/trees/<class>.json` in the pinned
+ * wowsims-tbc-new source, same as the tree indices above — a raw "tree 1"
+ * means nothing to someone reading a CLI error.
+ */
+const CLASS_TREE_NAMES: Record<string, readonly string[]> = {
+  Paladin: ["Holy", "Protection", "Retribution"],
+  Druid: ["Balance", "Feral Combat", "Restoration"],
+};
+
+/** The tree's display name, or a bare index when the class is unmapped. */
+export function treeName(className: string, treeIndex: number): string {
+  return CLASS_TREE_NAMES[className]?.[treeIndex] ?? `tree ${treeIndex}`;
+}
+
 export function classifySpec(
   className: string,
   talentPointsByTree: TalentPointsByTree

@@ -11,7 +11,7 @@
  * and the pinned wowsimcli exposes only `sim`, not the `ComputeStats` RPC
  * whose `PlayerStats.final_stats` would have been the right number. Talent
  * hit does not need that RPC: `talentsString` is already in the composed
- * `RaidSimRequest`, so `talentHitRatingFromString` decodes it directly
+ * `RaidSimRequest`, so `talentHitFromString` decodes it directly
  * (carry-forward 33).
  *
  * The talent half of the original gap was measurable and large: the pinned
@@ -24,7 +24,7 @@
  * slamaltman fixture character read 72 from gear against a 142 cap, gear
  * alone, but sits near 119 once Precision is counted.
  *
- * `talentHitRatingFromString` is a hand-maintained per-spec table (only
+ * `TALENT_HIT_BY_SPEC` is a hand-maintained per-spec table (only
  * "ret" → Precision is populated); an unrecognised spec or a talent string
  * with no points in the mapped slot contributes 0 rather than guessing, so
  * feral (no hit talent in druid.proto — see carry-forward 05 for its own gap)
@@ -81,11 +81,27 @@ export type CapEntry = {
   gap: number | null;
 };
 
+/**
+ * Talent hit folded into a cap figure that came from the *preset's* build
+ * rather than the logged character's (carry-forward 60). Its own type because
+ * it travels from the decoder through `HitCapEntry` to the banner.
+ */
+export type TalentHitAssumption = {
+  talent: string;
+  points: number;
+  maxPoints: number;
+};
+
 /** Hit always has a known cap, so it narrows both nullable fields back out. */
 export type HitCapEntry = CapEntry & {
   capRating: number;
   gap: number;
   assumedRace?: Race;
+  /**
+   * Absent means nothing was assumed — either no talent string was supplied,
+   * or the spec has no hit talent to assume.
+   */
+  talentHitAssumed?: TalentHitAssumption;
   capUncertainty: number;
 };
 
@@ -154,37 +170,55 @@ function sumStat(
 const TALENT_HIT_BY_SPEC: Readonly<
   Record<
     SpecId,
-    | { treeSegment: number; talentIndex: number; percentPerPoint: number }
+    | {
+        treeSegment: number;
+        talentIndex: number;
+        percentPerPoint: number;
+        talent: string;
+        maxPoints: number;
+      }
     | undefined
   >
 > = {
-  ret: { treeSegment: 1, talentIndex: 2, percentPerPoint: 1 },
+  ret: {
+    treeSegment: 1,
+    talentIndex: 2,
+    percentPerPoint: 1,
+    talent: "Precision",
+    maxPoints: 3,
+  },
   feral: undefined,
 };
 
 /**
  * Talent-granted physical hit rating from a wowhead-format `talentsString`
- * (proto.Player.talents_string), decoded per `TALENT_HIT_BY_SPEC`.
+ * (proto.Player.talents_string), decoded per `TALENT_HIT_BY_SPEC`, returned
+ * alongside what it was read from so callers that must disclose the
+ * assumption (carry-forward 60) do not re-decode the string themselves.
  *
  * Returns 0 rather than throwing for a spec with no mapped hit talent, a
  * string with fewer segments/characters than the mapped position, or a
  * non-digit at that position — an unreadable or absent talent contributes
  * nothing rather than crashing the cap computation over a preset detail.
  */
-export function talentHitRatingFromString(
+function talentHitFromString(
   talentsString: string,
   spec: SpecId
-): number {
+): { rating: number; assumed?: TalentHitAssumption } {
   const entry = TALENT_HIT_BY_SPEC[spec];
-  if (!entry) return 0;
+  if (!entry) return { rating: 0 };
 
   const segment = talentsString.split("-")[entry.treeSegment];
-  if (segment === undefined) return 0;
+  if (segment === undefined) return { rating: 0 };
 
   const points = Number(segment.charAt(entry.talentIndex));
-  if (!Number.isFinite(points) || points <= 0) return 0;
+  if (!Number.isFinite(points) || points <= 0) return { rating: 0 };
 
-  return points * entry.percentPerPoint * PHYSICAL_HIT_RATING_PER_HIT_PERCENT;
+  return {
+    rating:
+      points * entry.percentPerPoint * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+    assumed: { talent: entry.talent, points, maxPoints: entry.maxPoints },
+  };
 }
 
 export function capStateFrom(
@@ -193,11 +227,11 @@ export function capStateFrom(
   opts: { assumedRace?: Race; talentsString?: string; spec?: SpecId } = {}
 ): CapState {
   const gearHitRating = sumStat(equipment, socketed, Stat.StatMeleeHitRating);
-  const talentHitRating =
+  const talentHit =
     opts.talentsString !== undefined && opts.spec !== undefined
-      ? talentHitRatingFromString(opts.talentsString, opts.spec)
-      : 0;
-  const hitRating = gearHitRating + talentHitRating;
+      ? talentHitFromString(opts.talentsString, opts.spec)
+      : { rating: 0 };
+  const hitRating = gearHitRating + talentHit.rating;
   const expertiseRating = sumStat(
     equipment,
     socketed,
@@ -211,6 +245,7 @@ export function capStateFrom(
     capUncertainty: HIT_CAP_UNCERTAINTY,
   };
   if (opts.assumedRace !== undefined) hit.assumedRace = opts.assumedRace;
+  if (talentHit.assumed !== undefined) hit.talentHitAssumed = talentHit.assumed;
 
   return {
     hit,

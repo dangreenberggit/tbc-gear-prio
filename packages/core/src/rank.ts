@@ -67,6 +67,7 @@ import {
   usesPairedReplication,
 } from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
+import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
@@ -114,6 +115,13 @@ export type RankErrorKind =
   | "no-qualifying-fight"
   | "gear-unreadable"
   | "meta-unsolvable"
+  /**
+   * The resolved fight's talents classify as a spec other than the one asked
+   * for — the character's off-spec night (carry-forward 61). Refusing beats
+   * ranking it: the sim would run tank gear against ret's preset and EP
+   * weights and return a confident, wrong list with no error anywhere.
+   */
+  | "spec-mismatch"
   | "sim-failed"
   | "wcl-budget-exhausted"
   | "not-implemented"
@@ -279,6 +287,42 @@ export async function rankUpgrades(
   // Never a cache read here — ADR-0019 hashes what this returns. The point
   // budget is defended one layer down; see CachingGearSource.
   const logged = await deps.gear.readGear(fight);
+
+  // carry-forward 61: this is the check the resolution path was skipping.
+  //
+  // Refuse only on a *positive* reading that the fight is some other build.
+  // Two shapes qualify, and the second is the one ticket 04 actually hit:
+  // `matches: false` with a named `detected`, and `unsupported-spec` — where
+  // the class is known and the favoured tree is known and simply is not this
+  // spec's. A protection paladin classifies as `unsupported-spec`, not as a
+  // named other spec (protection has no spec home today), so keying the
+  // refusal on `detected` alone would never fire for the case that motivated
+  // the ticket.
+  //
+  // Everything else ranks as before: no class from the source,
+  // `unsupported-class`, an `ambiguous` split, or feral's
+  // `needs-form-uptime` are all absence of evidence, not evidence against.
+  if (logged.className !== undefined) {
+    const classification = classifySpec(
+      logged.className,
+      logged.talentPointsByTree
+    );
+    const match = matchesRequestedSpec(classification, input.spec);
+    const otherSpec =
+      match.detected ??
+      (!classification.ok && classification.reason === "unsupported-spec"
+        ? `a ${treeName(logged.className, classification.treeIndex)} build`
+        : undefined);
+    if (!match.matches && otherSpec !== undefined) {
+      throw new RankError(
+        "spec-mismatch",
+        `${input.character.name}'s ${resolved.encounterName} fight reads as ` +
+          `${otherSpec}, not ${input.spec} (talents ` +
+          `${logged.talentPointsByTree.join("/")}) — pick another fight with ` +
+          `--fight, or rank the spec they actually played`
+      );
+    }
+  }
 
   onProgress?.({ stage: "composing" });
   // PLAN.md §8.2 / race standing assumption: default to the preset skeleton's

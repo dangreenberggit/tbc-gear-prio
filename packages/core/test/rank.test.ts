@@ -186,6 +186,174 @@ describe("rankUpgrades", () => {
     } satisfies Partial<RankError>);
   });
 
+  it("refuses to rank a fight whose talents classify as another spec", async () => {
+    // carry-forward 61 / ticket 04's first capture: slamaltman has a
+    // protection night (0/44/17) in the same report. Ranking it as ret sims
+    // tank gear against ret's preset and EP weights and returns a confident,
+    // wrong list — PLAN.md's stated worst case. Refuse instead.
+    const logged = slamaltmanLoggedGear();
+    logged.className = "Paladin";
+    logged.talentPointsByTree = [0, 44, 17];
+
+    await expect(
+      rankUpgrades(
+        { character: CHAR, spec: "ret", maxPhase: 2 },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner("v0.0.101", new Map()),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+        }
+      )
+    ).rejects.toMatchObject({
+      name: "RankError",
+      kind: "spec-mismatch",
+    } satisfies Partial<RankError>);
+  });
+
+  it("names the tree it read rather than leaking a raw index", async () => {
+    // A player reading "reads as tree 1" learns nothing. Holy also covers the
+    // treeIndex-0 arm, which the protection test above does not reach.
+    const logged = slamaltmanLoggedGear();
+    logged.className = "Paladin";
+    logged.talentPointsByTree = [45, 11, 5];
+
+    await expect(
+      rankUpgrades(
+        { character: CHAR, spec: "ret", maxPhase: 2 },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner("v0.0.101", new Map()),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+        }
+      )
+    ).rejects.toThrow(/Holy build, not ret \(talents 45\/11\/5\)/);
+  });
+
+  it("does not refuse a feral druid, whose tree cannot name a spec by talents alone", async () => {
+    // Feral cat and feral tank are the same 45-point tree, so classifySpec
+    // returns needs-form-uptime. That is undecided, not a mismatch — refusing
+    // here would make the guard reject every druid it was never meant to
+    // judge. Guards against the obvious over-strict reading of ticket 61.
+    const logged = slamaltmanLoggedGear();
+    logged.className = "Druid";
+    logged.talentPointsByTree = [0, 45, 16];
+
+    const equipment = equipmentFromLoggedGear(logged);
+    const request = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const key = simCacheKey(request, "v0.0.101", {
+      seed: 42,
+      iterations: 3000,
+    });
+
+    await expect(
+      rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase: 2,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner(
+            "v0.0.101",
+            new Map([
+              [
+                key,
+                {
+                  dps: 1000,
+                  stdev: 10,
+                  iterationsDone: 3000,
+                  simVersion: "v0.0.101",
+                },
+              ],
+            ])
+          ),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+        }
+      )
+    ).resolves.toBeDefined();
+  });
+
+  it("ranks when the class is unknown rather than refusing on missing data", async () => {
+    // A source that cannot supply a class must degrade to "cannot classify",
+    // not to "mismatch" — treating absent data as a mismatch would refuse
+    // every character on any adapter that omits subType.
+    const logged = slamaltmanLoggedGear();
+    delete logged.className;
+    logged.talentPointsByTree = [0, 44, 17];
+
+    const equipment = equipmentFromLoggedGear(logged);
+    const request = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    const opts = { seed: 42, iterations: 3000 };
+    const key = simCacheKey(request, "v0.0.101", opts);
+
+    await expect(
+      rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase: 2,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner(
+            "v0.0.101",
+            new Map([
+              [
+                key,
+                {
+                  dps: 1000,
+                  stdev: 10,
+                  iterationsDone: 3000,
+                  simVersion: "v0.0.101",
+                },
+              ],
+            ])
+          ),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+        }
+      )
+    ).resolves.toBeDefined();
+  });
+
   it("sims the composed slamaltman baseline and reports metaAdjusted", async () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);
@@ -259,6 +427,20 @@ describe("rankUpgrades", () => {
     );
     expect(ranking.caps.hit.assumedRace).toBe("RaceHuman");
     expect(ranking.caps.expertise.rating).toBeGreaterThanOrEqual(0);
+
+    // carry-forward 33's third criterion, finally pinned end to end (it was
+    // closed on a synthetic additivity test): slamaltman's gear alone reads
+    // 72, and the preset's 3/3 Precision carries the total to ~119 of the
+    // ~142 cap. Independent source of truth: 72 is the ticket's own measured
+    // gear figure, 47.31 = 3 × PHYSICAL_HIT_RATING_PER_HIT_PERCENT.
+    expect(ranking.caps.hit.rating).toBeCloseTo(119.31, 1);
+    // carry-forward 60: and that 3/3 is the *preset's*, not slamaltman's, so
+    // the cap must say it assumed rather than read it.
+    expect(ranking.caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 3,
+      maxPoints: 3,
+    });
   });
 
   it("defaults race from the raid-sim skeleton when RankInput.race is omitted", async () => {
