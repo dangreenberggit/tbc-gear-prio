@@ -116,6 +116,25 @@ and keeps its own line unchanged.
 - No `data/universes/**` or other committed generated artifact needed
   regeneration; nothing under `data/` was touched.
 
+## Correction 2026-08-07 (pre-merge review of `fix/carry-forward-backlog`, spec S1)
+
+The third criterion — *"A test pins the fixture character near 119 rather than
+72"* — is **not met**, though the ticket was closed as if it were. The ~119
+figure above was reproduced by a one-off `npx tsx` run, not pinned by a test.
+The test that did land (`packages/core/test/caps.test.ts:178`) uses a synthetic
+single-item set and asserts the talent term is *additive*, saying so in its own
+comment; it never touches the slamaltman fixture:
+
+```bash
+grep -n "119\|talentsString\|capState" packages/core/test/rank.test.ts   # no hits
+```
+
+Consequence: a regression in `talentsStringFromRequest` (`rank.ts:877`, an
+untested accessor reading `parties[0].players[0]` through a structural cast)
+would not be caught. The first two criteria are genuinely met, so this stays
+closed rather than reopening — but the end-to-end pin is real outstanding work
+and is folded into ticket 60, which has to touch this code path anyway.
+
 Not in scope, not touched: feral's own talent-hit gap (carry-forward 05,
 still open — druid has no hit talent so this ticket's fix is a no-op for it,
 correctly); raid buffs and Heroic Presence (no TBC raid buff grants melee

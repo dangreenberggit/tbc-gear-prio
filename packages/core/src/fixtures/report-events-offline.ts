@@ -77,7 +77,6 @@ function talentPointsFrom(
   return [points[0]!, points[1]!, points[2]!];
 }
 
-/** The shape both raw fixture types have in common — what the shared walk needs. */
 type OfflineRawFixture = {
   report_code: string;
   fight: { id: number; name: string };

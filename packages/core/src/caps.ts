@@ -144,11 +144,12 @@ function sumStat(
  *
  * Ret's entry: paladin.proto's Protection block is talentIndex 21-40
  * (`precision = 23` is local index 2); wowsims-tbc-new's talent-string
- * encoder writes trees in Holy(0)/Protection(1)/Retribution(2) order, but the
- * pinned preset's string carries a leading `"5"` segment before Holy
- * (`5-053201-…` splits to `["5", "053201", "…"]`) — a carousel/version marker
- * observed empirically on every pinned preset string, not decoded further
- * here. Segment 1 is therefore Protection.
+ * encoder writes trees in Holy(0)/Protection(1)/Retribution(2) order, so
+ * `5-053201-…` splits to Holy `"5"` / Protection `"053201"` / Retribution
+ * `"0523005120033125331051"`. The segments sum to 5/11/45 — the same
+ * Holy/Prot/Ret point split asserted for this fixture at `spec.test.ts:16`
+ * and `rank.test.ts:103`, which is what confirms the alignment. Segment 1 is
+ * therefore Protection.
  */
 const TALENT_HIT_BY_SPEC: Readonly<
   Record<

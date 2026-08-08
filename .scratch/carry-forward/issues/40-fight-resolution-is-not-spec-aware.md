@@ -2,6 +2,7 @@ Status: open
 Type: task
 Origin: `phase-2/resolution-and-fallback` review fallout (domain D1), and user direction 2026-08-06
 Blocks: none
+Blocked by: `LoggedGear` carries no class name — WCL `actors[].subType` has it (PLAN.md §5.1), unthreaded through the gear-source seam
 Progress: `spec.ts` piece landed (see `## Progress 2026-08-06` below); resolution-path wiring in `rank.ts` / `seams/gear-source.ts` / fixtures is still open and out of this dispatch's file scope.
 
 # Fight resolution is not spec-aware: we can pick a fight the character played in another spec

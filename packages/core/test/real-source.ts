@@ -18,8 +18,8 @@ import {
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
-/** Reads `data/universes/<universe>.json` once per call; universes are small
- * (hundreds of rows), so no caching is worth the staleness risk. */
+/** Universes are small (hundreds of rows), so no caching is worth the
+ * staleness risk. */
 function loadUniverseEntries(universe: string): UniverseEntry[] {
   const raw = JSON.parse(
     readFileSync(join(root, "data/universes", `${universe}.json`), "utf8")

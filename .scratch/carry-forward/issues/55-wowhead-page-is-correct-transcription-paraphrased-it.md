@@ -1,4 +1,4 @@
-Status: closed — measured, premise false
+Status: closed — premise false; the one surviving criterion moved to ticket 56
 Type: bug
 Origin: user screenshot of the live p4 page, 2026-08-07
 Blocks: none
