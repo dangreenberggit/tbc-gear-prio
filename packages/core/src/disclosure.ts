@@ -65,32 +65,53 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
  * `hit.rating`/`hit.gap` already fold in talent-granted hit where
  * `capStateFrom` was given a `talentsString` and `spec` it recognises (the
  * pinned ret preset's 3/3 Precision, ~47 rating — carry-forward 33; a
- * recognised spec with no mapped hit talent, e.g. feral, or a preset this
- * engine has no mapping for yet, contributes 0 rather than being silently
- * assumed away). No TBC raid buff grants melee hit, so once talents are
- * counted, Heroic Presence — unreadable from WCL, party-scoped, only ever
- * *lowers* the cap — is the only remaining uncounted source. It is one-sided,
- * which is why this does not render a ± band: a symmetric band would dress a
- * one-sided overstatement up as noise.
+ * recognised spec with no mapped hit talent, e.g. feral, contributes 0 rather
+ * than being silently assumed away).
+ *
+ * That talent figure is **assumed, not read** (carry-forward 60): the string
+ * comes off the composed request, which `compose` never writes from the log,
+ * so it is always the preset's build. Pass `talentHitAssumed` to say so.
+ * Without it the reader would take the preset's Precision for their own.
+ *
+ * The assumption makes the error two-sided — a character who skipped
+ * Precision reads ~47 rating high, one who took it reads true — so the
+ * "at least this much" floor only holds when nothing was assumed. Heroic
+ * Presence remains one-sided (unreadable from WCL, party-scoped, only ever
+ * *lowers* the cap), which is why this still renders no ± band: a symmetric
+ * band would dress a one-sided overstatement up as noise.
  */
-export function hitCapBanner(hit: {
-  rating: number;
-  gap: number;
-  capUncertainty: number;
-}): string {
+export function hitCapBanner(
+  hit: {
+    rating: number;
+    gap: number;
+    capUncertainty: number;
+  },
+  opts: {
+    talentHitAssumed?: { talent: string; points: number; maxPoints: number };
+  } = {}
+): string {
   const rounded = Math.round(Math.abs(hit.gap));
   const band = Math.round(hit.capUncertainty);
+  const assumed = opts.talentHitAssumed;
+  const assumption = assumed
+    ? ` Assumes ${assumed.points}/${assumed.maxPoints} ${assumed.talent} — ` +
+      `your logged build is not read for talents yet.`
+    : "";
+
   if (hit.gap > 0) {
     return (
       `~${rounded} rating under the hit cap — ` +
       `Heroic Presence in your party would lower the cap by ~${band}. ` +
-      `The real shortfall may be smaller than this.`
+      `The real shortfall may be smaller than this.${assumption}`
     );
   }
+  const floor = assumed
+    ? `Heroic Presence would lower the cap further.`
+    : `You are over by at least this much.`;
   return (
     `~${rounded} rating over the hit cap — ` +
     `Heroic Presence in your party would lower the cap by ~${band}. ` +
-    `You are over by at least this much.`
+    `${floor}${assumption}`
   );
 }
 

@@ -259,6 +259,20 @@ describe("rankUpgrades", () => {
     );
     expect(ranking.caps.hit.assumedRace).toBe("RaceHuman");
     expect(ranking.caps.expertise.rating).toBeGreaterThanOrEqual(0);
+
+    // carry-forward 33's third criterion, finally pinned end to end (it was
+    // closed on a synthetic additivity test): slamaltman's gear alone reads
+    // 72, and the preset's 3/3 Precision carries the total to ~119 of the
+    // ~142 cap. Independent source of truth: 72 is the ticket's own measured
+    // gear figure, 47.31 = 3 × PHYSICAL_HIT_RATING_PER_HIT_PERCENT.
+    expect(ranking.caps.hit.rating).toBeCloseTo(119.31, 1);
+    // carry-forward 60: and that 3/3 is the *preset's*, not slamaltman's, so
+    // the cap must say it assumed rather than read it.
+    expect(ranking.caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 3,
+      maxPoints: 3,
+    });
   });
 
   it("defaults race from the raid-sim skeleton when RankInput.race is omitted", async () => {

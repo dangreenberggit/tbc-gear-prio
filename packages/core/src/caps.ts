@@ -86,6 +86,13 @@ export type HitCapEntry = CapEntry & {
   capRating: number;
   gap: number;
   assumedRace?: Race;
+  /**
+   * Set when `rating` includes talent hit taken from the *preset's* build
+   * rather than the logged character's (carry-forward 60). Absent means
+   * nothing was assumed — either no talent string was supplied, or the spec
+   * has no hit talent to assume.
+   */
+  talentHitAssumed?: { talent: string; points: number; maxPoints: number };
   capUncertainty: number;
 };
 
@@ -154,11 +161,23 @@ function sumStat(
 const TALENT_HIT_BY_SPEC: Readonly<
   Record<
     SpecId,
-    | { treeSegment: number; talentIndex: number; percentPerPoint: number }
+    | {
+        treeSegment: number;
+        talentIndex: number;
+        percentPerPoint: number;
+        talent: string;
+        maxPoints: number;
+      }
     | undefined
   >
 > = {
-  ret: { treeSegment: 1, talentIndex: 2, percentPerPoint: 1 },
+  ret: {
+    treeSegment: 1,
+    talentIndex: 2,
+    percentPerPoint: 1,
+    talent: "Precision",
+    maxPoints: 3,
+  },
   feral: undefined,
 };
 
@@ -175,16 +194,35 @@ export function talentHitRatingFromString(
   talentsString: string,
   spec: SpecId
 ): number {
+  return talentHitFromString(talentsString, spec).rating;
+}
+
+/**
+ * The rating plus what it was read from, so callers that must disclose the
+ * assumption (carry-forward 60) do not re-decode the string themselves.
+ * `points` is absent whenever `rating` is 0 — nothing was assumed.
+ */
+function talentHitFromString(
+  talentsString: string,
+  spec: SpecId
+): {
+  rating: number;
+  assumed?: { talent: string; points: number; maxPoints: number };
+} {
   const entry = TALENT_HIT_BY_SPEC[spec];
-  if (!entry) return 0;
+  if (!entry) return { rating: 0 };
 
   const segment = talentsString.split("-")[entry.treeSegment];
-  if (segment === undefined) return 0;
+  if (segment === undefined) return { rating: 0 };
 
   const points = Number(segment.charAt(entry.talentIndex));
-  if (!Number.isFinite(points) || points <= 0) return 0;
+  if (!Number.isFinite(points) || points <= 0) return { rating: 0 };
 
-  return points * entry.percentPerPoint * PHYSICAL_HIT_RATING_PER_HIT_PERCENT;
+  return {
+    rating:
+      points * entry.percentPerPoint * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+    assumed: { talent: entry.talent, points, maxPoints: entry.maxPoints },
+  };
 }
 
 export function capStateFrom(
@@ -193,11 +231,11 @@ export function capStateFrom(
   opts: { assumedRace?: Race; talentsString?: string; spec?: SpecId } = {}
 ): CapState {
   const gearHitRating = sumStat(equipment, socketed, Stat.StatMeleeHitRating);
-  const talentHitRating =
+  const talentHit =
     opts.talentsString !== undefined && opts.spec !== undefined
-      ? talentHitRatingFromString(opts.talentsString, opts.spec)
-      : 0;
-  const hitRating = gearHitRating + talentHitRating;
+      ? talentHitFromString(opts.talentsString, opts.spec)
+      : { rating: 0 };
+  const hitRating = gearHitRating + talentHit.rating;
   const expertiseRating = sumStat(
     equipment,
     socketed,
@@ -211,6 +249,7 @@ export function capStateFrom(
     capUncertainty: HIT_CAP_UNCERTAINTY,
   };
   if (opts.assumedRace !== undefined) hit.assumedRace = opts.assumedRace;
+  if (talentHit.assumed !== undefined) hit.talentHitAssumed = talentHit.assumed;
 
   return {
     hit,

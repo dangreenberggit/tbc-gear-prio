@@ -91,7 +91,46 @@ describe("hitCapBanner", () => {
       capUncertainty: HIT_CAP_UNCERTAINTY,
     });
     expect(line).not.toContain("gear alone");
-    expect(line).not.toContain("talents");
+    expect(line).not.toContain("not counted");
+  });
+
+  it("says the talent hit it counted was assumed, not read from the character", () => {
+    // carry-forward 60: capStateFrom reads `talentsString` off the *composed
+    // request*, which compose never writes from the log — so it is always the
+    // pinned preset's 3/3 Precision, for every ret character. That is a
+    // defensible default (a raiding ret paladin almost always takes it) but
+    // the reader must be told it is a default rather than their build.
+    const line = hitCapBanner(
+      { rating: 119, gap: 22.92, capUncertainty: HIT_CAP_UNCERTAINTY },
+      { talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 } }
+    );
+    expect(line).toContain("Precision");
+    expect(line).toContain("3/3");
+    expect(line).toMatch(/assum/i);
+  });
+
+  it("drops the assumption clause when no talent hit was folded in", () => {
+    // Feral has no mapped hit talent, so nothing was assumed and the banner
+    // must not invent a caveat about one.
+    const line = hitCapBanner({
+      rating: 119,
+      gap: 22.92,
+      capUncertainty: HIT_CAP_UNCERTAINTY,
+    });
+    expect(line).not.toContain("Precision");
+    expect(line).not.toMatch(/assum/i);
+  });
+
+  it("stops calling Heroic Presence the only uncounted source", () => {
+    // carry-forward 60: that claim held only while talents were genuinely
+    // counted from the character. Once they are assumed, the error runs both
+    // ways — a character who skipped Precision reads ~47 rating too high —
+    // so the one-sided framing is no longer honest.
+    const line = hitCapBanner(
+      { rating: 119, gap: 22.92, capUncertainty: HIT_CAP_UNCERTAINTY },
+      { talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 } }
+    );
+    expect(line).not.toContain("at least this much");
   });
 
   it("reads as over the cap when the gap is negative", () => {

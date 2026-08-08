@@ -379,7 +379,14 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
-    console.log(hitCapBanner(ranking.caps.hit));
+    console.log(
+      hitCapBanner(
+        ranking.caps.hit,
+        ranking.caps.hit.talentHitAssumed !== undefined
+          ? { talentHitAssumed: ranking.caps.hit.talentHitAssumed }
+          : {}
+      )
+    );
     for (const line of renderDisclosure({
       standing: ranking.assumptions.standing,
       substitutions: ranking.substitutions,

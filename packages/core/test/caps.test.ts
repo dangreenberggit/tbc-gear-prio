@@ -199,6 +199,30 @@ describe("capStateFrom", () => {
       4
     );
   });
+
+  it("reports which talent it assumed, so the banner can disclose it", () => {
+    // carry-forward 60: the talentsString is the preset's, never the logged
+    // character's, so the cap must carry the assumption alongside the number
+    // — the same way it already carries assumedRace.
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: "5-053201-0523005120033125331051",
+      spec: "ret",
+    });
+    expect(caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 3,
+      maxPoints: 3,
+    });
+  });
+
+  it("reports no talent assumption for a spec with no mapped hit talent", () => {
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: "-5032003115331051-",
+      spec: "feral",
+    });
+    expect(caps.hit.talentHitAssumed).toBeUndefined();
+    expect(caps.hit.rating).toBe(23);
+  });
 });
 
 describe("isHitDriven", () => {
