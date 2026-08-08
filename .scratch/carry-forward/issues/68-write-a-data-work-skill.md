@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: user, during ticket 66 — "there should also be a skill for database /
   data work that i think we'll do at the end of the branch before merging"
@@ -70,8 +70,44 @@ own failure modes and they are the ones this repo keeps hitting.
   approval before editing. Adding a *new* skill plus its AGENTS.md pointer is
   that kind of change — get the go-ahead.
 
+## Landed, 2026-08-08
+
+`data-pipeline-work`, in both mirrors. **Five rules, not the six this ticket
+lists** — two changes, both from review:
+
+- The `vendor/`-import rule was **cut**. It restates `.gitignore`, which the
+  environment already says, and an agent parsing into `data/` has no pull
+  toward importing the raw file. Its one non-obvious part — passes locally,
+  fails on a fresh clone — survives as a checklist line with the `names.ts`
+  precedent.
+- The stale-comment rule was **re-headed** on the claim that is not default
+  behaviour: a data change falsifies beliefs in code you never opened, across a
+  package boundary. Editing comments in files you are already touching needs no
+  skill; grepping `packages/core/` after a Python/JSON change does. Also added
+  that 66's assertion needed **replacing, not editing** — it asserted the wrong
+  invariant rather than a stale one.
+
+The skill records which rules `pnpm verify` already gates, and that all three
+gates are AtlasLoot-only. That boundary is the point: a green verify on a
+non-AtlasLoot input reads exactly like one that checked the pin and the regen.
+
+Two review passes. `writing-for-agents` first (self), which cut duplicated
+per-rule checks and turned prohibitions into positive headings. Then an
+independent agent for clarity, which verified every factual claim in the file
+and found one wrong: the gated-rules section named two rules when **three** are
+gated — the collision check is `check_rep_tables.py:136`, confirmed by reading
+it. It also found the regen rule stated a principle with no command and no
+bucketing criterion; it now has both, and the ordering rule that a bucket
+assigned after the diff rules nothing out.
+
+Dropped from that review's findings: a "leading word" framing the file had
+carried. It compressed one instruction into a coined term the agent would have
+to unpack again, and "already used elsewhere in the repo" is not a reason to
+spread a word into a new setting.
+
 ## Done when
 
-- The skill exists in both mirrors and `pnpm mirrors:check` passes.
-- AGENTS.md points at it from the "Agent skills" section.
-- It has been reviewed against `writing-for-agents`.
+- ~~The skill exists in both mirrors and `pnpm mirrors:check` passes.~~ Done.
+- ~~AGENTS.md points at it from the "Agent skills" section.~~ Done.
+- ~~It has been reviewed against `writing-for-agents`.~~ Done, plus an
+  independent clarity review.

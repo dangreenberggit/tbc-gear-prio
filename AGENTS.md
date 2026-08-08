@@ -14,6 +14,10 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root, created lazi
 
 For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-review` skill. Audience is the **engineering team** (gate and bugs), not player loot advice. Sharp lane.
 
+### Data pipeline work
+
+For pinning a vendored input, editing a parser, or regenerating a committed artifact under `data/`, use the `data-pipeline-work` skill. Three of its rules are gated by `pnpm verify` on the AtlasLoot path only; the rest are by hand.
+
 ### Editing skills
 
 Before adding anything to a skill file, ask: does this belong to **this skill’s job and nature**? A skill has a personality (e.g. game-domain SME vs pipeline debugging vs TDD). Do not dump related-but-wrong material into it — put engineering rules in engineering skills/docs, game rules in game skills, and so on. If it does not fit, write it elsewhere or leave it out. See also `writing-great-skills` (relevance) and `dont-be-stupid`.
