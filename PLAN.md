@@ -858,7 +858,7 @@ Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tag
 
 ### Phase 3 — Web shell
 
-**Flagged, not planned: going live on `GearSource`.** `WclGearSource` is fully speced (§5.2) but no phase gate anywhere in this document commits to actually building it and flipping the CLI/web shell off `--offline`. Phase 0/1/2 all run on recorded fixtures by design; Phase 4's gate only checks the deployed job/point-budget/cache story, not the switch itself. This needs its own real planning pass before Phase 3 closes — not scoped here.
+**Flagged, not planned: going live on `GearSource`.** `WclGearSource` is fully speced (§5.2) but no phase gate anywhere in this document commits to actually building it and flipping the CLI/web shell off `--offline`. Phase 0/1/2 all run on recorded fixtures by design; Phase 4's gate only checks the deployed job/point-budget/cache story, not the switch itself. This needs its own real planning pass before Phase 3 closes — not scoped here. One input for that pass: `FightSummary.salvationUptime` (ticket 06) means the live source has to fetch per-player buff uptimes, not just gear and fights. It is optional, so a source that omits it degrades to "never measured" rather than reporting a false zero — but the off-tank flag is silent until it is wired.
 
 **Flagged, not planned: simulate set bonuses gained, not just broken.** `setBonusNote` (§4, and the Phase 1 gate box for it) only explains the loss case — a recommended item breaking a set bonus the player currently has. It does not simulate the gain case: a tier item in the recommended options that would complete or newly unlock a set bonus. A player can't currently weigh that value from the ranking. Mechanism not decided — not scoped here.
 
