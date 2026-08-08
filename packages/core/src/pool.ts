@@ -48,9 +48,15 @@ export type ItemSource = { origin?: ItemSourceOrigin } & (
    * `faction` is a display string with one consumer (`formatItemSource`) and
    * must never be compared or joined on.
    *
-   * Optional because the prose path cannot supply one: a Wowhead row states
-   * "Requires Exalted with X" in English and carries no id. Those rows keep
-   * `origin: "wowhead"` and no `factionId`, which is the honest shape — see
+   * Every faction has an id — Wowhead exposes it in the URL
+   * (`wowhead.com/tbc/faction=1011/lower-city`). A prose row states the faction
+   * in English, so `assemble_universe.rep_source` resolves that string against
+   * `data/faction_ids.json` (AtlasLoot's 20 TBC factions) and attaches the id.
+   *
+   * Still optional, because resolution can miss: a spelling absent from that
+   * table yields a row with no id rather than a dropped source, since the guide
+   * is the only witness for some vendor items. An unresolved faction is a gap
+   * in our extraction, not a faction without an id — see
    * .scratch/carry-forward/notes/65-faction-ids.md.
    */
   | { kind: "rep"; faction: string; standing: string; factionId?: number }

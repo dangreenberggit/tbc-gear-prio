@@ -1139,6 +1139,7 @@
           "kind": "rep",
           "faction": "Lower City",
           "standing": "Exalted",
+          "factionId": 1011,
           "origin": "wowhead"
         }
       ],
@@ -3030,12 +3031,6 @@
           "standing": "Revered",
           "factionId": 1038,
           "origin": "db"
-        },
-        {
-          "kind": "rep",
-          "faction": "Ogri'la",
-          "standing": "Revered",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 21.91
@@ -3724,12 +3719,6 @@
           "standing": "Exalted",
           "factionId": 942,
           "origin": "db"
-        },
-        {
-          "kind": "rep",
-          "faction": "Cenarion Expedition",
-          "standing": "Exalted",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 273.68
@@ -4723,12 +4712,6 @@
           "standing": "Exalted",
           "factionId": 1038,
           "origin": "db"
-        },
-        {
-          "kind": "rep",
-          "faction": "Ogri'la",
-          "standing": "Exalted",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 37.9

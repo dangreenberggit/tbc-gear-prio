@@ -1,0 +1,31 @@
+{
+  "kind": "faction-id-map",
+  "generatedBy": "scripts/parse_atlasloot.py",
+  "notes": [
+    "AtlasLoot faction key -> Faction.dbc id, from AtlasLootClassic_Factions/data-tbc.lua at the pin in data/atlasloot.lock.json.",
+    "The keys are AtlasLoot's CamelCase identifiers, not display names -- AtlasLoot localises display text through ALIL[] and ships no English table. Consumers match a display string by normalising both sides to letters only; the id, not the string, is the identity thereafter.",
+    "Covers 20 factions against the 10 wowsims models, which is the point: prose names factions db.json has no row for."
+  ],
+  "factions": {
+    "Tranquillien": 922,
+    "TheAldor": 932,
+    "TheConsortium": 933,
+    "TheScryers": 934,
+    "TheShatar": 935,
+    "TheMaghar": 941,
+    "CenarionExpedition": 942,
+    "HonorHold": 946,
+    "Thrallmar": 947,
+    "TheVioletEye": 967,
+    "Sporeggar": 970,
+    "Kurenai": 978,
+    "KeepersOfTime": 989,
+    "TheScaleOfTheSands": 990,
+    "LowerCity": 1011,
+    "AshtongueDeathsworn": 1012,
+    "Netherwing": 1015,
+    "ShatariSkyguard": 1031,
+    "Ogrila": 1038,
+    "ShatteredSunOffensive": 1077
+  }
+}

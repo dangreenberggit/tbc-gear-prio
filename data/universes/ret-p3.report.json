@@ -37,7 +37,7 @@
     "db": 1733,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 17
+    "wowhead": 16
   },
   "membershipByOrigin": {
     "curated": 6,
@@ -45,7 +45,7 @@
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 321,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 13,
+    "itemHasOrigin:wowhead": 12,
     "listOnly": 25,
     "zoneMatch": 333
   },

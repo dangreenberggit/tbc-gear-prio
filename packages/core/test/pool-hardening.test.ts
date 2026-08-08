@@ -377,7 +377,11 @@ describe("data/universes/ret-p3.json hardening", () => {
   // only (`formatItemSource` is its single consumer) and must never be joined
   // on. The id is game-canonical: wowsims, ui.proto and AtlasLoot agree
   // id-for-id (.scratch/carry-forward/notes/65-faction-ids.md).
-  it("resolves db rep sources to a faction id, not just a display name", () => {
+  //
+  // Ticket 66 extended this to the prose path: AtlasLoot's faction tables cover
+  // 20 TBC factions against the 10 wowsims models, so a guide-parsed row now
+  // resolves an id too.
+  it("resolves rep sources to a faction id, not just a display name", () => {
     const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
 
     // Haramad's Bargain: was `origin: "wowhead"` (prose-parsed) and is now
@@ -391,21 +395,42 @@ describe("data/universes/ret-p3.json hardening", () => {
       origin: "db",
     });
 
-    // Every db-origin rep source carries its id; no prose-origin one does,
-    // because a Wowhead row states the faction in English and has no id to
-    // give. That asymmetry is the honest shape, not an omission.
+    // Every rep source carries its id, whatever the origin. A prose row states
+    // the faction in English, but the faction still *has* an id -- Wowhead puts
+    // it in the URL (wowhead.com/tbc/faction=1011/lower-city) -- so the parser
+    // resolves the string against data/faction_ids.json rather than shipping a
+    // display name with no identity behind it (ticket 66).
+    //
+    // Not asserted as universal: resolution can miss a spelling absent from
+    // that table, and such a row still ships (the guide is the only witness for
+    // some vendor items). What must never happen is one id under two spellings.
+    const spellingsById = new Map<number, Set<string>>();
     for (const e of raw.entries) {
       for (const s of e.sources) {
         if (s.kind !== "rep") continue;
         const label = `${e.itemId} ${e.name}`;
         if (s.origin === "db") {
           expect(typeof s.factionId, label).toBe("number");
-        } else {
-          expect(s.factionId, label).toBeUndefined();
+        }
+        if (s.factionId !== undefined) {
+          const seen = spellingsById.get(s.factionId) ?? new Set<string>();
+          seen.add(s.faction);
+          spellingsById.set(s.factionId, seen);
         }
         expect(s.faction, label).not.toBe("unknown");
       }
     }
+    for (const [factionId, spellings] of spellingsById) {
+      expect([...spellings], `faction id ${factionId}`).toHaveLength(1);
+    }
+
+    // The prose-only faction that motivated the change: no db.json row models
+    // it, so before ticket 66 it shipped as a bare string.
+    const signet = byId.get(30834);
+    expect(signet?.sources.find((s) => s.kind === "rep")).toMatchObject({
+      faction: "Lower City",
+      factionId: 1011,
+    });
   });
 
   // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that

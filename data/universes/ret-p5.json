@@ -2564,6 +2564,7 @@
           "kind": "rep",
           "faction": "Lower City",
           "standing": "Exalted",
+          "factionId": 1011,
           "origin": "wowhead"
         }
       ],
@@ -5544,12 +5545,6 @@
           "standing": "Exalted",
           "factionId": 933,
           "origin": "db"
-        },
-        {
-          "kind": "rep",
-          "faction": "The Consortium",
-          "standing": "Exalted",
-          "origin": "wowhead"
         }
       ],
       "curationHint": 44.75,
@@ -5632,6 +5627,7 @@
           "kind": "rep",
           "faction": "Shattered Sun Offensive",
           "standing": "Exalted",
+          "factionId": 1077,
           "origin": "wowhead"
         }
       ],

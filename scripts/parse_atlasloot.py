@@ -32,6 +32,8 @@ DEFAULT_LUA = ROOT / "vendor" / "atlasloot" / "data-tbc.lua"
 DEFAULT_DB = ROOT / "vendor" / "wowsims" / "db.json"
 DEFAULT_OUT = ROOT / "data" / "atlasloot_sources.json"
 DEFAULT_RECIPES_OUT = ROOT / "data" / "two-hop" / "raid-recipes.json"
+DEFAULT_FACTIONS_LUA = ROOT / "vendor" / "atlasloot" / "factions-tbc.lua"
+DEFAULT_FACTIONS_OUT = ROOT / "data" / "faction_ids.json"
 
 # AtlasLoot stores only the recipe's *item* id in the loot table; the crafted
 # product it teaches appears nowhere in the data structures. The trailing
@@ -341,12 +343,62 @@ def parse_raid_recipes(
     return [rows[k] for k in sorted(rows)], dict(stats)
 
 
+# Lua block comment. The terminator is `]]`; a trailing `--` (this file closes
+# one block with `]]--`) is an ordinary line comment and must not be part of the
+# match, or the scan for the next block starts mid-token and swallows live code.
+BLOCK_COMMENT_RE = re.compile(r"--\[\[.*?\]\]", re.S)
+FACTION_TABLE_RE = re.compile(
+    r'data\["(\w+)"\]\s*=\s*\{\s*\n\s*FactionID\s*=\s*(\d+)', re.M
+)
+
+
+def parse_factions(lua_text: str) -> dict[str, int]:
+    """AtlasLoot faction key -> FactionID, from the Factions module.
+
+    This is the only input in the tree that carries an id for the 11 TBC
+    factions wowsims does not model. db.json states a faction as a number but
+    covers only 10; ui.proto's RepFaction enum mirrors those same 10. Guide
+    prose names factions db.json has no row for at all -- Lower City (1011),
+    Shattered Sun Offensive (1077) -- so without this table a prose rep row has
+    no identity behind its display string (ticket 66).
+
+    Commented-out tables are stripped before parsing: `DUMMY` sits inside a
+    `--[[ ]]` block and claims FactionID 932, colliding with The Aldor.
+    """
+    live = BLOCK_COMMENT_RE.sub("", lua_text)
+    factions: dict[str, int] = {}
+    for key, fid in FACTION_TABLE_RE.findall(live):
+        prev = factions.get(key)
+        if prev is not None and prev != int(fid):
+            raise SystemExit(
+                f"AtlasLoot faction {key!r} declares two ids ({prev}, {fid}) -- "
+                "the table shape changed, fix the parser rather than guessing"
+            )
+        factions[key] = int(fid)
+    if not factions:
+        raise SystemExit(
+            "no faction tables found -- expected `data[\"Name\"] = { FactionID = N`. "
+            "Upstream changed the Factions module; fix the parser."
+        )
+    by_id: dict[int, str] = {}
+    for key, fid in factions.items():
+        if fid in by_id:
+            raise SystemExit(
+                f"AtlasLoot factions {by_id[fid]!r} and {key!r} share id {fid} -- "
+                "an id must identify one faction; fix the parser."
+            )
+        by_id[fid] = key
+    return factions
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lua", type=Path, default=DEFAULT_LUA)
     ap.add_argument("--db", type=Path, default=DEFAULT_DB)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--recipes-out", type=Path, default=DEFAULT_RECIPES_OUT)
+    ap.add_argument("--factions-lua", type=Path, default=DEFAULT_FACTIONS_LUA)
+    ap.add_argument("--factions-out", type=Path, default=DEFAULT_FACTIONS_OUT)
     args = ap.parse_args()
 
     if not args.lua.is_file():
@@ -422,6 +474,39 @@ def main() -> int:
     print(f"  wrote {len(recipe_rows)} raid-recipe products -> {args.recipes_out}")
     for key in sorted(recipe_stats):
         print(f"  {key}: {recipe_stats[key]}")
+
+    if not args.factions_lua.is_file():
+        print(
+            f"missing {args.factions_lua} — run python scripts/sync_atlasloot.py --restore",
+            file=sys.stderr,
+        )
+        return 2
+    factions = parse_factions(args.factions_lua.read_text(encoding="utf-8"))
+    args.factions_out.parent.mkdir(parents=True, exist_ok=True)
+    with args.factions_out.open("w", encoding="utf-8") as fh:
+        json.dump(
+            {
+                "kind": "faction-id-map",
+                "generatedBy": "scripts/parse_atlasloot.py",
+                "notes": [
+                    "AtlasLoot faction key -> Faction.dbc id, from "
+                    "AtlasLootClassic_Factions/data-tbc.lua at the pin in "
+                    "data/atlasloot.lock.json.",
+                    "The keys are AtlasLoot's CamelCase identifiers, not display "
+                    "names -- AtlasLoot localises display text through ALIL[] and "
+                    "ships no English table. Consumers match a display string by "
+                    "normalising both sides to letters only; the id, not the "
+                    "string, is the identity thereafter.",
+                    "Covers 20 factions against the 10 wowsims models, which is "
+                    "the point: prose names factions db.json has no row for.",
+                ],
+                "factions": dict(sorted(factions.items(), key=lambda kv: kv[1])),
+            },
+            fh,
+            indent=2,
+        )
+        fh.write("\n")
+    print(f"  wrote {len(factions)} faction ids -> {args.factions_out}")
     return 0
 
 

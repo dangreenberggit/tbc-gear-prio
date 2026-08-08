@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
+FACTION_IDS = ROOT / "data/faction_ids.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
@@ -516,14 +517,40 @@ def ep_score(
     return total
 
 
+# A member line, tolerating the option suffix protobuf allows
+# (`Foo = 1 [deprecated = true];`). `ui.proto` already carries `deprecated` on
+# message fields, so the syntax is live in a file this parses.
+_ENUM_MEMBER_RE = re.compile(r"^\s+(\w+)\s*=\s*(-?\d+)\s*(?:\[[^\]]*\])?\s*;", re.M)
+# Anything else that occupies a statement line inside an enum body. Everything
+# not matched by either pattern is a member we failed to parse.
+_ENUM_NON_MEMBER_RE = re.compile(
+    r"^\s*(?://|/\*|\*|reserved\b|option\b|\}|$)", re.M
+)
+
+
 def _enum_members(proto_path: Path, enum_name: str) -> dict[int, str]:
     text = proto_path.read_text(encoding="utf-8")
     enum = re.search(rf"enum {enum_name} \{{(.*?)\n\}}", text, re.S)
     if not enum:
         raise SystemExit(f"could not find the {enum_name} enum in {proto_path}")
-    members = re.findall(r"^\s+(\w+)\s*=\s*(\d+);", enum.group(1), re.M)
+    body = enum.group(1)
+    members = _ENUM_MEMBER_RE.findall(body)
     if not members:
         raise SystemExit(f"{enum_name} enum in {proto_path} has no members")
+
+    # A partial parse is the actual defect: dropping one member of RepLevel or
+    # Profession has no downstream assertion to catch it, and surfaces as a bare
+    # number in a display field (ticket 66). Refuse to guess.
+    for line in body.splitlines():
+        if not line.strip() or _ENUM_NON_MEMBER_RE.match(line):
+            continue
+        if not _ENUM_MEMBER_RE.match(line):
+            raise SystemExit(
+                f"{enum_name} enum in {proto_path} has a line this parser cannot "
+                f"read as a member: {line.strip()!r}. Fix the parser rather than "
+                "shipping a partial enum."
+            )
+
     return {int(num): name for name, num in members}
 
 
@@ -560,6 +587,14 @@ REP_LEVEL_NAMES = {
 # So the *ids* come from the proto and only the display strings are written
 # here. A faction added upstream fails the assertion below rather than silently
 # arriving as a CamelCase name.
+#
+# Second witness, so this is not a single-transcription table (tickets 48-53,
+# 58): wowsims ships the same map as REP_FACTION_NAMES in
+# `ui/core/proto_utils/names.ts`, and all ten agree character for character in
+# both directions -- including "Ogri'la" and "The Consortium". That file is NOT
+# vendored or pinned here; it was read from a local scratch checkout of wowsims
+# source, which is gitignored, so a fresh worktree will not have it. Re-fetch it
+# from upstream to re-check rather than assuming it is on disk.
 REP_FACTION_DISPLAY = {
     933: "The Consortium",
     941: "The Mag'har",
@@ -594,6 +629,48 @@ def rep_faction_names() -> dict[int, str]:
 
 
 REP_FACTION_NAMES = rep_faction_names()
+
+
+def _faction_key(name: str) -> str:
+    """Letters only, lowercased -- the join key between a display string and an
+    AtlasLoot CamelCase identifier ("Lower City" <-> "LowerCity", "Ogri'la" <->
+    "Ogrila"). Lossy by design and safe *because* it is only used to find a
+    candidate id: once resolved the id is the identity, and the string stops
+    carrying weight. Verified collision-free across all 20 TBC factions by
+    `check_rep_tables.py`."""
+    return re.sub(r"[^a-z]", "", name.lower())
+
+
+def faction_ids_by_key() -> dict[str, int]:
+    """Normalised faction name -> Faction.dbc id, from data/faction_ids.json.
+
+    Prose rep rows arrive as a display string with no id ("Requires Exalted with
+    Lower City"). db.json can only resolve the 10 factions wowsims models, and
+    names it a number for; this covers the other 10 as well, which is the whole
+    reason the file is parsed (ticket 66).
+    """
+    if not FACTION_IDS.is_file():
+        return {}
+    data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+    return {_faction_key(k): int(v) for k, v in (data.get("factions") or {}).items()}
+
+
+FACTION_IDS_BY_KEY = faction_ids_by_key()
+
+
+def rep_source(faction: str, standing: str) -> dict:
+    """A prose-parsed rep row, carrying an id whenever the faction is known.
+
+    The id is what downstream should key on; the display string is presentation
+    (see the REP_FACTION_DISPLAY comment). A faction we cannot resolve still
+    ships its row -- the guide is the only witness for some vendor items, and
+    dropping the row would lose the source entirely -- it just carries no id.
+    """
+    out = {"kind": "rep", "faction": faction, "standing": standing}
+    faction_id = FACTION_IDS_BY_KEY.get(_faction_key(faction))
+    if faction_id is not None:
+        out["factionId"] = faction_id
+    return out
 
 
 def map_db_source(
@@ -886,32 +963,18 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
             out.append({"kind": "crafted", "profession": prof})
     rm = REP_RE.search(text)
     if rm:
-        out.append(
-            {
-                "kind": "rep",
-                "faction": rm.group(2).strip(),
-                "standing": rm.group(1).strip().capitalize(),
-            }
-        )
+        out.append(rep_source(rm.group(2).strip(), rm.group(1).strip().capitalize()))
     else:
         vm = VENDOR_REP_RE.search(text)
         if vm:
             out.append(
-                {
-                    "kind": "rep",
-                    "faction": vm.group(1).strip(),
-                    "standing": vm.group(2).strip().capitalize(),
-                }
+                rep_source(vm.group(1).strip(), vm.group(2).strip().capitalize())
             )
         else:
             sm = VENDOR_STANDING_FIRST_RE.search(text)
             if sm:
                 out.append(
-                    {
-                        "kind": "rep",
-                        "faction": sm.group(2).strip(),
-                        "standing": sm.group(1).strip().capitalize(),
-                    }
+                    rep_source(sm.group(2).strip(), sm.group(1).strip().capitalize())
                 )
     return out
 

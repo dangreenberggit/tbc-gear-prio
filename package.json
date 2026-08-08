@@ -18,6 +18,8 @@
     "sync:wowsims": "python scripts/sync_wowsims.py --update",
     "sync:wowsims:restore": "python scripts/sync_wowsims.py --restore",
     "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
+    "sync:atlasloot:restore": "python scripts/sync_atlasloot.py --restore",
+    "sync:atlasloot:check": "python scripts/sync_atlasloot.py --check",
     "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py",
     "fetch:protos": "python scripts/fetch_protos.py",
     "fetch:protos:check": "python scripts/fetch_protos.py --check",
