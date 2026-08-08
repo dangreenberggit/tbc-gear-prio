@@ -1,8 +1,8 @@
-Status: open
+Status: closed
 Type: bug
 Origin: user request to add in-game phase 3 items, 2026-08-07
 Blocks: none
-Blocked by: 58 (partially — see "Correction" below; the Ashtongue half is not blocked)
+Blocked by: none (was 58, partially — see "Correction"; resolved by ticket 66 vendoring the Factions module)
 Plan: .scratch/carry-forward/65-plan.md
 
 # Phase 3 raid zones are covered; its reputation vendors and recipe vendors are not
@@ -213,3 +213,50 @@ Ordered so each step is independently landable:
    only be done once 1-2 land.
 
 Scale's 30 gem Designs need no step: already covered.
+
+## Closed, 2026-08-08
+
+All five plan steps landed (`.scratch/carry-forward/65-plan.md` carries an
+outcome section for each). Re-measured at `4181062`:
+
+```
+python -c "
+import json
+for u in ('ret-p3','ret-p4','ret-p5','feral-p3','ret-p2','feral-p2'):
+    ids={i['itemId'] for i in json.load(open(f'data/universes/{u}.json'))['entries']}
+    tal=sorted(i for i in range(32485,32494) if i in ids)
+    rings=sorted(i for i in range(29294,29310) if i in ids)
+    print(u, tal, len(rings))"
+# ret-p3/p4/p5  [32489] 16
+# feral-p3      [32486] 16
+# ret-p2        []       0   <- phase guard holds
+# feral-p2      []       0
+```
+
+Both P3 vendors are sourced from AtlasLoot, not prose. P4/P5 inherit, and the
+P2 guard holds — the carryover question this ticket flagged is answered by
+measurement rather than assumption.
+
+### The "0 missing gear" criterion was wrong, and is superseded
+
+`65-faction-overlap.py` still reports **8 Ashtongue gear missing from ret-p3**,
+and that is the correct outcome, not a gap. The nine talismans are one per
+class role; `classAllowlist` admits only the spec's own — 32489 Zeal for ret
+(paladin), 32486 Equilibrium for feral (druid). A ret universe carrying the
+warrior or priest talisman would be the bug.
+
+The criterion was written before step 2.5 established that membership is
+spec-filtered. Read the script's Ashtongue count as "8 belong to other specs",
+and treat **1 of 9 per spec** as the passing figure. Scale's rings are
+class-agnostic, so its 0-missing figure stands as originally written.
+
+Four Soulguard crafts (32437/32438/32439/32440) report "NOT in universe"
+because those ids are absent from `data/items/index.json` entirely — an item
+index question, not a vendor-coverage one. Not tracked here; the 17 recipe
+outputs that do resolve are all present.
+
+### Not closed by this ticket
+
+Step 4 of the slicing above — re-measuring 57's 94 load-bearing prose rows —
+belongs to ticket 58 and stays open there. This ticket closes on its own
+payload: the two P3 vendors and their recipes.
