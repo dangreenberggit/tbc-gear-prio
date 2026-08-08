@@ -3,9 +3,23 @@
   "generatedBy": "scripts/parse_atlasloot.py",
   "notes": [
     "Recipe\u2192product join comes from the trailing comment on each AtlasLoot loot row; the product name is resolved to an id via vendor/wowsims/db.json items[].name.",
-    "Only recipes dropping in a data/phase_raids.json zone are kept."
+    "Kept when the recipe drops in a data/phase_raids.json zone (`zones`) or is sold by a reputation vendor (`reps`). Either route makes the product obtainable; a recipe can have both."
   ],
   "entries": [
+    {
+      "productId": 13503,
+      "productName": "Alchemist's Stone",
+      "recipeId": 13517,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 935,
+          "faction": "The Shatar",
+          "standing": "Revered"
+        }
+      ]
+    },
     {
       "productId": 21864,
       "productName": "Soulcloth Shoulders",
@@ -16,7 +30,8 @@
           "zone": "Karazhan",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 21865,
@@ -27,6 +42,561 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Trash"
+        }
+      ],
+      "reps": []
+    },
+    {
+      "productId": 23509,
+      "productName": "Enchanted Adamantite Breastplate",
+      "recipeId": 23599,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 23510,
+      "productName": "Enchanted Adamantite Belt",
+      "recipeId": 23597,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 23511,
+      "productName": "Enchanted Adamantite Boots",
+      "recipeId": 23598,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 23512,
+      "productName": "Enchanted Adamantite Leggings",
+      "recipeId": 23600,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 23513,
+      "productName": "Flamebane Breastplate",
+      "recipeId": 23604,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 23514,
+      "productName": "Flamebane Gloves",
+      "recipeId": 23603,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 23515,
+      "productName": "Flamebane Bracers",
+      "recipeId": 23601,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 23516,
+      "productName": "Flamebane Helm",
+      "recipeId": 23602,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 24092,
+      "productName": "Pendant of Frozen Flame",
+      "recipeId": 24174,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 989,
+          "faction": "Keepers Of Time",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 24093,
+      "productName": "Pendant of Thawing",
+      "recipeId": 24175,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1011,
+          "faction": "Lower City",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 24095,
+      "productName": "Pendant of Withering",
+      "recipeId": 24176,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 24097,
+      "productName": "Pendant of Shadow's End",
+      "recipeId": 24177,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 24098,
+      "productName": "Pendant of the Null Rune",
+      "recipeId": 24178,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 933,
+          "faction": "The Consortium",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 25685,
+      "productName": "Fel Leather Gloves",
+      "recipeId": 25732,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 933,
+          "faction": "The Consortium",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 25686,
+      "productName": "Fel Leather Boots",
+      "recipeId": 25733,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 933,
+          "faction": "The Consortium",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 25687,
+      "productName": "Fel Leather Leggings",
+      "recipeId": 25734,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 933,
+          "faction": "The Consortium",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 25689,
+      "productName": "Heavy Clefthoof Vest",
+      "recipeId": 25735,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 25690,
+      "productName": "Heavy Clefthoof Leggings",
+      "recipeId": 25736,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 25691,
+      "productName": "Heavy Clefthoof Boots",
+      "recipeId": 25737,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 25692,
+      "productName": "Netherfury Leggings",
+      "recipeId": 25742,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 941,
+          "faction": "The Maghar",
+          "standing": "Honored"
+        },
+        {
+          "kind": "rep",
+          "factionId": 978,
+          "faction": "Kurenai",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 25693,
+      "productName": "Netherfury Boots",
+      "recipeId": 25743,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 941,
+          "faction": "The Maghar",
+          "standing": "Revered"
+        },
+        {
+          "kind": "rep",
+          "factionId": 978,
+          "faction": "Kurenai",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 25694,
+      "productName": "Netherfury Belt",
+      "recipeId": 25741,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 941,
+          "faction": "The Maghar",
+          "standing": "Friendly"
+        },
+        {
+          "kind": "rep",
+          "factionId": 978,
+          "faction": "Kurenai",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 25695,
+      "productName": "Felstalker Belt",
+      "recipeId": 25738,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 947,
+          "faction": "Thrallmar",
+          "standing": "Friendly"
+        },
+        {
+          "kind": "rep",
+          "factionId": 946,
+          "faction": "Honor Hold",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 25696,
+      "productName": "Felstalker Breastplate",
+      "recipeId": 25740,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 947,
+          "faction": "Thrallmar",
+          "standing": "Honored"
+        },
+        {
+          "kind": "rep",
+          "factionId": 946,
+          "faction": "Honor Hold",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 25697,
+      "productName": "Felstalker Bracers",
+      "recipeId": 25739,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 947,
+          "faction": "Thrallmar",
+          "standing": "Honored"
+        },
+        {
+          "kind": "rep",
+          "factionId": 946,
+          "faction": "Honor Hold",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 29489,
+      "productName": "Enchanted Felscale Leggings",
+      "recipeId": 29677,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 29490,
+      "productName": "Enchanted Felscale Gloves",
+      "recipeId": 29682,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 29491,
+      "productName": "Enchanted Felscale Boots",
+      "recipeId": 29684,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 29492,
+      "productName": "Flamescale Leggings",
+      "recipeId": 29689,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 29493,
+      "productName": "Flamescale Boots",
+      "recipeId": 29691,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 29494,
+      "productName": "Flamescale Belt",
+      "recipeId": 29693,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 29495,
+      "productName": "Enchanted Clefthoof Leggings",
+      "recipeId": 29698,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 29496,
+      "productName": "Enchanted Clefthoof Gloves",
+      "recipeId": 29700,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 29497,
+      "productName": "Enchanted Clefthoof Boots",
+      "recipeId": 29701,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 934,
+          "faction": "The Scryers",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 29498,
+      "productName": "Blastguard Pants",
+      "recipeId": 29702,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 29499,
+      "productName": "Blastguard Boots",
+      "recipeId": 29703,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 29500,
+      "productName": "Blastguard Belt",
+      "recipeId": 29704,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Honored"
         }
       ]
     },
@@ -45,7 +615,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30032,
@@ -62,7 +633,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30033,
@@ -79,7 +651,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30034,
@@ -96,7 +669,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30035,
@@ -113,7 +687,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30036,
@@ -130,7 +705,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30037,
@@ -147,7 +723,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30038,
@@ -164,7 +741,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30039,
@@ -181,7 +759,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30040,
@@ -198,7 +777,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30041,
@@ -215,7 +795,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30042,
@@ -232,7 +813,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30043,
@@ -249,7 +831,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30044,
@@ -266,7 +849,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30045,
@@ -283,7 +867,8 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 30046,
@@ -300,6 +885,427 @@
           "zone": "Tempest Keep",
           "boss": "Trash"
         }
+      ],
+      "reps": []
+    },
+    {
+      "productId": 30825,
+      "productName": "Ring of Arcane Shielding",
+      "recipeId": 30826,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 935,
+          "faction": "The Shatar",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 30831,
+      "productName": "Cloak of Arcane Evasion",
+      "recipeId": 30833,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1011,
+          "faction": "Lower City",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 30837,
+      "productName": "Flameheart Bracers",
+      "recipeId": 30842,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 30838,
+      "productName": "Flameheart Gloves",
+      "recipeId": 30843,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 30839,
+      "productName": "Flameheart Vest",
+      "recipeId": 30844,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 932,
+          "faction": "The Aldor",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 31364,
+      "productName": "Wildguard Breastplate",
+      "recipeId": 31390,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 31367,
+      "productName": "Wildguard Leggings",
+      "recipeId": 31391,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 31368,
+      "productName": "Wildguard Helm",
+      "recipeId": 31392,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 31369,
+      "productName": "Iceguard Breastplate",
+      "recipeId": 31393,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 31370,
+      "productName": "Iceguard Leggings",
+      "recipeId": 31394,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 31371,
+      "productName": "Iceguard Helm",
+      "recipeId": 31395,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 31398,
+      "productName": "The Frozen Eye",
+      "recipeId": 31401,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 31399,
+      "productName": "The Natural Ward",
+      "recipeId": 31402,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 942,
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 32389,
+      "productName": "Soulguard Leggings",
+      "recipeId": 32439,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32390,
+      "productName": "Soulguard Girdle",
+      "recipeId": 32440,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32391,
+      "productName": "Soulguard Slippers",
+      "recipeId": 32437,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32392,
+      "productName": "Soulguard Bracers",
+      "recipeId": 32438,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32393,
+      "productName": "Redeemed Soul Cinch",
+      "recipeId": 32436,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32394,
+      "productName": "Redeemed Soul Moccasins",
+      "recipeId": 32433,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32395,
+      "productName": "Redeemed Soul Wristguards",
+      "recipeId": 32434,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32396,
+      "productName": "Redeemed Soul Legguards",
+      "recipeId": 32435,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32397,
+      "productName": "Waistguard of Shackled Souls",
+      "recipeId": 32432,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32398,
+      "productName": "Boots of Shackled Souls",
+      "recipeId": 32429,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32399,
+      "productName": "Bracers of Shackled Souls",
+      "recipeId": 32430,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32400,
+      "productName": "Greaves of Shackled Souls",
+      "recipeId": 32431,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32401,
+      "productName": "Shadesteel Girdle",
+      "recipeId": 32444,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32402,
+      "productName": "Shadesteel Sabots",
+      "recipeId": 32441,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32403,
+      "productName": "Shadesteel Bracers",
+      "recipeId": 32442,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Friendly"
+        }
+      ]
+    },
+    {
+      "productId": 32404,
+      "productName": "Shadesteel Greaves",
+      "recipeId": 32443,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
+      ]
+    },
+    {
+      "productId": 32420,
+      "productName": "Night's End",
+      "recipeId": 32447,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1012,
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Honored"
+        }
       ]
     },
     {
@@ -312,7 +1318,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32570,
@@ -324,7 +1331,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32571,
@@ -336,7 +1344,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32573,
@@ -348,7 +1357,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32574,
@@ -360,7 +1370,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32575,
@@ -372,7 +1383,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32577,
@@ -384,7 +1396,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32579,
@@ -396,7 +1409,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32580,
@@ -408,7 +1422,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32581,
@@ -420,7 +1435,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32582,
@@ -432,7 +1448,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32583,
@@ -444,7 +1461,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32584,
@@ -456,7 +1474,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32585,
@@ -468,7 +1487,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32586,
@@ -480,7 +1500,8 @@
           "zone": "Black Temple",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 32587,
@@ -491,6 +1512,35 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Patterns"
+        }
+      ],
+      "reps": []
+    },
+    {
+      "productId": 33122,
+      "productName": "Cloak of Darkness",
+      "recipeId": 33124,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 33204,
+      "productName": "Shadowprowler's Chestguard",
+      "recipeId": 33205,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 967,
+          "faction": "The Violet Eye",
+          "standing": "Revered"
         }
       ]
     },
@@ -504,7 +1554,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34354,
@@ -516,7 +1567,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34355,
@@ -528,7 +1580,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34356,
@@ -540,7 +1593,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34357,
@@ -552,7 +1606,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34358,
@@ -564,7 +1619,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34359,
@@ -576,7 +1632,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34360,
@@ -588,7 +1645,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34361,
@@ -600,7 +1658,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34362,
@@ -612,7 +1671,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34363,
@@ -624,7 +1684,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34364,
@@ -636,7 +1697,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34365,
@@ -648,7 +1710,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34366,
@@ -660,7 +1723,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34367,
@@ -672,7 +1736,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34369,
@@ -684,7 +1749,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34370,
@@ -696,7 +1762,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34371,
@@ -708,7 +1775,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34372,
@@ -720,7 +1788,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34373,
@@ -732,7 +1801,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34374,
@@ -744,7 +1814,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34375,
@@ -756,7 +1827,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34376,
@@ -768,7 +1840,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34377,
@@ -780,7 +1853,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34378,
@@ -792,7 +1866,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34379,
@@ -804,7 +1879,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34380,
@@ -816,7 +1892,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Trash"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 34847,
@@ -828,7 +1905,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 35181,
@@ -840,7 +1918,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 35182,
@@ -852,7 +1931,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 35183,
@@ -864,7 +1944,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 35184,
@@ -876,7 +1957,8 @@
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
         }
-      ]
+      ],
+      "reps": []
     },
     {
       "productId": 35185,
@@ -887,6 +1969,133 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "Patterns"
+        }
+      ],
+      "reps": []
+    },
+    {
+      "productId": 35693,
+      "productName": "Figurine - Empyrean Tortoise",
+      "recipeId": 35695,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 35694,
+      "productName": "Figurine - Khorium Boar",
+      "recipeId": 35696,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 35700,
+      "productName": "Figurine - Crimson Serpent",
+      "recipeId": 35697,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 35702,
+      "productName": "Figurine - Shadowsong Panther",
+      "recipeId": 35698,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 35703,
+      "productName": "Figurine - Seaspray Albatross",
+      "recipeId": 35699,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Revered"
+        }
+      ]
+    },
+    {
+      "productId": 35748,
+      "productName": "Guardian's Alchemist Stone",
+      "recipeId": 35752,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 35749,
+      "productName": "Sorcerer's Alchemist Stone",
+      "recipeId": 35753,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 35750,
+      "productName": "Redeemer's Alchemist Stone",
+      "recipeId": 35754,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Exalted"
+        }
+      ]
+    },
+    {
+      "productId": 35751,
+      "productName": "Assassin's Alchemist Stone",
+      "recipeId": 35755,
+      "zones": [],
+      "reps": [
+        {
+          "kind": "rep",
+          "factionId": 1077,
+          "faction": "Shattered Sun Offensive",
+          "standing": "Exalted"
         }
       ]
     }

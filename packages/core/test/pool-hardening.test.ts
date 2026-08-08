@@ -350,7 +350,21 @@ describe("data/universes/ret-p3.json hardening", () => {
     // "Profession: ..." (parses today), only its p1-p2 text reads
     // "Crafting: ..." (does not), so it was already a p3 member and only
     // needed this fix at p2.
-    expect(universeP3.length).toBe(364);
+    // 364 -> 365: a rep source carries no zone, so a rep-only item satisfied
+    // no membership route and was absent entirely. phase_raids.json now maps
+    // faction -> phase (ticket 65 step 2.5), admitting +32489 Ashtongue
+    // Talisman of Zeal, the paladin trinket from Black Temple's faction. The
+    // other eight talismans are held out by classAllowlist, not by this route.
+    // 365 -> 381: AtlasLoot's Factions module is now parsed for vendor loot,
+    // not just faction ids (ticket 65 step 3), admitting the 16-ring Band of
+    // Eternity ladder (29294-29309) sold by Scale of the Sands. db.json has
+    // `sources: null` for all 16, so AtlasLoot is their only witness.
+    // 381 -> 394: a recipe bought from a reputation vendor now gates its
+    // product the way a raid-dropped one does (ticket 65 step 4), admitting
+    // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
+    // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
+    // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
+    expect(universeP3.length).toBe(394);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -369,6 +383,151 @@ describe("data/universes/ret-p3.json hardening", () => {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();
     }
+  });
+
+  // Ticket 65: db.json states a rep source as a numeric faction id, which
+  // assemble_universe.py used to discard for want of a name table. Now it
+  // resolves, and the id rides along as the identity — `faction` is display
+  // only (`formatItemSource` is its single consumer) and must never be joined
+  // on. The id is game-canonical: wowsims, ui.proto and AtlasLoot agree
+  // id-for-id (.scratch/carry-forward/notes/65-faction-ids.md).
+  //
+  // Ticket 66 extended this to the prose path: AtlasLoot's faction tables cover
+  // 20 TBC factions against the 10 wowsims models, so a guide-parsed row now
+  // resolves an id too.
+  it("resolves rep sources to a faction id, not just a display name", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    // Haramad's Bargain: was `origin: "wowhead"` (prose-parsed) and is now
+    // db-sourced, because the id resolves instead of being dropped.
+    const haramad = byId.get(29119);
+    expect(haramad?.sources[0]).toMatchObject({
+      kind: "rep",
+      faction: "The Consortium",
+      standing: "Exalted",
+      factionId: 933,
+      origin: "db",
+    });
+
+    // Every rep source carries its id, whatever the origin. A prose row states
+    // the faction in English, but the faction still *has* an id -- Wowhead puts
+    // it in the URL (wowhead.com/tbc/faction=1011/lower-city) -- so the parser
+    // resolves the string against data/faction_ids.json rather than shipping a
+    // display name with no identity behind it (ticket 66).
+    //
+    // Not asserted as universal: resolution can miss a spelling absent from
+    // that table, and such a row still ships (the guide is the only witness for
+    // some vendor items). What must never happen is one id under two spellings.
+    const spellingsById = new Map<number, Set<string>>();
+    for (const e of raw.entries) {
+      for (const s of e.sources) {
+        if (s.kind !== "rep") continue;
+        const label = `${e.itemId} ${e.name}`;
+        if (s.origin === "db") {
+          expect(typeof s.factionId, label).toBe("number");
+        }
+        if (s.factionId !== undefined) {
+          const seen = spellingsById.get(s.factionId) ?? new Set<string>();
+          seen.add(s.faction);
+          spellingsById.set(s.factionId, seen);
+        }
+        expect(s.faction, label).not.toBe("unknown");
+      }
+    }
+    for (const [factionId, spellings] of spellingsById) {
+      expect([...spellings], `faction id ${factionId}`).toHaveLength(1);
+    }
+
+    // The prose-only faction that motivated the change: no db.json row models
+    // it, so before ticket 66 it shipped as a bare string.
+    const signet = byId.get(30834);
+    expect(signet?.sources.find((s) => s.kind === "rep")).toMatchObject({
+      faction: "Lower City",
+      factionId: 1011,
+    });
+  });
+
+  // Ticket 65 step 2.5: a rep source names no zone, so the zone-match route
+  // can never see it and a rep-only item reached no universe at all. The
+  // faction→phase map in phase_raids.json is the admission route. Keyed by
+  // Faction.dbc id, never by the display string.
+  it("admits rep-only items whose faction gates that phase's raid tier", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    // Ashtongue Deathsworn is Black Temple's faction, so its Exalted trinket
+    // is a phase-3 item. 32489 is the paladin one (classAllowlist [2]); the
+    // other eight talismans are other classes' and must not be admitted.
+    const zeal = byId.get(32489);
+    expect(zeal?.sources[0]).toMatchObject({
+      kind: "rep",
+      factionId: 1012,
+      standing: "Exalted",
+    });
+
+    const talismans = [
+      32485, 32486, 32487, 32488, 32489, 32490, 32491, 32492, 32493,
+    ].filter((id) => byId.has(id));
+    expect(talismans).toEqual([32489]);
+
+    // Scale of the Sands (990) is Hyjal's faction. Its 16-ring ladder has
+    // `sources: null` in db.json, so AtlasLoot's Factions module is the only
+    // witness — the whole point of parsing it (ticket 65 step 3).
+    const bands: number[] = [];
+    for (let id = 29294; id <= 29309; id += 1) if (byId.has(id)) bands.push(id);
+    expect(bands.length).toBe(16);
+    for (const id of bands) {
+      expect(byId.get(id)?.sources[0], `${id}`).toMatchObject({
+        kind: "rep",
+        factionId: 990,
+        origin: "atlasloot",
+      });
+    }
+  });
+
+  // Ticket 65 step 4: the vendor-bought counterpart of the raid-recipe two-hop
+  // above. The recipe is sold at a standing rather than dropped, so there is no
+  // zone to claim — `recipeFaction*` records the grind instead, and the id is
+  // what grants phase membership.
+  it("attributes vendor-taught crafts to the faction that sells the recipe", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    const shadesteel = byId.get(32403); // Shadesteel Bracers, plate
+    expect(shadesteel?.sources[0]).toMatchObject({
+      kind: "crafted",
+      profession: "Blacksmithing",
+      recipeFactionId: 1012,
+      recipeStanding: "Friendly",
+    });
+    // A vendor-bought recipe drops in no raid, so claiming a zone would be a
+    // false provenance claim.
+    expect(shadesteel?.sources[0]).not.toHaveProperty("recipeZone");
+
+    // All 13 Ashtongue-taught crafts a paladin can wear. The 4 cloth Soulguard
+    // pieces are held out by armor type, not by this route.
+    const taught = [
+      32393, 32394, 32395, 32396, 32397, 32398, 32399, 32400, 32401, 32402,
+      32403, 32404, 32420,
+    ];
+    for (const id of taught) {
+      expect(
+        byId.get(id)?.sources[0],
+        `${id} ${byId.get(id)?.name ?? "absent"}`
+      ).toMatchObject({ kind: "crafted", recipeFactionId: 1012 });
+    }
+    for (const cloth of [32389, 32390, 32391, 32392]) {
+      expect(byId.has(cloth), `${cloth} is cloth`).toBe(false);
+    }
+  });
+
+  // Ticket 59: a trailing parenthetical is not always a zone. Step 3 admitting
+  // 29301 made this reachable for the first time — the row's only parse was a
+  // fabricated zone "The Scale of the Sands Exalted", which failed the build.
+  it("reads a standing in a quest parenthetical as rep, not as a zone", () => {
+    const champion = raw.entries.find((e) => e.itemId === 29301);
+    for (const s of champion?.sources ?? []) {
+      expect(s.kind, `29301 ${JSON.stringify(s)}`).not.toBe("raid");
+    }
+    expect(champion?.sources.some((s) => s.kind === "rep")).toBe(true);
   });
 
   // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that

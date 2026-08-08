@@ -196,6 +196,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Violet Eye",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 967,
           "origin": "db"
         }
       ],
@@ -511,6 +514,26 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Gurtogg Bloodboil",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32420,
+      "name": "Night's End",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -1154,6 +1177,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -1489,6 +1515,46 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 32391,
+      "name": "Soulguard Slippers",
+      "slot": "feet",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32394,
+      "name": "Redeemed Soul Moccasins",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32609,
       "name": "Boots of the Divine Light",
       "slot": "feet",
@@ -1630,6 +1696,44 @@
       "curationHint": 55.56
     },
     {
+      "itemId": 29300,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 54.64
+    },
+    {
+      "itemId": 29301,
+      "name": "Band of the Eternal Champion",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 54.64
+    },
+    {
       "itemId": 28757,
       "name": "Ring of a Thousand Marks",
       "slot": "finger",
@@ -1684,6 +1788,25 @@
       "curationHint": 51.18
     },
     {
+      "itemId": 29299,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 50.92
+    },
+    {
       "itemId": 30834,
       "name": "Shapeshifter's Signet",
       "slot": "finger",
@@ -1693,10 +1816,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "rep",
           "faction": "Lower City",
+          "factionId": 1011,
+          "kind": "rep",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 49.4,
@@ -1740,6 +1864,25 @@
       "curatedSets": [
         "preraid"
       ]
+    },
+    {
+      "itemId": 29298,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 46.5
     },
     {
       "itemId": 28730,
@@ -1909,6 +2052,234 @@
           "zone": "Karazhan",
           "boss": "Prince Malchezaar",
           "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29294,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29295,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29296,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29297,
+      "name": "Band of the Eternal Defender",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29302,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29303,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29304,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29305,
+      "name": "Band of the Eternal Sage",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29306,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29307,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29308,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29309,
+      "name": "Band of the Eternal Restorer",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -2359,6 +2730,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -3283,6 +3657,46 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 32389,
+      "name": "Soulguard Leggings",
+      "slot": "legs",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32396,
+      "name": "Redeemed Soul Legguards",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32260,
       "name": "Choker of Endless Nightmares",
       "slot": "neck",
@@ -3408,8 +3822,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted",
+          "factionId": 933,
+          "origin": "db"
         }
       ],
       "curationHint": 49.28,
@@ -4328,7 +4745,8 @@
           "kind": "rep",
           "faction": "Ogri'la",
           "standing": "Revered",
-          "origin": "wowhead"
+          "factionId": 1038,
+          "origin": "db"
         }
       ],
       "curationHint": 21.91
@@ -4597,6 +5015,25 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Illidan Stormrage",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32486,
+      "name": "Ashtongue Talisman of Equilibrium",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ashtongue Deathsworn",
+          "standing": "Exalted",
+          "factionId": 1012,
           "origin": "db"
         }
       ],
@@ -5098,6 +5535,46 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 32390,
+      "name": "Soulguard Girdle",
+      "slot": "waist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32393,
+      "name": "Redeemed Soul Cinch",
+      "slot": "waist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32519,
       "name": "Belt of Divine Guidance",
       "slot": "waist",
@@ -5270,7 +5747,8 @@
           "kind": "rep",
           "faction": "Cenarion Expedition",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "factionId": 942,
+          "origin": "db"
         }
       ],
       "curationHint": 273.68
@@ -7012,7 +7490,8 @@
           "kind": "rep",
           "faction": "Ogri'la",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "factionId": 1038,
+          "origin": "db"
         }
       ],
       "curationHint": 37.9
@@ -7264,6 +7743,46 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32392,
+      "name": "Soulguard Bracers",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32395,
+      "name": "Redeemed Soul Wristguards",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],

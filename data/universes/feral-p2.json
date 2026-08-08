@@ -770,6 +770,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -1136,10 +1139,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "rep",
           "faction": "Lower City",
+          "factionId": 1011,
+          "kind": "rep",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 49.4,
@@ -1642,6 +1646,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -2368,8 +2375,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted",
+          "factionId": 933,
+          "origin": "db"
         }
       ],
       "curationHint": 49.28,
@@ -3025,7 +3035,8 @@
           "kind": "rep",
           "faction": "Ogri'la",
           "standing": "Revered",
-          "origin": "wowhead"
+          "factionId": 1038,
+          "origin": "db"
         }
       ],
       "curationHint": 21.91
@@ -3712,7 +3723,8 @@
           "kind": "rep",
           "faction": "Cenarion Expedition",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "factionId": 942,
+          "origin": "db"
         }
       ],
       "curationHint": 273.68
@@ -4704,7 +4716,8 @@
           "kind": "rep",
           "faction": "Ogri'la",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "factionId": 1038,
+          "origin": "db"
         }
       ],
       "curationHint": 37.9

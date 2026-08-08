@@ -11,70 +11,75 @@
     "Tempest Keep",
     "World Bosses"
   ],
+  "phaseRepFactions": [
+    990,
+    1012
+  ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1595,
-  "universeTotal": 381,
+  "excludedNoSource": 1470,
+  "universeTotal": 407,
   "listOnlyMembership": 35,
   "perSlot": {
-    "back": 30,
+    "back": 31,
     "chest": 20,
-    "feet": 29,
-    "finger": 34,
+    "feet": 31,
+    "finger": 50,
     "hands": 20,
     "head": 18,
-    "legs": 18,
+    "legs": 20,
     "neck": 26,
     "ranged": 4,
     "shoulder": 18,
-    "trinket": 21,
-    "waist": 25,
+    "trinket": 22,
+    "waist": 27,
     "weapon": 94,
-    "wrist": 24
+    "wrist": 26
   },
   "sourceRecordAdds": {
-    "atlasloot": 213,
-    "curated": 3,
-    "db": 1807,
+    "atlasloot": 287,
+    "curated": 2,
+    "db": 1864,
     "two-hop": 15,
-    "wowhead": 32
+    "wowhead": 27
   },
   "membershipByOrigin": {
     "curated": 3,
-    "itemHasOrigin:atlasloot": 54,
-    "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 326,
+    "itemHasOrigin:atlasloot": 71,
+    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:db": 340,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 23,
+    "itemHasOrigin:wowhead": 19,
     "listOnly": 35,
+    "repFactionMatch": 26,
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
-    "db": 326,
-    "wowhead-only": 23,
-    "atlasloot-only": 14,
-    "other": 3,
+    "db": 340,
+    "wowhead-only": 19,
+    "atlasloot-only": 31,
+    "other": 2,
     "two-hop": 15
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 381,
-    "casterOnlyReject": 177,
+    "total": 407,
+    "casterOnlyReject": 185,
     "epFloorReject": 0,
-    "combinedReject": 177,
-    "combinedKeep": 204,
-    "casterRejectPct": 46.5,
-    "combinedRejectPct": 46.5,
+    "combinedReject": 185,
+    "combinedKeep": 222,
+    "casterRejectPct": 45.5,
+    "combinedRejectPct": 45.5,
     "applied": false
   },
   "wowheadListIds": 115,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 115,
-    "recalled": 95,
-    "missed": 20,
-    "recallPct": 82.6,
+    "recalled": 96,
+    "missed": 19,
+    "recallPct": 83.5,
     "missedItems": [
       {
         "itemId": 19406,
@@ -152,12 +157,6 @@
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 29301,
-        "name": "Band of the Eternal Champion",
-        "slot": "finger",
         "d7Eligible": true
       },
       {

@@ -38,7 +38,15 @@ export function formatItemSource(source: ItemSource): string {
     case "badge":
       return `${source.cost} badges`;
     case "crafted":
-      return `Crafted · ${source.profession}`;
+      // The profession alone does not tell a player whether they can make it.
+      // A recipe gated behind a reputation is a grind, and that is the part
+      // worth surfacing (ticket 65 step 4). `recipeZone` stays unrendered, as
+      // it always has — raid attribution is a filter concern, not a label.
+      return source.recipeFaction
+        ? `Crafted · ${source.profession} · ${source.recipeFaction}${
+            source.recipeStanding ? ` ${source.recipeStanding}` : ""
+          }`
+        : `Crafted · ${source.profession}`;
     case "rep":
       return `${source.faction} · ${source.standing}`;
     case "heroic":

@@ -24,10 +24,12 @@ ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
+FACTION_IDS = ROOT / "data/faction_ids.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 COMMON_PROTO = ROOT / "data/proto/common.proto"
+UI_PROTO = ROOT / "data/proto/ui.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -275,6 +277,13 @@ VENDOR_STANDING_FIRST_RE = re.compile(
 # no `quest` ItemSource variant, and inventing a zone would be worse than the
 # curated-set fallback that already covers those rows.
 QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
+# "(The Scale of the Sands Exalted)" -- a standing inside a parenthetical, with
+# no "Vendor:" prefix for VENDOR_REP_RE to anchor on. Matches the same shape
+# VENDOR_REP_RE captures, minus that prefix, so a quest reward gated on
+# reputation resolves to a rep source instead of a fabricated zone.
+STANDING_PAREN_RE = re.compile(
+    r"\(\s*(.+?)\s+(Friendly|Honored|Revered|Exalted)\s*\)", re.IGNORECASE
+)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
 # "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
 # Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
@@ -515,22 +524,204 @@ def ep_score(
     return total
 
 
+# A member line, tolerating the option suffix protobuf allows
+# (`Foo = 1 [deprecated = true];`). `ui.proto` already carries `deprecated` on
+# message fields, so the syntax is live in a file this parses.
+_ENUM_MEMBER_RE = re.compile(r"^\s+(\w+)\s*=\s*(-?\d+)\s*(?:\[[^\]]*\])?\s*;", re.M)
+# Anything else that occupies a statement line inside an enum body. Everything
+# not matched by either pattern is a member we failed to parse.
+_ENUM_NON_MEMBER_RE = re.compile(
+    r"^\s*(?://|/\*|\*|reserved\b|option\b|\}|$)", re.M
+)
+
+
+def _enum_members(proto_path: Path, enum_name: str) -> dict[int, str]:
+    text = proto_path.read_text(encoding="utf-8")
+    enum = re.search(rf"enum {enum_name} \{{(.*?)\n\}}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the {enum_name} enum in {proto_path}")
+    body = enum.group(1)
+    members = _ENUM_MEMBER_RE.findall(body)
+    if not members:
+        raise SystemExit(f"{enum_name} enum in {proto_path} has no members")
+
+    # A partial parse is the actual defect: dropping one member of RepLevel or
+    # Profession has no downstream assertion to catch it, and surfaces as a bare
+    # number in a display field (ticket 66). Refuse to guess.
+    for line in body.splitlines():
+        if not line.strip() or _ENUM_NON_MEMBER_RE.match(line):
+            continue
+        if not _ENUM_MEMBER_RE.match(line):
+            raise SystemExit(
+                f"{enum_name} enum in {proto_path} has a line this parser cannot "
+                f"read as a member: {line.strip()!r}. Fix the parser rather than "
+                "shipping a partial enum."
+            )
+
+    return {int(num): name for name, num in members}
+
+
 def profession_names_from_proto() -> dict[int, str]:
     """common.proto Profession enum, ordinal -> name. db.json's
     `crafted.profession` is this enum's number, not a name (ticket 42) --
     parsed from the proto rather than hand-typed so a member added upstream
     cannot silently mismatch a hardcoded table."""
-    text = COMMON_PROTO.read_text(encoding="utf-8")
-    enum = re.search(r"enum Profession \{(.*?)\n\}", text, re.S)
-    if not enum:
-        raise SystemExit(f"could not find the Profession enum in {COMMON_PROTO}")
-    members = re.findall(r"^\s+(\w+) = (\d+);", enum.group(1), re.M)
-    if not members:
-        raise SystemExit(f"Profession enum in {COMMON_PROTO} has no members")
-    return {int(num): name for name, num in members}
+    return _enum_members(COMMON_PROTO, "Profession")
 
 
 PROFESSION_NAMES = profession_names_from_proto()
+
+
+# ui.proto RepLevel, ordinal -> standing. db.json's `rep.repLevel` is this
+# enum's number (8 = Exalted). Parsed, not hand-typed, for the same reason as
+# PROFESSION_NAMES: an upstream renumbering must break loudly, not silently
+# relabel every rep source.
+REP_LEVEL_NAMES = {
+    num: name.removeprefix("RepLevel")
+    for num, name in _enum_members(UI_PROTO, "RepLevel").items()
+}
+# Standing name -> its ordinal, so "which of these is cheapest" is answered by
+# the proto's own scale rather than a hand-typed ranking.
+REP_STANDING_ORDER = {name: num for num, name in REP_LEVEL_NAMES.items()}
+
+# ui.proto RepFaction, id -> display name. The enum member is CamelCase
+# (`RepFactionOgriLa`) and the display name is not derivable from it: "Ogri'la"
+# needs an apostrophe no rule produces, and `RepFactionTheConsortium` keeps its
+# article while `RepFactionAshtongueDeathsworn` never had one. These must match
+# what the prose parser already emits (`Ogri'la`, `The Consortium`) so one
+# faction does not print two ways -- a presentation invariant, not an identity
+# one. The *ids* are the identity, and they are game-canonical: wowsims,
+# ui.proto and AtlasLoot agree id-for-id
+# (.scratch/carry-forward/notes/65-faction-ids.md).
+#
+# So the *ids* come from the proto and only the display strings are written
+# here. A faction added upstream fails the assertion below rather than silently
+# arriving as a CamelCase name.
+#
+# Second witness, so this is not a single-transcription table (tickets 48-53,
+# 58): wowsims ships the same map as REP_FACTION_NAMES in
+# `ui/core/proto_utils/names.ts`, and all ten agree character for character in
+# both directions -- including "Ogri'la" and "The Consortium". That file is NOT
+# vendored or pinned here; it was read from a local scratch checkout of wowsims
+# source, which is gitignored, so a fresh worktree will not have it. Re-fetch it
+# from upstream to re-check rather than assuming it is on disk.
+REP_FACTION_DISPLAY = {
+    # Ids beyond ui.proto's 10 come from AtlasLoot (data/faction_ids.json).
+    # They are spelled here for the same reason as the rest: splitting
+    # "TheScaleOfTheSands" yields "The Scale Of The Sands", and no rule knows
+    # that "of" is lowercase or that "Ogrila" wants an apostrophe. Ids not
+    # listed fall back to the split, which is fine for factions no shipped item
+    # references.
+    935: "The Sha'tar",
+    990: "The Scale of the Sands",
+    1011: "Lower City",
+    1077: "Shattered Sun Offensive",
+    933: "The Consortium",
+    941: "The Mag'har",
+    942: "Cenarion Expedition",
+    946: "Honor Hold",
+    947: "Thrallmar",
+    970: "Sporeggar",
+    978: "Kurenai",
+    1012: "Ashtongue Deathsworn",
+    1015: "Netherwing",
+    1038: "Ogri'la",
+}
+
+
+def rep_faction_names() -> dict[int, str]:
+    """ui.proto RepFaction id -> display name, checked against the proto.
+
+    Every proto id must be spelled here: a missing one would fall back to a
+    CamelCase split and stop matching the prose-parsed spelling of the same
+    faction (ticket 65).
+
+    The converse is not required. AtlasLoot carries ids the proto does not
+    model (Scale of the Sands 990, Lower City 1011), and those are spelled here
+    too rather than left to the split, which cannot know "of" is lowercase.
+    They are validated against data/faction_ids.json instead -- an id in
+    neither source is a typo and still fails.
+    """
+    proto_ids = set(_enum_members(UI_PROTO, "RepFaction")) - {0}
+    missing = proto_ids - set(REP_FACTION_DISPLAY)
+    known = proto_ids | set(FACTION_IDS_BY_KEY.values())
+    unknown = set(REP_FACTION_DISPLAY) - known
+    if missing or unknown:
+        raise SystemExit(
+            "REP_FACTION_DISPLAY is out of sync: missing proto ids "
+            f"{sorted(missing)}, ids in no known source {sorted(unknown)}"
+        )
+    return dict(REP_FACTION_DISPLAY)
+
+
+def _faction_key(name: str) -> str:
+    """Letters only, lowercased -- the join key between a display string and an
+    AtlasLoot CamelCase identifier ("Lower City" <-> "LowerCity", "Ogri'la" <->
+    "Ogrila"). Lossy by design and safe *because* it is only used to find a
+    candidate id: once resolved the id is the identity, and the string stops
+    carrying weight. Verified collision-free across all 20 TBC factions by
+    `check_rep_tables.py`."""
+    return re.sub(r"[^a-z]", "", name.lower())
+
+
+def faction_ids_by_key() -> dict[str, int]:
+    """Normalised faction name -> Faction.dbc id, from data/faction_ids.json.
+
+    Prose rep rows arrive as a display string with no id ("Requires Exalted with
+    Lower City"). db.json can only resolve the 10 factions wowsims models, and
+    names it a number for; this covers the other 10 as well, which is the whole
+    reason the file is parsed (ticket 66).
+    """
+    if not FACTION_IDS.is_file():
+        return {}
+    data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+    return {_faction_key(k): int(v) for k, v in (data.get("factions") or {}).items()}
+
+
+FACTION_IDS_BY_KEY = faction_ids_by_key()
+# After FACTION_IDS_BY_KEY: the sync check validates non-proto ids against it.
+REP_FACTION_NAMES = rep_faction_names()
+
+
+def faction_display_by_id() -> dict[int, str]:
+    """Faction.dbc id -> display string, for every id any input can produce.
+
+    `REP_FACTION_NAMES` is authoritative but covers only the 10 factions
+    wowsims models. AtlasLoot sources carry ids for 20, so the remainder get a
+    name split out of AtlasLoot's CamelCase key ("TheScaleOfTheSands" -> "The
+    Scale of the Sands"). That split is presentation only -- the id is the
+    identity -- but a rep source without a `faction` violates the ItemSource
+    union, so every id must yield some string.
+
+    The curated spellings win wherever they exist: splitting cannot produce
+    "Ogri'la" from "Ogrila", which is exactly why REP_FACTION_DISPLAY is
+    hand-written.
+    """
+    out: dict[int, str] = {}
+    if FACTION_IDS.is_file():
+        data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+        for key, faction_id in (data.get("factions") or {}).items():
+            out[int(faction_id)] = re.sub(r"(?<!^)(?=[A-Z])", " ", key)
+    out.update(REP_FACTION_NAMES)
+    return out
+
+
+FACTION_DISPLAY_BY_ID = faction_display_by_id()
+
+
+def rep_source(faction: str, standing: str) -> dict:
+    """A prose-parsed rep row, carrying an id whenever the faction is known.
+
+    The id is what downstream should key on; the display string is presentation
+    (see the REP_FACTION_DISPLAY comment). A faction we cannot resolve still
+    ships its row -- the guide is the only witness for some vendor items, and
+    dropping the row would lose the source entirely -- it just carries no id.
+    """
+    out = {"kind": "rep", "faction": faction, "standing": standing}
+    faction_id = FACTION_IDS_BY_KEY.get(_faction_key(faction))
+    if faction_id is not None:
+        out["factionId"] = faction_id
+    return out
 
 
 def map_db_source(
@@ -574,21 +765,36 @@ def map_db_source(
             return out
     if "rep" in first:
         rep = first["rep"] or {}
+        # db.json states the faction as a numeric id, never a name. It is the
+        # game-canonical id (wowsims, ui.proto and AtlasLoot agree id-for-id),
+        # so it resolves through REP_FACTION_NAMES rather than being discarded:
+        # before ticket 65 this row returned None and 111 items across 10
+        # factions silently lost their only machine-supplied source.
+        faction_id = rep.get("repFactionId")
         faction = rep.get("factionName") or rep.get("faction")
+        if faction is None and faction_id is not None:
+            faction = REP_FACTION_NAMES.get(int(faction_id))
         standing = rep.get("standing") or rep.get("rank")
-        # db.json ships no faction table, so a row keyed only by repFactionId
-        # resolves to "unknown with unknown" — a source that names nothing and
-        # cannot be acted on. Returning None lets the Wowhead "Requires Exalted
-        # with X" text supply the real one instead of being appended behind it,
-        # which matters because pool.ts reads sources[0]. Haramad's Bargain
-        # (29119) is the only affected row in the shipped tiers.
+        if standing is None and rep.get("repLevel") is not None:
+            standing = REP_LEVEL_NAMES.get(int(rep["repLevel"]))
+        # An id with no name is worse than no source: it would print as
+        # "unknown · Exalted" and cannot be acted on. Returning None lets the
+        # Wowhead "Requires Exalted with X" prose supply the real one instead
+        # of being appended behind it, which matters because pool.ts reads
+        # sources[0]. check_rep_tables.py makes this branch unreachable for
+        # every id db.json currently uses.
         if faction is None and standing is None:
             return None
-        return {
+        out = {
             "kind": "rep",
             "faction": str(faction or "unknown"),
             "standing": str(standing or "unknown"),
         }
+        # `faction` alone would be a name with no identity behind it, so the id
+        # rides only when it actually resolved to one.
+        if faction_id is not None and faction is not None:
+            out["factionId"] = int(faction_id)
+        return out
     if "faction" in first:
         return None
     return None
@@ -786,7 +992,14 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.extend(zone_sources(m.group(2).strip(), drop_boss(m.group(1).strip())))
     else:
         qm = QUEST_ZONE_RE.search(text)
-        if qm:
+        # A quest parenthetical is only a zone when it is not a standing:
+        # "Quest: Champion's Covenant (The Scale of the Sands Exalted)" names a
+        # reputation requirement, and reading it as a zone invented the zone
+        # "The Scale of the Sands Exalted" (ticket 59, which predicted this
+        # would surface as soon as such a row became a universe member -- step
+        # 3 admitting 29301 is what made it reachable). The rep parse below
+        # already handles the parenthetical correctly.
+        if qm and not VENDOR_REP_RE.search(text) and not STANDING_PAREN_RE.search(text):
             out.extend(zone_sources(qm.group(2).strip(), ""))
         elif WORLD_DROP_RE.search(text):
             out.append({"kind": "world"})
@@ -808,33 +1021,32 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
             out.append({"kind": "crafted", "profession": prof})
     rm = REP_RE.search(text)
     if rm:
-        out.append(
-            {
-                "kind": "rep",
-                "faction": rm.group(2).strip(),
-                "standing": rm.group(1).strip().capitalize(),
-            }
-        )
+        out.append(rep_source(rm.group(2).strip(), rm.group(1).strip().capitalize()))
     else:
         vm = VENDOR_REP_RE.search(text)
         if vm:
             out.append(
-                {
-                    "kind": "rep",
-                    "faction": vm.group(1).strip(),
-                    "standing": vm.group(2).strip().capitalize(),
-                }
+                rep_source(vm.group(1).strip(), vm.group(2).strip().capitalize())
             )
         else:
             sm = VENDOR_STANDING_FIRST_RE.search(text)
             if sm:
                 out.append(
-                    {
-                        "kind": "rep",
-                        "faction": sm.group(2).strip(),
-                        "standing": sm.group(1).strip().capitalize(),
-                    }
+                    rep_source(sm.group(2).strip(), sm.group(1).strip().capitalize())
                 )
+            else:
+                # A standing in a bare parenthetical, with no "Vendor:" or
+                # "Requires" to anchor the parses above: "Quest: Champion's
+                # Covenant (The Scale of the Sands Exalted)". Without this the
+                # row parses to nothing at all, which is how ticket 59's
+                # fabricated zone was the only thing it produced.
+                pm = STANDING_PAREN_RE.search(text)
+                if pm:
+                    out.append(
+                        rep_source(
+                            pm.group(1).strip(), pm.group(2).strip().capitalize()
+                        )
+                    )
     return out
 
 
@@ -854,6 +1066,41 @@ def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
         if isinstance(row, dict) and row.get("phase", 99) <= max_phase:
             zones.add(str(row["name"]))
     return zones
+
+
+def rep_factions_for_max_phase(max_phase: int, phase_raids: dict) -> set[int]:
+    """Faction ids whose vendors gate raid-tier gear at or before `max_phase`.
+
+    Same union carryover as `zones_for_max_phase`: Black Temple's vendor is
+    still worth buying from at phase 5.
+    """
+    factions: set[int] = set()
+    for row in phase_raids.get("repFactions") or []:
+        if isinstance(row, dict) and row.get("phase", 99) <= max_phase:
+            factions.add(int(row["factionId"]))
+    return factions
+
+
+def source_rep_factions(source: dict) -> set[int]:
+    """Faction ids a source attributes an item to, keyed by id not by name.
+
+    Two shapes qualify. A `rep` source is the item itself being vendor-sold.
+    A `crafted` source carrying `recipeFactionId` is the two-hop: the *recipe*
+    is vendor-sold, which gates the product just as surely -- the same argument
+    ticket 13 made for `recipeZone` putting a craft on a raid's shopping list.
+
+    Empty when the id is missing: an unresolved row still ships (the guide may
+    be the only witness) but must not grant phase membership on the strength of
+    a display string.
+    """
+    kind = source.get("kind")
+    if kind == "rep":
+        faction_id = source.get("factionId")
+    elif kind == "crafted":
+        faction_id = source.get("recipeFactionId")
+    else:
+        return set()
+    return {int(faction_id)} if faction_id is not None else set()
 
 
 def wowhead_lists_for_phase(
@@ -977,9 +1224,25 @@ def assemble(
         if isinstance(z, dict) and "name" in z
     }
     raid_recipe_by_product: dict[int, dict] = {}
+    # A vendor-sold recipe has no zone, so it is kept separately: `recipeZone`
+    # would be a false claim and there is no raid shopping list to put it on.
+    # The faction is what the player actually needs (ticket 65 step 4).
+    rep_recipe_by_product: dict[int, dict] = {}
     for entry in (raid_recipes.get("entries") or []):
         if not isinstance(entry, dict):
             continue
+        reps = [r for r in (entry.get("reps") or []) if isinstance(r, dict)]
+        if reps:
+            # Lowest standing wins: the cheapest way to obtain the recipe is
+            # the honest cost to state. Ties break on faction id for stability.
+            best_rep = min(
+                reps,
+                key=lambda r: (
+                    REP_STANDING_ORDER.get(str(r.get("standing")), 99),
+                    int(r.get("factionId") or 0),
+                ),
+            )
+            rep_recipe_by_product[int(entry["productId"])] = best_rep
         zones = [z for z in (entry.get("zones") or []) if isinstance(z, dict)]
         if not zones:
             continue
@@ -1020,6 +1283,7 @@ def assemble(
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
+    phase_rep_factions = rep_factions_for_max_phase(max_phase, phase_raids)
 
     # itemId -> list of (source, origin)
     source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
@@ -1036,6 +1300,15 @@ def assemble(
             source = {**source, "recipeZone": recipe["zone"]}
             if recipe.get("boss"):
                 source["recipeBoss"] = recipe["boss"]
+        rep_recipe = rep_recipe_by_product.get(item_id)
+        if rep_recipe and source.get("kind") == "crafted":
+            source = {
+                **source,
+                "recipeFaction": rep_recipe.get("faction"),
+                "recipeStanding": rep_recipe.get("standing"),
+            }
+            if rep_recipe.get("factionId") is not None:
+                source["recipeFactionId"] = int(rep_recipe["factionId"])
         # Same reason as the recipe block above: every input reaches this
         # funnel, so folding unit names onto their encounter here means the
         # dedupe below collapses the duplicate row whichever input produced it.
@@ -1073,6 +1346,13 @@ def assemble(
         add_source(iid, db_src, "db")
         for raw in (atlasloot.get(str(iid)) or []):
             if isinstance(raw, dict):
+                # AtlasLoot splits its CamelCase key for `faction`; re-derive
+                # from the id so one faction reads the same however it arrived
+                # ("Ogri'la", never AtlasLoot's "Ogrila").
+                if raw.get("kind") == "rep" and raw.get("factionId") is not None:
+                    display = FACTION_DISPLAY_BY_ID.get(int(raw["factionId"]))
+                    if display:
+                        raw = {**raw, "faction": display}
                 add_source(iid, raw, "atlasloot")
 
     # two-hop tokens
@@ -1223,9 +1503,11 @@ def assemble(
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
         heroics_hit = set()
+        rep_factions_hit = set()
         for s in sources:
             zones_hit |= source_zones(s)
             heroics_hit |= source_heroic_dungeons(s)
+            rep_factions_hit |= source_rep_factions(s)
 
         # An admitted heroic dungeon still only contributes the items whose own
         # phase reaches this tier -- MT drops phase-5 gear, but the same guard
@@ -1234,6 +1516,15 @@ def assemble(
             it.get("phase") or 99
         ) <= max_phase
         in_phase = bool(zones_hit & phase_zones)
+        # A rep source names no zone, so `in_phase` can never see it. Without
+        # this route a rep-only item reaches no universe at all -- the nine
+        # Ashtongue talismans and the Band of Eternity ladder were absent
+        # entirely (ticket 65 step 2.5). Phase-guarded like `in_heroic`: the
+        # faction gates the *tier*, and an item whose own phase runs ahead of
+        # it (Sunwell gear behind a Black Temple vendor) is not a phase-3 item.
+        in_rep_phase = bool(rep_factions_hit & phase_rep_factions) and int(
+            it.get("phase") or 99
+        ) <= max_phase
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
         # No phase guard: these are persistent non-raid items whose own phase is
         # not the interesting fact about them. Everbloom Idol is phase 1 and
@@ -1246,13 +1537,21 @@ def assemble(
         # are the two shapes where the curated claim itself is what grants
         # membership.
         curated = iid in curated_unsourced or iid in curated_list_only
-        if not in_phase and not in_heroic and not list_only and not curated:
+        if (
+            not in_phase
+            and not in_heroic
+            and not in_rep_phase
+            and not list_only
+            and not curated
+        ):
             continue
 
         if in_phase:
             membership_stats["zoneMatch"] += 1
         elif in_heroic:
             membership_stats["heroicMatch"] += 1
+        elif in_rep_phase:
+            membership_stats["repFactionMatch"] += 1
         elif list_only:
             list_only_count += 1
             membership_stats["listOnly"] += 1
@@ -1406,6 +1705,7 @@ def assemble(
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "phaseZones": sorted(phase_zones),
+        "phaseRepFactions": sorted(phase_rep_factions),
         "d7EligibleTotal": eligible_count,
         "excludedNoSource": no_zone_excluded,
         "universeTotal": len(entries),

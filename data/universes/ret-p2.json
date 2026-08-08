@@ -1281,10 +1281,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "rep",
           "faction": "Lower City",
+          "factionId": 1011,
+          "kind": "rep",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 61.55,
@@ -1355,8 +1356,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "faction": "The Sha'tar",
+          "factionId": 935,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 41.0,
@@ -2730,7 +2734,8 @@
           "kind": "rep",
           "faction": "The Consortium",
           "standing": "Exalted",
-          "origin": "wowhead"
+          "factionId": 933,
+          "origin": "db"
         }
       ],
       "curationHint": 44.75,

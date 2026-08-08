@@ -33,16 +33,43 @@ export type ItemSource = { origin?: ItemSourceOrigin } & (
   | { kind: "badge"; cost: number }
   /**
    * `recipeZone` is set only when the recipe itself drops in a raid, so raid
-   * views can attribute the craft to that raid's shopping list. Absent for
-   * vendor/reputation/world-drop recipes — see .scratch/carry-forward/issues/13.
+   * views can attribute the craft to that raid's shopping list.
+   *
+   * `recipeFaction*` is the vendor-sold counterpart: the recipe is bought at a
+   * standing rather than dropped, so there is no zone to claim and no raid
+   * shopping list to join. A recipe can have both routes; they are recorded
+   * independently rather than collapsed, because "drops in BT" and "costs
+   * Honored with the Ashtongue" are different costs to the player
+   * (ticket 65 step 4). `recipeFactionId` is the identity; the two strings are
+   * display, exactly as on the `rep` variant.
    */
   | {
       kind: "crafted";
       profession: string;
       recipeZone?: string;
       recipeBoss?: string;
+      recipeFaction?: string;
+      recipeStanding?: string;
+      recipeFactionId?: number;
     }
-  | { kind: "rep"; faction: string; standing: string }
+  /**
+   * `factionId` is the game-canonical faction id (`Faction.dbc`), agreed
+   * id-for-id by wowsims, `ui.proto` and AtlasLoot. It is the identity;
+   * `faction` is a display string with one consumer (`formatItemSource`) and
+   * must never be compared or joined on.
+   *
+   * Every faction has an id — Wowhead exposes it in the URL
+   * (`wowhead.com/tbc/faction=1011/lower-city`). A prose row states the faction
+   * in English, so `assemble_universe.rep_source` resolves that string against
+   * `data/faction_ids.json` (AtlasLoot's 20 TBC factions) and attaches the id.
+   *
+   * Still optional, because resolution can miss: a spelling absent from that
+   * table yields a row with no id rather than a dropped source, since the guide
+   * is the only witness for some vendor items. An unresolved faction is a gap
+   * in our extraction, not a faction without an id — see
+   * .scratch/carry-forward/notes/65-faction-ids.md.
+   */
+  | { kind: "rep"; faction: string; standing: string; factionId?: number }
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
   | { kind: "world" }
