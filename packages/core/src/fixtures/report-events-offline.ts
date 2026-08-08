@@ -29,7 +29,7 @@ import type { CharacterRef, SpecId } from "../types.js";
 export type ReportEventsRawFixture = {
   report_code: string;
   fight: { id: number; name: string; kill?: boolean };
-  actors: Array<{ id: number; name: string }>;
+  actors: Array<{ id: number; name: string; subType?: string }>;
   combatant_info_events: Array<{
     sourceID: number;
     gear: WclGearEntry[];
@@ -80,7 +80,7 @@ function talentPointsFrom(
 type OfflineRawFixture = {
   report_code: string;
   fight: { id: number; name: string };
-  actors: Array<{ id: number; name: string }>;
+  actors: Array<{ id: number; name: string; subType?: string }>;
   combatant_info_events: Array<{
     sourceID: number;
     gear: WclGearEntry[];
@@ -108,7 +108,8 @@ export function buildOfflineRecordings(
   const wanted = character.name.toLowerCase();
   let logged: LoggedGear | undefined;
   for (const ev of raw.combatant_info_events) {
-    if (actors.get(ev.sourceID)?.name.toLowerCase() !== wanted) continue;
+    const actor = actors.get(ev.sourceID);
+    if (actor?.name.toLowerCase() !== wanted) continue;
     const mapped = mapWclGearToSim(ev.gear);
     logged = {
       items: mapped.map((spec, i) => {
@@ -121,6 +122,7 @@ export function buildOfflineRecordings(
         return item;
       }),
       talentPointsByTree: talentPointsFrom(ev, character),
+      ...(actor.subType !== undefined ? { className: actor.subType } : {}),
       provenance: {
         reportCode: raw.report_code,
         fightId: raw.fight.id,

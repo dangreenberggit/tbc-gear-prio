@@ -1,8 +1,8 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/fix-carry-forward-backlog.md (adversarial A1)
 Blocks: none
-Blocked by: `LoggedGear` carries no class name — WCL `actors[].subType` has it, unthreaded (see ticket 40)
+Blocked by: none
 
 # `matchesRequestedSpec` is exported but never called in production
 
@@ -39,3 +39,59 @@ assume it guards something.
   fight, or ticket 40 closes and this is folded into it.
 - The `{matches:false, detected:<other spec>}` branch is exercised by a test
   (see review finding A4 — it currently is not, by any test).
+
+## Closed 2026-08-07
+
+Wired into `rankUpgrades` immediately after `readGear` (`rank.ts`), plus the
+seam change the "Blocked by" line called for.
+
+**The blocker was shallower than recorded.** `LoggedGear` did lack a class
+name, but WCL's `actors[].subType` carries it and every committed capture
+already has it — no re-capture, no new probe:
+
+```bash
+python -c "
+import json,glob
+for f in sorted(glob.glob('test/fixtures/*.raw.json')):
+    d=json.load(open(f,encoding='utf-8'))
+    print(f, sorted({a.get('subType') for a in d['actors'] if a.get('subType')})[:4])"
+```
+
+So `LoggedGear.className?: string` was added and populated in the shared
+offline builder. Optional on purpose: a source that cannot supply it degrades
+to "cannot classify" rather than throwing.
+
+**The refusal rule needed correcting mid-implementation.** The obvious guard —
+refuse when `matchesRequestedSpec` returns a named `detected` — never fires
+for the case that motivated this ticket. Measured:
+
+```
+Paladin prot  [0,44,17] -> {"ok":false,"reason":"unsupported-spec","treeIndex":1}
+Paladin ret   [5,11,45] -> {"ok":true,"spec":"ret","treeIndex":2}
+Druid feral   [0,45,16] -> {"ok":false,"reason":"needs-form-uptime",...}
+Warrior       [40,20,0] -> {"ok":false,"reason":"unsupported-class"}
+```
+
+Protection classifies as `unsupported-spec` with `detected: undefined`, which
+is correct per `matchesRequestedSpec`'s docstring (protection has no spec home
+today, so it is not a *wrongly detected* spec). The guard therefore refuses on
+either a named `detected` **or** `unsupported-spec` — where the class is known
+and the favoured tree is known and simply is not this spec's.
+
+Everything else ranks as before, because absence of evidence is not evidence
+against: no `className`, `unsupported-class`, `ambiguous`, and feral's
+`needs-form-uptime` all pass through. A test pins the feral case specifically,
+since over-strictness here would reject every druid.
+
+New `RankErrorKind: "spec-mismatch"`. Audited every catch site — `cli.ts:490`
+prints `${err.kind}: ${err.message}` generically rather than switching on the
+union, so the new kind surfaces without an unhandled-discriminant hole.
+
+`pnpm verify` green: 32 files, 434 passed / 2 todo (up from 425).
+
+## What this does not do
+
+The message tells the user to pick another fight or rank the spec they played;
+it cannot yet *offer* to sim that other spec, because only ret and feral ship
+presets. That remains ticket 40's territory — 40 stays open for the
+`resolveFight` / fixtures half of its own "Done when".

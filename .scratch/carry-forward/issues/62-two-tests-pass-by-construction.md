@@ -60,3 +60,30 @@ reintroduced a recomputation.
   branch either covered or explicitly `todo`.
 - `view.test.ts:361` is deleted or rewritten so it can fail.
 - `pnpm verify` stays green.
+
+## Note 2026-08-07 (ticket 61's work)
+
+Ticket 61 wired the guard into `rankUpgrades` and this ticket's finding 1 got
+sharper as a result, without being fixed.
+
+Measured while implementing 61 — the reason the named-`detected` branch is
+hard to test is not test laziness, it is that **nothing reaches it today**:
+
+```
+Paladin prot [0,44,17] -> unsupported-spec  (detected: undefined)
+Paladin holy [45,11,5] -> unsupported-spec  (detected: undefined)
+Druid feral  [0,45,16] -> needs-form-uptime (detected: undefined)
+```
+
+`{matches:false, detected:<other spec>}` requires **two supported specs on one
+class**, and ret is the only supported paladin spec. So the branch is
+unreachable from any real input until a second spec ships for some class, and
+`spec.test.ts:100`'s comment saying so was accurate — its *name* was the
+problem, not its coverage.
+
+Revised fix for finding 1: rename the test to what it asserts, and mark the
+real case `it.todo` so the gap is tracked rather than looking covered. Do not
+try to force the branch with a synthetic classification object — that would
+test the mock, not the classifier.
+
+Finding 2 (`view.test.ts:361`) is unchanged by 61's work.

@@ -215,6 +215,47 @@ describe("capStateFrom", () => {
     });
   });
 
+  it("still assumes the preset's Precision for a character who skipped it", () => {
+    // carry-forward 60's own acceptance case, kept as a *characterisation*
+    // test: this is the shipped behaviour, not the desired one. The talent
+    // string is the preset's, so a character with 0/3 Precision is still
+    // credited ~47 rating — which is exactly why the cap must disclose the
+    // assumption. If someone later threads real per-talent data through, this
+    // test should fail and be rewritten, not deleted.
+    const presetString = "5-053201-0523005120033125331051";
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: presetString,
+      spec: "ret",
+    });
+    expect(caps.hit.rating).toBeCloseTo(
+      23 + 3 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
+    expect(caps.hit.talentHitAssumed?.points).toBe(3);
+  });
+
+  it("discloses the preset's actual Precision rank rather than always 3", () => {
+    // The disclosed points are decoded, not hardcoded — a preset carrying
+    // 2/3 must say 2/3, or the banner would misreport a build it did read.
+    const twoOfThree = "5-053202-0523005120033125331051".replace(
+      "053202",
+      "052201"
+    );
+    const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
+      talentsString: twoOfThree,
+      spec: "ret",
+    });
+    expect(caps.hit.talentHitAssumed).toEqual({
+      talent: "Precision",
+      points: 2,
+      maxPoints: 3,
+    });
+    expect(caps.hit.rating).toBeCloseTo(
+      23 + 2 * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+      4
+    );
+  });
+
   it("reports no talent assumption for a spec with no mapped hit talent", () => {
     const caps = capStateFrom([{ id: 30129, gems: [] }], [], {
       talentsString: "-5032003115331051-",
