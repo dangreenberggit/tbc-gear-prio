@@ -1281,11 +1281,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "rep",
           "faction": "Lower City",
-          "standing": "Exalted",
           "factionId": 1011,
-          "origin": "wowhead"
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 61.55,
@@ -1356,8 +1356,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "faction": "The Sha'tar",
+          "factionId": 935,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 41.0,

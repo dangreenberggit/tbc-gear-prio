@@ -355,7 +355,11 @@ describe("data/universes/ret-p3.json hardening", () => {
     // faction -> phase (ticket 65 step 2.5), admitting +32489 Ashtongue
     // Talisman of Zeal, the paladin trinket from Black Temple's faction. The
     // other eight talismans are held out by classAllowlist, not by this route.
-    expect(universeP3.length).toBe(365);
+    // 365 -> 381: AtlasLoot's Factions module is now parsed for vendor loot,
+    // not just faction ids (ticket 65 step 3), admitting the 16-ring Band of
+    // Eternity ladder (29294-29309) sold by Scale of the Sands. db.json has
+    // `sources: null` for all 16, so AtlasLoot is their only witness.
+    expect(universeP3.length).toBe(381);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -459,6 +463,31 @@ describe("data/universes/ret-p3.json hardening", () => {
       32485, 32486, 32487, 32488, 32489, 32490, 32491, 32492, 32493,
     ].filter((id) => byId.has(id));
     expect(talismans).toEqual([32489]);
+
+    // Scale of the Sands (990) is Hyjal's faction. Its 16-ring ladder has
+    // `sources: null` in db.json, so AtlasLoot's Factions module is the only
+    // witness — the whole point of parsing it (ticket 65 step 3).
+    const bands: number[] = [];
+    for (let id = 29294; id <= 29309; id += 1) if (byId.has(id)) bands.push(id);
+    expect(bands.length).toBe(16);
+    for (const id of bands) {
+      expect(byId.get(id)?.sources[0], `${id}`).toMatchObject({
+        kind: "rep",
+        factionId: 990,
+        origin: "atlasloot",
+      });
+    }
+  });
+
+  // Ticket 59: a trailing parenthetical is not always a zone. Step 3 admitting
+  // 29301 made this reachable for the first time — the row's only parse was a
+  // fabricated zone "The Scale of the Sands Exalted", which failed the build.
+  it("reads a standing in a quest parenthetical as rep, not as a zone", () => {
+    const champion = raw.entries.find((e) => e.itemId === 29301);
+    for (const s of champion?.sources ?? []) {
+      expect(s.kind, `29301 ${JSON.stringify(s)}`).not.toBe("raid");
+    }
+    expect(champion?.sources.some((s) => s.kind === "rep")).toBe(true);
   });
 
   // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that

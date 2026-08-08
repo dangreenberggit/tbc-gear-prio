@@ -16,14 +16,14 @@
     1012
   ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1542,
-  "universeTotal": 382,
+  "excludedNoSource": 1470,
+  "universeTotal": 398,
   "listOnlyMembership": 35,
   "perSlot": {
     "back": 30,
     "chest": 20,
     "feet": 29,
-    "finger": 34,
+    "finger": 50,
     "hands": 20,
     "head": 18,
     "legs": 18,
@@ -36,27 +36,27 @@
     "wrist": 24
   },
   "sourceRecordAdds": {
-    "atlasloot": 213,
+    "atlasloot": 287,
     "curated": 2,
     "db": 1864,
     "two-hop": 15,
-    "wowhead": 29
+    "wowhead": 27
   },
   "membershipByOrigin": {
     "curated": 3,
-    "itemHasOrigin:atlasloot": 54,
+    "itemHasOrigin:atlasloot": 71,
     "itemHasOrigin:curated": 2,
     "itemHasOrigin:db": 331,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 20,
+    "itemHasOrigin:wowhead": 19,
     "listOnly": 35,
-    "repFactionMatch": 1,
+    "repFactionMatch": 17,
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
     "db": 331,
-    "wowhead-only": 20,
-    "atlasloot-only": 14,
+    "wowhead-only": 19,
+    "atlasloot-only": 31,
     "other": 2,
     "two-hop": 15
   },
@@ -64,22 +64,22 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 382,
-    "casterOnlyReject": 177,
+    "total": 398,
+    "casterOnlyReject": 185,
     "epFloorReject": 0,
-    "combinedReject": 177,
-    "combinedKeep": 205,
-    "casterRejectPct": 46.3,
-    "combinedRejectPct": 46.3,
+    "combinedReject": 185,
+    "combinedKeep": 213,
+    "casterRejectPct": 46.5,
+    "combinedRejectPct": 46.5,
     "applied": false
   },
   "wowheadListIds": 115,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 115,
-    "recalled": 95,
-    "missed": 20,
-    "recallPct": 82.6,
+    "recalled": 96,
+    "missed": 19,
+    "recallPct": 83.5,
     "missedItems": [
       {
         "itemId": 19406,
@@ -157,12 +157,6 @@
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 29301,
-        "name": "Band of the Eternal Champion",
-        "slot": "finger",
         "d7Eligible": true
       },
       {

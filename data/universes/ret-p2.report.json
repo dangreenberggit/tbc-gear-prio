@@ -11,7 +11,7 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1360,
+  "excludedNoSource": 1303,
   "universeTotal": 240,
   "listOnlyMembership": 15,
   "perSlot": {
@@ -31,29 +31,29 @@
     "wrist": 18
   },
   "sourceRecordAdds": {
-    "atlasloot": 196,
-    "curated": 3,
+    "atlasloot": 255,
+    "curated": 2,
     "db": 1733,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 10
+    "wowhead": 9
   },
   "membershipByOrigin": {
     "curated": 7,
-    "itemHasOrigin:atlasloot": 41,
-    "itemHasOrigin:curated": 3,
+    "itemHasOrigin:atlasloot": 43,
+    "itemHasOrigin:curated": 2,
     "itemHasOrigin:db": 206,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 8,
+    "itemHasOrigin:wowhead": 7,
     "listOnly": 15,
     "zoneMatch": 218
   },
   "exclusivePrimaryOrigin": {
     "db": 206,
-    "atlasloot-only": 13,
+    "atlasloot-only": 15,
     "two-hop": 10,
-    "other": 3,
-    "wowhead-only": 8
+    "other": 2,
+    "wowhead-only": 7
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,

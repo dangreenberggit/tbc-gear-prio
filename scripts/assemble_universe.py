@@ -277,6 +277,13 @@ VENDOR_STANDING_FIRST_RE = re.compile(
 # no `quest` ItemSource variant, and inventing a zone would be worse than the
 # curated-set fallback that already covers those rows.
 QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
+# "(The Scale of the Sands Exalted)" -- a standing inside a parenthetical, with
+# no "Vendor:" prefix for VENDOR_REP_RE to anchor on. Matches the same shape
+# VENDOR_REP_RE captures, minus that prefix, so a quest reward gated on
+# reputation resolves to a rep source instead of a fabricated zone.
+STANDING_PAREN_RE = re.compile(
+    r"\(\s*(.+?)\s+(Friendly|Honored|Revered|Exalted)\s*\)", re.IGNORECASE
+)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
 # "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
 # Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
@@ -596,6 +603,16 @@ REP_LEVEL_NAMES = {
 # source, which is gitignored, so a fresh worktree will not have it. Re-fetch it
 # from upstream to re-check rather than assuming it is on disk.
 REP_FACTION_DISPLAY = {
+    # Ids beyond ui.proto's 10 come from AtlasLoot (data/faction_ids.json).
+    # They are spelled here for the same reason as the rest: splitting
+    # "TheScaleOfTheSands" yields "The Scale Of The Sands", and no rule knows
+    # that "of" is lowercase or that "Ogrila" wants an apostrophe. Ids not
+    # listed fall back to the split, which is fine for factions no shipped item
+    # references.
+    935: "The Sha'tar",
+    990: "The Scale of the Sands",
+    1011: "Lower City",
+    1077: "Shattered Sun Offensive",
     933: "The Consortium",
     941: "The Mag'har",
     942: "Cenarion Expedition",
@@ -612,23 +629,26 @@ REP_FACTION_DISPLAY = {
 def rep_faction_names() -> dict[int, str]:
     """ui.proto RepFaction id -> display name, checked against the proto.
 
-    The proto is the authority on which ids exist; REP_FACTION_DISPLAY supplies
-    the human spelling. Drift in either direction is a hard failure, because a
-    faction that falls back to its CamelCase enum name would not match the
-    prose-parsed spelling of the same faction (ticket 65).
+    Every proto id must be spelled here: a missing one would fall back to a
+    CamelCase split and stop matching the prose-parsed spelling of the same
+    faction (ticket 65).
+
+    The converse is not required. AtlasLoot carries ids the proto does not
+    model (Scale of the Sands 990, Lower City 1011), and those are spelled here
+    too rather than left to the split, which cannot know "of" is lowercase.
+    They are validated against data/faction_ids.json instead -- an id in
+    neither source is a typo and still fails.
     """
     proto_ids = set(_enum_members(UI_PROTO, "RepFaction")) - {0}
     missing = proto_ids - set(REP_FACTION_DISPLAY)
-    extra = set(REP_FACTION_DISPLAY) - proto_ids
-    if missing or extra:
+    known = proto_ids | set(FACTION_IDS_BY_KEY.values())
+    unknown = set(REP_FACTION_DISPLAY) - known
+    if missing or unknown:
         raise SystemExit(
-            "REP_FACTION_DISPLAY is out of sync with ui.proto RepFaction: "
-            f"missing {sorted(missing)}, unknown {sorted(extra)}"
+            "REP_FACTION_DISPLAY is out of sync: missing proto ids "
+            f"{sorted(missing)}, ids in no known source {sorted(unknown)}"
         )
     return dict(REP_FACTION_DISPLAY)
-
-
-REP_FACTION_NAMES = rep_faction_names()
 
 
 def _faction_key(name: str) -> str:
@@ -656,6 +676,34 @@ def faction_ids_by_key() -> dict[str, int]:
 
 
 FACTION_IDS_BY_KEY = faction_ids_by_key()
+# After FACTION_IDS_BY_KEY: the sync check validates non-proto ids against it.
+REP_FACTION_NAMES = rep_faction_names()
+
+
+def faction_display_by_id() -> dict[int, str]:
+    """Faction.dbc id -> display string, for every id any input can produce.
+
+    `REP_FACTION_NAMES` is authoritative but covers only the 10 factions
+    wowsims models. AtlasLoot sources carry ids for 20, so the remainder get a
+    name split out of AtlasLoot's CamelCase key ("TheScaleOfTheSands" -> "The
+    Scale of the Sands"). That split is presentation only -- the id is the
+    identity -- but a rep source without a `faction` violates the ItemSource
+    union, so every id must yield some string.
+
+    The curated spellings win wherever they exist: splitting cannot produce
+    "Ogri'la" from "Ogrila", which is exactly why REP_FACTION_DISPLAY is
+    hand-written.
+    """
+    out: dict[int, str] = {}
+    if FACTION_IDS.is_file():
+        data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+        for key, faction_id in (data.get("factions") or {}).items():
+            out[int(faction_id)] = re.sub(r"(?<!^)(?=[A-Z])", " ", key)
+    out.update(REP_FACTION_NAMES)
+    return out
+
+
+FACTION_DISPLAY_BY_ID = faction_display_by_id()
 
 
 def rep_source(faction: str, standing: str) -> dict:
@@ -941,7 +989,14 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.extend(zone_sources(m.group(2).strip(), drop_boss(m.group(1).strip())))
     else:
         qm = QUEST_ZONE_RE.search(text)
-        if qm:
+        # A quest parenthetical is only a zone when it is not a standing:
+        # "Quest: Champion's Covenant (The Scale of the Sands Exalted)" names a
+        # reputation requirement, and reading it as a zone invented the zone
+        # "The Scale of the Sands Exalted" (ticket 59, which predicted this
+        # would surface as soon as such a row became a universe member -- step
+        # 3 admitting 29301 is what made it reachable). The rep parse below
+        # already handles the parenthetical correctly.
+        if qm and not VENDOR_REP_RE.search(text) and not STANDING_PAREN_RE.search(text):
             out.extend(zone_sources(qm.group(2).strip(), ""))
         elif WORLD_DROP_RE.search(text):
             out.append({"kind": "world"})
@@ -976,6 +1031,19 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
                 out.append(
                     rep_source(sm.group(2).strip(), sm.group(1).strip().capitalize())
                 )
+            else:
+                # A standing in a bare parenthetical, with no "Vendor:" or
+                # "Requires" to anchor the parses above: "Quest: Champion's
+                # Covenant (The Scale of the Sands Exalted)". Without this the
+                # row parses to nothing at all, which is how ticket 59's
+                # fabricated zone was the only thing it produced.
+                pm = STANDING_PAREN_RE.search(text)
+                if pm:
+                    out.append(
+                        rep_source(
+                            pm.group(1).strip(), pm.group(2).strip().capitalize()
+                        )
+                    )
     return out
 
 
@@ -1242,6 +1310,13 @@ def assemble(
         add_source(iid, db_src, "db")
         for raw in (atlasloot.get(str(iid)) or []):
             if isinstance(raw, dict):
+                # AtlasLoot splits its CamelCase key for `faction`; re-derive
+                # from the id so one faction reads the same however it arrived
+                # ("Ogri'la", never AtlasLoot's "Ogrila").
+                if raw.get("kind") == "rep" and raw.get("factionId") is not None:
+                    display = FACTION_DISPLAY_BY_ID.get(int(raw["factionId"]))
+                    if display:
+                        raw = {**raw, "faction": display}
                 add_source(iid, raw, "atlasloot")
 
     # two-hop tokens

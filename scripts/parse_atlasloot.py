@@ -352,6 +352,78 @@ FACTION_TABLE_RE = re.compile(
 )
 
 
+FACTION_BLOCK_RE = re.compile(r'data\["(\w+)"\]\s*=\s*\{(.*?)\n\}', re.S)
+STANDING_RE = re.compile(r"\{\s*--\s*(Friendly|Honored|Revered|Exalted)\b")
+LOOT_ROW_RE = re.compile(r"\{\s*\d+,\s*(\d{4,6})\s*\}")
+
+
+def parse_faction_items(
+    lua_text: str, faction_ids: dict[str, int]
+) -> tuple[dict[int, list[dict]], dict[str, int]]:
+    """Reputation-vendor loot -> {itemId: [{kind: rep, factionId, standing}]}.
+
+    The Factions module groups each faction's loot under standing sub-tables
+    marked by a `{ -- Exalted` comment. That comment is the only thing naming
+    the standing -- the `name = ALIL["Exalted"]` line beside it is a localisation
+    lookup, so the comment is what a Lua-less parser can read.
+
+    Items are keyed by id and standings resolve to the same names `ui.proto`'s
+    RepLevel uses, so a row here is shaped exactly like the db.json-derived rep
+    sources in `assemble_universe.map_db_source` and merges with them.
+
+    Recipe rows (`Plans:`, `Pattern:`, `Design:`) are *not* filtered here, and
+    deliberately so: filtering would mean trusting the trailing comment to
+    classify a row, and the id is the reliable part. 371 of the 517 ids emitted
+    are recipes or other non-equippables, and none can reach a universe --
+    `assemble_universe` iterates `db.json` items, which contain none of them, so
+    a source keyed by an id that is not an item is simply never looked up.
+    Verified rather than assumed:
+
+        python -c "
+        import json
+        s=json.load(open('data/atlasloot_sources.json'))
+        db={i['id'] for i in json.load(open('vendor/wowsims/db.json'))['items']}
+        rep=[int(k) for k,v in s.items() if any(x.get('kind')=='rep' for x in v)]
+        print(len([i for i in rep if i not in db]))"   # 371
+
+    Block comments are stripped first, so commented-out tables cannot
+    contribute.
+    """
+    live = BLOCK_COMMENT_RE.sub("", lua_text)
+    by_item: dict[int, list[dict]] = {}
+    stats: dict[str, int] = {"factionsSeen": 0, "rows": 0, "unknownFaction": 0}
+
+    for key, body in FACTION_BLOCK_RE.findall(live):
+        faction_id = faction_ids.get(key)
+        if faction_id is None:
+            stats["unknownFaction"] += 1
+            continue
+        stats["factionsSeen"] += 1
+        # Split on the standing markers; text before the first one is table
+        # preamble (FactionID, ContentType) and carries no loot.
+        parts = STANDING_RE.split(body)
+        for i in range(1, len(parts), 2):
+            standing, chunk = parts[i], parts[i + 1]
+            for raw_id in LOOT_ROW_RE.findall(chunk):
+                item_id = int(raw_id)
+                # `faction` is required by the ItemSource union, so the row
+                # carries a display string split out of AtlasLoot's CamelCase
+                # key. It is presentation only -- the id is the identity, and
+                # assemble_universe re-derives the string from its own table so
+                # the curated spellings ("Ogri'la", not "Ogrila") win.
+                source = {
+                    "kind": "rep",
+                    "factionId": faction_id,
+                    "faction": re.sub(r"(?<!^)(?=[A-Z])", " ", key),
+                    "standing": standing,
+                }
+                rows = by_item.setdefault(item_id, [])
+                if source not in rows:
+                    rows.append(source)
+                    stats["rows"] += 1
+    return by_item, stats
+
+
 def parse_factions(lua_text: str) -> dict[str, int]:
     """AtlasLoot faction key -> FactionID, from the Factions module.
 
@@ -481,7 +553,25 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
-    factions = parse_factions(args.factions_lua.read_text(encoding="utf-8"))
+    factions_lua = args.factions_lua.read_text(encoding="utf-8")
+    factions = parse_factions(factions_lua)
+
+    # Reputation-vendor loot merges into the same itemId -> [sources] map the
+    # instance tables produce, so membership and origin handling need no
+    # special case. Written before the file is dumped below.
+    faction_items, faction_item_stats = parse_faction_items(factions_lua, factions)
+    for item_id, rows in faction_items.items():
+        existing = sources.setdefault(str(item_id), [])
+        for row in rows:
+            if row not in existing:
+                existing.append(row)
+    with args.out.open("w", encoding="utf-8") as fh:
+        json.dump(sources, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    print(
+        f"  merged {faction_item_stats['rows']} reputation rows "
+        f"({len(faction_items)} items) from {faction_item_stats['factionsSeen']} factions"
+    )
     args.factions_out.parent.mkdir(parents=True, exist_ok=True)
     with args.factions_out.open("w", encoding="utf-8") as fh:
         json.dump(

@@ -2219,11 +2219,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "rep",
           "faction": "Lower City",
-          "standing": "Exalted",
           "factionId": 1011,
-          "origin": "wowhead"
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 61.55,
@@ -2308,6 +2308,44 @@
       ]
     },
     {
+      "itemId": 29300,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 46.35
+    },
+    {
+      "itemId": 29301,
+      "name": "Band of the Eternal Champion",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 46.35
+    },
+    {
       "itemId": 32261,
       "name": "Band of the Abyssal Lord",
       "slot": "finger",
@@ -2324,6 +2362,25 @@
         }
       ],
       "curationHint": 45.15
+    },
+    {
+      "itemId": 29299,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 43.21
     },
     {
       "itemId": 28730,
@@ -2353,14 +2410,36 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "faction": "The Sha'tar",
+          "factionId": 935,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 41.0,
       "curatedSets": [
         "preraid"
       ]
+    },
+    {
+      "itemId": 29298,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 39.25
     },
     {
       "itemId": 33055,
@@ -2458,6 +2537,44 @@
       "curationHint": 6.29
     },
     {
+      "itemId": 29304,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 5.78
+    },
+    {
+      "itemId": 29305,
+      "name": "Band of the Eternal Sage",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 5.78
+    },
+    {
       "itemId": 33497,
       "name": "Mana Attuned Band",
       "slot": "finger",
@@ -2504,6 +2621,25 @@
       "curationHint": 5.44
     },
     {
+      "itemId": 29303,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
       "itemId": 28510,
       "name": "Spectral Band of Innervation",
       "slot": "finger",
@@ -2517,6 +2653,25 @@
           "zone": "Karazhan",
           "boss": "Attumen the Huntsman",
           "origin": "db"
+        }
+      ],
+      "curationHint": 4.93
+    },
+    {
+      "itemId": 29302,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 4.93
@@ -2635,6 +2790,44 @@
       "curationHint": 3.91
     },
     {
+      "itemId": 29308,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.74
+    },
+    {
+      "itemId": 29309,
+      "name": "Band of the Eternal Restorer",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.74
+    },
+    {
       "itemId": 32238,
       "name": "Ring of Calming Waves",
       "slot": "finger",
@@ -2674,6 +2867,44 @@
         }
       ],
       "curationHint": 3.57
+    },
+    {
+      "itemId": 29306,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.4
+    },
+    {
+      "itemId": 29307,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.23
     },
     {
       "itemId": 29920,
@@ -2743,6 +2974,82 @@
           "zone": "Karazhan",
           "boss": "Shade of Aran",
           "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29294,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Friendly",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29295,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29296,
+      "name": "Band of Eternity",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29297,
+      "name": "Band of the Eternal Defender",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "faction": "The Scale of the Sands",
+          "factionId": 990,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
