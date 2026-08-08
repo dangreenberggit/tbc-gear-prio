@@ -30,6 +30,13 @@ jobs:
       # without rewriting the lock.
       - run: pnpm run sync:wowsims:restore
 
+      # vendor/atlasloot is gitignored too. Restoring it is what turns the two
+      # atlasloot gates in `verify` from a skip into a real check: without the
+      # Lua present they pass vacuously, and the committed parse
+      # (data/faction_ids.json, which rep-tables:check depends on) would never
+      # be compared against its source. Ticket 69.
+      - run: pnpm run sync:atlasloot:restore
+
       - run: pnpm run verify
 
       # PLAN.md §8.1: regenerating packages/core/src/proto/ from the pinned

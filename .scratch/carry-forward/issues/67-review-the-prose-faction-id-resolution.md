@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: review
 Origin: ticket 66 grew past its own scope; the user asked for the wider change
   to get its own review rather than blocking 66 on it.
@@ -69,3 +69,74 @@ Verified before landing (commands in 66's Done-when and the commit body):
 
 - A reviewer has signed off on 1-4, or filed the disagreements as tickets.
 - Ticket 58's scope is restated in light of the second vendored module.
+
+## Review, 2026-08-08
+
+Reviewed against the tree at `4d07e11`, not at `3f53c81` — three later commits
+on this branch moved two of the five premises. Every claim below was re-run, not
+read off the commit message. **Verdict: no blocker; land as-is.** Two follow-ups
+below are latent-risk, not defects.
+
+### 1. The normalised string join — accept
+
+The join is real but it is not the gate's only line of defence, which the ticket
+framing understates. `_faction_key` resolves an id; a *separate* check then
+requires the shipped spelling to equal the one the id names. Mutating shipped
+universe rows (id retained, spelling edited) fails on all three realistic drift
+shapes:
+
+```bash
+python scripts/check_rep_tables.py
+```
+
+- dropped article (`The Scale of the Sands` → `Scale of the Sands`) → FAIL
+- typo (`Deathsworn` → `Deathsworne`) → FAIL, plus the one-id-two-spellings check
+- doubled space (`Lower City` → `Lower  City`) → FAIL
+
+Note the asymmetry the ticket's example gets backwards: `Lower  City` does *not*
+pass. It resolves to 1011 and then fails the exactness check. The lossy key only
+widens what **resolves**; it never widens what **ships**. Invariant 4 (20 keys,
+all distinct, no containment pairs) guards the resolve side. That is sufficient
+— routing the id from a different source would be strictly better, but there is
+no second source in the tree to route it from.
+
+### 2. No regeneration gate on `faction_ids.json` — real, keep open
+
+Confirmed: `verify` runs `rep-tables:check` but not `sync:atlasloot:check`, and
+CI restores only `vendor/wowsims`, so nothing rebuilds or byte-compares this
+file. `sync:atlasloot:check` also cannot go into `verify` as-is — it hits the
+GitHub API for the upstream tag, so it would make `verify` network-dependent and
+fail on a new upstream release rather than on drift. This is the same exposure
+`atlasloot_sources.json` already carries, now load-bearing for a gate. Filed
+separately rather than fixed here; needs an offline-only local-checksum mode.
+
+### 3. Ten factions with no display authority — premise no longer holds
+
+Now six, not ten (`KeepersOfTime`, `ShatariSkyguard`, `TheAldor`, `TheScryers`,
+`TheVioletEye`, `Tranquillien`) — later commits extended `REP_FACTION_DISPLAY`
+past ui.proto's 10 to 14. More to the point, **none of the six ships**: shipped
+ids are `{933, 935, 942, 990, 1011, 1012, 1038, 1077}`, all of which have a
+display authority and take the exact-match path. The weak normalised-key branch
+is currently dead code. No action; it becomes live only if a new item pulls in
+one of the six, and the branch is a correct fallback when it does.
+
+### 4. `--restore` precedence — correct, and the window is closed
+
+Precedence is right: fetch from `TRACKED`, verify against the lock when an entry
+exists, skip verification when it does not, and print `not yet in lockfile`.
+That ordering is what lets a new input be added without moving an unrelated pin
+— the alternative (lockfile-driven fetch) makes adding a file require an
+`--update` that also chases upstream. The transitional state is gone anyway:
+`factions-tbc.lua` is now pinned with a sha256, and `--check` reports in sync.
+`--check` also now iterates `TRACKED`, so a tracked-but-unpinned file is
+reported as drift rather than skipped. Accept.
+
+### 5. Ticket 58 — narrowed, stays open
+
+58 asks for the badge **and** reputation modules. This vendored
+`AtlasLootClassic_Factions` for ids only, and later commits on this branch
+(`c240f2a`, `4d07e11`) parse its vendor loot and attribute vendor-taught crafts.
+So 58's rep half is largely delivered; the badge half is untouched, and its
+"re-measure the 94" step has not been done. 58 stays open with its scope
+restated rather than closing — the second vendored module changes the answer to
+"how many of the 94 have a machine witness", and that number is quoted in 57.

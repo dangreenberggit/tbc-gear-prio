@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run mirrors:check",
+    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run mirrors:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -20,6 +20,8 @@
     "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
     "sync:atlasloot:restore": "python scripts/sync_atlasloot.py --restore",
     "sync:atlasloot:check": "python scripts/sync_atlasloot.py --check",
+    "sync:atlasloot:verify-local": "python scripts/sync_atlasloot.py --verify-local",
+    "atlasloot:regen:check": "python scripts/check_atlasloot_regen.py",
     "fetch:wowsimcli": "python scripts/fetch_wowsimcli.py",
     "fetch:protos": "python scripts/fetch_protos.py",
     "fetch:protos:check": "python scripts/fetch_protos.py --check",

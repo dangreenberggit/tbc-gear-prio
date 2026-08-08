@@ -49,11 +49,48 @@ Measure before committing to the work — the 148/94/11 split came from
 `.scratch/carry-forward/notes/57-impact.py` and that script is the place to
 extend.
 
+## Scope restated, 2026-08-08 (ticket 67 review)
+
+The reputation half is largely delivered; this ticket is now **the badge module
+plus the re-measurement**. `feat/phase-3-vendor-and-craft-coverage` vendored a
+second AtlasLoot module and built on it:
+
+- `3f53c81` — vendors `AtlasLootClassic_Factions/data-tbc.lua` (pinned and
+  checksummed in `data/atlasloot.lock.json`, same discipline as `data-tbc.lua`)
+  and parses it to `data/faction_ids.json`, for faction **ids**.
+- `c240f2a` — parses that module's faction **vendor loot** into
+  `data/atlasloot_sources.json`.
+- `4d07e11` — attributes vendor-taught crafts to the faction selling the recipe.
+
+So "only the instance tables are vendored" is no longer true, and the framing
+this ticket corrected at five sites is now correct in the code as well as in the
+comments. What remains:
+
+- **The badge module is still not vendored.** `TRACKED` in
+  `scripts/sync_atlasloot.py` holds two entries; a badge-vendor table is not one
+  of them.
+- **The 94 has not been re-measured**, and that is now the load-bearing part.
+  Two of the three inputs feeding it have changed, so 57's 148/94/11 split is
+  stale in an unknown direction. Extend
+  `.scratch/carry-forward/notes/57-impact.py` and re-run before deciding whether
+  the badge module is worth vendoring at all — it may already be a small
+  remainder.
+
+Do the measurement first. It is cheap and it sizes the rest of the ticket.
+
+Related exposure filed separately as **69**, and since closed for this ticket's
+purposes: `pnpm atlasloot:regen:check` byte-compares `atlasloot_sources.json`
+against a fresh parse of `vendor/atlasloot`, so a badge module added here
+inherits the gate rather than widening the hole. Regenerate and commit when
+`TRACKED` grows, or `pnpm verify` fails.
+
 ## Done when
 
-- The badge and reputation loot tables are vendored under `vendor/atlasloot/`
-  with the same pinning discipline as `data-tbc.lua`, or a note records why not.
+- The badge loot tables are vendored under `vendor/atlasloot/` with the same
+  pinning discipline as `data-tbc.lua`, or a note records why not — decided
+  against the re-measured number, not the stale one.
 - `scripts/parse_atlasloot.py` reads them into `data/atlasloot_sources.json`.
-- The 94 is re-measured and 57's figures updated wherever they are quoted.
+- The 94 is re-measured against the current tree and 57's figures updated
+  wherever they are quoted.
 - `KNOWN_UNCORROBORATED` and the `real-source.ts` fixture gate are re-checked:
   both should get strictly easier to satisfy, never harder.

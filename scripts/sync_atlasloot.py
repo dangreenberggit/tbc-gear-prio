@@ -6,11 +6,19 @@ Everything we take from upstream is pinned to ONE release tag (or default-branch
 commit when no tags exist), recorded in data/atlasloot.lock.json, and fetched into
 vendor/ (gitignored). What gets committed is the parsed output plus the lockfile.
 
-    python scripts/sync_atlasloot.py --check     # drift report, no writes
-    python scripts/sync_atlasloot.py --update    # fetch latest tag, rewrite lockfile
+    python scripts/sync_atlasloot.py --check         # drift report, no writes
+    python scripts/sync_atlasloot.py --verify-local  # checksum vendor/, offline
+    python scripts/sync_atlasloot.py --restore       # fetch pinned files into vendor/
+    python scripts/sync_atlasloot.py --update        # fetch latest tag, rewrite lockfile
     python scripts/sync_atlasloot.py --update --tag v3.4.3.pre-release
 
-Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
+--check asks two questions; --verify-local asks only the second, so it can run
+in `pnpm verify`:
+
+    is there a newer release upstream?   network, and not drift
+    does vendor/ match the lockfile?     offline, and the integrity gate
+
+Exit codes: 0 in sync, 1 drift detected (--check, --verify-local), 2 error.
 """
 
 import argparse
@@ -22,6 +30,7 @@ import sys
 from pinned_fetch import digest as sha256_of
 from pinned_fetch import fetch as pinned_fetch
 from pinned_fetch import lock_entry
+from pinned_fetch import verify as verify_blob
 
 REPO = "Hoizame/AtlasLootClassic"
 LOCKFILE = "data/atlasloot.lock.json"
@@ -161,6 +170,51 @@ def do_restore():
     return 0
 
 
+def do_verify_local():
+    """Checksum vendor/ against the lockfile. No network, no upstream lookup.
+
+    Split out of --check so it can run inside `pnpm verify`, which must stay
+    offline and must not go red when upstream cuts a release: a new tag is not
+    drift and is not this repo's problem at commit time. This half -- "is the
+    file on disk the file the lock names" -- is the half worth gating on.
+
+    An absent vendor/ is not a failure. It is the normal state of a fresh
+    worktree that has not run --restore, and this is a data-integrity check, not
+    a setup check; the gates that actually need the files fail on their own.
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+
+    present = [l for l in TRACKED if os.path.exists(os.path.join(VENDOR, l))]
+    if not present:
+        print(f"  {VENDOR} absent -- skipping (run `pnpm sync:atlasloot:restore`)")
+        return 0
+
+    drift = []
+    for local in TRACKED:
+        path = os.path.join(VENDOR, local)
+        meta = (lock.get("files") or {}).get(local)
+        if not meta:
+            drift.append(f"{local} is tracked but not in {LOCKFILE} (run --update to pin)")
+            continue
+        if not os.path.exists(path):
+            drift.append(f"missing locally: {path} (run --restore)")
+            continue
+        with open(path, "rb") as fh:
+            reason = verify_blob(fh.read(), meta)
+        if reason:
+            drift.append(f"{path}: {reason}")
+
+    if drift:
+        for d in drift:
+            print(f"  DRIFT: {d}", file=sys.stderr)
+        return 1
+    print(f"  vendor/atlasloot matches {LOCKFILE} ({len(present)} files).")
+    return 0
+
+
 def do_check():
     lock = load_lock()
     if not lock:
@@ -215,6 +269,11 @@ def main():
         action="store_true",
         help="fetch pinned files into vendor/ from the lock (no lock rewrite)",
     )
+    ap.add_argument(
+        "--verify-local",
+        action="store_true",
+        help="checksum vendor/ against the lock, offline (no upstream lookup)",
+    )
     ap.add_argument("--tag", help="pin a specific tag instead of the latest")
     args = ap.parse_args()
 
@@ -222,6 +281,8 @@ def main():
         sys.exit(do_update(args.tag))
     elif args.restore:
         sys.exit(do_restore())
+    elif args.verify_local:
+        sys.exit(do_verify_local())
     elif args.check:
         sys.exit(do_check())
     else:
