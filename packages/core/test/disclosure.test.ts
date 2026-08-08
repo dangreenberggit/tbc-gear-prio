@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { HIT_CAP_RATING, HIT_CAP_UNCERTAINTY } from "../src/caps.js";
 import {
   buildStandingAssumptions,
+  fightProvenanceLines,
   hitCapBanner,
   renderDisclosure,
   substitutionsFromMetaRepair,
@@ -216,5 +217,78 @@ describe("renderDisclosure", () => {
     const text = lines.join("\n");
     expect(text).toContain("standing");
     expect(text).toContain("this run");
+  });
+});
+
+describe("fight provenance (ticket 06)", () => {
+  const morogrim = {
+    reportCode: "YwahQLgv2jBrZGn6",
+    fightId: 39,
+    encounterName: "Morogrim Tidewalker",
+    route: "ranked" as const,
+  };
+
+  it("names the fight the gear came from even when nothing looks wrong", () => {
+    // The whole point: an off-tank fight reached a user who had no way to see
+    // which fight was read. Disclosure is unconditional, not a warning.
+    const text = fightProvenanceLines({
+      ...morogrim,
+      confidence: 1,
+      salvationUptime: 1,
+    }).join("\n");
+    expect(text).toContain("Morogrim Tidewalker");
+    expect(text).toContain("39");
+    expect(text).toContain("YwahQLgv2jBrZGn6");
+  });
+
+  it("flags a confident DPS parse that never had salvation", () => {
+    const text = fightProvenanceLines({
+      ...morogrim,
+      confidence: 0.99,
+      salvationUptime: 0,
+    }).join("\n");
+    expect(text).toMatch(/salvation/i);
+  });
+
+  it("asks rather than asserting off-tank, because the roster is unreadable", () => {
+    // capture_fixture.py scopes the buffs table to one player, so "no paladin
+    // in the raid" is indistinguishable from "stripped for tank duty".
+    const text = fightProvenanceLines({
+      ...morogrim,
+      confidence: 0.99,
+      salvationUptime: 0,
+    }).join("\n");
+    expect(text).toMatch(/paladin/i);
+    expect(text).not.toMatch(/you were (the )?(off-?)?tank/i);
+  });
+
+  it("stays quiet about salvation on a clean cat parse that had it", () => {
+    const text = fightProvenanceLines({
+      ...morogrim,
+      confidence: 0.99,
+      salvationUptime: 1,
+    }).join("\n");
+    expect(text).not.toMatch(/salvation/i);
+  });
+
+  it("does not flag salvation on a fight that already reads as tank", () => {
+    // A bear parse has no salv either; saying so adds nothing the low
+    // confidence has not already said.
+    const text = fightProvenanceLines({
+      ...morogrim,
+      encounterName: "Fathom-Lord Karathress",
+      confidence: 0.69,
+      salvationUptime: 0,
+    }).join("\n");
+    expect(text).not.toMatch(/salvation/i);
+  });
+
+  it("says nothing about salvation when it was never measured", () => {
+    // Absent ≠ zero. The ret/report-events recordings carry no buff table.
+    const text = fightProvenanceLines({
+      ...morogrim,
+      confidence: 1,
+    }).join("\n");
+    expect(text).not.toMatch(/salvation/i);
   });
 });

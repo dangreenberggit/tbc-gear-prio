@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   classifyFeralForm,
   classifySpec,
+  salvationUptimeOf,
   talentPointsFromWclTalents,
 } from "../src/spec.js";
 
@@ -50,6 +51,10 @@ function load(name: string, character: string) {
     className: actor.subType,
     talents: talentPointsFromWclTalents(event.talents),
     uptime: { catMs, bearMs },
+    salvation: salvationUptimeOf(
+      raw.buffs_table.data.auras,
+      raw.buffs_table.data.totalTime
+    ),
   };
 }
 
@@ -91,5 +96,23 @@ describe("feral disambiguation on real captures", () => {
     const result = classifyFeralForm(nexess.uptime);
     expect(result.spec).toBe("feral");
     expect(result.confidence).toBeGreaterThan(0.9);
+  });
+
+  it("separates a backup-tank cat fight from a real one, where form uptime cannot", () => {
+    // Ticket 06. Both fights are ~99% cat form, so `classifyFeralForm` reports
+    // near-certainty on each and cannot tell them apart. Shredzepelin was
+    // backup tank on Morogrim; salvation is stripped from anyone who might
+    // tank, so its absence is the signal that survives where form uptime dies.
+    expect(classifyFeralForm(cat.uptime).confidence).toBeGreaterThan(0.95);
+    expect(classifyFeralForm(nexess.uptime).confidence).toBeGreaterThan(0.95);
+
+    expect(cat.salvation).toBe(0);
+    expect(nexess.salvation).toBe(1);
+  });
+
+  it("does not read the bear night's missing salvation as a cat signal", () => {
+    // Salvation is absent here too, but the fight already classifies as tank
+    // from form uptime — the flag must not double-count it as a surprise.
+    expect(bear.salvation).toBe(0);
   });
 });

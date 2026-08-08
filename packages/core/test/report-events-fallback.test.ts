@@ -297,4 +297,19 @@ describe("resolveFight", () => {
       route: "report-events",
     });
   });
+
+  it("carries confidence and salvation through, so the caller can disclose them", () => {
+    // Ticket 06: both were measured upstream and then dropped here, which is
+    // why an off-tank fight reached the user looking like a clean parse.
+    const chosen = resolveFight([
+      summary({ confidence: 0.99, salvationUptime: 0 }),
+    ]);
+    expect(chosen).toMatchObject({ confidence: 0.99, salvationUptime: 0 });
+  });
+
+  it("leaves salvation absent when the source never measured it", () => {
+    // Absent and zero mean different things — see FightSummary.salvationUptime.
+    const chosen = resolveFight([summary({})]);
+    expect(chosen?.salvationUptime).toBeUndefined();
+  });
 });

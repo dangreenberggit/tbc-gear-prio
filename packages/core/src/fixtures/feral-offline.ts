@@ -9,7 +9,11 @@
  * therefore measured here rather than asserted as 1.
  */
 
-import { classifyFeralForm, talentPointsFromWclTalents } from "../spec.js";
+import {
+  classifyFeralForm,
+  salvationUptimeOf,
+  talentPointsFromWclTalents,
+} from "../spec.js";
 import {
   characterFightKey,
   fightGearKey,
@@ -106,12 +110,21 @@ export function feralOfflineRecordings(
 
   const form = classifyFeralForm(formUptimeOf(raw));
 
+  const buffs = raw.buffs_table?.data;
   const summary: FightSummary = {
     reportCode: raw.report_code,
     fightId: raw.fight.id,
     encounterName: raw.fight.name,
     route: "ranked",
     confidence: form.confidence,
+    ...(buffs?.totalTime
+      ? {
+          salvationUptime: salvationUptimeOf(
+            buffs.auras ?? [],
+            buffs.totalTime
+          ),
+        }
+      : {}),
   };
 
   return {

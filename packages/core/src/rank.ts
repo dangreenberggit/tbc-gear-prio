@@ -215,6 +215,10 @@ export type ResolvedFight = {
    */
   killedAt?: string;
   route: FightSummary["route"];
+  /** Carried from `FightSummary` so the caller can disclose it (§5.4). */
+  confidence?: number;
+  /** Carried from `FightSummary`; absent means never measured, not zero. */
+  salvationUptime?: number;
 };
 
 export type Ranking = {
@@ -832,6 +836,10 @@ function summaryToResolved(f: FightSummary): ResolvedFight {
     ...(f.encounterName ? { encounterName: f.encounterName } : {}),
     ...(f.killedAt ? { killedAt: f.killedAt } : {}),
     route: f.route,
+    confidence: f.confidence,
+    ...(f.salvationUptime === undefined
+      ? {}
+      : { salvationUptime: f.salvationUptime }),
   };
 }
 

@@ -1134,7 +1134,7 @@ with the coupling evidence in `.scratch/phase-2/feral-coupling-audit.md`:
 | Box | Verdict |
 |---|---|
 | feral shipped without a structural change to `rankUpgrades` or its seams | **PASS** |
-| ≥3 real characters produce believable shortlists | **PARTIAL** — `sme-rank-review` returned trust-with-caveats and filed carry-forward 41 |
+| ≥3 real characters produce believable shortlists | **PARTIAL** — `sme-rank-review` returned trust-with-caveats and filed carry-forward 41; shredzepelin's capture is an off-tank fight, so usable characters is 2 of 3 (ticket 06, 2026-08-08) |
 
 **Those two boxes are deliberately not written up here.** This sitting was scoped
 to the five closed by `caches` / `disclosure-and-caps` / `apply-view`, and a gate
@@ -1318,6 +1318,41 @@ shredzepelin was ever put through `sme-rank-review` — it returned
 **trust-with-caveats** and found a real defect (carry-forward 41). The
 remaining work is a domain pass on slamaltman and nexess, not more pipeline
 work.
+
+**Update, 2026-08-08 — shredzepelin's shortlist is measured against the wrong
+baseline, so the count of usable characters is 2, not 3.** His capture
+(`shredzepelin.raw.json`, Morogrim Tidewalker) is a fight where he was **backup
+tank**: 99.1% cat form, but wearing tank gear for a job that never came up.
+Reported by the user from raid knowledge, not derivable from the log.
+`classifyFeralForm` reports confidence ~1.0 and is *correct about the form*
+while saying nothing about the role, so the fight looked like a clean cat
+parse. Consequence: Icebound Cloak and Violet Signet (zero agility, zero AP,
+both carrying defense rating) are ranked against a cat baseline, which is why
+backs and fingers dominate his shortlist — the `sme-rank-review` §2 verdict
+that this was "mostly correct rather than a bug" is corrected in
+[`sme-rank-judgment-feral-shredzepelin.md`](../.scratch/handoffs/sme-rank-judgment-feral-shredzepelin.md).
+
+Measured, from the `buffs_table` auras already in each fixture:
+
+| fixture | fight | form | Salvation |
+|---|---|---|---|
+| shredzepelin | Morogrim | 99.1% Cat | **absent** |
+| shredzepelin-bear | Karathress | 69.1% Bear | absent |
+| nexess | Karathress | 96.6% Cat | **100%** |
+
+Shredzepelin/Morogrim and nexess/Karathress are both ~99% cat, so form uptime
+cannot separate them and salvation does — it is stripped from anyone who might
+tank. Re-run with the one-liner in
+[ticket 06](../.scratch/phase-2/issues/06-shredzepelin-gear-incorrect.md).
+
+Shipped for this: `salvationUptimeOf`, `FightSummary.salvationUptime` carried
+through `resolveFight`, and `fightProvenanceLines` — every run now names its
+source fight, and a confident DPS parse with no salvation is flagged. The flag
+**asks rather than asserts**, because `capture_fixture.py:56` scopes the buffs
+table to one player, so "no paladin in the raid" cannot be ruled out. Closing
+this box still needs a genuine cat capture for shredzepelin (or a domain pass
+on the two clean characters) — the disclosure makes the problem visible, it
+does not make his shortlist believable.
 
 The defect behind the caveat is largely fixed. Worn items absent from their own
 universe, all three characters, before and after:

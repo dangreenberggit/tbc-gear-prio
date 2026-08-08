@@ -8,7 +8,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
-import { hitCapBanner, renderDisclosure } from "./disclosure.js";
+import {
+  fightProvenanceLines,
+  hitCapBanner,
+  renderDisclosure,
+} from "./disclosure.js";
 import {
   slamaltmanOfflineRecordings,
   SLAMALTMAN_REF,
@@ -362,6 +366,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer lands in Phase 2 rather than in the web shell.
+    // Every run names its source fight (ticket 06) — the route note below is
+    // the older, narrower case of the same idea.
+    for (const line of fightProvenanceLines(ranking.fight)) {
+      console.log(line);
+    }
     if (ranking.fight.route === "report-events") {
       // §5.2: the fallback walks a report's fights rather than a ranked parse,
       // so it can land on a fight the character performed unusually in. Said

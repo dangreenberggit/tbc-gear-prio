@@ -103,4 +103,19 @@ describe("feral offline recordings", () => {
     // signal that this fight is not the spec the caller asked for.
     expect(summary.confidence).toBeLessThan(0.8);
   });
+
+  it("carries salvation uptime onto the summary so a caller can flag off-tank duty", () => {
+    // Ticket 06: confidence alone cannot separate these two — both are ~99%
+    // cat. Shredzepelin was backup tank on Morogrim and has no salvation.
+    const offTank = feralOfflineRecordings(
+      load<FeralRawFixture>("test/fixtures/shredzepelin.raw.json"),
+      SHREDZEPELIN_REF
+    );
+    const realCat = feralOfflineRecordings(
+      load<FeralRawFixture>("test/fixtures/nexess.raw.json"),
+      NEXESS_REF
+    );
+    expect([...offTank.fights.values()][0]![0]!.salvationUptime).toBe(0);
+    expect([...realCat.fights.values()][0]![0]!.salvationUptime).toBe(1);
+  });
 });

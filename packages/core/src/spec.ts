@@ -188,3 +188,32 @@ export function classifyFeralForm(uptime: FormUptime): FeralFormClassification {
     confidence: winning / formed,
   };
 }
+
+/**
+ * Both ranks. A paladin who never picked up the Greater version still salvs,
+ * and reading only one name would report a salvaged DPS as unsalvaged.
+ */
+const SALVATION_AURAS = new Set([
+  "Blessing of Salvation",
+  "Greater Blessing of Salvation",
+]);
+
+/**
+ * Share of the fight spent under Blessing of Salvation, 0–1.
+ *
+ * Ratio rather than a boolean for the same reason `classifyFeralForm` is not
+ * thresholded: salv is lost on death and dropped deliberately by high-threat
+ * DPS, so "had it for 60% of the fight" is a real and different story from
+ * "never had it", and the caller is what decides which matters.
+ */
+export function salvationUptimeOf(
+  auras: readonly { name: string; totalUptime?: number }[],
+  totalTime: number
+): number {
+  if (totalTime <= 0) return 0;
+  let ms = 0;
+  for (const aura of auras) {
+    if (SALVATION_AURAS.has(aura.name)) ms += aura.totalUptime ?? 0;
+  }
+  return Math.min(ms / totalTime, 1);
+}

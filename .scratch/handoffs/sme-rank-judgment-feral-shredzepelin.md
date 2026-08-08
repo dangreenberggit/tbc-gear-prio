@@ -55,6 +55,23 @@ spec introduced.
 
 ### 2. Cloaks and rings crowd out everything else
 
+> **Correction, 2026-08-08.** The "mostly correct rather than a bug" verdict
+> below is **wrong**, and the reason is that this review did not know which
+> fight it was reading. The Morogrim capture is a fight where shredzepelin was
+> **backup tank** — he stayed in cat form throughout (99.1%, so form uptime
+> classifies it as a confident cat parse) but wore tank gear for a tanking job
+> that never came up. Icebound Cloak and Violet Signet are not "weak spots" in
+> a DPS set; they are **tank pieces** — zero agility, zero attack power, both
+> carrying defense rating. They dominate the shortlist because they are being
+> ranked against a cat baseline they were never part of.
+>
+> The 1917.50 DPS baseline is therefore a backup-tank baseline, and every delta
+> measured against it is inflated. The observation (backs and fingers crowd the
+> list) stands; the diagnosis did not. See
+> [`.scratch/phase-2/issues/06-shredzepelin-gear-incorrect.md`](../phase-2/issues/06-shredzepelin-gear-incorrect.md)
+> — the engine now discloses the source fight on every run and flags a
+> confident DPS parse with no Blessing of Salvation.
+
 Thirteen of the top fifteen rows are backs and fingers. Looking at his gear,
 that is mostly **correct rather than a bug**: he is in five pieces of T5 and a
 good staff, so his big slots are genuinely close to finished, while his cloak

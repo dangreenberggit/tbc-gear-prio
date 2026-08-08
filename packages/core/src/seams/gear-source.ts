@@ -15,6 +15,16 @@ export type FightSummary = {
   route: "ranked" | "report-events";
   /** Spec confidence 0–1; feral form uptime may lower this (PLAN.md §5.4). */
   confidence: number;
+  /**
+   * Share of the fight under Blessing of Salvation, 0–1. Absent when the
+   * source cannot supply buff uptimes at all — distinct from `0`, which is a
+   * measurement saying the player never had it.
+   *
+   * Here because form uptime cannot see role: a backup tank who never had to
+   * tank reads as ~100% cat and confident, and salv is what separates that
+   * from a real DPS parse (ticket 06).
+   */
+  salvationUptime?: number;
 };
 
 export type LoggedItem = {

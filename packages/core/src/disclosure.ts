@@ -150,6 +150,57 @@ export function renderDisclosure(opts: {
   return lines;
 }
 
+/**
+ * Above this, the fight reads as a clean parse of the spec asked for, so a
+ * missing salvation is surprising rather than expected. Below it the low
+ * confidence is already saying "this fight is not what you asked for" and a
+ * second line about salvation adds nothing.
+ */
+const CONFIDENT_PARSE = 0.9;
+
+/**
+ * Which fight the gear came from, printed on every run (ticket 06).
+ *
+ * Unconditional on purpose. Shredzepelin's Morogrim kill was a backup-tank
+ * fight — 99% cat form, tank gear, and a confident classification, because
+ * form uptime measures the form and not the job. Nothing in the output named
+ * the fight, so there was nothing for the one person who knew the raid
+ * assignment to disagree with.
+ *
+ * The salvation line is a **question, not a verdict**. Salv is stripped from
+ * anyone who might tank, but it is also lost on death, dropped by high-threat
+ * DPS, and absent entirely from a raid with no paladin — and
+ * `capture_fixture.py` scopes the buffs table to a single player, so we cannot
+ * check the roster to tell those apart.
+ */
+export function fightProvenanceLines(fight: {
+  reportCode: string;
+  fightId: number;
+  encounterName?: string;
+  route: "ranked" | "report-events";
+  confidence?: number;
+  salvationUptime?: number;
+}): string[] {
+  const where = fight.encounterName ?? `fight ${fight.fightId}`;
+  const lines = [
+    `gear read from ${where} (${fight.reportCode} fight ${fight.fightId}, ${fight.route} route)` +
+      (fight.confidence === undefined
+        ? ""
+        : `, spec confidence ${(fight.confidence * 100).toFixed(0)}%`),
+  ];
+
+  const salv = fight.salvationUptime;
+  const confident = (fight.confidence ?? 0) >= CONFIDENT_PARSE;
+  if (salv !== undefined && salv === 0 && confident) {
+    lines.push(
+      `  no Blessing of Salvation on this fight — were you off-tanking, or was there no paladin? ` +
+        `If you were covering a tank slot, this gear is not your DPS set and the numbers below are measured against the wrong baseline. ` +
+        `Pick another fight if so.`
+    );
+  }
+  return lines;
+}
+
 export function substitutionsFromMetaRepair(
   swaps: readonly MetaRepairSwap[]
 ): Substitution[] {
