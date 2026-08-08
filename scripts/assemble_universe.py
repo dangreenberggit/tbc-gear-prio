@@ -28,6 +28,7 @@ ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 COMMON_PROTO = ROOT / "data/proto/common.proto"
+UI_PROTO = ROOT / "data/proto/ui.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -515,22 +516,82 @@ def ep_score(
     return total
 
 
+def _enum_members(proto_path: Path, enum_name: str) -> dict[int, str]:
+    text = proto_path.read_text(encoding="utf-8")
+    enum = re.search(rf"enum {enum_name} \{{(.*?)\n\}}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the {enum_name} enum in {proto_path}")
+    members = re.findall(r"^\s+(\w+)\s*=\s*(\d+);", enum.group(1), re.M)
+    if not members:
+        raise SystemExit(f"{enum_name} enum in {proto_path} has no members")
+    return {int(num): name for name, num in members}
+
+
 def profession_names_from_proto() -> dict[int, str]:
     """common.proto Profession enum, ordinal -> name. db.json's
     `crafted.profession` is this enum's number, not a name (ticket 42) --
     parsed from the proto rather than hand-typed so a member added upstream
     cannot silently mismatch a hardcoded table."""
-    text = COMMON_PROTO.read_text(encoding="utf-8")
-    enum = re.search(r"enum Profession \{(.*?)\n\}", text, re.S)
-    if not enum:
-        raise SystemExit(f"could not find the Profession enum in {COMMON_PROTO}")
-    members = re.findall(r"^\s+(\w+) = (\d+);", enum.group(1), re.M)
-    if not members:
-        raise SystemExit(f"Profession enum in {COMMON_PROTO} has no members")
-    return {int(num): name for name, num in members}
+    return _enum_members(COMMON_PROTO, "Profession")
 
 
 PROFESSION_NAMES = profession_names_from_proto()
+
+
+# ui.proto RepLevel, ordinal -> standing. db.json's `rep.repLevel` is this
+# enum's number (8 = Exalted). Parsed, not hand-typed, for the same reason as
+# PROFESSION_NAMES: an upstream renumbering must break loudly, not silently
+# relabel every rep source.
+REP_LEVEL_NAMES = {
+    num: name.removeprefix("RepLevel")
+    for num, name in _enum_members(UI_PROTO, "RepLevel").items()
+}
+
+# ui.proto RepFaction, id -> display name. The enum member is CamelCase
+# (`RepFactionOgriLa`) and the display name is not derivable from it: "Ogri'la"
+# needs an apostrophe no rule produces, and `RepFactionTheConsortium` keeps its
+# article while `RepFactionAshtongueDeathsworn` never had one. Both spellings
+# are already load-bearing -- they are what the existing prose-parsed sources
+# emit (`Ogri'la`, `The Consortium`), and a mismatch would split one faction
+# into two.
+#
+# So the *ids* come from the proto and only the display strings are written
+# here. A faction added upstream fails the assertion below rather than silently
+# arriving as a CamelCase name.
+REP_FACTION_DISPLAY = {
+    933: "The Consortium",
+    941: "The Mag'har",
+    942: "Cenarion Expedition",
+    946: "Honor Hold",
+    947: "Thrallmar",
+    970: "Sporeggar",
+    978: "Kurenai",
+    1012: "Ashtongue Deathsworn",
+    1015: "Netherwing",
+    1038: "Ogri'la",
+}
+
+
+def rep_faction_names() -> dict[int, str]:
+    """ui.proto RepFaction id -> display name, checked against the proto.
+
+    The proto is the authority on which ids exist; REP_FACTION_DISPLAY supplies
+    the human spelling. Drift in either direction is a hard failure, because a
+    faction that falls back to its CamelCase enum name would not match the
+    prose-parsed spelling of the same faction (ticket 65).
+    """
+    proto_ids = set(_enum_members(UI_PROTO, "RepFaction")) - {0}
+    missing = proto_ids - set(REP_FACTION_DISPLAY)
+    extra = set(REP_FACTION_DISPLAY) - proto_ids
+    if missing or extra:
+        raise SystemExit(
+            "REP_FACTION_DISPLAY is out of sync with ui.proto RepFaction: "
+            f"missing {sorted(missing)}, unknown {sorted(extra)}"
+        )
+    return dict(REP_FACTION_DISPLAY)
+
+
+REP_FACTION_NAMES = rep_faction_names()
 
 
 def map_db_source(
