@@ -90,11 +90,57 @@ exist and three of them already carry `recipeZone: "Black Temple"` — so the
 the two rep vendors are represented at all; every crafted row currently has
 `origin: db`, none has a vendor origin.
 
-**Unmeasured, and the thing to measure first:** how many real P3 items the two
-factions actually contribute, and how many of those are already in the universe
-via some other source (a BT drop *and* an Ashtongue purchase can be the same
-item). Do not assume the count of missing rep rows equals the count of missing
-items — resolve against existing `itemId`s before sizing the work.
+## Measured scope
+
+Run `python .scratch/carry-forward/notes/65-faction-overlap.py <factions.lua>`
+(the docstring gives the pinned-commit fetch). Against `ret-p3`:
+
+| faction | rows | gear | already in universe | **gear to add** | recipes |
+| --- | --- | --- | --- | --- | --- |
+| Ashtongue Deathsworn | 26 | 9 | **0** | 9 | 17 |
+| Scale of the Sands | 48 | 16 | **0** | 16 | 30 |
+
+**Overlap is zero.** The concern that a BT drop and an Ashtongue purchase might
+be the same item does not materialise — none of these 25 ids is in `ret-p3` by
+any route. So the missing-rep-row count *is* the missing-item count here.
+
+### The 25 gear items
+
+- **Ashtongue: 9 trinkets** (32485-32493), the Ashtongue Talismans. One per
+  class role; the ret-relevant one is **32485 Ashtongue Talisman of Valor**.
+- **Scale: 16 rings** (29294-29309), the Band of Eternity ladder — four stat
+  variants x four standings, the Exalted tier being the named Bands.
+
+### The recipes split cleanly, and only one half is work
+
+- **Scale's 30 recipes are all gem Designs.** Their outputs are already in
+  `vendor/wowsims/db.json` (208 gems; spot-checked Bold Crimson Spinel, Rigid
+  Lionseye, Wicked Pyrestone, Delicate Crimson Spinel — all present). The gem
+  solver already has them. **No gear work.**
+- **Ashtongue's 17 recipes are gear patterns** (Shadesteel, Redeemed Soul,
+  Shackled Souls, Soulguard). All 17 outputs resolve in `data/items/index.json`
+  and **none is in `ret-p3`** — so this is a second, distinct body of ~17
+  crafted items, on top of the 25 vendor items.
+
+### Two things that could have blocked this, and do not
+
+- **Zero-stat trinkets are already accepted.** All nine Ashtongue talismans have
+  an all-zero `stats` array in the item index — their value is proc effects.
+  That is not novel: `ret-p3` already carries three such trinkets (The Lightning
+  Capacitor 28785, Tome of Fiery Redemption 30447, Prism of Inner Calm 30621).
+  Whether their *EP* is modelled is a separate question this ticket does not
+  answer.
+- **The junk filter cannot silently drop them.** `ret-p3.report.json` has
+  `junkFilter.applied: false` — it reports counts without filtering.
+
+### Upstream has what is needed
+
+`AtlasLootClassic_Factions/data-tbc.lua` (46,868 bytes at the pinned commit
+`0bc91eb`) contains `data["AshtongueDeathsworn"]` and
+`data["TheScaleOfTheSands"]`, with standings as nested tables. `sync_atlasloot.py`
+`TRACKED` currently holds exactly one file — adding the Factions module there is
+the concrete form of 58. `ItemSource` already has the
+`{ kind: "rep"; faction; standing }` variant (`pool.ts:45`), so no type work.
 
 ## Done when
 
@@ -122,3 +168,24 @@ items — resolve against existing `itemId`s before sizing the work.
   Ashtongue/Scale item id to confirm rather than assume.
 - The rep-source count is re-measured with the command above and the figures
   here updated.
+
+## Suggested slicing
+
+Ordered so each step is independently landable:
+
+1. **Vendor the Factions module** — add
+   `AtlasLootClassic_Factions/data-tbc.lua` to `sync_atlasloot.py` `TRACKED`,
+   re-run `--update`, commit the lockfile. This is 58's core ask and unblocks
+   everything below.
+2. **Parse faction tables into `rep` sources** — extend `parse_atlasloot.py` to
+   walk the standings tables into `{kind: "rep", faction, standing}`. Yields the
+   25 vendor items. Gets `origin: atlasloot` rather than prose, which is the
+   whole point.
+3. **Ashtongue's 17 crafted patterns** — `parse_raid_recipes` already maps
+   recipe→output for raid drops; this is the vendor-bought analogue. Decide then
+   whether a vendor-bought recipe needs a source shape distinct from
+   `recipeZone`, or whether `crafted` + faction is enough.
+4. **Re-measure 57's 94 load-bearing prose rows** — 58 asks for this and it can
+   only be done once 1-2 land.
+
+Scale's 30 gem Designs need no step: already covered.
