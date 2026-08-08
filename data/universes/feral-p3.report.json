@@ -35,25 +35,25 @@
     "atlasloot": 213,
     "curated": 3,
     "db": 1807,
-    "two-hop": 14,
-    "wowhead": 33
+    "two-hop": 15,
+    "wowhead": 32
   },
   "membershipByOrigin": {
     "curated": 3,
     "itemHasOrigin:atlasloot": 54,
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 326,
-    "itemHasOrigin:two-hop": 14,
-    "itemHasOrigin:wowhead": 24,
+    "itemHasOrigin:two-hop": 15,
+    "itemHasOrigin:wowhead": 23,
     "listOnly": 35,
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
     "db": 326,
-    "wowhead-only": 24,
+    "wowhead-only": 23,
     "atlasloot-only": 14,
     "other": 3,
-    "two-hop": 14
+    "two-hop": 15
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,

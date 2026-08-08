@@ -3938,10 +3938,11 @@
       "phase": 3,
       "sources": [
         {
-          "kind": "raid",
+          "kind": "token",
           "zone": "Black Temple",
+          "token": "Pauldrons of the Forgotten Vanquisher",
           "boss": "Mother Shahraz",
-          "origin": "wowhead"
+          "origin": "two-hop"
         }
       ],
       "curationHint": 72.18

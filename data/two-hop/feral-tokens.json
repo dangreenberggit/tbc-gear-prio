@@ -8,7 +8,8 @@
     "UNVERIFIED against Wowhead, unlike ret-tokens.json. The piece-to-token join here is by armour SLOT within a tier, because no committed source states the redemption pairing: db.json carries setName and classAllowlist but no token link, and AtlasLoot lists the tokens without the pieces they buy. Repeated Wowhead fetches did not return the redemption list. The slot join is sound for the slot, and 'Defender is the druid/warrior/priest token' is the assumption that still needs a human check.",
     "T6 (Thunderheart) coverage added 2026-08-07 for four of five slots. NOT by the slot-join assumption above: the T6 token vocabulary is Conqueror/Vanquisher/Protector, not T4/T5's Champion/Defender/Hero, and the class groupings were re-cut rather than renamed. Chestguard of the Forgotten Protector (31091) is Warrior/Hunter/Shaman on its item page, so 'druid uses the Defender-equivalent' would have been wrong. Druid T6 is the VANQUISHER token (Rogue/Mage/Druid).",
     "The T6 piece-to-token pairing is directly witnessed, not inferred: each Vanquisher token's Wowhead 'Currency for' list names the Thunderheart pieces it buys (vendor Tydormu). That list is the redemption source the note above says no committed input states -- it exists, it is just not in AtlasLoot or db.json. Zones/bosses below come from data/atlasloot_sources.json keyed on the TOKEN id, and independently match the boss recorded on the feral p3 Wowhead list for all four pieces.",
-    "T6 shoulders (31048 Thunderheart Pauldrons, token 31102 Pauldrons of the Forgotten Vanquisher) is DELIBERATELY OMITTED: the fetch was rate-limited before its 'Currency for' list could be read, and the other four were added only because they were each checked. Adding it on the pattern would be exactly the unwitnessed inference this map's history warns about. AtlasLoot puts 31102 at Mother Shahraz / Black Temple, which matches the feral p3 guide row -- that agreement is suggestive but does not establish the redemption pairing. Verify the 'Currency for' list, then add it."
+    "T6 shoulders (31048) was held back on the first pass because a rate limit stopped its 'Currency for' list being read, and was added only once that list was fetched and found to name Thunderheart Pauldrons -- same standard as the other four, not the AtlasLoot boss match, which proves nothing about the pairing because all three tokens in a triple drop from the same boss.",
+    "All five T6 slots are now covered. The Sunwell Harness pieces (34444 wrist, 34556 waist, 34573 feet, tokens 34852/34855/34858) are NOT mapped: they were never on KNOWN_UNCORROBORATED and no shipped universe carries a prose locus claim for them, so mapping them would be unwitnessed work with nothing to check it. Read the redemption lists first if a phase ever needs them."
   ],
   "entries": [
     {
@@ -135,6 +136,15 @@
       "tokenName": "Leggings of the Forgotten Vanquisher",
       "zone": "Black Temple",
       "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31048,
+      "pieceName": "Thunderheart Pauldrons",
+      "tokenId": 31102,
+      "tokenName": "Pauldrons of the Forgotten Vanquisher",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
       "assertTokenIdDiffers": true
     }
   ]

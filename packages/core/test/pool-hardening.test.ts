@@ -1088,10 +1088,6 @@ describe("zone and boss claims have an independent witness", () => {
   const KNOWN_UNCORROBORATED: ReadonlyArray<[number, string]> = [
     // Wowhead is the only input naming a zone for this item, in all six universes.
     [30017, "Telonicus's Pendant of Mayhem"],
-    // Druid T6 shoulders. The other Thunderheart pieces gained two-hop rows
-    // once each token's Wowhead redemption list was read; this one's fetch was
-    // rate-limited, so it stays here rather than being added on the pattern.
-    [31048, "Thunderheart Pauldrons"],
   ];
   const allowed = new Set(KNOWN_UNCORROBORATED.map(([id]) => id));
 

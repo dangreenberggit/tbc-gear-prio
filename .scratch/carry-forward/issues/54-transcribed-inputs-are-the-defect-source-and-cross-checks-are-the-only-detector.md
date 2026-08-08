@@ -185,9 +185,9 @@ Both directions mutation-verified: planting a lone `wowhead` raid row on 34241
 fails the first; adding 34241 to the allowlist while it still has a `db`
 witness fails the second.
 
-## Done 2026-08-07: feral T6 mapped, 11 → 7
+## Done 2026-08-07: feral T6 mapped, 11 → 6
 
-Four Thunderheart pieces gained two-hop rows. The T6 token vocabulary is
+All five Thunderheart slots gained two-hop rows. The T6 token vocabulary is
 Conqueror/Vanquisher/Protector and the class groupings were **re-cut**, not
 renamed, so this map's own "druid uses the Defender token" note would have
 produced the wrong answer: Forgotten Protector is Warrior/Hunter/Shaman, and
@@ -198,11 +198,19 @@ The pairing is witnessed rather than slot-inferred. Each token's Wowhead
 that is the redemption source this map's notes said no committed input states.
 It exists; it is just not in AtlasLoot or `db.json`.
 
-`31048 Thunderheart Pauldrons` is **deliberately still on the allowlist**: the
-fetch was rate-limited before its redemption list could be read. AtlasLoot puts
-its token at Mother Shahraz, matching the guide, but all three tokens in a
-triple drop from the same boss, so that agreement does not establish the
-pairing. Verify the "Currency for" list, then add it.
+`31048 Thunderheart Pauldrons` was held back on the first pass — a rate limit
+stopped its redemption list being read, and adding it on the pattern would have
+been the unwitnessed inference this ticket is about. The list was fetched once
+the limit cleared and names Thunderheart Pauldrons, so it went in on the same
+evidence as the other four.
+
+`KNOWN_UNCORROBORATED` is now **one item**: `30017 Telonicus's Pendant of
+Mayhem`, across all six universes.
+
+The Sunwell Harness pieces (34444, 34556, 34573) are deliberately **not**
+mapped. They were never on the allowlist and no shipped universe carries a prose
+locus claim for them, so mapping them would be unwitnessed work with nothing to
+check it against.
 
 ## Done 2026-08-07: the record/correction split (item from the handoff)
 
@@ -242,4 +250,3 @@ values and are *meant* to disagree with a wrong page.
   agent will read it. This is the one that bit twice in `pool.test.ts` and
   `view.test.ts`, and it is a `writing-for-agents` / AGENTS.md change, so it
   needs proposing in chat before editing per this repo's own rule.
-- `31048`'s redemption list, per above.

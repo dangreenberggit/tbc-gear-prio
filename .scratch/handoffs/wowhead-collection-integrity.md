@@ -2,7 +2,8 @@
 
 For whoever picks up **ticket 56** on `fix/carry-forward-backlog`.
 **Tickets 53, 55 and 57 are closed** — do not start them. Ticket 54 is down to
-two items (fixture guidance, and one token's redemption list).
+one item: fixture-authoring guidance, which is an AGENTS.md change and needs
+proposing in chat first.
 
 ## Session of 2026-08-07 (second): 53 closed, 54 nearly, records item done
 
@@ -26,15 +27,16 @@ Three findings worth carrying, each of which contradicted a plausible guess:
 - **The redemption pairing has a machine source after all.** Each token's
   Wowhead "Currency for" list names the pieces it buys (vendor Tydormu). Both
   `feral-tokens.json` and ticket 54 say no committed input states it — true of
-  AtlasLoot and `db.json`, but the page has it. Use it for `31048`.
+  AtlasLoot and `db.json`, but the page has it. This is the check to use for any
+  future token→piece mapping.
 - **The pre-correction text in git is identical across p3/p4/p5, and that is a
   flattening, not a record.** p3's page is right and its old text was our slip;
   p4/p5's pages are genuinely wrong. Restoring "the original" uniformly would
   have injected a defect into p3 while claiming faithfulness. Check per page —
   the same lesson this doc already records, which still nearly bit again.
 
-Page access turned out to be rate-limited, which is why one Thunderheart slot is
-unfinished — see "The pages are scrapeable" below.
+Page access is rate-limited — it blocked one slot mid-session and cleared on its
+own later. See "The pages are scrapeable" below before planning ticket 56.
 
 Originally written 2026-08-07 on `830dae0` and revised repeatedly the same day —
 several claims in the first version were wrong and are corrected below, so
@@ -210,16 +212,11 @@ diff: it is **deletions only**, which looks lossy and is not — the canonicalis
 wowhead row becomes byte-identical to the `db` row already present, so dedup
 collapses the pair onto the machine-origin one. No item lost the `crafted` kind.
 
-## Ticket 54 — two items left
+## Ticket 54 — one item left
 
-- ~~**Feral T6 has no two-hop map.**~~ **Done (`36957c0`)** for four of five
-  slots; uncorroborated locus claims went **11 → 7**.
-- **`31048 Thunderheart Pauldrons` still needs its redemption list.** It is the
-  one remaining Thunderheart id on `KNOWN_UNCORROBORATED`. Read the "Currency
-  for" list on token `31102` and add the row. Establish the pairing from that
-  list: AtlasLoot's Mother Shahraz matches the guide, but all three tokens in a
-  triple drop from the same boss, so that agreement says nothing about which
-  class redeems which piece.
+- ~~**Feral T6 has no two-hop map.**~~ **Done** — all five slots
+  (`36957c0`, `bd3e0e7`); uncorroborated locus claims went **11 → 6**.
+  `KNOWN_UNCORROBORATED` is now one item, `30017`.
 - ~~**Write down the "prefer the machine source over guide prose" rule.**~~
   **Done by 57 landing** — the pipeline enforces it and
   `pnpm wowhead-prose:check` gates it, which beats a doc line. Do not also
