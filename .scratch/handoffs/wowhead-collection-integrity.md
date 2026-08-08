@@ -5,17 +5,18 @@ For whoever picks up **ticket 56** on `fix/carry-forward-backlog`.
 one item: fixture-authoring guidance, which is an AGENTS.md change and needs
 proposing in chat first.
 
-## Session of 2026-08-07 (second): 53 closed, 54 nearly, records item done
+## Session of 2026-08-07 (second): 53 closed, 54 down to one item
 
-Three commits on top of `14fc241`, branch still **unreviewed and unlanded**:
+Four commits on top of `14fc241`, branch still **unreviewed and unlanded**:
 
 | Commit | What |
 |---|---|
-| `36957c0` | feral T6 → Vanquisher token, 4 pieces verified per redemption list |
+| `36957c0` | feral T6 → Vanquisher token, 4 slots verified per redemption list |
 | `8ecaeb3` | ticket 53 — `profession` canonicalised off the proto enum |
 | `ebc7525` | `wowheadSourceText` verbatim + `correctedSourceText` (option 1) |
+| `065701e` | feral T6 shoulder slot, closing the map; allowlist down to one id |
 
-`pnpm verify` on `ebc7525`: **425 passed**, 32 files, Node v22.16.0.
+`pnpm verify` on `065701e`: **425 passed**, 32 files, Node v22.16.0.
 
 Three findings worth carrying, each of which contradicted a plausible guess:
 
@@ -215,7 +216,7 @@ collapses the pair onto the machine-origin one. No item lost the `crafted` kind.
 ## Ticket 54 — one item left
 
 - ~~**Feral T6 has no two-hop map.**~~ **Done** — all five slots
-  (`36957c0`, `bd3e0e7`); uncorroborated locus claims went **11 → 6**.
+  (`36957c0`, `065701e`); uncorroborated locus claims went **11 → 6**.
   `KNOWN_UNCORROBORATED` is now one item, `30017`.
 - ~~**Write down the "prefer the machine source over guide prose" rule.**~~
   **Done by 57 landing** — the pipeline enforces it and
