@@ -1,4 +1,4 @@
-Status: open (pending a CI run — see Landed)
+Status: closed
 Type: bug
 Origin: ticket 67 review, point 2 — the one finding that survived review as a
   real gap rather than a stale premise.
@@ -89,11 +89,22 @@ Either alone leaves a hole.
 existing wowsims restore. That step is what makes the two gates real in CI —
 without `vendor/atlasloot` present they take the skip path and pass vacuously.
 
-Byte-reproducibility: all three outputs reproduce exactly on **Python 3.12.0,
-Windows** — one machine, one interpreter, so the cross-platform question 66
-raised is still open. That is the reason this ticket is not closed. The gate is
-written to fail loudly rather than silently if Linux disagrees, which is the
-safe direction, but the claim itself is unverified until a real CI run is read.
+Byte-reproducibility: **confirmed cross-platform.** Verified locally on Python
+3.12.0/Windows, then on Linux by CI run
+[31278101006](https://github.com/dangreenberggit/tbc-gear-prio/actions/runs/31278101006)
+(commit `7e760a8`, green in 48s), whose log reads:
+
+```
+> python scripts/sync_atlasloot.py --verify-local
+  vendor/atlasloot matches data/atlasloot.lock.json (2 files).
+> python scripts/check_atlasloot_regen.py
+  atlasloot parse reproduces: 3 committed outputs match.
+```
+
+That is the real byte-compare, not the skip path — the log also shows
+`sync:atlasloot:restore` fetching both Lua files first, so `vendor/` was
+present. The concern that the parse might be platform-dependent (raised by 66,
+carried here) is answered: it is not. No normalisation or platform pin needed.
 
 ## Done when
 
@@ -101,9 +112,9 @@ safe direction, but the claim itself is unverified until a real CI run is read.
   offline.~~ Done — `--verify-local`.
 - ~~The two parsed outputs are byte-compared against a regeneration.~~ Done, and
   it covers three outputs, not two.
-- **A real CI run on this branch is read** and confirms the parse reproduces on
-  Linux/CI Python. If it does not, the fix is a normalisation in the parser (or
-  a documented platform pin), not a weakened gate. Close on that evidence.
+- ~~A real CI run on this branch is read and confirms the parse reproduces on
+  Linux/CI Python.~~ Done — run 31278101006, quoted above. Closed on that
+  evidence.
 - Ticket 58's identical exposure on `atlasloot_sources.json` is closed by the
   same mechanism, or 58 records why it is handled separately. **Now covered** —
   the regen check includes `atlasloot_sources.json`, so 58 inherits the gate.
