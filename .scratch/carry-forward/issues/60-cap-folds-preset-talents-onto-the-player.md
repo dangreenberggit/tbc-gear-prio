@@ -50,10 +50,30 @@ grep -n "talentsString" packages/core/src/compose.ts   # no write
 sed -n '868,886p' packages/core/src/rank.ts            # the docstring above
 ```
 
-WCL does carry the real points — `CombatantInfo.talents[].id` is points-spent
-per tree ([R18], `docs/verification-log.md`), which is what `classifySpec`
-already consumes. Untested whether threading them into the composed request
-is cheap; that is the obvious fix but it crosses the compose stage.
+## The real points are already at the seam
+
+Corrected 2026-08-07 — an earlier draft of this ticket said the fix "crosses
+the compose stage" and left the data's reachability untested. It is already
+reachable: `LoggedGear` (`packages/core/src/seams/gear-source.ts:31`) carries
+
+```ts
+talentPointsByTree: [number, number, number];
+```
+
+i.e. the player's real points-spent per tree ([R18]), which `classifySpec`
+already consumes on the same object. So this is not a missing-data problem and
+needs no new seam.
+
+The mismatch is narrower than "we lack the player's talents": `caps.ts` decodes
+a wowsims **talent string** (`TALENT_HIT_BY_SPEC` indexes a character position
+within a tree segment), while `LoggedGear` offers **per-tree totals**. Per-tree
+totals alone cannot tell you whether 3 of Protection's 11 points went into
+Precision specifically, so the fix is not a one-line swap — it needs either the
+per-talent detail from `CombatantInfo.talents[]` threaded through `LoggedGear`,
+or the cap to state that it is using the preset's distribution.
+
+That is a real design question, but it is a **local** one, and cheaper than the
+compose-stage rewrite this ticket originally implied.
 
 ## Done when
 
