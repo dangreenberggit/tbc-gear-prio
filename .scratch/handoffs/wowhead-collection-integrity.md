@@ -1,9 +1,11 @@
 # Handoff: what is left after the tier-source work
 
-For whoever picks up **ticket 56** on `fix/carry-forward-backlog`.
-**Tickets 53, 55 and 57 are closed** — do not start them. Ticket 54 is down to
-one item: fixture-authoring guidance, which is an AGENTS.md change and needs
-proposing in chat first.
+For whoever picks up **ticket 56 or 58** on `fix/carry-forward-backlog`.
+**Tickets 53, 54, 55 and 57 are closed** — do not start them.
+**Ticket 58 is new** and unstarted: only AtlasLoot's instance loot tables were
+ever vendored, so vendor/badge/rep items have no machine witness *here*, and
+five sites called that a limitation of AtlasLoot itself. The claim is corrected;
+vendoring the other modules is the open work.
 
 ## Session of 2026-08-07 (second): 53 closed, 54 down to one item
 
@@ -197,7 +199,7 @@ Filed as
 are an **editorial** input (which items matter); their Source cell restates
 database facts we already hold. Measured: of the wowhead-parsed sources, **148
 raid rows are redundant** with a machine input, **94 are load-bearing**
-(crafted/pvp/badge/rep/world — AtlasLoot does not cover vendor and quest items),
+(crafted/pvp/badge/rep/world — `vendor/atlasloot/` holds only instance loot),
 and **11 zone/boss claims rest on prose alone** — the same 11 that ticket 54's
 `origin` query found from the other direction.
 
@@ -213,11 +215,16 @@ diff: it is **deletions only**, which looks lossy and is not — the canonicalis
 wowhead row becomes byte-identical to the `db` row already present, so dedup
 collapses the pair onto the machine-origin one. No item lost the `crafted` kind.
 
-## Ticket 54 — one item left
+## Ticket 54 — CLOSED
 
-- ~~**Feral T6 has no two-hop map.**~~ **Done** — all five slots
-  (`36957c0`, `065701e`); uncorroborated locus claims went **11 → 6**.
-  `KNOWN_UNCORROBORATED` is now one item, `30017`.
+- **Feral T6 map** — all five slots (`36957c0`, `065701e`); uncorroborated
+  locus claims went **11 → 6**. `KNOWN_UNCORROBORATED` is now one item, `30017`.
+- **Fixture guidance became a gate, not a doc line.** `realPoolEntry` throws
+  when a fixture item rests a zone/boss claim on transcription alone — the funnel
+  all 19 call sites already pass through, so it fires at the moment of the
+  mistake. The wider rule ("must have a machine source") was tried and rejected:
+  it failed two badge/rep fixtures that name no place and so cannot be
+  misattributed. Nothing was added to `AGENTS.md`.
 - ~~**Write down the "prefer the machine source over guide prose" rule.**~~
   **Done by 57 landing** — the pipeline enforces it and
   `pnpm wowhead-prose:check` gates it, which beats a doc line. Do not also

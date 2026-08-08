@@ -90,9 +90,12 @@ In `scripts/assemble_universe.py`, where `parse_wowhead_source` output is fed to
 `add_source` (~line 1063):
 
 - Keep every non-locus kind unconditionally — `crafted`, `pvp`, `badge`, `rep`,
-  `world`. AtlasLoot does not cover vendor/quest/world-drop items and the guide
-  is the only witness for many of them. That is the 94, and it is the guide
-  earning its place.
+  `world`. `vendor/atlasloot/` holds only the addon's **instance** loot tables
+  (25 dungeon/raid/world-boss sets), so vendor, quest and world-drop items have
+  no machine witness *here* and the guide is the only one. That is the 94, and
+  it is the guide earning its place. Note this is a property of what was
+  vendored, not of AtlasLoot: the addon ships badge, reputation, PvP and crafted
+  modules too, and vendoring one would shrink the 94.
 - For a source carrying a `boss`, or a `raid`/`dungeon` `zone`: emit it only
   when no machine input supplies a zone/boss for that item id.
 - Leave `wowhead` membership semantics alone. This changes where an item's

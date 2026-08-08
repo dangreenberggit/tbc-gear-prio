@@ -56,9 +56,9 @@ def check_predicate() -> list[str]:
         if not carries_locus(source):
             failures.append(f"carries_locus missed {why}: {source!r}")
 
-    # The 94 kept rows are these kinds. AtlasLoot does not cover vendor and
-    # quest items, so the guide is the only witness for many of them and they
-    # must survive suppression unconditionally.
+    # The 94 kept rows are these kinds. vendor/atlasloot/ holds only the addon's
+    # instance loot tables, so the guide is the only witness for many vendor and
+    # quest items here and they must survive suppression unconditionally.
     does_not = [
         ({"kind": "crafted", "profession": "Blacksmithing"}, "crafted"),
         ({"kind": "pvp", "via": "arena"}, "pvp"),

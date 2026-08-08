@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: analysis
 Origin: root-cause question after tickets 48-53, 2026-08-07
 Blocks: none
@@ -246,7 +246,36 @@ values and are *meant* to disagree with a wrong page.
 - The "prefer the parsed/curated side on disagreement" rule — **superseded**:
   carry-forward 57 landed the pipeline enforcement and `pnpm
   wowhead-prose:check` gates it, which beats a doc line. Do not also write one.
-- Fixture-authoring guidance (item 4 above) is not yet written anywhere an
-  agent will read it. This is the one that bit twice in `pool.test.ts` and
-  `view.test.ts`, and it is a `writing-for-agents` / AGENTS.md change, so it
-  needs proposing in chat before editing per this repo's own rule.
+
+## Done 2026-08-07: item 4 is a gate, not a doc line
+
+Fixture-authoring guidance was going to be an AGENTS.md paragraph. It is a
+`realPoolEntry` check instead: a fixture may not rest a zone or boss claim on
+transcription alone, enforced in `packages/core/test/real-source.ts`, which is
+the funnel all 19 fixture call sites already pass through.
+
+A doc line would have asked an agent to remember a preference at the moment it
+is thinking about something else. This throws at the call, naming the item and
+telling you to pick a covered one or construct the shape by hand. `AGENTS.md`
+also loads every turn of every session, so a paragraph about test fixtures
+would have spent attention on every unrelated task.
+
+The rule is deliberately **narrower than "must have a machine source"**. That
+wider rule was tried first and rejected: it failed `29381` (badge) and `30834`
+(rep), which have only a `wowhead` origin but name no place, so nothing about
+them can be misattributed. Only a locus claim needs a second witness. All nine
+current fixture items pass; verified to fire on `30017`, whose zone genuinely
+rests on prose alone.
+
+Writing the gate turned up a wrong claim this ticket repeated — see
+[[58-only-atlasloot-instance-tables-are-vendored]]. `29381` and `30834` lack a
+machine witness because only AtlasLoot's *instance* tables were vendored, not
+because AtlasLoot omits vendor items. Ticket 57's "94 load-bearing rows" is
+downstream of that and is a property of this repo, not of the world.
+
+## Closed 2026-08-07
+
+All five numbered items in §4 are done: per-row provenance and the witness gate
+(earlier pass), the machine-source rule (superseded by 57's pipeline gate),
+fixture guidance (the `realPoolEntry` check above), and the feral T6 map. The
+analysis in §1-§3 is what later tickets cite; it stands as written.

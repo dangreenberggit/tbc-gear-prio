@@ -1150,8 +1150,9 @@ def assemble(
             parsed = parse_wowhead_source(source_text_for_parsing(row))
             for src in parsed:
                 # Non-locus kinds (crafted/pvp/badge/rep/world) always survive:
-                # AtlasLoot does not cover vendor and quest items, so the guide
-                # is the only witness for many of them.
+                # vendor/atlasloot/ holds only the addon's instance loot tables,
+                # so the guide is the only witness for many vendor and quest
+                # items here.
                 if machine_locus and carries_locus(src):
                     continue
                 add_source(iid, src, "wowhead")

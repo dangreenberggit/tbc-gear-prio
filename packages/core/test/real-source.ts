@@ -38,5 +38,50 @@ export function realPoolEntry(itemId: number, universe = "ret-p2"): PoolEntry {
   if (!entry) {
     throw new Error(`${itemId} is not in data/universes/${universe}.json`);
   }
+  rejectUnwitnessedLocus(entry, universe);
   return poolEntryFromUniverse(entry);
+}
+
+/** Origins that are one agent's reading of a page rather than a machine parse. */
+const TRANSCRIBED = new Set(["wowhead", "curated"]);
+
+/**
+ * A fixture picked *because* it has an interesting shape pins whatever produced
+ * that shape. Item 30129 was chosen twice as the multi-zone fixture — by
+ * `pool.test.ts` and `view.test.ts`, each asserting it "really does carry" both
+ * zones — and its second zone was the carry-forward 50 defect. The tests made
+ * the bad data look correct and the eventual fix look like a regression.
+ *
+ * So a fixture may not rest a zone or boss claim on transcription alone. This
+ * is narrower than "must have a machine source": badge and reputation items
+ * legitimately have only a `wowhead` origin, because `vendor/atlasloot/` holds
+ * only the addon's instance loot tables — its badge, reputation, PvP and crafted
+ * modules were never vendored — but they name no place, so nothing about them
+ * can be misattributed. Only a locus claim needs a second witness.
+ */
+function rejectUnwitnessedLocus(entry: UniverseEntry, universe: string): void {
+  for (const source of entry.sources) {
+    const claimsPlace =
+      ("boss" in source && source.boss) ||
+      (source.kind === "raid" && "zone" in source);
+    if (!claimsPlace) continue;
+    if (!TRANSCRIBED.has(source.origin ?? "")) continue;
+    const corroborated = entry.sources.some(
+      (other) =>
+        !TRANSCRIBED.has(other.origin ?? "") &&
+        "zone" in other &&
+        "zone" in source &&
+        other.zone === source.zone
+    );
+    if (corroborated) continue;
+    throw new Error(
+      `${itemLabel(entry)} in ${universe} rests a zone/boss claim on transcription alone, ` +
+        `so a fixture built from it would pin whatever that claim gets wrong. ` +
+        `Pick an item a machine input covers, or construct the shape by hand.`
+    );
+  }
+}
+
+function itemLabel(entry: UniverseEntry): string {
+  return `${entry.itemId} ${entry.name}`;
 }
