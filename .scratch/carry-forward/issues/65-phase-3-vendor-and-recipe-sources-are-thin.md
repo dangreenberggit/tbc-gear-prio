@@ -2,7 +2,8 @@ Status: open
 Type: bug
 Origin: user request to add in-game phase 3 items, 2026-08-07
 Blocks: none
-Blocked by: 58
+Blocked by: 58 (partially — see "Correction" below; the Ashtongue half is not blocked)
+Plan: .scratch/carry-forward/65-plan.md
 
 # Phase 3 raid zones are covered; its reputation vendors and recipe vendors are not
 
@@ -168,6 +169,29 @@ the concrete form of 58. `ItemSource` already has the
   Ashtongue/Scale item id to confirm rather than assume.
 - The rep-source count is re-measured with the command above and the figures
   here updated.
+
+## Correction (2026-08-07, during planning)
+
+The claim above that `rep` sources "can only arrive today through guide prose"
+is **wrong for half the payload**, and the ticket's `Blocked by: 58` is
+correspondingly too strong.
+
+`vendor/wowsims/db.json` already carries a rep source on the nine Ashtongue
+talismans — `{"rep": {"repFactionId": 1012, "repLevel": 8, "factionId": 1}}`.
+It is discarded at `assemble_universe.py:585`, which returns `None` when a rep
+row has neither `factionName` nor `standing`. The comment there claims this hits
+one item; it hits **111 items across 10 factions**. That is a resolvable-id
+problem needing a lookup table, not a vendoring problem.
+
+Scale of the Sands' 16 rings have `sources: null` in the DB and do still need
+58's Factions module.
+
+So: **Ashtongue is unblocked and cheap; Scale is real 58 work.** The plan
+sequences them accordingly, which gets the ret and feral talismans in first.
+
+Also corrected: the DB *does* carry proc data (`itemEffects`, populated on 802
+items including all nine talismans) — an earlier read using the singular key
+`itemEffect` found nothing and wrongly suggested proc data was absent entirely.
 
 ## Suggested slicing
 
