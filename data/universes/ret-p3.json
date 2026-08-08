@@ -4040,6 +4040,13 @@
           "kind": "rep",
           "faction": "The Consortium",
           "standing": "Exalted",
+          "factionId": 933,
+          "origin": "db"
+        },
+        {
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted",
           "origin": "wowhead"
         }
       ],

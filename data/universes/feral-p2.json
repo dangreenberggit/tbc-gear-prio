@@ -2368,8 +2368,11 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted",
+          "factionId": 933,
+          "origin": "db"
         }
       ],
       "curationHint": 49.28,
@@ -3021,6 +3024,13 @@
       "quality": 3,
       "phase": 1,
       "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Revered",
+          "factionId": 1038,
+          "origin": "db"
+        },
         {
           "kind": "rep",
           "faction": "Ogri'la",
@@ -3708,6 +3718,13 @@
       "quality": 4,
       "phase": 1,
       "sources": [
+        {
+          "kind": "rep",
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted",
+          "factionId": 942,
+          "origin": "db"
+        },
         {
           "kind": "rep",
           "faction": "Cenarion Expedition",
@@ -4700,6 +4717,13 @@
       "quality": 4,
       "phase": 1,
       "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Exalted",
+          "factionId": 1038,
+          "origin": "db"
+        },
         {
           "kind": "rep",
           "faction": "Ogri'la",

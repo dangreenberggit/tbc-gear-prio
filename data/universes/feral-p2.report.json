@@ -10,7 +10,7 @@
     "World Bosses"
   ],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1606,
+  "excludedNoSource": 1553,
   "universeTotal": 253,
   "listOnlyMembership": 24,
   "perSlot": {
@@ -31,26 +31,26 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
-    "curated": 3,
-    "db": 1807,
+    "curated": 2,
+    "db": 1864,
     "two-hop": 15,
     "wowhead": 18
   },
   "membershipByOrigin": {
     "curated": 3,
     "itemHasOrigin:atlasloot": 39,
-    "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 212,
+    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:db": 216,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 14,
     "listOnly": 24,
     "zoneMatch": 226
   },
   "exclusivePrimaryOrigin": {
-    "db": 212,
-    "wowhead-only": 14,
+    "db": 216,
+    "wowhead-only": 11,
     "atlasloot-only": 14,
-    "other": 3,
+    "other": 2,
     "two-hop": 10
   },
   "tierPiecesExpected": 10,

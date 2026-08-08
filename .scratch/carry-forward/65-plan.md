@@ -158,8 +158,8 @@ Replace the `return None` at `assemble_universe.py:585` with a lookup through
 step 1's tables, falling back to `None` only when the id is genuinely unknown.
 Correct the stale "only affected row" comment to the measured 111.
 
-- **Yields:** the 9 Ashtongue talismans — **including the ret and feral ones** —
-  in both universes, with `origin: db`, no vendoring required.
+- **Yields:** *(revised after doing it)* the rep **sources** resolve, but the 9
+  talismans do **not** become universe members. See "Step 2 outcome" below.
 - **Watch for:** `pool.ts` reads `sources[0]`, and the current comment says
   returning `None` deliberately lets Wowhead prose supply the real source
   instead of being appended behind it. Landing this may **reorder** sources for
@@ -169,6 +169,54 @@ Correct the stale "only affected row" comment to the measured 111.
 - **Done when:** ret-p3 and feral-p3 both list Ashtongue Deathsworn in their rep
   factions, the 65 script reports 0 missing Ashtongue gear, and `pnpm verify`
   is green.
+
+### Step 2 outcome (done) — and the blocker it exposed
+
+Landed: `factionId` on the `rep` variant, the id/standing resolution, a
+regression test, and `check_rep_tables.py`. Zero source regressions across all
+six universes; two items even gained a real source in place of `unknown`.
+Haramad's Bargain moved from `origin: "wowhead"` (prose) to `origin: "db"` with
+`factionId: 933`, which is the single-witness→machine-witness upgrade 58 wants.
+
+**But the 9 talismans are still not in the universe, and step 2 alone cannot
+put them there.** Resolving a source is necessary, not sufficient: membership is
+a separate gate (`assemble_universe.py:1325`) admitting an item only via
+
+- `in_phase` — a source naming a zone in `phase_zones`, or
+- `in_heroic`, or
+- `list_only` — the item is on a collected Wowhead list, or
+- `curated` — a wowsims curated gear set equips it.
+
+`source_zones()` returns the empty set for `kind: "rep"` (by design — it is not
+a raid drop), so a rep source can never satisfy `in_phase`. The two rep items
+already shipping (29119, 30834) are members via **`list_only`**, not via their
+rep source. The talismans appear on **no** collected Wowhead list, so nothing
+admits them:
+
+```bash
+python -c "
+import json,glob
+w=set()
+for f in glob.glob('data/wowhead-lists/*/*.json'):
+    w |= {e['itemId'] for e in json.load(open(f))['entries']}
+print(sorted(i for i in range(32485,32494) if i in w) or 'none')"
+# none
+```
+
+This is the same shape as every prior membership gain logged in
+`pool-hardening.test.ts:322` — each needed an *admission route*, not just a
+parsed source.
+
+**So a step 2.5 is required, and it is a policy decision, not a bug fix:**
+should a `rep` source whose faction is tied to a phase raid grant membership at
+that phase? Ashtongue Deathsworn is Black Temple's faction and Scale of the
+Sands is Hyjal's, so a faction→zone map would admit exactly the intended items.
+That map does not exist yet and is the real content of the next step. The
+alternative — collecting a Wowhead list that includes them — reintroduces the
+prose channel 58 is trying to retire, so it is the worse option.
+
+Do **not** treat this as done until an admission route exists; the ticket's
+"0 missing gear" criterion is still failing by design.
 
 ### 3. Vendor the Factions module for Scale of the Sands
 

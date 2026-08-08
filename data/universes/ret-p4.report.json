@@ -13,7 +13,7 @@
     "Zul'Aman"
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1390,
+  "excludedNoSource": 1353,
   "universeTotal": 411,
   "listOnlyMembership": 27,
   "perSlot": {
@@ -35,7 +35,7 @@
   "sourceRecordAdds": {
     "atlasloot": 196,
     "curated": 3,
-    "db": 1695,
+    "db": 1733,
     "sunmote": 3,
     "two-hop": 18,
     "wowhead": 19
@@ -44,17 +44,17 @@
     "curated": 6,
     "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 365,
+    "itemHasOrigin:db": 366,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 15,
     "listOnly": 27,
     "zoneMatch": 378
   },
   "exclusivePrimaryOrigin": {
-    "db": 365,
+    "db": 366,
     "atlasloot-only": 13,
     "two-hop": 15,
-    "wowhead-only": 15,
+    "wowhead-only": 14,
     "other": 3
   },
   "tierPiecesExpected": 15,

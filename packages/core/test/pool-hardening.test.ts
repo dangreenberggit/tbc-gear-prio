@@ -371,6 +371,43 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
+  // Ticket 65: db.json states a rep source as a numeric faction id, which
+  // assemble_universe.py used to discard for want of a name table. Now it
+  // resolves, and the id rides along as the identity — `faction` is display
+  // only (`formatItemSource` is its single consumer) and must never be joined
+  // on. The id is game-canonical: wowsims, ui.proto and AtlasLoot agree
+  // id-for-id (.scratch/carry-forward/notes/65-faction-ids.md).
+  it("resolves db rep sources to a faction id, not just a display name", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    // Haramad's Bargain: was `origin: "wowhead"` (prose-parsed) and is now
+    // db-sourced, because the id resolves instead of being dropped.
+    const haramad = byId.get(29119);
+    expect(haramad?.sources[0]).toMatchObject({
+      kind: "rep",
+      faction: "The Consortium",
+      standing: "Exalted",
+      factionId: 933,
+      origin: "db",
+    });
+
+    // Every db-origin rep source carries its id; no prose-origin one does,
+    // because a Wowhead row states the faction in English and has no id to
+    // give. That asymmetry is the honest shape, not an omission.
+    for (const e of raw.entries) {
+      for (const s of e.sources) {
+        if (s.kind !== "rep") continue;
+        const label = `${e.itemId} ${e.name}`;
+        if (s.origin === "db") {
+          expect(typeof s.factionId, label).toBe("number");
+        } else {
+          expect(s.factionId, label).toBeUndefined();
+        }
+        expect(s.faction, label).not.toBe("unknown");
+      }
+    }
+  });
+
   // Ticket 13: a crafted item whose *recipe* drops in a raid belongs on that
   // raid's shopping list. The join is name-based (AtlasLoot records the
   // product only in a trailing Lua comment), so it is fragile in one specific

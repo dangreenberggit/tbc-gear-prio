@@ -637,21 +637,36 @@ def map_db_source(
             return out
     if "rep" in first:
         rep = first["rep"] or {}
+        # db.json states the faction as a numeric id, never a name. It is the
+        # game-canonical id (wowsims, ui.proto and AtlasLoot agree id-for-id),
+        # so it resolves through REP_FACTION_NAMES rather than being discarded:
+        # before ticket 65 this row returned None and 111 items across 10
+        # factions silently lost their only machine-supplied source.
+        faction_id = rep.get("repFactionId")
         faction = rep.get("factionName") or rep.get("faction")
+        if faction is None and faction_id is not None:
+            faction = REP_FACTION_NAMES.get(int(faction_id))
         standing = rep.get("standing") or rep.get("rank")
-        # db.json ships no faction table, so a row keyed only by repFactionId
-        # resolves to "unknown with unknown" — a source that names nothing and
-        # cannot be acted on. Returning None lets the Wowhead "Requires Exalted
-        # with X" text supply the real one instead of being appended behind it,
-        # which matters because pool.ts reads sources[0]. Haramad's Bargain
-        # (29119) is the only affected row in the shipped tiers.
+        if standing is None and rep.get("repLevel") is not None:
+            standing = REP_LEVEL_NAMES.get(int(rep["repLevel"]))
+        # An id with no name is worse than no source: it would print as
+        # "unknown · Exalted" and cannot be acted on. Returning None lets the
+        # Wowhead "Requires Exalted with X" prose supply the real one instead
+        # of being appended behind it, which matters because pool.ts reads
+        # sources[0]. check_rep_tables.py makes this branch unreachable for
+        # every id db.json currently uses.
         if faction is None and standing is None:
             return None
-        return {
+        out = {
             "kind": "rep",
             "faction": str(faction or "unknown"),
             "standing": str(standing or "unknown"),
         }
+        # `faction` alone would be a name with no identity behind it, so the id
+        # rides only when it actually resolved to one.
+        if faction_id is not None and faction is not None:
+            out["factionId"] = int(faction_id)
+        return out
     if "faction" in first:
         return None
     return None

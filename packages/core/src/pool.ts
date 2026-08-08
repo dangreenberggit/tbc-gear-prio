@@ -42,7 +42,18 @@ export type ItemSource = { origin?: ItemSourceOrigin } & (
       recipeZone?: string;
       recipeBoss?: string;
     }
-  | { kind: "rep"; faction: string; standing: string }
+  /**
+   * `factionId` is the game-canonical faction id (`Faction.dbc`), agreed
+   * id-for-id by wowsims, `ui.proto` and AtlasLoot. It is the identity;
+   * `faction` is a display string with one consumer (`formatItemSource`) and
+   * must never be compared or joined on.
+   *
+   * Optional because the prose path cannot supply one: a Wowhead row states
+   * "Requires Exalted with X" in English and carries no id. Those rows keep
+   * `origin: "wowhead"` and no `factionId`, which is the honest shape — see
+   * .scratch/carry-forward/notes/65-faction-ids.md.
+   */
+  | { kind: "rep"; faction: string; standing: string; factionId?: number }
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
   | { kind: "world" }
