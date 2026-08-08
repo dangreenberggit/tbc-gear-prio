@@ -1,4 +1,4 @@
-Status: closed — assumption kept deliberately, now disclosed
+Status: closed
 Type: task
 Origin: docs/reviews/fix-carry-forward-backlog.md (adversarial A2)
 Blocks: none
@@ -122,3 +122,28 @@ Letting the user *change* the assumption (a settings surface, or importing a
 wowsims talent string) needs somewhere to put it — there is no settings UI
 until Phase 3. Not filed as its own ticket yet; fold it into the Phase 3 view
 work, where the disclosure string is already the natural anchor.
+
+## Bullet 2, read on the disclosure branch
+
+*"A test pins a character whose talents differ from the preset and shows the
+cap figure does not silently inherit the preset's Precision."*
+
+Worth being precise, since the wording predates the decision to keep the
+assumption. Bullet 1 closed on its *second* branch (disclose rather than
+thread real data), so "does not **silently** inherit" is what bullet 2 can
+mean here — the inheritance stays, the silence goes. Two tests cover that
+reading:
+
+- `caps.test.ts` "still assumes the preset's Precision for a character who
+  skipped it" — a **characterisation** test: it pins the inheritance *and*
+  asserts `talentHitAssumed` is set, i.e. not silent. Labelled in-place as
+  shipped-not-desired, so it fails loudly if someone later threads real data.
+- `caps.test.ts` "discloses the preset's actual Precision rank rather than
+  always 3" — a genuinely differing build (`5-062201-…`, a legal 61-point
+  string with Precision at 2/3) proving the disclosure is decoded, not
+  hardcoded.
+
+What is **not** covered, and cannot be until real talent data is threaded: a
+*logged character* whose talents differ from the preset, because nothing reads
+a logged character's talents into the cap. That is the first branch of bullet
+1, and it is the follow-up recorded below.

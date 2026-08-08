@@ -100,10 +100,12 @@ describe("hitCapBanner", () => {
     // pinned preset's 3/3 Precision, for every ret character. That is a
     // defensible default (a raiding ret paladin almost always takes it) but
     // the reader must be told it is a default rather than their build.
-    const line = hitCapBanner(
-      { rating: 119, gap: 22.92, capUncertainty: HIT_CAP_UNCERTAINTY },
-      { talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 } }
-    );
+    const line = hitCapBanner({
+      rating: 119,
+      gap: 22.92,
+      capUncertainty: HIT_CAP_UNCERTAINTY,
+      talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 },
+    });
     expect(line).toContain("Precision");
     expect(line).toContain("3/3");
     expect(line).toMatch(/assum/i);
@@ -121,16 +123,39 @@ describe("hitCapBanner", () => {
     expect(line).not.toMatch(/assum/i);
   });
 
-  it("stops calling Heroic Presence the only uncounted source", () => {
-    // carry-forward 60: that claim held only while talents were genuinely
-    // counted from the character. Once they are assumed, the error runs both
-    // ways — a character who skipped Precision reads ~47 rating too high —
-    // so the one-sided framing is no longer honest.
-    const line = hitCapBanner(
-      { rating: 119, gap: 22.92, capUncertainty: HIT_CAP_UNCERTAINTY },
-      { talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 } }
-    );
-    expect(line).not.toContain("at least this much");
+  it("drops the over-cap floor once talent hit is only assumed", () => {
+    // carry-forward 60. NOTE the negative gap: "you are over by at least
+    // this much" lives on the OVER-cap branch, so a positive gap would take
+    // the under-cap return and pass this without exercising the change.
+    const over = { rating: 152, gap: -10, capUncertainty: HIT_CAP_UNCERTAINTY };
+    const assumed = {
+      ...over,
+      talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 },
+    };
+
+    expect(hitCapBanner(over)).toContain("at least this much");
+    expect(hitCapBanner(assumed)).not.toContain("at least this much");
+  });
+
+  it("does not promise the under-cap shortfall shrinks when talents were assumed", () => {
+    // The direction claim is the whole point of the banner. Heroic Presence
+    // alone can only shrink the shortfall, but an assumed 3/3 Precision can
+    // *inflate* the rating for someone who skipped it, making the real
+    // shortfall larger — so "smaller" would be wrong in the one direction
+    // this disclosure exists to get right.
+    const under = {
+      rating: 119,
+      gap: 22.92,
+      capUncertainty: HIT_CAP_UNCERTAINTY,
+    };
+
+    expect(hitCapBanner(under)).toContain("smaller");
+    const assumedLine = hitCapBanner({
+      ...under,
+      talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 },
+    });
+    expect(assumedLine).not.toContain("smaller");
+    expect(assumedLine).toContain("either way");
   });
 
   it("reads as over the cap when the gap is negative", () => {

@@ -216,6 +216,31 @@ describe("rankUpgrades", () => {
     } satisfies Partial<RankError>);
   });
 
+  it("names the tree it read rather than leaking a raw index", async () => {
+    // A player reading "reads as tree 1" learns nothing. Holy also covers the
+    // treeIndex-0 arm, which the protection test above does not reach.
+    const logged = slamaltmanLoggedGear();
+    logged.className = "Paladin";
+    logged.talentPointsByTree = [45, 11, 5];
+
+    await expect(
+      rankUpgrades(
+        { character: CHAR, spec: "ret", maxPhase: 2 },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim: new RecordedSimRunner("v0.0.101", new Map()),
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights,
+        }
+      )
+    ).rejects.toThrow(/Holy build, not ret \(talents 45\/11\/5\)/);
+  });
+
   it("does not refuse a feral druid, whose tree cannot name a spec by talents alone", async () => {
     // Feral cat and feral tank are the same 45-point tree, so classifySpec
     // returns needs-form-uptime. That is undecided, not a mismatch — refusing

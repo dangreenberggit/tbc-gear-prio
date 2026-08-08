@@ -67,7 +67,7 @@ import {
   usesPairedReplication,
 } from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
-import { classifySpec, matchesRequestedSpec } from "./spec.js";
+import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
@@ -311,7 +311,7 @@ export async function rankUpgrades(
     const otherSpec =
       match.detected ??
       (!classification.ok && classification.reason === "unsupported-spec"
-        ? `tree ${classification.treeIndex}`
+        ? `a ${treeName(logged.className, classification.treeIndex)} build`
         : undefined);
     if (!match.matches && otherSpec !== undefined) {
       throw new RankError(

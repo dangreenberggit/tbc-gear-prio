@@ -2,7 +2,7 @@ Status: closed
 Type: task
 Origin: docs/reviews/fix-carry-forward-backlog.md (adversarial A1)
 Blocks: none
-Blocked by: none
+Blocked by: none — was `LoggedGear` carrying no class name; that proved wrong (WCL `actors[].subType` has it, and every committed fixture already carried it), see Closed below
 
 # `matchesRequestedSpec` is exported but never called in production
 
@@ -95,3 +95,15 @@ The message tells the user to pick another fight or rank the spec they played;
 it cannot yet *offer* to sim that other spec, because only ret and feral ship
 presets. That remains ticket 40's territory — 40 stays open for the
 `resolveFight` / fixtures half of its own "Done when".
+
+## Bullet 2 closes unmet, deliberately
+
+*"The `{matches:false, detected:<other spec>}` branch is exercised by a test."*
+**Not met, and not reachable.** That branch needs two *supported* specs on one
+class; `SpecId` is `ret | feral` and ret is the only supported paladin spec, so
+no real input produces it. Forcing it would mean asserting on a hand-built
+`SpecClassification`, which tests the literal rather than the classifier.
+
+Deferred to ticket 62, which now carries the measurement and the revised fix
+(rename `spec.test.ts:100` to what it asserts, add an `it.todo` for the real
+case). Re-check this bullet when a second spec ships for any class.

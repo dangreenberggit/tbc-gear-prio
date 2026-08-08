@@ -5,6 +5,7 @@
 
 import type { ContentPhase, Race } from "./types.js";
 import type { MetaRepairSwap } from "./meta-repair.js";
+import type { TalentHitAssumption } from "./caps.js";
 
 export type StandingAssumptionId =
   | "race"
@@ -80,29 +81,34 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
  * *lowers* the cap), which is why this still renders no ± band: a symmetric
  * band would dress a one-sided overstatement up as noise.
  */
-export function hitCapBanner(
-  hit: {
-    rating: number;
-    gap: number;
-    capUncertainty: number;
-  },
-  opts: {
-    talentHitAssumed?: { talent: string; points: number; maxPoints: number };
-  } = {}
-): string {
+export function hitCapBanner(hit: {
+  rating: number;
+  gap: number;
+  capUncertainty: number;
+  talentHitAssumed?: TalentHitAssumption;
+}): string {
   const rounded = Math.round(Math.abs(hit.gap));
   const band = Math.round(hit.capUncertainty);
-  const assumed = opts.talentHitAssumed;
+  const assumed = hit.talentHitAssumed;
   const assumption = assumed
     ? ` Assumes ${assumed.points}/${assumed.maxPoints} ${assumed.talent} — ` +
       `your logged build is not read for talents yet.`
     : "";
 
   if (hit.gap > 0) {
+    // Direction, not a band. With nothing assumed the only uncounted source
+    // is Heroic Presence, which lowers the cap, so the shortfall can only
+    // shrink. With an assumed talent it can run *either* way — a character
+    // who skipped Precision is credited ~47 rating they do not have, making
+    // the real shortfall LARGER — so claiming "smaller" would be the same
+    // confidently-wrong direction this disclosure exists to prevent.
+    const direction = assumed
+      ? `The real shortfall could run either way.`
+      : `The real shortfall may be smaller than this.`;
     return (
       `~${rounded} rating under the hit cap — ` +
       `Heroic Presence in your party would lower the cap by ~${band}. ` +
-      `The real shortfall may be smaller than this.${assumption}`
+      `${direction}${assumption}`
     );
   }
   const floor = assumed

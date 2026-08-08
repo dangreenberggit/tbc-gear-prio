@@ -156,3 +156,44 @@ which other workers had open in this same tree.
 The "no matching fight" product decision (§ "Decide what happens next") is
 still unwritten — it needs the wiring above to exist before it's meaningfully
 answerable, and it wasn't this slice's job to decide it unasked.
+
+## Progress 2026-08-07 — the refusal policy, written down (ticket 61)
+
+Ticket 61 built the guard, which satisfies **bullets 1 and 2** of the Done-when
+above: `rankUpgrades` calls `classifySpec` on the resolved fight's gear right
+after `readGear` and compares it to `RankInput.spec`, and a mismatch throws
+`RankError` kind `spec-mismatch` rather than silently ranking.
+
+Recording the policy here because this ticket's last bullet requires the
+decision be written down before it is built — it was built in 61, so this is
+the record, after the fact.
+
+**Refuse only on a positive reading that the fight is another build.** Two
+shapes qualify:
+
+- `matchesRequestedSpec` returns a named `detected` (currently unreachable —
+  needs two supported specs on one class, see ticket 62), and
+- `classifySpec` returns `unsupported-spec`, where the class *and* the favoured
+  tree are both known and the tree simply is not this spec's. **This is the
+  case that matters**: a protection paladin classifies here, not as a named
+  other spec, so keying on `detected` alone would never have fired for ticket
+  04's capture.
+
+**Everything else ranks as before**, because absence of evidence is not
+evidence against: no `className` from the source, `unsupported-class`,
+`ambiguous` (a points tie), and feral's `needs-form-uptime`. Tests pin the
+feral and no-class cases specifically — over-strictness here would reject every
+druid.
+
+**Known edge, accepted:** a build whose plurality tree is not Retribution but
+who is nonetheless played as melee DPS (e.g. `[0, 31, 30]`, a deep-prot ret)
+is refused. Domain review's verdict was that refusing is still the safer arm,
+since ranking would run that gear against ret's preset, EP weights and APL.
+The message names the tree ("reads as a Protection build, not ret") and offers
+`--fight`, so the user can override by picking a fight.
+
+**Still open on this ticket:** bullet 3 (`resolveFight` *preferring* a
+spec-matching fight, rather than the current refuse-after-resolve), bullet 4
+(a test driving report `mKTA9V7Lx4Ck2DXf` end to end), and the "no matching
+fight" product decision — the guard refuses, but cannot yet offer to sim the
+spec the character actually played, because only ret and feral ship presets.
