@@ -189,8 +189,10 @@ load-bearing _why_. **Fixed** — first deleted, second trimmed to the why.
 together (`route`, `confidence`, `notFoundMessage`, `killedAt`), plus a
 `notFoundMessage` callback whose two call sites barely use its arguments (one
 is `() => "slamaltman not found in raw fixture"`) — mild Speculative
-Generality. **Deferred to ticket 24**, the existing standards-smells cleanup
-ticket.
+Generality. **Deferred to ticket 63.** (Filed fresh rather than appended to
+ticket 24, the earlier standards-smells cleanup — 24 is `closed` and fully
+done, so adding to it would have parked the finding where nobody reopens it.
+`pnpm land --check-only` caught the attempt.)
 
 **Clean:** durable claims are unusually well handled on this branch — ADR-0020,
 the verification-log five-box entry, and tickets 57/58/59 all pair causal claims
@@ -282,7 +284,7 @@ One reviewer claim was checked and rejected rather than recorded (S2's
 | S1  | Standards   | fixed       | Ticket 57 `Status: done` → `closed`; confirmed it was absent from `pnpm issues:open`                                                          |
 | S2  | Standards   | wontfix     | `ItemSourceOrigin` mirrors a Python list, but the claimed `sunmote` drift does not exist — all six origins match `add_source`                 |
 | S3  | Standards   | fixed       | Deleted the restating `OfflineRawFixture` doc; trimmed `loadUniverseEntries` to its why                                                       |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/24-standards-smells-cleanup.md`                                                                                |
+| S4  | Standards   | defer       | `.scratch/carry-forward/issues/63-buildofflinerecordings-parameter-clump.md`                                                                  |
 | P1  | Spec        | fixed       | Correction recorded on ticket 33; the end-to-end pin folds into ticket 60                                                                     |
 | P2  | Spec        | fixed       | Ticket 44 given a `Progress:` line and a `## Measured 2026-08-06` section with the disproof and re-runnable command                           |
 | P3  | Spec        | fixed       | Ticket 55 status now names the surviving criterion and points at ticket 56                                                                    |
