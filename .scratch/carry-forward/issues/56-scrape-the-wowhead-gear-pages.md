@@ -37,14 +37,47 @@ carrying the token's own item id.
   the `via*` fields.
 - Emit the same provenance block (`sourceUrl`, `pageAuthor`, `pageUpdated`,
   `collectedDate`) plus a `collectedBy` naming the script.
+- **Restore the 40 dropped rank labels.** Inherited from ticket 55, and the real
+  defect behind it: every `alternative`-section row in `ret/p4.json` has
+  `rankLabel: null`, while the page labels them. A faithful scrape fixes it, and
+  there is no longer a singleton gate to fight — that gate was deleted in
+  `530711f` precisely because it penalised this fix.
 
-## Unknown: are the pages scrapeable at all
+  ```bash
+  python -c "
+  import json
+  from collections import Counter
+  d=json.load(open('data/wowhead-lists/ret/p4.json',encoding='utf-8'))
+  print(Counter((e.get('section'), e.get('rankLabel') is None) for e in d['entries']))
+  "
+  # ('alternative', True): 40   ('headline', False): 56
+  ```
+- **Do [[59-parenthetical-parsed-as-a-zone]] first, or with this.** The parser
+  turns any trailing parenthetical into a zone. Three known items are absent
+  from every shipped universe today, so the bug is dormant — a re-scrape that
+  admits one of them ships a wrong `zone`/`boss` pair straight to a filter
+  control.
 
-**Not yet investigated.** Wowhead renders a lot client-side, so a plain
-`requests` + HTML parse may return an empty shell and the guide tables may need
-a headless browser. Establish this first — it decides whether this ticket is a
-small script or a browser-automation job, and it is cheap to check by fetching
-one `sourceUrl` and looking for a known item name in the response body.
+## Answered: the pages are scrapeable, but access is rate-limited
+
+**The guide body is not HTML.** It ships as one `WH.markup.printHtml("...")` JS
+string holding Wowhead's own BBCode — `[table]`, `[tr]`, `[td]`,
+`[item=30905]`, `[npc=17968]` — so extraction is: pull the `printHtml` argument
+as a JS string literal, `json.loads` it, then walk the BBCode. Item ids and rank
+labels are both structured there (`[item=NNNNN]` and a plain `[td]`), which is
+all this ticket needs. NPC and item names resolve from `WH.Gatherer.addData(...)`
+payloads in the same response.
+
+**Access is the unsettled part.** An earlier session recorded that `urllib` with
+browser-like headers returns 200. On 2026-08-07 that stopped being true from
+this machine — every URL 403s, including one that had worked minutes earlier —
+so the 200 was a property of that attempt, not a durable fact. The in-app
+browser reads the pages fine but began returning CDN errors after roughly eight
+loads, and cleared on its own within the hour.
+
+So: **budget the fetches, expect to resume across sessions, and do not tune
+request headers to defeat the block.** Plan for ~30 page loads (7 lists, plus
+re-reads), not one clean pass.
 
 ## Value, honestly stated
 

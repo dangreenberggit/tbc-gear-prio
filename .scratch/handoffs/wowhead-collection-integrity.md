@@ -1,15 +1,22 @@
 # Handoff: what is left after the tier-source work
 
-For whoever picks up **ticket 56 or 58** on `fix/carry-forward-backlog`.
+For whoever picks up **56, 58 or 59** on `fix/carry-forward-backlog`.
 **Tickets 53, 54, 55 and 57 are closed** — do not start them.
-**Ticket 58 is new** and unstarted: only AtlasLoot's instance loot tables were
-ever vendored, so vendor/badge/rep items have no machine witness *here*, and
-five sites called that a limitation of AtlasLoot itself. The claim is corrected;
-vendoring the other modules is the open work.
 
-## Session of 2026-08-07 (second): 53 closed, 54 down to one item
+**Everything actionable is in a ticket now.** This doc holds only the findings
+and process notes that no ticket owns; it is not a work list. `pnpm issues:open`
+is the work list.
 
-Four commits on top of `14fc241`, branch still **unreviewed and unlanded**:
+- **58** (new) — only AtlasLoot's instance loot tables were ever vendored, so
+  vendor/badge/rep items have no machine witness *here*. Five sites called that
+  a limitation of AtlasLoot itself; the claim is corrected, the vendoring is open.
+- **59** (new) — `DROP_RE` reads any trailing parenthetical as a zone. Dormant
+  today because the three known items are in no shipped universe, which is
+  exactly why it must be fixed **before or with 56** rather than after.
+
+## Session of 2026-08-07 (second): 53 and 54 closed, 58 and 59 filed
+
+Branch still **unreviewed and unlanded**. Commits on top of `14fc241`:
 
 | Commit | What |
 |---|---|
@@ -239,19 +246,10 @@ id is a *stronger* witness than prose, not an infallible one. Do not over-read
 
 ## Ticket 56 — the scraper
 
-Now **smaller**, and **unblocked** — 57 has landed. The scrapeability question
-is answered (yes, no browser). The scraper needs only the item id and rank
-label, both structured on the page as `[item=NNNNN]` and a plain `[td]` — not
-the Source prose.
-
-Fold in the dropped-label defect inherited from ticket 55: our p4 file has
-`rankLabel: null` on the 40 `alternative`-section rows the page does label. A
-faithful scrape fixes that, and there is no longer a singleton gate to fight.
-
-Parser junk worth fixing while nearby, exposed by the 57 measurement:
-`31856 Darkmoon Card: Crusade` → `zone: "Bind on Equip"`;
-`32658 Badge of Tenacity` → `boss: "Depleted Badge"`;
-`29301 Band of the Eternal Champion` → `zone: "The Scale of the Sands Exalted"`.
+Everything this section used to carry now lives in the ticket itself: the
+BBCode/`printHtml` extraction shape, the rate-limit warning, the 40 dropped
+rank labels, and the dependency on ticket 59. Read
+`.scratch/carry-forward/issues/56-scrape-the-wowhead-gear-pages.md`, not this.
 
 ## Records cleanup — DONE (`ebc7525`)
 
