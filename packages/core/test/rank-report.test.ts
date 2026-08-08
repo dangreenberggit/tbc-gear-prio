@@ -87,6 +87,27 @@ describe("rank-report", () => {
       formatItemSource({ kind: "raid", zone: "SSC", boss: "Lady Vashj" })
     ).toBe("SSC · Lady Vashj");
     expect(formatItemSource({ kind: "badge", cost: 50 })).toBe("50 badges");
+    expect(
+      formatItemSource({ kind: "crafted", profession: "Blacksmithing" })
+    ).toBe("Crafted · Blacksmithing");
+    // A recipe behind a reputation is a grind the player has to know about.
+    expect(
+      formatItemSource({
+        kind: "crafted",
+        profession: "Blacksmithing",
+        recipeFaction: "Ashtongue Deathsworn",
+        recipeStanding: "Friendly",
+        recipeFactionId: 1012,
+      })
+    ).toBe("Crafted · Blacksmithing · Ashtongue Deathsworn Friendly");
+    // recipeZone is a filter concern and stays out of the label, as before.
+    expect(
+      formatItemSource({
+        kind: "crafted",
+        profession: "Tailoring",
+        recipeZone: "Black Temple",
+      })
+    ).toBe("Crafted · Tailoring");
   });
 
   it("partitionShortlist splits raid from pvp above cutoff", () => {

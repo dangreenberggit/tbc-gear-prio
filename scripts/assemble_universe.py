@@ -580,6 +580,9 @@ REP_LEVEL_NAMES = {
     num: name.removeprefix("RepLevel")
     for num, name in _enum_members(UI_PROTO, "RepLevel").items()
 }
+# Standing name -> its ordinal, so "which of these is cheapest" is answered by
+# the proto's own scale rather than a hand-typed ranking.
+REP_STANDING_ORDER = {name: num for num, name in REP_LEVEL_NAMES.items()}
 
 # ui.proto RepFaction, id -> display name. The enum member is CamelCase
 # (`RepFactionOgriLa`) and the display name is not derivable from it: "Ogri'la"
@@ -1081,14 +1084,22 @@ def rep_factions_for_max_phase(max_phase: int, phase_raids: dict) -> set[int]:
 def source_rep_factions(source: dict) -> set[int]:
     """Faction ids a source attributes an item to, keyed by id not by name.
 
-    Empty for every kind but `rep`, and empty for a `rep` row we could not
-    resolve to an id -- an unresolved row still ships (the guide may be the
-    only witness) but must not grant phase membership on the strength of a
-    display string.
+    Two shapes qualify. A `rep` source is the item itself being vendor-sold.
+    A `crafted` source carrying `recipeFactionId` is the two-hop: the *recipe*
+    is vendor-sold, which gates the product just as surely -- the same argument
+    ticket 13 made for `recipeZone` putting a craft on a raid's shopping list.
+
+    Empty when the id is missing: an unresolved row still ships (the guide may
+    be the only witness) but must not grant phase membership on the strength of
+    a display string.
     """
-    if source.get("kind") != "rep":
+    kind = source.get("kind")
+    if kind == "rep":
+        faction_id = source.get("factionId")
+    elif kind == "crafted":
+        faction_id = source.get("recipeFactionId")
+    else:
         return set()
-    faction_id = source.get("factionId")
     return {int(faction_id)} if faction_id is not None else set()
 
 
@@ -1213,9 +1224,25 @@ def assemble(
         if isinstance(z, dict) and "name" in z
     }
     raid_recipe_by_product: dict[int, dict] = {}
+    # A vendor-sold recipe has no zone, so it is kept separately: `recipeZone`
+    # would be a false claim and there is no raid shopping list to put it on.
+    # The faction is what the player actually needs (ticket 65 step 4).
+    rep_recipe_by_product: dict[int, dict] = {}
     for entry in (raid_recipes.get("entries") or []):
         if not isinstance(entry, dict):
             continue
+        reps = [r for r in (entry.get("reps") or []) if isinstance(r, dict)]
+        if reps:
+            # Lowest standing wins: the cheapest way to obtain the recipe is
+            # the honest cost to state. Ties break on faction id for stability.
+            best_rep = min(
+                reps,
+                key=lambda r: (
+                    REP_STANDING_ORDER.get(str(r.get("standing")), 99),
+                    int(r.get("factionId") or 0),
+                ),
+            )
+            rep_recipe_by_product[int(entry["productId"])] = best_rep
         zones = [z for z in (entry.get("zones") or []) if isinstance(z, dict)]
         if not zones:
             continue
@@ -1273,6 +1300,15 @@ def assemble(
             source = {**source, "recipeZone": recipe["zone"]}
             if recipe.get("boss"):
                 source["recipeBoss"] = recipe["boss"]
+        rep_recipe = rep_recipe_by_product.get(item_id)
+        if rep_recipe and source.get("kind") == "crafted":
+            source = {
+                **source,
+                "recipeFaction": rep_recipe.get("faction"),
+                "recipeStanding": rep_recipe.get("standing"),
+            }
+            if rep_recipe.get("factionId") is not None:
+                source["recipeFactionId"] = int(rep_recipe["factionId"])
         # Same reason as the recipe block above: every input reaches this
         # funnel, so folding unit names onto their encounter here means the
         # dedupe below collapses the duplicate row whichever input produced it.

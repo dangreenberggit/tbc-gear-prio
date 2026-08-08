@@ -281,6 +281,42 @@ faction is enough. Recommendation: reuse `crafted` and add the faction — the
 player-facing question is "can I get this", and the answer is a rep grind either
 way.
 
+### Step 4 outcome (done) — vendor-taught crafts
+
+The open design question is settled: a vendor-sold recipe gets
+`recipeFaction` / `recipeStanding` / `recipeFactionId` on the `crafted` variant,
+**not** a reuse of `recipeZone`. A bought recipe drops in no raid, so a zone
+would be a false claim and there is no raid shopping list to join. Both routes
+can coexist on one product and are recorded independently, because "drops in BT"
+and "costs Honored with the Ashtongue" are different costs.
+
+`parse_raid_recipes` now keeps rep-sourced recipes alongside raid-dropped ones
+(79 products across all factions, 17 from Ashtongue). Two ordering fixes were
+needed: the faction merge has to run *before* the recipe join so the rep sources
+exist, and the join has to scan both Lua files because the vendor recipes'
+product comments live in the Factions module.
+
+`source_rep_factions` was extended to read `recipeFactionId`, so the step 2.5
+membership route covers the two-hop as well — same argument ticket 13 made for
+`recipeZone`.
+
+Measured: zero regressions, and per-spec armor filtering is correct.
+
+| universe | added |
+| --- | --- |
+| ret-p3/p4 | 13 (leather Redeemed Soul, mail Shackled Souls, plate Shadesteel, Night's End) |
+| feral-p3 | 9 (cloth Soulguard, leather Redeemed Soul, Night's End) |
+| ret-p5 | 21 (the 13 plus 8 Shattered Sun figurines and alchemist stones) |
+| ret-p2, feral-p2 | none |
+
+The 4 cloth Soulguard pieces correctly go to feral and not ret; Night's End is a
+cloak and reaches both.
+
+`formatItemSource` now renders the faction on a vendor-taught craft, since the
+profession alone does not tell a player whether they can obtain it.
+`recipeZone` stays unrendered exactly as before — that was already true, and is
+a filter concern rather than a label.
+
 ### 5. Decide what to do about proc-only trinkets
 
 The step that makes the payload useful, and the one with a real open question.

@@ -196,6 +196,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Violet Eye",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 967,
           "origin": "db"
         }
       ],
@@ -511,6 +514,26 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Gurtogg Bloodboil",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32420,
+      "name": "Night's End",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -1154,6 +1177,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -1483,6 +1509,46 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32391,
+      "name": "Soulguard Slippers",
+      "slot": "feet",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32394,
+      "name": "Redeemed Soul Moccasins",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -2664,6 +2730,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -3582,6 +3651,46 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Mother Shahraz",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32389,
+      "name": "Soulguard Leggings",
+      "slot": "legs",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32396,
+      "name": "Redeemed Soul Legguards",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -5420,6 +5529,46 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Gurtogg Bloodboil",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32390,
+      "name": "Soulguard Girdle",
+      "slot": "waist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32393,
+      "name": "Redeemed Soul Cinch",
+      "slot": "waist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -7594,6 +7743,46 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Reliquary of the Lost",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32392,
+      "name": "Soulguard Bracers",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32395,
+      "name": "Redeemed Soul Wristguards",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],

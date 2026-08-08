@@ -180,6 +180,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Violet Eye",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 967,
           "origin": "db"
         }
       ],
@@ -577,6 +580,26 @@
           "kind": "raid",
           "zone": "Karazhan",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32420,
+      "name": "Night's End",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -2034,6 +2057,66 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "High Astromancer Solarian",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32394,
+      "name": "Redeemed Soul Moccasins",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32398,
+      "name": "Boots of Shackled Souls",
+      "slot": "feet",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32402,
+      "name": "Shadesteel Sabots",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -4719,6 +4802,66 @@
       "curationHint": 3.74
     },
     {
+      "itemId": 32396,
+      "name": "Redeemed Soul Legguards",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32400,
+      "name": "Greaves of Shackled Souls",
+      "slot": "legs",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32404,
+      "name": "Shadesteel Greaves",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32260,
       "name": "Choker of Endless Nightmares",
       "slot": "neck",
@@ -7253,6 +7396,66 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 32393,
+      "name": "Redeemed Soul Cinch",
+      "slot": "waist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32397,
+      "name": "Waistguard of Shackled Souls",
+      "slot": "waist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32401,
+      "name": "Shadesteel Girdle",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 30902,
       "name": "Cataclysm's Edge",
       "slot": "weapon",
@@ -8219,6 +8422,66 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "High Warlord Naj'entus",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32395,
+      "name": "Redeemed Soul Wristguards",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32399,
+      "name": "Bracers of Shackled Souls",
+      "slot": "wrist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32403,
+      "name": "Shadesteel Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],

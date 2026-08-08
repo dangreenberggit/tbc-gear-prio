@@ -319,12 +319,18 @@ def parse_raid_recipes(
             # they are not equippable items and never enter the gear universe.
             stats["product_not_an_item"] += 1
             continue
+        recipe_sources = sources.get(str(recipe_id)) or []
         raid_drops = [
             src
-            for src in (sources.get(str(recipe_id)) or [])
+            for src in recipe_sources
             if src.get("kind") == "raid" and src.get("zone") in raid_zones
         ]
-        if not raid_drops:
+        # A recipe bought from a reputation vendor reaches its product exactly
+        # the way a raid-dropped one does -- the product is the equippable item
+        # and the recipe is how you come to make it. Recording the faction keeps
+        # the two-hop honest about *which* grind it costs (ticket 65 step 4).
+        rep_vendors = [src for src in recipe_sources if src.get("kind") == "rep"]
+        if not raid_drops and not rep_vendors:
             stats["recipe_not_raid_dropped"] += 1
             continue
         existing = rows.get(product_id)
@@ -332,14 +338,21 @@ def parse_raid_recipes(
         for src in raid_drops:
             if src not in zones:
                 zones.append(src)
+        reps = existing["reps"] if existing else []
+        for src in rep_vendors:
+            if src not in reps:
+                reps.append(src)
         if existing is None:
             rows[product_id] = {
                 "productId": product_id,
                 "productName": product_name,
                 "recipeId": recipe_id,
                 "zones": zones,
+                "reps": reps,
             }
             stats["raid_recipe_products"] += 1
+            if rep_vendors and not raid_drops:
+                stats["rep_vendor_recipe_products"] += 1
     return [rows[k] for k in sorted(rows)], dict(stats)
 
 
@@ -511,6 +524,32 @@ def main() -> int:
     for key in sorted(stats):
         print(f"  {key}: {stats[key]}")
 
+    # Faction loot is parsed and merged *before* the recipe join, because a
+    # vendor-sold recipe is only visible to that join once its rep source is in
+    # `sources`. The two Lua files are concatenated for the same reason: the
+    # recipe→product comments for vendor recipes live in the Factions module.
+    if not args.factions_lua.is_file():
+        print(
+            f"missing {args.factions_lua} — run python scripts/sync_atlasloot.py --restore",
+            file=sys.stderr,
+        )
+        return 2
+    factions_lua = args.factions_lua.read_text(encoding="utf-8")
+    factions = parse_factions(factions_lua)
+    faction_items, faction_item_stats = parse_faction_items(factions_lua, factions)
+    for item_id, rows in faction_items.items():
+        existing = sources.setdefault(str(item_id), [])
+        for row in rows:
+            if row not in existing:
+                existing.append(row)
+    with args.out.open("w", encoding="utf-8") as fh:
+        json.dump(sources, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+    print(
+        f"  merged {faction_item_stats['rows']} reputation rows "
+        f"({len(faction_items)} items) from {faction_item_stats['factionsSeen']} factions"
+    )
+
     item_ids_by_name: dict[str, int] = {}
     for it in db.get("items") or []:
         if isinstance(it, dict) and "id" in it and "name" in it:
@@ -520,7 +559,7 @@ def main() -> int:
     )
     raid_zones = {str(z["name"]) for z in phase_raids.get("zones") or []}
     recipe_rows, recipe_stats = parse_raid_recipes(
-        lua_text,
+        lua_text + "\n" + factions_lua,
         sources,
         item_ids_by_name=item_ids_by_name,
         raid_zones=raid_zones,
@@ -535,7 +574,9 @@ def main() -> int:
                     "Recipe→product join comes from the trailing comment on each "
                     "AtlasLoot loot row; the product name is resolved to an id via "
                     "vendor/wowsims/db.json items[].name.",
-                    "Only recipes dropping in a data/phase_raids.json zone are kept.",
+                    "Kept when the recipe drops in a data/phase_raids.json zone "
+                    "(`zones`) or is sold by a reputation vendor (`reps`). Either "
+                    "route makes the product obtainable; a recipe can have both.",
                 ],
                 "entries": recipe_rows,
             },
@@ -547,31 +588,6 @@ def main() -> int:
     for key in sorted(recipe_stats):
         print(f"  {key}: {recipe_stats[key]}")
 
-    if not args.factions_lua.is_file():
-        print(
-            f"missing {args.factions_lua} — run python scripts/sync_atlasloot.py --restore",
-            file=sys.stderr,
-        )
-        return 2
-    factions_lua = args.factions_lua.read_text(encoding="utf-8")
-    factions = parse_factions(factions_lua)
-
-    # Reputation-vendor loot merges into the same itemId -> [sources] map the
-    # instance tables produce, so membership and origin handling need no
-    # special case. Written before the file is dumped below.
-    faction_items, faction_item_stats = parse_faction_items(factions_lua, factions)
-    for item_id, rows in faction_items.items():
-        existing = sources.setdefault(str(item_id), [])
-        for row in rows:
-            if row not in existing:
-                existing.append(row)
-    with args.out.open("w", encoding="utf-8") as fh:
-        json.dump(sources, fh, indent=2, sort_keys=True)
-        fh.write("\n")
-    print(
-        f"  merged {faction_item_stats['rows']} reputation rows "
-        f"({len(faction_items)} items) from {faction_item_stats['factionsSeen']} factions"
-    )
     args.factions_out.parent.mkdir(parents=True, exist_ok=True)
     with args.factions_out.open("w", encoding="utf-8") as fh:
         json.dump(

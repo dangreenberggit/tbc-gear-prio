@@ -770,6 +770,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],
@@ -1643,6 +1646,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Consortium",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 933,
           "origin": "db"
         }
       ],

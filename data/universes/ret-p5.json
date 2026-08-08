@@ -216,6 +216,9 @@
         {
           "kind": "crafted",
           "profession": "Leatherworking",
+          "recipeFaction": "The Violet Eye",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 967,
           "origin": "db"
         }
       ],
@@ -649,6 +652,26 @@
           "kind": "raid",
           "zone": "Karazhan",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32420,
+      "name": "Night's End",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -2339,6 +2362,66 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "High Astromancer Solarian",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32394,
+      "name": "Redeemed Soul Moccasins",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32398,
+      "name": "Boots of Shackled Souls",
+      "slot": "feet",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32402,
+      "name": "Shadesteel Sabots",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -5582,6 +5665,66 @@
       "curationHint": 3.74
     },
     {
+      "itemId": 32396,
+      "name": "Redeemed Soul Legguards",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32400,
+      "name": "Greaves of Shackled Souls",
+      "slot": "legs",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32404,
+      "name": "Shadesteel Greaves",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32260,
       "name": "Choker of Endless Nightmares",
       "slot": "neck",
@@ -7376,6 +7519,26 @@
       "curationHint": 50.76
     },
     {
+      "itemId": 35751,
+      "name": "Assassin's Alchemist Stone",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Alchemy",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 44.28
+    },
+    {
       "itemId": 33831,
       "name": "Berserker's Call",
       "slot": "trinket",
@@ -7394,6 +7557,26 @@
       "curationHint": 36.9
     },
     {
+      "itemId": 35694,
+      "name": "Figurine - Khorium Boar",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Jewelcrafting",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Revered",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 34.44
+    },
+    {
       "itemId": 35702,
       "name": "Figurine - Shadowsong Panther",
       "slot": "trinket",
@@ -7405,6 +7588,9 @@
         {
           "kind": "crafted",
           "profession": "Jewelcrafting",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Revered",
+          "recipeFactionId": 1077,
           "origin": "db"
         }
       ],
@@ -7465,6 +7651,26 @@
       "bisSets": [
         "p2"
       ]
+    },
+    {
+      "itemId": 35749,
+      "name": "Sorcerer's Alchemist Stone",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Alchemy",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 10.71
     },
     {
       "itemId": 32483,
@@ -7550,6 +7756,26 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.8
+    },
+    {
+      "itemId": 35750,
+      "name": "Redeemer's Alchemist Stone",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Alchemy",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 1077,
           "origin": "db"
         }
       ],
@@ -7926,6 +8152,86 @@
         {
           "kind": "heroic",
           "dungeon": "Magisters' Terrace",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35693,
+      "name": "Figurine - Empyrean Tortoise",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Jewelcrafting",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Revered",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35700,
+      "name": "Figurine - Crimson Serpent",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Jewelcrafting",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Revered",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35703,
+      "name": "Figurine - Seaspray Albatross",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Jewelcrafting",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Revered",
+          "recipeFactionId": 1077,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35748,
+      "name": "Guardian's Alchemist Stone",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 5,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Alchemy",
+          "recipeFaction": "Shattered Sun Offensive",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 1077,
           "origin": "db"
         }
       ],
@@ -8687,6 +8993,66 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Gurtogg Bloodboil",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32393,
+      "name": "Redeemed Soul Cinch",
+      "slot": "waist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32397,
+      "name": "Waistguard of Shackled Souls",
+      "slot": "waist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32401,
+      "name": "Shadesteel Girdle",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],
@@ -9772,6 +10138,66 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "High Warlord Naj'entus",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32395,
+      "name": "Redeemed Soul Wristguards",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Honored",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32399,
+      "name": "Bracers of Shackled Souls",
+      "slot": "wrist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32403,
+      "name": "Shadesteel Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeFaction": "Ashtongue Deathsworn",
+          "recipeStanding": "Friendly",
+          "recipeFactionId": 1012,
           "origin": "db"
         }
       ],

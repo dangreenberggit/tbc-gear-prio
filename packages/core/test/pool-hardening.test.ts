@@ -359,7 +359,12 @@ describe("data/universes/ret-p3.json hardening", () => {
     // not just faction ids (ticket 65 step 3), admitting the 16-ring Band of
     // Eternity ladder (29294-29309) sold by Scale of the Sands. db.json has
     // `sources: null` for all 16, so AtlasLoot is their only witness.
-    expect(universeP3.length).toBe(381);
+    // 381 -> 394: a recipe bought from a reputation vendor now gates its
+    // product the way a raid-dropped one does (ticket 65 step 4), admitting
+    // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
+    // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
+    // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
+    expect(universeP3.length).toBe(394);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -476,6 +481,41 @@ describe("data/universes/ret-p3.json hardening", () => {
         factionId: 990,
         origin: "atlasloot",
       });
+    }
+  });
+
+  // Ticket 65 step 4: the vendor-bought counterpart of the raid-recipe two-hop
+  // above. The recipe is sold at a standing rather than dropped, so there is no
+  // zone to claim — `recipeFaction*` records the grind instead, and the id is
+  // what grants phase membership.
+  it("attributes vendor-taught crafts to the faction that sells the recipe", () => {
+    const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
+
+    const shadesteel = byId.get(32403); // Shadesteel Bracers, plate
+    expect(shadesteel?.sources[0]).toMatchObject({
+      kind: "crafted",
+      profession: "Blacksmithing",
+      recipeFactionId: 1012,
+      recipeStanding: "Friendly",
+    });
+    // A vendor-bought recipe drops in no raid, so claiming a zone would be a
+    // false provenance claim.
+    expect(shadesteel?.sources[0]).not.toHaveProperty("recipeZone");
+
+    // All 13 Ashtongue-taught crafts a paladin can wear. The 4 cloth Soulguard
+    // pieces are held out by armor type, not by this route.
+    const taught = [
+      32393, 32394, 32395, 32396, 32397, 32398, 32399, 32400, 32401, 32402,
+      32403, 32404, 32420,
+    ];
+    for (const id of taught) {
+      expect(
+        byId.get(id)?.sources[0],
+        `${id} ${byId.get(id)?.name ?? "absent"}`
+      ).toMatchObject({ kind: "crafted", recipeFactionId: 1012 });
+    }
+    for (const cloth of [32389, 32390, 32391, 32392]) {
+      expect(byId.has(cloth), `${cloth} is cloth`).toBe(false);
     }
   });
 
