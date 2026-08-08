@@ -303,6 +303,43 @@ Three options, cheapest first:
   been burned before: a transcribed number with no second witness. Strictly
   worse than (b) now that (b) is known to be a swap-and-compare.
 
+### Step 5 outcome (done) — no disclosure needed; the premise was wrong
+
+**Investigated before building, and the concern does not survive contact with
+the code.** Steps 1-4 were shaped around "the talismans will rank last", which
+assumed `curationHint` drives the user-facing order. It does not:
+
+- **The ranking is sim-driven.** `rank.ts:631` sorts by `deltaDps`, computed
+  from real `SimRunner` observations (`rank.ts:573`). `curationHint` has no
+  consumer in the ranking path at all — `grep -rn curationHint packages/core/src`
+  returns only `pool.ts`, where it is carried through as a passthrough field.
+- **Its real job is ordering the universe JSON** (`assemble_universe.py:1556`)
+  and feeding the junk-filter percentile.
+- **Nothing truncates the pool by it.** `poolFromUniverse` has no top-N.
+- **The junk filter cannot touch these anyway.** `applied` is `false` in every
+  shipped report; the caster-only rule exempts `trinket` outright
+  (`assemble_universe.py:1118`); and the EP floor only applies to
+  `SLOTS_WITH_EP_SIGNAL = {feet, waist, hands, wrist}` (`:326`), which excludes
+  trinkets twice over.
+- **The sim prices the procs.** The pinned binary contains
+  `Ashtongue Talisman of Zeal` and `Ashtongue Talisman of Equilibrium` by name,
+  so the proc is modelled where the ranking is actually decided.
+
+So a `curationHint` of `0.00` is an artefact of a field the player never sees,
+on items the sim ranks properly. Adding a "not stat-modelled" badge would
+explain a number that is not shown, about a ranking that is not affected —
+noise, not disclosure.
+
+**One caveat worth keeping.** `docs/verification-log.md:908` records a real case
+where "`curationHint` dropped them before the sim was consulted" — that was the
+junk filter with `--apply-junk-filter` on, against *weapons*, which are not in
+`SLOTS_WITH_EP_SIGNAL` either but were rejected by the caster-only rule's
+weapon-damage blindness (ticket 27). If the junk filter is ever switched on by
+default, re-check this: the exemptions above are what make trinkets safe, and
+they are per-slot, not general.
+
+**Superseded recommendation** (kept for the reasoning, not the conclusion):
+
 **Recommendation: (a) in this branch, (b) as its own ticket, never (c).**
 Still keep (b) out of *this* branch — it is a different kind of work and would
 stall steps 1-4, which are useful alone — but file it as a real follow-up rather
