@@ -99,12 +99,36 @@ proc trinkets — but shipping it silently would put a visibly wrong ordering in
 front of a player. Step 4 exists for that reason and its disclosure is not
 optional.
 
-**Good news for pricing them later:** the DB *does* carry proc data —
-`itemEffects` is populated on 802 items including all nine talismans, with
-`buffId`, `effectDurationMs` and stat payloads. Ret's 32485 has a real stat
-buff (Fire Blood, 12s); feral's 32486 is a `-1`-duration class-tier effect with
-an empty stat payload, so it is **not** priceable from stats alone even in
-principle. That asymmetry matters for step 4 and is why (b) is a sim job.
+**Good news for pricing them later: wowsims already models these items, so the
+number does not have to be invented.** Three levels of evidence, cheapest to
+strongest:
+
+- `itemEffects` is populated on 802 DB items including all nine talismans.
+  Ret's 32485 is fully specified: `{buffId: 40459, "Fire Blood", 12000ms,
+  stats {0: 55}, proc {procChance: 0.25}}` — 55 strength, 12s, 25% on proc.
+- Feral's 32486 has an **empty** stat payload (`-1` duration, class-tier
+  effect), so it is not priceable from the DB row alone.
+- **But the pinned sim binary implements it by name.** Extracting strings from
+  `vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe` yields all nine
+  talismans, `RepFactionAshtongueDeathsworn`, and — decisively — the coded aura
+  label `"Ashtongue Talisman of Equilibrium (Starfire)"`. Buff ids `40442`
+  (feral) and `40470` (paladin tier 6) both appear in the binary.
+
+  ```bash
+  python -c "
+  import re
+  d=open('vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe','rb').read()
+  print(sorted({m.decode('ascii','replace') for m in re.findall(rb'[ -~]{6,}',d)
+                if b'shtongue' in m})[:12])
+  print('40442:', d.count(b'40442'))"
+  ```
+
+So **(b) below is a swap-and-compare against a seam this repo already has**, not
+a modelling project: `SimRunner.run()` returns `{dps, stdev, ...}`
+(`seams/sim-runner.ts:20`), so the value of a trinket is one sim with it
+equipped minus one without. `RecordedSimRunner` and `simCacheKey` already exist
+for determinism. That is a materially smaller job than "sim them" first
+suggested, and it is the only route that prices feral's 32486 at all.
 
 Two blockers checked and ruled out: trinkets are exempt from the caster-junk
 filter (`is_caster_junk`, `assemble_universe.py:882`) and `junkFilter.applied`
@@ -183,16 +207,25 @@ Three options, cheapest first:
 - **(a) Disclose only.** Flag proc-only trinkets so a `0.00` reads as "unpriced",
   not "worthless". Cheap, honest, changes no ranking.
   `packages/core/src/disclosure.ts` already has the machinery.
-- **(b) Sim them.** The `SimRunner` seam is the correct home for "what is this
-  proc worth". `itemEffects` gives the sim real input. Needs a recorded fixture
-  per spec. Note feral's 32486 has an empty stat payload, so it is sim-only —
-  no shortcut exists.
+- **(b) Sim them — cheaper than it sounds, because wowsims already models
+  them.** The `SimRunner` seam is the right home and already returns
+  `{dps, stdev}`, so a trinket's worth is *sim with it equipped minus sim
+  without*: a swap-and-compare, not a modelling exercise. The pinned binary
+  implements the talismans by name (see above), including feral's 32486, which
+  no other option can price. Needs a recorded fixture per spec;
+  `RecordedSimRunner` + `simCacheKey` already provide the determinism.
+  Gear skeletons exist for both specs (`vendor/wowsims/ret_p2.gear.json`,
+  `feral_p2_9p.gear.json`) — check they are P3-appropriate before trusting a
+  delta.
 - **(c) Hand-price in the preset.** Fast, and wrong in the way this repo has
-  been burned before: a transcribed number with no second witness.
+  been burned before: a transcribed number with no second witness. Strictly
+  worse than (b) now that (b) is known to be a swap-and-compare.
 
 **Recommendation: (a) in this branch, (b) as its own ticket, never (c).**
-Do not fold (b) in — it is a different kind of work and would stall steps 1-4,
-which are useful alone.
+Still keep (b) out of *this* branch — it is a different kind of work and would
+stall steps 1-4, which are useful alone — but file it as a real follow-up rather
+than a someday, since the sim evidence makes it tractable. It is also the only
+thing that makes the feral talisman rank honestly.
 
 ### 6. Re-measure ticket 57's 94 prose rows
 
