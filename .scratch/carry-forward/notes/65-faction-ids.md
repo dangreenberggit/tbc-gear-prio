@@ -57,6 +57,21 @@ Shattered Sun Offensive, 922 Tranquillien.
 Note `data["DUMMY"]` also claims `FactionID = 932`, colliding with The Aldor —
 so a parser keying AtlasLoot tables by `FactionID` must skip `DUMMY`.
 
+**Refinement (verified independently):** `DUMMY` sits inside a `--[[ ... ]]`
+Lua block comment, so it is commented-out template code rather than a live
+entry. The practical warning stands and is arguably sharper — a naive
+line-oriented regex (which is what `parse_atlasloot.py` uses; it has no Lua VM)
+will happily match commented-out tables. The fix is block-comment awareness, not
+a `DUMMY` special-case, since the same trap catches anything else upstream
+comments out later.
+
+```bash
+python -c "
+src=open('<factions-tbc.lua>',encoding='utf-8').read()
+i=src.find('data[\"DUMMY\"]')
+print(src.rfind('--[[',0,i) < i < src.find(']]',i))  # True -> inside a comment"
+```
+
 ## The one thing that is *not* upstream: English display names
 
 - `ui.proto` gives CamelCase **enum member names** (`RepFactionOgriLa`), not
@@ -85,3 +100,53 @@ Two corrections to things previously written down:
 
 No schema change is proposed here. Whether a rep source should also carry its
 numeric id is a separate question that has not been asked or decided.
+
+## Independent confirmation, and what Wowhead actually gives us
+
+Re-derived separately while working ticket 65 step 2. The AtlasLoot/proto
+agreement reproduces exactly: 21 AtlasLoot tables, and **every one of the proto's
+10 ids appears in AtlasLoot with the same number** — set difference in the
+"our ids not in AtlasLoot" direction is empty. Scale of the Sands = 990 and
+Lower City = 1011 confirmed absent from both `ui.proto` and every
+`repFactionId` in `db.json`.
+
+**On Wowhead specifically** (the other half of the original question): our
+vendored Wowhead data does *not* carry faction ids. `data/wowhead-lists/*/*.json`
+rows key the item by `itemId` — an id, correctly — but the faction survives only
+inside transcribed prose:
+
+```json
+{ "itemId": 29119, "itemName": "Haramad's Bargain",
+  "wowheadSourceText": "Vendor: Paulsta'ats- Requires Exalted with The Consortium" }
+```
+
+So the faction string `"The Consortium"` in our universes is a **regex capture
+from transcribed English**, not an id lookup. That is the single-witness channel
+tickets 48-53 kept producing defects through, and it is why the prose path and
+the db path can disagree on spelling at all. Wowhead the *website* routes
+`faction=1012` correctly, but the ids are not in what we vendored.
+
+This sharpens the finding: the id space is standard and available from
+**AtlasLoot** (21 factions, superset of the proto's 10). It is not available
+from our Wowhead inputs without re-collection.
+
+## Recommendation on the open schema question
+
+The note correctly declines to decide this. Recording the recommendation so
+step 2 does not have to re-derive it:
+
+**Add `factionId` to the `rep` variant, keep `faction` as the display string.**
+
+- Identity becomes the id, end to end, matching how items already work
+  (`itemId` everywhere).
+- `REP_FACTION_DISPLAY` becomes an ordinary presentation table — no drift gate
+  needed on the *identity* axis, only on "does every id in use have a name".
+- The prose path cannot supply an id, so those rows carry `faction` only. That
+  asymmetry is honest and is exactly what `origin` already exists to record:
+  `origin: "db"` rows would gain an id, `origin: "wowhead"` rows would not.
+- It makes the step-3 Scale of the Sands work land on ids (990) rather than on
+  a second hand-typed spelling.
+
+Cost is real but contained: `ItemSource` in `pool.ts`, the generated kinds, and
+both parsers. Worth doing *inside* step 2, which already rewrites that
+resolution path, rather than as a retrofit over shipped data.

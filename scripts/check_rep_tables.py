@@ -9,9 +9,10 @@ trustworthy, and none of them is guaranteed by the code that does it:
 1. Every faction id ui.proto defines has a display spelling. A missing one used
    to fall back to nothing and the whole source was discarded (ticket 65).
 2. Those spellings match what the prose parser already emits for the same
-   faction. `Ogri'la` and `The Consortium` are the load-bearing cases: if this
-   table said "Ogrila" or "Consortium", one faction would split into two and a
-   filter would show both.
+   faction, so one faction does not print two ways across rows. This is a
+   *presentation* invariant, not an identity one: `faction` has a single
+   consumer, `rank-report.ts` interpolating it into a label. Nothing filters,
+   groups or joins on it (see `.scratch/carry-forward/notes/65-faction-ids.md`).
 3. Every `repLevel` db.json actually uses resolves to a standing name.
 
 Re-derived here rather than asserted, so drift in ui.proto, in db.json, or in
@@ -117,7 +118,7 @@ def main() -> int:
         if matches and name not in matches:
             failures.append(
                 f"universe ships faction {name!r} but the table spells it "
-                f"{matches[0]!r} -- one faction would split into two"
+                f"{matches[0]!r} -- the same faction would print two ways"
             )
 
     if failures:

@@ -550,10 +550,12 @@ REP_LEVEL_NAMES = {
 # ui.proto RepFaction, id -> display name. The enum member is CamelCase
 # (`RepFactionOgriLa`) and the display name is not derivable from it: "Ogri'la"
 # needs an apostrophe no rule produces, and `RepFactionTheConsortium` keeps its
-# article while `RepFactionAshtongueDeathsworn` never had one. Both spellings
-# are already load-bearing -- they are what the existing prose-parsed sources
-# emit (`Ogri'la`, `The Consortium`), and a mismatch would split one faction
-# into two.
+# article while `RepFactionAshtongueDeathsworn` never had one. These must match
+# what the prose parser already emits (`Ogri'la`, `The Consortium`) so one
+# faction does not print two ways -- a presentation invariant, not an identity
+# one. The *ids* are the identity, and they are game-canonical: wowsims,
+# ui.proto and AtlasLoot agree id-for-id
+# (.scratch/carry-forward/notes/65-faction-ids.md).
 #
 # So the *ids* come from the proto and only the display strings are written
 # here. A faction added upstream fails the assertion below rather than silently
