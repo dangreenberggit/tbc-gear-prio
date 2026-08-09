@@ -20,9 +20,21 @@ did **not** get that treatment and are still typed by hand:
 Also hand-ported from `OtherDefaults` in that file: `RACE`, `PROFESSION1`,
 `PROFESSION2`, `REACTION_TIME_MS`, `DISTANCE_FROM_TARGET`.
 
-Nothing checks these against upstream. A wowsims tag bump that retunes the
-default talent build or swaps a consumable leaves them silently stale — exactly
-the failure mode ADR-0022 closed for the buff blocks, still open for these.
+**The current values are correct — verified, not assumed.** Diffed against
+`ui/druid/feralcat/presets.ts` @ 8aa378b3 on 2026-08-08: all 11 `CONSUMABLES`
+keys, the `StandardTalents` string, and all five `OtherDefaults` match upstream
+exactly, with no extra keys. This is **not** the ret-inheritance bug that
+ADR-0022 fixed; these were read off feral's own presets from the start.
+
+The gap is provenance, not correctness. Nothing re-checks them, so a wowsims tag
+bump that retunes the default talent build or swaps a consumable would leave
+them stale without failing any gate — the failure mode ADR-0022 closed for the
+buff blocks, still open for these. Priority is accordingly low: this is
+insurance against a future upstream change, not a live defect.
+
+Not in scope here: that these are wowsims' defaults rather than the player's own
+settings. There is no customization to diverge from yet, and adding it is
+carry-forward 72.
 
 ## Why it wasn't done in ADR-0022
 
