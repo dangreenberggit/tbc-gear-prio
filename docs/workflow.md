@@ -25,7 +25,8 @@ because that would need updating every time a tool changes.
 
 1. Branch off `dev`.
 2. Red → green, one slice at a time (see the `tdd` skill). Commit regularly
-   — a commit per green slice, not one commit at the end.
+   as you accomplish work — a commit per green slice, not one commit at the
+   end, and not only when asked.
 3. `pnpm verify` before every push. This runs typecheck, lint, format check,
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
