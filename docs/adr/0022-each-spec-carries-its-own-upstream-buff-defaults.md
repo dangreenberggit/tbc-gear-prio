@@ -45,14 +45,29 @@ including one the ticket misattributed — see below.
 own upstream defaults. Keep copying only `encounter`. Accept that absolute DPS
 is no longer comparable across specs.**
 
-The constants are transcribed into `build_feral_skeleton.py` rather than pinned
-through `sync_wowsims.py`. That script's `TRACKED` map fetches **files**;
-these values are TypeScript expressions with spreads and helper calls
-(`defaultRaidBuffMajorDamageCooldowns()`, `defaultExposeWeaknessSettings(phase)`),
-so there is no upstream JSON to pin. Each transcribed helper is resolved at its
-use site with an upstream file:line citation. This is the same class of
-hand-port as `TALENTS` and `CONSUMABLES`, and carries the same refresh cost:
-a tag bump can silently invalidate it.
+The values are **extracted from upstream's TypeScript at build time**, not
+hand-transcribed. `scripts/extract_sim_defaults.mjs` parses `sim.ts` with the
+TypeScript compiler API and statically evaluates the literals into
+`data/presets/feral/buff-defaults.json`, which `build_feral_skeleton.py` reads.
+
+Parsing rather than executing, because `sim.ts` imports the whole upstream
+`ui/` tree — widgets, SCSS, the lot — so importing it needs a full upstream
+checkout. Parsing needs only the one file. The two spread helpers
+(`defaultRaidBuffMajorDamageCooldowns()`,
+`defaultExposeWeaknessSettings(Phase.PhaseN)`) are resolved by reading
+`ui/core/proto_utils/utils.ts` the same way, so no upstream value is retyped
+anywhere in this repo.
+
+`ui/druid/feralcat/sim.ts` and `ui/core/proto_utils/utils.ts` are now pinned in
+`sync_wowsims.py` `TRACKED`, so an upstream tag bump trips a checksum mismatch,
+and `pnpm sim-defaults:check` independently fails if the committed JSON stops
+matching the pinned source. Both were verified to fire by mutating each input.
+
+This is deliberately _unlike_ `TALENTS` and `CONSUMABLES`, which remain
+hand-ported constants in `build_feral_skeleton.py` and can still go stale
+silently. Extending the extractor to cover them is carry-forward 73
+(`.scratch/carry-forward/issues/73-extend-sim-defaults-extractor-to-talents-and-consumables.md`);
+it was left out here to keep this change scoped to the ticket.
 
 `encounter` keeps being copied, and this is now a checked claim rather than an
 assumption: neither spec's `encounterPicker` sets any encounter or target
@@ -119,9 +134,17 @@ feral sets both, at different strengths (`LesserDrumsOfBattle` party,
   cover the skeleton will serve pre-change numbers.
 - **Adding a third spec now means sourcing its own `sim.ts` defaults**, not
   copying either existing skeleton.
-- **A wowsims tag bump can silently invalidate the transcription.** It is not
-  checksum-guarded, unlike the `.gear.json`/`.apl.json` inputs. The upstream
-  file:line citations in `build_feral_skeleton.py` are what a refresh re-reads.
+- **A wowsims tag bump now fails loudly**, twice over: the `TRACKED` checksum
+  and `pnpm sim-defaults:check`. Refreshing means re-running
+  `pnpm sim-defaults:build` and `python scripts/build_feral_skeleton.py`, not
+  re-reading upstream by eye.
+- **An upstream shape change stops the build rather than corrupting it.** The
+  extractor throws on anything it cannot statically resolve — a computed value,
+  or `defaultExposeWeaknessSettings()` losing its explicit phase argument (it
+  refuses to assume `CURRENT_PHASE`). Exit 2 with the offending expression, so
+  the failure mode is a red build, never a silently wrong raid.
+- **`scripts/*.mjs` is now a linted file class.** `eslint.config.js` gives it
+  Node globals; `packages/core`'s purity rules are unaffected.
 - **If carry-forward 72 lands**, these constants become the _fallback_ for a user
   who supplies no config, rather than the only raid definition.
 
@@ -130,13 +153,19 @@ feral sets both, at different strengths (`LesserDrumsOfBattle` party,
 **Keep ret's blocks for comparability.** Rejected: the property has no consumer
 in this tool, and carry-forward 72 destroys it regardless.
 
-**Add `presets.ts`/`sim.ts` to `sync_wowsims.py` TRACKED.** Pinning the files
-would checksum-guard the transcription. Rejected for now because it pins the
-files without extracting the values — the constants would still be hand-copied,
-so it buys a drift alarm, not automation, while committing us to vendoring two
-TypeScript files we cannot execute. Worth revisiting if the transcription drifts
-in practice; that is the trigger, and it would be a strict improvement over
-today's silent staleness.
+**Hand-transcribe the constants into `build_feral_skeleton.py`.** This is what
+the first cut of this change did, on the reasoning that `TRACKED` fetches files
+rather than expressions so there was "no upstream JSON to pin". That conflated
+two things: pinning the file and extracting its values. The file is perfectly
+pinnable, and the TypeScript compiler API — already a dependency — parses the
+values out in ~200 lines without executing anything. Rejected once measured:
+the extractor's output was byte-identical to the transcription, so the accuracy
+argument was neutral and the drift-gate argument decided it.
+
+**Execute upstream's TypeScript to read the exported values.** Rejected on
+evidence: importing `sim.ts` fails on the first of many transitive imports into
+the upstream `ui/` tree, so it needs a full upstream checkout and toolchain to
+read four object literals.
 
 **Normalise both specs onto a hand-built "neutral" raid.** Rejected: it restores
 comparability by matching neither spec's browser output — the original bug, with

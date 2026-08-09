@@ -71,6 +71,13 @@ TRACKED = {
     "feral_p2_9p.gear.json": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
     "feral_preraid.gear.json": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
     "feral_default.apl.json": "ui/druid/feralcat/apls/default.apl.json",
+    # Sources for scripts/extract_sim_defaults.mjs (ADR-0022). Unlike everything
+    # above these are TypeScript, not data: the buff/debuff defaults live in
+    # `sim.ts` as constructor calls, so they are parsed with the TS compiler API
+    # rather than json.load'ed. Pinned here so a tag bump trips the checksum
+    # instead of silently invalidating data/presets/*/buff-defaults.json.
+    "feral_sim.ts": "ui/druid/feralcat/sim.ts",
+    "proto_utils.ts": "ui/core/proto_utils/utils.ts",
 }
 
 def gh(*args):

@@ -8,18 +8,25 @@ Resolved: 2026-08-08 — ADR-0022, `docs/adr/0022-each-spec-carries-its-own-upst
 ## Resolution
 
 Feral now carries its own upstream buff/debuff/individual-buff blocks,
-transcribed from `ui/druid/feralcat/sim.ts` @ 8aa378b3 into
-`build_feral_skeleton.py`. Only `encounter` is still copied from ret, and that
-is now a checked claim: neither spec's `encounterPicker` sets any encounter or
-target value.
+**extracted at build time** from `ui/druid/feralcat/sim.ts` by
+`scripts/extract_sim_defaults.mjs` (TypeScript compiler API, no execution) into
+`data/presets/feral/buff-defaults.json`. Only `encounter` is still copied from
+ret, and that is now a checked claim: neither spec's `encounterPicker` sets any
+encounter or target value.
+
+Both upstream sources are pinned in `sync_wowsims.py` `TRACKED`, and
+`pnpm sim-defaults:check` runs in `pnpm verify`, so a tag bump fails the build
+instead of silently shipping stale defaults.
 
 Scope items, as filed:
 
 1. **Done.** Sourced per spec. Note the defaults live in `sim.ts`, not
    `presets.ts` where `TALENTS`/`CONSUMABLES` came from — feral inline, ret via
-   `Presets.Default*`. They are TypeScript expressions, not pinnable files, so
-   they are hand-transcribed with upstream file:line citations rather than added
-   to `sync_wowsims.py` TRACKED.
+   `Presets.Default*`. They are parsed out of the pinned `sim.ts` rather than
+   retyped; the two spread helpers resolve against the pinned `utils.ts`.
+   `TALENTS`/`CONSUMABLES` are still hand-ported constants and remain a
+   silent-staleness risk — extending the extractor to cover them is the
+   follow-up.
 2. **Done — comparability dropped deliberately.** ADR-0022 states it: feral and
    ret DPS are no longer comparable to each other, each is comparable to its own
    wowsims browser output. Nothing in the tool ranks feral against ret, and

@@ -1179,12 +1179,12 @@
     ],
     "numActiveParties": 5,
     "buffs": {
+      "bloodlust": true,
       "arcaneBrilliance": true,
       "divineSpirit": "TristateEffectImproved",
       "giftOfTheWild": "TristateEffectImproved",
       "powerWordFortitude": "TristateEffectImproved",
-      "shadowProtection": true,
-      "bloodlust": true
+      "shadowProtection": true
     },
     "debuffs": {
       "exposeWeaknessUptime": 0.9,

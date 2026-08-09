@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run mirrors:check",
+    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run mirrors:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -28,6 +28,8 @@
     "proto:generate": "buf generate data/proto --template buf.gen.yaml && python scripts/normalize_proto_gen.py",
     "data:items:generate": "python scripts/generate_item_gem_index.py",
     "experiment:five-seed": "python scripts/five_seed_spread.py",
+    "sim-defaults:build": "node scripts/extract_sim_defaults.mjs --spec feral",
+    "sim-defaults:check": "node scripts/extract_sim_defaults.mjs --spec feral --check",
     "skeleton:check": "python scripts/check_raid_sim_skeleton.py && python scripts/check_raid_sim_skeleton.py --spec feral",
     "universe:assemble": "python scripts/assemble_universe.py",
     "land": "python scripts/land.py",
