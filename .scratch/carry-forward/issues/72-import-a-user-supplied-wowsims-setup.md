@@ -23,6 +23,21 @@ Motivating case: feral cat, where rotation and buff fidelity matter more than
 for simpler specs, and where an unexplained helm-ranking gap between our sim
 and wowsims prompted this.
 
+## The plan already anticipated this
+
+**PLAN.md:522 names the runtime lift as "the eventual end state"** and names its
+blocker: the exported `consumables.potions[]` / `conjuredItems[]` menus, inert
+for ret but not yet regenerable. PLAN.md:516 ([R6]) states the message-boundary
+distinction this ticket depends on. So the lift is not a new idea — it is a
+deferred decision that was never assigned to a phase, and this ticket is that
+assignment.
+
+What is genuinely new here, beyond §8.2: the **user-supplied** case. §8.2 is
+about assembling *our* skeleton from pinned presets. This ticket adds a skeleton
+that comes from the user, which is what makes our number reconcilable with the
+one they got in the browser — and which §8.2's build-time framing cannot serve,
+since it happens per-run rather than per-release.
+
 ## What already exists
 
 The import path is built for **build time, one direction**. Read from code:
