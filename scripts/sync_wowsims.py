@@ -7,6 +7,10 @@ data/wowsims.lock.json, and fetched into vendor/ (gitignored). What gets committ
 is the generated output plus the lockfile -- so "which upstream release produced
 this data" is always answerable from the repo alone.
 
+This script is NOT the only writer of that lockfile -- it owns OWNED_KEYS below
+and must leave every other top-level key alone (see merge_lock). Adding a third
+writer? Read the contract in scripts/pinned_fetch.py first.
+
 The load-bearing field is CURRENT_PHASE.
 
     // ui/core/constants/other.ts
@@ -128,6 +132,40 @@ def load_lock():
         return json.load(fh)
 
 
+# Keys in the lockfile that this script owns and rewrites on every --update.
+# Everything else in there belongs to another script -- data/proto/'s pin is
+# written by scripts/fetch_protos.py -- and must survive untouched. Rebuilding
+# the dict from scratch and dropping the rest silently destroyed the `proto`
+# block once already; carry unknown keys forward rather than naming them, so
+# the next script to add a block doesn't have to edit this one.
+OWNED_KEYS = frozenset(
+    {"repo", "tag", "commit", "currentPhase", "defaultMaxPhase", "files", "_comment"}
+)
+
+
+def merge_lock(prev, owned):
+    """Overlay this script's freshly-built keys onto the previous lockfile,
+    preserving any top-level key we don't own.
+
+    Raises SystemExit if `owned` contains a key missing from OWNED_KEYS. That
+    combination is the dangerous one: the key would be classified as another
+    script's, so the *previous* value would win and the freshly-fetched one be
+    discarded -- a pin that looks updated but never moves again. Refusing to
+    write beats a lockfile that quietly lies about what it points at."""
+    unclaimed = set(owned) - OWNED_KEYS
+    if unclaimed:
+        raise SystemExit(
+            f"do_update() built key(s) {sorted(unclaimed)} that are not in OWNED_KEYS.\n"
+            "Add them to OWNED_KEYS -- otherwise merge_lock() treats them as another "
+            "script's data and keeps the stale value forever."
+        )
+    foreign = {k: v for k, v in (prev or {}).items() if k not in OWNED_KEYS}
+    if not foreign:
+        return dict(owned)
+    # Our keys lead; foreign blocks keep their relative order at the tail.
+    return {**owned, **foreign}
+
+
 def do_update(tag):
     if tag:
         sha = tag_sha(tag)
@@ -161,7 +199,7 @@ def do_update(tag):
         raise SystemExit("never resolved CURRENT_PHASE -- refusing to write a lockfile")
 
     prev = load_lock()
-    lock = {
+    owned = {
         "repo": REPO,
         "tag": tag,
         "commit": sha,
@@ -175,6 +213,7 @@ def do_update(tag):
             "player's most recent log."
         ),
     }
+    lock = merge_lock(prev, owned)
     with open(LOCKFILE, "w", encoding="utf-8") as fh:
         json.dump(lock, fh, indent=2)
         fh.write("\n")

@@ -7,6 +7,21 @@ for a supply-chain check to rot, so the primitives live here.
 
 Each script keeps its own REPO, lockfile path and layout — only the fetch,
 the digest and the lock-entry shape are shared.
+
+IF YOU ARE ADDING A SCRIPT THAT WRITES data/wowsims.lock.json, READ THIS.
+That file is shared: `sync_wowsims.py` owns the upstream pin (its OWNED_KEYS),
+`fetch_protos.py` owns "proto" (its OWNED_KEY). The rule is touch only your own
+top-level key and carry every other key through untouched — load the lockfile
+immediately before writing, set your key, write the whole dict back. Do NOT
+rebuild it from the keys you happen to know about: `sync_wowsims.py --update`
+did exactly that and deleted the entire 16-entry "proto" block, and because the
+result was still valid JSON nothing failed until someone diffed it by hand.
+
+A new writer that ignores this is the one case scripts/check_lock_merge.py
+cannot catch in advance — it verifies the two existing owners agree, but it
+only notices a third owner after that script has already run and clobbered
+something. So declare your key as a module-level OWNED_KEY, and add it to the
+allowance in check_lock_merge.check_owned_keys_match_writer().
 """
 
 from __future__ import annotations
