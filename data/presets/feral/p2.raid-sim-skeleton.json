@@ -218,7 +218,6 @@
             },
             "buffs": {
               "blessingOfKings": true,
-              "blessingOfWisdom": "TristateEffectImproved",
               "blessingOfMight": "TristateEffectImproved",
               "unleashedRage": true
             },
@@ -1127,14 +1126,14 @@
           {}
         ],
         "buffs": {
-          "leaderOfThePack": "TristateEffectImproved",
           "drums": "LesserDrumsOfBattle",
-          "manaSpringTotem": "TristateEffectRegular",
+          "ferociousInspiration": 2,
+          "battleShout": "TristateEffectImproved",
           "graceOfAirTotem": "TristateEffectImproved",
-          "strengthOfEarthTotem": "TristateEffectImproved",
           "windfuryTotem": "TristateEffectImproved",
-          "totemTwisting": true,
-          "battleShout": "TristateEffectImproved"
+          "manaSpringTotem": "TristateEffectRegular",
+          "strengthOfEarthTotem": "TristateEffectImproved",
+          "totemTwisting": true
         }
       },
       {
@@ -1181,27 +1180,25 @@
     "numActiveParties": 5,
     "buffs": {
       "arcaneBrilliance": true,
-      "powerWordFortitude": "TristateEffectImproved",
-      "shadowProtection": true,
       "divineSpirit": "TristateEffectImproved",
       "giftOfTheWild": "TristateEffectImproved",
-      "thorns": "TristateEffectImproved",
+      "powerWordFortitude": "TristateEffectImproved",
+      "shadowProtection": true,
       "bloodlust": true
     },
     "debuffs": {
-      "judgementOfWisdom": true,
-      "improvedSealOfTheCrusader": "TristateEffectImproved",
-      "jocRetribution2pt4": true,
-      "misery": true,
-      "curseOfElements": "TristateEffectImproved",
+      "exposeWeaknessUptime": 0.9,
+      "exposeWeaknessHunterAgility": 1080,
       "bloodFrenzy": true,
       "exposeArmor": "TristateEffectImproved",
+      "huntersMark": "TristateEffectImproved",
+      "improvedSealOfTheCrusader": "TristateEffectImproved",
+      "judgementOfWisdom": true,
+      "misery": true,
+      "curseOfRecklessness": true,
       "faerieFire": "TristateEffectImproved",
       "sunderArmor": true,
-      "curseOfRecklessness": true,
-      "huntersMark": "TristateEffectImproved",
-      "exposeWeaknessUptime": 0.9,
-      "exposeWeaknessHunterAgility": 1150
+      "giftOfArthas": true
     }
   },
   "encounter": {

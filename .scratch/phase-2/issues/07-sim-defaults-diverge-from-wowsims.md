@@ -1,8 +1,44 @@
-Status: open
+Status: closed
 Type: bug
 Origin: chat, 2026-08-08
 Blocks: phase-2
 Blocked by: none
+Resolved: 2026-08-08 — ADR-0022, `docs/adr/0022-each-spec-carries-its-own-upstream-buff-defaults.md`
+
+## Resolution
+
+Feral now carries its own upstream buff/debuff/individual-buff blocks,
+transcribed from `ui/druid/feralcat/sim.ts` @ 8aa378b3 into
+`build_feral_skeleton.py`. Only `encounter` is still copied from ret, and that
+is now a checked claim: neither spec's `encounterPicker` sets any encounter or
+target value.
+
+Scope items, as filed:
+
+1. **Done.** Sourced per spec. Note the defaults live in `sim.ts`, not
+   `presets.ts` where `TALENTS`/`CONSUMABLES` came from — feral inline, ret via
+   `Presets.Default*`. They are TypeScript expressions, not pinnable files, so
+   they are hand-transcribed with upstream file:line citations rather than added
+   to `sync_wowsims.py` TRACKED.
+2. **Done — comparability dropped deliberately.** ADR-0022 states it: feral and
+   ret DPS are no longer comparable to each other, each is comparable to its own
+   wowsims browser output. Nothing in the tool ranks feral against ret, and
+   carry-forward 72 would destroy the property regardless.
+3. **Done.** Both drums fields stay — `PartyBuffs.drums` (someone else plays)
+   and `ConsumesSpec.drums_id` (this player plays) are distinct proto fields
+   (`common.proto:479`, `:593`) and upstream sets both. `TypeAPL` recorded as a
+   deliberate divergence from upstream's `TypeSimple` default.
+
+**One row of the table above was misattributed.** `exposeWeaknessHunterAgility`
+1150 vs 1080 is not ret-inheritance: `utils.ts:1317-1324` maps Phase1→1080,
+Phase2→1150, and feral's `sim.ts` passes an explicit `Phase.Phase1` while ret's
+`P2_PLAYER_SETTINGS` respreads Phase2. 1080 is feral's real upstream default and
+is what now ships, even though this is a P2 tool.
+
+**Still open, deliberately not addressed here:** the APL energy-gate hypothesis
+(entries 7-10, `currentEnergy <= 30`) for the ~8.5 vs ~3 DPS helm gap, and the
+"Related" worry about whether any buff effect is modelled in our data rather
+than deferred to the sim.
 
 # Our raid buffs/debuffs are ret's, not each spec's wowsims defaults
 
