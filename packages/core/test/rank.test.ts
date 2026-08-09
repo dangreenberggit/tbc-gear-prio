@@ -1996,6 +1996,47 @@ describe("rankUpgrades paired-replicate SE", () => {
   });
 
   /**
+   * §10 Phase 2 is only a real method if a caller who passes no seeds gets it.
+   * It shipped implemented, tested and *unreachable*: `DEFAULT_SEEDS` was a
+   * single seed, so `usesPairedReplication` was false on every production run
+   * and `replicateTopItems` returned at its first line. Every other test in
+   * this block passes `seeds` explicitly and so could not see that. This one
+   * omits `seeds` on purpose — that is the whole point of it.
+   */
+  it("replicates the top items when the caller passes no seeds", async () => {
+    const sim = new SeedAwareSimRunner();
+    const logged = slamaltmanLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: neckPool(),
+      }
+    );
+
+    const top = ranking.items.find((i) => i.itemId === 29381)!;
+    expect(top.seMethod).toBe("paired-replicate");
+    expect(ranking.assumptions.seeds.length).toBeGreaterThan(1);
+    expect(new Set(ranking.assumptions.seeds).size).toBe(
+      ranking.assumptions.seeds.length
+    );
+  });
+
+  /**
    * The point estimate and its error bar must describe the same thing. An SE
    * built from five deltas describes the *mean* of those five, so leaving
    * `deltaDps` at the first seed's draw would attach a confidence interval to

@@ -252,7 +252,18 @@ type BestSwap = {
 };
 
 const DEFAULT_ITERATIONS = 3000;
-const DEFAULT_SEEDS = [42];
+/**
+ * Five distinct seeds, because `usesPairedReplication` is what switches §10
+ * Phase 2 on and it keys off `seeds.length > 1` (`se.ts`). A single default
+ * seed left the whole paired-replicate path implemented, tested and dead: no
+ * caller passes `seeds`, so `replicateTopItems` returned at its first line on
+ * every real run and the shortlist shipped the Phase 1 `independent` SE that
+ * §10:705 records as overstating a shared-seed delta's variance.
+ *
+ * These are the seeds `docs/five-seed-spread.json` measured, so the shipped
+ * constant and the evidence for it stay the same numbers.
+ */
+const DEFAULT_SEEDS = [11, 22, 33, 44, 55];
 /**
  * Hashed and disclosed from one place, so the two cannot drift apart. Now
  * per-spec, which keeps that property: both call sites read this one function,
