@@ -82,3 +82,9 @@ A secondary worry raised alongside this, **not investigated and not in scope
 here**: if any buff/debuff effect is modelled in *our* data rather than deferred
 to the sim, a wrong value would be a much more serious problem than a default
 mismatch. Worth a separate look to confirm we defer all of it to the sim.
+
+Carry-forward 72 (`../../carry-forward/issues/72-import-a-user-supplied-wowsims-setup.md`)
+is the complement of this ticket: it lets a user supply *their* config rather
+than fixing *ours*. Note it weakens scope item 2 above — an imported config is
+per-user, so cross-spec comparability cannot be maintained by choosing one set
+of defaults. Resolve this ticket first, or resolve the two together.
