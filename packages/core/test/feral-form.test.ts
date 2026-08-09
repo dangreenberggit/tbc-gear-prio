@@ -59,19 +59,22 @@ function load(name: string, character: string) {
 }
 
 describe("feral disambiguation on real captures", () => {
-  const cat = load("shredzepelin.raw.json", "shredzepelin");
+  // `offtank` is ~99% cat form but a tanking gear set — the fight ticket 06
+  // was filed about. `cat` is the real DPS night the engine now defaults to.
+  const offtank = load("shredzepelin.raw.json", "shredzepelin");
+  const cat = load("shredzepelin-cat.raw.json", "shredzepelin");
   const bear = load("shredzepelin-bear.raw.json", "shredzepelin");
   const nexess = load("nexess.raw.json", "nexess");
 
   it("sees identical talents on the cat and the bear night", () => {
     // The whole reason form uptime exists. If this ever fails, talents became
     // a usable signal and the second step could be dropped.
-    expect(cat.talents).toEqual(bear.talents);
-    expect(cat.className).toBe("Druid");
+    expect(offtank.talents).toEqual(bear.talents);
+    expect(offtank.className).toBe("Druid");
   });
 
   it("refuses to pick a feral spec from talents alone", () => {
-    for (const fixture of [cat, bear, nexess]) {
+    for (const fixture of [offtank, cat, bear, nexess]) {
       expect(classifySpec(fixture.className, fixture.talents)).toMatchObject({
         ok: false,
         reason: "needs-form-uptime",
@@ -81,15 +84,33 @@ describe("feral disambiguation on real captures", () => {
   });
 
   it("resolves the same character to opposite specs on different fights", () => {
-    expect(classifyFeralForm(cat.uptime).spec).toBe("feral");
+    expect(classifyFeralForm(offtank.uptime).spec).toBe("feral");
     expect(classifyFeralForm(bear.uptime).spec).toBe("feral-tank");
   });
 
   it("reports the mixed bear fight at lower confidence than the clean cat one", () => {
-    const catResult = classifyFeralForm(cat.uptime);
+    const catResult = classifyFeralForm(offtank.uptime);
     const bearResult = classifyFeralForm(bear.uptime);
     expect(catResult.confidence).toBeGreaterThan(0.95);
     expect(bearResult.confidence).toBeLessThan(catResult.confidence);
+  });
+
+  it("reads the Void Reaver kill as a cat fight that kept salvation", () => {
+    // The fixture the CLI now defaults to for shredzepelin. Same form reading
+    // as the Morogrim off-tank fight (~99% cat), so form uptime alone still
+    // cannot separate them — salvation is what makes this one trustworthy.
+    const result = classifyFeralForm(cat.uptime);
+    expect(result.spec).toBe("feral");
+    expect(result.confidence).toBeGreaterThan(0.95);
+    expect(cat.salvation).toBe(1);
+  });
+
+  it("does not warn on the DPS fight the off-tank fight warns about", () => {
+    // Both are confident cat parses; only the off-tank one is missing salv.
+    // If this ever fails the default fixture stopped being a clean DPS set.
+    expect(classifyFeralForm(offtank.uptime).confidence).toBeGreaterThan(0.95);
+    expect(offtank.salvation).toBe(0);
+    expect(cat.salvation).toBeGreaterThan(0);
   });
 
   it("classifies nexess as cat", () => {
@@ -103,10 +124,10 @@ describe("feral disambiguation on real captures", () => {
     // near-certainty on each and cannot tell them apart. Shredzepelin was
     // backup tank on Morogrim; salvation is stripped from anyone who might
     // tank, so its absence is the signal that survives where form uptime dies.
-    expect(classifyFeralForm(cat.uptime).confidence).toBeGreaterThan(0.95);
+    expect(classifyFeralForm(offtank.uptime).confidence).toBeGreaterThan(0.95);
     expect(classifyFeralForm(nexess.uptime).confidence).toBeGreaterThan(0.95);
 
-    expect(cat.salvation).toBe(0);
+    expect(offtank.salvation).toBe(0);
     expect(nexess.salvation).toBe(1);
   });
 

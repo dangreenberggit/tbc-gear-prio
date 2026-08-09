@@ -1424,3 +1424,65 @@ work also fixed source data an SME reads first: before it, ret P5 showed
 Crystalforge Breastplate sourced from Morogrim Tidewalker in Serpentshrine (a
 Tempest Keep piece), token names in `boss` fields, and `Crafted · 2` for a
 profession. Reviewing that would have spent a domain pass on known-fixed data.
+
+## 2026-08-08 — Shredzepelin's cat set now reads from a DPS fight (ticket 06)
+
+Ticket 06 shipped disclosure and an off-tank warning but left the scope-3 item
+open: the warning told the reader to "pick another fight" and there was no other
+fight to pick, because `feralOfflineRecordings` records exactly one fight per
+fixture and shredzepelin's only cat capture was the Morogrim off-tank kill.
+
+### The fight was chosen by measurement, not by preference
+
+Probed all ten SSC/TK kills in report `YwahQLgv2jBrZGn6` for form uptime and
+salvation. Three fights are unambiguous DPS — Leotheras (26), Void Reaver (63),
+Solarian (73): high cat form *and* full salvation. Void Reaver was taken because
+its 98.8% cat form is nearest to Morogrim's 99.1%, which holds form uptime fixed
+and isolates the tank-vs-DPS variable.
+
+Re-run (needs WCL credentials in `.env`; costs API points):
+
+```bash
+python scripts/capture_fixture.py --name shredzepelin --server-slug dreamscythe \
+  --region US --report YwahQLgv2jBrZGn6 --fight 63 \
+  --out test/fixtures/shredzepelin-cat.raw.json
+```
+
+### The gear confirms the diagnosis rather than assuming it
+
+Nine of seventeen slots differ between the two fights. Both pieces the SME
+handoff flagged — Icebound Cloak and Violet Signet, the zero-agility tank items
+— are gone on Void Reaver, replaced by The Frost Lord's War Cloak and Ring of
+Lethality. The original "the gear read is wrong" report was right about the
+gear and wrong about the cause: the parser was faithful, the fight was not.
+
+### A live detector bug the new fixture exposed
+
+`SALVATION_AURAS` listed only the two Blessings. This raid used **Hand of
+Salvation** — a distinct spell, not a rank — so the Void Reaver fight scored
+salvation 0 and drew the exact false off-tank warning ticket 06 exists to
+prevent. Both real captures matter here: nexess carries `Greater Blessing of
+Salvation`, shredzepelin's cat fight carries `Hand of Salvation`. Fixed by
+adding the third name; pinned by three direct `salvationUptimeOf` unit tests
+(including a partial-uptime case, since Hand of Salvation is also a short
+emergency cast and presence must not be read as a fight-long buff).
+
+### Result
+
+`pnpm rank --spec feral --offline --max-phase 2`, shredzepelin:
+
+- Provenance reads `Void Reaver … spec confidence 100%`, and the salvation
+  warning correctly stays silent.
+- Baseline **2067.99** vs the off-tank fight's **1917.50** — the old baseline
+  was measured in tank gear, so every prior delta was inflated against it.
+- The shortlist shape the SME called out is gone: 13 of the top 15 rows were
+  backs and fingers, now the top rows are belts, legs and neck, with two cloaks
+  and one ring.
+
+`pnpm verify` green: 459 tests + 2 todo, 32 files.
+
+The Morogrim fixture is **kept, not dropped** — `shredzepelin.raw.json` is now
+the regression fixture for the off-tank warning itself, and the feral form tests
+bind it as `offtank` rather than `cat` so the name stops asserting the wrong
+thing. This closes the last open Phase 2 §14 gate box's shredzepelin half; the
+SME re-read of the corrected shortlist is still a human step.

@@ -118,4 +118,18 @@ describe("feral offline recordings", () => {
     expect([...offTank.fights.values()][0]![0]!.salvationUptime).toBe(0);
     expect([...realCat.fights.values()][0]![0]!.salvationUptime).toBe(1);
   });
+
+  it("builds shredzepelin's default recording from a fight that raises no flag", () => {
+    // The fixture cli.ts now maps SHREDZEPELIN_REF to. A confident cat parse
+    // that kept salvation is the pair of conditions fightProvenanceLines needs
+    // in order to stay quiet, so this pins the fix for ticket 06.
+    const data = feralOfflineRecordings(
+      load<FeralRawFixture>("test/fixtures/shredzepelin-cat.raw.json"),
+      SHREDZEPELIN_REF
+    );
+    const summary = [...data.fights.values()][0]![0]!;
+    expect(summary.encounterName).toBe("Void Reaver");
+    expect(summary.confidence).toBeGreaterThan(0.95);
+    expect(summary.salvationUptime).toBe(1);
+  });
 });

@@ -301,7 +301,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   // `confidence` is measured from form uptime by feralOfflineRecordings rather
   // than assumed, because cat and bear are the same talents.
   const FERAL_FIXTURES: ReadonlyArray<readonly [CharacterRef, string]> = [
-    [SHREDZEPELIN_REF, "test/fixtures/shredzepelin.raw.json"],
+    // Void Reaver, not the Morogrim kill: on Morogrim he was backup tank and
+    // wore tank gear in cat form, so form uptime read 99.1% cat while nine of
+    // seventeen slots were a tanking set (ticket 06). Void Reaver is 98.8% cat
+    // with 100% Blessing of Salvation — same form, never on a tank assignment.
+    [SHREDZEPELIN_REF, "test/fixtures/shredzepelin-cat.raw.json"],
     [NEXESS_REF, "test/fixtures/nexess.raw.json"],
   ];
   const feralMatch = FERAL_FIXTURES.find(

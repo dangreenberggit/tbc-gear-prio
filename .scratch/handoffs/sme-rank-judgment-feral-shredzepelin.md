@@ -71,6 +71,17 @@ spec introduced.
 > [`.scratch/phase-2/issues/06-shredzepelin-gear-incorrect.md`](../phase-2/issues/06-shredzepelin-gear-incorrect.md)
 > — the engine now discloses the source fight on every run and flags a
 > confident DPS parse with no Blessing of Salvation.
+>
+> **Superseded, 2026-08-08.** The engine no longer reads this fight at all.
+> Shredzepelin's default capture is now his Void Reaver kill (98.8% cat,
+> salvation throughout), where the two tank pieces named above are simply not
+> equipped. Baseline 1917.50 → **2067.99**, and the backs-and-fingers block this
+> section is about does not appear in the new shortlist. **Every number and row
+> in this review predates that change and should not be read as current** — the
+> whole review was conducted against the off-tank set. A re-read of the
+> corrected output is the remaining Phase 2 gate step; §1 (the thin ranged slot)
+> is the part most likely to still stand, since it is a pool property rather
+> than a baseline one.
 
 Thirteen of the top fifteen rows are backs and fingers. Looking at his gear,
 that is mostly **correct rather than a bug**: he is in five pieces of T5 and a

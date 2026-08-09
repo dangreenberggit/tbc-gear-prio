@@ -192,10 +192,19 @@ export function classifyFeralForm(uptime: FormUptime): FeralFormClassification {
 /**
  * Both ranks. A paladin who never picked up the Greater version still salvs,
  * and reading only one name would report a salvaged DPS as unsalvaged.
+ *
+ * Hand of Salvation is a distinct spell, not a rank of the Blessing, and is
+ * included because it carries the same meaning for this check: it is threat
+ * reduction nobody hands a tank. Reading only the Blessings scored
+ * shredzepelin's Void Reaver kill — a clean DPS fight salved end to end — as
+ * unsalvaged, which is the exact false off-tank warning ticket 06 exists to
+ * avoid. Uptime, not presence, is what the caller reads, so the short
+ * emergency-cast use of this spell reports as the low ratio it is.
  */
 const SALVATION_AURAS = new Set([
   "Blessing of Salvation",
   "Greater Blessing of Salvation",
+  "Hand of Salvation",
 ]);
 
 /**

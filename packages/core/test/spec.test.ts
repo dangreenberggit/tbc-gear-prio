@@ -6,6 +6,7 @@ import {
   classifyFeralForm,
   classifySpec,
   matchesRequestedSpec,
+  salvationUptimeOf,
   talentPointsFromWclTalents,
 } from "../src/spec.js";
 
@@ -73,6 +74,34 @@ describe("classifyFeralForm", () => {
     const result = classifyFeralForm({ catMs: 0, bearMs: 0 });
     expect(result.spec).toBeUndefined();
     expect(result.confidence).toBe(0);
+  });
+});
+
+describe("salvationUptimeOf", () => {
+  it("counts every spell that means the player was not tanking", () => {
+    // Hand of Salvation is a separate spell rather than a rank of the
+    // Blessing. Missing it read a fully-salved DPS fight as unsalvaged and
+    // produced a false off-tank warning.
+    for (const name of [
+      "Blessing of Salvation",
+      "Greater Blessing of Salvation",
+      "Hand of Salvation",
+    ]) {
+      expect(salvationUptimeOf([{ name, totalUptime: 500 }], 500)).toBe(1);
+    }
+  });
+
+  it("reports a partial cover as a ratio rather than presence", () => {
+    // A brief emergency cast must not read the same as a fight-long buff.
+    expect(
+      salvationUptimeOf([{ name: "Hand of Salvation", totalUptime: 50 }], 1000)
+    ).toBeCloseTo(0.05, 5);
+  });
+
+  it("ignores unrelated blessings", () => {
+    expect(
+      salvationUptimeOf([{ name: "Blessing of Might", totalUptime: 900 }], 900)
+    ).toBe(0);
   });
 });
 

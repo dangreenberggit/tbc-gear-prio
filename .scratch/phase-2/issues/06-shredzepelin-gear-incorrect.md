@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: chat, 2026-08-08
 Blocks: phase-2
@@ -97,3 +97,39 @@ fixture, so a multi-fight capture is needed before choosing between fights is
 testable end to end. (1) and (2) are reachable without it.
 
 Not in scope: changing what the parser reads, or dropping the fixture.
+
+## Resolution, 2026-08-08
+
+All three scope items are done. (1) and (2) shipped in 6649cec. (3) is closed by
+capturing a second fight rather than by adding a `--fight` flag: the warning
+told the reader to pick another fight when no other fight existed, so supplying
+one was the load-bearing half.
+
+`test/fixtures/shredzepelin-cat.raw.json` is Void Reaver (fight 63) — 98.8% cat
+form, salvation the whole fight — and `cli.ts` maps `SHREDZEPELIN_REF` to it.
+The fight was picked by probing all ten kills in the report for form uptime and
+salvation, not by preference; Void Reaver's form uptime is the closest match to
+Morogrim's, so the tank-vs-DPS variable moves alone. Nine of seventeen slots
+differ, and both flagged tank pieces (Icebound Cloak, Violet Signet) are absent.
+Baseline moves 1917.50 → 2067.99 and the backs-and-fingers block is gone.
+
+The Morogrim fixture is **kept** as the regression fixture for the warning
+itself. The feral form tests now bind it as `offtank`, since calling it `cat`
+was the naming that made the wrong fight easy to keep using.
+
+**A live bug fell out of this.** `SALVATION_AURAS` knew only the two Blessings,
+but this raid used **Hand of Salvation** — a separate spell — so the clean DPS
+fight scored 0 salvation and drew the false off-tank warning this ticket exists
+to prevent. Fixed in `spec.ts` with three direct unit tests. Worth noting the
+detector shipped with this hole and only a second real capture found it.
+
+Still open, and **not** blockers for this ticket:
+
+- No `--fight` CLI flag and no way to list candidate fights. `resolveFight`
+  still takes `input.fight`, so the plumbing exists; only the surface is
+  missing. Now a convenience rather than a correctness gap.
+- The roster check is still unimplementable — `capture_fixture.py` scopes the
+  buffs table to one player, so "did anyone else have salv?" cannot be asked.
+  The warning stays worded as a question.
+
+Evidence: `docs/verification-log.md`, 2026-08-08.
