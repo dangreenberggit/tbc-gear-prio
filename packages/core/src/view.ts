@@ -123,6 +123,45 @@ function zoneKeyOf(item: RankedItem): string {
 }
 
 /**
+ * Half-width of the interval within which two rows read as tied, in DPS.
+ *
+ * Two `seMethod`s ship at once — paired replication rewrites the top 8
+ * above-cutoff rows and everything below stays `independent` — and they are not
+ * the same quantity. Measured on the ret P2 ranking (240 rows, 3,000 iterations,
+ * seeds 11/22/33/44/55) with the command below — full reasoning in ADR-0021:
+ *
+ *   independent      232 rows, mean SE 2.149 DPS  → window 4.30
+ *   paired-replicate   8 rows, mean SE 0.016 DPS  → window 0.031
+ *
+ * ~139x apart. So the comparison that spans the two — row 8 against row 9 — has
+ * no single scale to be measured on, and `Math.min` silently picked the paired
+ * one. On that run rows 8 and 9 sit 0.440 DPS apart: the paired window calls
+ * that a real ordering, the independent window calls it a tie, and the honest
+ * answer is that **only one of the two rows was ever measured precisely enough
+ * to tell**. Row 9 carries a ±2.18 DPS interval; no amount of precision on row 8
+ * shrinks it.
+ *
+ * So a mixed pair is judged on the **coarser** SE, which is the only scale both
+ * rows were actually measured on. `Math.min` is kept **within** a method, where
+ * point 2 above still applies and both figures mean the same thing.
+ *
+ * This deliberately does not let Phase 2's resolution leak past the 8 rows that
+ * paid for it: §10 buys "resolution, not correctness", and a tighter tie at the
+ * boundary would be resolution row 9 never bought. Re-measure with:
+ *
+ *   pnpm rank --region US --realm dreamscythe --character slamaltman \
+ *     --offline --max-phase 2 --report <path>.html
+ *
+ * then read `se` and `seMethod` per row from the emitted `.json`. Note `--raid`
+ * filters the emitted rows, so omit it or the replicated rows may not appear.
+ */
+function tieWindow(a: ViewRow, b: ViewRow): number {
+  const se =
+    a.seMethod === b.seMethod ? Math.min(a.se, b.se) : Math.max(a.se, b.se);
+  return se * 2;
+}
+
+/**
  * Rows whose SE intervals overlap are one tie group (§10).
  *
  * Three things here are each a bug someone already shipped:
@@ -132,23 +171,17 @@ function zoneKeyOf(item: RankedItem): string {
  *    this on the pinned order let a pinned −8 DPS row lead the list and swallow
  *    every positive row behind it, displaying a downgrade as tied with a +40
  *    upgrade.
- * 2. **Membership is measured on the *narrower* of the two SEs.** Testing only
- *    `row.high >= leader.low` lets one wide-SE row bridge a gap its partner's
- *    own interval never spans — with SEs of 0.01 and 60, deltas 100 and 50 came
- *    out tied while 50 and 49 did not.
+ * 2. **Membership is measured on the *narrower* of the two SEs**, within one
+ *    `seMethod`. Testing only `row.high >= leader.low` lets one wide-SE row
+ *    bridge a gap its partner's own interval never spans — with SEs of 0.01 and
+ *    60, deltas 100 and 50 came out tied while 50 and 49 did not. That argument
+ *    assumed two SEs of the same kind; `tieWindow` handles the mixed case.
  * 3. **Anchored to the leader, not to the running union.** Chaining on the
  *    union is the obvious implementation and collapses the whole list at the
  *    SE scale this tool actually reports — §10's "reads as broken" failure.
- *    Observed on the ret P2 Karazhan ranking at 3,000 iterations, where
- *    reported SE runs a little over 2 DPS while adjacent deltas differ by far
- *    less; §10 records 1.678 DPS at 5,000 iterations, and SE grows as
- *    iterations fall. Re-measure with:
- *
- *      pnpm rank --region US --realm dreamscythe --character slamaltman \
- *        --offline --max-phase 2 --raid Karazhan --report <path>.html
- *
- *    then read `se` from the emitted `.json`. The conclusion needs only
- *    SE ≳ adjacent-delta spacing, not the exact figure.
+ *    Observed on the ret P2 ranking at 3,000 iterations, where `independent`
+ *    SE measures 2.149 DPS while adjacent deltas differ by far less; §10
+ *    records 1.678 DPS at 5,000 iterations, and SE grows as iterations fall.
  */
 function assignTieGroups(rows: ViewRow[]): void {
   const byDelta = [...rows].sort((a, b) => b.deltaDps - a.deltaDps);
@@ -166,11 +199,9 @@ function assignTieGroups(rows: ViewRow[]): void {
   for (let i = 1; i <= byDelta.length; i += 1) {
     const leader = byDelta[groupStart]!;
     const row = byDelta[i];
-    // The narrower of the two SEs, so one wide-SE row cannot reach across a
-    // gap its partner's own interval never spans.
     const overlapsLeader =
       row !== undefined &&
-      leader.deltaDps - row.deltaDps <= Math.min(row.se, leader.se) * 2;
+      leader.deltaDps - row.deltaDps <= tieWindow(row, leader);
     if (!overlapsLeader) {
       flush(i);
       groupStart = i;

@@ -517,6 +517,53 @@ describe("applyView", () => {
       expect(groupsBy(true)).toEqual(groupsBy(false));
     });
 
+    it("judges a mixed-seMethod pair on the coarser SE", () => {
+      // Ticket 08. Paired replication rewrites the top 8 above-cutoff rows, so
+      // the row-8/row-9 boundary compares a ~0.016 DPS SE against a ~2.15 one
+      // (measured on the ret P2 ranking; ADR-0021 records the run). Under
+      // `Math.min` the paired row's window decided the pair, claiming a
+      // resolution the independent row never had. Deltas 0.44 apart, as on the
+      // measured run: within the independent window, far outside the paired one.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 7.977,
+          deltaPct: 0.4,
+          se: 0.00053,
+          seMethod: "paired-replicate",
+        }),
+        item({ itemId: 2, deltaDps: 7.537, deltaPct: 0.38, se: 2.181 }),
+      ]);
+      const { rows } = applyView(r);
+      expect(rows[0]!.tieGroupId).toBeDefined();
+      expect(rows[0]!.tieGroupId).toBe(rows[1]!.tieGroupId);
+    });
+
+    it("keeps the narrower SE within a single seMethod", () => {
+      // The mixed-method rule must not weaken the same-scale case: two
+      // paired-replicate rows 0.44 apart are genuinely resolved, and widening
+      // to `max` there would re-collapse exactly what Phase 2 bought.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 7.977,
+          deltaPct: 0.4,
+          se: 0.00053,
+          seMethod: "paired-replicate",
+        }),
+        item({
+          itemId: 2,
+          deltaDps: 7.537,
+          deltaPct: 0.38,
+          se: 0.0068,
+          seMethod: "paired-replicate",
+        }),
+      ]);
+      const { rows } = applyView(r);
+      expect(rows[0]!.tieGroupId).toBeUndefined();
+      expect(rows[1]!.tieGroupId).toBeUndefined();
+    });
+
     it("does not let one wide-SE row bridge rows that do not overlap", () => {
       // Regression, pre-merge review (adversarial A2). Testing only
       // `row.high >= leader.low` made the group as wide as its widest member:

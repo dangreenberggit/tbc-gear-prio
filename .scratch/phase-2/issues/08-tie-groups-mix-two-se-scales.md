@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: chat, 2026-08-08 (fallout from 9c62693)
 Blocks: phase-2
@@ -82,6 +82,43 @@ then read `se` and `seMethod` per row from the emitted `.json`.
   explicitly recorded as intentionally independent-scaled.
 - `view.ts:141-145`'s note that reported SE "runs a little over 2 DPS" is
   re-checked; it describes the pre-9c62693 top of the list.
+
+## Resolution (2026-08-08)
+
+Settled by [ADR-0021](../../../docs/adr/0021-a-mixed-semethod-tie-is-judged-on-the-coarser-se.md).
+Measured first, on ret P2, 240 rows, 3,000 iterations, seeds 11/22/33/44/55
+(local run 2026-08-08; `.scratch/` is gitignored so nothing is committed —
+re-run the command in ADR-0021 to reproduce):
+
+| method | rows | mean SE | window |
+| --- | --- | --- | --- |
+| `independent` | 232 | 2.149 | 4.30 |
+| `paired-replicate` | 8 | 0.0155 | 0.031 |
+
+~139x, confirming the estimated ~127x. Three corrections to this ticket:
+
+- **The reproduction command above is wrong.** `--raid Karazhan` filters the
+  rows written to the JSON (`cli.ts`, `reportRanking`), so it emits zero
+  `paired-replicate` rows — every row reads `independent`. Omit `--raid`.
+- The paired SEs are not uniform: rank 1 is 0.0994, the other seven 0.0005–0.0068.
+- `independent` at 3,000 iters measures 2.149, not the 2.166 obtained by scaling.
+
+The row8→row9 boundary is a live disagreement, not a theoretical one: the two
+rows sit **0.440 DPS** apart, inside the independent window (4.362) and far
+outside the paired one (0.0011).
+
+Decisions, per the Done-when list:
+
+- `tieWindow(a, b)` in `view.ts` states the rule: `min` within one `seMethod`,
+  `max` across two. A pair cannot be resolved more finely than its
+  worse-measured member. Covered by two tests in `view.test.ts`, the first
+  confirmed to fail against the old `Math.min`.
+- The `view.ts` three-bug comment is updated; point 2 now scopes itself to one
+  method.
+- The 3.4 cutoff **stays independent-scaled, recorded as intentional** in
+  `cutoff.ts` and ADR-0021: it runs before replication and selects which rows
+  get replicated, so a paired-derived bar would be circular.
+- "runs a little over 2 DPS" re-checked and replaced with the measured 2.149.
 
 ## Not in scope
 
