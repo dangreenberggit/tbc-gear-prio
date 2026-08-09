@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Phase 2 gate check — 3 characters</title>
+<style>
+  :root {
+    --ink: #1a2430;
+    --muted: #7a8a9a;
+    --paper: #eef3f6;
+    --panel: #ffffff;
+    --line: #c8d4de;
+    --accent: #c45c26;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 15px;
+    margin: 0;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+  .tab {
+    padding: 8px 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .tab .spec {
+    font-weight: 400;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .zone-picker {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    font-size: 13px;
+    background: white;
+  }
+  .frame-wrap {
+    flex: 1;
+    position: relative;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Phase 2 gate: 3 real characters</h1>
+    <div class="tabs" id="tabs"></div>
+    <div class="zone-picker">
+      <label for="zone">Raid zone</label>
+      <select id="zone"></select>
+    </div>
+    <span class="note">Each report is the real CLI's <code>--report</code> output over the P3 universe (Kara/SSC/TK/Gruul's/Mag's/Black Temple/Hyjal). Nothing here is re-derived — the iframe just loads the generated HTML file.</span>
+  </header>
+  <div class="frame-wrap">
+    <iframe id="frame" title="rank report"></iframe>
+  </div>
+
+<script>
+const CHARACTERS = [
+  { key: "slamaltman", label: "Slamaltman", spec: "ret" },
+  { key: "shredzepelin", label: "Shredzepelin", spec: "feral" },
+  { key: "nexess", label: "Nexess", spec: "feral" },
+];
+
+const ZONES = [
+  { key: "all", label: "All zones" },
+  { key: "karazhan", label: "Karazhan" },
+  { key: "gruuls-lair", label: "Gruul's Lair" },
+  { key: "magtheridons-lair", label: "Magtheridon's Lair" },
+  { key: "serpentshrine-cavern", label: "Serpentshrine Cavern" },
+  { key: "tempest-keep", label: "Tempest Keep" },
+  { key: "hyjal-summit", label: "Hyjal Summit" },
+  { key: "black-temple", label: "Black Temple" },
+  { key: "world-bosses", label: "World Bosses" },
+];
+
+let activeChar = CHARACTERS[0].key;
+let activeZone = ZONES[0].key;
+
+const tabsEl = document.getElementById("tabs");
+const zoneEl = document.getElementById("zone");
+const frameEl = document.getElementById("frame");
+
+function reportPath(charKey, zoneKey) {
+  return `reports/${charKey}-p3-${zoneKey}.html`;
+}
+
+function render() {
+  for (const el of tabsEl.querySelectorAll(".tab")) {
+    el.classList.toggle("active", el.dataset.char === activeChar);
+  }
+  frameEl.src = reportPath(activeChar, activeZone);
+}
+
+for (const c of CHARACTERS) {
+  const btn = document.createElement("button");
+  btn.className = "tab";
+  btn.dataset.char = c.key;
+  btn.innerHTML = `${c.label} <span class="spec">${c.spec}</span>`;
+  btn.addEventListener("click", () => {
+    activeChar = c.key;
+    render();
+  });
+  tabsEl.appendChild(btn);
+}
+
+for (const z of ZONES) {
+  const opt = document.createElement("option");
+  opt.value = z.key;
+  opt.textContent = z.label;
+  zoneEl.appendChild(opt);
+}
+zoneEl.addEventListener("change", () => {
+  activeZone = zoneEl.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

@@ -47,6 +47,17 @@ vendor/
 !.scratch/ticket-18/
 !.scratch/ticket-20/
 
+# The phase-2 verification UI: a dev harness for eyeballing real rank output for
+# three characters across raid zones. The shell and its generator are tracked;
+# everything they produce is not. reports/ is ~3MB of HTML+JSON regenerated on
+# every run and goes stale the moment the ranking changes, so committing it
+# would re-commit megabytes to ship output that contradicts the code.
+# Regenerate with `bash .scratch/phase2-verify-ui/gen-zone-reports.sh`.
+!.scratch/phase2-verify-ui/
+.scratch/phase2-verify-ui/*
+!.scratch/phase2-verify-ui/index.html
+!.scratch/phase2-verify-ui/gen-zone-reports.sh
+
 # handoffs/ is re-included above because live worker handoffs belong in git, but
 # these are session byproduct: process logs, superseded fix plans whose fixes have
 # landed, and scraper/diff residue. Durable investigations were moved to
