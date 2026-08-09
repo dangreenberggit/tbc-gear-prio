@@ -84,6 +84,7 @@ export function feralOfflineRecordings(
       continue;
     }
     const mapped = mapWclGearToSim(ev.gear);
+    const subType = actors.get(ev.sourceID)?.subType;
     logged = {
       items: mapped.map((spec, i) => {
         const item: LoggedGear["items"][number] = {
@@ -100,6 +101,7 @@ export function feralOfflineRecordings(
         fightId: raw.fight.id,
         sourceID: ev.sourceID,
       },
+      ...(subType !== undefined ? { className: subType } : {}),
     };
     break;
   }

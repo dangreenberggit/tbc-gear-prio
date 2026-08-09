@@ -83,6 +83,17 @@ describe("feral offline recordings", () => {
     }
   });
 
+  it("carries className from the actor's subType, like the other fixture builders do", () => {
+    // Was silently dropped: the actor map is read for .name but subType
+    // (LoggedGear.className) never made it onto the returned LoggedGear.
+    const data = feralOfflineRecordings(
+      load<FeralRawFixture>("test/fixtures/shredzepelin-cat.raw.json"),
+      SHREDZEPELIN_REF
+    );
+    const gear = [...data.gear.values()][0]!;
+    expect(gear.className).toBe("Druid");
+  });
+
   it("measures confidence from form uptime instead of asserting 1", () => {
     const data = feralOfflineRecordings(
       load<FeralRawFixture>("test/fixtures/shredzepelin.raw.json"),

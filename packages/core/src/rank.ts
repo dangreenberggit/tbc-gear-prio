@@ -260,8 +260,9 @@ const DEFAULT_ITERATIONS = 3000;
  * every real run and the shortlist shipped the Phase 1 `independent` SE that
  * §10:705 records as overstating a shared-seed delta's variance.
  *
- * These are the seeds `docs/five-seed-spread.json` measured, so the shipped
- * constant and the evidence for it stay the same numbers.
+ * These are the five seed values `docs/five-seed-spread.json` measured
+ * spread at — that file ran at 5000 iterations, not this module's 3000, so
+ * only the seed values transfer, not the SE evidence at this configuration.
  */
 const DEFAULT_SEEDS = [11, 22, 33, 44, 55];
 /**

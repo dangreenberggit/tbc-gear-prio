@@ -289,6 +289,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   }
 
   const isSlamaltman =
+    args.spec === "ret" &&
     args.region === SLAMALTMAN_REF.region &&
     args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
     args.character.toLowerCase() === SLAMALTMAN_REF.name;
@@ -308,12 +309,15 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     [SHREDZEPELIN_REF, "test/fixtures/shredzepelin-cat.raw.json"],
     [NEXESS_REF, "test/fixtures/nexess.raw.json"],
   ];
-  const feralMatch = FERAL_FIXTURES.find(
-    ([ref]) =>
-      args.region === ref.region &&
-      args.realm.toLowerCase() === ref.realm &&
-      args.character.toLowerCase() === ref.name
-  );
+  const feralMatch =
+    args.spec === "feral"
+      ? FERAL_FIXTURES.find(
+          ([ref]) =>
+            args.region === ref.region &&
+            args.realm.toLowerCase() === ref.realm &&
+            args.character.toLowerCase() === ref.name
+        )
+      : undefined;
 
   const gearData = isSlamaltman
     ? args.reportEvents
