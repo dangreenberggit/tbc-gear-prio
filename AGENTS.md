@@ -22,6 +22,10 @@ For pinning a vendored input, editing a parser, or regenerating a committed arti
 
 Before adding anything to a skill file, ask: does this belong to **this skill’s job and nature**? A skill has a personality (e.g. game-domain SME vs pipeline debugging vs TDD). Do not dump related-but-wrong material into it — put engineering rules in engineering skills/docs, game rules in game skills, and so on. If it does not fit, write it elsewhere or leave it out. See also `writing-great-skills` (relevance) and `dont-be-stupid`.
 
+### Don't be stupid
+
+Before reporting a nontrivial task done — especially a review, research, or "use X to check Y" request — run the `dont-be-stupid` checklist of previously-caught failure modes (missing named artifacts, unsourced claims stated as fact, skipped clarifying questions).
+
 ### Writing for agents
 
 Review with the `writing-for-agents` skill before calling any agent-facing document done: a **plan** (PLAN.md, `.scratch/**` specs and tickets), a **skill** file, `AGENTS.md` / `CLAUDE.md`, or a tracked doc an agent is pointed at. A plan counts because an agent executes it.
