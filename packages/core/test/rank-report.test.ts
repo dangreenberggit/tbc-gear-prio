@@ -12,6 +12,7 @@ import {
 import {
   formatSetBonusLine,
   formatSetPotentialLine,
+  weightedSetPotentialDps,
 } from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
 
@@ -431,10 +432,19 @@ describe("rank-report", () => {
     // empty `${setPotentialPanel}` slot next to `${subs}`. Diffed before/after
     // to confirm the delta is exactly those interpolation points' whitespace —
     // no visible markup changes with the toggle off.
+    // Repinned for the set-weight toggle: rows and chips now carry
+    // `data-delta`/`data-weighted`, the row's delta div is split into a
+    // `.delta-plain`/`.delta-weighted` pair, and the stylesheet gains the
+    // toggle's rules. This fixture has no `setContext` on any row, so the
+    // toggle control and its <script> do not render at all here (both
+    // interpolate to ""), and every weighted value equals its plain one.
+    // Diffed before/after to confirm the delta is exactly those attributes,
+    // the paired delta divs, the new CSS block, and the empty interpolation
+    // slots — no visible markup moved.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "d85d3eb3fa38b3570b3435007f02a309e560be110c02cf6b11ff7effb38229be",
-      length: 11648,
+        "4712eb05a6fa7a678506f82c5a37c7d7dde124256332847c2e2ebacdae8c66a8",
+      length: 12826,
     });
   });
 });
@@ -621,6 +631,137 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
 
   it("is undefined with no setContext at all", () => {
     expect(formatSetPotentialLine({})).toBeUndefined();
+  });
+});
+
+describe("weightedSetPotentialDps", () => {
+  const ctx = (over: Partial<NonNullable<RankedItem["setContext"]>> = {}) => ({
+    setId: 626,
+    setName: "Justicar Battlegear",
+    piecesWornBefore: 1,
+    piecesAfterSwap: 2,
+    nextThreshold: 4 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 100,
+    ...over,
+  });
+
+  it("adds a quarter of a 4pc bonus", () => {
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: ctx() })
+    ).toBeCloseTo(35);
+  });
+
+  it("adds half of a 2pc bonus", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ piecesAfterSwap: 1, nextThreshold: 2 }),
+      })
+    ).toBeCloseTo(60);
+  });
+
+  it("weights flatly, ignoring how many pieces are still missing", () => {
+    // One piece away and three pieces away both take the same 0.25x credit —
+    // the documented consequence of a flat weight, asserted so a later change
+    // to a pieces-remaining divisor cannot land silently.
+    const oneAway = weightedSetPotentialDps({
+      deltaDps: 0,
+      setContext: ctx({ piecesAfterSwap: 3 }),
+    });
+    const threeAway = weightedSetPotentialDps({
+      deltaDps: 0,
+      setContext: ctx({ piecesAfterSwap: 1 }),
+    });
+    expect(oneAway).toBeCloseTo(25);
+    expect(threeAway).toBeCloseTo(25);
+  });
+
+  it("falls back to deltaDps when the bonus is already inside it", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ crossesThreshold: true, nextThreshold: null }),
+      })
+    ).toBe(10);
+  });
+
+  it("falls back to deltaDps when the threshold was never measured", () => {
+    // `prospectiveBonusDps` absent, not set to undefined —
+    // `exactOptionalPropertyTypes` distinguishes the two, and an unmeasured
+    // bonus is genuinely an absent key.
+    const unmeasured = ctx();
+    delete (unmeasured as { prospectiveBonusDps?: number }).prospectiveBonusDps;
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: unmeasured })
+    ).toBe(10);
+  });
+
+  it("falls back to deltaDps with no setContext", () => {
+    expect(weightedSetPotentialDps({ deltaDps: 10 })).toBe(10);
+  });
+
+  it("keeps a negative row negative when the weighted credit is too small", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: -220,
+        setContext: ctx({ prospectiveBonusDps: 18 }),
+      })
+    ).toBeCloseTo(-215.5);
+  });
+});
+
+describe("set-weight toggle (client-side re-sort)", () => {
+  const withPotential = item({
+    name: "Tier piece",
+    slot: "head",
+    deltaDps: -100,
+    itemId: 30229,
+    setContext: {
+      setId: 641,
+      setName: "Nordrassil Harness",
+      piecesWornBefore: 0,
+      piecesAfterSwap: 1,
+      nextThreshold: 4,
+      crossesThreshold: false,
+      prospectiveBonusDps: 200,
+    },
+  });
+
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 2,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  it("emits both values and the toggle when some row would move", () => {
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain('id="set-weight"');
+    expect(html).toContain('data-delta="-100"');
+    // -100 + 200 * 0.25
+    expect(html).toContain('data-weighted="-50"');
+  });
+
+  it("omits the toggle entirely when no row would move", () => {
+    const html = renderRankHtml(
+      ranking([item({ name: "plain", slot: "head", deltaDps: 5 })]),
+      meta
+    );
+    // The stylesheet always carries the toggle's rules, so the absence check
+    // is on the control and its script, not on the class name.
+    expect(html).not.toContain('id="set-weight"');
+    expect(html).not.toContain("<script>");
+  });
+
+  it("does not change which rows are above cutoff", () => {
+    // The toggle is display-only: a row's `belowCutoff` class is rendered from
+    // the ranking, never from the weighted value.
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain('class="row muted"');
   });
 });
 

@@ -286,6 +286,31 @@ export const REPORT_CSS = `
     font-size: 0.8rem;
     color: var(--ink-soft);
   }
+  .set-weight-toggle {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .set-weight-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .set-weight-note {
+    margin: 0.35rem 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  /* Exactly one of the two figures is live at a time, so the row never shows
+     a number whose meaning depends on remembering the toggle's state. */
+  .delta-weighted { display: none; }
+  body.weighted .delta-plain { display: none; }
+  body.weighted .delta-weighted { display: block; }
   .nums { text-align: right; white-space: nowrap; }
   .delta { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; }
   .delta .unit { font-size: 0.7rem; color: var(--muted); }

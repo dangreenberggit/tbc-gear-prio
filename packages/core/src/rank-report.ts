@@ -20,6 +20,8 @@ import {
   formatSetPotentialLine,
   groupBySlot,
   partitionShortlist,
+  SET_POTENTIAL_WEIGHTS,
+  weightedSetPotentialDps,
   SLOT_ORDER,
   type ReportItem,
   type RankReportMeta,
@@ -73,10 +75,10 @@ function renderShortlistChips(items: RankedItem[]): string {
   return items
     .slice()
     .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
-    .map(
-      (i) =>
-        `<a class="chip" href="#slot-${i.slot}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d">${fmtDelta(i.deltaDps)}</span></a>`
-    )
+    .map((i) => {
+      const weighted = weightedSetPotentialDps(i);
+      return `<a class="chip" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}">${fmtDelta(i.deltaDps)}</span></a>`;
+    })
     .join("\n");
 }
 
@@ -234,7 +236,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
               : item.deltaDps < 0
                 ? "delta down"
                 : "delta flat";
-          return `<article class="${cls}">
+          // Both values ride on the row so the toggle is a re-sort and a
+          // label swap in the browser, never a re-run of the pipeline. The
+          // weighted figure differs from `deltaDps` only where a row carries
+          // an unrealised prospective bonus.
+          const weighted = weightedSetPotentialDps(item);
+          const weightedCls =
+            weighted > 0
+              ? "delta up"
+              : weighted < 0
+                ? "delta down"
+                : "delta flat";
+          return `<article class="${cls}" data-delta="${item.deltaDps}" data-weighted="${weighted}">
   <div class="lead">${rank}${choice}</div>
   <div class="body">
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
@@ -246,7 +259,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${hitLoss}
   </div>
   <div class="nums">
-    <div class="${deltaCls}">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
+    <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
+    <div class="${weightedCls} delta-weighted">${fmtDelta(weighted)} <span class="unit">DPS</span></div>
     <div class="pct">${fmtDelta(item.deltaPct)}%</div>
   </div>
 </article>`;
@@ -291,6 +305,62 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     .join("\n")}</ul>
 </details>`
       : "";
+
+  // Offered only where some row would actually move: a page with no
+  // unrealised prospective bonus gets an inert switch otherwise.
+  const anyWeighted = ranking.items.some(
+    (i) => weightedSetPotentialDps(i) !== i.deltaDps
+  );
+  const setWeightToggle = anyWeighted
+    ? `<div class="set-weight-toggle">
+      <label>
+        <input type="checkbox" id="set-weight" />
+        <span>Weight set-bonus potential into the ranking</span>
+      </label>
+      <p class="set-weight-note">Adds ${SET_POTENTIAL_WEIGHTS[2]}× of a 2pc bonus and ${SET_POTENTIAL_WEIGHTS[4]}× of a 4pc bonus to a tier piece's DPS, then re-sorts. Display only — which items count as above cutoff is unchanged.</p>
+    </div>`
+    : "";
+
+  // Re-sorts in place and swaps the visible number. Deliberately the whole of
+  // the client-side behaviour: the values were both computed at generation
+  // time, so nothing here recomputes DPS or re-derives the cutoff.
+  const setWeightScript = anyWeighted
+    ? `<script>
+(function () {
+  var box = document.getElementById("set-weight");
+  if (!box) return;
+  var containers = [].slice.call(document.querySelectorAll(".rows, .chips"));
+  var originals = containers.map(function (c) {
+    return { container: c, order: [].slice.call(c.children) };
+  });
+  function apply() {
+    var on = box.checked;
+    document.body.classList.toggle("weighted", on);
+    originals.forEach(function (entry) {
+      var kids = entry.order.slice();
+      if (on) {
+        kids.sort(function (a, b) {
+          return (
+            parseFloat(b.getAttribute("data-weighted")) -
+            parseFloat(a.getAttribute("data-weighted"))
+          );
+        });
+      }
+      kids.forEach(function (k) {
+        entry.container.appendChild(k);
+      });
+    });
+    [].slice.call(document.querySelectorAll(".chip .d")).forEach(function (d) {
+      d.textContent = on
+        ? d.getAttribute("data-weighted-label")
+        : d.getAttribute("data-plain");
+    });
+  }
+  box.addEventListener("change", apply);
+  apply();
+})();
+</script>`
+    : "";
 
   const title = `${meta.character} · ${meta.spec} P${meta.maxPhase}`;
 
@@ -339,6 +409,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     </div>`
         : ""
     }
+    ${setWeightToggle}
     ${noiseNote}
     ${capBanner}
     ${provenance}
@@ -359,6 +430,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       metaAdjusted=${ranking.baseline.metaAdjusted}
     </footer>
   </div>
+  ${setWeightScript}
 </body>
 </html>
 `;

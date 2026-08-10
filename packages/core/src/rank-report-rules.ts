@@ -12,6 +12,7 @@ import type { ItemSlot } from "./items.js";
 import type { SimSlotName } from "./pool.js";
 import type { ViewOptions } from "./view.js";
 import type { RankedItem, SetBonusValue } from "./rank.js";
+import type { SetThreshold } from "./set-value.js";
 
 /** Display order for slot sections; also seeds `groupBySlot`'s empty buckets. */
 export const SLOT_ORDER: readonly ItemSlot[] = [
@@ -149,6 +150,49 @@ export function formatBreaksSuffix(b: SetBonusValue): string {
     (x) => `${x.setName} ${x.threshold}pc (${x.piecesBefore}→${x.piecesAfter})`
   );
   return ` [breaks ${parts.join("; ")}; measured value nets this in]`;
+}
+
+/**
+ * How much of a prospective bonus counts toward a row's displayed value, by
+ * the threshold that would unlock it. A 2pc is nearer and cheaper than a 4pc,
+ * so it is discounted less.
+ *
+ * Flat per threshold, deliberately: the weight does not scale by how many
+ * pieces are still missing. A row three pieces short of 4pc therefore carries
+ * the same 0.25x credit as one that is a single piece away. That was chosen
+ * over a pieces-remaining divisor, so the toggle stays the arithmetic the
+ * reader can do in their head against `formatSetPotentialLine`'s number.
+ */
+export const SET_POTENTIAL_WEIGHTS: Record<SetThreshold, number> = {
+  2: 0.5,
+  4: 0.25,
+};
+
+/**
+ * A row's value with prospective set potential weighted in — the quantity the
+ * report's client-side toggle sorts and displays on.
+ *
+ * Falls back to plain `deltaDps` whenever there is no prospective bonus to
+ * weight: no `setContext`, a candidate that already crosses its threshold (the
+ * bonus is inside `deltaDps` already, §2.1, so weighting it would double-count),
+ * or a threshold whose bonus the sim never measured.
+ */
+export function weightedSetPotentialDps(
+  item: Pick<RankedItem, "deltaDps" | "setContext">
+): number {
+  const ctx = item.setContext;
+  if (
+    !ctx ||
+    ctx.crossesThreshold ||
+    ctx.nextThreshold === null ||
+    ctx.prospectiveBonusDps === undefined
+  ) {
+    return item.deltaDps;
+  }
+  return (
+    item.deltaDps +
+    ctx.prospectiveBonusDps * SET_POTENTIAL_WEIGHTS[ctx.nextThreshold]
+  );
 }
 
 /**
