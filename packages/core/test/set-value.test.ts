@@ -394,7 +394,7 @@ describe("brokenSetBonuses (finding 8)", () => {
     // Malorne's, taking Malorne from 2 pieces to 1 and killing its 2pc.
     const broken = brokenSetBonuses(
       gear,
-      [{ itemId: 31048, slotIndex: SHOULDER, alreadyWorn: false }],
+      [{ itemId: 31048, slotIndex: SHOULDER }],
       676
     );
 
@@ -418,8 +418,8 @@ describe("brokenSetBonuses (finding 8)", () => {
     const broken = brokenSetBonuses(
       gear,
       [
-        { itemId: 29098, slotIndex: HEAD, alreadyWorn: false },
-        { itemId: 29097, slotIndex: HANDS, alreadyWorn: false },
+        { itemId: 29098, slotIndex: HEAD },
+        { itemId: 29097, slotIndex: HANDS },
       ],
       MALORNE_SET_ID
     );
@@ -433,7 +433,7 @@ describe("brokenSetBonuses (finding 8)", () => {
     gear[SHOULDER] = { id: 29100, gems: [] };
     const broken = brokenSetBonuses(
       gear,
-      [{ itemId: 29098, slotIndex: SHOULDER, alreadyWorn: false }],
+      [{ itemId: 29098, slotIndex: SHOULDER }],
       MALORNE_SET_ID
     );
     expect(broken.every((b) => b.setId !== MALORNE_SET_ID)).toBe(true);
@@ -447,7 +447,7 @@ describe("brokenSetBonuses (finding 8)", () => {
     gear[LEGS] = { id: 29074, gems: [] };
     const broken = brokenSetBonuses(
       gear,
-      [{ itemId: 31039, slotIndex: HEAD, alreadyWorn: false }],
+      [{ itemId: 31039, slotIndex: HEAD }],
       676
     );
     expect(broken).toEqual([]);

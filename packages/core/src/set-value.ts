@@ -50,7 +50,6 @@ export function isBonusImplemented(
   return IMPLEMENTED_IN_SIM[setId]?.[threshold] ?? false;
 }
 
-/** Count of equipped pieces per `setId`, ignoring items with no set. */
 export function setCounts(
   equipment: readonly SimItemSpec[]
 ): Map<number, number> {
@@ -106,12 +105,9 @@ export function nextMeasurableThreshold(
   return null;
 }
 
-/** One item worn or selected for a completion package, by canonical slot. */
 export type PackagePiece = {
   itemId: number;
   slotIndex: number;
-  /** True when this piece was already worn (does not need to be "added"). */
-  alreadyWorn: boolean;
 };
 
 export type PackageSelectionResult =
@@ -205,7 +201,6 @@ export function selectPackage(
     .map((c) => ({
       itemId: c.itemId,
       slotIndex: c.slotIndex,
-      alreadyWorn: false,
     }))
     .sort((a, b) => a.slotIndex - b.slotIndex);
 
@@ -281,7 +276,6 @@ export function brokenSetBonuses(
   return broken.sort((a, b) => a.setId - b.setId);
 }
 
-/** One sim observation feeding synergy arithmetic: a DPS mean and its SE. */
 export type DpsSample = { dps: number; se: number };
 
 /** `sqrt(Σ se_i²)` — conservative combined SE over the sims involved (§2.2). */
@@ -329,10 +323,11 @@ export type SynergyResult = {
  *   packageDelta(S,t) = D(P(S,t)) - D(baseline)
  *   bonus(S,2)         = packageDelta(S,2) - Σ singles
  *   bonus(S,4)         = packageDelta(S,4) - Σ singles - bonus(S,2)
- * `twoPieceBonus` supplies the subtracted term for t=4; omit it (rather than
- * passing 0) when the 2pc bonus itself was `not-implemented-in-sim` — the
- * spec calls out this exact case (§2.2 note) so the 4pc number does not
- * silently absorb a phantom zero-valued subtraction that was never measured.
+ * `twoPieceBonus` supplies the subtracted term for t=4. Omitting it and
+ * passing `0` are arithmetically identical here — both subtract nothing.
+ * The parameter stays optional only so the *call site* can read differently
+ * for "no 2pc was measured" (not-implemented-in-sim, per §2.2's note)
+ * versus "a 2pc measured 0" — a distinction for the caller, not the formula.
  */
 export function computeSynergy(input: SynergyInput): SynergyResult {
   const packageDeltaDps = input.packageSample.dps - input.baseline.dps;

@@ -226,9 +226,7 @@ export type SetBonusValue = {
   setId: number;
   setName: string;
   threshold: SetThreshold;
-  /** Pieces of this set worn in the logged baseline. */
   piecesWorn: number;
-  /** The added pieces, canonical-slot order. */
   packageItemIds: number[];
   packageDeltaDps: number;
   bonusDps?: number;

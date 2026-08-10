@@ -185,7 +185,7 @@ describe("--with-set-potential output", () => {
       ...SET_BONUSES.map((b) => `  ${formatSetBonusLine(b)}`),
     ];
     expect(lines).toEqual([
-      "assumption: set potential is measured with the completion-package synergy method, shared seeds — see .scratch/set-bonus-value/spec.md §2.2",
+      "assumption: set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment",
       "set potential (2):",
       "  Thunderheart Harness 4pc (0 worn) — +91.68 DPS",
       "  Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim",

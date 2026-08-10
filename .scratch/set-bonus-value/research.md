@@ -6,7 +6,7 @@ Repo: `tbc-gear-prio`, wowsims/tbc-new pinned at commit `8aa378b3671a0923fd11fb3
 
 | Set | setId | Spec/role | 2pc implemented in sim? | 4pc implemented in sim? | DPS-relevant? |
 |---|---|---|---|---|---|
-| Justicar Battlegear (T4 ret) | 626 | Ret | Yes (JotC dmg +15%, but only via `ExposeToAPL` — see caveat below) | Yes (JoCommand dmg +10%) | Yes |
+| Justicar Battlegear (T4 ret) | 626 | Ret | ~~Yes (JotC dmg +15%, but only via `ExposeToAPL` — see caveat below)~~ **Correction (verification.md V1): the `2:` closure has no effect body at all, just a bare `ExposeToAPL(37186)` call — `not-implemented-in-sim`, like Nordrassil 641 2pc.** | Yes (JoCommand dmg +10%) | Yes |
 | Crystalforge Battlegear (T5 ret) | 629 | Ret | Yes (Judgement mana cost -35, not DPS) | Partial — implements group heal proc only, no direct DPS effect | 2pc no, 4pc no (heal, not damage) |
 | Lightbringer Battlegear (T6 ret) | 680 | Ret | Yes (mana proc on melee, not DPS) | Yes (Hammer of Wrath dmg +10%) | 4pc yes, 2pc no (mana, not damage) |
 | Malorne Harness (T4 feral) | 640 | Feral (dual bear/cat) | Yes (energy/rage proc on melee — DPS-relevant for cat) | Yes (Str +30 cat / Armor +1400 bear) | Yes |

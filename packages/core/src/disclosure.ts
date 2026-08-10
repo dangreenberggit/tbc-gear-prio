@@ -212,7 +212,7 @@ export function fightProvenanceLines(fight: {
  * instead, gated the same way the numbers themselves are.
  */
 export function setPotentialDisclosureLine(): string {
-  return "set potential is measured with the completion-package synergy method, shared seeds — see .scratch/set-bonus-value/spec.md §2.2";
+  return "set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment";
 }
 
 export function substitutionsFromMetaRepair(
