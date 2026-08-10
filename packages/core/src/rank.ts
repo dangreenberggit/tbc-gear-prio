@@ -67,6 +67,19 @@ import {
   usesPairedReplication,
 } from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
+import {
+  computeSynergy,
+  isBonusImplemented,
+  nextMeasurableThreshold,
+  selectPackage,
+  setCounts,
+  setLabel,
+  SET_THRESHOLDS,
+  type DpsSample,
+  type IndividualDelta,
+  type SetThreshold,
+} from "./set-value.js";
+import { getItem } from "./items.js";
 import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
@@ -188,6 +201,37 @@ export type RankedItem = {
   setBonusNote?: string;
   owned?: boolean;
   belowCutoff: boolean;
+  /**
+   * Present when this item's set has any measured/attempted `SetBonusValue`
+   * (spec §3) — including the crossing case, so a renderer can say "completes
+   * 2pc (included in delta)" instead of silently having nothing to say.
+   */
+  setContext?: SetContext;
+};
+
+export type SetContext = {
+  setId: number;
+  setName: string;
+  piecesWornBefore: number;
+  piecesAfterSwap: number;
+  nextThreshold: SetThreshold | null;
+  /** True ⇒ the bonus is already inside `deltaDps`; no `prospectiveBonusDps`. */
+  crossesThreshold: boolean;
+  prospectiveBonusDps?: number;
+};
+
+export type SetBonusValue = {
+  setId: number;
+  setName: string;
+  threshold: SetThreshold;
+  /** Pieces of this set worn in the logged baseline. */
+  piecesWorn: number;
+  /** The added pieces, canonical-slot order. */
+  packageItemIds: number[];
+  packageDeltaDps: number;
+  bonusDps?: number;
+  se?: number;
+  unmeasured?: "not-implemented-in-sim" | "insufficient-pieces" | "sim-failed";
 };
 
 /**
@@ -232,6 +276,8 @@ export type Ranking = {
   /** Required by §4 — a Ranking you can't audit is not a Ranking. */
   caps: CapState;
   items: RankedItem[];
+  /** Completion-package synergy per (set, threshold) — spec §2.2. */
+  setBonuses?: SetBonusValue[];
 };
 
 /** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
@@ -246,6 +292,8 @@ type BestSwap = {
    */
   request: RaidSimRequest;
   slotChoice?: SimSlotName;
+  /** The SIM_ORDER index the winning attempt swapped, for set-package selection. */
+  slotIndex: number;
   setBonusNote?: string;
   hitDriven: boolean;
   hitRegression: { lost: number; gapAfter: number } | null;
@@ -513,6 +561,13 @@ export async function rankUpgrades(
       slot: string;
       reason: string;
     }[] = [];
+    /**
+     * Every candidate's winning single-swap delta, by item id — the input
+     * `selectPackage` (set-value.ts §2.2 step 1) needs to rank same-set
+     * candidates by their own measured `deltaDps`. Populated alongside `best`
+     * in the candidate loop below.
+     */
+    const individualDeltasByItemId = new Map<number, IndividualDelta>();
 
     // From the repaired layout, which is what the sim actually ran. Hoisted
     // above the loop because `hitDriven` prices each candidate against it.
@@ -594,6 +649,7 @@ export async function rankUpgrades(
             deltaDps,
             stdev: candObs.stdev,
             request: candReq,
+            slotIndex,
             hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
             hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
           };
@@ -609,6 +665,17 @@ export async function rankUpgrades(
       onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
       if (!best) continue;
+
+      // Recorded before the cutoff/rank logic below: package selection needs
+      // every candidate's own measured delta, including below-cutoff rows —
+      // a set piece that is individually a downgrade can still be the best
+      // available filler for a completion package (V0b: all four Thunderheart
+      // singles were negative, and the package was still worth +91.68 DPS).
+      individualDeltasByItemId.set(entry.itemId, {
+        itemId: entry.itemId,
+        slotIndex: best.slotIndex,
+        deltaDps: best.deltaDps,
+      });
 
       const deltaPct =
         baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
@@ -638,6 +705,21 @@ export async function rankUpgrades(
       ranked.push(item);
       winningRequests.set(entry.itemId, best.request);
     }
+
+    const setBonuses = await buildSetBonuses(
+      deps,
+      candidates,
+      equipment,
+      gems,
+      race,
+      input,
+      individualDeltasByItemId,
+      { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
+      simVersion,
+      runOpts,
+      simSkips
+    );
+    if (setBonuses.length > 0) applySetContext(ranked, setBonuses, equipment);
 
     onProgress?.({ stage: "ranking" });
     // Sorted first so replication can pick the contested top of the list, then
@@ -684,6 +766,7 @@ export async function rankUpgrades(
         })),
       ],
       items: ranked,
+      ...(setBonuses.length > 0 ? { setBonuses } : {}),
     };
 
     await deps.store.put(rankingCacheKey(contentHash), ranking);
@@ -791,6 +874,228 @@ export async function rankUpgrades(
     }
     await cacheSimResult(deps, req, simVersion, opts, obs);
     return obs;
+  }
+}
+
+/**
+ * Completion-package synergy (spec §2.2/§2.3): for every set with at least
+ * one candidate present in this run's pool, and every threshold above the
+ * pieces currently worn, build the completion package, sim it once through
+ * the shared cache, and record `SetBonusValue`. Cost target §2.4: at most
+ * ~4 extra sims per run — bounded by only building for sets with candidate
+ * presence and skipping `not-implemented-in-sim` thresholds entirely.
+ */
+async function buildSetBonuses(
+  deps: Deps,
+  candidates: readonly PoolEntry[],
+  equipment: readonly SimItemSpec[],
+  gems: GemContext,
+  race: Race,
+  input: RankInput,
+  individualDeltasByItemId: ReadonlyMap<number, IndividualDelta>,
+  baseline: DpsSample,
+  simVersion: string,
+  runOpts: SimRunOpts,
+  simSkips: { itemId: number; name: string; slot: string; reason: string }[]
+): Promise<SetBonusValue[]> {
+  // Which sets actually have a pool candidate this run — §2.4's "do not build
+  // packages for sets with no candidate presence".
+  const setIdsWithCandidates = new Set<number>();
+  for (const entry of candidates) {
+    const setId = getItem(entry.itemId)?.setId;
+    if (setId != null) setIdsWithCandidates.add(setId);
+  }
+  if (setIdsWithCandidates.size === 0) return [];
+
+  const wornCounts = setCounts(equipment);
+  const slotIndexForPoolEntry = (entry: PoolEntry): number | undefined => {
+    for (const slotName of simSlotsForPoolSlot(entry.slot)) {
+      const idx = SIM_ORDER.indexOf(slotName);
+      if (idx >= 0) return idx;
+    }
+    return undefined;
+  };
+
+  const results: SetBonusValue[] = [];
+  for (const setId of setIdsWithCandidates) {
+    const piecesWorn = wornCounts.get(setId) ?? 0;
+    const label = setLabel(equipment, setId);
+    let twoPieceBonus: number | undefined;
+
+    for (const threshold of SET_THRESHOLDS) {
+      if (threshold <= piecesWorn) continue;
+
+      if (!isBonusImplemented(setId, threshold)) {
+        // §2.3: never burn a sim measuring a bonus known to be absent.
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: [],
+          packageDeltaDps: 0,
+          unmeasured: "not-implemented-in-sim",
+        });
+        continue;
+      }
+
+      const selection = selectPackage(
+        setId,
+        threshold,
+        equipment,
+        candidates,
+        [...individualDeltasByItemId.values()],
+        slotIndexForPoolEntry
+      );
+      if (!selection.ok) {
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: [],
+          packageDeltaDps: 0,
+          unmeasured: "insufficient-pieces",
+        });
+        continue;
+      }
+
+      const addedPieces = selection.addedPieces;
+      // Applied sequentially, one slot at a time, through the same helper
+      // every single-candidate swap uses — spec §2.2 step 1's byte-identical
+      // gem/enchant policy.
+      let packageEquipment: SimItemSpec[] = [...equipment];
+      for (const piece of addedPieces) {
+        packageEquipment = equipmentForCandidateSwap(
+          packageEquipment,
+          piece.slotIndex,
+          piece.itemId,
+          gems
+        );
+      }
+      const packageRequest = compose(deps.raidSimSkeleton, {
+        name: input.character.name.toLowerCase(),
+        race,
+        equipment: packageEquipment,
+      });
+
+      let packageObs = await readCachedSim(
+        deps,
+        packageRequest,
+        simVersion,
+        runOpts
+      );
+      if (!packageObs) {
+        try {
+          packageObs = await deps.sim.run(packageRequest, runOpts);
+        } catch (err) {
+          simSkips.push({
+            itemId: addedPieces[0]?.itemId ?? setId,
+            name: `${label} ${threshold}pc completion package`,
+            slot: "set-package",
+            reason: err instanceof Error ? err.message : String(err),
+          });
+          results.push({
+            setId,
+            setName: label,
+            threshold,
+            piecesWorn,
+            packageItemIds: addedPieces.map((p) => p.itemId),
+            packageDeltaDps: 0,
+            unmeasured: "sim-failed",
+          });
+          continue;
+        }
+        await cacheSimResult(
+          deps,
+          packageRequest,
+          simVersion,
+          runOpts,
+          packageObs
+        );
+      }
+
+      const addedPieceDeltas = addedPieces.map(
+        (p) => individualDeltasByItemId.get(p.itemId)?.deltaDps ?? 0
+      );
+      const packageSample: DpsSample = {
+        dps: packageObs.dps,
+        se: packageObs.stdev / Math.sqrt(runOpts.iterations),
+      };
+      const synergy = computeSynergy({
+        baseline,
+        packageSample,
+        addedPieceDeltas,
+        ...(threshold === 4 && twoPieceBonus !== undefined
+          ? { twoPieceBonus }
+          : {}),
+      });
+      if (threshold === 2) twoPieceBonus = synergy.bonusDps;
+
+      results.push({
+        setId,
+        setName: label,
+        threshold,
+        piecesWorn,
+        packageItemIds: addedPieces.map((p) => p.itemId),
+        packageDeltaDps: synergy.packageDeltaDps,
+        bonusDps: synergy.bonusDps,
+        se: synergy.se,
+      });
+    }
+  }
+  return results;
+}
+
+/**
+ * Populate `RankedItem.setContext` for every candidate whose item belongs to
+ * a set with any attempted `SetBonusValue` (spec §3) — including the
+ * crossing case, so a renderer can say "completes 2pc (included in delta)".
+ */
+function applySetContext(
+  ranked: RankedItem[],
+  setBonuses: readonly SetBonusValue[],
+  equipment: readonly SimItemSpec[]
+): void {
+  const wornCounts = setCounts(equipment);
+  const bonusesBySet = new Map<number, SetBonusValue[]>();
+  for (const b of setBonuses) {
+    const list = bonusesBySet.get(b.setId) ?? [];
+    list.push(b);
+    bonusesBySet.set(b.setId, list);
+  }
+
+  for (const item of ranked) {
+    const setId = getItem(item.itemId)?.setId;
+    if (setId == null) continue;
+    const bonusesForSet = bonusesBySet.get(setId);
+    if (!bonusesForSet) continue;
+
+    const piecesWornBefore = wornCounts.get(setId) ?? 0;
+    // The candidate's own item joins the set on this swap: worn count + 1,
+    // unless it was already worn (then the count is unchanged).
+    const piecesAfterSwap = item.owned
+      ? piecesWornBefore
+      : piecesWornBefore + 1;
+    const nextThreshold = nextMeasurableThreshold(setId, piecesWornBefore);
+    const crossesThreshold =
+      nextThreshold !== null && piecesAfterSwap >= nextThreshold;
+
+    const setContext: SetContext = {
+      setId,
+      setName: setLabel(equipment, setId),
+      piecesWornBefore,
+      piecesAfterSwap,
+      nextThreshold,
+      crossesThreshold,
+    };
+    if (!crossesThreshold && nextThreshold !== null) {
+      const matching = bonusesForSet.find((b) => b.threshold === nextThreshold);
+      if (matching?.bonusDps !== undefined) {
+        setContext.prospectiveBonusDps = matching.bonusDps;
+      }
+    }
+    item.setContext = setContext;
   }
 }
 

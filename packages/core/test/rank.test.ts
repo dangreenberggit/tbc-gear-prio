@@ -2175,3 +2175,279 @@ describe("rankUpgrades paired-replicate SE", () => {
     }
   });
 });
+
+describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
+  // Justicar Battlegear (setId 626): 2pc is not-implemented-in-sim, 4pc is
+  // implemented (verification.md V1). Four pieces, all in data/universes/ret-p2.
+  const HEAD_ID = 29073;
+  const SHOULDER_ID = 29075;
+  const HANDS_ID = 29072;
+  const LEGS_ID = 29074;
+  const SET_BONUS_X = 40; // synthetic 4pc bonus magnitude
+
+  /**
+   * Responds to every sim request with `baseline + individual item deltas
+   * (via a per-item table) + X when equipment holds >=4 Justicar pieces`.
+   * Deterministic and self-contained: no recordings to key, so the same
+   * fixture works across seeds/iterations without a keyed map.
+   */
+  function justicarRespondingSim(opts?: {
+    perItemDelta?: Record<number, number>;
+    failOnPackage?: boolean;
+  }): SimRunner {
+    const perItemDelta = opts?.perItemDelta ?? {};
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const justicarCount = [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].filter(
+          (id) => ids.includes(id)
+        ).length;
+
+        let dps = 2000;
+        for (const id of ids) {
+          dps += perItemDelta[id] ?? 0;
+        }
+        if (justicarCount >= 4) {
+          if (opts?.failOnPackage) {
+            throw new Error("synthetic package sim failure");
+          }
+          dps += SET_BONUS_X;
+        }
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  const justicarPool = [
+    realPoolEntry(HEAD_ID),
+    realPoolEntry(SHOULDER_ID),
+    realPoolEntry(HANDS_ID),
+    realPoolEntry(LEGS_ID),
+  ];
+
+  const input = {
+    character: CHAR,
+    spec: "ret" as const,
+    maxPhase: 2 as const,
+    iterations: 3000,
+    seeds: [42],
+    race: "RaceHuman" as const,
+  };
+
+  function depsWith(sim: SimRunner, pool = justicarPool) {
+    const logged = slamaltmanLoggedGear();
+    return {
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", logged]]),
+      }),
+      sim,
+      store: new MemoryStore(),
+      clock: () => new Date("2026-07-26T12:00:00.000Z"),
+      raidSimSkeleton: skeleton,
+      epWeights,
+      pool,
+    };
+  }
+
+  it("records a measured SetBonusValue whose bonusDps equals the synthetic X", async () => {
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim())
+    );
+
+    expect(ranking.setBonuses).toBeDefined();
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBeUndefined();
+    expect(fourPc!.bonusDps).toBeCloseTo(SET_BONUS_X, 6);
+    expect(fourPc!.packageItemIds.sort()).toEqual(
+      [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].sort()
+    );
+
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 2
+    );
+    expect(twoPc).toBeDefined();
+    expect(twoPc!.unmeasured).toBe("not-implemented-in-sim");
+    expect(twoPc!.bonusDps).toBeUndefined();
+  });
+
+  it("gives a crossing candidate crossesThreshold true and no prospective bonus", async () => {
+    // Player already wears 3 Justicar pieces; the 4th candidate's own swap
+    // crosses the 4pc threshold, so its deltaDps already includes the bonus.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      candidateEquipmentForTest(
+        candidateEquipmentForTest(equipment, "head", HEAD_ID, 2, epWeights),
+        "shoulder",
+        SHOULDER_ID,
+        2,
+        epWeights
+      ),
+      "hands",
+      HANDS_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [realPoolEntry(LEGS_ID)],
+    });
+
+    const legsRow = ranking.items.find((i) => i.itemId === LEGS_ID);
+    expect(legsRow).toBeDefined();
+    expect(legsRow!.setContext).toBeDefined();
+    expect(legsRow!.setContext!.crossesThreshold).toBe(true);
+    expect(legsRow!.setContext!.prospectiveBonusDps).toBeUndefined();
+    // The crossing swap's own deltaDps already carries the bonus.
+    expect(legsRow!.deltaDps).toBeGreaterThan(SET_BONUS_X - 1);
+  });
+
+  it("gives a below-threshold candidate a prospectiveBonusDps equal to the matching SetBonusValue", async () => {
+    // Full pool so the package can actually be built (4 pieces needed for
+    // 4pc); the head candidate alone still only reaches 1 piece worn, well
+    // below the 4pc threshold, so it should carry the prospective value
+    // rather than cross it.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim())
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc?.bonusDps).toBeDefined();
+
+    const headRow = ranking.items.find((i) => i.itemId === HEAD_ID);
+    expect(headRow).toBeDefined();
+    expect(headRow!.setContext).toBeDefined();
+    expect(headRow!.setContext!.crossesThreshold).toBe(false);
+    expect(headRow!.setContext!.prospectiveBonusDps).toBeCloseTo(
+      fourPc!.bonusDps!,
+      6
+    );
+  });
+
+  it("reports insufficient-pieces when the pool cannot supply enough Justicar pieces", async () => {
+    // Only two of the four pieces are offered — 4pc cannot be built.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim(), [
+        realPoolEntry(HEAD_ID),
+        realPoolEntry(SHOULDER_ID),
+      ])
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("insufficient-pieces");
+    expect(fourPc!.bonusDps).toBeUndefined();
+    // Never a zero standing in for the missing reason.
+    expect(fourPc!.packageDeltaDps).toBe(0);
+  });
+
+  it("reports not-implemented-in-sim for Justicar 2pc with no sim spent on it", async () => {
+    let packageSimCalls = 0;
+    const base = justicarRespondingSim();
+    const counting: SimRunner = {
+      version: () => base.version(),
+      run: async (req, opts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const justicarCount = [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].filter(
+          (id) => ids.includes(id)
+        ).length;
+        // A 2pc-only package (exactly 2 Justicar pieces, below the 4pc
+        // package built by this same run) would prove a sim was spent
+        // measuring the unimplemented bonus.
+        if (justicarCount === 2) packageSimCalls++;
+        return base.run(req, opts);
+      },
+    };
+
+    const ranking = await rankUpgrades(input, depsWith(counting));
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 2
+    );
+    expect(twoPc!.unmeasured).toBe("not-implemented-in-sim");
+    expect(packageSimCalls).toBe(0);
+  });
+
+  it("surfaces a package sim failure as unmeasured sim-failed, not silently", async () => {
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim({ failOnPackage: true }))
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("sim-failed");
+    expect(fourPc!.bonusDps).toBeUndefined();
+
+    // Recorded in the substitutions surface, the existing simSkips pattern —
+    // never a silent drop.
+    const sub = ranking.substitutions.find((s) =>
+      s.detail.includes("synthetic package sim failure")
+    );
+    expect(sub).toBeDefined();
+  });
+
+  it("is deterministic: same input, same seeds, two runs deep-equal setBonuses (V2)", async () => {
+    const deps = depsWith(justicarRespondingSim());
+    const a = await rankUpgrades(input, deps);
+    const b = await rankUpgrades(input, deps);
+    expect(a.setBonuses).toEqual(b.setBonuses);
+  });
+});
