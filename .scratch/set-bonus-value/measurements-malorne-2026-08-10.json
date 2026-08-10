@@ -1,0 +1,102 @@
+{
+  "simVersion": "v0.0.101",
+  "gear": "vendor/wowsims/feral_p2_9p.gear.json",
+  "skeleton": "data/presets/feral/p2.raid-sim-skeleton.json",
+  "seeds": [
+    "11",
+    "22",
+    "33",
+    "44",
+    "55"
+  ],
+  "iterations": 3000,
+  "malorneItems": {
+    "shoulder": 29100,
+    "chest": 29096
+  },
+  "bsideItems": {
+    "shoulder": 28755,
+    "chest": 30730
+  },
+  "fillerGem": 24028,
+  "socketDeltaBsideMinusTier": {
+    "shoulder": 0,
+    "chest": 0
+  },
+  "arms": {
+    "M2": {
+      "label": "M2",
+      "replaced": [],
+      "perSeed": [
+        2227.0755410703227,
+        2226.9667963095435,
+        2226.813182201579,
+        2226.4919831213997,
+        2226.4007906412658
+      ],
+      "mean": 2226.749658668822,
+      "spreadMaxMin": 0.674750429056985,
+      "meanReportedSe": 2.5569855013483926
+    },
+    "M0": {
+      "label": "M0",
+      "replaced": [
+        "shoulder",
+        "chest"
+      ],
+      "perSeed": [
+        2048.526286041902,
+        2048.542890910464,
+        2048.6876406248207,
+        2048.5023295788105,
+        2048.670541302783
+      ],
+      "mean": 2048.585937691756,
+      "spreadMaxMin": 0.18531104601015613,
+      "meanReportedSe": 3.5280565688771346
+    },
+    "R_shoulder": {
+      "label": "R_shoulder",
+      "replaced": [
+        "chest"
+      ],
+      "perSeed": [
+        2071.674504441702,
+        2071.7326666887334,
+        2071.8371227314474,
+        2071.646602496708,
+        2071.470563512829
+      ],
+      "mean": 2071.672291974284,
+      "spreadMaxMin": 0.36655921861847673,
+      "meanReportedSe": 3.5637893701898857
+    },
+    "R_chest": {
+      "label": "R_chest",
+      "replaced": [
+        "shoulder"
+      ],
+      "perSeed": [
+        2072.3219846469683,
+        2072.7056856155,
+        2072.9097286735255,
+        2072.487867161866,
+        2072.3986072248654
+      ],
+      "mean": 2072.564774664545,
+      "spreadMaxMin": 0.587744026557175,
+      "meanReportedSe": 3.4478916397763246
+    }
+  },
+  "derived": {
+    "statCostOffM0": {
+      "shoulder": 23.086354282527736,
+      "chest": 23.97883697278894
+    },
+    "gross_M2_minus_M0": 178.16372097706608,
+    "malorne_2pc_B": 131.0985297217494
+  },
+  "noiseBand1Se": {
+    "malorne_2pc_B": 6.601053661501388
+  }
+}
