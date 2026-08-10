@@ -150,10 +150,10 @@ describe("rank-report", () => {
 
   it("raid shortlist excludes pvp sources", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
-    expect(html).toContain("Act on tonight");
+    expect(html).toContain("Curated ranked list");
     const raidShortlist =
       html.match(
-        /<div class="shortlist">\s*<h2>Act on tonight<\/h2>[\s\S]*?<\/div>\s*<\/div>/
+        /<div class="shortlist">\s*<h2>Curated ranked list[\s\S]*?<\/div>\s*<\/div>/
       )?.[0] ?? "";
     expect(raidShortlist).not.toContain("Vengeful Gladiator's Bonegrinder");
     expect(html).toContain("PvP upgrades");
@@ -202,7 +202,7 @@ describe("rank-report", () => {
     expect(html).toContain("Gorehowl");
   });
 
-  it("excludes magnitude-flagged weapons from Act on tonight", () => {
+  it("excludes magnitude-flagged weapons from the curated ranked list", () => {
     const html = renderRankHtml(
       ranking([
         item({
@@ -227,11 +227,11 @@ describe("rank-report", () => {
       ]),
       meta()
     );
-    expect(html).toContain("Act on tonight");
+    expect(html).toContain("Curated ranked list");
     expect(html).toContain("Torch of the Damned");
     const raidShortlist =
       html.match(
-        /<div class="shortlist">\s*<h2>Act on tonight<\/h2>[\s\S]*?<\/div>\s*<\/div>/
+        /<div class="shortlist">\s*<h2>Curated ranked list[\s\S]*?<\/div>\s*<\/div>/
       )?.[0] ?? "";
     expect(raidShortlist).not.toContain("Gorehowl");
   });
@@ -469,6 +469,10 @@ describe("rank-report", () => {
     // the filter's rules. No row here is curated, so the filter control and
     // the <script> still do not render for this fixture. Diffed before/after
     // to confirm that is the whole delta.
+    // Repinned for the curated-ranked-list rename: the heading changes, chips
+    // split the old "#N Name" into an empty `.pos` (the script writes the
+    // position), the name, and a dimmed `.abs` carrying the absolute rank,
+    // plus a title tooltip and the renumbering pass in the script.
     // Repinned for the source filter and the JSON export: rows gain
     // `data-item-id`/`data-sources`, chips gain `data-sources`, the page gains
     // the Sources and Export panels, and the <script> is now unconditional
@@ -479,8 +483,8 @@ describe("rank-report", () => {
     // the script, and the new CSS block.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "feff44f2c463ffefb29ff8a838dbfa79e76e52eb6b1beae31cacf117eb289f5e",
-      length: 22702,
+        "da771fac6b9931131edb071d4f52e52074dce19d160053f1249c1fc34d0eae71",
+      length: 24467,
     });
   });
 });
@@ -1007,6 +1011,89 @@ describe("BiS-only filter", () => {
     // filter is CSS over classes.
     const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
     expect(html).toContain("Uncurated");
+  });
+});
+
+describe("curated ranked list chips", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  const chipItems = [
+    item({
+      name: "First",
+      slot: "head",
+      deltaDps: 20,
+      itemId: 41,
+      rank: 1,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+    }),
+    item({
+      name: "Third overall",
+      slot: "waist",
+      deltaDps: 10,
+      itemId: 42,
+      rank: 7,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+    }),
+  ];
+
+  it("carries the absolute rank separately from the rendered position", () => {
+    // The position itself is written by the script, so the served markup has
+    // an empty `.pos` and the absolute rank alongside it — never the absolute
+    // rank *as* the position, which is what it used to render.
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain('data-abs-rank="#7"');
+    expect(html).toContain('<span class="pos"></span>');
+    expect(html).toContain('<span class="abs">#7</span>');
+  });
+
+  it("explains the absolute rank in the chip's tooltip", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain('title="#7 of every candidate simmed"');
+  });
+
+  it("does not renumber RankedItem.rank itself (§12)", () => {
+    // §12 forbids renumbering `rank` inside a filter. The row in the slot
+    // section still shows the absolute rank; only the chip shows position.
+    const html = renderRankHtml(ranking(chipItems), meta);
+    // `soft-rank` rides along when |delta| < stdev, so match the rank span
+    // without pinning that unrelated class.
+    expect(html).toMatch(/<span class="rank[^"]*">#7<\/span>/);
+  });
+
+  it("names an unranked chip's tooltip rather than emitting #null", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          name: "Unranked",
+          slot: "head",
+          deltaDps: 5,
+          itemId: 43,
+          belowCutoff: false,
+          source: { kind: "raid", zone: "Karazhan" },
+        }),
+      ]),
+      meta
+    );
+    expect(html).toContain('title="not ranked overall"');
+    expect(html).toContain('data-abs-rank=""');
+    expect(html).not.toContain("#null");
+  });
+
+  it("gives each strip its own live counter element", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain(
+      '<h2>Curated ranked list <span class="list-count"></span></h2>'
+    );
   });
 });
 

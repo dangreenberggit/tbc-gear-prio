@@ -73,6 +73,20 @@ export function formatItemSource(source: ItemSource): string {
   }
 }
 
+/**
+ * The curated ranked list's chips.
+ *
+ * The leading number is the item's **position in this list**, renumbered
+ * 1..N by the script whenever a filter changes, so it always describes the
+ * list on screen. That is deliberately not `RankedItem.rank`, which stays
+ * absolute across the whole ranking (§12) and is carried alongside as
+ * `data-abs-rank` — shown dimmed and in the tooltip, because a chip reading
+ * "3" while the same item reads "#7" in its slot section would otherwise be
+ * two unexplained numbers for one item.
+ *
+ * §12's objection is to renumbering *`rank` itself* inside a filter, which
+ * would claim an item is better than it is. Nothing here writes `rank`.
+ */
 function renderShortlistChips(items: RankedItem[]): string {
   return items
     .slice()
@@ -80,7 +94,12 @@ function renderShortlistChips(items: RankedItem[]): string {
     .map((i) => {
       const weighted = weightedSetPotentialDps(i);
       const full = weightedSetPotentialDps(i, "full");
-      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
+      const absRank = i.rank == null ? "" : `#${i.rank}`;
+      const title =
+        i.rank == null
+          ? "not ranked overall"
+          : `#${i.rank} of every candidate simmed`;
+      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" title="${esc(title)}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
     })
     .join("\n");
 }
@@ -575,6 +594,27 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         }
       }
     });
+    // Each chip strip renumbers 1..N over what is visible *in that strip*, so
+    // the raid list and the PvP list each read from 1 rather than the PvP one
+    // continuing the raid one's count.
+    [].slice.call(document.querySelectorAll(".shortlist")).forEach(function (strip) {
+      var chips = [].slice.call(strip.querySelectorAll(".chip"));
+      var n = 0;
+      chips.forEach(function (c) {
+        var visible = c.className.indexOf("source-hidden") < 0 &&
+          (!bisOn || c.className.indexOf("is-bis") >= 0);
+        var pos = c.querySelector(".pos");
+        if (!visible) {
+          if (pos) pos.textContent = "";
+          return;
+        }
+        n += 1;
+        if (pos) pos.textContent = String(n);
+      });
+      var counter = strip.querySelector(".list-count");
+      if (counter) counter.textContent = n === 0 ? "" : "(" + n + ")";
+      strip.classList.toggle("empty-under-filter", n === 0);
+    });
     updateExport(visibleRows);
   }
   // Takes the same list the filters just computed, so the export cannot
@@ -681,7 +721,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${
       aboveRaid.length
         ? `<div class="shortlist">
-      <h2>Act on tonight</h2>
+      <h2>Curated ranked list <span class="list-count"></span></h2>
       <div class="chips">
         ${renderShortlistChips(aboveRaid)}
       </div>
@@ -691,7 +731,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${
       abovePvp.length
         ? `<div class="shortlist pvp-shortlist">
-      <h2>PvP upgrades (optional)</h2>
+      <h2>PvP upgrades (optional) <span class="list-count"></span></h2>
       <div class="chips">
         ${renderShortlistChips(abovePvp)}
       </div>

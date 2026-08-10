@@ -185,7 +185,22 @@ export const REPORT_CSS = `
   }
   .chip:hover { transform: translateY(-1px); }
   .chip .n { font-family: var(--font-display); font-weight: 700; }
+  /* Position in this list, renumbered by the script. Given the accent so the
+     eye reads the order first; the absolute rank sits dimmed after the name
+     so the two numbers cannot be mistaken for each other. */
+  .chip .pos {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 1ch;
+  }
+  .chip .abs {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
   .chip .d { font-family: var(--font-mono); font-size: 0.85rem; color: var(--up); }
+  .list-count { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); font-weight: 400; }
   .slot { margin-bottom: 2.25rem; scroll-margin-top: 3.5rem; }
   .slot-head {
     display: flex;
