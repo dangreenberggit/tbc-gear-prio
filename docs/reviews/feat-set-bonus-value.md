@@ -91,7 +91,7 @@ conservative default whose Go source was not read.
 | D1  | Domain      | fixed       | `161e4d0` — V0c Malorne probe is the gate evidence                                                              |
 | D2  | Domain      | fixed       | `f52da38` — `SetBonusValue.breaks`, rendered                                                                    |
 | D3  | Domain      | fixed       | `c945d2c` — research.md corrected in place                                                                      |
-| D4  | Domain      | defer       | ticket 86 (same root as A2)                                                                                     |
+| D4  | Domain      | defer       | `.scratch/carry-forward/issues/86-pieces-after-swap-uses-owned-as-equipped-proxy.md` (same root as A2)          |
 | S1  | Spec        | fixed       | `de70cd3` — §8.2/§8.4 evidence persisted at tip                                                                 |
 | S2  | Spec        | fixed       | `d0387e7` — se over all contributing sims                                                                       |
 | S3  | Spec        | fixed       | `d0387e7` — `piecesAfterSwap`; `thresholdBeforeSwap` split out                                                  |
