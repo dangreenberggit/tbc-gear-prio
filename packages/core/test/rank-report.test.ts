@@ -337,6 +337,32 @@ describe("rank-report", () => {
     expect(html).toContain("widens your gap to 87");
   });
 
+  // The real cap is 9 * 15.769233, so a live `gapAfter` is essentially never
+  // integral and the raw value rendered as 64.92309699999998 in the shipped
+  // report (carry-forward 77). Whole-number fixtures above hid it.
+  it("rounds a fractional hit gap like the banner does (carry-forward 77)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            hitRegression: { lost: 17, gapAfter: 64.92309699999998 },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("widens your gap to 65");
+    expect(html).not.toContain("64.92309699999998");
+  });
+
   // The other cases here assert on fragments, so a change to the surrounding
   // markup or CSS passes them all. This pins the whole document, which is what
   // makes a pure restructure of this module provable: split the file, move the

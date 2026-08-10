@@ -162,7 +162,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             ? `<div class="hit-note">most of this gain is hit rating, and you are under the cap</div>`
             : "";
           const hitLoss = item.hitRegression
-            ? `<div class="hit-note down">costs ${item.hitRegression.lost} hit rating — widens your gap to ${item.hitRegression.gapAfter}</div>`
+            ? `<div class="hit-note down">costs ${item.hitRegression.lost} hit rating — widens your gap to ${Math.round(item.hitRegression.gapAfter)}</div>`
             : "";
           const owned = item.owned
             ? `<span class="pill owned">owned</span>`
