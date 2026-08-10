@@ -25,11 +25,13 @@ export {
   type Ranking,
   type ResolvedFight,
 } from "./rank.js";
-export {
-  REPORT_EVENTS_REF,
-  reportEventsOfflineRecordings,
-  type ReportEventsRawFixture,
-} from "./fixtures/report-events-offline.js";
+// Offline fixture builders are deliberately NOT re-exported here. All three
+// (`slamaltman-offline`, `report-events-offline`, `feral-offline`) are imported
+// from their own module by every consumer — `cli.ts` and one test each — so
+// the barrel is not the path anyone actually uses. Re-exporting one of the
+// three was the inconsistency (carry-forward 79); direct import is the
+// convention. Keeping them out also keeps test scaffolding off the package's
+// public surface.
 export {
   capStateFrom,
   hitRegression,
