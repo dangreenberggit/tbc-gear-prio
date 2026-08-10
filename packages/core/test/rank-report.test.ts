@@ -524,6 +524,25 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     ).toBe("+45.00 set potential (needs 2 more pieces)");
   });
 
+  it("points at the 4pc threshold and says needs 2 more for a 1-worn candidate crossing to 2 (finding 3)", () => {
+    // piecesWornBefore=1, piecesAfterSwap=2, but 2pc is not-implemented-in-sim
+    // so nextThreshold is the nearest *measurable* one: 4pc. needed must be
+    // nextThreshold - piecesAfterSwap = 2, never 0.
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 2 more pieces)");
+  });
+
   it("singularizes 'piece' when exactly one more is needed", () => {
     expect(
       formatSetPotentialLine({

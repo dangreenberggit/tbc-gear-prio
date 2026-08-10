@@ -675,6 +675,7 @@ export async function rankUpgrades(
         itemId: entry.itemId,
         slotIndex: best.slotIndex,
         deltaDps: best.deltaDps,
+        se: best.stdev / Math.sqrt(iterations),
       });
 
       const deltaPct =
@@ -706,6 +707,20 @@ export async function rankUpgrades(
       winningRequests.set(entry.itemId, best.request);
     }
 
+    /**
+     * Package-level sim failures (Finding 5): a whole completion package has
+     * no single item to blame, and its `setId` must never masquerade as an
+     * `itemId` in the per-candidate `simSkips` shape — so this is a distinct
+     * collection, named by set + threshold, folded into `substitutions`
+     * alongside `simSkips` below rather than forced into its shape.
+     */
+    const packageSimSkips: {
+      setId: number;
+      setName: string;
+      threshold: SetThreshold;
+      reason: string;
+    }[] = [];
+
     const setBonuses = await buildSetBonuses(
       deps,
       candidates,
@@ -717,7 +732,7 @@ export async function rankUpgrades(
       { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
       simVersion,
       runOpts,
-      simSkips
+      packageSimSkips
     );
     if (setBonuses.length > 0) applySetContext(ranked, setBonuses, equipment);
 
@@ -763,6 +778,12 @@ export async function rankUpgrades(
         ...simSkips.map((s) => ({
           field: `candidate ${s.itemId} (${s.slot})`,
           detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
+        })),
+        ...packageSimSkips.map((s) => ({
+          field: `${s.setName} ${s.threshold}pc completion package`,
+          detail:
+            `the ${s.setName} ${s.threshold}pc completion package could not ` +
+            `be measured: the sim failed — ${s.reason}`,
         })),
       ],
       items: ranked,
@@ -896,7 +917,12 @@ async function buildSetBonuses(
   baseline: DpsSample,
   simVersion: string,
   runOpts: SimRunOpts,
-  simSkips: { itemId: number; name: string; slot: string; reason: string }[]
+  packageSimSkips: {
+    setId: number;
+    setName: string;
+    threshold: SetThreshold;
+    reason: string;
+  }[]
 ): Promise<SetBonusValue[]> {
   // Which sets actually have a pool candidate this run — §2.4's "do not build
   // packages for sets with no candidate presence".
@@ -993,10 +1019,10 @@ async function buildSetBonuses(
         try {
           packageObs = await deps.sim.run(packageRequest, runOpts);
         } catch (err) {
-          simSkips.push({
-            itemId: addedPieces[0]?.itemId ?? setId,
-            name: `${label} ${threshold}pc completion package`,
-            slot: "set-package",
+          packageSimSkips.push({
+            setId,
+            setName: label,
+            threshold,
             reason: err instanceof Error ? err.message : String(err),
           });
           results.push({
@@ -1019,9 +1045,13 @@ async function buildSetBonuses(
         );
       }
 
-      const addedPieceDeltas = addedPieces.map(
-        (p) => individualDeltasByItemId.get(p.itemId)?.deltaDps ?? 0
-      );
+      const addedPieceSamples = addedPieces.map((p) => {
+        const individual = individualDeltasByItemId.get(p.itemId);
+        return {
+          deltaDps: individual?.deltaDps ?? 0,
+          se: individual?.se ?? 0,
+        };
+      });
       const packageSample: DpsSample = {
         dps: packageObs.dps,
         se: packageObs.stdev / Math.sqrt(runOpts.iterations),
@@ -1029,7 +1059,7 @@ async function buildSetBonuses(
       const synergy = computeSynergy({
         baseline,
         packageSample,
-        addedPieceDeltas,
+        addedPieceSamples,
         ...(threshold === 4 && twoPieceBonus !== undefined
           ? { twoPieceBonus }
           : {}),
@@ -1081,9 +1111,19 @@ function applySetContext(
     const piecesAfterSwap = item.owned
       ? piecesWornBefore
       : piecesWornBefore + 1;
-    const nextThreshold = nextMeasurableThreshold(setId, piecesWornBefore);
+    // Whether *this swap* crosses a threshold is judged against the nearest
+    // measurable threshold from *before* the swap — that is the bonus the
+    // swap could newly deliver. `nextThreshold` recorded on the context is
+    // the forward-looking one from *after* the swap (spec §2.3/§3, finding
+    // 3): the smallest implemented threshold still ahead, for a "needs N
+    // more" prompt. The two are deliberately evaluated from different counts.
+    const thresholdBeforeSwap = nextMeasurableThreshold(
+      setId,
+      piecesWornBefore
+    );
     const crossesThreshold =
-      nextThreshold !== null && piecesAfterSwap >= nextThreshold;
+      thresholdBeforeSwap !== null && piecesAfterSwap >= thresholdBeforeSwap;
+    const nextThreshold = nextMeasurableThreshold(setId, piecesAfterSwap);
 
     const setContext: SetContext = {
       setId,

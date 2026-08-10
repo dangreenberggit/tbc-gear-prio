@@ -153,6 +153,11 @@ export function formatSetPotentialLine(
   }
   const needed =
     ctx.nextThreshold === null ? 0 : ctx.nextThreshold - ctx.piecesAfterSwap;
+  // `nextThreshold` (§2.3) is always strictly above `piecesAfterSwap`, so
+  // `needed` should always be positive here; a non-positive value means the
+  // caller passed a `setContext` that does not match its own invariant
+  // (e.g. crossesThreshold mis-set) rather than a real "0 more" state.
+  if (needed <= 0) return undefined;
   const sign = ctx.prospectiveBonusDps >= 0 ? "+" : "";
   return `${sign}${ctx.prospectiveBonusDps.toFixed(2)} set potential (needs ${needed} more piece${needed === 1 ? "" : "s"})`;
 }

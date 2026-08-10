@@ -2266,10 +2266,21 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     };
   }
 
-  it("records a measured SetBonusValue whose bonusDps equals the synthetic X", async () => {
+  // Finding 7: with every candidate's individual delta at 0, Σ singles is 0
+  // and bonusDps collapses to packageDeltaDps — the subtraction the whole
+  // feature rests on is never exercised. Nonzero per-item deltas force it.
+  const PER_ITEM_DELTAS = {
+    [HEAD_ID]: 5,
+    [SHOULDER_ID]: 3,
+    [HANDS_ID]: 2,
+    [LEGS_ID]: 4,
+  };
+  const SUM_SINGLES = Object.values(PER_ITEM_DELTAS).reduce((a, b) => a + b, 0);
+
+  it("records a measured SetBonusValue whose bonusDps equals packageDelta minus the singles", async () => {
     const ranking = await rankUpgrades(
       input,
-      depsWith(justicarRespondingSim())
+      depsWith(justicarRespondingSim({ perItemDelta: PER_ITEM_DELTAS }))
     );
 
     expect(ranking.setBonuses).toBeDefined();
@@ -2278,7 +2289,16 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     );
     expect(fourPc).toBeDefined();
     expect(fourPc!.unmeasured).toBeUndefined();
+    // packageDeltaDps = Σ singles + SET_BONUS_X (the synthetic fixture adds
+    // both); bonusDps must subtract Σ singles back out, proving the
+    // subtraction actually ran rather than netting to packageDeltaDps.
+    expect(fourPc!.packageDeltaDps).toBeCloseTo(SUM_SINGLES + SET_BONUS_X, 6);
     expect(fourPc!.bonusDps).toBeCloseTo(SET_BONUS_X, 6);
+    expect(fourPc!.bonusDps).not.toBeCloseTo(fourPc!.packageDeltaDps, 6);
+    expect(fourPc!.bonusDps).toBeCloseTo(
+      fourPc!.packageDeltaDps - SUM_SINGLES,
+      6
+    );
     expect(fourPc!.packageItemIds.sort()).toEqual(
       [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].sort()
     );
@@ -2367,6 +2387,56 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     );
   });
 
+  it("computes nextThreshold from piecesAfterSwap, not piecesWornBefore (finding 3)", async () => {
+    // Player wears 1 Justicar piece (head); the shoulder candidate's swap
+    // takes them to 2 worn. 2pc is not-implemented-in-sim, so the nearest
+    // *measurable* threshold above piecesAfterSwap=2 is 4pc, not 2pc — using
+    // piecesWornBefore=1 would wrongly land on 2pc (still unimplemented) or
+    // otherwise mis-point the "needs N more" arithmetic.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "head",
+      HEAD_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [
+        realPoolEntry(SHOULDER_ID),
+        realPoolEntry(HANDS_ID),
+        realPoolEntry(LEGS_ID),
+      ],
+    });
+
+    const shoulderRow = ranking.items.find((i) => i.itemId === SHOULDER_ID);
+    expect(shoulderRow).toBeDefined();
+    expect(shoulderRow!.setContext).toBeDefined();
+    expect(shoulderRow!.setContext!.piecesWornBefore).toBe(1);
+    expect(shoulderRow!.setContext!.piecesAfterSwap).toBe(2);
+    expect(shoulderRow!.setContext!.nextThreshold).toBe(4);
+  });
+
   it("reports insufficient-pieces when the pool cannot supply enough Justicar pieces", async () => {
     // Only two of the four pieces are offered — 4pc cannot be built.
     const ranking = await rankUpgrades(
@@ -2442,6 +2512,37 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
       s.detail.includes("synthetic package sim failure")
     );
     expect(sub).toBeDefined();
+    // Finding 5: the failure names the whole package (set + threshold), not
+    // one arbitrary added piece, and no field carries a raw set id where an
+    // item id would be expected.
+    expect(sub!.field).toContain("4pc");
+    expect(sub!.field).not.toBe(String(626));
+  });
+
+  it("names the whole package on failure, never a set id standing in for an item id (finding 5)", async () => {
+    // An empty pool with only enough candidates to attempt the package but
+    // fail it — the failure path historically fell back to `setId` when
+    // `addedPieces[0]` was empty, landing a set id in an item-id field.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim({ failOnPackage: true }))
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc!.unmeasured).toBe("sim-failed");
+
+    for (const sub of ranking.substitutions) {
+      // The set id (626) must never appear as a bare numeric field value
+      // standing in for an item id.
+      expect(sub.field).not.toBe("626");
+      expect(sub.field).not.toMatch(/^candidate 626\b/);
+    }
+    const packageSub = ranking.substitutions.find((s) =>
+      s.field.includes("Justicar Battlegear 4pc")
+    );
+    expect(packageSub).toBeDefined();
   });
 
   it("is deterministic: same input, same seeds, two runs deep-equal setBonuses (V2)", async () => {

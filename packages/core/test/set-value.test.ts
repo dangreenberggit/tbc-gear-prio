@@ -7,6 +7,7 @@ import {
   nextMeasurableThreshold,
   selectPackage,
   setCounts,
+  SET_THRESHOLDS,
   setLabel,
   type IndividualDelta,
 } from "../src/set-value.js";
@@ -50,6 +51,16 @@ const slotIndexForPoolEntry = (entry: PoolEntry): number | undefined => {
       return undefined;
   }
 };
+
+describe("SET_THRESHOLDS", () => {
+  // The 4pc formula (rank.ts's buildSetBonuses) carries the 2pc bonus
+  // forward as a subtracted term, which only works if 2 is iterated before
+  // 4 — a silent dependency on array order (finding 7's guard).
+  it("stays ascending", () => {
+    const sorted = [...SET_THRESHOLDS].sort((a, b) => a - b);
+    expect(SET_THRESHOLDS).toEqual(sorted);
+  });
+});
 
 describe("setCounts / setLabel", () => {
   it("counts worn pieces per setId, ignoring non-set items", () => {
@@ -133,9 +144,9 @@ describe("selectPackage", () => {
       justicarPoolEntry(29074, "legs"),
     ];
     const deltas: IndividualDelta[] = [
-      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10 },
-      { itemId: 29072, slotIndex: HANDS, deltaDps: 20 },
-      { itemId: 29074, slotIndex: LEGS, deltaDps: 5 },
+      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10, se: 1 },
+      { itemId: 29072, slotIndex: HANDS, deltaDps: 20, se: 1 },
+      { itemId: 29074, slotIndex: LEGS, deltaDps: 5, se: 1 },
     ];
     const result = selectPackage(
       JUSTICAR_SET_ID,
@@ -161,8 +172,8 @@ describe("selectPackage", () => {
       justicarPoolEntry(29072, "hands"),
     ];
     const deltas: IndividualDelta[] = [
-      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10 },
-      { itemId: 29072, slotIndex: HANDS, deltaDps: 10 }, // tie
+      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10, se: 1 },
+      { itemId: 29072, slotIndex: HANDS, deltaDps: 10, se: 1 }, // tie
     ];
     const result = selectPackage(
       JUSTICAR_SET_ID,
@@ -193,8 +204,8 @@ describe("selectPackage", () => {
     const gearWithOne = blank();
     gearWithOne[HEAD] = { id: 29073, gems: [] };
     const deltas: IndividualDelta[] = [
-      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10 },
-      { itemId: 29072, slotIndex: HANDS, deltaDps: 10 },
+      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10, se: 1 },
+      { itemId: 29072, slotIndex: HANDS, deltaDps: 10, se: 1 },
     ];
     const result = selectPackage(
       JUSTICAR_SET_ID,
@@ -211,11 +222,48 @@ describe("selectPackage", () => {
     expect(result.addedPieces[0]?.itemId).toBe(29072);
   });
 
+  it("emits addedPieces in canonical-slot order regardless of selection order (finding 6)", () => {
+    // Selection picks by highest deltaDps first — legs (30) beats hands (20)
+    // beats shoulder (10) — but SIM_ORDER puts shoulder before hands before
+    // legs. Spec §3 requires the emitted array in canonical-slot order, not
+    // selection order.
+    // One Justicar piece already worn (not head, so all three pool slots stay
+    // open) — threshold 4 then needs exactly the 3 pool candidates supplied.
+    const wornOther = blank();
+    wornOther[HEAD] = { id: 29073, gems: [] };
+    const pool: PoolEntry[] = [
+      justicarPoolEntry(29075, "shoulder"),
+      justicarPoolEntry(29072, "hands"),
+      justicarPoolEntry(29074, "legs"),
+    ];
+    const deltas: IndividualDelta[] = [
+      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10, se: 1 },
+      { itemId: 29072, slotIndex: HANDS, deltaDps: 20, se: 1 },
+      { itemId: 29074, slotIndex: LEGS, deltaDps: 30, se: 1 },
+    ];
+    const result = selectPackage(
+      JUSTICAR_SET_ID,
+      4,
+      wornOther,
+      pool,
+      deltas,
+      slotIndexForPoolEntry
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.addedPieces.map((p) => p.slotIndex)).toEqual(
+      [SHOULDER, HANDS, LEGS].sort((a, b) => a - b)
+    );
+    expect(result.addedPieces.map((p) => p.itemId)).toEqual([
+      29075, 29072, 29074,
+    ]);
+  });
+
   it("reports insufficient-pieces when the pool cannot fill enough slots", () => {
     const gear = blank();
     const pool: PoolEntry[] = [justicarPoolEntry(29075, "shoulder")];
     const deltas: IndividualDelta[] = [
-      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10 },
+      { itemId: 29075, slotIndex: SHOULDER, deltaDps: 10, se: 1 },
     ];
     const result = selectPackage(
       JUSTICAR_SET_ID,
@@ -245,19 +293,43 @@ describe("computeSynergy", () => {
     const result = computeSynergy({
       baseline: { dps: 1000, se: 2 },
       packageSample: { dps: 1100, se: 2 },
-      addedPieceDeltas: [30, 20],
+      addedPieceSamples: [
+        { deltaDps: 30, se: 1 },
+        { deltaDps: 20, se: 1 },
+      ],
     });
     // packageDelta = 100; sumSingles = 50; bonus = 100 - 50 - 0 = 50
     expect(result.packageDeltaDps).toBeCloseTo(100, 10);
     expect(result.bonusDps).toBeCloseTo(50, 10);
-    expect(result.se).toBeCloseTo(Math.sqrt(4 + 4), 10);
+  });
+
+  /**
+   * §2.2's `se` is `sqrt(Σ se_i²)` over *every* sim involved — baseline,
+   * package, and each subtracted single — not just baseline+package.
+   * verification.md's V0 worked example combines exactly these six.
+   */
+  it("combines se over baseline, package, and every added single (finding 4)", () => {
+    const result = computeSynergy({
+      baseline: { dps: 1000, se: 2 },
+      packageSample: { dps: 1100, se: 2 },
+      addedPieceSamples: [
+        { deltaDps: 30, se: 1 },
+        { deltaDps: 20, se: 3 },
+      ],
+    });
+    expect(result.se).toBeCloseTo(Math.sqrt(4 + 4 + 1 + 9), 10);
   });
 
   it("bonus(S,4) subtracts a measured bonus(S,2)", () => {
     const result = computeSynergy({
       baseline: { dps: 1000, se: 1 },
       packageSample: { dps: 1200, se: 1 },
-      addedPieceDeltas: [40, 30, 20, 10], // sum 100
+      addedPieceSamples: [
+        { deltaDps: 40, se: 1 },
+        { deltaDps: 30, se: 1 },
+        { deltaDps: 20, se: 1 },
+        { deltaDps: 10, se: 1 },
+      ], // sum 100
       twoPieceBonus: 15,
     });
     // packageDelta = 200; bonus = 200 - 100 - 15 = 85
@@ -265,16 +337,22 @@ describe("computeSynergy", () => {
   });
 
   it("treats an unmeasured (not-implemented) 2pc as a 0 subtraction, not a missing term", () => {
+    const samples = [
+      { deltaDps: 40, se: 1 },
+      { deltaDps: 30, se: 1 },
+      { deltaDps: 20, se: 1 },
+      { deltaDps: 10, se: 1 },
+    ];
     const withOmitted = computeSynergy({
       baseline: { dps: 1000, se: 1 },
       packageSample: { dps: 1200, se: 1 },
-      addedPieceDeltas: [40, 30, 20, 10],
+      addedPieceSamples: samples,
       // twoPieceBonus intentionally omitted — Justicar/Nordrassil 2pc case.
     });
     const withExplicitZero = computeSynergy({
       baseline: { dps: 1000, se: 1 },
       packageSample: { dps: 1200, se: 1 },
-      addedPieceDeltas: [40, 30, 20, 10],
+      addedPieceSamples: samples,
       twoPieceBonus: 0,
     });
     expect(withOmitted.bonusDps).toBeCloseTo(withExplicitZero.bonusDps, 10);
@@ -285,7 +363,10 @@ describe("computeSynergy", () => {
     const result = computeSynergy({
       baseline: { dps: 2000, se: 5 },
       packageSample: { dps: 2000.5, se: 5 },
-      addedPieceDeltas: [0.3, 0.2],
+      addedPieceSamples: [
+        { deltaDps: 0.3, se: 1 },
+        { deltaDps: 0.2, se: 1 },
+      ],
     });
     expect(result.bonusDps).toBeCloseTo(0, 5);
     expect(typeof result.bonusDps).toBe("number");

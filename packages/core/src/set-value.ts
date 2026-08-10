@@ -127,6 +127,8 @@ export type IndividualDelta = {
   itemId: number;
   slotIndex: number;
   deltaDps: number;
+  /** SE of this single-swap sim's DPS mean — feeds §2.2's combined `se`. */
+  se: number;
 };
 
 /**
@@ -194,11 +196,18 @@ export function selectPackage(
     return { ok: false, reason: "insufficient-pieces" };
   }
 
-  const addedPieces: PackagePiece[] = candidates.slice(0, needed).map((c) => ({
-    itemId: c.itemId,
-    slotIndex: c.slotIndex,
-    alreadyWorn: false,
-  }));
+  // Selection above ranks by deltaDps (highest first, ties by lower item id)
+  // to choose *which* pieces fill the package — unchanged. The emitted order
+  // is a separate concern (spec §3: "canonical-slot order"), sorted only
+  // after selection so it stays deterministic regardless of selection order.
+  const addedPieces: PackagePiece[] = candidates
+    .slice(0, needed)
+    .map((c) => ({
+      itemId: c.itemId,
+      slotIndex: c.slotIndex,
+      alreadyWorn: false,
+    }))
+    .sort((a, b) => a.slotIndex - b.slotIndex);
 
   return { ok: true, piecesWorn, addedPieces };
 }
@@ -211,13 +220,26 @@ export function combineSe(samples: readonly DpsSample[]): number {
   return Math.sqrt(samples.reduce((sum, s) => sum + s.se * s.se, 0));
 }
 
+/**
+ * One added piece's single-swap measurement: the `deltaDps` subtracted in
+ * §2.2's formula, alongside the `se` of that same single-swap sim — needed
+ * because §2.2 reports `se` as `sqrt(Σ se_i²)` over *every* sim involved,
+ * including the singles whose deltas are subtracted, not just baseline and
+ * package (verification.md's V0 worked example combines six: base + package
+ * + four singles).
+ */
+export type AddedPieceSample = {
+  deltaDps: number;
+  se: number;
+};
+
 export type SynergyInput = {
   /** `D(baseline)` */
   baseline: DpsSample;
   /** `D(P(S,t))` */
   packageSample: DpsSample;
-  /** Individual single-swap `deltaDps` for each piece added to reach `t`. */
-  addedPieceDeltas: readonly number[];
+  /** Each added piece's single-swap delta and se (§2.2). */
+  addedPieceSamples: readonly AddedPieceSample[];
   /**
    * `bonus(S,2)`, subtracted when computing `bonus(S,4)` per §2.2's formula.
    * Absent (not just 0) when there was no 2pc bonus to subtract — either t=2
@@ -245,8 +267,15 @@ export type SynergyResult = {
  */
 export function computeSynergy(input: SynergyInput): SynergyResult {
   const packageDeltaDps = input.packageSample.dps - input.baseline.dps;
-  const sumSingles = input.addedPieceDeltas.reduce((sum, d) => sum + d, 0);
+  const sumSingles = input.addedPieceSamples.reduce(
+    (sum, s) => sum + s.deltaDps,
+    0
+  );
   const bonusDps = packageDeltaDps - sumSingles - (input.twoPieceBonus ?? 0);
-  const se = combineSe([input.baseline, input.packageSample]);
+  const se = combineSe([
+    input.baseline,
+    input.packageSample,
+    ...input.addedPieceSamples.map((s) => ({ dps: 0, se: s.se })),
+  ]);
   return { packageDeltaDps, bonusDps, se };
 }
