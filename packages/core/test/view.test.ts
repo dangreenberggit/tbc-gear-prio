@@ -416,6 +416,101 @@ describe("applyView", () => {
       const { rows } = applyView(r, { withSetPotential: true });
       expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
     });
+
+    /**
+     * The finding this toggle existed to serve and originally defeated: a first
+     * tier piece is normally below cutoff *on its own stats* (V0b's Thunderheart
+     * singles are all negative), so carrying `belowCutoff` had the shortlist
+     * filter out exactly the rows the toggle surfaces.
+     */
+    it("promotes a below-cutoff row whose prospective value clears the bar", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
+        item({
+          itemId: 2,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 90,
+          },
+        }),
+      ]);
+
+      const off = applyView(r);
+      expect(off.shortlist.map((x) => x.itemId)).toEqual([1]);
+      expect(off.belowCutoffCount).toBe(1);
+
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([2, 1]);
+      expect(on.belowCutoffCount).toBe(0);
+    });
+
+    it("leaves a row below cutoff when even its prospective value is noise", () => {
+      const r = ranking([
+        item({
+          itemId: 3,
+          deltaDps: -1,
+          deltaPct: -0.05,
+          belowCutoff: true,
+          setContext: {
+            setId: 629,
+            setName: "Crystalforge Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 1.2,
+          },
+        }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist).toEqual([]);
+      expect(on.rows[0]!.belowCutoffInView).toBe(true);
+    });
+
+    /**
+     * The bar itself never moves — only the quantity measured against it
+     * (ADR-0020's rejected alternative was a threshold derived from the row
+     * *set*, which this is not).
+     */
+    it("uses the same absolute cutoff, not a relative one", () => {
+      // Under both arms: 2.0 DPS < 3.4, and 2.0/2000 = 0.1% < 0.15%.
+      const r = ranking([
+        item({
+          itemId: 4,
+          deltaDps: 0,
+          deltaPct: 0,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 2,
+          },
+        }),
+      ]);
+      // Sole row, so a set-relative bar would promote it; the absolute one does not.
+      expect(applyView(r, { withSetPotential: true }).shortlist).toEqual([]);
+    });
+
+    it("leaves rows without set context on their ranking verdict", () => {
+      const r = ranking([
+        item({ itemId: 5, deltaDps: 2, deltaPct: 0.1, belowCutoff: true }),
+        item({ itemId: 6, deltaDps: 40, deltaPct: 2, rank: 1 }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([6]);
+    });
   });
 
   describe("hideOwned", () => {

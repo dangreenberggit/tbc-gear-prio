@@ -4,6 +4,7 @@
  * that is the property the Phase 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
+import { CUTOFF, meetsCutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
@@ -43,14 +44,20 @@ export type ViewRow = RankedItem & {
    */
   tieGroupId?: string;
   /**
-   * Whether the cutoff hides this row — the view's own copy of `belowCutoff`,
-   * carried rather than recomputed.
+   * Whether the cutoff hides this row, as this view values it. Carried from
+   * `belowCutoff` for every view except `withSetPotential`.
    *
    * The cutoff is absolute and no view moves it (ADR-0020, amending §12).
    * "Filter first, then apply the cutoff within the filtered view" fixes the
    * *ordering* of the two hiding mechanisms, and the ordering is what matters:
    * filtering never *deletes* a row, so a 2 DPS gain that is the best thing in
    * one raid still appears under that raid's filter — flagged, not absent.
+   *
+   * `withSetPotential` re-derives this against the **same absolute `CUTOFF`**,
+   * substituting only the quantity measured — the effective value the toggle
+   * displays. ADR-0020 forbids a threshold that depends on the row *set*; this
+   * changes the row's own value, not the bar, so the filtered-relative
+   * alternative that ADR rejected stays rejected.
    *
    * The field stays because the shortlist is a property of the view, so
    * `ViewResult` and the CLI read a row's own display verdict rather than
@@ -231,6 +238,37 @@ function assignTieGroups(
  * `prospectiveBonusDps` — that value is already inside `deltaDps` (§2.1) —
  * so `?? 0` never double-counts it.
  */
+/**
+ * The cutoff verdict for a row as this view values it.
+ *
+ * Default: carried from the `Ranking`, which is all ADR-0020 permits — a filter
+ * selects rows and never moves the bar.
+ *
+ * Under `withSetPotential` the **bar is still the same absolute `CUTOFF`**;
+ * what changes is the quantity measured against it, from `deltaDps` to the
+ * effective value the toggle exists to display. Carrying the default verdict
+ * here would have the shortlist hide exactly the rows the toggle surfaces: a
+ * first tier piece is normally below cutoff *on its own stats* — V0b's
+ * Thunderheart singles are all negative — and its whole point is the bonus it
+ * unlocks. That is not a per-view threshold, so ADR-0020's rejected
+ * "derive the bar from the filtered set" alternative is untouched.
+ */
+function belowCutoffUnderView(
+  item: RankedItem,
+  withSetPotential: boolean,
+  baselineDps: number
+): boolean {
+  if (!withSetPotential) return item.belowCutoff;
+  const prospective = item.setContext?.prospectiveBonusDps ?? 0;
+  if (prospective === 0) return item.belowCutoff;
+  const effectiveDps = item.deltaDps + prospective;
+  // Percentage arm scaled off the same baseline `rank.ts` used for `deltaPct`,
+  // so both arms of the cutoff see the effective value.
+  const effectivePct =
+    baselineDps === 0 ? item.deltaPct : (effectiveDps / baselineDps) * 100;
+  return !meetsCutoff(effectiveDps, effectivePct, CUTOFF);
+}
+
 function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {
   return withSetPotential
     ? (r) => r.deltaDps + (r.setContext?.prospectiveBonusDps ?? 0)
@@ -269,7 +307,14 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
       if (boss !== undefined && !matchesBoss(item, zone, boss)) return false;
       return true;
     })
-    .map((item) => ({ ...item, belowCutoffInView: item.belowCutoff }));
+    .map((item) => ({
+      ...item,
+      belowCutoffInView: belowCutoffUnderView(
+        item,
+        v.withSetPotential ?? false,
+        r.baseline.dps
+      ),
+    }));
 
   rows.sort((a, b) => compareRows(a, b, pinBis, sortKey));
 

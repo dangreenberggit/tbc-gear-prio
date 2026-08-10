@@ -47,7 +47,18 @@ correct measurement of an inert bonus, not a broken measurement.
 The same reasoning rules out Lightbringer 4pc as a substitute probe on this fixture: it masks
 Hammer of Wrath, and no Hammer of Wrath rank (24239 / 27180) appears in the fixture's APL either.
 
-### V0b (valid probe): Thunderheart Harness 4pc, feral cat — **PASS**
+### V0b: Thunderheart Harness 4pc, feral cat — passes, but **CONFOUNDED; superseded by V0c**
+
+> **Caveat, added after pre-merge review.** This run is kept for the record but is **not** the gate
+> evidence. The baseline gear (`vendor/wowsims/feral_p2_9p.gear.json`) already wears **two Malorne
+> Harness pieces** — 29100 Mantle (shoulder) and 29096 Breastplate (chest), setId 640 — which is an
+> active, implemented 2pc bonus (4% proc for +20 cat energy). The Thunderheart package below swaps a
+> piece over the **shoulder**, breaking that Malorne 2pc. The single-swap arm for the shoulder pays
+> that breakage once and the package pays it once, so `Σ singles` charges it twice while
+> `packageDelta` charges it once. The difference lands in `synergy` as a spurious positive, biasing
+> **+91.68 upward by an unquantified amount**. The number below is therefore an overestimate of
+> Thunderheart 4pc and must not be cited as its value. See V0c for the clean measurement.
+
 
 Request built from `data/presets/feral/p2.raid-sim-skeleton.json` with equipment from
 `vendor/wowsims/feral_p2_9p.gear.json`. Thunderheart Harness (setId 676) T6 feral 4pc is
@@ -73,14 +84,50 @@ se(combined) =    7.2451   (3x = 21.7353)
 => synergy = 91.68 > 21.74 : PASS, positive and >3σ
 ```
 
-**Conclusion: the §2.2 completion-package synergy formula recovers a real, implemented set bonus at a
-magnitude far above the noise floor.** The individual pieces are all downgrades against this gear set
-(negative singles), yet the package is worth ~92 DPS more than the sum of its parts — which is exactly
-the prospective value the feature exists to surface. V0 is satisfied; implementation proceeds.
+The direction is right — the individual pieces are all downgrades against this gear set, yet the package
+beats the sum of its parts — but the magnitude is inflated by the Malorne breakage described above.
+
+### V0c (gate evidence): Malorne Harness 2pc→4pc, feral cat — **PASS, confound-free**
+
+Same request construction as V0b (`data/presets/feral/p2.raid-sim-skeleton.json` + equipment from
+`vendor/wowsims/feral_p2_9p.gear.json`), chosen so that **no other set's threshold is disturbed**:
+
+- The baseline already wears Malorne chest (29096) and shoulder (29100), i.e. **2 pieces, 2pc active**.
+- The package adds **29098 Stag-Helm (head)** and **29097 Gauntlets (hands)**, crossing 2 → 4.
+- Both target slots hold **non-set items** in the baseline — head holds 8345 Wolfshead Helm, hands hold
+  29947 Gloves of the Searing Grip, both `setId: null`. So no piece is displaced out of any set and
+  nothing breaks. `Σ singles` and `packageDelta` are charged for exactly the same things.
+- Both Malorne bonuses are implemented and cat-relevant (V1): 2pc is the energy proc, 4pc is
+  `CatFormAura.AttachStatsBuff(Strength: 30)`. Crossing to 4pc keeps the 2pc active throughout, so the
+  measured synergy is the 4pc bonus plus residual stat interaction — exactly what §2.2 defines.
+
+| arm | dps | stdev | se |
+|---|---|---|---|
+| base (Malorne 2pc active) | 2226.5350 | 140.2865 | 2.5613 |
+| +29098 (head) | 1946.5584 | 196.8689 | 3.5943 |
+| +29097 (hands) | 2203.3290 | 125.2307 | 2.2864 |
+| +both (Malorne 4pc) | 1944.2469 | 185.1713 | 3.3807 |
+
+```
+packageDelta = -282.2882
+sum singles  = -303.1827
+synergy      =   20.8945
+se(combined) =    6.0113   (3x = 18.0340)
+=> synergy = 20.89 > 18.03 : PASS, positive and >3σ
+```
+
+**Conclusion: the §2.2 completion-package synergy formula recovers a real, implemented set bonus with no
+confounding set breakage.** The margin over the 3σ bar is much tighter than V0b's inflated figure — 20.89
+against 18.03, rather than 91.68 against 21.74 — which is the direct evidence that V0b's confound mattered
+and is the reason V0c, not V0b, is the gate. V0 is satisfied; implementation proceeds.
 
 Note the corollary, which §2.3 already anticipates: a bonus that is implemented but whose gated spell the
 character's APL never casts measures ≈0. That is a true answer about a DPS ranking for that character,
 and it is reported as a number, not as `unmeasured`.
+
+**Production consequence (finding 8).** V0b's confound is not only a measurement-hygiene problem, it is a
+real failure mode of `selectPackage`, which treats a slot as free unless it holds the same `setId`. The
+fix records broken other-set thresholds on the `SetBonusValue` so the net is never silently misattributed.
 
 ## V1 — "implemented in sim" table reconciled against the pinned Go source
 
