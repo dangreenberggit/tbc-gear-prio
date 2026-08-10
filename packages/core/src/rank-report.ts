@@ -379,8 +379,15 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // block: one row per SetBonusValue, unmeasured reasons rendered as text
   // rather than a blank or a 0 (§8.5), plus the standing-assumption line
   // naming the measurement method (PLAN.md §9 R7).
+  //
+  // Deliberately NOT gated on `withSetPotential`, unlike the per-row
+  // annotation above. Spec §4's default-off rule is about keeping the *sort
+  // key and cutoff* unchanged; this panel moves no number, and it is the only
+  // surface a 4pc bonus at 0 pieces worn can reach at all (carry-forward 91).
+  // Gating disclosure on the ranking toggle hid that figure from every default
+  // reader — carry-forward 100.
   const setPotentialPanel =
-    withSetPotential && ranking.setBonuses && ranking.setBonuses.length > 0
+    ranking.setBonuses && ranking.setBonuses.length > 0
       ? `<details class="panel" open>
   <summary>Set potential (${ranking.setBonuses.length})</summary>
   <p class="set-potential-assumption">${esc(setPotentialDisclosureLine())}</p>

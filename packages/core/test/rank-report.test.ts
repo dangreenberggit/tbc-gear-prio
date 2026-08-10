@@ -1366,7 +1366,7 @@ describe("curatedSetPhase", () => {
 });
 
 describe("set potential (§4)", () => {
-  it("renders nothing when the toggle is off, even with setBonuses present", () => {
+  it("renders the panel with the toggle off — disclosure is not gated on the ranking change", () => {
     const html = renderRankHtml(
       {
         ...rankingWithPvpWeaponAboveCutoff(),
@@ -1384,8 +1384,8 @@ describe("set potential (§4)", () => {
       },
       meta()
     );
-    expect(html).not.toContain("Set potential");
-    expect(html).not.toContain("Justicar Battlegear");
+    expect(html).toContain("Set potential (1)");
+    expect(html).toContain("Justicar Battlegear");
   });
 
   it("renders the set block and the measured bonus under the toggle", () => {
