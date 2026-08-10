@@ -515,8 +515,13 @@ def main() -> int:
         npc_zone_by_id=npc_zone_by_id,
     )
 
+    # `newline=""` on every write here: Python's text mode translates "\n" to
+    # "\r\n" on Windows, so without it a fresh parse differs from the committed
+    # LF artifact by 13927 bytes of line ending and `check_atlasloot_regen.py`
+    # -- which compares bytes -- reports drift on data that is identical.
+    # Same fix `normalize_proto_gen.py` already carries for the proto tree.
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8") as fh:
+    with args.out.open("w", encoding="utf-8", newline="") as fh:
         json.dump(sources, fh, indent=2, sort_keys=True)
         fh.write("\n")
 
@@ -542,7 +547,7 @@ def main() -> int:
         for row in rows:
             if row not in existing:
                 existing.append(row)
-    with args.out.open("w", encoding="utf-8") as fh:
+    with args.out.open("w", encoding="utf-8", newline="") as fh:
         json.dump(sources, fh, indent=2, sort_keys=True)
         fh.write("\n")
     print(
@@ -565,7 +570,7 @@ def main() -> int:
         raid_zones=raid_zones,
     )
     args.recipes_out.parent.mkdir(parents=True, exist_ok=True)
-    with args.recipes_out.open("w", encoding="utf-8") as fh:
+    with args.recipes_out.open("w", encoding="utf-8", newline="") as fh:
         json.dump(
             {
                 "kind": "raid-recipe-map",
@@ -589,7 +594,7 @@ def main() -> int:
         print(f"  {key}: {recipe_stats[key]}")
 
     args.factions_out.parent.mkdir(parents=True, exist_ok=True)
-    with args.factions_out.open("w", encoding="utf-8") as fh:
+    with args.factions_out.open("w", encoding="utf-8", newline="") as fh:
         json.dump(
             {
                 "kind": "faction-id-map",
