@@ -80,7 +80,7 @@ function renderShortlistChips(items: RankedItem[]): string {
     .map((i) => {
       const weighted = weightedSetPotentialDps(i);
       const full = weightedSetPotentialDps(i, "full");
-      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
+      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
     })
     .join("\n");
 }
@@ -115,6 +115,51 @@ function fmtAlternateSlot(item: ReportItem): string {
 function wowheadUrl(itemId: number): string {
   return `https://www.wowhead.com/tbc/item=${itemId}`;
 }
+
+/**
+ * The filter buckets a row belongs to — a zone key per raid it drops in, plus
+ * its non-raid source kinds. Every source is read, not just the primary one:
+ * a tier piece reaches its raid through `kind: "token"`, and filtering on
+ * `source` alone is the two-hop bug §15's risk table names (a "Karazhan"
+ * filter that omits every T4 piece).
+ */
+function sourceKeysOf(item: RankedItem): string[] {
+  const keys = new Set<string>();
+  for (const s of item.sources ?? [item.source]) {
+    if ("zone" in s) keys.add(`zone:${s.zone}`);
+    else keys.add(`kind:${s.kind}`);
+  }
+  return [...keys].sort();
+}
+
+/**
+ * `data-sources` is a delimited list, and zone names contain spaces
+ * ("Black Temple"), so it cannot be space-separated — splitting on space gave
+ * every multi-word zone a key that matched no checkbox, and those rows
+ * vanished with their own filter switched on. Tab is safe: it cannot occur in
+ * a zone name or an `ItemSource` kind.
+ */
+const SOURCE_KEY_SEP = "\t";
+
+/** Reader-facing label for a `sourceKeysOf` key. */
+function sourceKeyLabel(key: string): string {
+  const [prefix, ...rest] = key.split(":");
+  const value = rest.join(":");
+  if (prefix === "zone") return value;
+  return ZONELESS_SOURCE_LABELS[value] ?? value;
+}
+
+// Mirrors `view.ts`'s labels for the same zone-less kinds, so the filter and
+// `--group-by raid` name a bucket the same way.
+const ZONELESS_SOURCE_LABELS: Record<string, string> = {
+  badge: "Badge vendor",
+  crafted: "Crafted",
+  rep: "Reputation vendor",
+  pvp: "PvP vendor",
+  world: "World drop",
+  heroic: "Heroic dungeon",
+  unknown: "Source not recorded",
+};
 
 // The spec was hardcoded to `ret`, so every feral report claimed it had loaded
 // `ret-p2` while the CLI had in fact loaded `feral-p2.json`. The name here has
@@ -261,7 +306,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             n > 0 ? "delta up" : n < 0 ? "delta down" : "delta flat";
           const weightedCls = deltaClsFor(weighted);
           const fullCls = deltaClsFor(full);
-          return `<article class="${cls}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}">
+          return `<article class="${cls}" data-item-id="${item.itemId}" data-sources="${esc(sourceKeysOf(item).join(SOURCE_KEY_SEP))}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}">
   <div class="lead">${rank}${choice}</div>
   <div class="body">
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
@@ -382,19 +427,62 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     </div>`
       : "";
 
+  // One checkbox per source bucket present in the data, raids first (by row
+  // count, the order a reader scans) then the zone-less kinds alphabetically.
+  // All start checked, so the default page is unfiltered and the control reads
+  // as "uncheck what you cannot raid tonight".
+  const sourceCounts = new Map<string, number>();
+  for (const item of ranking.items) {
+    for (const key of sourceKeysOf(item)) {
+      sourceCounts.set(key, (sourceCounts.get(key) ?? 0) + 1);
+    }
+  }
+  const sourceKeys = [...sourceCounts.entries()].sort((a, b) => {
+    const aZone = a[0].startsWith("zone:");
+    const bZone = b[0].startsWith("zone:");
+    if (aZone !== bZone) return aZone ? -1 : 1;
+    if (aZone && a[1] !== b[1]) return b[1] - a[1];
+    return sourceKeyLabel(a[0]).localeCompare(sourceKeyLabel(b[0]));
+  });
+  const sourceFilter =
+    sourceKeys.length > 1
+      ? `<div class="set-weight-toggle source-filter">
+      <p class="set-weight-title">Sources</p>
+      <div class="source-boxes">${sourceKeys
+        .map(
+          ([key, n]) =>
+            `<label><input type="checkbox" class="source-box" value="${esc(key)}" checked /> <span>${esc(sourceKeyLabel(key))} <span class="source-n">${n}</span></span></label>`
+        )
+        .join("\n      ")}</div>
+      <p class="set-weight-note"><button type="button" id="source-all">All</button> <button type="button" id="source-none">None</button> — a row shows if <em>any</em> of its sources is checked, so a tier piece stays under its raid via the token that drops there.</p>
+    </div>`
+      : "";
+
+  // Exports what is on screen, so it composes with every filter above rather
+  // than being a second, silently different selection.
+  const exportPanel = `<div class="set-weight-toggle export-panel">
+      <p class="set-weight-title">Export</p>
+      <p class="set-weight-note">The <span id="export-count">0</span> visible upgrades as wowsims-shaped JSON. Item ids only, in display order — a list of candidates, <strong>not</strong> a 17-slot gear set, so it will not reconstruct a character on import.</p>
+      <p><button type="button" id="export-copy">Copy JSON</button> <span id="export-status" class="export-status"></span></p>
+      <textarea id="export-json" readonly rows="6" spellcheck="false"></textarea>
+    </div>`;
+
   // Re-sorts in place, swaps the visible number, and toggles the BiS filter.
   // Deliberately the whole of the client-side behaviour: every value was
   // computed at generation time, so nothing here recomputes DPS, re-derives
   // the cutoff, or decides what counts as BiS. The two controls are
   // independent — either may be absent, and neither gates the other.
-  const setWeightScript =
-    anyWeighted || bisCount > 0
-      ? `<script>
+  const setWeightScript = `<script>
 (function () {
   var radios = [].slice.call(
     document.querySelectorAll('input[name="set-weight"]')
   );
   var bisBox = document.getElementById("bis-only");
+  var sourceBoxes = [].slice.call(document.querySelectorAll(".source-box"));
+  var exportArea = document.getElementById("export-json");
+  var exportCount = document.getElementById("export-count");
+  var exportCopy = document.getElementById("export-copy");
+  var exportStatus = document.getElementById("export-status");
   var containers = [].slice.call(document.querySelectorAll(".rows, .chips"));
   var originals = containers.map(function (c) {
     return { container: c, order: [].slice.call(c.children) };
@@ -405,12 +493,34 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     }
     return "off";
   }
+  // null means "no source filtering", which is not the same as the empty set:
+  // unchecking every box legitimately shows nothing.
+  function allowedSources() {
+    if (!sourceBoxes.length) return null;
+    var on = {};
+    sourceBoxes.forEach(function (b) {
+      if (b.checked) on[b.value] = true;
+    });
+    return on;
+  }
+  function sourceOk(el, allowed) {
+    if (!allowed) return true;
+    var raw = el.getAttribute("data-sources");
+    if (!raw) return false;
+    var keys = raw.split("	");
+    for (var i = 0; i < keys.length; i++) {
+      if (allowed[keys[i]]) return true;
+    }
+    return false;
+  }
   function apply() {
     var m = mode();
     var attr = m === "full" ? "data-full" : "data-weighted";
+    var allowed = allowedSources();
+    var bisOn = !!bisBox && bisBox.checked;
     document.body.classList.toggle("weighted", m === "weighted");
     document.body.classList.toggle("full", m === "full");
-    document.body.classList.toggle("bis-only", !!bisBox && bisBox.checked);
+    document.body.classList.toggle("bis-only", bisOn);
     originals.forEach(function (entry) {
       var kids = entry.order.slice();
       if (m !== "off") {
@@ -421,6 +531,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         });
       }
       kids.forEach(function (k) {
+        k.classList.toggle("source-hidden", !sourceOk(k, allowed));
         entry.container.appendChild(k);
       });
     });
@@ -433,24 +544,112 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             : "data-plain"
       );
     });
-    // The nav badge counts what is actually on screen.
-    [].slice.call(document.querySelectorAll(".nav-slot")).forEach(function (a) {
-      var badge = a.querySelector(".nav-hit");
-      if (!badge) return;
-      badge.textContent =
-        bisBox && bisBox.checked
-          ? a.getAttribute("data-bis-hits")
-          : a.getAttribute("data-hits");
+    // Visibility is computed from the row's own classes, never from layout:
+    // reading offsetParent here is circular, because hiding a section makes
+    // its rows report hidden, so the next apply() sees an empty section and
+    // the page can never come back. (It did exactly that.)
+    function rowShown(r) {
+      return (
+        r.className.indexOf("source-hidden") < 0 &&
+        (!bisOn || r.className.indexOf("is-bis") >= 0)
+      );
+    }
+    var visibleRows = [].slice
+      .call(document.querySelectorAll("article.row"))
+      .filter(rowShown);
+    // A slot section hides when the filters leave it with nothing, so the page
+    // never shows a heading over an empty list.
+    [].slice.call(document.querySelectorAll("section.slot")).forEach(function (s) {
+      var shown = [].slice.call(s.querySelectorAll("article.row")).filter(rowShown);
+      s.classList.toggle("empty-under-filter", shown.length === 0);
+      var link = document.querySelector('.nav-slot[href="#' + s.id + '"]');
+      if (link) {
+        link.classList.toggle("empty-under-filter", shown.length === 0);
+        var badge = link.querySelector(".nav-hit");
+        if (badge) {
+          badge.textContent = String(
+            shown.filter(function (r) {
+              return r.className.indexOf("hit") >= 0;
+            }).length
+          );
+        }
+      }
     });
+    updateExport(visibleRows);
+  }
+  // Takes the same list the filters just computed, so the export cannot
+  // disagree with what the page shows.
+  function updateExport(visibleRows) {
+    if (!exportArea) return;
+    var seen = {};
+    var ids = [];
+    visibleRows.forEach(function (r) {
+      var id = r.getAttribute("data-item-id");
+      if (!id || seen[id]) return;
+      seen[id] = true;
+      ids.push({ id: parseInt(id, 10) });
+    });
+    exportArea.value = JSON.stringify({ items: ids }, null, 2);
+    if (exportCount) exportCount.textContent = String(ids.length);
   }
   radios.forEach(function (r) {
     r.addEventListener("change", apply);
   });
   if (bisBox) bisBox.addEventListener("change", apply);
+  sourceBoxes.forEach(function (b) {
+    b.addEventListener("change", apply);
+  });
+  var allBtn = document.getElementById("source-all");
+  var noneBtn = document.getElementById("source-none");
+  if (allBtn)
+    allBtn.addEventListener("click", function () {
+      sourceBoxes.forEach(function (b) {
+        b.checked = true;
+      });
+      apply();
+    });
+  if (noneBtn)
+    noneBtn.addEventListener("click", function () {
+      sourceBoxes.forEach(function (b) {
+        b.checked = false;
+      });
+      apply();
+    });
+  if (exportCopy)
+    exportCopy.addEventListener("click", function () {
+      exportArea.select();
+      var ok = false;
+      // execCommand is deprecated but works from a file:// page, where the
+      // async clipboard API is blocked in some browsers. Try the modern one
+      // first and fall back rather than leaving the button dead.
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(exportArea.value).then(
+          function () {
+            if (exportStatus) exportStatus.textContent = "copied";
+          },
+          function () {
+            try {
+              ok = document.execCommand("copy");
+            } catch (e) {
+              ok = false;
+            }
+            if (exportStatus)
+              exportStatus.textContent = ok ? "copied" : "press Ctrl+C";
+          }
+        );
+        return;
+      }
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {
+        ok = false;
+      }
+      if (exportStatus)
+        exportStatus.textContent = ok ? "copied" : "press Ctrl+C";
+    });
   apply();
 })();
-</script>`
-      : "";
+</script>`;
 
   const title = `${meta.character} · ${meta.spec} P${meta.maxPhase}`;
 
@@ -500,7 +699,9 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         : ""
     }
     ${bisFilter}
+    ${sourceFilter}
     ${setWeightToggle}
+    ${exportPanel}
     ${noiseNote}
     ${capBanner}
     ${provenance}

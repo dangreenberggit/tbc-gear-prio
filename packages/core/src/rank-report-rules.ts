@@ -153,6 +153,32 @@ export function formatBreaksSuffix(b: SetBonusValue): string {
 }
 
 /**
+ * The visible upgrade list as wowsims-shaped JSON: `{"items":[{"id":N}, ...]}`,
+ * the same envelope as `vendor/wowsims/*.gear.json` and what its importer
+ * accepts.
+ *
+ * One deliberate difference from a gear-set file, and it matters: a gear set is
+ * **positional** — 17 slots in `SIM_ORDER`, `{}` for empty — whereas this is a
+ * *list of upgrades* in the order the page displays them, which is neither 17
+ * long nor slot-indexed. Two rows here can share a slot (both rings, several
+ * legs candidates), so it cannot be read as an equipment set, and pasting it
+ * where a full set is expected will not reconstruct a character.
+ *
+ * Ids only. Enchants and gems belong to the *worn* item; a ranked candidate is
+ * an item the player does not have yet, so emitting either would invent gear
+ * the sim never measured.
+ */
+export function wowsimsItemIdsJson(
+  items: ReadonlyArray<Pick<RankedItem, "itemId">>
+): string {
+  return JSON.stringify(
+    { items: items.map((i) => ({ id: i.itemId })) },
+    null,
+    2
+  );
+}
+
+/**
  * The phase a curated gear-set label is BiS *for*, or `null` if unrecognised.
  *
  * Mirrors `CURATED_SET_PHASE` / `curated_set_phase` in

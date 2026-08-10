@@ -310,6 +310,40 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--ink-soft);
   }
+  .source-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.1rem 0.75rem;
+  }
+  .source-n { color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem; }
+  .set-weight-toggle button {
+    font: inherit;
+    font-size: 0.78rem;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .set-weight-toggle button:hover { background: var(--paper-2); }
+  #export-json {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 0.5rem;
+    resize: vertical;
+  }
+  .export-status { font-size: 0.78rem; color: var(--up); }
+  /* Source filter and the "nothing left in this slot" case, both driven by a
+     class rather than by deleting nodes — see the BiS note below. */
+  .source-hidden,
+  .empty-under-filter { display: none; }
   /* The BiS filter hides rather than deletes: every row stays in the
      document, so the artifact is whole and the filter is a pure view. */
   .slot-count-bis { display: none; }

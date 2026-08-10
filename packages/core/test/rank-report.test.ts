@@ -15,6 +15,7 @@ import {
   formatSetPotentialLine,
   isCuratedBis,
   weightedSetPotentialDps,
+  wowsimsItemIdsJson,
 } from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
 
@@ -468,10 +469,18 @@ describe("rank-report", () => {
     // the filter's rules. No row here is curated, so the filter control and
     // the <script> still do not render for this fixture. Diffed before/after
     // to confirm that is the whole delta.
+    // Repinned for the source filter and the JSON export: rows gain
+    // `data-item-id`/`data-sources`, chips gain `data-sources`, the page gains
+    // the Sources and Export panels, and the <script> is now unconditional
+    // (the export panel needs it on every page, where before it only shipped
+    // alongside a set or BiS control). This fixture has two source buckets, so
+    // unlike the previous repins it *does* render a new control. Diffed
+    // before/after to confirm the delta is those attributes, the two panels,
+    // the script, and the new CSS block.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "d13f06315b3d6d3f20a39efbe72a8e004b9352078bada1ff392da181a2acd0fb",
-      length: 13968,
+        "feff44f2c463ffefb29ff8a838dbfa79e76e52eb6b1beae31cacf117eb289f5e",
+      length: 22702,
     });
   });
 });
@@ -827,9 +836,9 @@ describe("set-weight toggle (client-side re-sort)", () => {
       meta
     );
     // The stylesheet always carries the control's rules, so the absence check
-    // is on the control and its script, not on the class name.
-    expect(html).not.toContain('name="set-weight"');
-    expect(html).not.toContain("<script>");
+    // is on the control markup. The <script> is now unconditional — the export
+    // panel needs it on every page — so its presence says nothing here.
+    expect(html).not.toContain('type="radio" name="set-weight"');
   });
 
   it("offers the control for a row only `full` would move", () => {
@@ -998,6 +1007,136 @@ describe("BiS-only filter", () => {
     // filter is CSS over classes.
     const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
     expect(html).toContain("Uncurated");
+  });
+});
+
+describe("wowsimsItemIdsJson", () => {
+  it("emits the wowsims envelope with ids in display order", () => {
+    expect(wowsimsItemIdsJson([{ itemId: 30229 }, { itemId: 32014 }])).toBe(`{
+  "items": [
+    {
+      "id": 30229
+    },
+    {
+      "id": 32014
+    }
+  ]
+}`);
+  });
+
+  it("emits an empty items array rather than null when nothing is visible", () => {
+    expect(JSON.parse(wowsimsItemIdsJson([]))).toEqual({ items: [] });
+  });
+
+  it("carries ids only — no enchant or gems invented for unowned items", () => {
+    const parsed = JSON.parse(wowsimsItemIdsJson([{ itemId: 1 }])) as {
+      items: Array<Record<string, unknown>>;
+    };
+    expect(Object.keys(parsed.items[0]!)).toEqual(["id"]);
+  });
+});
+
+describe("source filter", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 3,
+    generatedAt: "now",
+  };
+
+  const karaDrop = item({
+    name: "Kara drop",
+    slot: "head",
+    deltaDps: 10,
+    itemId: 21,
+    belowCutoff: false,
+    source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+  });
+  const crafted = item({
+    name: "Crafted thing",
+    slot: "waist",
+    deltaDps: 5,
+    itemId: 22,
+    belowCutoff: false,
+    source: { kind: "crafted", profession: "Leatherworking" },
+  });
+
+  it("tags a row with a zone key per raid it drops in", () => {
+    const html = renderRankHtml(ranking([karaDrop, crafted]), meta);
+    expect(html).toContain('data-sources="zone:Karazhan"');
+    expect(html).toContain('data-sources="kind:crafted"');
+  });
+
+  it("reaches a tier piece's raid through its token source, not just the primary", () => {
+    // The two-hop case §15's risk table names: filtering on `source` alone
+    // gives a Karazhan filter that omits every T4 piece.
+    const tierPiece = item({
+      name: "Tier piece",
+      slot: "chest",
+      deltaDps: 3,
+      itemId: 23,
+      source: { kind: "unknown" },
+      sources: [
+        {
+          kind: "token",
+          zone: "Serpentshrine Cavern",
+          token: "Chest of the Vanquished",
+          boss: "Vashj",
+        },
+      ],
+    });
+    const html = renderRankHtml(ranking([tierPiece]), meta);
+    expect(html).toContain('data-sources="zone:Serpentshrine Cavern"');
+  });
+
+  it("separates source keys with a tab, so multi-word zones survive", () => {
+    // Space-separated was the first cut, and every multi-word zone ("Black
+    // Temple") then split into keys matching no checkbox — 236 of 407 rows
+    // vanished with their own filter switched on. Caught in a browser, not by
+    // a test, which is why this one exists.
+    const twoZones = item({
+      name: "Two zones",
+      slot: "head",
+      deltaDps: 1,
+      itemId: 24,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+      sources: [
+        { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+        { kind: "raid", zone: "Hyjal Summit", boss: "Archimonde" },
+      ],
+    });
+    const html = renderRankHtml(ranking([twoZones]), meta);
+    expect(html).toContain(
+      'data-sources="zone:Black Temple\tzone:Hyjal Summit"'
+    );
+    // The delimiter must not appear inside a key, or the split re-breaks.
+    for (const key of ["zone:Black Temple", "zone:Hyjal Summit"]) {
+      expect(key).not.toContain("\t");
+    }
+  });
+
+  it("offers one checkbox per bucket, all checked, with a count", () => {
+    const html = renderRankHtml(ranking([karaDrop, crafted]), meta);
+    expect(html).toContain('class="source-box" value="zone:Karazhan" checked');
+    expect(html).toContain('class="source-box" value="kind:crafted" checked');
+    // Zone-less kinds get the reader-facing label, not the bare kind.
+    expect(html).toContain("Crafted");
+  });
+
+  it("omits the filter when every row shares one source bucket", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).not.toContain('class="source-box"');
+  });
+
+  it("always ships the export panel and its script", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).toContain('id="export-json"');
+    expect(html).toContain('id="export-copy"');
+    expect(html).toContain('data-item-id="21"');
+    expect(html).toContain("<script>");
   });
 });
 
