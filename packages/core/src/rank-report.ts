@@ -16,6 +16,7 @@ import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
 import {
+  curatedSetPhase,
   formatSetBonusLine,
   formatSetPotentialLine,
   groupBySlot,
@@ -115,8 +116,11 @@ function wowheadUrl(itemId: number): string {
   return `https://www.wowhead.com/tbc/item=${itemId}`;
 }
 
+// The spec was hardcoded to `ret`, so every feral report claimed it had loaded
+// `ret-p2` while the CLI had in fact loaded `feral-p2.json`. The name here has
+// to match `loadUniversePool`'s `data/universes/${spec}-p${maxPhase}.json`.
 function poolScopeNote(meta: RankReportMeta): string {
-  const base = `Universe pool (ret-p${meta.maxPhase}).`;
+  const base = `Universe pool (${meta.spec}-p${meta.maxPhase}).`;
   return meta.raid ? `${base} Filtered to ${meta.raid}.` : base;
 }
 
@@ -348,12 +352,32 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // member of a whole optimized set, so several are below cutoff as single
   // swaps (Wolfshead Helm, Bloodlust Brooch) — showing 10 of 17 under a
   // control labelled "BiS only" would misdescribe the list it names.
+  // Name the sets the tags actually came from, never the requested phase.
+  // Upstream vendors no gear set past p2, so a P3+ run silently degrades to
+  // p2's list (`bis_set_labels_for_max_phase`). Labelling that "P3 BiS" would
+  // assert a curation upstream never made — the exact per-item overclaim
+  // carry-forward 47 §1 was filed for.
+  const bisSetLabels = [
+    ...new Set(
+      ranking.items.filter(isCuratedBis).flatMap((i) => i.bisSets ?? [])
+    ),
+  ].sort();
+  const bisStale = bisSetLabels.some((s) => {
+    const phase = curatedSetPhase(s);
+    return phase !== null && phase < meta.maxPhase;
+  });
+  const bisProvenance = bisSetLabels.length
+    ? ` (${esc(bisSetLabels.join(", "))})`
+    : "";
+  const bisStaleNote = bisStale
+    ? ` <strong>Upstream ships no curated set for P${meta.maxPhase}</strong>, so these are the newest it does vendor — an older phase's list, not a P${meta.maxPhase} recommendation.`
+    : "";
   const bisFilter =
     bisCount > 0
       ? `<div class="set-weight-toggle bis-filter">
       <p class="set-weight-title">Curated list</p>
-      <label><input type="checkbox" id="bis-only" /> <span>BiS only — the ${bisCount} items on this phase's curated set${meta.spec ? ` (${esc(meta.spec)} P${meta.maxPhase})` : ""}</span></label>
-      <p class="set-weight-note">Upstream's pinned gear sets for this phase, not an absolute verdict. Below-cutoff picks stay visible and stay muted: an item is BiS as part of a whole optimized set, which is why some are downgrades as a single swap.</p>
+      <label><input type="checkbox" id="bis-only" /> <span>BiS only — the ${bisCount} items on upstream's ${esc(meta.spec)} gear set${bisSetLabels.length === 1 ? "" : "s"}${bisProvenance}</span></label>
+      <p class="set-weight-note">Upstream's pinned gear sets, not an absolute verdict.${bisStaleNote} Below-cutoff picks stay visible and stay muted: an item is BiS as part of a whole optimized set, which is why some are downgrades as a single swap.</p>
     </div>`
       : "";
 

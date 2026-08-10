@@ -10,6 +10,7 @@ import {
   type RankReportMeta,
 } from "../src/rank-report.js";
 import {
+  curatedSetPhase,
   formatSetBonusLine,
   formatSetPotentialLine,
   isCuratedBis,
@@ -292,6 +293,19 @@ describe("rank-report", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     expect(html).toContain("Universe pool (ret-p3).");
     expect(html).not.toContain("EP prefilter");
+  });
+
+  it("names the ranked spec's pool, not a hardcoded ret", () => {
+    // The spec was interpolated as a literal `ret`, so every feral report
+    // claimed a `ret-pN` pool while the CLI had loaded `feral-pN.json`. The
+    // ret fixture above passes either way, which is why it never caught this.
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), {
+      ...meta(),
+      spec: "feral",
+      maxPhase: 3,
+    });
+    expect(html).toContain("Universe pool (feral-p3).");
+    expect(html).not.toContain("ret-p3");
   });
 
   it("names the stage a BiS badge is BiS for (carry-forward 47)", () => {
@@ -947,6 +961,27 @@ describe("BiS-only filter", () => {
     expect(html).not.toContain('id="bis-only"');
   });
 
+  it("names the sets the tags came from, not the requested phase", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain("(p2_6p)");
+  });
+
+  it("warns when the curated list is older than the ranked phase", () => {
+    // Upstream vendors no gear set past p2, so a P3 run degrades to p2's
+    // list. Calling that "P3 BiS" would assert a curation upstream never
+    // made — the per-item overclaim carry-forward 47 §1 was filed for.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), {
+      ...meta,
+      maxPhase: 3,
+    });
+    expect(html).toContain("Upstream ships no curated set for P3");
+  });
+
+  it("does not warn when the curated list matches the ranked phase", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).not.toContain("Upstream ships no curated set");
+  });
+
   it("still ships the script when only the BiS filter is present", () => {
     // The two controls are independent: a page with curated rows but no
     // unrealised set bonus still needs the script for the filter to work.
@@ -963,6 +998,22 @@ describe("BiS-only filter", () => {
     // filter is CSS over classes.
     const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
     expect(html).toContain("Uncurated");
+  });
+});
+
+describe("curatedSetPhase", () => {
+  it("reads the phase from a label, ignoring the variant suffix", () => {
+    expect(curatedSetPhase("p2")).toBe(2);
+    expect(curatedSetPhase("p2_6p")).toBe(2);
+    expect(curatedSetPhase("p2_9p")).toBe(2);
+    expect(curatedSetPhase("p1")).toBe(1);
+    // Pre-raid is phase 1: it is the set you take *into* a phase-1 raid.
+    expect(curatedSetPhase("preraid")).toBe(1);
+  });
+
+  it("is null for a label it does not recognise", () => {
+    expect(curatedSetPhase("p3")).toBeNull();
+    expect(curatedSetPhase("")).toBeNull();
   });
 });
 
