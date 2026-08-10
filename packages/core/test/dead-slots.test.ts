@@ -1,0 +1,137 @@
+import { describe, expect, it } from "vitest";
+import { classifyDeadSlots, type DeadSlotRow } from "../src/dead-slots.js";
+
+/**
+ * The four dead slots of `.scratch/rank-reports/shredzepelin-p3.json`, which
+ * ticket 94 established arise from three different causes. Item ids and deltas
+ * are transcribed from that artifact; the setIds come from
+ * `data/items/index.json` via the classifier's own join, not from here.
+ */
+
+/** Worn item rows sit at exactly 0 — the swap that changes nothing. */
+function worn(itemId: number, name: string, slot: string): DeadSlotRow {
+  return { itemId, name, slot, deltaDps: 0 };
+}
+
+function cand(
+  itemId: number,
+  name: string,
+  slot: string,
+  deltaDps: number
+): DeadSlotRow {
+  return { itemId, name, slot, deltaDps };
+}
+
+const CHEST: DeadSlotRow[] = [
+  worn(29096, "Breastplate of Malorne", "chest"),
+  cand(33675, "Vengeful Gladiator's Dragonhide Tunic", "chest", -90.16),
+  cand(31042, "Thunderheart Chestguard", "chest", -100.16),
+];
+
+const SHOULDER: DeadSlotRow[] = [
+  worn(29100, "Mantle of Malorne", "shoulder"),
+  cand(33674, "Vengeful Gladiator's Dragonhide Spaulders", "shoulder", -102.16),
+  cand(31048, "Thunderheart Pauldrons", "shoulder", -106.16),
+];
+
+// 18 rows in the artifact — a deep pool, so thinness cannot explain this one.
+// Only the two nearest candidates are named; the rest pad the pool to its real
+// depth so the `thin-pool` test does not fire ahead of `unique-effect`.
+const HEAD: DeadSlotRow[] = [
+  worn(8345, "Wolfshead Helm", "head"),
+  cand(33672, "Vengeful Gladiator's Dragonhide Helm", "head", -202.05),
+  cand(32235, "Cursed Vision of Sargeras", "head", -202.13),
+  ...Array.from({ length: 15 }, (_, i) =>
+    cand(40000 + i, `head filler ${i}`, "head", -210 - i)
+  ),
+];
+
+const RANGED: DeadSlotRow[] = [
+  worn(29390, "Everbloom Idol", "ranged"),
+  cand(32257, "Idol of the White Stag", "ranged", -25.27),
+  cand(28568, "Idol of the Avian Heart", "ranged", -54.6),
+  cand(30051, "Idol of the Crescent Goddess", "ranged", -54.6),
+];
+
+/** A live slot: some candidate beats the worn item, so it is not dead at all. */
+const WAIST: DeadSlotRow[] = [
+  worn(21873, "worn waist", "waist"),
+  cand(32268, "Belt of One-Hundred Deaths", "waist", 45.5),
+];
+
+/** Worn counts of the player's sets, as `setCounts` would report them. */
+const SHREDZEPELIN_WORN_SET_COUNTS = new Map<number, number>([[640, 2]]);
+
+describe("classifyDeadSlots", () => {
+  it("leaves a slot with a positive candidate unclassified", () => {
+    const found = classifyDeadSlots([...WAIST, ...CHEST], {
+      wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS,
+    });
+    expect(found.map((d) => d.slot)).not.toContain("waist");
+  });
+
+  it("classifies chest and shoulder as a set-break toll, naming the set", () => {
+    const found = classifyDeadSlots([...CHEST, ...SHOULDER], {
+      wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS,
+    });
+
+    const chest = found.find((d) => d.slot === "chest");
+    expect(chest?.cause).toBe("set-break-toll");
+    // The signature is the worn item's own setId sitting at/above an
+    // implemented threshold — not the size of the gap.
+    expect(chest?.wornSetId).toBe(640);
+    expect(chest?.wornSetName).toBe("Malorne Harness");
+    expect(chest?.brokenThreshold).toBe(2);
+    expect(chest?.runnerUpGapDps).toBeCloseTo(-90.16, 2);
+
+    const shoulder = found.find((d) => d.slot === "shoulder");
+    expect(shoulder?.cause).toBe("set-break-toll");
+    expect(shoulder?.wornSetId).toBe(640);
+    expect(shoulder?.brokenThreshold).toBe(2);
+  });
+
+  it("classifies Wolfshead Helm's slot as a unique effect, not a toll", () => {
+    const found = classifyDeadSlots(HEAD, {
+      wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS,
+    });
+    const head = found.find((d) => d.slot === "head");
+    // A huge gap with no set behind it: the symptom of a toll, none of the cause.
+    expect(head?.cause).toBe("unique-effect");
+    expect(head?.wornSetId).toBeNull();
+    expect(head?.runnerUpGapDps).toBeCloseTo(-202.05, 2);
+  });
+
+  it("classifies the 4-idol ranged slot as a thin pool", () => {
+    const found = classifyDeadSlots(RANGED, {
+      wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS,
+    });
+    const ranged = found.find((d) => d.slot === "ranged");
+    expect(ranged?.cause).toBe("thin-pool");
+    expect(ranged?.wornSetId).toBeNull();
+    expect(ranged?.poolSize).toBe(3);
+  });
+
+  it("classifies a setless slot with a shallow gap as benign", () => {
+    // Ret's dead slots: a deep pool, no set, and nothing better by a hair.
+    const benign: DeadSlotRow[] = [
+      worn(29390, "worn wrist", "wrist"),
+      ...Array.from({ length: 12 }, (_, i) =>
+        cand(30000 + i, `wrist ${i}`, "wrist", -0.2 - i)
+      ),
+    ];
+    const found = classifyDeadSlots(benign, { wornSetCounts: new Map() });
+    const wrist = found.find((d) => d.slot === "wrist");
+    expect(wrist?.cause).toBe("benign-nothing-better");
+  });
+
+  it("does not call a set-break toll on a worn set below its threshold", () => {
+    // One Malorne piece worn: swapping it away breaks no active threshold, so
+    // the dead zone needs a different explanation than a toll.
+    const found = classifyDeadSlots(CHEST, {
+      wornSetCounts: new Map([[640, 1]]),
+    });
+    expect(found.find((d) => d.slot === "chest")?.cause).not.toBe(
+      "set-break-toll"
+    );
+  });
+});
