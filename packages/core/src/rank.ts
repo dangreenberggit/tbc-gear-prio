@@ -789,6 +789,7 @@ export async function rankUpgrades(
         name: i.name,
         slot: i.slot,
         deltaDps: i.deltaDps,
+        ...(i.owned === true ? { owned: true } : {}),
       })),
       wornSetCounts: setCounts(equipment),
     });

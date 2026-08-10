@@ -43,6 +43,14 @@ export type DeadSlotCause =
   | "unique-effect"
   /** Too few candidates for "worn item is best" to mean anything. */
   | "thin-pool"
+  /**
+   * The worn item is not in `data/items/index.json`, so its set membership is
+   * unknowable and a `set-break-toll` cannot be ruled in or out. Distinct from
+   * every other cause because those are findings and this is a data gap — the
+   * classifier has no cause, and saying `unique-effect` here would state a
+   * confident wrong one.
+   */
+  | "unknown-item"
   /** A real pool, no set, nothing better — not a defect. */
   | "benign-nothing-better";
 
@@ -52,6 +60,12 @@ export type DeadSlotRow = {
   name: string;
   slot: string;
   deltaDps: number;
+  /**
+   * This item is the one currently equipped (`RankedItem.owned`). The direct
+   * signal for "worn", where `deltaDps === 0` is only a proxy for it — see
+   * `wornRowOf`.
+   */
+  owned?: boolean;
 };
 
 export type DeadSlot = {
@@ -67,8 +81,18 @@ export type DeadSlot = {
    * below. Present only for `set-break-toll` — it is the toll being charged.
    */
   brokenThreshold?: SetThreshold;
-  /** Best candidate's delta: how much the best alternative loses by. */
+  /**
+   * Best *strictly worse* candidate's delta: how much the nearest real
+   * alternative loses by. Candidates tying the worn item at 0 are excluded, so
+   * a clone cannot report a gap of 0 — see `tiedCandidates`.
+   */
   runnerUpGapDps: number;
+  /**
+   * Candidates measuring the worn item's delta exactly. At 3000 iterations a
+   * genuine tie is ordinary, and the gap is silent about them by construction,
+   * so the count is carried rather than folded into `runnerUpGapDps`.
+   */
+  tiedCandidates: number;
   /** Candidates considered, excluding the worn item itself. */
   poolSize: number;
 };
@@ -101,12 +125,33 @@ function thresholdLostByDroppingOnePiece(
 }
 
 /**
+ * The equipped row, or `null` when the slot has no unambiguous one.
+ *
+ * `owned` is the direct signal and is preferred wherever a row carries it;
+ * `deltaDps === 0` is only a *proxy* for "this is the item you are wearing",
+ * and it stops being a reliable one the moment a second candidate measures
+ * identically to baseline — ordinary at 3000 iterations with rounding. Picking
+ * the first such row silently decided which item's set membership got joined,
+ * and the arbitrary pick could suppress a real `set-break-toll`.
+ *
+ * Ambiguity resolves to `null` rather than a guess: the caller drops the slot,
+ * which is the honest outcome when the worn item cannot be identified.
+ */
+function wornRowOf(slotRows: readonly DeadSlotRow[]): DeadSlotRow | null {
+  const owned = slotRows.filter((r) => r.owned === true);
+  const candidates = owned.length > 0 ? owned : slotRows;
+  const zeroed = candidates.filter((r) => r.deltaDps === 0);
+  return zeroed.length === 1 ? (zeroed[0] ?? null) : null;
+}
+
+/**
  * Classify every slot in `rows` that has no positive candidate.
  *
- * The worn item is the row at exactly `deltaDps === 0` — a swap measured
- * against itself. Slots with a positive candidate are not dead and are omitted
- * entirely, as are slots whose worn item cannot be identified (nothing to join
- * against, so no cause can be established).
+ * Slots with a positive candidate are not dead and are omitted entirely, as are
+ * slots whose worn item cannot be identified (nothing to join against, so no
+ * cause can be established). A worn item that *is* identified but absent from
+ * the item index is a different matter and gets `unknown-item`, because there
+ * the report would otherwise state a cause it cannot have established.
  */
 export function classifyDeadSlots(
   rows: readonly DeadSlotRow[],
@@ -124,12 +169,22 @@ export function classifyDeadSlots(
     const best = Math.max(...slotRows.map((r) => r.deltaDps));
     if (best > 0) continue;
 
-    const wornRow = slotRows.find((r) => r.deltaDps === 0);
+    const wornRow = wornRowOf(slotRows);
     if (!wornRow) continue;
 
     const candidates = slotRows.filter((r) => r !== wornRow);
     if (candidates.length === 0) continue;
-    const runnerUpGapDps = Math.max(...candidates.map((r) => r.deltaDps));
+
+    // Only strictly-worse rows can be the runner-up. A tie leaves the gap
+    // undefined rather than 0: reporting 0 would say "an alternative is this
+    // close" using a row that is not an alternative at all, which is how a
+    // clone at 0 used to force `benign-nothing-better` and suppress the warning.
+    const strictlyWorse = candidates.filter((r) => r.deltaDps < 0);
+    const tiedCandidates = candidates.length - strictlyWorse.length;
+    const runnerUpGapDps =
+      strictlyWorse.length > 0
+        ? Math.max(...strictlyWorse.map((r) => r.deltaDps))
+        : 0;
 
     const wornItem = getItem(wornRow.itemId);
     const wornSetId = wornItem?.setId ?? null;
@@ -145,8 +200,12 @@ export function classifyDeadSlots(
 
     // Order matters: a real toll outranks the pool-shape explanations, because
     // a set-holding slot can also be thin, and the toll is the actionable fact.
+    // `unknown-item` comes first of all — with no index entry the toll test
+    // never ran, so every cause below it would be asserting more than is known.
     let cause: DeadSlotCause;
-    if (brokenThreshold !== null) {
+    if (wornItem === undefined) {
+      cause = "unknown-item";
+    } else if (brokenThreshold !== null) {
       cause = "set-break-toll";
     } else if (candidates.length < THIN_POOL_CANDIDATES) {
       cause = "thin-pool";
@@ -164,6 +223,7 @@ export function classifyDeadSlots(
       wornSetId,
       wornSetName,
       runnerUpGapDps,
+      tiedCandidates,
       poolSize: candidates.length,
     };
     if (brokenThreshold !== null) entry.brokenThreshold = brokenThreshold;

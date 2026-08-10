@@ -124,7 +124,7 @@ describe("setBonusMagnitudeWarnings", () => {
 
 /** The shredzepelin-p3 dead slots, as ticket 94's classifier tests transcribe them. */
 function worn(itemId: number, name: string, slot: string): DeadSlotRow {
-  return { itemId, name, slot, deltaDps: 0 };
+  return { itemId, name, slot, deltaDps: 0, owned: true };
 }
 function cand(
   itemId: number,
@@ -193,6 +193,21 @@ describe("deadSlotWarnings", () => {
     expect(
       deadSlotWarnings(RANGED, { wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS })
     ).toEqual([]);
+  });
+
+  it("warns that an unresolvable worn item leaves the cause unknown", () => {
+    const rows: DeadSlotRow[] = [
+      worn(999_999_999, "Mystery Helm", "head"),
+      ...Array.from({ length: 10 }, (_, i) =>
+        cand(50300 + i, `head filler ${i}`, "head", -300 - i)
+      ),
+    ];
+    const found = deadSlotWarnings(rows, { wornSetCounts: new Map() });
+    expect(found.map((w) => w.cause)).toEqual(["unknown-item"]);
+    // Naming a cause it cannot have established is exactly the failure this
+    // warning replaces, so the unique-effect wording must not appear.
+    expect(found[0]?.message).not.toContain("matches");
+    expect(found[0]?.message).toContain("could not be resolved");
   });
 
   it("does NOT warn when a deep pool simply has nothing better", () => {

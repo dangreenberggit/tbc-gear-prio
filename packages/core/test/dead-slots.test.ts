@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { classifyDeadSlots, type DeadSlotRow } from "../src/dead-slots.js";
+import {
+  classifyDeadSlots,
+  THIN_POOL_CANDIDATES,
+  UNIQUE_EFFECT_GAP_DPS,
+  type DeadSlotRow,
+} from "../src/dead-slots.js";
 
 /**
  * The four dead slots of `.scratch/rank-reports/shredzepelin-p3.json`, which
@@ -8,9 +13,12 @@ import { classifyDeadSlots, type DeadSlotRow } from "../src/dead-slots.js";
  * `data/items/index.json` via the classifier's own join, not from here.
  */
 
-/** Worn item rows sit at exactly 0 — the swap that changes nothing. */
+/**
+ * The equipped item: `owned` marks it, and its delta is exactly 0 because the
+ * swap replaces it with itself.
+ */
 function worn(itemId: number, name: string, slot: string): DeadSlotRow {
-  return { itemId, name, slot, deltaDps: 0 };
+  return { itemId, name, slot, deltaDps: 0, owned: true };
 }
 
 function cand(
@@ -122,6 +130,91 @@ describe("classifyDeadSlots", () => {
     const found = classifyDeadSlots(benign, { wornSetCounts: new Map() });
     const wrist = found.find((d) => d.slot === "wrist");
     expect(wrist?.cause).toBe("benign-nothing-better");
+  });
+
+  it("uses the owned flag, not the zero delta, to pick the worn item", () => {
+    // A second candidate measuring identically to baseline is unremarkable at
+    // 3000 iterations. Without `owned` the classifier picked whichever zero row
+    // came first, so the setId it joined against was arbitrary.
+    const tied: DeadSlotRow[] = [
+      cand(33675, "Vengeful Gladiator's Dragonhide Tunic", "chest", 0),
+      { ...worn(29096, "Breastplate of Malorne", "chest"), owned: true },
+      cand(31042, "Thunderheart Chestguard", "chest", -100.16),
+    ];
+    const chest = classifyDeadSlots(tied, {
+      wornSetCounts: SHREDZEPELIN_WORN_SET_COUNTS,
+    }).find((d) => d.slot === "chest");
+    expect(chest?.wornItemId).toBe(29096);
+    expect(chest?.cause).toBe("set-break-toll");
+  });
+
+  it("does not let a tied candidate masquerade as the runner-up", () => {
+    // The reviewer's case: a clone at 0 made the gap 0, which read as benign
+    // and suppressed the warning for a slot whose real runner-up is at -300.
+    const tied: DeadSlotRow[] = [
+      { ...worn(8345, "Wolfshead Helm", "head"), owned: true },
+      cand(50001, "head clone", "head", 0),
+      ...Array.from({ length: 10 }, (_, i) =>
+        cand(50100 + i, `head filler ${i}`, "head", -300 - i)
+      ),
+    ];
+    const head = classifyDeadSlots(tied, { wornSetCounts: new Map() }).find(
+      (d) => d.slot === "head"
+    );
+    expect(head?.tiedCandidates).toBe(1);
+    expect(head?.runnerUpGapDps).toBeCloseTo(-300, 2);
+    expect(head?.cause).toBe("unique-effect");
+  });
+
+  it("reports an unresolvable worn item as unknown-item, not a unique effect", () => {
+    // Item id absent from data/items/index.json: a set-break toll is
+    // undetectable by construction, so no confident cause may be claimed.
+    const rows: DeadSlotRow[] = [
+      { ...worn(999_999_999, "Mystery Helm", "head"), owned: true },
+      ...Array.from({ length: 10 }, (_, i) =>
+        cand(50200 + i, `head filler ${i}`, "head", -300 - i)
+      ),
+    ];
+    const head = classifyDeadSlots(rows, { wornSetCounts: new Map() }).find(
+      (d) => d.slot === "head"
+    );
+    expect(head?.cause).toBe("unknown-item");
+    expect(head?.wornSetId).toBeNull();
+  });
+
+  it("omits a slot with no worn row at all", () => {
+    const rows: DeadSlotRow[] = [
+      cand(33675, "a", "chest", -10),
+      cand(31042, "b", "chest", -20),
+    ];
+    expect(classifyDeadSlots(rows, { wornSetCounts: new Map() })).toEqual([]);
+  });
+
+  it("puts THIN_POOL_CANDIDATES at the boundary between thin and deep", () => {
+    const pool = (n: number): DeadSlotRow[] => [
+      { ...worn(29390, "worn wrist", "wrist"), owned: true },
+      ...Array.from({ length: n }, (_, i) =>
+        cand(60000 + i, `wrist ${i}`, "wrist", -100 - i)
+      ),
+    ];
+    const causeOf = (n: number) =>
+      classifyDeadSlots(pool(n), { wornSetCounts: new Map() })[0]?.cause;
+    expect(causeOf(THIN_POOL_CANDIDATES - 1)).toBe("thin-pool");
+    expect(causeOf(THIN_POOL_CANDIDATES)).toBe("unique-effect");
+  });
+
+  it("treats UNIQUE_EFFECT_GAP_DPS as inclusive of the gap itself", () => {
+    const pool = (gap: number): DeadSlotRow[] => [
+      { ...worn(29390, "worn wrist", "wrist"), owned: true },
+      cand(61000, "nearest", "wrist", gap),
+      ...Array.from({ length: 10 }, (_, i) =>
+        cand(61100 + i, `wrist ${i}`, "wrist", -500 - i)
+      ),
+    ];
+    const causeOf = (gap: number) =>
+      classifyDeadSlots(pool(gap), { wornSetCounts: new Map() })[0]?.cause;
+    expect(causeOf(UNIQUE_EFFECT_GAP_DPS)).toBe("unique-effect");
+    expect(causeOf(UNIQUE_EFFECT_GAP_DPS + 0.01)).toBe("benign-nothing-better");
   });
 
   it("does not call a set-break toll on a worn set below its threshold", () => {

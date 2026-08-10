@@ -32,7 +32,7 @@ import type { SetThreshold } from "./set-value.js";
  * - Must fire on the engine's Thunderheart 4pc, 193.89 on a 2152.10 baseline
  *   (**9.0%**) — the confounded figure, ~2.6x the 73.5 ± 6.3 measured for the
  *   same bonus in isolation.
- * - Must NOT fire on Malorne 2pc, measured **directly** at 131.1 ± 5.5 on its
+ * - Must NOT fire on Malorne 2pc, measured **directly** at 131.1 ± 6.6 on its
  *   own 2227 reference baseline (**5.9%**). This is why the threshold is not
  *   the SME's original "~5% of baseline is suspect" rule of thumb: that rule
  *   produces a false positive on a real, unconfounded, sim-measured bonus.
@@ -65,6 +65,10 @@ export const IMPLAUSIBLE_BONUS_FRACTION = 0.075;
 const WARNED_DEAD_SLOT_CAUSES: readonly DeadSlotCause[] = [
   "set-break-toll",
   "unique-effect",
+  // `unknown-item` warns for the opposite reason to the other two: not a
+  // finding, but the absence of one. Silence would hide a data gap behind a
+  // clean report, and the wording below is careful to claim no cause at all.
+  "unknown-item",
 ];
 
 export type ImplausibleSetBonusWarning = {
@@ -144,6 +148,13 @@ function deadSlotMessage(
     return (
       `No positive candidate in ${slot}: every alternative displaces ${wornItemName} ` +
       `and pays ${setName ?? "its set"}'s lost bonus. Check that toll is real before trusting the slot.`
+    );
+  }
+  if (cause === "unknown-item") {
+    return (
+      `No positive candidate in ${slot}, and the worn ${wornItemName} could not be resolved ` +
+      `in the item index — its set membership is unknown, so why the slot is dead is unknown too. ` +
+      `Check the item data before reading anything into this slot.`
     );
   }
   return (

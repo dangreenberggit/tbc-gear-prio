@@ -343,8 +343,11 @@ export function formatSetPotentialLine(
   const base = `${sign}${ctx.prospectiveBonusDps.toFixed(2)} set potential (needs ${needed} more piece${needed === 1 ? "" : "s"})`;
   const breaks = ctx.prospectiveBonusBreaks;
   if (breaks === undefined || breaks.length === 0) return base;
-  // Correct-and-disclose: the figure is inflated by an unseparable break, so it
-  // is shown with its cause but excluded from the sort key and cutoff.
+  // Suppress-and-disclose: the figure is inflated by an unseparable break, so
+  // it is shown with its cause but excluded from the sort key and cutoff. No
+  // numeric correction is applied — the `(k−1)·B` inflation is not subtracted
+  // here or anywhere, because `B` is gear-dependent (see `brokenSetBonuses` in
+  // `set-value.ts`). "Correct" would promise arithmetic this does not do.
   const names = breaks.map((b) => `${b.setName} ${b.threshold}pc`).join("; ");
   return `${base} — inflated by breaking ${names}, not counted in ranking`;
 }
