@@ -62,7 +62,9 @@ A durable-claims violation: checkable against committed data, and wrong. The
 outcome the test pins was always right; only the reason was wrong.
 
 **D2 — `RangedWeaponType` constants are off by one. Real bug. Deferred to
-ticket 83.** `enchants.ts:35-38` declares Bow 2 / Crossbow 3 / Gun 4 against
+ticket 83 at the time; subsequently implemented on this branch as 6fb9f1c and
+reviewed in the second pass below, so the disposition is now `fixed`.**
+`enchants.ts:35-38` declares Bow 2 / Crossbow 3 / Gun 4 against
 `common.proto`'s Bow 1 / Crossbow 2 / Gun 3 / Thrown 4. Measured at runtime:
 all 66 bows are denied scopes they take in TBC, and all 42 thrown weapons are
 granted scopes they never take. `WAND = 5` is right only by coincidence.
@@ -143,22 +145,31 @@ all data gates green.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                         |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | `"all"` sentinel honoured for both `--raid` and `--boss`; pure `validateViewFilter` + tests (efa13a8) |
-| A2  | Adversarial | fixed       | `sourceMatchesBoss` extracted; `view.ts` and the test share one predicate (efa13a8)                   |
-| A3  | Adversarial | fixed       | Same as D1 — docstring corrected (efa13a8)                                                            |
-| A4  | Adversarial | fixed       | Validation moved to a pure function and tested; CLI wiring still untested by design                   |
-| D1  | Domain      | fixed       | `items.ts` now cites the shootable allowlist and the four real type-14 scopes (efa13a8)               |
-| D2  | Domain      | defer       | `.scratch/carry-forward/issues/83-ranged-weapon-type-constants-off-by-one.md`                         |
-| D3  | Domain      | wontfix     | Correct as written; the unpinned upstream constant is a vendoring question, not this branch's         |
-| D4  | Domain      | wontfix     | No finding — framing verified correct                                                                 |
-| D5  | Domain      | wontfix     | `"Trash"` in the suggestion list is cosmetic and honest; it is a filterable name                      |
-| D6  | Domain      | wontfix     | No finding — correction reproduces exactly                                                            |
-| S1  | Standards   | fixed       | Boss-predicate triplication — same fix as A2                                                          |
-| S2  | Standards   | wontfix     | `write_json` helper in `parse_atlasloot.py`; mechanical, and adjacent to open ticket 71               |
-| S3  | Standards   | wontfix     | `zonesInPool` left on its own loop; changing it is unrelated churn                                    |
-| P1  | Spec        | fixed       | `toContain("test")` tightened to the full provenance sentence (efa13a8)                               |
+| ID    | Axis        | Disposition | Ticket / note                                                                                                   |
+| ----- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| A1    | Adversarial | fixed       | `"all"` sentinel honoured for both `--raid` and `--boss`; pure `validateViewFilter` + tests (efa13a8)           |
+| A2    | Adversarial | fixed       | `sourceMatchesBoss` extracted; `view.ts` and the test share one predicate (efa13a8)                             |
+| A3    | Adversarial | fixed       | Same as D1 — docstring corrected (efa13a8)                                                                      |
+| A4    | Adversarial | fixed       | Validation moved to a pure function and tested; CLI wiring still untested by design                             |
+| D1    | Domain      | fixed       | `items.ts` now cites the shootable allowlist and the four real type-14 scopes (efa13a8)                         |
+| D2    | Domain      | fixed       | Deferred to ticket 83 at the time, then implemented on this branch in 6fb9f1c; ticket 83 now closed             |
+| D3    | Domain      | wontfix     | Correct as written; the unpinned upstream constant is a vendoring question, not this branch's                   |
+| D4    | Domain      | wontfix     | No finding — framing verified correct                                                                           |
+| D5    | Domain      | wontfix     | `"Trash"` in the suggestion list is cosmetic and honest; it is a filterable name                                |
+| D6    | Domain      | wontfix     | No finding — correction reproduces exactly                                                                      |
+| S1    | Standards   | fixed       | Boss-predicate triplication — same fix as A2                                                                    |
+| S2    | Standards   | wontfix     | `write_json` helper in `parse_atlasloot.py`; mechanical, and adjacent to open ticket 71                         |
+| S3    | Standards   | wontfix     | `zonesInPool` left on its own loop; changing it is unrelated churn                                              |
+| P1    | Spec        | fixed       | `toContain("test")` tightened to the full provenance sentence (efa13a8)                                         |
+| 2-A1  | Adversarial | wontfix     | Second pass (6fb9f1c): no findings; test-theatre hypothesis empirically rejected (whole-enum shift still fails) |
+| 2-D-a | Domain      | fixed       | Second pass: docstring reworded to name the CI byte-compare and the `pnpm verify` gap; gap itself → ticket 84   |
+| 2-D-b | Domain      | fixed       | Second pass: `RELIC_RANGED_TYPES` now built from `RangedWeaponType` members instead of `[6, 7, 8]`              |
+| 2-D-c | Domain      | wontfix     | Second pass: item 186071 verified in the pinned TBC DB (`phase: 1`); a classic-id totem would be cosmetic only  |
+| 2-S-a | Spec        | defer       | `.scratch/carry-forward/issues/84-proto-drift-not-caught-by-local-verify.md`                                    |
+| 2-S-b | Standards   | fixed       | Second pass: alias layer deleted; enum members used inline, matching `gems.ts`/`meta.ts`/`meta-repair.ts`       |
+| 2-S-c | Standards   | fixed       | Second pass: `enchants.ts` block comment trimmed to the load-bearing half; test comment trimmed likewise        |
+| 2-S-d | Standards   | fixed       | Second pass: ticket 83 `Resolution:` now carries the repro command and names the environment observed           |
+| 2-S-e | Standards   | wontfix     | Second pass: `it.each` instead of the object-wrapping assertion — real idiom point, but churn on a green test   |
 
 ---
 
@@ -246,7 +257,7 @@ manual command is not a gate and the real guard is the CI byte-compare. Fixed
 here; the underlying gap that makes it true — `pnpm verify` runs no proto check
 at all — is ticket 84.
 
-## Disposition
+## Disposition (second pass — rows merged into the table above so `check_merge_ready.py` parses them)
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                     |
 | --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------- |
