@@ -169,16 +169,33 @@ export const SET_POTENTIAL_WEIGHTS: Record<SetThreshold, number> = {
 };
 
 /**
- * A row's value with prospective set potential weighted in — the quantity the
+ * How much of a prospective bonus a row's displayed value credits.
+ *
+ * - `weighted` — `SET_POTENTIAL_WEIGHTS`, discounting by threshold.
+ * - `full` — the whole bonus, no discount. Answers a different question than
+ *   `weighted`: not "what fraction of this bonus does this piece deliver" but
+ *   "what is this piece worth *if* I end up completing the set anyway", which
+ *   is the realistic case when the remaining pieces are upgrades on their own
+ *   merits. It over-credits every row of the set equally, so it reads as an
+ *   upper bound rather than an estimate.
+ *
+ * The two are alternatives, never combined — `full` is not `weighted` with a
+ * different constant, it is a different question.
+ */
+export type SetPotentialCredit = "weighted" | "full";
+
+/**
+ * A row's value with prospective set potential credited in — the quantity the
  * report's client-side toggle sorts and displays on.
  *
  * Falls back to plain `deltaDps` whenever there is no prospective bonus to
- * weight: no `setContext`, a candidate that already crosses its threshold (the
- * bonus is inside `deltaDps` already, §2.1, so weighting it would double-count),
+ * credit: no `setContext`, a candidate that already crosses its threshold (the
+ * bonus is inside `deltaDps` already, §2.1, so crediting it would double-count),
  * or a threshold whose bonus the sim never measured.
  */
 export function weightedSetPotentialDps(
-  item: Pick<RankedItem, "deltaDps" | "setContext">
+  item: Pick<RankedItem, "deltaDps" | "setContext">,
+  credit: SetPotentialCredit = "weighted"
 ): number {
   const ctx = item.setContext;
   if (
@@ -189,10 +206,9 @@ export function weightedSetPotentialDps(
   ) {
     return item.deltaDps;
   }
-  return (
-    item.deltaDps +
-    ctx.prospectiveBonusDps * SET_POTENTIAL_WEIGHTS[ctx.nextThreshold]
-  );
+  const factor =
+    credit === "full" ? 1 : SET_POTENTIAL_WEIGHTS[ctx.nextThreshold];
+  return item.deltaDps + ctx.prospectiveBonusDps * factor;
 }
 
 /**

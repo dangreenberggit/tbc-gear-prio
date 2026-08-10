@@ -77,7 +77,8 @@ function renderShortlistChips(items: RankedItem[]): string {
     .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
     .map((i) => {
       const weighted = weightedSetPotentialDps(i);
-      return `<a class="chip" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}">${fmtDelta(i.deltaDps)}</span></a>`;
+      const full = weightedSetPotentialDps(i, "full");
+      return `<a class="chip" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
     })
     .join("\n");
 }
@@ -236,18 +237,17 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
               : item.deltaDps < 0
                 ? "delta down"
                 : "delta flat";
-          // Both values ride on the row so the toggle is a re-sort and a
-          // label swap in the browser, never a re-run of the pipeline. The
-          // weighted figure differs from `deltaDps` only where a row carries
-          // an unrealised prospective bonus.
+          // All three values ride on the row so the control is a re-sort and a
+          // label swap in the browser, never a re-run of the pipeline. They
+          // differ from `deltaDps` only where a row carries an unrealised
+          // prospective bonus.
           const weighted = weightedSetPotentialDps(item);
-          const weightedCls =
-            weighted > 0
-              ? "delta up"
-              : weighted < 0
-                ? "delta down"
-                : "delta flat";
-          return `<article class="${cls}" data-delta="${item.deltaDps}" data-weighted="${weighted}">
+          const full = weightedSetPotentialDps(item, "full");
+          const deltaClsFor = (n: number) =>
+            n > 0 ? "delta up" : n < 0 ? "delta down" : "delta flat";
+          const weightedCls = deltaClsFor(weighted);
+          const fullCls = deltaClsFor(full);
+          return `<article class="${cls}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}">
   <div class="lead">${rank}${choice}</div>
   <div class="body">
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
@@ -261,6 +261,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   <div class="nums">
     <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
     <div class="${weightedCls} delta-weighted">${fmtDelta(weighted)} <span class="unit">DPS</span></div>
+    <div class="${fullCls} delta-full">${fmtDelta(full)} <span class="unit">DPS</span></div>
     <div class="pct">${fmtDelta(item.deltaPct)}%</div>
   </div>
 </article>`;
@@ -307,42 +308,56 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       : "";
 
   // Offered only where some row would actually move: a page with no
-  // unrealised prospective bonus gets an inert switch otherwise.
+  // unrealised prospective bonus gets an inert control otherwise. Measured on
+  // `full`, the wider of the two credits — a row `weighted` leaves still can
+  // move under `full`, so testing `weighted` alone could hide a live control.
   const anyWeighted = ranking.items.some(
-    (i) => weightedSetPotentialDps(i) !== i.deltaDps
+    (i) => weightedSetPotentialDps(i, "full") !== i.deltaDps
   );
+  // Radios rather than two checkboxes: the modes are alternative answers to
+  // "how much of this bonus counts", so the markup itself has to make picking
+  // both impossible rather than leaving the script to referee it.
   const setWeightToggle = anyWeighted
     ? `<div class="set-weight-toggle">
-      <label>
-        <input type="checkbox" id="set-weight" />
-        <span>Weight set-bonus potential into the ranking</span>
-      </label>
-      <p class="set-weight-note">Adds ${SET_POTENTIAL_WEIGHTS[2]}× of a 2pc bonus and ${SET_POTENTIAL_WEIGHTS[4]}× of a 4pc bonus to a tier piece's DPS, then re-sorts. Display only — which items count as above cutoff is unchanged.</p>
+      <p class="set-weight-title">Set-bonus potential</p>
+      <label><input type="radio" name="set-weight" value="off" checked /> <span>Off — measured DPS only</span></label>
+      <label><input type="radio" name="set-weight" value="weighted" /> <span>Weighted — ${SET_POTENTIAL_WEIGHTS[2]}× a 2pc bonus, ${SET_POTENTIAL_WEIGHTS[4]}× a 4pc</span></label>
+      <label><input type="radio" name="set-weight" value="full" /> <span>Full — the whole bonus, as if the set gets completed anyway</span></label>
+      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not.</p>
     </div>`
     : "";
 
   // Re-sorts in place and swaps the visible number. Deliberately the whole of
-  // the client-side behaviour: the values were both computed at generation
-  // time, so nothing here recomputes DPS or re-derives the cutoff.
+  // the client-side behaviour: every value was computed at generation time, so
+  // nothing here recomputes DPS or re-derives the cutoff.
   const setWeightScript = anyWeighted
     ? `<script>
 (function () {
-  var box = document.getElementById("set-weight");
-  if (!box) return;
+  var radios = [].slice.call(
+    document.querySelectorAll('input[name="set-weight"]')
+  );
+  if (!radios.length) return;
   var containers = [].slice.call(document.querySelectorAll(".rows, .chips"));
   var originals = containers.map(function (c) {
     return { container: c, order: [].slice.call(c.children) };
   });
+  function mode() {
+    for (var i = 0; i < radios.length; i++) {
+      if (radios[i].checked) return radios[i].value;
+    }
+    return "off";
+  }
   function apply() {
-    var on = box.checked;
-    document.body.classList.toggle("weighted", on);
+    var m = mode();
+    var attr = m === "full" ? "data-full" : "data-weighted";
+    document.body.classList.toggle("weighted", m === "weighted");
+    document.body.classList.toggle("full", m === "full");
     originals.forEach(function (entry) {
       var kids = entry.order.slice();
-      if (on) {
+      if (m !== "off") {
         kids.sort(function (a, b) {
           return (
-            parseFloat(b.getAttribute("data-weighted")) -
-            parseFloat(a.getAttribute("data-weighted"))
+            parseFloat(b.getAttribute(attr)) - parseFloat(a.getAttribute(attr))
           );
         });
       }
@@ -351,12 +366,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       });
     });
     [].slice.call(document.querySelectorAll(".chip .d")).forEach(function (d) {
-      d.textContent = on
-        ? d.getAttribute("data-weighted-label")
-        : d.getAttribute("data-plain");
+      d.textContent = d.getAttribute(
+        m === "full"
+          ? "data-full-label"
+          : m === "weighted"
+            ? "data-weighted-label"
+            : "data-plain"
+      );
     });
   }
-  box.addEventListener("change", apply);
+  radios.forEach(function (r) {
+    r.addEventListener("change", apply);
+  });
   apply();
 })();
 </script>`

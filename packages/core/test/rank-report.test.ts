@@ -441,10 +441,16 @@ describe("rank-report", () => {
     // Diffed before/after to confirm the delta is exactly those attributes,
     // the paired delta divs, the new CSS block, and the empty interpolation
     // slots — no visible markup moved.
+    // Repinned again for the `full` credit mode: rows and chips gain
+    // `data-full`/`data-full-label`, the delta pair becomes a triple with
+    // `.delta-full`, and the toggle's CSS grows a `.set-weight-title` rule and
+    // a third display arm. This fixture still renders no control and no
+    // <script>, and all three values are equal on every row here. Diffed
+    // before/after to confirm the delta is exactly that.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "4712eb05a6fa7a678506f82c5a37c7d7dde124256332847c2e2ebacdae8c66a8",
-      length: 12826,
+        "89f331bbca65d59909a0ba224ac47afab2f4884c8951e3a65f95d3619b78d604",
+      length: 13252,
     });
   });
 });
@@ -701,6 +707,40 @@ describe("weightedSetPotentialDps", () => {
     expect(weightedSetPotentialDps({ deltaDps: 10 })).toBe(10);
   });
 
+  it("credits the whole bonus under `full`, at either threshold", () => {
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: ctx() }, "full")
+    ).toBeCloseTo(110);
+    expect(
+      weightedSetPotentialDps(
+        { deltaDps: 10, setContext: ctx({ nextThreshold: 2 }) },
+        "full"
+      )
+    ).toBeCloseTo(110);
+  });
+
+  it("still falls back to deltaDps under `full` with nothing to credit", () => {
+    // `full` widens the credit, never the set of rows eligible for one — a
+    // crossing candidate's bonus is already inside deltaDps either way.
+    expect(
+      weightedSetPotentialDps(
+        {
+          deltaDps: 10,
+          setContext: ctx({ crossesThreshold: true, nextThreshold: null }),
+        },
+        "full"
+      )
+    ).toBe(10);
+    expect(weightedSetPotentialDps({ deltaDps: 10 }, "full")).toBe(10);
+  });
+
+  it("defaults to the weighted credit when no mode is given", () => {
+    const c = ctx();
+    expect(weightedSetPotentialDps({ deltaDps: 10, setContext: c })).toBe(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: c }, "weighted")
+    );
+  });
+
   it("keeps a negative row negative when the weighted credit is too small", () => {
     expect(
       weightedSetPotentialDps({
@@ -738,23 +778,64 @@ describe("set-weight toggle (client-side re-sort)", () => {
     generatedAt: "now",
   };
 
-  it("emits both values and the toggle when some row would move", () => {
+  it("emits all three values and the control when some row would move", () => {
     const html = renderRankHtml(ranking([withPotential]), meta);
-    expect(html).toContain('id="set-weight"');
+    expect(html).toContain('name="set-weight"');
     expect(html).toContain('data-delta="-100"');
     // -100 + 200 * 0.25
     expect(html).toContain('data-weighted="-50"');
+    // -100 + 200 * 1
+    expect(html).toContain('data-full="100"');
   });
 
-  it("omits the toggle entirely when no row would move", () => {
+  it("offers the three modes as radios, defaulting to off", () => {
+    // Radios, not checkboxes: the modes are alternatives, and the markup has
+    // to make picking both impossible rather than policing it in script.
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain(
+      'type="radio" name="set-weight" value="off" checked'
+    );
+    expect(html).toContain('type="radio" name="set-weight" value="weighted"');
+    expect(html).toContain('type="radio" name="set-weight" value="full"');
+    expect(html).not.toContain('type="checkbox" name="set-weight"');
+  });
+
+  it("omits the control entirely when no row would move", () => {
     const html = renderRankHtml(
       ranking([item({ name: "plain", slot: "head", deltaDps: 5 })]),
       meta
     );
-    // The stylesheet always carries the toggle's rules, so the absence check
+    // The stylesheet always carries the control's rules, so the absence check
     // is on the control and its script, not on the class name.
-    expect(html).not.toContain('id="set-weight"');
+    expect(html).not.toContain('name="set-weight"');
     expect(html).not.toContain("<script>");
+  });
+
+  it("offers the control for a row only `full` would move", () => {
+    // A 4pc bonus small enough that the 0.25x weighted credit rounds to the
+    // same displayed value would still move materially under `full`; gating
+    // availability on `weighted` alone would hide a live control.
+    const html = renderRankHtml(
+      ranking([
+        item({
+          name: "Tier piece",
+          slot: "head",
+          deltaDps: 0,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 80,
+          },
+        }),
+      ]),
+      meta
+    );
+    expect(html).toContain('name="set-weight"');
+    expect(html).toContain('data-full="80"');
   });
 
   it("does not change which rows are above cutoff", () => {
