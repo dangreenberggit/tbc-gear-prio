@@ -155,6 +155,21 @@ export const REPORT_CSS = `
     font-size: 0.88rem;
     color: var(--muted);
   }
+  /* The cap banner qualifies every "widens your gap" row below it, so it
+     reads at body weight rather than as fine print. */
+  .cap-banner {
+    margin: 0 0 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    font-size: 0.92rem;
+  }
+  .provenance {
+    margin: 0 0 1.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
   .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip {
     display: inline-flex;

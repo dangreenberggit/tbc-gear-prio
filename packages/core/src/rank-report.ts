@@ -7,6 +7,7 @@
  * assets, open in any browser.
  */
 
+import { fightProvenanceLines, hitCapBanner } from "./disclosure.js";
 import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
@@ -118,6 +119,17 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ranking.baseline.stdev > 0
       ? `<p class="noise-note">Order within ~±${ranking.baseline.stdev.toFixed(1)} DPS is run noise, not a ranked wishlist.</p>`
       : "";
+  // Rows say "widens your gap to N", so the page has to say what the gap is
+  // and carry the Heroic Presence caveat that makes it uncertain. Rendered
+  // from `ranking.caps` / `ranking.fight`, which `renderRankHtml` already
+  // receives — the CLI and the report read one source rather than two
+  // (carry-forward 76).
+  const capBanner = `<p class="cap-banner">${esc(hitCapBanner(ranking.caps.hit))}</p>`;
+  const provenanceLines = fightProvenanceLines(ranking.fight);
+  const provenance = provenanceLines.length
+    ? `<p class="provenance">${provenanceLines.map(esc).join("<br />")}</p>`
+    : "";
+
   const slotsWithItems = SLOT_ORDER.filter(
     (s) => (bySlot.get(s) ?? []).length > 0
   );
@@ -281,6 +293,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         : ""
     }
     ${noiseNote}
+    ${capBanner}
+    ${provenance}
 
     <nav class="nav" aria-label="Slots">${nav}</nav>
 
