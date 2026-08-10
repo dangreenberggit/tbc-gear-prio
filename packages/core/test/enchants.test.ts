@@ -5,7 +5,14 @@ import {
   getEnchant,
   getEnchants,
 } from "../src/enchants.js";
-import { getItem, isEnchantable } from "../src/items.js";
+import { getItem, isEnchantable, type ItemEntry } from "../src/items.js";
+import enchantIndex from "../../../data/enchants/index.json" with { type: "json" };
+import rawItemIndex from "../../../data/items/index.json" with { type: "json" };
+
+const itemIndex = rawItemIndex as Record<string, ItemEntry>;
+
+/** wowsims RangedWeaponType: 6 idol, 7 libram, 8 totem — the TBC relics. */
+const RELIC_RANGED_TYPES = new Set([6, 7, 8]);
 
 /**
  * Real ids from the committed indexes, chosen so each branch of the UI rule
@@ -77,6 +84,26 @@ describe("enchantAppliesToItem", () => {
   // not land on it — the branch that keeps ret's ranged slot bare.
   it("does not put a scope on a libram", () => {
     expect(enchantAppliesToItem(ADAMANTITE_SCOPE, LIBRAM_OF_HOPE)).toBe(false);
+  });
+
+  // `enchantable` is slot-level, and the ranged slot mixes shootables with
+  // relics, so every idol/libram/totem claims `enchantable: true` while no
+  // relic takes an enchant in TBC. This pins the gap rather than the wish:
+  // the flag stays true (it is a true statement about the *slot*) and
+  // `enchantAppliesToItem` is what has to say no (carry-forward 81).
+  it("says no for every relic, though `enchantable` says yes", () => {
+    const relicIds = Object.entries(itemIndex)
+      .filter(([, e]) => RELIC_RANGED_TYPES.has(e.rangedWeaponType ?? -1))
+      .map(([id]) => Number(id));
+    expect(relicIds).toHaveLength(104);
+
+    const effectIds = Object.keys(enchantIndex).map(Number);
+    for (const itemId of relicIds) {
+      expect(isEnchantable(itemId)).toBe(true);
+      for (const effectId of effectIds) {
+        expect(enchantAppliesToItem(effectId, itemId)).toBe(false);
+      }
+    }
   });
 
   it("returns false for ids absent from either index", () => {
