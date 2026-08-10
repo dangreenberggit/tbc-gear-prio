@@ -5,12 +5,20 @@ Blocks: none
 Blocked by: none
 Relates to: 81
 Resolution: fixed all three steps. The hand-copied constants were replaced by
-  imports from `packages/core/src/proto/common_pb.ts` (already generated from
-  data/proto by `pnpm proto:generate`), so there is no second copy left to
-  drift -- EnchantType, WeaponType, HandType and ItemType were switched over
-  with them. `packages/core/test/enchants.test.ts` now pins one real item of
-  every rangedWeaponType 1-8 against Adamantite Scope; it failed on the bow
-  before the fix and passes after. `pnpm verify` green. 2026-08-09.
+  the enum members of `packages/core/src/proto/common_pb.ts`, used inline at
+  the call sites as `gems.ts` and `meta.ts` already do; EnchantType,
+  WeaponType, HandType and ItemType were switched over with them. That file
+  is generated from data/proto, and CI regenerates and byte-compares it
+  (`.github/workflows/verify.yml`: `pnpm proto:generate` then `git diff
+  --exit-code -- packages/core/src/proto data/proto`). Note `pnpm verify`
+  does NOT run that check, so a local verify passes on a stale or hand-edited
+  `common_pb.ts` -- CI is the gate, and that gap is ticket 84.
+  `packages/core/test/enchants.test.ts` now pins one real item of every
+  rangedWeaponType 1-8 against Adamantite Scope. Re-run the red state with
+  `pnpm vitest run packages/core/test/enchants.test.ts` after reverting the
+  shootable set to the old 2/3/4: it fails on Polished Shortbow (2505).
+  Reviewed on this machine (Windows, local `pnpm verify` green); the CI
+  byte-compare was not observed for this commit. 2026-08-09.
 
 # `enchants.ts`'s `RangedWeaponType` constants are off by one, so bows are denied scopes and thrown weapons are granted them
 

@@ -12,8 +12,12 @@ import rawItemIndex from "../../../data/items/index.json" with { type: "json" };
 
 const itemIndex = rawItemIndex as Record<string, ItemEntry>;
 
-/** wowsims RangedWeaponType: 6 idol, 7 libram, 8 totem — the TBC relics. */
-const RELIC_RANGED_TYPES = new Set([6, 7, 8]);
+/** The TBC relics — the ranged-slot items that are not shootable or wands. */
+const RELIC_RANGED_TYPES = new Set([
+  RangedWeaponType.RangedWeaponTypeIdol,
+  RangedWeaponType.RangedWeaponTypeLibram,
+  RangedWeaponType.RangedWeaponTypeTotem,
+]);
 
 /**
  * Real ids from the committed indexes, chosen so each branch of the UI rule
@@ -107,11 +111,11 @@ describe("enchantAppliesToItem", () => {
     }
   });
 
-  // The relic case above passes under either the right or the wrong
-  // RangedWeaponType constants, because relics (6/7/8) sit outside both the
-  // correct and the off-by-one shootable set. Only bows (1) and thrown (4)
-  // tell the two apart, so every type gets a real item here (carry-forward
-  // 83). A future enum shift fails rather than passing on relics alone.
+  // The relic case above passes under either the right or the off-by-one
+  // RangedWeaponType constants, because relics sit outside both shootable
+  // sets — so it could not have caught carry-forward 83. Pinning each item's
+  // type against real index data is what keeps this from passing by
+  // construction: a coherently shifted enum still fails the first assertion.
   it("puts a scope on shootables and nothing else, by rangedWeaponType", () => {
     const cases: Array<[number, string, number, boolean]> = [
       [RangedWeaponType.RangedWeaponTypeBow, "Polished Shortbow", 2505, true],

@@ -159,3 +159,103 @@ all data gates green.
 | S2  | Standards   | wontfix     | `write_json` helper in `parse_atlasloot.py`; mechanical, and adjacent to open ticket 71               |
 | S3  | Standards   | wontfix     | `zonesInPool` left on its own loop; changing it is unrelated churn                                    |
 | P1  | Spec        | fixed       | `toContain("test")` tightened to the full provenance sentence (efa13a8)                               |
+
+---
+
+# Pre-merge review (second pass) — commit 6fb9f1c
+
+Diffed against: `5c14b9d...HEAD` (6fb9f1c at dispatch; fixes applied on top)
+
+**Why a second pass.** The review above covers the branch up to `5c14b9d`. Its
+own D2 finding was deferred to ticket 83, that ticket was then implemented as
+`6fb9f1c`, and a review file that predates the tip no longer covers the branch.
+This pass reviews that one commit; the earlier body is unchanged.
+
+Dispatch: four fresh Opus subagents, no access to the authoring context.
+`codex` is not on `PATH`, so option 1 of the skill's ladder was unavailable —
+this is the harness's sharp lane, not a downgrade.
+
+## Adversarial
+
+**No findings.** The reviewer verified rather than assumed, on all five enums
+the commit touched — `RangedWeaponType`, `EnchantType`, `WeaponType`,
+`HandType`, `ItemType` — against `data/proto/common.proto`. Only the ranged
+constants had drifted; no enum was corrected while another silently broke.
+
+The substantive question it was asked to attack was test theatre: production
+code and test now import constants from the same generated module, so a
+self-consistent wrong regeneration might pass. It ran the experiment. Reverting
+only the production constants fails on Polished Shortbow, as claimed. Shifting
+the _entire_ `RangedWeaponType` enum in the generated file, so test and
+production agree with each other, **still fails** — because
+`expect(getItem(id)?.rangedWeaponType).toEqual(RangedWeaponType.X)` is anchored
+to `data/items/index.json`, which the enum cannot move. The tautology escape
+hatch is real and closed.
+
+Also confirmed: importing runtime enum values from generated code is
+established practice here (`GemColor`/`Stat` across six core modules), no
+purity violation, and the `ENCHANT_TYPE_*` type-surface change is unobservable.
+
+## Domain
+
+**No contradictions** with `docs/phase0-findings.md` or
+`docs/verification-log.md`. Nothing here touches the 19→17 slot mapping (R17),
+the `permanentEnchant`/`effectId` namespace, spec classification, race, or
+`currentPhase`.
+
+Verified against vendored data, not memory: the off-by-one is real; all eight
+item→type fixtures are correct in `data/items/index.json`; and
+`data/enchants/index.json` ships exactly four `type: 14` enchants (2523, 2722,
+2723, 2724), all scopes — so excluding thrown and wands is right for TBC, and
+the wand exemption in the relic branch is necessary rather than incidental.
+
+Two flags, both carried forward below: the docstring's drift claim is
+CI-enforced rather than `pnpm verify`-enforced (D-a), and
+`RELIC_RANGED_TYPES` still hand-wrote `[6, 7, 8]` six lines above a test
+importing those values from the proto — the same second-source pattern the
+commit set out to remove (D-b).
+
+On item 186071 as the totem exemplar: flagged as suspicious-looking, then
+cleared — it carries `"phase": 1` and sits in the pinned wowsims TBC DB as an
+Anniversary re-issue. Noted as cosmetic, not a defect.
+
+## Standards + Spec
+
+**Spec:** all three of ticket 83's numbered requirements met. Requirement 3 is
+exceeded — the ticket's table grouped relics as one row, the test covers 6, 7
+and 8 individually. The "WAND = 5 correct only by coincidence" framing is
+genuinely addressed rather than preserved, since the value is no longer
+independently asserted. The four extra enum conversions were judged justified
+by requirement 2's own categorical rationale ("a hand-copied second source"),
+not scope creep — and were disclosed in the ticket rather than slipped in.
+Requirement 2 rated **partial** on the gate question (S-a below).
+
+**Standards:** the comment-policy and durable-claims findings below, plus a
+Middle Man call on the alias layer argued from repo precedent — five modules
+write `GemColor.GemColorMeta` inline and `stats.ts` re-exports the enum; none
+aliases members. That precedent check is what moved it from taste to fact.
+
+## Summary
+
+The underlying fix is sound and the test is not theatre — the strongest
+possible result on the axis most likely to embarrass this commit, and it was
+established by experiment rather than argument. Every finding is about wording
+and shape. Two of them are the same defect found independently by two axes: the
+new docstring credits `pnpm proto:generate` with preventing drift, when a
+manual command is not a gate and the real guard is the CI byte-compare. Fixed
+here; the underlying gap that makes it true — `pnpm verify` runs no proto check
+at all — is ticket 84.
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                     |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | wontfix     | No findings; test-theatre hypothesis empirically rejected (whole-enum shift still fails)          |
+| D-a | Domain      | fixed       | Docstring reworded to name the CI byte-compare and the `pnpm verify` gap; gap itself → ticket 84  |
+| D-b | Domain      | fixed       | `RELIC_RANGED_TYPES` now built from `RangedWeaponType` members instead of `[6, 7, 8]`             |
+| D-c | Domain      | wontfix     | Item 186071 verified in the pinned TBC DB (`phase: 1`); a classic-id totem would be cosmetic only |
+| S-a | Spec        | defer       | `.scratch/carry-forward/issues/84-proto-drift-not-caught-by-local-verify.md`                      |
+| S-b | Standards   | fixed       | Alias layer deleted; enum members used inline, matching `gems.ts`/`meta.ts`/`meta-repair.ts`      |
+| S-c | Standards   | fixed       | `enchants.ts` block comment trimmed to the load-bearing half; test comment trimmed likewise       |
+| S-d | Standards   | fixed       | Ticket 83 `Resolution:` now carries the repro command and names the environment observed          |
+| S-e | Standards   | wontfix     | `it.each` instead of the object-wrapping assertion — real idiom point, but churn on a green test  |
