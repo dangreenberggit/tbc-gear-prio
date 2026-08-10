@@ -2437,6 +2437,62 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     expect(shoulderRow!.setContext!.nextThreshold).toBe(4);
   });
 
+  it("gives an already-worn set piece no prospectiveBonusDps (its swap advances nothing)", async () => {
+    // Player wears the Justicar head; offering that same head back as a
+    // candidate is a swap for itself — piecesAfterSwap === piecesWornBefore,
+    // so it moves the player no closer to the 4pc it would otherwise advertise.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "head",
+      HEAD_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [
+        realPoolEntry(HEAD_ID),
+        realPoolEntry(SHOULDER_ID),
+        realPoolEntry(HANDS_ID),
+        realPoolEntry(LEGS_ID),
+      ],
+    });
+
+    const headRow = ranking.items.find((i) => i.itemId === HEAD_ID);
+    expect(headRow).toBeDefined();
+    expect(headRow!.owned).toBe(true);
+    expect(headRow!.setContext).toBeDefined();
+    expect(headRow!.setContext!.piecesAfterSwap).toBe(
+      headRow!.setContext!.piecesWornBefore
+    );
+    expect(headRow!.setContext!.prospectiveBonusDps).toBeUndefined();
+
+    // A not-yet-worn piece of the same set still gets its prospective value —
+    // the gate is about advancing the count, not about the set.
+    const shoulderRow = ranking.items.find((i) => i.itemId === SHOULDER_ID);
+    expect(shoulderRow!.setContext!.prospectiveBonusDps).toBeDefined();
+  });
+
   it("reports insufficient-pieces when the pool cannot supply enough Justicar pieces", async () => {
     // Only two of the four pieces are offered — 4pc cannot be built.
     const ranking = await rankUpgrades(

@@ -1146,7 +1146,11 @@ function applySetContext(
       nextThreshold,
       crossesThreshold,
     };
-    if (!crossesThreshold && nextThreshold !== null) {
+    // A swap that leaves the piece count where it found it (re-equipping an
+    // item already worn) advances nothing toward `nextThreshold`, so it has no
+    // prospective bonus to offer even though its set does — ticket 95.
+    const advancesPieceCount = piecesAfterSwap > piecesWornBefore;
+    if (advancesPieceCount && !crossesThreshold && nextThreshold !== null) {
       const matching = bonusesForSet.find((b) => b.threshold === nextThreshold);
       if (matching?.bonusDps !== undefined) {
         setContext.prospectiveBonusDps = matching.bonusDps;
