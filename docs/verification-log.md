@@ -1283,8 +1283,12 @@ integration branch it branched from — not against `dev`, which would fold in
 the four trust slices that ran first and *did* touch `seams/`:
 
 ```bash
-# merge-base of the feral slice, i.e. phase-2/trust before this merge
-git diff phase-2/trust~1...phase-2/feral --stat -- \
+# 42db95a = phase-2/trust before the feral merge; e841a67^2 = the feral tip.
+# Pinned to SHAs, not branch names: `phase-2/trust~1...phase-2/feral` was the
+# original form and is wrong, because feral is an *ancestor* of trust~1, so
+# their merge-base is feral itself and the three-dot diff is always empty
+# (carry-forward 82).
+git diff 42db95a...e841a67^2 --stat -- \
   packages/core/src/rank.ts packages/core/src/seams/ \
   packages/core/src/compose.ts
 # => packages/core/src/rank.ts | 20 ++++++++++++++++----
