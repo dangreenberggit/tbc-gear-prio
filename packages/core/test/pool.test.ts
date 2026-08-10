@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { ItemSlot } from "../src/items.js";
 import {
+  bossesInPool,
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
@@ -179,6 +180,87 @@ describe("zonesInPool", () => {
       "Karazhan",
       "Serpentshrine Cavern",
     ]);
+  });
+});
+
+describe("bossesInPool", () => {
+  // Deliberately covers what `zonesInPool`'s fixture cannot: a boss on a
+  // secondary `sources` entry, a zoneless kind, a bossless raid source, and
+  // one name shared by two zones.
+  const bossPool: PoolEntry[] = [
+    {
+      itemId: 1,
+      name: "Kara drop",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Karazhan", boss: "Prince Malchezaar" },
+    },
+    {
+      itemId: 2,
+      name: "Kara trash",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Karazhan" },
+    },
+    {
+      itemId: 3,
+      name: "Badge, also a BT drop",
+      slot: "finger",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "badge", cost: 25 },
+      sources: [
+        { kind: "badge", cost: 25 },
+        { kind: "raid", zone: "Black Temple", boss: "Illidan Stormrage" },
+      ],
+    },
+    {
+      itemId: 4,
+      name: "Shared name",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Black Temple", boss: "Prince Malchezaar" },
+    },
+  ];
+
+  it("returns sorted unique boss names, including from secondary sources", () => {
+    expect(bossesInPool(bossPool)).toEqual([
+      "Illidan Stormrage",
+      "Prince Malchezaar",
+    ]);
+  });
+
+  it("scopes to one zone when given", () => {
+    expect(bossesInPool(bossPool, "Karazhan")).toEqual(["Prince Malchezaar"]);
+    expect(bossesInPool(bossPool, "Black Temple")).toEqual([
+      "Illidan Stormrage",
+      "Prince Malchezaar",
+    ]);
+  });
+
+  it("returns nothing for a zone with no bosses in the pool", () => {
+    expect(bossesInPool(bossPool, "Zul'Aman")).toEqual([]);
+  });
+
+  // A name listed as known must actually filter to something, or the
+  // validation would reject spellings the filter accepts and vice versa.
+  it("agrees with what applyView's boss filter would keep", () => {
+    for (const zone of [undefined, "Karazhan", "Black Temple"]) {
+      for (const boss of bossesInPool(bossPool, zone)) {
+        const matched = bossPool.filter((e) =>
+          [e.source, ...(e.sources ?? [])].some(
+            (s) =>
+              "boss" in s &&
+              s.boss === boss &&
+              (zone === undefined || ("zone" in s && s.zone === zone))
+          )
+        );
+        expect(matched.length).toBeGreaterThan(0);
+      }
+    }
   });
 });
 

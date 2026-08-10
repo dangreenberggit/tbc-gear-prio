@@ -31,6 +31,7 @@ import {
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
+  bossesInPool,
   poolFromUniverse,
   zonesInPool,
   type PoolEntry,
@@ -283,6 +284,24 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       console.error("known zones:");
       for (const zone of known) {
         console.error(`  ${zone}`);
+      }
+      return 2;
+    }
+  }
+
+  // Without this a misspelled boss filters every row out and the run exits 0
+  // having printed a baseline, a hit banner and nothing else — indistinguishable
+  // from "this boss drops no upgrades for you" (carry-forward 75). Scoped to
+  // `--raid` when given so the suggestion list is the bosses of the raid the
+  // player named, not all of them.
+  if (args.view.boss !== undefined) {
+    const known = bossesInPool(pool, args.raid);
+    if (!known.includes(args.view.boss)) {
+      const scope = args.raid ? ` in ${args.raid}` : "";
+      console.error(`unknown boss: ${args.view.boss}`);
+      console.error(`known bosses${scope}:`);
+      for (const boss of known) {
+        console.error(`  ${boss}`);
       }
       return 2;
     }

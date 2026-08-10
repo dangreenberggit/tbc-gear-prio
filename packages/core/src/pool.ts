@@ -217,6 +217,32 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
 }
 
 /**
+ * Boss names the pool can actually be filtered to, optionally scoped to one
+ * zone. Scoped and unscoped are different questions: two zones can share a
+ * boss name, and an unscoped list is long enough to be useless as a "did you
+ * mean" for a typo made inside one raid.
+ *
+ * Pairs with `matchesBoss`, which compares `s.boss` exactly and requires the
+ * zone to match too when one is given — so this enumerates from the same
+ * sources under the same zone condition, or a name could be listed as known
+ * and still filter to nothing.
+ */
+export function bossesInPool(
+  pool: readonly PoolEntry[],
+  zone?: string
+): string[] {
+  const bosses = new Set<string>();
+  for (const e of pool) {
+    for (const s of [e.source, ...(e.sources ?? [])]) {
+      if (!("boss" in s) || s.boss === undefined) continue;
+      if (zone !== undefined && !("zone" in s && s.zone === zone)) continue;
+      bosses.add(s.boss);
+    }
+  }
+  return [...bosses].sort();
+}
+
+/**
  * A sim equipment slot name, as `SIM_ORDER` spells it.
  *
  * The comment that used to sit here said this had to be written out because
