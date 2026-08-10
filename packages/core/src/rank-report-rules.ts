@@ -243,6 +243,27 @@ export function isCuratedBis(item: Pick<RankedItem, "bisTags">): boolean {
 }
 
 /**
+ * Reconciles the one row that asserts two true things at once: a "BiS" badge
+ * and a large negative delta. Both are right — the swap really does forfeit the
+ * worn set's bonus, and the completed package really is upstream's pick — so
+ * this is a framing mismatch between a single swap and a package, not a wrong
+ * number (carry-forward 96).
+ *
+ * A pointer, never a recomputed number: the value of the package lives in the
+ * Set potential panel, whose figure is break-confounded and deliberately kept
+ * out of the sort (carry-forward 90). Restating any part of it here would put
+ * that number back where a reader takes it for a ranking.
+ */
+export function formatCuratedPackagePointer(
+  item: Pick<RankedItem, "bisTags" | "belowCutoff" | "setContext">
+): string {
+  if (!isCuratedBis(item) || !item.belowCutoff) return "";
+  const setName = item.setContext?.setName;
+  if (setName === undefined) return "";
+  return `BiS as part of ${setName}, not as this swap alone — see Set potential`;
+}
+
+/**
  * How much of a prospective bonus counts toward a row's displayed value, by
  * the threshold that would unlock it. A 2pc is nearer and cheaper than a 4pc,
  * so it is discounted less.

@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: b51f08c
 Type: bug
 Origin: pre-merge review of `feat/set-bonus-value`, 2026-08-10 (spec axis)
 Blocks: none
@@ -57,3 +58,30 @@ reviewer's guess.
 Ticket 96 (BiS-tagged items ranked below cutoff) is expected to be answered by
 this panel. If the panel is invisible by default, ticket 96's contradiction
 stays visible by default while its explanation does not. Resolve this one first.
+
+---
+
+## Disposition (2026-08-10) — closed via option 1, `b51f08c`
+
+The Set potential panel now renders whenever `ranking.setBonuses` is non-empty,
+independent of `withSetPotential`. The per-row set-potential annotation
+(`rank-report.ts:279`) and the sort key / cutoff derivation (`view.ts`) stay
+behind the default-off flag, unchanged.
+
+**Why option 1 and not a spec amendment:** spec.md section 4 states the
+default-off rule in terms of purity — "sort key becomes `deltaDps +
+(setContext?.prospectiveBonusDps ?? 0)` when on; `rank` stays the absolute
+default-order rank". The rationale it gives is about not moving the ranking.
+Nothing in section 4 or section 2.4 forbids default *disclosure*, and the panel
+moves no number, so no spec amendment was required. The spec text still
+describes `ViewOptions.withSetPotential` accurately: it still gates exactly the
+sort key and the per-row column.
+
+Verify:
+
+```
+cd packages/core && npx vitest run test/rank-report.test.ts -t "disclosure is not gated"
+```
+
+The previously test-locked assertion (`renders nothing when the toggle is off`)
+was inverted in the same commit, red confirmed before green.

@@ -481,14 +481,19 @@ describe("rank-report", () => {
     // unlike the previous repins it *does* render a new control. Diffed
     // before/after to confirm the delta is those attributes, the two panels,
     // the script, and the new CSS block.
+    // Repinned for carry-forward 96's curated-package pointer: the stylesheet
+    // gains the `.curated-pointer` rule and every row interpolates an empty
+    // pointer slot. No row in this fixture is both curated-BiS and carries a
+    // `setContext`, so nothing visible renders — diffed before/after, where the
+    // whole delta is those five CSS lines and two blank slots.
     // Repinned for ticket 98's plausibility panel: the stylesheet gains the
     // `.panel.plausibility` rule. This fixture trips neither gate, so the panel
     // itself does not render — verified by dumping the document on both sides,
     // where the whole diff is those six CSS lines and nothing in the body.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "5861ecdc1b3860f1f9c52aea705812bebb769f8c3092c46376b656abf44b56e4",
-      length: 24707,
+        "b494466716a009202f2f0a90db1df9218978bb535542c4b54aa7e594b21620ce",
+      length: 24819,
     });
   });
 });
@@ -1464,6 +1469,55 @@ describe("set potential (§4)", () => {
     expect(html).toContain("Thunderheart Chestguard");
     // And the figure stays qualified by what completing it would break.
     expect(html).toContain("Malorne Harness 2pc");
+  });
+
+  /**
+   * Carry-forward 96. A curated-BiS row can rank far below cutoff as a single
+   * swap and still be genuinely BiS as part of a completed package — both
+   * figures are correct, and the row shows them side by side with no
+   * reconciliation. The Set potential panel holds the explanation; this is the
+   * pointer from the row to it. A pointer, never a recomputed number.
+   */
+  it("points a below-cutoff curated row at the panel that reconciles its BiS tag", () => {
+    const html = renderRankHtml(
+      {
+        ...ranking([
+          item({
+            rank: 40,
+            name: "Thunderheart Chestguard",
+            slot: "chest",
+            deltaDps: -100.16,
+            belowCutoff: true,
+            bisTags: ["BiS"],
+            setBonusNote: "breaks 2-piece Malorne Harness (below 2)",
+            setContext: {
+              setId: 676,
+              setName: "Thunderheart Harness",
+              piecesWornBefore: 0,
+              piecesAfterSwap: 1,
+              nextThreshold: 2,
+              crossesThreshold: false,
+              prospectiveBonusDps: 31.46,
+            },
+          }),
+        ]),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31048, 31042, 31034, 31044],
+            packageDeltaDps: 64.07,
+            bonusDps: 193.89,
+          },
+        ],
+      },
+      meta()
+    );
+
+    expect(html).toContain("BiS as part of Thunderheart Harness");
+    expect(html).toContain("Set potential");
   });
 
   it("renders each unmeasured reason as text, never a blank or a 0", () => {

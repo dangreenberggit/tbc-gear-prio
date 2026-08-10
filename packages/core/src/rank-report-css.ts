@@ -303,6 +303,11 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--accent);
   }
+  .curated-pointer {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
   .set-potential-assumption {
     font-size: 0.8rem;
     color: var(--ink-soft);

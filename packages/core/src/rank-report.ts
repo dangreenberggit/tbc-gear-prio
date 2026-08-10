@@ -20,6 +20,7 @@ import {
   formatSetBonusLine,
   formatSetPotentialLine,
   groupBySlot,
+  formatCuratedPackagePointer,
   isCuratedBis,
   partitionShortlist,
   SET_POTENTIAL_WEIGHTS,
@@ -279,6 +280,13 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             withSetPotential && item.setContext
               ? `<div class="set-potential">${esc(formatSetPotentialLine(item) ?? setPotentialUnmeasuredText(item))}</div>`
               : "";
+          // Ungated, unlike `setPotential` above: this carries no figure, and
+          // the contradiction it reconciles is visible by default
+          // (carry-forward 96).
+          const curatedPointerText = formatCuratedPackagePointer(item);
+          const curatedPointer = curatedPointerText
+            ? `<div class="curated-pointer">${esc(curatedPointerText)}</div>`
+            : "";
           // The HTML report rendered neither cap annotation, so the page could
           // banner a hit gap and then recommend an item that widened it with
           // nothing on the row saying so (carry-forward 47 §2).
@@ -333,6 +341,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${alternate}
     ${set}
     ${setPotential}
+    ${curatedPointer}
     ${hitNote}
     ${hitLoss}
   </div>
