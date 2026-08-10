@@ -16,6 +16,14 @@ export type ViewOptions = {
   boss?: string;
   groupBy?: "rank" | "slot" | "raid";
   hideOwned?: boolean;
+  /**
+   * Sort by `deltaDps + (setContext?.prospectiveBonusDps ?? 0)` instead of
+   * `deltaDps` alone (spec §4). Default off, so the default view is exactly
+   * today's. Pure: `rank` is never renumbered by this toggle (§12) — a row
+   * keeps the absolute rank `rankUpgrades` assigned it, even though the
+   * toggle can move it to a different position in `rows`.
+   */
+  withSetPotential?: boolean;
 };
 
 /**
@@ -178,8 +186,11 @@ function tieWindow(a: ViewRow, b: ViewRow): number {
  *    SE measures 2.149 DPS while adjacent deltas differ by far less; §10
  *    records 1.678 DPS at 5,000 iterations, and SE grows as iterations fall.
  */
-function assignTieGroups(rows: ViewRow[]): void {
-  const byDelta = [...rows].sort((a, b) => b.deltaDps - a.deltaDps);
+function assignTieGroups(
+  rows: ViewRow[],
+  sortKey: (r: ViewRow) => number
+): void {
+  const byDelta = [...rows].sort((a, b) => sortKey(b) - sortKey(a));
   let groupStart = 0;
   let groupId = 0;
 
@@ -196,7 +207,7 @@ function assignTieGroups(rows: ViewRow[]): void {
     const row = byDelta[i];
     const overlapsLeader =
       row !== undefined &&
-      leader.deltaDps - row.deltaDps <= tieWindow(row, leader);
+      sortKey(leader) - sortKey(row) <= tieWindow(row, leader);
     if (!overlapsLeader) {
       flush(i);
       groupStart = i;
@@ -213,13 +224,33 @@ function assignTieGroups(rows: ViewRow[]): void {
  * common case. Ties break on BiS-tag richness then item id, so the order is
  * total and stable rather than dependent on the input's order.
  */
-function compareRows(a: ViewRow, b: ViewRow, pinBis: boolean): number {
+/**
+ * `deltaDps` alone by default; with `withSetPotential` on, add the
+ * prospective bonus a below-threshold candidate would unlock (spec §4). A
+ * candidate that already crosses its threshold carries no
+ * `prospectiveBonusDps` — that value is already inside `deltaDps` (§2.1) —
+ * so `?? 0` never double-counts it.
+ */
+function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {
+  return withSetPotential
+    ? (r) => r.deltaDps + (r.setContext?.prospectiveBonusDps ?? 0)
+    : (r) => r.deltaDps;
+}
+
+function compareRows(
+  a: ViewRow,
+  b: ViewRow,
+  pinBis: boolean,
+  sortKey: (r: ViewRow) => number
+): number {
   if (pinBis) {
     const ap = a.bisTags.includes("BiS") ? 0 : 1;
     const bp = b.bisTags.includes("BiS") ? 0 : 1;
     if (ap !== bp) return ap - bp;
   }
-  if (a.deltaDps !== b.deltaDps) return b.deltaDps - a.deltaDps;
+  const ak = sortKey(a);
+  const bk = sortKey(b);
+  if (ak !== bk) return bk - ak;
   const richness = b.bisTags.length - a.bisTags.length;
   if (richness !== 0) return richness;
   return a.itemId - b.itemId;
@@ -229,6 +260,7 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const pinBis = v.pinBis ?? false;
   const zone = v.raid === undefined || v.raid === "all" ? undefined : v.raid;
   const boss = v.boss === undefined || v.boss === "all" ? undefined : v.boss;
+  const sortKey = sortKeyFor(v.withSetPotential ?? false);
 
   const rows: ViewRow[] = r.items
     .filter((item) => {
@@ -239,9 +271,9 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
     })
     .map((item) => ({ ...item, belowCutoffInView: item.belowCutoff }));
 
-  rows.sort((a, b) => compareRows(a, b, pinBis));
+  rows.sort((a, b) => compareRows(a, b, pinBis, sortKey));
 
-  assignTieGroups(rows);
+  assignTieGroups(rows, sortKey);
 
   const pinBisAvailable = r.items.some((i) => i.bisTags.includes("BiS"));
   const shortlist = rows.filter((row) => !row.belowCutoffInView);

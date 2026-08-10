@@ -321,6 +321,103 @@ describe("applyView", () => {
     });
   });
 
+  describe("withSetPotential (spec §4)", () => {
+    it("does not change sort order or rank when off (default)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const off = applyView(r);
+      expect(off.rows.map((x) => x.itemId)).toEqual([2, 1]);
+      const explicitOff = applyView(r, { withSetPotential: false });
+      expect(explicitOff.rows.map((x) => x.itemId)).toEqual([2, 1]);
+    });
+
+    it("sorts on deltaDps + prospectiveBonusDps when on, reordering the rows", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // itemId 1: 10 + 50 = 60, beats itemId 2's bare 20 — order flips.
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+    });
+
+    it("keeps rank absolute even though the toggle reorders rows (§12)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // Reordered [1, 2] in display, but ranks stay their absolute default
+      // values — non-monotonic in the new order, proving no renumbering.
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+      expect(rows.map((x) => x.rank)).toEqual([2, 1]);
+    });
+
+    it("does not double-count a candidate that already crosses its threshold (§2.1)", () => {
+      // crossesThreshold: true carries no prospectiveBonusDps — the value is
+      // already inside deltaDps — so `?? 0` must not invent one.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 30,
+          rank: 1,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 3,
+            piecesAfterSwap: 4,
+            nextThreshold: null,
+            crossesThreshold: true,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 2 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+    });
+  });
+
   describe("hideOwned", () => {
     it("removes equipped rows only when asked", () => {
       const r = ranking([

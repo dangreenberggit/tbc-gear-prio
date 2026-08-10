@@ -201,6 +201,20 @@ export function fightProvenanceLines(fight: {
   return lines;
 }
 
+/**
+ * The set-potential disclosure line (spec §4, PLAN.md §9 R7's honesty rule).
+ *
+ * Not a `StandingAssumption`: it names how `setBonuses`/`setContext` numbers
+ * were measured, and those fields only exist under the `--with-set-potential`
+ * view toggle. Folding it into `Ranking.assumptions.standing` unconditionally
+ * would change the default ranking's own object — the thing acceptance §8.2
+ * pins byte-for-byte against `dev` — so it renders at the CLI/report layer
+ * instead, gated the same way the numbers themselves are.
+ */
+export function setPotentialDisclosureLine(): string {
+  return "set potential is measured with the completion-package synergy method, shared seeds — see .scratch/set-bonus-value/spec.md §2.2";
+}
+
 export function substitutionsFromMetaRepair(
   swaps: readonly MetaRepairSwap[]
 ): Substitution[] {

@@ -229,12 +229,15 @@ const VIEWS: ViewOptions[] = [
   { groupBy: "raid" },
   { hideOwned: true },
   { hideOwned: false },
+  { withSetPotential: true },
+  { withSetPotential: false },
   {
     pinBis: true,
     raid: "Karazhan",
     boss: "Moroes",
     groupBy: "slot",
     hideOwned: true,
+    withSetPotential: true,
   },
 ];
 

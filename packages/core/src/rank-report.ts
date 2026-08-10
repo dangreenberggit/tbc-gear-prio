@@ -7,11 +7,17 @@
  * assets, open in any browser.
  */
 
-import { fightProvenanceLines, hitCapBanner } from "./disclosure.js";
+import {
+  fightProvenanceLines,
+  hitCapBanner,
+  setPotentialDisclosureLine,
+} from "./disclosure.js";
 import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
 import {
+  formatSetBonusLine,
+  formatSetPotentialLine,
   groupBySlot,
   partitionShortlist,
   SLOT_ORDER,
@@ -110,7 +116,25 @@ function poolScopeNote(meta: RankReportMeta): string {
   return meta.raid ? `${base} Filtered to ${meta.raid}.` : base;
 }
 
+/**
+ * A row's `setContext` exists but `formatSetPotentialLine` returned nothing
+ * — the crossing case (bonus already in `deltaDps`) or a set at/above its
+ * top measurable threshold. Neither is "unmeasured", so this names the
+ * crossing case explicitly rather than rendering a misleading blank.
+ */
+function setPotentialUnmeasuredText(item: RankedItem): string {
+  const ctx = item.setContext;
+  if (ctx?.crossesThreshold) {
+    return `completes ${ctx.piecesAfterSwap}pc (included in delta)`;
+  }
+  return "no further threshold to measure";
+}
+
 export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
+  // Report-time toggle semantics, same as the other optional facts this
+  // report already gates on `meta.view` (§4) — the ranking always computes
+  // setBonuses/setContext, but rendering them is a display choice.
+  const withSetPotential = meta.view?.withSetPotential === true;
   const reportItems = ranking.items as ReportItem[];
   const bySlot = groupBySlot(ranking.items);
   const { raid: aboveRaid, pvp: abovePvp } = partitionShortlist(ranking.items);
@@ -167,6 +191,13 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const set = item.setBonusNote
             ? `<div class="set">${esc(item.setBonusNote)}</div>`
             : "";
+          // The "with set" column (§4): under the toggle, every row with a
+          // setContext shows its prospective value or, when unmeasured, the
+          // reason — never a blank and never a silent 0 (§8.5).
+          const setPotential =
+            withSetPotential && item.setContext
+              ? `<div class="set-potential">${esc(formatSetPotentialLine(item) ?? setPotentialUnmeasuredText(item))}</div>`
+              : "";
           // The HTML report rendered neither cap annotation, so the page could
           // banner a hit gap and then recommend an item that widened it with
           // nothing on the row saying so (carry-forward 47 §2).
@@ -210,6 +241,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <div class="meta">${esc(formatItemSource(item.source))} ${owned}${pvp}${magnitude}${tags}</div>
     ${alternate}
     ${set}
+    ${setPotential}
     ${hitNote}
     ${hitLoss}
   </div>
@@ -244,6 +276,21 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     .map((s) => `<li><code>${esc(s.field)}</code> ${esc(s.detail)}</li>`)
     .join("\n")}</ul>
 </details>`;
+
+  // The "with set" block (§4), the report's counterpart to the CLI's set
+  // block: one row per SetBonusValue, unmeasured reasons rendered as text
+  // rather than a blank or a 0 (§8.5), plus the standing-assumption line
+  // naming the measurement method (PLAN.md §9 R7).
+  const setPotentialPanel =
+    withSetPotential && ranking.setBonuses && ranking.setBonuses.length > 0
+      ? `<details class="panel" open>
+  <summary>Set potential (${ranking.setBonuses.length})</summary>
+  <p class="set-potential-assumption">${esc(setPotentialDisclosureLine())}</p>
+  <ul>${ranking.setBonuses
+    .map((b) => `<li>${esc(formatSetBonusLine(b))}</li>`)
+    .join("\n")}</ul>
+</details>`
+      : "";
 
   const title = `${meta.character} · ${meta.spec} P${meta.maxPhase}`;
 
@@ -303,6 +350,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       <ul>${assumptions}</ul>
     </details>
     ${subs}
+    ${setPotentialPanel}
 
     ${sections}
 

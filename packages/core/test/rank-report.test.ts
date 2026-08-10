@@ -9,6 +9,10 @@ import {
   renderRankHtml,
   type RankReportMeta,
 } from "../src/rank-report.js";
+import {
+  formatSetBonusLine,
+  formatSetPotentialLine,
+} from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
 
 type TestItem = RankedItem & {
@@ -421,11 +425,262 @@ describe("rank-report", () => {
     // and the fight-provenance line it was only ever printing to the CLI.
     // Diffed before/after to confirm the delta is exactly those two <p>
     // elements plus their CSS rules — nothing else in the document moved.
+    // Repinned for set-bonus-value Slice C: every row now interpolates a
+    // `${setPotential}` div (empty string when `--with-set-potential` is off,
+    // as this fixture renders), and the document gains an always-present but
+    // empty `${setPotentialPanel}` slot next to `${subs}`. Diffed before/after
+    // to confirm the delta is exactly those interpolation points' whitespace —
+    // no visible markup changes with the toggle off.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "2bca97bff348944591b448e33ffebb512211b79cba5269175d50292fc047f36c",
-      length: 11450,
+        "d85d3eb3fa38b3570b3435007f02a309e560be110c02cf6b11ff7effb38229be",
+      length: 11648,
     });
+  });
+});
+
+describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", () => {
+  it("renders a measured bonus, signed", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [1, 2, 3, 4],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+      })
+    ).toBe("Thunderheart Harness 4pc (0 worn) — +91.68 DPS");
+  });
+
+  it("renders a measured ≈0 bonus as a number, not as unmeasured (§2.3)", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 629,
+        setName: "Crystalforge Battlegear",
+        threshold: 2,
+        piecesWorn: 1,
+        packageItemIds: [1],
+        packageDeltaDps: 0.1,
+        bonusDps: 0,
+      })
+    ).toBe("Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS");
+  });
+
+  it("renders each unmeasured reason as readable text", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 626,
+        setName: "Justicar Battlegear",
+        threshold: 2,
+        piecesWorn: 1,
+        packageItemIds: [1],
+        packageDeltaDps: 0,
+        unmeasured: "not-implemented-in-sim",
+      })
+    ).toBe(
+      "Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim"
+    );
+    expect(
+      formatSetBonusLine({
+        setId: 641,
+        setName: "Nordrassil Harness",
+        threshold: 4,
+        piecesWorn: 1,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "insufficient-pieces",
+      })
+    ).toBe(
+      "Nordrassil Harness 4pc (1 worn) — not enough pieces in the pool to build the package"
+    );
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 2,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "sim-failed",
+      })
+    ).toBe("Thunderheart Harness 4pc (2 worn) — the package sim failed");
+  });
+
+  it("formats the per-item potential line with the pieces-needed count", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 2 more pieces)");
+  });
+
+  it("singularizes 'piece' when exactly one more is needed", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 3,
+          piecesAfterSwap: 3,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 1 more piece)");
+  });
+
+  it("is undefined for a crossing candidate (value already in deltaDps)", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 3,
+          piecesAfterSwap: 4,
+          nextThreshold: null,
+          crossesThreshold: true,
+        },
+      })
+    ).toBeUndefined();
+  });
+
+  it("is undefined with no setContext at all", () => {
+    expect(formatSetPotentialLine({})).toBeUndefined();
+  });
+});
+
+describe("set potential (§4)", () => {
+  it("renders nothing when the toggle is off, even with setBonuses present", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            threshold: 4,
+            piecesWorn: 1,
+            packageItemIds: [1, 2, 3],
+            packageDeltaDps: 10,
+            bonusDps: 5,
+          },
+        ],
+      },
+      meta()
+    );
+    expect(html).not.toContain("Set potential");
+    expect(html).not.toContain("Justicar Battlegear");
+  });
+
+  it("renders the set block and the measured bonus under the toggle", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31039, 31048, 31034, 31044],
+            packageDeltaDps: -317.24,
+            bonusDps: 91.68,
+          },
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    expect(html).toContain("Set potential (1)");
+    expect(html).toContain("Thunderheart Harness 4pc (0 worn)");
+    expect(html).toContain("+91.68 DPS");
+    expect(html).toContain("completion-package synergy");
+  });
+
+  it("renders each unmeasured reason as text, never a blank or a 0", () => {
+    const reasons = [
+      "not-implemented-in-sim",
+      "insufficient-pieces",
+      "sim-failed",
+    ] as const;
+    for (const reason of reasons) {
+      const html = renderRankHtml(
+        {
+          ...rankingWithPvpWeaponAboveCutoff(),
+          setBonuses: [
+            {
+              setId: 641,
+              setName: "Nordrassil Harness",
+              threshold: 2,
+              piecesWorn: 1,
+              packageItemIds: [1],
+              packageDeltaDps: 0,
+              unmeasured: reason,
+            },
+          ],
+        },
+        { ...meta(), view: { withSetPotential: true } }
+      );
+      expect(html).not.toMatch(/Nordrassil Harness 2pc \(1 worn\) — <\/li>/);
+      expect(html).not.toContain("Nordrassil Harness 2pc (1 worn) — 0.00 DPS");
+      expect(html.match(/Nordrassil Harness/g)?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("shows the per-item set-potential annotation, and the crossing case as included-in-delta", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 29073,
+            name: "Justicar Crown",
+            slot: "head",
+            deltaDps: 12,
+            belowCutoff: false,
+            setContext: {
+              setId: 626,
+              setName: "Justicar Battlegear",
+              piecesWornBefore: 1,
+              piecesAfterSwap: 2,
+              nextThreshold: 4,
+              crossesThreshold: false,
+              prospectiveBonusDps: 45,
+            },
+          }),
+          item({
+            rank: 2,
+            itemId: 29074,
+            name: "Justicar Legplates",
+            slot: "legs",
+            deltaDps: 8,
+            belowCutoff: false,
+            setContext: {
+              setId: 626,
+              setName: "Justicar Battlegear",
+              piecesWornBefore: 3,
+              piecesAfterSwap: 4,
+              nextThreshold: null,
+              crossesThreshold: true,
+            },
+          }),
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    expect(html).toContain("+45.00 set potential (needs 2 more pieces)");
+    expect(html).toContain("completes 4pc (included in delta)");
   });
 });
 

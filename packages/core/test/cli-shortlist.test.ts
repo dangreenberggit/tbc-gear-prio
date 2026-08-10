@@ -16,6 +16,11 @@
  */
 import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
+import { setPotentialDisclosureLine } from "../src/disclosure.js";
+import {
+  formatSetBonusLine,
+  formatSetPotentialLine,
+} from "../src/rank-report-rules.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import { applyView } from "../src/view.js";
 
@@ -140,5 +145,74 @@ describe("CLI shortlist default", () => {
       "hands",
       "neck",
     ]);
+  });
+});
+
+/**
+ * `--with-set-potential` (spec §4): the CLI prints a short block from
+ * `Ranking.setBonuses` plus a per-item annotation from `RankedItem.setContext`.
+ * `main()` cannot be driven here (see file header) — this exercises the same
+ * lines `main()` builds, the way `cli.ts` actually assembles them: one
+ * `formatSetBonusLine` per entry in the block, one `formatSetPotentialLine`
+ * per printed row.
+ */
+describe("--with-set-potential output", () => {
+  const SET_BONUSES = [
+    {
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4 as const,
+      piecesWorn: 0,
+      packageItemIds: [31039, 31048, 31034, 31044],
+      packageDeltaDps: -317.24,
+      bonusDps: 91.68,
+    },
+    {
+      setId: 626,
+      setName: "Justicar Battlegear",
+      threshold: 2 as const,
+      piecesWorn: 1,
+      packageItemIds: [29073],
+      packageDeltaDps: 0,
+      unmeasured: "not-implemented-in-sim" as const,
+    },
+  ];
+
+  it("prints the disclosure line and one line per SetBonusValue, unmeasured reasons included", () => {
+    const lines = [
+      `assumption: ${setPotentialDisclosureLine()}`,
+      `set potential (${SET_BONUSES.length}):`,
+      ...SET_BONUSES.map((b) => `  ${formatSetBonusLine(b)}`),
+    ];
+    expect(lines).toEqual([
+      "assumption: set potential is measured with the completion-package synergy method, shared seeds — see .scratch/set-bonus-value/spec.md §2.2",
+      "set potential (2):",
+      "  Thunderheart Harness 4pc (0 worn) — +91.68 DPS",
+      "  Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim",
+    ]);
+  });
+
+  it("prints the per-item +X set potential (needs N more pieces) line", () => {
+    const withPotential = item({
+      itemId: 1,
+      deltaDps: 12,
+      setContext: {
+        setId: 676,
+        setName: "Thunderheart Harness",
+        piecesWornBefore: 2,
+        piecesAfterSwap: 3,
+        nextThreshold: 4,
+        crossesThreshold: false,
+        prospectiveBonusDps: 91.68,
+      },
+    });
+    expect(formatSetPotentialLine(withPotential)).toBe(
+      "+91.68 set potential (needs 1 more piece)"
+    );
+  });
+
+  it("prints nothing for a row with no setContext, even under the flag", () => {
+    const plain = item({ itemId: 1, deltaDps: 12 });
+    expect(formatSetPotentialLine(plain)).toBeUndefined();
   });
 });

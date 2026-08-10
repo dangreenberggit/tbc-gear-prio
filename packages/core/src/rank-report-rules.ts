@@ -11,7 +11,7 @@
 import type { ItemSlot } from "./items.js";
 import type { SimSlotName } from "./pool.js";
 import type { ViewOptions } from "./view.js";
-import type { RankedItem } from "./rank.js";
+import type { RankedItem, SetBonusValue } from "./rank.js";
 
 /** Display order for slot sections; also seeds `groupBySlot`'s empty buckets. */
 export const SLOT_ORDER: readonly ItemSlot[] = [
@@ -106,4 +106,53 @@ export function groupBySlot(items: RankedItem[]): Map<ItemSlot, RankedItem[]> {
     list.sort((a, b) => b.deltaDps - a.deltaDps);
   }
   return map;
+}
+
+/**
+ * Human-readable reason a `SetBonusValue` shows no `bonusDps` (spec §2.3,
+ * acceptance §8.5). Every `unmeasured` value must render as a reason here —
+ * never a blank and never a `0`, which would read as "measured, worth
+ * nothing" when the truth is "we don't know".
+ */
+const UNMEASURED_REASON_TEXT: Record<
+  NonNullable<SetBonusValue["unmeasured"]>,
+  string
+> = {
+  "not-implemented-in-sim": "not implemented in the pinned sim",
+  "insufficient-pieces": "not enough pieces in the pool to build the package",
+  "sim-failed": "the package sim failed",
+};
+
+/**
+ * One line per `SetBonusValue`: set, threshold, pieces worn, and either the
+ * measured bonus or the reason it could not be measured (§4). A measured
+ * ≈0 bonus (e.g. Crystalforge, a mana/heal effect) renders as a number, not
+ * as unmeasured — §2.3 draws that line and this function preserves it.
+ */
+export function formatSetBonusLine(b: SetBonusValue): string {
+  const sign = b.bonusDps !== undefined && b.bonusDps > 0 ? "+" : "";
+  const measured =
+    b.unmeasured !== undefined
+      ? UNMEASURED_REASON_TEXT[b.unmeasured]
+      : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
+  return `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${measured}`;
+}
+
+/**
+ * The per-item annotation under `--with-set-potential` (§4): "+X set
+ * potential (needs N more pieces)". Absent when the row has no prospective
+ * value to show — already at/above the top threshold, already crossing one,
+ * or the relevant bonus is unmeasured (nothing numeric to add).
+ */
+export function formatSetPotentialLine(
+  item: Pick<RankedItem, "setContext">
+): string | undefined {
+  const ctx = item.setContext;
+  if (!ctx || ctx.crossesThreshold || ctx.prospectiveBonusDps === undefined) {
+    return undefined;
+  }
+  const needed =
+    ctx.nextThreshold === null ? 0 : ctx.nextThreshold - ctx.piecesAfterSwap;
+  const sign = ctx.prospectiveBonusDps >= 0 ? "+" : "";
+  return `${sign}${ctx.prospectiveBonusDps.toFixed(2)} set potential (needs ${needed} more piece${needed === 1 ? "" : "s"})`;
 }

@@ -277,6 +277,15 @@ export const REPORT_CSS = `
     color: var(--ink-soft);
   }
   .hit-note.down { color: var(--down); }
+  .set-potential {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .set-potential-assumption {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
   .nums { text-align: right; white-space: nowrap; }
   .delta { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; }
   .delta .unit { font-size: 0.7rem; color: var(--muted); }
