@@ -119,4 +119,8 @@ Sets with **no** DPS-relevant, implemented bonus, and the reason each is unmeasu
 
 ## V2 — determinism (post-implementation)
 
-_Filled in by Slice B: same input, same seeds, two runs, identical `setBonuses`._
+Pinned by `packages/core/test/rank.test.ts`, inside
+`describe("rankUpgrades — set-bonus prospective value (Slice B)")`, test
+`"is deterministic: same input, same seeds, two runs deep-equal setBonuses (V2)"` (line 2447):
+runs `rankUpgrades` twice against the same input and seeds and asserts the two `setBonuses`
+results are deep-equal. Re-run: `npx vitest run packages/core/test/rank.test.ts`.

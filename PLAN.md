@@ -862,7 +862,12 @@ Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tag
 
 **Flagged, not planned: going live on `GearSource`.** `WclGearSource` is fully speced (§5.2) but no phase gate anywhere in this document commits to actually building it and flipping the CLI/web shell off `--offline`. Phase 0/1/2 all run on recorded fixtures by design; Phase 4's gate only checks the deployed job/point-budget/cache story, not the switch itself. This needs its own real planning pass before Phase 3 closes — not scoped here. One input for that pass: `FightSummary.salvationUptime` (ticket 06) means the live source has to fetch per-player buff uptimes, not just gear and fights. It is optional, so a source that omits it degrades to "never measured" rather than reporting a false zero — but the off-tank flag is silent until it is wired.
 
-**Flagged, not planned: simulate set bonuses gained, not just broken.** `setBonusNote` (§4, and the Phase 1 gate box for it) only explains the loss case — a recommended item breaking a set bonus the player currently has. It does not simulate the gain case: a tier item in the recommended options that would complete or newly unlock a set bonus. A player can't currently weigh that value from the ranking. Mechanism not decided — not scoped here.
+**Amended 2026-08-09 (set-bonus prospective value, shipped).** This phase previously flagged
+"simulate set bonuses gained, not just broken" with the mechanism undecided. It is now
+implemented: for each (set, threshold) above worn pieces, the engine sims a completion package once
+and reports `packageDelta − Σ individual deltas` as the bonus, attached whole at the threshold (not
+split per piece). Display is opt-in via `ViewOptions.withSetPotential` / `--with-set-potential`; the
+default ranking output is unchanged. See `.scratch/set-bonus-value/spec.md`.
 
 Three routes; job submit/poll; skeleton-then-fill results; assumptions drawer; view controls over the Phase 2 `applyView`; exports and share link; attribution. Confirm TMB's actual control labels before building the filter UI (§12).
 
