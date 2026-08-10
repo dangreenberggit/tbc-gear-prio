@@ -1,4 +1,5 @@
-Status: open (root cause identified; see disposition)
+Status: closed
+Closed: e3eceb3
 Type: bug
 Origin: SME rank review, 2026-08-10 (`.scratch/set-bonus-value/sme-review-2026-08-10.md`, G5)
 Blocks: none
@@ -88,3 +89,44 @@ a recomputed number. Keeping this ticket open for that check.
 
 **Do NOT** "fix" this by correcting the −100/−106 figures. They are correct, and
 ADR-0020 (absolute cutoff) forecloses moving the bar to surface these rows.
+
+---
+
+## Closed (2026-08-10) — pointer added, `e3eceb3`
+
+The confirmation step this ticket was held open for: **the reader could not
+reach the explanation by default.**
+
+What a default reader saw on the 31042 row before this commit:
+
+- the `BiS` tag,
+- `-100.16 DPS`,
+- `setBonusNote` = "breaks 2-piece Malorne Harness (below 2)" — ungated, and the
+  half of the reconciliation that explains *why the number is negative*.
+
+What they could not reach: anything explaining what the BiS tag was claiming.
+The per-row set-potential annotation is gated on `withSetPotential`
+(`rank-report.ts`), and the Set potential panel — unblocked by carry-forward 100
+in `b51f08c` — renders elsewhere on the page with nothing on the row linking to
+it.
+
+So the answer to "is it reachable" was **no**, and the minimal per-row pointer
+this ticket authorised was added: `formatCuratedPackagePointer` in
+`rank-report-rules.ts` renders
+
+```
+BiS as part of Thunderheart Harness, not as this swap alone — see Set potential
+```
+
+on any curated-BiS row that is below cutoff and carries a `setContext`. It is a
+pointer only — no figure is restated, per this ticket's own "a pointer, not a
+recomputed number" and carry-forward 90's suppression rule. The `-100.16` and
+`-106.16` deltas are untouched, as this ticket required.
+
+Verify:
+
+```
+cd packages/core && npx vitest run test/rank-report.test.ts -t "points a below-cutoff curated row"
+```
+
+Red confirmed before green. Full suite: `pnpm verify` green, 623 tests.

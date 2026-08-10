@@ -1364,8 +1364,19 @@ describe("curatedSetPhase", () => {
     expect(curatedSetPhase("preraid")).toBe(1);
   });
 
+  /**
+   * Every stage `assemble_universe.py` can emit must resolve. A label the map
+   * does not know returns null, which makes `bisStale` false and silently
+   * withholds the "no curated set is pinned for PN" warning — it fails in the
+   * direction that looks correct (carry-forward 102).
+   */
+  it("resolves every stage the Python source can label", () => {
+    expect(curatedSetPhase("p3")).toBe(3);
+    expect(curatedSetPhase("p3_9p")).toBe(3);
+  });
+
   it("is null for a label it does not recognise", () => {
-    expect(curatedSetPhase("p3")).toBeNull();
+    expect(curatedSetPhase("p9")).toBeNull();
     expect(curatedSetPhase("")).toBeNull();
   });
 });

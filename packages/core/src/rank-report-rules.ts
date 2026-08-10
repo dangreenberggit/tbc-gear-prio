@@ -208,9 +208,15 @@ export function wowsimsItemIdsJson(
  * The phase a curated gear-set label is BiS *for*, or `null` if unrecognised.
  *
  * Mirrors `CURATED_SET_PHASE` / `curated_set_phase` in
- * `scripts/assemble_universe.py` — the labels are produced there, and this
- * only reads them back to decide whether to warn that a list is stale. Pre-raid
- * is phase 1: it is the set you take *into* a phase-1 raid.
+ * `scripts/assemble_universe.py` — **that file is the source of truth**; the
+ * labels are produced there, and this only reads them back to decide whether to
+ * warn that a list is stale. Pre-raid is phase 1: it is the set you take *into*
+ * a phase-1 raid.
+ *
+ * Do not edit this map alone. `scripts/check_curated_set_phase.py` re-derives it
+ * from this file and fails `pnpm verify` on any divergence — it exists because
+ * the mirror drifted once and failed *silently*, suppressing the staleness
+ * warning rather than erroring (carry-forward 102).
  *
  * The suffix on a variant label (`p2_6p`, `p2_9p`) is not part of the phase, so
  * only the leading `pN` is read. That suffix is a hit percentage rather than a
@@ -220,6 +226,7 @@ const CURATED_SET_PHASE: Record<string, number> = {
   preraid: 1,
   p1: 1,
   p2: 2,
+  p3: 3,
 };
 
 export function curatedSetPhase(label: string): number | null {

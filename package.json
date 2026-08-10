@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run mirrors:check && pnpm run lock-merge:check",
+    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run curated-set-phase:check && pnpm run mirrors:check && pnpm run lock-merge:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -38,6 +38,7 @@
     "boss-aliases:check": "python scripts/check_boss_aliases.py",
     "rep-tables:check": "python scripts/check_rep_tables.py",
     "wowhead-prose:check": "python scripts/check_wowhead_prose_suppression.py",
+    "curated-set-phase:check": "python scripts/check_curated_set_phase.py",
     "mirrors:check": "python scripts/check_skill_mirrors.py",
     "lock-merge:check": "python scripts/check_lock_merge.py",
     "codegen:json-types": "python scripts/generate_json_literal_types.py",
