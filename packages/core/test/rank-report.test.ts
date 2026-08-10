@@ -967,19 +967,19 @@ describe("BiS-only filter", () => {
   });
 
   it("warns when the curated list is older than the ranked phase", () => {
-    // Upstream vendors no gear set past p2, so a P3 run degrades to p2's
-    // list. Calling that "P3 BiS" would assert a curation upstream never
-    // made — the per-item overclaim carry-forward 47 §1 was filed for.
+    // Where no set is pinned for the ranked phase the tags degrade to the
+    // newest one that is. Calling that "P3 BiS" would assert a curation
+    // nobody made — the overclaim carry-forward 47 §1 was filed for.
     const html = renderRankHtml(ranking([bisAbove, notBis]), {
       ...meta,
       maxPhase: 3,
     });
-    expect(html).toContain("Upstream ships no curated set for P3");
+    expect(html).toContain("No curated set is pinned for P3");
   });
 
   it("does not warn when the curated list matches the ranked phase", () => {
     const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
-    expect(html).not.toContain("Upstream ships no curated set");
+    expect(html).not.toContain("No curated set is pinned");
   });
 
   it("still ships the script when only the BiS filter is present", () => {

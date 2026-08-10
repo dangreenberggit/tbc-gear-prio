@@ -50,8 +50,12 @@ VENDOR = "vendor/wowsims"
 # is the whole process for taking on a new upstream input.
 #
 # Per-phase refresh runbook (manual — not automated in CI):
-# - wowsims gear-set files stop at P2 upstream; new phase gear sets require a
-#   hand edit to TRACKED after checking the pinned tag in data/wowsims.lock.json.
+# - Ret's gear sets stop at p2 upstream; feral cat's run to p5. Taking on a new
+#   phase's set is a hand edit to TRACKED followed by
+#   `--update --tag <the tag already in data/wowsims.lock.json>` — plain
+#   `--restore` iterates the lockfile, so it cannot fetch a file that has no
+#   entry yet, and a bare `--update` would chase latest and move every other
+#   pin in the same diff.
 # - Pool membership refreshes from AtlasLoot (data/atlasloot_sources.json),
 #   Wowhead ret lists (data/wowhead-lists/ret/), and the tier token map
 #   (data/two-hop/ret-tokens.json) — not from wowsims curated gear sets
@@ -60,10 +64,19 @@ VENDOR = "vendor/wowsims"
 #   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
 #
 # Feral cat is not shaped like ret upstream. Retribution ships one curated set
-# per stage; feral cat ships sixteen, split BiS/Alt/Realistic and again by
-# 6-piece against 9-piece tier bonus. Only the p2 pair is tracked here — the
-# stage this repo defaults to — so `bisTags` has a defensible input without
-# this file becoming a mirror of upstream's whole catalogue.
+# per stage and genuinely stops at p2; feral cat ships sixteen, split
+# BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus, and runs
+# to p5.
+#
+# The p2 *and p3* pairs are tracked, plus pre-raid: those are the stages this
+# repo assembles universes for, and a max-phase-3 run tagging its BiS rows from
+# p2's list silently presents a stale curated set as the current one. p4/p5
+# stay untracked until a universe is assembled for them — the point is to cover
+# the phases we rank, not to mirror upstream's whole catalogue.
+#
+# The `_6p`/`_9p` suffix is a hit percentage, not a piece count (carry-forward
+# 88). Only the BiS pair per stage is tracked; upstream's Alt/Realistic
+# variants are a different claim and would need their own tag vocabulary.
 TRACKED = {
     "db.json": "assets/database/db.json",
     "constants_other.ts": "ui/core/constants/other.ts",
@@ -73,6 +86,8 @@ TRACKED = {
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
     "feral_p2_6p.gear.json": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
     "feral_p2_9p.gear.json": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
+    "feral_p3_6p.gear.json": "ui/druid/feralcat/gear_sets/p3_6p.gear.json",
+    "feral_p3_9p.gear.json": "ui/druid/feralcat/gear_sets/p3_9p.gear.json",
     "feral_preraid.gear.json": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
     "feral_default.apl.json": "ui/druid/feralcat/apls/default.apl.json",
     # Sources for scripts/extract_sim_defaults.mjs (ADR-0022). Unlike everything
@@ -214,7 +229,11 @@ def do_update(tag):
         ),
     }
     lock = merge_lock(prev, owned)
-    with open(LOCKFILE, "w", encoding="utf-8") as fh:
+    # newline="" so Windows does not translate "\n" to "\r\n": the lockfile is
+    # committed, and a CRLF rewrite makes every line of the diff look changed,
+    # hiding which pins actually moved. Same defect as 393ab4f fixed for the
+    # AtlasLoot artifacts.
+    with open(LOCKFILE, "w", encoding="utf-8", newline="") as fh:
         json.dump(lock, fh, indent=2)
         fh.write("\n")
 

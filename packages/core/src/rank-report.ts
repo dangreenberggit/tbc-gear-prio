@@ -353,10 +353,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // swaps (Wolfshead Helm, Bloodlust Brooch) — showing 10 of 17 under a
   // control labelled "BiS only" would misdescribe the list it names.
   // Name the sets the tags actually came from, never the requested phase.
-  // Upstream vendors no gear set past p2, so a P3+ run silently degrades to
-  // p2's list (`bis_set_labels_for_max_phase`). Labelling that "P3 BiS" would
-  // assert a curation upstream never made — the exact per-item overclaim
-  // carry-forward 47 §1 was filed for.
+  // Where no set is vendored for the ranked phase,
+  // `bis_set_labels_for_max_phase` degrades to the newest one that is, so the
+  // rows can carry an older stage's list. Labelling that "P3 BiS" would assert
+  // a curation nobody made — the per-item overclaim carry-forward 47 §1 was
+  // filed for, one level up. The warning below says so rather than hiding it.
   const bisSetLabels = [
     ...new Set(
       ranking.items.filter(isCuratedBis).flatMap((i) => i.bisSets ?? [])
@@ -370,7 +371,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ? ` (${esc(bisSetLabels.join(", "))})`
     : "";
   const bisStaleNote = bisStale
-    ? ` <strong>Upstream ships no curated set for P${meta.maxPhase}</strong>, so these are the newest it does vendor — an older phase's list, not a P${meta.maxPhase} recommendation.`
+    ? ` <strong>No curated set is pinned for P${meta.maxPhase}</strong>, so these are the newest that is — an older phase's list, not a P${meta.maxPhase} recommendation.`
     : "";
   const bisFilter =
     bisCount > 0

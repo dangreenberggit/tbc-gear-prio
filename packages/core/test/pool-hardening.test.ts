@@ -226,6 +226,8 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
       "feral_preraid.gear.json",
       "feral_p2_6p.gear.json",
       "feral_p2_9p.gear.json",
+      "feral_p3_6p.gear.json",
+      "feral_p3_9p.gear.json",
     ],
   };
 
@@ -288,6 +290,27 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
         expect(entry.bisSets).toEqual(["p2"]);
       }
     }
+  });
+
+  it("tags feral p3 from the p3 sets, not a carried-over p2 list", () => {
+    // Ret degrades to p2 above because upstream genuinely ships no later ret
+    // set. Feral does not have that excuse — upstream runs to p5 — so a feral
+    // p3 list tagged from p2 means the stage is simply not vendored, and the
+    // fix is to pin it (scripts/sync_wowsims.py TRACKED) rather than to accept
+    // the fallback. This pins that the p3 pair is in fact vendored and used.
+    const p3 = loadUniverse("data/universes/feral-p3.json").raw.entries;
+    const tagged = p3.filter((e) => (e.bisTags ?? []).includes("BiS"));
+    expect(tagged.length).toBeGreaterThan(0);
+    for (const entry of tagged) {
+      expect(entry.bisSets?.every((s) => s.startsWith("p3_"))).toBe(true);
+    }
+    // T6 replaced T5 in the curated list: Malorne (T5) keeps its provenance
+    // but loses the current-stage claim, and Thunderheart (T6) gains it.
+    const malorneChest = p3.find((e) => e.itemId === 29096);
+    expect(malorneChest?.curatedSets).toContain("p2_6p");
+    expect(malorneChest?.bisTags ?? []).not.toContain("BiS");
+    const thunderheartChest = p3.find((e) => e.itemId === 31042);
+    expect(thunderheartChest?.bisTags).toContain("BiS");
   });
 
   it("keeps the ret and feral verdicts on the shared ring distinguishable", () => {

@@ -45,6 +45,16 @@
       "sha256": "1920540f69c0caf3e5123d93a5f6785bb90753ed395f37a1d9b9a1931b25a750",
       "bytes": 664
     },
+    "feral_p3_6p.gear.json": {
+      "path": "ui/druid/feralcat/gear_sets/p3_6p.gear.json",
+      "sha256": "26db156ca5387647bb26db8e812a6395bb82166184ff49beb28960ff9e9b1abc",
+      "bytes": 667
+    },
+    "feral_p3_9p.gear.json": {
+      "path": "ui/druid/feralcat/gear_sets/p3_9p.gear.json",
+      "sha256": "9bcea727faf49ae5fac1db9e5a914f3c0a5c51ab47e6b4750304798f45672d71",
+      "bytes": 687
+    },
     "feral_preraid.gear.json": {
       "path": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
       "sha256": "53fe6584b383202cc3e8bd7047fa02cef012619c5effec20da2dac14d64c49f2",
