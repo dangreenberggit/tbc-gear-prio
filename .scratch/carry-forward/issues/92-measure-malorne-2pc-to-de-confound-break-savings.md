@@ -171,7 +171,7 @@ the 15–40 side of the disagreement above.
 
 ## Disposition (2026-08-10) — RESOLVED BY DIRECT MEASUREMENT
 
-**B = 131.1 ± 5.5 DPS.** The factor-of-4 disagreement is settled **in favour of
+**B = 131.1 ± 6.6 DPS.** The factor-of-4 disagreement is settled **in favour of
 the regression evidence (100–133)**. The SME's domain estimate (15–40) is
 refuted by measurement.
 

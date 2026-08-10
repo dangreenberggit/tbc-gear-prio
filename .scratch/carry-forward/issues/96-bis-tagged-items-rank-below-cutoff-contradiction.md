@@ -60,7 +60,7 @@ node -e "const j=require('./.scratch/rank-reports/shredzepelin-p3.json');for(con
 
 Measurement (ticket 92) resolves what was previously an open question:
 
-- **The Malorne 2pc is worth 131.1 ± 5.5 DPS** on a T4-era reference set.
+- **The Malorne 2pc is worth 131.1 ± 6.6 DPS** on a T4-era reference set.
 - Chest and shoulder are the only two slots whose worn item belongs to a set, so
   **every** single-swap candidate in those slots breaks the 2pc and forfeits
   ~131 DPS. A −100 delta on a strictly-better item is therefore **arithmetically
