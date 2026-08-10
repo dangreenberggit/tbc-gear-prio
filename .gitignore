@@ -40,6 +40,7 @@ vendor/
 .scratch/*
 !.scratch/carry-forward/
 !.scratch/phase-2/
+!.scratch/set-bonus-value/
 !.scratch/archive/
 !.scratch/handoffs/
 !.scratch/phase0-close/
