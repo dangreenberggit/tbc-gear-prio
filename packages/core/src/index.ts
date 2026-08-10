@@ -161,6 +161,24 @@ export {
 } from "./enchants.js";
 export { compose, type ComposePlayer } from "./compose.js";
 export { setBreakNote } from "./set-bonus.js";
+export {
+  SET_THRESHOLDS,
+  combineSe,
+  computeSynergy,
+  isBonusImplemented,
+  nextMeasurableThreshold,
+  selectPackage,
+  setCounts,
+  setLabel,
+  type DpsSample,
+  type IndividualDelta,
+  type PackagePiece,
+  type PackageSelectionResult,
+  type SetThreshold,
+  type SynergyInput,
+  type SynergyResult,
+  type UnmeasuredReason,
+} from "./set-value.js";
 export { Stat, epScore, statAt } from "./stats.js";
 export {
   gemColorCounts,
