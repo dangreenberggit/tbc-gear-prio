@@ -212,6 +212,75 @@ export function selectPackage(
   return { ok: true, piecesWorn, addedPieces };
 }
 
+/** An other-set threshold a completion package drops below by displacing gear. */
+export type BrokenSetBonus = {
+  setId: number;
+  setName: string;
+  /** The highest implemented threshold that was active before and is not after. */
+  threshold: SetThreshold;
+  piecesBefore: number;
+  piecesAfter: number;
+};
+
+/**
+ * Other sets' implemented thresholds this package breaks.
+ *
+ * `selectPackage` treats a slot as free unless it holds a piece of the set
+ * being completed, so a package can displace a *different* set's piece and drop
+ * that set below its own threshold. The measured synergy then silently nets the
+ * two: the lost bonus is charged once inside `packageDelta` but twice across
+ * `Σ singles` (each single that touches the slot pays it too), and the residue
+ * is misattributed to the set being completed.
+ *
+ * Verification.md V0b is exactly this bug measured by hand — a Thunderheart
+ * package over a shoulder holding Malorne, reporting +91.68 where the
+ * confound-free V0c measures +20.89. No sim can separate the two after the
+ * fact, so this reports the breakage rather than trying to correct for it.
+ */
+export function brokenSetBonuses(
+  equipment: readonly SimItemSpec[],
+  addedPieces: readonly PackagePiece[],
+  completingSetId: number
+): BrokenSetBonus[] {
+  const before = setCounts(equipment);
+  const after = new Map(before);
+  for (const piece of addedPieces) {
+    const displaced = equipment[piece.slotIndex]?.id;
+    const displacedSetId = displaced ? getItem(displaced)?.setId : undefined;
+    if (displacedSetId != null) {
+      after.set(displacedSetId, (after.get(displacedSetId) ?? 0) - 1);
+    }
+    const addedSetId = getItem(piece.itemId)?.setId;
+    if (addedSetId != null) {
+      after.set(addedSetId, (after.get(addedSetId) ?? 0) + 1);
+    }
+  }
+
+  const broken: BrokenSetBonus[] = [];
+  for (const [setId, piecesBefore] of before) {
+    if (setId === completingSetId) continue;
+    const piecesAfter = after.get(setId) ?? 0;
+    if (piecesAfter >= piecesBefore) continue;
+    // Highest implemented threshold that was met before and is not after; a
+    // threshold nothing implements costs no DPS to lose.
+    const lost = [...SET_THRESHOLDS]
+      .reverse()
+      .find(
+        (t) =>
+          piecesBefore >= t && piecesAfter < t && isBonusImplemented(setId, t)
+      );
+    if (lost === undefined) continue;
+    broken.push({
+      setId,
+      setName: setLabel(equipment, setId),
+      threshold: lost,
+      piecesBefore,
+      piecesAfter,
+    });
+  }
+  return broken.sort((a, b) => a.setId - b.setId);
+}
+
 /** One sim observation feeding synergy arithmetic: a DPS mean and its SE. */
 export type DpsSample = { dps: number; se: number };
 

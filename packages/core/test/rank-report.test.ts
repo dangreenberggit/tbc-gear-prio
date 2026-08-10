@@ -454,6 +454,51 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     ).toBe("Thunderheart Harness 4pc (0 worn) — +91.68 DPS");
   });
 
+  /**
+   * verification.md V0b measured exactly this package and reported +91.68,
+   * where the confound-free V0c measures +20.89. The number nets the broken
+   * bonus in and cannot separate it, so the line has to say so (finding 8).
+   */
+  it("names an other-set bonus the package breaks", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [31039, 31048, 31034, 31044],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+        breaks: [
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 2,
+            piecesBefore: 2,
+            piecesAfter: 1,
+          },
+        ],
+      })
+    ).toBe(
+      "Thunderheart Harness 4pc (0 worn) — +91.68 DPS " +
+        "[breaks Malorne Harness 2pc (2→1); measured value nets this in]"
+    );
+  });
+
+  it("says nothing about breakage when the package breaks nothing", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 640,
+        setName: "Malorne Harness",
+        threshold: 4,
+        piecesWorn: 2,
+        packageItemIds: [29098, 29097],
+        packageDeltaDps: -282.29,
+        bonusDps: 20.89,
+      })
+    ).not.toContain("breaks");
+  });
+
   it("renders a measured ≈0 bonus as a number, not as unmeasured (§2.3)", () => {
     expect(
       formatSetBonusLine({

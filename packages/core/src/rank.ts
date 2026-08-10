@@ -68,6 +68,7 @@ import {
 } from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
 import {
+  brokenSetBonuses,
   computeSynergy,
   isBonusImplemented,
   nextMeasurableThreshold,
@@ -75,6 +76,7 @@ import {
   setCounts,
   setLabel,
   SET_THRESHOLDS,
+  type BrokenSetBonus,
   type DpsSample,
   type IndividualDelta,
   type SetThreshold,
@@ -232,6 +234,12 @@ export type SetBonusValue = {
   bonusDps?: number;
   se?: number;
   unmeasured?: "not-implemented-in-sim" | "insufficient-pieces" | "sim-failed";
+  /**
+   * Other sets' implemented thresholds this package drops below. Present only
+   * when non-empty. `bonusDps` nets the loss in and cannot separate it, so a
+   * reader must see it rather than read the number as the bonus alone.
+   */
+  breaks?: BrokenSetBonus[];
 };
 
 /**
@@ -1066,6 +1074,7 @@ async function buildSetBonuses(
       });
       if (threshold === 2) twoPieceBonus = synergy.bonusDps;
 
+      const breaks = brokenSetBonuses(equipment, addedPieces, setId);
       results.push({
         setId,
         setName: label,
@@ -1075,6 +1084,7 @@ async function buildSetBonuses(
         packageDeltaDps: synergy.packageDeltaDps,
         bonusDps: synergy.bonusDps,
         se: synergy.se,
+        ...(breaks.length > 0 ? { breaks } : {}),
       });
     }
   }

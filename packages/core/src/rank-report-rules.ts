@@ -135,7 +135,20 @@ export function formatSetBonusLine(b: SetBonusValue): string {
     b.unmeasured !== undefined
       ? UNMEASURED_REASON_TEXT[b.unmeasured]
       : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
-  return `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${measured}`;
+  return `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${measured}${formatBreaksSuffix(b)}`;
+}
+
+/**
+ * Names the other-set bonuses a package breaks. The measured number nets that
+ * loss in and cannot separate it (see verification.md V0b vs V0c), so leaving
+ * this off would present a confounded figure as the bonus alone.
+ */
+export function formatBreaksSuffix(b: SetBonusValue): string {
+  if (!b.breaks || b.breaks.length === 0) return "";
+  const parts = b.breaks.map(
+    (x) => `${x.setName} ${x.threshold}pc (${x.piecesBefore}→${x.piecesAfter})`
+  );
+  return ` [breaks ${parts.join("; ")}; measured value nets this in]`;
 }
 
 /**

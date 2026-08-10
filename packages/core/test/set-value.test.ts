@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PoolEntry } from "../src/pool.js";
 import {
+  brokenSetBonuses,
   combineSe,
   computeSynergy,
   isBonusImplemented,
@@ -371,5 +372,84 @@ describe("computeSynergy", () => {
     expect(result.bonusDps).toBeCloseTo(0, 5);
     expect(typeof result.bonusDps).toBe("number");
     expect(Number.isNaN(result.bonusDps)).toBe(false);
+  });
+});
+
+/**
+ * The production mirror of verification.md's V0b confound: `selectPackage`
+ * treats a slot as free unless it holds the *same* set's piece, so a package
+ * can displace another set's piece and drop it below a threshold.
+ */
+describe("brokenSetBonuses (finding 8)", () => {
+  // Malorne Harness (640) T4 feral: 29096 chest, 29097 hands, 29098 head,
+  // 29100 shoulder. Both its 2pc and 4pc are implemented (verification.md V1).
+  const MALORNE_SET_ID = 640;
+
+  it("reports an other set's threshold the package drops below", () => {
+    const gear = blank();
+    gear[CHEST] = { id: 29096, gems: [] };
+    gear[SHOULDER] = { id: 29100, gems: [] };
+
+    // Exactly V0b: a Thunderheart shoulder (31048) lands on the slot holding
+    // Malorne's, taking Malorne from 2 pieces to 1 and killing its 2pc.
+    const broken = brokenSetBonuses(
+      gear,
+      [{ itemId: 31048, slotIndex: SHOULDER, alreadyWorn: false }],
+      676
+    );
+
+    expect(broken).toHaveLength(1);
+    expect(broken[0]).toMatchObject({
+      setId: MALORNE_SET_ID,
+      setName: "Malorne Harness",
+      threshold: 2,
+      piecesBefore: 2,
+      piecesAfter: 1,
+    });
+  });
+
+  it("reports nothing when the package only fills slots holding no set piece", () => {
+    const gear = blank();
+    gear[CHEST] = { id: 29096, gems: [] };
+    gear[SHOULDER] = { id: 29100, gems: [] };
+
+    // V0c: head and hands are empty here, so crossing Malorne 2pc -> 4pc
+    // displaces nothing and breaks nothing.
+    const broken = brokenSetBonuses(
+      gear,
+      [
+        { itemId: 29098, slotIndex: HEAD, alreadyWorn: false },
+        { itemId: 29097, slotIndex: HANDS, alreadyWorn: false },
+      ],
+      MALORNE_SET_ID
+    );
+
+    expect(broken).toEqual([]);
+  });
+
+  it("never reports the set being completed as broken", () => {
+    const gear = blank();
+    gear[CHEST] = { id: 29096, gems: [] };
+    gear[SHOULDER] = { id: 29100, gems: [] };
+    const broken = brokenSetBonuses(
+      gear,
+      [{ itemId: 29098, slotIndex: SHOULDER, alreadyWorn: false }],
+      MALORNE_SET_ID
+    );
+    expect(broken.every((b) => b.setId !== MALORNE_SET_ID)).toBe(true);
+  });
+
+  it("ignores a dropped threshold whose bonus the sim does not implement", () => {
+    const gear = blank();
+    // Justicar 626 2pc is not implemented (verification.md V1), so dropping
+    // from 2 pieces to 1 costs no DPS and is not worth reporting.
+    gear[HEAD] = { id: 29073, gems: [] };
+    gear[LEGS] = { id: 29074, gems: [] };
+    const broken = brokenSetBonuses(
+      gear,
+      [{ itemId: 31039, slotIndex: HEAD, alreadyWorn: false }],
+      676
+    );
+    expect(broken).toEqual([]);
   });
 });
