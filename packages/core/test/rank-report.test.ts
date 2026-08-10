@@ -12,6 +12,7 @@ import {
 import {
   formatSetBonusLine,
   formatSetPotentialLine,
+  isCuratedBis,
   weightedSetPotentialDps,
 } from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
@@ -447,10 +448,16 @@ describe("rank-report", () => {
     // a third display arm. This fixture still renders no control and no
     // <script>, and all three values are equal on every row here. Diffed
     // before/after to confirm the delta is exactly that.
+    // Repinned for the BiS-only filter: nav links gain
+    // `class`/`data-hits`/`data-bis-hits`, slot sections gain a `no-bis`
+    // marker and a second (hidden) count paragraph, and the stylesheet gains
+    // the filter's rules. No row here is curated, so the filter control and
+    // the <script> still do not render for this fixture. Diffed before/after
+    // to confirm that is the whole delta.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "89f331bbca65d59909a0ba224ac47afab2f4884c8951e3a65f95d3619b78d604",
-      length: 13252,
+        "d13f06315b3d6d3f20a39efbe72a8e004b9352078bada1ff392da181a2acd0fb",
+      length: 13968,
     });
   });
 });
@@ -843,6 +850,119 @@ describe("set-weight toggle (client-side re-sort)", () => {
     // the ranking, never from the weighted value.
     const html = renderRankHtml(ranking([withPotential]), meta);
     expect(html).toContain('class="row muted"');
+  });
+});
+
+describe("isCuratedBis", () => {
+  it("is true only for a current-stage BiS tag", () => {
+    expect(isCuratedBis({ bisTags: ["BiS"] })).toBe(true);
+    expect(isCuratedBis({ bisTags: ["BiS", "Alt"] })).toBe(true);
+    expect(isCuratedBis({ bisTags: [] })).toBe(false);
+    expect(isCuratedBis({ bisTags: ["Alt"] })).toBe(false);
+    expect(isCuratedBis({ bisTags: ["Realistic"] })).toBe(false);
+  });
+
+  it("does not read curatedSets", () => {
+    // `curatedSets` also carries earlier-stage sets (feral P2 has five
+    // `preraid` rows). "Was in the pre-raid set" is not "BiS now".
+    expect(
+      isCuratedBis({ bisTags: [], curatedSets: ["preraid"] } as Pick<
+        RankedItem,
+        "bisTags"
+      >)
+    ).toBe(false);
+  });
+});
+
+describe("BiS-only filter", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 2,
+    poolSize: 3,
+    generatedAt: "now",
+  };
+
+  const bisAbove = item({
+    name: "Curated hit",
+    slot: "head",
+    deltaDps: 20,
+    itemId: 11,
+    belowCutoff: false,
+    bisTags: ["BiS"],
+    bisSets: ["p2_6p"],
+  });
+  const bisBelow = item({
+    name: "Curated but a downgrade alone",
+    slot: "head",
+    deltaDps: -30,
+    itemId: 12,
+    belowCutoff: true,
+    bisTags: ["BiS"],
+    bisSets: ["p2_6p"],
+  });
+  const notBis = item({
+    name: "Uncurated",
+    slot: "waist",
+    deltaDps: 5,
+    itemId: 13,
+    belowCutoff: false,
+  });
+
+  it("marks curated rows and offers the filter", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain('id="bis-only"');
+    expect(html).toContain("is-bis");
+  });
+
+  it("marks a slot with no curated row so it can be hidden wholesale", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    // head has a curated row, waist does not.
+    expect(html).toContain('<section class="slot" id="slot-head">');
+    expect(html).toContain('<section class="slot no-bis" id="slot-waist">');
+  });
+
+  it("keeps below-cutoff curated rows marked, so the filter shows all of them", () => {
+    // An item is BiS as a member of a whole optimized set, so some curated
+    // picks are downgrades as a single swap. Dropping them would misdescribe
+    // the very list the control names.
+    const html = renderRankHtml(ranking([bisAbove, bisBelow]), meta);
+    expect(html).toContain('class="row muted is-bis"');
+    expect(html).toContain('class="row hit is-bis"');
+    expect(html).toContain("2 BiS candidates");
+  });
+
+  it("carries both nav counts so the badge can follow the filter", () => {
+    const html = renderRankHtml(ranking([bisAbove, bisBelow, notBis]), meta);
+    // head: 1 above cutoff, 2 curated.
+    expect(html).toContain('data-hits="1" data-bis-hits="2"');
+    // waist: 1 above cutoff, 0 curated — and marked so the link hides.
+    expect(html).toContain('class="nav-slot no-bis" data-hits="1"');
+  });
+
+  it("omits the filter when nothing is curated", () => {
+    const html = renderRankHtml(ranking([notBis]), meta);
+    expect(html).not.toContain('id="bis-only"');
+  });
+
+  it("still ships the script when only the BiS filter is present", () => {
+    // The two controls are independent: a page with curated rows but no
+    // unrealised set bonus still needs the script for the filter to work.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    // The script's own querySelectorAll mentions `set-weight`, so the absence
+    // check has to target the radio markup rather than the bare string.
+    expect(html).not.toContain('type="radio" name="set-weight"');
+    expect(html).toContain("<script>");
+    expect(html).toContain('getElementById("bis-only")');
+  });
+
+  it("does not filter rows out of the emitted document", () => {
+    // Hidden, never deleted (§10): the artifact holds every row and the
+    // filter is CSS over classes.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain("Uncurated");
   });
 });
 

@@ -310,6 +310,15 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--ink-soft);
   }
+  /* The BiS filter hides rather than deletes: every row stays in the
+     document, so the artifact is whole and the filter is a pure view. */
+  .slot-count-bis { display: none; }
+  body.bis-only .slot-count-all { display: none; }
+  body.bis-only .slot-count-bis { display: block; }
+  body.bis-only .row:not(.is-bis),
+  body.bis-only .chip:not(.is-bis),
+  body.bis-only .slot.no-bis,
+  body.bis-only .nav-slot.no-bis { display: none; }
   /* Exactly one of the three figures is live at a time, so the row never shows
      a number whose meaning depends on remembering the control's state. */
   .delta-weighted, .delta-full { display: none; }

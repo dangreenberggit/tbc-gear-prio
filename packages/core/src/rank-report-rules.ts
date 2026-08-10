@@ -153,6 +153,22 @@ export function formatBreaksSuffix(b: SetBonusValue): string {
 }
 
 /**
+ * Is this row on a curated BiS list for the ranked phase?
+ *
+ * Reads `bisTags`, which `assemble_universe.py` scopes to the *current* stage
+ * — an item BiS for an earlier stage keeps `curatedSets` and loses its tag, so
+ * this never badges "was BiS two phases ago" as a recommendation
+ * (carry-forward 47 §1).
+ *
+ * Deliberately not `curatedSets`: on feral P2 that field also carries five
+ * `preraid` rows, and "in the pre-raid set" is a different claim from "BiS
+ * now" — the opposite one, mostly.
+ */
+export function isCuratedBis(item: Pick<RankedItem, "bisTags">): boolean {
+  return (item.bisTags ?? []).includes("BiS");
+}
+
+/**
  * How much of a prospective bonus counts toward a row's displayed value, by
  * the threshold that would unlock it. A 2pc is nearer and cheaper than a 4pc,
  * so it is discounted less.

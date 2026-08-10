@@ -19,6 +19,7 @@ import {
   formatSetBonusLine,
   formatSetPotentialLine,
   groupBySlot,
+  isCuratedBis,
   partitionShortlist,
   SET_POTENTIAL_WEIGHTS,
   weightedSetPotentialDps,
@@ -78,7 +79,7 @@ function renderShortlistChips(items: RankedItem[]): string {
     .map((i) => {
       const weighted = weightedSetPotentialDps(i);
       const full = weightedSetPotentialDps(i, "full");
-      return `<a class="chip" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
+      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="n">#${i.rank} ${esc(i.name)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
     })
     .join("\n");
 }
@@ -161,11 +162,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     (s) => (bySlot.get(s) ?? []).length > 0
   );
 
+  // Both counts ride on the nav link so the BiS filter can swap the badge
+  // without recomputing anything client-side.
   const nav = slotsWithItems
     .map((slot) => {
-      const n = (bySlot.get(slot) ?? []).filter((i) => !i.belowCutoff).length;
+      const list = bySlot.get(slot) ?? [];
+      const n = list.filter((i) => !i.belowCutoff).length;
+      const bisN = list.filter(isCuratedBis).length;
       const badge = n > 0 ? `<span class="nav-hit">${n}</span>` : "";
-      return `<a href="#slot-${slot}">${esc(slot)}${badge}</a>`;
+      const bisCls = bisN > 0 ? "" : " no-bis";
+      return `<a href="#slot-${slot}" class="nav-slot${bisCls}" data-hits="${n}" data-bis-hits="${bisN}">${esc(slot)}${badge}</a>`;
     })
     .join("\n");
 
@@ -176,7 +182,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       const rows = list
         .map((item) => {
           const reportItem = item as ReportItem;
-          const cls = item.belowCutoff ? "row muted" : "row hit";
+          // `is-bis` drives the BiS-only filter in CSS. Marked per row rather
+          // than filtered here, because the filter is a client-side view and
+          // the artifact must still hold every row (§10, hidden not deleted).
+          const bisCls = isCuratedBis(item) ? " is-bis" : "";
+          const cls = (item.belowCutoff ? "row muted" : "row hit") + bisCls;
           const softRank =
             !item.belowCutoff &&
             Math.abs(item.deltaDps) < ranking.baseline.stdev;
@@ -268,10 +278,15 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         })
         .join("\n");
 
-      return `<section class="slot" id="slot-${slot}">
+      // A slot with no BiS row is hidden wholesale under the filter, rather
+      // than left as an empty heading.
+      const bisCount = list.filter(isCuratedBis).length;
+      const sectionCls = bisCount > 0 ? "slot" : "slot no-bis";
+      return `<section class="${sectionCls}" id="slot-${slot}">
   <header class="slot-head">
     <h2>${esc(slot)}</h2>
-    <p>${list.length} candidates${hits ? ` · <strong>${hits} above cutoff</strong>` : ""}</p>
+    <p class="slot-count-all">${list.length} candidates${hits ? ` · <strong>${hits} above cutoff</strong>` : ""}</p>
+    <p class="slot-count-bis">${bisCount} BiS candidate${bisCount === 1 ? "" : "s"}</p>
   </header>
   <div class="rows">${rows}</div>
 </section>`;
@@ -327,16 +342,34 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     </div>`
     : "";
 
-  // Re-sorts in place and swaps the visible number. Deliberately the whole of
-  // the client-side behaviour: every value was computed at generation time, so
-  // nothing here recomputes DPS or re-derives the cutoff.
-  const setWeightScript = anyWeighted
-    ? `<script>
+  // Same availability rule as the set control: no curated rows, no filter.
+  const bisCount = ranking.items.filter(isCuratedBis).length;
+  // Deliberately not scoped to above-cutoff rows. A curated pick is BiS as a
+  // member of a whole optimized set, so several are below cutoff as single
+  // swaps (Wolfshead Helm, Bloodlust Brooch) — showing 10 of 17 under a
+  // control labelled "BiS only" would misdescribe the list it names.
+  const bisFilter =
+    bisCount > 0
+      ? `<div class="set-weight-toggle bis-filter">
+      <p class="set-weight-title">Curated list</p>
+      <label><input type="checkbox" id="bis-only" /> <span>BiS only — the ${bisCount} items on this phase's curated set${meta.spec ? ` (${esc(meta.spec)} P${meta.maxPhase})` : ""}</span></label>
+      <p class="set-weight-note">Upstream's pinned gear sets for this phase, not an absolute verdict. Below-cutoff picks stay visible and stay muted: an item is BiS as part of a whole optimized set, which is why some are downgrades as a single swap.</p>
+    </div>`
+      : "";
+
+  // Re-sorts in place, swaps the visible number, and toggles the BiS filter.
+  // Deliberately the whole of the client-side behaviour: every value was
+  // computed at generation time, so nothing here recomputes DPS, re-derives
+  // the cutoff, or decides what counts as BiS. The two controls are
+  // independent — either may be absent, and neither gates the other.
+  const setWeightScript =
+    anyWeighted || bisCount > 0
+      ? `<script>
 (function () {
   var radios = [].slice.call(
     document.querySelectorAll('input[name="set-weight"]')
   );
-  if (!radios.length) return;
+  var bisBox = document.getElementById("bis-only");
   var containers = [].slice.call(document.querySelectorAll(".rows, .chips"));
   var originals = containers.map(function (c) {
     return { container: c, order: [].slice.call(c.children) };
@@ -352,6 +385,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     var attr = m === "full" ? "data-full" : "data-weighted";
     document.body.classList.toggle("weighted", m === "weighted");
     document.body.classList.toggle("full", m === "full");
+    document.body.classList.toggle("bis-only", !!bisBox && bisBox.checked);
     originals.forEach(function (entry) {
       var kids = entry.order.slice();
       if (m !== "off") {
@@ -374,14 +408,24 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             : "data-plain"
       );
     });
+    // The nav badge counts what is actually on screen.
+    [].slice.call(document.querySelectorAll(".nav-slot")).forEach(function (a) {
+      var badge = a.querySelector(".nav-hit");
+      if (!badge) return;
+      badge.textContent =
+        bisBox && bisBox.checked
+          ? a.getAttribute("data-bis-hits")
+          : a.getAttribute("data-hits");
+    });
   }
   radios.forEach(function (r) {
     r.addEventListener("change", apply);
   });
+  if (bisBox) bisBox.addEventListener("change", apply);
   apply();
 })();
 </script>`
-    : "";
+      : "";
 
   const title = `${meta.character} · ${meta.spec} P${meta.maxPhase}`;
 
@@ -430,6 +474,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     </div>`
         : ""
     }
+    ${bisFilter}
     ${setWeightToggle}
     ${noiseNote}
     ${capBanner}
