@@ -47,17 +47,22 @@ correct measurement of an inert bonus, not a broken measurement.
 The same reasoning rules out Lightbringer 4pc as a substitute probe on this fixture: it masks
 Hammer of Wrath, and no Hammer of Wrath rank (24239 / 27180) appears in the fixture's APL either.
 
-### V0b: Thunderheart Harness 4pc, feral cat — passes, but **CONFOUNDED; superseded by V0c**
+### V0b: Thunderheart Harness 4pc, feral cat — passes; **breaks a set, but is NOT inflated by it**
 
-> **Caveat, added after pre-merge review.** This run is kept for the record but is **not** the gate
-> evidence. The baseline gear (`vendor/wowsims/feral_p2_9p.gear.json`) already wears **two Malorne
-> Harness pieces** — 29100 Mantle (shoulder) and 29096 Breastplate (chest), setId 640 — which is an
-> active, implemented 2pc bonus (4% proc for +20 cat energy). The Thunderheart package below swaps a
-> piece over the **shoulder**, breaking that Malorne 2pc. The single-swap arm for the shoulder pays
-> that breakage once and the package pays it once, so `Σ singles` charges it twice while
-> `packageDelta` charges it once. The difference lands in `synergy` as a spurious positive, biasing
-> **+91.68 upward by an unquantified amount**. The number below is therefore an overestimate of
-> Thunderheart 4pc and must not be cited as its value. See V0c for the clean measurement.
+> **Caveat, added after pre-merge review; corrected 2026-08-10.** This run is kept for the record but is
+> **not** the gate evidence. The baseline gear (`vendor/wowsims/feral_p2_9p.gear.json`) already wears
+> **two Malorne Harness pieces** — 29100 Mantle (shoulder) and 29096 Breastplate (chest), setId 640 —
+> which is an active, implemented 2pc bonus (4% proc for +20 cat energy). The Thunderheart package below
+> swaps a piece over the **shoulder**, breaking that Malorne 2pc.
+>
+> An earlier version of this caveat claimed that breakage biased +91.68 upward. **That was wrong.** With
+> `B` the lost bonus's DPS, `T` the true set bonus, and `k` the number of package slots displacing a
+> piece of the broken set, `packageDelta` charges `k·B` and `Σ singles` charges `B·[k≥1]`, so
+> `reported = T + (k−1)·B`. Here only the **shoulder** is both in the package and held by Malorne
+> (the chest is untouched), so **k=1** and the inflation is `(k−1)·B = 0` — the two charges cancel
+> exactly. V0b is unconfounded by the break.
+>
+> V0c remains the gate because it disturbs no other set at all and so needs no such argument.
 
 
 Request built from `data/presets/feral/p2.raid-sim-skeleton.json` with equipment from
@@ -85,7 +90,7 @@ se(combined) =    7.2451   (3x = 21.7353)
 ```
 
 The direction is right — the individual pieces are all downgrades against this gear set, yet the package
-beats the sum of its parts — but the magnitude is inflated by the Malorne breakage described above.
+beats the sum of its parts. The Malorne breakage above does not inflate this figure (k=1).
 
 ### V0c (gate evidence): Malorne Harness 2pc→4pc, feral cat — **PASS, confound-free**
 
@@ -117,16 +122,19 @@ se(combined) =    6.0113   (3x = 18.0340)
 ```
 
 **Conclusion: the §2.2 completion-package synergy formula recovers a real, implemented set bonus with no
-confounding set breakage.** The margin over the 3σ bar is much tighter than V0b's inflated figure — 20.89
-against 18.03, rather than 91.68 against 21.74 — which is the direct evidence that V0b's confound mattered
-and is the reason V0c, not V0b, is the gate. V0 is satisfied; implementation proceeds.
+confounding set breakage.** V0c is the gate because it disturbs no other set's threshold, so its result
+needs no correctness argument about breakage at all. **The V0b(+91.68) vs V0c(+20.89) gap is not evidence
+of confound magnitude** — the two runs measure different bonuses of different sets (Thunderheart 4pc vs
+Malorne 4pc), not one bonus with and without a break, and V0b's k=1 break inflates it by zero. V0 is satisfied; implementation proceeds.
 
 Note the corollary, which §2.3 already anticipates: a bonus that is implemented but whose gated spell the
 character's APL never casts measures ≈0. That is a true answer about a DPS ranking for that character,
 and it is reported as a number, not as `unmeasured`.
 
-**Production consequence (finding 8).** V0b's confound is not only a measurement-hygiene problem, it is a
-real failure mode of `selectPackage`, which treats a slot as free unless it holds the same `setId`. The
+**Production consequence (finding 8).** Set breakage is not only a measurement-hygiene problem, it is a
+real failure mode of `selectPackage`, which treats a slot as free unless it holds the same `setId`. V0b
+happens to be the benign k=1 case, but a package displacing k≥2 pieces of one set misattributes
+`(k−1)·B` to the set being completed. The
 fix records broken other-set thresholds on the `SetBonusValue` so the net is never silently misattributed.
 
 ## V1 — "implemented in sim" table reconciled against the pinned Go source

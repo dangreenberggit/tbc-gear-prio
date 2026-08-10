@@ -223,14 +223,19 @@ export type BrokenSetBonus = {
  * `selectPackage` treats a slot as free unless it holds a piece of the set
  * being completed, so a package can displace a *different* set's piece and drop
  * that set below its own threshold. The measured synergy then silently nets the
- * two: the lost bonus is charged once inside `packageDelta` but twice across
- * `Σ singles` (each single that touches the slot pays it too), and the residue
- * is misattributed to the set being completed.
+ * lost bonus in, and the residue is misattributed to the set being completed.
  *
- * Verification.md V0b is exactly this bug measured by hand — a Thunderheart
- * package over a shoulder holding Malorne, reporting +91.68 where the
- * confound-free V0c measures +20.89. No sim can separate the two after the
- * fact, so this reports the breakage rather than trying to correct for it.
+ * With `B` the lost bonus's DPS, `T` the true set bonus, and `k` the number of
+ * package slots that displace a piece of the broken set: `packageDelta` charges
+ * `B` once per displacing slot (`k·B`) while `Σ singles` charges it once
+ * (`B·[k≥1]`), so `reported = T + (k−1)·B`. The inflation is `(k−1)·B`, not a
+ * constant: `k=0` and `k=1` both report `T` exactly — at `k=1` the two charges
+ * cancel — and only `k≥2` inflates.
+ *
+ * Verification.md V0b is the `k=1` case (a Thunderheart package over one
+ * shoulder holding Malorne): unconfounded despite the break. No sim can
+ * separate the two at `k≥2` after the fact, so this reports the breakage rather
+ * than trying to correct for it.
  */
 export function brokenSetBonuses(
   equipment: readonly SimItemSpec[],
