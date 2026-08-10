@@ -171,3 +171,60 @@ Pinned by `packages/core/test/rank.test.ts`, inside
 `"is deterministic: same input, same seeds, two runs deep-equal setBonuses (V2)"` (line 2447):
 runs `rankUpgrades` twice against the same input and seeds and asserts the two `setBonuses`
 results are deep-equal. Re-run: `npx vitest run packages/core/test/rank.test.ts`.
+
+## §8.2 — the default ranking output is unchanged
+
+The spec's own procedure, re-run at the final branch tip (after every pre-merge fix landed):
+run the same fixture ranking on `dev` and on this branch; from the branch's `Ranking` JSON delete
+`setBonuses`, every `setContext` and `contentHash`; from `dev`'s delete `contentHash`; deep-compare.
+
+Harness: a temporary `packages/core/test/__acc82.test.ts` (not committed — it exists to compare two
+checkouts, so it has no home in either) driving `rankUpgrades` over the **real `data/universes/ret-p2.json`
+pool** with the slamaltman recorded gear and a deterministic request-hashing `SimRunner`, dumping the
+stripped object sorted-key to JSON. Run once in this worktree and once in a `dev` worktree sharing the
+same `node_modules`, then `diff`.
+
+```
+items:  240
+dev:    135268 bytes
+branch: 135268 bytes
+=> IDENTICAL
+```
+
+The pool matters: a first attempt supplied no pool, ranked **0 items**, and compared two near-empty
+objects — a vacuous pass. The 240-item run is the real check.
+
+## §8.4 — CLI `--with-set-potential` demonstrated
+
+```
+$ npx tsx packages/core/src/cli.ts --region US --realm dreamscythe \
+    --character slamaltman --offline --max-phase 2 --with-set-potential --show-below-cutoff
+
+assumption: set potential is measured with the completion-package synergy method, shared seeds
+  — see PLAN.md §14's 2026-08-09 amendment
+set potential (8):
+  Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS
+  Crystalforge Battlegear 4pc (1 worn) — -9.26 DPS
+  Burning Rage 2pc (0 worn) — not implemented in the pinned sim
+  Burning Rage 4pc (0 worn) — not implemented in the pinned sim
+  Justicar Battlegear 2pc (0 worn) — not implemented in the pinned sim
+  Justicar Battlegear 4pc (0 worn) — -4.57 DPS
+  Gladiator's Vindication 2pc (0 worn) — not implemented in the pinned sim
+  Gladiator's Vindication 4pc (0 worn) — not implemented in the pinned sim
+#1 Belt of One-Hundred Deaths (waist) Δ47.75 (2.38%)
+...
+#- Justicar Breastplate (chest) Δ-13.14 (-0.66%)  (below cutoff)  (tied)
+    -4.57 set potential (needs 3 more pieces)
+```
+
+Reading the numbers honestly: every measured value on this fixture is ≈0 or slightly negative, and that
+is correct rather than a defect. Crystalforge 2pc/4pc are a mana-cost reduction and a heal proc, and
+Justicar 4pc masks Judgement of Command, which this fixture's Seal-of-Blood APL never casts (V0a). A
+slightly negative figure is noise around a true zero, not a claim that the bonus costs DPS. The ret
+fixture therefore shows no positive set potential anywhere; the feature's value is demonstrated on the
+feral side by V0c.
+
+Burning Rage (566) and Gladiator's Vindication (583) are crafted/PvP sets outside V1's tier-set table, so
+`isBonusImplemented` returns its conservative default for them. **That default is untested for these two
+specifically** — their Go source was not read. They are reported as `not-implemented-in-sim`, which is the
+safe direction (it spends no sim and claims no value), but confirming them is follow-up work.
