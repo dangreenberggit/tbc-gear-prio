@@ -6,6 +6,7 @@
  */
 import { CUTOFF, meetsCutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
+import { setPotentialIsConfounded } from "./rank-report-rules.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export type ViewOptions = {
@@ -259,7 +260,7 @@ function belowCutoffUnderView(
   baselineDps: number
 ): boolean {
   if (!withSetPotential) return item.belowCutoff;
-  const prospective = item.setContext?.prospectiveBonusDps ?? 0;
+  const prospective = rankableSetPotential(item);
   if (prospective === 0) return item.belowCutoff;
   const effectiveDps = item.deltaDps + prospective;
   // Percentage arm scaled off the same baseline `rank.ts` used for `deltaPct`,
@@ -269,9 +270,20 @@ function belowCutoffUnderView(
   return !meetsCutoff(effectiveDps, effectivePct, CUTOFF);
 }
 
+/**
+ * The prospective bonus this view is allowed to rank on. A figure whose package
+ * breaks another worn set is inflated by an amount no sim can separate after
+ * the fact, so it contributes nothing here — it is still disclosed on the row
+ * and in the Set potential panel (ticket 90).
+ */
+function rankableSetPotential(item: Pick<RankedItem, "setContext">): number {
+  if (setPotentialIsConfounded(item)) return 0;
+  return item.setContext?.prospectiveBonusDps ?? 0;
+}
+
 function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {
   return withSetPotential
-    ? (r) => r.deltaDps + (r.setContext?.prospectiveBonusDps ?? 0)
+    ? (r) => r.deltaDps + rankableSetPotential(r)
     : (r) => r.deltaDps;
 }
 

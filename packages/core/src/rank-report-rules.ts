@@ -257,6 +257,23 @@ export type SetPotentialCredit = "weighted" | "full";
  * bonus is inside `deltaDps` already, §2.1, so crediting it would double-count),
  * or a threshold whose bonus the sim never measured.
  */
+/**
+ * Is this row's prospective bonus too confounded to rank on (ticket 90)?
+ *
+ * `bonus = packageDelta − Σ singles` charges a displaced set's lost bonus once
+ * inside `packageDelta` but k times across the singles, so a figure whose
+ * package breaks another worn set reads as `true + (k−1)·B`. `B` is not known
+ * to within a factor of 4, so the figure is suppressed from ranking rather than
+ * corrected — it stays visible in the Set potential panel, qualified by what it
+ * breaks.
+ */
+export function setPotentialIsConfounded(
+  item: Pick<RankedItem, "setContext">
+): boolean {
+  const breaks = item.setContext?.prospectiveBonusBreaks;
+  return breaks !== undefined && breaks.length > 0;
+}
+
 export function weightedSetPotentialDps(
   item: Pick<RankedItem, "deltaDps" | "setContext">,
   credit: SetPotentialCredit = "weighted"
@@ -266,7 +283,8 @@ export function weightedSetPotentialDps(
     !ctx ||
     ctx.crossesThreshold ||
     ctx.nextThreshold === null ||
-    ctx.prospectiveBonusDps === undefined
+    ctx.prospectiveBonusDps === undefined ||
+    setPotentialIsConfounded(item)
   ) {
     return item.deltaDps;
   }
@@ -296,5 +314,11 @@ export function formatSetPotentialLine(
   // (e.g. crossesThreshold mis-set) rather than a real "0 more" state.
   if (needed <= 0) return undefined;
   const sign = ctx.prospectiveBonusDps >= 0 ? "+" : "";
-  return `${sign}${ctx.prospectiveBonusDps.toFixed(2)} set potential (needs ${needed} more piece${needed === 1 ? "" : "s"})`;
+  const base = `${sign}${ctx.prospectiveBonusDps.toFixed(2)} set potential (needs ${needed} more piece${needed === 1 ? "" : "s"})`;
+  const breaks = ctx.prospectiveBonusBreaks;
+  if (breaks === undefined || breaks.length === 0) return base;
+  // Correct-and-disclose: the figure is inflated by an unseparable break, so it
+  // is shown with its cause but excluded from the sort key and cutoff.
+  const names = breaks.map((b) => `${b.setName} ${b.threshold}pc`).join("; ");
+  return `${base} — inflated by breaking ${names}, not counted in ranking`;
 }

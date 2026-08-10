@@ -672,6 +672,35 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
   it("is undefined with no setContext at all", () => {
     expect(formatSetPotentialLine({})).toBeUndefined();
   });
+
+  it("still discloses a confounded figure, qualified by what it breaks", () => {
+    // Ticket 90: the number is kept out of ranking, but the reader must still
+    // see it and see why it is not being counted.
+    const line = formatSetPotentialLine({
+      setContext: {
+        setId: 676,
+        setName: "Thunderheart Harness",
+        piecesWornBefore: 0,
+        piecesAfterSwap: 1,
+        nextThreshold: 4,
+        crossesThreshold: false,
+        prospectiveBonusDps: 193.89,
+        prospectiveBonusBreaks: [
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 2,
+            piecesBefore: 2,
+            piecesAfter: 0,
+          },
+        ],
+      },
+    });
+    expect(line).toBeDefined();
+    expect(line).toContain("193.89");
+    expect(line).toContain("Malorne Harness");
+    expect(line).toContain("not counted in ranking");
+  });
 });
 
 describe("weightedSetPotentialDps", () => {
@@ -739,6 +768,40 @@ describe("weightedSetPotentialDps", () => {
 
   it("falls back to deltaDps with no setContext", () => {
     expect(weightedSetPotentialDps({ deltaDps: 10 })).toBe(10);
+  });
+
+  it("credits nothing for a confounded bonus, under either credit mode", () => {
+    // Ticket 90: `bonus = packageDelta - Σ singles` charges a displaced set's
+    // lost bonus once in packageDelta and k times across the singles, so a
+    // figure with non-empty `breaks` is inflated by (k-1)·B and must not move
+    // a row's value. B is disputed, so this suppresses rather than corrects.
+    const confounded = ctx({
+      prospectiveBonusBreaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: confounded })
+    ).toBe(10);
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: confounded }, "full")
+    ).toBe(10);
+  });
+
+  it("still credits a bonus whose breaks list is empty", () => {
+    // An empty `breaks` is the unconfounded case (k=0), not a missing field.
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ prospectiveBonusBreaks: [] }),
+      })
+    ).toBeCloseTo(35);
   });
 
   it("credits the whole bonus under `full`, at either threshold", () => {

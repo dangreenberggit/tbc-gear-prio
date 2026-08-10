@@ -369,6 +369,74 @@ describe("applyView", () => {
       expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
     });
 
+    it("keeps a confounded bonus out of the sort key (ticket 90)", () => {
+      // A bonus whose package breaks another worn set is inflated by (k-1)·B
+      // and cannot be corrected after the fact, so it must not reorder rows.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+            prospectiveBonusBreaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // Without the confound gate this would flip to [1, 2] on 10 + 50 = 60.
+      expect(rows.map((x) => x.itemId)).toEqual([2, 1]);
+    });
+
+    it("keeps a confounded bonus out of the cutoff comparison (ticket 90)", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
+        item({
+          itemId: 2,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 90,
+            prospectiveBonusBreaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      // The unconfounded version of this row is promoted; this one must not be.
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([1]);
+      expect(on.belowCutoffCount).toBe(1);
+    });
+
     it("keeps rank absolute even though the toggle reorders rows (§12)", () => {
       const r = ranking([
         item({

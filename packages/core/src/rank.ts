@@ -220,6 +220,14 @@ export type SetContext = {
   /** True ⇒ the bonus is already inside `deltaDps`; no `prospectiveBonusDps`. */
   crossesThreshold: boolean;
   prospectiveBonusDps?: number;
+  /**
+   * Other sets the measured package displaced, carried from the source
+   * `SetBonusValue.breaks`. Non-empty ⇒ `prospectiveBonusDps` is confounded:
+   * the lost bonus is charged once in `packageDelta` but k times across
+   * `Σ singles`, inflating by `(k−1)·B` with no way to separate it after the
+   * fact. Such a figure is disclosed but never ranked on — ticket 90.
+   */
+  prospectiveBonusBreaks?: BrokenSetBonus[];
 };
 
 export type SetBonusValue = {
@@ -1154,6 +1162,9 @@ function applySetContext(
       const matching = bonusesForSet.find((b) => b.threshold === nextThreshold);
       if (matching?.bonusDps !== undefined) {
         setContext.prospectiveBonusDps = matching.bonusDps;
+        if (matching.breaks && matching.breaks.length > 0) {
+          setContext.prospectiveBonusBreaks = matching.breaks;
+        }
       }
     }
     item.setContext = setContext;
