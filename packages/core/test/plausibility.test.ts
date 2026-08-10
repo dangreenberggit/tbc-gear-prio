@@ -114,6 +114,11 @@ describe("setBonusMagnitudeWarnings", () => {
     expect(found[0]?.kind).toBe("implausible-set-bonus");
     expect(found[0]?.message).toContain("193.89");
     expect(found[0]?.message).toContain("Thunderheart Harness");
+    // The flagged figure is the engine's *report*, not a measurement of the
+    // bonus — ticket 99 measures the same 4pc at 73.5 in isolation. Measurement
+    // voice here would restate the suspect number as authoritative.
+    expect(found[0]?.message).toContain("reports");
+    expect(found[0]?.message).not.toContain("measures");
   });
 });
 

@@ -55,6 +55,12 @@ export const IMPLAUSIBLE_BONUS_FRACTION = 0.075;
  * omitted on purpose: the feral ranged pool is four idols, so the worn one being
  * best is unremarkable, and warning there would fire on every idol, relic and
  * ranged slot in the game (ticket 94's over-collection).
+ *
+ * Which cause a slot gets depends on `THIN_POOL_CANDIDATES` and
+ * `UNIQUE_EFFECT_GAP_DPS`, and both were **fitted to one artifact**
+ * (shredzepelin-p3) rather than measured. A slot near either boundary can
+ * therefore flip between warning and silence on a judgement call nobody has
+ * validated — a reason to treat a missing warning as weak evidence, not proof.
  */
 const WARNED_DEAD_SLOT_CAUSES: readonly DeadSlotCause[] = [
   "set-break-toll",
@@ -114,11 +120,15 @@ export function setBonusMagnitudeWarnings(
       bonusDps: b.bonusDps,
       fractionOfBaseline,
       thresholdFraction: IMPLAUSIBLE_BONUS_FRACTION,
+      // "reports", never "measures": the flagged figure is the engine's output,
+      // and the whole point of the gate is that it is probably not a
+      // measurement of the bonus. Stating it in measurement voice would restate
+      // the suspect number as authoritative.
       message:
-        `${b.setName} ${b.threshold}pc measures ${b.bonusDps.toFixed(2)} DPS — ` +
-        `${(fractionOfBaseline * 100).toFixed(1)}% of a ${options.baselineDps.toFixed(2)} baseline, ` +
+        `${b.setName} ${b.threshold}pc reports ${b.bonusDps.toFixed(2)} DPS — ` +
+        `~${(fractionOfBaseline * 100).toFixed(1)}% of a ${options.baselineDps.toFixed(2)} baseline, ` +
         `above the ${(IMPLAUSIBLE_BONUS_FRACTION * 100).toFixed(1)}% plausibility band. ` +
-        `Suspect a measurement confound rather than a bonus this large.`,
+        `Treat as a suspected confound, not a bonus this large; check what the package breaks.`,
     });
   }
   return warnings;

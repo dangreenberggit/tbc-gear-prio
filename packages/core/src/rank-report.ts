@@ -390,6 +390,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
 </details>`
       : "";
 
+  // Ticket 98's gates. Open, and above the rows rather than filed in a
+  // details drawer, because each one qualifies a figure the reader is about to
+  // act on. Nothing is suppressed — the flagged bonus still renders in the Set
+  // potential panel, and the dead slot still shows all its rows.
+  const warnings = ranking.plausibilityWarnings ?? [];
+  const plausibilityPanel = warnings.length
+    ? `<details class="panel plausibility" open>
+  <summary>Plausibility warnings (${warnings.length})</summary>
+  <ul>${warnings.map((w) => `<li>${esc(w.message)}</li>`).join("\n")}</ul>
+</details>`
+    : "";
+
   // Offered only where some row would actually move: a page with no
   // unrealised prospective bonus gets an inert control otherwise. Measured on
   // `full`, the wider of the two credits — a row `weighted` leaves still can
@@ -744,7 +756,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${exportPanel}
     ${noiseNote}
     ${capBanner}
-    ${provenance}
+    ${provenance}${plausibilityPanel ? `\n    ${plausibilityPanel}` : ""}
 
     <nav class="nav" aria-label="Slots">${nav}</nav>
 

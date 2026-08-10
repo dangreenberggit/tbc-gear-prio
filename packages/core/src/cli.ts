@@ -435,6 +435,16 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     })) {
       console.log(line);
     }
+    // Unconditional, unlike the set-potential block below: a warning qualifies
+    // figures the reader sees whether or not they asked for the set lens.
+    if (ranking.plausibilityWarnings?.length) {
+      console.log(
+        `plausibility warnings (${ranking.plausibilityWarnings.length}):`
+      );
+      for (const w of ranking.plausibilityWarnings) {
+        console.log(`  ${w.message}`);
+      }
+    }
     if (args.view.withSetPotential === true && ranking.setBonuses) {
       console.log(`assumption: ${setPotentialDisclosureLine()}`);
       console.log(`set potential (${ranking.setBonuses.length}):`);

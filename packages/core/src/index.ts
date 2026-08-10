@@ -162,6 +162,23 @@ export {
 export { compose, type ComposePlayer } from "./compose.js";
 export { setBreakNote } from "./set-bonus.js";
 export {
+  classifyDeadSlots,
+  THIN_POOL_CANDIDATES,
+  UNIQUE_EFFECT_GAP_DPS,
+  type DeadSlot,
+  type DeadSlotCause,
+  type DeadSlotRow,
+} from "./dead-slots.js";
+export {
+  IMPLAUSIBLE_BONUS_FRACTION,
+  deadSlotWarnings,
+  plausibilityWarnings,
+  setBonusMagnitudeWarnings,
+  type DeadSlotWarning,
+  type ImplausibleSetBonusWarning,
+  type PlausibilityWarning,
+} from "./plausibility.js";
+export {
   SET_THRESHOLDS,
   combineSe,
   computeSynergy,

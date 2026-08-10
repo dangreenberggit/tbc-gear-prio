@@ -481,10 +481,14 @@ describe("rank-report", () => {
     // unlike the previous repins it *does* render a new control. Diffed
     // before/after to confirm the delta is those attributes, the two panels,
     // the script, and the new CSS block.
+    // Repinned for ticket 98's plausibility panel: the stylesheet gains the
+    // `.panel.plausibility` rule. This fixture trips neither gate, so the panel
+    // itself does not render — verified by dumping the document on both sides,
+    // where the whole diff is those six CSS lines and nothing in the body.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "da771fac6b9931131edb071d4f52e52074dce19d160053f1249c1fc34d0eae71",
-      length: 24467,
+        "5861ecdc1b3860f1f9c52aea705812bebb769f8c3092c46376b656abf44b56e4",
+      length: 24707,
     });
   });
 });

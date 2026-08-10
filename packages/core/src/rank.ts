@@ -81,6 +81,10 @@ import {
   type IndividualDelta,
   type SetThreshold,
 } from "./set-value.js";
+import {
+  plausibilityWarnings,
+  type PlausibilityWarning,
+} from "./plausibility.js";
 import { getItem } from "./items.js";
 import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
@@ -292,6 +296,12 @@ export type Ranking = {
   items: RankedItem[];
   /** Completion-package synergy per (set, threshold) — spec §2.2. */
   setBonuses?: SetBonusValue[];
+  /**
+   * Sanity checks that fired on this run (ticket 98). Computed here rather
+   * than at render time because both need the worn `equipment`, which a
+   * `Ranking` does not carry. Present only when non-empty.
+   */
+  plausibilityWarnings?: PlausibilityWarning[];
 };
 
 /** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
@@ -769,6 +779,20 @@ export async function rankUpgrades(
       }
     }
 
+    // Run over the finished rows and the final `setBonuses`, so a warning
+    // describes what the report will actually show rather than an intermediate.
+    const warnings = plausibilityWarnings({
+      baselineDps: observation.dps,
+      setBonuses,
+      rows: ranked.map((i) => ({
+        itemId: i.itemId,
+        name: i.name,
+        slot: i.slot,
+        deltaDps: i.deltaDps,
+      })),
+      wornSetCounts: setCounts(equipment),
+    });
+
     const ranking: Ranking = {
       contentHash,
       cutoff: CUTOFF,
@@ -802,6 +826,7 @@ export async function rankUpgrades(
       ],
       items: ranked,
       ...(setBonuses.length > 0 ? { setBonuses } : {}),
+      ...(warnings.length > 0 ? { plausibilityWarnings: warnings } : {}),
     };
 
     await deps.store.put(rankingCacheKey(contentHash), ranking);

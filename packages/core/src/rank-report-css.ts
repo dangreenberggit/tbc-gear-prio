@@ -164,6 +164,12 @@ export const REPORT_CSS = `
     background: var(--accent-soft);
     font-size: 0.92rem;
   }
+  /* Questions a figure the reader is about to act on, so it carries the
+     warning colour rather than the accent the cap banner uses. */
+  .panel.plausibility {
+    border-left: 3px solid var(--down);
+    background: var(--down-bg);
+  }
   .provenance {
     margin: 0 0 1.5rem;
     font-size: 0.85rem;
