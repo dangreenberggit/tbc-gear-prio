@@ -261,3 +261,77 @@ Review: `docs/reviews/feat-set-bonus-value.md`.
 
 **Not landed. Not merged. Not pushed.** `pnpm land` was never run and
 `TBC_ALLOW_DEV_MERGE` was never set.
+
+---
+
+## Follow-up round
+
+Written 2026-08-10 by a second session, on `feat/set-bonus-value`. Resolves the
+three tickets the pre-merge review filed (100, 101, 102) plus the one this
+handoff left deliberately open (96). **Still not landed, merged, or pushed.**
+
+| SHA | ticket | what |
+|---|---|---|
+| `b51f08c` | 100 | Show the Set potential panel to every reader, not just flagged ones |
+| `e3eceb3` | 96 | Point a below-cutoff curated row at the panel that explains its BiS tag |
+| `c2d3897` | 102 | Gate the `CURATED_SET_PHASE` mirror against the Python that produces it |
+| `610d6db` | 101 | Record the set-bonus threshold and package-as-card decisions as ADR-0023 |
+
+All three code tickets done red→green with the failing test confirmed first.
+
+### Dispositions
+
+- **100 — closed** via option 1 (decouple the panel from the toggle). The Set
+  potential panel now renders whenever `ranking.setBonuses` is non-empty; the
+  per-row credit and the sort key stay behind default-off `withSetPotential`.
+  **No spec amendment was needed** — spec.md §4 states its default-off rule in
+  terms of what moves the ranking, and the panel moves no number, so the spec
+  text still describes the flag accurately.
+- **96 — closed.** The confirmation step it was held open for came back **no**:
+  a default reader on the 31042 row got the `BiS` tag, `-100.16`, and an ungated
+  `setBonusNote` naming what the swap breaks — but nothing saying what the BiS
+  tag was claiming, since the per-row set annotation is toggle-gated and nothing
+  linked the row to the panel. Added `formatCuratedPackagePointer`
+  (`rank-report-rules.ts`), which renders a text pointer on any curated-BiS row
+  below cutoff carrying a `setContext`. **No figure is restated** and the
+  `-100.16` / `-106.16` deltas are untouched, per this ticket's own constraint
+  and ticket 90's suppression rule.
+- **102 — closed** with a corrected mirror **plus** a drift gate, not codegen.
+  `generate_json_literal_types.py` reads a JSON *string list*; `CURATED_SET_PHASE`
+  is a Python dict of label→phase, so routing it through that machinery would
+  have meant a new JSON export step and a new generator mode. Instead
+  `scripts/check_curated_set_phase.py` re-derives the TS map from the file and
+  compares it to the Python, wired into `pnpm verify`. The test-locked wrong
+  expectation (`curatedSetPhase("p3") → null`) was inverted.
+- **101 — closed.** `docs/adr/0023-set-bonus-thresholds-are-selected-nearest-measurable-and-packages-are-disclosed-not-scored.md`.
+
+### Worth carrying forward
+
+**The `102` gate was proved to fail, not just to pass.** Deleting the `p3: 3`
+line and re-running exits 1 naming the drifted key; restored before commit. This
+handoff's own earlier lesson — "a safety net that fabricates a verdict when its
+input is missing is worse than no net" — applies equally to a net that never
+fires, so the negative case was exercised deliberately.
+
+**The golden-document repin in `e3eceb3` was diffed, not assumed.** The rendered
+document was dumped on both sides and diffed: the whole delta is five CSS lines
+and two empty interpolation slots, no visible markup. Instrumentation removed
+before commit.
+
+### State of the branch
+
+`pnpm verify` green at `610d6db` — 36 test files, 624 tests, 2 todo, and the new
+`curated-set-phase:check` gate passing.
+
+`pnpm issues:open` no longer lists 90–102; all are closed.
+
+**Not landed. Not merged. Not pushed.** `pnpm land` was never run and
+`TBC_ALLOW_DEV_MERGE` was never set.
+
+### Note for the concurrent session
+
+This round touched `packages/core/src/rank-report-rules.ts` twice — a new
+`formatCuratedPackagePointer` function and the `CURATED_SET_PHASE` map plus its
+docstring. **Neither diff goes near `formatBreaksSuffix` or its doc comment**,
+which another session was fixing a stale V0b citation in. `git status` was clean
+of foreign modifications before each commit.

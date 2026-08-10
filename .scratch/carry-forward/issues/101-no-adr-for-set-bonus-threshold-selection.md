@@ -1,5 +1,5 @@
 Status: closed
-Closed: PENDING
+Closed: 610d6db
 Type: docs
 Origin: ticket 93's closing ask, restated by the pre-merge review of `feat/set-bonus-value`, 2026-08-10 (spec axis)
 Blocks: none
