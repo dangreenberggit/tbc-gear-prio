@@ -63,9 +63,11 @@ export type ItemEntry = {
    * the item-level question.
    *
    * `enchantAppliesToItem` is the real item-level gate and is what
-   * `rank.ts` actually calls; it fails closed for relics today because
-   * db.json ships no enchant whose type is 14. Never synthesize from
-   * `enchantable` alone. Synthesis must additionally gate on observed
+   * `rank.ts` actually calls. It rejects relics via an explicit *shootable*
+   * allowlist (`enchants.ts`) — bow/crossbow/gun only — not because ranged
+   * enchants are absent: `data/enchants/index.json` ships four type-14
+   * scopes (2523, 2722, 2723, 2724). Never synthesize from `enchantable`
+   * alone. Synthesis must additionally gate on observed
    * per-slot presence, or a synthesized candidate enchant gets compared
    * against a bare baseline slot and its stats are misattributed to the
    * item — PLAN.md §9, "the symmetry invariant".

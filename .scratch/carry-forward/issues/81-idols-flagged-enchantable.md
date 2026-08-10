@@ -59,3 +59,21 @@ passing vacuously.
 
 The ticket's "no current impact" holds and is now enforced rather than
 observed.
+
+## Pre-merge review correction (2026-08-09)
+
+The domain axis (D1) caught a false claim in the first version of this
+work's docstring: it said `enchantAppliesToItem` "fails closed for relics
+today because db.json ships no enchant whose type is 14". That is wrong --
+`data/enchants/index.json` ships **four** type-14 scopes (2523 Biznicks
+247x128 Accurascope, 2722 Adamantite, 2723 Khorium, 2724 Stabilitzed
+Eternium). The actual gate is an explicit *shootable* allowlist in
+`enchants.ts` (bow/crossbow/gun only). Corrected in `items.ts`; the outcome
+the test pins was always right, only the stated cause was wrong.
+
+The same review found that the shootable allowlist's constants are
+themselves off by one against `common.proto` -- filed as ticket 83. That
+does not change this ticket's conclusion (relics sit outside both the wrong
+and the right shootable sets, so they are rejected either way), but it does
+mean the relic test here would pass even if the shootable branch were
+broken, which it currently is.

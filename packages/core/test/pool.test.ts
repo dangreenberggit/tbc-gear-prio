@@ -11,6 +11,9 @@ import {
   ITEM_SOURCE_KINDS,
   poolFromUniverse,
   simSlotsForPoolSlot,
+  sourceMatchesBoss,
+  validateViewFilter,
+  viewFilterValue,
   zonesInPool,
   type ItemSourceKind,
   type PoolEntry,
@@ -247,20 +250,58 @@ describe("bossesInPool", () => {
 
   // A name listed as known must actually filter to something, or the
   // validation would reject spellings the filter accepts and vice versa.
-  it("agrees with what applyView's boss filter would keep", () => {
+  // Through `sourceMatchesBoss` — the same predicate `view.ts`'s `matchesBoss`
+  // calls — rather than a fourth hand-rolled copy of the condition. A test
+  // that re-implements the filter can agree with itself while `applyView`
+  // disagrees, which is the failure it is supposed to catch.
+  it("only lists names applyView's boss filter would actually keep", () => {
     for (const zone of [undefined, "Karazhan", "Black Temple"]) {
-      for (const boss of bossesInPool(bossPool, zone)) {
+      const listed = bossesInPool(bossPool, zone);
+      expect(listed.length).toBeGreaterThan(0);
+      for (const boss of listed) {
         const matched = bossPool.filter((e) =>
-          [e.source, ...(e.sources ?? [])].some(
-            (s) =>
-              "boss" in s &&
-              s.boss === boss &&
-              (zone === undefined || ("zone" in s && s.zone === zone))
+          (e.sources ?? [e.source]).some((s) =>
+            sourceMatchesBoss(s, boss, zone)
           )
         );
-        expect(matched.length).toBeGreaterThan(0);
+        expect(
+          matched.length,
+          `${boss} in ${zone ?? "any zone"}`
+        ).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+// The CLI shells out to `wowsimcli`, so `main()` has no test — which is
+// exactly how `--boss all` came to exit 2 while `applyView` treated "all" as
+// "no filter" (carry-forward 75 review, A1). The decision lives here, pure,
+// so the sentinel is pinned even though the wiring is not.
+describe("validateViewFilter", () => {
+  const known = ["Karazhan", "Black Temple"];
+
+  it("passes the documented 'all' sentinel through unvalidated", () => {
+    expect(validateViewFilter("all", known).ok).toBe(true);
+    // "all" is never a real zone or boss name, so validating it literally
+    // would reject it — the regression this pins.
+    expect(known).not.toContain("all");
+  });
+
+  it("passes an absent filter", () => {
+    expect(validateViewFilter(undefined, known).ok).toBe(true);
+  });
+
+  it("passes a known name and rejects a typo", () => {
+    expect(validateViewFilter("Karazhan", known).ok).toBe(true);
+    const bad = validateViewFilter("Karazan", known);
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.known).toEqual(known);
+  });
+
+  it("agrees with applyView on what counts as no filter", () => {
+    expect(viewFilterValue("all")).toBeUndefined();
+    expect(viewFilterValue(undefined)).toBeUndefined();
+    expect(viewFilterValue("Karazhan")).toBe("Karazhan");
   });
 });
 

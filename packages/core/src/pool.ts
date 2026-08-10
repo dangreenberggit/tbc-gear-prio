@@ -217,15 +217,78 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
 }
 
 /**
+ * `applyView` reads `"all"` as "no filter" for both `raid` and `boss`
+ * (`view.ts`, pinned by `view.test.ts`). Anything validating those controls
+ * has to honour the sentinel or it rejects the documented way to ask for
+ * everything — which is how `--boss all` came to exit 2 (carry-forward 75
+ * review, A1).
+ */
+export const VIEW_ALL = "all";
+
+/**
+ * Which filter the CLI should validate and pass on: `undefined` for "no
+ * filter", otherwise the literal name.
+ */
+export function viewFilterValue(raw: string | undefined): string | undefined {
+  return raw === undefined || raw === VIEW_ALL ? undefined : raw;
+}
+
+/**
+ * Is this a name the pool can actually be filtered to? Pure so the decision
+ * is testable without running the CLI, which shells out to `wowsimcli` and
+ * so has no test at all — the gap that let the `"all"` regression through.
+ *
+ * `known` is returned alongside so the caller can print it as a "did you
+ * mean" list without enumerating twice.
+ */
+export function validateViewFilter(
+  value: string | undefined,
+  known: readonly string[]
+): { ok: true } | { ok: false; known: readonly string[] } {
+  const wanted = viewFilterValue(value);
+  if (wanted === undefined || known.includes(wanted)) return { ok: true };
+  return { ok: false, known };
+}
+
+/**
+ * Every source of an entry, in one spelling.
+ *
+ * `sources[0]` is `source` (`poolEntryFromUniverse`), so listing both would
+ * double-count the primary. `view.ts`'s `sourcesOf` already reads it this
+ * either/or way; matching it here keeps enumeration and filtering on the same
+ * footing rather than relying on that invariant holding.
+ */
+function sourcesOfEntry(entry: {
+  source: ItemSource;
+  sources?: readonly ItemSource[];
+}): readonly ItemSource[] {
+  return entry.sources ?? [entry.source];
+}
+
+/**
+ * Does one source name this boss, under this zone scope?
+ *
+ * Exported because `bossesInPool` and `view.ts`'s `matchesBoss` must agree
+ * exactly: the first decides which names the CLI calls valid, the second
+ * decides which rows survive. If they drift, `--boss` accepts a name that
+ * filters to nothing — which is the defect carry-forward 75 exists to fix,
+ * one level down. Sharing the predicate makes that structural instead of a
+ * property a test has to police.
+ */
+export function sourceMatchesBoss(
+  source: ItemSource,
+  boss: string,
+  zone: string | undefined
+): boolean {
+  if (!("boss" in source) || source.boss !== boss) return false;
+  return zone === undefined || ("zone" in source && source.zone === zone);
+}
+
+/**
  * Boss names the pool can actually be filtered to, optionally scoped to one
  * zone. Scoped and unscoped are different questions: two zones can share a
  * boss name, and an unscoped list is long enough to be useless as a "did you
  * mean" for a typo made inside one raid.
- *
- * Pairs with `matchesBoss`, which compares `s.boss` exactly and requires the
- * zone to match too when one is given — so this enumerates from the same
- * sources under the same zone condition, or a name could be listed as known
- * and still filter to nothing.
  */
 export function bossesInPool(
   pool: readonly PoolEntry[],
@@ -233,10 +296,9 @@ export function bossesInPool(
 ): string[] {
   const bosses = new Set<string>();
   for (const e of pool) {
-    for (const s of [e.source, ...(e.sources ?? [])]) {
+    for (const s of sourcesOfEntry(e)) {
       if (!("boss" in s) || s.boss === undefined) continue;
-      if (zone !== undefined && !("zone" in s && s.zone === zone)) continue;
-      bosses.add(s.boss);
+      if (sourceMatchesBoss(s, s.boss, zone)) bosses.add(s.boss);
     }
   }
   return [...bosses].sort();

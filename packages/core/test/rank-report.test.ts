@@ -372,7 +372,11 @@ describe("rank-report", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     expect(html).toContain("under the hit cap");
     expect(html).toContain("Heroic Presence");
-    expect(html).toContain("test");
+    // The whole provenance sentence, not a substring of it: "test" alone also
+    // matches the contentHash in the footer and proves nothing.
+    expect(html).toContain(
+      "gear read from fight 1 (test fight 1, ranked route)"
+    );
   });
 
   // The off-tank warning is the one ticket 06 added *because* nothing in the
