@@ -8,7 +8,7 @@
  * consumes these and owns escaping, formatting and structure.
  */
 
-import type { ItemSlot } from "./items.js";
+import { getItem, type ItemSlot } from "./items.js";
 import type { SimSlotName } from "./pool.js";
 import type { ViewOptions } from "./view.js";
 import type { RankedItem, SetBonusValue } from "./rank.js";
@@ -129,6 +129,16 @@ const UNMEASURED_REASON_TEXT: Record<
  * measured bonus or the reason it could not be measured (§4). A measured
  * ≈0 bonus (e.g. Crystalforge, a mana/heal effect) renders as a number, not
  * as unmeasured — §2.3 draws that line and this function preserves it.
+ *
+ * This panel is the *only* surface some bonuses reach. At 0 worn pieces every
+ * single-swap candidate lands at `piecesAfterSwap === 1`, so
+ * `nextMeasurableThreshold` stops at an implemented 2pc and the 4pc figure is
+ * credited to no row in any display mode (ticket 91). Rather than smear a
+ * fraction of it across member rows — which would put a break-confounded
+ * number into the sort, and the confound is large: the engine reports 193.89
+ * for the Thunderheart 4pc where an isolated measurement gives 73.5 ± 6.3 DPS
+ * (`.scratch/set-bonus-value/measurements-2026-08-10.md`) — set completion is
+ * surfaced here as its own thing, named by the items that would complete it.
  */
 export function formatSetBonusLine(b: SetBonusValue): string {
   const sign = b.bonusDps !== undefined && b.bonusDps > 0 ? "+" : "";
@@ -136,20 +146,36 @@ export function formatSetBonusLine(b: SetBonusValue): string {
     b.unmeasured !== undefined
       ? UNMEASURED_REASON_TEXT[b.unmeasured]
       : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
-  return `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${measured}${formatBreaksSuffix(b)}`;
+  const head = `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${formatBreaksPrefix(b)}${measured}`;
+  return `${head}${formatPackageContents(b)}`;
 }
 
 /**
- * Names the other-set bonuses a package breaks. The measured number nets that
- * loss in and cannot separate it (see verification.md V0b vs V0c), so leaving
- * this off would present a confounded figure as the bonus alone.
+ * Qualifies the figure *before* it is read, not after. A break inflates the
+ * measured number by `(k−1)·B` with no way to separate it after the fact (see
+ * the closed form on `brokenSetBonuses` in `set-value.ts`), so a trailing
+ * suffix let a reader take the number away before reaching the caveat.
  */
-export function formatBreaksSuffix(b: SetBonusValue): string {
+export function formatBreaksPrefix(b: SetBonusValue): string {
   if (!b.breaks || b.breaks.length === 0) return "";
   const parts = b.breaks.map(
     (x) => `${x.setName} ${x.threshold}pc (${x.piecesBefore}→${x.piecesAfter})`
   );
-  return ` [breaks ${parts.join("; ")}; measured value nets this in]`;
+  return `[breaks ${parts.join("; ")}; nets this in] `;
+}
+
+/**
+ * Names the items that would complete the package. Without this the panel
+ * states a bonus with no way to act on it — and for a threshold no row carries,
+ * "which items" is the whole of the actionable information.
+ */
+export function formatPackageContents(b: SetBonusValue): string {
+  // An unmeasured bonus has no value to chase, so naming the items that would
+  // assemble it would invite acting on a number that does not exist.
+  if (b.unmeasured !== undefined) return "";
+  if (b.packageItemIds.length === 0) return "";
+  const names = b.packageItemIds.map((id) => getItem(id)?.name ?? `item ${id}`);
+  return ` — add ${names.join(", ")}`;
 }
 
 /**

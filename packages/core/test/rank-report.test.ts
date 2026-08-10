@@ -501,13 +501,17 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
         packageDeltaDps: -317.24,
         bonusDps: 91.68,
       })
-    ).toBe("Thunderheart Harness 4pc (0 worn) — +91.68 DPS");
+    ).toBe(
+      "Thunderheart Harness 4pc (0 worn) — +91.68 DPS — " +
+        "add item 1, item 2, item 3, item 4"
+    );
   });
 
   /**
-   * verification.md V0b measured exactly this package and reported +91.68,
-   * where the confound-free V0c measures +20.89. The number nets the broken
-   * bonus in and cannot separate it, so the line has to say so (finding 8).
+   * A package that displaces another worn set inflates the reported figure by
+   * `(k−1)·B` (the closed form on `brokenSetBonuses`), which no sim can
+   * separate after the fact — so the line has to say so. The qualifier leads
+   * the figure rather than trailing it (ticket 91).
    */
   it("names an other-set bonus the package breaks", () => {
     expect(
@@ -530,8 +534,10 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
         ],
       })
     ).toBe(
-      "Thunderheart Harness 4pc (0 worn) — +91.68 DPS " +
-        "[breaks Malorne Harness 2pc (2→1); measured value nets this in]"
+      "Thunderheart Harness 4pc (0 worn) — " +
+        "[breaks Malorne Harness 2pc (2→1); nets this in] +91.68 DPS — " +
+        "add Thunderheart Cover, Thunderheart Pauldrons, " +
+        "Thunderheart Gauntlets, Thunderheart Leggings"
     );
   });
 
@@ -549,6 +555,55 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     ).not.toContain("breaks");
   });
 
+  /**
+   * Ticket 91: at 0 worn pieces every single-swap candidate lands at
+   * `piecesAfterSwap === 1`, and `nextMeasurableThreshold` stops at
+   * Thunderheart's implemented 2pc — so no row anywhere carries the 4pc figure.
+   * The panel is the only surface that can show it, which makes naming the
+   * package contents the actionable part: the reader needs to know *which four
+   * items* the number is about.
+   */
+  it("names the package contents so a bonus no row carries is still actionable", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+    });
+    expect(line).toContain("Thunderheart Pauldrons");
+    expect(line).toContain("Thunderheart Chestguard");
+    expect(line).toContain("Thunderheart Gauntlets");
+    expect(line).toContain("Thunderheart Leggings");
+  });
+
+  it("leads with the breakage rather than trailing it after the figure", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    // A qualified figure must read as qualified before the reader has taken the
+    // number away — the caveat cannot sit past the end of the sentence.
+    expect(line.indexOf("breaks")).toBeLessThan(line.indexOf("193.89"));
+    expect(line).toContain("Malorne Harness 2pc");
+  });
+
   it("renders a measured ≈0 bonus as a number, not as unmeasured (§2.3)", () => {
     expect(
       formatSetBonusLine({
@@ -560,7 +615,7 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
         packageDeltaDps: 0.1,
         bonusDps: 0,
       })
-    ).toBe("Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS");
+    ).toBe("Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — add item 1");
   });
 
   it("renders each unmeasured reason as readable text", () => {
@@ -1351,6 +1406,60 @@ describe("set potential (§4)", () => {
     expect(html).toContain("Thunderheart Harness 4pc (0 worn)");
     expect(html).toContain("+91.68 DPS");
     expect(html).toContain("completion-package synergy");
+  });
+
+  /**
+   * Ticket 91's user-facing fix. With 0 pieces worn and an implemented 2pc, the
+   * 4pc bonus reaches no row in any display mode (`off`, `weighted`, `full`) —
+   * the walk stops at 2. The Set potential panel is where it stays visible, so
+   * the panel must carry both thresholds and name what completes each.
+   */
+  it("shows a 4pc bonus no row can carry, for a set worn 0 pieces of", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 2,
+            piecesWorn: 0,
+            packageItemIds: [31034, 31044],
+            packageDeltaDps: 76.5,
+            bonusDps: 31.46,
+          },
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31048, 31042, 31034, 31044],
+            packageDeltaDps: 64.07,
+            bonusDps: 193.89,
+            breaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+
+    expect(html).toContain("Set potential (2)");
+    expect(html).toContain("Thunderheart Harness 4pc (0 worn)");
+    expect(html).toContain("193.89");
+    // The four items that complete it — the actionable part a per-row number
+    // was failing to convey.
+    expect(html).toContain("Thunderheart Pauldrons");
+    expect(html).toContain("Thunderheart Chestguard");
+    // And the figure stays qualified by what completing it would break.
+    expect(html).toContain("Malorne Harness 2pc");
   });
 
   it("renders each unmeasured reason as text, never a blank or a 0", () => {

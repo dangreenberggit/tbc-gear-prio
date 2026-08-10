@@ -187,7 +187,9 @@ describe("--with-set-potential output", () => {
     expect(lines).toEqual([
       "assumption: set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment",
       "set potential (2):",
-      "  Thunderheart Harness 4pc (0 worn) — +91.68 DPS",
+      "  Thunderheart Harness 4pc (0 worn) — +91.68 DPS — add Thunderheart Cover, " +
+        "Thunderheart Pauldrons, Thunderheart Gauntlets, Thunderheart Leggings",
+      // Unmeasured: no figure to chase, so no package contents are named.
       "  Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim",
     ]);
   });
