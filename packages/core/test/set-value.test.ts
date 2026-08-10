@@ -64,6 +64,28 @@ describe("setCounts / setLabel", () => {
     const gear = blank();
     expect(setLabel(gear, 999999)).toBe("set 999999");
   });
+
+  /**
+   * The regression this feature is most exposed to: its whole subject is sets
+   * the player wears no piece of, and a worn-gear-only scan names none of them.
+   * A live `--with-set-potential` run printed `set 626 4pc` for Justicar
+   * Battlegear, whose setName is right there in the item data.
+   */
+  it("names a set the player wears no piece of, from the pieces offered", () => {
+    const gear = blank();
+    expect(setLabel(gear, JUSTICAR_SET_ID)).toBe(`set ${JUSTICAR_SET_ID}`);
+    expect(setLabel(gear, JUSTICAR_SET_ID, [29073])).toBe(
+      "Justicar Battlegear"
+    );
+  });
+
+  it("still prefers a worn piece's name over the offered pieces", () => {
+    const gear = blank();
+    gear[HEAD] = { id: 29073, gems: [] };
+    expect(setLabel(gear, JUSTICAR_SET_ID, [29074])).toBe(
+      "Justicar Battlegear"
+    );
+  });
 });
 
 describe("isBonusImplemented (verification.md V1 table)", () => {

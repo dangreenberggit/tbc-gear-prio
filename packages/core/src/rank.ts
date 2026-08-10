@@ -919,7 +919,11 @@ async function buildSetBonuses(
   const results: SetBonusValue[] = [];
   for (const setId of setIdsWithCandidates) {
     const piecesWorn = wornCounts.get(setId) ?? 0;
-    const label = setLabel(equipment, setId);
+    const label = setLabel(
+      equipment,
+      setId,
+      candidates.map((entry) => entry.itemId)
+    );
     let twoPieceBonus: number | undefined;
 
     for (const threshold of SET_THRESHOLDS) {
@@ -1083,7 +1087,12 @@ function applySetContext(
 
     const setContext: SetContext = {
       setId,
-      setName: setLabel(equipment, setId),
+      // The set's SetBonusValue rows already resolved this name against the
+      // package pieces, which is the only place it is findable for a set the
+      // player wears none of. Recomputing from worn gear alone regresses to
+      // the bare `set <id>` fallback.
+      setName:
+        bonusesForSet[0]?.setName ?? setLabel(equipment, setId, [item.itemId]),
       piecesWornBefore,
       piecesAfterSwap,
       nextThreshold,

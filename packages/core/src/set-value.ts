@@ -64,14 +64,26 @@ export function setCounts(
   return counts;
 }
 
-/** Display name for `setId`, falling back to `set ${setId}` (§3). */
+/**
+ * Display name for `setId`, falling back to `set ${setId}` (§3).
+ *
+ * `alsoConsider` exists because this feature's whole subject is sets the player
+ * has *no* pieces of yet: scanning worn equipment alone finds no name for them,
+ * so every prospective bonus rendered as a bare `set 626`. Callers pass the
+ * package's own item ids, which do carry the name.
+ */
 export function setLabel(
   equipment: readonly SimItemSpec[],
-  setId: number
+  setId: number,
+  alsoConsider: readonly number[] = []
 ): string {
   for (const spec of equipment) {
     if (!spec.id) continue;
     const item = getItem(spec.id);
+    if (item?.setId === setId && item.setName) return item.setName;
+  }
+  for (const itemId of alsoConsider) {
+    const item = getItem(itemId);
     if (item?.setId === setId && item.setName) return item.setName;
   }
   return `set ${setId}`;
