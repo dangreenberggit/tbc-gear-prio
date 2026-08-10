@@ -202,10 +202,62 @@ have been wrong without it.
 
 ---
 
+## The pre-merge review found two more silent failures — both fixed
+
+Four fresh-context axes reviewed the branch (`docs/reviews/feat-set-bonus-value.md`,
+second round). The adversarial axis found **two high-severity silent-failure
+modes in the dead-slot classifier**, both of which survived the entire 615-test
+suite green:
+
+1. A tie at `deltaDps === 0` made the classifier pick the wrong worn row and
+   then compute the runner-up gap over a set that still contained the other
+   zero — so `[worn 0, clone 0, −300]` classified `benign-nothing-better` with a
+   gap of 0, and since benign is not a warned cause, **the warning silently
+   vanished**.
+2. An item missing from `data/items/index.json` produced a confident
+   `unique-effect` verdict, because the null set id skipped the toll branch. The
+   report asserted "nothing matches this item's effect" when the truth was "we
+   could not look it up".
+
+Both fixed in `cfc77c9`: the worn row is identified from `owned` (actually
+"is equipped") rather than a zero-delta proxy, ambiguity resolves to `null`
+instead of an arbitrary pick, the gap is taken over strictly worse rows, and
+an unresolvable item gets its own `unknown-item` cause that warns in its own
+words.
+
+**Carry this lesson forward:** those bugs were in the component added *this
+round to catch silent confounds*. A safety net that fabricates a verdict when
+its input is missing is worse than no net — the team then reads a missing
+warning as evidence of health.
+
+The domain axis independently confirmed all four claim-groups against the
+pinned Go source and **accepted the 131 DPS Malorne 2pc**, showing the
+arithmetic closes (Shred is 35.3% of damage; +11.3% Shred casts against a 2226
+baseline is ~88 DPS from Shred alone, the rest from combo points feeding
+Rip/Bite). Its verdict on the old estimate: "a proc-rate argument that never
+priced the energy — wrong at the conversion step, not the rate step."
+
+Three tickets filed from the review:
+
+- **100** — ticket 91's Set potential panel is the only surface an unreachable
+  bonus can reach, but it is gated on `withSetPotential`, which the spec defines
+  as **default off**. The figure that reaches no row reaches no default reader
+  either. **Resolve this before ticket 96**, whose contradiction that panel is
+  supposed to explain.
+- **101** — no ADR records the set-bonus threshold-selection rule (ticket 93's
+  own closing ask).
+- **102** — `CURATED_SET_PHASE` in `rank-report-rules.ts` is a hand-copied
+  mirror of `assemble_universe.py` that stops at `p2` where the Python has `p3`;
+  latent until p4 is pinned, then it silently suppresses a staleness warning.
+  The wrong behaviour is test-locked.
+
 ## State of the branch
 
-`pnpm verify` green at the tip (see the review file). Review:
-`docs/reviews/feat-set-bonus-value.md`.
+`pnpm verify` green at `cfc77c9` — 36 test files, 622 tests, 2 todo.
+`pnpm land --check-only` green: **merge-ready: ok**, all 30 disposition rows
+validated, every `defer` row resolving to an open ticket.
+
+Review: `docs/reviews/feat-set-bonus-value.md`.
 
 **Not landed. Not merged. Not pushed.** `pnpm land` was never run and
 `TBC_ALLOW_DEV_MERGE` was never set.
