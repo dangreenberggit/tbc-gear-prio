@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  CachingGearSource,
   RecordedGearSource,
   type FightSummary,
+  type GearSource,
   type LoggedGear,
 } from "../src/seams/gear-source.js";
+import { MemoryStore } from "../src/seams/store.js";
 import type { CharacterRef, FightRef } from "../src/types.js";
 
 const CHAR: CharacterRef = {
@@ -61,5 +64,109 @@ describe("RecordedGearSource", () => {
       gear: new Map(),
     });
     await expect(gear.readGear(FIGHT)).rejects.toThrow(/no recording/i);
+  });
+});
+
+describe("CachingGearSource", () => {
+  /** Counts fetches so "no second WCL call" is asserted, not assumed. */
+  class CountingGearSource implements GearSource {
+    reads = 0;
+    constructor(private readonly gear: ReadonlyMap<string, LoggedGear>) {}
+    async findFights(): Promise<FightSummary[]> {
+      return [SUMMARY];
+    }
+    async readGear(f: FightRef): Promise<LoggedGear> {
+      this.reads += 1;
+      const hit = this.gear.get(`${f.reportCode}|${f.fightId}`);
+      if (!hit) throw new Error(`no recording for ${f.fightId}`);
+      return hit;
+    }
+  }
+
+  it("fetches a fight once and serves the rest from the store", async () => {
+    const inner = new CountingGearSource(new Map([["abc123|7", GEAR]]));
+    const gear = new CachingGearSource(inner, new MemoryStore(), CHAR, "ret");
+
+    expect(await gear.readGear(FIGHT)).toEqual(GEAR);
+    expect(await gear.readGear(FIGHT)).toEqual(GEAR);
+    expect(inner.reads).toBe(1);
+  });
+
+  it("fetches each fight separately", async () => {
+    const other: FightRef = { reportCode: "abc123", fightId: 9 };
+    const inner = new CountingGearSource(
+      new Map([
+        ["abc123|7", GEAR],
+        ["abc123|9", GEAR],
+      ])
+    );
+    const gear = new CachingGearSource(inner, new MemoryStore(), CHAR, "ret");
+
+    await gear.readGear(FIGHT);
+    await gear.readGear(other);
+    expect(inner.reads).toBe(2);
+  });
+
+  it("does not serve one raider's gear to another in the same fight", async () => {
+    // docs/phase0-findings.md §11: this repo already quoted a warrior's gear
+    // for a slamaltman run, because a fight holds all 25 raiders. A cache
+    // keyed on (reportCode, fightId) alone would make that permanent — the
+    // second character asked for would get the first one's 17 slots, with no
+    // error and no TTL to age it out.
+    const hagguth: CharacterRef = { ...CHAR, name: "hagguth" };
+    const warriorGear: LoggedGear = {
+      ...GEAR,
+      items: [{ id: 30120, slot: "head" }],
+      provenance: { ...GEAR.provenance, sourceID: 3 },
+    };
+
+    const store = new MemoryStore();
+    const slam = new CachingGearSource(
+      new CountingGearSource(new Map([["abc123|7", GEAR]])),
+      store,
+      CHAR,
+      "ret"
+    );
+    const warrior = new CachingGearSource(
+      new CountingGearSource(new Map([["abc123|7", warriorGear]])),
+      store,
+      hagguth,
+      "ret"
+    );
+
+    expect(await slam.readGear(FIGHT)).toEqual(GEAR);
+    expect(await warrior.readGear(FIGHT)).toEqual(warriorGear);
+  });
+
+  it("survives a new instance over the same store", async () => {
+    // The point of caching into the Store rather than a field: with
+    // SqliteStore behind it, yesterday's snapshot still costs no points.
+    const store = new MemoryStore();
+    const inner = new CountingGearSource(new Map([["abc123|7", GEAR]]));
+
+    await new CachingGearSource(inner, store, CHAR, "ret").readGear(FIGHT);
+    expect(
+      await new CachingGearSource(inner, store, CHAR, "ret").readGear(FIGHT)
+    ).toEqual(GEAR);
+    expect(inner.reads).toBe(1);
+  });
+
+  it("does not cache the fight list", async () => {
+    // A fight list grows as a character raids, so it is not immutable the way
+    // a completed fight's gear is. PLAN.md §12 [R9] calls it a live query.
+    const inner = new CountingGearSource(new Map());
+    let calls = 0;
+    const counted: GearSource = {
+      findFights: async () => {
+        calls += 1;
+        return inner.findFights();
+      },
+      readGear: (f) => inner.readGear(f),
+    };
+    const gear = new CachingGearSource(counted, new MemoryStore(), CHAR, "ret");
+
+    await gear.findFights(CHAR, "ret");
+    await gear.findFights(CHAR, "ret");
+    expect(calls).toBe(2);
   });
 });

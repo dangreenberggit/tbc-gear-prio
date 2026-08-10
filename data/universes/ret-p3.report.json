@@ -11,67 +11,76 @@
     "Tempest Keep",
     "World Bosses"
   ],
+  "phaseRepFactions": [
+    990,
+    1012
+  ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1399,
-  "universeTotal": 356,
-  "listOnlyMembership": 23,
+  "excludedNoSource": 1298,
+  "universeTotal": 394,
+  "listOnlyMembership": 25,
   "perSlot": {
-    "back": 28,
-    "chest": 28,
-    "feet": 36,
-    "finger": 33,
+    "back": 29,
+    "chest": 29,
+    "feet": 40,
+    "finger": 50,
     "hands": 26,
     "head": 25,
-    "legs": 21,
-    "neck": 24,
-    "ranged": 3,
-    "shoulder": 26,
-    "trinket": 20,
-    "waist": 36,
-    "weapon": 17,
-    "wrist": 33
+    "legs": 25,
+    "neck": 25,
+    "ranged": 4,
+    "shoulder": 27,
+    "trinket": 21,
+    "waist": 39,
+    "weapon": 18,
+    "wrist": 36
   },
   "sourceRecordAdds": {
-    "atlasloot": 196,
-    "db": 1695,
+    "atlasloot": 255,
+    "curated": 2,
+    "db": 1733,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 52
+    "wowhead": 15
   },
   "membershipByOrigin": {
-    "itemHasOrigin:atlasloot": 53,
-    "itemHasOrigin:db": 317,
+    "curated": 6,
+    "itemHasOrigin:atlasloot": 71,
+    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:db": 335,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 43,
-    "listOnly": 23,
+    "itemHasOrigin:wowhead": 11,
+    "listOnly": 25,
+    "repFactionMatch": 30,
     "zoneMatch": 333
   },
   "exclusivePrimaryOrigin": {
-    "db": 317,
-    "atlasloot-only": 13,
+    "db": 335,
+    "atlasloot-only": 31,
     "two-hop": 15,
-    "wowhead-only": 11
+    "wowhead-only": 11,
+    "other": 2
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 356,
-    "casterOnlyReject": 119,
+    "total": 394,
+    "casterOnlyReject": 127,
     "epFloorReject": 15,
-    "combinedReject": 134,
-    "combinedKeep": 222,
-    "casterRejectPct": 33.4,
-    "combinedRejectPct": 37.6,
+    "combinedReject": 142,
+    "combinedKeep": 252,
+    "casterRejectPct": 32.2,
+    "combinedRejectPct": 36.0,
     "applied": false
   },
   "wowheadListIds": 123,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 123,
-    "recalled": 102,
-    "missed": 21,
-    "recallPct": 82.9,
+    "recalled": 105,
+    "missed": 18,
+    "recallPct": 85.4,
     "missedItems": [
       {
         "itemId": 18823,
@@ -107,12 +116,6 @@
         "itemId": 23041,
         "name": "Slayer's Crest",
         "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23203,
-        "name": "Libram of Fervor",
-        "slot": "ranged",
         "d7Eligible": true
       },
       {
@@ -152,12 +155,6 @@
         "d7Eligible": true
       },
       {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
-        "d7Eligible": true
-      },
-      {
         "itemId": 30341,
         "name": "Flesh Handler's Gauntlets",
         "slot": "hands",
@@ -167,12 +164,6 @@
         "itemId": 31033,
         "name": "Libram of Righteous Power",
         "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31275,
-        "name": "Necklace of Trophies",
-        "slot": "neck",
         "d7Eligible": true
       },
       {

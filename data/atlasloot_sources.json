@@ -1,4 +1,12 @@
 {
+  "13517": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "21524": [
     {
       "dungeon": "Old Hillsbrad Foothills",
@@ -54,11 +62,67 @@
       "kind": "heroic"
     }
   ],
+  "22531": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "22535": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22536": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "22537": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22538": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "22545": [
     {
       "boss": "Trash",
       "kind": "raid",
       "zone": "Karazhan"
+    }
+  ],
+  "22547": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22552": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "22559": [
@@ -82,6 +146,70 @@
       "zone": "Karazhan"
     }
   ],
+  "22905": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "22906": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "22908": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22910": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22915": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22916": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22917": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22918": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "22920": [
     {
       "dungeon": "The Mechanar",
@@ -94,16 +222,248 @@
       "kind": "heroic"
     }
   ],
+  "22922": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "22927": [
     {
       "dungeon": "Old Hillsbrad Foothills",
       "kind": "heroic"
     }
   ],
+  "22985": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22986": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22987": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "22990": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "22991": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "22992": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "22993": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23133": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23134": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23136": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23138": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23142": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23143": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23145": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23146": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23149": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23150": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23155": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23597": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23598": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23599": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "23600": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "23601": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "23602": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "23603": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23604": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "23617": [
     {
       "dungeon": "The Botanica",
       "kind": "heroic"
+    }
+  ],
+  "23618": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "23619": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "23723": [
@@ -123,6 +483,14 @@
       "boss": "Attumen the Huntsman",
       "kind": "raid",
       "zone": "Karazhan"
+    }
+  ],
+  "23814": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "23857": [
@@ -151,6 +519,14 @@
       "boss": "Trash",
       "kind": "raid",
       "zone": "Karazhan"
+    }
+  ],
+  "23874": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "23881": [
@@ -184,6 +560,86 @@
       "zone": "Karazhan"
     }
   ],
+  "23999": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "24000": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24001": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "24002": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "24003": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24004": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "24006": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24007": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24008": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24009": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "24139": [
     {
       "boss": "Nightbane",
@@ -203,10 +659,122 @@
       "kind": "heroic"
     }
   ],
+  "24174": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24175": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24176": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24177": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24178": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24179": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24180": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24181": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24182": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "24183": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "24248": [
     {
       "dungeon": "The Underbog",
       "kind": "heroic"
+    }
+  ],
+  "24292": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "24293": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "24294": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "24295": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "24308": [
@@ -245,6 +813,38 @@
       "kind": "heroic"
     }
   ],
+  "24314": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "24417": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24429": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "24539": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "25461": [
     {
       "dungeon": "Sethekk Halls",
@@ -257,10 +857,274 @@
       "kind": "heroic"
     }
   ],
+  "25526": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25548": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25550": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25721": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "25722": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "25728": [
     {
       "dungeon": "Shadow Labyrinth",
       "kind": "heroic"
+    }
+  ],
+  "25732": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25733": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25734": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "25735": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25736": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25737": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25738": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25739": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25740": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25741": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25742": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25743": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "25823": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25824": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25825": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25826": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25827": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25828": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25835": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25836": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25838": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25869": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25870": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25902": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25903": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "25904": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "25908": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "25910": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "27447": [
@@ -777,6 +1641,14 @@
     {
       "dungeon": "The Slave Pens",
       "kind": "heroic"
+    }
+  ],
+  "27689": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "27712": [
@@ -1745,6 +2617,38 @@
       "kind": "heroic"
     }
   ],
+  "28155": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "28158": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "28162": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "28164": [
+    {
+      "faction": "Tranquillien",
+      "factionId": 922,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "28184": [
     {
       "dungeon": "The Black Morass",
@@ -2117,6 +3021,38 @@
       "kind": "heroic"
     }
   ],
+  "28271": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "28272": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "28273": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "28274": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "28275": [
     {
       "dungeon": "The Mechanar",
@@ -2127,6 +3063,14 @@
     {
       "dungeon": "The Mechanar",
       "kind": "heroic"
+    }
+  ],
+  "28281": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "28285": [
@@ -3050,6 +3994,14 @@
       "zone": "Karazhan"
     }
   ],
+  "28632": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "28633": [
     {
       "boss": "The Curator",
@@ -3701,6 +4653,710 @@
       "zone": "Gruul's Lair"
     }
   ],
+  "29102": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29103": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29104": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29105": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29115": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29116": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29117": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29118": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29119": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29121": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29122": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29123": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29124": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29125": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29126": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29127": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29128": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29129": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29130": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29131": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29132": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29133": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29134": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29135": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29136": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29137": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29138": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29139": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29140": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29141": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29142": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29143": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29144": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29145": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29146": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29147": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29148": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29149": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29150": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29151": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29152": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29153": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29155": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29156": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29165": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29166": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29167": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29168": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29169": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29170": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29171": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29172": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29173": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29174": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29175": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29176": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29177": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29179": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29180": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29181": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29182": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29183": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29184": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29185": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29186": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29187": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29189": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29190": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29191": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29192": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29193": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29194": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29195": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29196": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29197": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29198": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29199": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29213": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29214": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29215": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29217": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29218": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29219": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29227": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29229": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29230": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29231": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29232": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "29238": [
     {
       "dungeon": "Hellfire Ramparts",
@@ -3855,6 +5511,262 @@
     {
       "dungeon": "The Underbog",
       "kind": "heroic"
+    }
+  ],
+  "29276": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29277": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29278": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29279": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29280": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29281": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29282": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29283": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29284": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29285": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29286": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29287": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29288": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29289": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29290": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29291": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29294": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29295": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29296": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29297": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29298": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29299": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29300": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29301": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29302": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29303": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29304": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29305": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29306": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29307": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "29308": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29309": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "29346": [
@@ -4043,6 +5955,22 @@
       "zone": "Zul'Aman"
     }
   ],
+  "29456": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29457": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "29458": [
     {
       "boss": "Magtheridon",
@@ -4054,6 +5982,14 @@
     {
       "dungeon": "The Steamvault",
       "kind": "heroic"
+    }
+  ],
+  "29664": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "29673": [
@@ -4072,6 +6008,150 @@
     {
       "dungeon": "The Black Morass",
       "kind": "heroic"
+    }
+  ],
+  "29677": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29682": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29684": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29689": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29691": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29693": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29698": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29700": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29701": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29702": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29703": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "29704": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29713": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29717": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29719": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29720": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "29721": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "29722": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "29753": [
@@ -4886,6 +6966,14 @@
       "zone": "Serpentshrine Cavern"
     }
   ],
+  "30156": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "30183": [
     {
       "boss": "Trash",
@@ -5249,6 +7337,22 @@
       "boss": "Trash",
       "kind": "raid",
       "zone": "Tempest Keep"
+    }
+  ],
+  "30443": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30444": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "30446": [
@@ -5638,6 +7742,22 @@
       "zone": "Serpentshrine Cavern"
     }
   ],
+  "30622": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30623": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "30626": [
     {
       "boss": "Fathom-Lord Karathress",
@@ -5657,6 +7777,38 @@
       "boss": "Hydross the Unstable",
       "kind": "raid",
       "zone": "Serpentshrine Cavern"
+    }
+  ],
+  "30633": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30634": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30635": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30637": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "30641": [
@@ -6010,6 +8162,14 @@
       "kind": "heroic"
     }
   ],
+  "30826": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "30827": [
     {
       "dungeon": "Shadow Labyrinth",
@@ -6026,6 +8186,94 @@
     {
       "dungeon": "The Shattered Halls",
       "kind": "heroic"
+    }
+  ],
+  "30830": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "30832": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "30833": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "30834": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "30835": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30836": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30841": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "30842": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "30843": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "30844": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "30846": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "30861": [
@@ -6523,6 +8771,142 @@
       "zone": "Black Temple"
     }
   ],
+  "31113": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31354": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31355": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31356": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31357": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31358": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "31359": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "31361": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31362": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31390": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31391": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "31392": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "31393": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31394": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "31395": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31401": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31402": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "31554": [
     {
       "dungeon": "Mana-Tombs",
@@ -6565,6 +8949,22 @@
       "kind": "heroic"
     }
   ],
+  "31735": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "31737": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "31744": [
     {
       "dungeon": "The Botanica",
@@ -6583,6 +8983,150 @@
       "boss": "Nightbane",
       "kind": "raid",
       "zone": "Karazhan"
+    }
+  ],
+  "31773": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31774": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31775": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31776": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31777": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31778": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31779": [
+    {
+      "faction": "The Aldor",
+      "factionId": 932,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31780": [
+    {
+      "faction": "The Scryers",
+      "factionId": 934,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31781": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31804": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31829": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31830": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31831": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31832": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31833": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31834": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31835": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "31836": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "31919": [
@@ -6619,6 +9163,22 @@
     {
       "dungeon": "Mana-Tombs",
       "kind": "heroic"
+    }
+  ],
+  "31949": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32070": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "32072": [
@@ -7000,6 +9560,14 @@
       "zone": "Black Temple"
     }
   ],
+  "32274": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "32275": [
     {
       "boss": "Shade of Akama",
@@ -7012,6 +9580,14 @@
       "boss": "Shade of Akama",
       "kind": "raid",
       "zone": "Black Temple"
+    }
+  ],
+  "32277": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "32278": [
@@ -7035,6 +9611,38 @@
       "zone": "Black Temple"
     }
   ],
+  "32281": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32282": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32283": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32284": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "32285": [
     {
       "boss": "Trash",
@@ -7042,11 +9650,75 @@
       "zone": "Hyjal Summit"
     }
   ],
+  "32286": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32287": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32288": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "32289": [
     {
       "boss": "Trash",
       "kind": "raid",
       "zone": "Hyjal Summit"
+    }
+  ],
+  "32290": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32291": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32292": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32293": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32294": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "32295": [
@@ -7077,6 +9749,38 @@
       "zone": "Hyjal Summit"
     }
   ],
+  "32299": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32300": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32301": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32302": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "32303": [
     {
       "boss": "Trash",
@@ -7084,11 +9788,115 @@
       "zone": "Hyjal Summit"
     }
   ],
+  "32304": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32305": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32306": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "32307": [
     {
       "boss": "Trash",
       "kind": "raid",
       "zone": "Hyjal Summit"
+    }
+  ],
+  "32308": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32309": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32310": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32311": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32312": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32314": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32316": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32317": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32318": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32319": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "32323": [
@@ -7439,6 +10247,150 @@
       "zone": "Black Temple"
     }
   ],
+  "32429": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32430": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32431": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32432": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32433": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32434": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32435": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32436": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32437": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32438": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32439": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32440": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32441": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32442": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32443": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32444": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32445": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32447": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "32458": [
     {
       "boss": "Kael'thas Sunstrider",
@@ -7465,6 +10417,78 @@
       "boss": "Illidan Stormrage",
       "kind": "raid",
       "zone": "Black Temple"
+    }
+  ],
+  "32485": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32486": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32487": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32488": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32489": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32490": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32491": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32492": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32493": [
+    {
+      "faction": "Ashtongue Deathsworn",
+      "factionId": 1012,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "32496": [
@@ -7600,6 +10624,38 @@
       "zone": "Black Temple"
     }
   ],
+  "32538": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32539": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32569": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32572": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
   "32589": [
     {
       "boss": "Trash",
@@ -7679,6 +10735,102 @@
       "boss": "Trash",
       "kind": "raid",
       "zone": "Black Temple"
+    }
+  ],
+  "32645": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32647": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32648": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32650": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32651": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32652": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32653": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32654": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32694": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32695": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32721": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32722": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "32736": [
@@ -7805,6 +10957,22 @@
       "kind": "heroic"
     }
   ],
+  "32770": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32771": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "32778": [
     {
       "dungeon": "Sethekk Halls",
@@ -7829,6 +10997,30 @@
       "kind": "heroic"
     }
   ],
+  "32783": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32784": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32828": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "32837": [
     {
       "boss": "Illidan Stormrage",
@@ -7841,6 +11033,86 @@
       "boss": "Illidan Stormrage",
       "kind": "raid",
       "zone": "Black Temple"
+    }
+  ],
+  "32857": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32858": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32859": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32860": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32861": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32862": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "32863": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "32864": [
+    {
+      "faction": "Netherwing",
+      "factionId": 1015,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32882": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "32883": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "32897": [
@@ -7863,6 +11135,22 @@
       "boss": "Trash",
       "kind": "raid",
       "zone": "Black Temple"
+    }
+  ],
+  "32909": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "32910": [
+    {
+      "faction": "Ogrila",
+      "factionId": 1038,
+      "kind": "rep",
+      "standing": "Friendly"
     }
   ],
   "32943": [
@@ -7921,6 +11209,118 @@
       "zone": "Zul'Aman"
     }
   ],
+  "33124": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33148": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33149": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33150": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33151": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33152": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33153": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "33155": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "33156": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "33157": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "33158": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "33159": [
+    {
+      "faction": "The Shatar",
+      "factionId": 935,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "33160": [
+    {
+      "faction": "Keepers Of Time",
+      "factionId": 989,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "33165": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "33191": [
     {
       "boss": "Nalorakk",
@@ -7935,11 +11335,27 @@
       "zone": "Zul'Aman"
     }
   ],
+  "33205": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "33206": [
     {
       "boss": "Nalorakk",
       "kind": "raid",
       "zone": "Zul'Aman"
+    }
+  ],
+  "33209": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "33211": [
@@ -8038,6 +11454,14 @@
       "boss": "Halazzi",
       "kind": "raid",
       "zone": "Zul'Aman"
+    }
+  ],
+  "33305": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "33307": [
@@ -8408,6 +11832,14 @@
       "zone": "Zul'Aman"
     }
   ],
+  "33622": [
+    {
+      "faction": "The Consortium",
+      "factionId": 933,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "33640": [
     {
       "boss": "Nalorakk",
@@ -8590,6 +12022,14 @@
       "zone": "Zul'Aman"
     }
   ],
+  "33999": [
+    {
+      "faction": "Cenarion Expedition",
+      "factionId": 942,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "34009": [
     {
       "boss": "Trash",
@@ -8677,6 +12117,38 @@
       "boss": "Kalecgos",
       "kind": "raid",
       "zone": "Sunwell Plateau"
+    }
+  ],
+  "34172": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "34173": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "34174": [
+    {
+      "faction": "The Maghar",
+      "factionId": 941,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "34175": [
+    {
+      "faction": "Kurenai",
+      "factionId": 978,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "34176": [
@@ -8833,6 +12305,22 @@
       "zone": "Sunwell Plateau"
     }
   ],
+  "34200": [
+    {
+      "faction": "Lower City",
+      "factionId": 1011,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34201": [
+    {
+      "faction": "Thrallmar",
+      "factionId": 947,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "34202": [
     {
       "boss": "Eredar Twins",
@@ -8929,6 +12417,14 @@
       "boss": "M'uru",
       "kind": "raid",
       "zone": "Sunwell Plateau"
+    }
+  ],
+  "34218": [
+    {
+      "faction": "Honor Hold",
+      "factionId": 946,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "34228": [
@@ -9235,6 +12731,30 @@
       "kind": "heroic"
     }
   ],
+  "34478": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34581": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34582": [
+    {
+      "faction": "The Violet Eye",
+      "factionId": 967,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "34601": [
     {
       "dungeon": "Magisters' Terrace",
@@ -9338,6 +12858,126 @@
       "zone": "Sunwell Plateau"
     }
   ],
+  "34665": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34666": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34667": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34670": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34671": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34672": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34673": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34674": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "34675": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34676": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34677": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34678": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34679": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34680": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "34780": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
   "34845": [
     {
       "boss": "Magtheridon",
@@ -9413,6 +13053,14 @@
       "boss": "Felmyst",
       "kind": "raid",
       "zone": "Sunwell Plateau"
+    }
+  ],
+  "34872": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
     }
   ],
   "35186": [
@@ -9646,6 +13294,284 @@
       "zone": "Sunwell Plateau"
     }
   ],
+  "35221": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35238": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35239": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35240": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35241": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35242": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35243": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35244": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35246": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35247": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35248": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35249": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35250": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35251": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35252": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35253": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35254": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    },
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35255": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35256": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35257": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35258": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35259": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35260": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35261": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35262": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35263": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35264": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Friendly"
+    }
+  ],
+  "35265": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35266": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35267": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35268": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35269": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35270": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35271": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "35273": [
     {
       "boss": "Trash",
@@ -9719,10 +13645,58 @@
       "kind": "heroic"
     }
   ],
+  "35322": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35323": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35325": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35500": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35502": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "35504": [
     {
       "dungeon": "Magisters' Terrace",
       "kind": "heroic"
+    }
+  ],
+  "35505": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "35513": [
@@ -9737,6 +13711,54 @@
       "kind": "heroic"
     }
   ],
+  "35695": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35696": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35697": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35698": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35699": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35708": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
   "35733": [
     {
       "boss": "Trash",
@@ -9744,10 +13766,122 @@
       "zone": "Sunwell Plateau"
     }
   ],
+  "35752": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35753": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35754": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "35755": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
   "35756": [
     {
       "dungeon": "Magisters' Terrace",
       "kind": "heroic"
+    }
+  ],
+  "35762": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35763": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35764": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35765": [
+    {
+      "faction": "The Scale Of The Sands",
+      "factionId": 990,
+      "kind": "rep",
+      "standing": "Honored"
+    }
+  ],
+  "35766": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35767": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35768": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "35769": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Revered"
+    }
+  ],
+  "37504": [
+    {
+      "faction": "Shattered Sun Offensive",
+      "factionId": 1077,
+      "kind": "rep",
+      "standing": "Exalted"
+    }
+  ],
+  "38229": [
+    {
+      "faction": "Sporeggar",
+      "factionId": 970,
+      "kind": "rep",
+      "standing": "Revered"
     }
   ],
   "38276": [
@@ -9766,6 +13900,14 @@
     {
       "dungeon": "Old Hillsbrad Foothills",
       "kind": "heroic"
+    }
+  ],
+  "38628": [
+    {
+      "faction": "Shatari Skyguard",
+      "factionId": 1031,
+      "kind": "rep",
+      "standing": "Exalted"
     }
   ],
   "38658": [

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: `docs/reviews/feat-content-hash.md` Spec finding S4
 Blocks: phase-2
@@ -67,3 +67,22 @@ the system, because there is no view layer to drive.
 
 `applyView` is listed in AGENTS.md § Testing as one of the four pure functions
 unit-tested directly, so its own tests need no new seam agreement.
+
+## Comments
+
+**2026-08-04 — superseded by a Phase 2 subplan.** The implementation half of
+this ticket is now `.scratch/phase-2/issues/03-apply-view.md`, on branch
+`phase-2/apply-view`. Close this ticket when that branch lands; the analysis
+above (especially "what `feat/content-hash` closed" and the altitude the gate
+box actually needs) is carried into that subplan rather than restated here.
+
+**2026-08-05 — closed on `phase-2/apply-view`.** `applyView` is built
+(`packages/core/src/view.ts`) and the gate box is closed at the altitude this
+ticket named, not at the pure-function altitude it warned about:
+`packages/core/test/view-gate.test.ts` produces a `Ranking` through
+`rankUpgrades` with a counting `SimRunner`, applies all fourteen `ViewOptions`
+combinations, and asserts `contentHash` and the run count are both unchanged.
+The counter is not vacuous — it is asserted `> 0` first, and adding one extra
+`sim.run` inside the loop fails the test with `expected 5 to be 4`.
+
+Review: `docs/reviews/phase-2-apply-view.md`.

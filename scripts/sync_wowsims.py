@@ -7,6 +7,10 @@ data/wowsims.lock.json, and fetched into vendor/ (gitignored). What gets committ
 is the generated output plus the lockfile -- so "which upstream release produced
 this data" is always answerable from the repo alone.
 
+This script is NOT the only writer of that lockfile -- it owns OWNED_KEYS below
+and must leave every other top-level key alone (see merge_lock). Adding a third
+writer? Read the contract in scripts/pinned_fetch.py first.
+
 The load-bearing field is CURRENT_PHASE.
 
     // ui/core/constants/other.ts
@@ -54,6 +58,12 @@ VENDOR = "vendor/wowsims"
 #   (those are bisTags/display input only).
 # - Each new tier needs token-to-piece verification against Wowhead before
 #   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
+#
+# Feral cat is not shaped like ret upstream. Retribution ships one curated set
+# per stage; feral cat ships sixteen, split BiS/Alt/Realistic and again by
+# 6-piece against 9-piece tier bonus. Only the p2 pair is tracked here — the
+# stage this repo defaults to — so `bisTags` has a defensible input without
+# this file becoming a mirror of upstream's whole catalogue.
 TRACKED = {
     "db.json": "assets/database/db.json",
     "constants_other.ts": "ui/core/constants/other.ts",
@@ -61,6 +71,17 @@ TRACKED = {
     "ret_p2.gear.json": "ui/paladin/retribution/gear_sets/p2.gear.json",
     "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
+    "feral_p2_6p.gear.json": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
+    "feral_p2_9p.gear.json": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
+    "feral_preraid.gear.json": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
+    "feral_default.apl.json": "ui/druid/feralcat/apls/default.apl.json",
+    # Sources for scripts/extract_sim_defaults.mjs (ADR-0022). Unlike everything
+    # above these are TypeScript, not data: the buff/debuff defaults live in
+    # `sim.ts` as constructor calls, so they are parsed with the TS compiler API
+    # rather than json.load'ed. Pinned here so a tag bump trips the checksum
+    # instead of silently invalidating data/presets/*/buff-defaults.json.
+    "feral_sim.ts": "ui/druid/feralcat/sim.ts",
+    "proto_utils.ts": "ui/core/proto_utils/utils.ts",
 }
 
 def gh(*args):
@@ -111,6 +132,40 @@ def load_lock():
         return json.load(fh)
 
 
+# Keys in the lockfile that this script owns and rewrites on every --update.
+# Everything else in there belongs to another script -- data/proto/'s pin is
+# written by scripts/fetch_protos.py -- and must survive untouched. Rebuilding
+# the dict from scratch and dropping the rest silently destroyed the `proto`
+# block once already; carry unknown keys forward rather than naming them, so
+# the next script to add a block doesn't have to edit this one.
+OWNED_KEYS = frozenset(
+    {"repo", "tag", "commit", "currentPhase", "defaultMaxPhase", "files", "_comment"}
+)
+
+
+def merge_lock(prev, owned):
+    """Overlay this script's freshly-built keys onto the previous lockfile,
+    preserving any top-level key we don't own.
+
+    Raises SystemExit if `owned` contains a key missing from OWNED_KEYS. That
+    combination is the dangerous one: the key would be classified as another
+    script's, so the *previous* value would win and the freshly-fetched one be
+    discarded -- a pin that looks updated but never moves again. Refusing to
+    write beats a lockfile that quietly lies about what it points at."""
+    unclaimed = set(owned) - OWNED_KEYS
+    if unclaimed:
+        raise SystemExit(
+            f"do_update() built key(s) {sorted(unclaimed)} that are not in OWNED_KEYS.\n"
+            "Add them to OWNED_KEYS -- otherwise merge_lock() treats them as another "
+            "script's data and keeps the stale value forever."
+        )
+    foreign = {k: v for k, v in (prev or {}).items() if k not in OWNED_KEYS}
+    if not foreign:
+        return dict(owned)
+    # Our keys lead; foreign blocks keep their relative order at the tail.
+    return {**owned, **foreign}
+
+
 def do_update(tag):
     if tag:
         sha = tag_sha(tag)
@@ -144,7 +199,7 @@ def do_update(tag):
         raise SystemExit("never resolved CURRENT_PHASE -- refusing to write a lockfile")
 
     prev = load_lock()
-    lock = {
+    owned = {
         "repo": REPO,
         "tag": tag,
         "commit": sha,
@@ -158,6 +213,7 @@ def do_update(tag):
             "player's most recent log."
         ),
     }
+    lock = merge_lock(prev, owned)
     with open(LOCKFILE, "w", encoding="utf-8") as fh:
         json.dump(lock, fh, indent=2)
         fh.write("\n")

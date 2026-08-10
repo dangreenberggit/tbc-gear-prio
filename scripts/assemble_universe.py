@@ -22,28 +22,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
-EP_WEIGHTS = ROOT / "data/presets/ret/p2.ep-weights.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
+FACTION_IDS = ROOT / "data/faction_ids.json"
 
-# Pinned wowsims ret gear-set presets (vendor/wowsims/ret_*.gear.json — see
-# packages/core/test/pool-hardening.test.ts's wowsimsCuratedItemIds for the
-# same file list). Upstream tbc-new only ships one curated set per stage for
-# retribution (no BiS/Alt/Realistic split like some other specs), so any item
-# id that appears in one of these files is tagged "BiS".
-WOWSIMS_GEAR_SETS = [
-    ROOT / "vendor/wowsims/ret_preraid.gear.json",
-    ROOT / "vendor/wowsims/ret_p1.gear.json",
-    ROOT / "vendor/wowsims/ret_p2.gear.json",
-]
-TWO_HOP = ROOT / "data/two-hop/ret-tokens.json"
-# Kept out of TWO_HOP because that file is the ret *tier set* map and
-# pool-hardening.test.ts pins it against wowsims db setIds; Sunmote upgrades
-# are raid drops exchanged at a vendor, not set pieces.
-SUNMOTE_UPGRADES = ROOT / "data/two-hop/ret-sunmote-upgrades.json"
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
-WOWHEAD_DIR = ROOT / "data/wowhead-lists/ret"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
+COMMON_PROTO = ROOT / "data/proto/common.proto"
+UI_PROTO = ROOT / "data/proto/ui.proto"
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -88,12 +74,14 @@ ITEM_TYPE_SLOT = {
     14: "ranged",
 }
 
+ARMOR_CLOTH = 1
 ARMOR_LEATHER = 2
 ARMOR_MAIL = 3
 ARMOR_PLATE = 4
 WEAPON_POLEARM = 6
 WEAPON_STAFF = 8
 HAND_TYPE_TWO_HAND = 4
+RANGED_IDOL = 6
 RANGED_LIBRAM = 7
 MIN_QUALITY = 3
 
@@ -124,6 +112,131 @@ RET_TIER_PIECE_IDS = frozenset(
     }
 )
 
+# Malorne Harness (T4) and Nordrassil Harness (T5) — the feral variant of
+# druid tier. Harness rather than Regalia or Raiment is confirmed on stats
+# from the pinned db, not on the name: see data/two-hop/feral-tokens.json.
+# T6 (Thunderheart) is absent, so feral tier coverage stops at T5.
+FERAL_TIER_PIECE_IDS = frozenset(
+    {
+        29096,
+        29097,
+        29098,
+        29099,
+        29100,
+        30222,
+        30223,
+        30228,
+        30229,
+        30230,
+    }
+)
+
+# common.proto Class enum. These are wowsims ids and are NOT WCL's class ids:
+# WCL numbers Druid 2 and Warrior 11, which is the reverse reading of the same
+# two numbers. Anything crossing between the two needs an explicit map.
+CLASS_PALADIN = 2
+CLASS_DRUID = 11
+
+
+class SpecProfile:
+    """Everything assemble_universe needs that differs per spec.
+
+    Split deliberately into *paths* (which files to read) and *equip rules*
+    (what the class can wear). The paths were always per-spec; the equip rules
+    were hidden inside a function named for ret, and they are the part that is
+    genuinely different rather than merely relocated — a druid is not a paladin
+    with different filenames. See .scratch/phase-2/feral-coupling-audit.md.
+    """
+
+    def __init__(
+        self,
+        spec: str,
+        *,
+        ep_weights: Path,
+        gear_sets: list[Path],
+        wowhead_dir: Path,
+        two_hop: Path | None,
+        sunmote_upgrades: Path | None,
+        tier_piece_ids: frozenset[int],
+        class_id: int,
+        armor_types: frozenset[int],
+        ranged_type: int,
+        allow_one_hand: bool,
+        excluded_weapon_types: frozenset[int],
+    ):
+        self.spec = spec
+        self.ep_weights = ep_weights
+        self.gear_sets = gear_sets
+        self.wowhead_dir = wowhead_dir
+        self.two_hop = two_hop
+        self.sunmote_upgrades = sunmote_upgrades
+        self.tier_piece_ids = tier_piece_ids
+        self.class_id = class_id
+        self.armor_types = armor_types
+        self.ranged_type = ranged_type
+        self.allow_one_hand = allow_one_hand
+        self.excluded_weapon_types = excluded_weapon_types
+
+
+SPEC_PROFILES: dict[str, SpecProfile] = {
+    "ret": SpecProfile(
+        "ret",
+        ep_weights=ROOT / "data/presets/ret/p2.ep-weights.json",
+        # Upstream tbc-new ships one curated set per stage for retribution --
+        # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
+        # Feral cat does have that split; see its own entry below.
+        gear_sets=[
+            ROOT / "vendor/wowsims/ret_preraid.gear.json",
+            ROOT / "vendor/wowsims/ret_p1.gear.json",
+            ROOT / "vendor/wowsims/ret_p2.gear.json",
+        ],
+        wowhead_dir=ROOT / "data/wowhead-lists/ret",
+        two_hop=ROOT / "data/two-hop/ret-tokens.json",
+        # Kept out of two_hop because that file is the tier *set* map and
+        # pool-hardening.test.ts pins it against wowsims db setIds; Sunmote
+        # upgrades are raid drops exchanged at a vendor, not set pieces.
+        sunmote_upgrades=ROOT / "data/two-hop/ret-sunmote-upgrades.json",
+        tier_piece_ids=RET_TIER_PIECE_IDS,
+        class_id=CLASS_PALADIN,
+        armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
+        ranged_type=RANGED_LIBRAM,
+        allow_one_hand=False,
+        # Paladins wield polearms but not staves. wowsims
+        # ui/core/player_classes/paladin.ts lists Polearm with
+        # canUseTwoHand: true and omits Staff entirely.
+        excluded_weapon_types=frozenset({WEAPON_STAFF}),
+    ),
+    "feral": SpecProfile(
+        "feral",
+        # Phase 1, because upstream ships no P2 EP preset for feral cat.
+        ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
+        # Upstream ships sixteen curated cat sets against ret's three, split
+        # BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus.
+        # Only the p2 pair plus pre-raid is vendored, so "BiS" here means
+        # "in an upstream p2 or pre-raid cat set" rather than a single verdict.
+        gear_sets=[
+            ROOT / "vendor/wowsims/feral_preraid.gear.json",
+            ROOT / "vendor/wowsims/feral_p2_6p.gear.json",
+            ROOT / "vendor/wowsims/feral_p2_9p.gear.json",
+        ],
+        wowhead_dir=ROOT / "data/wowhead-lists/feral",
+        two_hop=ROOT / "data/two-hop/feral-tokens.json",
+        # No feral Sunmote map collected yet.
+        sunmote_upgrades=None,
+        tier_piece_ids=FERAL_TIER_PIECE_IDS,
+        class_id=CLASS_DRUID,
+        # Druid is Leather + Cloth, per wowsims
+        # ui/core/player_classes/druid.ts. Not a subset of ret's set either
+        # way: druids take cloth, and never mail or plate.
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
+        ranged_type=RANGED_IDOL,
+        # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
+        # one-handers are eligible and staves are the signature weapon.
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(),
+    ),
+}
+
 # Wowhead list files included when assembling up to maxPhase N.
 WOWHEAD_STAGE_FOR_MAX_PHASE: dict[int, list[str]] = {
     2: ["p1-p2"],
@@ -138,7 +251,45 @@ BADGE_RE = re.compile(
     re.IGNORECASE,
 )
 CRAFTED_RE = re.compile(r"Crafted:\s*([^(\n]+)|Profession:\s*([^(\n]+)", re.IGNORECASE)
+# The badge vendor named without a price: "Vendor: G'eras (Badges of Justice)".
+# BADGE_RE cannot match this -- its count group is mandatory -- so before this
+# existed the row parsed to nothing and the item was recorded as having no
+# origin at all. Cost 0 is a deliberate "unpriced": the guide states the
+# currency but not the amount, and inventing a number would be a false claim.
+BADGE_VENDOR_RE = re.compile(r"Badges?\s+of\s+Justice", re.IGNORECASE)
+# Reputation vendors, in the three phrasings the collected guides actually use:
+#   "Vendor: Nakodu (Lower City Exalted)"      -- npc named, faction in parens
+#   "Vendor: Exalted with The Consortium"      -- standing first, no parens
+# REP_RE already covers the third ("Requires Exalted with X"). All three name a
+# faction and a standing, so each stays a parse rather than a lookup table.
+VENDOR_REP_RE = re.compile(
+    r"Vendor:[^(\n]*\(\s*(.+?)\s+(Friendly|Honored|Revered|Exalted)\s*\)",
+    re.IGNORECASE,
+)
+VENDOR_STANDING_FIRST_RE = re.compile(
+    r"Vendor:\s*(Friendly|Honored|Revered|Exalted)\s+with\s+([^(\n]+)",
+    re.IGNORECASE,
+)
+# "Quest: Kael'thas and the Verdant Sphere (Tempest Keep: The Eye)". A quest
+# reward that names a zone is obtained there, so the zone is a real source and
+# the row belongs in that raid's view -- DROP_RE cannot see it because the text
+# says Quest, not Drop. Quests naming no zone stay unparsed by design: there is
+# no `quest` ItemSource variant, and inventing a zone would be worse than the
+# curated-set fallback that already covers those rows.
+QUEST_ZONE_RE = re.compile(r"Quest:\s*(.+?)\s*\(([^)]+)\)", re.IGNORECASE)
+# "(The Scale of the Sands Exalted)" -- a standing inside a parenthetical, with
+# no "Vendor:" prefix for VENDOR_REP_RE to anchor on. Matches the same shape
+# VENDOR_REP_RE captures, minus that prefix, so a quest reward gated on
+# reputation resolves to a rep source instead of a fabricated zone.
+STANDING_PAREN_RE = re.compile(
+    r"\(\s*(.+?)\s+(Friendly|Honored|Revered|Exalted)\s*\)", re.IGNORECASE
+)
 WOWHEAD_HEROIC_ZONE_RE = re.compile(r"^Heroic\s+(.+)$", re.IGNORECASE)
+# "Drop: World Drop", "Random World Drop (Bind on Equip)", "World Drop -
+# Azeroth", "World Drop -The Outland" -- all four phrasings collected so far
+# name no real zone, so they map to the zone-less `{kind: "world"}` variant
+# rather than a fabricated one (ticket 45 §1).
+WORLD_DROP_RE = re.compile(r"world\s+drop", re.IGNORECASE)
 # "Requires Exalted with Shattered Sun Offensive". The standing and faction are
 # both named, so this stays a parse rather than a lookup table.
 REP_RE = re.compile(
@@ -152,8 +303,6 @@ REP_RE = re.compile(
 # attributed that weight to ret's spell-power coefficients on Seal/Judgement of
 # Blood and Crusader Strike — plausible, but untested here; the EP weight alone
 # is sufficient reason.)
-# common.proto Class enum: ClassPaladin = 2.
-CLASS_PALADIN = 2
 # Shared with the ItemSource union in packages/core/src/pool.ts, which imports
 # the same file. A kind this script emits but that module cannot parse is a
 # build failure, not a runtime surprise — so the list is loaded rather than
@@ -181,30 +330,118 @@ def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def wowsims_curated_item_ids() -> set[int]:
-    """Union of item ids across the pinned ret gear-set presets (§bisTags)."""
-    ids: set[int] = set()
-    for path in WOWSIMS_GEAR_SETS:
+def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
+    """Union of item ids across the pinned gear-set presets (§bisTags).
+
+    Empty for a spec with no vendored gear sets, which makes every entry
+    untagged rather than falsely "BiS".
+
+    Membership only. `BiS` itself is phase-scoped -- see
+    `curated_set_phase` and `bis_set_labels_for_max_phase`.
+    """
+    return set(wowsims_curated_sets_by_item(profile))
+
+
+# Upstream names its gear sets by the stage they are BiS *for*: `preraid`
+# before Karazhan, `p1` for T4 content, `p2` for T5. Pre-raid is phase 1 --
+# it is the set you take into a phase-1 raid.
+CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2}
+
+
+def curated_set_phase(label: str) -> int | None:
+    """The phase a curated set is BiS for, or None if unrecognised.
+
+    `feral_p2_6p` / `p2_9p` are the same phase split by tier-bonus count, so
+    the leading `pN` is the phase and the suffix is a variant.
+    """
+    return CURATED_SET_PHASE.get(label.split("_", 1)[0])
+
+
+def bis_set_labels_for_max_phase(
+    sets_by_item: dict[int, list[str]], max_phase: int
+) -> dict[int, list[str]]:
+    """Curated sets that still make a *current* BiS claim at `max_phase`.
+
+    "BiS" is a claim about a stage, exactly as wowsims scopes it -- there is no
+    absolute BiS. A set for an earlier stage says "this was BiS before the
+    content you are now running", which is the opposite of a recommendation.
+    Without this, a phase-5 ret list badged Justicar (T4) chest, boots and
+    crown plus five pre-raid pieces as `BiS`, because the union flattened three
+    stage sets into one verdict (carry-forward 47 §1).
+
+    Upstream vendors no set past `p2`, so beyond phase 2 the newest available
+    stage is used rather than tagging nothing: the claim degrades to "the
+    latest curated set upstream ships", which `curatedSets` then names.
+    """
+    known = {
+        iid: [s for s in labels if curated_set_phase(s) is not None]
+        for iid, labels in sets_by_item.items()
+    }
+    available = {
+        phase
+        for labels in known.values()
+        for phase in (curated_set_phase(s) for s in labels)
+        if phase is not None and phase <= max_phase
+    }
+    if not available:
+        return {}
+    target = max(available)
+    scoped = {
+        iid: sorted(s for s in labels if curated_set_phase(s) == target)
+        for iid, labels in known.items()
+    }
+    return {iid: labels for iid, labels in scoped.items() if labels}
+
+
+def wowsims_curated_sets_by_item(profile: SpecProfile) -> dict[int, list[str]]:
+    """itemId -> the curated set names that equip it, sorted.
+
+    Carried per item rather than flattened to one boolean because the set name
+    is the whole provenance of the claim. A union says only "some upstream
+    preset equipped this", which is what let Shapeshifter's Signet -- 25
+    agility, 18 stamina, 20 expertise, no strength -- ship tagged a flat "BiS"
+    on a retribution list (carry-forward 47 §1). Upstream really does equip it
+    in all three ret sets, so the tag was not a cross-spec leak and not a bug
+    in membership; the defect is that "BiS" asserts a per-item verdict the
+    source never made. Naming the set lets the reader see it is a preset's
+    choice, and lets `curatedSets` outrank a bare label downstream.
+    """
+    by_item: dict[int, list[str]] = {}
+    for path in profile.gear_sets:
         if not path.is_file():
             continue
         doc = load_json(path)
         assert isinstance(doc, dict)
+        # `ret_p2.gear.json` -> `p2`: the stem carries the spec prefix, which is
+        # redundant once the row is in a spec's own universe file.
+        label = path.stem.removesuffix(".gear")
+        label = label.split("_", 1)[1] if "_" in label else label
         for item in doc.get("items") or []:
             if isinstance(item, dict) and item.get("id") is not None:
-                ids.add(int(item["id"]))
-    return ids
+                by_item.setdefault(int(item["id"]), []).append(label)
+    return {iid: sorted(set(names)) for iid, names in by_item.items()}
 
 
-def ret_eligible_d7(it: dict) -> bool:
-    """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable()."""
+ARMOR_SLOTS = frozenset(
+    {"head", "shoulder", "chest", "wrist", "hands", "waist", "legs", "feet"}
+)
+
+
+def eligible_d7(it: dict, profile: SpecProfile) -> bool:
+    """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable().
+
+    Previously `ret_eligible_d7`, whose name was honest: four of these rules
+    are class-specific, so they now come from `profile` rather than from
+    module constants.
+    """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
     # A non-empty classAllowlist is a hard equip restriction, so an item that
-    # omits Paladin cannot be worn by this character at all. db.json carries
+    # omits this class cannot be worn by this character at all. db.json carries
     # the field on 2006 items and nothing read it, which let 8 class-specific
     # SSC/TK trinkets into both shipping universes.
     allowlist = it.get("classAllowlist")
-    if allowlist and CLASS_PALADIN not in allowlist:
+    if allowlist and profile.class_id not in allowlist:
         return False
     t = it.get("type")
     if t is None:
@@ -214,28 +451,19 @@ def ret_eligible_d7(it: dict) -> bool:
         return False
     if (it.get("quality") or 0) < MIN_QUALITY:
         return False
-    if slot in {
-        "head",
-        "shoulder",
-        "chest",
-        "wrist",
-        "hands",
-        "waist",
-        "legs",
-        "feet",
-    }:
-        return it.get("armorType") in (ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE)
+    if slot in ARMOR_SLOTS:
+        return it.get("armorType") in profile.armor_types
     if slot == "weapon":
-        if it.get("handType") != HAND_TYPE_TWO_HAND:
+        if (
+            not profile.allow_one_hand
+            and it.get("handType") != HAND_TYPE_TWO_HAND
+        ):
             return False
-        # Paladins can wield polearms but not staves — the two are not
-        # interchangeable here. wowsims ui/core/player_classes/paladin.ts lists
-        # Polearm with canUseTwoHand: true and omits Staff entirely.
-        if it.get("weaponType") == WEAPON_STAFF:
+        if it.get("weaponType") in profile.excluded_weapon_types:
             return False
         return True
     if slot == "ranged":
-        return it.get("rangedWeaponType") == RANGED_LIBRAM
+        return it.get("rangedWeaponType") == profile.ranged_type
     return True
 
 
@@ -296,6 +524,206 @@ def ep_score(
     return total
 
 
+# A member line, tolerating the option suffix protobuf allows
+# (`Foo = 1 [deprecated = true];`). `ui.proto` already carries `deprecated` on
+# message fields, so the syntax is live in a file this parses.
+_ENUM_MEMBER_RE = re.compile(r"^\s+(\w+)\s*=\s*(-?\d+)\s*(?:\[[^\]]*\])?\s*;", re.M)
+# Anything else that occupies a statement line inside an enum body. Everything
+# not matched by either pattern is a member we failed to parse.
+_ENUM_NON_MEMBER_RE = re.compile(
+    r"^\s*(?://|/\*|\*|reserved\b|option\b|\}|$)", re.M
+)
+
+
+def _enum_members(proto_path: Path, enum_name: str) -> dict[int, str]:
+    text = proto_path.read_text(encoding="utf-8")
+    enum = re.search(rf"enum {enum_name} \{{(.*?)\n\}}", text, re.S)
+    if not enum:
+        raise SystemExit(f"could not find the {enum_name} enum in {proto_path}")
+    body = enum.group(1)
+    members = _ENUM_MEMBER_RE.findall(body)
+    if not members:
+        raise SystemExit(f"{enum_name} enum in {proto_path} has no members")
+
+    # A partial parse is the actual defect: dropping one member of RepLevel or
+    # Profession has no downstream assertion to catch it, and surfaces as a bare
+    # number in a display field (ticket 66). Refuse to guess.
+    for line in body.splitlines():
+        if not line.strip() or _ENUM_NON_MEMBER_RE.match(line):
+            continue
+        if not _ENUM_MEMBER_RE.match(line):
+            raise SystemExit(
+                f"{enum_name} enum in {proto_path} has a line this parser cannot "
+                f"read as a member: {line.strip()!r}. Fix the parser rather than "
+                "shipping a partial enum."
+            )
+
+    return {int(num): name for name, num in members}
+
+
+def profession_names_from_proto() -> dict[int, str]:
+    """common.proto Profession enum, ordinal -> name. db.json's
+    `crafted.profession` is this enum's number, not a name (ticket 42) --
+    parsed from the proto rather than hand-typed so a member added upstream
+    cannot silently mismatch a hardcoded table."""
+    return _enum_members(COMMON_PROTO, "Profession")
+
+
+PROFESSION_NAMES = profession_names_from_proto()
+
+
+# ui.proto RepLevel, ordinal -> standing. db.json's `rep.repLevel` is this
+# enum's number (8 = Exalted). Parsed, not hand-typed, for the same reason as
+# PROFESSION_NAMES: an upstream renumbering must break loudly, not silently
+# relabel every rep source.
+REP_LEVEL_NAMES = {
+    num: name.removeprefix("RepLevel")
+    for num, name in _enum_members(UI_PROTO, "RepLevel").items()
+}
+# Standing name -> its ordinal, so "which of these is cheapest" is answered by
+# the proto's own scale rather than a hand-typed ranking.
+REP_STANDING_ORDER = {name: num for num, name in REP_LEVEL_NAMES.items()}
+
+# ui.proto RepFaction, id -> display name. The enum member is CamelCase
+# (`RepFactionOgriLa`) and the display name is not derivable from it: "Ogri'la"
+# needs an apostrophe no rule produces, and `RepFactionTheConsortium` keeps its
+# article while `RepFactionAshtongueDeathsworn` never had one. These must match
+# what the prose parser already emits (`Ogri'la`, `The Consortium`) so one
+# faction does not print two ways -- a presentation invariant, not an identity
+# one. The *ids* are the identity, and they are game-canonical: wowsims,
+# ui.proto and AtlasLoot agree id-for-id
+# (.scratch/carry-forward/notes/65-faction-ids.md).
+#
+# So the *ids* come from the proto and only the display strings are written
+# here. A faction added upstream fails the assertion below rather than silently
+# arriving as a CamelCase name.
+#
+# Second witness, so this is not a single-transcription table (tickets 48-53,
+# 58): wowsims ships the same map as REP_FACTION_NAMES in
+# `ui/core/proto_utils/names.ts`, and all ten agree character for character in
+# both directions -- including "Ogri'la" and "The Consortium". That file is NOT
+# vendored or pinned here; it was read from a local scratch checkout of wowsims
+# source, which is gitignored, so a fresh worktree will not have it. Re-fetch it
+# from upstream to re-check rather than assuming it is on disk.
+REP_FACTION_DISPLAY = {
+    # Ids beyond ui.proto's 10 come from AtlasLoot (data/faction_ids.json).
+    # They are spelled here for the same reason as the rest: splitting
+    # "TheScaleOfTheSands" yields "The Scale Of The Sands", and no rule knows
+    # that "of" is lowercase or that "Ogrila" wants an apostrophe. Ids not
+    # listed fall back to the split, which is fine for factions no shipped item
+    # references.
+    935: "The Sha'tar",
+    990: "The Scale of the Sands",
+    1011: "Lower City",
+    1077: "Shattered Sun Offensive",
+    933: "The Consortium",
+    941: "The Mag'har",
+    942: "Cenarion Expedition",
+    946: "Honor Hold",
+    947: "Thrallmar",
+    970: "Sporeggar",
+    978: "Kurenai",
+    1012: "Ashtongue Deathsworn",
+    1015: "Netherwing",
+    1038: "Ogri'la",
+}
+
+
+def rep_faction_names() -> dict[int, str]:
+    """ui.proto RepFaction id -> display name, checked against the proto.
+
+    Every proto id must be spelled here: a missing one would fall back to a
+    CamelCase split and stop matching the prose-parsed spelling of the same
+    faction (ticket 65).
+
+    The converse is not required. AtlasLoot carries ids the proto does not
+    model (Scale of the Sands 990, Lower City 1011), and those are spelled here
+    too rather than left to the split, which cannot know "of" is lowercase.
+    They are validated against data/faction_ids.json instead -- an id in
+    neither source is a typo and still fails.
+    """
+    proto_ids = set(_enum_members(UI_PROTO, "RepFaction")) - {0}
+    missing = proto_ids - set(REP_FACTION_DISPLAY)
+    known = proto_ids | set(FACTION_IDS_BY_KEY.values())
+    unknown = set(REP_FACTION_DISPLAY) - known
+    if missing or unknown:
+        raise SystemExit(
+            "REP_FACTION_DISPLAY is out of sync: missing proto ids "
+            f"{sorted(missing)}, ids in no known source {sorted(unknown)}"
+        )
+    return dict(REP_FACTION_DISPLAY)
+
+
+def _faction_key(name: str) -> str:
+    """Letters only, lowercased -- the join key between a display string and an
+    AtlasLoot CamelCase identifier ("Lower City" <-> "LowerCity", "Ogri'la" <->
+    "Ogrila"). Lossy by design and safe *because* it is only used to find a
+    candidate id: once resolved the id is the identity, and the string stops
+    carrying weight. Verified collision-free across all 20 TBC factions by
+    `check_rep_tables.py`."""
+    return re.sub(r"[^a-z]", "", name.lower())
+
+
+def faction_ids_by_key() -> dict[str, int]:
+    """Normalised faction name -> Faction.dbc id, from data/faction_ids.json.
+
+    Prose rep rows arrive as a display string with no id ("Requires Exalted with
+    Lower City"). db.json can only resolve the 10 factions wowsims models, and
+    names it a number for; this covers the other 10 as well, which is the whole
+    reason the file is parsed (ticket 66).
+    """
+    if not FACTION_IDS.is_file():
+        return {}
+    data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+    return {_faction_key(k): int(v) for k, v in (data.get("factions") or {}).items()}
+
+
+FACTION_IDS_BY_KEY = faction_ids_by_key()
+# After FACTION_IDS_BY_KEY: the sync check validates non-proto ids against it.
+REP_FACTION_NAMES = rep_faction_names()
+
+
+def faction_display_by_id() -> dict[int, str]:
+    """Faction.dbc id -> display string, for every id any input can produce.
+
+    `REP_FACTION_NAMES` is authoritative but covers only the 10 factions
+    wowsims models. AtlasLoot sources carry ids for 20, so the remainder get a
+    name split out of AtlasLoot's CamelCase key ("TheScaleOfTheSands" -> "The
+    Scale of the Sands"). That split is presentation only -- the id is the
+    identity -- but a rep source without a `faction` violates the ItemSource
+    union, so every id must yield some string.
+
+    The curated spellings win wherever they exist: splitting cannot produce
+    "Ogri'la" from "Ogrila", which is exactly why REP_FACTION_DISPLAY is
+    hand-written.
+    """
+    out: dict[int, str] = {}
+    if FACTION_IDS.is_file():
+        data = json.loads(FACTION_IDS.read_text(encoding="utf-8"))
+        for key, faction_id in (data.get("factions") or {}).items():
+            out[int(faction_id)] = re.sub(r"(?<!^)(?=[A-Z])", " ", key)
+    out.update(REP_FACTION_NAMES)
+    return out
+
+
+FACTION_DISPLAY_BY_ID = faction_display_by_id()
+
+
+def rep_source(faction: str, standing: str) -> dict:
+    """A prose-parsed rep row, carrying an id whenever the faction is known.
+
+    The id is what downstream should key on; the display string is presentation
+    (see the REP_FACTION_DISPLAY comment). A faction we cannot resolve still
+    ships its row -- the guide is the only witness for some vendor items, and
+    dropping the row would lose the source entirely -- it just carries no id.
+    """
+    out = {"kind": "rep", "faction": faction, "standing": standing}
+    faction_id = FACTION_IDS_BY_KEY.get(_faction_key(faction))
+    if faction_id is not None:
+        out["factionId"] = faction_id
+    return out
+
+
 def map_db_source(
     raw: object,
     *,
@@ -310,7 +738,10 @@ def map_db_source(
         return None
     if "crafted" in first:
         prof = (first["crafted"] or {}).get("profession")
-        return {"kind": "crafted", "profession": str(prof)} if prof is not None else None
+        if prof is None:
+            return None
+        name = PROFESSION_NAMES.get(prof, str(prof))
+        return {"kind": "crafted", "profession": name}
     if "drop" in first:
         drop = first["drop"] or {}
         zone = (
@@ -334,21 +765,36 @@ def map_db_source(
             return out
     if "rep" in first:
         rep = first["rep"] or {}
+        # db.json states the faction as a numeric id, never a name. It is the
+        # game-canonical id (wowsims, ui.proto and AtlasLoot agree id-for-id),
+        # so it resolves through REP_FACTION_NAMES rather than being discarded:
+        # before ticket 65 this row returned None and 111 items across 10
+        # factions silently lost their only machine-supplied source.
+        faction_id = rep.get("repFactionId")
         faction = rep.get("factionName") or rep.get("faction")
+        if faction is None and faction_id is not None:
+            faction = REP_FACTION_NAMES.get(int(faction_id))
         standing = rep.get("standing") or rep.get("rank")
-        # db.json ships no faction table, so a row keyed only by repFactionId
-        # resolves to "unknown with unknown" — a source that names nothing and
-        # cannot be acted on. Returning None lets the Wowhead "Requires Exalted
-        # with X" text supply the real one instead of being appended behind it,
-        # which matters because pool.ts reads sources[0]. Haramad's Bargain
-        # (29119) is the only affected row in the shipped tiers.
+        if standing is None and rep.get("repLevel") is not None:
+            standing = REP_LEVEL_NAMES.get(int(rep["repLevel"]))
+        # An id with no name is worse than no source: it would print as
+        # "unknown · Exalted" and cannot be acted on. Returning None lets the
+        # Wowhead "Requires Exalted with X" prose supply the real one instead
+        # of being appended behind it, which matters because pool.ts reads
+        # sources[0]. check_rep_tables.py makes this branch unreachable for
+        # every id db.json currently uses.
         if faction is None and standing is None:
             return None
-        return {
+        out = {
             "kind": "rep",
             "faction": str(faction or "unknown"),
             "standing": str(standing or "unknown"),
         }
+        # `faction` alone would be a name with no identity behind it, so the id
+        # rides only when it actually resolved to one.
+        if faction_id is not None and faction is not None:
+            out["factionId"] = int(faction_id)
+        return out
     if "faction" in first:
         return None
     return None
@@ -372,13 +818,31 @@ def source_heroic_dungeons(source: dict) -> set[str]:
     return {d} if d else set()
 
 
+def carries_locus(source: dict) -> bool:
+    """Does this source place the item somewhere -- a boss, or a raid/dungeon?
+
+    The question both halves of the wowhead-suppression test ask: of a machine
+    source, "do you already know where this drops"; of a Wowhead row, "are you
+    about to restate that". `token` counts because the two-hop maps name a raid
+    and a boss, and `heroic` because its locus rides in `dungeon` rather than
+    `zone`.
+    """
+    if source.get("boss"):
+        return True
+    if source.get("kind") in ("raid", "dungeon", "token") and source.get("zone"):
+        return True
+    return bool(source.get("kind") == "heroic" and source.get("dungeon"))
+
+
 # Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
 # zone is not merely cosmetic: it never matches a zone-keyed lookup, so the
 # item advertises a raid that does not exist, and add_source keeps it as a
 # second row beside the correct one.
 ZONE_SPELLING_FIXES = {
     "maghteridon's lair": "Magtheridon's Lair",
-
+    # The feral guide writes the full instance name where the ret guide writes
+    # the short one; phase_raids.json carries only "Tempest Keep".
+    "tempest keep: the eye": "Tempest Keep",
 }
 
 
@@ -395,31 +859,156 @@ def canonical_zone(zone: str) -> str:
     return ZONE_SPELLING_FIXES.get(zone.lower(), zone)
 
 
+# A TBC "boss" is an *encounter*, which may be several killable units: the
+# Illidari Council is four, the Eredar Twins two, and M'uru/Reliquary of the
+# Lost each transform into a second named unit mid-fight. Wowhead sometimes
+# credits a drop to the unit, AtlasLoot always to the encounter, so the same
+# real drop arrives under two names and `add_source` keeps both -- the item
+# then advertises two bosses in one zone where only one encounter exists.
+#
+# This is the `boss` counterpart of ZONE_SPELLING_FIXES above, and the same
+# reasoning applies: an unfolded alias is a second row, not a cosmetic
+# difference. `boss` is a shipped ViewOptions filter control.
+#
+# Every value here is a name AtlasLoot itself uses and every key is one it does
+# not; `check_boss_aliases.py` re-derives that from data/atlasloot_sources.json
+# and fails if it stops holding, so this table cannot drift into asserting an
+# encounter that no longer exists.
+#
+# The Karazhan Opera variants (Romulo and Julianne / The Big Bad Wolf / The
+# Wizard of Oz) are deliberately NOT folded: AtlasLoot lists all three, so they
+# are three distinct encounters filling one slot, not aliases of each other.
+BOSS_UNIT_TO_ENCOUNTER = {
+    "high nethermancer zerevor": "The Illidari Council",
+    "lady sacrolash": "Eredar Twins",
+    "entropius": "M'uru",
+    "essence of anger": "Reliquary of the Lost",
+    "trash mobs": "Trash",
+}
+
+
+def canonical_boss(boss: str) -> str:
+    return BOSS_UNIT_TO_ENCOUNTER.get(boss.strip().lower(), boss)
+
+
+# Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
+# to land in `boss` -- a shipped ViewOptions filter control listing an item as
+# a boss (carry-forward 48). The token half is dropped rather than emitted:
+# every affected piece already carries a `kind: token` row from the curated
+# data/two-hop/*-tokens.json, which is the side measured to be correct where
+# the two disagree.
+#
+# The separator is the spaced " - " because a bare hyphen would cut
+# `Fathom-Lord Karathress` in half. Measured across 74 distinct boss strings
+# in data/universes/** and .scratch/heldout/**, " - " appeared only in the 10
+# defective rows.
+TOKEN_BOSS_SEPARATOR = " - "
+
+
+def drop_boss(phrase: str) -> str:
+    if TOKEN_BOSS_SEPARATOR not in phrase:
+        return phrase
+    return phrase.rsplit(TOKEN_BOSS_SEPARATOR, 1)[1].strip()
+
+
+# The guides write the profession two lossy ways (carry-forward 53): a trailing
+# note off the same " - " splice as ticket 48 ("Leatherworking - BoP only"), and
+# a leading specialisation ("Master Swordsmith Blacksmithing"). Both make a real
+# profession fail equality against itself, which is only display-noise until
+# something groups or filters by it.
+#
+# The specialisation is dropped rather than relocated: no consumer reads it, and
+# db.json's own crafted sources carry the bare enum name with no field for it, so
+# keeping it would mean a field only the prose path can ever populate.
+#
+# Authority is the proto Profession enum, the same closed set map_db_source maps
+# into -- not a hand-typed list, so a profession added upstream cannot silently
+# fall outside the gate.
+CRAFT_PROFESSIONS = frozenset(
+    name for num, name in PROFESSION_NAMES.items() if num != 0
+)
+
+
+def canonical_profession(phrase: str) -> str | None:
+    """Bare profession name from a guide phrase, or None if it names none."""
+    head = phrase.split(TOKEN_BOSS_SEPARATOR, 1)[0].strip()
+    # The specialisation is a prefix, so the profession is the last word.
+    tail = head.split()[-1] if head.split() else ""
+    for known in CRAFT_PROFESSIONS:
+        if tail.lower() == known.lower():
+            return known
+    return None
+
+
+def zone_sources(zone: str, boss: str) -> list[dict]:
+    """One Wowhead zone parenthetical → the sources it names.
+
+    Wowhead writes the difficulty into the parenthetical ("Heroic Magisters'
+    Terrace"), and writes content dropping in more than one place as a single
+    slashed row ("Black Temple / Hyjal Summit"). Split first, then classify
+    each side: the other order leaves "Heroic A / B" as one bogus dungeon,
+    because the heroic prefix only ever fronts the first name.
+    """
+    out: list[dict] = []
+    if zone.endswith("(via"):
+        zone = zone.split("(via")[0].strip()
+    for one in zone.split("/"):
+        one = one.strip()
+        if not one:
+            continue
+        heroic_m = WOWHEAD_HEROIC_ZONE_RE.match(one)
+        if heroic_m:
+            out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
+            continue
+        src: dict = {"kind": "raid", "zone": canonical_zone(one)}
+        if boss and boss.lower() != "unknown":
+            src["boss"] = boss
+        out.append(src)
+    return out
+
+
+# `wowheadSourceText` is a record of what the page says, so a page that is
+# factually wrong stays wrong there (carry-forward 54). Where we know better,
+# the correction goes in `correctedSourceText` alongside it rather than
+# overwriting the record -- otherwise "the page said this" and "we decided this"
+# become indistinguishable, which is what made tickets 49/50 hard to re-check.
+#
+# Only the parser prefers the correction; the verbatim field stays the thing a
+# human re-reading the page compares against.
+def source_text_for_parsing(row: dict) -> str | None:
+    corrected = row.get("correctedSourceText")
+    if isinstance(corrected, str) and corrected.strip():
+        return corrected
+    text = row.get("wowheadSourceText")
+    return text if isinstance(text, str) else None
+
+
 def parse_wowhead_source(text: str | None) -> list[dict]:
     if not text:
         return []
     out: list[dict] = []
     m = DROP_RE.search(text)
     if m:
-        boss = m.group(1).strip()
-        zone = m.group(2).strip()
-        if zone.endswith("(via"):
-            zone = zone.split("(via")[0].strip()
-        # Wowhead writes the difficulty into the zone parenthetical ("Heroic
-        # Magisters' Terrace"). Left alone that becomes a `raid` row naming a
-        # zone that exists nowhere, which the phase_raids.json guard rejects.
-        heroic_m = WOWHEAD_HEROIC_ZONE_RE.match(zone)
-        if heroic_m:
-            out.append({"kind": "heroic", "dungeon": heroic_m.group(1).strip()})
-        else:
-            src: dict = {"kind": "raid", "zone": canonical_zone(zone)}
-            if boss and boss.lower() != "unknown":
-                src["boss"] = boss
-            out.append(src)
+        out.extend(zone_sources(m.group(2).strip(), drop_boss(m.group(1).strip())))
+    else:
+        qm = QUEST_ZONE_RE.search(text)
+        # A quest parenthetical is only a zone when it is not a standing:
+        # "Quest: Champion's Covenant (The Scale of the Sands Exalted)" names a
+        # reputation requirement, and reading it as a zone invented the zone
+        # "The Scale of the Sands Exalted" (ticket 59, which predicted this
+        # would surface as soon as such a row became a universe member -- step
+        # 3 admitting 29301 is what made it reachable). The rep parse below
+        # already handles the parenthetical correctly.
+        if qm and not VENDOR_REP_RE.search(text) and not STANDING_PAREN_RE.search(text):
+            out.extend(zone_sources(qm.group(2).strip(), ""))
+        elif WORLD_DROP_RE.search(text):
+            out.append({"kind": "world"})
     bm = BADGE_RE.search(text)
     if bm:
         cost = int(next(g for g in bm.groups() if g))
         out.append({"kind": "badge", "cost": cost})
+    elif BADGE_VENDOR_RE.search(text):
+        out.append({"kind": "badge", "cost": 0})
     lower = text.lower()
     if "arena points" in lower or ("pvp:" in lower and "arena" in lower):
         out.append({"kind": "pvp", "via": "arena"})
@@ -427,24 +1016,43 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.append({"kind": "pvp", "via": "honor"})
     cm = CRAFTED_RE.search(text)
     if cm:
-        prof = (cm.group(1) or cm.group(2) or "").strip()
+        prof = canonical_profession((cm.group(1) or cm.group(2) or "").strip())
         if prof:
             out.append({"kind": "crafted", "profession": prof})
     rm = REP_RE.search(text)
     if rm:
-        out.append(
-            {
-                "kind": "rep",
-                "faction": rm.group(2).strip(),
-                "standing": rm.group(1).strip().capitalize(),
-            }
-        )
+        out.append(rep_source(rm.group(2).strip(), rm.group(1).strip().capitalize()))
+    else:
+        vm = VENDOR_REP_RE.search(text)
+        if vm:
+            out.append(
+                rep_source(vm.group(1).strip(), vm.group(2).strip().capitalize())
+            )
+        else:
+            sm = VENDOR_STANDING_FIRST_RE.search(text)
+            if sm:
+                out.append(
+                    rep_source(sm.group(2).strip(), sm.group(1).strip().capitalize())
+                )
+            else:
+                # A standing in a bare parenthetical, with no "Vendor:" or
+                # "Requires" to anchor the parses above: "Quest: Champion's
+                # Covenant (The Scale of the Sands Exalted)". Without this the
+                # row parses to nothing at all, which is how ticket 59's
+                # fabricated zone was the only thing it produced.
+                pm = STANDING_PAREN_RE.search(text)
+                if pm:
+                    out.append(
+                        rep_source(
+                            pm.group(1).strip(), pm.group(2).strip().capitalize()
+                        )
+                    )
     return out
 
 
 def is_list_only_source(source: dict) -> bool:
-    """Badge/PvP/crafted/rep without a raid zone — list-driven membership."""
-    return source.get("kind") in ("badge", "pvp", "crafted", "rep")
+    """Badge/PvP/crafted/rep/world without a raid zone — list-driven membership."""
+    return source.get("kind") in ("badge", "pvp", "crafted", "rep", "world")
 
 
 def heroic_dungeons_for_max_phase(max_phase: int) -> set[str]:
@@ -460,11 +1068,48 @@ def zones_for_max_phase(max_phase: int, phase_raids: dict) -> set[str]:
     return zones
 
 
-def wowhead_lists_for_phase(max_phase: int) -> list[tuple[str, dict]]:
+def rep_factions_for_max_phase(max_phase: int, phase_raids: dict) -> set[int]:
+    """Faction ids whose vendors gate raid-tier gear at or before `max_phase`.
+
+    Same union carryover as `zones_for_max_phase`: Black Temple's vendor is
+    still worth buying from at phase 5.
+    """
+    factions: set[int] = set()
+    for row in phase_raids.get("repFactions") or []:
+        if isinstance(row, dict) and row.get("phase", 99) <= max_phase:
+            factions.add(int(row["factionId"]))
+    return factions
+
+
+def source_rep_factions(source: dict) -> set[int]:
+    """Faction ids a source attributes an item to, keyed by id not by name.
+
+    Two shapes qualify. A `rep` source is the item itself being vendor-sold.
+    A `crafted` source carrying `recipeFactionId` is the two-hop: the *recipe*
+    is vendor-sold, which gates the product just as surely -- the same argument
+    ticket 13 made for `recipeZone` putting a craft on a raid's shopping list.
+
+    Empty when the id is missing: an unresolved row still ships (the guide may
+    be the only witness) but must not grant phase membership on the strength of
+    a display string.
+    """
+    kind = source.get("kind")
+    if kind == "rep":
+        faction_id = source.get("factionId")
+    elif kind == "crafted":
+        faction_id = source.get("recipeFactionId")
+    else:
+        return set()
+    return {int(faction_id)} if faction_id is not None else set()
+
+
+def wowhead_lists_for_phase(
+    max_phase: int, profile: SpecProfile
+) -> list[tuple[str, dict]]:
     stages = WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, [])
     out: list[tuple[str, dict]] = []
     for stage in stages:
-        path = WOWHEAD_DIR / f"{stage}.json"
+        path = profile.wowhead_dir / f"{stage}.json"
         if path.is_file():
             data = load_json(path)
             assert isinstance(data, dict)
@@ -545,9 +1190,11 @@ def assemble(
     max_phase: int,
     hold_out_wowhead: bool = False,
     apply_junk_filter: bool = False,
+    spec: str = "ret",
 ) -> tuple[dict, dict]:
+    profile = SPEC_PROFILES[spec]
     if not DB.is_file():
-        print(f"missing {DB} — run pnpm sync:wowsims", file=sys.stderr)
+        print(f"missing {DB} — run pnpm sync:wowsims:restore", file=sys.stderr)
         sys.exit(2)
 
     db = load_json(DB)
@@ -555,8 +1202,16 @@ def assemble(
     phase_raids = load_json(PHASE_RAIDS)
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
-    two_hop = load_json(TWO_HOP) if TWO_HOP.is_file() else {}
-    sunmote = load_json(SUNMOTE_UPGRADES) if SUNMOTE_UPGRADES.is_file() else {}
+    two_hop = (
+        load_json(profile.two_hop)
+        if profile.two_hop and profile.two_hop.is_file()
+        else {}
+    )
+    sunmote = (
+        load_json(profile.sunmote_upgrades)
+        if profile.sunmote_upgrades and profile.sunmote_upgrades.is_file()
+        else {}
+    )
     raid_recipes = load_json(RAID_RECIPES) if RAID_RECIPES.is_file() else {}
 
     # A recipe can drop in several zones (the SSC/TK belt patterns drop in
@@ -569,9 +1224,25 @@ def assemble(
         if isinstance(z, dict) and "name" in z
     }
     raid_recipe_by_product: dict[int, dict] = {}
+    # A vendor-sold recipe has no zone, so it is kept separately: `recipeZone`
+    # would be a false claim and there is no raid shopping list to put it on.
+    # The faction is what the player actually needs (ticket 65 step 4).
+    rep_recipe_by_product: dict[int, dict] = {}
     for entry in (raid_recipes.get("entries") or []):
         if not isinstance(entry, dict):
             continue
+        reps = [r for r in (entry.get("reps") or []) if isinstance(r, dict)]
+        if reps:
+            # Lowest standing wins: the cheapest way to obtain the recipe is
+            # the honest cost to state. Ties break on faction id for stability.
+            best_rep = min(
+                reps,
+                key=lambda r: (
+                    REP_STANDING_ORDER.get(str(r.get("standing")), 99),
+                    int(r.get("factionId") or 0),
+                ),
+            )
+            rep_recipe_by_product[int(entry["productId"])] = best_rep
         zones = [z for z in (entry.get("zones") or []) if isinstance(z, dict)]
         if not zones:
             continue
@@ -583,7 +1254,7 @@ def assemble(
             "zone": str(best["zone"]),
             "boss": best.get("boss"),
         }
-    weights_raw = load_json(EP_WEIGHTS)
+    weights_raw = load_json(profile.ep_weights)
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
     assert isinstance(w, dict)
@@ -601,10 +1272,18 @@ def assemble(
         if isinstance(n, dict) and "id" in n and "name" in n
     }
     db_by_id = {int(it["id"]): it for it in db["items"]}
-    bis_ids = wowsims_curated_item_ids()
+    curated_sets_by_item = wowsims_curated_sets_by_item(profile)
+    # Membership stays the union: an item upstream equips at any stage is still
+    # a real candidate to rank (that is ticket 12's widening). Only the *claim*
+    # narrows to the current stage.
+    bis_ids = set(curated_sets_by_item)
+    bis_sets_at_phase = bis_set_labels_for_max_phase(
+        curated_sets_by_item, max_phase
+    )
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
+    phase_rep_factions = rep_factions_for_max_phase(max_phase, phase_raids)
 
     # itemId -> list of (source, origin)
     source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
@@ -621,6 +1300,22 @@ def assemble(
             source = {**source, "recipeZone": recipe["zone"]}
             if recipe.get("boss"):
                 source["recipeBoss"] = recipe["boss"]
+        rep_recipe = rep_recipe_by_product.get(item_id)
+        if rep_recipe and source.get("kind") == "crafted":
+            source = {
+                **source,
+                "recipeFaction": rep_recipe.get("faction"),
+                "recipeStanding": rep_recipe.get("standing"),
+            }
+            if rep_recipe.get("factionId") is not None:
+                source["recipeFactionId"] = int(rep_recipe["factionId"])
+        # Same reason as the recipe block above: every input reaches this
+        # funnel, so folding unit names onto their encounter here means the
+        # dedupe below collapses the duplicate row whichever input produced it.
+        if isinstance(source.get("boss"), str):
+            folded = canonical_boss(source["boss"])
+            if folded != source["boss"]:
+                source = {**source, "boss": folded}
         # AtlasLoot's world-boss tables are per-NPC and complete, so they own the
         # boss attribution for that zone. Wowhead's free text names the wrong
         # boss on some rows (30730 Terrorweave Tunic reads as Kazzak; it drops
@@ -642,7 +1337,7 @@ def assemble(
 
     # db + atlasloot for all D7-eligible items
     for it in db["items"]:
-        if not ret_eligible_d7(it):
+        if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
         db_src = map_db_source(
@@ -651,6 +1346,13 @@ def assemble(
         add_source(iid, db_src, "db")
         for raw in (atlasloot.get(str(iid)) or []):
             if isinstance(raw, dict):
+                # AtlasLoot splits its CamelCase key for `faction`; re-derive
+                # from the id so one faction reads the same however it arrived
+                # ("Ogri'la", never AtlasLoot's "Ogrila").
+                if raw.get("kind") == "rep" and raw.get("factionId") is not None:
+                    display = FACTION_DISPLAY_BY_ID.get(int(raw["factionId"]))
+                    if display:
+                        raw = {**raw, "faction": display}
                 add_source(iid, raw, "atlasloot")
 
     # two-hop tokens
@@ -689,9 +1391,34 @@ def assemble(
     # the universe is built only from db / atlasloot / two-hop / zone match.
     # Grading against a list that also populated the universe is circular for
     # exactly the items it added; see ticket 18.
+    #
+    # Ticket 57. The guides are an *editorial* input -- which items matter for
+    # this spec, an opinion no database carries. Their Source cell is the author
+    # restating drop facts db.json / AtlasLoot / the token maps already hold
+    # machine-parsed, and every defect in tickets 48-52 was in that restatement
+    # rather than in the underlying fact. So where a machine input already
+    # places an item, the prose does not get to speak about where it drops.
+    #
+    # The test is "does a machine source actually supply a locus for this id",
+    # never "is this id known to a machine input": AtlasLoot carries heroic
+    # dungeon drops with an *empty* zone list, and the looser test would strike
+    # those items' only zone claim.
+    #
+    # Frozen before the loop rather than read from source_acc inside it. Only
+    # db / atlasloot / two-hop / sunmote have written by now, which is exactly
+    # the machine-input set; computing it per row would also count wowhead rows
+    # added by an earlier list, so an item appearing on two lists would suppress
+    # its own second row. 30017 does exactly that -- a zone-only quest row on
+    # p1-p2 and a zone+boss drop row on p3 -- and prose is all it has.
+    machine_locus_ids = {
+        iid
+        for iid, pairs in source_acc.items()
+        if any(carries_locus(s) for s, _ in pairs)
+    }
+
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
-    for stage, doc in wowhead_lists_for_phase(max_phase):
+    for stage, doc in wowhead_lists_for_phase(max_phase, profile):
         for row in doc.get("entries") or []:
             if not isinstance(row, dict):
                 continue
@@ -699,14 +1426,57 @@ def assemble(
             wowhead_list_ids.add(iid)
             if hold_out_wowhead:
                 continue
-            for src in parse_wowhead_source(row.get("wowheadSourceText")):
+            machine_locus = iid in machine_locus_ids
+            parsed = parse_wowhead_source(source_text_for_parsing(row))
+            for src in parsed:
+                # Non-locus kinds (crafted/pvp/badge/rep/world) always survive:
+                # vendor/atlasloot/ holds only the addon's instance loot tables,
+                # so the guide is the only witness for many vendor and quest
+                # items here.
+                if machine_locus and carries_locus(src):
+                    continue
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
-            parsed = parse_wowhead_source(row.get("wowheadSourceText"))
             if parsed and all(is_list_only_source(s) for s in parsed):
                 wowhead_list_only.add(iid)
 
-    eligible_count = sum(1 for it in db["items"] if ret_eligible_d7(it))
+    # The curated gear sets are wowsims equipping an item on this spec, which is
+    # a membership claim in its own right and the only one some items have:
+    # Everbloom Idol and Bloodlust Brooch carry no db source, no AtlasLoot row,
+    # and Wowhead prose our parser cannot read. Previously `bis_ids` was used
+    # only to *label* rows that had already got in by another route, so an item
+    # wowsims explicitly equips was dropped and the label never applied.
+    #
+    # `unknown` rather than a guessed badge cost or faction: the origin really
+    # is unrecorded, and carrying no zone is what keeps these out of the raid
+    # and boss filters, which is the behaviour these items need.
+    curated_unsourced: set[int] = set()
+    # A curated item can also have a *real* source that is still list-only
+    # shaped -- e.g. 28430 Lionheart Executioner's db.json source is a genuine
+    # `{kind: "crafted"}` record, not an invented one, but `crafted` carries no
+    # zone and only grants membership today via the Wowhead-list path
+    # (`wowhead_list_only`). Its own Wowhead row reads "Crafting: Blacksmithing
+    # (...)", a prefix `CRAFTED_RE` does not match, so that path never fires
+    # either, and the item is dropped despite wowsims equipping it and db.json
+    # naming a real profession (carry-forward 41). Distinct from ticket 17: a
+    # `raid`/`heroic` source names a real zone outside phase scope, which is a
+    # scoping question this ticket does not touch; `crafted`/`badge`/`rep`/
+    # `pvp`/`world` name no zone at all, so there is no scope to respect.
+    curated_list_only: set[int] = set()
+    for iid in sorted(bis_ids):
+        it = db_by_id.get(iid)
+        if it is None or not eligible_d7(it, profile):
+            continue
+        pairs = source_acc.get(iid)
+        if not pairs:
+            add_source(iid, {"kind": "unknown"}, "curated")
+            curated_unsourced.add(iid)
+        elif all(is_list_only_source(s) for s, _ in pairs):
+            curated_list_only.add(iid)
+
+    eligible_count = sum(
+        1 for it in db["items"] if eligible_d7(it, profile)
+    )
 
     entries: list[dict] = []
     membership_stats = Counter()
@@ -714,7 +1484,7 @@ def assemble(
     no_zone_excluded = 0
 
     for it in db["items"]:
-        if not ret_eligible_d7(it):
+        if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
         pairs = source_acc.get(iid) or []
@@ -722,13 +1492,22 @@ def assemble(
             no_zone_excluded += 1
             continue
 
-        sources = [s for s, _ in pairs]
+        # `origin` rides on the row rather than staying an aggregate report
+        # count. Every defect in carry-forward 48-53 entered through the
+        # `wowhead` path -- an agent transcribing a rendered page -- and the
+        # only checks that ever caught one worked by disagreeing with a second
+        # input. Which claims rest on a single transcription is therefore a
+        # question worth being able to ask of the shipped data, not one to
+        # reconstruct by re-joining the inputs. See carry-forward 54.
+        sources = [{**s, "origin": o} for s, o in pairs]
         origins_for_item = {o for _, o in pairs}
         zones_hit = set()
         heroics_hit = set()
+        rep_factions_hit = set()
         for s in sources:
             zones_hit |= source_zones(s)
             heroics_hit |= source_heroic_dungeons(s)
+            rep_factions_hit |= source_rep_factions(s)
 
         # An admitted heroic dungeon still only contributes the items whose own
         # phase reaches this tier -- MT drops phase-5 gear, but the same guard
@@ -737,17 +1516,47 @@ def assemble(
             it.get("phase") or 99
         ) <= max_phase
         in_phase = bool(zones_hit & phase_zones)
+        # A rep source names no zone, so `in_phase` can never see it. Without
+        # this route a rep-only item reaches no universe at all -- the nine
+        # Ashtongue talismans and the Band of Eternity ladder were absent
+        # entirely (ticket 65 step 2.5). Phase-guarded like `in_heroic`: the
+        # faction gates the *tier*, and an item whose own phase runs ahead of
+        # it (Sunwell gear behind a Black Temple vendor) is not a phase-3 item.
+        in_rep_phase = bool(rep_factions_hit & phase_rep_factions) and int(
+            it.get("phase") or 99
+        ) <= max_phase
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
-        if not in_phase and not in_heroic and not list_only:
+        # No phase guard: these are persistent non-raid items whose own phase is
+        # not the interesting fact about them. Everbloom Idol is phase 1 and
+        # still what a cat wants at phase 2.
+        # A curated item whose db source names a real zone (raid/heroic) keeps
+        # whatever scope rules that source implies -- several point at
+        # five-man dungeons outside PHASE_HEROIC_DUNGEONS, and admitting those
+        # is ticket 17's question, not this one. `curated_unsourced` (no
+        # source at all) and `curated_list_only` (a real but zone-less source)
+        # are the two shapes where the curated claim itself is what grants
+        # membership.
+        curated = iid in curated_unsourced or iid in curated_list_only
+        if (
+            not in_phase
+            and not in_heroic
+            and not in_rep_phase
+            and not list_only
+            and not curated
+        ):
             continue
 
         if in_phase:
             membership_stats["zoneMatch"] += 1
         elif in_heroic:
             membership_stats["heroicMatch"] += 1
+        elif in_rep_phase:
+            membership_stats["repFactionMatch"] += 1
         elif list_only:
             list_only_count += 1
             membership_stats["listOnly"] += 1
+        elif curated:
+            membership_stats["curated"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
@@ -765,7 +1574,13 @@ def assemble(
             ),
         }
         if iid in bis_ids:
-            entry["bisTags"] = ["BiS"]
+            # `curatedSets` is the full provenance and stays unscoped: an item
+            # dropped from the current set is still worth showing as having
+            # been curated, it just no longer carries the BiS claim.
+            entry["curatedSets"] = curated_sets_by_item[iid]
+            if iid in bis_sets_at_phase:
+                entry["bisTags"] = ["BiS"]
+                entry["bisSets"] = bis_sets_at_phase[iid]
         entries.append(entry)
 
         # Sorted: set iteration order over strings varies per process, which
@@ -831,13 +1646,13 @@ def assemble(
         entries = junk_survivors
     junk["applied"] = apply_junk_filter
 
-    tier_present = {e["itemId"] for e in entries} & RET_TIER_PIECE_IDS
+    tier_present = {e["itemId"] for e in entries} & profile.tier_piece_ids
     tier_expected: set[int] = set()
     for entry in (two_hop.get("entries") or []) if isinstance(two_hop, dict) else []:
         if not isinstance(entry, dict):
             continue
         piece_id = int(entry["pieceId"])
-        if piece_id not in RET_TIER_PIECE_IDS:
+        if piece_id not in profile.tier_piece_ids:
             continue
         if str(entry.get("zone")) in phase_zones:
             tier_expected.add(piece_id)
@@ -879,7 +1694,7 @@ def assemble(
                 "name": (db_by_id.get(iid) or {}).get("name"),
                 "slot": ITEM_TYPE_SLOT.get((db_by_id.get(iid) or {}).get("type")),
                 "d7Eligible": bool(
-                    db_by_id.get(iid) and ret_eligible_d7(db_by_id[iid])
+                    db_by_id.get(iid) and eligible_d7(db_by_id[iid], profile)
                 ),
             }
             for iid in sorted(missed)
@@ -890,6 +1705,7 @@ def assemble(
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "phaseZones": sorted(phase_zones),
+        "phaseRepFactions": sorted(phase_rep_factions),
         "d7EligibleTotal": eligible_count,
         "excludedNoSource": no_zone_excluded,
         "universeTotal": len(entries),
@@ -907,7 +1723,7 @@ def assemble(
     }
 
     payload = {
-        "spec": "ret",
+        "spec": profile.spec,
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
@@ -921,9 +1737,15 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-phase", type=int, required=True, choices=[2, 3, 4, 5])
     ap.add_argument(
+        "--spec",
+        default="ret",
+        choices=sorted(SPEC_PROFILES),
+        help="Which spec profile to build for (default ret)",
+    )
+    ap.add_argument(
         "--out",
         type=Path,
-        help="Output path (default data/universes/ret-p{N}.json)",
+        help="Output path (default data/universes/{spec}-p{N}.json)",
     )
     ap.add_argument(
         "--report",
@@ -953,17 +1775,23 @@ def main() -> int:
     if args.hold_out_wowhead and not (args.out and args.report):
         ap.error("--hold-out-wowhead requires explicit --out and --report paths")
 
-    out_path = args.out or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.json"
+    out_path = (
+        args.out or DEFAULT_OUT_DIR / f"{args.spec}-p{args.max_phase}.json"
+    )
     payload, report = assemble(
         args.max_phase,
         hold_out_wowhead=args.hold_out_wowhead,
         apply_junk_filter=args.apply_junk_filter,
+        spec=args.spec,
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    report_path = args.report or DEFAULT_OUT_DIR / f"ret-p{args.max_phase}.report.json"
+    report_path = (
+        args.report
+        or DEFAULT_OUT_DIR / f"{args.spec}-p{args.max_phase}.report.json"
+    )
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     def display(p: Path) -> Path:

@@ -5,28 +5,46 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { CUTOFF } from "./cutoff.js";
+import {
+  fightProvenanceLines,
+  hitCapBanner,
+  renderDisclosure,
+} from "./disclosure.js";
 import {
   slamaltmanOfflineRecordings,
   SLAMALTMAN_REF,
   type SlamaltmanRawFixture,
 } from "./fixtures/slamaltman-offline.js";
+import {
+  reportEventsOfflineRecordings,
+  type ReportEventsRawFixture,
+} from "./fixtures/report-events-offline.js";
+import {
+  feralOfflineRecordings,
+  NEXESS_REF,
+  SHREDZEPELIN_REF,
+  type FeralRawFixture,
+} from "./fixtures/feral-offline.js";
 import { renderRankHtml } from "./rank-report.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
-  filterByZone,
+  bossesInPool,
   poolFromUniverse,
+  validateViewFilter,
+  viewFilterValue,
   zonesInPool,
   type PoolEntry,
   type UniverseEntry,
 } from "./pool.js";
+import { applyView, type ViewOptions } from "./view.js";
 import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
 import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
-import type { ContentPhase, Region } from "./types.js";
+import type { CharacterRef, ContentPhase, Region, SpecId } from "./types.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -53,7 +71,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--report-events] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -64,24 +82,62 @@ function parseArgs(argv: string[]): {
   realm: string;
   character: string;
   offline: boolean;
+  spec: SpecId;
   maxPhase: ContentPhase;
+  assumptions: boolean;
+  showBelowCutoff: boolean;
+  reportEvents: boolean;
   raid?: string;
   report?: string;
+  view: ViewOptions;
 } {
   const out: {
     region?: Region;
     realm?: string;
     character?: string;
     offline: boolean;
+    spec: SpecId;
     maxPhase: ContentPhase;
+    assumptions: boolean;
+    showBelowCutoff: boolean;
+    reportEvents: boolean;
     raid?: string;
     report?: string;
-  } = { offline: false, maxPhase: defaultMaxPhaseFromLock() };
+    view: ViewOptions;
+  } = {
+    offline: false,
+    spec: "ret",
+    assumptions: false,
+    showBelowCutoff: false,
+    reportEvents: false,
+    maxPhase: defaultMaxPhaseFromLock(),
+    view: {},
+  };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--offline") {
       out.offline = true;
+      continue;
+    }
+    if (arg === "--assumptions") {
+      out.assumptions = true;
+      continue;
+    }
+    if (arg === "--pin-bis") {
+      out.view.pinBis = true;
+      continue;
+    }
+    if (arg === "--hide-owned") {
+      out.view.hideOwned = true;
+      continue;
+    }
+    if (arg === "--show-below-cutoff") {
+      out.showBelowCutoff = true;
+      continue;
+    }
+    if (arg === "--report-events") {
+      out.reportEvents = true;
       continue;
     }
     const next = argv[i + 1];
@@ -100,6 +156,15 @@ function parseArgs(argv: string[]): {
       i++;
       continue;
     }
+    if (arg === "--spec" && next) {
+      if (next !== "ret" && next !== "feral") {
+        console.error(`unknown spec: ${next} (known: ret, feral)`);
+        process.exit(2);
+      }
+      out.spec = next;
+      i++;
+      continue;
+    }
     if (arg === "--max-phase" && next) {
       out.maxPhase = Number(next) as ContentPhase;
       i++;
@@ -107,6 +172,18 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--raid" && next) {
       out.raid = next;
+      out.view.raid = next;
+      i++;
+      continue;
+    }
+    if (arg === "--boss" && next) {
+      out.view.boss = next;
+      i++;
+      continue;
+    }
+    if (arg === "--group-by" && next) {
+      if (next !== "rank" && next !== "slot" && next !== "raid") usage();
+      out.view.groupBy = next;
       i++;
       continue;
     }
@@ -128,7 +205,12 @@ function parseArgs(argv: string[]): {
     realm: out.realm,
     character: out.character,
     offline: out.offline,
+    spec: out.spec,
     maxPhase: out.maxPhase,
+    assumptions: out.assumptions,
+    showBelowCutoff: out.showBelowCutoff,
+    reportEvents: out.reportEvents,
+    view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
   };
@@ -144,13 +226,13 @@ function defaultReportPath(args: {
   return join(root, ".scratch", "rank-reports", name);
 }
 
-function loadUniversePool(maxPhase: ContentPhase): PoolEntry[] {
-  const rel = `data/universes/ret-p${maxPhase}.json`;
+function loadUniversePool(maxPhase: ContentPhase, spec: SpecId): PoolEntry[] {
+  const rel = `data/universes/${spec}-p${maxPhase}.json`;
   const path = join(root, rel);
   if (!existsSync(path)) {
     console.error(`missing universe file ${rel}`);
     console.error(
-      "generate: python scripts/assemble_universe.py --max-phase N"
+      `generate: python scripts/assemble_universe.py --max-phase ${maxPhase} --spec ${spec}`
     );
     process.exit(2);
     throw new Error("unreachable");
@@ -181,40 +263,100 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       realm: args.realm,
       name: args.character,
     },
-    spec: "ret",
+    spec: args.spec,
     maxPhase: args.maxPhase,
   };
 
+  // Feral's EP preset is named p1 because upstream ships no p2 one for it;
+  // data/presets/feral/p1.ep-weights.json records why.
   const skeleton = loadJson<RaidSimRequest>(
-    "data/presets/ret/p2.raid-sim-skeleton.json"
+    `data/presets/${args.spec}/p2.raid-sim-skeleton.json`
   );
   const epWeights = loadJson<{ weights: Record<string, number> }>(
-    "data/presets/ret/p2.ep-weights.json"
+    args.spec === "feral"
+      ? "data/presets/feral/p1.ep-weights.json"
+      : "data/presets/ret/p2.ep-weights.json"
   ).weights;
-  const pool = loadUniversePool(args.maxPhase);
+  const pool = loadUniversePool(args.maxPhase, args.spec);
 
-  if (args.raid) {
-    const known = zonesInPool(pool);
-    if (!known.includes(args.raid)) {
-      console.error(`unknown raid zone: ${args.raid}`);
-      console.error("known zones:");
-      for (const zone of known) {
-        console.error(`  ${zone}`);
-      }
-      return 2;
+  const raidFilter = viewFilterValue(args.raid);
+
+  const raidCheck = validateViewFilter(args.raid, zonesInPool(pool));
+  if (!raidCheck.ok) {
+    console.error(`unknown raid zone: ${args.raid}`);
+    console.error("known zones:");
+    for (const zone of raidCheck.known) {
+      console.error(`  ${zone}`);
     }
+    return 2;
+  }
+
+  // Without this a misspelled boss filters every row out and the run exits 0
+  // having printed a baseline, a hit banner and nothing else — indistinguishable
+  // from "this boss drops no upgrades for you" (carry-forward 75). Scoped to
+  // `--raid` when given so the suggestion list is the bosses of the raid the
+  // player named, not all of them.
+  const bossCheck = validateViewFilter(
+    args.view.boss,
+    bossesInPool(pool, raidFilter)
+  );
+  if (!bossCheck.ok) {
+    const scope = raidFilter ? ` in ${raidFilter}` : "";
+    console.error(`unknown boss: ${args.view.boss}`);
+    console.error(`known bosses${scope}:`);
+    for (const boss of bossCheck.known) {
+      console.error(`  ${boss}`);
+    }
+    return 2;
   }
 
   const isSlamaltman =
+    args.spec === "ret" &&
     args.region === SLAMALTMAN_REF.region &&
     args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
     args.character.toLowerCase() === SLAMALTMAN_REF.name;
 
+  // Two recordings of the same character, differing in the route that reached
+  // his gear. Slamaltman has ten SSC kills and zero encounterRankings, so the
+  // fallback capture is a real resolve rather than a simulated one — see
+  // docs/verification-log.md, 2026-08-05.
+  // Feral captures, keyed by character. Each is one kill from one raid night;
+  // `confidence` is measured from form uptime by feralOfflineRecordings rather
+  // than assumed, because cat and bear are the same talents.
+  const FERAL_FIXTURES: ReadonlyArray<readonly [CharacterRef, string]> = [
+    // Void Reaver, not the Morogrim kill: on Morogrim he was backup tank and
+    // wore tank gear in cat form, so form uptime read 99.1% cat while nine of
+    // seventeen slots were a tanking set (ticket 06). Void Reaver is 98.8% cat
+    // with 100% Blessing of Salvation — same form, never on a tank assignment.
+    [SHREDZEPELIN_REF, "test/fixtures/shredzepelin-cat.raw.json"],
+    [NEXESS_REF, "test/fixtures/nexess.raw.json"],
+  ];
+  const feralMatch =
+    args.spec === "feral"
+      ? FERAL_FIXTURES.find(
+          ([ref]) =>
+            args.region === ref.region &&
+            args.realm.toLowerCase() === ref.realm &&
+            args.character.toLowerCase() === ref.name
+        )
+      : undefined;
+
   const gearData = isSlamaltman
-    ? slamaltmanOfflineRecordings(
-        loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
-      )
-    : { fights: new Map(), gear: new Map() };
+    ? args.reportEvents
+      ? reportEventsOfflineRecordings(
+          loadJson<ReportEventsRawFixture>(
+            "test/fixtures/slamaltman-report-events.raw.json"
+          )
+        )
+      : slamaltmanOfflineRecordings(
+          loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
+        )
+    : feralMatch
+      ? feralOfflineRecordings(
+          loadJson<FeralRawFixture>(feralMatch[1]),
+          feralMatch[0]
+        )
+      : { fights: new Map(), gear: new Map() };
 
   const binary = resolveWowsimcli();
   if (!existsSync(binary)) {
@@ -251,38 +393,109 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         }
       }
     );
-    const items = args.raid
-      ? filterByZone(ranking.items, args.raid)
-      : ranking.items;
+    // Through applyView (§4.1) rather than a second filter implementation —
+    // the CLI exercising every ViewOptions field is the stated reason the view
+    // layer lands in Phase 2 rather than in the web shell.
+    // Every run names its source fight (ticket 06) — the route note below is
+    // the older, narrower case of the same idea.
+    for (const line of fightProvenanceLines(ranking.fight)) {
+      console.log(line);
+    }
+    if (ranking.fight.route === "report-events") {
+      // §5.2: the fallback walks a report's fights rather than a ranked parse,
+      // so it can land on a fight the character performed unusually in. Said
+      // out loud rather than left to look identical to a ranked resolve.
+      console.log(
+        `note: no ranked kill for this character; gear read through the report-events route (${ranking.fight.reportCode} fight ${ranking.fight.fightId})`
+      );
+    }
+    const view = applyView(ranking, args.view);
+    // The default run is the shortlist (§10, ticket 04). `view.rows` still
+    // holds every row and the report below still writes them, so this hides
+    // rather than deletes — `--show-below-cutoff` is the expand.
+    const items = args.showBelowCutoff ? view.rows : view.shortlist;
 
     console.log(
       `baseline ${ranking.baseline.dps.toFixed(2)} ± ${ranking.baseline.stdev.toFixed(2)} (metaAdjusted=${ranking.baseline.metaAdjusted})`
     );
-    console.log("assumptions:");
-    for (const a of ranking.assumptions.standing) {
-      console.log(`  - [${a.id}] ${a.detail}`);
+    console.log(hitCapBanner(ranking.caps.hit));
+    for (const line of renderDisclosure({
+      standing: ranking.assumptions.standing,
+      substitutions: ranking.substitutions,
+      expandStanding: args.assumptions,
+    })) {
+      console.log(line);
     }
-    if (ranking.substitutions.length > 0) {
-      console.log("substitutions:");
-      for (const s of ranking.substitutions) {
-        console.log(`  - ${s.field}: ${s.detail}`);
-      }
+    if (args.view.pinBis === true && !view.pinBisAvailable) {
+      // Disabled, not silently inert (§4.1): ret's curated sets stop at P2.
+      console.log(
+        `note: --pin-bis has no curated BiS data at maxPhase=${args.maxPhase}; showing the unpinned order`
+      );
     }
-    for (const item of items) {
-      const mark = item.belowCutoff ? "  (below cutoff)" : "";
+
+    const printRow = (item: (typeof items)[number], indent: string) => {
+      const mark = item.belowCutoffInView ? "  (below cutoff)" : "";
+      const tie = item.tieGroupId ? "  (tied)" : "";
       const rankLabel = item.rank == null ? "-" : String(item.rank);
       console.log(
-        `#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}`
+        `${indent}#${rankLabel} ${item.name} (${item.slot}) Δ${item.deltaDps.toFixed(2)} (${item.deltaPct.toFixed(2)}%)${mark}${tie}`
       );
-      if (item.setBonusNote) {
-        console.log(`    set: ${item.setBonusNote}`);
+      if (item.hitDriven) {
+        console.log(
+          `${indent}    hit-driven: most of this gain is hit rating, and you are under the cap`
+        );
       }
+      if (item.hitRegression) {
+        console.log(
+          `${indent}    costs hit: -${item.hitRegression.lost} hit rating, ` +
+            `widening the gap above to ${item.hitRegression.gapAfter}`
+        );
+      }
+      if (item.setBonusNote) {
+        console.log(`${indent}    set: ${item.setBonusNote}`);
+      }
+    };
+
+    if (view.groups) {
+      // Grouped output takes the same shortlist default as the flat listing,
+      // read off each row's own `belowCutoffInView` — `applyView` owns that
+      // answer, and reconstructing it here from an id set would be a second
+      // implementation of the cutoff to keep in step.
+      for (const group of view.groups) {
+        const rows = args.showBelowCutoff
+          ? group.rows
+          : group.rows.filter((r) => !r.belowCutoffInView);
+        if (rows.length === 0) continue;
+        console.log(`${group.key} (${rows.length})`);
+        for (const item of rows) printRow(item, "  ");
+      }
+    } else {
+      for (const item of items) printRow(item, "");
+    }
+
+    if (!args.showBelowCutoff && view.belowCutoffCount > 0) {
+      // Hidden, never deleted (§10) — and the user is told where they went,
+      // rather than being left to wonder why the list is short.
+      console.log(
+        `${view.belowCutoffCount} row(s) below cutoff hidden; --show-below-cutoff to list them`
+      );
     }
 
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
-      const reportRanking = args.raid ? { ...ranking, items } : ranking;
+      // The report carries every row the *filters* left, so `meta` has to name
+      // every filter that shaped them — reporting only `raid` while `--boss`
+      // or `--hide-owned` had also cut rows is a quietly wrong artifact, and
+      // these files get read long after the command is forgotten.
+      //
+      // `view.rows` rather than the terminal's `items`: `--show-below-cutoff`
+      // is a terminal display choice, and the report already partitions
+      // below-cutoff itself (`partitionShortlist`, the noise note). Handing it
+      // the shortlist would delete from the artifact rows the renderer expects
+      // to hold — the opposite of §10's "hidden, never deleted".
+      const viewed = Object.keys(args.view).length > 0;
+      const reportRanking = viewed ? { ...ranking, items: view.rows } : ranking;
       mkdirSync(dirname(reportPath), { recursive: true });
       const meta = {
         character: args.character,
@@ -293,6 +506,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         poolSize: pool.length,
         generatedAt: new Date().toISOString(),
         ...(args.raid !== undefined ? { raid: args.raid } : {}),
+        ...(viewed ? { view: args.view } : {}),
       };
       writeFileSync(reportPath, renderRankHtml(reportRanking, meta), "utf8");
       const jsonPath = reportPath.replace(/\.html$/i, ".json");
@@ -314,5 +528,13 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   return 0;
 }
 
-const code = await main();
-process.exit(code);
+// Only when run as the program. Without this the module cannot be imported —
+// importing it would run a full ranking and then exit the process — which is
+// why the CLI's own output rules had no test.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const code = await main();
+  process.exit(code);
+}

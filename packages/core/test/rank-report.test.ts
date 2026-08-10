@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import { CUTOFF } from "../src/cutoff.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import {
   formatItemSource,
@@ -8,6 +9,7 @@ import {
   renderRankHtml,
   type RankReportMeta,
 } from "../src/rank-report.js";
+import { realPoolEntry } from "./real-source.js";
 
 type TestItem = RankedItem & {
   magnitudeWarning?: boolean;
@@ -40,6 +42,34 @@ function item(
   };
 }
 
+/**
+ * A real `Ranking`, not a cast — these tests render one, so a cast fixture
+ * would stop catching shape changes the renderer has to keep up with. Rows
+ * carry their own `belowCutoff`; the renderer never re-applies `cutoff`.
+ */
+function ranking(items: RankedItem[]): Ranking {
+  return {
+    contentHash: "test",
+    cutoff: CUTOFF,
+    fight: { reportCode: "test", fightId: 1, route: "ranked" },
+    baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
+    assumptions: {
+      maxPhase: 2,
+      seeds: [42],
+      iterations: 3000,
+      race: "RaceBloodElf",
+      presetId: "ret/p2.raid-sim-skeleton",
+      standing: [],
+    },
+    substitutions: [],
+    caps: {
+      hit: { rating: 100, capRating: 142, gap: 42, capUncertainty: 0 },
+      expertise: { rating: 0, capRating: null, gap: null },
+    },
+    items,
+  };
+}
+
 describe("rank-report", () => {
   it("groups and sorts by delta within each slot", () => {
     const bySlot = groupBySlot([
@@ -57,6 +87,27 @@ describe("rank-report", () => {
       formatItemSource({ kind: "raid", zone: "SSC", boss: "Lady Vashj" })
     ).toBe("SSC · Lady Vashj");
     expect(formatItemSource({ kind: "badge", cost: 50 })).toBe("50 badges");
+    expect(
+      formatItemSource({ kind: "crafted", profession: "Blacksmithing" })
+    ).toBe("Crafted · Blacksmithing");
+    // A recipe behind a reputation is a grind the player has to know about.
+    expect(
+      formatItemSource({
+        kind: "crafted",
+        profession: "Blacksmithing",
+        recipeFaction: "Ashtongue Deathsworn",
+        recipeStanding: "Friendly",
+        recipeFactionId: 1012,
+      })
+    ).toBe("Crafted · Blacksmithing · Ashtongue Deathsworn Friendly");
+    // recipeZone is a filter concern and stays out of the label, as before.
+    expect(
+      formatItemSource({
+        kind: "crafted",
+        profession: "Tailoring",
+        recipeZone: "Black Temple",
+      })
+    ).toBe("Crafted · Tailoring");
   });
 
   it("partitionShortlist splits raid from pvp above cutoff", () => {
@@ -125,29 +176,18 @@ describe("rank-report", () => {
 
   it("shows magnitude warning pill on flagged weapons", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: null,
-            itemId: 28773,
-            name: "Gorehowl",
-            slot: "weapon",
-            deltaDps: -103.9,
-            belowCutoff: true,
-            magnitudeWarning: true,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: null,
+          itemId: 28773,
+          name: "Gorehowl",
+          slot: "weapon",
+          deltaDps: -103.9,
+          belowCutoff: true,
+          magnitudeWarning: true,
+          source: realPoolEntry(28773).source,
+        }),
+      ]),
       meta()
     );
     expect(html).toContain('<span class="pill warn">sim magnitude</span>');
@@ -156,42 +196,27 @@ describe("rank-report", () => {
 
   it("excludes magnitude-flagged weapons from Act on tonight", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 1,
-            itemId: 32332,
-            name: "Torch of the Damned",
-            slot: "weapon",
-            deltaDps: 82,
-            belowCutoff: false,
-            source: {
-              kind: "raid",
-              zone: "Black Temple",
-              boss: "Reliquary of Souls",
-            },
-          }),
-          item({
-            rank: null,
-            itemId: 28773,
-            name: "Gorehowl",
-            slot: "weapon",
-            deltaDps: -103.9,
-            belowCutoff: true,
-            magnitudeWarning: true,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 1,
+          itemId: 32332,
+          name: "Torch of the Damned",
+          slot: "weapon",
+          deltaDps: 82,
+          belowCutoff: false,
+          source: realPoolEntry(32332, "ret-p3").source,
+        }),
+        item({
+          rank: null,
+          itemId: 28773,
+          name: "Gorehowl",
+          slot: "weapon",
+          deltaDps: -103.9,
+          belowCutoff: true,
+          magnitudeWarning: true,
+          source: realPoolEntry(28773).source,
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Act on tonight");
@@ -205,40 +230,29 @@ describe("rank-report", () => {
 
   it("shows which ring is replaced instead of bare slot choice", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 3.4, pct: 0.15 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 4,
-            itemId: 32526,
-            name: "Band of Devastation",
-            slot: "finger",
-            deltaDps: 20.68,
-            belowCutoff: false,
-            slotChoice: "finger1",
-            replacesEquipped: {
-              slot: "finger1",
-              itemId: 28757,
-              name: "Ring of a Thousand Marks",
-            },
-            alternateSlot: {
-              choice: "finger2",
-              deltaDps: 8,
-              deltaPct: 0.39,
-              replacesName: "Shapeshifter's Signet",
-            },
-            source: {
-              kind: "raid",
-              zone: "Black Temple",
-              boss: "Illidan Stormrage",
-            },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 4,
+          itemId: 32526,
+          name: "Band of Devastation",
+          slot: "finger",
+          deltaDps: 20.68,
+          belowCutoff: false,
+          slotChoice: "finger1",
+          replacesEquipped: {
+            slot: "finger1",
+            itemId: 28757,
+            name: "Ring of a Thousand Marks",
+          },
+          alternateSlot: {
+            choice: "finger2",
+            deltaDps: 8,
+            deltaPct: 0.39,
+            replacesName: "Shapeshifter's Signet",
+          },
+          source: realPoolEntry(32526, "ret-p3").source,
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Replaces Ring of a Thousand Marks");
@@ -250,25 +264,18 @@ describe("rank-report", () => {
   // slotChoice is what the reader gets. It used to be a bare "a".
   it("names the sim slot when nothing is being replaced", () => {
     const html = renderRankHtml(
-      {
-        contentHash: "test",
-        cutoff: { absDps: 5, pct: 0.5 },
-        baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-        assumptions: { standing: [] },
-        substitutions: [],
-        items: [
-          item({
-            rank: 1,
-            itemId: 32526,
-            name: "Band of Devastation",
-            slot: "finger",
-            deltaDps: 20.68,
-            belowCutoff: false,
-            slotChoice: "finger2",
-            source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
-          }),
-        ],
-      },
+      ranking([
+        item({
+          rank: 1,
+          itemId: 32526,
+          name: "Band of Devastation",
+          slot: "finger",
+          deltaDps: 20.68,
+          belowCutoff: false,
+          slotChoice: "finger2",
+          source: realPoolEntry(32526, "ret-p3").source,
+        }),
+      ]),
       meta()
     );
     expect(html).toContain("Into finger2");
@@ -281,6 +288,119 @@ describe("rank-report", () => {
     expect(html).not.toContain("EP prefilter");
   });
 
+  it("names the stage a BiS badge is BiS for (carry-forward 47)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30834,
+            name: "Shapeshifter's Signet",
+            slot: "finger",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: realPoolEntry(30834).source,
+            bisTags: ["BiS"],
+            bisSets: ["p2"],
+            curatedSets: ["p1", "p2", "preraid"],
+          }),
+        ],
+      },
+      meta()
+    );
+    // The bare pill is what overstated the claim; the stage is the whole fix.
+    expect(html).toContain("p2 BiS");
+    expect(html).not.toMatch(/<span class="pill tag">BiS<\/span>/);
+  });
+
+  it("says when a recommendation costs hit under the cap (carry-forward 47)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            hitRegression: { lost: 17, gapAfter: 87 },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("costs 17 hit rating");
+    expect(html).toContain("widens your gap to 87");
+  });
+
+  // The real cap is 9 * 15.769233, so a live `gapAfter` is essentially never
+  // integral and the raw value rendered as 64.92309699999998 in the shipped
+  // report (carry-forward 77). Whole-number fixtures above hid it.
+  it("rounds a fractional hit gap like the banner does (carry-forward 77)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            hitRegression: { lost: 17, gapAfter: 64.92309699999998 },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("widens your gap to 65");
+    expect(html).not.toContain("64.92309699999998");
+  });
+
+  // The page rendered per-row "widens your gap to N" while never stating what
+  // the gap was, carrying no Heroic Presence caveat, and naming no fight —
+  // 22 rows referencing "your gap" against zero banner lines in the shipped
+  // nexess-p3-all.html (carry-forward 76). The HTML report is the shareable
+  // artifact, so it has to carry the same disclosure the CLI prints.
+  it("renders the hit-cap banner and fight provenance (carry-forward 76)", () => {
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    expect(html).toContain("under the hit cap");
+    expect(html).toContain("Heroic Presence");
+    // The whole provenance sentence, not a substring of it: "test" alone also
+    // matches the contentHash in the footer and proves nothing.
+    expect(html).toContain(
+      "gear read from fight 1 (test fight 1, ranked route)"
+    );
+  });
+
+  // The off-tank warning is the one ticket 06 added *because* nothing in the
+  // output named the fight. It fires only on a confident parse with zero
+  // salvation uptime — the combination that means "this may be tank gear".
+  it("names the report-events route and the off-tank warning in the HTML too", () => {
+    const base = rankingWithPvpWeaponAboveCutoff();
+    const html = renderRankHtml(
+      {
+        ...base,
+        fight: {
+          ...base.fight,
+          route: "report-events",
+          confidence: 1,
+          salvationUptime: 0,
+        },
+      },
+      meta()
+    );
+    expect(html).toContain("report-events");
+    expect(html).toContain("Blessing of Salvation");
+    expect(html).toContain("off-tanking");
+  });
+
   // The other cases here assert on fragments, so a change to the surrounding
   // markup or CSS passes them all. This pins the whole document, which is what
   // makes a pure restructure of this module provable: split the file, move the
@@ -290,10 +410,21 @@ describe("rank-report", () => {
   it("renders a byte-identical document for a fixed ranking", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     const digest = createHash("sha256").update(html, "utf8").digest("hex");
+    // Repinned for carry-forward 34: the fixture now builds its `Ranking`
+    // through the shared `ranking()` helper, which uses the real `CUTOFF`
+    // constant (3.4 DPS / 0.15%) instead of the old ad hoc `{ absDps: 5, pct:
+    // 0.5 }` literal — `Cutoff`'s fields are literal-typed, so that literal
+    // could never have satisfied the real type. The rendered "Cutoff 3.4 DPS
+    // / 0.15%" line is longer than "Cutoff 5 DPS / 0.5%", which is the whole
+    // delta against the previous pin.
+    // Repinned for carry-forward 76: the page now renders the hit-cap banner
+    // and the fight-provenance line it was only ever printing to the CLI.
+    // Diffed before/after to confirm the delta is exactly those two <p>
+    // elements plus their CSS rules — nothing else in the document moved.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "e8c594b6c29cf7bb5776f19ba2b1437c482bf9f2838ef6be88b8cff0d51ff78b",
-      length: 10626,
+        "2bca97bff348944591b448e33ffebb512211b79cba5269175d50292fc047f36c",
+      length: 11450,
     });
   });
 });
@@ -311,29 +442,22 @@ function meta(): RankReportMeta {
 }
 
 function rankingWithPvpWeaponAboveCutoff(): Ranking {
-  return {
-    contentHash: "test",
-    cutoff: { absDps: 5, pct: 0.5 },
-    baseline: { dps: 2040, stdev: 119, metaAdjusted: false },
-    assumptions: { standing: [] },
-    substitutions: [],
-    items: [
-      item({
-        rank: 1,
-        name: "Helm of the Illidari Shatterer",
-        slot: "head",
-        deltaDps: 15,
-        belowCutoff: false,
-        source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
-      }),
-      item({
-        rank: 12,
-        name: "Vengeful Gladiator's Bonegrinder",
-        slot: "weapon",
-        deltaDps: 7.6,
-        belowCutoff: false,
-        source: { kind: "pvp", via: "arena", season: 3 },
-      }),
-    ],
-  };
+  return ranking([
+    item({
+      rank: 1,
+      name: "Helm of the Illidari Shatterer",
+      slot: "head",
+      deltaDps: 15,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+    }),
+    item({
+      rank: 12,
+      name: "Vengeful Gladiator's Bonegrinder",
+      slot: "weapon",
+      deltaDps: 7.6,
+      belowCutoff: false,
+      source: { kind: "pvp", via: "arena", season: 3 },
+    }),
+  ]);
 }

@@ -1,17 +1,53 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
-export { CUTOFF, type Cutoff } from "./cutoff.js";
+export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+export {
+  DegenerateSeedsError,
+  PAIRED_REPLICATE_TOP_N,
+  assertUsableSeeds,
+  pairedReplicateSe,
+  usesPairedReplication,
+} from "./se.js";
+export {
+  applyView,
+  type ViewOptions,
+  type ViewResult,
+  type ViewRow,
+} from "./view.js";
 export {
   RankError,
   rankUpgrades,
+  resolveFight,
   type Deps,
   type Progress,
   type RankErrorKind,
   type RankInput,
   type RankedItem,
   type Ranking,
+  type ResolvedFight,
 } from "./rank.js";
+// Offline fixture builders are deliberately NOT re-exported here. All three
+// (`slamaltman-offline`, `report-events-offline`, `feral-offline`) are imported
+// from their own module by every consumer — `cli.ts` and one test each — so
+// the barrel is not the path anyone actually uses. Re-exporting one of the
+// three was the inconsistency (carry-forward 79); direct import is the
+// convention. Keeping them out also keeps test scaffolding off the package's
+// public surface.
+export {
+  capStateFrom,
+  hitRegression,
+  isHitDriven,
+  statDeltaBetween,
+  HIT_CAP_RATING,
+  HIT_CAP_UNCERTAINTY,
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  type CapEntry,
+  type CapState,
+  type HitCapEntry,
+} from "./caps.js";
 export {
   buildStandingAssumptions,
+  hitCapBanner,
+  renderDisclosure,
   substitutionsFromMetaRepair,
   type Assumptions,
   type StandingAssumption,
@@ -32,9 +68,11 @@ export {
 } from "./pool.js";
 export { isKaelTempLegendary, KAEL_TEMP_LEGENDARY_IDS } from "./kael-temp.js";
 export {
+  CachingGearSource,
   RecordedGearSource,
   characterFightKey,
   fightGearKey,
+  gearCacheKey,
   type FightSummary,
   type GearSource,
   type LoggedGear,
@@ -52,6 +90,7 @@ export {
 export { CliSimRunner } from "./seams/cli-sim-runner.js";
 export {
   MemoryStore,
+  SqliteStore,
   type Job,
   type JobCreateInput,
   type JobStatus,
@@ -66,14 +105,20 @@ export {
   type WclGearEntry,
 } from "./slots.js";
 export {
+  classifyFeralForm,
   classifySpec,
+  matchesRequestedSpec,
   talentPointsFromWclTalents,
+  type FeralFormClassification,
+  type FormUptime,
   type SpecClassification,
+  type SpecMatch,
   type TalentPointsByTree,
 } from "./spec.js";
 export type {
   CharacterRef,
   ContentPhase,
+  DetectedSpecId,
   FightRef,
   Race,
   Region,

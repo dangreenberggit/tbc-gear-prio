@@ -6,11 +6,19 @@ Everything we take from upstream is pinned to ONE release tag (or default-branch
 commit when no tags exist), recorded in data/atlasloot.lock.json, and fetched into
 vendor/ (gitignored). What gets committed is the parsed output plus the lockfile.
 
-    python scripts/sync_atlasloot.py --check     # drift report, no writes
-    python scripts/sync_atlasloot.py --update    # fetch latest tag, rewrite lockfile
+    python scripts/sync_atlasloot.py --check         # drift report, no writes
+    python scripts/sync_atlasloot.py --verify-local  # checksum vendor/, offline
+    python scripts/sync_atlasloot.py --restore       # fetch pinned files into vendor/
+    python scripts/sync_atlasloot.py --update        # fetch latest tag, rewrite lockfile
     python scripts/sync_atlasloot.py --update --tag v3.4.3.pre-release
 
-Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
+--check asks two questions; --verify-local asks only the second, so it can run
+in `pnpm verify`:
+
+    is there a newer release upstream?   network, and not drift
+    does vendor/ match the lockfile?     offline, and the integrity gate
+
+Exit codes: 0 in sync, 1 drift detected (--check, --verify-local), 2 error.
 """
 
 import argparse
@@ -22,13 +30,20 @@ import sys
 from pinned_fetch import digest as sha256_of
 from pinned_fetch import fetch as pinned_fetch
 from pinned_fetch import lock_entry
+from pinned_fetch import verify as verify_blob
 
 REPO = "Hoizame/AtlasLootClassic"
 LOCKFILE = "data/atlasloot.lock.json"
 VENDOR = "vendor/atlasloot"
 
+# The faction tables are a *separate* addon module from the instance loot, and
+# they are the only input that maps a faction to its numeric id. Prose rep rows
+# reach us as a display string ("Lower City") with no id attached; without this
+# file there is nothing in the tree to resolve one, and the ids for the 11
+# factions wowsims does not model exist nowhere else we vendor (ticket 66).
 TRACKED = {
     "data-tbc.lua": "AtlasLootClassic_DungeonsAndRaids/data-tbc.lua",
+    "factions-tbc.lua": "AtlasLootClassic_Factions/data-tbc.lua",
 }
 
 def gh(*args):
@@ -112,6 +127,94 @@ def do_update(tag):
     return 0
 
 
+def do_restore():
+    """Fetch pinned files into vendor/ from the lock commit, without rewriting it.
+
+    Mirrors sync_wowsims.py --restore. vendor/ is gitignored, so a fresh worktree
+    has nothing; --update would chase latest and move the pin, which is the wrong
+    tool for "give me the files this lockfile names".
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+
+    sha = lock["commit"]
+    print(f"  restoring {lock['repo']} @ {lock['tag_or_branch']} ({sha[:12]}) -> {VENDOR}")
+    os.makedirs(VENDOR, exist_ok=True)
+
+    errors = []
+    # TRACKED, not the lock's file map: a newly tracked file has no lock entry
+    # until the next --update, and refusing to fetch it would make adding an
+    # input require moving the pin.
+    for local, path in TRACKED.items():
+        try:
+            blob = fetch(sha, path)
+        except Exception as e:
+            errors.append(f"{local}: fetch failed: {e}")
+            continue
+        meta = (lock.get("files") or {}).get(local)
+        if meta and sha256_of(blob) != meta["sha256"]:
+            errors.append(f"{local}: checksum mismatch against {LOCKFILE}")
+            continue
+        with open(os.path.join(VENDOR, local), "wb") as fh:
+            fh.write(blob)
+        note = "" if meta else "  (not yet in lockfile -- run --update to pin)"
+        print(f"    {local:<26} {len(blob):>9,} bytes{note}")
+
+    if errors:
+        for e in errors:
+            print(f"  !! {e}", file=sys.stderr)
+        return 2
+    print("  restore ok.")
+    return 0
+
+
+def do_verify_local():
+    """Checksum vendor/ against the lockfile. No network, no upstream lookup.
+
+    Split out of --check so it can run inside `pnpm verify`, which must stay
+    offline and must not go red when upstream cuts a release: a new tag is not
+    drift and is not this repo's problem at commit time. This half -- "is the
+    file on disk the file the lock names" -- is the half worth gating on.
+
+    An absent vendor/ is not a failure. It is the normal state of a fresh
+    worktree that has not run --restore, and this is a data-integrity check, not
+    a setup check; the gates that actually need the files fail on their own.
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+
+    present = [l for l in TRACKED if os.path.exists(os.path.join(VENDOR, l))]
+    if not present:
+        print(f"  {VENDOR} absent -- skipping (run `pnpm sync:atlasloot:restore`)")
+        return 0
+
+    drift = []
+    for local in TRACKED:
+        path = os.path.join(VENDOR, local)
+        meta = (lock.get("files") or {}).get(local)
+        if not meta:
+            drift.append(f"{local} is tracked but not in {LOCKFILE} (run --update to pin)")
+            continue
+        if not os.path.exists(path):
+            drift.append(f"missing locally: {path} (run --restore)")
+            continue
+        with open(path, "rb") as fh:
+            reason = verify_blob(fh.read(), meta)
+        if reason:
+            drift.append(f"{path}: {reason}")
+
+    if drift:
+        for d in drift:
+            print(f"  DRIFT: {d}", file=sys.stderr)
+        return 1
+    print(f"  vendor/atlasloot matches {LOCKFILE} ({len(present)} files).")
+    return 0
+
+
 def do_check():
     lock = load_lock()
     if not lock:
@@ -135,10 +238,14 @@ def do_check():
             f"new release available: {lock['tag_or_branch']} -> {upstream_tag}"
         )
 
-    for local, meta in lock.get("files", {}).items():
+    for local in TRACKED:
         path = os.path.join(VENDOR, local)
+        meta = (lock.get("files") or {}).get(local)
+        if not meta:
+            drift.append(f"{local} is tracked but not in {LOCKFILE} (run --update to pin)")
+            continue
         if not os.path.exists(path):
-            drift.append(f"missing locally: {path} (run --update)")
+            drift.append(f"missing locally: {path} (run --restore)")
             continue
         with open(path, "rb") as fh:
             if sha256_of(fh.read()) != meta["sha256"]:
@@ -157,11 +264,25 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
     ap.add_argument("--update", action="store_true", help="fetch and rewrite the lockfile")
+    ap.add_argument(
+        "--restore",
+        action="store_true",
+        help="fetch pinned files into vendor/ from the lock (no lock rewrite)",
+    )
+    ap.add_argument(
+        "--verify-local",
+        action="store_true",
+        help="checksum vendor/ against the lock, offline (no upstream lookup)",
+    )
     ap.add_argument("--tag", help="pin a specific tag instead of the latest")
     args = ap.parse_args()
 
     if args.update:
         sys.exit(do_update(args.tag))
+    elif args.restore:
+        sys.exit(do_restore())
+    elif args.verify_local:
+        sys.exit(do_verify_local())
     elif args.check:
         sys.exit(do_check())
     else:

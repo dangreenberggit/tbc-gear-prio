@@ -22,6 +22,7 @@ export const ITEM_SOURCE_KINDS = [
   "heroic",
   "pvp",
   "world",
+  "unknown",
 ] as const;
 
 export type ItemSourceKindName = (typeof ITEM_SOURCE_KINDS)[number];

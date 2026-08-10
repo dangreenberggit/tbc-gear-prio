@@ -2,21 +2,48 @@
  * Spec classification (PLAN.md §5.2). WCL has no spec-name field at actor
  * level, and CombatantInfo.specID is 0 for every combatant on TBC
  * Anniversary logs seen so far (ticket 01) — talent-tree plurality is the
- * only trusted signal. Paladin-only until other classes have a verified
- * fixture.
+ * only trusted signal for picking a tree.
+ *
+ * Plurality is not always enough to pick a *spec*. Druid's feral tree carries
+ * both cat and tank, so this module classifies in two steps: the tree from
+ * talents, then — only where the tree is ambiguous — the spec from form
+ * uptime, which is fight-scoped rather than character-scoped.
  */
 
-import type { SpecId } from "./types.js";
+import type { DetectedSpecId, SpecId } from "./types.js";
 
 export type TalentPointsByTree = readonly [number, number, number];
 
 export type SpecClassification =
   | { ok: true; spec: SpecId; treeIndex: number }
-  | { ok: false; reason: "ambiguous" | "unsupported-class" };
+  | { ok: false; reason: "ambiguous" | "unsupported-class" }
+  | { ok: false; reason: "unsupported-spec"; treeIndex: number }
+  /**
+   * The tree is known and it maps to more than one spec. Talents cannot go
+   * further — feral cat and feral tank are the same 45-point tree, measured
+   * byte-identical across a cat kill and a bear kill by the same character on
+   * one night (test/fixtures/shredzepelin{,-bear}.raw.json). Resolving this
+   * needs `classifyFeralForm` and a fight to measure.
+   */
+  | {
+      ok: false;
+      reason: "needs-form-uptime";
+      candidates: readonly DetectedSpecId[];
+      treeIndex: number;
+    };
 
 const PALADIN_TREE_SPEC: Record<number, SpecId> = {
   2: "ret",
 };
+
+/**
+ * Druid tree 1 (feral) is deliberately absent: it maps to two specs, so
+ * `classifySpec` reports `needs-form-uptime` for it rather than choosing.
+ */
+const DRUID_TREE_SPEC: Record<number, SpecId> = {};
+
+const DRUID_FERAL_TREE_INDEX = 1;
+const FERAL_CANDIDATES: readonly DetectedSpecId[] = ["feral", "feral-tank"];
 
 /**
  * WCL's CombatantInfo.talents is a three-entry array where `id` is points
@@ -31,11 +58,33 @@ export function talentPointsFromWclTalents(
   return [talents[0]!.id, talents[1]!.id, talents[2]!.id];
 }
 
+const CLASS_TREE_SPEC: Record<string, Record<number, SpecId>> = {
+  Paladin: PALADIN_TREE_SPEC,
+  Druid: DRUID_TREE_SPEC,
+};
+
+/**
+ * Tree names in talent-string segment order, for messages a player reads.
+ * Copied from `ui/core/talents/trees/<class>.json` in the pinned
+ * wowsims-tbc-new source, same as the tree indices above — a raw "tree 1"
+ * means nothing to someone reading a CLI error.
+ */
+const CLASS_TREE_NAMES: Record<string, readonly string[]> = {
+  Paladin: ["Holy", "Protection", "Retribution"],
+  Druid: ["Balance", "Feral Combat", "Restoration"],
+};
+
+/** The tree's display name, or a bare index when the class is unmapped. */
+export function treeName(className: string, treeIndex: number): string {
+  return CLASS_TREE_NAMES[className]?.[treeIndex] ?? `tree ${treeIndex}`;
+}
+
 export function classifySpec(
   className: string,
   talentPointsByTree: TalentPointsByTree
 ): SpecClassification {
-  if (className !== "Paladin") {
+  const treeSpec = CLASS_TREE_SPEC[className];
+  if (!treeSpec) {
     return { ok: false, reason: "unsupported-class" };
   }
 
@@ -49,10 +98,131 @@ export function classifySpec(
   }
 
   const treeIndex = topTrees[0]!.index;
-  const spec = PALADIN_TREE_SPEC[treeIndex];
+
+  if (className === "Druid" && treeIndex === DRUID_FERAL_TREE_INDEX) {
+    return {
+      ok: false,
+      reason: "needs-form-uptime",
+      candidates: FERAL_CANDIDATES,
+      treeIndex,
+    };
+  }
+
+  const spec = treeSpec[treeIndex];
   if (!spec) {
-    return { ok: false, reason: "unsupported-class" };
+    return { ok: false, reason: "unsupported-spec", treeIndex };
   }
 
   return { ok: true, spec, treeIndex };
+}
+
+export type SpecMatch =
+  | { matches: true; detected: SpecId }
+  | { matches: false; detected?: DetectedSpecId };
+
+/**
+ * Compares a resolved fight's talent classification to the spec a caller
+ * asked for (carry-forward ticket 40). `classifySpec` already ran; this is
+ * the comparison the resolution path was skipping — nothing called it, so a
+ * character's off-spec night (a ret paladin's one protection kill, report
+ * `mKTA9V7Lx4Ck2DXf`) sailed through and was simmed with ret's preset and EP
+ * weights.
+ *
+ * Anything short of a *confirmed* match reports `matches: false`. That
+ * includes `ambiguous` and `needs-form-uptime` — a tree that cannot yet be
+ * read as anything in particular is not evidence *for* the requested spec,
+ * so it is not a match — and `unsupported-spec` — the fight is provably some
+ * other build (the ticket's protection case) without becoming the false
+ * positive of "detected as ret". `detected` is left absent whenever
+ * `classifySpec` did not land on a genuine spec name (paladin protection is
+ * `unsupported-spec`, an armour tree with no spec home today, not a wrongly
+ * detected one), so a caller can only ever report a spec this module
+ * actually classified.
+ */
+export function matchesRequestedSpec(
+  classification: SpecClassification,
+  requested: SpecId
+): SpecMatch {
+  if (classification.ok) {
+    return classification.spec === requested
+      ? { matches: true, detected: classification.spec }
+      : { matches: false, detected: classification.spec };
+  }
+  return { matches: false };
+}
+
+export type FormUptime = {
+  /** Milliseconds in Cat Form. */
+  catMs: number;
+  /** Milliseconds in Dire Bear Form or Bear Form, summed. */
+  bearMs: number;
+};
+
+export type FeralFormClassification = {
+  /** Absent when there is no form time to judge — never defaulted to cat. */
+  spec?: DetectedSpecId;
+  /**
+   * 0–1, feeding `FightSummary.confidence`. This is the share of formed time
+   * spent in the winning form, so a mixed fight reports a middling number
+   * rather than certainty: the Karathress kill is 69% bear and says 0.69.
+   */
+  confidence: number;
+};
+
+/**
+ * Resolve feral cat from feral tank on what the character actually did.
+ *
+ * Deliberately not thresholded. A rule like "≥80% cat means cat" would have to
+ * invent an answer for the 69%-bear Karathress kill, and inventing one is the
+ * failure mode §5.4 is guarding against — the caller gets the ratio and
+ * decides what is good enough.
+ */
+export function classifyFeralForm(uptime: FormUptime): FeralFormClassification {
+  const formed = uptime.catMs + uptime.bearMs;
+  if (formed <= 0) return { confidence: 0 };
+
+  const cat = uptime.catMs >= uptime.bearMs;
+  const winning = cat ? uptime.catMs : uptime.bearMs;
+  return {
+    spec: cat ? "feral" : "feral-tank",
+    confidence: winning / formed,
+  };
+}
+
+/**
+ * Both ranks. A paladin who never picked up the Greater version still salvs,
+ * and reading only one name would report a salvaged DPS as unsalvaged.
+ *
+ * Hand of Salvation is a distinct spell, not a rank of the Blessing, and is
+ * included because it carries the same meaning for this check: it is threat
+ * reduction nobody hands a tank. Reading only the Blessings scored
+ * shredzepelin's Void Reaver kill — a clean DPS fight salved end to end — as
+ * unsalvaged, which is the exact false off-tank warning ticket 06 exists to
+ * avoid. Uptime, not presence, is what the caller reads, so the short
+ * emergency-cast use of this spell reports as the low ratio it is.
+ */
+const SALVATION_AURAS = new Set([
+  "Blessing of Salvation",
+  "Greater Blessing of Salvation",
+  "Hand of Salvation",
+]);
+
+/**
+ * Share of the fight spent under Blessing of Salvation, 0–1.
+ *
+ * Ratio rather than a boolean for the same reason `classifyFeralForm` is not
+ * thresholded: salv is lost on death and dropped deliberately by high-threat
+ * DPS, so "had it for 60% of the fight" is a real and different story from
+ * "never had it", and the caller is what decides which matters.
+ */
+export function salvationUptimeOf(
+  auras: readonly { name: string; totalUptime?: number }[],
+  totalTime: number
+): number {
+  if (totalTime <= 0) return 0;
+  let ms = 0;
+  for (const aura of auras) {
+    if (SALVATION_AURAS.has(aura.name)) ms += aura.totalUptime ?? 0;
+  }
+  return Math.min(ms / totalTime, 1);
 }

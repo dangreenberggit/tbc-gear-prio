@@ -60,6 +60,14 @@ export default tseslint.config(
     },
   },
   {
+    // scripts/ is build-time tooling, the opposite of packages/core's purity
+    // rule below: reading files and printing to stdout is its whole job.
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: { process: "readonly", console: "readonly" },
+    },
+  },
+  {
     files: ["packages/core/src/**/*.ts"],
     ignores: ["packages/core/src/seams/**", "packages/core/src/cli.ts"],
     rules: {

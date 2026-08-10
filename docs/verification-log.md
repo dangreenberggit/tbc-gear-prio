@@ -374,6 +374,22 @@ Measured on the committed universes (the only ranking membership that ships —
 Tier coverage is also complete in both: p2 10/10 expected tier pieces present,
 p3 15/15, `tierPiecesMissing: []`.
 
+> **Counts restated 2026-08-06 on `phase-2/feral`.** The property still holds —
+> zero empty-source rows, tier coverage still complete — but the totals grew and
+> two more universes now ship:
+>
+> | Universe | entries | empty `sources` | tier |
+> |---|---|---|---|
+> | `ret-p2.json` | 235 | **0** | 10/10 |
+> | `ret-p3.json` | 359 | **0** | 15/15 |
+> | `feral-p2.json` | 250 | **0** | 10/10 |
+> | `feral-p3.json` | 377 | **0** | 10/10 |
+>
+> Feral tier coverage stops at T5 by construction: T6 Thunderheart is absent
+> from `FERAL_TIER_PIECE_IDS`, so 10/10 is the whole expected set, not a
+> shortfall. Ret grew because the wowsims curated gear sets now grant
+> membership; feral is new.
+
 Note the schema is `sources` (an array of `{kind, zone, boss}` rows), not a
 scalar `source`. A first probe reading `.source` reported 224/224 null and was
 wrong; the corrected probe reads `sources`.
@@ -521,6 +537,28 @@ It does say the Phase 1 gate box cannot be closed by quoting 76.4%. The honest
 figure for "would our pipeline find the right items on its own" is 58.5%, and
 the trinket/libram gap is a concrete, ownable defect rather than a vague recall
 worry. Ticket 18 now has its instrument and its first measurement.
+
+> **Re-measured 2026-08-06 on `phase-2/feral`**, same two commands, same `--max-phase 3`:
+>
+> | | Wowhead as input | Held out |
+> |---|---|---|
+> | universe total | 347 → **359** | 325 → **339** |
+> | `listOnlyMembership` | 21 → **23** | 0 |
+> | Wowhead P3 BiS recall | 76.4% → **83.7%** (103/123) | 58.5% → **67.5%** (83/123) |
+> | tier pieces present | 15/15 | 15/15 |
+>
+> The held-out figure is the one that matters, and **58.5% → 67.5%** is a real
+> improvement in what the pipeline finds *without* the answer key: that branch
+> taught `parse_wowhead_source` the badge-vendor, reputation-vendor (both word
+> orders) and quest-with-zone phrasings, so rows whose prose was previously
+> discarded now resolve to a source from db/AtlasLoot corroboration rather than
+> depending on the list.
+>
+> The reading above is unchanged. Keep Wowhead as a shipping input; use the
+> held-out number as the diagnostic. The remaining gap is still concentrated in
+> badge, reputation and world-drop items — see
+> `.scratch/carry-forward/issues/45-unparsed-wowhead-prose-and-unknown-bucket.md`
+> for the 87-of-627 rows that still parse to nothing.
 
 ---
 
@@ -874,3 +912,629 @@ magnitude test, so it does not depend on `ep_score` at all.
 
 Filed as ticket 27 (`ep_score` blind to weapon damage) — the underlying scoring
 gap is still there for any future use of `curationHint` on weapons.
+
+---
+
+## 2026-08-06 — Phase 2 gate: the five boxes closed by the merged slices
+
+Five gate boxes were closed by work already merged into `phase-2/trust`
+(`caches`, `disclosure-and-caps`, `apply-view`) but never written into this log.
+This sitting is **transcription of existing evidence**, not new implementation —
+no source file changed, and every claim below is a test that passes at the
+integrated tip.
+
+Reproduce all five at once:
+
+```bash
+pnpm exec vitest run packages/core/test/rank.test.ts packages/core/test/view-gate.test.ts packages/core/test/meta-repair.test.ts packages/core/test/store-contract.test.ts packages/core/test/content-hash.test.ts packages/core/test/view.test.ts
+```
+
+Run on 2026-08-06 at `42db95a`: **6 files, 124 tests, all passing.**
+
+### ☑ Re-run hits cache; deltas stable
+
+Owned by `.scratch/phase-2/issues/01-caches.md`.
+
+**The obvious test does not close this box, and the ticket says so from
+measurement rather than suspicion.** `rank.test.ts`'s "serves the second
+identical call from the store without simming" passed *before* either new cache
+existed and still passes with both reverted: a second identical call returns at
+the Phase 1 ranking cache before gear is read or a sim is spawned, so "zero
+reads, zero runs" is satisfied without any of this ticket's work.
+
+The evidence is therefore the two **hash-miss** cases, where the ranking cache
+misses and execution actually reaches the new caches:
+
+| Test (`rank.test.ts`) | What moves the hash | Assertion | Fails without |
+|---|---|---|---|
+| `fetches gear once across runs whose ranking hash differs` | `maxPhase` 1→2, same resolved fight | `fetches.reads` stays **1** across both runs | `CachingGearSource is not a constructor` |
+| `reuses a cached sim result when only the candidate pool grows` | one candidate added | `sim.runs === afterFirst + 2`, not +4 | `expected 6 to be 4` |
+
+Both were confirmed to fail by stashing `rank.ts` / `gear-source.ts` — a test
+that cannot fail is exactly the trap the "deltas stable" half warns about.
+
+**Where the cache lives matters and the first attempt was wrong.** Building the
+gear cache inside `rankUpgrades` went red on the pre-existing "re-sims when the
+logged gear changes but the character does not" case: a `kv` hit made the
+source's fresh gear unreachable, so the hash matched and last run's numbers were
+served for a re-gemmed set — the staleness ADR-0019 exists to prevent.
+`rankUpgrades` always calls `deps.gear.readGear` and hashes what comes back; the
+cache wraps the WCL adapter (`CachingGearSource`), which is why
+`RecordedGearSource` stays uncached and the offline tests keep their meaning.
+`findFights` is deliberately **not** cached — a fight list grows as a character
+raids, so it is not immutable.
+
+**"Deltas stable" had teeth only after the review.** The pre-merge review found
+the sole deep-equal sat inside the identical-re-run test, i.e. it covered the
+Phase 1 ranking cache and not the new ones — a sim cache returning a mismatched
+observation would have moved every `deltaDps` while the run-count assertions
+still passed. The pool-grows test now deep-equals the cached candidate's
+`RankedItem` across runs; the assertion entered in `8ca148c` (whose subject
+line, "Key the gear cache by character, not by fight alone", describes the other
+change it carried — `git log -S "expect(after).toEqual(before)"` locates it).
+
+`SqliteStore` (`node:sqlite`) and `MemoryStore` pass one shared contract suite —
+25 tests across both halves of the `Store` interface, plus a persistence test
+that reads a blob back through a second connection to the same file.
+
+**Scope limit:** `SqliteStore` has **zero production call sites**; `cli.ts` still
+constructs `MemoryStore`. Deployment is Phase 4. Two defects are known and
+deferred to `.scratch/carry-forward/issues/31-sqlitestore-job-ids-and-kv-created-at.md`
+(`Blocks: phase-4`): `kv` omits §11's `created_at`, and job ids from
+`SELECT COUNT(*)` race two writers and reuse ids after a delete. Neither can
+bite until something deploys it with more than one writer.
+
+### ☑ Inactive-meta baseline auto-repaired and disclosed
+
+Owned by `.scratch/phase-2/issues/02-disclosure-and-caps.md`.
+
+Two altitudes, because the unit tests passing says nothing about whether the
+engine wires one to the other.
+
+**The unit level** — `meta-repair.test.ts`, on slamaltman's real logged gear:
+
+- `leaves an already-active slamaltman layout alone` — his actual layout is
+  `active`, and repair returns `metaAdjusted: false`, `swaps: []`. A repairer
+  that fires on a healthy set would be worse than none.
+- `repairs slamaltman when yellow contribution is stripped` — the lever is real
+  gear: Crystalforge Breastplate (30129) carries `[24027, 24058, 24058]`, and
+  its two orange gems are the entire yellow count. Recolouring them red drives
+  `gemColorCounts(...).yellow` to 0 and the meta to `inactive`; repair returns
+  it to `active`.
+
+**Through `rankUpgrades`** — `rank.test.ts`'s "auto-repairs an inactive meta and
+discloses it as a run substitution", same lever, driving the real engine:
+
+| Assertion | Value |
+|---|---|
+| `ranking.baseline.metaAdjusted` | `true` |
+| substitution present | `field === "gems.meta-repair"` |
+| detail shape | contains `Meta inactive`, matches `/\d+→\d+@item \d+/` |
+| tier | **not** in `assumptions.standing` |
+
+That last row is the one worth keeping: §9 R7's two tiers must not blur, so a
+run substitution appearing among standing assumptions is a failure even though
+the repair itself worked.
+
+### ☑ A meta repair that would break a socket bonus picks the other move (§9, R4)
+
+Same ticket. **Closed by pre-existing work, and the honest thing is to say so:**
+both the pricing rule (`meta-repair.ts:193-197`) and its fixture
+(`meta-repair.test.ts:94`) predate the `disclosure-and-caps` branch, which is
+what the branch's own review independently confirmed.
+
+The rule is that the socket-bonus forfeit is priced **inside** the move's cost,
+not checked afterwards:
+
+```ts
+let cost = gemEp(from, opts.epWeights) - gemEp(candidate.id, opts.epWeights);
+if (matchedBefore && !socketsMatch(slot.itemId, trialGems)) {
+  cost += socketBonusEp(slot.itemId, opts.epWeights);
+}
+```
+
+The fixture is constructed so that the gem-only cost **ties**, which is the only
+way to prove the bonus term is what decides. Under strength-only weights, yellow
+and blue/green gems all score 0, so yellow→green and yellow→blue cost the same
+on gems alone; the chest's +4 str socket bonus is the entire difference. The
+test asserts the repair recolours to a gem that satisfies yellow *and*
+contributes blue — colour 5 (Green) or 8 (Prismatic) — rather than a pure blue
+that would activate the meta just as well while forfeiting the bonus.
+
+Both moves fix the meta. Only one of them is free. The test fails if the
+repairer picks the other.
+
+### ☑ A raid filter on a tier-token slot returns the tier piece (§8.3.2)
+
+Owned by `.scratch/phase-2/issues/03-apply-view.md` (closed). This is §15's
+quiet failure mode: a "Karazhan" filter that silently omits every T4 piece,
+because the tier piece reaches its zone only through `ItemSource`
+`kind: 'token'` — a two-hop resolution the filter must follow.
+
+`view-gate.test.ts`, three tests, all through a real `rankUpgrades` ranking:
+
+| Test | Filter | Rows |
+|---|---|---|
+| returns the token-sourced T4 piece | `raid: "Karazhan"` | `[28530, 29072]` — 29072's `source.kind === "token"` |
+| scopes a boss filter through the token hop too | `+ boss: "The Curator"` | `[29072]` only |
+| does not return the tier piece under a different raid | `raid: "Tempest Keep"` | `[30129]`, no 29072 |
+
+The premise is guarded first (`expect(ranking.items...).toContain(29072)`), so a
+pass cannot come from the item being absent from the ranking entirely. The
+Curator case matters independently: the boss filter has to follow the *token
+source's own boss* and must not sweep in Moroes' neck. The Tempest Keep case
+makes the filter discriminating rather than merely empty — TK has its own token
+piece, which is what comes back.
+
+**Mutation-checked, not merely green:** matching only the `raid` hop instead of
+the `token` hop fails a named test, per ticket 03's outcome.
+
+**Deferred:** `.scratch/carry-forward/issues/37-token-boss-unguarded-and-fixtures-bypass-the-map.md`
+— 45 hand-written `ItemSource` literals across the test suite, none cross-checked
+against the committed universe. They are correctly *typed*, so ticket 34 (tests
+are never typechecked) would not catch them either.
+
+### ☑ Toggling any `ViewOptions` field does not change `contentHash` or trigger a sim
+
+Same ticket. Ticket 30 named the right altitude for this box and it is **not**
+the pure-function level — that is why the box outlived the `content-hash` branch.
+
+`content-hash.test.ts` already proved the hash *function* ignores
+ViewOptions-shaped fields (mutation-checked: `hashPayload` builds its object
+field by field, and the test fails if that becomes a spread). That is half the
+box at the wrong altitude, and it cannot reach "or trigger a sim" at all.
+
+`view-gate.test.ts` drives 14 `ViewOptions` combinations against a ranking
+produced by `rankUpgrades` with a counting `SimRunner` and a counting
+`GearSource`:
+
+| Test | Claim |
+|---|---|
+| `toggling any ViewOptions field changes neither contentHash nor the sim count` | `contentHash` identical across all 14; sim count unchanged |
+| `serves every view change from one ranking, without re-entering the engine` | 14 views rendered, `gear.entries` stays **1** |
+| `keeps the ranking's own rows and deltas intact across every view` | `ranking.items` deep-equal to a `structuredClone` taken before |
+
+**The middle test is the one that closes the box, and the reason is recorded in
+the test itself.** `applyView` is pure and never receives a `SimRunner`, so
+asserting on the sim counter *inside* the view call is trivially true — the
+first test says as much and keeps the assertion only as a tripwire on a future
+`applyView(r, v, deps)`. The claim the box actually makes is about the
+**caller's** loop: one `rankUpgrades`, then N re-renders. A caller that re-ranked
+to serve a view change would satisfy every pure-function test in the file and
+still violate the box — and would *not* be caught by the sim counter either,
+because identical input hits the ranking cache and costs zero sims. Counting
+**gear entries** is what discriminates: a re-ranking caller reads 15.
+
+Each run's `sim.runs > 0` is asserted before the loop, so "count unchanged" is
+never vacuously true against a ranking that never simmed.
+
+**One real bug this branch found by running the CLI rather than the unit tests,**
+worth recording because the unit tests were green throughout: tie grouping
+originally extended each group against its running bounds, so on the actual ret
+P2 Karazhan ranking (reported SE ~2.18 DPS, adjacent deltas much smaller) the
+overlaps chained and all 100 rows collapsed into one tie group — items 20+ DPS
+apart marked as tied, the exact "reads as broken" failure §10 warns about.
+Groups are now leader-anchored and bounded at 2×SE, with a regression test
+(`does not chain a long ladder into one undifferentiated group`).
+
+**Deferred:** `groupBy: 'raid'` keys off the first zone-bearing source, arbitrary
+for a multi-zone item (ticket 35); the below-cutoff expand is modelled as data
+(`belowCutoffInView`, hidden never deleted) rather than as a UI affordance,
+since there is no UI until Phase 3.
+
+### Where this leaves the Phase 2 gate
+
+**6 of 8 boxes** recorded by this sitting, up from 1. The other two are owned by
+`.scratch/phase-2/issues/05-feral.md`, the last slice, which merged into
+`phase-2/trust` at `e841a67` after this entry was written. Ticket 05 is closed
+and carries a verdict for both — **one PASS, one PARTIAL** — in
+[`.scratch/phase-2/feral-gate-verdict.md`](../.scratch/phase-2/feral-gate-verdict.md),
+with the coupling evidence in `.scratch/phase-2/feral-coupling-audit.md`:
+
+| Box | Verdict |
+|---|---|
+| feral shipped without a structural change to `rankUpgrades` or its seams | **PASS** |
+| ≥3 real characters produce believable shortlists | **PARTIAL** — `sme-rank-review` returned trust-with-caveats and filed carry-forward 41; shredzepelin's capture is an off-tank fight, so usable characters is 2 of 3 (ticket 06, 2026-08-08) |
+
+**Those two boxes are deliberately not written up here.** This sitting was scoped
+to the five closed by `caches` / `disclosure-and-caps` / `apply-view`, and a gate
+box is closed by the slice that owns it recording its own evidence — not by a
+neighbouring entry summarising a verdict file.
+
+> **Superseded 2026-08-07.** Ticket 05's own entry below (2026-08-06, "feral as
+> the second spec") records both boxes against its own evidence, which is what
+> this paragraph was waiting for. The gate now stands at **7 of 8 recorded**,
+> and PLAN.md §14 is ticked to match. The one open box — ≥3 characters produce
+> believable shortlists — remains a live domain decision, not a formality, and
+> §14's "no phase starts until the previous gate is written" still binds Phase 3
+> until it closes.
+
+---
+
+## 2026-08-05 — Phase 2 gate: the report-events fallback route
+
+Closes:
+
+> ☑ fallback route exercised on a character with no ranked kills
+
+Owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`.
+
+### "No ranked kills" is about a ranked parse, not about whether the boss died
+
+The ticket asked for a character with no ranked kills, and the obvious reading —
+find a wipe-only report — is the wrong one. All three parts below are one
+committed script, so this is re-runnable from a fresh worktree:
+
+```bash
+python scripts/probe_ranked_route.py --name slamaltman --server-slug dreamscythe --region US
+```
+
+**Part 1, kills.** Every one of slamaltman's 25 most recent reports contains
+kills — 25/25 had at least one, and the SSC / TK reports run 10 kills out of 11
+boss fights. There was no wipe-only report to capture. (Skip this part with
+`--skip-kills`; it is the expensive one, one query per report.)
+
+**Part 2, ranks.** The distinction that matters is `encounterRankings`, which is
+what the `ranked` route resolves through. Slamaltman returns
+`totalKills=None, ranks=0` on encounters 623 (Hydross), 624 (The Lurker Below)
+and 625 (Leotheras) — encounters he has ten kills on. The encounter IDs were
+confirmed against `worldData.zones` (zone 1010, SSC / TK) before being trusted,
+because a wrong id returns the same empty result as an unranked character.
+
+**Part 3, control** — because zero ranks only means "no ranked kills" if the
+query is capable of returning a non-zero. Hydross has 100 ranked characters; the
+top of that leaderboard (Seonsu @ Herod) returns `totalKills=19, ranks=19` from
+the *same* query shape. The query works; slamaltman is genuinely unranked.
+
+Verdict line from the run on 2026-08-05:
+
+```
+  slamaltman has NO ranked kills -- the 'report-events' fallback
+  is the only route that reaches this character's gear.
+```
+
+So slamaltman is himself the character the gate box asks for, and the fixture is
+a real capture rather than a contrived one.
+
+### The capture
+
+```bash
+python wcl_probe.py --name slamaltman --server-slug dreamscythe --region US \
+  --report-code VGjFb3mtX9xHgyav \
+  --raw-out test/fixtures/slamaltman-report-events.raw.json
+```
+
+~12.62 points against the 3,600/hour budget. Written: 25 combatants, 19 gear
+entries for slamaltman, plus the buffs table — committed.
+
+The captured fight is Hydross the Unstable with `kill: true`. That is not a
+contradiction and the test asserts it on purpose: the route is `report-events`
+because the character has no ranked *parse*, not because the boss lived.
+
+**The first capture was wrong, and the way it was wrong is the lesson.** It came
+from report `mKTA9V7Lx4Ck2DXf` (Magtheridon), which is slamaltman's one
+**protection** night among his recent reports — talents 0/44/17, 17,192 armour,
+a shield in the off-hand. Nothing objected, because the fixture builder
+hardcoded ret's `[5, 11, 45]` on the false claim that `--raw-out` does not
+persist tree points. It does. Every downstream number was ret EP weights and
+the ret P2 preset applied to a tank set, and the only visible symptom was a
+baseline of 758.98 DPS against the ranked fixture's 2003.26 — which reads as a
+plausible "different report, different gear" until you resolve the items.
+
+Caught by the domain axis of the pre-merge review, not by any test. The builder
+now reads `talents` from the capture and throws when it cannot, and
+`packages/core/test/report-events-fallback.test.ts` asserts the build is ret
+(retribution plurality, empty off-hand). Re-captured from a ret fight, the
+fallback baseline is **2003.26** — identical to the ranked fixture, which is the
+right answer for the same character's same gear.
+
+**The fixture was fixed; the engine gap was not.** Nothing on the resolution
+path calls `classifySpec`, so any character who tanks or off-specs on some
+nights can still resolve to a fight they played in another spec and be simmed
+against the wrong preset and EP weights. That is
+`.scratch/carry-forward/issues/40-fight-resolution-is-not-spec-aware.md`, and it
+carries an open product decision: preferring a spec-matching fight is
+uncontroversial, but the fallback when none exists ("assume their last fight is
+their spec") only produces a right answer once the tool can sim that other spec,
+which needs more than the one shipped spec.
+
+Check which report a fresh worktree's fixture actually holds, and that it is
+ret, without spending points:
+
+```bash
+python -c "import json; d=json.load(open('test/fixtures/slamaltman-report-events.raw.json')); a={x['id']:x['name'] for x in d['actors']}; e=[v for v in d['combatant_info_events'] if a.get(v['sourceID'],'').lower()=='slamaltman'][0]; print(d['report_code'], d['fight']['name'], [t['id'] for t in e['talents']], 'offhand=', e['gear'][16]['id'])"
+```
+
+Expected: `VGjFb3mtX9xHgyav Hydross the Unstable [5, 11, 45] offhand= 0`.
+
+### The behaviour
+
+`Ranking` had no `fight` field, so nothing carried the route out to a caller.
+Added `Ranking.fight: ResolvedFight` (reportCode, fightId, encounterName,
+killedAt, route) per PLAN.md §4, and `resolveFight` now prefers a ranked
+summary and falls through to report-events rather than depending on list order.
+
+```bash
+pnpm vitest run packages/core/test/report-events-fallback.test.ts
+```
+
+11 passing: the fixture loads to 17 sim slots from 19 WCL entries, `rankUpgrades`
+returns a `Ranking` for a character who previously reached
+`RankError('no-qualifying-fight')`, `ranking.fight.route` reads `report-events`,
+and the throw still happens when neither route has a fight.
+
+`pnpm verify` green on the branch.
+
+---
+
+## 2026-08-06 — Phase 2, ticket 05: feral as the second spec (gate boxes)
+
+Branch `phase-2/feral`, merged into `phase-2/trust` as `e841a67`. Full verdict
+in `.scratch/phase-2/feral-gate-verdict.md`, measurements in
+`.scratch/phase-2/feral-coupling-audit.md`, review in
+`docs/reviews/phase-2-feral.md`.
+
+### ☑ Box — feral shipped without a structural change to `rankUpgrades` or its seams
+
+The §14 box is a falsification test, and the claim survived.
+
+The box asks what **feral** forced, so the diff is the feral slice against the
+integration branch it branched from — not against `dev`, which would fold in
+the four trust slices that ran first and *did* touch `seams/`:
+
+```bash
+# 42db95a = phase-2/trust before the feral merge; e841a67^2 = the feral tip.
+# Pinned to SHAs, not branch names: `phase-2/trust~1...phase-2/feral` was the
+# original form and is wrong, because feral is an *ancestor* of trust~1, so
+# their merge-base is feral itself and the three-dot diff is always empty
+# (carry-forward 82).
+git diff 42db95a...e841a67^2 --stat -- \
+  packages/core/src/rank.ts packages/core/src/seams/ \
+  packages/core/src/compose.ts
+# => packages/core/src/rank.ts | 20 ++++++++++++++++----
+```
+
+`seams/` and `compose.ts` do not appear: **0 lines**. No fourth port, no port
+signature changed. `rankUpgrades`'s signature, `Deps`, `RankInput` and `Ranking` are
+unchanged; `rank.ts` moved 20 lines turning `PRESET_ID` into a per-spec lookup.
+`spec.ts` did change shape (+95) to carry `DetectedSpecId` and form-uptime
+disambiguation, which §14 anticipated in the words "plus the disambiguation
+confidence field".
+
+That `Deps` already carried `raidSimSkeleton`, `epWeights`, `gemPalette` and
+`pool` as **data rather than ports** (ADR-0019) is what made this cheap, and is
+the thing the box was really testing.
+
+**Reported separately, per ticket 05:** `scripts/assemble_universe.py` *did*
+need a parameterisation pass. Six of its seven named hard-codings were paths;
+`CLASS_PALADIN` and `ret_eligible_d7` were logic. The generator is a build-time
+script producing one of the `Deps` data fields, so it is outside the box as
+written — but it is a genuine spec-coupling surface the box does not name, and
+saying so is part of the deliverable.
+
+### ☐ Box — ≥3 real characters produce believable shortlists (PARTIAL)
+
+Three characters rank end to end: slamaltman (ret), shredzepelin and nexess
+(feral cat), from committed fixtures under `test/fixtures/`.
+
+**The box does not close.** "Believable" is a domain judgment, and only
+shredzepelin was ever put through `sme-rank-review` — it returned
+**trust-with-caveats** and found a real defect (carry-forward 41). The
+remaining work is a domain pass on slamaltman and nexess, not more pipeline
+work.
+
+**Update, 2026-08-08 — shredzepelin's shortlist is measured against the wrong
+baseline, so the count of usable characters is 2, not 3.** His capture
+(`shredzepelin.raw.json`, Morogrim Tidewalker) is a fight where he was **backup
+tank**: 99.1% cat form, but wearing tank gear for a job that never came up.
+Reported by the user from raid knowledge, not derivable from the log.
+`classifyFeralForm` reports confidence ~1.0 and is *correct about the form*
+while saying nothing about the role, so the fight looked like a clean cat
+parse. Consequence: Icebound Cloak and Violet Signet (zero agility, zero AP,
+both carrying defense rating) are ranked against a cat baseline, which is why
+backs and fingers dominate his shortlist — the `sme-rank-review` §2 verdict
+that this was "mostly correct rather than a bug" is corrected in
+[`sme-rank-judgment-feral-shredzepelin.md`](../.scratch/handoffs/sme-rank-judgment-feral-shredzepelin.md).
+
+Measured, from the `buffs_table` auras already in each fixture:
+
+| fixture | fight | form | Salvation |
+|---|---|---|---|
+| shredzepelin | Morogrim | 99.1% Cat | **absent** |
+| shredzepelin-bear | Karathress | 69.1% Bear | absent |
+| nexess | Karathress | 96.6% Cat | **100%** |
+
+Shredzepelin/Morogrim and nexess/Karathress are both ~99% cat, so form uptime
+cannot separate them and salvation does — it is stripped from anyone who might
+tank. Re-run with the one-liner in
+[ticket 06](../.scratch/phase-2/issues/06-shredzepelin-gear-incorrect.md).
+
+Shipped for this: `salvationUptimeOf`, `FightSummary.salvationUptime` carried
+through `resolveFight`, and `fightProvenanceLines` — every run now names its
+source fight, and a confident DPS parse with no salvation is flagged. The flag
+**asks rather than asserts**, because `capture_fixture.py:56` scopes the buffs
+table to one player, so "no paladin in the raid" cannot be ruled out. Closing
+this box still needs a genuine cat capture for shredzepelin (or a domain pass
+on the two clean characters) — the disclosure makes the problem visible, it
+does not make his shortlist believable.
+
+The defect behind the caveat is largely fixed. Worn items absent from their own
+universe, all three characters, before and after:
+
+```bash
+# ticket 41 carries the full script and both counts
+```
+
+| character | before | after |
+|---|---|---|
+| slamaltman | 6 | **4** |
+| shredzepelin | 12 | **8** |
+| nexess | 6 | **2** |
+
+The feral ranged slot went from 2 idols to 4, admitting Everbloom Idol and Idol
+of the Raven Goddess — the two the SME review said were missing. Cause was not
+"no db source records" (29 shipping ret rows have none either) but that
+`wowsims_curated_item_ids()` was read only to *label* rows already admitted,
+never to grant membership.
+
+### What shipped alongside
+
+- `data/wowhead-lists/feral/{p1-p2,p3}.json` — 166 hand-collected rows. The
+  pre-merge domain axis validated every one against the pinned db: all ids
+  exist, names byte-identical, slots match `ITEM_TYPE_SLOT[type]`.
+- `data/universes/feral-p{2,3}.json` — feral's first candidate universes.
+- A new `{kind:"unknown"}` `ItemSource` for items with no recorded origin. It
+  carries no fields, so nothing is invented, and having no `zone` keeps it out
+  of every raid and boss filter.
+
+**Correction (2026-08-09, carry-forward 74).** This section previously claimed
+`data/universes/ret-p*.json` "grew by additions only — p2 +5, p3/p4/p5 +3, zero
+deletions, no existing row altered". Every part of that is false against the
+real merge-base; it summarised a diff that is not the one it named. Retracted
+and replaced by the measurement below.
+
+```bash
+BASE=$(git merge-base dev phase-2/trust)
+git diff "$BASE"...phase-2/trust --stat -- data/universes/ret-p{2,3,4,5}.json
+```
+
+Line-level (6563 insertions, 2506 deletions) overstates the semantic change,
+because these files are pretty-printed and a one-key edit rewrites a row. Keyed
+by `itemId` against the same merge-base:
+
+| file | entries base → tip | added | removed | rows altered |
+|---|---|---|---|---|
+| ret-p2 | 230 → 240 | 10 | 0 | 230 |
+| ret-p3 | 356 → 394 | 38 | 0 | 356 |
+| ret-p4 | 403 → 441 | 38 | 0 | 403 |
+| ret-p5 | 484 → 534 | 50 | 0 | 484 |
+
+So: **no row was deleted**, but **every surviving row was altered**, in three
+ways, all intended.
+
+1. `sources` — every row gained an `origin` field (`"db"`, `"atlasloot"`,
+   `"wowhead"`, …). That is the provenance work this phase shipped; it accounts
+   for all 1473 altered rows on its own.
+2. `curatedSets` (23–26 rows/file) — added, naming which wowsims presets equip
+   the item.
+3. `bisTags`/`bisSets` (11–14 rows/file) — the flat `["BiS"]` label became a
+   phase-scoped claim.
+
+Of (3), 11 rows at p2 and 12 at p3/p4/p5 lost `["BiS"]` and gained no `bisSets`.
+This is the **intended** fix for carry-forward 47 §1, not a regression: all of
+them are `curatedSets` of `p1` / `preraid` only, i.e. items last curated for a
+stage earlier than the one being ranked, so their BiS claim had expired. They
+keep `curatedSets`, so the provenance survives — only the current-stage verdict
+is withdrawn. The rule is `bis_set_labels_for_max_phase`
+(`scripts/assemble_universe.py:360`); the affected rows are Justicar T4 pieces,
+Black Felsteel Bracers, Vengeance Wrap, Ironstriders of Urgency, Mithril Chain
+of Heroism, Ring of a Thousand Marks, Girdle of the Endless Pit, Grips of
+Deftness, Mask of the Deceiver, and (p3+) Haramad's Bargain.
+
+The 10–50 added rows per file are wowsims-curated ret items that were being
+dropped in silence, plus the Band of Eternity / Shattered Sun families that
+entered with the vendor slice.
+
+The phase-2 spec's boundary (`.scratch/phase-2/spec.md:84`) says a byte-level
+change to `ret-p*.json` "is a finding to report". It is reported here: the
+change is real, large, and attributable to this phase's own provenance and
+BiS-scoping work rather than to feral's slice.
+
+### A silent wrong answer, caught by review and fixed
+
+Worth logging because it is the failure mode PLAN.md names as this project's
+worst case. Universes are cumulative, so a p3 build also reads the p1-p2
+Wowhead list. Where two guides phrased the same item differently and only the
+later phrasing parsed, the item shipped a real `raid` source at p3 and a
+zoneless `{kind:"unknown"}` at p2 — and `matchesZone` requires a zone, so at p2
+the item silently vanished from its own raid's view with no error.
+
+30017 Telonicus's Pendant of Mayhem is a Kael'thas drop, written
+`Quest: … (Tempest Keep: The Eye)` on the feral p1-p2 page. Fixed by teaching
+the parser that shape plus the two vendor phrasings; pinned by four cross-tier
+source-stability tests and one asserting a Wowhead-listed item never ships as
+`unknown`, each verified to fail without the fix.
+
+`pnpm verify` green on the merged tip: **357 tests, 32 files**.
+
+### Where this leaves Phase 2
+
+Seven of the eight §14 Phase 2 boxes are closed by their owning tickets. The
+open one is **"≥3 real characters produce believable shortlists"**, above, and
+it needs a human/SME reading of two shortlists rather than code.
+
+**Reconciled into PLAN.md 2026-08-07.** §14's gate line had shown one ☑ against
+seven written-up boxes, because the five from `caches` / `disclosure-and-caps` /
+`apply-view` sat on `claude/verification-log-five-boxes-4c2a8c`, stranded off
+`phase-2/trust` and merged into no branch until then. Ticking the line was the
+whole reconciliation; no box's evidence changed.
+
+**Run the two SME passes after this branch lands on `dev`, not before.** The
+feral universe and the nexess shortlist exist only here — `data/universes/feral-*`
+is absent from `dev` — so a pass run there could not read them. The carry-forward
+work also fixed source data an SME reads first: before it, ret P5 showed
+Crystalforge Breastplate sourced from Morogrim Tidewalker in Serpentshrine (a
+Tempest Keep piece), token names in `boss` fields, and `Crafted · 2` for a
+profession. Reviewing that would have spent a domain pass on known-fixed data.
+
+## 2026-08-08 — Shredzepelin's cat set now reads from a DPS fight (ticket 06)
+
+Ticket 06 shipped disclosure and an off-tank warning but left the scope-3 item
+open: the warning told the reader to "pick another fight" and there was no other
+fight to pick, because `feralOfflineRecordings` records exactly one fight per
+fixture and shredzepelin's only cat capture was the Morogrim off-tank kill.
+
+### The fight was chosen by measurement, not by preference
+
+Probed all ten SSC/TK kills in report `YwahQLgv2jBrZGn6` for form uptime and
+salvation. Three fights are unambiguous DPS — Leotheras (26), Void Reaver (63),
+Solarian (73): high cat form *and* full salvation. Void Reaver was taken because
+its 98.8% cat form is nearest to Morogrim's 99.1%, which holds form uptime fixed
+and isolates the tank-vs-DPS variable.
+
+Re-run (needs WCL credentials in `.env`; costs API points):
+
+```bash
+python scripts/capture_fixture.py --name shredzepelin --server-slug dreamscythe \
+  --region US --report YwahQLgv2jBrZGn6 --fight 63 \
+  --out test/fixtures/shredzepelin-cat.raw.json
+```
+
+### The gear confirms the diagnosis rather than assuming it
+
+Nine of seventeen slots differ between the two fights. Both pieces the SME
+handoff flagged — Icebound Cloak and Violet Signet, the zero-agility tank items
+— are gone on Void Reaver, replaced by The Frost Lord's War Cloak and Ring of
+Lethality. The original "the gear read is wrong" report was right about the
+gear and wrong about the cause: the parser was faithful, the fight was not.
+
+### A live detector bug the new fixture exposed
+
+`SALVATION_AURAS` listed only the two Blessings. This raid used **Hand of
+Salvation** — a distinct spell, not a rank — so the Void Reaver fight scored
+salvation 0 and drew the exact false off-tank warning ticket 06 exists to
+prevent. Both real captures matter here: nexess carries `Greater Blessing of
+Salvation`, shredzepelin's cat fight carries `Hand of Salvation`. Fixed by
+adding the third name; pinned by three direct `salvationUptimeOf` unit tests
+(including a partial-uptime case, since Hand of Salvation is also a short
+emergency cast and presence must not be read as a fight-long buff).
+
+### Result
+
+`pnpm rank --spec feral --offline --max-phase 2`, shredzepelin:
+
+- Provenance reads `Void Reaver … spec confidence 100%`, and the salvation
+  warning correctly stays silent.
+- Baseline **2067.99** vs the off-tank fight's **1917.50** — the old baseline
+  was measured in tank gear, so every prior delta was inflated against it.
+- The shortlist shape the SME called out is gone: 13 of the top 15 rows were
+  backs and fingers, now the top rows are belts, legs and neck, with two cloaks
+  and one ring.
+
+`pnpm verify` green: 459 tests + 2 todo, 32 files.
+
+The Morogrim fixture is **kept, not dropped** — `shredzepelin.raw.json` is now
+the regression fixture for the off-tank warning itself, and the feral form tests
+bind it as `offtank` rather than `cat` so the name stops asserting the wrong
+thing. This closes the last open Phase 2 §14 gate box's shredzepelin half; the
+SME re-read of the corrected shortlist is still a human step.

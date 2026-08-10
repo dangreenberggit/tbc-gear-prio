@@ -4,16 +4,21 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { ItemSlot } from "../src/items.js";
 import {
+  bossesInPool,
   filterByZone,
   filterPoolByPhase,
   filterPoolByZone,
   ITEM_SOURCE_KINDS,
   poolFromUniverse,
   simSlotsForPoolSlot,
+  sourceMatchesBoss,
+  validateViewFilter,
+  viewFilterValue,
   zonesInPool,
   type ItemSourceKind,
   type PoolEntry,
 } from "../src/pool.js";
+import { realPoolEntry } from "./real-source.js";
 import { SIM_ORDER } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -146,33 +151,21 @@ describe("filterPoolByZone", () => {
   });
 
   it("matches any zone in sources[], not only the primary source", () => {
-    const multi: PoolEntry[] = [
-      {
-        itemId: 30129,
-        name: "Crystalforge Breastplate",
-        slot: "chest",
-        phase: 2,
-        source: {
-          kind: "token",
-          zone: "Tempest Keep",
-          token: "Chestguard of the Forgotten Conqueror",
-        },
-        sources: [
-          {
-            kind: "token",
-            zone: "Tempest Keep",
-            token: "Chestguard of the Forgotten Conqueror",
-          },
-          { kind: "raid", zone: "Serpentshrine Cavern", boss: "Lady Vashj" },
-        ],
-      },
-    ];
+    // 32590 Nethervoid Cloak is a T6-era trash drop that genuinely drops in
+    // both Hyjal Summit and Black Temple, so the real universe row exercises
+    // a secondary-source zone without inventing anything. Its sources[0] is
+    // Hyjal Summit, so a Black Temple match can only come from sources[1..].
+    //
+    // This used to use 30129 and its Serpentshrine Cavern row, which was not a
+    // second true zone but the transcription bug in carry-forward 50 — the
+    // test was pinning the defect in place.
+    const multi: PoolEntry[] = [realPoolEntry(32590, "ret-p3")];
     expect(
-      filterPoolByZone(multi, "Serpentshrine Cavern").map((e) => e.itemId)
-    ).toEqual([30129]);
+      filterPoolByZone(multi, "Black Temple").map((e) => e.itemId)
+    ).toEqual([32590]);
     expect(
-      filterPoolByZone(multi, "Tempest Keep").map((e) => e.itemId)
-    ).toEqual([30129]);
+      filterPoolByZone(multi, "Hyjal Summit").map((e) => e.itemId)
+    ).toEqual([32590]);
   });
 });
 
@@ -190,6 +183,125 @@ describe("zonesInPool", () => {
       "Karazhan",
       "Serpentshrine Cavern",
     ]);
+  });
+});
+
+describe("bossesInPool", () => {
+  // Deliberately covers what `zonesInPool`'s fixture cannot: a boss on a
+  // secondary `sources` entry, a zoneless kind, a bossless raid source, and
+  // one name shared by two zones.
+  const bossPool: PoolEntry[] = [
+    {
+      itemId: 1,
+      name: "Kara drop",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Karazhan", boss: "Prince Malchezaar" },
+    },
+    {
+      itemId: 2,
+      name: "Kara trash",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Karazhan" },
+    },
+    {
+      itemId: 3,
+      name: "Badge, also a BT drop",
+      slot: "finger",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "badge", cost: 25 },
+      sources: [
+        { kind: "badge", cost: 25 },
+        { kind: "raid", zone: "Black Temple", boss: "Illidan Stormrage" },
+      ],
+    },
+    {
+      itemId: 4,
+      name: "Shared name",
+      slot: "neck",
+      phase: 1,
+      curationHint: 1,
+      source: { kind: "raid", zone: "Black Temple", boss: "Prince Malchezaar" },
+    },
+  ];
+
+  it("returns sorted unique boss names, including from secondary sources", () => {
+    expect(bossesInPool(bossPool)).toEqual([
+      "Illidan Stormrage",
+      "Prince Malchezaar",
+    ]);
+  });
+
+  it("scopes to one zone when given", () => {
+    expect(bossesInPool(bossPool, "Karazhan")).toEqual(["Prince Malchezaar"]);
+    expect(bossesInPool(bossPool, "Black Temple")).toEqual([
+      "Illidan Stormrage",
+      "Prince Malchezaar",
+    ]);
+  });
+
+  it("returns nothing for a zone with no bosses in the pool", () => {
+    expect(bossesInPool(bossPool, "Zul'Aman")).toEqual([]);
+  });
+
+  // A name listed as known must actually filter to something, or the
+  // validation would reject spellings the filter accepts and vice versa.
+  // Through `sourceMatchesBoss` — the same predicate `view.ts`'s `matchesBoss`
+  // calls — rather than a fourth hand-rolled copy of the condition. A test
+  // that re-implements the filter can agree with itself while `applyView`
+  // disagrees, which is the failure it is supposed to catch.
+  it("only lists names applyView's boss filter would actually keep", () => {
+    for (const zone of [undefined, "Karazhan", "Black Temple"]) {
+      const listed = bossesInPool(bossPool, zone);
+      expect(listed.length).toBeGreaterThan(0);
+      for (const boss of listed) {
+        const matched = bossPool.filter((e) =>
+          (e.sources ?? [e.source]).some((s) =>
+            sourceMatchesBoss(s, boss, zone)
+          )
+        );
+        expect(
+          matched.length,
+          `${boss} in ${zone ?? "any zone"}`
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+// The CLI shells out to `wowsimcli`, so `main()` has no test — which is
+// exactly how `--boss all` came to exit 2 while `applyView` treated "all" as
+// "no filter" (carry-forward 75 review, A1). The decision lives here, pure,
+// so the sentinel is pinned even though the wiring is not.
+describe("validateViewFilter", () => {
+  const known = ["Karazhan", "Black Temple"];
+
+  it("passes the documented 'all' sentinel through unvalidated", () => {
+    expect(validateViewFilter("all", known).ok).toBe(true);
+    // "all" is never a real zone or boss name, so validating it literally
+    // would reject it — the regression this pins.
+    expect(known).not.toContain("all");
+  });
+
+  it("passes an absent filter", () => {
+    expect(validateViewFilter(undefined, known).ok).toBe(true);
+  });
+
+  it("passes a known name and rejects a typo", () => {
+    expect(validateViewFilter("Karazhan", known).ok).toBe(true);
+    const bad = validateViewFilter("Karazan", known);
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) expect(bad.known).toEqual(known);
+  });
+
+  it("agrees with applyView on what counts as no filter", () => {
+    expect(viewFilterValue("all")).toBeUndefined();
+    expect(viewFilterValue(undefined)).toBeUndefined();
+    expect(viewFilterValue("Karazhan")).toBe("Karazhan");
   });
 });
 
@@ -232,6 +344,25 @@ describe("poolFromUniverse", () => {
   });
 });
 
+describe("realPoolEntry (test helper, carry-forward 37)", () => {
+  it("returns the item's real source from the committed universe", () => {
+    const entry = realPoolEntry(29381);
+    expect(entry.name).toBe("Choker of Vile Intent");
+    // `origin` is part of the real row: the helper's whole purpose is to hand
+    // back what actually shipped, so asserting it here keeps the helper honest
+    // rather than letting it drift from the committed data (carry-forward 54).
+    expect(entry.source).toEqual({
+      kind: "badge",
+      cost: 25,
+      origin: "wowhead",
+    });
+  });
+
+  it("throws rather than silently returning a fixture for an id not in the universe", () => {
+    expect(() => realPoolEntry(999999)).toThrow(/999999/);
+  });
+});
+
 describe("item-source-kinds.json", () => {
   // The union/generated-list agreement is enforced at compile time in pool.ts
   // (`_JsonCoversUnion` / `_UnionCoversJson`), which is possible now that the
@@ -255,6 +386,7 @@ describe("item-source-kinds.json", () => {
       heroic: true,
       pvp: true,
       world: true,
+      unknown: true,
     };
     // Read the JSON off disk rather than the generated re-export: that is the
     // file Python opens, and checking the generated copy would only prove the
@@ -290,7 +422,23 @@ describe("data/universes/ret-p2.json", () => {
     // Doom Lord Kazzak drops now resolving through AtlasLoot's WorldBossesBC.
     // 238 -> 230: classAllowlist is enforced, evicting 8 class-specific SSC/TK
     // trinkets a paladin cannot equip (ticket 25).
-    expect(entries.length).toBe(230);
+    // 230 -> 235: the wowsims curated gear sets now grant membership rather
+    // than only labelling rows that got in some other way, admitting the 5
+    // curated ret items with no recorded origin (ticket 41). They carry
+    // `{kind: "unknown"}` and so are filtered out of every raid view.
+    // 235 -> 236: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
+    // membership, the same way badge/pvp/crafted/rep already did, admitting
+    // 23203 Libram of Fervor via its "World Drop - Azeroth" Wowhead text.
+    // 236 -> 240: a curated item can carry a *real* db source that is still
+    // list-only shaped (no zone) -- `curated_list_only` in
+    // assemble_universe.py now grants membership for that shape the same way
+    // `curated_unsourced` already did for no source at all (ticket 41
+    // remainder). +23522 Ragesteel Breastplate, +28429 Lionheart Champion,
+    // +28430 Lionheart Executioner, +33173 Ragesteel Shoulders — all
+    // `{kind: "crafted"}`, all wowsims-curated, none independently a member
+    // because their own Wowhead row uses "Crafting:" prose the parser does
+    // not read (ticket 45 leaves that prose unmodeled by design).
+    expect(entries.length).toBe(240);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

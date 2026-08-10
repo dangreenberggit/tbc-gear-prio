@@ -2,6 +2,10 @@
 """
 fetch_protos.py -- pin the wowsims .proto schema into data/proto/ (PLAN.md §8.1).
 
+This script is one of two writers of data/wowsims.lock.json -- it owns the
+"proto" key (OWNED_KEY below) and nothing else. Adding a third writer? Read the
+contract in scripts/pinned_fetch.py first.
+
 Same pin as everything else in data/wowsims.lock.json: one commit sha, sha256
 per file. Unlike vendor/ (gitignored, rebuilt locally), data/proto/ IS
 committed -- the .proto files are the generation *input*, small, and reviewable
@@ -33,6 +37,15 @@ ROOT = Path(__file__).resolve().parents[1]
 LOCKFILE = ROOT / "data/wowsims.lock.json"
 DEST = ROOT / "data/proto"
 REPO = "wowsims/tbc-new"
+
+# data/wowsims.lock.json has two writers: sync_wowsims.py owns the upstream pin
+# (its OWNED_KEYS), this script owns "proto" and nothing else. The rule for both
+# is the same: touch only your own key, carry every other key through untouched.
+# Breaking it is silent -- --update once rebuilt the lockfile from its own keys
+# and deleted this block outright, and the lockfile still parsed fine afterwards.
+# scripts/check_lock_merge.py enforces the split; add a key here and you must
+# tell that check about it.
+OWNED_KEY = "proto"
 
 # proto/*.proto at the pinned commit, upstream path -> local filename (same).
 # ui.proto (IndividualSimSettings) imports api.proto (RaidSimRequest), apl.proto,
@@ -72,9 +85,8 @@ def fetch(sha: str, path: str) -> bytes:
 def do_fetch(lock: dict) -> int:
     sha = lock["commit"]
     DEST.mkdir(parents=True, exist_ok=True)
-    proto_lock = lock.setdefault("proto", {"commit": sha, "files": {}})
-    files = proto_lock["files"]
 
+    files: dict = {}
     for name in PROTO_FILES:
         blob = fetch(sha, name)
         (DEST / name).write_bytes(blob)
@@ -82,7 +94,11 @@ def do_fetch(lock: dict) -> int:
         files[name] = entry
         print(f"    {name:<16} {len(blob):>6,} bytes  {entry['sha256'][:12]}")
 
-    proto_lock["commit"] = sha
+    # Re-read rather than writing back the dict we were handed: --update may
+    # have rewritten the file since load_lock(), and this script owns exactly
+    # one key. See OWNED_KEY and the note in sync_wowsims.merge_lock().
+    lock = load_lock()
+    lock[OWNED_KEY] = {"commit": sha, "files": files}
     LOCKFILE.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
     print(f"\n  wrote {len(PROTO_FILES)} proto files to {DEST.relative_to(ROOT)}")
     print(f"  lockfile updated: {LOCKFILE.relative_to(ROOT)}")

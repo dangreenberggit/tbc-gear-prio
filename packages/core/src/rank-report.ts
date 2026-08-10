@@ -7,6 +7,7 @@
  * assets, open in any browser.
  */
 
+import { fightProvenanceLines, hitCapBanner } from "./disclosure.js";
 import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
@@ -38,7 +39,15 @@ export function formatItemSource(source: ItemSource): string {
     case "badge":
       return `${source.cost} badges`;
     case "crafted":
-      return `Crafted · ${source.profession}`;
+      // The profession alone does not tell a player whether they can make it.
+      // A recipe gated behind a reputation is a grind, and that is the part
+      // worth surfacing (ticket 65 step 4). `recipeZone` stays unrendered, as
+      // it always has — raid attribution is a filter concern, not a label.
+      return source.recipeFaction
+        ? `Crafted · ${source.profession} · ${source.recipeFaction}${
+            source.recipeStanding ? ` ${source.recipeStanding}` : ""
+          }`
+        : `Crafted · ${source.profession}`;
     case "rep":
       return `${source.faction} · ${source.standing}`;
     case "heroic":
@@ -49,6 +58,8 @@ export function formatItemSource(source: ItemSource): string {
         : `PvP · ${source.via}`;
     case "world":
       return "World drop";
+    case "unknown":
+      return "Source not recorded";
   }
 }
 
@@ -108,6 +119,17 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ranking.baseline.stdev > 0
       ? `<p class="noise-note">Order within ~±${ranking.baseline.stdev.toFixed(1)} DPS is run noise, not a ranked wishlist.</p>`
       : "";
+  // Rows say "widens your gap to N", so the page has to say what the gap is
+  // and carry the Heroic Presence caveat that makes it uncertain. Rendered
+  // from `ranking.caps` / `ranking.fight`, which `renderRankHtml` already
+  // receives — the CLI and the report read one source rather than two
+  // (carry-forward 76).
+  const capBanner = `<p class="cap-banner">${esc(hitCapBanner(ranking.caps.hit))}</p>`;
+  const provenanceLines = fightProvenanceLines(ranking.fight);
+  const provenance = provenanceLines.length
+    ? `<p class="provenance">${provenanceLines.map(esc).join("<br />")}</p>`
+    : "";
+
   const slotsWithItems = SLOT_ORDER.filter(
     (s) => (bySlot.get(s) ?? []).length > 0
   );
@@ -145,6 +167,15 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const set = item.setBonusNote
             ? `<div class="set">${esc(item.setBonusNote)}</div>`
             : "";
+          // The HTML report rendered neither cap annotation, so the page could
+          // banner a hit gap and then recommend an item that widened it with
+          // nothing on the row saying so (carry-forward 47 §2).
+          const hitNote = item.hitDriven
+            ? `<div class="hit-note">most of this gain is hit rating, and you are under the cap</div>`
+            : "";
+          const hitLoss = item.hitRegression
+            ? `<div class="hit-note down">costs ${item.hitRegression.lost} hit rating — widens your gap to ${Math.round(item.hitRegression.gapAfter)}</div>`
+            : "";
           const owned = item.owned
             ? `<span class="pill owned">owned</span>`
             : "";
@@ -155,8 +186,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const magnitude = reportItem.magnitudeWarning
             ? `<span class="pill warn">sim magnitude</span>`
             : "";
+          // "BiS" is a claim about a stage, exactly as upstream scopes it, so
+          // the badge names the stage rather than implying an absolute verdict
+          // (carry-forward 47 §1).
+          const bisSets = item.bisSets;
           const tags = (item.bisTags ?? [])
-            .map((t) => `<span class="pill tag">${esc(t)}</span>`)
+            .map((t) =>
+              t === "BiS" && bisSets?.length
+                ? `<span class="pill tag" title="equipped by the pinned upstream ${bisSets.join(" and ")} gear set${bisSets.length > 1 ? "s" : ""}">${esc(bisSets.join("/"))} BiS</span>`
+                : `<span class="pill tag">${esc(t)}</span>`
+            )
             .join("");
           const deltaCls =
             item.deltaDps > 0
@@ -171,6 +210,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <div class="meta">${esc(formatItemSource(item.source))} ${owned}${pvp}${magnitude}${tags}</div>
     ${alternate}
     ${set}
+    ${hitNote}
+    ${hitLoss}
   </div>
   <div class="nums">
     <div class="${deltaCls}">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
@@ -252,6 +293,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         : ""
     }
     ${noiseNote}
+    ${capBanner}
+    ${provenance}
 
     <nav class="nav" aria-label="Slots">${nav}</nav>
 

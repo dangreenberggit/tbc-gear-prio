@@ -9,67 +9,72 @@
     "Tempest Keep",
     "World Bosses"
   ],
+  "phaseRepFactions": [],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1405,
-  "universeTotal": 230,
-  "listOnlyMembership": 12,
+  "excludedNoSource": 1303,
+  "universeTotal": 240,
+  "listOnlyMembership": 15,
   "perSlot": {
     "back": 20,
-    "chest": 16,
-    "feet": 23,
-    "finger": 23,
+    "chest": 17,
+    "feet": 24,
+    "finger": 25,
     "hands": 18,
     "head": 17,
-    "legs": 13,
-    "neck": 17,
-    "ranged": 2,
-    "shoulder": 15,
+    "legs": 14,
+    "neck": 18,
+    "ranged": 3,
+    "shoulder": 16,
     "trinket": 16,
     "waist": 22,
-    "weapon": 10,
+    "weapon": 12,
     "wrist": 18
   },
   "sourceRecordAdds": {
-    "atlasloot": 196,
-    "db": 1695,
+    "atlasloot": 255,
+    "curated": 2,
+    "db": 1733,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 25
+    "wowhead": 9
   },
   "membershipByOrigin": {
-    "itemHasOrigin:atlasloot": 41,
-    "itemHasOrigin:db": 201,
+    "curated": 7,
+    "itemHasOrigin:atlasloot": 43,
+    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:db": 206,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 23,
-    "listOnly": 12,
+    "itemHasOrigin:wowhead": 7,
+    "listOnly": 15,
     "zoneMatch": 218
   },
   "exclusivePrimaryOrigin": {
-    "db": 201,
-    "atlasloot-only": 13,
+    "db": 206,
+    "atlasloot-only": 15,
     "two-hop": 10,
-    "wowhead-only": 6
+    "other": 2,
+    "wowhead-only": 7
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 230,
+    "total": 240,
     "casterOnlyReject": 74,
     "epFloorReject": 10,
     "combinedReject": 84,
-    "combinedKeep": 146,
-    "casterRejectPct": 32.2,
-    "combinedRejectPct": 36.5,
+    "combinedKeep": 156,
+    "casterRejectPct": 30.8,
+    "combinedRejectPct": 35.0,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 69,
-    "missed": 17,
-    "recallPct": 80.2,
+    "recalled": 74,
+    "missed": 12,
+    "recallPct": 86.0,
     "missedItems": [
       {
         "itemId": 19343,
@@ -80,12 +85,6 @@
       {
         "itemId": 22401,
         "name": "Libram of Hope",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23203,
-        "name": "Libram of Fervor",
         "slot": "ranged",
         "d7Eligible": true
       },
@@ -114,27 +113,9 @@
         "d7Eligible": true
       },
       {
-        "itemId": 28430,
-        "name": "Lionheart Executioner",
-        "slot": "weapon",
-        "d7Eligible": true
-      },
-      {
         "itemId": 28442,
         "name": "Stormherald",
         "slot": "weapon",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 29119,
-        "name": "Haramad's Bargain",
-        "slot": "neck",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 30257,
-        "name": "Shattrath Leggings",
-        "slot": "legs",
         "d7Eligible": true
       },
       {
@@ -142,12 +123,6 @@
         "name": "Flesh Handler's Gauntlets",
         "slot": "hands",
         "d7Eligible": false
-      },
-      {
-        "itemId": 30834,
-        "name": "Shapeshifter's Signet",
-        "slot": "finger",
-        "d7Eligible": true
       },
       {
         "itemId": 31033,

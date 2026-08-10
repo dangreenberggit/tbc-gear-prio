@@ -12,25 +12,79 @@ export {
   type ItemSourceKindName,
 } from "./item-source-kinds.generated.js";
 
-export type ItemSource =
+/**
+ * Which input asserted a source row.
+ *
+ * Orthogonal to `kind`, so it intersects the union rather than being repeated
+ * on all nine variants. It matters because the inputs are not equally
+ * trustworthy: `db`, `atlasloot` and `two-hop` are machine parses or curated
+ * files with correction notes, while `wowhead` is an agent transcribing a
+ * rendered page. Every defect in carry-forward 48-53 arrived on the `wowhead`
+ * path, and each was caught only by disagreeing with one of the others — so
+ * "how many independent witnesses does this claim have" is the question that
+ * finds this class, and it is unanswerable without this field.
+ */
+export type ItemSourceOrigin =
+  "db" | "atlasloot" | "two-hop" | "wowhead" | "curated" | "sunmote";
+
+export type ItemSource = { origin?: ItemSourceOrigin } & (
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "token"; zone: string; boss?: string; token: string }
   | { kind: "badge"; cost: number }
   /**
    * `recipeZone` is set only when the recipe itself drops in a raid, so raid
-   * views can attribute the craft to that raid's shopping list. Absent for
-   * vendor/reputation/world-drop recipes — see .scratch/carry-forward/issues/13.
+   * views can attribute the craft to that raid's shopping list.
+   *
+   * `recipeFaction*` is the vendor-sold counterpart: the recipe is bought at a
+   * standing rather than dropped, so there is no zone to claim and no raid
+   * shopping list to join. A recipe can have both routes; they are recorded
+   * independently rather than collapsed, because "drops in BT" and "costs
+   * Honored with the Ashtongue" are different costs to the player
+   * (ticket 65 step 4). `recipeFactionId` is the identity; the two strings are
+   * display, exactly as on the `rep` variant.
    */
   | {
       kind: "crafted";
       profession: string;
       recipeZone?: string;
       recipeBoss?: string;
+      recipeFaction?: string;
+      recipeStanding?: string;
+      recipeFactionId?: number;
     }
-  | { kind: "rep"; faction: string; standing: string }
+  /**
+   * `factionId` is the game-canonical faction id (`Faction.dbc`), agreed
+   * id-for-id by wowsims, `ui.proto` and AtlasLoot. It is the identity;
+   * `faction` is a display string with one consumer (`formatItemSource`) and
+   * must never be compared or joined on.
+   *
+   * Every faction has an id — Wowhead exposes it in the URL
+   * (`wowhead.com/tbc/faction=1011/lower-city`). A prose row states the faction
+   * in English, so `assemble_universe.rep_source` resolves that string against
+   * `data/faction_ids.json` (AtlasLoot's 20 TBC factions) and attaches the id.
+   *
+   * Still optional, because resolution can miss: a spelling absent from that
+   * table yields a row with no id rather than a dropped source, since the guide
+   * is the only witness for some vendor items. An unresolved faction is a gap
+   * in our extraction, not a faction without an id — see
+   * .scratch/carry-forward/notes/65-faction-ids.md.
+   */
+  | { kind: "rep"; faction: string; standing: string; factionId?: number }
   | { kind: "heroic"; dungeon: string }
   | { kind: "pvp"; via: "arena" | "honor"; season?: number }
-  | { kind: "world" };
+  | { kind: "world" }
+  /**
+   * Origin not recorded by any input. Membership came from the wowsims curated
+   * gear sets, which equip the item on this spec without saying where it comes
+   * from — mostly badge and reputation gear that persists across phases.
+   *
+   * Deliberately carries no fields: `badge` needs a cost and `rep` needs a
+   * faction, and inventing either would be a false provenance claim. Having no
+   * `zone` is what keeps these out of every raid and boss filter (`view.ts`
+   * `matchesZone`), which is the behaviour we actually need from them.
+   */
+  | { kind: "unknown" }
+);
 
 export type ItemSourceKind = ItemSource["kind"];
 
@@ -64,6 +118,19 @@ export type PoolEntry = {
    */
   curationHint?: number;
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
+  /**
+   * Every pinned upstream gear set that equips this item (e.g. `["p1","p2"]`),
+   * regardless of stage. Full provenance: an item curated only for an earlier
+   * stage keeps this and loses `bisTags`.
+   */
+  curatedSets?: string[];
+  /**
+   * The current-stage sets behind `bisTags`. Present only alongside a `BiS`
+   * tag — "BiS" is a claim about a stage, never absolute, so the row names
+   * which one. See `bis_set_labels_for_max_phase` in
+   * `scripts/assemble_universe.py`.
+   */
+  bisSets?: string[];
 };
 
 /** Row shape from `data/universes/ret-p*.json` before normalization. */
@@ -77,6 +144,8 @@ export type UniverseEntry = {
   /** @deprecated JSON key from pre-rename generators; mapped to curationHint */
   ep?: number;
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
+  curatedSets?: string[];
+  bisSets?: string[];
 };
 
 export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
@@ -94,6 +163,10 @@ export function poolEntryFromUniverse(entry: UniverseEntry): PoolEntry {
     sources: [...entry.sources],
     ...(curationHint !== undefined ? { curationHint } : {}),
     ...(entry.bisTags !== undefined ? { bisTags: entry.bisTags } : {}),
+    ...(entry.curatedSets !== undefined
+      ? { curatedSets: [...entry.curatedSets] }
+      : {}),
+    ...(entry.bisSets !== undefined ? { bisSets: [...entry.bisSets] } : {}),
   };
 }
 
@@ -141,6 +214,94 @@ export function zonesInPool(pool: readonly PoolEntry[]): string[] {
     }
   }
   return [...zones].sort();
+}
+
+/**
+ * `applyView` reads `"all"` as "no filter" for both `raid` and `boss`
+ * (`view.ts`, pinned by `view.test.ts`). Anything validating those controls
+ * has to honour the sentinel or it rejects the documented way to ask for
+ * everything — which is how `--boss all` came to exit 2 (carry-forward 75
+ * review, A1).
+ */
+export const VIEW_ALL = "all";
+
+/**
+ * Which filter the CLI should validate and pass on: `undefined` for "no
+ * filter", otherwise the literal name.
+ */
+export function viewFilterValue(raw: string | undefined): string | undefined {
+  return raw === undefined || raw === VIEW_ALL ? undefined : raw;
+}
+
+/**
+ * Is this a name the pool can actually be filtered to? Pure so the decision
+ * is testable without running the CLI, which shells out to `wowsimcli` and
+ * so has no test at all — the gap that let the `"all"` regression through.
+ *
+ * `known` is returned alongside so the caller can print it as a "did you
+ * mean" list without enumerating twice.
+ */
+export function validateViewFilter(
+  value: string | undefined,
+  known: readonly string[]
+): { ok: true } | { ok: false; known: readonly string[] } {
+  const wanted = viewFilterValue(value);
+  if (wanted === undefined || known.includes(wanted)) return { ok: true };
+  return { ok: false, known };
+}
+
+/**
+ * Every source of an entry, in one spelling.
+ *
+ * `sources[0]` is `source` (`poolEntryFromUniverse`), so listing both would
+ * double-count the primary. `view.ts`'s `sourcesOf` already reads it this
+ * either/or way; matching it here keeps enumeration and filtering on the same
+ * footing rather than relying on that invariant holding.
+ */
+function sourcesOfEntry(entry: {
+  source: ItemSource;
+  sources?: readonly ItemSource[];
+}): readonly ItemSource[] {
+  return entry.sources ?? [entry.source];
+}
+
+/**
+ * Does one source name this boss, under this zone scope?
+ *
+ * Exported because `bossesInPool` and `view.ts`'s `matchesBoss` must agree
+ * exactly: the first decides which names the CLI calls valid, the second
+ * decides which rows survive. If they drift, `--boss` accepts a name that
+ * filters to nothing — which is the defect carry-forward 75 exists to fix,
+ * one level down. Sharing the predicate makes that structural instead of a
+ * property a test has to police.
+ */
+export function sourceMatchesBoss(
+  source: ItemSource,
+  boss: string,
+  zone: string | undefined
+): boolean {
+  if (!("boss" in source) || source.boss !== boss) return false;
+  return zone === undefined || ("zone" in source && source.zone === zone);
+}
+
+/**
+ * Boss names the pool can actually be filtered to, optionally scoped to one
+ * zone. Scoped and unscoped are different questions: two zones can share a
+ * boss name, and an unscoped list is long enough to be useless as a "did you
+ * mean" for a typo made inside one raid.
+ */
+export function bossesInPool(
+  pool: readonly PoolEntry[],
+  zone?: string
+): string[] {
+  const bosses = new Set<string>();
+  for (const e of pool) {
+    for (const s of sourcesOfEntry(e)) {
+      if (!("boss" in s) || s.boss === undefined) continue;
+      if (sourceMatchesBoss(s, s.boss, zone)) bosses.add(s.boss);
+    }
+  }
+  return [...bosses].sort();
 }
 
 /**

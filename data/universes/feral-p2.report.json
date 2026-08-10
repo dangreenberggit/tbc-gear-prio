@@ -1,0 +1,188 @@
+{
+  "maxPhase": 2,
+  "carryoverPolicy": "union",
+  "phaseZones": [
+    "Gruul's Lair",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep",
+    "World Bosses"
+  ],
+  "phaseRepFactions": [],
+  "d7EligibleTotal": 3463,
+  "excludedNoSource": 1480,
+  "universeTotal": 253,
+  "listOnlyMembership": 24,
+  "perSlot": {
+    "back": 22,
+    "chest": 12,
+    "feet": 19,
+    "finger": 25,
+    "hands": 16,
+    "head": 12,
+    "legs": 11,
+    "neck": 20,
+    "ranged": 3,
+    "shoulder": 10,
+    "trinket": 17,
+    "waist": 16,
+    "weapon": 57,
+    "wrist": 13
+  },
+  "sourceRecordAdds": {
+    "atlasloot": 287,
+    "curated": 2,
+    "db": 1864,
+    "two-hop": 15,
+    "wowhead": 14
+  },
+  "membershipByOrigin": {
+    "curated": 3,
+    "itemHasOrigin:atlasloot": 40,
+    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:db": 216,
+    "itemHasOrigin:two-hop": 10,
+    "itemHasOrigin:wowhead": 10,
+    "listOnly": 24,
+    "zoneMatch": 226
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 216,
+    "wowhead-only": 10,
+    "atlasloot-only": 15,
+    "other": 2,
+    "two-hop": 10
+  },
+  "tierPiecesExpected": 10,
+  "tierPiecesPresent": 10,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 253,
+    "casterOnlyReject": 114,
+    "epFloorReject": 0,
+    "combinedReject": 114,
+    "combinedKeep": 139,
+    "casterRejectPct": 45.1,
+    "combinedRejectPct": 45.1,
+    "applied": false
+  },
+  "wowheadListIds": 79,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 79,
+    "recalled": 61,
+    "missed": 18,
+    "recallPct": 77.2,
+    "missedItems": [
+      {
+        "itemId": 19406,
+        "name": "Drake Fang Talisman",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 23206,
+        "name": "Mark of the Champion",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 25790,
+        "name": "Expedition Scout's Epaulets",
+        "slot": "shoulder",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27837,
+        "name": "Wastewalker Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27877,
+        "name": "Draenic Wildstaff",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 27878,
+        "name": "Auchenai Death Shroud",
+        "slot": "back",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28064,
+        "name": "Idol of the Wild",
+        "slot": "ranged",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 28121,
+        "name": "Icon of Unyielding Courage",
+        "slot": "trinket",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28171,
+        "name": "Spymistress's Wristguards",
+        "slot": "wrist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 28372,
+        "name": "Idol of Feral Shadows",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29247,
+        "name": "Girdle of the Deathdealer",
+        "slot": "waist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 29359,
+        "name": "Feral Staff of Lashing",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 30372,
+        "name": "Socrethar's Girdle",
+        "slot": "waist",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 31544,
+        "name": "Clefthoof Hide Leggings",
+        "slot": "legs",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 32387,
+        "name": "Idol of the Raven Goddess",
+        "slot": "ranged",
+        "d7Eligible": true
+      },
+      {
+        "itemId": 38287,
+        "name": "Empty Mug of Direbrew",
+        "slot": "trinket",
+        "d7Eligible": true
+      }
+    ]
+  }
+}

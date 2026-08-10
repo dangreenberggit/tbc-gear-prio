@@ -14,15 +14,25 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root, created lazi
 
 For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-review` skill. Audience is the **engineering team** (gate and bugs), not player loot advice. Sharp lane.
 
+### Data pipeline work
+
+For pinning a vendored input, editing a parser, or regenerating a committed artifact under `data/`, use the `data-pipeline-work` skill. Three of its rules are gated by `pnpm verify` on the AtlasLoot path only; the rest are by hand.
+
 ### Editing skills
 
 Before adding anything to a skill file, ask: does this belong to **this skill’s job and nature**? A skill has a personality (e.g. game-domain SME vs pipeline debugging vs TDD). Do not dump related-but-wrong material into it — put engineering rules in engineering skills/docs, game rules in game skills, and so on. If it does not fit, write it elsewhere or leave it out. See also `writing-great-skills` (relevance) and `dont-be-stupid`.
+
+### Don't be stupid
+
+Before reporting a nontrivial task done — especially a review, research, or "use X to check Y" request — run the `dont-be-stupid` checklist of previously-caught failure modes (missing named artifacts, unsourced claims stated as fact, skipped clarifying questions).
 
 ### Writing for agents
 
 Review with the `writing-for-agents` skill before calling any agent-facing document done: a **plan** (PLAN.md, `.scratch/**` specs and tickets), a **skill** file, `AGENTS.md` / `CLAUDE.md`, or a tracked doc an agent is pointed at. A plan counts because an agent executes it.
 
 Review means a second pass over your finished draft, revising it against the skill — the skill is the rubric, and citing it is not the same as having applied it.
+
+Propose changes to `AGENTS.md`, `CLAUDE.md`, and skill files in chat and wait for approval before editing them. These files steer every future session, so a bad line costs more than a bad commit and nothing catches it.
 
 ## Engineering workflow
 
@@ -70,7 +80,7 @@ the eight stages must stay reorganisable without touching a test.
 
 ### Parallel agents
 
-When a phase or feature branch has **independent** slices (different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
+When you will have **two writers running at once** (independent slices — different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm land` — never land each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
 
@@ -85,7 +95,8 @@ Two lanes, every harness: **workhorse** for implementation / parallel workers, *
 ### The loop
 
 1. Branch off `dev`: `feat/<slug>` (or `phase-N/<slug>` for a PLAN.md phase).
-2. Red → green, one slice at a time, with regular commits.
+2. Red → green, one slice at a time. **Commit regularly as you accomplish work — a commit per green slice, not one commit at the end, and not only when asked.** Landing is the gated step, not this one.
+   - **`git add <paths>` does not scope the commit** — pre-commit runs `lint-staged` against `*`, so any dirty file rides along. Before each commit `git status` must be clean of work you did not do (commit it separately or ask), and after `git reset`, re-read `git log -1` before recommitting — another session may have landed in between.
 3. `pnpm verify` before every push — typecheck, lint, format, test (also on pre-push).
 4. When the branch looks done: run the `pre-merge-review` skill → `docs/reviews/<branch>.md` (commit it on the feature branch). Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime. **Do not skip this** — `pnpm land` only checks that the review file exists; it does not run the review.
 5. **Ask before landing.** Never `pnpm land`, never `git merge` into `dev`, and never set `TBC_ALLOW_DEV_MERGE=1`, unless the user has explicitly asked to land/merge **after** the review file is written and they have had a chance to see the summary (a combined “review and land” request is **not** enough — finish the review, stop, wait for a separate land ask). When they ask: `pnpm land` is the only supported door — verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first).
