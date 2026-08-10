@@ -6,6 +6,7 @@ import {
   getEnchants,
 } from "../src/enchants.js";
 import { getItem, isEnchantable, type ItemEntry } from "../src/items.js";
+import { RangedWeaponType } from "../src/proto/common_pb.js";
 import enchantIndex from "../../../data/enchants/index.json" with { type: "json" };
 import rawItemIndex from "../../../data/items/index.json" with { type: "json" };
 
@@ -103,6 +104,55 @@ describe("enchantAppliesToItem", () => {
       for (const effectId of effectIds) {
         expect(enchantAppliesToItem(effectId, itemId)).toBe(false);
       }
+    }
+  });
+
+  // The relic case above passes under either the right or the wrong
+  // RangedWeaponType constants, because relics (6/7/8) sit outside both the
+  // correct and the off-by-one shootable set. Only bows (1) and thrown (4)
+  // tell the two apart, so every type gets a real item here (carry-forward
+  // 83). A future enum shift fails rather than passing on relics alone.
+  it("puts a scope on shootables and nothing else, by rangedWeaponType", () => {
+    const cases: Array<[number, string, number, boolean]> = [
+      [RangedWeaponType.RangedWeaponTypeBow, "Polished Shortbow", 2505, true],
+      [RangedWeaponType.RangedWeaponTypeCrossbow, "Stoneshatter", 18388, true],
+      [
+        RangedWeaponType.RangedWeaponTypeGun,
+        "Willey's Portable Howitzer",
+        13380,
+        true,
+      ],
+      [
+        RangedWeaponType.RangedWeaponTypeThrown,
+        "Standard Thrown Weapon",
+        25871,
+        false,
+      ],
+      [RangedWeaponType.RangedWeaponTypeWand, "Banshee Finger", 13534, false],
+      [
+        RangedWeaponType.RangedWeaponTypeIdol,
+        "Idol of Rejuvenation",
+        22398,
+        false,
+      ],
+      [RangedWeaponType.RangedWeaponTypeLibram, "Libram of Hope", 22401, false],
+      [
+        RangedWeaponType.RangedWeaponTypeTotem,
+        "Communal Totem of Lightning",
+        186071,
+        false,
+      ],
+    ];
+
+    for (const [rangedWeaponType, name, itemId, applies] of cases) {
+      expect({ name, type: getItem(itemId)?.rangedWeaponType }).toEqual({
+        name,
+        type: rangedWeaponType,
+      });
+      expect({
+        name,
+        applies: enchantAppliesToItem(ADAMANTITE_SCOPE, itemId),
+      }).toEqual({ name, applies });
     }
   });
 

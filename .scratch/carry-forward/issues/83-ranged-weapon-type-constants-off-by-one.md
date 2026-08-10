@@ -1,9 +1,16 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-75-82-review-tickets.md (domain axis, D2)
 Blocks: none
 Blocked by: none
 Relates to: 81
+Resolution: fixed all three steps. The hand-copied constants were replaced by
+  imports from `packages/core/src/proto/common_pb.ts` (already generated from
+  data/proto by `pnpm proto:generate`), so there is no second copy left to
+  drift -- EnchantType, WeaponType, HandType and ItemType were switched over
+  with them. `packages/core/test/enchants.test.ts` now pins one real item of
+  every rangedWeaponType 1-8 against Adamantite Scope; it failed on the bow
+  before the fix and passes after. `pnpm verify` green. 2026-08-09.
 
 # `enchants.ts`'s `RangedWeaponType` constants are off by one, so bows are denied scopes and thrown weapons are granted them
 

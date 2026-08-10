@@ -12,30 +12,42 @@
 
 import rawEnchants from "../../../data/enchants/index.json" with { type: "json" };
 import { getItem, type ItemEntry } from "./items.js";
+import {
+  EnchantType,
+  HandType,
+  ItemType,
+  RangedWeaponType,
+  WeaponType,
+} from "./proto/common_pb.js";
 
-/** common.proto EnchantType. Absent upstream means Normal. */
-export const ENCHANT_TYPE_NORMAL = 0;
-export const ENCHANT_TYPE_TWO_HAND = 1;
-export const ENCHANT_TYPE_SHIELD = 2;
-export const ENCHANT_TYPE_STAFF = 4;
-export const ENCHANT_TYPE_OFF_HAND = 5;
+/**
+ * These came from the proto rather than being re-typed here: a hand-copied
+ * copy of RangedWeaponType had drifted one value up, denying bows a scope and
+ * granting one to thrown weapons (carry-forward 83). `pnpm proto:generate`
+ * regenerates the imported enums from data/proto, so the next upstream change
+ * cannot silently disagree with them.
+ */
 
-/** common.proto WeaponType. */
-const WEAPON_TYPE_OFF_HAND = 5;
-const WEAPON_TYPE_SHIELD = 7;
-const WEAPON_TYPE_STAFF = 8;
+/** Absent upstream means Normal. */
+export const ENCHANT_TYPE_NORMAL = EnchantType.EnchantTypeNormal;
+export const ENCHANT_TYPE_TWO_HAND = EnchantType.EnchantTypeTwoHand;
+export const ENCHANT_TYPE_SHIELD = EnchantType.EnchantTypeShield;
+export const ENCHANT_TYPE_STAFF = EnchantType.EnchantTypeStaff;
+export const ENCHANT_TYPE_OFF_HAND = EnchantType.EnchantTypeOffHand;
 
-/** common.proto HandType. */
-const HAND_TYPE_TWO_HAND = 4;
+const WEAPON_TYPE_OFF_HAND = WeaponType.WeaponTypeOffHand;
+const WEAPON_TYPE_SHIELD = WeaponType.WeaponTypeShield;
+const WEAPON_TYPE_STAFF = WeaponType.WeaponTypeStaff;
 
-/** wowsims ItemType — the same enum `ItemEntry.itemType` carries. */
-const ITEM_TYPE_RANGED = 14;
+const HAND_TYPE_TWO_HAND = HandType.HandTypeTwoHand;
 
-/** common.proto RangedWeaponType. */
-const RANGED_WEAPON_TYPE_BOW = 2;
-const RANGED_WEAPON_TYPE_CROSSBOW = 3;
-const RANGED_WEAPON_TYPE_GUN = 4;
-const RANGED_WEAPON_TYPE_WAND = 5;
+/** The same enum `ItemEntry.itemType` carries. */
+const ITEM_TYPE_RANGED = ItemType.ItemTypeRanged;
+
+const RANGED_WEAPON_TYPE_BOW = RangedWeaponType.RangedWeaponTypeBow;
+const RANGED_WEAPON_TYPE_CROSSBOW = RangedWeaponType.RangedWeaponTypeCrossbow;
+const RANGED_WEAPON_TYPE_GUN = RangedWeaponType.RangedWeaponTypeGun;
+const RANGED_WEAPON_TYPE_WAND = RangedWeaponType.RangedWeaponTypeWand;
 
 export type EnchantEntry = {
   name: string | null;
