@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: c2d3897
 Type: bug
 Origin: pre-merge review of `feat/set-bonus-value`, 2026-08-10 (domain axis)
 Blocks: none
@@ -71,3 +72,39 @@ TypeScript gated by `pnpm verify`, and AGENTS.md's "types from JSON" section
 exists because hand-mirroring a Python/JSON source into TypeScript has bitten
 this repo before. A generated mirror would make this drift impossible rather
 than merely fixed once.
+
+---
+
+## Closed (2026-08-10) — corrected mirror plus a drift gate, `c2d3897`
+
+Took the ticket's middle path: kept the hand-written map (corrected) and made
+recurrence impossible with a check, rather than building codegen.
+
+**Why not `generate_json_literal_types.py`.** That generator reads a **JSON**
+list and emits an `as const` union. `CURATED_SET_PHASE` is a Python *dict
+literal* mapping label to phase number, not a JSON file and not a string list,
+so routing it through that machinery would have meant adding a JSON export step
+to `assemble_universe.py` and a new generator mode — more moving parts than the
+one-line drift warrants, and the ticket said not to over-engineer.
+
+**What shipped:**
+
+1. `p3: 3` added to `packages/core/src/rank-report-rules.ts`.
+2. The test-locked wrong expectation (`curatedSetPhase("p3") -> null`) inverted;
+   the unrecognised-label case now uses `p9`, which is genuinely unrecognised.
+3. `scripts/check_curated_set_phase.py` — parses the TS object literal and
+   compares it to `assemble_universe.CURATED_SET_PHASE`, wired into
+   `pnpm verify` as `pnpm curated-set-phase:check`.
+4. The TS docstring now names `assemble_universe.py` as the source of truth and
+   points at the gate.
+
+Verify:
+
+```
+python scripts/check_curated_set_phase.py
+grep -n "CURATED_SET_PHASE" packages/core/src/rank-report-rules.ts scripts/assemble_universe.py
+```
+
+**The gate was proved to fail, not just to pass:** deleting the `p3: 3` line and
+re-running the check exits 1 with
+`p3: assemble_universe.py=3 rank-report-rules.ts=None`. Restored before commit.

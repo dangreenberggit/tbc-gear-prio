@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: PENDING
 Type: docs
 Origin: ticket 93's closing ask, restated by the pre-merge review of `feat/set-bonus-value`, 2026-08-10 (spec axis)
 Blocks: none
@@ -55,3 +56,36 @@ was an unconsidered consequence rather than a decision anyone revisited.
 Sources to draw on: `.scratch/set-bonus-value/spec.md`,
 `.scratch/set-bonus-value/measurements-2026-08-10.md`,
 `.scratch/handoffs/set-bonus-resolution-2026-08-10.md`, and tickets 90–99.
+
+---
+
+## Closed (2026-08-10) — ADR-0023 written
+
+`docs/adr/0023-set-bonus-thresholds-are-selected-nearest-measurable-and-packages-are-disclosed-not-scored.md`
+
+All four items this ticket asked for are recorded, plus two the follow-up round
+added:
+
+1. The threshold-selection rule, with the omitted symmetric case stated
+   explicitly — at 0 pieces worn with an implemented 2pc, every swap lands at
+   `piecesAfterSwap === 1`, so the walk stops at 2 and the 4pc is structurally
+   unreachable from any row.
+2. Why per-row credit was rejected for package-as-card, with the measured
+   193.89-vs-73.5 inflation as the reason.
+3. Suppress-and-disclose rather than correct-and-disclose, with `B`'s
+   gear-dependence as the reason no correction exists.
+4. The `(k−1)·B` closed form, k=0 and k=1 both inflating by exactly zero.
+5. (new) Disclosure is not gated on the ranking toggle — carry-forward 100.
+6. (new) A row may point at the panel but never restate its figure —
+   carry-forward 96.
+
+Measured figures carry their re-runnable commands (wowsimcli v0.0.101, seeds
+`[11,22,33,44,55]`, 3000 iterations) per AGENTS.md's durable-claims rule, and the
+one unmeasured direction (does the 2pc shrink on later-phase gear) is labelled
+**Untested**.
+
+Verify:
+
+```
+grep -ril "set bonus\|setBonus" docs/adr/
+```
