@@ -48,10 +48,26 @@ export type ItemEntry = {
    * *" recipes, confirmed against real WCL fixture data
    * (test/fixtures/slamaltman.raw.json shows 14/50 ring slots enchanted).
    *
-   * Not sufficient to gate synthesis on its own. Ring enchants are
-   * enchanter-only (the only four records in db.json's enchants[] with a
-   * requiredProfession), so `enchantable: true` on a finger does not mean
-   * this player can apply one. Synthesis must additionally gate on observed
+   * Not sufficient to gate synthesis on its own, for two distinct reasons.
+   *
+   * *Profession*: ring enchants are enchanter-only (the only four records in
+   * db.json's enchants[] with a requiredProfession), so `enchantable: true`
+   * on a finger does not mean this player can apply one.
+   *
+   * *Granularity*: the flag is slot-level, and the `ranged` slot mixes item
+   * classes that do not share its answer. All 104 relics — idols
+   * (`rangedWeaponType` 6), librams (7) and totems (8) — carry
+   * `enchantable: true` because bows and guns in the same slot have scope
+   * recipes, but no relic takes an enchant in TBC (carry-forward 81). The
+   * flag is not wrong at the granularity it claims; it just does not answer
+   * the item-level question.
+   *
+   * `enchantAppliesToItem` is the real item-level gate and is what
+   * `rank.ts` actually calls. It rejects relics via an explicit *shootable*
+   * allowlist (`enchants.ts`) — bow/crossbow/gun only — not because ranged
+   * enchants are absent: `data/enchants/index.json` ships four type-14
+   * scopes (2523, 2722, 2723, 2724). Never synthesize from `enchantable`
+   * alone. Synthesis must additionally gate on observed
    * per-slot presence, or a synthesized candidate enchant gets compared
    * against a bare baseline slot and its stats are misattributed to the
    * item — PLAN.md §9, "the symmetry invariant".

@@ -4,7 +4,7 @@
  * that is the property the Phase 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
-import type { ItemSource } from "./pool.js";
+import { sourceMatchesBoss, type ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export type ViewOptions = {
@@ -93,12 +93,7 @@ function matchesZone(item: RankedItem, zone: string): boolean {
 }
 
 function matchesBoss(item: RankedItem, zone: string | undefined, boss: string) {
-  return sourcesOf(item).some(
-    (s) =>
-      "boss" in s &&
-      s.boss === boss &&
-      (zone === undefined || ("zone" in s && s.zone === zone))
-  );
+  return sourcesOf(item).some((s) => sourceMatchesBoss(s, boss, zone));
 }
 
 // Zone-less ItemSource kinds, ticket 45 §3: `--group-by raid` used to fall

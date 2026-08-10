@@ -337,6 +337,70 @@ describe("rank-report", () => {
     expect(html).toContain("widens your gap to 87");
   });
 
+  // The real cap is 9 * 15.769233, so a live `gapAfter` is essentially never
+  // integral and the raw value rendered as 64.92309699999998 in the shipped
+  // report (carry-forward 77). Whole-number fixtures above hid it.
+  it("rounds a fractional hit gap like the banner does (carry-forward 77)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            hitRegression: { lost: 17, gapAfter: 64.92309699999998 },
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("widens your gap to 65");
+    expect(html).not.toContain("64.92309699999998");
+  });
+
+  // The page rendered per-row "widens your gap to N" while never stating what
+  // the gap was, carrying no Heroic Presence caveat, and naming no fight —
+  // 22 rows referencing "your gap" against zero banner lines in the shipped
+  // nexess-p3-all.html (carry-forward 76). The HTML report is the shareable
+  // artifact, so it has to carry the same disclosure the CLI prints.
+  it("renders the hit-cap banner and fight provenance (carry-forward 76)", () => {
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    expect(html).toContain("under the hit cap");
+    expect(html).toContain("Heroic Presence");
+    // The whole provenance sentence, not a substring of it: "test" alone also
+    // matches the contentHash in the footer and proves nothing.
+    expect(html).toContain(
+      "gear read from fight 1 (test fight 1, ranked route)"
+    );
+  });
+
+  // The off-tank warning is the one ticket 06 added *because* nothing in the
+  // output named the fight. It fires only on a confident parse with zero
+  // salvation uptime — the combination that means "this may be tank gear".
+  it("names the report-events route and the off-tank warning in the HTML too", () => {
+    const base = rankingWithPvpWeaponAboveCutoff();
+    const html = renderRankHtml(
+      {
+        ...base,
+        fight: {
+          ...base.fight,
+          route: "report-events",
+          confidence: 1,
+          salvationUptime: 0,
+        },
+      },
+      meta()
+    );
+    expect(html).toContain("report-events");
+    expect(html).toContain("Blessing of Salvation");
+    expect(html).toContain("off-tanking");
+  });
+
   // The other cases here assert on fragments, so a change to the surrounding
   // markup or CSS passes them all. This pins the whole document, which is what
   // makes a pure restructure of this module provable: split the file, move the
@@ -353,10 +417,14 @@ describe("rank-report", () => {
     // could never have satisfied the real type. The rendered "Cutoff 3.4 DPS
     // / 0.15%" line is longer than "Cutoff 5 DPS / 0.5%", which is the whole
     // delta against the previous pin.
+    // Repinned for carry-forward 76: the page now renders the hit-cap banner
+    // and the fight-provenance line it was only ever printing to the CLI.
+    // Diffed before/after to confirm the delta is exactly those two <p>
+    // elements plus their CSS rules — nothing else in the document moved.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "34d6896269904120abced85d1b9591d07be2a63324451f59fdd3d2689afe0546",
-      length: 10785,
+        "2bca97bff348944591b448e33ffebb512211b79cba5269175d50292fc047f36c",
+      length: 11450,
     });
   });
 });

@@ -1283,8 +1283,12 @@ integration branch it branched from — not against `dev`, which would fold in
 the four trust slices that ran first and *did* touch `seams/`:
 
 ```bash
-# merge-base of the feral slice, i.e. phase-2/trust before this merge
-git diff phase-2/trust~1...phase-2/feral --stat -- \
+# 42db95a = phase-2/trust before the feral merge; e841a67^2 = the feral tip.
+# Pinned to SHAs, not branch names: `phase-2/trust~1...phase-2/feral` was the
+# original form and is wrong, because feral is an *ancestor* of trust~1, so
+# their merge-base is feral itself and the three-dot diff is always empty
+# (carry-forward 82).
+git diff 42db95a...e841a67^2 --stat -- \
   packages/core/src/rank.ts packages/core/src/seams/ \
   packages/core/src/compose.ts
 # => packages/core/src/rank.ts | 20 ++++++++++++++++----
@@ -1383,10 +1387,58 @@ never to grant membership.
   carries no fields, so nothing is invented, and having no `zone` keeps it out
   of every raid and boss filter.
 
-`data/universes/ret-p*.json` grew by additions only — p2 +5, p3/p4/p5 +3, zero
-deletions, no existing row altered — which is what the phase-2 spec's boundary
-actually requires. All 8 are wowsims-curated ret items that were being dropped
-in silence.
+**Correction (2026-08-09, carry-forward 74).** This section previously claimed
+`data/universes/ret-p*.json` "grew by additions only — p2 +5, p3/p4/p5 +3, zero
+deletions, no existing row altered". Every part of that is false against the
+real merge-base; it summarised a diff that is not the one it named. Retracted
+and replaced by the measurement below.
+
+```bash
+BASE=$(git merge-base dev phase-2/trust)
+git diff "$BASE"...phase-2/trust --stat -- data/universes/ret-p{2,3,4,5}.json
+```
+
+Line-level (6563 insertions, 2506 deletions) overstates the semantic change,
+because these files are pretty-printed and a one-key edit rewrites a row. Keyed
+by `itemId` against the same merge-base:
+
+| file | entries base → tip | added | removed | rows altered |
+|---|---|---|---|---|
+| ret-p2 | 230 → 240 | 10 | 0 | 230 |
+| ret-p3 | 356 → 394 | 38 | 0 | 356 |
+| ret-p4 | 403 → 441 | 38 | 0 | 403 |
+| ret-p5 | 484 → 534 | 50 | 0 | 484 |
+
+So: **no row was deleted**, but **every surviving row was altered**, in three
+ways, all intended.
+
+1. `sources` — every row gained an `origin` field (`"db"`, `"atlasloot"`,
+   `"wowhead"`, …). That is the provenance work this phase shipped; it accounts
+   for all 1473 altered rows on its own.
+2. `curatedSets` (23–26 rows/file) — added, naming which wowsims presets equip
+   the item.
+3. `bisTags`/`bisSets` (11–14 rows/file) — the flat `["BiS"]` label became a
+   phase-scoped claim.
+
+Of (3), 11 rows at p2 and 12 at p3/p4/p5 lost `["BiS"]` and gained no `bisSets`.
+This is the **intended** fix for carry-forward 47 §1, not a regression: all of
+them are `curatedSets` of `p1` / `preraid` only, i.e. items last curated for a
+stage earlier than the one being ranked, so their BiS claim had expired. They
+keep `curatedSets`, so the provenance survives — only the current-stage verdict
+is withdrawn. The rule is `bis_set_labels_for_max_phase`
+(`scripts/assemble_universe.py:360`); the affected rows are Justicar T4 pieces,
+Black Felsteel Bracers, Vengeance Wrap, Ironstriders of Urgency, Mithril Chain
+of Heroism, Ring of a Thousand Marks, Girdle of the Endless Pit, Grips of
+Deftness, Mask of the Deceiver, and (p3+) Haramad's Bargain.
+
+The 10–50 added rows per file are wowsims-curated ret items that were being
+dropped in silence, plus the Band of Eternity / Shattered Sun families that
+entered with the vendor slice.
+
+The phase-2 spec's boundary (`.scratch/phase-2/spec.md:84`) says a byte-level
+change to `ret-p*.json` "is a finding to report". It is reported here: the
+change is real, large, and attributable to this phase's own provenance and
+BiS-scoping work rather than to feral's slice.
 
 ### A silent wrong answer, caught by review and fixed
 

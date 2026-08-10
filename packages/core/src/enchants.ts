@@ -12,30 +12,22 @@
 
 import rawEnchants from "../../../data/enchants/index.json" with { type: "json" };
 import { getItem, type ItemEntry } from "./items.js";
+import {
+  EnchantType,
+  HandType,
+  ItemType,
+  RangedWeaponType,
+  WeaponType,
+} from "./proto/common_pb.js";
 
-/** common.proto EnchantType. Absent upstream means Normal. */
-export const ENCHANT_TYPE_NORMAL = 0;
-export const ENCHANT_TYPE_TWO_HAND = 1;
-export const ENCHANT_TYPE_SHIELD = 2;
-export const ENCHANT_TYPE_STAFF = 4;
-export const ENCHANT_TYPE_OFF_HAND = 5;
-
-/** common.proto WeaponType. */
-const WEAPON_TYPE_OFF_HAND = 5;
-const WEAPON_TYPE_SHIELD = 7;
-const WEAPON_TYPE_STAFF = 8;
-
-/** common.proto HandType. */
-const HAND_TYPE_TWO_HAND = 4;
-
-/** wowsims ItemType — the same enum `ItemEntry.itemType` carries. */
-const ITEM_TYPE_RANGED = 14;
-
-/** common.proto RangedWeaponType. */
-const RANGED_WEAPON_TYPE_BOW = 2;
-const RANGED_WEAPON_TYPE_CROSSBOW = 3;
-const RANGED_WEAPON_TYPE_GUN = 4;
-const RANGED_WEAPON_TYPE_WAND = 5;
+/**
+ * A hand-copied copy of RangedWeaponType had drifted one value up, denying
+ * bows a scope and granting one to thrown weapons (carry-forward 83). CI
+ * regenerates these enums and byte-compares them against the committed output
+ * (`.github/workflows/verify.yml`, `pnpm proto:generate` then `git diff
+ * --exit-code`), which `pnpm verify` does not do — that step is the gate, not
+ * the generate command on its own.
+ */
 
 export type EnchantEntry = {
   name: string | null;
@@ -113,22 +105,22 @@ export function enchantAppliesToItem(
   if (!enchant) return false;
 
   if (
-    enchant.enchantType === ENCHANT_TYPE_TWO_HAND &&
-    item.handType !== HAND_TYPE_TWO_HAND
+    enchant.enchantType === EnchantType.EnchantTypeTwoHand &&
+    item.handType !== HandType.HandTypeTwoHand
   ) {
     return false;
   }
 
   if (
-    enchant.enchantType === ENCHANT_TYPE_STAFF &&
-    item.weaponType !== WEAPON_TYPE_STAFF
+    enchant.enchantType === EnchantType.EnchantTypeStaff &&
+    item.weaponType !== WeaponType.WeaponTypeStaff
   ) {
     return false;
   }
 
   if (
-    enchant.enchantType === ENCHANT_TYPE_SHIELD &&
-    item.weaponType !== WEAPON_TYPE_SHIELD
+    enchant.enchantType === EnchantType.EnchantTypeShield &&
+    item.weaponType !== WeaponType.WeaponTypeShield
   ) {
     return false;
   }
@@ -136,27 +128,28 @@ export function enchantAppliesToItem(
   // An off-hand enchant belongs on an off-hand or shield and nowhere else,
   // and conversely a non-off-hand enchant must not land on one — upstream
   // writes this as an inequality between the two predicates.
-  const isOffHandEnchant = enchant.enchantType === ENCHANT_TYPE_OFF_HAND;
+  const isOffHandEnchant =
+    enchant.enchantType === EnchantType.EnchantTypeOffHand;
   const takesOffHandEnchant =
-    item.weaponType === WEAPON_TYPE_OFF_HAND ||
-    (item.weaponType === WEAPON_TYPE_SHIELD &&
-      enchant.enchantType !== ENCHANT_TYPE_SHIELD);
+    item.weaponType === WeaponType.WeaponTypeOffHand ||
+    (item.weaponType === WeaponType.WeaponTypeShield &&
+      enchant.enchantType !== EnchantType.EnchantTypeShield);
   if (isOffHandEnchant !== takesOffHandEnchant) return false;
 
-  if (enchant.type === ITEM_TYPE_RANGED) {
+  if (enchant.type === ItemType.ItemTypeRanged) {
     const shootable =
-      item.rangedWeaponType === RANGED_WEAPON_TYPE_BOW ||
-      item.rangedWeaponType === RANGED_WEAPON_TYPE_CROSSBOW ||
-      item.rangedWeaponType === RANGED_WEAPON_TYPE_GUN;
+      item.rangedWeaponType === RangedWeaponType.RangedWeaponTypeBow ||
+      item.rangedWeaponType === RangedWeaponType.RangedWeaponTypeCrossbow ||
+      item.rangedWeaponType === RangedWeaponType.RangedWeaponTypeGun;
     if (!shootable) return false;
   }
 
   // A libram/idol/totem (ranged slot, non-wand) takes no non-ranged enchant.
   if (
     item.rangedWeaponType != null &&
-    item.rangedWeaponType !== RANGED_WEAPON_TYPE_WAND &&
+    item.rangedWeaponType !== RangedWeaponType.RangedWeaponTypeWand &&
     item.rangedWeaponType > 0 &&
-    enchant.type !== ITEM_TYPE_RANGED
+    enchant.type !== ItemType.ItemTypeRanged
   ) {
     return false;
   }

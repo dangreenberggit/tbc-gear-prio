@@ -5,7 +5,19 @@ import {
   getEnchant,
   getEnchants,
 } from "../src/enchants.js";
-import { getItem, isEnchantable } from "../src/items.js";
+import { getItem, isEnchantable, type ItemEntry } from "../src/items.js";
+import { RangedWeaponType } from "../src/proto/common_pb.js";
+import enchantIndex from "../../../data/enchants/index.json" with { type: "json" };
+import rawItemIndex from "../../../data/items/index.json" with { type: "json" };
+
+const itemIndex = rawItemIndex as Record<string, ItemEntry>;
+
+/** The TBC relics — the ranged-slot items that are not shootable or wands. */
+const RELIC_RANGED_TYPES = new Set([
+  RangedWeaponType.RangedWeaponTypeIdol,
+  RangedWeaponType.RangedWeaponTypeLibram,
+  RangedWeaponType.RangedWeaponTypeTotem,
+]);
 
 /**
  * Real ids from the committed indexes, chosen so each branch of the UI rule
@@ -77,6 +89,75 @@ describe("enchantAppliesToItem", () => {
   // not land on it — the branch that keeps ret's ranged slot bare.
   it("does not put a scope on a libram", () => {
     expect(enchantAppliesToItem(ADAMANTITE_SCOPE, LIBRAM_OF_HOPE)).toBe(false);
+  });
+
+  // `enchantable` is slot-level, and the ranged slot mixes shootables with
+  // relics, so every idol/libram/totem claims `enchantable: true` while no
+  // relic takes an enchant in TBC. This pins the gap rather than the wish:
+  // the flag stays true (it is a true statement about the *slot*) and
+  // `enchantAppliesToItem` is what has to say no (carry-forward 81).
+  it("says no for every relic, though `enchantable` says yes", () => {
+    const relicIds = Object.entries(itemIndex)
+      .filter(([, e]) => RELIC_RANGED_TYPES.has(e.rangedWeaponType ?? -1))
+      .map(([id]) => Number(id));
+    expect(relicIds).toHaveLength(104);
+
+    const effectIds = Object.keys(enchantIndex).map(Number);
+    for (const itemId of relicIds) {
+      expect(isEnchantable(itemId)).toBe(true);
+      for (const effectId of effectIds) {
+        expect(enchantAppliesToItem(effectId, itemId)).toBe(false);
+      }
+    }
+  });
+
+  // The relic case above passes under either the right or the off-by-one
+  // RangedWeaponType constants, because relics sit outside both shootable
+  // sets — so it could not have caught carry-forward 83. Pinning each item's
+  // type against real index data is what keeps this from passing by
+  // construction: a coherently shifted enum still fails the first assertion.
+  it("puts a scope on shootables and nothing else, by rangedWeaponType", () => {
+    const cases: Array<[number, string, number, boolean]> = [
+      [RangedWeaponType.RangedWeaponTypeBow, "Polished Shortbow", 2505, true],
+      [RangedWeaponType.RangedWeaponTypeCrossbow, "Stoneshatter", 18388, true],
+      [
+        RangedWeaponType.RangedWeaponTypeGun,
+        "Willey's Portable Howitzer",
+        13380,
+        true,
+      ],
+      [
+        RangedWeaponType.RangedWeaponTypeThrown,
+        "Standard Thrown Weapon",
+        25871,
+        false,
+      ],
+      [RangedWeaponType.RangedWeaponTypeWand, "Banshee Finger", 13534, false],
+      [
+        RangedWeaponType.RangedWeaponTypeIdol,
+        "Idol of Rejuvenation",
+        22398,
+        false,
+      ],
+      [RangedWeaponType.RangedWeaponTypeLibram, "Libram of Hope", 22401, false],
+      [
+        RangedWeaponType.RangedWeaponTypeTotem,
+        "Communal Totem of Lightning",
+        186071,
+        false,
+      ],
+    ];
+
+    for (const [rangedWeaponType, name, itemId, applies] of cases) {
+      expect({ name, type: getItem(itemId)?.rangedWeaponType }).toEqual({
+        name,
+        type: rangedWeaponType,
+      });
+      expect({
+        name,
+        applies: enchantAppliesToItem(ADAMANTITE_SCOPE, itemId),
+      }).toEqual({ name, applies });
+    }
   });
 
   it("returns false for ids absent from either index", () => {
