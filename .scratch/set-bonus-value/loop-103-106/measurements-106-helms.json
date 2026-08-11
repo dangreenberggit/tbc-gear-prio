@@ -1,0 +1,102 @@
+{
+  "simVersion": "v0.0.101",
+  "gearSource": "test/fixtures/shredzepelin-cat.raw.json",
+  "gearSourceActor": "shredzepelin",
+  "skeleton": "data/presets/feral/p2.raid-sim-skeleton.json",
+  "seeds": [
+    "11",
+    "22",
+    "33",
+    "44",
+    "55"
+  ],
+  "guardTargetDps": 2152.0998,
+  "guardToleranceDps": 15.0,
+  "helmGems": [
+    32409,
+    32194
+  ],
+  "helmEnchant": 3003,
+  "cursedId": 32235,
+  "vengId": 33672,
+  "arms3k": {
+    "BASE": {
+      "label": "BASE",
+      "iterations": 3000,
+      "perSeed": [
+        2152.099805582717,
+        2152.017198044096,
+        2152.1590382068075,
+        2152.0704976234797,
+        2152.3097424328103
+      ],
+      "mean": 2152.131256377982,
+      "spreadMaxMin": 0.29254438871430466,
+      "meanReportedSe": 2.3344758852005336
+    },
+    "CURSED": {
+      "label": "CURSED",
+      "iterations": 3000,
+      "perSeed": [
+        1966.7022241632187,
+        1966.3972448891495,
+        1966.5453235364575,
+        1966.8668719049442,
+        1966.825823423509
+      ],
+      "mean": 1966.6674975834558,
+      "spreadMaxMin": 0.4696270157946856,
+      "meanReportedSe": 3.4859766907842427
+    },
+    "VENG": {
+      "label": "VENG",
+      "iterations": 3000,
+      "perSeed": [
+        1963.8038954058154,
+        1963.911068360095,
+        1964.0345773055828,
+        1963.9650895030063,
+        1963.4186919300016
+      ],
+      "mean": 1963.8266645009003,
+      "spreadMaxMin": 0.6158853755812288,
+      "meanReportedSe": 3.4221927906834675
+    }
+  },
+  "deltasVsBase3k": {
+    "CURSED": -185.46375879452626,
+    "VENG": -188.30459187708175
+  },
+  "cursedMinusVeng3k": 2.8408330825554913,
+  "arms20k": {
+    "CURSED": {
+      "label": "CURSED",
+      "iterations": 20000,
+      "perSeed": [
+        1964.1661593412114,
+        1964.1408243334301,
+        1964.223911167432,
+        1964.325476155269,
+        1964.3623264918592
+      ],
+      "mean": 1964.2437394978404,
+      "spreadMaxMin": 0.22150215842907528,
+      "meanReportedSe": 1.3628149822145486
+    },
+    "VENG": {
+      "label": "VENG",
+      "iterations": 20000,
+      "perSeed": [
+        1959.2590469888253,
+        1959.2627228363835,
+        1959.2699229062546,
+        1959.3052562095636,
+        1959.2888452618108
+      ],
+      "mean": 1959.2771588405676,
+      "spreadMaxMin": 0.046209220738319345,
+      "meanReportedSe": 1.3498812030812182
+    }
+  },
+  "cursedMinusVeng20k": 4.966580657272743
+}
