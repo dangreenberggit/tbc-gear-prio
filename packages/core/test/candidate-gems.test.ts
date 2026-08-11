@@ -85,9 +85,12 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
 
   it("never returns a gem whose palette quality exceeds rare", () => {
     const ctx = gemContext(gemsForPhase(3), retEpWeights);
-    // Gloves (1 socket), goggles (meta+yellow), belt (2 red) — cap holds on
-    // every socket colour, and the meta socket stays empty rather than
-    // getting an epic meta (the suggest-gems button does not place metas).
+    // Gloves (1 socket), goggles (meta+yellow), belt (2 red) — the cap holds
+    // on every socket colour. All 18 meta gems are quality 3, so the meta
+    // socket is NOT left empty: the fill seats Relentless (32409) through
+    // the cap. That diverges from the owner's observed suggest-gems button
+    // (which placed no meta) — a known model difference, recorded at ticket
+    // 111 close-out, not silently asserted away here.
     for (const itemId of [31034, 32461, 30106]) {
       const gems = fillEmptyCandidateGems(
         itemId,
@@ -95,11 +98,21 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
         ctx.fillPalette,
         ctx.weightRecord
       );
+      expect(gems.every((id) => id > 0)).toBe(true);
       for (const id of gems) {
-        if (id === 0) continue;
         expect(getGem(id)?.quality ?? 99).toBeLessThanOrEqual(3);
       }
     }
+    const goggleSockets = socketsFor(32461);
+    const metaIdx = goggleSockets.indexOf(GemColor.GemColorMeta);
+    expect(metaIdx).toBeGreaterThanOrEqual(0);
+    const goggleGems = fillEmptyCandidateGems(
+      32461,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
+    expect(goggleGems[metaIdx]).toBe(32409);
   });
 
   it("keeps the full palette for meta repair — only the fill palette narrows", () => {

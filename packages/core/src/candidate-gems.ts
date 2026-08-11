@@ -38,8 +38,11 @@ export type GemContext = {
   readonly palette: readonly GemEntry[];
   /**
    * The palette auto-fill may draw from — `palette` capped at rare. Meta
-   * repair must keep `palette` itself: metas are quality 4, so repairing
-   * from `fillPalette` makes every meta unsolvable (ticket 111).
+   * repair keeps `palette` itself: the cap is a fill policy (which gems we
+   * assume a player can buy), and repair must never be narrowed by it
+   * (ticket 111 instruction 3). Note all 18 TBC meta gems are quality 3 —
+   * they pass the cap, so the fill does seat metas; the split exists to
+   * isolate the policies, not because repair would break today.
    */
   readonly fillPalette: readonly GemEntry[];
   readonly weights: EpWeights;
