@@ -1772,6 +1772,47 @@ describe("curated ranked list chips", () => {
     const html = renderRankHtml(ranking(chipItems), meta);
     expect(html).not.toContain('<span class="pkg">');
   });
+
+  // Ticket 115: the emit decision used to be a number comparison (package
+  // figure differs from the row's own delta), so a package figure that landed
+  // exactly on the row's own delta hid the marker. The decision is now the
+  // membership fact — the row is in a measured package — so an exact tie
+  // still shows the marker.
+  it("keeps the package marker when the package figure equals the row's own delta", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: 64.07,
+          belowCutoff: false,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
+    expect(chip?.[0]).toContain('data-plain="+64.07"');
+  });
 });
 
 describe("wowsimsItemIdsJson", () => {
