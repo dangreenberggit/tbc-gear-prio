@@ -499,7 +499,7 @@ describe("rank-report", () => {
     // with `.delta-package`, every row interpolates an empty package-line slot,
     // the stylesheet gains `.package-line` and a fourth display arm, and the
     // script gains a `package` arm on the sort attribute and the label swap.
-    // No row in this fixture carries a `setContext.package`, so the control's
+    // No row in this fixture carries a `setContext.packages`, so the control's
     // fourth radio does not render here and every package value equals its
     // plain delta. Diffed before/after to confirm the delta is exactly that and
     // nothing visible moves with the toggle off. Extended again in the same
@@ -525,7 +525,7 @@ describe("rank-report", () => {
     // diffed: the whole delta is the two `.chip .pkg` CSS rules (plus comment)
     // inside `<style>` and, inside `<script>`, the label swap losing its
     // `data-package-label` arm. No row in this fixture carries a
-    // `setContext.package`, so no `.pkg` span renders and nothing in the body
+    // `setContext.packages`, so no `.pkg` span renders and nothing in the body
     // moved — which is what the emit-only-with-a-package guard promises.
     expect({ digest, length: html.length }).toEqual({
       digest:
@@ -1085,12 +1085,14 @@ describe("packageSetPotentialDps", () => {
     nextThreshold: 2 as const,
     crossesThreshold: false,
     prospectiveBonusDps: 31.46,
-    package: {
-      threshold: 4 as const,
-      deltaDps: 64.07,
-      itemIds: [31048, 31042, 31034, 31044],
-      piecesNeeded: 4,
-    },
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
     ...over,
   });
 
@@ -1111,27 +1113,29 @@ describe("packageSetPotentialDps", () => {
     for (const v of rows) expect(v).toBeCloseTo(64.07);
   });
 
-  it("falls back to deltaDps when the package value is not positive", () => {
+  it("falls back to deltaDps when no package value is positive", () => {
     // Only a measured, positive package is credited. Nordrassil's 4pc package
     // measures -21.18 on this gear; crediting it would demote the row below its
     // own honest delta.
+    const negative = (deltaDps: number) =>
+      pkg({ packages: [{ ...pkg().packages![0]!, deltaDps }] });
     expect(
       packageSetPotentialDps({
         deltaDps: -110.9,
-        setContext: pkg({ package: { ...pkg().package, deltaDps: -21.18 } }),
+        setContext: negative(-21.18),
       })
     ).toBe(-110.9);
     expect(
       packageSetPotentialDps({
         deltaDps: 5,
-        setContext: pkg({ package: { ...pkg().package, deltaDps: 0 } }),
+        setContext: negative(0),
       })
     ).toBe(5);
   });
 
-  it("falls back to deltaDps with no package on the context", () => {
+  it("falls back to deltaDps with no packages on the context", () => {
     const bare = pkg();
-    delete (bare as { package?: unknown }).package;
+    delete (bare as { packages?: unknown }).packages;
     expect(packageSetPotentialDps({ deltaDps: 5, setContext: bare })).toBe(5);
     expect(packageSetPotentialDps({ deltaDps: 5 })).toBe(5);
   });
@@ -1175,12 +1179,14 @@ describe("formatPackageMembershipLine", () => {
     piecesAfterSwap: 1,
     nextThreshold: 2 as const,
     crossesThreshold: false,
-    package: {
-      threshold: 4 as const,
-      deltaDps: 64.07,
-      itemIds: [31048, 31042, 31034, 31044],
-      piecesNeeded: 4,
-    },
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
   };
 
   it("states the package figure and keeps the row's own swap visible", () => {
@@ -1190,7 +1196,7 @@ describe("formatPackageMembershipLine", () => {
     });
     expect(line).toBeDefined();
     expect(line).toContain("this swap alone: -106.16");
-    expect(line).toContain("part of 4pc package: +64.07");
+    expect(line).toContain("4pc package +64.07");
     expect(line).toContain("Thunderheart Harness");
   });
 
@@ -1216,14 +1222,21 @@ describe("formatPackageMembershipLine", () => {
     expect(line).toContain(GEM_POLICY_QUALIFIER);
   });
 
-  it("is absent when there is no positive package to describe", () => {
+  it("is absent when the row is in no measured package", () => {
     expect(formatPackageMembershipLine({ deltaDps: 5 })).toBeUndefined();
-    expect(
-      formatPackageMembershipLine({
-        deltaDps: 5,
-        setContext: { ...ctx, package: { ...ctx.package, deltaDps: -21.18 } },
-      })
-    ).toBeUndefined();
+  });
+
+  it("renders a negative package figure rather than hiding it (ticket 118)", () => {
+    // We sim things and present data: a package that measured badly is a
+    // measurement. Only the sort key ignores non-positive packages.
+    const line = formatPackageMembershipLine({
+      deltaDps: 5,
+      setContext: {
+        ...ctx,
+        packages: [{ ...ctx.packages[0]!, deltaDps: -21.18 }],
+      },
+    });
+    expect(line).toContain("4pc package -21.18");
   });
 });
 
@@ -1331,12 +1344,14 @@ describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
     nextThreshold: 2 as const,
     crossesThreshold: false,
     prospectiveBonusDps: 31.46,
-    package: {
-      threshold: 4 as const,
-      deltaDps: 64.07,
-      itemIds: [31048, 31042, 31034, 31044],
-      piecesNeeded: 4,
-    },
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
   };
 
   const shoulders = item({
@@ -1397,7 +1412,7 @@ describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
   it("shows the package framing on the row with its own swap delta", () => {
     const html = renderRankHtml(ranking([shoulders, plain]), meta);
     expect(html).toContain("this swap alone: -106.16");
-    expect(html).toContain("part of 4pc package: +64.07");
+    expect(html).toContain("4pc package +64.07");
   });
 
   it("offers the control when only the package figure would move a row", () => {
@@ -1675,12 +1690,14 @@ describe("curated ranked list chips", () => {
             nextThreshold: 2,
             crossesThreshold: false,
             prospectiveBonusDps: 31.46,
-            package: {
-              threshold: 4,
-              deltaDps: 64.07,
-              piecesNeeded: 4,
-              itemIds: [31048, 31042, 31034, 31044],
-            },
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
           },
         }),
       ]),
@@ -1693,7 +1710,7 @@ describe("curated ranked list chips", () => {
     expect(chip?.[0]).toContain('data-plain="-106.16"');
     // The package figure is subordinate, marked as the package's, and its own
     // element, so the two numbers can never read as one value or a range.
-    expect(chip?.[0]).toContain('<span class="pkg">pkg +64.07</span>');
+    expect(chip?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
     // The client script no longer selects data-package-label for `.d`: under
     // package mode `.d` falls through to the plain delta.
     expect(html).not.toContain('"data-package-label"');
@@ -1702,7 +1719,56 @@ describe("curated ranked list chips", () => {
     expect(html).toContain("body.package .chip .pkg");
   });
 
-  it("emits no .pkg span on a chip without a positive package", () => {
+  // Ticket 118: each measured threshold's figure appears separately in the
+  // marker, and the sort key is the best of them — the ret Lightbringer case,
+  // where the 2pc measures +11.31 and the 4pc -6.83.
+  it("shows each measured threshold's figure in the package marker", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 30990,
+          name: "Lightbringer Breastplate",
+          slot: "chest",
+          deltaDps: -0.55,
+          belowCutoff: false,
+          setContext: {
+            setId: 680,
+            setName: "Lightbringer Battlegear",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            packages: [
+              {
+                threshold: 2,
+                deltaDps: 11.31,
+                piecesNeeded: 2,
+                itemIds: [30990, 30993],
+              },
+              {
+                threshold: 4,
+                deltaDps: -6.83,
+                piecesNeeded: 4,
+                itemIds: [30989, 30997, 30990, 30993],
+              },
+            ],
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="30990"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip?.[0]).toContain(
+      '<span class="pkg">pkg 2pc +11.31 / 4pc -6.83</span>'
+    );
+    // The sort key is the best measured package value, not the largest
+    // threshold's.
+    expect(chip?.[0]).toContain('data-package="11.31"');
+  });
+
+  it("emits no .pkg span on a chip that is in no measured package", () => {
     const html = renderRankHtml(ranking(chipItems), meta);
     expect(html).not.toContain('<span class="pkg">');
   });
@@ -2159,7 +2225,7 @@ describe("curated list under package mode (owner direction 2026-08-10)", () => {
       nextThreshold: 2 as const,
       crossesThreshold: false,
       prospectiveBonusDps: 31.46,
-      package: pkg,
+      packages: [pkg],
     });
     return ranking([
       item({
@@ -2207,7 +2273,7 @@ describe("curated list under package mode (owner direction 2026-08-10)", () => {
       const full = new RegExp(
         `<a class="chip[^"]*"[^>]*data-item-id="${id}"[^>]*>.*?</a>`
       ).exec(html);
-      expect(full?.[0]).toContain('<span class="pkg">pkg +64.07</span>');
+      expect(full?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
     }
   });
 
@@ -2341,12 +2407,14 @@ describe("Set potential presentation (grouping and order)", () => {
             nextThreshold: 2,
             crossesThreshold: false,
             prospectiveBonusDps: 31.46,
-            package: {
-              threshold: 4,
-              deltaDps: 64.07,
-              piecesNeeded: 4,
-              itemIds: [31048, 31042, 31034, 31044],
-            },
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
           },
         }),
       ]),

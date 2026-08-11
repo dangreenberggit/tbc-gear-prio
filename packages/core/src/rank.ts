@@ -233,9 +233,16 @@ export type SetContext = {
    */
   prospectiveBonusBreaks?: BrokenSetBonus[];
   /**
-   * The completion package this row is a **member** of — present when the
-   * item's id appears in a `SetBonusValue.packageItemIds` (owner decision,
-   * 2026-08-10; spec §4).
+   * The set's measured completion packages, one entry per measured threshold,
+   * smallest first — present when the item's id appears in any of them
+   * (owner decisions, 2026-08-10 and 2026-08-11; spec §4).
+   *
+   * Every measured threshold rides along, not just the largest. Ticket 118:
+   * the largest-threshold-first rule meant a positive 2pc package reached no
+   * row whenever the 4pc measured negative — on the ret artifact every
+   * Lightbringer row carried -6.83 while +11.31 was visible only in the
+   * panel. Both figures are data; the reader sees them side by side, and
+   * package mode sorts by the best of them.
    *
    * Membership is keyed on `packageItemIds` rather than on `nextThreshold`
    * because the two disagree exactly where the feature matters: at 0 pieces
@@ -250,7 +257,7 @@ export type SetContext = {
    * `packageDelta − Σ singles` split that carries the `(k−1)·B` inflation
    * ticket 90 suppresses from ranking.
    */
-  package?: SetPackageContext;
+  packages?: SetPackageContext[];
 };
 
 export type SetPackageContext = {
@@ -1152,6 +1159,36 @@ async function buildSetBonuses(
 }
 
 /**
+ * The completion packages a member row carries (ticket 118, owner decision
+ * 2026-08-11). A row is a member when its item id appears in any of its set's
+ * measured packages. A member carries EVERY measured threshold's package for
+ * the set, smallest threshold first — both the 2pc and the 4pc figure reach
+ * the row as data. The old rule kept only the largest threshold's package, so
+ * on the ret artifact every Lightbringer row carried the negative 4pc figure
+ * (-6.83) while the positive 2pc figure (+11.31) reached no row at all.
+ *
+ * Exported for direct testing against the committed report artifacts.
+ */
+export function memberPackages(
+  itemId: number,
+  bonusesForSet: readonly SetBonusValue[]
+): SetPackageContext[] | undefined {
+  const measured = bonusesForSet.filter((b) => b.unmeasured === undefined);
+  if (!measured.some((b) => b.packageItemIds.includes(itemId))) {
+    return undefined;
+  }
+  return measured
+    .slice()
+    .sort((a, b) => a.threshold - b.threshold)
+    .map((b) => ({
+      threshold: b.threshold,
+      deltaDps: b.packageDeltaDps,
+      itemIds: b.packageItemIds,
+      piecesNeeded: b.packageItemIds.length,
+    }));
+}
+
+/**
  * Populate `RankedItem.setContext` for every candidate whose item belongs to
  * a set with any attempted `SetBonusValue` (spec §3) — including the
  * crossing case, so a renderer can say "completes 2pc (included in delta)".
@@ -1223,23 +1260,10 @@ function applySetContext(
     }
     // Package membership is independent of everything above: it asks only
     // "is this item one of the pieces a measured package assembles", so it
-    // reaches rows whose `nextThreshold` points elsewhere. Largest threshold
-    // first, so a piece in both the 2pc and the 4pc package is described by
-    // the fuller one the owner's view is about.
-    const memberOf = bonusesForSet
-      .filter(
-        (b) =>
-          b.unmeasured === undefined && b.packageItemIds.includes(item.itemId)
-      )
-      .sort((a, b) => b.threshold - a.threshold)[0];
-    if (memberOf) {
-      setContext.package = {
-        threshold: memberOf.threshold,
-        deltaDps: memberOf.packageDeltaDps,
-        itemIds: memberOf.packageItemIds,
-        piecesNeeded: memberOf.packageItemIds.length,
-      };
-    }
+    // reaches rows whose `nextThreshold` points elsewhere. Every measured
+    // threshold's figure rides along (ticket 118) — see `memberPackages`.
+    const pkgs = memberPackages(item.itemId, bonusesForSet);
+    if (pkgs) setContext.packages = pkgs;
     item.setContext = setContext;
   }
 }

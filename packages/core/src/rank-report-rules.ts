@@ -417,18 +417,37 @@ export function isCuratedBis(item: Pick<RankedItem, "bisTags">): boolean {
  * this is a framing mismatch between a single swap and a package, not a wrong
  * number (carry-forward 96).
  *
- * A pointer, never a recomputed number: the value of the package lives in the
- * Set potential panel, whose figure is break-confounded and deliberately kept
- * out of the sort (carry-forward 90). Restating any part of it here would put
- * that number back where a reader takes it for a ranking.
+ * The pointer states the set's measured whole-package figures itself (ticket
+ * 118, folding in ticket 96's live case). Before that, it read "see Set
+ * potential" with no number, which implied the package redeems the row — and
+ * on a set whose every package measured negative, the panel then said the
+ * opposite. With the figures inline the destination cannot contradict the
+ * pointer: the numbers are the data, and no advice is added either way.
+ *
+ * The figures are `packageDeltaDps` — the same measured quantity every other
+ * surface shows — never the break-confounded derived `bonusDps`
+ * (carry-forward 90), and nothing here reaches a sort key.
  */
 export function formatCuratedPackagePointer(
-  item: Pick<RankedItem, "bisTags" | "belowCutoff" | "setContext">
+  item: Pick<RankedItem, "bisTags" | "belowCutoff" | "setContext">,
+  setBonuses: readonly SetBonusValue[] = []
 ): string {
   if (!isCuratedBis(item) || !item.belowCutoff) return "";
-  const setName = item.setContext?.setName;
-  if (setName === undefined) return "";
-  return `BiS as part of ${setName}, not as this swap alone — see Set potential`;
+  const ctx = item.setContext;
+  if (ctx?.setName === undefined) return "";
+  const head = `BiS as part of ${ctx.setName}, not as this swap alone`;
+  const measured = setBonuses.filter(
+    (b) => b.setId === ctx.setId && b.unmeasured === undefined
+  );
+  if (measured.length === 0) return `${head} — see Set potential`;
+  const figures = [...measured]
+    .sort((a, b) => a.threshold - b.threshold)
+    .map(
+      (b) =>
+        `${b.threshold}pc ${b.packageDeltaDps > 0 ? "+" : ""}${b.packageDeltaDps.toFixed(2)}`
+    )
+    .join(" / ");
+  return `${head} — its measured packages: ${figures} DPS vs current gear (see Set potential)`;
 }
 
 /**
@@ -464,13 +483,21 @@ export const SET_POTENTIAL_WEIGHTS: Record<SetThreshold, number> = {
 export type SetPotentialCredit = "weighted" | "full";
 
 /**
- * A member row's value as the **whole completion package** it belongs to, or
- * its own `deltaDps` when no measured, positive package claims it.
+ * A member row's value as the **best of its set's measured whole-package
+ * figures**, or its own `deltaDps` when no measured package for the set is
+ * positive.
  *
  * The owner's decision of 2026-08-10 (spec §4): under the opt-in view, the
  * question a tier row should answer is not "what does this piece do tonight"
  * but "is starting this set worth it at all" — so every member row of one
  * package carries the same whole-package figure and they sort as a block.
+ *
+ * "Best of the measured values" is the owner's ticket-118 refinement
+ * (2026-08-11). A row carries every measured threshold's figure, and the sort
+ * takes the highest: on the ret artifact the Lightbringer 2pc measures +11.31
+ * while the 4pc measures -6.83, so a Lightbringer row sorts by +11.31 rather
+ * than being pinned to the larger threshold's negative number. Plain
+ * arithmetic over simmed data, not a judgment about which goal matters.
  *
  * Three things this deliberately is not:
  *
@@ -482,44 +509,55 @@ export type SetPotentialCredit = "weighted" | "full";
  *   `packageDeltaDps` is a single simmed delta with any broken set's cost
  *   already netted inside it, so the confound never lands on it and
  *   `setPotentialIsConfounded` is correctly not consulted here.
- * - **Not a maximum.** The package figure replaces the row's own value rather
- *   than being maxed with it, so the member rows stay one block instead of
- *   splitting around whichever pieces happen to be upgrades alone.
+ * - **Not a maximum against the row's own delta.** A positive package figure
+ *   replaces the row's own value rather than being maxed with it, so the
+ *   member rows stay one block instead of splitting around whichever pieces
+ *   happen to be upgrades alone.
  *
- * Only a **positive** package is credited. A package that measures ≤ 0 is a set
- * not worth starting on this gear, and crediting it would move rows on a figure
- * that argues against them.
+ * Only a **positive** package is credited. A set whose every measured package
+ * is ≤ 0 is not worth starting on this gear, and crediting it would move rows
+ * on figures that argue against them.
  */
 export function packageSetPotentialDps(
   item: Pick<RankedItem, "deltaDps" | "setContext">
 ): number {
-  const pkg = item.setContext?.package;
-  if (!pkg || pkg.deltaDps <= 0) return item.deltaDps;
-  return pkg.deltaDps;
+  const pkgs = item.setContext?.packages;
+  if (!pkgs || pkgs.length === 0) return item.deltaDps;
+  const best = Math.max(...pkgs.map((p) => p.deltaDps));
+  return best > 0 ? best : item.deltaDps;
 }
 
 /**
- * The member row's package line: the row's own single-swap delta and the
- * package figure side by side, so the number that moved the row is never the
- * only one on screen.
+ * The member row's package line: the row's own single-swap delta first, then
+ * one figure per measured threshold — "2pc package +11.31 / 4pc package
+ * -6.83" — so the number that moved the row is never the only one on screen,
+ * and no threshold's measurement is hidden behind another's (ticket 118).
  *
- * The wording is load-bearing on two counts. It says **whole package**, because
- * every member row shows this same figure and a reader must not take it for
- * this piece's share. And it carries `GEM_POLICY_QUALIFIER`, the same caveat
- * the panel states about the same figure.
+ * Negative figures render too. The owner's direction: we sim things and
+ * present data; a package that measured badly is a measurement, not a secret.
+ * (Only the *sort* ignores non-positive packages — `packageSetPotentialDps`.)
+ *
+ * The wording says each figure is the **whole package**'s, because every
+ * member row shows the same figures and a reader must not take one for this
+ * piece's share. And it carries `GEM_POLICY_QUALIFIER`, the same caveat the
+ * panel states about the same figures.
  */
 export function formatPackageMembershipLine(
   item: Pick<RankedItem, "deltaDps" | "setContext">
 ): string | undefined {
   const ctx = item.setContext;
-  const pkg = ctx?.package;
-  if (!ctx || !pkg || pkg.deltaDps <= 0) return undefined;
+  const pkgs = ctx?.packages;
+  if (!ctx || !pkgs || pkgs.length === 0) return undefined;
   const own = `${item.deltaDps > 0 ? "+" : ""}${item.deltaDps.toFixed(2)}`;
+  const figures = pkgs
+    .map(
+      (p) =>
+        `${p.threshold}pc package ${p.deltaDps > 0 ? "+" : ""}${p.deltaDps.toFixed(2)} (${p.piecesNeeded} pieces)`
+    )
+    .join(" / ");
   return (
-    `this swap alone: ${own} — part of ${pkg.threshold}pc package: ` +
-    `+${pkg.deltaDps.toFixed(2)} for the whole package ` +
-    `(${pkg.piecesNeeded} ${ctx.setName} pieces vs current gear; ` +
-    `${GEM_POLICY_QUALIFIER})`
+    `this swap alone: ${own} — ${figures} — each figure is that whole ` +
+    `package of ${ctx.setName} pieces vs current gear (${GEM_POLICY_QUALIFIER})`
   );
 }
 

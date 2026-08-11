@@ -124,13 +124,19 @@ function chipHtml(i: RankedItem, packageOnly: boolean): string {
       ? "not ranked overall"
       : `#${i.rank} of every candidate simmed`;
   const cls = `chip${isCuratedBis(i) ? " is-bis" : ""}${packageOnly ? " package-only muted" : ""}`;
-  // The package figure is a group's number, not this piece's, so it never
-  // replaces `.d` — it rides in its own subordinate span, shown only under
+  // The package figures are a group's numbers, not this piece's, so they never
+  // replace `.d` — they ride in their own subordinate span, shown only under
   // package mode, with a literal marker so the pair cannot read as a range
-  // (ticket 112). Emitted only when a positive package exists, so ordinary
-  // chips keep byte-identical markup.
+  // (ticket 112). Each measured threshold shows separately (ticket 118):
+  // "pkg 2pc +11.31 / 4pc -6.83". Emitted only when the row is in a measured
+  // package, so ordinary chips keep byte-identical markup.
+  const memberPkgs = i.setContext?.packages ?? [];
   const pkgSpan =
-    pkg !== i.deltaDps ? `<span class="pkg">pkg ${fmtDelta(pkg)}</span>` : "";
+    memberPkgs.length > 0
+      ? `<span class="pkg">pkg ${memberPkgs
+          .map((p) => `${p.threshold}pc ${fmtDelta(p.deltaDps)}`)
+          .join(" / ")}</span>`
+      : "";
   return `<a class="${cls}" href="#slot-${i.slot}" title="${esc(title)}" data-item-id="${i.itemId}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span>${pkgSpan}</a>`;
 }
 
@@ -328,7 +334,10 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const packageLine = packageLineText
             ? `<div class="package-line">${esc(packageLineText)}</div>`
             : "";
-          const curatedPointerText = formatCuratedPackagePointer(item);
+          const curatedPointerText = formatCuratedPackagePointer(
+            item,
+            ranking.setBonuses ?? []
+          );
           const curatedPointer = curatedPointerText
             ? `<div class="curated-pointer">${esc(curatedPointerText)}</div>`
             : "";
