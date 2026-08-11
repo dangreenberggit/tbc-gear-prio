@@ -308,6 +308,14 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--ink-soft);
   }
+  /* Shown in every mode, not only under package mode: it is the one place a
+     reader sees the row's own swap delta beside the package figure, and under
+     package mode the .nums column has switched to the package number. */
+  .package-line {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
   .set-potential-assumption {
     font-size: 0.8rem;
     color: var(--ink-soft);
@@ -381,10 +389,11 @@ export const REPORT_CSS = `
   body.bis-only .nav-slot.no-bis { display: none; }
   /* Exactly one of the three figures is live at a time, so the row never shows
      a number whose meaning depends on remembering the control's state. */
-  .delta-weighted, .delta-full { display: none; }
-  body.weighted .delta-plain, body.full .delta-plain { display: none; }
+  .delta-weighted, .delta-full, .delta-package { display: none; }
+  body.weighted .delta-plain, body.full .delta-plain, body.package .delta-plain { display: none; }
   body.weighted .delta-weighted { display: block; }
   body.full .delta-full { display: block; }
+  body.package .delta-package { display: block; }
   .nums { text-align: right; white-space: nowrap; }
   .delta { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; }
   .delta .unit { font-size: 0.7rem; color: var(--muted); }

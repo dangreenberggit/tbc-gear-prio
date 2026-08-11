@@ -22,6 +22,8 @@ import {
   groupBySlot,
   formatCuratedPackagePointer,
   isCuratedBis,
+  formatPackageMembershipLine,
+  packageSetPotentialDps,
   partitionShortlist,
   SET_POTENTIAL_WEIGHTS,
   weightedSetPotentialDps,
@@ -95,12 +97,13 @@ function renderShortlistChips(items: RankedItem[]): string {
     .map((i) => {
       const weighted = weightedSetPotentialDps(i);
       const full = weightedSetPotentialDps(i, "full");
+      const pkg = packageSetPotentialDps(i);
       const absRank = i.rank == null ? "" : `#${i.rank}`;
       const title =
         i.rank == null
           ? "not ranked overall"
           : `#${i.rank} of every candidate simmed`;
-      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" title="${esc(title)}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}">${fmtDelta(i.deltaDps)}</span></a>`;
+      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" title="${esc(title)}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span></a>`;
     })
     .join("\n");
 }
@@ -283,6 +286,14 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           // Ungated, unlike `setPotential` above: this carries no figure, and
           // the contradiction it reconciles is visible by default
           // (carry-forward 96).
+          // Ungated like the curated pointer below: it carries the row's own
+          // delta beside the package figure, so it explains the package mode
+          // rather than asserting a ranking. Rendered whenever a measured,
+          // positive package claims this row.
+          const packageLineText = formatPackageMembershipLine(item);
+          const packageLine = packageLineText
+            ? `<div class="package-line">${esc(packageLineText)}</div>`
+            : "";
           const curatedPointerText = formatCuratedPackagePointer(item);
           const curatedPointer = curatedPointerText
             ? `<div class="curated-pointer">${esc(curatedPointerText)}</div>`
@@ -329,11 +340,13 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           // prospective bonus.
           const weighted = weightedSetPotentialDps(item);
           const full = weightedSetPotentialDps(item, "full");
+          const pkg = packageSetPotentialDps(item);
           const deltaClsFor = (n: number) =>
             n > 0 ? "delta up" : n < 0 ? "delta down" : "delta flat";
           const weightedCls = deltaClsFor(weighted);
           const fullCls = deltaClsFor(full);
-          return `<article class="${cls}" data-item-id="${item.itemId}" data-sources="${esc(sourceKeysOf(item).join(SOURCE_KEY_SEP))}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}">
+          const pkgCls = deltaClsFor(pkg);
+          return `<article class="${cls}" data-item-id="${item.itemId}" data-sources="${esc(sourceKeysOf(item).join(SOURCE_KEY_SEP))}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}">
   <div class="lead">${rank}${choice}</div>
   <div class="body">
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
@@ -341,6 +354,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${alternate}
     ${set}
     ${setPotential}
+    ${packageLine}
     ${curatedPointer}
     ${hitNote}
     ${hitLoss}
@@ -349,6 +363,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
     <div class="${weightedCls} delta-weighted">${fmtDelta(weighted)} <span class="unit">DPS</span></div>
     <div class="${fullCls} delta-full">${fmtDelta(full)} <span class="unit">DPS</span></div>
+    <div class="${pkgCls} delta-package">${fmtDelta(pkg)} <span class="unit">DPS</span></div>
     <div class="pct">${fmtDelta(item.deltaPct)}%</div>
   </div>
 </article>`;
@@ -422,8 +437,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // unrealised prospective bonus gets an inert control otherwise. Measured on
   // `full`, the wider of the two credits — a row `weighted` leaves still can
   // move under `full`, so testing `weighted` alone could hide a live control.
+  //
+  // Package mode is tested separately rather than folded in: a member row can
+  // carry a package while carrying no prospective bonus at all (its
+  // `nextThreshold` bonus may be unmeasured, or point at a threshold it does
+  // not advance), so a `full`-only test would hide a control that has work to
+  // do — exactly the T6 shoulders case the owner asked for.
   const anyWeighted = ranking.items.some(
-    (i) => weightedSetPotentialDps(i, "full") !== i.deltaDps
+    (i) =>
+      weightedSetPotentialDps(i, "full") !== i.deltaDps ||
+      packageSetPotentialDps(i) !== i.deltaDps
   );
   // Radios rather than two checkboxes: the modes are alternative answers to
   // "how much of this bonus counts", so the markup itself has to make picking
@@ -434,7 +457,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       <label><input type="radio" name="set-weight" value="off" checked /> <span>Off — measured DPS only</span></label>
       <label><input type="radio" name="set-weight" value="weighted" /> <span>Weighted — ${SET_POTENTIAL_WEIGHTS[2]}× a 2pc bonus, ${SET_POTENTIAL_WEIGHTS[4]}× a 4pc</span></label>
       <label><input type="radio" name="set-weight" value="full" /> <span>Full — the whole bonus, as if the set gets completed anyway</span></label>
-      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not.</p>
+      <label><input type="radio" name="set-weight" value="package" /> <span>Package — score each set piece by the whole set it completes</span></label>
+      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not. <strong>Package</strong> answers a different question again — not what a piece is worth tonight, but whether starting the set is worth it: every piece of one completion package shows that package's own simmed value against your current gear, breaks included, so a piece that is a downgrade alone can still be worth collecting. Each row keeps its own single-swap delta beside the figure. Package values hold your current gems fixed, so re-gemming can only improve them.</p>
     </div>`
     : "";
 
@@ -562,11 +586,17 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   }
   function apply() {
     var m = mode();
-    var attr = m === "full" ? "data-full" : "data-weighted";
+    var attr =
+      m === "full"
+        ? "data-full"
+        : m === "package"
+          ? "data-package"
+          : "data-weighted";
     var allowed = allowedSources();
     var bisOn = !!bisBox && bisBox.checked;
     document.body.classList.toggle("weighted", m === "weighted");
     document.body.classList.toggle("full", m === "full");
+    document.body.classList.toggle("package", m === "package");
     document.body.classList.toggle("bis-only", bisOn);
     originals.forEach(function (entry) {
       var kids = entry.order.slice();
@@ -586,9 +616,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       d.textContent = d.getAttribute(
         m === "full"
           ? "data-full-label"
-          : m === "weighted"
-            ? "data-weighted-label"
-            : "data-plain"
+          : m === "package"
+            ? "data-package-label"
+            : m === "weighted"
+              ? "data-weighted-label"
+              : "data-plain"
       );
     });
     // Visibility is computed from the row's own classes, never from layout:

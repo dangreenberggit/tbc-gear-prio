@@ -333,6 +333,72 @@ export const SET_POTENTIAL_WEIGHTS: Record<SetThreshold, number> = {
 export type SetPotentialCredit = "weighted" | "full";
 
 /**
+ * A member row's value as the **whole completion package** it belongs to, or
+ * its own `deltaDps` when no measured, positive package claims it.
+ *
+ * The owner's decision of 2026-08-10 (spec §4): under the opt-in view, the
+ * question a tier row should answer is not "what does this piece do tonight"
+ * but "is starting this set worth it at all" — so every member row of one
+ * package carries the same whole-package figure and they sort as a block.
+ *
+ * Three things this deliberately is not:
+ *
+ * - **Not a per-piece split.** Spec §2.1 stands: no fraction of a package is
+ *   attributed to any piece. Every member shows the identical number, which is
+ *   why `formatPackageMembershipLine` must label it as the package's.
+ * - **Not the confounded quantity.** Ticket 90 suppresses `bonusDps`, the
+ *   derived `packageDelta − Σ singles` split that inflates by `(k−1)·B`.
+ *   `packageDeltaDps` is a single simmed delta with any broken set's cost
+ *   already netted inside it, so the confound never lands on it and
+ *   `setPotentialIsConfounded` is correctly not consulted here.
+ * - **Not a maximum.** The package figure replaces the row's own value rather
+ *   than being maxed with it, so the member rows stay one block instead of
+ *   splitting around whichever pieces happen to be upgrades alone.
+ *
+ * Only a **positive** package is credited. A package that measures ≤ 0 is a set
+ * not worth starting on this gear, and crediting it would move rows on a figure
+ * that argues against them.
+ */
+export function packageSetPotentialDps(
+  item: Pick<RankedItem, "deltaDps" | "setContext">
+): number {
+  const pkg = item.setContext?.package;
+  if (!pkg || pkg.deltaDps <= 0) return item.deltaDps;
+  return pkg.deltaDps;
+}
+
+/**
+ * The member row's package line: the row's own single-swap delta and the
+ * package figure side by side, so the number that moved the row is never the
+ * only one on screen.
+ *
+ * The wording is load-bearing on two counts. It says **whole package**, because
+ * every member row shows this same figure and a reader must not take it for
+ * this piece's share. And it discloses the gem qualifier: `packageDeltaDps`
+ * holds the player's current gem policy fixed (the package is assembled with
+ * the same sequential `equipmentForCandidateSwap` single swaps use, so each
+ * piece is denied a unique gem an earlier one consumed), which reads ~30 DPS
+ * conservative against a re-gemmed wowsims run — +64.07 against a reported +97
+ * on the shredzepelin P3 artifact (ticket 103). Conservative is the safe
+ * direction, but the gap is large enough that a reader comparing the two would
+ * otherwise think one is broken.
+ */
+export function formatPackageMembershipLine(
+  item: Pick<RankedItem, "deltaDps" | "setContext">
+): string | undefined {
+  const ctx = item.setContext;
+  const pkg = ctx?.package;
+  if (!ctx || !pkg || pkg.deltaDps <= 0) return undefined;
+  const own = `${item.deltaDps > 0 ? "+" : ""}${item.deltaDps.toFixed(2)}`;
+  return (
+    `this swap alone: ${own} — part of ${pkg.threshold}pc package: ` +
+    `+${pkg.deltaDps.toFixed(2)} for the whole package ` +
+    `(${pkg.piecesNeeded} ${ctx.setName} pieces vs current gear; ` +
+    `holds your current gems fixed, so re-gemming can only improve it)`
+  );
+}
+
+/**
  * A row's value with prospective set potential credited in — the quantity the
  * report's client-side toggle sorts and displays on.
  *

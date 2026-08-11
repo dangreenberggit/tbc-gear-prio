@@ -232,6 +232,35 @@ export type SetContext = {
    * fact. Such a figure is disclosed but never ranked on — ticket 90.
    */
   prospectiveBonusBreaks?: BrokenSetBonus[];
+  /**
+   * The completion package this row is a **member** of — present when the
+   * item's id appears in a `SetBonusValue.packageItemIds` (owner decision,
+   * 2026-08-10; spec §4).
+   *
+   * Membership is keyed on `packageItemIds` rather than on `nextThreshold`
+   * because the two disagree exactly where the feature matters: at 0 pieces
+   * worn every single swap lands at `piecesAfterSwap === 1`, so
+   * `nextThreshold` pins to an implemented 2pc and a threshold-keyed lookup
+   * reaches only the 2pc package's members (ADR-0023's ticket-91 case). The
+   * four-piece package's other members would carry nothing.
+   *
+   * `deltaDps` is `SetBonusValue.packageDeltaDps` — one sim of the assembled
+   * package against the baseline, with any broken set's cost already inside the
+   * measurement. It is deliberately **not** `bonusDps`, the derived
+   * `packageDelta − Σ singles` split that carries the `(k−1)·B` inflation
+   * ticket 90 suppresses from ranking.
+   */
+  package?: SetPackageContext;
+};
+
+export type SetPackageContext = {
+  threshold: SetThreshold;
+  /** `SetBonusValue.packageDeltaDps`: sim-measured, breaks netted in. */
+  deltaDps: number;
+  /** The package's members, canonical-slot order — this row among them. */
+  itemIds: number[];
+  /** How many pieces the package assembles, for the row's label. */
+  piecesNeeded: number;
 };
 
 export type SetBonusValue = {
@@ -1192,6 +1221,25 @@ function applySetContext(
           setContext.prospectiveBonusBreaks = matching.breaks;
         }
       }
+    }
+    // Package membership is independent of everything above: it asks only
+    // "is this item one of the pieces a measured package assembles", so it
+    // reaches rows whose `nextThreshold` points elsewhere. Largest threshold
+    // first, so a piece in both the 2pc and the 4pc package is described by
+    // the fuller one the owner's view is about.
+    const memberOf = bonusesForSet
+      .filter(
+        (b) =>
+          b.unmeasured === undefined && b.packageItemIds.includes(item.itemId)
+      )
+      .sort((a, b) => b.threshold - a.threshold)[0];
+    if (memberOf) {
+      setContext.package = {
+        threshold: memberOf.threshold,
+        deltaDps: memberOf.packageDeltaDps,
+        itemIds: memberOf.packageItemIds,
+        piecesNeeded: memberOf.packageItemIds.length,
+      };
     }
     item.setContext = setContext;
   }

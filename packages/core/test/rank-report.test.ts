@@ -14,6 +14,8 @@ import {
   formatSetBonusLine,
   formatSetPotentialLine,
   isCuratedBis,
+  formatPackageMembershipLine,
+  packageSetPotentialDps,
   weightedSetPotentialDps,
   wowsimsItemIdsJson,
 } from "../src/rank-report-rules.js";
@@ -490,10 +492,19 @@ describe("rank-report", () => {
     // `.panel.plausibility` rule. This fixture trips neither gate, so the panel
     // itself does not render — verified by dumping the document on both sides,
     // where the whole diff is those six CSS lines and nothing in the body.
+    // Repinned for the owner's package mode (2026-08-10): rows and chips gain
+    // `data-package`/`data-package-label`, the delta triple becomes a quadruple
+    // with `.delta-package`, every row interpolates an empty package-line slot,
+    // the stylesheet gains `.package-line` and a fourth display arm, and the
+    // script gains a `package` arm on the sort attribute and the label swap.
+    // No row in this fixture carries a `setContext.package`, so the control's
+    // fourth radio does not render here and every package value equals its
+    // plain delta. Diffed before/after to confirm the delta is exactly that and
+    // nothing visible moves with the toggle off.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "b494466716a009202f2f0a90db1df9218978bb535542c4b54aa7e594b21620ce",
-      length: 24819,
+        "a4d4792a511ac32ffbe4840159cb39cf83820af8b73a33201ca211bae1170fea",
+      length: 25753,
     });
   });
 });
@@ -1011,6 +1022,163 @@ describe("weightedSetPotentialDps", () => {
   });
 });
 
+describe("packageSetPotentialDps", () => {
+  // The owner's decision (2026-08-10, spec §4): under the opt-in view, a member
+  // row of an incomplete set scores by the WHOLE-PACKAGE net figure. Membership
+  // is `packageItemIds`, not `nextThreshold` — at 0 pieces worn every single
+  // swap lands at `piecesAfterSwap === 1`, so `nextThreshold` pins to 2pc and a
+  // threshold-keyed lookup would reach only two of the four T6 rows (ticket 91).
+  const pkg = (over: Partial<NonNullable<RankedItem["setContext"]>> = {}) => ({
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 31.46,
+    package: {
+      threshold: 4 as const,
+      deltaDps: 64.07,
+      itemIds: [31048, 31042, 31034, 31044],
+      piecesNeeded: 4,
+    },
+    ...over,
+  });
+
+  it("scores a member row by the whole-package figure, not its own delta", () => {
+    // The marquee case: the T6 shoulders sim at -106.16 as a single swap while
+    // the package they belong to is +64.07.
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: pkg() })
+    ).toBeCloseTo(64.07);
+  });
+
+  it("gives every member row of one package the same figure", () => {
+    // Not a per-piece split (spec §2.1 stands): all four rows carry the
+    // identical whole-package number, which is why it must be labelled as one.
+    const rows = [-106.16, -100.16, 21.75, 23.29].map((deltaDps) =>
+      packageSetPotentialDps({ deltaDps, setContext: pkg() })
+    );
+    for (const v of rows) expect(v).toBeCloseTo(64.07);
+  });
+
+  it("falls back to deltaDps when the package value is not positive", () => {
+    // Only a measured, positive package is credited. Nordrassil's 4pc package
+    // measures -21.18 on this gear; crediting it would demote the row below its
+    // own honest delta.
+    expect(
+      packageSetPotentialDps({
+        deltaDps: -110.9,
+        setContext: pkg({ package: { ...pkg().package, deltaDps: -21.18 } }),
+      })
+    ).toBe(-110.9);
+    expect(
+      packageSetPotentialDps({
+        deltaDps: 5,
+        setContext: pkg({ package: { ...pkg().package, deltaDps: 0 } }),
+      })
+    ).toBe(5);
+  });
+
+  it("falls back to deltaDps with no package on the context", () => {
+    const bare = pkg();
+    delete (bare as { package?: unknown }).package;
+    expect(packageSetPotentialDps({ deltaDps: 5, setContext: bare })).toBe(5);
+    expect(packageSetPotentialDps({ deltaDps: 5 })).toBe(5);
+  });
+
+  it("does not suppress a package whose bonusDps split is confounded", () => {
+    // Ticket 90 suppresses `bonusDps` — the DERIVED `packageDelta - Σ singles`
+    // split, which carries the (k-1)·B inflation. `packageDeltaDps` is one
+    // simmed measurement with the break's cost already inside it, so the
+    // confound never lands on it and the suppression does not apply.
+    const confounded = pkg({
+      prospectiveBonusBreaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: confounded })
+    ).toBeCloseTo(64.07);
+  });
+
+  it("still credits a row whose own delta already beats the package", () => {
+    // The package figure replaces the row's own value rather than maxing with
+    // it, so the whole set of member rows sorts as one block — which is the
+    // point of the view.
+    expect(
+      packageSetPotentialDps({ deltaDps: 23.29, setContext: pkg() })
+    ).toBeCloseTo(64.07);
+  });
+});
+
+describe("formatPackageMembershipLine", () => {
+  const ctx = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    package: {
+      threshold: 4 as const,
+      deltaDps: 64.07,
+      itemIds: [31048, 31042, 31034, 31044],
+      piecesNeeded: 4,
+    },
+  };
+
+  it("states the package figure and keeps the row's own swap visible", () => {
+    const line = formatPackageMembershipLine({
+      deltaDps: -106.16,
+      setContext: ctx,
+    });
+    expect(line).toBeDefined();
+    expect(line).toContain("this swap alone: -106.16");
+    expect(line).toContain("part of 4pc package: +64.07");
+    expect(line).toContain("Thunderheart Harness");
+  });
+
+  it("labels the figure as the whole package, never as this piece's share", () => {
+    // Spec §2.1 is unchanged: no per-piece split exists. Every member row shows
+    // the same number, so the wording has to say it is the package's.
+    const line = formatPackageMembershipLine({
+      deltaDps: 21.75,
+      setContext: ctx,
+    })!;
+    expect(line).toContain("whole package");
+    expect(line).not.toContain("share");
+  });
+
+  it("discloses that the figure holds the current gem policy fixed", () => {
+    // Ticket 103: packageDeltaDps reads ~30 DPS conservative against a
+    // re-gemmed wowsims run (+64.07 vs +97 reported), because the package is
+    // assembled with the same sequential gem policy single swaps use. Not
+    // fixed here; disclosed where the figure is shown.
+    const line = formatPackageMembershipLine({
+      deltaDps: -106.16,
+      setContext: ctx,
+    })!;
+    expect(line).toContain("re-gemming");
+  });
+
+  it("is absent when there is no positive package to describe", () => {
+    expect(formatPackageMembershipLine({ deltaDps: 5 })).toBeUndefined();
+    expect(
+      formatPackageMembershipLine({
+        deltaDps: 5,
+        setContext: { ...ctx, package: { ...ctx.package, deltaDps: -21.18 } },
+      })
+    ).toBeUndefined();
+  });
+});
+
 describe("set-weight toggle (client-side re-sort)", () => {
   const withPotential = item({
     name: "Tier piece",
@@ -1103,6 +1271,107 @@ describe("set-weight toggle (client-side re-sort)", () => {
     // the ranking, never from the weighted value.
     const html = renderRankHtml(ranking([withPotential]), meta);
     expect(html).toContain('class="row muted"');
+  });
+});
+
+describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
+  const pkgContext = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 31.46,
+    package: {
+      threshold: 4 as const,
+      deltaDps: 64.07,
+      itemIds: [31048, 31042, 31034, 31044],
+      piecesNeeded: 4,
+    },
+  };
+
+  const shoulders = item({
+    name: "Thunderheart Pauldrons",
+    slot: "shoulder",
+    itemId: 31048,
+    deltaDps: -106.16,
+    setContext: pkgContext,
+  });
+  // A plain row that outranks the shoulders by delta but is beaten by the
+  // package figure — the pair that proves the toggle actually reorders.
+  const plain = item({
+    name: "Plain shoulders",
+    slot: "shoulder",
+    itemId: 999,
+    deltaDps: 30,
+    belowCutoff: false,
+  });
+
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  it("embeds both orders as data, so the toggle needs no shell re-run", () => {
+    // The delivery shape from `.scratch/handoffs/set-potential-weighted-toggle
+    // -scope-miss.md`: both sort keys ride on the row at generation time and
+    // the browser re-sorts DOM it already has.
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('data-delta="-106.16"');
+    expect(html).toContain('data-package="64.07"');
+    // The unaffected row carries its own delta under both keys, so a sort on
+    // either attribute is total over every row.
+    expect(html).toContain('data-package="30"');
+  });
+
+  it("offers package as a fourth radio in the existing set-weight control", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('type="radio" name="set-weight" value="package"');
+    expect(html).toContain(
+      'type="radio" name="set-weight" value="off" checked'
+    );
+  });
+
+  it("ships the client-side script that re-sorts on the package key", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain("<script>");
+    expect(html).toContain("data-package");
+    // No shell re-run: the script sorts children already in the DOM.
+    expect(html).toContain("appendChild");
+  });
+
+  it("shows the package framing on the row with its own swap delta", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain("this swap alone: -106.16");
+    expect(html).toContain("part of 4pc package: +64.07");
+  });
+
+  it("offers the control when only the package figure would move a row", () => {
+    // A member row with no prospective bonus at all still moves under package
+    // mode, so availability cannot be gated on the weighted/full credits.
+    const bonusless = { ...pkgContext };
+    delete (bonusless as { prospectiveBonusDps?: number }).prospectiveBonusDps;
+    const html = renderRankHtml(
+      ranking([item({ ...shoulders, setContext: bonusless })]),
+      meta
+    );
+    expect(html).toContain('type="radio" name="set-weight" value="package"');
+  });
+
+  it("leaves the default order and the cutoff untouched", () => {
+    // Default view (toggle off) is exactly today's: the row renders muted from
+    // its own `belowCutoff`, and the plain +30 row precedes it in the DOM.
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('class="row muted"');
+    expect(html.indexOf("Plain shoulders")).toBeLessThan(
+      html.indexOf("Thunderheart Pauldrons")
+    );
   });
 });
 
