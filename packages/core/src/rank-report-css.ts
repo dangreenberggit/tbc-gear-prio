@@ -206,6 +206,20 @@ export const REPORT_CSS = `
     color: var(--muted);
   }
   .chip .d { font-family: var(--font-mono); font-size: 0.85rem; color: var(--up); }
+  /* Chips admitted into the curated list for package mode only: below cutoff
+     as single swaps, so every other mode must render the list it always did.
+     Hidden rather than absent, because the client script can re-sort chips but
+     cannot create them -- which is exactly why these were unreachable before
+     (ADR-0024 amendment). Muted styling and the figure being the package's,
+     not the swap's, keep them from reading as single-swap winners. */
+  .chip.package-only { display: none; }
+  body.package .chip.package-only { display: inline-flex; }
+  .chip.muted {
+    background: var(--paper-2);
+    border-color: var(--line);
+    opacity: 0.85;
+  }
+  .chip.muted .pos { color: var(--muted); }
   .list-count { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); font-weight: 400; }
   .slot { margin-bottom: 2.25rem; scroll-margin-top: 3.5rem; }
   .slot-head {

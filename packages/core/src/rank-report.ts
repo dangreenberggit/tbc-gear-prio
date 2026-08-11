@@ -25,6 +25,7 @@ import {
   isCuratedBis,
   formatPackageMembershipLine,
   packageSetPotentialDps,
+  packageOnlyShortlist,
   partitionShortlist,
   SET_POTENTIAL_WEIGHTS,
   weightedSetPotentialDps,
@@ -37,6 +38,7 @@ import {
 // as index.ts and the CLI already use it.
 export {
   groupBySlot,
+  packageOnlyShortlist,
   partitionShortlist,
   SLOT_ORDER,
   type RankReportMeta,
@@ -91,22 +93,38 @@ export function formatItemSource(source: ItemSource): string {
  * §12's objection is to renumbering *`rank` itself* inside a filter, which
  * would claim an item is better than it is. Nothing here writes `rank`.
  */
-function renderShortlistChips(items: RankedItem[]): string {
-  return items
+function renderShortlistChips(
+  items: RankedItem[],
+  // Package-only chips are appended after the ordinary ones and marked, so the
+  // three modes that do not show them render exactly the list they always did.
+  packageOnly: RankedItem[] = []
+): string {
+  const ordinary = items
     .slice()
     .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
-    .map((i) => {
-      const weighted = weightedSetPotentialDps(i);
-      const full = weightedSetPotentialDps(i, "full");
-      const pkg = packageSetPotentialDps(i);
-      const absRank = i.rank == null ? "" : `#${i.rank}`;
-      const title =
-        i.rank == null
-          ? "not ranked overall"
-          : `#${i.rank} of every candidate simmed`;
-      return `<a class="chip${isCuratedBis(i) ? " is-bis" : ""}" href="#slot-${i.slot}" title="${esc(title)}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span></a>`;
-    })
-    .join("\n");
+    .map((i) => chipHtml(i, false));
+  const admitted = packageOnly
+    .slice()
+    .sort((a, b) => packageSetPotentialDps(b) - packageSetPotentialDps(a))
+    .map((i) => chipHtml(i, true));
+  return [...ordinary, ...admitted].join("\n");
+}
+
+function chipHtml(i: RankedItem, packageOnly: boolean): string {
+  const weighted = weightedSetPotentialDps(i);
+  const full = weightedSetPotentialDps(i, "full");
+  const pkg = packageSetPotentialDps(i);
+  const absRank = i.rank == null ? "" : `#${i.rank}`;
+  // An admitted chip is below cutoff, so the tooltip has to say what it is
+  // doing in a curated list at all — the figure it carries is the package's,
+  // not this swap's.
+  const title = packageOnly
+    ? `below cutoff as a single swap — shown for its ${fmtDelta(pkg)} DPS package`
+    : i.rank == null
+      ? "not ranked overall"
+      : `#${i.rank} of every candidate simmed`;
+  const cls = `chip${isCuratedBis(i) ? " is-bis" : ""}${packageOnly ? " package-only muted" : ""}`;
+  return `<a class="${cls}" href="#slot-${i.slot}" title="${esc(title)}" data-item-id="${i.itemId}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span></a>`;
 }
 
 function esc(s: string): string {
@@ -215,6 +233,9 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   const reportItems = ranking.items as ReportItem[];
   const bySlot = groupBySlot(ranking.items);
   const { raid: aboveRaid, pvp: abovePvp } = partitionShortlist(ranking.items);
+  // Admitted into the curated strip for package mode only; hidden by CSS in
+  // every other mode, so those modes render the list they always did.
+  const packageOnlyChips = packageOnlyShortlist(ranking.items);
   const above = ranking.items.filter((i) => !i.belowCutoff);
   const noiseNote =
     ranking.baseline.stdev > 0
@@ -805,11 +826,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     </div>
 
     ${
-      aboveRaid.length
+      aboveRaid.length || packageOnlyChips.length
         ? `<div class="shortlist">
       <h2>Curated ranked list <span class="list-count"></span></h2>
       <div class="chips">
-        ${renderShortlistChips(aboveRaid)}
+        ${renderShortlistChips(aboveRaid, packageOnlyChips)}
       </div>
     </div>`
         : ""

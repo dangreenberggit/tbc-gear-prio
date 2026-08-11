@@ -90,6 +90,40 @@ export function partitionShortlist(items: RankedItem[]): {
 }
 
 /**
+ * Below-cutoff rows the curated list admits **for package mode only**.
+ *
+ * Package mode exists to organise the report's shopping-list area, and it could
+ * not reach the rows it was built for. Chips come from `partitionShortlist`,
+ * which keeps only above-cutoff rows, so a piece that is a downgrade as a single
+ * swap but positive as part of its package — 31048 at −106.16 inside a +64.07
+ * package — had no chip element at all. The client script re-sorts and filters
+ * chips; it cannot conjure one, so no toggle state could ever surface these.
+ *
+ * Render-but-hide, at the owner's direction (ADR-0024 amendment, 2026-08-10):
+ * the chips are in every document and only package mode displays them, so the
+ * other three modes stay byte-identical to what they showed before.
+ *
+ * **No cutoff data moves.** `belowCutoff` is untouched, these rows stay muted
+ * and stay out of every count, and nothing here feeds a sort key or the bar.
+ * This is admission into a presentation area under an opt-in mode — ADR-0024's
+ * re-sort-not-repartition principle, extended from rows to the chip strip.
+ *
+ * `magnitudeWarning` is excluded on the same grounds `partitionShortlist`
+ * excludes it: an implausible sim delta should not reach a curated list under
+ * any mode.
+ */
+export function packageOnlyShortlist(items: RankedItem[]): RankedItem[] {
+  const reportItems = items as ReportItem[];
+  return reportItems.filter(
+    (i) =>
+      i.belowCutoff &&
+      !i.magnitudeWarning &&
+      i.source.kind !== "pvp" &&
+      packageSetPotentialDps(i) !== i.deltaDps
+  );
+}
+
+/**
  * Bucket by slot in `SLOT_ORDER`, best delta first within each.
  *
  * Every slot gets a bucket even when empty, so the renderer can decide

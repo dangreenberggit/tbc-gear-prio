@@ -513,10 +513,15 @@ describe("rank-report", () => {
     // interpolation slots (this fixture carries no set data, so no `.set-info`
     // block and no panel entry render at all), and the remaining +1744 is
     // inside `<style>`. Body 13909 -> 13879, CSS 12342 -> 14086.
+    // Repinned once more for the package-mode curated-list admission. Diffed
+    // again: the entire body delta is one `data-item-id` attribute per chip,
+    // which the admission needs to identify a chip. This fixture has no
+    // package-carrying row, so no admitted chip renders and the chip list is
+    // the same two chips in the same order. The rest is the new CSS.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "f18f2dd42835b04c45d07cfbc132f0b13d22dc53331f51709356ea8bb13750a3",
-      length: 27965,
+        "2096808276024c4b203a9c56d3163c5239d6650c3fe8549390ad9d054984252d",
+      length: 28707,
     });
   });
 });
@@ -2036,6 +2041,115 @@ describe("set potential (§4)", () => {
  * qualifier that was disclosed before is still disclosed — the no-information-
  * loss assertions below are the guard on that.
  */
+/**
+ * The curated ranked list is the report's shopping-list area, and package mode
+ * exists to organise it. It could not: chips are rendered from
+ * `partitionShortlist`, which keeps only above-cutoff rows, so a package-
+ * positive member that is a downgrade as a single swap (31048, 31042) had no
+ * chip element at all and the client script had nothing to re-sort into view.
+ *
+ * The fix is render-but-hide, at the owner's direction (ADR-0024 amendment):
+ * these chips exist in every document and are visible only under package mode.
+ * Cutoff data is untouched — this is admission into a presentation area, the
+ * same re-sort-not-repartition principle ADR-0024 already applies to rows.
+ */
+describe("curated list under package mode (owner direction 2026-08-10)", () => {
+  function t6Ranking(): Ranking {
+    const pkg = {
+      threshold: 4 as const,
+      deltaDps: 64.07,
+      piecesNeeded: 4,
+      itemIds: [31048, 31042, 31034, 31044],
+    };
+    const ctx = (piecesAfterSwap: number) => ({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      piecesWornBefore: 0,
+      piecesAfterSwap,
+      nextThreshold: 2 as const,
+      crossesThreshold: false,
+      prospectiveBonusDps: 31.46,
+      package: pkg,
+    });
+    return ranking([
+      item({
+        rank: 1,
+        itemId: 999,
+        name: "Plain Upgrade",
+        slot: "neck",
+        deltaDps: 30,
+        belowCutoff: false,
+      }),
+      item({
+        itemId: 31048,
+        name: "Thunderheart Pauldrons",
+        slot: "shoulder",
+        deltaDps: -106.16,
+        belowCutoff: true,
+        bisTags: ["BiS"],
+        setContext: ctx(1),
+      }),
+      item({
+        itemId: 31042,
+        name: "Thunderheart Chestguard",
+        slot: "chest",
+        deltaDps: -100.16,
+        belowCutoff: true,
+        bisTags: ["BiS"],
+        setContext: ctx(1),
+      }),
+    ]);
+  }
+
+  it("renders chips for package-positive members that miss the cutoff", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    for (const id of [31048, 31042]) {
+      const chip = new RegExp(
+        `<a class="chip[^"]*"[^>]*data-item-id="${id}"[^>]*>`
+      ).exec(html);
+      expect(chip, `chip for ${id}`).not.toBeNull();
+      // Carries the package figure the client sorts on, and is marked so CSS
+      // can keep it out of every mode that did not ask for it.
+      expect(chip?.[0]).toContain('data-package="64.07"');
+      expect(chip?.[0]).toContain("package-only");
+    }
+  });
+
+  /**
+   * The other three modes must stay byte-identical to today, which is what
+   * "hidden by default" has to mean here — the chips exist in the document but
+   * no mode except `package` shows them.
+   */
+  it("hides those chips outside package mode", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(".chip.package-only { display: none; }");
+    expect(html).toContain(
+      "body.package .chip.package-only { display: inline-flex; }"
+    );
+  });
+
+  /**
+   * The admitted chips must not disturb the list the report has always shown:
+   * a package member that already cleared the cutoff keeps its ordinary chip,
+   * and the above-cutoff chips keep their generation-time order.
+   */
+  it("leaves the above-cutoff chip list unchanged", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    const chips = [...html.matchAll(/<a class="chip([^"]*)"[^>]*>/g)];
+    const ordinary = chips.filter((c) => !c[1]?.includes("package-only"));
+    expect(ordinary).toHaveLength(1);
+  });
+
+  /** BiS-only must not strand them: 31042/31048 carry BiS tags. */
+  it("keeps them in the BiS-only filter", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    const chip = /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>/.exec(
+      html
+    );
+    expect(chip?.[0]).toContain("is-bis");
+  });
+});
+
 describe("Set potential presentation (grouping and order)", () => {
   const thunderheart = {
     setId: 676,

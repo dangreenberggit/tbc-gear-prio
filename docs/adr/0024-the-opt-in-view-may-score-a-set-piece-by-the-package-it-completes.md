@@ -130,3 +130,35 @@ wrong on its own terms: spec §2.2 requires byte-identical gem policy between
 package and single swaps so PLAN.md §9's symmetry invariant holds by
 construction. The conservatism is the price of that invariant, and ticket 103's
 own recommendation is disclosure.
+
+## Amendment, 2026-08-10 — package mode admits members into the curated list
+
+Package mode did not deliver the outcome this ADR accepted it for. The owner's
+stated intent was that it "organize the top area that ranks items for their
+shopping list", and on the shredzepelin P3 report it could not: with package
+mode selected and BiS-only on, Thunderheart Pauldrons (31048) and Chestguard
+(31042) still did not appear in the Curated ranked list.
+
+The cause is structural, not a sort bug. Chips are rendered from
+`partitionShortlist`, which keeps only above-cutoff rows, so those two items had
+**no chip element in the document at all**. The client-side script re-sorts and
+filters chips; it cannot create one. No toggle state could ever have surfaced
+them.
+
+**Decision.** At the owner's direction, package mode admits package-positive
+below-cutoff set members into the curated list _presentation_
+(`packageOnlyShortlist`). Those chips are rendered in every document and shown
+only under package mode, sorted by `packageDeltaDps`, carrying muted styling and
+a tooltip saying the figure is the package's and the row is below cutoff as a
+single swap. They keep their BiS tags, so the BiS-only filter includes them.
+
+**Cutoff data is untouched.** `belowCutoff` is not recomputed, the rows stay
+muted, and no count or sort key changes — this is the same
+re-sort-not-repartition principle above, extended from rows to the chip strip,
+plus render-but-hide so the other three modes stay byte-identical.
+
+This does **not** reverse the rejected alternative "Recompute `belowCutoff` from
+the package figure". That was rejected for rewriting a cutoff verdict from a
+figure that is not the row's own delta, and nothing here rewrites a verdict: the
+chip is a presentation element admitted under an opt-in mode, and the row it
+points at still reads below cutoff wherever the cutoff is stated.
