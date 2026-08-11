@@ -1199,11 +1199,10 @@ describe("formatPackageMembershipLine", () => {
     expect(line).not.toContain("share");
   });
 
-  it("discloses that the package figure's gem handling may read low", () => {
-    // Ticket 103 (reopened): packageDeltaDps reads ~33 DPS below the owner's
-    // wowsims run of the same swap with the SAME gems (+64.07 vs +97), so the
-    // gap is not re-gemming and must not be attributed to it. Unexplained;
-    // disclosed neutrally where the figure is shown via GEM_POLICY_QUALIFIER.
+  it("states the package figure's gem model where the figure is shown", () => {
+    // Ticket 111: the qualifier states the model (migrate worn gems, rare-cap
+    // the auto-fill) rather than apologising for it, and claims no match to a
+    // wowsims run — that has never been measured.
     const line = formatPackageMembershipLine({
       deltaDps: -106.16,
       setContext: ctx,

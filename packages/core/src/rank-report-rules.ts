@@ -205,23 +205,23 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
 }
 
 /**
- * The one wording for `packageDeltaDps`'s gem caveat, shared by every surface
- * that states the figure (ticket 103).
+ * The one wording for `packageDeltaDps`'s gem-model statement, shared by every
+ * surface that states the figure (tickets 103, 111).
  *
- * The package is assembled with the same sequential `equipmentForCandidateSwap`
- * single swaps use, so each piece is denied a unique gem an earlier one
- * consumed and metas are repaired against a partly-assembled set. That reads
- * ~30 DPS conservative against a re-gemmed wowsims run — +64.07 against a
- * reported +97 on the shredzepelin P3 artifact. Conservative is the safe
- * direction, but the gap is large enough that a reader comparing the two would
- * otherwise think one is broken.
+ * This states the model rather than apologising for it: swapping in an item
+ * migrates the worn gems that fit (wowsims equip semantics), and sockets the
+ * migration leaves empty are auto-gemmed capped at rare quality within the
+ * run's phase — gems the player could actually have (owner decision, ticket
+ * 111). It deliberately does NOT claim the figure matches a wowsims run:
+ * nobody has measured that, and part of the original gap to the owner's run
+ * remains unattributed.
  *
  * One constant rather than two strings: the panel and the member row state the
- * same quantity, and the caveat drifting between them would read as two
+ * same quantity, and the wording drifting between them would read as two
  * different claims about one number.
  */
 export const GEM_POLICY_QUALIFIER =
-  "gem handling differs from a wowsims run and this figure may read low";
+  "uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase";
 
 /**
  * The whole-package delta: one sim of the assembled package against the

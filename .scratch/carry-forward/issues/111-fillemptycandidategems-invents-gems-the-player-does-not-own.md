@@ -369,3 +369,12 @@ behaviour and silently start re-gemming worn slots.
 **Status: open**, now an implementation task (rarity-capped auto-fill) rather
 than an open question. TDD, and note that changing the fill moves candidate
 deltas in every existing report.
+
+## Implementation note, 2026-08-11 — cap landed as a fixed default
+
+The cap is `MAX_FILL_QUALITY = 3` in `packages/core/src/candidate-gems.ts`,
+applied via `GemContext.fillPalette` to the fill path only (`repairMeta` keeps
+the full palette). **Future work, per the owner decision:** open the cap up as
+a run-level option — a `RankInput` field / CLI flag mirroring wowsims' own
+rarity and phase dropdowns, especially if we integrate with wowsims directly.
+Not scheduled; no ticket yet.
