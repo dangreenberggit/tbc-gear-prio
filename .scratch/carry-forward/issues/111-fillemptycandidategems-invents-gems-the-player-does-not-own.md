@@ -378,3 +378,26 @@ the full palette). **Future work, per the owner decision:** open the cap up as
 a run-level option — a `RankInput` field / CLI flag mirroring wowsims' own
 rarity and phase dropdowns, especially if we integrate with wowsims directly.
 Not scheduled; no ticket yet.
+
+### Post-fix measurement, 2026-08-11 — the hands socket criterion, measured
+
+The frozen `sim_uigems.py` arms replay pre-fix payloads (its `PKG_PROD`
+carries 32194), so re-running it verbatim proves nothing about the fix.
+Instead the post-fix production package arm was rebuilt through the current
+engine — `equipmentForCandidateSwap` applied sequentially to the four T6
+pieces on the owner's OWNER2_BASE gear with feral P1 weights and the P3
+palette — and the engine now puts **24028 (rare)** in 31034's socket, not
+32194. The rebuilt arm's equipment is slot-identical to the ticket's frozen
+`PKG_FILL24028.req.json` (sole diff: `{id:0}` vs `{}` for the empty
+off-hand).
+
+Simmed against OWNER2_BASE, seeds [11,22,33,44,55] @ 3000, pinned CLI
+v0.0.101: baseline 2219.82, post-fix package 2331.54, **delta +111.72** —
+landing exactly on the ticket's PKG_FILL24028 rung, as predicted. Re-run:
+
+    pnpm exec tsx .scratch/set-bonus-value/loop-103-106/build_postfix_arm_111.ts
+    python .scratch/set-bonus-value/loop-103-106/sim_postfix_111.py
+
+(Inputs under `uigems-arms-simplerot/` are untracked scratch; on a fresh
+worktree regenerate OWNER2_BASE per `08-sequential-gems-typesimple.md`
+before running.) Outputs: `sims-111-postfix/` incl. `per-seed.json`.
