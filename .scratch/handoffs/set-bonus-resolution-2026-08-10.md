@@ -387,7 +387,7 @@ It has now been run.
 ### The first ret setContext artifact
 
 `.scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.{html,json,console.log}`
-(~65 min wall, 431 sims, wowsimcli v0.0.101, ret-p3 universe 394 entries).
+(~8 min wall — start ~18:02Z per artifact-dir creation, report stamped 18:09:56Z; the console log itself is untimestamped — 431 sims, wowsimcli v0.0.101, ret-p3 universe 394 entries).
 Re-run:
 
 ```
@@ -451,7 +451,7 @@ worked), 123 (substitutions drawer embeds the raw 2.4KB Go panic), 124
 
 ### Lessons and caveats
 
-- **W2 monitoring failure**: the generate worker backgrounded the ~65 min
+- **W2 monitoring failure**: the generate worker backgrounded the
   run and ended its turn without a disk handoff; the director's monitor sat
   on an untracked side-channel and only surfaced after intervention. The run
   itself succeeded. Lesson (DIRECTOR.md): verify worker liveness / prefer

@@ -110,7 +110,7 @@ makes that check possible; running it costs one `pnpm rank` on `ret-p3` with
 
 ---
 
-## Verification note (2026-08-11, ret catch-up round) — ret "benign" VERIFIED; ticket stays closed
+## Verification note (2026-08-11, ret catch-up round) — ret dead zones moot in this run, and no toll possible; ticket stays closed
 
 The `setId` join this disposition asked for has now been run, on the first
 ret setContext artifact
@@ -119,7 +119,7 @@ ret setContext artifact
 
 **Benign confirmed by the join, not just by gap magnitude.** 12 of 14 slots
 are alive (best delta > 0) — the old ret "dead zones" (shoulder/head/hands/
-wrist) are simply not dead in this run. The setId join across all 15 worn
+wrist) are simply not dead in this run. The setId join across all 16 worn
 items finds exactly one set piece: 30129 Crystalforge Breastplate (set 629)
 at count 1, below any implemented threshold, so **no ret slot can be a
 set-break toll**. Nothing reclassifies.
