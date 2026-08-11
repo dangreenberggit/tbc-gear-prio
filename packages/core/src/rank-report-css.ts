@@ -316,6 +316,51 @@ export const REPORT_CSS = `
     font-size: 0.78rem;
     color: var(--accent);
   }
+  /* One secondary block per row instead of four sibling clauses. The rule is
+     the hierarchy: the row's own delta is primary and lives in .nums, and
+     everything about the row's sets is one indented, labelled subject under
+     it. */
+  .set-info {
+    margin-top: 0.4rem;
+    padding: 0.35rem 0 0.35rem 0.6rem;
+    border-left: 2px solid var(--line);
+  }
+  .set-info-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  /* Inside the block the clauses are already grouped, so their own top margins
+     would re-space what the block just spaced. */
+  .set-info > .set,
+  .set-info > .set-potential,
+  .set-info > .package-line,
+  .set-info > .curated-pointer { margin-top: 0.15rem; }
+  .set-info > :nth-child(2) { margin-top: 0; }
+  /* Panel entries: one heading, then a fixed line order. The figures lead, the
+     contents are the actionable part, and the qualifiers are small print that
+     constrains both -- ranked by weight so the order is visible, not just
+     implied. */
+  .set-entries { list-style: none; margin: 0; padding: 0; }
+  .set-entry {
+    margin: 0 0 0.7rem;
+    padding-left: 0.6rem;
+    border-left: 2px solid var(--line);
+  }
+  .set-entry:last-child { margin-bottom: 0; }
+  .set-entry-head {
+    margin: 0 0 0.2rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .set-entry-line { font-size: 0.8rem; }
+  .set-entry-line.bonus { font-family: var(--font-mono); color: var(--ink); }
+  .set-entry-line.package { font-family: var(--font-mono); color: var(--accent); }
+  .set-entry-line.contents { color: var(--ink-soft); }
+  .set-entry-line.qualifier { font-size: 0.75rem; color: var(--muted); }
   .set-potential-assumption {
     font-size: 0.8rem;
     color: var(--ink-soft);

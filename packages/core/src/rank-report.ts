@@ -17,7 +17,7 @@ import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
 import {
   curatedSetPhase,
-  formatSetBonusLine,
+  setBonusEntry,
   formatSetPotentialLine,
   groupBySlot,
   formatCuratedPackagePointer,
@@ -277,6 +277,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const set = item.setBonusNote
             ? `<div class="set">${esc(item.setBonusNote)}</div>`
             : "";
+          // The set clauses below were four sibling divs hung off the body,
+          // which read as four unrelated sentences competing with the item
+          // name. They are one subject — what this swap does to your sets — so
+          // they render as one labelled block, keeping the row's own delta as
+          // the primary figure in the numbers column.
           // The "with set" column (§4): under the toggle, every row with a
           // setContext shows its prospective value or, when unmeasured, the
           // reason — never a blank and never a silent 0 (§8.5).
@@ -329,6 +334,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
                 : `<span class="pill tag">${esc(t)}</span>`
             )
             .join("");
+          // Emitted only when something is in it, so a row with no set
+          // involvement keeps exactly today's markup and the block never
+          // renders as an empty bordered strip.
+          const setInfoParts = [set, setPotential, packageLine, curatedPointer]
+            .filter((p) => p !== "")
+            .join("\n      ");
+          const setInfo = setInfoParts
+            ? `<div class="set-info">
+      <p class="set-info-title">Set</p>
+      ${setInfoParts}
+    </div>`
+            : "";
           const deltaCls =
             item.deltaDps > 0
               ? "delta up"
@@ -353,10 +370,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
     <div class="meta">${esc(formatItemSource(item.source))} ${owned}${pvp}${magnitude}${tags}</div>
     ${alternate}
-    ${set}
-    ${setPotential}
-    ${packageLine}
-    ${curatedPointer}
+    ${setInfo}
     ${hitNote}
     ${hitLoss}
   </div>
@@ -416,8 +430,19 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       ? `<details class="panel" open>
   <summary>Set potential (${ranking.setBonuses.length})</summary>
   <p class="set-potential-assumption">${esc(setPotentialDisclosureLine())}</p>
-  <ul>${ranking.setBonuses
-    .map((b) => `<li>${esc(formatSetBonusLine(b))}</li>`)
+  <ul class="set-entries">${ranking.setBonuses
+    .map((b) => {
+      const entry = setBonusEntry(b);
+      const lines = entry.lines
+        .map(
+          (l) => `<div class="set-entry-line ${l.kind}">${esc(l.text)}</div>`
+        )
+        .join("\n      ");
+      return `<li class="set-entry">
+      <p class="set-entry-head">${esc(entry.heading)}</p>
+      ${lines}
+    </li>`;
+    })
     .join("\n")}</ul>
 </details>`
       : "";

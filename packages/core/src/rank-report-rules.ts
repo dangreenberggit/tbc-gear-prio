@@ -214,6 +214,84 @@ export function formatPackageDelta(b: SetBonusValue): string {
 }
 
 /**
+ * A panel entry, decomposed — the same facts `formatSetBonusLine` states, in a
+ * fixed order the renderer can lay out instead of one em-dash chain.
+ *
+ * `kind` exists so the stylesheet can rank the parts without parsing prose: the
+ * two figures read as figures, the contents as the actionable list, and the
+ * qualifiers as the small print that constrains both. Order is fixed here
+ * rather than at the call site, because "consistent across entries" is the
+ * whole point — the flat line's order was the order the clauses were written
+ * in over five commits, so a reader scanning the panel found the break caveat
+ * in a different place in each entry.
+ */
+export type SetBonusEntryLine = {
+  kind: "bonus" | "package" | "contents" | "qualifier";
+  text: string;
+};
+
+export type SetBonusEntry = {
+  heading: string;
+  lines: SetBonusEntryLine[];
+};
+
+/**
+ * The panel's structured form of a `SetBonusValue`.
+ *
+ * Loses nothing `formatSetBonusLine` says — the same bonus figure, package
+ * figure, package contents, break caveat and gem caveat — and adds no number.
+ * The CLI keeps the flat line, which is the right shape for a terminal; only
+ * the HTML panel takes this.
+ *
+ * The break caveat moves from a *prefix* to a qualifier line, which the flat
+ * line could not do: in one run of text a trailing caveat let a reader take the
+ * number away before reaching it, so `formatBreaksPrefix` front-loaded it. In a
+ * laid-out entry the qualifiers sit under the figures as their own visible
+ * block, so they are read with the figures rather than after them.
+ */
+export function setBonusEntry(b: SetBonusValue): SetBonusEntry {
+  const heading = `${b.setName} ${b.threshold}pc — ${b.piecesWorn} worn`;
+  if (b.unmeasured !== undefined) {
+    return {
+      heading,
+      lines: [{ kind: "bonus", text: UNMEASURED_REASON_TEXT[b.unmeasured] }],
+    };
+  }
+  const bonus = b.bonusDps ?? 0;
+  const lines: SetBonusEntryLine[] = [
+    {
+      kind: "bonus",
+      text: `set bonus ${bonus > 0 ? "+" : ""}${bonus.toFixed(2)} DPS`,
+    },
+    {
+      kind: "package",
+      text: `whole package ${b.packageDeltaDps >= 0 ? "+" : ""}${b.packageDeltaDps.toFixed(2)} DPS vs current gear`,
+    },
+  ];
+  if (b.packageItemIds.length > 0) {
+    const names = b.packageItemIds.map(
+      (id) => getItem(id)?.name ?? `item ${id}`
+    );
+    lines.push({ kind: "contents", text: `add ${names.join(", ")}` });
+  }
+  if (b.breaks && b.breaks.length > 0) {
+    const parts = b.breaks.map(
+      (x) =>
+        `${x.setName} ${x.threshold}pc (${x.piecesBefore}→${x.piecesAfter})`
+    );
+    lines.push({
+      kind: "qualifier",
+      text: `breaks ${parts.join("; ")} — the set bonus figure is inflated by it, and is not counted in ranking`,
+    });
+  }
+  lines.push({
+    kind: "qualifier",
+    text: `the package figure ${GEM_POLICY_QUALIFIER}`,
+  });
+  return { heading, lines };
+}
+
+/**
  * Names the items that would complete the package. Without this the panel
  * states a bonus with no way to act on it — and for a threshold no row carries,
  * "which items" is the whole of the actionable information.

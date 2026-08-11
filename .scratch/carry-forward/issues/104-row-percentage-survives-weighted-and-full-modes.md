@@ -41,7 +41,7 @@ body.weighted .pct, body.full .pct, body.package .pct { display: none; }
 
 Presentation only. No computed value, sort key, or cutoff moves.
 
-## Closed, 2026-08-10 in `dd08ef4`
+## Closed, 2026-08-10 in "Hide the row's own percentage under weighted and full modes too"
 
 Fixed as specified. Red first: the test asserted the widened selector and failed
 against the `package`-only rule.

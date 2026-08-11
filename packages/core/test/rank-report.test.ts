@@ -13,6 +13,7 @@ import {
   curatedSetPhase,
   formatSetBonusLine,
   GEM_POLICY_QUALIFIER,
+  setBonusEntry,
   formatSetPotentialLine,
   isCuratedBis,
   formatPackageMembershipLine,
@@ -507,10 +508,15 @@ describe("rank-report", () => {
     // Repinned again for carry-forward 104, which widens that rule to
     // `weighted` and `full`: the length moved by exactly the 186 characters the
     // CSS edit adds, so the whole delta is inside `<style>` and no markup moved.
+    // Repinned once more for the Set potential reorganisation. Both documents
+    // were dumped and diffed: the entire body delta is the removal of six empty
+    // interpolation slots (this fixture carries no set data, so no `.set-info`
+    // block and no panel entry render at all), and the remaining +1744 is
+    // inside `<style>`. Body 13909 -> 13879, CSS 12342 -> 14086.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "00a79a99eb42c62b3cc7cfd97e905cc3b86da898a9f5ea33568a606b3cb35498",
-      length: 26251,
+        "f18f2dd42835b04c45d07cfbc132f0b13d22dc53331f51709356ea8bb13750a3",
+      length: 27965,
     });
   });
 });
@@ -1835,7 +1841,7 @@ describe("set potential (§4)", () => {
       { ...meta(), view: { withSetPotential: true } }
     );
     expect(html).toContain("Set potential (1)");
-    expect(html).toContain("Thunderheart Harness 4pc (0 worn)");
+    expect(html).toContain("Thunderheart Harness 4pc — 0 worn");
     expect(html).toContain("+91.68 DPS");
     expect(html).toContain("completion-package synergy");
   });
@@ -1884,7 +1890,7 @@ describe("set potential (§4)", () => {
     );
 
     expect(html).toContain("Set potential (2)");
-    expect(html).toContain("Thunderheart Harness 4pc (0 worn)");
+    expect(html).toContain("Thunderheart Harness 4pc — 0 worn");
     expect(html).toContain("193.89");
     // The four items that complete it — the actionable part a per-row number
     // was failing to convey.
@@ -2017,6 +2023,135 @@ describe("set potential (§4)", () => {
     );
     expect(html).toContain("+45.00 set potential (needs 2 more pieces)");
     expect(html).toContain("completes 4pc (included in delta)");
+  });
+});
+
+/**
+ * The Set potential surfaces grew across five commits and read as accreted
+ * clauses: a panel entry was one em-dash chain whose order fell out of the
+ * order the parts were added, and a member row hung three loose divs off the
+ * body with nothing saying they were one subject.
+ *
+ * These tests pin the *organisation*, not the numbers. Every figure and every
+ * qualifier that was disclosed before is still disclosed — the no-information-
+ * loss assertions below are the guard on that.
+ */
+describe("Set potential presentation (grouping and order)", () => {
+  const thunderheart = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    threshold: 4 as const,
+    piecesWorn: 0,
+    packageItemIds: [31048, 31042, 31034, 31044],
+    packageDeltaDps: 64.07,
+    bonusDps: 193.89,
+    breaks: [
+      {
+        setId: 640,
+        setName: "Malorne Harness",
+        threshold: 2 as const,
+        piecesBefore: 2,
+        piecesAfter: 0,
+      },
+    ],
+  };
+
+  /**
+   * One consistent order for every entry, so a reader scanning the panel finds
+   * the same fact in the same place in each: what the set is, the bonus figure,
+   * the package figure, what completes it, then the qualifiers that constrain
+   * both figures.
+   */
+  it("orders a panel entry: bonus, package, contents, then qualifiers", () => {
+    const parts = setBonusEntry(thunderheart);
+    expect(parts.heading).toBe("Thunderheart Harness 4pc — 0 worn");
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+      "qualifier",
+    ]);
+  });
+
+  /** No information loss: every figure and caveat the flat line carried. */
+  it("keeps every figure and qualifier the accreted line disclosed", () => {
+    const text = [
+      setBonusEntry(thunderheart).heading,
+      ...setBonusEntry(thunderheart).lines.map((l) => l.text),
+    ].join("\n");
+    expect(text).toContain("+193.89 DPS");
+    expect(text).toContain("+64.07 DPS");
+    expect(text).toContain("Thunderheart Pauldrons");
+    expect(text).toContain("Thunderheart Leggings");
+    expect(text).toContain("Malorne Harness 2pc");
+    expect(text).toContain("inflated");
+    expect(text).toContain(GEM_POLICY_QUALIFIER);
+  });
+
+  /**
+   * An unmeasured bonus has no package sim and nothing to chase, so it stays a
+   * bare reason rather than acquiring empty package and contents rows.
+   */
+  it("renders an unmeasured entry as a reason alone", () => {
+    const parts = setBonusEntry({
+      setId: 641,
+      setName: "Nordrassil Harness",
+      threshold: 2,
+      piecesWorn: 0,
+      packageItemIds: [],
+      packageDeltaDps: 0,
+      unmeasured: "not-implemented-in-sim",
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual(["bonus"]);
+    expect(parts.lines[0]?.text).toBe("not implemented in the pinned sim");
+  });
+
+  /**
+   * The row's own delta stays primary. The set clauses become one labelled
+   * block instead of three sibling divs, so the reader sees one secondary
+   * subject rather than three unrelated sentences competing with the name.
+   */
+  it("groups a row's set clauses into one block", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: -106.16,
+          belowCutoff: true,
+          bisTags: ["BiS"],
+          setBonusNote: "breaks 2-piece Malorne Harness (below 2)",
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            prospectiveBonusDps: 31.46,
+            package: {
+              threshold: 4,
+              deltaDps: 64.07,
+              piecesNeeded: 4,
+              itemIds: [31048, 31042, 31034, 31044],
+            },
+          },
+        }),
+      ]),
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    const block = /<div class="set-info">([\s\S]*?)<\/div>\s*<\/div>/.exec(
+      html
+    );
+    expect(block).not.toBeNull();
+    const inner = block?.[1] ?? "";
+    expect(inner).toContain("Thunderheart Harness");
+    expect(inner).toContain("31.46");
+    expect(inner).toContain("64.07");
+    // The row's own figure stays in the numbers column, not inside the block.
+    expect(html).toContain('class="delta down delta-plain">-106.16');
   });
 });
 
