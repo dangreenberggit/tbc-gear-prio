@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: data gap (policy decision required)
 Origin: ret catch-up round, 2026-08-11
 (`.scratch/set-bonus-value/ret-catchup/03-verify.md` task 6;
@@ -38,7 +38,33 @@ Unknown either way: whether 30892 is the only such item in the pinned db
 
 ## Acceptance criteria
 
-- [ ] Either 30892 (and any swept siblings) no longer enter cross-class
+- [x] Either 30892 (and any swept siblings) no longer enter cross-class
       universes, or the drop+disclose path is documented as accepted and
       pinned by a test.
-- [ ] `pnpm verify` green.
+- [x] `pnpm verify` green.
+
+## Resolution (2026-08-11) — option 2
+
+Drop-and-disclose is the accepted, durable behaviour. When a candidate's swap
+sim crashes (the Go class lock firing), the engine drops that candidate,
+finishes the ranking, and records the drop in `ranking.substitutions`; the
+HTML report shows the first line of the crash text (ticket 123). No wrong
+numbers can come out of this path — the cost is one wasted sim and one
+substitutions entry per affected item per run.
+
+Pinned end to end by the new test "rankUpgrades — cross-class candidate whose
+sim crashes (ticket 122)" in `packages/core/test/rank.test.ts`: a sim that
+crashes exactly when 30892 is equipped, on the real ret-p3 pool entry — the
+item is absent from `ranking.items`, a healthy candidate still ranks, and the
+substitution names the item and carries the crash message.
+
+Documented in ticket 25 ("Known limit of this filter"), which owns the
+class-eligibility rules: the allowlist filter can only see locks that exist
+as data, and Go-only locks fall through to this backstop by design.
+
+Option 1 (a hand-maintained denylist against the pinned Go source) was turned
+down: it adds upkeep against a moving upstream source for a failure mode that
+already cannot produce a wrong number. Still untested: whether 30892 is the
+only such item in the pinned db — no sweep of Go item-effect registrations
+against `classAllowlist: null` entries has been run. If more turn up and the
+wasted sims start to matter, that sweep is the input option 1 would need.

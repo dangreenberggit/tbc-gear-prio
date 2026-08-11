@@ -2780,3 +2780,88 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     expect(a.setBonuses).toEqual(b.setBonuses);
   });
 });
+
+/**
+ * Ticket 122 (accepted behaviour, pinned here): some items are locked to a
+ * class only inside the sim's Go code — the pinned db.json entry carries
+ * `classAllowlist: null`, so ticket 25's universe filter cannot see the lock
+ * and the item enters another class's candidate list. 30892 Beast-tamer's
+ * Shoulders (hunter-only via a Go item-effect registration) reached the ret
+ * P3 universe this way, and its swap sim crashes. The accepted, durable
+ * behaviour is the engine backstop: drop the candidate, keep ranking, and
+ * disclose the drop in `substitutions` — never a silent disappearance and
+ * never an aborted run.
+ */
+describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)", () => {
+  const CROSS_CLASS_ID = 30892; // Beast-tamer's Shoulders, hunter-only in Go
+  const GO_PANIC =
+    "interface conversion: *retribution.RetributionPaladin is not " +
+    "hunter.HunterAgent: missing method GetHunter";
+
+  it("drops the candidate, finishes the ranking, and discloses the drop", async () => {
+    const crashingSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        if (items.some((i) => i.id === CROSS_CLASS_ID)) {
+          throw new Error(GO_PANIC);
+        }
+        return {
+          dps: 2000,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+
+    const logged = slamaltmanLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: crashingSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CROSS_CLASS_ID, "ret-p3"),
+          // A healthy candidate proves the run carried on past the crash.
+          realPoolEntry(29381),
+        ],
+      }
+    );
+
+    expect(ranking.items.some((i) => i.itemId === CROSS_CLASS_ID)).toBe(false);
+    expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
+
+    const sub = ranking.substitutions.find(
+      (s) => s.field === `candidate ${CROSS_CLASS_ID} (shoulder)`
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.detail).toContain(
+      "Beast-tamer's Shoulders was dropped from the ranking"
+    );
+    expect(sub!.detail).toContain(GO_PANIC);
+  });
+});
