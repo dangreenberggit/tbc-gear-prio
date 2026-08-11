@@ -504,10 +504,13 @@ describe("rank-report", () => {
     // nothing visible moves with the toggle off. Extended again in the same
     // change for the `body.package .pct` rule, which hides the row's own
     // percentage under package mode -- four more CSS lines, nothing in the body.
+    // Repinned again for carry-forward 104, which widens that rule to
+    // `weighted` and `full`: the length moved by exactly the 186 characters the
+    // CSS edit adds, so the whole delta is inside `<style>` and no markup moved.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "ff19f8b1fa24a8af680a63c8bd3d696158ec8df0dcb5d940f614f99c396d4bc4",
-      length: 26065,
+        "00a79a99eb42c62b3cc7cfd97e905cc3b86da898a9f5ea33568a606b3cb35498",
+      length: 26251,
     });
   });
 });
@@ -1390,13 +1393,19 @@ describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
     expect(html).toContain('type="radio" name="set-weight" value="package"');
   });
 
-  it("hides the row's own percentage under package mode", () => {
-    // The percentage is `deltaPct`, derived from the row's own swap. Left
-    // visible under package mode it stacks a "-4.93%" under a "+64.07 DPS" —
-    // two numbers describing different things in one column. No package
-    // percentage was measured, so the honest move is to show none.
+  /**
+   * Carry-forward 104. `weighted` and `full` have the same shape as `package`
+   * and predate it, so `5b7ee96`'s fix applies to all three: the DPS column
+   * switches to a credited figure while `.pct` keeps showing `deltaPct` from
+   * the row's own swap. No percentage was measured for any credited mode —
+   * `prospectiveBonusDps` is absolute DPS and the weights scale DPS, not a
+   * ratio — so showing none beats deriving one the pipeline never computed.
+   */
+  it("hides the row's own percentage under every credited mode", () => {
     const html = renderRankHtml(ranking([shoulders, plain]), meta);
-    expect(html).toContain("body.package .pct { display: none; }");
+    expect(html).toContain(
+      "body.weighted .pct, body.full .pct, body.package .pct { display: none; }"
+    );
   });
 
   it("leaves the default order and the cutoff untouched", () => {
