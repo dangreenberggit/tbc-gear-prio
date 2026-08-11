@@ -2782,6 +2782,164 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
 });
 
 /**
+ * Ticket 119: with 1 worn piece of a set whose 2pc is implemented, the 2pc
+ * "completion package" is a single added piece — the package sim is that
+ * piece's own single-swap sim, so `packageDelta − Σ singles` is 0 no matter
+ * what the bonus is worth. The old behaviour printed that 0.00 with an SE as
+ * if measured. The chosen behaviour (option B): any package needing exactly
+ * one piece reports the bonus as unmeasurable from this starting gear, and no
+ * sim is spent on it.
+ */
+describe("rankUpgrades — set bonus at one piece short of a threshold (ticket 119)", () => {
+  // Crystalforge Battlegear (setId 629): both 2pc and 4pc implemented in the
+  // pinned sim (verification.md V1), all pieces in data/universes/ret-p2.
+  const CF_CHEST = 30129;
+  const CF_HANDS = 30130;
+  const CF_HELM = 30131;
+  const CF_LEGS = 30132;
+  const CF_IDS = [CF_CHEST, CF_HANDS, CF_HELM, CF_LEGS, 30133];
+  const TWO_PC = 30; // synthetic 2pc bonus magnitude
+  const FOUR_PC = 50; // synthetic 4pc bonus magnitude
+  const PER_ITEM_DELTAS: Record<number, number> = {
+    [CF_HELM]: 5,
+    [CF_LEGS]: 4,
+    [CF_HANDS]: 2,
+  };
+
+  function crystalforgeRespondingSim(): SimRunner {
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const cfCount = CF_IDS.filter((id) => ids.includes(id)).length;
+        let dps = 2000;
+        for (const id of ids) dps += PER_ITEM_DELTAS[id] ?? 0;
+        if (cfCount >= 2) dps += TWO_PC;
+        if (cfCount >= 4) dps += FOUR_PC;
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  async function rankWithOneCfPieceWorn() {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "chest",
+      CF_CHEST,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", wornLogged]]),
+        }),
+        sim: crystalforgeRespondingSim(),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CF_HELM),
+          realPoolEntry(CF_HANDS),
+          realPoolEntry(CF_LEGS),
+        ],
+      }
+    );
+  }
+
+  it("reports the 2pc as unmeasurable at this worn count, not as a measured 0.00", async () => {
+    const ranking = await rankWithOneCfPieceWorn();
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 2
+    );
+    expect(twoPc).toBeDefined();
+    expect(twoPc!.piecesWorn).toBe(1);
+    expect(twoPc!.unmeasured).toBe("unmeasurable-at-this-worn-count");
+    // Never a zero-by-construction figure wearing a fabricated SE.
+    expect(twoPc!.bonusDps).toBeUndefined();
+    expect(twoPc!.se).toBeUndefined();
+    expect(twoPc!.packageDeltaDps).toBe(0);
+    // The one piece that would complete the threshold is still named — the
+    // best-single selection (helm carries the largest individual delta).
+    expect(twoPc!.packageItemIds).toEqual([CF_HELM]);
+  });
+
+  it("keeps the 4pc measured, with the self-set 2pc confound intact and documented", async () => {
+    const ranking = await rankWithOneCfPieceWorn();
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBeUndefined();
+    expect(fourPc!.packageItemIds.slice().sort()).toEqual(
+      [CF_HELM, CF_HANDS, CF_LEGS].sort()
+    );
+
+    // With 1 piece worn, every single swap reaches 2 pieces and carries the
+    // 2pc, so Σ singles charges the 2pc three times while the package holds
+    // it once: the reported figure is 4pc − 2·2pc, not the 4pc alone. This is
+    // ticket 119's anomaly A — same (k−1)·B arithmetic as ADR-0023's
+    // cross-set breaks, inside the completing set. Option B (this round) only
+    // stops the fabricated 2pc "0.00"; the 4pc stays confounded, pinned here
+    // as the current behaviour until option A is decided.
+    const sumSingles = Object.values(PER_ITEM_DELTAS).reduce(
+      (a, b) => a + b + TWO_PC,
+      0
+    );
+    expect(fourPc!.packageDeltaDps).toBeCloseTo(
+      Object.values(PER_ITEM_DELTAS).reduce((a, b) => a + b, 0) +
+        TWO_PC +
+        FOUR_PC,
+      6
+    );
+    expect(fourPc!.bonusDps).toBeCloseTo(
+      fourPc!.packageDeltaDps - sumSingles,
+      6
+    );
+    expect(fourPc!.bonusDps).toBeCloseTo(FOUR_PC - 2 * TWO_PC, 6);
+  });
+});
+
+/**
  * Ticket 122 (accepted behaviour, pinned here): some items are locked to a
  * class only inside the sim's Go code — the pinned db.json entry carries
  * `classAllowlist: null`, so ticket 25's universe filter cannot see the lock

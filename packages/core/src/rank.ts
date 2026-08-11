@@ -80,6 +80,7 @@ import {
   type DpsSample,
   type IndividualDelta,
   type SetThreshold,
+  type UnmeasuredReason,
 } from "./set-value.js";
 import {
   plausibilityWarnings,
@@ -279,7 +280,7 @@ export type SetBonusValue = {
   packageDeltaDps: number;
   bonusDps?: number;
   se?: number;
-  unmeasured?: "not-implemented-in-sim" | "insufficient-pieces" | "sim-failed";
+  unmeasured?: UnmeasuredReason;
   /**
    * Other sets' implemented thresholds this package drops below. Present only
    * when non-empty. `bonusDps` nets the loss in and cannot separate it, so a
@@ -1066,6 +1067,25 @@ async function buildSetBonuses(
       }
 
       const addedPieces = selection.addedPieces;
+      // One added piece means the "package" is that piece's own single swap:
+      // identical equipment, so packageDelta − Σ singles is 0 by construction
+      // and the real bonus is buried inside the single's delta where this
+      // method cannot reach it. Reporting that 0 with an SE printed it as a
+      // measurement (ticket 119 anomaly B); say it is unmeasurable instead,
+      // and spend no sim. The completing piece is still named so a renderer
+      // can say which item would finish the threshold.
+      if (addedPieces.length === 1) {
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: addedPieces.map((p) => p.itemId),
+          packageDeltaDps: 0,
+          unmeasured: "unmeasurable-at-this-worn-count",
+        });
+        continue;
+      }
       // Applied sequentially, one slot at a time, through the same helper
       // every single-candidate swap uses — spec §2.2 step 1's byte-identical
       // gem/enchant policy.

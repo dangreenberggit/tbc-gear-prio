@@ -156,6 +156,9 @@ const UNMEASURED_REASON_TEXT: Record<
   "not-implemented-in-sim": "not implemented in the pinned sim",
   "insufficient-pieces": "not enough pieces in the pool to build the package",
   "sim-failed": "the package sim failed",
+  "unmeasurable-at-this-worn-count":
+    "can't be measured from this starting gear — one piece short of this " +
+    "threshold, so the completing piece's own swap already carries the bonus",
 };
 
 /**

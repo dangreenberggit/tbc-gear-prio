@@ -14,7 +14,17 @@ export type SetThreshold = 2 | 4;
 export const SET_THRESHOLDS: readonly SetThreshold[] = [2, 4];
 
 export type UnmeasuredReason =
-  "not-implemented-in-sim" | "insufficient-pieces" | "sim-failed";
+  | "not-implemented-in-sim"
+  | "insufficient-pieces"
+  | "sim-failed"
+  /**
+   * The package needs exactly one piece (worn count = threshold − 1), so the
+   * "package" sim is that piece's own single-swap sim and
+   * `packageDelta − Σ singles` is 0 whatever the bonus is worth. The bonus is
+   * folded into the completing single's delta and cannot be separated from it
+   * by this method (ticket 119, ADR-0023 self-set case).
+   */
+  | "unmeasurable-at-this-worn-count";
 
 /**
  * Which (setId, threshold) bonuses have a DPS-relevant effect body in the

@@ -5,6 +5,9 @@
 opt-in view only, which may score a member row by the package's own
 `packageDeltaDps`. Decisions 1, 3, 4 and 5 stand as written; in particular the
 break-confounded `bonusDps` this ADR suppresses is still never ranked on.
+**Amended:** 2026-08-11 (ticket 119) — added the self-set case below and
+decision 6. The confound analysis in this ADR originally covered cross-set
+breaks only.
 **Date:** 2026-08-10
 **Implements:** `.scratch/set-bonus-value/spec.md` §2.3, §4
 **Tickets:** `.scratch/carry-forward/issues/90-set-break-confound-inflates-bonus-and-inverts-sets.md`,
@@ -97,6 +100,31 @@ whose value depends on how energy-starved the rotation is, which is gear- and
 phase-dependent. The 131.1 figure is a reference-gear figure, and measured energy
 waste already falls from 5.31% to 3.21% across the arms measured.
 
+### The self-set case at threshold−1 worn (added 2026-08-11, ticket 119)
+
+The `(k−1)·B` arithmetic above also happens **inside the completing set
+itself**, with no `breaks` entry to disclose it, because `brokenSetBonuses`
+only looks at other sets. With 1 piece worn of a set whose 2pc is
+implemented:
+
+- The 2pc package is **one added piece**, so the package sim is that piece's
+  own single-swap sim. `packageDelta − Σ singles` is 0 by construction —
+  whatever the 2pc is worth, it sits inside the completing single's delta and
+  this method cannot separate the two. The engine used to print that 0.00
+  with an SE as if it had been measured (ticket 119 anomaly B).
+- The 4pc package adds 3 pieces, and **every one of those singles** crosses
+  the 2pc on its own (worn piece + candidate = 2). Σ singles therefore
+  charges the 2pc three times while the package holds it once, so the
+  reported figure is `4pc − 2·2pc` — the same `(k−1)·B` shape as a cross-set
+  break, self-inflicted (ticket 119 anomaly A). On a set with a mana/heal
+  2pc (Crystalforge on ret) this is ≈0 either way; on a strong-2pc set it
+  would be badly wrong (hypothesis, untested: Malorne's measured 2pc would
+  put the error near 260 DPS — arithmetic from ticket 92's figure, not a sim
+  of this configuration).
+
+The generalisation: any package needing exactly **one** piece (worn count =
+threshold − 1, at either threshold) has a zero-by-construction figure.
+
 ## Decision
 
 **1. Threshold selection stays nearest-implemented-above.** A candidate's
@@ -132,6 +160,15 @@ reaches no row also reached no default reader (ticket 100).
 curated-BiS row below cutoff renders a text pointer to the Set potential panel
 (ticket 96). It carries no number — restating any part of a break-confounded
 figure on a row would reintroduce decision 3's failure by another route.
+
+**6. A package needing exactly one piece is reported unmeasurable, never as a
+measured zero (added 2026-08-11, ticket 119 option B).** `buildSetBonuses`
+skips the sim and records `unmeasured: "unmeasurable-at-this-worn-count"`,
+still naming the completing piece. No surface prints a zero-by-construction
+figure with an SE. The 4pc-at-1-worn figure (anomaly A above) is **left as
+measured and confounded for now** — extending suppression or qualification to
+the completing set itself is ticket 119 option A, still open; decision 3's
+"suppress and disclose, never correct" is the precedent it would follow.
 
 ## Consequences
 
