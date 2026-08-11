@@ -124,7 +124,14 @@ function chipHtml(i: RankedItem, packageOnly: boolean): string {
       ? "not ranked overall"
       : `#${i.rank} of every candidate simmed`;
   const cls = `chip${isCuratedBis(i) ? " is-bis" : ""}${packageOnly ? " package-only muted" : ""}`;
-  return `<a class="${cls}" href="#slot-${i.slot}" title="${esc(title)}" data-item-id="${i.itemId}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span></a>`;
+  // The package figure is a group's number, not this piece's, so it never
+  // replaces `.d` — it rides in its own subordinate span, shown only under
+  // package mode, with a literal marker so the pair cannot read as a range
+  // (ticket 112). Emitted only when a positive package exists, so ordinary
+  // chips keep byte-identical markup.
+  const pkgSpan =
+    pkg !== i.deltaDps ? `<span class="pkg">pkg ${fmtDelta(pkg)}</span>` : "";
+  return `<a class="${cls}" href="#slot-${i.slot}" title="${esc(title)}" data-item-id="${i.itemId}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span>${pkgSpan}</a>`;
 }
 
 function esc(s: string): string {
@@ -659,15 +666,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         entry.container.appendChild(k);
       });
     });
+    // No package arm: under package mode .d keeps the piece's own delta and
+    // the .pkg span carries the package figure (ticket 112) -- the group's
+    // number must never display as the piece's.
     [].slice.call(document.querySelectorAll(".chip .d")).forEach(function (d) {
       d.textContent = d.getAttribute(
         m === "full"
           ? "data-full-label"
-          : m === "package"
-            ? "data-package-label"
-            : m === "weighted"
-              ? "data-weighted-label"
-              : "data-plain"
+          : m === "weighted"
+            ? "data-weighted-label"
+            : "data-plain"
       );
     });
     // Visibility is computed from the row's own classes, never from layout:

@@ -206,6 +206,12 @@ export const REPORT_CSS = `
     color: var(--muted);
   }
   .chip .d { font-family: var(--font-mono); font-size: 0.85rem; color: var(--up); }
+  /* The package figure on a member chip (ticket 112). Shown only under package
+     mode, and deliberately smaller and muted with its literal "pkg" marker: it
+     is the whole group's number sitting next to the piece's own delta, and the
+     two must never read as one value or a range. */
+  .chip .pkg { display: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+  body.package .chip .pkg { display: inline; }
   /* Chips admitted into the curated list for package mode only: below cutoff
      as single swaps, so every other mode must render the list it always did.
      Hidden rather than absent, because the client script can re-sort chips but

@@ -521,10 +521,16 @@ describe("rank-report", () => {
     // Repinned for the export-order fix. Diffed with `<style>` and `<script>`
     // elided: the only body change is the export panel's caption, rewritten to
     // say what the export now is. Everything else in the delta is the script.
+    // Repinned for ticket 112's chip `.pkg` span. Both documents dumped and
+    // diffed: the whole delta is the two `.chip .pkg` CSS rules (plus comment)
+    // inside `<style>` and, inside `<script>`, the label swap losing its
+    // `data-package-label` arm. No row in this fixture carries a
+    // `setContext.package`, so no `.pkg` span renders and nothing in the body
+    // moved — which is what the emit-only-with-a-package guard promises.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "6c4756b73d392eead051e6952e987c2c0ba8bd400a9493494cef296bf6c67529",
-      length: 29759,
+        "f2a56248d29bb6eae4a835a574ac1a1ef5f9ca1d810f76532100eb90a5485350",
+      length: 30336,
     });
   });
 });
@@ -1647,6 +1653,59 @@ describe("curated ranked list chips", () => {
       '<h2>Curated ranked list <span class="list-count"></span></h2>'
     );
   });
+
+  // Ticket 112: under package mode the chip used to overwrite `.d` with the
+  // package figure, so four member chips read as four identical per-piece
+  // values. The package figure is a group's number and gets its own element.
+  it("shows a package member's own delta and the package figure in separate elements", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: -106.16,
+          belowCutoff: false,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            prospectiveBonusDps: 31.46,
+            package: {
+              threshold: 4,
+              deltaDps: 64.07,
+              piecesNeeded: 4,
+              itemIds: [31048, 31042, 31034, 31044],
+            },
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip, "chip for 31048").not.toBeNull();
+    // Own delta stays in `.d` — the script must not swap the package figure in.
+    expect(chip?.[0]).toContain('data-plain="-106.16"');
+    // The package figure is subordinate, marked as the package's, and its own
+    // element, so the two numbers can never read as one value or a range.
+    expect(chip?.[0]).toContain('<span class="pkg">pkg +64.07</span>');
+    // The client script no longer selects data-package-label for `.d`: under
+    // package mode `.d` falls through to the plain delta.
+    expect(html).not.toContain('"data-package-label"');
+    // The span is package-mode-only, via the same CSS pattern as .package-only.
+    expect(html).toContain(".chip .pkg { display: none;");
+    expect(html).toContain("body.package .chip .pkg");
+  });
+
+  it("emits no .pkg span on a chip without a positive package", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).not.toContain('<span class="pkg">');
+  });
 });
 
 describe("wowsimsItemIdsJson", () => {
@@ -2143,6 +2202,12 @@ describe("curated list under package mode (owner direction 2026-08-10)", () => {
       // can keep it out of every mode that did not ask for it.
       expect(chip?.[0]).toContain('data-package="64.07"');
       expect(chip?.[0]).toContain("package-only");
+      // Ticket 112: the admitted chip too shows its own delta in `.d` and the
+      // package figure in a separate marked span.
+      const full = new RegExp(
+        `<a class="chip[^"]*"[^>]*data-item-id="${id}"[^>]*>.*?</a>`
+      ).exec(html);
+      expect(full?.[0]).toContain('<span class="pkg">pkg +64.07</span>');
     }
   });
 
