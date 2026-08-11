@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
@@ -264,3 +264,71 @@ is a `data/presets/feral/` change gated by `pnpm sim-defaults:check` (a
 should represent — not a bug fix. A reverse-direction export of our settings is
 at `.scratch/set-bonus-value/loop-103-106/our-settings-for-web-import.json` so
 the owner can verify parity from the web side.
+
+## REOPENED, 2026-08-10 — the "different characters" close was wrong; a real defect found underneath
+
+**The previous section's closing story is withdrawn.** The owner reported that
+the equipment in their first settings export was wrong. The corrected export
+(`owner-settings-export-v2.json`, verified identical to v1 apart from equipment)
+shows it is **the same character**: 15 of 17 slots carry the identical item id,
+and the two that "differ" are the same two rings in swapped slot order.
+
+So "the owner benchmarked a different, better-geared character (10 of 17 slots,
+baseline 2264 vs 2152)" is void, as are the +87.63 / +7.78 figures measured on
+that gear. Real differences are trim only: ring enchants `2929` on both rings
+(+11.59 DPS, missed by the first diff), feet gem `24058` (+1.52), shoulder
+enchant (+0.29).
+
+### Re-priced on the corrected gear
+
+`07-corrected-gear.md`, seeds [11,22,33,44,55] @ 3000 iters, pinned CLI:
+baseline **2219.82** under TypeSimple, and the T6 four-piece package
+**+113.42** against the owner's +97. **The sign inverted** — we now *overshoot*
+by 16.42 DPS, ~53x the 0.31 seed spread, so iteration count and seed cannot
+explain it.
+
+### The defect: 10.43 of that 16.42 is ours
+
+`08-sequential-gems-typesimple.md` traced it to `fillEmptyCandidateGems`
+(`packages/core/src/candidate-gems.ts:117`, from `rank.ts:1462`). Upstream's
+equip path (`ui/core/proto_utils/equipped_item.ts:138-168` at pinned commit
+`8aa378b`) migrates gems and **leaves leftover sockets empty — it never
+auto-fills**. We fill them. The owner's worn gloves 29947 have no sockets, so
+T6 gloves 31034's socket arrives empty and we EP-fill it with **32194, a
+phase-3 epic gem the player wears nowhere**.
+
+| arm | delta |
+|---|---|
+| `PKG_PROD` (today) | +113.42 |
+| `PKG_FILL24028` (fill from a gem the owner owns) | +111.72 |
+| `PKG_UIMIGRATE` (true UI semantics) | **+102.99** |
+
+**Filed as ticket 111 — a decision, not a fix**, because removing the fill
+collides with spec §2.2 step 1's byte-identical gem policy and would move every
+candidate delta in every report. Do not implement without an owner decision.
+
+**Also correcting this ticket's own record**: the "sequential-exclusion"
+mechanism in the original "Why" section is not what is happening — the
+sequential application is irrelevant here, and iteration 03 never tested the
+fill at all (all three of its arms filled the socket; it varied *which* gem,
+never *whether*). The earlier claim that 03 falsified this is withdrawn.
+
+### What remains open: −5.99 DPS, deliberately unattributed
+
+After the UI-semantics correction, +102.99 vs the owner's +97 leaves −5.99,
+~19x the seed spread. This loop has twice reported confident closures that were
+later overturned, so this residue gets no third story.
+
+**The +97 is itself a legitimate suspect.** We have never seen that run — the v2
+export is settings-only, with no results and no iteration count (`bonusStats`
+all zero, `itemSwap` empty, so neither hides a confound), and the +97 *predates*
+the export. "+97" is also a round number; if the true value is ≥100 the residue
+is inside reporting precision.
+
+**Four artifacts from the owner would settle it**, none obtainable from our side:
+(1) an exported sim **result** (not settings) for baseline and package at a
+stated iteration count; (2) their gloves socket state after equipping 31034,
+which tests ticket 111's load-bearing premise; (3) their web build string vs our
+pinned `v0.0.101`; (4) how precisely "+97" was read.
+
+**Status: open**, pending the ticket-111 decision and the owner's artifacts.

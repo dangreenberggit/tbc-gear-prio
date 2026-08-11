@@ -183,3 +183,37 @@ ticket 103's resolution as a proposal for the owner; it is a
 `data/presets/feral/` decision, not a bug. A reverse-direction export of our
 settings for web-side parity checking is at
 `.scratch/set-bonus-value/loop-103-106/our-settings-for-web-import.json`.
+
+## CORRECTION, 2026-08-10 — same conclusion, corrected reasoning; stays closed
+
+The owner's first settings export carried the wrong equipment. The corrected
+export (`owner-settings-export-v2.json`) shows it is **the same character** as
+our fixture — 15 of 17 slots identical, the two "differing" slots being the same
+two rings in swapped order. The "different, better-geared character" reasoning
+in the section above is therefore **void**, and the +7.78 figure was measured on
+gear the owner does not have.
+
+Re-priced on the corrected gear (`07-corrected-gear.md`, seeds [11,22,33,44,55]
+@ 3000 iters, pinned CLI):
+
+| CURSED − VENG | value |
+|---|---|
+| our configuration (stored) | −0.084 |
+| corrected owner gear + TypeSimple rotation | **+8.61** |
+| owner's ground truth | ~+10 |
+
+**The conclusion is unchanged and now better supported**: the helms separate
+under the owner's rotation and stay flat under ours, so the report's
+near-equality was a correct measurement of our configuration. The +1.86 shift
+from the earlier wrong-gear figure was attributed by isolated measurement, not
+assumption — feet gem 24028→24058 (+1.52), shoulder enchant (+0.29), ring
+enchants (~0), summing to +1.78 against +1.86 measured.
+
+**Remains closed.** The residue against ~+10 is inside plausible rounding, and
+the dominant lever is still the rotation, carried as ticket 109. Ticket 108
+(out-of-range ids) is closed as **invalid** — 278827 / 278819 are legitimate
+TBC Ahune/Midsummer items at Phase-2 item levels and appear in the owner's own
+corrected export, so the cross-reference in the section above is void. Ticket
+103 is **reopened** on a genuine defect found while re-pricing
+(`fillEmptyCandidateGems`, ticket 111); it does not affect this comparison,
+since neither helm's swap leaves a socket the fill would touch differently.

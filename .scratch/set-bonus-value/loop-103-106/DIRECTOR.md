@@ -435,3 +435,210 @@ Reverse-direction artifact produced for the owner to verify parity from their
 side: `our-settings-for-web-import.json` plus `our-settings-for-web-import.md`,
 the note stating which fields were constructed (`name`, empty slot 15) and which
 could not be represented (`canCrush` has no field in the export format).
+
+## CORRECTION — the v1 export carried the wrong gear
+
+The owner reports the equipment in their first export was wrong. The corrected
+export is `owner-settings-export-v2.json`. **This invalidates iteration 6's
+headline conclusion**, which I had already reported as fact — recorded here in
+full rather than quietly amended.
+
+Verified directly (`python -c`, iteration 7's log carries the command verbatim):
+v1 and v2 are **identical apart from equipment**
+(`json.dumps(..., sort_keys=True)` equality with `equipment` nulled), and their
+item ids differ in 8 slots.
+
+### The true diff: same character, not a different one
+
+Corrected owner gear vs our fixture-derived baseline — **15 of 17 slots carry
+the identical item id**, and the two that differ are the *same two rings in
+swapped slot order*:
+
+| slot | owner v2 | fixture | |
+|---|---|---|---|
+| 10 | 30834 Shapeshifter's Signet | 30052 | swapped pair |
+| 11 | 30052 Ring of Lethality | 30834 | swapped pair |
+
+Set-wise the equipment is **identical**. Two same-item slots differ in trim:
+slot 2 enchant `2986` vs `2983`, and slot 9 gems `[24028, 24058]` vs
+`[24028, 24028]`.
+
+So iteration 6's "the owner benchmarked a different, better-geared character
+(10 of 17 slots, baseline 2264 vs 2152)" was computed against gear the owner
+does not have, and is **withdrawn**. The +87.63 and +7.78 figures were measured
+on that wrong gear and are withdrawn with it.
+
+The corrected gear also **contains the two out-of-range Ahune ids** 278827 /
+278819 that ticket 108 flagged in our fixture — they are the owner's real neck
+and back. That makes 108 a live discrepancy channel rather than a fixture smell,
+because wowsims web and our pinned db may resolve those ids differently, and
+they now sit in the baseline arm of every comparison.
+
+### Iteration 7 — dispatched
+
+- **Hypothesis**: with the corrected gear ≈ our fixture, the "our gear under
+  TypeSimple" figures from iteration 6 (**+113.73** package, **+6.75** helm gap)
+  become the owner-gear figures, and the residue against the owner's +97 / ~+10
+  is rotation + iterations + Ahune-id resolution rather than gear. **To be
+  verified, not assumed** — iteration 6 is exactly why.
+- **Subagent**: `07-corrected-gear` → `07-corrected-gear.md`.
+- **Result**: the hypothesis was **half right, and the half that failed matters
+  more.**
+
+  **Baseline on corrected gear: 2219.82** (owner's TypeSimple) / **2170.01**
+  (our APL). Our stored 2152.0998 reproduces exactly on the fixture; the
+  corrected gear sits **+17.9** above it under the same rotation, all of it
+  trim. Iteration 6's wrong-gear **2264** is withdrawn — the real owner baseline
+  is ~94 DPS lower than that.
+
+  **(a) T6 four-piece = +113.42** against the owner's **+97**. This matches
+  iteration 6's "our gear" column (+113.73) within noise, confirming the
+  gear-is-effectively-ours prediction — **but it overshoots the owner by 16.4
+  DPS**. Iteration 6's +87.63 *undershoot* is withdrawn, and the residue has
+  **inverted sign**.
+
+  **(b) CURSED − VENG = +8.61** against the owner's **~+10**. This does *not*
+  match iteration 6's +6.75; it is +1.86 higher, and 07 attributed the shift by
+  isolated measurement rather than assumption: feet gem 24028→24058 accounts for
+  +1.52, shoulder enchant +0.29, ring enchants ~0 (sum +1.78 vs measured +1.86).
+  **(b) is essentially closed** — plausibly rounding.
+
+  **A trim difference my own diff missed**: the owner's rings *both* carry
+  `enchant: 2929` (Enchant Ring – Striking, Enchanting-only, which their export
+  declares) where our fixture carries none — worth **+11.59 DPS** on the
+  baseline. Slots 10/11 are not merely swapped order, and my correction section
+  above understated the diff. Recorded rather than silently fixed.
+
+  **Ticket 108's premise is falsified.** 278827 / 278819 resolve to `phase: 2`,
+  ilvl-128 **epic TBC** items. All nine out-of-range ids form one coherent
+  Ahune / Frost Lord block (including `Frostscythe of Lord Ahune`) — an upstream
+  Midsummer re-release at TBC Phase-2 item levels, **not** a Wrath id collision.
+  Each name is unique in the db, so 108's proposed remediation has nothing to map
+  to. The sim pays their full stats: emptying both slots costs ~**+96 DPS**, so
+  they are not silently zero.
+
+  **Web-side resolution could not be determined locally, and 07 did not guess.**
+  The vendored db *is* upstream's own `assets/database/db.json` at the pinned
+  commit, and the owner's export carries bare ids with no embedded stats.
+  Settling it needs the owner's tooltip stats, their web build string, or an
+  exported result. **Sizing**: both ids sit in the baseline arm and neither the
+  package nor either helm touches neck/back, so a mis-resolution shifts the
+  absolute baseline but **nearly cancels in the deltas** — negligible for the
+  +113 / +8.6 figures (hypothesis, bounded from structure plus the +96
+  measurement).
+
+- **Verdict**: **gear is no longer an explanation for anything**, and the loop
+  is not finished. (b) is closed. **(a) is not**: the −16.42 residue is ~53× the
+  seed spread (0.31 DPS at 3000 iters, ~0.1 at 25000), so **iteration count and
+  seed cannot account for it** — it needs a mechanism.
+
+  This is the second time a confident closing story has been overturned, so the
+  correct posture is to reopen 103 rather than re-close it with a new narrative.
+  The strongest untested lead, from 07: our package applies four *sequential*
+  swaps through `equipmentForCandidateSwap`, re-gemming as it goes, where the
+  owner clicking four items in the UI keeps their gems. Iteration 3 priced that
+  at ~0 — **but only under the APL rotation**, and 07's own trim measurements
+  prove the rotation changes what stat mixes are worth. That is a real gap in
+  the earlier falsification, not a restatement of it.
+
+- **Next step**: iteration 8 — re-price the sequential-swap gem mechanism under
+  the **TypeSimple** rotation on corrected gear, the one lead that survives and
+  the one place iteration 3's falsification was conditional.
+
+### Iteration 8 — dispatched
+
+- **Hypothesis**: the −16.42 package residue is the sequential re-gemming our
+  builder performs across four swaps, which iteration 3 priced at ~0 under the
+  APL rotation but which may be worth real DPS under TypeSimple.
+- **Subagent**: `08-sequential-gems-typesimple` → `08-sequential-gems-typesimple.md`.
+- **Result**: **a real defect in our code, worth 10.43 DPS — 64% of the
+  residue.** On corrected owner gear under TypeSimple, seeds [11,22,33,44,55] @
+  3000 iters, pinned CLI v0.0.101:
+
+  | arm | delta | vs owner's +97 |
+  |---|---|---|
+  | `PKG_PROD` (production; byte-identical to 07's arm) | **+113.42** | −16.42 |
+  | `PKG_FILL24028` (fill, using a gem the owner owns) | +111.72 | −14.72 |
+  | `PKG_UIMIGRATE` (**true wowsims UI semantics**) | **+102.99** | **−5.99** |
+
+  `PKG_PROD` reproduces 07's +113.42 and baseline 2219.82 to the digit.
+
+  **The UI semantics were settled from upstream source, not inferred.** Upstream
+  `ui/core/proto_utils/equipped_item.ts` at the pinned commit `8aa378b`:
+  `EquippedItem.withItem` (:138-168) migrates gems colour-matched-then-eligible,
+  drops overflow, and **leaves leftover sockets null — it never auto-fills**.
+  Our `migrateGemsToItem` is a faithful port of exactly that. The divergence is
+  the step we run *afterwards*: **`fillEmptyCandidateGems` has no upstream
+  counterpart on the equip path.**
+
+  **The mechanism is one gem in one slot**, not cross-slot re-gemming. The
+  `PKG_UIONLY_*` intermediates put shoulder/chest/legs exactly on `PKG_PROD` and
+  hands exactly on `PKG_UIMIGRATE`. The owner's worn gloves 29947 have **no
+  sockets**, so migration leaves T6 gloves' single socket empty and production
+  EP-fills it with 32194 — a phase-3 epic +10-agi gem **the owner wears
+  nowhere**. No `repairMeta` rewrite occurs anywhere (no meta socket on any T6
+  piece), so the "sequential swaps re-gem as they go" framing was wrong.
+
+  **Correction to this log's own record**: I wrote above that iteration 3
+  "priced that at ~0" and that its falsification was merely *conditional on the
+  rotation*. That was too generous to it. **Iteration 3 never tested this at
+  all** — all three of its arms (`PKG_PROD`, `PKG_FILLER`, `PKG_BESTGEMS`)
+  *fill* the hands socket; it varied *which* gem, never *whether*. Measured
+  properly the mechanism is worth **−7.76 under APL** and **−10.43 under
+  TypeSimple**: the rotation-dependence is real (+2.67) but is a modifier, not
+  the mechanism.
+
+  Tested and cleared: set bonuses (identical set membership in both package arms
+  — Malorne 2pc broken, Thunderheart 4pc gained), the T6 ids (all four are
+  setId 676 Thunderheart Harness, no plausible alternate), and socket bonuses
+  (every T6 socket yellow/blue, every migrated gem red, so unmet in *both* arms).
+
+- **Verdict**: **the loop has found a genuine defect, and it is ours.**
+  `fillEmptyCandidateGems` invents a gem the player does not own and would not
+  receive by equipping the item, inflating package deltas by ~10 DPS on this
+  swap. That is a real overstatement to the user, and unlike everything else this
+  loop chased, it is grounded in upstream source rather than in a narrative.
+
+  **−5.99 DPS remains open and is deliberately not attributed.** It is ~19× the
+  seed spread, so iteration count and seed cannot cover it. Given this loop has
+  twice reported confident closures that were overturned, the residue stays an
+  open question rather than getting a third story.
+
+  **The +97 itself is now a legitimate suspect, and this must be said plainly.**
+  We have never seen that run. The v2 export is settings-only — no results, no
+  iteration count (`bonusStats` all zero, `itemSwap` empty, so neither hides a
+  confound). The +97 *predates* the export, and this loop was already burned once
+  by an export carrying gear the owner did not have. "+97" is also a round
+  number: if the true value is ≥100, the residue is inside reporting precision.
+
+- **Next step**: no further measurement from our side can close −5.99. Write the
+  defect into ticket 103, file the `fillEmptyCandidateGems` bug as its own
+  ticket with a spec question attached, and ask the owner for the four artifacts
+  below. **Do not implement the fix** — see the spec question.
+
+## Final disposition (iteration 8)
+
+**One real defect, one bounded open residue, no fix implemented.**
+
+### The defect — for a new ticket, not implemented here
+
+`fillEmptyCandidateGems` fills sockets that upstream's equip path leaves empty,
+with gems the player may not own (here 32194, a phase-3 epic). Worth **−10.43
+DPS** of overstatement on the T6 package under TypeSimple, **−7.76** under APL.
+
+This is **not** a straightforward bug fix, because it collides with a settled
+decision: spec §2.2 step 1 requires byte-identical gem policy between package
+and single swaps, and the fill exists so candidate items are not penalised for
+arriving with empty sockets. Removing it changes what every candidate delta
+means. **This needs a spec decision from the owner before any code moves** —
+propose, do not implement. Filed as ticket 111.
+
+### What the owner can settle that we cannot
+
+1. An exported sim **result** (not settings) for baseline and package at a
+   stated iteration count — one artifact that would close or localise the whole
+   −5.99.
+2. Their **gloves socket state after equipping 31034** — directly tests the
+   load-bearing premise of the 10.43.
+3. Their web **build string** vs our pinned `v0.0.101`.
+4. How precisely **"+97"** was read off the UI.

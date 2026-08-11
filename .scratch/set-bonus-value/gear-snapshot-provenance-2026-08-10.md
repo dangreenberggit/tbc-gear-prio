@@ -180,3 +180,57 @@ Filed as ticket **110**. Summary:
 - Whether re-snapshotting closes the remaining +87.6 vs +97 residue on 103 —
   the 103/106 loop attributes most of that residue to rotation, not gear, and
   ticket 109 covers the rotation import. **Untested.**
+
+---
+
+## CORRECTION, 2026-08-10 — the "10 slots of progression" analysis was computed against wrong gear
+
+The owner reported that the equipment in their first wowsims settings export was
+incorrect. The corrected export is
+`.scratch/set-bonus-value/loop-103-106/owner-settings-export-v2.json`, verified
+identical to v1 apart from equipment.
+
+**Every conclusion in this document that rests on comparing the fixture to the
+owner's gear is void**, specifically: the ten differing slots, the five
+phase 1 → phase 2 moves, and the aggregate stat delta (+26 agi, +181 AP,
++113 crit, −40 str, −47 hit). None of that is real. It described a gear set the
+owner does not have.
+
+Against the corrected export the fixture is an accurate snapshot: **15 of 17
+slots carry the identical item id**, and the two that differ are the same two
+rings in swapped slot order (slot 10 owner 30834 / fixture 30052; slot 11 owner
+30052 / fixture 30834). Set-wise the equipment is identical.
+
+The real differences are trim, and were measured in
+`.scratch/set-bonus-value/loop-103-106/07-corrected-gear.md`:
+
+| difference | owner | fixture | measured |
+|---|---|---|---|
+| ring enchants (both) | `2929` Enchant Ring – Striking | none | **+11.59 DPS** |
+| feet gem | `[24028, 24058]` | `[24028, 24028]` | +1.52 DPS |
+| shoulder enchant | `2986` | `2983` | +0.29 DPS |
+
+**What in this document still stands** — everything derived from the fixture
+itself rather than from the comparison:
+
+- The fixture is report `YwahQLgv2jBrZGn6`, fight 63, Void Reaver, committed in
+  `78ca9af` and untouched since.
+- It carries Hand of Salvation at 100% uptime, so it is a clean DPS fight and
+  not the backup-tank capture it was suspected of being.
+- Ticket 06's off-tank fix is intact and did not regress; the off-tank fixture
+  the owner remembered is the separate `shredzepelin.raw.json` (Morogrim
+  Tidewalker).
+
+Ticket 110, which this document originated, is **closed**: its staleness
+conclusion is withdrawn and only the capture-age disclosure idea survives, on
+general merits rather than on evidence of a live gap. Ticket 108 is likewise
+closed as invalid — 278827 / 278819 are legitimate TBC Ahune/Midsummer items at
+Phase-2 item levels and appear in the owner's own corrected export.
+
+**Methodological note worth keeping**: this analysis was rigorous in its
+internals — the git archaeology and the salvation-uptime check were both right,
+and both survive. It was wrong because its *input* was wrong, and nothing in the
+method could have caught that. The owner's export was treated as ground truth
+without a plausibility check against the fixture it contradicted; a 10-slot
+mismatch on what was supposed to be the same character was itself the signal to
+ask, and it was read as a finding instead of as a question.

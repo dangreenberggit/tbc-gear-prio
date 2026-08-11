@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: combined 103/106 diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-103-106/06-owner-settings-diff.md`)
 Blocks: none
@@ -77,3 +77,44 @@ any fix here must handle "real item, phase-shifted variant id our pinned db
 lacks" as a legitimate case (map to the nearest same-name variant and
 disclose, or warn), not just reject the id. Silent resolution to a Wrath
 item remains the bug.
+
+## WITHDRAWN, 2026-08-10 — the premise was wrong
+
+**These are legitimate TBC items and the fixture is correct.** Measured in
+`.scratch/set-bonus-value/loop-103-106/07-corrected-gear.md`.
+
+The ids resolve to `phase: 2`, `quality: 4` (epic) entries, and all the
+out-of-range ids in the pinned db form one coherent block:
+
+```
+python -c "
+import json
+for i in json.load(open('vendor/wowsims/db.json'))['items']:
+    if i['id']>100000: print(i['id'],'|',i['name'],'| phase',i.get('phase'),'| quality',i.get('quality'))
+"
+```
+
+gives `278774 Cloak of the Frigid Winds`, `278819 The Frost Lord's War Cloak`,
+`278823 Icebound Cloak`, `278827 Amulet of Bitter Hatred`,
+`278833 Choker of the Arctic Flow`, `278838 Amulet of Glacial Tranquility`,
+`278847 Hailstone Pendant`, `278953 Frostscythe of Lord Ahune`,
+`279240 Shroud of Winter's Chill` — an upstream **Ahune / Midsummer
+re-release at TBC Phase-2 item levels**, not a Wrath id collision.
+
+The two "possibilities" above are therefore both wrong. Resolution is not
+silent or accidental: each name is unique in the db, the items carry full stat
+vectors, and the sim pays them — emptying both slots costs **~96 DPS**
+(`07-corrected-gear.md`). And the owner's own corrected settings export
+(`owner-settings-export-v2.json`) carries these same two ids as their real neck
+and back, which independently confirms the fixture rather than impugning it.
+
+The proposed "guard against out-of-range ids" remediation would have **rejected
+the player's actual gear**, and the "map to the nearest same-name variant"
+remediation had nothing to map to.
+
+**Closing as invalid.** The one thing worth keeping: our vendored db is
+upstream's own `assets/database/db.json` at the pinned commit, but we still
+cannot confirm from local data alone what a given wowsims *web deployment*
+resolves these ids to — that would need the owner's tooltip stats or their web
+build string. Recorded in tickets 103/106 as a (small, near-cancelling)
+discrepancy channel rather than carried here.
