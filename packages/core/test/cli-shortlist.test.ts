@@ -19,6 +19,7 @@ import { CUTOFF } from "../src/cutoff.js";
 import { setPotentialDisclosureLine } from "../src/disclosure.js";
 import {
   formatSetBonusLine,
+  GEM_POLICY_QUALIFIER,
   formatSetPotentialLine,
 } from "../src/rank-report-rules.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
@@ -188,7 +189,8 @@ describe("--with-set-potential output", () => {
       "assumption: set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment",
       "set potential (2):",
       "  Thunderheart Harness 4pc (0 worn) — +91.68 DPS — " +
-        "whole package -317.24 DPS vs current gear — add Thunderheart Cover, " +
+        "whole package -317.24 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — add Thunderheart Cover, ` +
         "Thunderheart Pauldrons, Thunderheart Gauntlets, Thunderheart Leggings",
       // Unmeasured: no figure to chase, so no package contents are named.
       "  Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim",

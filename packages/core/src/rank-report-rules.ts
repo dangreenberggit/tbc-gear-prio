@@ -171,6 +171,25 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
 }
 
 /**
+ * The one wording for `packageDeltaDps`'s gem caveat, shared by every surface
+ * that states the figure (ticket 103).
+ *
+ * The package is assembled with the same sequential `equipmentForCandidateSwap`
+ * single swaps use, so each piece is denied a unique gem an earlier one
+ * consumed and metas are repaired against a partly-assembled set. That reads
+ * ~30 DPS conservative against a re-gemmed wowsims run — +64.07 against a
+ * reported +97 on the shredzepelin P3 artifact. Conservative is the safe
+ * direction, but the gap is large enough that a reader comparing the two would
+ * otherwise think one is broken.
+ *
+ * One constant rather than two strings: the panel and the member row state the
+ * same quantity, and the caveat drifting between them would read as two
+ * different claims about one number.
+ */
+export const GEM_POLICY_QUALIFIER =
+  "holds your current gems fixed, so re-gemming can only improve it";
+
+/**
  * The whole-package delta: one sim of the assembled package against the
  * baseline. This is the figure that answers "what if I equip all of these?",
  * and the only one that is genuinely **net of any break** — the displaced set's
@@ -191,7 +210,7 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
 export function formatPackageDelta(b: SetBonusValue): string {
   if (b.unmeasured !== undefined) return "";
   const sign = b.packageDeltaDps >= 0 ? "+" : "";
-  return ` — whole package ${sign}${b.packageDeltaDps.toFixed(2)} DPS vs current gear`;
+  return ` — whole package ${sign}${b.packageDeltaDps.toFixed(2)} DPS vs current gear (${GEM_POLICY_QUALIFIER})`;
 }
 
 /**
@@ -374,14 +393,8 @@ export function packageSetPotentialDps(
  *
  * The wording is load-bearing on two counts. It says **whole package**, because
  * every member row shows this same figure and a reader must not take it for
- * this piece's share. And it discloses the gem qualifier: `packageDeltaDps`
- * holds the player's current gem policy fixed (the package is assembled with
- * the same sequential `equipmentForCandidateSwap` single swaps use, so each
- * piece is denied a unique gem an earlier one consumed), which reads ~30 DPS
- * conservative against a re-gemmed wowsims run — +64.07 against a reported +97
- * on the shredzepelin P3 artifact (ticket 103). Conservative is the safe
- * direction, but the gap is large enough that a reader comparing the two would
- * otherwise think one is broken.
+ * this piece's share. And it carries `GEM_POLICY_QUALIFIER`, the same caveat
+ * the panel states about the same figure.
  */
 export function formatPackageMembershipLine(
   item: Pick<RankedItem, "deltaDps" | "setContext">
@@ -394,7 +407,7 @@ export function formatPackageMembershipLine(
     `this swap alone: ${own} — part of ${pkg.threshold}pc package: ` +
     `+${pkg.deltaDps.toFixed(2)} for the whole package ` +
     `(${pkg.piecesNeeded} ${ctx.setName} pieces vs current gear; ` +
-    `holds your current gems fixed, so re-gemming can only improve it)`
+    `${GEM_POLICY_QUALIFIER})`
   );
 }
 

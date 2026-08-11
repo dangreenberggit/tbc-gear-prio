@@ -21,6 +21,7 @@ import {
   formatSetPotentialLine,
   groupBySlot,
   formatCuratedPackagePointer,
+  GEM_POLICY_QUALIFIER,
   isCuratedBis,
   formatPackageMembershipLine,
   packageSetPotentialDps,
@@ -458,7 +459,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       <label><input type="radio" name="set-weight" value="weighted" /> <span>Weighted — ${SET_POTENTIAL_WEIGHTS[2]}× a 2pc bonus, ${SET_POTENTIAL_WEIGHTS[4]}× a 4pc</span></label>
       <label><input type="radio" name="set-weight" value="full" /> <span>Full — the whole bonus, as if the set gets completed anyway</span></label>
       <label><input type="radio" name="set-weight" value="package" /> <span>Package — score each set piece by the whole set it completes</span></label>
-      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not. <strong>Package</strong> answers a different question again — not what a piece is worth tonight, but whether starting the set is worth it: every piece of one completion package shows that package's own simmed value against your current gear, breaks included, so a piece that is a downgrade alone can still be worth collecting. Each row keeps its own single-swap delta beside the figure. Package values hold your current gems fixed, so re-gemming can only improve them.</p>
+      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not. <strong>Package</strong> answers a different question again — not what a piece is worth tonight, but whether starting the set is worth it: every piece of one completion package shows that package's own simmed value against your current gear, breaks included, so a piece that is a downgrade alone can still be worth collecting. Each row keeps its own single-swap delta beside the figure. Every package value ${esc(GEM_POLICY_QUALIFIER)}.</p>
     </div>`
     : "";
 

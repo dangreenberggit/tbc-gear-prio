@@ -12,6 +12,7 @@ import {
 import {
   curatedSetPhase,
   formatSetBonusLine,
+  GEM_POLICY_QUALIFIER,
   formatSetPotentialLine,
   isCuratedBis,
   formatPackageMembershipLine,
@@ -525,7 +526,8 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       })
     ).toBe(
       "Thunderheart Harness 4pc (0 worn) — +91.68 DPS — " +
-        "whole package -317.24 DPS vs current gear — " +
+        "whole package -317.24 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — ` +
         "add item 1, item 2, item 3, item 4"
     );
   });
@@ -559,7 +561,8 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     ).toBe(
       "Thunderheart Harness 4pc (0 worn) — " +
         "[breaks Malorne Harness 2pc (2→1); figure inflated by it] +91.68 DPS — " +
-        "whole package -317.24 DPS vs current gear — " +
+        "whole package -317.24 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — ` +
         "add Thunderheart Cover, Thunderheart Pauldrons, " +
         "Thunderheart Gauntlets, Thunderheart Leggings"
     );
@@ -624,6 +627,26 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       ],
     });
     expect(line).toContain("whole package +64.07 DPS vs current gear");
+  });
+
+  /**
+   * Ticket 103's disclosure, on the surface the ticket was filed against. The
+   * per-row package line already carries this qualifier; the panel's own
+   * package figure is the same quantity assembled the same way, so a reader
+   * comparing it against their own re-gemmed wowsims run needs the same
+   * warning — the gap is ~30 DPS on a ~2150 baseline.
+   */
+  it("qualifies the panel's package figure as holding current gems fixed", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+    });
+    expect(line).toContain(GEM_POLICY_QUALIFIER);
   });
 
   it("states a negative whole-package delta with its sign", () => {
@@ -735,7 +758,8 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       })
     ).toBe(
       "Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — " +
-        "whole package +0.10 DPS vs current gear — add item 1"
+        "whole package +0.10 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — add item 1`
     );
   });
 

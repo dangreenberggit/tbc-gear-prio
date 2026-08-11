@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
@@ -95,3 +95,22 @@ no such qualifier, which is the surface this ticket was originally filed
 against. Nothing here measures the spread (option 2) or isolates the
 sequential-gem mechanism from the socket-count differences — both remain
 untested as written above.
+
+## Closed, 2026-08-10 — option 1 complete
+
+The panel's own `formatPackageDelta` line now carries the qualifier, so every
+surface that states `packageDeltaDps` states it: the panel, the per-row package
+line, and the set-weight control's note. The wording is one exported constant,
+`GEM_POLICY_QUALIFIER` in `packages/core/src/rank-report-rules.ts`, rather than
+three strings that could drift into three different claims about one number.
+The CLI's set block picks it up for free — it renders through the same
+`formatSetBonusLine`.
+
+**Closing on disclosure, which was this ticket's full scope.** The title is a
+statement about what the figure *reads like*, and the ticket's own
+recommendation was option 1 with an explicit instruction not to change how the
+package is gemmed. Options 2 (measure the spread) and 3 (do nothing) are not
+carried forward as work: no number moved, and the mechanism hypothesis in "Why"
+above stays **untested** exactly as written — nothing in this change isolated
+the sequential-gem effect from the socket-count differences. If the spread is
+ever wanted as a range, that is a new ticket with a sim budget, not this one.
