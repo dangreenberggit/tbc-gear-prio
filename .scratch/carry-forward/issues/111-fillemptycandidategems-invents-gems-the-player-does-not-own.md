@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: c57b034 / 97e07b4 / 9c35e48 (implementation), 95ad7fc / a237501 / be5fdf1 (review fixes + measurement)
 Type: bug
 Origin: combined 103/106 diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-103-106/08-sequential-gems-typesimple.md`)
 Blocks: none
@@ -401,3 +402,32 @@ landing exactly on the ticket's PKG_FILL24028 rung, as predicted. Re-run:
 (Inputs under `uigems-arms-simplerot/` are untracked scratch; on a fresh
 worktree regenerate OWNER2_BASE per `08-sequential-gems-typesimple.md`
 before running.) Outputs: `sims-111-postfix/` incl. `per-seed.json`.
+
+## CLOSED, 2026-08-11
+
+Commits on `feat/set-bonus-value`: `c57b034` (palette carries `quality`),
+`97e07b4` (rare cap on the fill path via `GemContext.fillPalette`), `9c35e48`
+(new `GEM_POLICY_QUALIFIER`), then from the fresh-context review `95ad7fc`
+(docstring + de-vacuated meta test), `a237501` (maxPhase-reaches-the-fill
+end-to-end test), `be5fdf1` (post-fix measurement above). Every acceptance
+criterion is met; the last one is measured at **+111.72** (see the post-fix
+measurement section for the re-run commands).
+
+Two corrections and one known divergence recorded here so nobody re-cites the
+wrong version:
+
+- **Commit `97e07b4`'s message claims meta gems are quality 4. That is false**
+  — all 18 TBC metas are quality 3 in `vendor/wowsims/db.json` and
+  `data/gems/palette.json` (re-check: `python -c "import json;import
+  collections;db=json.load(open('vendor/wowsims/db.json'));print(collections.Counter(g['quality']
+  for g in db['gems'] if g['color']==1))"`). The fill/repair palette split is
+  still correct — its reason is isolation of the fill policy from repair, not
+  meta quality — and the docstring now says so (`candidate-gems.ts`).
+- **The rare cap does not stop the fill from seating metas** (they are quality
+  3). This diverges from the owner's observed web behaviour — suggest-gems did
+  NOT place metas, a manual seat was required
+  (`owner-web-results-2026-08-11.md`) — and is kept deliberately as part of our
+  stated gem model, pinned by test (`candidate-gems.test.ts` seats 32409).
+- Review follow-ups filed rather than fixed: ticket **114** (null/undefined
+  `quality` asymmetry in the cap), ticket **116** (exported
+  `fillCandidateGems` bypasses the cap for direct callers).

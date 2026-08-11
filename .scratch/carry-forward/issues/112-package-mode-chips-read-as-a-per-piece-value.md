@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 03cd0d1
 Type: bug
 Origin: owner report against the live report, 2026-08-11 (screenshot of the Curated ranked list under package mode)
 Blocks: none
@@ -185,3 +186,21 @@ caveats are ticket 103; nothing here re-measures it.
   *labels* the figure.
 - **Ticket 103** covers whether +64.07 is the right number. This ticket is about
   whether the chip says whose number it is. They are independent.
+
+## CLOSED, 2026-08-11
+
+Commit `03cd0d1` on `feat/set-bonus-value`. All eight acceptance criteria met;
+the digest golden repin comment records the inspected diff (CSS + script only,
+zero body markup, confirming the emit-only-with-a-package guard).
+
+As implemented, on the regenerated `.scratch/rank-reports/shredzepelin-p3.html`
+(2026-08-11, post-111 numbers) the 31048 chip carries `.d` = `-106.16` with a
+separate `<span class="pkg">pkg +64.09</span>`, hidden except under
+`body.package`. Four states: off → own delta, weighted → weighted potential,
+full → full potential, package → own delta + visible `pkg` span. Sort still
+reads `data-package`; export path untouched.
+
+Review follow-up filed rather than fixed: ticket **115** — the span's emit
+guard is the numeric comparison `packageSetPotentialDps(i) !== i.deltaDps`
+rather than the `setContext.package` fact it stands for (coincidental-equality
+and NaN edges).

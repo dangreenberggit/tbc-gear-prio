@@ -335,3 +335,37 @@ This round touched `packages/core/src/rank-report-rules.ts` twice — a new
 docstring. **Neither diff goes near `formatBreaksSuffix` or its doc comment**,
 which another session was fixing a stale V0b citation in. `git status` was clean
 of foreign modifications before each commit.
+
+---
+
+## Third round — tickets 111 and 112 (gem fill rarity cap, package-chip display)
+
+Written 2026-08-11 by the orchestrating session, on `feat/set-bonus-value`.
+**Still not landed, merged, or pushed.**
+
+| SHA | ticket | what |
+|---|---|---|
+| `c57b034` | 111 | Carry gem `quality` into `data/gems/palette.json` (data prerequisite, data-pipeline-work rules; generator also fixed to write LF) |
+| `97e07b4` | 111 | Cap candidate auto-fill at rare via `GemContext.fillPalette`; repair keeps the full palette. **Its message misstates meta quality — see ticket 111's CLOSED section** |
+| `9c35e48` | 111 | `GEM_POLICY_QUALIFIER` restated as the gem model ("may read low" removed) |
+| `03cd0d1` | 112 | Package-mode chips: own delta in `.d`, subordinate `pkg +X` span visible only under `body.package`; sort unchanged |
+| `95ad7fc` | review | Correct the false metas-are-quality-4 claim (all 18 metas are quality 3); de-vacuate the meta-seating test |
+| `a237501` | review | End-to-end proof maxPhase reaches the fill (phase-5 rares differ 2-vs-5), sensitivity shown by mutation |
+| `be5fdf1` | review | Post-fix package arm rebuilt through the current engine: 24028 in 31034's socket, **delta +111.72** vs OWNER2_BASE (seeds [11,22,33,44,55] @ 3000, CLI v0.0.101; `sim_postfix_111.py`) |
+
+Before/after ladder for the T6 4pc package arm (TypeSimple, from ticket 111):
+**+113.42** pre-fix (epic 32194 invented) → **+111.72** post-fix (rare 24028)
+→ +102.99 pure UI empty-socket reference → +98.17 owner's own web run.
+
+`.scratch/rank-reports/shredzepelin-p3.html` regenerated (not committed):
+package figure 64.07 → 64.09, Gauntlets own delta 21.75 → 18.57 (the capped
+fill), and the 31048 chip now reads `-106.16` + `pkg +64.09` under package
+mode instead of `+64.07` alone.
+
+Fresh-context review (adversarial + spec axes over `81d2ef4..HEAD`): both axes
+pass-with-findings, no runtime defect. A1/A2/S1/S2 fixed in the three review
+commits above; A3, A4, and the uncapped exported `fillCandidateGems` filed as
+tickets **114**, **115**, **116** rather than fixed (none was an honest
+one-liner).
+
+`pnpm verify` green at `be5fdf1`. Tickets 111 and 112 closed; 114–116 opened.
