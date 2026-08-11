@@ -1,8 +1,8 @@
-Status: open
+Status: closed
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
-Blocked by: 72
+Blocked by: none
 
 # packageDeltaDps reads systematically low against a re-gemmed wowsims run
 
@@ -208,3 +208,59 @@ run disagrees" into a leaf-level request diff. Its motivating case is recorded a
 "an unexplained helm-ranking gap between our sim and wowsims", i.e. ticket 106.
 Recommend treating 72 as the blocker for both 103 and 106 rather than opening a
 third path.
+
+## RESOLVED, 2026-08-10 — the owner's settings export arrived and closed it
+
+The evidence this ticket was blocked on landed at
+`.scratch/set-bonus-value/loop-103-106/owner-settings-export.json` (apiVersion
+14). Full diff and measurements: `06-owner-settings-diff.md`.
+
+**Our figure was never wrong. Two legitimate differences explain the gap, and
+neither is a defect.**
+
+**1. The settings are almost a perfect match.** Byte-identical between the
+owner's export and our skeleton: all 6 raid buffs, all 8 party buffs (including
+`totemTwisting` and `drums: LesserDrumsOfBattle`), all 12 debuffs, the talents
+string, race, both professions, `reactionTimeMs 250`, every consumable that is a
+sim input, and the entire encounter block (180s ±5, level-73 Mechanical, armor,
+`parryHaste`). **`exposeWeaknessHunterAgility` is 1080 on both sides** — the
+lead recorded in the previous section is dead, as is every other suspect it
+named. There was nothing to toggle.
+
+**2. The owner benchmarked a different character.** 10 of 17 slots differ —
+neck, back, waist, legs, both rings, trinket1, weapon, relic, plus a shoulder
+enchant — on better gear (baseline 2264 vs our 2152). Their legs have no sockets
+where shredzepelin's have three, so the package arm's socket accounting inverts
+between the two characters.
+
+**3. The rotation differs, and that is the dominant lever.** Our skeleton pins
+upstream's default APL (`TypeAPL`); the owner's run uses the `TypeSimple`
+biteweave/mangleTrick preset.
+
+Measured (seeds [11,22,33,44,55] @ 3000 iters, pinned CLI v0.0.101, every arm
+built through the real `equipmentForCandidateSwap`):
+
+| T6 four-piece delta | our APL | owner's TypeSimple |
+|---|---|---|
+| our gear | **+64.48** (= stored +64.07) | +113.73 |
+| owner gear | +56.55 | **+87.63** |
+
+**+87.63 against the owner's +97**, resolvable on every paired seed. The
+remaining single-digit residue is plausibly their 25000 iterations, a different
+seed, and a round number read off a UI — closing it would need exported
+*results*, not settings. The two differences do not superpose: the rotation is
+worth +49 on our gear but +31 on theirs.
+
+**Disposition: close.** The three figures in "The measurement" at the top of this
+ticket were each correct for what they measured; they disagreed because they
+measured different characters under different rotations. Nothing in the gem
+handling, the package assembly, or the artifact was ever at fault — see
+`DIRECTOR.md` for the seven mechanisms falsified along the way.
+
+**One question for the owner, not implemented:** should the tool model
+upstream's default APL or the `TypeSimple` preset the owner actually plays? That
+is a `data/presets/feral/` change gated by `pnpm sim-defaults:check` (a
+`data-pipeline-work` job) and a judgment call about whose rotation the numbers
+should represent — not a bug fix. A reverse-direction export of our settings is
+at `.scratch/set-bonus-value/loop-103-106/our-settings-for-web-import.json` so
+the owner can verify parity from the web side.

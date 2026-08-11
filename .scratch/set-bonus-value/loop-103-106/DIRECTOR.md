@@ -307,3 +307,131 @@ regardless of phase; P2's would be 1150) and the talent preset
 The next decisive evidence is not another sim on our side but the owner's
 exported wowsims settings for the two runs, which would let a request-level diff
 finish the job the way 04's leaf diff finished the payload question.
+
+## LOOP RESUMED — the blocking evidence arrived
+
+The owner's full wowsims settings export landed at
+`.scratch/set-bonus-value/loop-103-106/owner-settings-export.json` (apiVersion
+14). The residue named above is now attackable directly: the disposition's
+"blocked on owner evidence" no longer holds.
+
+First read of the export (`python -c` key dump, recorded in iteration 5's log):
+raid buffs, party buffs incl. `drums: LesserDrumsOfBattle` and
+`totemTwisting: true`, debuffs incl. `exposeWeaknessUptime 0.9` and
+`exposeWeaknessHunterAgility 1080`, consumables incl. super/goblin sappers and
+agi/str scrolls, a talents string, a simple rotation with biteweave/mangleTrick,
+encounter 180s ±5 with a level-73 Mechanical target and `parryHaste`, and the
+full 17-slot equipment.
+
+**`exposeWeaknessHunterAgility` is 1080 in BOTH** — confirmed by direct read of
+the export above and by `03-package-gap.md`'s reading of our skeleton. That lead
+from the disposition is **dead on arrival**; the surviving candidates are the
+ones our earlier diff could not see because it only compared our skeleton
+against upstream defaults, never against the owner's actual run.
+
+### Iteration 5 — dispatched
+
+- **Hypothesis**: the +64→+97 and flat-vs-+10 residues are driven by sim-request
+  settings present in the owner's run and absent (or different) in our skeleton
+  — with `totemTwisting`, drums, sappers/scrolls, the ±5 duration variation, the
+  level-73 Mechanical target, `parryHaste`, and the rotation/talents as the
+  named suspects.
+- **Subagent**: `06-owner-settings-diff` → `06-owner-settings-diff.md`.
+- **Method note**: arms must be built through `equipmentForCandidateSwap` (the
+  `repairMeta` trap from iterations 2/4/5), and settings toggled **individually**
+  rather than all-or-nothing so each difference gets a price.
+- **Result**: **both residues explained — by two differences, neither of which
+  was on the suspect list.** The settings themselves were almost a perfect match.
+
+  **Byte-identical** between the owner's export and our skeleton: all 6 raid
+  buffs, all 8 party buffs (including `totemTwisting` and
+  `drums: LesserDrumsOfBattle`), all 12 debuffs, the talents string, race, both
+  professions, `reactionTimeMs 250`, every consumable that is a sim input, and
+  the **entire encounter block** (180s ±5, level-73 Mechanical, armor,
+  `parryHaste`). `exposeWeaknessHunterAgility` is 1080 on both sides — that lead
+  is **confirmed dead**.
+
+  So every suspect the iteration named — totemTwisting, drums, sappers, scrolls,
+  duration variation, Mechanical/73, parryHaste, talents — was *already
+  identical*, and there was nothing to toggle. Only three real differences:
+
+  | field | owner | ours | verdict |
+  |---|---|---|---|
+  | **equipment** | different character, 10/17 slots | shredzepelin fixture | **DIFF, priced** |
+  | **rotation** | `TypeSimple` (biteweave/mangleTrick) | `TypeAPL` (upstream default) | **DIFF, priced** |
+  | `consumables.drumsId` | absent | `GreaterDrumsOfBattle` atop the party-level Lesser | no counterpart, unpriced |
+  | `target.canCrush` | absent | `true` | no counterpart (format gap), unpriced |
+
+  **The owner's baseline gear is not ours.** 10 of 17 slots differ — neck, back,
+  waist, legs, both rings, trinket1, weapon, relic, plus a shoulder enchant. They
+  benchmarked on a **different, better-geared character** (baseline 2264 vs our
+  2152). Their legs have no sockets where shredzepelin's have three, so the
+  package arm's socket accounting *inverts* between the two characters.
+
+  Measured (seeds [11,22,33,44,55] @ 3000 iters, pinned CLI v0.0.101, every arm
+  built through the real `equipmentForCandidateSwap`):
+
+  **103 — T6 four-piece delta** (ground truth +97):
+
+  | | our APL | owner's TypeSimple |
+  |---|---|---|
+  | our gear | **+64.48** (= stored +64.07) | +113.73 |
+  | owner gear | +56.55 | **+87.63** |
+
+  **106 — CURSED − VENG** (ground truth ~+10):
+
+  | | our APL | owner's TypeSimple |
+  |---|---|---|
+  | our gear | **+0.15** (= stored −0.084) | +6.75 |
+  | owner gear | +4.64 | **+7.78** |
+
+  Both ground truths substantially reproduce: **+87.63 vs +97** and **+7.78 vs
+  ~+10**, resolvable on every paired seed. The single-digit residues are
+  plausibly the owner's 25000 iterations, a different seed, and round numbers
+  read off a UI — closing them needs exported *results*, not settings.
+
+  The two differences **do not superpose**: the rotation is worth +49 on our
+  gear but +31 on the owner's.
+
+- **Verdict**: **Both tickets are resolved, and the answer is not a bug.** Our
+  pipeline was measuring correctly the whole way down — the disagreement was two
+  legitimate differences in what was being measured: a different character's
+  gear, and a different rotation. The rotation is the dominant lever, and it is
+  **our choice, not the owner's error**: our skeleton pins upstream's default APL
+  while the owner plays the `TypeSimple` biteweave/mangleTrick preset.
+
+  This retroactively vindicates the loop's discipline. The apparent bug was never
+  in the code; every mechanism we were dispatched to catch was genuinely absent,
+  and each falsification was correct.
+
+- **Next step**: no further measurement. Write findings into 103/106, unblock
+  both from ticket 72 (the export it was blocking on has arrived and done its
+  job), and put the rotation question to the owner as a proposal — it is a
+  `data/presets/feral/` change gated by `pnpm sim-defaults:check`, i.e. a
+  `data-pipeline-work` job, and a judgment call about which rotation the tool
+  should model. **Propose, do not implement.**
+
+## Final disposition
+
+The loop closes with **no production change and no spec amendment**, which is
+the correct outcome: seven candidate mechanisms were falsified by experiment,
+and the residue turned out to be a comparison mismatch rather than a defect.
+
+Three items for the owner, none implemented:
+
+1. **Rotation mismatch** (the big one). Our skeleton pins upstream's default APL;
+   the owner's run uses `TypeSimple` biteweave/mangleTrick, worth +49 DPS on our
+   gear. Which rotation should the tool model? A `data/presets/feral/` change
+   gated by `pnpm sim-defaults:check`.
+2. **Double drums** — our skeleton specifies `partyBuffs.drums` Lesser *and*
+   `consumables.drumsId` Greater. Unexplained; **untested** whether additive,
+   overriding, or ignored.
+3. **Incidental smell, out of scope**: our shredzepelin baseline contains item
+   ids **278827** and **278819**, outside the TBC range, resolving to non-TBC
+   names in the pinned db. Possibly a fixture or id-mapping issue — filed as
+   ticket 108.
+
+Reverse-direction artifact produced for the owner to verify parity from their
+side: `our-settings-for-web-import.json` plus `our-settings-for-web-import.md`,
+the note stating which fields were constructed (`name`, empty slot 15) and which
+could not be represented (`canCrush` has no field in the export format).

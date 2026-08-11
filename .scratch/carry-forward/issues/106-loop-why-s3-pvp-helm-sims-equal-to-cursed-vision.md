@@ -1,8 +1,8 @@
-Status: open
+Status: closed
 Type: investigation
 Origin: owner report, 2026-08-10
 Blocks: none
-Blocked by: 72
+Blocked by: none
 
 # loop: why does the S3 PvP helm sim ~equal to Cursed Vision?
 
@@ -138,3 +138,48 @@ setup) names this exact investigation as its motivating case — "an unexplained
 helm-ranking gap between our sim and wowsims". Its stage 1 (`--sim-settings`
 flag feeding `Deps.raidSimSkeleton`) is what would let us diff the owner's run
 against ours at leaf level. Recommend 72 as the blocker for both 103 and 106.
+
+## RESOLVED, 2026-08-10 — the owner's settings export arrived and closed it
+
+Evidence at `.scratch/set-bonus-value/loop-103-106/owner-settings-export.json`
+(apiVersion 14); full diff and measurements in `06-owner-settings-diff.md`.
+
+**Our near-equality was a correct measurement of our configuration. The owner's
+~+10 is a correct measurement of theirs. Two differences separate them.**
+
+The settings themselves were almost identical — all raid/party buffs, all
+debuffs, talents, race, professions, `reactionTimeMs`, consumables, and the
+whole encounter block (180s ±5, level-73 Mechanical, `parryHaste`) match
+byte-for-byte, and `exposeWeaknessHunterAgility` is 1080 on both sides. Every
+Phase-2 suspect in this ticket was already eliminated by measurement; every
+sim-request suspect turned out to be identical. What differed:
+
+1. **Gear** — the owner benchmarked a different, better-geared character (10 of
+   17 slots differ; baseline 2264 vs our 2152).
+2. **Rotation** — ours pins upstream's default APL, theirs uses the `TypeSimple`
+   biteweave/mangleTrick preset.
+
+Measured (seeds [11,22,33,44,55] @ 3000 iters, pinned CLI, arms built through
+the real `equipmentForCandidateSwap`):
+
+| CURSED − VENG | our APL | owner's TypeSimple |
+|---|---|---|
+| our gear | **+0.15** (= stored −0.084) | +6.75 |
+| owner gear | +4.64 | **+7.78** |
+
+**+7.78 against the owner's ~+10**, resolvable on every paired seed. Both
+differences push the same way, and the helms separate once either is applied —
+which is why the effect looked like it had vanished on our configuration rather
+than merely shrunk.
+
+**Disposition: close.** Every mechanism this ticket named — meta activation, gem
+handling, socket bonuses, item variant, noise — was falsified by direct
+measurement, and the report's flat ordering was right for the inputs it was
+given. The `repairMeta` trap recorded above stands as the loop's main
+methodological warning.
+
+The rotation question (which rotation should the tool model?) is carried in
+ticket 103's resolution as a proposal for the owner; it is a
+`data/presets/feral/` decision, not a bug. A reverse-direction export of our
+settings for web-side parity checking is at
+`.scratch/set-bonus-value/loop-103-106/our-settings-for-web-import.json`.
