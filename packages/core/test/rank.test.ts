@@ -6,6 +6,7 @@ import { gemContext } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
+import { Stat } from "../src/stats.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
   equipmentForCandidateSwap,
@@ -1606,6 +1607,123 @@ describe("rankUpgrades", () => {
     for (const id of gems3) {
       expect(id).toBeGreaterThan(0);
       expect(palette2).toContain(id);
+      expect(getGem(id)?.quality).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("maxPhase still reaches the fill: phase-5 rares appear only at maxPhase 5 (ticket 111)", async () => {
+    // Compensates for the rare-cap test above, whose fills are identical at 2
+    // and 3 by design — alone it would also pass if the engine ignored
+    // maxPhase entirely. The palette's only rares above phase 2 are the three
+    // phase-5 jewels (35315/35316/35318), and 35315 is the sole gem of any
+    // rarity carrying spell haste (stat 14), so under haste-leaning weights a
+    // maxPhase 5 run must fill it where a maxPhase 2 run cannot — proving the
+    // input's maxPhase flows through gemContext into the simmed request.
+    const hasteWeights = {
+      [String(Stat.StatSpellHasteRating)]: 1,
+      [String(Stat.StatStrength)]: 0.01,
+    };
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+    const bootId = 30104;
+    const bootIdx = SIM_ORDER.indexOf("feet");
+    const gemsAt = (maxPhase: 2 | 5) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: candidateEquipmentForTest(
+            equipment,
+            "feet",
+            bootId,
+            maxPhase,
+            hasteWeights
+          ),
+        }),
+        "v0.0.101",
+        opts
+      );
+    const obs = (dps: number) => ({
+      dps,
+      stdev: 92.0,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+    const pool = [realPoolEntry(bootId, "ret-p3")];
+
+    const socketedBootGems = async (maxPhase: 2 | 5) => {
+      const sim = new CapturingSimRunner(
+        "v0.0.101",
+        new Map([
+          [baselineKey, obs(2042.85)],
+          [gemsAt(maxPhase), obs(2075.0)],
+        ])
+      );
+      await rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim,
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights: hasteWeights,
+          pool,
+        }
+      );
+      const req = sim.requests.find((r) => {
+        const items =
+          (
+            r.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number; gems: number[] }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        return items[bootIdx]?.id === bootId;
+      });
+      expect(req).toBeDefined();
+      return (
+        (
+          req!.raid as {
+            parties: Array<{
+              players: Array<{
+                equipment: { items: Array<{ id: number; gems: number[] }> };
+              }>;
+            }>;
+          }
+        ).parties[0]?.players[0]?.equipment.items[bootIdx]?.gems ?? []
+      );
+    };
+
+    const gems2 = await socketedBootGems(2);
+    const gems5 = await socketedBootGems(5);
+
+    expect(gems2.length).toBeGreaterThan(0);
+    expect(gems5).not.toEqual(gems2);
+    expect(gems5).toContain(35315);
+    expect(gems2).not.toContain(35315);
+    // Both sides stay under the rarity cap — maxPhase widens the phase axis
+    // only, never the quality one.
+    for (const id of [...gems2, ...gems5]) {
       expect(getGem(id)?.quality).toBeLessThanOrEqual(3);
     }
   });
