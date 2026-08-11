@@ -1,5 +1,6 @@
-Status: open
-Type: bug (policy decision required)
+Status: resolved
+Resolved: a61628a (fix + tests), 2026-08-11
+Type: bug
 Origin: convergence check, 2026-08-11
 (`.scratch/set-bonus-value/loop-103-106/convergence-check-2026-08-11.md`)
 Blocks: none
@@ -73,3 +74,118 @@ join) and `03-verify.md` task 5 (fill replay). Artifact re-run:
   head has fewer gems (or no head sockets, like feral's Wolfshead) puts
   every one of these rows, T6 included, back in the blast radius. Record
   only; the policy decision above is unchanged.
+
+## DECIDED AND FIXED, 2026-08-11 — option 1, coloured swaps capped at rare
+
+**The owner chose option 1.** The gem-swapping step that keeps the meta gem's
+colour requirement satisfied must stop picking replacements from the
+unrestricted list. The sim is an apples-to-apples comparison of gear upgrades,
+not hidden gem upgrades: if we aren't deliberately re-gemming someone with epic
+gems they didn't have, we shouldn't do it. So the coloured-socket swaps
+`repairMeta` makes now draw from the same rare-capped list the socket-filling
+step uses. The meta socket itself keeps whatever it needs — which turns out to
+be automatic, see below.
+
+### What upstream wowsims actually does (checked before writing our own policy)
+
+The owner asked for upstream's regem / suggest-gems behaviour to be checked
+first, at the pin `8aa378b3671a0923fd11fb34b4b3753e53f20c9b`
+(`data/wowsims.lock.json`, repo `wowsims/tbc-new`).
+
+**The pinned upstream has no automatic gem-choosing code at all.** The vendored
+copies under `vendor/wowsims/` don't include the UI gear code, so the full file
+tree at the pin was listed through the GitHub API
+(`gh api "repos/wowsims/tbc-new/git/trees/8aa378b3671a0923fd11fb34b4b3753e53f20c9b?recursive=1"`)
+and every gem-related file fetched and read at that commit: `ui/core/proto_utils/gems.ts`,
+`gear.ts`, the gear picker (`gear_picker.tsx`, `item_list.tsx`,
+`quick_gem_popover.tsx`, `filters_menu.tsx`), `gear_tab.ts`, `gem_summary.tsx`,
+and the bulk-sim `gem_selector_modal.tsx`. What they contain: manual gem
+picking, gem migration on equip that leaves leftover sockets empty (already
+ported as `migrateGemsToItem`), and a check whether the meta's colour condition
+is met (`hasActiveMetaGem` / `isMetaGemActive`). When the condition fails, the
+sim simply withholds the meta bonus. **Upstream never swaps a player's gems to
+keep a meta lit — our `repairMeta` pass has no upstream counterpart.**
+
+The suggest-gems button the owner used in their web session (ticket 111,
+"Two behavioural facts") is **not in the pinned source**, and a filename sweep
+of the current tip of `wowsims/tbc-new` found no suggest-gems file there
+either — where that button's code lives is unresolved, and nothing local pins
+it. The closest findable implementation in the wowsims family is
+`wowsims/wotlk`'s `ui/core/components/suggest_gems_action.ts` (fetched from
+that repo's tip, not our pin): it clears every gem and rebuilds the whole set
+from per-spec hardcoded gem-id priority lists — it doesn't select by rarity at
+all, the spec author's list simply is the policy.
+
+**So there was no upstream approach to reuse at the pin.** The relation of our
+behaviour to upstream is now: upstream never introduces gems on its own; we do
+(the owner-decided auto-fill plus this repair pass), and after this fix
+everything we introduce respects the same rare cap. We are strictly more
+conservative than the button the owner observed, which re-gemmed worn body
+gems; we never touch a gem the player actually wears unless the meta condition
+forces it, and then only with rares.
+
+### The fix
+
+Both `repairMeta` call sites in `packages/core/src/rank.ts` (the worn-gear
+repair at rank start and the candidate-swap path in
+`equipmentForCandidateSwap`) now pass `GemContext.fillPalette` — the
+rare-capped list — instead of the full palette. `repairMeta` itself is
+unchanged: it never touches the meta socket (its search skips meta sockets),
+so "the meta socket may use whatever it needs" holds automatically — the meta
+gem is seated by the fill step, and all 18 TBC metas are quality 3, so they
+pass the cap. The stale docstring on `GemContext.fillPalette`
+(`packages/core/src/candidate-gems.ts`) that said repair keeps the full
+palette is rewritten.
+
+**Solvability with the smaller list, verified:** any non-meta gem may legally
+sit in any coloured socket (colour only decides the socket bonus), and every
+gem colour exists at rare quality, so capping cannot make a repair unsolvable
+that the full list could solve. Checked by running the repair for all 18 metas
+against a worst-case all-red body: every one activates except 25898
+(Tenacious, needs 5 blue), which fails identically with the full palette —
+that failure is a socket-count limit of the test gear, not a quality limit.
+Pinned by tests:
+
+- `packages/core/test/rank.test.ts` — "meta repair never places a gem above
+  the rare fill cap" (red before the fix: the swap onto Cursed Vision seated
+  epic 30549 on the helm and epic 32220 twice on the chest).
+- `packages/core/test/meta-repair.test.ts` — "still solves from the
+  rare-capped palette (ticket 117)".
+
+Commit: `a61628a` on `feat/set-bonus-value`. `pnpm verify` green.
+
+### Re-measured helm A/B — the "possibly related" hypothesis is disproven
+
+Same protocol as the convergence check (owner's gear + TypeSimple rotation,
+seeds [11,22,33,44,55] @ 3000 iterations, pinned wowsimcli v0.0.101):
+
+    pnpm exec tsx .scratch/set-bonus-value/loop-103-106/build_convergence_arms_0811.ts
+    python .scratch/set-bonus-value/loop-103-106/sim_convergence_0811.py
+
+Both helm arms now carry [32409, 24061 Glinting Noble Topaz (rare)] instead of
+[32409, 32220 Glinting Pyrestone (epic)]. Results
+(`sims-convergence-0811/per-seed.json`, transcript
+`sim_convergence_0811_ticket117.stdout.log`):
+
+| measurement | value |
+|---|---|
+| Cursed − Vengeful, capped repair | **+6.76** (SE 0.912; per-seed 6.778, 6.675, 6.677, 6.837, 6.838) |
+| owner web | +10.69 (SE 0.693) |
+| gap | −3.93, z = 3.43 |
+
+History of this A/B: +8.61 (before the rare cap) → +7.90 (cap on fill, epic
+repair) → **+6.76** (cap on fill and repair). The section above suspected the
+epic repair swap caused the +8.61 → +7.90 drop; **that hypothesis is now
+disproven in direction** — removing the epic from both arms moved the figure
+further from the owner, not closer. Each step toward cheaper gems lowers the
+A/B, which makes sense: the same two gems sit in both arms, but Cursed Vision's
+socket bonus and stat mix profit more from a stronger gem, so cheaper gems
+shrink the gap between the helms. The remaining −3.93 against the owner is
+**not** attributable to gem quality policy; the owner's web arms carried their
+own manual gem choices, and the unversioned-web-vs-pinned-CLI offset (ticket
+113) is still open. The policy is correct by decision, not because it closes
+this comparison — the owner chose consistency over chasing the web figure.
+
+Unchanged cross-checks from the same run: baseline 2219.82 (bit-identical to
+the pre-fix run, so same engine), belt +50.45 (no meta socket involved, so the
+fix correctly left it alone).
