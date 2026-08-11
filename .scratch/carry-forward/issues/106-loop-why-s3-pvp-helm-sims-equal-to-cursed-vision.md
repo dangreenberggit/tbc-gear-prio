@@ -2,7 +2,7 @@ Status: open
 Type: investigation
 Origin: owner report, 2026-08-10
 Blocks: none
-Blocked by: none
+Blocked by: 72
 
 # loop: why does the S3 PvP helm sim ~equal to Cursed Vision?
 
@@ -63,3 +63,78 @@ quick manual sim valid. Any reproduction here should match that setup: same
 gems in both arms, meta active in both. If our pipeline's swap builder
 cannot produce that configuration for one of the helms, that inability is
 itself the likely answer.
+
+## Loop findings, 2026-08-10 — the report's near-equality is CORRECT; every named suspect falsified
+
+Ran as a combined loop with ticket 103. Director log:
+`.scratch/set-bonus-value/loop-103-106/DIRECTOR.md`; agent logs `01`–`05` in the
+same directory, with measurement scripts committed alongside.
+
+Phase 2's suspects, taken cheapest-first exactly as this ticket ordered them,
+are all eliminated **by measurement**:
+
+**Meta activation — not broken.** The payload production builds (dumped by
+calling the real `equipmentForCandidateSwap`, not a reimplementation:
+`.scratch/set-bonus-value/loop-103-106/dump-payloads.ts`) has the meta **ACTIVE
+in both helm arms**, confirmed with the real `metaStatus`
+(`packages/core/src/meta.ts`): `{red:12, yellow:2, blue:2}` against
+`minRed:2 minYellow:2 minBlue:2` for gem 32409.
+
+**Gems and socket bonuses — identical between the arms.** The two payloads are
+identical apart from the item id itself: same 2 sockets, same gems (meta 32409 +
+red 32194), same carried enchant, identical whole-equipment gem multiset (13
+gems). This is exactly the setup the owner's context section asks for — same
+gems both arms, meta active in both — so our builder *can* produce it.
+
+**Wrong item variant — no.** 32235 (Cursed Vision) and 33672 (Vengeful
+Gladiator's Dragonhide Helm) are the only matching ids in
+`vendor/wowsims/db.json` and are the ids `.scratch/rank-reports/shredzepelin-p3.json`
+actually uses.
+
+**Noise — the near-equality is real, and reproduces exactly.** Simming the
+production requests byte-for-byte (`04-artifact-vs-direct.md`,
+`sim_prod_requests.py`) reproduces the stored figures to two decimals: CURSED
+32235 stored −202.13357 vs simmed −202.13; VENG 33672 stored −202.04970 vs
+simmed −202.05. A 5-seed re-run gives CURSED − VENG = **+0.15**, matching the
+stored −0.084 in being flat. The two helms genuinely sim within noise.
+
+### The trap this loop fell into, recorded so it is not repeated
+
+An intermediate measurement (`02-helm-ab.md`) appeared to show CURSED +2.84 /
++4.97 ahead and each helm ~15 DPS above the stored figure. That was a **harness
+error**: the script substituted only the head slot and left the rest of the gear
+at the baseline's `24028` gems, skipping the four-gem recolour on shoulder 29100
+and chest 29096 that `repairMeta` performs to satisfy the new meta's colour
+condition. Those arms had the meta socketed but its condition unmet — and the Go
+sim applies 32409's **+3% crit damage unconditionally** even then. Isolating the
+head socket (`05-meta-tax.md`, `sim_meta_arms.py`) prices that free ride at
+**~35 DPS**: `ISO_META − ISO_32194 = +39.25` for +2 agi where the measured rate
+(1 agi ≈ 1.83 DPS) predicts ~+3.7. So the apparent gap was impossible stats, the
+exact case PLAN.md §9 exists to prevent — **any future arm built for this
+comparison must go through `equipmentForCandidateSwap`, never a hand-substituted
+slot.**
+
+`repairMeta` was also cleared while we were there: activation is a net **+22.40
+DPS gain** here (`META_ACTIVE` −201.98 vs `NO_META` −224.38, winning on all five
+paired seeds), so the recolouring cost is worth paying and the 8 affected rows
+are not undervalued.
+
+### Disposition
+
+Our side is exonerated on every mechanism this ticket named. The owner's ~+10
+expectation is **not reproduced** — but nor is it refuted, because we cannot see
+their run's settings. The residue is the same as ticket 103's: our numbers
+reproduce themselves exactly and disagree with a wowsims web run, leaving the
+sim *request* (not the equipment) as the only place left to look. The untested
+leads are shared with 103 (`exposeWeaknessHunterAgility` phase pinning; the
+talent preset).
+
+**Recommend: keep open, blocked on owner evidence** — the exported wowsims
+settings for the two helm runs. A leaf-level request diff against those would
+settle it; more sims on our side will not.
+
+**The unblock already has a ticket.** Ticket 72 (import a user-supplied wowsims
+setup) names this exact investigation as its motivating case — "an unexplained
+helm-ranking gap between our sim and wowsims". Its stage 1 (`--sim-settings`
+flag feeding `Deps.raidSimSkeleton`) is what would let us diff the owner's run
+against ours at leaf level. Recommend 72 as the blocker for both 103 and 106.

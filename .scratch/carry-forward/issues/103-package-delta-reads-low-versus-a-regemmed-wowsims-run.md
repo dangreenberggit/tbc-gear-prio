@@ -2,7 +2,7 @@ Status: open
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
-Blocked by: none
+Blocked by: 72
 
 # packageDeltaDps reads systematically low against a re-gemmed wowsims run
 
@@ -144,3 +144,67 @@ What this ticket now needs — a loop-style isolation, not disclosure:
 Related: ticket 106 investigates a helm comparison where the same gem
 handling is the prime suspect — if step 1 finds the builder mangling gems,
 check whether one fix covers both.
+
+## Loop findings, 2026-08-10 — every local mechanism falsified, gap still unexplained
+
+Ran as a combined loop with ticket 106 (shared prime suspect: the swap builder's
+gem handling). Full director log:
+`.scratch/set-bonus-value/loop-103-106/DIRECTOR.md`; per-agent logs `01`–`05` in
+the same directory, with their measurement scripts committed alongside.
+
+**The prime suspect is dead.** Dumping the payload production actually builds —
+by calling the real exported `equipmentForCandidateSwap`, not a reimplementation
+(`.scratch/set-bonus-value/loop-103-106/dump-payloads.ts`) — shows the T6
+package arm has **no empty socket and no dropped gem** beyond what socket
+capacity mechanically forces (11→10 gems: legs 31044 has 1 socket against worn
+Skulker's Greaves' 3; hands 31034 has 1 against worn 0).
+
+**The socket-capacity attribution in "Why" above is wrong on this data.**
+`python .scratch/set-bonus-value/loop-103-106/measure_pkg_gap_line_a.py`
+(seeds [11,22,33,44,55] @ 3000 iters, guard 2152.13 vs stored 2152.0998):
+
+| arm | delta vs BASE |
+|---|---|
+| `PKG_PROD` (the real production payload) | **+64.48** |
+| `PKG_FILLER` (flat filler gem 32194) | **+80.80** |
+| `PKG_BESTGEMS` (T6 sockets filled with 24028, the gem the baseline already uses) | **+64.43** |
+
+`PKG_BESTGEMS` lands on `PKG_PROD` (0.05 apart against a ~2.7 SE), not on
+`PKG_FILLER`. So the ~16.72 DPS `PKG_PROD`/`PKG_FILLER` split is **gem choice**
+(24028 vs 32194), not socket *count* and not sequential exclusion. Socket
+capacity explains ~0 of the 32.93 DPS gap to the owner's +97. The "Untested"
+paragraph above is now tested, and its mechanism is refuted.
+
+**The stored figure is not displaced.** `PKG_PROD` +64.48 agrees with the stored
++64.07, so nothing in our own pipeline is losing DPS between payload and
+artifact. (Ticket 106's apparent ~15 DPS artifact-vs-sim displacement turned out
+to be a harness error in one measurement agent — see `04-artifact-vs-direct.md`
+— and does not touch the package arm, which never introduces a meta socket.)
+
+**Where the gap must now live: the sim request, not the equipment.** Diffing our
+skeleton (`03-package-gap.md`) found no divergence in fight duration (180s),
+target count (1), target armor/level, or buff/debuff composition, and confirmed
+the `p2` skeleton filename is deliberate rather than a p2/p3 mismatch
+(`--maxPhase` moves only the candidate pool; the skeleton is phase-agnostic and
+gated by `pnpm sim-defaults:check`). Two leads survive, both **untested** for
+DPS impact:
+
+1. `exposeWeaknessHunterAgility: 1080` — upstream's Phase-1 value, hardcoded in
+   feral's sim.ts regardless of actual phase; P2's correct value would be 1150.
+2. The talent preset is "StandardTalents, the first one upstream lists" — a
+   judgment call never verified against what the owner's run used.
+
+**What this ticket needs next is evidence from outside our pipeline**: the
+owner's exported wowsims settings for the +97 run (buffs, consumables, debuffs,
+encounter, talents). A leaf-level diff of that against our composed request
+would finish this the way `04-artifact-vs-direct.md`'s leaf diff finished the
+payload question. Absent that, further sims on our side re-measure numbers we
+have already reproduced exactly.
+
+**The unblock already has a ticket.** Ticket 72 (import a user-supplied wowsims
+setup) is exactly the capability needed here — its stage 1 accepts a pasted
+`IndividualSimSettings` as the skeleton source, which is what turns "the owner's
+run disagrees" into a leaf-level request diff. Its motivating case is recorded as
+"an unexplained helm-ranking gap between our sim and wowsims", i.e. ticket 106.
+Recommend treating 72 as the blocker for both 103 and 106 rather than opening a
+third path.
