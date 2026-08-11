@@ -78,3 +78,20 @@ but the panel currently states the figure without qualification, and the gap is
 
 Option 1 is the recommendation. Do **not** change how the package is gemmed —
 that would break the spec §2.2 symmetry invariant to chase a display problem.
+
+## Update, 2026-08-10 — option 1 partially shipped, ticket stays open
+
+`packageDeltaDps` now also drives the report's opt-in **package** display mode
+(ADR-0024), so the figure reaches member rows and not only the panel. Option 1's
+disclosure ships with it, in two places:
+
+- every package-member row's line ends "holds your current gems fixed, so
+  re-gemming can only improve it" (`formatPackageMembershipLine`,
+  `packages/core/src/rank-report-rules.ts`);
+- the set-weight control's note repeats it for the mode as a whole.
+
+Still open: the **Set potential panel's** own `formatPackageDelta` line carries
+no such qualifier, which is the surface this ticket was originally filed
+against. Nothing here measures the spread (option 2) or isolates the
+sequential-gem mechanism from the socket-count differences — both remain
+untested as written above.

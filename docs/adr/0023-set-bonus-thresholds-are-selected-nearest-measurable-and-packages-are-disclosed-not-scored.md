@@ -1,6 +1,10 @@
 # ADR-0023 — Set-bonus thresholds are nearest-measurable, and a package is disclosed rather than scored
 
 **Status:** accepted
+**Amended by:** ADR-0024 (2026-08-10) — decision 2 below is relaxed for the
+opt-in view only, which may score a member row by the package's own
+`packageDeltaDps`. Decisions 1, 3, 4 and 5 stand as written; in particular the
+break-confounded `bonusDps` this ADR suppresses is still never ranked on.
 **Date:** 2026-08-10
 **Implements:** `.scratch/set-bonus-value/spec.md` §2.3, §4
 **Tickets:** `.scratch/carry-forward/issues/90-set-break-confound-inflates-bonus-and-inverts-sets.md`,

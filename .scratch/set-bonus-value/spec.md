@@ -24,6 +24,21 @@ A set bonus is gained and lost **atomically at a threshold** — the break case 
 - The bonus's value is measured **once per (set, threshold)** and attached whole, with the context "you'd need N more pieces".
 - A candidate whose swap crosses a threshold gets `crossesThreshold: true` and **no** prospective add-on — the value is already inside its `deltaDps`.
 
+**Amendment, 2026-08-10 (owner decision).** The opt-in view may *organize member
+rows by the whole-package figure*, and this does not reopen the rule above. The
+distinction is exact: a split would give each of four pieces a different
+quarter-share, inventing a per-piece value no piece delivers. Package mode gives
+every member row of one package the **same** whole-package number, labelled as
+the package's, precisely because it is not divisible. It is one measured figure
+shown against several rows, not one figure cut into several.
+
+The figure is `SetBonusValue.packageDeltaDps` — one sim of the assembled package
+against the baseline — never the derived `bonusDps`. `bonusDps` is
+`packageDelta − Σ singles`, which is the quantity ticket 90's `(k−1)·B` inflation
+lands on; its suppression from sort keys stands unchanged. `packageDeltaDps`
+carries the broken set's cost inside the measurement rather than derived back out
+of it, so the confound never reaches it.
+
 ### 2.2 The measurement: completion-package synergy
 
 For each relevant set `S` and threshold `t` (2 or 4, only thresholds with a DPS-relevant bonus per research.md, and only `t >` pieces currently worn):
@@ -96,6 +111,63 @@ setContext?: {
 - CLI: `--with-set-potential` flag; when a ranking has `setBonuses`, print a short block (set, threshold, pieces worn, measured bonus or the unmeasured reason). Per-item line shows `+X set potential (needs N more pieces)` under the flag.
 - HTML report (`rank-report.ts`): a "with set" column/badge under the toggle semantics the report already uses for other optional facts; unmeasured states render their reason, not a blank.
 - Disclosure: one standing-assumption line naming how the number was measured ("completion-package synergy, shared seeds") — the drawer's honesty rule (PLAN.md §9 R7).
+
+### 4.1 Package mode (amendment, 2026-08-10 — owner decision)
+
+The owner's rationale, in their words: the point is to show "yeah, this piece in
+particular isn't worth breaking the T4 set bonus, but it's ultimately worth it",
+and to let the reader **opt in** to letting that organize the shortlist, so they
+can decide to start collecting tier without waiting to own three other pieces.
+
+**What it does.** A row whose item id appears in a measured package's
+`packageItemIds` carries `setContext.package`. Under package mode, such a row
+sorts and displays by `package.deltaDps` instead of its own `deltaDps`, and
+renders both: "this swap alone: −106.16 — part of 4pc package: +64.07 for the
+whole package". Every member of one package shows the same figure (§2.1's
+amendment). Only a **measured, positive** package is credited; a package that
+measures ≤ 0 argues against itself and moves no row.
+
+**Membership is keyed on `packageItemIds`, not `nextThreshold`.** The two
+disagree exactly where this feature matters. At 0 pieces worn every single swap
+lands at `piecesAfterSwap === 1`, so `nextThreshold` stops at an implemented 2pc
+(ADR-0023's ticket-91 case) and a threshold-keyed lookup would reach two of the
+four Thunderheart rows and miss the two the owner named.
+
+**Delivery is an in-browser toggle, not a flag.** The report embeds both orders
+at generation time — `data-delta` and `data-package` on every row and chip — and
+a small inline `<script>` re-sorts the DOM it already has. `view.ts`'s comparator
+and cutoff stay a build-time library; nothing reaches into them at request time.
+The existing `--with-set-potential` CLI flag remains for the console printer, and
+the HTML report carries the toggle regardless of the flag. This is the shape
+`.scratch/handoffs/set-potential-weighted-toggle-scope-miss.md` §"What the
+correct shape looks like" specifies, after a previous attempt shipped a CLI flag
+and was reverted.
+
+**Default order is untouched.** Toggle off is exactly today's view.
+
+**Cutoff, and the ADR-0020 question.** The absolute cutoff does not move, and
+`belowCutoff` is not recomputed from the package figure. ADR-0020 forbids a bar
+that depends on the row set; that is not at issue here, but a second question is:
+may a row that is below cutoff *on its own delta* appear in the opt-in shortlist
+on its package figure?
+
+**Decided: it may, and the shipped mechanism gets there without touching the bar
+at all.** The report's package mode is a **re-sort of rows already rendered**,
+not a re-partition — the shortlist chips are built from `belowCutoff` at
+generation time and a below-cutoff member row keeps its `muted` class in every
+mode. So the T6 shoulders rise to the top of their slot section under package
+mode, showing +64.07 with their −106.16 beside it, while remaining marked as
+below cutoff on their own delta. That satisfies the owner's intent (the rows
+organize by the package figure and are impossible to miss) and ADR-0020's text
+simultaneously: no threshold was moved, no row's `belowCutoff` was rewritten, and
+the row's own sub-cutoff delta is displayed next to the figure that promoted it.
+No conflict to flag.
+
+**Ticket 103 qualifier.** `packageDeltaDps` holds the player's current gem policy
+fixed (the package is assembled with the same sequential `equipmentForCandidateSwap`
+single swaps use), so it reads conservative against a re-gemmed wowsims run —
++64.07 against a reported +97 on the shredzepelin P3 artifact. Disclosed on the
+row line and in the control's note, per ticket 103's option 1. Not fixed here.
 
 ## 5. Verification tasks (do these FIRST, they gate the rest)
 
