@@ -42,6 +42,18 @@ export function gemsForPhase(maxPhase: number): GemEntry[] {
 }
 
 /**
+ * Like gemsForPhase, what counts as an available gem is a fact about gem
+ * data, so the quality filter lives here rather than at the call site
+ * (ticket 111 — the auto-fill path caps rarity; meta repair does not).
+ */
+export function gemsForQuality(
+  palette: readonly GemEntry[],
+  maxQuality: number
+): GemEntry[] {
+  return palette.filter((g) => g.quality <= maxQuality);
+}
+
+/**
  * The meta gem among `gemIds`, if any. A character can only have one, so the
  * first match wins.
  *

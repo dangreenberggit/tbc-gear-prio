@@ -9,7 +9,7 @@
  * thrash). See `.scratch/handoffs/gem-optimizer-comparison.md`.
  */
 
-import { getGem, type GemEntry } from "./gems.js";
+import { gemsForQuality, getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
 import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
@@ -36,15 +36,35 @@ type EpWeightRecord = Readonly<Record<string, number>>;
  */
 export type GemContext = {
   readonly palette: readonly GemEntry[];
+  /**
+   * The palette auto-fill may draw from — `palette` capped at rare. Meta
+   * repair must keep `palette` itself: metas are quality 4, so repairing
+   * from `fillPalette` makes every meta unsolvable (ticket 111).
+   */
+  readonly fillPalette: readonly GemEntry[];
   readonly weights: EpWeights;
   readonly weightRecord: EpWeightRecord;
 };
+
+/**
+ * Auto-fill caps at rare (owner decision, ticket 111): a player's own epics
+ * ride through migration, but the fill never assumes epics they may not own —
+ * the unconstrained fill overstated a measured swap by pricing a phase-3 epic
+ * worn nowhere in the player's gear. Fixed default for now; a run-level
+ * option mirroring wowsims' rarity/phase dropdowns is future work.
+ */
+const MAX_FILL_QUALITY = 3;
 
 export function gemContext(
   palette: readonly GemEntry[],
   weights: EpWeights
 ): GemContext {
-  return { palette, weights, weightRecord: toWeightRecord(weights) };
+  return {
+    palette,
+    fillPalette: gemsForQuality(palette, MAX_FILL_QUALITY),
+    weights,
+    weightRecord: toWeightRecord(weights),
+  };
 }
 
 /** Dense-array weights are index-keyed; the record form keys by the same index. */
@@ -113,6 +133,13 @@ export function fillCandidateGems(
 
 /**
  * Keep already-placed gems; EP-fill only empty sockets (after UI-style migrate).
+ *
+ * Deliberate simplification, not a mirror of wowsims' suggest-gems button
+ * (ticket 111 "Two behavioural facts", observed in the owner's web session):
+ * the button re-gems existing body gems and skips meta sockets, whereas we
+ * keep every worn gem and fill only what migration left empty. Do not "fix"
+ * this toward the button — silently re-gemming worn slots breaks the owner's
+ * consistency principle (the user must know which gems were used).
  */
 export function fillEmptyCandidateGems(
   itemId: number,

@@ -1462,7 +1462,7 @@ function swapItemAt(
       : fillEmptyCandidateGems(
           itemId,
           migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
-          gemCtx.palette,
+          gemCtx.fillPalette,
           gemCtx.weightRecord,
           fillOptsForSwap(equipment, slotIndex)
         );

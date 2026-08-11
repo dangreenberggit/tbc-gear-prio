@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { gemContext } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
-import { gemsForPhase } from "../src/gems.js";
+import { gemsForPhase, getGem } from "../src/gems.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
   equipmentForCandidateSwap,
@@ -1485,14 +1485,16 @@ describe("rankUpgrades", () => {
     }
   });
 
-  it("maxPhase 2 vs 3 moves the palette all the way into the sim request", async () => {
-    // The 1->2 case above proves the two axes are wired to the same maxPhase,
-    // but phase 2's six additions are all EP-dominated by phase-1 gems, so the
-    // fill output is identical and the palette move never reaches the request.
-    // Phase 3's epic gems do win, so this is where "the gem palette changed"
-    // is observable end to end rather than asserted on gemsForPhase alone.
+  it("maxPhase 3 leaves auto-filled gems rare-capped in the sim request (ticket 111)", async () => {
+    // This test used to assert the opposite: that phase 3's epic gems win the
+    // fill, making maxPhase observable end to end. That behaviour WAS ticket
+    // 111's defect — the unconstrained fill priced epics the player owns
+    // nowhere. Under the rarity cap, phase 3 unlocks only epic gems
+    // ((quality,phase) counts: the sole (3,x>2) rares are phase 5), so the P2
+    // and P3 fills must now be identical, and every auto-filled gem rare or
+    // below — asserted here at the seam, on the request the engine sims.
     //
-    // The candidate must also leave the fill something to do: the rank path is
+    // The candidate must leave the fill something to do: the rank path is
     // migrate-then-fill-empties, so a candidate whose sockets the worn gems
     // fully cover never consults the palette. Slamaltman's worn boots (30081)
     // are ungemmed, so every socket on the candidate arrives empty.
@@ -1596,16 +1598,16 @@ describe("rankUpgrades", () => {
 
     expect(gems2.length).toBeGreaterThan(0);
     expect(gems3.length).toBe(gems2.length);
-    // Same item, same character, same seed — only maxPhase differs, and the
-    // gems the engine actually sent to the sim are different.
-    expect(gems3).not.toEqual(gems2);
+    // Same item, same character, same seed — raising maxPhase to 3 no longer
+    // changes the fill, because its only unlocks are epics the cap refuses.
+    expect(gems3).toEqual(gems2);
 
     const palette2 = gemsForPhase(2).map((g) => g.id);
-    const palette3 = gemsForPhase(3).map((g) => g.id);
-    for (const id of gems2) expect(palette2).toContain(id);
-    for (const id of gems3) expect(palette3).toContain(id);
-    // At least one placed gem is one phase 3 unlocked.
-    expect(gems3.some((id) => !palette2.includes(id))).toBe(true);
+    for (const id of gems3) {
+      expect(id).toBeGreaterThan(0);
+      expect(palette2).toContain(id);
+      expect(getGem(id)?.quality).toBeLessThanOrEqual(3);
+    }
   });
 
   it("migrates worn gems onto socketed candidates before simming", async () => {

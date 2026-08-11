@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillCandidateGems, gemContext } from "../src/candidate-gems.js";
+import {
+  fillCandidateGems,
+  fillEmptyCandidateGems,
+  gemContext,
+} from "../src/candidate-gems.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { socketsFor } from "../src/items.js";
 import { isKaelTempLegendary } from "../src/kael-temp.js";
@@ -59,6 +63,51 @@ describe("fillCandidateGems", () => {
     expect(gems).toEqual([32193, 32193]);
     expect(getGem(gems[0]!)?.colour).toBe(GemColor.GemColorRed);
     expect(getGem(gems[0]!)?.stats[Stat.StatStrength]).toBe(10);
+  });
+});
+
+describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
+  // Agility-only weights reproduce the ticket's measured case: unconstrained
+  // P3 fill picked 32194 (epic +10 agi) for Thunderheart Gauntlets' socket;
+  // the owner wears that gem nowhere. The rare pick is 24028 (+8 agi).
+  const agiWeights = { [String(Stat.StatAgility)]: 1 };
+
+  it("fills the socket a P3 swap leaves empty with rare 24028, not epic 32194", () => {
+    const ctx = gemContext(gemsForPhase(3), agiWeights);
+    const gems = fillEmptyCandidateGems(
+      31034,
+      [0],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
+    expect(gems).toEqual([24028]);
+  });
+
+  it("never returns a gem whose palette quality exceeds rare", () => {
+    const ctx = gemContext(gemsForPhase(3), retEpWeights);
+    // Gloves (1 socket), goggles (meta+yellow), belt (2 red) — cap holds on
+    // every socket colour, and the meta socket stays empty rather than
+    // getting an epic meta (the suggest-gems button does not place metas).
+    for (const itemId of [31034, 32461, 30106]) {
+      const gems = fillEmptyCandidateGems(
+        itemId,
+        [],
+        ctx.fillPalette,
+        ctx.weightRecord
+      );
+      for (const id of gems) {
+        if (id === 0) continue;
+        expect(getGem(id)?.quality ?? 99).toBeLessThanOrEqual(3);
+      }
+    }
+  });
+
+  it("keeps the full palette for meta repair — only the fill palette narrows", () => {
+    const full = gemsForPhase(3);
+    const ctx = gemContext(full, retEpWeights);
+    expect(ctx.palette).toBe(full);
+    expect(ctx.fillPalette.every((g) => g.quality <= 3)).toBe(true);
+    expect(ctx.fillPalette.length).toBeLessThan(full.length);
   });
 });
 
