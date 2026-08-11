@@ -147,7 +147,7 @@ export function formatSetBonusLine(b: SetBonusValue): string {
       ? UNMEASURED_REASON_TEXT[b.unmeasured]
       : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
   const head = `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${formatBreaksPrefix(b)}${measured}`;
-  return `${head}${formatPackageContents(b)}`;
+  return `${head}${formatPackageDelta(b)}${formatPackageContents(b)}`;
 }
 
 /**
@@ -155,13 +155,43 @@ export function formatSetBonusLine(b: SetBonusValue): string {
  * measured number by `(k−1)·B` with no way to separate it after the fact (see
  * the closed form on `brokenSetBonuses` in `set-value.ts`), so a trailing
  * suffix let a reader take the number away before reaching the caveat.
+ *
+ * The wording says the break **inflates** this figure, never that it is netted
+ * in. `bonusDps` is derived as `packageDelta − Σ singles`, which is exactly the
+ * quantity the `(k−1)·B` inflation lands on — on the shredzepelin P3 artifact it
+ * reads 193.89 against a de-confounded ~62.8. The figure that genuinely nets the
+ * break in is `packageDeltaDps`, rendered separately by `formatPackageDelta`.
  */
 export function formatBreaksPrefix(b: SetBonusValue): string {
   if (!b.breaks || b.breaks.length === 0) return "";
   const parts = b.breaks.map(
     (x) => `${x.setName} ${x.threshold}pc (${x.piecesBefore}→${x.piecesAfter})`
   );
-  return `[breaks ${parts.join("; ")}; nets this in] `;
+  return `[breaks ${parts.join("; ")}; figure inflated by it] `;
+}
+
+/**
+ * The whole-package delta: one sim of the assembled package against the
+ * baseline. This is the figure that answers "what if I equip all of these?",
+ * and the only one that is genuinely **net of any break** — the displaced set's
+ * loss is inside the measurement rather than derived back out of it, so it
+ * carries none of `bonusDps`'s `(k−1)·B` inflation (ADR-0023 decision 3).
+ *
+ * Disclosure only. It is deliberately not credited to any row, not summed into
+ * a sort key, and not compared against the cutoff: ADR-0020 keeps the bar
+ * absolute and spec §7 keeps whole packages out of the ranking. It is stated
+ * here so a reader looking at a member row's large negative delta can see the
+ * package figure that row is a step toward — on the shredzepelin P3 artifact
+ * the four Thunderheart rows read −106/−100/+22/+23 while the package they
+ * belong to is +64.07 (loop log iteration 5).
+ *
+ * Omitted when the bonus is unmeasured, where `packageDeltaDps` is a structural
+ * zero and never a simmed one.
+ */
+export function formatPackageDelta(b: SetBonusValue): string {
+  if (b.unmeasured !== undefined) return "";
+  const sign = b.packageDeltaDps >= 0 ? "+" : "";
+  return ` — whole package ${sign}${b.packageDeltaDps.toFixed(2)} DPS vs current gear`;
 }
 
 /**

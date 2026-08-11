@@ -512,6 +512,7 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       })
     ).toBe(
       "Thunderheart Harness 4pc (0 worn) — +91.68 DPS — " +
+        "whole package -317.24 DPS vs current gear — " +
         "add item 1, item 2, item 3, item 4"
     );
   });
@@ -544,10 +545,105 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       })
     ).toBe(
       "Thunderheart Harness 4pc (0 worn) — " +
-        "[breaks Malorne Harness 2pc (2→1); nets this in] +91.68 DPS — " +
+        "[breaks Malorne Harness 2pc (2→1); figure inflated by it] +91.68 DPS — " +
+        "whole package -317.24 DPS vs current gear — " +
         "add Thunderheart Cover, Thunderheart Pauldrons, " +
         "Thunderheart Gauntlets, Thunderheart Leggings"
     );
+  });
+
+  /**
+   * The break qualifier must not claim the figure it introduces is net of the
+   * break. `bonusDps = packageDelta − Σ singles` is the quantity ADR-0023
+   * decision 3 suppresses *because* it is inflated by `(k−1)·B`; on the
+   * shredzepelin P3 artifact it reads 193.89 where the de-confounded value is
+   * ~62.8. "nets this in" promised the opposite of what the number does.
+   */
+  it("does not claim the confounded figure is net of the break it names", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(line).not.toContain("nets this in");
+    expect(line).toContain("inflated by");
+  });
+
+  /**
+   * The question a reader actually arrives with is "what happens if I equip the
+   * whole package?", and `packageDeltaDps` is the only stored figure that
+   * answers it: one sim of the assembled package against the baseline, with the
+   * break already inside the measurement rather than derived back out. It
+   * reached no surface at all before this — the panel showed only the
+   * confounded `bonusDps`, so the member rows' large negatives had nothing
+   * positive to be read against (loop log iteration 5, defect A).
+   */
+  it("states the whole-package delta, the figure that is net of any break", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(line).toContain("whole package +64.07 DPS vs current gear");
+  });
+
+  it("states a negative whole-package delta with its sign", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [1, 2, 3, 4],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+      })
+    ).toContain("whole package -317.24 DPS vs current gear");
+  });
+
+  /**
+   * An unmeasured bonus has no package sim behind it, so `packageDeltaDps` is a
+   * structural zero rather than a measurement. Rendering it would state a
+   * measured-looking 0.00 for a package that was never simmed.
+   */
+  it("omits the whole-package delta when the bonus is unmeasured", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 641,
+        setName: "Nordrassil Harness",
+        threshold: 2,
+        piecesWorn: 0,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "not-implemented-in-sim",
+      })
+    ).not.toContain("whole package");
   });
 
   it("says nothing about breakage when the package breaks nothing", () => {
@@ -624,7 +720,10 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
         packageDeltaDps: 0.1,
         bonusDps: 0,
       })
-    ).toBe("Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — add item 1");
+    ).toBe(
+      "Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — " +
+        "whole package +0.10 DPS vs current gear — add item 1"
+    );
   });
 
   it("renders each unmeasured reason as readable text", () => {
