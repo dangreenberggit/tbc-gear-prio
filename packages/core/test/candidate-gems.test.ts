@@ -2,11 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import {
-  fillCandidateGems,
-  fillEmptyCandidateGems,
-  gemContext,
-} from "../src/candidate-gems.js";
+import { fillEmptyCandidateGems, gemContext } from "../src/candidate-gems.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { socketsFor } from "../src/items.js";
 import { isKaelTempLegendary } from "../src/kael-temp.js";
@@ -25,44 +21,73 @@ const retEpWeights = JSON.parse(
   )
 ).weights as Record<string, number>;
 
-describe("fillCandidateGems", () => {
+// Ticket 116: `fillCandidateGems` — a from-scratch fill that accepted any gem
+// list — was deleted. It had no production caller, and a direct caller passing
+// the full list would have quietly auto-filled epic gems above the rare cap
+// (ticket 111). Its behaviour pins now run through `fillEmptyCandidateGems`
+// with an all-empty starting layout and the capped `fillPalette`, the one path
+// production uses.
+describe("fillEmptyCandidateGems filling from scratch", () => {
   it("fills each socket on a gemmed head", () => {
     const headId = 32461; // Furious Gizmatic Goggles
     const sockets = socketsFor(headId);
     expect(sockets.length).toBeGreaterThan(0);
-    const gems = fillCandidateGems(headId, gemsForPhase(2), epWeights);
+    const ctx = gemContext(gemsForPhase(2), epWeights);
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
     expect(gems).toHaveLength(sockets.length);
     expect(gems.every((id) => id > 0)).toBe(true);
   });
 
   it("returns empty for socketless items", () => {
-    expect(fillCandidateGems(28757, gemsForPhase(2), epWeights)).toEqual([]);
+    const ctx = gemContext(gemsForPhase(2), epWeights);
+    expect(
+      fillEmptyCandidateGems(28757, [], ctx.fillPalette, ctx.weightRecord)
+    ).toEqual([]);
   });
 
   it("puts Relentless in an empty meta socket, not the higher-EP Swift Skyfire", () => {
     // Stat EP ranks Swift Skyfire 9.84 over Relentless 9.00, because
     // Relentless's +3% crit damage is a multiplier and additive EP cannot see
-    // it. All three upstream wowsims ret gear presets use Relentless.
+    // it. All three upstream wowsims ret gear presets use Relentless. Both
+    // metas are quality 3, so the rare cap removes neither — the preference
+    // still has something to choose between.
     const headId = 32461; // Furious Gizmatic Goggles
     const sockets = socketsFor(headId);
     const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
     expect(metaIdx).toBeGreaterThanOrEqual(0);
 
-    const gems = fillCandidateGems(headId, gemsForPhase(3), retEpWeights);
+    const ctx = gemContext(gemsForPhase(3), retEpWeights);
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
     expect(gems[metaIdx]).toBe(32409);
     expect(getGem(gems[metaIdx]!)?.colour).toBe(GemColor.GemColorMeta);
   });
 
   it("prefers strength reds over hit orange on Belt of One-Hundred Deaths under ret EP", () => {
-    // Two Bold Crimson Spinels beat Glinting+Sovereign on this set even though
-    // uncapped hit EP ranks the orange higher — which is why gemFillWeights
-    // zeroes hit. Measured against live wowsimcli; re-run with
-    // `pnpm rank --region US --realm dreamscythe --character slamaltman
-    //  --offline --max-phase 3` and compare the waist row.
-    const gems = fillCandidateGems(30106, gemsForPhase(3), retEpWeights);
-    expect(gems).toEqual([32193, 32193]);
+    // Uncapped hit EP ranks a hit orange above a strength red on this set —
+    // which is why gemFillWeights zeroes hit. Before the rare cap the picks
+    // were two epic Bold Crimson Spinels (32193, measured against live
+    // wowsimcli at ticket 111); under the cap the same preference lands on
+    // rare Bold Living Ruby (24027, +8 Strength).
+    const ctx = gemContext(gemsForPhase(3), retEpWeights);
+    const gems = fillEmptyCandidateGems(
+      30106,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
+    expect(gems).toEqual([24027, 24027]);
     expect(getGem(gems[0]!)?.colour).toBe(GemColor.GemColorRed);
-    expect(getGem(gems[0]!)?.stats[Stat.StatStrength]).toBe(10);
+    expect(getGem(gems[0]!)?.stats[Stat.StatStrength]).toBe(8);
   });
 });
 

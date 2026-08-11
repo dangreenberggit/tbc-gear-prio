@@ -125,7 +125,6 @@ export type {
   SpecId,
 } from "./types.js";
 export {
-  fillCandidateGems,
   fillEmptyCandidateGems,
   gemEp,
   gemFillWeights,

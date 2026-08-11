@@ -118,22 +118,6 @@ export type FillEmptyOpts = {
   meta?: { metaId: number; otherGemIds: readonly number[] };
 };
 
-export function fillCandidateGems(
-  itemId: number,
-  palette: readonly GemEntry[],
-  epWeights: EpWeightRecord
-): number[] {
-  const sockets = socketsFor(itemId);
-  if (sockets.length === 0) return [];
-
-  const weights = gemFillWeights(epWeights);
-  const matched = fillSockets(sockets, palette, weights, true, new Set());
-  const free = fillSockets(sockets, palette, weights, false, new Set());
-  const matchedScore = layoutScore(itemId, sockets, matched, weights);
-  const freeScore = layoutScore(itemId, sockets, free, weights);
-  return freeScore > matchedScore ? free : matched;
-}
-
 /**
  * Keep already-placed gems; EP-fill only empty sockets (after UI-style migrate).
  *
@@ -217,36 +201,6 @@ function fillEmpties(
   }
 
   return out;
-}
-
-function fillSockets(
-  sockets: readonly number[],
-  palette: readonly GemEntry[],
-  epWeights: EpWeightRecord,
-  matchColors: boolean,
-  usedUnique: ReadonlySet<number>
-): number[] {
-  const gems: number[] = [];
-  const used = new Set(usedUnique);
-
-  for (const socket of sockets) {
-    const pick = bestGemForSocket(
-      socket,
-      palette,
-      epWeights,
-      used,
-      matchColors,
-      undefined
-    );
-    if (pick) {
-      gems.push(pick.id);
-      if (pick.unique) used.add(pick.id);
-    } else {
-      gems.push(0);
-    }
-  }
-
-  return gems;
 }
 
 function bestGemForSocket(
