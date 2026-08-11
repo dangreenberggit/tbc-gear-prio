@@ -90,14 +90,50 @@ describe("setBonusMagnitudeWarnings", () => {
     ).toEqual([]);
   });
 
-  it("does not flag a large negative bonus", () => {
-    // A strongly negative figure is its own kind of suspect, but this gate is
-    // about a bonus being implausibly *large*; sign-flipping it here would
-    // report "too big" about a number that is too small.
-    const found = setBonusMagnitudeWarnings([bonus({ bonusDps: -400 })], {
-      baselineDps: SHREDZEPELIN_BASELINE,
+  it("flags a strongly negative bonus, worded as negative rather than large", () => {
+    // Ticket 120: a Malorne-strength 2pc measured with one piece already worn
+    // would put roughly -262 on the 4pc figure. That is not a set bonus
+    // hurting the player; it is a measurement gone wrong, and the warning has
+    // to say so in those words — calling it "too large" would misdescribe it.
+    const found = setBonusMagnitudeWarnings([bonus({ bonusDps: -262 })], {
+      baselineDps: 2000,
+    });
+    expect(found).toHaveLength(1);
+    expect(found[0]?.kind).toBe("implausible-set-bonus");
+    expect(found[0]?.bonusDps).toBeCloseTo(-262, 2);
+    expect(found[0]?.fractionOfBaseline).toBeCloseTo(-0.131, 3);
+    expect(found[0]?.thresholdFraction).toBe(IMPLAUSIBLE_BONUS_FRACTION);
+    expect(found[0]?.message).toContain("implausibly negative");
+    expect(found[0]?.message).toContain("measurement problem");
+    // The positive-side wording must not leak in: this figure is not "large".
+    expect(found[0]?.message).not.toContain("large");
+    // Same voice rule as the positive side: the figure is the engine's report.
+    expect(found[0]?.message).toContain("reports");
+  });
+
+  it("does not flag a noise-sized negative bonus", () => {
+    // The ret artifact's Crystalforge 4pc came out at -9.92 on a ~2000
+    // baseline — about two standard errors of run noise. A gate that fires
+    // there would flag ordinary measurement scatter on every run.
+    const found = setBonusMagnitudeWarnings([bonus({ bonusDps: -9.92 })], {
+      baselineDps: 2000,
     });
     expect(found).toEqual([]);
+  });
+
+  it("uses the same band on both sides of zero", () => {
+    // 7.5% of a 2000 baseline is 150: just inside stays quiet, just outside
+    // fires, in either direction.
+    const justInside = setBonusMagnitudeWarnings(
+      [bonus({ bonusDps: -149 }), bonus({ bonusDps: 149 })],
+      { baselineDps: 2000 }
+    );
+    expect(justInside).toEqual([]);
+    const justOutside = setBonusMagnitudeWarnings(
+      [bonus({ bonusDps: -151 }), bonus({ bonusDps: 151 })],
+      { baselineDps: 2000 }
+    );
+    expect(justOutside).toHaveLength(2);
   });
 
   it("keeps the threshold above the measured Malorne 2pc and below the confound", () => {

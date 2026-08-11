@@ -99,11 +99,15 @@ export type MagnitudeGateOptions = {
 };
 
 /**
- * Set bonuses whose measured DPS is too large a share of baseline to believe.
+ * Set bonuses whose measured DPS is too far from zero, as a share of baseline,
+ * to believe.
  *
- * Only positive measured figures are considered. A strongly negative bonus is
- * suspect too, but for the opposite reason, and reporting it as "too large"
- * would misdescribe it.
+ * Both directions use the same 7.5% band but get their own wording: a huge
+ * positive figure is probably a confound inflating the bonus, while a huge
+ * negative figure cannot be the bonus at all — set bonuses do not hurt the
+ * player by hundreds of DPS — so it points at a measurement problem (ticket
+ * 120: a same-set piece already worn can push the whole loss of breaking it
+ * into one threshold's figure).
  */
 export function setBonusMagnitudeWarnings(
   bonuses: readonly SetBonusValue[],
@@ -113,9 +117,24 @@ export function setBonusMagnitudeWarnings(
 
   const warnings: ImplausibleSetBonusWarning[] = [];
   for (const b of bonuses) {
-    if (b.bonusDps === undefined || b.bonusDps <= 0) continue;
+    if (b.bonusDps === undefined || b.bonusDps === 0) continue;
     const fractionOfBaseline = b.bonusDps / options.baselineDps;
-    if (fractionOfBaseline <= IMPLAUSIBLE_BONUS_FRACTION) continue;
+    if (Math.abs(fractionOfBaseline) <= IMPLAUSIBLE_BONUS_FRACTION) continue;
+    // "reports", never "measures": the flagged figure is the engine's output,
+    // and the whole point of the gate is that it is probably not a
+    // measurement of the bonus. Stating it in measurement voice would restate
+    // the suspect number as authoritative.
+    const message =
+      b.bonusDps > 0
+        ? `${b.setName} ${b.threshold}pc reports ${b.bonusDps.toFixed(2)} DPS — ` +
+          `~${(fractionOfBaseline * 100).toFixed(1)}% of a ${options.baselineDps.toFixed(2)} baseline, ` +
+          `above the ${(IMPLAUSIBLE_BONUS_FRACTION * 100).toFixed(1)}% plausibility band. ` +
+          `Treat as a suspected confound, not a bonus this large; check what the package breaks.`
+        : `${b.setName} ${b.threshold}pc reports ${b.bonusDps.toFixed(2)} DPS — ` +
+          `a loss of ~${(Math.abs(fractionOfBaseline) * 100).toFixed(1)}% of a ${options.baselineDps.toFixed(2)} baseline, ` +
+          `outside the ${(IMPLAUSIBLE_BONUS_FRACTION * 100).toFixed(1)}% plausibility band. ` +
+          `This bonus is implausibly negative; suspect a measurement problem ` +
+          `(for example, a piece of the same set already worn), not a bonus that hurts this much.`;
     warnings.push({
       kind: "implausible-set-bonus",
       setId: b.setId,
@@ -124,15 +143,7 @@ export function setBonusMagnitudeWarnings(
       bonusDps: b.bonusDps,
       fractionOfBaseline,
       thresholdFraction: IMPLAUSIBLE_BONUS_FRACTION,
-      // "reports", never "measures": the flagged figure is the engine's output,
-      // and the whole point of the gate is that it is probably not a
-      // measurement of the bonus. Stating it in measurement voice would restate
-      // the suspect number as authoritative.
-      message:
-        `${b.setName} ${b.threshold}pc reports ${b.bonusDps.toFixed(2)} DPS — ` +
-        `~${(fractionOfBaseline * 100).toFixed(1)}% of a ${options.baselineDps.toFixed(2)} baseline, ` +
-        `above the ${(IMPLAUSIBLE_BONUS_FRACTION * 100).toFixed(1)}% plausibility band. ` +
-        `Treat as a suspected confound, not a bonus this large; check what the package breaks.`,
+      message,
     });
   }
   return warnings;

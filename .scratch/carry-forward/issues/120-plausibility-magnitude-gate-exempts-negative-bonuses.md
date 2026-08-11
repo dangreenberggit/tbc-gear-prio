@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: gap
 Origin: ret catch-up round, 2026-08-11
 (`.scratch/set-bonus-value/ret-catchup/03-verify.md` task 4)
@@ -26,7 +26,20 @@ backstop, not the fix.
 
 ## Acceptance criteria
 
-- [ ] A synthetic bonus at −262 on a ~2000 baseline fires a warning; the ret
+- [x] A synthetic bonus at −262 on a ~2000 baseline fires a warning; the ret
       artifact's −9.9 (noise-scale) does not.
-- [ ] Warning wording does not misdescribe negative as "too large".
-- [ ] `pnpm verify` green.
+- [x] Warning wording does not misdescribe negative as "too large".
+- [x] `pnpm verify` green.
+
+## Comments
+
+Resolved 2026-08-11. `setBonusMagnitudeWarnings`
+(`packages/core/src/plausibility.ts`) now checks both directions against the
+same 7.5%-of-baseline band: a bonus is flagged when its distance from zero,
+as a share of baseline, is outside the band. The negative side gets its own
+wording ("This bonus is implausibly negative; suspect a measurement
+problem…"), never the positive side's "not a bonus this large". Pinned in
+`packages/core/test/plausibility.test.ts`: −262 on a 2000 baseline fires,
+−9.92 (the ret artifact's noise-sized figure) does not, and a boundary test
+shows the band is the same width on both sides. Verify green (38 files,
+688 tests).
