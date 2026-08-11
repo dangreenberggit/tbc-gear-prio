@@ -66,3 +66,14 @@ back slot.
 
 Found incidentally while diffing the owner's settings export against ours; not
 investigated further because it was outside that loop's scope.
+
+## Owner context, 2026-08-10 — the neck/back are Ahune holiday items
+
+The current neck and back are Midsummer (Ahune) event items. Their item
+levels and stats shift depending on which phase they are re-released in, so
+some databases will not carry their exact ids at a given item level. The
+out-of-range ids may be a symptom of that rather than fixture corruption —
+any fix here must handle "real item, phase-shifted variant id our pinned db
+lacks" as a legitimate case (map to the nearest same-name variant and
+disclose, or warn), not just reject the id. Silent resolution to a Wrath
+item remains the bug.
