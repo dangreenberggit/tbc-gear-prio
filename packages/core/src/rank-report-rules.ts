@@ -221,7 +221,7 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
  * different claims about one number.
  */
 export const GEM_POLICY_QUALIFIER =
-  "holds your current gems fixed, so re-gemming can only improve it";
+  "gem handling differs from a wowsims run and this figure may read low";
 
 /**
  * The whole-package delta: one sim of the assembled package against the

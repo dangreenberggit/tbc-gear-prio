@@ -1199,16 +1199,16 @@ describe("formatPackageMembershipLine", () => {
     expect(line).not.toContain("share");
   });
 
-  it("discloses that the figure holds the current gem policy fixed", () => {
-    // Ticket 103: packageDeltaDps reads ~30 DPS conservative against a
-    // re-gemmed wowsims run (+64.07 vs +97 reported), because the package is
-    // assembled with the same sequential gem policy single swaps use. Not
-    // fixed here; disclosed where the figure is shown.
+  it("discloses that the package figure's gem handling may read low", () => {
+    // Ticket 103 (reopened): packageDeltaDps reads ~33 DPS below the owner's
+    // wowsims run of the same swap with the SAME gems (+64.07 vs +97), so the
+    // gap is not re-gemming and must not be attributed to it. Unexplained;
+    // disclosed neutrally where the figure is shown via GEM_POLICY_QUALIFIER.
     const line = formatPackageMembershipLine({
       deltaDps: -106.16,
       setContext: ctx,
     })!;
-    expect(line).toContain("re-gemming");
+    expect(line).toContain(GEM_POLICY_QUALIFIER);
   });
 
   it("is absent when there is no positive package to describe", () => {

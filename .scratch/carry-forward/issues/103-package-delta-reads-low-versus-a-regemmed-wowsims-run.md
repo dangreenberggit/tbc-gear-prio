@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
@@ -114,3 +114,33 @@ carried forward as work: no number moved, and the mechanism hypothesis in "Why"
 above stays **untested** exactly as written — nothing in this change isolated
 the sequential-gem effect from the socket-count differences. If the spread is
 ever wanted as a range, that is a new ticket with a sim budget, not this one.
+
+## REOPENED, 2026-08-10 — the owner falsified the re-gemming diagnosis
+
+The owner reports their +97 wowsims run used the **same gems** as the
+baseline — no re-gemming happened, and for this gear the current gems are
+already optimal, so re-gemming would only have made it worse. That removes
+"the player would re-gem" as the explanation for the gap. Three figures for
+the same swap still disagree (+64.07 pipeline, +80.80 filler-gem repro, +97
+owner's run with unchanged gems), and the difference is now **unexplained**,
+not conservatively explained.
+
+The qualifier text was corrected accordingly (it previously said "re-gemming
+can only improve it", which pointed readers at a mechanism the owner's own
+run rules out as the story here). It now says only that gem handling differs
+from a wowsims run and the figure may read low.
+
+What this ticket now needs — a loop-style isolation, not disclosure:
+
+1. Dump the exact equipment payload (items + gems + enchants) production
+   builds for the package arm and diff it against the owner's wowsims arm.
+   If our builder dropped a gem, left a socket empty, or broke the meta
+   activation, that is the gap.
+2. If the payloads match, diff the sim request settings (fight, buffs,
+   consumables) between the two runs.
+3. The sequential-gem mechanism hypothesis above stays untested; step 1
+   tests it directly.
+
+Related: ticket 106 investigates a helm comparison where the same gem
+handling is the prime suspect — if step 1 finds the builder mangling gems,
+check whether one fix covers both.

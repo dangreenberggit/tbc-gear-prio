@@ -51,3 +51,15 @@ in both tickets rather than fixing it twice, and propose the fix once.
 Owner's expected outcome (+10 for Cursed Vision) is ground truth to
 reproduce, not to explain away — same rule as the T6 loop. Label anything
 unmeasured as hypothesis/untested.
+
+## Owner-added context, 2026-08-10
+
+How wowsims itself handles regemming matters here: it is quick and good at
+it, and it activates the meta gem. In the owner's own comparison sim, both
+helm arms carried the same gem sets relative to each other (not the same as
+the Wolfshead Helm baseline, which has no meta gem — but identical between
+the two candidate helms, both with an active meta), which is what made the
+quick manual sim valid. Any reproduction here should match that setup: same
+gems in both arms, meta active in both. If our pipeline's swap builder
+cannot produce that configuration for one of the helms, that inability is
+itself the likely answer.
