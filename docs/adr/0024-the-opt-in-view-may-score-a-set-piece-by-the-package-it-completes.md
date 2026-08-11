@@ -162,3 +162,44 @@ the package figure". That was rejected for rewriting a cutoff verdict from a
 figure that is not the row's own delta, and nothing here rewrites a verdict: the
 chip is a presentation element admitted under an opt-in mode, and the row it
 points at still reads below cutoff wherever the cutoff is stated.
+
+## Amendment, 2026-08-11 — a member row carries every measured threshold's figure, and package mode sorts by the best of them
+
+Ticket 118 found the case this ADR's shape could not serve. Decision 1 above
+attached one package per row — the largest measured threshold's. On the ret
+report every 4-piece package measured negative while the Lightbringer 2-piece
+measured **+11.31**, so every Lightbringer row carried the negative 4-piece
+figure, the positive 2-piece figure reached no row anywhere, and package mode
+re-sorted nothing. The mode's own note kept promising an answer ("whether
+starting the set is worth it") that the page could not give.
+
+The owner rejected both ways out that avoid showing more data (pick the one
+threshold worth talking about; hide the control when nothing would move). In
+the owner's framing: this is a shopping list with an order, we want the set
+bonus option to affect that order intelligently, and we sim things and present
+data. So:
+
+1. **A member row carries every measured threshold's package figure for its
+   set** — the 2-piece's and the 4-piece's, separately, as data. Nothing
+   measured is hidden behind a bigger threshold.
+2. **The row detail line and the chip marker show the figures separately** —
+   "2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces)" on the row,
+   "pkg 2pc +11.31 / 4pc -6.83" on the chip. Negative figures render too: a
+   package that measured badly is a measurement, not a secret.
+3. **Package mode sorts a member row by the best of its set's measured
+   figures, when that best is positive.** That is plain arithmetic over
+   simmed numbers, not an editorial pick. When every measured package for the
+   set is negative, the row keeps sorting by its own delta — decision 5's
+   only-credit-a-positive-package rule is unchanged, now applied to the best
+   figure instead of the largest threshold's.
+4. **The control stays, and no advisory prose is added.** The default
+   (non-package) view is untouched.
+5. The below-cutoff BiS pointer ("BiS as part of X, not as this swap alone")
+   now states the set's measured package figures itself before sending the
+   reader to the Set potential panel, so the destination can never contradict
+   the pointer's framing again.
+
+Everything else in this ADR stands: the figure is still `packageDeltaDps` and
+never `bonusDps`, still not a per-piece split, membership still keyed on
+`packageItemIds`, the cutoff still does not move, and delivery is still the
+in-browser toggle.

@@ -30,7 +30,9 @@ distinction is exact: a split would give each of four pieces a different
 quarter-share, inventing a per-piece value no piece delivers. Package mode gives
 every member row of one package the **same** whole-package number, labelled as
 the package's, precisely because it is not divisible. It is one measured figure
-shown against several rows, not one figure cut into several.
+shown against several rows, not one figure cut into several. (Since the
+2026-08-11 amendment in §4.1, a member row shows one such figure **per measured
+threshold** — still whole figures against several rows, never a split.)
 
 The figure is `SetBonusValue.packageDeltaDps` — one sim of the assembled package
 against the baseline — never the derived `bonusDps`. `bonusDps` is
@@ -119,13 +121,21 @@ particular isn't worth breaking the T4 set bonus, but it's ultimately worth it",
 and to let the reader **opt in** to letting that organize the shortlist, so they
 can decide to start collecting tier without waiting to own three other pieces.
 
-**What it does.** A row whose item id appears in a measured package's
-`packageItemIds` carries `setContext.package`. Under package mode, such a row
-sorts and displays by `package.deltaDps` instead of its own `deltaDps`, and
-renders both: "this swap alone: −106.16 — part of 4pc package: +64.07 for the
-whole package". Every member of one package shows the same figure (§2.1's
-amendment). Only a **measured, positive** package is credited; a package that
-measures ≤ 0 argues against itself and moves no row.
+**What it does** (as amended 2026-08-11, ticket 118 — this paragraph replaces
+the original single-package rule). A row whose item id appears in any of its
+set's measured packages carries `setContext.packages`: one entry per measured
+threshold, smallest first, so the 2pc figure and the 4pc figure both reach the
+row as data. The row detail line shows each figure separately — "this swap
+alone: −0.55 — 2pc package +11.31 (2 pieces) / 4pc package −6.83 (4 pieces)" —
+and the chip marker reads "pkg 2pc +11.31 / 4pc −6.83". Negative figures render
+too; we sim things and present data. Under package mode the row sorts by the
+**best** of its set's measured figures when that best is positive, and by its
+own `deltaDps` when every measured package is negative — only a measured,
+positive figure ever moves a row. Every member of one package shows the same
+figures (§2.1's amendment). The original rule attached only the largest
+measured threshold's package, which on the ret report meant every Lightbringer
+row carried the negative 4pc figure while the positive 2pc figure reached no
+row at all and package mode moved nothing (ticket 118).
 
 **Membership is keyed on `packageItemIds`, not `nextThreshold`.** The two
 disagree exactly where this feature matters. At 0 pieces worn every single swap
@@ -157,7 +167,9 @@ not a re-partition — the shortlist chips are built from `belowCutoff` at
 generation time and a below-cutoff member row keeps its `muted` class in every
 mode. So the T6 shoulders rise to the top of their slot section under package
 mode, showing +64.07 with their −106.16 beside it, while remaining marked as
-below cutoff on their own delta. That satisfies the owner's intent (the rows
+below cutoff on their own delta. (Figures as measured for the 2026-08-10
+decision; since the 2026-08-11 amendment the row shows every measured
+threshold's figure and sorts by the best of them.) That satisfies the owner's intent (the rows
 organize by the package figure and are impossible to miss) and ADR-0020's text
 simultaneously: no threshold was moved, no row's `belowCutoff` was rewritten, and
 the row's own sub-cutoff delta is displayed next to the figure that promoted it.
