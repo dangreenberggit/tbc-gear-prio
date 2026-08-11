@@ -243,6 +243,7 @@ def build_gem_palette(db: dict) -> list[dict]:
                 "colour": g.get("color"),
                 "stats": g.get("stats") or [],
                 "phase": g.get("phase"),
+                "quality": g.get("quality"),
                 "unique": bool(g.get("unique")),
             }
         )
@@ -274,15 +275,18 @@ def main() -> int:
     GEMS_OUT.parent.mkdir(parents=True, exist_ok=True)
     ENCHANTS_OUT.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(ITEMS_OUT, "w", encoding="utf-8") as fh:
+    # newline="\n": the committed artifacts are LF; Windows text mode would
+    # otherwise rewrite all three as CRLF and every regen would read as a
+    # full-file diff against HEAD.
+    with open(ITEMS_OUT, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(items_index, fh, indent=2, sort_keys=True)
         fh.write("\n")
 
-    with open(GEMS_OUT, "w", encoding="utf-8") as fh:
+    with open(GEMS_OUT, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(gem_palette, fh, indent=2)
         fh.write("\n")
 
-    with open(ENCHANTS_OUT, "w", encoding="utf-8") as fh:
+    with open(ENCHANTS_OUT, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(enchants_index, fh, indent=2, sort_keys=True)
         fh.write("\n")
 

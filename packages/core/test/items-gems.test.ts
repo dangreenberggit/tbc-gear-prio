@@ -138,6 +138,20 @@ describe("gem palette", () => {
     }
   });
 
+  it("carries db.json's `quality` on every entry (ticket 111 rarity cap)", () => {
+    const raw = JSON.parse(
+      readFileSync(join(root, "data/gems/palette.json"), "utf8")
+    ) as Array<Record<string, unknown>>;
+    expect(raw.length).toBeGreaterThan(0);
+    for (const entry of raw) {
+      expect(typeof entry.quality).toBe("number");
+    }
+    // 32194 (Brilliant Crimson Spinel) is the epic the unconstrained fill
+    // chose; 24028 (Delicate Living Ruby) is the rare the cap should pick.
+    expect(getGem(32194)?.quality).toBe(4);
+    expect(getGem(24028)?.quality).toBe(3);
+  });
+
   it("renames db.json's `color` field to `colour`", () => {
     const raw = JSON.parse(
       readFileSync(join(root, "data/gems/palette.json"), "utf8")

@@ -21,6 +21,8 @@ export type GemEntry = {
   /** Raw stat-index array, same shape as db.json's gems[].stats. */
   stats: number[];
   phase: number;
+  /** db.json item quality: 2 uncommon, 3 rare, 4 epic (ticket 111). */
+  quality: number;
   /** Unique gems are excluded from multi-socket consideration (§9 R4.2). */
   unique: boolean;
 };
