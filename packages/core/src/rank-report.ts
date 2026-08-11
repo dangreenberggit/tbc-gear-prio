@@ -580,7 +580,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // than being a second, silently different selection.
   const exportPanel = `<div class="set-weight-toggle export-panel">
       <p class="set-weight-title">Export</p>
-      <p class="set-weight-note">The <span id="export-count">0</span> visible upgrades as wowsims-shaped JSON. Item ids only, in display order — a list of candidates, <strong>not</strong> a 17-slot gear set, so it will not reconstruct a character on import.</p>
+      <p class="set-weight-note"><span id="export-count">0</span> items: <strong>the curated list, top to bottom, as currently filtered and sorted</strong> — the same order the chips above read, so changing the mode or a filter changes this. Where both a raid and a PvP list are shown they concatenate in that order, raid first. Item ids only, wowsims-shaped: a ranked list of candidates, <strong>not</strong> a 17-slot gear set, so it will not reconstruct a character on import.</p>
       <p><button type="button" id="export-copy">Copy JSON</button> <span id="export-status" class="export-status"></span></p>
       <textarea id="export-json" readonly rows="6" spellcheck="false"></textarea>
     </div>`;
@@ -680,9 +680,6 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         (!bisOn || r.className.indexOf("is-bis") >= 0)
       );
     }
-    var visibleRows = [].slice
-      .call(document.querySelectorAll("article.row"))
-      .filter(rowShown);
     // A slot section hides when the filters leave it with nothing, so the page
     // never shows a heading over an empty list.
     [].slice.call(document.querySelectorAll("section.slot")).forEach(function (s) {
@@ -704,12 +701,24 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     // Each chip strip renumbers 1..N over what is visible *in that strip*, so
     // the raid list and the PvP list each read from 1 rather than the PvP one
     // continuing the raid one's count.
+    //
+    // The same pass collects the export's payload. Chips are already sorted
+    // into the displayed order by the block above and already carry the
+    // visibility rules, so reading them here is what makes the export and the
+    // list impossible to disagree -- and the strips are walked in document
+    // order, which is the concatenation the caption promises.
+    var exportChips = [];
     [].slice.call(document.querySelectorAll(".shortlist")).forEach(function (strip) {
       var chips = [].slice.call(strip.querySelectorAll(".chip"));
       var n = 0;
       chips.forEach(function (c) {
         var visible = c.className.indexOf("source-hidden") < 0 &&
-          (!bisOn || c.className.indexOf("is-bis") >= 0);
+          (!bisOn || c.className.indexOf("is-bis") >= 0) &&
+          // A package-only chip is in the document in every mode but displayed
+          // only under package mode, so the export has to test the mode rather
+          // than the class -- reading layout here would be the circular bug the
+          // row-visibility comment above warns about.
+          (m === "package" || c.className.indexOf("package-only") < 0);
         var pos = c.querySelector(".pos");
         if (!visible) {
           if (pos) pos.textContent = "";
@@ -717,21 +726,24 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         }
         n += 1;
         if (pos) pos.textContent = String(n);
+        exportChips.push(c);
       });
       var counter = strip.querySelector(".list-count");
       if (counter) counter.textContent = n === 0 ? "" : "(" + n + ")";
       strip.classList.toggle("empty-under-filter", n === 0);
     });
-    updateExport(visibleRows);
+    updateExport(exportChips);
   }
-  // Takes the same list the filters just computed, so the export cannot
-  // disagree with what the page shows.
-  function updateExport(visibleRows) {
+  // The curated list, in the order it is displayed. Deliberately not the slot
+  // rows: those are grouped slot by slot in document order, so exporting them
+  // threw away the cross-slot ranked order that is the whole payload for a
+  // thatsmybis priority list.
+  function updateExport(chips) {
     if (!exportArea) return;
     var seen = {};
     var ids = [];
-    visibleRows.forEach(function (r) {
-      var id = r.getAttribute("data-item-id");
+    chips.forEach(function (c) {
+      var id = c.getAttribute("data-item-id");
       if (!id || seen[id]) return;
       seen[id] = true;
       ids.push({ id: parseInt(id, 10) });

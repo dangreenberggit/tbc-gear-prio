@@ -518,10 +518,13 @@ describe("rank-report", () => {
     // which the admission needs to identify a chip. This fixture has no
     // package-carrying row, so no admitted chip renders and the chip list is
     // the same two chips in the same order. The rest is the new CSS.
+    // Repinned for the export-order fix. Diffed with `<style>` and `<script>`
+    // elided: the only body change is the export panel's caption, rewritten to
+    // say what the export now is. Everything else in the delta is the script.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "2096808276024c4b203a9c56d3163c5239d6650c3fe8549390ad9d054984252d",
-      length: 28707,
+        "6c4756b73d392eead051e6952e987c2c0ba8bd400a9493494cef296bf6c67529",
+      length: 29759,
     });
   });
 });
@@ -1774,6 +1777,35 @@ describe("source filter", () => {
     expect(html).toContain('id="export-copy"');
     expect(html).toContain('data-item-id="21"');
     expect(html).toContain("<script>");
+  });
+
+  /**
+   * The export's payload is the *ranked order*, because it is pasted into
+   * thatsmybis as an upgrade priority list. It read
+   * `document.querySelectorAll("article.row")` — the per-slot detail rows in
+   * document order — so it emitted every visible row grouped slot by slot and
+   * never reflected the curated list's global cross-slot order. On the
+   * shredzepelin P3 report that was 407 ids starting from a below-cutoff row,
+   * against a 36-chip curated list.
+   */
+  it("builds the export from the curated chips, not the slot rows", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    // The export is handed the chips the strip pass just collected, and the
+    // slot rows are no longer gathered for it at all.
+    expect(html).toContain("updateExport(exportChips)");
+    expect(html).toContain("exportChips.push(c)");
+    expect(html).not.toContain("var visibleRows");
+  });
+
+  /**
+   * Strips are read in document order (raid, then PvP), which the caption has
+   * to say — the two strips renumber from 1 independently on screen, so a
+   * reader seeing "1" twice needs to know which one the export leads with.
+   */
+  it("says what the export is and how strips concatenate", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).toContain("the curated list, top to bottom");
+    expect(html).toContain("as currently filtered and sorted");
   });
 });
 
