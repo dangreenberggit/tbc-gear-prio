@@ -217,3 +217,33 @@ corrected export, so the cross-reference in the section above is void. Ticket
 103 is **reopened** on a genuine defect found while re-pricing
 (`fillEmptyCandidateGems`, ticket 111); it does not affect this comparison,
 since neither helm's swap leaves a socket the fill would touch differently.
+
+## CONFIRMED CLOSED, 2026-08-11 — the owner's web A/B reconciles with ours
+
+The owner ran the helm A/B on wowsims web at 25000 iterations
+(`.scratch/set-bonus-value/loop-103-106/owner-web-results-2026-08-11.md`):
+
+- Cursed Vision of Sargeras (32235): **2101.65** (±78)
+- Vengeful Gladiator's Dragonhide Helm (33672): **2090.96** (±77)
+- **Cursed Vision ahead by +10.69**, SE 0.693, 95% CI 9.33 … 12.05
+
+Against our engine's **+8.61**: gap 2.08, combined SE 1.107, **z = 1.9** — it
+**closes** (`09-reconciliation.md`). And the arms were not even like-for-like:
+the owner's carry 24067 body gems from "suggest gems" that ours do not, so the
+true agreement is at least this good.
+
+The owner's original ~+10 is confirmed, our engine agrees within noise once the
+rotation matches, and the report's flat ordering was a correct measurement of
+our own configuration all along. **Nothing in this ticket was ever a defect.**
+
+Two procedural facts recorded from the owner's session, both carried into ticket
+111 because they bound what our gem model should imitate: wowsims' "suggest
+gems" does **not** place meta gems (manual seating required), and it **does**
+change existing body gems — it is closer to a re-gem than a fill-only.
+
+Ticket 108's closed-invalid disposition is now backed by external citations: the
+owner confirmed 278827 and 278819 on wowhead
+(https://www.wowhead.com/tbc/item=278827/amulet-of-bitter-hatred and
+https://www.wowhead.com/tbc/item=278819/the-frost-lords-war-cloak), and
+`10-baseline-offset.md` independently verified our db's stat vectors for both
+match wowhead exactly.

@@ -312,3 +312,60 @@ in that directory; narrative in `08-sequential-gems-typesimple.md`.
 **Correcting this ticket's own record:** the section above cites
 `sim_pkg_uimigrate.py` as the re-run command. **No such file exists.**
 `sim_uigems.py` produced those numbers.
+
+## CONFIRMED AT THE ORACLE, 2026-08-11 — plus the owner's rarity decision
+
+The owner ran the protocol on wowsims web
+(`.scratch/set-bonus-value/loop-103-106/owner-web-results-2026-08-11.md`). The
+web's **own exported payload** for the package arm contains:
+
+```json
+{"id":31034,"enchant":2564,"gems":[0]}
+```
+
+**The gloves socket is empty.** wowsims left the migrated-in socket unfilled,
+exactly as upstream `equipped_item.ts:138-168` said it would. This ticket's
+premise is no longer an inference from source — it is observed behaviour of the
+tool we treat as the oracle, in its own export format.
+
+The magnitude is confirmed from the other direction too: our `PKG_UIMIGRATE`
+payload is **byte-identical to the owner's exported package payload, 17/17
+slots, same order** (`10-baseline-offset.md`), so the +113.42 our pipeline ships
+today against their +98.17 is not an input difference. **The honest comparison is
++102.99 vs +98.17**, and the ~10.4 DPS between +113.42 and +102.99 is this
+defect.
+
+### Owner decision — rarity policy
+
+**Cap auto-fill at RARE for testing**, with a note to open it up later
+(eventually an option resembling wowsims' own rarity / phase dropdowns,
+especially if we integrate with wowsims directly).
+
+The owner's stated principle: *the user must know which gems were used, and it
+must be consistent.* A user with epic gems equipped keeps their epic gems — that
+is what migrate already does — while **auto-fill assumes only rare
+availability**. That directly addresses this ticket's complaint: today we fill
+with 32194, a phase-3 epic the player wears nowhere.
+
+Note this decision **keeps the fill** rather than removing it, so spec §2.2 step
+1's byte-identical gem policy is preserved and the "decision" framing above is
+resolved: implement the rarity cap, do not delete the fill.
+
+### Two behavioural facts that bound what we should imitate
+
+From the owner's session, about the web's own "suggest gems" button:
+
+1. **It does NOT place meta gems.** After equipping Cursed Vision the meta had to
+   be seated manually.
+2. **It DOES change existing body gems** (boots 24028→24067, belt 24058→24067),
+   i.e. it is closer to a **re-gem than a fill-only**.
+
+So the web button is *not* the model for our step 2. Our chosen consistency
+principle — keep the player's existing gems and fill only what is empty — is a
+**deliberate simplification, not a mirror of the button**, and should be
+documented as such so a later agent does not "fix" us toward the button's
+behaviour and silently start re-gemming worn slots.
+
+**Status: open**, now an implementation task (rarity-capped auto-fill) rather
+than an open question. TDD, and note that changing the fill moves candidate
+deltas in every existing report.

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: disclosure
 Origin: diagnostic loop, 2026-08-10 (`.scratch/set-bonus-value/loop-log-t6-shoulders.md`, iterations 3–4)
 Blocks: none
@@ -332,3 +332,83 @@ which tests ticket 111's load-bearing premise; (3) their web build string vs our
 pinned `v0.0.101`; (4) how precisely "+97" was read.
 
 **Status: open**, pending the ticket-111 decision and the owner's artifacts.
+
+## RESIDUE DISPOSITION, 2026-08-11 — the owner's web runs close the story
+
+The owner ran the protocol on wowsims web
+(`.scratch/set-bonus-value/loop-103-106/owner-web-results-2026-08-11.md`),
+reproducing their "+97" as **+98.17** (2245.60 → 2343.77, ±73/±75, 12500 iters).
+Analysis in `09-reconciliation.md` and `10-baseline-offset.md`.
+
+### The substantive defect is confirmed and is ticket 111's
+
+The web's own export shows the gloves socket **empty** (`"gems":[0]` on 31034),
+so our shipped +113.42 overstates the swap. The honest comparison is our
+UI-semantics figure:
+
+| figure | value |
+|---|---|
+| ours as shipped today | +113.42 |
+| ours with wowsims' own gem semantics | **+102.99** |
+| owner's web run | **+98.17** |
+
+The ~10.4 between the first two rows is ticket 111, now confirmed at the oracle
+and carrying an owner decision (cap auto-fill at rare).
+
+### The remaining residue: 4.82 ± 1.27 DPS, open, no story attached
+
+`python -c` arithmetic in `09-reconciliation.md`. Owner SE(delta) 0.936 from
+per-iteration stdevs 73/75 at n=12500; our SE(delta) 0.863 from the sim's
+reported stdev 74.77 at 3000×5. Combined SE **1.274**, **z = 3.8**, 95% CI
+**2.32 … 7.32** — it does **not** close statistically, so it is named rather
+than explained.
+
+Ruled out as its cause, by measurement:
+
+- **Inputs.** Our `PKG_UIMIGRATE` payload is **byte-identical to the owner's
+  exported package payload** — 17/17 slots, same order, every id/enchant/gem
+  (`10-baseline-offset.md`). This localizes the residue to the engine or build,
+  not to what we feed it.
+- **Item data.** 278827 and 278819 match wowhead's stat vectors exactly (ilvl,
+  quality, agi, sta, AP, hit/armor).
+- **Ring enchants, double drums, `canCrush`.** Ring enchants are honored
+  (−11.62 when removed) but wrong-signed; drums and `canCrush` are **+0.00,
+  bit-identical per seed**.
+
+### It is one quantity, not two
+
+The absolute baseline offset and this package gap are **the same offset sampled
+twice**:
+
+| arm | owner | ours | offset |
+|---|---|---|---|
+| baseline | 2245.60 | 2219.82 | +25.78 |
+| package | 2343.77 | 2322.81 | +20.96 |
+
+The difference between those rows *is* the 4.82. The offset is neither constant
+nor proportional, so it **does not cleanly cancel in deltas** — roughly 80%
+cancels, 20% does not. Any future candidate must explain an offset that is
+*smaller on the arm carrying T6 4pc*. Only ~1.3 DPS is attributed (iteration
+count 3000×5 → 12500); ~24.5 is unattributed, with build drift the residual **by
+elimination** and explicitly **hypothesis, not measurement** — the web is an
+unversioned alpha ("tbc new", no version number) and this is not testable from
+our side.
+
+### Disposition
+
+**Close the original complaint.** This ticket was filed because our package
+figure read low against a wowsims run; it read low for reasons now fully
+enumerated, and the one defect on our side is ticket 111 with a decision
+attached. What is left is a characterised ~1% engine/build offset against an
+unversioned alpha, not a defect in this pipeline.
+
+**Two owner-side artifacts would close the remainder**, neither obtainable here:
+
+1. **The web build string** — load-bearing now, since inputs and item stats are
+   both proven identical.
+2. One more like-for-like web arm pair touching **neither neck/back nor a set
+   bonus**, to test whether the coupling tracks T6 4pc or simply DPS level (two
+   points cannot distinguish them).
+
+Recommend closing this ticket and carrying the 4.82/25.78 offset forward as
+ticket 113 if it is ever worth chasing; it is not a package-delta bug.

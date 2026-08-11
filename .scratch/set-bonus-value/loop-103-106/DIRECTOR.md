@@ -642,3 +642,159 @@ propose, do not implement. Filed as ticket 111.
    load-bearing premise of the 10.43.
 3. Their web **build string** vs our pinned `v0.0.101`.
 4. How precisely **"+97"** was read off the UI.
+
+## ORACLE DATA ARRIVED — the owner ran the protocol on wowsims web
+
+`owner-web-results-2026-08-11.md`. Two headline confirmations and one number
+that does not reconcile.
+
+**Ticket 111's premise is confirmed at the source.** The web's own export for the
+package arm carries `{"id":31034,"enchant":2564,"gems":[0]}` — **the gloves
+socket is empty**. wowsims left the migrated-in socket unfilled, exactly as
+upstream `equipped_item.ts` said it would. Our `fillEmptyCandidateGems` fills a
+socket the oracle leaves empty. This is no longer an inference from source; it is
+observed behaviour of the tool we treat as ground truth.
+
+**"+97" reproduced as +98.17** (2245.60 → 2343.77, ±73/±75, 12500 iters).
+
+### Iteration 9 — reconciliation arithmetic (director, no subagent)
+
+All figures below from `python -c` computations recorded in
+`09-reconciliation.md`.
+
+**Owner's package delta**: 98.17, SE 0.936 (SE(base) 0.653, SE(pkg) 0.671 from
+per-iteration stdevs 73/75 at n=12500), 95% CI **96.34 … 100.00**.
+
+**Our `PKG_UIMIGRATE`**: 102.99 (base 2219.82, arm 2322.81; seed spreads 0.187
+and 0.231). Reported per-iteration stdev 126.4 at 3000×5 = 15000 effective
+iterations gives SE per arm 1.032, SE(delta) 1.459.
+
+| comparison | gap | combined SE | z | verdict |
+|---|---|---|---|---|
+| package: ours 102.99 vs owner 98.17 | **4.82** | 1.734 | **2.8** | **does NOT close** |
+| helm A/B: ours 8.61 vs owner 10.69 | 2.08 | 1.616 | **1.3** | **closes** |
+
+**Package: the 4.82 does not close statistically** (95% CI on the gap
+1.43 … 8.22, excluding zero). Per the standing instruction, it is named as the
+remaining open quantity at **4.82 ± 1.73 DPS** and given no new story.
+
+**Helm A/B: closes at z = 1.3**, and the arms were not even like-for-like — the
+owner's carry 24067 body gems ours do not. Owner's +10.69 (SE 0.693, 95% CI
+9.33 … 12.05) against our +8.61. **106's residue is closed.**
+
+### The absolute baseline offset is real and is *not* the package explanation
+
+Web 2245.60 vs engine 2219.82 on identical v2 gear: **25.78 DPS, z = 21.1** —
+overwhelmingly real, not noise.
+
+Critically, it does **not** explain the package gap, and I tested this rather
+than assuming: if the offset were *proportional*, scaling our delta to the
+owner's baseline gives 104.19 against their 98.17 — a **worse** residual (6.02)
+than the 4.82 we started with. Owner's package is +4.372% of baseline; ours is
++4.640%. So the two discrepancies are **distinct**, and a constant offset
+cancels in deltas exactly as the coordinator noted.
+
+### Iteration 10 — dispatched
+
+- **Hypothesis**: the 25.78 DPS absolute offset is attributable to a concrete
+  input difference — Ahune item stat resolution in our pinned db vs the live
+  web, ring-enchant handling, or build drift (the web is an unversioned alpha,
+  "tbc new").
+- **Subagent**: `10-baseline-offset` → `10-baseline-offset.md`.
+- **Result**: **the leading candidate died, and the loop's framing changed.**
+
+  **Payload diff: byte-identical.** Our `PKG_UIMIGRATE` against the owner's
+  exported package payload — **17/17 slots identical, same order**, every id,
+  enchant and gem, including the empty gloves socket `[0]` on 31034 and the
+  empty slot 15. Not "identical modulo ordering" — identical outright. **This
+  localizes the 4.82 to the engine/build, not the inputs.**
+
+  **Ahune stats match wowhead exactly**, killing my leading candidate. Wowhead's
+  plain pages render via JS; the `?xml` and `nether.wowhead.com/tbc/tooltip/`
+  endpoints work, and stat indices were anchored empirically off gems with known
+  stats rather than assumed:
+
+  | 278827 Amulet of Bitter Hatred | ours | wowhead |
+  |---|---|---|
+  | ilvl / quality | 128 / epic | 128 / epic |
+  | agi / sta | 22 / 20 | 22 / 20 |
+  | melee + ranged AP | 48 / 48 | 48 / 48 |
+  | hit rating | 20 | 20 |
+
+  | 278819 Frost Lord's War Cloak | ours | wowhead |
+  |---|---|---|
+  | ilvl / quality | 128 / epic | 128 / epic |
+  | agi / sta | 25 / 24 | 25 / 24 |
+  | melee + ranged AP | 56 / 56 | 56 / 56 |
+  | armor | 108 | 108 |
+
+  Ticket 108's falsification now rests on an external source too.
+
+  **Attribution of the 25.78: only ~1.3 DPS (5%).** Ring enchants 2929 are
+  present and honored (removing them costs −11.62, matching 07's +11.59 from the
+  other side) but are **wrong-signed** to explain us being lower. The
+  double-drums and `canCrush` leads, carried unpriced since iteration 6, are
+  **+0.00, bit-identical per seed** — both closable. Iteration count to the
+  owner's 12500 accounts for **+1.30**, the only attributed term. **~24.5 DPS
+  (95%) is unattributed**, with build drift the residual by *elimination* and
+  flagged as hypothesis, not measurement.
+
+  **The headline — the two quantities are one:**
+
+  | arm | owner | ours | offset | relative |
+  |---|---|---|---|---|
+  | baseline | 2245.60 | 2219.82 | **+25.78** | +1.161% |
+  | package | 2343.77 | 2322.81 | **+20.96** | +0.902% |
+
+  The offset is **neither constant nor proportional**, and the difference
+  between those rows *is* the 4.82. So iteration 9's conclusion that the package
+  gap and the baseline offset are "distinct" is **wrong**: they are **one
+  arm-dependent offset sampled twice**. It therefore does **not** cleanly cancel
+  in deltas — roughly 80% cancels, 20% does not — and any future candidate must
+  explain an offset that is *smaller on the arm carrying T6 4pc*.
+
+  **A correction to my own iteration 9**: I used a per-iteration stdev of 126.4;
+  the actual `raidMetrics.dps.stdev` is **74.77** (verified directly — my loop
+  took the first `stdev` it found, from another arm's file). Corrected, the
+  package gap is **4.82 ± 1.27, z = 3.8** (95% CI 2.32 … 7.32), the offset
+  **z = 28.8**, and the helm gap **z = 1.9**. Every verdict stands; the package
+  residue *hardens*. Tightening the bars cut against my own conclusion, which is
+  the honest direction.
+
+- **Verdict**: **both tickets close on their own terms; one bounded quantity
+  stays open and is now well-characterised.** 106 is fully resolved. 103's
+  substantive defect is confirmed at the oracle. What remains is not a mystery
+  about our gear or our inputs — those are proven identical — but a ~1% engine-
+  or build-level offset against an unversioned web alpha, of which ~20% fails to
+  cancel in deltas.
+
+## FINAL DISPOSITION — the loop is closed
+
+**What was actually wrong, after ten iterations:** one thing, in our code.
+`fillEmptyCandidateGems` fills a socket that wowsims leaves empty. Everything
+else the loop chased — gem mangling, dead metas, wrong item variants, socket
+capacity, artifact displacement, meta tax, stale fixtures, out-of-range ids —
+was falsified by experiment.
+
+**Confirmed at the oracle**: the web's own export carries
+`{"id":31034,...,"gems":[0]}`. Ticket 111's premise is no longer an inference.
+
+**Numbers that reconcile:**
+
+| comparison | ours | owner | verdict |
+|---|---|---|---|
+| helm A/B (106) | +8.61 | +10.69 | closes, z = 1.9 |
+| package, UI semantics (103) | +102.99 | +98.17 | 4.82 ± 1.27 open, z = 3.8 |
+| package, as shipped today | +113.42 | +98.17 | **the 10.43 defect** |
+
+**Open and named, no story attached**: one arm-dependent offset — 25.78 DPS on
+the baseline, 20.96 on the package, difference 4.82. ~1.3 attributed to
+iteration count; ~24.5 unattributed, build drift the residual by elimination.
+
+**The one artifact that would close it**: the web build string. It was a
+nice-to-have when I first asked; it is now load-bearing, since inputs and item
+stats are both proven identical. A cheap second ask, from iteration 10: one more
+like-for-like web arm pair touching neither neck/back nor a set bonus, which
+would test whether the coupling is about T6 4pc or simply about DPS level.
+
+The offset is carried forward as **ticket 113**; ticket 103 closes.

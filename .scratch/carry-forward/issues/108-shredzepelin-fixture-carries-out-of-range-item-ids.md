@@ -118,3 +118,35 @@ cannot confirm from local data alone what a given wowsims *web deployment*
 resolves these ids to — that would need the owner's tooltip stats or their web
 build string. Recorded in tickets 103/106 as a (small, near-cancelling)
 discrepancy channel rather than carried here.
+
+## External confirmation, 2026-08-11
+
+The owner verified both ids on wowhead (matching wowsims and in-game tooltips),
+recorded in `.scratch/set-bonus-value/loop-103-106/owner-web-results-2026-08-11.md`:
+
+- 278827 Amulet of Bitter Hatred —
+  https://www.wowhead.com/tbc/item=278827/amulet-of-bitter-hatred
+- 278819 The Frost Lord's War Cloak —
+  https://www.wowhead.com/tbc/item=278819/the-frost-lords-war-cloak
+
+Independently, `10-baseline-offset.md` fetched those pages (via the `?xml` and
+`nether.wowhead.com/tbc/tooltip/` endpoints — the plain pages render stats in JS
+and return nothing) and compared them against our pinned db field by field:
+
+| 278827 | ours | wowhead |
+|---|---|---|
+| ilvl / quality | 128 / epic | 128 / epic |
+| agi / sta | 22 / 20 | 22 / 20 |
+| melee + ranged AP | 48 / 48 | 48 / 48 |
+| hit rating | 20 | 20 |
+
+| 278819 | ours | wowhead |
+|---|---|---|
+| ilvl / quality | 128 / epic | 128 / epic |
+| agi / sta | 25 / 24 | 25 / 24 |
+| melee + ranged AP | 56 / 56 | 56 / 56 |
+| armor | 108 | 108 |
+
+**Every leaf matches.** Our db resolves these items correctly, the fixture is
+right, and the "silent resolution to a Wrath item" premise is falsified from an
+external source as well as internally. Stays closed as invalid.
