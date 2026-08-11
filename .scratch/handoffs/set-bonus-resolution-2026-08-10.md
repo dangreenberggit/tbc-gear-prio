@@ -369,3 +369,97 @@ tickets **114**, **115**, **116** rather than fixed (none was an honest
 one-liner).
 
 `pnpm verify` green at `be5fdf1`. Tickets 111 and 112 closed; 114–116 opened.
+
+---
+
+## Ret catch-up round
+
+Written 2026-08-11 by the W5 docs worker of a serial orchestration
+(director log: `.scratch/set-bonus-value/ret-catchup/DIRECTOR.md`; plan:
+`.scratch/set-bonus-value/ret-catchup-plan-2026-08-11.md`; worker logs
+`01-survey.md` … `05-docs.md` in the same dir). **Docs and artifacts only —
+no code changed this round. Still not landed, merged, or pushed.**
+
+The round closed this handoff's own standing gap: "Ret is still unexercised…
+Costs one `pnpm rank` on `ret-p3` with `--with-set-potential`; not run here."
+It has now been run.
+
+### The first ret setContext artifact
+
+`.scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.{html,json,console.log}`
+(~65 min wall, 431 sims, wowsimcli v0.0.101, ret-p3 universe 394 entries).
+Re-run:
+
+```
+pnpm rank --offline --region US --realm dreamscythe --character slamaltman --spec ret --max-phase 3 --with-set-potential --show-below-cutoff --report
+```
+
+Baseline **2003.51 ± 118.93** DPS. Set potential, 10 entries:
+
+| set | threshold (worn) | bonus DPS | package DPS |
+|---|---|---|---|
+| Lightbringer 680 | 2pc (0 worn) | +0.55 | +11.31 |
+| Lightbringer 680 | 4pc (0 worn) | −9.31 | −6.83 |
+| Crystalforge 629 | 2pc (1 worn) | 0.00 | −0.47 |
+| Crystalforge 629 | 4pc (1 worn) | −9.92 | −26.77 |
+| Justicar 626 | 4pc (0 worn) | −3.88 | −80.56 |
+| Justicar 2pc; Gladiator's Vindication 2/4pc; Burning Rage 2/4pc | — | unmeasured | "not implemented in the pinned sim" |
+
+### Verifications (03-verify.md, 04-surfaces.md)
+
+- **ADR-0023 package construction PASS**, including the worn-1 case feral
+  never exercised: the worn CF Breastplate counts toward `t`, its slot is
+  never re-selected, `packageItemIds` names added pieces only, and `breaks`
+  is correctly empty (the displaced CF piece is below any implemented
+  threshold).
+- **Ticket 94's ret "benign" call VERIFIED** via the setId join this handoff
+  asked for — 12/14 slots alive, the only worn set piece is CF chest at
+  count 1, no toll possible. Verification note appended to the closed
+  ticket; two classifier blind spots filed as ticket 124.
+- **Ticket 117 is latent on ret, not escaped**: 13 meta-socket heads in
+  ret-p3 including the T6 Lightbringer War-Helm (the "no T6 piece has a meta
+  socket" escape does not hold), but 0/13 show epic fills on this artifact
+  because the fully-gemmed worn head leaves repairMeta nothing to do. Second
+  data set appended to ticket 117.
+- **All report surfaces pass mechanically** (panel, toggles, ticket-96
+  pointer, source filter, BiS-only wording, wowsims export, plausibility
+  panel absence) — with one headline finding: **package display mode is a
+  total no-op on this report** while its control still renders. Every
+  row-attached package is a negative 4pc, the positive Lightbringer 2pc
+  package (+11.31) attaches to no row under largest-threshold-wins, and
+  nothing re-sorts. Ticket 91's intent inverted; ticket 118.
+
+### Tickets filed this round
+
+118 (package mode no-op / positive package unreachable), 119 (self-set 2pc
+multi-charge at threshold−1 worn + zero-by-construction 2pc figure), 120
+(negative-bonus plausibility exemption now a live gap), 121 (no upstream ret
+p3 curated set to pin — W2b cancelled after gh api verification), 122
+(effect-only class restriction admitted hunter item 30892; drop+disclose
+worked), 123 (substitutions drawer embeds the raw 2.4KB Go panic), 124
+(dead-slot classifier blind to dual-slot buckets and unrankable worn items),
+125 (`--spec` missing from the usage string).
+
+### INFO items, not ticketed
+
+- **Justicar 2pc is "not implemented" while Justicar 4pc is measured** —
+  plausible sim reality (only one bonus implemented), but flag for the next
+  SME pass rather than assuming.
+- **"Band of Eternity" appears twice in the curated strip** (#22 +9.12,
+  #33 +6.51) — two of the 12 Scale of the Sands rep-rank ids above cutoff.
+  Correct data, confusing label; a pool/label question, not a report bug.
+
+### Lessons and caveats
+
+- **W2 monitoring failure**: the generate worker backgrounded the ~65 min
+  run and ended its turn without a disk handoff; the director's monitor sat
+  on an untracked side-channel and only surfaced after intervention. The run
+  itself succeeded. Lesson (DIRECTOR.md): verify worker liveness / prefer
+  synchronous workers; the harness notifies on tracked children, a monitor
+  on a side-channel can wait forever.
+- **Fixture freshness unverified**: the slamaltman capture is 2026-07-26
+  (Hydross kill, VGjFb3mtX9xHgyav fight 8) and, unlike shredzepelin, there
+  is no current owner settings export to confirm against. "Snapshot = current
+  gear" is unverified; the gear reads as early-P2 (1/5 Crystalforge).
+
+**Not landed. Not merged. Not pushed.**

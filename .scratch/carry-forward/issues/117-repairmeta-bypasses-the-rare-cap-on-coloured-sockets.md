@@ -48,3 +48,28 @@ are used, consistently; auto-fill assumes rare availability). Whichever way
 it goes, add a test that pins repairMeta's coloured-socket choices to the
 chosen policy, and re-run the helm A/B to re-measure against the owner's
 +10.69.
+
+## Second data set: ret-p3 (2026-08-11, ret catch-up round) — blast radius includes T6; bypass latent on this artifact
+
+Sources: `.scratch/set-bonus-value/ret-catchup/01-survey.md` §5 (universe/db
+join) and `03-verify.md` task 5 (fill replay). Artifact re-run:
+`pnpm rank --offline --region US --realm dreamscythe --character slamaltman --spec ret --max-phase 3 --with-set-potential --show-below-cutoff --report`.
+
+- **13 meta-socket candidates in the ret-p3 universe, all head slot**,
+  including **30989 Lightbringer War-Helm (T6)** — so this ticket's "no T6
+  piece has a meta socket" escape does **NOT** hold on ret: the ret tier
+  package itself contains a meta-socket piece, inside the LB 4pc package.
+  Full 13-row table in 01-survey.md §5.
+- **But on THIS artifact the bypass is latent: 0 of 13 heads show epic
+  fills.** Slamaltman's worn head (32461 Furious Gizmatic Goggles) is fully
+  gemmed [32409 meta, 24054]; `migrateGemsToItem` carries both gems onto
+  every candidate (all 13 heads have exactly 2 sockets), so
+  `fillEmptyCandidateGems` finds no empty socket and `repairMeta` no-ops
+  (baseline `metaAdjusted: false`). Verified by replaying the exact swap
+  path (`equipmentForCandidateSwap` + `gemsForPhase(3)`) on all 13 heads —
+  per-head table in 03-verify.md task 5.
+- **Any barer worn head re-exposes all 13**: the defect needs an empty
+  coloured socket or an unsatisfied meta condition; a character whose worn
+  head has fewer gems (or no head sockets, like feral's Wolfshead) puts
+  every one of these rows, T6 included, back in the blast radius. Record
+  only; the policy decision above is unchanged.

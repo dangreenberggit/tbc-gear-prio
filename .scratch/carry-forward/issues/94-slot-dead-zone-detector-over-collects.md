@@ -107,3 +107,30 @@ artifact with `setContext`, and the "benign" classification for ret dead zones
 still rests on gap magnitude rather than a confirmed `setId` join. The classifier
 makes that check possible; running it costs one `pnpm rank` on `ret-p3` with
 `--with-set-potential`, **not run here**.
+
+---
+
+## Verification note (2026-08-11, ret catch-up round) — ret "benign" VERIFIED; ticket stays closed
+
+The `setId` join this disposition asked for has now been run, on the first
+ret setContext artifact
+(`.scratch/set-bonus-value/ret-catchup/03-verify.md` task 3; re-run:
+`pnpm rank --offline --region US --realm dreamscythe --character slamaltman --spec ret --max-phase 3 --with-set-potential --show-below-cutoff --report`).
+
+**Benign confirmed by the join, not just by gap magnitude.** 12 of 14 slots
+are alive (best delta > 0) — the old ret "dead zones" (shoulder/head/hands/
+wrist) are simply not dead in this run. The setId join across all 15 worn
+items finds exactly one set piece: 30129 Crystalforge Breastplate (set 629)
+at count 1, below any implemented threshold, so **no ret slot can be a
+set-break toll**. Nothing reclassifies.
+
+Two classifier blind spots surfaced by the same derivation, recorded here
+and filed as **ticket 124** (severity low; reopen-worthy for *this* ticket
+only if a ret artifact ever shows a wrongly-suppressed warning, which these
+are not — both are silent skips, not wrong verdicts):
+
+- worn Libram 27484 is absent from the ret-p3 universe, so the ranged slot
+  is silently dropped before classification (`wornRowOf` finds no zero row);
+- both worn trinkets rank at exactly 0 in the merged two-slot trinket
+  bucket, so `wornRowOf` is ambiguous → null → skipped; dual-slot buckets
+  with tied owned rows are unclassifiable for any character.
