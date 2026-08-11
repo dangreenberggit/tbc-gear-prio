@@ -500,11 +500,13 @@ describe("rank-report", () => {
     // No row in this fixture carries a `setContext.package`, so the control's
     // fourth radio does not render here and every package value equals its
     // plain delta. Diffed before/after to confirm the delta is exactly that and
-    // nothing visible moves with the toggle off.
+    // nothing visible moves with the toggle off. Extended again in the same
+    // change for the `body.package .pct` rule, which hides the row's own
+    // percentage under package mode -- four more CSS lines, nothing in the body.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "a4d4792a511ac32ffbe4840159cb39cf83820af8b73a33201ca211bae1170fea",
-      length: 25753,
+        "ff19f8b1fa24a8af680a63c8bd3d696158ec8df0dcb5d940f614f99c396d4bc4",
+      length: 26065,
     });
   });
 });
@@ -1362,6 +1364,15 @@ describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
       meta
     );
     expect(html).toContain('type="radio" name="set-weight" value="package"');
+  });
+
+  it("hides the row's own percentage under package mode", () => {
+    // The percentage is `deltaPct`, derived from the row's own swap. Left
+    // visible under package mode it stacks a "-4.93%" under a "+64.07 DPS" —
+    // two numbers describing different things in one column. No package
+    // percentage was measured, so the honest move is to show none.
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain("body.package .pct { display: none; }");
   });
 
   it("leaves the default order and the cutoff untouched", () => {

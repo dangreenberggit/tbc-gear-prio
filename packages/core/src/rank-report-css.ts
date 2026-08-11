@@ -401,6 +401,11 @@ export const REPORT_CSS = `
   .delta.down { color: var(--down); }
   .delta.flat { color: var(--muted); }
   .pct { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+  /* The percentage is derived from the row's own swap, so under package mode it
+     would stack a "-4.93%" under a "+64.07 DPS". No package percentage was
+     measured; showing none beats showing one that describes a different
+     quantity than the figure above it. */
+  body.package .pct { display: none; }
   footer {
     margin-top: 2.5rem;
     padding-top: 1rem;
