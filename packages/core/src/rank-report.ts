@@ -140,6 +140,20 @@ function chipHtml(i: RankedItem, packageOnly: boolean): string {
   return `<a class="${cls}" href="#slot-${i.slot}" title="${esc(title)}" data-item-id="${i.itemId}" data-abs-rank="${esc(absRank)}" data-sources="${esc(sourceKeysOf(i).join(SOURCE_KEY_SEP))}" data-delta="${i.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"><span class="pos"></span><span class="n">${esc(i.name)}</span><span class="abs">${esc(absRank)}</span><span class="d" data-plain="${esc(fmtDelta(i.deltaDps))}" data-weighted-label="${esc(fmtDelta(weighted))}" data-full-label="${esc(fmtDelta(full))}" data-package-label="${esc(fmtDelta(pkg))}">${fmtDelta(i.deltaDps)}</span>${pkgSpan}</a>`;
 }
 
+/**
+ * Ticket 123: a substitution caused by a sim crash carries the whole Go stack
+ * trace in its detail — 2.4KB of goroutine frames on the ret artifact — and
+ * the first line of the error already says what went wrong. Only the HTML
+ * rendering trims; the JSON artifact keeps the full text as the diagnostic
+ * record. The trace's newlines arrive both as real newline characters and as
+ * written-out backslash-n pairs (the sim's error object is stringified into
+ * the detail), so both count as a line break here.
+ */
+function firstLineOf(detail: string): string {
+  const line = detail.split(/\r?\n|\\n/, 1)[0] ?? detail;
+  return line === detail ? detail : `${line} … (full text in the JSON report)`;
+}
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -447,7 +461,10 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       : `<details class="panel">
   <summary>Substitutions (${ranking.substitutions.length})</summary>
   <ul>${ranking.substitutions
-    .map((s) => `<li><code>${esc(s.field)}</code> ${esc(s.detail)}</li>`)
+    .map(
+      (s) =>
+        `<li><code>${esc(s.field)}</code> ${esc(firstLineOf(s.detail))}</li>`
+    )
     .join("\n")}</ul>
 </details>`;
 

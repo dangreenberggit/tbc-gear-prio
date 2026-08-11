@@ -2433,6 +2433,58 @@ describe("Set potential presentation (grouping and order)", () => {
   });
 });
 
+/**
+ * Ticket 123: a failed sim's substitution entry can carry a whole Go crash
+ * trace (2.4KB of goroutine frames on the ret artifact). The first line of the
+ * error says everything a reader needs; the JSON artifact keeps the full text,
+ * so only the HTML rendering trims.
+ */
+describe("substitutions drawer (ticket 123)", () => {
+  // The crash text arrives with the newlines written out as backslash-n
+  // character pairs (the sim's error object is stringified into the detail),
+  // so in this fixture "\\n" is the two characters backslash and n — exactly
+  // what the artifact holds.
+  const goCrashDetail =
+    "Beast-tamer's Shoulders was dropped from the ranking: the sim failed " +
+    'on this swap — sim error: {"type":"ErrorOutcomeError","message":' +
+    '"interface conversion: *retribution.RetributionPaladin is not ' +
+    "hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\n" +
+    "goroutine 54 [running]:\\nruntime/debug.Stack()\\n\\t/opt/go/stack.go:26";
+
+  const withSubs = (detail: string): Ranking => ({
+    ...ranking([]),
+    substitutions: [{ field: "candidate 30892 (shoulder)", detail }],
+  });
+
+  it("shows only the first line of a crash trace, with a pointer to the full text", () => {
+    const html = renderRankHtml(withSubs(goCrashDetail), meta());
+    expect(html).toContain("missing method GetHunter");
+    expect(html).not.toContain("goroutine 54");
+    expect(html).not.toContain("Stack Trace");
+    expect(html).toContain("full text in the JSON report");
+  });
+
+  it("also trims on real newlines", () => {
+    const html = renderRankHtml(
+      withSubs("first line of the error\nsecond line the reader can skip"),
+      meta()
+    );
+    expect(html).toContain("first line of the error");
+    expect(html).not.toContain("second line the reader can skip");
+  });
+
+  it("leaves a one-line detail exactly as it was", () => {
+    const html = renderRankHtml(
+      withSubs("swapped gem 24061 in for 32220 to keep the meta active"),
+      meta()
+    );
+    expect(html).toContain(
+      "swapped gem 24061 in for 32220 to keep the meta active"
+    );
+    expect(html).not.toContain("full text in the JSON report");
+  });
+});
+
 function meta(): RankReportMeta {
   return {
     character: "slamaltman",
