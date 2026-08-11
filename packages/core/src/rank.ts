@@ -448,11 +448,15 @@ export async function rankUpgrades(
   let socketed: SocketedItem[] = socketedItemsFromLoggedGear(logged);
   let metaAdjusted = false;
   let metaSwaps: MetaRepairSwap[] = [];
+  const gems = gemContext(
+    deps.gemPalette ?? gemsForPhase(input.maxPhase),
+    deps.epWeights
+  );
   try {
     const repaired = repairMeta({
       items: socketed,
       epWeights: deps.epWeights,
-      palette: deps.gemPalette ?? gemsForPhase(input.maxPhase),
+      palette: gems.fillPalette,
     });
     socketed = repaired.items;
     metaAdjusted = repaired.metaAdjusted;
@@ -463,11 +467,6 @@ export async function rankUpgrades(
     }
     throw err;
   }
-
-  const gems = gemContext(
-    deps.gemPalette ?? gemsForPhase(input.maxPhase),
-    deps.epWeights
-  );
 
   const equipment = applyRepairedGems(
     equipmentFromLoggedGear(logged),
@@ -1437,7 +1436,7 @@ export function equipmentForCandidateSwap(
     repaired = repairMeta({
       items: socketed,
       epWeights: gems.weights,
-      palette: gems.palette,
+      palette: gems.fillPalette,
     });
   } catch (err) {
     if (err instanceof MetaUnsolvableError) {

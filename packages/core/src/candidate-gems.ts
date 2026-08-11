@@ -37,12 +37,12 @@ type EpWeightRecord = Readonly<Record<string, number>>;
 export type GemContext = {
   readonly palette: readonly GemEntry[];
   /**
-   * The palette auto-fill may draw from — `palette` capped at rare. Meta
-   * repair keeps `palette` itself: the cap is a fill policy (which gems we
-   * assume a player can buy), and repair must never be narrowed by it
-   * (ticket 111 instruction 3). Note all 18 TBC meta gems are quality 3 —
-   * they pass the cap, so the fill does seat metas; the split exists to
-   * isolate the policies, not because repair would break today.
+   * The palette both auto-fill and meta repair may draw from — `palette`
+   * capped at rare. Ticket 111 left repair on the full `palette`, but repair
+   * only ever touches coloured sockets (never the meta socket), and on those
+   * it was quietly handing out epic gems the fill had deliberately avoided
+   * (ticket 117). Every colour exists at rare and all 18 TBC meta gems are
+   * quality 3, so nothing becomes unsolvable under the cap.
    */
   readonly fillPalette: readonly GemEntry[];
   readonly weights: EpWeights;

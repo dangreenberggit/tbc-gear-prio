@@ -6,6 +6,8 @@ import { gemContext } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
+import { getItem } from "../src/items.js";
+import { metaStatus } from "../src/meta.js";
 import { Stat } from "../src/stats.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
@@ -1905,6 +1907,56 @@ describe("rankUpgrades", () => {
     expect(ranking.items).toHaveLength(1);
     expect(ranking.items[0]!.owned).toBe(true);
     expect(ranking.items[0]!.deltaDps).toBe(0);
+  });
+});
+
+/**
+ * Ticket 117: the meta-repair step used to pick replacement gems from the
+ * full palette, so a swap onto a meta-socket helm could quietly hand the
+ * player epic gems the rare-capped auto-fill had deliberately avoided.
+ * Repair must shop from the same rare-capped list the fill uses.
+ */
+describe("equipmentForCandidateSwap gem quality (ticket 117)", () => {
+  const feralP1Weights = (
+    JSON.parse(
+      readFileSync(join(root, "data/presets/feral/p1.ep-weights.json"), "utf8")
+    ) as { weights: Record<string, number> }
+  ).weights;
+
+  function bareEquipmentWithChestGems(): SimItemSpec[] {
+    const equipment: SimItemSpec[] = SIM_ORDER.map(() => ({
+      id: 0,
+      gems: [],
+    }));
+    // Worn head has no sockets, so the candidate helm is filled from scratch.
+    equipment[SIM_ORDER.indexOf("head")] = { id: 8345, gems: [] };
+    // Two red + one blue on the chest leaves Relentless (2R/2Y/2B) short of
+    // yellow, so the repair step must recolour body sockets to activate it.
+    equipment[SIM_ORDER.indexOf("chest")] = {
+      id: 30129,
+      gems: [24027, 24027, 24054],
+    };
+    return equipment;
+  }
+
+  it("meta repair never places a gem above the rare fill cap", () => {
+    const equipment = bareEquipmentWithChestGems();
+    const swapped = equipmentForCandidateSwap(
+      equipment,
+      SIM_ORDER.indexOf("head"),
+      32235, // Cursed Vision of Sargeras: meta + yellow socket
+      gemContext(gemsForPhase(3), feralP1Weights)
+    );
+
+    const gemIds = swapped.flatMap((s) => s.gems ?? []).filter((g) => g > 0);
+    // Guard against a vacuous pass: the meta must be seated and active,
+    // i.e. the repair really had to do its job here.
+    expect(gemIds).toContain(32409);
+    expect(metaStatus(getItem(32235)!.sockets, gemIds).kind).toBe("active");
+
+    for (const id of gemIds) {
+      expect(getGem(id)?.quality, `gem ${id}`).toBeLessThanOrEqual(3);
+    }
   });
 });
 

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { gemsForPhase } from "../src/gems.js";
+import { gemsForPhase, gemsForQuality, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
 import { gemColorCounts, metaStatus } from "../src/meta.js";
 import { repairMeta, type SocketedItem } from "../src/meta-repair.js";
@@ -89,6 +89,32 @@ describe("repairMeta", () => {
     expect(result.metaAdjusted).toBe(true);
     expect(result.swaps.length).toBeGreaterThan(0);
     expect(metaStatus(head.sockets, allGems(result.items)).kind).toBe("active");
+  });
+
+  it("still solves from the rare-capped palette (ticket 117)", () => {
+    // Production now hands repairMeta the same rare-capped list the auto-fill
+    // uses. That must not make any repair unsolvable: every gem colour exists
+    // at rare quality, so the smaller list loses options, never colours.
+    const items = slamaltmanItems();
+    const chest = items.find((it) => it.itemId === 30129)!;
+    chest.gems = [24027, 24027, 24027];
+
+    const head = getItem(items[0]!.itemId)!;
+    expect(metaStatus(head.sockets, allGems(items)).kind).toBe("inactive");
+
+    const capped = gemsForQuality(gemsForPhase(2), 3);
+    expect(capped.length).toBeLessThan(gemsForPhase(2).length);
+
+    const result = repairMeta({
+      items,
+      epWeights: retP2Ep,
+      palette: capped,
+    });
+    expect(result.metaAdjusted).toBe(true);
+    expect(metaStatus(head.sockets, allGems(result.items)).kind).toBe("active");
+    for (const swap of result.swaps) {
+      expect(getGem(swap.to)?.quality).toBeLessThanOrEqual(3);
+    }
   });
 
   it("prices socket-bonus forfeiture inside the cost (PLAN.md §9 R4)", () => {
