@@ -42,7 +42,11 @@ Date: 2026-08-10 → 2026-08-11.
 | 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | 63,250 + 70,113 + 107,763 (3 legs) | 147 | done |
 | 22 | Review-disposition worker's successor: orchestration-observations HTML | opus (med) | 136,365 | 30 | done |
 | 23 | Round-3 pre-merge review orchestrator (ran the skill, 3 axes) | opus | 160,978 | 92 | done — adversarial blocking on 3-A1 |
-| 24 | Round-3 findings judge (dispositions per the incorporating-reviews handoff) | fable (low) | pending | — | running |
+| 24 | Round-3 findings judge (dispositions per the incorporating-reviews handoff) | fable (low) | 97,922 | 22 | done — blocker cleared |
+| 24a | — worker A: 3-A1 disclosure + 3-D2 qualifier | sonnet | 249,388 | 177 | done |
+| 24b | — worker B: standards fixes St1–St4 | sonnet | 84,935 | 44 | done |
+| 24c | — worker C: 3-A2 chip filter CSS | sonnet | 131,625 | 81 | done |
+| 24d | — worker D: 3-S1 ADR narrowing + 3-S3 checkboxes | sonnet | 105,007 | 31 | done |
 
 ## Correction from the observations document (2026-08-12)
 
