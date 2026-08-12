@@ -232,21 +232,24 @@ describe("formatPackageMembershipLine with several measured thresholds", () => {
  * contradict it.
  */
 describe("formatCuratedPackagePointer with measured package figures", () => {
+  // piecesWorn is 0 on both entries because ticket 119 made worn count =
+  // threshold - 1 report as unmeasured rather than a measured figure, so a
+  // 2pc entry can no longer carry a measured packageDeltaDps at 1 worn.
   const crystalforge: SetBonusValue[] = [
     {
       setId: 629,
       setName: "Crystalforge Battlegear",
       threshold: 2,
-      piecesWorn: 1,
-      packageItemIds: [30131],
+      piecesWorn: 0,
+      packageItemIds: [30131, 30130],
       packageDeltaDps: -0.47,
     },
     {
       setId: 629,
       setName: "Crystalforge Battlegear",
       threshold: 4,
-      piecesWorn: 1,
-      packageItemIds: [30131, 30133, 30132],
+      piecesWorn: 0,
+      packageItemIds: [30131, 30130, 30133, 30132],
       packageDeltaDps: -26.77,
     },
   ];
@@ -257,7 +260,7 @@ describe("formatCuratedPackagePointer with measured package figures", () => {
     setContext: {
       setId: 629,
       setName: "Crystalforge Battlegear",
-      piecesWornBefore: 1,
+      piecesWornBefore: 0,
       piecesAfterSwap: 1,
       nextThreshold: 2 as const,
       crossesThreshold: false,
