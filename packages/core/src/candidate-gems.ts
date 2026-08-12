@@ -55,10 +55,6 @@ export function gemContext(
 ): GemContext {
   return {
     palette,
-    // Chokepoint: `fillEligibleGems` (gems.ts) owns both the cap value and
-    // its enforcement, so there is exactly one way to build a fill-eligible
-    // palette rather than a call-site convention every caller has to
-    // remember (ticket 114).
     fillPalette: fillEligibleGems(palette),
     weights,
     weightRecord: toWeightRecord(weights),
@@ -282,10 +278,9 @@ function layoutScore(
 }
 
 /**
- * Whether the socket bonus is active. Only the coloured sockets gate it — an
- * unfilled or mismatched meta socket does not forfeit the bonus (matches
- * upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`, and the
- * game rule it encodes).
+ * Whether the socket bonus is active. Same rule as `socketsMatch` in
+ * meta-repair.ts, including its meta-only exception (round-4 review, D1) —
+ * keep the two in lockstep until they share one definition.
  */
 function allSocketsMatched(
   sockets: readonly number[],
@@ -293,15 +288,20 @@ function allSocketsMatched(
 ): boolean {
   if (gemIds.length < sockets.length) return false;
 
+  let sawColoured = false;
+  let metaEmpty = false;
   for (let i = 0; i < sockets.length; i++) {
-    if (sockets[i] === GemColor.GemColorMeta) continue;
-
+    if (sockets[i] === GemColor.GemColorMeta) {
+      if (!gemIds[i]) metaEmpty = true;
+      continue;
+    }
+    sawColoured = true;
     const gem = getGem(gemIds[i] ?? 0);
     if (!gem) return false;
     if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
   }
 
-  return true;
+  return sawColoured || !metaEmpty;
 }
 
 /** Test helper — resolve palette gem by id after fill. */

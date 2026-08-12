@@ -37,9 +37,15 @@ one in theirs, and a trap for the next re-pin. All facts below are as of
 3. **Adopt upstream's socket-bonus rule where ours was wrong:** an unfilled
    meta socket does not break an item's socket bonus; only coloured sockets
    gate it. Fixed in `socketsMatch` (`meta-repair.ts`) and `allSocketsMatched`
-   (`candidate-gems.ts`), with tests. Measured on the three committed offline
-   fixtures: rankings byte-identical (every worn meta was already active) — a
-   null result, recorded with re-runnable commands in the slice-A handoff.
+   (`candidate-gems.ts`), with tests. One deliberate divergence from
+   upstream's unconditional skip: an item whose sockets are meta-only (11 in
+   db.json) requires that socket filled, else the bonus is credited vacuously
+   (round-4 review, D1). Blast-radius check: re-running
+   `npx tsx packages/core/src/cli.ts --region US --realm dreamscythe --character <slamaltman|shredzepelin|nexess> --offline --spec <ret|feral> --show-below-cutoff`
+   before and after the predicate change produced byte-identical rankings on
+   all three committed fixtures — a **null result**: every worn meta there was
+   already active and none of the three wears a meta-only-socket item, so this
+   exercises neither changed branch. No committed fixture currently does.
 4. **Keep our prismatic rule where upstream is wrong:** prismatic gems count
    toward all three meta colours (game rule); upstream counts them as nothing.
    Pinned by comment and tests at the prismatic mapping in `meta.ts`. Low

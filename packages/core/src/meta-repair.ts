@@ -26,6 +26,12 @@ export type SocketedItem = {
 
 export type MetaRepairSwap = {
   itemId: number;
+  /**
+   * Position in the equipment array, not derivable from `itemId`: the same id
+   * can legally appear twice (paired rings/trinkets), and an id-keyed lookup
+   * silently lands on the first copy (round-4 review, A2).
+   */
+  itemIndex: number;
   socketIndex: number;
   from: number;
   to: number;
@@ -120,6 +126,7 @@ export function repairMeta(opts: {
     slot.gems[move.socketIndex] = move.to;
     swaps.push({
       itemId: slot.itemId,
+      itemIndex: move.itemIndex,
       socketIndex: move.socketIndex,
       from: move.from,
       to: move.to,
@@ -154,41 +161,52 @@ function allGemIds(items: readonly SocketedItem[]): number[] {
  * each swap in turn — independently, against the fully repaired layout — and
  * reverts it if the meta condition survives without it.
  *
- * Never touches the meta socket: `repairMeta` never recolours it either
- * (`bestRepairMove` skips `GemColorMeta` sockets), so nothing here should
- * treat it as optional.
+ * Two guards keep a revert from making the layout *worse* than the repair
+ * (round-4 review, A1/A3): the meta socket is skipped outright rather than
+ * trusted to survive the `metaStatus` probe, and a swap whose original gem
+ * was `0` (an empty socket the repair filled) is never reverted — emptying it
+ * again would silently forfeit the gem's EP and possibly the socket bonus,
+ * with the swap gone from the disclosure report.
+ *
+ * The item carrying the meta socket is found by inspecting sockets, not taken
+ * on faith from a caller-supplied id or from position 0.
  */
 export function minimizeRegems(opts: {
   original: readonly SocketedItem[];
   repaired: readonly SocketedItem[];
   swaps: readonly MetaRepairSwap[];
-  headId: number;
 }): MetaRepairResult {
-  const { original, repaired, swaps, headId } = opts;
+  const { original, repaired, swaps } = opts;
   const items = repaired.map((it) => ({
     itemId: it.itemId,
     gems: [...it.gems],
   }));
-  const headItem = getItem(headId);
-  if (!headItem) {
+  const metaItem = items
+    .map((it) => getItem(it.itemId))
+    .find((entry) => entry?.sockets.includes(GemColor.GemColorMeta));
+  if (!metaItem) {
     return { items, metaAdjusted: swaps.length > 0, swaps: [...swaps] };
   }
 
-  const originalByItem = new Map(original.map((it) => [it.itemId, it]));
   const survivingSwaps: MetaRepairSwap[] = [];
 
   for (const swap of swaps) {
-    const slot = items.find((it) => it.itemId === swap.itemId);
-    const orig = originalByItem.get(swap.itemId);
-    const originalGem = orig?.gems[swap.socketIndex];
-    if (!slot || originalGem == null) {
+    const slot = items[swap.itemIndex];
+    const originalGem = original[swap.itemIndex]?.gems[swap.socketIndex];
+    const socketColor = slot && getItem(slot.itemId)?.sockets[swap.socketIndex];
+    if (
+      !slot ||
+      slot.itemId !== swap.itemId ||
+      !originalGem ||
+      socketColor === GemColor.GemColorMeta
+    ) {
       survivingSwaps.push(swap);
       continue;
     }
 
     const before = slot.gems[swap.socketIndex];
     slot.gems[swap.socketIndex] = originalGem;
-    const status = metaStatus(headItem.sockets, allGemIds(items));
+    const status = metaStatus(metaItem.sockets, allGemIds(items));
     if (status.kind === "active") {
       // Revert kept — the swap is dropped from the report because the final
       // layout no longer contains it, not appended alongside a stale entry.
@@ -207,25 +225,34 @@ export function minimizeRegems(opts: {
 
 /**
  * Whether the item's socket bonus is active. The bonus is gated on the
- * *coloured* sockets only — the meta socket does not participate (matches
- * upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`, and the
- * game itself: an empty meta socket does not forfeit a chest's socket
- * bonus). Exported as a test helper so the predicate can be pinned directly
- * instead of only through repair-cost side effects.
+ * *coloured* sockets — an unfilled meta socket does not forfeit it (issue #1
+ * step 2; upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`
+ * skips non-coloured sockets, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`).
+ * Exception: an item whose sockets are meta-only (11 exist in db.json, e.g.
+ * 28559) has nothing else to gate on, and an empty socket grants no bonus
+ * in-game — skipping it unconditionally would credit the bonus vacuously
+ * (round-4 review, D1). Exported as a test helper so the predicate can be
+ * pinned directly instead of only through repair-cost side effects.
  */
 export function socketsMatch(itemId: number, gems: readonly number[]): boolean {
   const item = getItem(itemId);
   if (!item || item.sockets.length === 0) return true;
   if (gems.length < item.sockets.length) return false;
+  let sawColoured = false;
+  let metaEmpty = false;
   for (let i = 0; i < item.sockets.length; i++) {
-    if (item.sockets[i] === GemColor.GemColorMeta) continue;
+    if (item.sockets[i] === GemColor.GemColorMeta) {
+      if (!gems[i]) metaEmpty = true;
+      continue;
+    }
+    sawColoured = true;
     const gemId = gems[i] ?? 0;
     if (!gemId) return false;
     const gem = getGem(gemId);
     if (!gem) return false;
     if (!gemColorMatchesSocket(gem.colour, item.sockets[i]!)) return false;
   }
-  return true;
+  return sawColoured || !metaEmpty;
 }
 
 function gemEp(gemId: number, weights: EpWeights): number {

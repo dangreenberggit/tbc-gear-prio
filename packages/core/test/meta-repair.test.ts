@@ -76,6 +76,14 @@ describe("socketsMatch", () => {
     const red = 24027; // Bold Living Ruby, red
     expect(socketsMatch(24545, [0, red])).toBe(false);
   });
+
+  // Exorcist's Plate Helm (28559): sockets [meta] only. With no coloured
+  // socket to gate on, an unconditional meta-skip credits the bonus with the
+  // socket empty (round-4 review, D1) — the one socket must be filled.
+  it("requires a meta-only item's socket filled before crediting its bonus", () => {
+    expect(socketsMatch(28559, [0])).toBe(false);
+    expect(socketsMatch(28559, [25897])).toBe(true);
+  });
 });
 
 describe("repairMeta", () => {
@@ -232,12 +240,33 @@ describe("minimizeRegems", () => {
       { itemId: itemF, gems: [redGem] },
     ];
     const swaps: MetaRepairSwap[] = [
-      { itemId: itemD, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
-      { itemId: itemE, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
-      { itemId: itemF, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+      {
+        itemId: itemD,
+        itemIndex: 1,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
+      {
+        itemId: itemE,
+        itemIndex: 2,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
+      {
+        itemId: itemF,
+        itemIndex: 3,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
     ];
 
-    const result = minimizeRegems({ original, repaired, swaps, headId });
+    const result = minimizeRegems({ original, repaired, swaps });
 
     expect(
       metaStatus(getItem(headId)!.sockets, allGems(result.items)).kind
@@ -261,10 +290,17 @@ describe("minimizeRegems", () => {
     const original: SocketedItem[] = [{ itemId: headId, gems: [0] }];
     const repaired: SocketedItem[] = [{ itemId: headId, gems: [25897] }];
     const swaps: MetaRepairSwap[] = [
-      { itemId: headId, socketIndex: 0, from: 0, to: 25897, cost: 0 },
+      {
+        itemId: headId,
+        itemIndex: 0,
+        socketIndex: 0,
+        from: 0,
+        to: 25897,
+        cost: 0,
+      },
     ];
 
-    const result = minimizeRegems({ original, repaired, swaps, headId });
+    const result = minimizeRegems({ original, repaired, swaps });
     expect(result.items[0]!.gems[0]).toBe(25897);
     expect(result.swaps).toEqual(swaps);
   });
@@ -275,7 +311,14 @@ describe("minimizeRegems", () => {
       { itemId: itemD, gems: [redGem] },
     ];
     const swaps: MetaRepairSwap[] = [
-      { itemId: itemD, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+      {
+        itemId: itemD,
+        itemIndex: 1,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
     ];
     const original: SocketedItem[] = [
       { itemId: headId, gems: [25897] },
@@ -286,9 +329,86 @@ describe("minimizeRegems", () => {
       original,
       repaired: items,
       swaps,
-      headId,
     });
     expect(result.items).toEqual(items);
     expect(result.swaps).toEqual(swaps);
+  });
+
+  it("never re-empties a socket the repair filled, even when the meta would survive", () => {
+    // Repair filled an originally-empty socket. With red 2 / blue 0 the meta
+    // (red > blue) survives removing either red gem, so an unguarded revert
+    // would empty the socket again — silently losing the gem's EP and any
+    // socket bonus, with the swap gone from the disclosure report (round-4
+    // review, A1).
+    const original: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [redGem] },
+      { itemId: itemE, gems: [0] },
+    ];
+    const repaired: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [redGem] },
+      { itemId: itemE, gems: [redGem] },
+    ];
+    const swaps: MetaRepairSwap[] = [
+      {
+        itemId: itemE,
+        itemIndex: 2,
+        socketIndex: 0,
+        from: 0,
+        to: redGem,
+        cost: 0,
+      },
+    ];
+
+    const result = minimizeRegems({ original, repaired, swaps });
+    expect(result.items[2]!.gems[0]).toBe(redGem);
+    expect(result.swaps).toEqual(swaps);
+  });
+
+  it("resolves swaps by item index, not item id, when the same id is worn twice", () => {
+    // Two copies of one ring id, each repaired blue→red. An id-keyed lookup
+    // collapses both swaps onto the first copy (round-4 review, A2). With
+    // red 2 / blue 0 one revert survives the meta check; it must land on the
+    // copy its swap names.
+    const original: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [blueGem] },
+      { itemId: itemD, gems: [blueGem] },
+      { itemId: itemE, gems: [redGem] },
+    ];
+    // red 3 / blue 0 after repair: exactly one revert can survive (red 2 /
+    // blue 1 keeps red > blue), and the first swap examined names index 2 —
+    // so the revert must land there. An id-keyed lookup would revert index 1
+    // instead.
+    const repaired: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [redGem] },
+      { itemId: itemD, gems: [redGem] },
+      { itemId: itemE, gems: [redGem] },
+    ];
+    const swaps: MetaRepairSwap[] = [
+      {
+        itemId: itemD,
+        itemIndex: 2,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
+      {
+        itemId: itemD,
+        itemIndex: 1,
+        socketIndex: 0,
+        from: blueGem,
+        to: redGem,
+        cost: 0,
+      },
+    ];
+
+    const result = minimizeRegems({ original, repaired, swaps });
+    expect(result.items[2]!.gems[0]).toBe(blueGem);
+    expect(result.items[1]!.gems[0]).toBe(redGem);
+    expect(result.swaps).toEqual([swaps[1]]);
   });
 });

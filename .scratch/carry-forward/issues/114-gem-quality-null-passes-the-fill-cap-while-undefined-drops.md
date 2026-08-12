@@ -35,11 +35,10 @@ string.
 
 - [x] `null` and `undefined` quality take the same documented path.
 - [x] The chosen behaviour is asserted directly in a unit test.
-- [ ] `pnpm verify` green. — not run in full on this worktree: three
-      pre-existing failures (`vendor/wowsims/*` not synced in this worktree)
-      are unrelated to this fix; typecheck, lint, and every gem-area test file
-      pass. See the parallel-phase handoff for the exact `pnpm verify`
-      command and its output.
+- [x] `pnpm verify` green. — not run in full on the worker's worktree (three
+      pre-existing `vendor/wowsims` failures there, unrelated); run green on
+      the integrated `feat/set-bonus-value` tip at fan-in, 2026-08-12
+      (round-4 review; re-run `pnpm verify` to confirm).
 
 ## CLOSED, 2026-08-12
 

@@ -180,8 +180,8 @@ def vendor_is_empty():
     --restore has none of the tracked files. Left unchecked, that reads to a
     downstream consumer (e.g. build_feral_skeleton.py) as "upstream doesn't
     have this file" -- issue #1's actual failure -- instead of "the sync never
-    ran here". --check and --restore both refuse loudly before doing anything
-    else that could produce that misdiagnosis.
+    ran here". Only --check refuses on it -- --restore's whole job is to fill
+    an empty vendor/, so refusing there would be wrong.
     """
     if not os.path.isdir(VENDOR):
         return True

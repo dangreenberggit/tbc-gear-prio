@@ -47,14 +47,11 @@ export function gemsForPhase(maxPhase: number): GemEntry[] {
  * (ticket 111, revised by ticket 117 — both the auto-fill path and meta
  * repair now cap rarity, via `GemContext.fillPalette`).
  *
- * `null`/`undefined` `quality` used to take opposite paths: `null <= 3` is
- * `true` in JS (the entry silently passed the cap), `undefined <= 3` is
- * `false` (the entry silently dropped). Neither was reported, so a caller
- * building its own palette (tests, or any future direct constructor) had no
- * signal either way (ticket 114). A committed `data/gems/palette.json` entry
- * always carries a number — the generator guarantees it — so this only fires
- * on a malformed injected palette, and it fires loudly: a safety net that
- * fabricates a verdict on missing data is worse than no net.
+ * A non-number `quality` has no safe default under `<=` — `null` and
+ * `undefined` coerce in opposite directions, each silently — so the guard
+ * throws rather than fabricating a verdict (ticket 114). Committed palette
+ * entries always carry a number; this fires only on a malformed injected
+ * palette.
  */
 export function gemsForQuality(
   palette: readonly GemEntry[],
@@ -75,17 +72,12 @@ export function gemsForQuality(
  * extended to repair by ticket 117): a player's own epics ride through
  * migration, but neither path assumes epics they may not own.
  *
- * The cap used to be call-site discipline — `candidate-gems.ts` held its own
- * `MAX_FILL_QUALITY` constant and remembered to pass it to `gemsForQuality`
- * on every palette it built. Two palettes existed on one `GemContext`
- * (`palette` uncapped, `fillPalette` capped), type-indistinguishable from
- * each other, so grabbing the wrong one compiled fine and only showed up as
- * an epic gem nobody asked for (tickets 117/116, both since fixed at their
- * call sites — this is the chokepoint that keeps the bug class from
- * recurring at a new one). Moving the cap in here means there is exactly one
- * way to get a fill-eligible palette, and it cannot be constructed by
- * forgetting a filter call. Fixed default for now; a run-level option
- * mirroring wowsims' rarity/phase dropdowns is future work.
+ * Chokepoint: the cap value and its enforcement live together so a
+ * fill-eligible palette cannot be constructed by forgetting a filter call —
+ * an uncapped and a capped palette are type-indistinguishable, so call-site
+ * discipline only ever fails silently (tickets 116/117). Fixed default for
+ * now; a run-level option mirroring wowsims' rarity/phase dropdowns is
+ * future work.
  */
 export const FILL_MAX_QUALITY = 3;
 

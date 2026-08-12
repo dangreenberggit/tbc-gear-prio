@@ -59,9 +59,7 @@ const CONDITIONS = new Map<number, Condition>(
  * (`sim/core/meta_gem_constraints.go`) has a `default: return 0,0,0` branch
  * that credits Prismatic with nothing — that looks like upstream's own
  * oversight, not a rule we should match (issue #1 investigation, upheld by
- * independent review in review-corrections.md: "the previous comment called
- * our prismatic counting our highest-confidence correctness bug... that is
- * backwards"). Confirmed against community-documented game rules, not
+ * independent review). Confirmed against community-documented game rules, not
  * verifiable from either repo's data files — neither db.json carries
  * activation prose.
  *

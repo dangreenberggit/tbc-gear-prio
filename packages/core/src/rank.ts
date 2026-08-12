@@ -481,14 +481,12 @@ export async function rankUpgrades(
       epWeights: deps.epWeights,
       palette: gems.fillPalette,
     });
-    const headId = preRepairSocketed[0]?.itemId;
     const minimized =
-      repaired.swaps.length > 0 && headId !== undefined
+      repaired.swaps.length > 0
         ? minimizeRegems({
             original: preRepairSocketed,
             repaired: repaired.items,
             swaps: repaired.swaps,
-            headId,
           })
         : repaired;
     socketed = minimized.items;
@@ -1589,14 +1587,12 @@ export function equipmentForCandidateSwap(
     epWeights: gems.weights,
     palette: gems.fillPalette,
   });
-  const headId = socketed[0]?.itemId;
   const minimized =
-    repaired.swaps.length > 0 && headId !== undefined
+    repaired.swaps.length > 0
       ? minimizeRegems({
           original: socketed,
           repaired: repaired.items,
           swaps: repaired.swaps,
-          headId,
         })
       : repaired;
   return applyRepairedGems(swapped, minimized.items);
