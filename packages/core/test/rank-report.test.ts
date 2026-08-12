@@ -364,6 +364,64 @@ describe("rank-report", () => {
     expect(html).toContain("widens your gap to 87");
   });
 
+  // Ticket 107 / PLAN.md §9 policy item 5. The standing gem-policy qualifier
+  // says meta repair *may* recolour worn gems; that is the caveat, not the
+  // disclosure. A row priced given four changes to two other items has to say
+  // which gems moved, or the player cannot tell this row's offer from a row
+  // that needed no adjustment at all.
+  it("names the gems a candidate's meta repair recoloured on other items (ticket 107)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            gemSubstitutions: [
+              { itemId: 29100, socketIndex: 0, from: 24028, to: 32220 },
+              { itemId: 29096, socketIndex: 1, from: 24028, to: 30549 },
+            ],
+          }),
+        ],
+      },
+      meta()
+    );
+    // The count is the headline — "this price assumes N changes elsewhere".
+    expect(html).toContain("2 gem");
+    // Both the displaced gem and its replacement are named, on both items.
+    expect(html).toContain("24028");
+    expect(html).toContain("32220");
+    expect(html).toContain("30549");
+  });
+
+  it("renders no gem-substitution note when a row needed none (ticket 107)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+          }),
+        ],
+      },
+      meta()
+    );
+    // The stylesheet always carries the rule; what must not appear is the
+    // row-level div that would claim gems moved.
+    expect(html).not.toContain('<div class="gem-subs">');
+  });
+
   // The real cap is 9 * 15.769233, so a live `gapAfter` is essentially never
   // integral and the raw value rendered as 64.92309699999998 in the shipped
   // report (carry-forward 77). Whole-number fixtures above hid it.
@@ -536,10 +594,17 @@ describe("rank-report", () => {
     // .chip.package-only:not(.source-hidden) { ... }` plus a new
     // `body.package.bis-only .chip.package-only:not(.is-bis) { display: none;
     // }` guard and its explanatory comment. Nothing in the body moved.
+    // Repinned for ticket 107's per-row gem-substitution disclosure. Both
+    // documents dumped and diffed (git stash the two renderer files, dump,
+    // pop, dump again): the delta is the five-line `.gem-subs` rule inside
+    // `<style>`, plus two whitespace-only lines where the new `${gemSubs}`
+    // slot interpolates empty. No row in this fixture carries
+    // `gemSubstitutions`, so no note renders and nothing in the body moved —
+    // which is what the emit-only-when-non-empty guard promises.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "e50bc66ab50d0502d92f6d2522c1e8ad75937d0f897f1587c87085ce596e5201",
-      length: 30890,
+        "85ddccf51aeb0219ad7a81713b10984bf4bfb46b7e896b81f6b77b20ed048487",
+      length: 30995,
     });
   });
 });

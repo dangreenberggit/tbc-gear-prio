@@ -12,6 +12,7 @@ import {
   hitCapBanner,
   setPotentialDisclosureLine,
 } from "./disclosure.js";
+import { getItem } from "./items.js";
 import type { ItemSource } from "./pool.js";
 import type { RankedItem, Ranking } from "./rank.js";
 import { REPORT_CSS } from "./rank-report-css.js";
@@ -364,6 +365,20 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const hitLoss = item.hitRegression
             ? `<div class="hit-note down">costs ${item.hitRegression.lost} hit rating — widens your gap to ${Math.round(item.hitRegression.gapAfter)}</div>`
             : "";
+          // Ticket 107: this row's delta was measured with the listed gems
+          // moved on *other* items, to re-light the candidate's meta. The
+          // standing gem-policy qualifier says that may happen; only this
+          // says it did, and to which gems.
+          const gemSubs = item.gemSubstitutions?.length
+            ? `<div class="gem-subs">priced with ${item.gemSubstitutions.length} gem${item.gemSubstitutions.length === 1 ? "" : "s"} re-cut on other items to activate this meta: ${esc(
+                item.gemSubstitutions
+                  .map(
+                    (s) =>
+                      `${s.from}→${s.to} on ${getItem(s.itemId)?.name ?? `item ${s.itemId}`}`
+                  )
+                  .join(", ")
+              )}</div>`
+            : "";
           const owned = item.owned
             ? `<span class="pill owned">owned</span>`
             : "";
@@ -424,6 +439,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${setInfo}
     ${hitNote}
     ${hitLoss}
+    ${gemSubs}
   </div>
   <div class="nums">
     <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>

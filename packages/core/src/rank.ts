@@ -208,6 +208,20 @@ export type RankedItem = {
    */
   hitRegression?: { lost: number; gapAfter: number };
   setBonusNote?: string;
+  /**
+   * Gems meta repair recoloured on *other* worn items to activate this
+   * candidate's meta — the per-row half of PLAN.md §9 policy item 5
+   * (ticket 107). Absent, never an empty array, when the swap needed no
+   * adjustment: a row carrying `[]` reads as a disclosure that was considered
+   * and came back empty, which is a different claim from "nothing to
+   * disclose" only when the field is present.
+   */
+  gemSubstitutions?: Array<{
+    itemId: number;
+    socketIndex: number;
+    from: number;
+    to: number;
+  }>;
   owned?: boolean;
   belowCutoff: boolean;
   /**
@@ -368,6 +382,8 @@ type BestSwap = {
   setBonusNote?: string;
   hitDriven: boolean;
   hitRegression: { lost: number; gapAfter: number } | null;
+  /** Repair swaps on other worn items, per the winning slot attempt (107). */
+  repairSwaps: readonly MetaRepairSwap[];
 };
 
 const DEFAULT_ITERATIONS = 3000;
@@ -706,13 +722,16 @@ export async function rankUpgrades(
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
         if (wornAt >= 0 && wornAt !== slotIndex) continue;
         let swapped: SimItemSpec[];
+        let repairSwaps: readonly MetaRepairSwap[];
         try {
-          swapped = equipmentForCandidateSwap(
+          const outcome = candidateSwapWithRepairs(
             equipment,
             slotIndex,
             entry.itemId,
             gems
           );
+          swapped = outcome.equipment;
+          repairSwaps = outcome.swaps;
         } catch (err) {
           // A repair failure is a fact about this one candidate's gem layout,
           // not about the character or the rest of the pool — it must skip
@@ -766,6 +785,7 @@ export async function rankUpgrades(
             slotIndex,
             hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
             hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
+            repairSwaps,
           };
           if (slotNames.length > 1) {
             next.slotChoice = slotName;
@@ -816,6 +836,14 @@ export async function rankUpgrades(
       if (best.hitRegression) item.hitRegression = best.hitRegression;
       if (best.slotChoice) item.slotChoice = best.slotChoice;
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
+      if (best.repairSwaps.length > 0) {
+        item.gemSubstitutions = best.repairSwaps.map((s) => ({
+          itemId: s.itemId,
+          socketIndex: s.socketIndex,
+          from: s.from,
+          to: s.to,
+        }));
+      }
       if (owned) item.owned = true;
       ranked.push(item);
       winningRequests.set(entry.itemId, best.request);
@@ -1568,6 +1596,25 @@ export function equipmentForCandidateSwap(
   itemId: number,
   gems: GemContext
 ): SimItemSpec[] {
+  return candidateSwapWithRepairs(equipment, slotIndex, itemId, gems).equipment;
+}
+
+/**
+ * The swap plus the gem swaps meta repair had to make on *other* worn items
+ * to activate the candidate's meta.
+ *
+ * Those swaps are the disclosure PLAN.md §9 policy item 5 requires and
+ * ticket 107 found missing: pricing a helm "given four changes to two other
+ * items" without saying so misreports what the player is being offered.
+ * `equipmentForCandidateSwap` discarded them, so only the *baseline* repair
+ * ever reached the report.
+ */
+export function candidateSwapWithRepairs(
+  equipment: readonly SimItemSpec[],
+  slotIndex: number,
+  itemId: number,
+  gems: GemContext
+): { equipment: SimItemSpec[]; swaps: readonly MetaRepairSwap[] } {
   const swapped = swapItemAt(equipment, slotIndex, itemId, gems);
   const socketed: SocketedItem[] = swapped.map((spec) => ({
     itemId: spec.id ?? 0,
@@ -1590,7 +1637,12 @@ export function equipmentForCandidateSwap(
           swaps: repaired.swaps,
         })
       : repaired;
-  return applyRepairedGems(swapped, minimized.items);
+  return {
+    equipment: applyRepairedGems(swapped, minimized.items),
+    // The swapped-in candidate's own sockets are the offer itself, not an
+    // adjustment to gear the player already had on.
+    swaps: minimized.swaps.filter((s) => s.itemIndex !== slotIndex),
+  };
 }
 
 function swapItemAt(

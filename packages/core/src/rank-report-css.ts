@@ -327,6 +327,11 @@ export const REPORT_CSS = `
     color: var(--ink-soft);
   }
   .hit-note.down { color: var(--down); }
+  .gem-subs {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
   .set-potential {
     margin-top: 0.25rem;
     font-size: 0.78rem;

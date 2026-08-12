@@ -3326,3 +3326,146 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
     expect(sub!.detail).toContain("gem repair could not activate its meta");
   });
 });
+
+/**
+ * Ticket 107 / PLAN.md §9 policy item 5: when a candidate helm brings a meta
+ * socket, `repairMeta` satisfies the new meta's colour condition by recolouring
+ * gems on *other* worn items. Those swaps happened inside
+ * `equipmentForCandidateSwap` and were discarded — the player was told what a
+ * helm is worth given several changes to other slots, and nothing said so.
+ *
+ * Only the baseline repair's swaps ever reached `substitutions`, which is why
+ * `.scratch/rank-reports/shredzepelin-p3.json` stores `substitutions: []` while
+ * 8 of its rows each silently recolour four gems.
+ */
+describe("rankUpgrades candidate-arm gem substitutions (ticket 107)", () => {
+  const HEAD_CANDIDATE = 32461; // Furious Gizmatic Goggles: meta + blue
+
+  /**
+   * Worn gems are every-socket red, which cannot satisfy Relentless's
+   * 2 red / 2 yellow / 2 blue. The worn head (Wolfshead Helm 8345) has no
+   * sockets, so no meta is active at baseline and the baseline repair is a
+   * no-op — any swaps observed therefore belong to the candidate arm, which
+   * is the thing under test. Swapping in a meta-socketed helm forces the
+   * repair to recolour gems on the chest and legs.
+   */
+  function allRedLoggedGear(): LoggedGear {
+    const worn: Record<string, { id: number; gems: number[] }> = {
+      head: { id: 8345, gems: [] },
+      chest: { id: 23563, gems: [23094, 23094, 23094] },
+      legs: { id: 24022, gems: [23094, 23094, 23094] },
+    };
+    return {
+      items: SIM_ORDER.map((slot) => {
+        const w = worn[slot];
+        return w ? { id: w.id, slot, gems: w.gems } : { id: 0, slot, gems: [] };
+      }),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+  }
+
+  async function rankWithAllRedGear() {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", allRedLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(HEAD_CANDIDATE, "ret-p3")],
+      }
+    );
+  }
+
+  it("discloses the recoloured gems on the row whose swap caused them", async () => {
+    const ranking = await rankWithAllRedGear();
+
+    const row = ranking.items.find((i) => i.itemId === HEAD_CANDIDATE);
+    expect(row).toBeDefined();
+    // Guard against a vacuous pass: this fixture must really provoke a
+    // recolour, or the assertion below would hold for the wrong reason.
+    expect(row!.gemSubstitutions).toBeDefined();
+    expect(row!.gemSubstitutions!.length).toBeGreaterThan(0);
+
+    // Each disclosed swap names the item it lands on and both gem ids, so a
+    // reader can tell which of their own gems moved and to what.
+    for (const swap of row!.gemSubstitutions!) {
+      expect(swap.itemId).toBeGreaterThan(0);
+      expect(swap.itemId).not.toBe(HEAD_CANDIDATE);
+      expect(swap.from).toBeGreaterThan(0);
+      expect(swap.to).toBeGreaterThan(0);
+      expect(swap.from).not.toBe(swap.to);
+    }
+
+    // The swaps land on other worn items, which is the whole complaint.
+    const touched = new Set(row!.gemSubstitutions!.map((s) => s.itemId));
+    expect([...touched].sort()).toEqual([23563, 24022]);
+  });
+
+  it("leaves gemSubstitutions absent when the candidate arm recoloured nothing", async () => {
+    // slamaltman's own gear already satisfies its meta, so no candidate swap
+    // needs to recolour anything — the field must not appear as an empty
+    // array on every row.
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(29381)],
+      }
+    );
+
+    const row = ranking.items.find((i) => i.itemId === 29381);
+    expect(row).toBeDefined();
+    expect(row!.gemSubstitutions).toBeUndefined();
+  });
+});
