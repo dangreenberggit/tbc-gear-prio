@@ -475,6 +475,85 @@ have since been fixed and closed on this branch, and the checker requires a
 `defer` ticket to be open. Those three rows are corrected to `fixed` below, with
 the closing commits named.
 
+## Round 4 — issue-1 upstream gem cleanup (2026-08-12)
+
+Diffed against: `3f5e21b...HEAD` (rounds 1–3 covered `dev..3f5e21b`). The range
+is the issue-1 fan-out: socket-bonus predicate fix, `minimizeRegems`, the
+`MetaUnsolvableError` split, the fill-cap chokepoint, prismatic pinning, the
+feral cutoff (3.6) with per-spec wiring, and the upstream guard rails
+(`--ref`/`--watch-ref`, empty-vendor refusal, APL schema gate).
+
+Dispatch: no `codex` binary on PATH; four fresh-context Opus subagents —
+adversarial and domain per `.agents/reviews/*.md`, standards + spec via the
+`code-review` skill. Delegator (Fable) aggregated and applied fixes.
+
+### Adversarial
+
+- **4-A1** `minimizeRegems` reverted repair-filled sockets to empty (`0`
+  passed the `== null` guard), silently deleting a gem, its EP, and possibly
+  the socket bonus, with the swap gone from disclosure. Reviewer reproduced it
+  live on 28559 + 23542.
+- **4-A2** `minimizeRegems` resolved swaps by `itemId`; duplicate ids (paired
+  rings) collapse onto the first copy. `MetaRepairSwap` lacked the index.
+- **4-A3** Test theatre: "never touches the meta socket itself" passed for an
+  incidental reason (`metaStatus` returning `no-meta-gem`), not because any
+  meta-socket guard existed.
+- **4-A4** `ENGINE_VERSION` unchanged, so feral rankings cached before this
+  branch would be served with the old 3.4 cutoff and pre-fix predicates.
+- **4-A5** `vendor_is_empty()` docstring claimed `--restore` also refuses; it
+  is called only from `--check` (and refusing in restore would be wrong).
+- Clean: both `rank.ts` abort sites genuinely fixed; fill-cap chokepoint not
+  bypassable; APL gate real (verified live); prismatic and ticket-114 tests
+  sound; per-spec cutoff plumbing complete.
+
+### Domain
+
+- **4-D1** Unconditionally skipping meta sockets makes the 11 meta-only-socket
+  items in db.json (e.g. 28559) socket-bonus-active with the socket empty —
+  vacuous credit, verified by probe.
+- **4-D2** `watchedRefs` stored the abbreviated `d09edaaf8` while the check
+  compares against the API's full 40-char sha — permanent false DRIFT, an
+  always-red signal people learn to ignore.
+- Verified correct: feral cutoff derivation (fixture genuinely feral, ceil
+  rule consistent with ret), `timeToNextEnergyTick` gap real (vs
+  `energyTimeToTarget` in the pinned protos), snake→camel exact across all
+  1303 proto fields, prismatic rule and its zero-EP low-impact argument.
+
+### Standards + Spec
+
+- **4-St1** Changelog-style comments in `gems.ts` (×2), duplicated chokepoint
+  comment in `candidate-gems.ts`, review-quote in `meta.ts` — comment-policy
+  breaches.
+- **4-St2** ADR-0025 decision 3 cited measurement evidence in an uncommitted
+  artifact ("the slice-A handoff") and overstated a null result.
+- **4-St3** Ticket 114's `pnpm verify` acceptance box left unchecked under a
+  `## CLOSED` heading; undeclared `Closed:` header field (parser keys on
+  `Status:`, harmless).
+- **4-St4** Judgement-call smells: duplicated repair-then-minimize shape,
+  duplicated socket predicates, skip-array clump, feral five-seed script
+  near-copy.
+- **4-S1** Step-2 blast-radius measurement is a null result (no fixture
+  exercises either changed predicate branch) and was stated stronger than
+  that.
+- **4-S2** `minimizeRegems` head lookup via `socketed[0]` — positional
+  assumption the wrapped code doesn't make (same cluster as 4-A1/4-A2).
+- **4-S3** Package-repair failures recorded as `unmeasured: "sim-failed"`
+  when no sim ran.
+- Verified present: steps 0, 4, 5, 6, 7, 8, 9 of the issue-1 README, with
+  both abort sites fixed and baseline-aborts-ranking correct.
+
+### Summary
+
+The fan-out's structural work held up (chokepoint, error split, gates,
+cutoff derivation all verified clean), but `minimizeRegems` — the newest
+code — carried a cluster of three real defects (4-A1/4-A2/4-S2) all fixed
+together in `c7e57c4` by keying swaps on a new `itemIndex` field, refusing to
+revert a repair-filled socket, adding a real meta-socket guard, and finding
+the meta item by socket inspection. The domain exception 4-D1 is a deliberate,
+tested divergence from upstream's unconditional skip. `ENGINE_VERSION` bumped
+to 5 (4-A4). The watched-ref regen (4-D2) also surfaced real drift:
+`feature/backend-reforge` has moved to `33970a8f` since the investigation.
+
 ## Disposition
 
 | ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                  |
@@ -525,3 +604,17 @@ the closing commits named.
 | 3-S2  | Spec        | defer       | `.scratch/carry-forward/issues/134-usage-string-names-spec-but-not-its-default.md`                                                                                                                                                                                                                                                                                             |
 | 3-S3  | Spec        | fixed       | `775ee46` — boxes in 111/112 checked only where the closing sections record the verification (111: 1/7; 112: 6/8), unverified ones annotated rather than checked; ticket 132 closed                                                                                                                                                                                            |
 | 3-S4  | Spec        | wontfix     | `memberPackages` carrying every measured threshold for the set is deliberate, tested, and consistent with the owner's sort rule; the spec sentence understates it but the behaviour is the asked-for one                                                                                                                                                                       |
+| 4-A1  | Adversarial | fixed       | `c7e57c4` — `minimizeRegems` never reverts a swap whose original gem was `0`; test pins a repair-filled socket surviving minimization                                                                                                                                                                                                                                          |
+| 4-A2  | Adversarial | fixed       | `c7e57c4` — `MetaRepairSwap.itemIndex` added; swaps resolved by index; duplicate-ring test asserts the revert lands on the named copy                                                                                                                                                                                                                                          |
+| 4-A3  | Adversarial | fixed       | `c7e57c4` — real meta-socket guard added to the revert loop; the test's promised invariant now exists in code                                                                                                                                                                                                                                                                  |
+| 4-A4  | Adversarial | fixed       | `c7e57c4` — `ENGINE_VERSION` 4→5                                                                                                                                                                                                                                                                                                                                               |
+| 4-A5  | Adversarial | fixed       | `c7e57c4` — docstring corrected: only `--check` refuses; `--restore`'s job is filling an empty vendor/                                                                                                                                                                                                                                                                         |
+| 4-D1  | Domain      | fixed       | `c7e57c4` — meta-only items require their socket filled in both predicates, kept in lockstep; test on 28559; ADR-0025 records the deliberate divergence from upstream                                                                                                                                                                                                          |
+| 4-D2  | Domain      | fixed       | `c7e57c4` — regenerated via `python scripts/sync_wowsims.py --watch-ref --ref feature/backend-reforge`; full sha stored; real drift to `33970a8f` captured                                                                                                                                                                                                                     |
+| 4-St1 | Standards   | fixed       | `c7e57c4` — changelog comments compressed to load-bearing why; duplicate chokepoint comment deleted; review quote dropped                                                                                                                                                                                                                                                      |
+| 4-St2 | Standards   | fixed       | `c7e57c4` — ADR-0025 decision 3 inlines the re-runnable CLI commands and names the null result as one                                                                                                                                                                                                                                                                          |
+| 4-St3 | Standards   | fixed       | `c7e57c4` — 114's verify box resolved against the integrated tip's green `pnpm verify`; the extra `Closed:` header line is left as-is (parsers key on `Status:`)                                                                                                                                                                                                               |
+| 4-St4 | Standards   | defer       | `.scratch/carry-forward/issues/136-issue1-cleanup-duplication-and-fixture-followups.md`                                                                                                                                                                                                                                                                                        |
+| 4-S1  | Spec        | defer       | `.scratch/carry-forward/issues/136-issue1-cleanup-duplication-and-fixture-followups.md` — item 5: a fixture that exercises the changed predicate branches; ADR-0025 wording already corrected (`c7e57c4`)                                                                                                                                                                      |
+| 4-S2  | Spec        | fixed       | `c7e57c4` — head lookup replaced by socket inspection; `headId` param removed                                                                                                                                                                                                                                                                                                  |
+| 4-S3  | Spec        | defer       | `.scratch/carry-forward/issues/135-unmeasured-reason-misreports-repair-failure-as-sim-failed.md`                                                                                                                                                                                                                                                                               |
