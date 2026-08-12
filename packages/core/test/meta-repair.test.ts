@@ -5,7 +5,11 @@ import { describe, expect, it } from "vitest";
 import { gemsForPhase, gemsForQuality, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
 import { gemColorCounts, metaStatus } from "../src/meta.js";
-import { repairMeta, type SocketedItem } from "../src/meta-repair.js";
+import {
+  repairMeta,
+  socketsMatch,
+  type SocketedItem,
+} from "../src/meta-repair.js";
 import { mapWclGearToSim, type WclGearEntry } from "../src/slots.js";
 import { epScore, Stat } from "../src/stats.js";
 
@@ -52,6 +56,21 @@ describe("epScore", () => {
     stats[Stat.StatStrength] = 10;
     stats[Stat.StatAttackPower] = 100;
     expect(epScore(stats, retP2Ep)).toBeCloseTo(10 * 1.0 + 100 * 0.41);
+  });
+});
+
+describe("socketsMatch", () => {
+  // Gladiator's Plate Helm (24545): sockets [meta, yellow]. The game only
+  // requires the coloured sockets to match for the socket bonus — an
+  // unfilled meta socket does not forfeit it (upstream gear.go
+  // socketBonusActive skips non-coloured sockets the same way).
+  it("is satisfied by a matching yellow socket even with the meta socket empty", () => {
+    expect(socketsMatch(24545, [0, 23113])).toBe(true);
+  });
+
+  it("still fails when the coloured socket itself does not match", () => {
+    const red = 24027; // Bold Living Ruby, red
+    expect(socketsMatch(24545, [0, red])).toBe(false);
   });
 });
 

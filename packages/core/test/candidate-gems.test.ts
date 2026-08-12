@@ -154,6 +154,38 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
   });
 });
 
+describe("fillEmptyCandidateGems socket bonus with an unfilled meta socket", () => {
+  // Gladiator's Plate Helm (24545): sockets [meta, yellow], +4 to stat
+  // index 0 when both match. A palette with no meta gem always leaves the
+  // meta socket empty — the bonus must still be scored once the yellow
+  // socket matches, because only coloured sockets gate it. If the fix
+  // regresses (meta socket required to match), the two candidate layouts
+  // below tie at 0 EP and `matchColors=true` is no longer strictly better,
+  // so the fill would be free to return the wrong (unmatched) layout.
+  it("prefers a colour-matched yellow gem worth less raw EP over an unmatched one worth more, because the bonus is still live", () => {
+    const headId = 24545;
+    // 23113 (yellow, +6 to stat 3) is colour-matched; 24054 (purple, +4 to
+    // stat 0 and +6 to stat 2) is not. Weighted to tie at 10 raw EP either
+    // way — only the socket bonus (stat 0, weighted higher) can break it.
+    const palette = [
+      ...gemsForPhase(2).filter((g) => g.id === 23113 || g.id === 24054),
+    ];
+    expect(palette).toHaveLength(2);
+
+    const weights = { "0": 10, "2": 1, "3": 10 / 6 };
+    const gems = fillEmptyCandidateGems(headId, [], palette, weights);
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const yellowIdx = sockets.indexOf(GemColor.GemColorYellow);
+
+    // No meta gem in this palette, so the meta socket is left empty.
+    expect(gems[metaIdx]).toBe(0);
+    // Yet the yellow socket still takes the colour-matched gem, because the
+    // fill can see the socket bonus is live even with the meta socket bare.
+    expect(gems[yellowIdx]).toBe(23113);
+  });
+});
+
 describe("Kael temp legendaries", () => {
   it("flags encounter-only Kael weapons, not Twinblade", () => {
     expect(isKaelTempLegendary(30318)).toBe(true);

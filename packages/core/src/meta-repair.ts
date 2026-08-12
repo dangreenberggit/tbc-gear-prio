@@ -112,11 +112,20 @@ function allGemIds(items: readonly SocketedItem[]): number[] {
   return ids;
 }
 
-function socketsMatch(itemId: number, gems: readonly number[]): boolean {
+/**
+ * Whether the item's socket bonus is active. The bonus is gated on the
+ * *coloured* sockets only — the meta socket does not participate (matches
+ * upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`, and the
+ * game itself: an empty meta socket does not forfeit a chest's socket
+ * bonus). Exported as a test helper so the predicate can be pinned directly
+ * instead of only through repair-cost side effects.
+ */
+export function socketsMatch(itemId: number, gems: readonly number[]): boolean {
   const item = getItem(itemId);
   if (!item || item.sockets.length === 0) return true;
   if (gems.length < item.sockets.length) return false;
   for (let i = 0; i < item.sockets.length; i++) {
+    if (item.sockets[i] === GemColor.GemColorMeta) continue;
     const gemId = gems[i] ?? 0;
     if (!gemId) return false;
     const gem = getGem(gemId);

@@ -286,6 +286,12 @@ function layoutScore(
   return score;
 }
 
+/**
+ * Whether the socket bonus is active. Only the coloured sockets gate it — an
+ * unfilled or mismatched meta socket does not forfeit the bonus (matches
+ * upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`, and the
+ * game rule it encodes).
+ */
 function allSocketsMatched(
   sockets: readonly number[],
   gemIds: readonly number[]
@@ -293,14 +299,10 @@ function allSocketsMatched(
   if (gemIds.length < sockets.length) return false;
 
   for (let i = 0; i < sockets.length; i++) {
+    if (sockets[i] === GemColor.GemColorMeta) continue;
+
     const gem = getGem(gemIds[i] ?? 0);
     if (!gem) return false;
-
-    if (sockets[i] === GemColor.GemColorMeta) {
-      if (gem.colour !== GemColor.GemColorMeta) return false;
-      continue;
-    }
-
     if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
   }
 
