@@ -8,6 +8,9 @@ break-confounded `bonusDps` this ADR suppresses is still never ranked on.
 **Amended:** 2026-08-11 (ticket 119) — added the self-set case below and
 decision 6. The confound analysis in this ADR originally covered cross-set
 breaks only.
+**Amended:** 2026-08-12 (ticket 131) — decision 5 narrowed to name the figure
+it forbids restating, so it no longer reads as contradicting ADR-0024's
+2026-08-11 amendment, which the code follows.
 **Date:** 2026-08-10
 **Implements:** `.scratch/set-bonus-value/spec.md` §2.3, §4
 **Tickets:** `.scratch/carry-forward/issues/90-set-break-confound-inflates-bonus-and-inverts-sets.md`,
@@ -160,6 +163,12 @@ reaches no row also reached no default reader (ticket 100).
 curated-BiS row below cutoff renders a text pointer to the Set potential panel
 (ticket 96). It carries no number — restating any part of a break-confounded
 figure on a row would reintroduce decision 3's failure by another route.
+**(Narrowed 2026-08-12, ticket 131):** what this decision forbids is
+restating the break-confounded `bonusDps`; it was never about
+`packageDeltaDps`, which decision 3 above already calls "the only one that is
+genuinely net of any break" — so ADR-0024's 2026-08-11 amendment, whose
+pointer states a package's measured `packageDeltaDps`, is consistent with
+this decision's intent, not an exception to it.
 
 **6. A package needing exactly one piece is reported unmeasurable, never as a
 measured zero (added 2026-08-11, ticket 119 option B).** `buildSetBonuses`
