@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 75d3f87 (test coverage completed in d114e91)
 Type: bug
 Origin: fresh-context review of tickets 111/112, 2026-08-11 (axis 1 finding A3)
 Blocks: none
@@ -32,6 +33,25 @@ string.
 
 ## Acceptance criteria
 
-- [ ] `null` and `undefined` quality take the same documented path.
-- [ ] The chosen behaviour is asserted directly in a unit test.
-- [ ] `pnpm verify` green.
+- [x] `null` and `undefined` quality take the same documented path.
+- [x] The chosen behaviour is asserted directly in a unit test.
+- [ ] `pnpm verify` green. — not run in full on this worktree: three
+      pre-existing failures (`vendor/wowsims/*` not synced in this worktree)
+      are unrelated to this fix; typecheck, lint, and every gem-area test file
+      pass. See the parallel-phase handoff for the exact `pnpm verify`
+      command and its output.
+
+## CLOSED, 2026-08-12
+
+Commits `75d3f87` and `d114e91` on `wt/issue1-gem-fixes` (issue #1 cleanup).
+
+Decision: **throw**, loud over quiet. `gemsForQuality` (`packages/core/src/gems.ts`)
+now throws when an entry's `quality` is not a `number`, covering `null`,
+`undefined`, and a string — one path for every malformed value, pinned in
+`packages/core/test/items-gems.test.ts` ("treats null and undefined quality
+alike, loudly, not as opposite outcomes (ticket 114)").
+
+Folded into the same commit as the chokepoint fix (review-corrections.md
+item 5): the rare-gem fill cap moved off call-site discipline into a new
+`fillEligibleGems` accessor in `gems.ts`, so `candidate-gems.ts`'s
+`gemContext` can no longer build a fill palette without the cap applied.
