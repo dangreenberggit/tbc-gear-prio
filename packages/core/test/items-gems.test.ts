@@ -185,8 +185,19 @@ describe("gem palette", () => {
         unique: false,
       },
     ];
+    const withStringQuality: GemEntry[] = [
+      {
+        id: 3,
+        colour: 2,
+        stats: [],
+        phase: 1,
+        quality: "3" as unknown as number,
+        unique: false,
+      },
+    ];
     expect(() => gemsForQuality(withNullQuality, 3)).toThrow(/quality/i);
     expect(() => gemsForQuality(withUndefinedQuality, 3)).toThrow(/quality/i);
+    expect(() => gemsForQuality(withStringQuality, 3)).toThrow(/quality/i);
   });
 
   it("renames db.json's `color` field to `colour`", () => {
