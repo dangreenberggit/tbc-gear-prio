@@ -26,3 +26,12 @@ died at spawn; nothing was half-done — tree was clean at 96ec2d5), then resume
 when the limit lifted. Checked before resuming: ticket 118's code change is
 commit ee2a4e4 (memberPackages in rank.ts and the plural setContext.packages in
 the report code are in the tree); 83ca4ae is only the paperwork on top.
+
+## Fix-round-of-the-fix-round (2026-08-11, follow-up)
+
+Findings 1, 2, 3, 4 and 8 from 06-review.md were fixed after the round above
+closed (see the commits after 801065a). Review notes 5, 6 and 7 in 06-review.md
+were read and accepted as-is, no code change: 5 (`firstLineOf`'s harmless
+"full text" pointer on details with no hidden text), 6 (the ret substitution
+ending mid-JSON, cosmetic), and 7 (the ticket-119 skip's arithmetic equivalence,
+already verified correct in the review).
