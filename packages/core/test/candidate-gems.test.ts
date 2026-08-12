@@ -140,7 +140,12 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
     expect(goggleGems[metaIdx]).toBe(32409);
   });
 
-  it("keeps the full palette for meta repair — only the fill palette narrows", () => {
+  it("keeps ctx.palette uncapped for gemPaletteIds provenance — only fillPalette narrows", () => {
+    // Ticket 117: gem selection (fill and meta repair alike) now reads only
+    // `fillPalette`. `ctx.palette`'s sole remaining consumer is rank.ts's
+    // `gemPaletteIds`, which feeds the content hash — see ticket 130 item 4
+    // for the open question on whether that hash should key off
+    // `fillPalette` instead.
     const full = gemsForPhase(3);
     const ctx = gemContext(full, retEpWeights);
     expect(ctx.palette).toBe(full);

@@ -44,7 +44,8 @@ export function gemsForPhase(maxPhase: number): GemEntry[] {
 /**
  * Like gemsForPhase, what counts as an available gem is a fact about gem
  * data, so the quality filter lives here rather than at the call site
- * (ticket 111 — the auto-fill path caps rarity; meta repair does not).
+ * (ticket 111, revised by ticket 117 — both the auto-fill path and meta
+ * repair now cap rarity, via `GemContext.fillPalette`).
  */
 export function gemsForQuality(
   palette: readonly GemEntry[],

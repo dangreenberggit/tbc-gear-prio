@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: docs
 Origin: pre-merge review of `feat/set-bonus-value`, round 3, 2026-08-12 (standards axis, 3-St2 / 3-St3 / 3-St4)
 Blocks: none
@@ -46,10 +46,37 @@ is actually for.
 
 ## Acceptance
 
-- [ ] `gems.ts:47` describes the rarity cap as applying to both paths.
-- [ ] The two comment blocks at `rank-report.ts:340-346` each sit above the code
+- [x] `gems.ts:47` describes the rarity cap as applying to both paths.
+- [x] The two comment blocks at `rank-report.ts:340-346` each sit above the code
       they describe, and neither claims the line renders only for positive
       packages.
-- [ ] `candidate-gems.test.ts:143`'s name matches what it asserts.
+- [x] `candidate-gems.test.ts:143`'s name matches what it asserts.
 - [ ] A decision is recorded on whether `gemPaletteIds` should hash the capped
       palette.
+
+## Closing notes
+
+Fixed in commit (this branch), items 1-3:
+
+- `gems.ts:47` (`gemsForQuality` docstring): reworded to say ticket 117
+  extended the rarity cap to both the auto-fill path and meta repair, both
+  now routed through `GemContext.fillPalette` — matching the correct
+  `fillPalette` docstring at `candidate-gems.ts:40-46`.
+- `rank-report.ts:340-346`: removed the misplaced block that described
+  `curatedPointer` (declared 12 lines below) while sitting above
+  `packageLineText`; `curatedPointer`'s own doc comment already lives with
+  `formatCuratedPackagePointer` in `rank-report-rules.ts`. Rewrote the
+  remaining comment to say `formatPackageMembershipLine` renders for any
+  non-empty `packages`, including negative ones, per ADR-0024's "negative
+  figures render too" amendment — matches the function's actual guard
+  (`pkgs.length === 0` only, no sign check).
+- `candidate-gems.test.ts:143`: renamed from "keeps the full palette for meta
+  repair — only the fill palette narrows" (the old, now-false claim) to
+  "keeps ctx.palette uncapped for gemPaletteIds provenance — only fillPalette
+  narrows", and added an inline comment pointing at `rank.ts`'s
+  `gemPaletteIds` as the sole remaining consumer. Assertion left unchanged —
+  still meaningful coverage of that provenance fact, not deleted.
+
+Item 4 (the `gemPaletteIds`/content-hash question) is explicitly out of scope
+for this pass per the assigning instructions — left open here, undecided, for
+a separate ticket/decision.

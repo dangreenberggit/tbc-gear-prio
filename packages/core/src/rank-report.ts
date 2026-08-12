@@ -338,13 +338,12 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             withSetPotential && item.setContext
               ? `<div class="set-potential">${esc(formatSetPotentialLine(item) ?? setPotentialUnmeasuredText(item))}</div>`
               : "";
-          // Ungated, unlike `setPotential` above: this carries no figure, and
-          // the contradiction it reconciles is visible by default
-          // (carry-forward 96).
           // Ungated like the curated pointer below: it carries the row's own
           // delta beside the package figure, so it explains the package mode
-          // rather than asserting a ranking. Rendered whenever a measured,
-          // positive package claims this row.
+          // rather than asserting a ranking. Rendered whenever any package
+          // claims this row, including a negative one — negative figures
+          // render too (ADR-0024): a package that measured badly is a
+          // measurement, not a secret.
           const packageLineText = formatPackageMembershipLine(item);
           const packageLine = packageLineText
             ? `<div class="package-line">${esc(packageLineText)}</div>`
