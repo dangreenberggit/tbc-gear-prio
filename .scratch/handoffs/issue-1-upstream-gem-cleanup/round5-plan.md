@@ -67,3 +67,46 @@ Output file: `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.m
 - Comment policy: why, never what.
 - The other session's agent-md commit must be the base or an ancestor —
   assert the base SHA in the handoff.
+
+## Execution log (2026-08-12, round-5 executor)
+
+Base: `f491310` (the agent-md commit from the other session, as required).
+All six Phase X items done, in the planned order. No landing, no merge.
+
+- [x] **1. Ticket 136 item 5 (fixture)** — `2e55dce`. Two tests through
+      `equipmentForCandidateSwap`. Both pass on arrival (the behaviour was
+      already correct), so non-vacuity was shown by **mutation**: reverting each
+      predicate independently fails the corresponding test. The round-4 null
+      result is now a real measurement. The ADR-0025 decision-3 before/after
+      commands were not re-run — the new coverage is a rank-level test, not a
+      new CLI fixture, so those commands measure the same thing they did.
+- [x] **2. Ticket 107** — `3539cfe`, closed. Report-shape decision recorded in
+      the ticket: a new optional `RankedItem.gemSubstitutions` rather than
+      extending the run-level `substitutions` list. **Residual disclosed**: the
+      ticket's Reproduce command was not re-run, so "minimizeRegems may have
+      shrunk the recolour set to zero" stays untested; a probe against the
+      committed fixture found zero recolours, which is consistent with it.
+- [x] **3. Ticket 135** — `a6b911c`, closed. `"repair-failed"` added; the
+      renderer gap was caught by typecheck because `UNMEASURED_REASON_TEXT` is
+      an exhaustive `Record`.
+- [x] **4. Ticket 136 items 1–4** — `2f32a2b`, `c196c47`, `cc5b4b3`, closed.
+      All four done, none rejected. Item 3 folded only the two
+      *candidate* skip arrays; `packageSimSkips` was deliberately left out (its
+      shape differs, and round-4 finding 5 exists because a `setId` once
+      masqueraded as an `itemId`). Item 4 was verified by **re-running both
+      five-seed arms** against the live sim binary — ret 3.4 / SE 1.678, feral
+      3.6 / SE 1.774, both matching the committed artifacts byte-for-byte apart
+      from the new `"spec"` field.
+- [x] **5. Per-spec meta table** — `ec56939`, spike note updated in `6a0e259`.
+      Both research gaps closed first (`23df60f`), from committed data:
+      Chaotic Skyfire 34220 is **phase 1** in our db.json/palette (the online
+      "phase 3" claim does not describe our data), and the vendored presets
+      confirm one static meta for ret and **none at all** for feral.
+
+      The plan's phrasing anticipated a table over the researched specs. The
+      real constraint is `DetectedSpecId` = `ret | feral | feral-tank`, so the
+      table can only have three rows; feral's is deliberately absent because
+      upstream has no feral meta to copy (all five presets wear the socketless
+      Wolfshead Helm 8345). Ret is byte-identical — no existing test changed.
+- [x] **6. Commits per green slice; `pnpm verify` exit 0** at `ec56939`.
+- [x] **7. No land, no merge, no push.**
