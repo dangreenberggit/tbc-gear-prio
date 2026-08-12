@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: chore
 Origin: pre-merge review of `feat/set-bonus-value`, round 3, 2026-08-12 (standards axis, 3-St1)
 Blocks: none
@@ -43,6 +43,17 @@ root-level JSON.
 
 ## Acceptance
 
-- [ ] `git show HEAD:package.json` contains zero CRLF pairs.
-- [ ] A rule prevents recurrence, or a note records why the file is left
+- [x] `git show HEAD:package.json` contains zero CRLF pairs.
+- [x] A rule prevents recurrence, or a note records why the file is left
       unpinned.
+
+## Closing notes
+
+Fixed in commit (this branch): converted `package.json`'s committed bytes
+from CRLF back to LF (verified via `python -c` byte count: 67 CRLF / 0 LF-only
+before, 0 CRLF / 67 LF-only after — same command style the ticket used to
+detect the flip). Added `package.json text eol=lf` to `.gitattributes`,
+scoped to the one file per the ticket's own suggestion rather than widening to
+`*.json` — `git status` after adding the rule showed only `.gitattributes` and
+`package.json` dirty, so no other file's normalized ending changed as a side
+effect.

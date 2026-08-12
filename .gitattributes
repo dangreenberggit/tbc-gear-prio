@@ -5,3 +5,9 @@
 # `//` comment lines — see ticket 05-proto-codegen-byte-stability.md.
 data/proto/**              text eol=lf
 packages/core/src/proto/** text eol=lf
+
+# Root package.json flipped to CRLF once already (ticket 129) because nothing
+# pinned it while core.autocrlf=false. Pin it the same way as the proto trees
+# rather than widening to *.json, which would also catch data/ fixtures this
+# ticket never measured.
+package.json text eol=lf
