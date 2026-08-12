@@ -3,7 +3,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { getItem } from "../src/items.js";
-import { gemColorCounts, isMetaConditionMet, metaStatus } from "../src/meta.js";
+import {
+  gemColorCounts,
+  gemColorMatchesSocket,
+  isMetaConditionMet,
+  metaStatus,
+} from "../src/meta.js";
+import { GemColor } from "../src/proto/common_pb.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -49,6 +55,47 @@ describe("meta conditions", () => {
     expect(isMetaConditionMet(25897, { red: 2, yellow: 0, blue: 2 })).toBe(
       false
     );
+  });
+});
+
+describe("prismatic gems count toward all three meta colours (intentional divergence from upstream)", () => {
+  // Void Sphere (22459) / Prismatic Sphere (22460) are the only two
+  // Prismatic gems in TBC. Game rule: a Prismatic gem satisfies red, yellow,
+  // AND blue meta-colour requirements at once — that is what "Prismatic"
+  // means, not a bug to match against upstream's own `default: return 0,0,0`
+  // (review-corrections.md item, overturning the previous comment's "highest-
+  // confidence correctness bug" call).
+  it("matches every primary socket colour, not just its own", () => {
+    expect(
+      gemColorMatchesSocket(GemColor.GemColorPrismatic, GemColor.GemColorRed)
+    ).toBe(true);
+    expect(
+      gemColorMatchesSocket(GemColor.GemColorPrismatic, GemColor.GemColorYellow)
+    ).toBe(true);
+    expect(
+      gemColorMatchesSocket(GemColor.GemColorPrismatic, GemColor.GemColorBlue)
+    ).toBe(true);
+    // But not the meta socket itself — only a genuine meta-colour gem seats there.
+    expect(
+      gemColorMatchesSocket(GemColor.GemColorPrismatic, GemColor.GemColorMeta)
+    ).toBe(false);
+  });
+
+  it("credits a single Prismatic gem toward red, yellow, and blue simultaneously", () => {
+    const VOID_SPHERE = 22459;
+    expect(gemColorCounts([VOID_SPHERE])).toEqual({
+      red: 1,
+      yellow: 1,
+      blue: 1,
+    });
+  });
+
+  it("alone activates Relentless Earthstorm Diamond's 2/2/2 with two copies", () => {
+    const VOID_SPHERE = 22459;
+    const PRISMATIC_SPHERE = 22460;
+    const counts = gemColorCounts([VOID_SPHERE, PRISMATIC_SPHERE]);
+    expect(counts).toEqual({ red: 2, yellow: 2, blue: 2 });
+    expect(isMetaConditionMet(32409, counts)).toBe(true);
   });
 });
 
