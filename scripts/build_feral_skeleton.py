@@ -23,9 +23,19 @@ ret the APL block -- prepullActions especially -- is what the Go sim actually
 runs, and that `type`+`simple` alone produces a different, wrong DPS. So the
 feral skeleton carries the same four APL fields.
 
+Before that copy happens, the APL JSON is checked against apl_schema.py's
+extraction of data/proto/*.proto (issue #1, step 8): the pinned wowsimcli
+binary (v0.0.101) unmarshals with DiscardUnknown: true, so a field name our
+proto pin doesn't know about is silently dropped rather than erroring --
+upstream's newer feral APL uses `timeToNextEnergyTick`, which produces a
+plausible but wrong rotation under that pin with no signal at all. This
+script refuses to write a skeleton containing a field name absent from the
+pinned schema; re-pin the proto (fetch:protos) before regenerating past that
+point.
+
     python scripts/build_feral_skeleton.py
 
-Exit 0 ok, 2 missing inputs.
+Exit 0 ok, 1 unknown APL field, 2 missing inputs.
 """
 
 from __future__ import annotations
@@ -33,6 +43,10 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from apl_schema import known_fields, unknown_field_keys  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 RET_SKELETON = ROOT / "data/presets/ret/p2.raid-sim-skeleton.json"
@@ -102,6 +116,28 @@ def main() -> int:
     skeleton = json.loads(RET_SKELETON.read_text(encoding="utf-8"))
     apl = json.loads(FERAL_APL.read_text(encoding="utf-8"))
     buffs = json.loads(BUFF_DEFAULTS.read_text(encoding="utf-8"))
+
+    # DiscardUnknown: true means the pinned binary drops a field it doesn't
+    # recognise instead of erroring -- so check before the copy, not after.
+    # Only the four fields this script actually carries forward (APL_KEYS)
+    # matter here; unrelated top-level keys in the vendor APL file (if any)
+    # are never read.
+    apl_subset = {key: apl.get(key) for key in APL_KEYS}
+    unknown = unknown_field_keys(apl_subset, known_fields())
+    if unknown:
+        print(
+            f"{FERAL_APL} uses field(s) unknown to the pinned "
+            f"proto (data/proto/*.proto): {unknown}",
+            file=sys.stderr,
+        )
+        print(
+            "  the pinned wowsimcli binary silently discards unrecognised fields "
+            "(DiscardUnknown: true) rather than erroring -- writing this skeleton "
+            "would produce a plausible but wrong rotation with no signal.",
+            file=sys.stderr,
+        )
+        print("  re-pin the proto (pnpm fetch:protos) before regenerating.", file=sys.stderr)
+        return 1
 
     raid = skeleton["raid"]
     party = raid["parties"][0]
