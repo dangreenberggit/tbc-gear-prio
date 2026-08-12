@@ -34,6 +34,11 @@ Barrel `packages/core/src/index.ts`: owned by delegator; workers state needed ex
 - B: sync script fails loudly on empty vendor/; unknown-APL-field gate rejects `timeToNextEnergyTick` under pinned schema.
 - C: feral cutoff derived from an actual five-seed run (artifact committed), not extrapolated from ret.
 
+## Worker status
+
+- C **done** (2026-08-12): branch `wt/issue1-feral-noise`, commits `8eeb40c` + `53aa0e3`. Feral cutoff derived: 3.6 dps / 0.15% (ret 3.4 unchanged; feral mean SE 1.774 vs ret 1.678, `docs/five-seed-spread-feral.json`, rerun via `python scripts/five_seed_spread_feral.py` after `pnpm fetch:wowsimcli` + `python scripts/compose_feral_raid_sim.py`). Fan-in obligations: apply barrel line `export { CUTOFF_FERAL, cutoffForSpec } from "./cutoff.js";` to `packages/core/src/index.ts`; wire `cutoffForSpec` into `rank.ts`/`view.ts`/`cli.ts` AFTER merging A (or ticket it) — nothing calls it yet, so feral still ranks at 3.4 until wired.
+- A, B: in flight.
+
 ## After fan-in
 
 Teardown worktrees → `pnpm verify` on integrated tip → delegator does steps 6, 9 → triage tickets 111,107,103,29,20,06,04 (recheck 103 after regem-minimization) → `pre-merge-review` → ask user before `pnpm land`.
