@@ -23,3 +23,26 @@ Option 1. It is the same epistemics we already accepted for ret, extended per sp
 - Feral entry: read upstream feral presets at the pin — do this *after* the re-pin, since the feral overhaul lives on `feature/backend-reforge`.
 - Add the "no meta preference" disclosure path + test for a spec absent from the table.
 - Activation stays deliberately unchecked (existing comment's rationale holds spec-independently).
+
+## Implemented (2026-08-12, `ec56939`)
+
+Option 1, with one finding from the local evidence pass that changed the shape:
+
+- `SPEC_PREFERRED_METAS` (`packages/core/src/candidate-gems.ts`) keyed by
+  `DetectedSpecId`, carrying `ret: [32409]`.
+- **Feral got no entry, and none was expected.** The implementation item above
+  said "read upstream feral presets at the pin". Doing so found that all five
+  vendored feral presets wear Wolfshead Helm 8345 — no sockets, no meta. There
+  is no feral meta to copy at the pin, so feral takes the fail-loud path.
+  The re-pin this note anticipated will not change that unless the feral
+  overhaul also changes the head choice.
+- Fail-loud path: `missingMetaPreferenceNote`, surfaced through
+  `substitutions` as `gems.meta-preference`. The meta socket is left as worn.
+- The spec threads through `GemContext` and `FillEmptyOpts`. Absent spec keeps
+  ret's entry, so ret's behaviour is byte-identical and no existing test moved.
+- Activation stays unchecked, as this note argued.
+
+Scope correction worth recording: this note assumed a table over specs
+generally. `DetectedSpecId` is `"ret" | "feral" | "feral-tank"`, so the table
+can only ever have three rows. The eight other specs in `meta-gem-research.md`
+are unreachable from this code.
