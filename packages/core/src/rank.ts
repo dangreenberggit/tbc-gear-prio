@@ -38,8 +38,7 @@ import {
 } from "./logged-gear.js";
 import {
   MetaRepairError,
-  minimizeRegems,
-  repairMeta,
+  repairAndMinimize,
   type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
@@ -492,19 +491,11 @@ export async function rankUpgrades(
     deps.epWeights
   );
   try {
-    const repaired = repairMeta({
-      items: socketed,
+    const minimized = repairAndMinimize({
+      items: preRepairSocketed,
       epWeights: deps.epWeights,
       palette: gems.fillPalette,
     });
-    const minimized =
-      repaired.swaps.length > 0
-        ? minimizeRegems({
-            original: preRepairSocketed,
-            repaired: repaired.items,
-            swaps: repaired.swaps,
-          })
-        : repaired;
     socketed = minimized.items;
     metaAdjusted = minimized.metaAdjusted;
     metaSwaps = minimized.swaps;
@@ -1624,19 +1615,11 @@ export function candidateSwapWithRepairs(
   // here: a repair failure on one candidate must skip only that candidate
   // (both callers below catch it for exactly that), not abort the whole
   // ranking the way a baseline-gear repair failure legitimately does.
-  const repaired = repairMeta({
+  const minimized = repairAndMinimize({
     items: socketed,
     epWeights: gems.weights,
     palette: gems.fillPalette,
   });
-  const minimized =
-    repaired.swaps.length > 0
-      ? minimizeRegems({
-          original: socketed,
-          repaired: repaired.items,
-          swaps: repaired.swaps,
-        })
-      : repaired;
   return {
     equipment: applyRepairedGems(swapped, minimized.items),
     // The swapped-in candidate's own sockets are the offer itself, not an

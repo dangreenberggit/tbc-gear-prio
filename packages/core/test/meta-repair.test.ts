@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { gemsForPhase, gemsForQuality, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
-import { gemColorCounts, metaStatus } from "../src/meta.js";
+import { gemColorCounts, metaStatus, socketBonusActive } from "../src/meta.js";
 import {
   MetaInfeasibleError,
   MetaRepairError,
@@ -83,6 +83,37 @@ describe("socketsMatch", () => {
   it("requires a meta-only item's socket filled before crediting its bonus", () => {
     expect(socketsMatch(28559, [0])).toBe(false);
     expect(socketsMatch(28559, [25897])).toBe(true);
+  });
+
+  /**
+   * Ticket 136 item 1: this rule was implemented twice — here and as
+   * `allSocketsMatched` in candidate-gems.ts — kept in lockstep by a comment
+   * asking the next editor to remember. Both now delegate to
+   * `socketBonusActive` (meta.ts). This pins the delegation rather than the
+   * duplication: if `socketsMatch` ever regrows its own copy of the rule, the
+   * two can drift again and this fails.
+   */
+  it("delegates to the shared socketBonusActive predicate", () => {
+    const cases: Array<[number, number[]]> = [
+      [24545, [0, 23113]], // meta empty, coloured matches
+      [24545, [0, 24027]], // meta empty, coloured mismatched
+      [28559, [0]], // meta-only, empty
+      [28559, [25897]], // meta-only, filled
+      [24545, []], // fewer gems than sockets
+    ];
+    for (const [itemId, gems] of cases) {
+      expect(
+        socketsMatch(itemId, gems),
+        `item ${itemId} ${gems.join(",")}`
+      ).toBe(socketBonusActive(getItem(itemId)!.sockets, gems));
+    }
+  });
+
+  // Only the id-keyed wrapper can express this: an item absent from db.json
+  // has no sockets to read, and treating it as unconstrained is what keeps an
+  // unknown item from silently forfeiting a bonus it may not even have.
+  it("treats an unknown item as unconstrained", () => {
+    expect(socketsMatch(999999999, [])).toBe(true);
   });
 });
 

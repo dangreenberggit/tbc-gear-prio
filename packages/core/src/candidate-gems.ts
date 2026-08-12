@@ -11,7 +11,12 @@
 
 import { fillEligibleGems, getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
-import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
+import {
+  gemColorCounts,
+  gemColorMatchesSocket,
+  metaDeficit,
+  socketBonusActive,
+} from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat, type EpWeights } from "./stats.js";
 
@@ -269,39 +274,12 @@ function layoutScore(
     if (gem) score += epScore(gem.stats, epWeights);
   }
 
-  if (allSocketsMatched(sockets, gemIds)) {
+  if (socketBonusActive(sockets, gemIds)) {
     const bonus = getItem(itemId)?.socketBonus;
     if (bonus) score += epScore(bonus, epWeights);
   }
 
   return score;
-}
-
-/**
- * Whether the socket bonus is active. Same rule as `socketsMatch` in
- * meta-repair.ts, including its meta-only exception (round-4 review, D1) —
- * keep the two in lockstep until they share one definition.
- */
-function allSocketsMatched(
-  sockets: readonly number[],
-  gemIds: readonly number[]
-): boolean {
-  if (gemIds.length < sockets.length) return false;
-
-  let sawColoured = false;
-  let metaEmpty = false;
-  for (let i = 0; i < sockets.length; i++) {
-    if (sockets[i] === GemColor.GemColorMeta) {
-      if (!gemIds[i]) metaEmpty = true;
-      continue;
-    }
-    sawColoured = true;
-    const gem = getGem(gemIds[i] ?? 0);
-    if (!gem) return false;
-    if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
-  }
-
-  return sawColoured || !metaEmpty;
 }
 
 /** Test helper — resolve palette gem by id after fill. */

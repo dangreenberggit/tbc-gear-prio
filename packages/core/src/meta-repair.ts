@@ -10,9 +10,9 @@ import { getGem, type GemEntry } from "./gems.js";
 import { getItem } from "./items.js";
 import {
   gemColorCounts,
-  gemColorMatchesSocket,
   metaDeficit,
   metaStatus,
+  socketBonusActive,
   type GemColorCounts,
 } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
@@ -224,35 +224,44 @@ export function minimizeRegems(opts: {
 }
 
 /**
- * Whether the item's socket bonus is active. The bonus is gated on the
- * *coloured* sockets — an unfilled meta socket does not forfeit it (issue #1
- * step 2; upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`
- * skips non-coloured sockets, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`).
- * Exception: an item whose sockets are meta-only (11 exist in db.json, e.g.
- * 28559) has nothing else to gate on, and an empty socket grants no bonus
- * in-game — skipping it unconditionally would credit the bonus vacuously
- * (round-4 review, D1). Exported as a test helper so the predicate can be
- * pinned directly instead of only through repair-cost side effects.
+ * Repair the meta, then put back every gem the repair did not need to move.
+ *
+ * The two steps are always run together — a repaired layout that skipped
+ * minimization would recommend the cheapest gems that solved the meta rather
+ * than the player's own. Both `rank.ts` call sites had the same ternary
+ * inline, including the `swaps.length > 0` guard that keeps `minimizeRegems`
+ * off an untouched layout (ticket 136 item 2).
+ *
+ * Throws `MetaRepairError` from `repairMeta`; callers decide whether that
+ * skips one candidate or aborts the ranking.
+ */
+export function repairAndMinimize(opts: {
+  items: readonly SocketedItem[];
+  epWeights: EpWeights;
+  palette: readonly GemEntry[];
+}): MetaRepairResult {
+  const repaired = repairMeta(opts);
+  if (repaired.swaps.length === 0) return repaired;
+  return minimizeRegems({
+    original: opts.items,
+    repaired: repaired.items,
+    swaps: repaired.swaps,
+  });
+}
+
+/**
+ * Whether the item's socket bonus is active, keyed by item id. The rule lives
+ * in `socketBonusActive` (meta.ts) — this resolves the id to its sockets and
+ * treats an unknown item as unconstrained, which id lookup makes possible and
+ * the socket-level predicate cannot express.
+ *
+ * Exported as a test helper so the predicate can be pinned directly instead of
+ * only through repair-cost side effects.
  */
 export function socketsMatch(itemId: number, gems: readonly number[]): boolean {
   const item = getItem(itemId);
-  if (!item || item.sockets.length === 0) return true;
-  if (gems.length < item.sockets.length) return false;
-  let sawColoured = false;
-  let metaEmpty = false;
-  for (let i = 0; i < item.sockets.length; i++) {
-    if (item.sockets[i] === GemColor.GemColorMeta) {
-      if (!gems[i]) metaEmpty = true;
-      continue;
-    }
-    sawColoured = true;
-    const gemId = gems[i] ?? 0;
-    if (!gemId) return false;
-    const gem = getGem(gemId);
-    if (!gem) return false;
-    if (!gemColorMatchesSocket(gem.colour, item.sockets[i]!)) return false;
-  }
-  return sawColoured || !metaEmpty;
+  if (!item) return true;
+  return socketBonusActive(item.sockets, gems);
 }
 
 function gemEp(gemId: number, weights: EpWeights): number {

@@ -124,6 +124,50 @@ export function gemColorMatchesSocket(
   return SOCKET_TO_MATCHING.get(socketColor)?.has(gemColor) ?? false;
 }
 
+/**
+ * Whether an item's socket bonus is active, given its socket colours and the
+ * gems sitting in them.
+ *
+ * The bonus is gated on the *coloured* sockets — an unfilled meta socket does
+ * not forfeit it (issue #1 step 2; upstream
+ * `sim/core/reforge_optimizer/gear.go:socketBonusActive` skips non-coloured
+ * sockets, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`). Exception: an item
+ * whose sockets are meta-only (11 exist in db.json, e.g. 28559) has nothing
+ * else to gate on, and an empty socket grants no bonus in-game — skipping it
+ * unconditionally would credit the bonus vacuously (round-4 review, D1).
+ *
+ * One definition because there were two: `socketsMatch` (meta-repair.ts) and
+ * `allSocketsMatched` (candidate-gems.ts) implemented this rule separately,
+ * kept in lockstep by a comment asking the next editor to remember
+ * (ticket 136 item 1). It lives here rather than in either caller because both
+ * already depend on this module, and it needs only socket colours and gems.
+ *
+ * Takes sockets rather than an item id so it stays independent of item
+ * lookup; `socketsMatch` is the id-keyed wrapper.
+ */
+export function socketBonusActive(
+  sockets: readonly number[],
+  gemIds: readonly number[]
+): boolean {
+  if (sockets.length === 0) return true;
+  if (gemIds.length < sockets.length) return false;
+
+  let sawColoured = false;
+  let metaEmpty = false;
+  for (let i = 0; i < sockets.length; i++) {
+    if (sockets[i] === GemColor.GemColorMeta) {
+      if (!gemIds[i]) metaEmpty = true;
+      continue;
+    }
+    sawColoured = true;
+    const gem = getGem(gemIds[i] ?? 0);
+    if (!gem) return false;
+    if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
+  }
+
+  return sawColoured || !metaEmpty;
+}
+
 export function gemColorCounts(gemIds: readonly number[]): GemColorCounts {
   const colours: GemColour[] = [];
   for (const id of gemIds) {
