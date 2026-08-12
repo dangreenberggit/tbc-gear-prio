@@ -163,12 +163,14 @@ figure on a row would reintroduce decision 3's failure by another route.
 
 **6. A package needing exactly one piece is reported unmeasurable, never as a
 measured zero (added 2026-08-11, ticket 119 option B).** `buildSetBonuses`
-skips the sim and records `unmeasured: "unmeasurable-at-this-worn-count"`,
-still naming the completing piece. No surface prints a zero-by-construction
-figure with an SE. The 4pc-at-1-worn figure (anomaly A above) is **left as
-measured and confounded for now** — extending suppression or qualification to
-the completing set itself is ticket 119 option A, still open; decision 3's
-"suppress and disclose, never correct" is the precedent it would follow.
+skips the sim and records `unmeasured: "unmeasurable-at-this-worn-count"`. The
+completing piece's id is retained in `packageItemIds` for a future display; no
+current renderer reads it on an unmeasured entry. No surface prints a
+zero-by-construction figure with an SE. The 4pc-at-1-worn figure (anomaly A
+above) is **left as measured and confounded for now** — extending suppression
+or qualification to the completing set itself is ticket 119 option A, still
+open; decision 3's "suppress and disclose, never correct" is the precedent it
+would follow.
 
 ## Consequences
 

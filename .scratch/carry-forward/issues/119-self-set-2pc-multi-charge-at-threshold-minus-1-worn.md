@@ -69,8 +69,8 @@ one piece (worn count = threshold − 1, at either threshold) is now reported
 as `unmeasured: "unmeasurable-at-this-worn-count"` instead of a measured
 0.00 ± se, and no sim is spent on it — the "package" sim would have been the
 completing piece's own single-swap sim, identical equipment, zero by
-construction. The completing piece is still named in `packageItemIds` so a
-renderer can say which item would finish the threshold. The report renders
+construction. The completing piece's id is retained in `packageItemIds` for a
+future display; no current renderer reads it on an unmeasured entry. The report renders
 the reason as "can't be measured from this starting gear — one piece short
 of this threshold, so the completing piece's own swap already carries the
 bonus". Changes: `UnmeasuredReason` in `packages/core/src/set-value.ts`, the
