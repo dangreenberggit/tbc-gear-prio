@@ -23,7 +23,7 @@ import {
   statDeltaBetween,
   type CapState,
 } from "./caps.js";
-import { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+import { cutoffForSpec, meetsCutoff, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
   substitutionsFromMetaRepair,
@@ -405,6 +405,7 @@ export async function rankUpgrades(
   onProgress?: (p: Progress) => void
 ): Promise<Ranking> {
   onProgress?.({ stage: "resolving" });
+  const cutoff = cutoffForSpec(input.spec);
   const fights = await deps.gear.findFights(input.character, input.spec);
   const maybeResolved = resolveFight(fights, input.fight);
   if (!maybeResolved) {
@@ -795,7 +796,7 @@ export async function rankUpgrades(
 
       const deltaPct =
         baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
-      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, CUTOFF);
+      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, cutoff);
       const item: RankedItem = {
         rank: null,
         itemId: entry.itemId,
@@ -887,7 +888,7 @@ export async function rankUpgrades(
 
     const ranking: Ranking = {
       contentHash,
-      cutoff: CUTOFF,
+      cutoff,
       fight: resolved,
       baseline: {
         dps: observation.dps,
@@ -992,7 +993,7 @@ export async function rankUpgrades(
       // Re-evaluated against the mean rather than left at the first seed's
       // verdict: a row whose replicated estimate crosses the cutoff must not
       // keep a `belowCutoff` computed from a number no longer reported.
-      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, CUTOFF);
+      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, cutoff);
     }
   }
 

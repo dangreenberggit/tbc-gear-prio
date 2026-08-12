@@ -4,7 +4,7 @@
  * that is the property the Phase 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
-import { CUTOFF, meetsCutoff } from "./cutoff.js";
+import { meetsCutoff, type Cutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
 import { setPotentialIsConfounded } from "./rank-report-rules.js";
 import type { RankedItem, Ranking } from "./rank.js";
@@ -245,7 +245,8 @@ function assignTieGroups(
  * Default: carried from the `Ranking`, which is all ADR-0020 permits — a filter
  * selects rows and never moves the bar.
  *
- * Under `withSetPotential` the **bar is still the same absolute `CUTOFF`**;
+ * Under `withSetPotential` the **bar is still the ranking's own absolute
+ * cutoff** (per-spec since issue #1 step 0, carried on the `Ranking`);
  * what changes is the quantity measured against it, from `deltaDps` to the
  * effective value the toggle exists to display. Carrying the default verdict
  * here would have the shortlist hide exactly the rows the toggle surfaces: a
@@ -257,7 +258,8 @@ function assignTieGroups(
 function belowCutoffUnderView(
   item: RankedItem,
   withSetPotential: boolean,
-  baselineDps: number
+  baselineDps: number,
+  cutoff: Cutoff
 ): boolean {
   if (!withSetPotential) return item.belowCutoff;
   const prospective = rankableSetPotential(item);
@@ -267,7 +269,7 @@ function belowCutoffUnderView(
   // so both arms of the cutoff see the effective value.
   const effectivePct =
     baselineDps === 0 ? item.deltaPct : (effectiveDps / baselineDps) * 100;
-  return !meetsCutoff(effectiveDps, effectivePct, CUTOFF);
+  return !meetsCutoff(effectiveDps, effectivePct, cutoff);
 }
 
 /**
@@ -324,7 +326,8 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
       belowCutoffInView: belowCutoffUnderView(
         item,
         v.withSetPotential ?? false,
-        r.baseline.dps
+        r.baseline.dps,
+        r.cutoff
       ),
     }));
 

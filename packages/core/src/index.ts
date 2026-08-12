@@ -1,5 +1,11 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
-export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+export {
+  CUTOFF,
+  CUTOFF_FERAL,
+  cutoffForSpec,
+  meetsCutoff,
+  type Cutoff,
+} from "./cutoff.js";
 export {
   DegenerateSeedsError,
   PAIRED_REPLICATE_TOP_N,
@@ -206,7 +212,10 @@ export {
   type MetaStatus,
 } from "./meta.js";
 export {
-  MetaUnsolvableError,
+  MetaInfeasibleError,
+  MetaRepairError,
+  MetaStepBudgetExceededError,
+  minimizeRegems,
   repairMeta,
   type MetaRepairResult,
   type MetaRepairSwap,
