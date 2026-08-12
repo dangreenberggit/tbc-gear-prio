@@ -1,0 +1,36 @@
+wowsimcli v0.0.101
+gear      test\fixtures\shredzepelin-cat.raw.json (actor 'shredzepelin')
+skeleton  data\presets\feral\p2.raid-sim-skeleton.json
+seeds=['11', '22', '33', '44', '55'] iterations=3000
+
+=== worn items in the four tier slots (BASE) ===
+  shoulder  worn 29100 Mantle of Malorne (2 sockets) -> T6 31048 Thunderheart Pauldrons (2 sockets, +0)
+  chest     worn 29096 Breastplate of Malorne (3 sockets) -> T6 31042 Thunderheart Chestguard (3 sockets, +0)
+  hands     worn 29947 Gloves of the Searing Grip (0 sockets) -> T6 31034 Thunderheart Gauntlets (1 sockets, +1)
+  legs      worn 28741 Skulker's Greaves (3 sockets) -> T6 31044 Thunderheart Leggings (1 sockets, -2)
+
+=== guard sim: shredzepelin's unmodified gear (BASE) ===
+  BASE          2152.10  2152.02  2152.16  2152.07  2152.31   mean= 2152.13  spread= 0.29  SE~= 2.33
+  guard OK: 2152.13 vs target 2152.10 (diff +0.03)
+
+=== T6 substitution arms ===
+  T6_ALL        2232.65  2233.09  2233.33  2232.88  2232.68   mean= 2232.93  spread= 0.68  SE~= 2.69
+  T6_shoulder   2052.45  2051.98  2051.84  2051.71  2051.53   mean= 2051.90  spread= 0.92  SE~= 3.05
+  T6_chest      2056.48  2056.38  2056.27  2056.41  2056.08   mean= 2056.32  spread= 0.39  SE~= 3.15
+  T6_hands      2173.85  2173.55  2173.28  2173.04  2173.13   mean= 2173.37  spread= 0.81  SE~= 1.86
+  T6_legs       2178.61  2178.64  2178.53  2178.60  2178.64   mean= 2178.60  spread= 0.12  SE~= 1.97
+
+=== deltas vs BASE ===
+  T6_ALL       delta =   +80.80 DPS
+  T6_shoulder  delta =  -100.23 DPS
+  T6_chest     delta =   -95.81 DPS
+  T6_hands     delta =   +21.24 DPS
+  T6_legs      delta =   +26.47 DPS
+  sum of singles       =  -148.32 DPS
+  T6_ALL       delta       =   +80.80 DPS
+
+=== resources array length (empirical set-bonus-threshold check) ===
+  BASE         resources[len]=19
+  T6_ALL       resources[len]=18
+
+wrote .scratch\set-bonus-value\measurements-shredz-t6-2026-08-10.json

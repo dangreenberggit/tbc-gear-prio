@@ -1,0 +1,21 @@
+  OURS_BASE     2202.35   2202.39   2202.34   2202.37   2202.43   mean=  2202.38
+  OURS_PKG      2316.07   2315.98   2316.11   2316.17   2316.22   mean=  2316.11
+  OURS_CURSED   2047.90   2047.85   2047.74   2047.89   2047.86   mean=  2047.85
+  OURS_VENG     2041.21   2041.13   2041.01   2041.04   2041.08   mean=  2041.10
+  OWNER_BASE    2333.39   2333.40   2333.24   2333.39   2333.31   mean=  2333.35
+  OWNER_PKG     2420.91   2420.84   2421.12   2421.00   2421.03   mean=  2420.98
+  OWNER_CURSED  2179.18   2179.34   2179.42   2179.50   2179.31   mean=  2179.35
+  OWNER_VENG    2171.59   2171.46   2171.45   2171.63   2171.69   mean=  2171.56
+
+  [OURS] baseline           =   2202.38
+  [OURS] T6 4pc pkg delta   =  +113.73  (ground truth: +97 owner / +64.07 ours)
+  [OURS] CURSED delta       =  -154.53
+  [OURS] VENG   delta       =  -161.28
+  [OURS] CURSED - VENG      =    +6.75  per-seed ['6.68', '6.72', '6.73', '6.85', '6.78']  (ground truth: ~+10)
+
+  [OWNER] baseline           =   2333.35
+  [OWNER] T6 4pc pkg delta   =   +87.63  (ground truth: +97 owner / +64.07 ours)
+  [OWNER] CURSED delta       =  -154.00
+  [OWNER] VENG   delta       =  -161.78
+  [OWNER] CURSED - VENG      =    +7.78  per-seed ['7.58', '7.87', '7.97', '7.87', '7.62']  (ground truth: ~+10)
+

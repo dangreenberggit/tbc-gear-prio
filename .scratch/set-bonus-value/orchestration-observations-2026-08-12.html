@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orchestration observations — set-bonus arc, 10–12 Aug 2026</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0 auto; max-width: 60rem; padding: 2.5rem 1.5rem 6rem;
+    background: #fbfaf8; color: #23201c;
+    font: 16px/1.62 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 .3rem; letter-spacing: -.01em; }
+  .sub { color: #6d675f; margin: 0 0 2.2rem; font-size: .95rem; }
+  h2 {
+    font-size: 1.28rem; margin: 3rem 0 .9rem; padding-bottom: .35rem;
+    border-bottom: 2px solid #ddd7cd; letter-spacing: -.005em;
+  }
+  h3 { font-size: 1.02rem; margin: 1.9rem 0 .5rem; }
+  p, li { margin: .55rem 0; }
+  ul, ol { padding-left: 1.35rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1.1rem 0; font-size: .89rem; }
+  th, td { border: 1px solid #ddd7cd; padding: .45rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f1ede6; font-weight: 600; }
+  td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tbody tr:nth-child(even) { background: #f7f4ef; }
+  code { background: #efece6; padding: .08em .34em; border-radius: 3px; font-size: .87em; }
+  .box {
+    background: #fff; border: 1px solid #ddd7cd; border-left: 4px solid #b8ab95;
+    padding: .9rem 1.15rem; margin: 1.2rem 0; border-radius: 3px;
+  }
+  .box.fail { border-left-color: #b5643f; }
+  .box.win { border-left-color: #5e8055; }
+  .box h3 { margin-top: 0; }
+  .lead { font-size: 1.05rem; }
+  .caveat { color: #6d675f; font-size: .88rem; font-style: italic; }
+  .tag {
+    display: inline-block; font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .06em; padding: .1rem .45rem; border-radius: 3px;
+    background: #e7e2d8; color: #57514a; vertical-align: .12em; margin-right: .4rem;
+  }
+  .tag.fail { background: #f2dcd2; color: #8a4526; }
+  .tag.win { background: #dee8da; color: #3f5c37; }
+  hr { border: 0; border-top: 1px solid #ddd7cd; margin: 3rem 0; }
+  footer { margin-top: 3.5rem; color: #6d675f; font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<h1>Orchestration observations — the set-bonus arc</h1>
+<p class="sub">10–12 August 2026 &middot; branch <code>feat/set-bonus-value</code> &middot; tickets 90–126 &middot; written for the owner's own review</p>
+
+<h2>Summary</h2>
+
+<p class="lead">Over three days the branch went from "the set-bonus numbers are
+disputed and nobody has run a simulation" to "every disputed number is measured,
+one genuine bug in our own code was found and fixed, and the two remaining gaps
+are named with error bars instead of stories." That was done by roughly three
+dozen agent runs costing about 4.7 million tokens, of which the largest single
+block was one ten-iteration diagnostic loop.</p>
+
+<h3>What the arc accomplished</h3>
+<ul>
+  <li><strong>Measurement replaced argument.</strong> The central dispute — the
+  value of the Malorne 2-piece bonus — had a regression camp saying 100–133 DPS
+  and a domain-expert camp saying 15–40, with neither side having run a sim.
+  Direct measurement settled it at <strong>131.1 ± 6.6</strong>, in favour of the
+  regression camp, and explained the mechanism (a cat rotation is energy-limited,
+  so an energy proc converts almost entirely into extra Shred casts — +11.3% of
+  them).</li>
+
+  <li><strong>A real bug in our code, found by ten iterations of falsification.</strong>
+  The 103/106 loop killed seven candidate explanations by experiment — gem
+  mangling, dead meta gems, wrong item variants, socket capacity, artifact
+  displacement, a supposed "meta tax", stale fixtures, out-of-range item ids —
+  before finding the actual defect: <code>fillEmptyCandidateGems</code> filled a
+  gem socket that wowsims itself leaves empty, inventing an epic gem the player
+  does not own and inflating a package figure by about 10 DPS. Confirmed at the
+  oracle when the owner's own web export came back carrying an empty socket.</li>
+
+  <li><strong>Gemming honesty and package display fixed.</strong> Auto-fill is now
+  capped at rare quality, the meta-repair step obeys the same cap, package figures
+  ride on member rows per threshold instead of one shared number pretending to be
+  four, and a one-piece-short package now reports "unmeasurable" instead of a
+  fake 0.00.</li>
+
+  <li><strong>Both specs exercised.</strong> Feral was the whole arc's subject;
+  the ret catch-up round closed a standing gap ("ret is still unexercised") by
+  producing the first ret artifact with set context, which immediately found that
+  package display mode was doing nothing at all on that report.</li>
+</ul>
+
+<h3>What it cost</h3>
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th class="n">Runs</th><th class="n">Tokens</th><th>What it did</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Opus-class, explicitly chosen</td><td class="n">15</td><td class="n">2,207,336</td><td>Diagnostic loops, ticket specs, orchestration of the early rounds, the sharp-lane fix-round review</td></tr>
+    <tr><td>Opus-class, inherited by children</td><td class="n">3</td><td class="n">402,311</td><td>Children spawned by orchestrators before per-child model recording existed</td></tr>
+    <tr><td>Fable, directors</td><td class="n">7</td><td class="n">762,799</td><td>Orchestrating the implementation rounds (111/112, ret catch-up, fix round)</td></tr>
+    <tr><td>Fable, inherited by fix-round workers</td><td class="n">5</td><td class="n">834,322</td><td>The five implementation waves of the fix round</td></tr>
+    <tr><td>Sonnet</td><td class="n">6</td><td class="n">504,228</td><td>Report rendering, review-disposition application, the two-character report page</td></tr>
+    <tr><td><strong>Total (visible)</strong></td><td class="n"><strong>36</strong></td><td class="n"><strong>4,710,996</strong></td><td></td></tr>
+  </tbody>
+</table>
+
+<p class="caveat">Two caveats on that total. First, it is the visible total only:
+a session cannot see its own token usage, so every orchestrating session's own
+spend is missing, and two runs were killed by session limits mid-work with their
+spend never reported. Second, "runs" counts completions, not distinct agents —
+several rows are the same agent resumed, which the harness reports separately.</p>
+
+<h3>The big cost centres</h3>
+<ol>
+  <li><strong>The 103/106 diagnostic loop — roughly 750k tokens across four
+  director completions plus its ten worker investigations.</strong> This was the
+  single most expensive thing in the arc and also the thing that found the only
+  real code defect. It was expensive because it was honest: it kept refusing to
+  accept a story until an experiment killed the alternatives, and it twice
+  retracted a conclusion it had already reported as fact.</li>
+  <li><strong>The fix round — about 1.0 million tokens across six workers.</strong>
+  Five implementation waves and one fresh-context review. The two biggest workers
+  were the per-threshold package work (239k) and the judgment sweep (201k).</li>
+  <li><strong>Early orchestration — 312k for the tickets 90–99 round alone</strong>,
+  the single largest individual run in the arc.</li>
+</ol>
+
+<p><strong>One correction to how those costs were labelled.</strong> The rounds run
+on Fable at low effort were treated in the logs as the cheap workhorse lane, with
+Opus reserved as the expensive sharp lane. Anthropic's published lineup has it the
+other way round: Fable is the top tier, above Opus in both capability and list
+price. So roughly 1.6 million tokens — the Fable directors and their inherited
+workers — were spent on the most expensive tier while being reasoned about as the
+economical one. The low effort setting did constrain how hard those runs thought,
+but it did not make them a cheaper model. See the note on limits below for
+sources.</p>
+
+<h3>The process lessons that mattered most</h3>
+<ol>
+  <li><strong>Run the simulation.</strong> Two camps argued for a long time about
+  a number that a few hours of sim time settled definitively — and the winning
+  camp's <em>reasoning</em> was still partly wrong (the proc-mask argument pointed
+  the right way but did not explain the magnitude; energy starvation did). Being
+  right for the wrong reason is not a good position to defend from.</li>
+
+  <li><strong>Never price a change across a threshold that moves.</strong> A
+  specified measurement recipe was itself confounded and would have produced a
+  confidently negative 4-piece bonus. The general rule that fell out — never price
+  a stat swap across a configuration where the number of active set bonuses changes —
+  would have invalidated three separate runs in this arc.</li>
+
+  <li><strong>A safety net that invents a verdict is worse than no net.</strong>
+  The two highest-severity bugs the first pre-merge review found were both inside
+  the component added <em>that same round</em> to catch silent confounds, and both
+  survived a 615-test green suite. When a missing warning reads as evidence of
+  health, the failure is invisible.</li>
+
+  <li><strong>Green locally is not green on CI.</strong> A test depended on a file
+  that existed in the working tree but was gitignored and untracked. Everything
+  passed for everyone who had run the generation step, and would have failed on
+  every fresh checkout. Several tickets had already recorded "verify green"
+  without that qualification.</li>
+
+  <li><strong>Verify the reviewer before obeying the reviewer.</strong> A review
+  finding is a claim, not an order. In this arc a reviewer correctly caught a
+  factually false code comment, and a separate investigation produced two
+  convincing false bugs out of a broken test harness. Workers that checked first
+  saved retractions; the loop that did not check reported wrong conclusions as
+  fact twice.</li>
+
+  <li><strong>Write down what each worker did and what it cost, as you go.</strong>
+  The per-worker observability logs are the only reason this document can say
+  anything specific. Where they were not kept — the early rounds, before
+  orchestrator briefs asked for per-child model and token rows — the record is
+  just "inherited" and the detail is gone.</li>
+</ol>
+
+<hr>
+
+<h2>Details</h2>
+
+<h3>Model, task and token table</h3>
+
+<p>From the committed usage log. Rows sharing a name are the same agent resumed;
+the harness reports each completion separately. "Inherited" means a child agent
+spawned by an orchestrator, running the orchestrator's model because the
+orchestrator was not asked to record or override per-child model choices — a gap
+closed partway through the arc.</p>
+
+<table>
+  <thead>
+    <tr><th class="n">#</th><th>Task</th><th>Model (effort)</th><th class="n">Tokens</th><th class="n">Tool uses</th><th>Outcome</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="n">1</td><td>Orchestrate ticket 90–99 resolution (sims, fixes, review)</td><td>Opus (high)</td><td class="n">312,420</td><td class="n">176</td><td>done</td></tr>
+    <tr><td class="n">2</td><td>Practical-outcome report</td><td>Opus (medium)</td><td class="n">74,701</td><td class="n">7</td><td>done</td></tr>
+    <tr><td class="n">3</td><td>Re-render scratch HTML (flagged)</td><td>Sonnet</td><td class="n">72,222</td><td class="n">15</td><td>done</td></tr>
+    <tr><td class="n">3b</td><td>&mdash; resumed: default-mode render check</td><td>Sonnet</td><td class="n">79,851</td><td class="n">5</td><td>done</td></tr>
+    <tr><td class="n">4</td><td>Resolve tickets 100 / 96 / 101 / 102</td><td>Opus (high)</td><td class="n">146,407</td><td class="n">97</td><td>done</td></tr>
+    <tr><td class="n">5</td><td>Loop: why T6 shoulders never surface</td><td>Opus (high)</td><td class="n">142,250</td><td class="n">61</td><td>done</td></tr>
+    <tr><td class="n">6</td><td>Design note: sim-process vs UI-only</td><td>Opus (medium)</td><td class="n">101,410</td><td class="n">13</td><td>done</td></tr>
+    <tr><td class="n">7</td><td>Panel qualifier, percentage ticket, UI cleanup, curated list, export fixes</td><td>Opus (high)</td><td class="n">213,229</td><td class="n">194</td><td>done</td></tr>
+    <tr><td class="n">8</td><td>Gear-snapshot provenance hunt</td><td>Opus (medium)</td><td class="n">84,738</td><td class="n">25</td><td>done (later corrected by the v2 gear export)</td></tr>
+    <tr><td class="n">9</td><td>Director: combined 103/106 loop</td><td>Opus (high)</td><td class="n">112,812</td><td class="n">32</td><td>done</td></tr>
+    <tr><td class="n">9b</td><td>&mdash; resumed: owner settings diff</td><td>Opus (high)</td><td class="n">131,633</td><td class="n">10</td><td>done</td></tr>
+    <tr><td class="n">9c</td><td>&mdash; resumed: corrected gear re-price</td><td>Opus (high)</td><td class="n">166,167</td><td class="n">19</td><td>done</td></tr>
+    <tr><td class="n">9d</td><td>&mdash; resumed: web-results analysis, close-out</td><td>Opus (high)</td><td class="n">201,488</td><td class="n">23</td><td>done</td></tr>
+    <tr><td class="n">10</td><td>Ticket specs: gem two-step (111) and chips (112)</td><td>Opus (medium)</td><td class="n">136,722</td><td class="n">59</td><td>done</td></tr>
+    <tr><td class="n">11</td><td>Owner's wowsims simming instructions</td><td>Opus (medium)</td><td class="n">108,041</td><td class="n">26</td><td>done</td></tr>
+    <tr><td class="n">12</td><td>Orchestrate tickets 111 + 112 implementation</td><td>Fable (low)</td><td class="n">95,857</td><td class="n">26</td><td>phase 1</td></tr>
+    <tr><td class="n">12b</td><td>&mdash; resumed: chip verification</td><td>Fable (low)</td><td class="n">106,169</td><td class="n">6</td><td>done</td></tr>
+    <tr><td class="n">12c</td><td>&mdash; resumed: close-out after review fixes</td><td>Fable (low)</td><td class="n">131,422</td><td class="n">16</td><td>done</td></tr>
+    <tr><td class="n">13</td><td>Implement ticket 111 review fixes (child of 12)</td><td>inherited (Opus-class)</td><td class="n">180,401</td><td class="n">37</td><td>done</td></tr>
+    <tr><td class="n">14</td><td>Review two-ticket increment (child of 12)</td><td>inherited</td><td class="n">106,480</td><td class="n">26</td><td>done</td></tr>
+    <tr><td class="n">15</td><td>Convergence check vs web results</td><td>Opus (medium)</td><td class="n">107,131</td><td class="n">38</td><td>done — found ticket 117</td></tr>
+    <tr><td class="n">16</td><td>Orchestrate ret catch-up</td><td>Fable (low)</td><td class="n">90,221</td><td class="n">25</td><td><strong>stalled — dead monitor</strong></td></tr>
+    <tr><td class="n">16b</td><td>&mdash; resumed after stall</td><td>Fable (low)</td><td class="n">109,493</td><td class="n">3</td><td><strong>killed by session limit</strong></td></tr>
+    <tr><td class="n">16c</td><td>&mdash; resumed after limit lifted</td><td>Fable (low)</td><td class="n">132,447</td><td class="n">16</td><td>done</td></tr>
+    <tr><td class="n">17</td><td>W4 ret HTML surfaces check (child of 16)</td><td>inherited</td><td class="n">115,430</td><td class="n">12</td><td>done</td></tr>
+    <tr><td class="n">18</td><td>Orchestrate fix round (117 / 118 + sweeps)</td><td>Fable (low)</td><td class="n">unreported</td><td class="n">—</td><td><strong>killed by session limit mid-round</strong>; most commits had already landed</td></tr>
+    <tr><td class="n">19</td><td>&mdash; resumed: finish 118, regenerate, review</td><td>Fable (low)</td><td class="n">97,190</td><td class="n">8</td><td>done</td></tr>
+    <tr><td class="n">20</td><td>Apply review dispositions (blocker + 4 fixes)</td><td>Sonnet</td><td class="n">111,029</td><td class="n">56</td><td>done</td></tr>
+    <tr><td class="n">21</td><td>Two-character report page (character toggle)</td><td>Sonnet (high)</td><td class="n">63,250 + 70,113 + 107,763 (3 legs)</td><td class="n">147</td><td>done</td></tr>
+  </tbody>
+</table>
+
+<h4>Fix-round workers, recorded separately</h4>
+
+<p>The fix round was the first to record per-worker model and tokens in its
+director log, which is why this level of detail exists for it and not for the
+earlier rounds.</p>
+
+<table>
+  <thead>
+    <tr><th class="n">#</th><th>Worker</th><th>Model</th><th class="n">Tokens</th><th>Outcome</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="n">1</td><td>Ticket 117 — meta-repair gem cap and helm re-measure</td><td>inherited (Fable), no effort set</td><td class="n">171,255</td><td>done</td></tr>
+    <tr><td class="n">2</td><td>Ticket 118 — per-threshold packages</td><td>inherited (Fable), no effort set</td><td class="n">239,606</td><td>done</td></tr>
+    <tr><td class="n">3</td><td>Cheap sweep — tickets 120, 123, 115</td><td>inherited (Fable), no effort set</td><td class="n">119,779</td><td>done</td></tr>
+    <tr><td class="n">4</td><td>Judgment sweep — tickets 119, 122, 116</td><td>inherited (Fable), no effort set</td><td class="n">201,243</td><td>done</td></tr>
+    <tr><td class="n">5</td><td>Report regeneration</td><td>inherited (Fable), no effort set</td><td class="n">102,439</td><td>done — a first dispatch died at spawn on the session limit at roughly zero tokens</td></tr>
+    <tr><td class="n">6</td><td>Fresh-context review (sharp lane)</td><td>Opus — effort not settable from the dispatch tool</td><td class="n">168,187</td><td>done — one blocker, three should-fix, four notes</td></tr>
+  </tbody>
+</table>
+
+<h3>Process observations — the failures</h3>
+
+<div class="box fail">
+<h3><span class="tag fail">Failure</span>A background worker died silently while its parent waited forever</h3>
+<p>In the ret catch-up round, the worker responsible for generating the first ret
+report started its long simulation run in the background and then <em>ended its
+turn without leaving anything on disk</em>. Its director had armed a monitor to
+wait for completion — but the monitor was watching a side-channel signal the
+harness does not track, so the "done" event never fired. The director sat waiting
+on something that could not arrive.</p>
+<p>The run itself had actually succeeded. The work was fine; only the handoff was
+missing. It took an outside intervention to notice, and the director then had to
+reconstruct the worker's log from the artifacts it left behind.</p>
+<p><strong>The lesson written into the director log:</strong> the harness notifies
+you about children it tracks; a monitor on anything else can wait forever. Verify
+the worker is alive, or prefer synchronous workers. A manager must not background
+a worker and end its turn without leaving a handoff on disk.</p>
+</div>
+
+<div class="box fail">
+<h3><span class="tag fail">Failure</span>Two session-limit kills mid-round</h3>
+<p>Two orchestrators were killed by the usage limit while a round was in flight.
+Both were recovered by resuming from the transcript rather than restarting.</p>
+<ul>
+  <li><strong>The ret catch-up director</strong> was killed right after the stall
+  above, so the round absorbed two disruptions back to back. It resumed and
+  finished.</li>
+  <li><strong>The fix-round director</strong> was killed mid-round with its token
+  spend never reported — the one genuinely missing number in the accounting. It
+  was killed at a fortunate moment: most commits had already landed and the tree
+  was clean, so nothing was half-done. The very next thing it tried to do (a
+  report-regeneration worker) died at spawn on the same limit, spending roughly
+  nothing.</li>
+</ul>
+<p><strong>What made the recovery cheap</strong> was that the resumed session
+could re-read the transcript and the commit history, and then <em>verify</em>
+rather than assume. The fix-round director on resume explicitly re-checked that
+ticket 118's code change was actually in the tree before continuing, and recorded
+that check. That is the difference between resuming and guessing.</p>
+</div>
+
+<div class="box fail">
+<h3><span class="tag fail">Failure</span>Two sessions filing into the same ticket numbering space</h3>
+<p>Tickets in this repo are markdown files whose names begin with a number, and the
+number is chosen by picking the next free one. On the morning of the 11th, two
+sessions were both live: one filed tickets 111 and 112 at 08:29, and the other
+closed the diagnostic loop and filed ticket 113 at 09:18. The usage log records
+the near-miss in its own row for that work — the chips ticket is annotated with
+where it was <em>meant</em> to land versus where it was filed.</p>
+<p>Nothing was lost, but the failure mode is obvious: two sessions that both
+compute "next free number" from a tree that is changing under them will collide,
+and the collision is a filename collision, which git resolves by whichever write
+lands second. The related and better-documented hazard from the same period is
+below.</p>
+<p class="caveat">The record on disk is thin here — the usage log's annotation and
+the commit timestamps are the evidence; there is no post-mortem of the incident
+itself.</p>
+</div>
+
+<div class="box fail">
+<h3><span class="tag fail">Failure</span>The commit hook sweeps files you did not touch</h3>
+<p>The pre-commit hook runs its formatter against every dirty tracked file, not
+just the paths named in <code>git add</code>. That means anything another session
+left modified in the same tree rides along in your commit.</p>
+<p>This nearly bit twice. It was anticipated in the ret-catchup plan (which
+instructs the director to run <code>git status</code> before every commit
+precisely because the hook sweeps everything), and it produced one real, if
+benign, incident: commit <code>b3321cd</code> carried a <strong>930-line churn in
+a handoff document that nobody had edited</strong> — the formatter rewriting line
+endings and re-wrapping paragraphs. The 108 deleted lines were reformatting, not
+lost text, and that was verified rather than assumed before the commit was
+accepted.</p>
+<p>On Windows this is a standing hazard: CRLF and LF differences make a file look
+wholly rewritten when nothing meaningful changed, which both hides real edits in
+noise and makes review diffs useless. The rule that came out of it is in the
+review-incorporation handoff: run <code>git status</code> before each commit, and
+if you see changes you did not make, stop and sort it out.</p>
+</div>
+
+<div class="box fail">
+<h3><span class="tag fail">Failure</span>Confident conclusions reported as fact, then withdrawn — twice</h3>
+<p>The 103/106 loop reported two closing stories that later proved wrong, and both
+retractions are worth reading because of <em>how</em> they were handled.</p>
+<ol>
+  <li><strong>"The owner benchmarked a different, better-geared character."</strong>
+  A whole set of figures was computed against a settings export the owner later
+  said carried the wrong gear. The conclusion had already been reported as fact.
+  It was withdrawn in full, in place, rather than quietly amended.</li>
+  <li><strong>"Iteration 3 already priced that at zero."</strong> The loop's own
+  log claimed an earlier iteration had ruled out a mechanism. On re-checking, that
+  iteration had <em>never tested it</em> — it had varied which gem filled a socket,
+  never whether the socket was filled at all. The correction is recorded as a
+  correction to the log's own record, naming its earlier self as too generous.</li>
+</ol>
+<p>The loop also corrected its own statistics against itself: a later iteration
+found it had used the wrong standard deviation, and the corrected figures made
+its open residue <em>harder</em> to dismiss, not easier. The log notes that
+tightening the error bars cut against its own conclusion, "which is the honest
+direction."</p>
+</div>
+
+<h3>Process observations — the wins</h3>
+
+<div class="box win">
+<h3><span class="tag win">Win</span>Reviews caught things the test suite could not</h3>
+<p>Every review round in this arc paid for itself, and the findings were of a kind
+tests structurally cannot catch:</p>
+<ul>
+  <li><strong>A CI-breaking untracked file.</strong> The fix-round reviewer found
+  that a test loaded a report artifact that was gitignored and untracked — so
+  <code>pnpm verify</code> was green on the developer's machine and would have
+  failed on every fresh clone, taking eight tests down at collection time. The
+  reviewer reproduced it by moving the file aside rather than asserting it.</li>
+  <li><strong>False comments.</strong> A code comment justified a design decision
+  with a claim about gem quality that was simply untrue (all eighteen meta gems
+  are rare, not epic). The reviewer checked it against the data. The same false
+  claim had already been copied into a commit message, which cannot be amended —
+  so it was corrected durably in the ticket instead.</li>
+  <li><strong>Vacuous tests.</strong> A test asserting that a quality cap held
+  would have passed whether or not the cap ever ran. It was strengthened with an
+  explicit guard that the repair actually happened first, and made to fail by
+  mutation to prove the strengthening was real.</li>
+  <li><strong>Claims written as present capability that were actually aspirations.</strong>
+  A comment and an ADR both said a renderer could name the completing piece. No
+  renderer could, and the reviewer traced all three code paths that return early
+  before ever reaching it.</li>
+</ul>
+</div>
+
+<div class="box win">
+<h3><span class="tag win">Win</span>Workers verified reviewer claims before acting on them</h3>
+<p>The stance that emerged and was later written down: a review finding is a claim,
+not an order, and every finding gets exactly one of four dispositions — a fix, a
+ticket, a wording correction, or a written "accepted as-is, and here is why." None
+get silently ignored.</p>
+<p>In practice this meant the reviewer's own findings were re-checked. Of the fix
+round's nine findings, five were fixed, three were read and accepted as-is with a
+recorded reason (a harmless pointer, a cosmetic truncation, and an arithmetic
+equivalence that had already been verified), and one was independently confirmed
+before action. That is a healthy ratio: it means the reviewer was mostly right and
+the implementer was not simply obeying.</p>
+</div>
+
+<div class="box win">
+<h3><span class="tag win">Win</span>Measurement-first discipline, held under pressure</h3>
+<p>The single most valuable habit in the whole arc: <strong>falsify by experiment,
+not by argument.</strong> The 103/106 loop's disposition table is a list of seven
+plausible-sounding explanations, each with the specific experiment that killed it.
+None was argued away.</p>
+<p>Two supporting habits made the measurements trustworthy:</p>
+<ul>
+  <li><strong>Build the test arms through the real code path.</strong> One
+  investigation hand-edited a single gear slot instead of going through the real
+  engine function, and thereby produced two convincing false bugs and about 35 DPS
+  of stats no player could actually have. That mistake is now a written rule.</li>
+  <li><strong>Prove the gate fails, not just that it passes.</strong> When a drift
+  check was added, the change it was supposed to catch was deliberately introduced
+  to confirm the check exits with an error, then reverted before commit. The
+  principle behind it — a net that never fires is as bad as one that fabricates —
+  was applied in both directions.</li>
+</ul>
+</div>
+
+<div class="box win">
+<h3><span class="tag win">Win</span>Per-worker observability logs</h3>
+<p>Each round kept a director log with one row per worker: status, commits, its own
+detailed log file, and — from the fix round onward — its model and token count.
+Each worker wrote its own numbered log. This is why the arc can be reconstructed
+at all.</p>
+<p>The value shows most clearly by contrast. For the early rounds, where
+orchestrators were not asked to record per-child model choices, the record says
+"inherited" and the actual detail is unrecoverable. The usage log itself notes
+this and states the change in practice: from 2026-08-11 on, orchestrator briefs
+ask for per-worker model and token rows.</p>
+<p>The logs also carried corrections. The 103/106 director log records its
+withdrawn conclusions in place, with the reason, rather than editing the history
+to look clean — which is exactly what made the second retraction cheap, because
+the reader could see the first one coming.</p>
+</div>
+
+<h3>Costs, limits, and pacing</h3>
+
+<p>The usage limit was hit twice, both times on the 11th, both times mid-round.
+The practical effects were these:</p>
+
+<ul>
+  <li><strong>Work in flight is at risk, work committed is not.</strong> Both kills
+  were survivable specifically because the rounds were committing per green slice
+  rather than batching one commit at the end. The fix-round director was killed
+  with a clean tree at a known commit; nothing had to be redone. Had it been
+  holding four workers' output uncommitted, that would have been a very different
+  morning.</li>
+
+  <li><strong>Resume beats restart, if the record is good enough.</strong> Both
+  kills were recovered by resuming from the transcript. What made that work was
+  the on-disk record — director logs, worker logs, commit messages — that let the
+  resumed session <em>verify</em> where it actually was rather than trusting its
+  own recollection. The verification step is not optional; the fix-round director
+  re-derived which commit carried which change before continuing.</li>
+
+  <li><strong>The limit degrades gracefully at the edges and abruptly in the
+  middle.</strong> One dispatch simply died at spawn, spending nothing, which is
+  the cheap failure. The mid-round kill is the expensive one because it leaves a
+  gap in the accounting — the fix-round director's spend is the one number in this
+  whole document that is unrecoverable.</li>
+
+  <li><strong>Pacing implication.</strong> The expensive runs in this arc were
+  Opus-class diagnostic loops running at high effort for long stretches — several
+  individual completions above 200,000 tokens. Those are the runs worth starting
+  early in a window rather than late, and the ones worth checkpointing to disk
+  most aggressively, because they are also the ones whose context is most
+  expensive to reconstruct. Cheap, bounded questions were correctly sent out as
+  separate short-lived subagents rather than absorbed into a long session.</li>
+</ul>
+
+<p class="caveat">Nothing in this section relies on the specific mechanics of when
+the limit resets — see the note below.</p>
+
+<div class="box" id="limits-note">
+<h3>Note on the mechanics behind those limits</h3>
+
+<p>Checked against Anthropic's own documentation on 12 August 2026, so the pacing
+advice above rests on facts rather than folklore. Anything that could not be
+confirmed from an official page is marked as such.</p>
+
+<p><strong>The session window.</strong> Subscription plans use a session-based
+limit that <em>resets every five hours</em>, and there is a separate weekly limit
+that resets at a fixed time each week assigned to your account. How many messages
+fit in a window varies with message length, attachments, conversation length, and
+which model and features are used
+(<a href="https://support.claude.com/en/articles/8325606-what-is-the-pro-plan">support.claude.com — What is the Pro plan?</a>).
+On team and enterprise seats the same shape applies: a per-seat allowance on a
+rolling five-hour window plus a weekly window
+(<a href="https://code.claude.com/docs/en/costs">code.claude.com/docs/en/costs</a>).
+<span class="caveat">The commonly repeated detail that the five hours start from
+your first message rather than a clock boundary is consistent across third-party
+sources but I could not confirm it word-for-word from an official page — treat it
+as likely but UNVERIFIED. Likewise the exact weekly cadence in hours.</span></p>
+
+<p><strong>Claude Code shares the pool with everything else.</strong> Activity in
+Claude Code and in Claude chat count against the same limits — there is no separate
+coding budget
+(<a href="https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan">support.claude.com — Using Claude Code with your Pro or Max plan</a>).
+There is also a distinct, model-specific limit on the top-tier model that can be
+hit before the general session limit, which is why switching models can sometimes
+keep you working when the top model is exhausted (code.claude.com/docs/en/costs).
+That is very likely what the two kills in this arc looked like from the inside.</p>
+
+<p><strong>Subagent tokens are not free.</strong> A subagent gets its own separate
+context window, but its spend counts against the same session and plan totals as
+the main conversation — it is tracked as an attribution breakdown within one pool,
+not a second pool. <code>/usage</code> (also <code>/cost</code>,
+<code>/stats</code>) shows session usage and that per-source breakdown, including
+subagents (code.claude.com/docs/en/costs). So the 4.7 million tokens in the table
+above were drawn from the same allowance the sessions themselves were spending,
+which is the most direct explanation for two limit kills in one day.</p>
+
+<p><strong>Subagents inherit the parent's model by default.</strong> Officially,
+the model field defaults to <code>inherit</code> and uses the same model as the
+main conversation
+(<a href="https://code.claude.com/docs/en/sub-agents">code.claude.com/docs/en/sub-agents</a>).
+That is exactly what the "inherited" rows in the usage table mean, and it is why
+the fix round's five implementation workers all ran on the director's model with
+no effort level set — nobody chose that, it was the default. Selection order is:
+environment variable, then the per-call model parameter, then the subagent's own
+frontmatter, then inherit.</p>
+
+<p><strong>Effort is a real, settable parameter.</strong> In Claude Code it is the
+<code>/effort</code> command, with a persistent setting available; on the API it
+is an output-config field with levels low, medium, high (the default), xhigh and
+max, not all of which every model supports
+(<a href="https://platform.claude.com/docs/en/build-with-claude/effort">platform.claude.com — effort</a>).
+Subagents can override it in frontmatter. Worth noting against the fix round's
+own log entry, which recorded that effort was "not settable from the dispatch
+tool" for its reviewer — that was a limitation of how the worker was dispatched,
+not of the platform.</p>
+
+<p><strong>Model tiers, for reading the table correctly.</strong> Anthropic's
+published lineup puts <strong>Fable 5</strong> at the top ("most capable widely
+released model"), then <strong>Opus 5</strong> for complex agentic coding, then
+<strong>Sonnet 5</strong> for the speed-and-intelligence balance, then
+<strong>Haiku 4.5</strong> as the fastest
+(<a href="https://platform.claude.com/docs/en/about-claude/models/overview">platform.claude.com — models overview</a>).
+Fable is a real published model name, not a nickname. <strong>This is worth
+pausing on:</strong> the usage log's shorthand treats "Fable (low)" as the
+cheap-and-cheerful director tier and Opus as the sharp lane, but Fable is
+officially the <em>more</em> capable and <em>more</em> expensive tier of the two.
+The rounds run on Fable at low effort were therefore not the economy option they
+were labelled as.</p>
+
+<p><strong>Published list pricing</strong>, retrieved 12 August 2026 from
+<a href="https://platform.claude.com/docs/en/about-claude/pricing">platform.claude.com/docs/en/about-claude/pricing</a>,
+per million tokens, input / output: Fable 5 $10 / $50; Opus 5 $5 / $25; Sonnet 5
+$2 / $10; Haiku 4.5 $1 / $5. Cache reads cost a tenth of base input.
+<span class="caveat">These are API list prices and are the wrong instrument for
+costing this arc — subscription usage is metered against session and weekly
+allowances, not billed per token, and the token counts in the table above do not
+separate input from output or account for cache reads. They are included only for
+a sense of relative tier cost, and no dollar figure for this arc is stated because
+none can be honestly derived from what was recorded.</span></p>
+</div>
+
+<hr>
+
+<h3>Where the branch stands</h3>
+<p>About sixty commits on <code>feat/set-bonus-value</code>, tickets 90 through 126
+opened and mostly closed, <strong>nothing landed, merged, or pushed</strong>. The
+open items carried forward are named with numbers rather than narratives: a
+1%-scale engine-versus-web-alpha offset that is arm-dependent (ticket 113), a
+package residue of 4.82 ± 1.27 DPS that does not close statistically and has
+deliberately been given no third story, and a handful of smaller tickets parked as
+not-trivially-adjacent.</p>
+
+<footer>
+Sources on disk: <code>.scratch/set-bonus-value/agent-usage-log.md</code>;
+the director logs under <code>fix-round/</code>, <code>loop-103-106/</code> and
+<code>ret-catchup/</code> with their numbered worker logs;
+<code>.scratch/handoffs/set-bonus-resolution-2026-08-10.md</code>;
+<code>.scratch/handoffs/incorporating-reviews.md</code>;
+<code>docs/reviews/feat-set-bonus-value.md</code>; and
+<code>git log</code> on the branch.
+</footer>
+
+</body>
+</html>

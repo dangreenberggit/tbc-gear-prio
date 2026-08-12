@@ -1,0 +1,22 @@
+MODE=simplerot CLI=C:\Users\dgree\Code\lulz\tbc-gear-prio\vendor\wowsimcli-v0.0.101-win32-x64\wowsimcli-windows.exe
+  OWNER2_BASE             2219.84   2219.84   2219.71   2219.79   2219.90   mean=  2219.82
+  PKG_PROD                2333.09   2333.11   2333.28   2333.32   2333.39   mean=  2333.24
+  PKG_UIMIGRATE           2322.71   2322.68   2322.87   2322.90   2322.91   mean=  2322.81
+  PKG_UIONLY_shoulder     2333.09   2333.11   2333.28   2333.32   2333.39   mean=  2333.24
+  PKG_UIONLY_chest        2333.09   2333.11   2333.28   2333.32   2333.39   mean=  2333.24
+  PKG_UIONLY_hands        2322.71   2322.68   2322.87   2322.90   2322.91   mean=  2322.81
+  PKG_UIONLY_legs         2333.09   2333.11   2333.28   2333.32   2333.39   mean=  2333.24
+
+  baseline =   2219.82   (07 measured 2219.82 under simplerot)
+  PKG_PROD               delta =  +113.42   per-seed ['113.25', '113.27', '113.56', '113.53', '113.49']
+  PKG_UIMIGRATE          delta =  +102.99   per-seed ['102.87', '102.84', '103.15', '103.11', '103.01']
+  PKG_UIONLY_shoulder    delta =  +113.42   per-seed ['113.25', '113.27', '113.56', '113.53', '113.49']
+  PKG_UIONLY_chest       delta =  +113.42   per-seed ['113.25', '113.27', '113.56', '113.53', '113.49']
+  PKG_UIONLY_hands       delta =  +102.99   per-seed ['102.87', '102.84', '103.15', '103.11', '103.01']
+  PKG_UIONLY_legs        delta =  +113.42   per-seed ['113.25', '113.27', '113.56', '113.53', '113.49']
+
+  PKG_UIMIGRATE - PKG_PROD =   -10.43   (residue to explain: -16.42)
+  PKG_FILL24028     2331.41   2331.40   2331.56   2331.63   2331.71  mean=  2331.54
+
+  PKG_FILL24028 delta vs base =  +111.72
+  (PKG_PROD +113.42 with 32194 / PKG_UIMIGRATE +102.99 empty / owner +97)

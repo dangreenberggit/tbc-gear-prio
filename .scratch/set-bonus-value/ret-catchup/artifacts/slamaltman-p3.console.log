@@ -1,0 +1,884 @@
+
+> tbc-gear-prio@0.1.0 rank C:\Users\dgree\Code\lulz\tbc-gear-prio
+> tsx packages/core/src/cli.ts "--offline" "--region" "US" "--realm" "dreamscythe" "--character" "slamaltman" "--spec" "ret" "--max-phase" "3" "--with-set-potential" "--show-below-cutoff" "--report"
+
+(node:47328) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+rank slamaltman@dreamscythe-US (offline) maxPhase=3 universe=394 cutoff=3.4 DPS / 0.15%
+simming 0/431
+simming 1/431
+simming 2/431
+simming 3/431
+simming 4/431
+simming 5/431
+simming 6/431
+simming 7/431
+simming 8/431
+simming 9/431
+simming 10/431
+simming 11/431
+simming 12/431
+simming 13/431
+simming 14/431
+simming 15/431
+simming 16/431
+simming 17/431
+simming 18/431
+simming 19/431
+simming 20/431
+simming 21/431
+simming 22/431
+simming 23/431
+simming 24/431
+simming 25/431
+simming 26/431
+simming 27/431
+simming 28/431
+simming 29/431
+simming 30/431
+simming 31/431
+simming 32/431
+simming 33/431
+simming 34/431
+simming 35/431
+simming 36/431
+simming 37/431
+simming 38/431
+simming 39/431
+simming 40/431
+simming 41/431
+simming 42/431
+simming 43/431
+simming 44/431
+simming 45/431
+simming 46/431
+simming 47/431
+simming 48/431
+simming 49/431
+simming 50/431
+simming 51/431
+simming 52/431
+simming 53/431
+simming 54/431
+simming 55/431
+simming 56/431
+simming 57/431
+simming 58/431
+simming 59/431
+simming 60/431
+simming 61/431
+simming 62/431
+simming 63/431
+simming 64/431
+simming 65/431
+simming 66/431
+simming 67/431
+simming 68/431
+simming 69/431
+simming 70/431
+simming 71/431
+simming 72/431
+simming 73/431
+simming 74/431
+simming 75/431
+simming 76/431
+simming 77/431
+simming 78/431
+simming 79/431
+simming 80/431
+simming 81/431
+simming 82/431
+simming 83/431
+simming 84/431
+simming 85/431
+simming 86/431
+simming 87/431
+simming 88/431
+simming 89/431
+simming 90/431
+simming 91/431
+simming 92/431
+simming 93/431
+simming 94/431
+simming 95/431
+simming 96/431
+simming 97/431
+simming 98/431
+simming 99/431
+simming 100/431
+simming 101/431
+simming 102/431
+simming 103/431
+simming 104/431
+simming 105/431
+simming 106/431
+simming 107/431
+simming 108/431
+simming 109/431
+simming 110/431
+simming 111/431
+simming 112/431
+simming 113/431
+simming 114/431
+simming 115/431
+simming 116/431
+simming 117/431
+simming 118/431
+simming 119/431
+simming 120/431
+simming 121/431
+simming 122/431
+simming 123/431
+simming 124/431
+simming 125/431
+simming 126/431
+simming 127/431
+simming 128/431
+simming 129/431
+simming 130/431
+simming 131/431
+simming 132/431
+simming 133/431
+simming 134/431
+simming 135/431
+simming 136/431
+simming 137/431
+simming 138/431
+simming 139/431
+simming 140/431
+simming 141/431
+simming 142/431
+simming 143/431
+simming 144/431
+simming 145/431
+simming 146/431
+simming 147/431
+simming 148/431
+simming 149/431
+simming 150/431
+simming 151/431
+simming 152/431
+simming 153/431
+simming 154/431
+simming 155/431
+simming 156/431
+simming 157/431
+simming 158/431
+simming 159/431
+simming 160/431
+simming 161/431
+simming 162/431
+simming 163/431
+simming 164/431
+simming 165/431
+simming 166/431
+simming 167/431
+simming 168/431
+simming 169/431
+simming 170/431
+simming 171/431
+simming 172/431
+simming 173/431
+simming 174/431
+simming 175/431
+simming 176/431
+simming 177/431
+simming 178/431
+simming 179/431
+simming 180/431
+simming 181/431
+simming 182/431
+simming 183/431
+simming 184/431
+simming 185/431
+simming 186/431
+simming 187/431
+simming 188/431
+simming 189/431
+simming 190/431
+simming 191/431
+simming 192/431
+simming 193/431
+simming 194/431
+simming 195/431
+simming 196/431
+simming 197/431
+simming 198/431
+simming 199/431
+simming 200/431
+simming 201/431
+simming 202/431
+simming 203/431
+simming 204/431
+simming 205/431
+simming 206/431
+simming 207/431
+simming 208/431
+simming 209/431
+simming 210/431
+simming 211/431
+simming 212/431
+simming 213/431
+simming 214/431
+simming 215/431
+simming 216/431
+simming 217/431
+simming 218/431
+simming 219/431
+simming 220/431
+simming 221/431
+simming 222/431
+simming 223/431
+simming 224/431
+simming 225/431
+simming 226/431
+simming 227/431
+simming 228/431
+simming 229/431
+simming 230/431
+simming 231/431
+simming 232/431
+simming 233/431
+simming 234/431
+simming 235/431
+simming 236/431
+simming 237/431
+simming 238/431
+simming 239/431
+simming 240/431
+simming 241/431
+simming 242/431
+simming 243/431
+simming 244/431
+simming 245/431
+simming 246/431
+simming 247/431
+simming 248/431
+simming 249/431
+simming 250/431
+simming 251/431
+simming 252/431
+simming 253/431
+simming 254/431
+simming 255/431
+simming 256/431
+simming 257/431
+simming 258/431
+simming 259/431
+simming 260/431
+simming 261/431
+simming 262/431
+simming 263/431
+simming 264/431
+simming 265/431
+simming 266/431
+simming 267/431
+simming 268/431
+simming 269/431
+simming 270/431
+simming 271/431
+simming 272/431
+simming 273/431
+simming 274/431
+simming 275/431
+simming 276/431
+simming 277/431
+simming 278/431
+simming 279/431
+simming 280/431
+simming 281/431
+simming 282/431
+simming 283/431
+simming 284/431
+simming 285/431
+simming 286/431
+simming 287/431
+simming 288/431
+simming 289/431
+simming 290/431
+simming 291/431
+simming 292/431
+simming 293/431
+simming 294/431
+simming 295/431
+simming 296/431
+simming 297/431
+simming 298/431
+simming 299/431
+simming 300/431
+simming 301/431
+simming 302/431
+simming 303/431
+simming 304/431
+simming 305/431
+simming 306/431
+simming 307/431
+simming 308/431
+simming 309/431
+simming 310/431
+simming 311/431
+simming 312/431
+simming 313/431
+simming 314/431
+simming 315/431
+simming 316/431
+simming 317/431
+simming 318/431
+simming 319/431
+simming 320/431
+simming 321/431
+simming 322/431
+simming 323/431
+simming 324/431
+simming 325/431
+simming 326/431
+simming 327/431
+simming 328/431
+simming 329/431
+simming 330/431
+simming 331/431
+simming 332/431
+simming 333/431
+simming 334/431
+simming 335/431
+simming 336/431
+simming 337/431
+simming 338/431
+simming 339/431
+simming 340/431
+simming 341/431
+simming 342/431
+simming 343/431
+simming 344/431
+simming 345/431
+simming 346/431
+simming 347/431
+simming 348/431
+simming 349/431
+simming 350/431
+simming 351/431
+simming 352/431
+simming 353/431
+simming 354/431
+simming 355/431
+simming 356/431
+simming 357/431
+simming 358/431
+simming 359/431
+simming 360/431
+simming 361/431
+simming 362/431
+simming 363/431
+simming 364/431
+simming 365/431
+simming 366/431
+simming 367/431
+simming 368/431
+simming 369/431
+simming 370/431
+simming 371/431
+simming 372/431
+simming 373/431
+simming 374/431
+simming 375/431
+simming 376/431
+simming 377/431
+simming 378/431
+simming 379/431
+simming 380/431
+simming 381/431
+simming 382/431
+simming 383/431
+simming 384/431
+simming 385/431
+simming 386/431
+simming 387/431
+simming 388/431
+simming 389/431
+simming 390/431
+simming 391/431
+simming 392/431
+simming 393/431
+simming 394/431
+simming 395/431
+simming 396/431
+simming 397/431
+simming 398/431
+simming 399/431
+simming 400/431
+simming 401/431
+simming 402/431
+simming 403/431
+simming 404/431
+simming 405/431
+simming 406/431
+simming 407/431
+simming 408/431
+simming 409/431
+simming 410/431
+simming 411/431
+simming 412/431
+simming 413/431
+simming 414/431
+simming 415/431
+simming 416/431
+simming 417/431
+simming 418/431
+simming 419/431
+simming 420/431
+simming 421/431
+simming 422/431
+simming 423/431
+simming 424/431
+simming 425/431
+simming 426/431
+simming 427/431
+simming 428/431
+simming 429/431
+simming 430/431
+simming 431/431
+gear read from Hydross the Unstable (VGjFb3mtX9xHgyav fight 8, ranked route), spec confidence 100%
+baseline 2003.51 ± 118.93 (metaAdjusted=false)
+~23 rating under the hit cap — Heroic Presence in your party would lower the cap by ~16. The real shortfall could run either way. Assumes 3/3 Precision — your logged build is not read for talents yet.
+assumptions: 4 standing (--assumptions to expand)
+substitutions this run (1):
+  - candidate 30892 (shoulder): Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {"type":"ErrorOutcomeError","message":"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\nStack Trace:\ngoroutine 54 [running]:\nruntime/debug.Stack()\n\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/debug/stack.go:26 +0x5e\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\npanic({0x7ff77541bec0?, 0xc0009189f0?})\n\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/panic.go:783 +0x132\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff7756dfdd0?, 0xc000912058})\n\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff7756dfdd0, 0xc000912058}, 0xc003087c30, 0xc003087c60, 0x1)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc0034d4000, {0x7ff7756dfdd0, 0xc000912058})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:349 +0x145\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc0034d4000, {0x7ff7756dfdd0, 0xc000912058}, 0xc000539d60, 0xc0029140b0, 0xc000539630)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:299 +0xd1\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc00090e160, 0xc0004b9d00)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc00090e000, 0xc0004b9d00, 0xc0004fe480)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc0004b9d00, 0xc0004fe480, 0x0)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc00040c360, {{0xc0005b1a00?}})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\ngithub.com/wowsims/tbc/sim/core.runSim(0xc00040c360, 0xc000559a40, 0x0, {{0xc0005b7380?}})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 15\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\n"}
+assumption: set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment
+set potential (10):
+  Lightbringer Battlegear 2pc (0 worn) — +0.55 DPS — whole package +11.31 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Lightbringer Breastplate, Lightbringer Greaves
+  Lightbringer Battlegear 4pc (0 worn) — -9.31 DPS — whole package -6.83 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Lightbringer War-Helm, Lightbringer Shoulderbraces, Lightbringer Breastplate, Lightbringer Greaves
+  Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — whole package -0.47 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Crystalforge War-Helm
+  Crystalforge Battlegear 4pc (1 worn) — -9.92 DPS — whole package -26.77 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Crystalforge War-Helm, Crystalforge Shoulderbraces, Crystalforge Greaves
+  Gladiator's Vindication 2pc (0 worn) — not implemented in the pinned sim
+  Gladiator's Vindication 4pc (0 worn) — not implemented in the pinned sim
+  Burning Rage 2pc (0 worn) — not implemented in the pinned sim
+  Burning Rage 4pc (0 worn) — not implemented in the pinned sim
+  Justicar Battlegear 2pc (0 worn) — not implemented in the pinned sim
+  Justicar Battlegear 4pc (0 worn) — -3.88 DPS — whole package -80.56 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Justicar Crown, Justicar Shoulderplates, Justicar Breastplate, Justicar Greaves
+#1 Belt of One-Hundred Deaths (waist) Δ47.75 (2.38%)
+#2 Torch of the Damned (weapon) Δ43.61 (2.18%)
+#3 Cataclysm's Edge (weapon) Δ26.22 (1.31%)
+#4 Band of Devastation (finger) Δ22.63 (1.13%)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#5 Unstoppable Aggressor's Ring (finger) Δ20.34 (1.02%)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#6 Cursed Vision of Sargeras (head) Δ19.73 (0.98%)
+#7 Shadow-walker's Cord (waist) Δ19.10 (0.95%)
+#8 Band of the Eternal Champion (finger) Δ16.40 (0.82%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#9 Razor-Scale Battlecloak (back) Δ15.82 (0.79%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#10 Valestalker Girdle (waist) Δ15.78 (0.79%)  (tied)
+#11 Bulwark of the Ancient Kings (chest) Δ15.25 (0.76%)  (tied)
+#12 Cloak of Darkness (back) Δ14.38 (0.72%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#13 Thalassian Wildercloak (back) Δ14.37 (0.72%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#14 Belt of Seething Fury (waist) Δ14.19 (0.71%)  (tied)
+#15 Shadowmaster's Boots (feet) Δ13.92 (0.69%)  (tied)
+#16 Shadowmoon Destroyer's Drape (back) Δ13.67 (0.68%)  (tied)
+#17 Leggings of Divine Retribution (legs) Δ13.45 (0.67%)  (tied)
+#18 Black-Iron Battlecloak (back) Δ13.42 (0.67%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#19 Vengeance Wrap (back) Δ13.05 (0.65%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#20 Bow-stitched Leggings (legs) Δ12.92 (0.65%)  (tied)
+#21 Ancestral Ring of Conquest (finger) Δ10.41 (0.52%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#22 Band of Eternity (finger) Δ9.12 (0.46%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#23 Bindings of Lightning Reflexes (wrist) Δ9.02 (0.45%)  (tied)
+#24 Dreadboots of the Legion (feet) Δ8.95 (0.45%)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#25 Vengeful Gladiator's Greatsword (weapon) Δ8.71 (0.43%)  (tied)
+#26 Don Alejandro's Money Belt (waist) Δ8.67 (0.43%)  (tied)
+#27 Girdle of the Lightbearer (waist) Δ8.48 (0.42%)  (tied)
+#29 Lightbringer Greaves (legs) Δ7.66 (0.38%)  (tied)
+    +0.55 set potential (needs 1 more piece)
+#28 Cloak of the Pit Stalker (back) Δ7.98 (0.40%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#30 Band of the Ranger-General (finger) Δ7.54 (0.38%)  (tied)
+    costs hit: -1 hit rating, widening the gap above to 23.615397999999985
+#31 Forest Prowler's Helm (head) Δ7.50 (0.37%)  (tied)
+    costs hit: -13 hit rating, widening the gap above to 35.615397999999985
+#32 Boneweave Girdle (waist) Δ7.09 (0.35%)  (tied)
+#33 Band of Eternity (finger) Δ6.51 (0.33%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#34 Legguards of Endless Rage (legs) Δ6.14 (0.31%)  (tied)
+#35 Mithril Band of the Unscarred (finger) Δ5.79 (0.29%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#36 Grips of Damnation (hands) Δ5.28 (0.26%)  (tied)
+#37 Swiftsteel Bracers (wrist) Δ5.13 (0.26%)  (tied)
+#38 Fists of Mukoa (hands) Δ4.14 (0.21%)  (tied)
+#39 A'dal's Command (finger) Δ4.08 (0.20%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#40 Ring of Reciprocity (finger) Δ3.77 (0.19%)  (tied)
+    costs hit: -4 hit rating, widening the gap above to 26.615397999999985
+#44 Lightbringer Breastplate (chest) Δ3.11 (0.16%)  (tied)
+    costs hit: -2 hit rating, widening the gap above to 24.615397999999985
+    +0.55 set potential (needs 1 more piece)
+#41 Stormrage Signet Ring (finger) Δ3.43 (0.17%)  (tied)
+#42 Ring of Deceitful Intent (finger) Δ3.30 (0.16%)  (tied)
+#43 Softstep Boots of Tracking (feet) Δ3.30 (0.16%)  (tied)
+#- Helm of the Illidari Shatterer (head) Δ2.85 (0.14%)  (below cutoff)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#- Band of Eternity (finger) Δ2.76 (0.14%)  (below cutoff)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#- Leggings of Murderous Intent (legs) Δ2.19 (0.11%)  (below cutoff)  (tied)
+#- Ring of Lethality (finger) Δ2.12 (0.11%)  (below cutoff)  (tied)
+#- Midnight Chestguard (chest) Δ1.85 (0.09%)  (below cutoff)  (tied)
+#- Swiftstrike Shoulders (shoulder) Δ1.80 (0.09%)  (below cutoff)  (tied)
+#- Star-Strider Boots (feet) Δ1.20 (0.06%)  (below cutoff)  (tied)
+#- Red Belt of Battle (waist) Δ1.06 (0.05%)  (below cutoff)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#- Choker of Endless Nightmares (neck) Δ0.43 (0.02%)  (below cutoff)  (tied)
+#- Furious Shackles (wrist) Δ0.22 (0.01%)  (below cutoff)  (tied)
+#- Lionheart Executioner (weapon) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Bladespire Warbands (wrist) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Dragonspine Trophy (trinket) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Bloodlust Brooch (trinket) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Gloves of the Searing Grip (hands) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Pendant of the Perilous (neck) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Shoulderpads of the Stranger (shoulder) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Crystalforge Breastplate (chest) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Shattrath Leggings (legs) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Shapeshifter's Signet (finger) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Furious Gizmatic Goggles (head) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Drape of the Dark Reavers (back) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Ring of a Thousand Marks (finger) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Girdle of the Endless Pit (waist) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Warboots of Obliteration (feet) Δ0.00 (0.00%)  (below cutoff)  (tied)
+#- Shady Dealer's Pantaloons (legs) Δ-0.14 (-0.01%)  (below cutoff)  (tied)
+#- Cobra-Lash Boots (feet) Δ-0.24 (-0.01%)  (below cutoff)  (tied)
+#- Crystalforge War-Helm (head) Δ-0.47 (-0.02%)  (below cutoff)  (tied)
+#- Soul Cleaver (weapon) Δ-0.56 (-0.03%)  (below cutoff)  (tied)
+#- Telonicus's Pendant of Mayhem (neck) Δ-0.61 (-0.03%)  (below cutoff)  (tied)
+#- Lightbringer War-Helm (head) Δ-1.34 (-0.07%)  (below cutoff)  (tied)
+    +0.55 set potential (needs 1 more piece)
+#- Wraps of Precise Flight (wrist) Δ-0.85 (-0.04%)  (below cutoff)  (tied)
+#- Greaves of the Bloodwarder (legs) Δ-1.00 (-0.05%)  (below cutoff)  (tied)
+#- Ironstriders of Urgency (feet) Δ-1.43 (-0.07%)  (below cutoff)  (tied)
+#- Ranger-General's Chestguard (chest) Δ-2.52 (-0.13%)  (below cutoff)  (tied)
+#- Choker of Serrated Blades (neck) Δ-2.95 (-0.15%)  (below cutoff)  (tied)
+#- Farstrider Wildercloak (back) Δ-3.03 (-0.15%)  (below cutoff)  (tied)
+#- Twinblade of the Phoenix (weapon) Δ-3.22 (-0.16%)  (below cutoff)  (tied)
+#- Bracers of Eradication (wrist) Δ-3.56 (-0.18%)  (below cutoff)  (tied)
+#- Garona's Signet Ring (finger) Δ-3.74 (-0.19%)  (below cutoff)  (tied)
+#- Deadly Cuffs (wrist) Δ-3.85 (-0.19%)  (below cutoff)  (tied)
+#- Vengeful Gladiator's Scaled Chestpiece (chest) Δ-3.87 (-0.19%)  (below cutoff)  (tied)
+#- Belt of the Black Eagle (waist) Δ-3.98 (-0.20%)  (below cutoff)  (tied)
+#- Insidious Bands (wrist) Δ-4.25 (-0.21%)  (below cutoff)  (tied)
+#- Haramad's Bargain (neck) Δ-4.35 (-0.22%)  (below cutoff)  (tied)
+#- Mithril Chain of Heroism (neck) Δ-4.67 (-0.23%)  (below cutoff)  (tied)
+#- Choker of Animalistic Fury (neck) Δ-4.98 (-0.25%)  (below cutoff)  (tied)
+#- Treads of the Den Mother (feet) Δ-5.09 (-0.25%)  (below cutoff)  (tied)
+#- Quickstrider Moccasins (feet) Δ-5.36 (-0.27%)  (below cutoff)  (tied)
+#- Crystalforge Greaves (legs) Δ-5.61 (-0.28%)  (below cutoff)  (tied)
+#- Belt of Deep Shadow (waist) Δ-5.76 (-0.29%)  (below cutoff)  (tied)
+#- Royal Cloak of Arathi Kings (back) Δ-5.85 (-0.29%)  (below cutoff)  (tied)
+#- Pillager's Gauntlets (hands) Δ-5.93 (-0.30%)  (below cutoff)  (tied)
+#- Bands of the Celestial Archer (wrist) Δ-6.29 (-0.31%)  (below cutoff)  (tied)
+#- Mail of Fevered Pursuit (chest) Δ-6.73 (-0.34%)  (below cutoff)  (tied)
+#- Lightbringer Shoulderbraces (shoulder) Δ-7.50 (-0.37%)  (below cutoff)  (tied)
+    +0.55 set potential (needs 1 more piece)
+#- Shoulders of the Hidden Predator (shoulder) Δ-7.35 (-0.37%)  (below cutoff)  (tied)
+#- Vindicator's Scaled Bracers (wrist) Δ-7.36 (-0.37%)  (below cutoff)  (tied)
+#- Gronn-Stitched Girdle (waist) Δ-7.57 (-0.38%)  (below cutoff)  (tied)
+#- Vambraces of Ending (wrist) Δ-7.74 (-0.39%)  (below cutoff)  (tied)
+#- Void Reaver Greaves (legs) Δ-7.99 (-0.40%)  (below cutoff)  (tied)
+#- Girdle of the Tidal Call (waist) Δ-8.01 (-0.40%)  (below cutoff)  (tied)
+#- Bracers of the Pathfinder (wrist) Δ-8.72 (-0.44%)  (below cutoff)  (tied)
+#- Black Felsteel Bracers (wrist) Δ-9.04 (-0.45%)  (below cutoff)  (tied)
+#- True-Aim Stalker Bands (wrist) Δ-9.29 (-0.46%)  (below cutoff)  (tied)
+#- Bloodsea Brigand's Vest (chest) Δ-9.75 (-0.49%)  (below cutoff)  (tied)
+#- Scaled Greaves of the Marksman (legs) Δ-10.11 (-0.50%)  (below cutoff)  (tied)
+#- Edgewalker Longboots (feet) Δ-10.25 (-0.51%)  (below cutoff)  (tied)
+#- Tsunami Talisman (trinket) Δ-10.28 (-0.51%)  (below cutoff)  (tied)
+#- Pauldrons of the Wardancer (shoulder) Δ-10.29 (-0.51%)  (below cutoff)  (tied)
+#- Sha'tari Wrought Greaves (feet) Δ-10.59 (-0.53%)  (below cutoff)  (tied)
+#- Boots of Effortless Striking (feet) Δ-10.63 (-0.53%)  (below cutoff)  (tied)
+#- Lightbringer Gauntlets (hands) Δ-11.28 (-0.56%)  (below cutoff)  (tied)
+    +0.55 set potential (needs 1 more piece)
+#- Crystalforge Shoulderbraces (shoulder) Δ-10.77 (-0.54%)  (below cutoff)  (tied)
+#- Zierhut's Lost Treads (feet) Δ-10.88 (-0.54%)  (below cutoff)  (tied)
+#- Grips of Silent Justice (hands) Δ-11.24 (-0.56%)  (below cutoff)  (tied)
+#- Grips of Deftness (hands) Δ-12.63 (-0.63%)  (below cutoff)  (tied)
+#- Nether Shadow Tunic (chest) Δ-12.78 (-0.64%)  (below cutoff)  (tied)
+#- Terrorweave Tunic (chest) Δ-12.90 (-0.64%)  (below cutoff)  (tied)
+#- Saberclaw Talisman (neck) Δ-13.05 (-0.65%)  (below cutoff)  (tied)
+#- Band of Vile Aggression (finger) Δ-13.08 (-0.65%)  (below cutoff)  (tied)
+#- Rapscallion Boots (feet) Δ-13.13 (-0.66%)  (below cutoff)  (tied)
+#- Merciless Gladiator's Scaled Helm (head) Δ-13.14 (-0.66%)  (below cutoff)  (tied)
+#- Bracers of Maliciousness (wrist) Δ-13.31 (-0.66%)  (below cutoff)  (tied)
+#- Ferocious Swift-Kickers (feet) Δ-13.44 (-0.67%)  (below cutoff)  (tied)
+#- Heartshatter Breastplate (chest) Δ-13.70 (-0.68%)  (below cutoff)  (tied)
+#- Libram of Souls Redeemed (ranged) Δ-13.81 (-0.69%)  (below cutoff)  (tied)
+#- Libram of Absolute Truth (ranged) Δ-13.81 (-0.69%)  (below cutoff)  (tied)
+#- Tome of the Lightbringer (ranged) Δ-13.81 (-0.69%)  (below cutoff)  (tied)
+#- Libram of Fervor (ranged) Δ-14.10 (-0.70%)  (below cutoff)  (tied)
+#- Necklace of Trophies (neck) Δ-14.21 (-0.71%)  (below cutoff)  (tied)
+#- Gauntlets of Martial Perfection (hands) Δ-14.47 (-0.72%)  (below cutoff)  (tied)
+#- Blood-stained Pauldrons (shoulder) Δ-14.57 (-0.73%)  (below cutoff)  (tied)
+#- Ripfiend Shoulderplates (shoulder) Δ-14.58 (-0.73%)  (below cutoff)  (tied)
+#- Worgen Claw Necklace (neck) Δ-15.11 (-0.75%)  (below cutoff)  (tied)
+#- Choker of Vile Intent (neck) Δ-15.11 (-0.75%)  (below cutoff)  (tied)
+#- Girdle of Treachery (waist) Δ-15.55 (-0.78%)  (below cutoff)  (tied)
+#- Razorfury Mantle (shoulder) Δ-15.64 (-0.78%)  (below cutoff)  (tied)
+#- Fiend Slayer Boots (feet) Δ-16.17 (-0.81%)  (below cutoff)  (tied)
+#- Stalker's War Bands (wrist) Δ-16.67 (-0.83%)  (below cutoff)  (tied)
+#- Mantle of the Tireless Tracker (shoulder) Δ-16.84 (-0.84%)  (below cutoff)  (tied)
+#- Justicar Breastplate (chest) Δ-13.14 (-0.66%)  (below cutoff)  (tied)
+    -3.88 set potential (needs 3 more pieces)
+#- Krakken-Heart Breastplate (chest) Δ-17.54 (-0.88%)  (below cutoff)  (tied)
+#- Terror Pit Girdle (waist) Δ-17.90 (-0.89%)  (below cutoff)  (tied)
+#- Liar's Tongue Gloves (hands) Δ-18.14 (-0.91%)  (below cutoff)  (tied)
+#- Crystalforge Gauntlets (hands) Δ-18.53 (-0.93%)  (below cutoff)  (tied)
+#- Vest of Mounting Assault (chest) Δ-18.82 (-0.94%)  (below cutoff)  (tied)
+#- Drape of the Righteous (back) Δ-19.27 (-0.96%)  (below cutoff)  (tied)
+#- Skulker's Greaves (legs) Δ-19.47 (-0.97%)  (below cutoff)  (tied)
+#- Ring of Ancient Knowledge (finger) Δ-20.19 (-1.01%)  (below cutoff)  (tied)
+#- Madness of the Betrayer (trinket) Δ-20.75 (-1.04%)  (below cutoff)  (tied)
+#- Mantle of Darkness (shoulder) Δ-20.94 (-1.05%)  (below cutoff)  (tied)
+#- Royal Cloak of the Sunstriders (back) Δ-21.46 (-1.07%)  (below cutoff)  (tied)
+#- Justicar Crown (head) Δ-18.08 (-0.90%)  (below cutoff)  (tied)
+    -3.88 set potential (needs 3 more pieces)
+#- Cloak of the Illidari Council (back) Δ-21.97 (-1.10%)  (below cutoff)  (tied)
+#- World Breaker (weapon) Δ-22.33 (-1.11%)  (below cutoff)  (tied)
+#- Shroud of the Final Stand (back) Δ-22.41 (-1.12%)  (below cutoff)  (tied)
+#- Shadow-Cloak of Dalaran (back) Δ-22.68 (-1.13%)  (below cutoff)  (tied)
+#- Ancient Spellcloak of the Highborne (back) Δ-22.75 (-1.14%)  (below cutoff)  (tied)
+#- Stainless Cloak of the Pure Hearted (back) Δ-23.02 (-1.15%)  (below cutoff)  (tied)
+#- Black Featherlight Boots (feet) Δ-23.30 (-1.16%)  (below cutoff)  (tied)
+#- Red Riding Hood's Cloak (back) Δ-23.31 (-1.16%)  (below cutoff)  (tied)
+#- Ruby Drape of the Mysticant (back) Δ-23.48 (-1.17%)  (below cutoff)  (tied)
+#- Shroud of Forgiveness (back) Δ-23.60 (-1.18%)  (below cutoff)  (tied)
+#- Rip-Flayer Leggings (legs) Δ-23.72 (-1.18%)  (below cutoff)  (tied)
+#- Sunshower Light Cloak (back) Δ-23.73 (-1.18%)  (below cutoff)  (tied)
+#- Gloves of Dexterous Manipulation (hands) Δ-23.75 (-1.19%)  (below cutoff)  (tied)
+#- Shroud of the Highborne (back) Δ-23.90 (-1.19%)  (below cutoff)  (tied)
+#- Blessed Band of Karabor (finger) Δ-23.95 (-1.20%)  (below cutoff)  (tied)
+#- Brute Cloak of the Ogre-Magi (back) Δ-23.97 (-1.20%)  (below cutoff)  (tied)
+#- Ragesteel Shoulders (shoulder) Δ-24.16 (-1.21%)  (below cutoff)  (tied)
+#- Ring of Captured Storms (finger) Δ-24.90 (-1.24%)  (below cutoff)  (tied)
+#- Jade Ring of the Everliving (finger) Δ-24.97 (-1.25%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-25.36 (-1.27%)  (below cutoff)  (tied)
+#- Band of the Eternal Restorer (finger) Δ-25.36 (-1.27%)  (below cutoff)  (tied)
+#- Shadowvine Cloak of Infusion (back) Δ-25.39 (-1.27%)  (below cutoff)  (tied)
+#- Girdle of the Prowler (waist) Δ-25.46 (-1.27%)  (below cutoff)  (tied)
+#- Ring of Endless Coils (finger) Δ-25.47 (-1.27%)  (below cutoff)  (tied)
+#- Band of Al'ar (finger) Δ-25.50 (-1.27%)  (below cutoff)  (tied)
+#- Mask of the Deceiver (head) Δ-25.76 (-1.29%)  (below cutoff)  (tied)
+#- Phoenix-Ring of Rebirth (finger) Δ-25.80 (-1.29%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-25.86 (-1.29%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-25.95 (-1.30%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-26.10 (-1.30%)  (below cutoff)  (tied)
+#- Band of the Eternal Sage (finger) Δ-26.10 (-1.30%)  (below cutoff)  (tied)
+#- Justicar Greaves (legs) Δ-22.37 (-1.12%)  (below cutoff)  (tied)
+    -3.88 set potential (needs 3 more pieces)
+#- Ring of Recurrence (finger) Δ-26.35 (-1.32%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-26.41 (-1.32%)  (below cutoff)  (tied)
+#- Spectral Band of Innervation (finger) Δ-26.64 (-1.33%)  (below cutoff)  (tied)
+#- Coral Band of the Revived (finger) Δ-26.79 (-1.34%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-26.86 (-1.34%)  (below cutoff)  (tied)
+#- Justicar Shoulderplates (shoulder) Δ-23.08 (-1.15%)  (below cutoff)  (tied)
+    -3.88 set potential (needs 3 more pieces)
+#- The Seal of Danzalar (finger) Δ-27.14 (-1.35%)  (below cutoff)  (tied)
+#- Ring of Flowing Light (finger) Δ-27.25 (-1.36%)  (below cutoff)  (tied)
+#- Gilded Thorium Cloak (back) Δ-27.70 (-1.38%)  (below cutoff)  (tied)
+#- Phoenix-Wing Cloak (back) Δ-27.70 (-1.38%)  (below cutoff)  (tied)
+#- Night's End (back) Δ-27.72 (-1.38%)  (below cutoff)  (tied)
+#- Pepe's Shroud of Pacification (back) Δ-27.72 (-1.38%)  (below cutoff)  (tied)
+#- Ring of Calming Waves (finger) Δ-27.81 (-1.39%)  (below cutoff)  (tied)
+#- Bladed Shoulderpads of the Merciless (shoulder) Δ-27.82 (-1.39%)  (below cutoff)  (tied)
+#- Nethervoid Cloak (back) Δ-27.84 (-1.39%)  (below cutoff)  (tied)
+#- Gauntlets of the Dragonslayer (hands) Δ-28.16 (-1.41%)  (below cutoff)  (tied)
+#- Mender's Heart-Ring (finger) Δ-28.36 (-1.42%)  (below cutoff)  (tied)
+#- Band of the Vigilant (finger) Δ-28.59 (-1.43%)  (below cutoff)  (tied)
+#- Battlescar Boots (feet) Δ-28.91 (-1.44%)  (below cutoff)  (tied)
+#- Justicar Gauntlets (hands) Δ-25.43 (-1.27%)  (below cutoff)  (tied)
+    -3.88 set potential (needs 3 more pieces)
+#- Gloves of Quickening (hands) Δ-30.03 (-1.50%)  (below cutoff)  (tied)
+#- Shermanar Great-Ring (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Band of Eternity (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Band of the Eternal Defender (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Band of the Abyssal Lord (finger) Δ-30.73 (-1.53%)  (below cutoff)  (tied)
+#- Seventh Ring of the Tirisfalen (finger) Δ-30.75 (-1.53%)  (below cutoff)  (tied)
+#- Ring of Sundered Souls (finger) Δ-30.75 (-1.53%)  (below cutoff)  (tied)
+#- Ring of Unrelenting Storms (finger) Δ-30.94 (-1.54%)  (below cutoff)  (tied)
+#- Halberd of Desolation (weapon) Δ-33.79 (-1.69%)  (below cutoff)  (tied)
+#- Ragesteel Breastplate (chest) Δ-35.00 (-1.75%)  (below cutoff)  (tied)
+#- Naturewarden's Treads (feet) Δ-35.77 (-1.79%)  (below cutoff)  (tied)
+#- Crimson Girdle of the Indomitable (waist) Δ-35.95 (-1.79%)  (below cutoff)  (tied)
+#- Translucent Spellthread Necklace (neck) Δ-36.32 (-1.81%)  (below cutoff)  (tied)
+#- Nadina's Pendant of Purity (neck) Δ-36.63 (-1.83%)  (below cutoff)  (tied)
+#- Emberspur Talisman (neck) Δ-37.25 (-1.86%)  (below cutoff)  (tied)
+#- Pendant of the Lost Ages (neck) Δ-37.66 (-1.88%)  (below cutoff)  (tied)
+#- Howling Wind Bracers (wrist) Δ-37.72 (-1.88%)  (below cutoff)  (tied)
+#- Stormherald (weapon) Δ-38.07 (-1.90%)  (below cutoff)  (tied)
+#- Teeth of Gruul (neck) Δ-38.09 (-1.90%)  (below cutoff)  (tied)
+#- Gauntlets of Enforcement (hands) Δ-38.14 (-1.90%)  (below cutoff)  (tied)
+#- Elunite Empowered Bracers (wrist) Δ-38.86 (-1.94%)  (below cutoff)  (tied)
+#- Rejuvenating Bracers (wrist) Δ-38.90 (-1.94%)  (below cutoff)  (tied)
+#- Adornment of Stolen Souls (neck) Δ-38.99 (-1.95%)  (below cutoff)  (tied)
+#- Brooch of Unquenchable Fury (neck) Δ-39.08 (-1.95%)  (below cutoff)  (tied)
+#- Merciless Gladiator's Greatsword (weapon) Δ-39.20 (-1.96%)  (below cutoff)  (tied)
+#- Archaic Charm of Presence (neck) Δ-39.22 (-1.96%)  (below cutoff)  (tied)
+#- Blackfathom Warbands (wrist) Δ-39.29 (-1.96%)  (below cutoff)  (tied)
+#- Blessed Adamantite Bracers (wrist) Δ-39.98 (-2.00%)  (below cutoff)  (tied)
+#- Gold-Leaf Wildboots (feet) Δ-40.04 (-2.00%)  (below cutoff)  (tied)
+#- Tide-stomper's Greaves (feet) Δ-40.10 (-2.00%)  (below cutoff)  (tied)
+#- Shining Chain of the Afterworld (neck) Δ-40.21 (-2.01%)  (below cutoff)  (tied)
+#- Orca-Hide Boots (feet) Δ-40.61 (-2.03%)  (below cutoff)  (tied)
+#- Tome of Fiery Redemption (trinket) Δ-40.85 (-2.04%)  (below cutoff)  (tied)
+#- Bands of the Coming Storm (wrist) Δ-40.89 (-2.04%)  (below cutoff)  (tied)
+#- Whirlwind Bracers (wrist) Δ-41.15 (-2.05%)  (below cutoff)  (tied)
+#- Lionheart Champion (weapon) Δ-41.17 (-2.05%)  (below cutoff)  (tied)
+#- The Skull of Gul'dan (trinket) Δ-41.48 (-2.07%)  (below cutoff)  (tied)
+#- Forestlord Striders (feet) Δ-41.53 (-2.07%)  (below cutoff)  (tied)
+#- Bracers of the White Stag (wrist) Δ-41.60 (-2.08%)  (below cutoff)  (tied)
+#- Chestguard of the Conniver (chest) Δ-41.87 (-2.09%)  (below cutoff)  (tied)
+#- Grove-Bands of Remulos (wrist) Δ-41.96 (-2.09%)  (below cutoff)  (tied)
+#- Wrynn Dynasty Greaves (legs) Δ-42.14 (-2.10%)  (below cutoff)  (tied)
+#- The Seeker's Wristguards (wrist) Δ-42.38 (-2.12%)  (below cutoff)  (tied)
+#- Frayed Tether of the Drowned (neck) Δ-42.73 (-2.13%)  (below cutoff)  (tied)
+#- Pendant of Titans (neck) Δ-42.73 (-2.13%)  (below cutoff)  (tied)
+#- Vambraces of Courage (wrist) Δ-42.73 (-2.13%)  (below cutoff)  (tied)
+#- Barbed Choker of Discipline (neck) Δ-42.75 (-2.13%)  (below cutoff)  (tied)
+#- Ritssyn's Lost Pendant (neck) Δ-42.75 (-2.13%)  (below cutoff)  (tied)
+#- Hellfire-Encased Pendant (neck) Δ-42.83 (-2.14%)  (below cutoff)  (tied)
+#- Belt of the Tracker (waist) Δ-42.94 (-2.14%)  (below cutoff)  (tied)
+#- Bracers of Justice (wrist) Δ-43.43 (-2.17%)  (below cutoff)  (tied)
+#- Girdle of Fallen Stars (waist) Δ-43.58 (-2.18%)  (below cutoff)  (tied)
+#- Sextant of Unstable Currents (trinket) Δ-43.89 (-2.19%)  (below cutoff)  (tied)
+#- Beastmaw Pauldrons (shoulder) Δ-44.22 (-2.21%)  (below cutoff)  (tied)
+#- Boots of the Resilient (feet) Δ-44.40 (-2.22%)  (below cutoff)  (tied)
+#- Myrmidon's Treads (feet) Δ-44.40 (-2.22%)  (below cutoff)  (tied)
+#- Mantle of Abrahmis (shoulder) Δ-44.49 (-2.22%)  (below cutoff)  (tied)
+#- Girdle of Mighty Resolve (waist) Δ-45.03 (-2.25%)  (below cutoff)  (tied)
+#- Romulo's Poison Vial (trinket) Δ-45.26 (-2.26%)  (below cutoff)  (tied)
+#- Girdle of Zaetar (waist) Δ-45.45 (-2.27%)  (below cutoff)  (tied)
+#- Eternium Shell Bracers (wrist) Δ-45.53 (-2.27%)  (below cutoff)  (tied)
+#- Wristguards of Determination (wrist) Δ-45.53 (-2.27%)  (below cutoff)  (tied)
+#- Ravager's Wrist-Wraps (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Ravager's Bands (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Ravager's Bracers (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Redeemed Soul Wristguards (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Bracers of Shackled Souls (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Shadesteel Bracers (wrist) Δ-45.55 (-2.27%)  (below cutoff)  (tied)
+#- Girdle of Hope (waist) Δ-45.56 (-2.27%)  (below cutoff)  (tied)
+#- Thundering Greathelm (head) Δ-46.66 (-2.33%)  (below cutoff)  (tied)
+#- Flashfire Girdle (waist) Δ-48.50 (-2.42%)  (below cutoff)  (tied)
+#- Eye of Magtheridon (trinket) Δ-48.51 (-2.42%)  (below cutoff)  (tied)
+#- Fel-Steel Warhelm (head) Δ-48.63 (-2.43%)  (below cutoff)  (tied)
+#- Girdle of the Invulnerable (waist) Δ-49.32 (-2.46%)  (below cutoff)  (tied)
+#- Girdle of Stability (waist) Δ-49.32 (-2.46%)  (below cutoff)  (tied)
+#- Boots of Oceanic Fury (feet) Δ-50.09 (-2.50%)  (below cutoff)  (tied)
+#- Scaled Breastplate of Carnage (chest) Δ-50.64 (-2.53%)  (below cutoff)  (tied)
+#- Naturalist's Preserving Cinch (waist) Δ-50.89 (-2.54%)  (below cutoff)  (tied)
+#- Belt of Primal Majesty (waist) Δ-50.89 (-2.54%)  (below cutoff)  (tied)
+#- Memento of Tyrande (trinket) Δ-50.97 (-2.54%)  (below cutoff)  (tied)
+#- Pearl Inlaid Boots (feet) Δ-51.39 (-2.56%)  (below cutoff)  (tied)
+#- Belt of the Crescent Moon (waist) Δ-51.48 (-2.57%)  (below cutoff)  (tied)
+#- Botanist's Gloves of Growth (hands) Δ-51.50 (-2.57%)  (below cutoff)  (tied)
+#- Stillwater Boots (feet) Δ-51.58 (-2.57%)  (below cutoff)  (tied)
+#- Windshear Boots (feet) Δ-52.36 (-2.61%)  (below cutoff)  (tied)
+#- Ribbon of Sacrifice (trinket) Δ-52.70 (-2.63%)  (below cutoff)  (tied)
+#- Girdle of Lordaeron's Fallen (waist) Δ-53.08 (-2.65%)  (below cutoff)  (tied)
+#- Tempest-Strider Boots (feet) Δ-53.32 (-2.66%)  (below cutoff)  (tied)
+#- Enchanted Leather Sandals (feet) Δ-53.34 (-2.66%)  (below cutoff)  (tied)
+#- Boots of Courage Unending (feet) Δ-53.73 (-2.68%)  (below cutoff)  (tied)
+#- Fel Reaver's Piston (trinket) Δ-53.75 (-2.68%)  (below cutoff)  (tied)
+#- Eye of Gruul (trinket) Δ-54.15 (-2.70%)  (below cutoff)  (tied)
+#- Cord of Nature's Sustenance (waist) Δ-54.79 (-2.73%)  (below cutoff)  (tied)
+#- Girdle of Truth (waist) Δ-54.81 (-2.74%)  (below cutoff)  (tied)
+#- Belt of Gale Force (waist) Δ-54.91 (-2.74%)  (below cutoff)  (tied)
+#- Worldstorm Gauntlets (hands) Δ-55.02 (-2.75%)  (below cutoff)  (tied)
+#- Sun-touched Chain Leggings (legs) Δ-55.16 (-2.75%)  (below cutoff)  (tied)
+#- Boots of Valiance (feet) Δ-55.31 (-2.76%)  (below cutoff)  (tied)
+#- Kilt of Immortal Nature (legs) Δ-55.36 (-2.76%)  (below cutoff)  (tied)
+#- Glorious Gauntlets of Crestfall (hands) Δ-55.70 (-2.78%)  (below cutoff)  (tied)
+#- Sunhawk Leggings (legs) Δ-55.94 (-2.79%)  (below cutoff)  (tied)
+#- Spyglass of the Hidden Fleet (trinket) Δ-56.11 (-2.80%)  (below cutoff)  (tied)
+#- Gauntlets of Renewed Hope (hands) Δ-56.28 (-2.81%)  (below cutoff)  (tied)
+#- Shadowmoon Insignia (trinket) Δ-56.30 (-2.81%)  (below cutoff)  (tied)
+#- Moroes' Lucky Pocket Watch (trinket) Δ-56.32 (-2.81%)  (below cutoff)  (tied)
+#- The Lightning Capacitor (trinket) Δ-56.32 (-2.81%)  (below cutoff)  (tied)
+#- Prism of Inner Calm (trinket) Δ-56.32 (-2.81%)  (below cutoff)  (tied)
+#- Ashtongue Talisman of Zeal (trinket) Δ-56.32 (-2.81%)  (below cutoff)  (tied)
+#- Girdle of the Righteous Path (waist) Δ-56.37 (-2.81%)  (below cutoff)  (tied)
+#- Pendant of the Violet Eye (trinket) Δ-56.51 (-2.82%)  (below cutoff)  (tied)
+#- Mitts of the Treemender (hands) Δ-56.70 (-2.83%)  (below cutoff)  (tied)
+#- Gloves of Centering (hands) Δ-56.70 (-2.83%)  (below cutoff)  (tied)
+#- Glimmering Steel Mantle (shoulder) Δ-57.50 (-2.87%)  (below cutoff)  (tied)
+#- Heart-Flame Leggings (legs) Δ-57.62 (-2.88%)  (below cutoff)  (tied)
+#- Earthsoul Leggings (legs) Δ-57.69 (-2.88%)  (below cutoff)  (tied)
+#- Boots of Elusion (feet) Δ-57.77 (-2.88%)  (below cutoff)  (tied)
+#- Glider's Boots (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Glider's Sabatons (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Glider's Greaves (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Redeemed Soul Moccasins (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Boots of Shackled Souls (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Shadesteel Sabots (feet) Δ-57.79 (-2.88%)  (below cutoff)  (tied)
+#- Coral-Barbed Shoulderpads (shoulder) Δ-58.08 (-2.90%)  (below cutoff)  (tied)
+#- Legplates of the Innocent (legs) Δ-58.12 (-2.90%)  (below cutoff)  (tied)
+#- Maulgar's Warhelm (head) Δ-59.02 (-2.95%)  (below cutoff)  (tied)
+#- Malefic Mask of the Shadows (head) Δ-59.58 (-2.97%)  (below cutoff)  (tied)
+#- Cowl of Defiance (head) Δ-59.78 (-2.98%)  (below cutoff)  (tied)
+#- Lurker's Grasp (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Lurker's Belt (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Lurker's Girdle (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Redeemed Soul Cinch (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Waistguard of Shackled Souls (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Shadesteel Girdle (waist) Δ-59.90 (-2.99%)  (below cutoff)  (tied)
+#- Helm of Soothing Currents (head) Δ-60.25 (-3.01%)  (below cutoff)  (tied)
+#- Iron Gauntlets of the Maiden (hands) Δ-60.29 (-3.01%)  (below cutoff)  (tied)
+#- Royal Gauntlets of Silvermoon (hands) Δ-60.29 (-3.01%)  (below cutoff)  (tied)
+#- Topaz-Studded Battlegrips (hands) Δ-60.29 (-3.01%)  (below cutoff)  (tied)
+#- Guise of the Tidal Lurker (head) Δ-61.13 (-3.05%)  (below cutoff)  (tied)
+#- Praetorian's Legguards (legs) Δ-62.20 (-3.10%)  (below cutoff)  (tied)
+#- Ethereum Nexus-Reaver (weapon) Δ-62.67 (-3.13%)  (below cutoff)  (tied)
+#- Crown of Empowered Fate (head) Δ-63.14 (-3.15%)  (below cutoff)  (tied)
+#- Spiritwalker Gauntlets (hands) Δ-64.72 (-3.23%)  (below cutoff)  (tied)
+#- Panzar'Thar Breastplate (chest) Δ-65.83 (-3.29%)  (below cutoff)  (tied)
+#- Gorehowl (weapon) Δ-65.91 (-3.29%)  (below cutoff)  (tied)
+#- Faceplate of the Impenetrable (head) Δ-68.29 (-3.41%)  (below cutoff)  (tied)
+#- Bark-Gloves of Ancient Wisdom (hands) Δ-69.13 (-3.45%)  (below cutoff)  (tied)
+#- The Wavemender's Mantle (shoulder) Δ-69.59 (-3.47%)  (below cutoff)  (tied)
+#- Steelspine Faceguard (head) Δ-70.05 (-3.50%)  (below cutoff)  (tied)
+#- Runetotem's Mantle (shoulder) Δ-70.33 (-3.51%)  (below cutoff)  (tied)
+#- Veil of Turning Leaves (shoulder) Δ-71.04 (-3.55%)  (below cutoff)  (tied)
+#- Eternium Greathelm (head) Δ-71.56 (-3.57%)  (below cutoff)  (tied)
+#- Pauldrons of the Argent Sentinel (shoulder) Δ-71.83 (-3.59%)  (below cutoff)  (tied)
+#- Forest Wind Shoulderpads (shoulder) Δ-72.12 (-3.60%)  (below cutoff)  (tied)
+#- Dragon-Quake Shoulderguards (shoulder) Δ-72.77 (-3.63%)  (below cutoff)  (tied)
+#- Pauldrons of the Justice-Seeker (shoulder) Δ-72.85 (-3.64%)  (below cutoff)  (tied)
+#- Scarab of Displacement (trinket) Δ-74.08 (-3.70%)  (below cutoff)  (tied)
+#- Pauldrons of Abyssal Fury (shoulder) Δ-75.71 (-3.78%)  (below cutoff)  (tied)
+#- Hammer of the Naaru (weapon) Δ-76.00 (-3.79%)  (below cutoff)  (tied)
+#- Redeemed Soul Legguards (legs) Δ-82.26 (-4.11%)  (below cutoff)  (tied)
+#- Greaves of Shackled Souls (legs) Δ-82.26 (-4.11%)  (below cutoff)  (tied)
+#- Shadesteel Greaves (legs) Δ-82.26 (-4.11%)  (below cutoff)  (tied)
+#- Despair (weapon) Δ-84.36 (-4.21%)  (below cutoff)  (tied)
+#- Chestguard of Relentless Storms (chest) Δ-86.23 (-4.30%)  (below cutoff)  (tied)
+#- Golden Links of Restoration (chest) Δ-88.56 (-4.42%)  (below cutoff)  (tied)
+#- Fire Crest Breastplate (chest) Δ-89.96 (-4.49%)  (below cutoff)  (tied)
+#- Stonebough Jerkin (chest) Δ-90.27 (-4.51%)  (below cutoff)  (tied)
+#- Breastplate of the Lightbinder (chest) Δ-90.27 (-4.51%)  (below cutoff)  (tied)
+#- Earthblood Chestguard (chest) Δ-90.29 (-4.51%)  (below cutoff)  (tied)
+#- Axe of the Gronn Lords (weapon) Δ-90.41 (-4.51%)  (below cutoff)  (tied)
+#- Don Rodrigo's Poncho (chest) Δ-90.48 (-4.52%)  (below cutoff)  (tied)
+#- Gnarled Chestpiece of the Ancients (chest) Δ-90.75 (-4.53%)  (below cutoff)  (tied)
+#- Fathom-Helm of the Deeps (head) Δ-90.94 (-4.54%)  (below cutoff)  (tied)
+#- Glowing Breastplate of Truth (chest) Δ-91.30 (-4.56%)  (below cutoff)  (tied)
+#- Savior's Grasp (chest) Δ-91.50 (-4.57%)  (below cutoff)  (tied)
+#- Glory of the Defender (chest) Δ-96.96 (-4.84%)  (below cutoff)  (tied)
+#- Faceguard of the Endless Watch (head) Δ-97.63 (-4.87%)  (below cutoff)  (tied)
+#- Big Bad Wolf's Head (head) Δ-107.75 (-5.38%)  (below cutoff)  (tied)
+#- Brighthelm of Justice (head) Δ-107.80 (-5.38%)  (below cutoff)  (tied)
+#- Glaive of the Pit (weapon) Δ-109.07 (-5.44%)  (below cutoff)  (tied)
+#- Cowl of Nature's Breath (head) Δ-109.42 (-5.46%)  (below cutoff)  (tied)
+#- Legacy (weapon) Δ-124.48 (-6.21%)  (below cutoff)
+report C:\Users\dgree\Code\lulz\tbc-gear-prio\.scratch\rank-reports\slamaltman@dreamscythe-US-2026-08-11T18-09-56-132Z.html
+report-json C:\Users\dgree\Code\lulz\tbc-gear-prio\.scratch\rank-reports\slamaltman@dreamscythe-US-2026-08-11T18-09-56-132Z.json
