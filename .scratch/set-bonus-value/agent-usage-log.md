@@ -53,10 +53,12 @@ flag: Fable is the TOP price tier ($10/$50 per Mtok vs Opus $5/$25,
 retrieved 2026-08-12), so the "fable (low)" director runs were the most
 expensive model at constrained effort, not a budget lane.
 
-Owner's clarification (2026-08-12): this was intentional, not a mistake —
-Fable was chosen for high judgment, and low effort chosen to cut cost and
-avoid unnecessary thinking. Treat "fable low" as a deliberate lane for
-orchestration/direction work, priced accordingly.
+Owner's clarification (2026-08-12): the Fable choice was intentional — top
+judgment, low effort to cut cost and unnecessary thinking. Refined the same
+day: the owner's usual pattern is Fable-low for PLANNING and for receiving/
+judging orchestrated outcomes against the plan, with OPUS running the
+orchestration itself. This arc's fable-low directors did both jobs; treat
+that as tolerated here, not the template.
 
 ## Notes
 
