@@ -111,3 +111,10 @@ shows), which is the same class of call as ticket 90 and should not be made
 by a worker mid-sweep. Cost once decided: small — the counting is a few
 lines next to the existing `brokenSetBonuses` call, and the rendering path
 for suppressed figures already exists.
+
+**Update (2026-08-12):** ticket 127 closed the *disclosure* half of anomaly
+A — the 4pc-at-1-worn figure now carries a `selfConfound` qualifier wherever
+it renders, naming the missing 2pc term (commit `102b425`,
+`feat/set-bonus-value`). The arithmetic itself is untouched: `bonusDps` is
+still `4pc − 2·2pc` exactly as this ticket documents, and the suppress-vs-
+qualify-vs-correct decision above remains open and unmade.

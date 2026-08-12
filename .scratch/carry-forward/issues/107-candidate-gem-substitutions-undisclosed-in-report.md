@@ -40,3 +40,14 @@ All 8 affected rows are below the cutoff today, so nothing user-visible is
 currently wrong on the default view — which is exactly why this is easy to leave
 broken until a meta-socketed helm ranks above the cutoff and the omission starts
 mattering.
+
+## Update (2026-08-12)
+
+Finding 3-D2 closed the *wording* half on `feat/set-bonus-value` (commit
+`102b425`): `GEM_POLICY_QUALIFIER` now discloses that meta repair may
+recolour worn coloured gems, drawing from the same rare-capped fill pool as
+the candidate auto-fill this qualifier already described. That is a
+sentence-level fix to the standing caveat text, not the per-row
+`substitutions` reporting this ticket is actually about — the 8 affected
+rows in `shredzepelin-p3.json` still carry `substitutions: []` with no
+mention of the four recoloured gems. This ticket's data work remains open.
