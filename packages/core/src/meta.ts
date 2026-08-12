@@ -49,7 +49,29 @@ const CONDITIONS = new Map<number, Condition>(
   (conditions as Condition[]).map((c) => [c.id, c])
 );
 
-/** Socket colour → gem colours that match it for meta counting / socket bonus. */
+/**
+ * Socket colour -> gem colours that match it for meta counting / socket
+ * bonus. Note Prismatic appearing in the Red, Yellow, *and* Blue sets below —
+ * that is deliberate and correct, not a bug to "fix" toward parity with
+ * upstream. In TBC, a Prismatic gem satisfies all three primary meta
+ * colours simultaneously; that is the defining property of the colour, not
+ * an approximation of it. Upstream wowsims' `metaGemActivationColorContribution`
+ * (`sim/core/meta_gem_constraints.go`) has a `default: return 0,0,0` branch
+ * that credits Prismatic with nothing — that looks like upstream's own
+ * oversight, not a rule we should match (issue #1 investigation, upheld by
+ * independent review in review-corrections.md: "the previous comment called
+ * our prismatic counting our highest-confidence correctness bug... that is
+ * backwards"). Confirmed against community-documented game rules, not
+ * verifiable from either repo's data files — neither db.json carries
+ * activation prose.
+ *
+ * Low-impact either way in practice: the only two Prismatic gems in TBC
+ * (Void Sphere 22459, Prismatic Sphere 22460) carry resistance-only stats,
+ * which score 0 EP under every weight set here, so an EP-driven fill or
+ * repair never selects them — this matters only for a player who already
+ * wears one. That reasoning survives only as long as resistances stay
+ * unweighted; if EP ever prices resistance, revisit.
+ */
 const SOCKET_TO_MATCHING: ReadonlyMap<
   GemColour,
   ReadonlySet<GemColour>

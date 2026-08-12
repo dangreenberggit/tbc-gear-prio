@@ -1274,8 +1274,9 @@ describe("rankUpgrades", () => {
     it("errors the job row when the run throws after the row is created", async () => {
       // Ticket 29: once the Phase 2 job API attaches to a `running` row, a
       // stranded one is a job that never finishes and never fails, so the
-      // caller waits forever. `equipmentForCandidateSwap`'s meta-unsolvable
-      // throw escapes by this same route.
+      // caller waits forever. The baseline repair's meta-unsolvable throw
+      // escapes by this same route (the per-candidate path no longer aborts
+      // the ranking at all — it now skips just the affected candidate).
       class ExplodingBlobStore extends MemoryStore {
         override async put(): Promise<void> {
           throw new Error("blob write exploded");
@@ -3096,5 +3097,88 @@ describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)"
       "Beast-tamer's Shoulders was dropped from the ranking"
     );
     expect(sub!.detail).toContain(GO_PANIC);
+  });
+});
+
+describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
+  const META_SOCKET_HEAD_ID = 32461; // Furious Gizmatic Goggles: meta + blue
+
+  /**
+   * Every slot bare (no item, no gems) except head, which stays empty too —
+   * `repairMeta`'s own head-item lookup (`getItem(0)`) returns undefined for
+   * an empty head, so the baseline path's `!headItem?.sockets.includes(...)`
+   * guard returns early without attempting a repair. Colour counts are zero
+   * everywhere, so once the candidate swap seats a head with a meta socket,
+   * nothing on the character can ever satisfy Relentless's 2/2/2 — genuinely
+   * infeasible, not a step-budget or sim failure.
+   */
+  function bareLoggedGear(): LoggedGear {
+    return {
+      items: SIM_ORDER.map((slot) => ({ id: 0, slot, gems: [] })),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+  }
+
+  it("drops only the affected candidate instead of aborting the whole ranking", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+
+    const logged = bareLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        // Only the meta gem — no coloured gem exists to fill the blue
+        // socket once fill seats Relentless, so repair on the head candidate
+        // is genuinely infeasible (MetaInfeasibleError), not a sim crash.
+        gemPalette: gemsForPhase(3).filter((g) => g.id === 32409),
+        pool: [
+          realPoolEntry(META_SOCKET_HEAD_ID, "ret-p3"),
+          // A healthy candidate proves the run carried on past the failure.
+          realPoolEntry(29381),
+        ],
+      }
+    );
+
+    expect(ranking.items.some((i) => i.itemId === META_SOCKET_HEAD_ID)).toBe(
+      false
+    );
+    expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
+
+    const sub = ranking.substitutions.find(
+      (s) => s.field === `candidate ${META_SOCKET_HEAD_ID} (head)`
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.detail).toContain(
+      "Furious Gizmatic Goggles was dropped from the ranking"
+    );
+    expect(sub!.detail).toContain("gem repair could not activate its meta");
   });
 });
