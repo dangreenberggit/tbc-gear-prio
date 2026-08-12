@@ -1169,6 +1169,32 @@ describe("packageSetPotentialDps", () => {
       packageSetPotentialDps({ deltaDps: 23.29, setContext: pkg() })
     ).toBeCloseTo(64.07);
   });
+
+  it("ignores a NaN package figure instead of letting it hide a real positive sibling", () => {
+    // Math.max returns NaN if any input is NaN, and NaN > 0 is false, so
+    // without filtering, one corrupt figure would fall the row back to its
+    // own delta and throw away a perfectly good positive figure from the
+    // other threshold.
+    const twoThresholds = pkg({
+      packages: [
+        {
+          threshold: 2 as const,
+          deltaDps: NaN,
+          itemIds: [31048],
+          piecesNeeded: 2,
+        },
+        {
+          threshold: 4 as const,
+          deltaDps: 64.07,
+          itemIds: [31048, 31042, 31034, 31044],
+          piecesNeeded: 4,
+        },
+      ],
+    });
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: twoThresholds })
+    ).toBeCloseTo(64.07);
+  });
 });
 
 describe("formatPackageMembershipLine", () => {

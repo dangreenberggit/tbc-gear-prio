@@ -526,7 +526,11 @@ export function packageSetPotentialDps(
 ): number {
   const pkgs = item.setContext?.packages;
   if (!pkgs || pkgs.length === 0) return item.deltaDps;
-  const best = Math.max(...pkgs.map((p) => p.deltaDps));
+  const finiteDeltas = pkgs
+    .map((p) => p.deltaDps)
+    .filter((d) => Number.isFinite(d));
+  if (finiteDeltas.length === 0) return item.deltaDps;
+  const best = Math.max(...finiteDeltas);
   return best > 0 ? best : item.deltaDps;
 }
 
