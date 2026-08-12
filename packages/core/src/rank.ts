@@ -650,17 +650,17 @@ export async function rankUpgrades(
      * `ranked` reorders the rows but never this association.
      */
     const winningRequests = new Map<number, RaidSimRequest>();
-    const simSkips: {
-      itemId: number;
-      name: string;
-      slot: string;
-      reason: string;
-    }[] = [];
-    // Distinct from simSkips: the sim never ran here, meta repair failed
-    // before a request could even be composed. Kept separate so the
-    // disclosure text names the right subsystem instead of blaming the sim
-    // for a gem-layout problem.
-    const repairSkips: {
+    /**
+     * Candidates dropped before they could be ranked. `kind` carries why:
+     * `sim` means the sim panicked on the composed swap, `repair` means the
+     * sim never ran at all because meta repair could not activate the gem
+     * layout. The distinction is load-bearing in the disclosure text —
+     * blaming the sim for a gem problem sends an operator to the wrong
+     * subsystem — but it is one sentence's difference over an identical
+     * shape, which is why these were two parallel arrays (ticket 136 item 3).
+     */
+    const candidateSkips: {
+      kind: "sim" | "repair";
       itemId: number;
       name: string;
       slot: string;
@@ -729,7 +729,8 @@ export async function rankUpgrades(
           // this slot attempt exactly like a sim panic does below, not take
           // the whole ranking down (review-corrections.md item 4).
           if (!(err instanceof MetaRepairError)) throw err;
-          repairSkips.push({
+          candidateSkips.push({
+            kind: "repair",
             itemId: entry.itemId,
             name: entry.name,
             slot: slotName,
@@ -743,7 +744,7 @@ export async function rankUpgrades(
           equipment: swapped,
         });
         // Outside the catch below: only a failing *sim* may skip a candidate.
-        // A failing store read routed in there would push a simSkips row
+        // A failing store read routed in there would push a `sim`-kind skip
         // blaming the sim, drop the item, and return a ranking one place
         // short with no error anywhere.
         let candObs = await readCachedSim(deps, candReq, simVersion, runOpts);
@@ -755,7 +756,8 @@ export async function rankUpgrades(
             // wowsimcli when equipped on ret — skip this slot attempt. Recorded
             // rather than swallowed: a candidate that never simmed must not be
             // indistinguishable from one that simmed badly.
-            simSkips.push({
+            candidateSkips.push({
+              kind: "sim",
               itemId: entry.itemId,
               name: entry.name,
               slot: slotName,
@@ -843,9 +845,9 @@ export async function rankUpgrades(
     /**
      * Package-level sim failures (Finding 5): a whole completion package has
      * no single item to blame, and its `setId` must never masquerade as an
-     * `itemId` in the per-candidate `simSkips` shape — so this is a distinct
-     * collection, named by set + threshold, folded into `substitutions`
-     * alongside `simSkips` below rather than forced into its shape.
+     * `itemId` in the per-candidate `candidateSkips` shape — so this is a
+     * distinct collection, named by set + threshold, folded into
+     * `substitutions` alongside it rather than forced into its shape.
      */
     const packageSimSkips: {
       setId: number;
@@ -923,13 +925,13 @@ export async function rankUpgrades(
       caps,
       substitutions: [
         ...substitutionsFromMetaRepair(metaSwaps),
-        ...simSkips.map((s) => ({
+        ...candidateSkips.map((s) => ({
           field: `candidate ${s.itemId} (${s.slot})`,
-          detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
-        })),
-        ...repairSkips.map((s) => ({
-          field: `candidate ${s.itemId} (${s.slot})`,
-          detail: `${s.name} was dropped from the ranking: gem repair could not activate its meta — ${s.reason}`,
+          detail:
+            `${s.name} was dropped from the ranking: ` +
+            (s.kind === "sim"
+              ? `the sim failed on this swap — ${s.reason}`
+              : `gem repair could not activate its meta — ${s.reason}`),
         })),
         ...packageSimSkips.map((s) => ({
           field: `${s.setName} ${s.threshold}pc completion package`,
