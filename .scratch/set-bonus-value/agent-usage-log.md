@@ -37,7 +37,8 @@ Date: 2026-08-10 → 2026-08-11.
 | 16c | — resumed after limit | fable (low) | 132,447 | 16 | done |
 | 17 | W4 ret HTML surfaces check (child of 16) | inherited | 115,430 | 12 | done |
 | 18 | Orchestrate fix round (117/118 + sweep) | fable (low) | unreported | — | killed by session limit mid-round; most commits landed first |
-| 19 | — resumed: finish 118, regenerate, review | fable (low) | pending | — | running |
+| 19 | — resumed: finish 118, regenerate, review | fable (low) | 97,190 | 8 | done (per-worker rows in fix-round/DIRECTOR.md) |
+| 20 | Apply review dispositions (blocker + 4 fixes) | sonnet | pending | — | running |
 
 ## Notes
 
