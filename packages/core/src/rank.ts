@@ -79,6 +79,7 @@ import {
   type BrokenSetBonus,
   type DpsSample,
   type IndividualDelta,
+  type SelfSetConfound,
   type SetThreshold,
   type UnmeasuredReason,
 } from "./set-value.js";
@@ -287,6 +288,14 @@ export type SetBonusValue = {
    * reader must see it rather than read the number as the bonus alone.
    */
   breaks?: BrokenSetBonus[];
+  /**
+   * Present when this bonus was computed with its own lower threshold's term
+   * missing — the lower threshold was `unmeasurable-at-this-worn-count` for
+   * the same set, so `computeSynergy` subtracted nothing where it should have
+   * subtracted that bonus (ticket 119 anomaly A, disclosed per ticket 127).
+   * The arithmetic is unchanged; this only names what `bonusDps` is missing.
+   */
+  selfConfound?: SelfSetConfound;
 };
 
 /**
@@ -1027,6 +1036,13 @@ async function buildSetBonuses(
       candidates.map((entry) => entry.itemId)
     );
     let twoPieceBonus: number | undefined;
+    // Set only when the 2pc row itself came back `unmeasurable-at-this-worn-
+    // count` (ticket 119 anomaly B) — the specific case where `twoPieceBonus`
+    // stays undefined not because no 2pc exists, but because it could not be
+    // measured from here. Distinguishing this from "no 2pc bonus" (e.g.
+    // not-implemented-in-sim) is the whole point: only this case means the
+    // 4pc figure below is missing a real, non-zero term (ticket 127).
+    let twoPieceUnmeasurableAtThisWornCount = false;
 
     for (const threshold of SET_THRESHOLDS) {
       if (threshold <= piecesWorn) continue;
@@ -1075,6 +1091,7 @@ async function buildSetBonuses(
       // and spend no sim. The completing piece is still named so a renderer
       // can say which item would finish the threshold.
       if (addedPieces.length === 1) {
+        if (threshold === 2) twoPieceUnmeasurableAtThisWornCount = true;
         results.push({
           setId,
           setName: label,
@@ -1162,6 +1179,14 @@ async function buildSetBonuses(
       if (threshold === 2) twoPieceBonus = synergy.bonusDps;
 
       const breaks = brokenSetBonuses(equipment, addedPieces, setId);
+      // The 2pc term is missing from this 4pc figure exactly when the 2pc row
+      // was `unmeasurable-at-this-worn-count` for the *same* set — not merely
+      // whenever `twoPieceBonus` is undefined, which is also true (correctly,
+      // with nothing missing) for `not-implemented-in-sim`.
+      const selfConfound: SelfSetConfound | undefined =
+        threshold === 4 && twoPieceUnmeasurableAtThisWornCount
+          ? { threshold: 2 }
+          : undefined;
       results.push({
         setId,
         setName: label,
@@ -1172,6 +1197,7 @@ async function buildSetBonuses(
         bonusDps: synergy.bonusDps,
         se: synergy.se,
         ...(breaks.length > 0 ? { breaks } : {}),
+        ...(selfConfound ? { selfConfound } : {}),
       });
     }
   }

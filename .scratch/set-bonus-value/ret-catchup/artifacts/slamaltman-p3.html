@@ -581,7 +581,7 @@
       <label><input type="radio" name="set-weight" value="weighted" /> <span>Weighted — 0.5× a 2pc bonus, 0.25× a 4pc</span></label>
       <label><input type="radio" name="set-weight" value="full" /> <span>Full — the whole bonus, as if the set gets completed anyway</span></label>
       <label><input type="radio" name="set-weight" value="package" /> <span>Package — score each set piece by the whole set it completes</span></label>
-      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not. <strong>Package</strong> answers a different question again — not what a piece is worth tonight, but whether starting the set is worth it: every piece of one completion package shows that package's own simmed value against your current gear, breaks included, so a piece that is a downgrade alone can still be worth collecting. Each row keeps its own single-swap delta beside the figure. Every package value uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase.</p>
+      <p class="set-weight-note">Re-sorts and re-labels rows and chips. Display only — which items count as above cutoff is unchanged. <strong>Full</strong> credits every piece of a set with the entire bonus, so it is an upper bound, not an estimate: it is the right lens when the set's other pieces are upgrades you would take regardless, and too generous when they are not. <strong>Package</strong> answers a different question again — not what a piece is worth tonight, but whether starting the set is worth it: every piece of one completion package shows that package's own simmed value against your current gear, breaks included, so a piece that is a downgrade alone can still be worth collecting. Each row keeps its own single-swap delta beside the figure. Every package value uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117).</p>
     </div>
     <div class="set-weight-toggle export-panel">
       <p class="set-weight-title">Export</p>
@@ -627,14 +627,14 @@
       <div class="set-entry-line bonus">set bonus +0.55 DPS</div>
       <div class="set-entry-line package">whole package +11.31 DPS vs current gear</div>
       <div class="set-entry-line contents">add Lightbringer Breastplate, Lightbringer Greaves</div>
-      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase</div>
+      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117)</div>
     </li>
 <li class="set-entry">
       <p class="set-entry-head">Lightbringer Battlegear 4pc — 0 worn</p>
       <div class="set-entry-line bonus">set bonus -9.31 DPS</div>
       <div class="set-entry-line package">whole package -6.83 DPS vs current gear</div>
       <div class="set-entry-line contents">add Lightbringer War-Helm, Lightbringer Shoulderbraces, Lightbringer Breastplate, Lightbringer Greaves</div>
-      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase</div>
+      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117)</div>
     </li>
 <li class="set-entry">
       <p class="set-entry-head">Crystalforge Battlegear 2pc — 1 worn</p>
@@ -645,7 +645,8 @@
       <div class="set-entry-line bonus">set bonus -9.92 DPS</div>
       <div class="set-entry-line package">whole package -26.77 DPS vs current gear</div>
       <div class="set-entry-line contents">add Crystalforge War-Helm, Crystalforge Shoulderbraces, Crystalforge Greaves</div>
-      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase</div>
+      <div class="set-entry-line qualifier">this figure includes the unmeasured 2pc effect and cannot be separated from it — the completing pieces each cross the 2pc threshold on their own, so its bonus is folded into the set bonus figure above rather than subtracted out</div>
+      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117)</div>
     </li>
 <li class="set-entry">
       <p class="set-entry-head">Gladiator's Vindication 2pc — 0 worn</p>
@@ -672,7 +673,7 @@
       <div class="set-entry-line bonus">set bonus -3.88 DPS</div>
       <div class="set-entry-line package">whole package -80.56 DPS vs current gear</div>
       <div class="set-entry-line contents">add Justicar Crown, Justicar Shoulderplates, Justicar Breastplate, Justicar Greaves</div>
-      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase</div>
+      <div class="set-entry-line qualifier">the package figure uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117)</div>
     </li></ul>
 </details>
 
@@ -763,7 +764,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">completes 2pc (included in delta)</div>
-      <div class="package-line">this swap alone: -0.47 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -0.47 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -785,7 +786,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">+0.55 set potential (needs 1 more piece)</div>
-      <div class="package-line">this swap alone: -1.34 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -1.34 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -828,7 +829,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">-3.88 set potential (needs 3 more pieces)</div>
-      <div class="package-line">this swap alone: -18.08 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -18.08 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -1674,7 +1675,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">+0.55 set potential (needs 1 more piece)</div>
-      <div class="package-line">this swap alone: -7.50 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -7.50 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -1714,7 +1715,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">completes 2pc (included in delta)</div>
-      <div class="package-line">this swap alone: -10.77 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -10.77 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -1826,7 +1827,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">-3.88 set potential (needs 3 more pieces)</div>
-      <div class="package-line">this swap alone: -23.08 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -23.08 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -2657,7 +2658,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">+0.55 set potential (needs 1 more piece)</div>
-      <div class="package-line">this swap alone: +3.11 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: +3.11 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     <div class="hit-note down">costs 2 hit rating — widens your gap to 25</div>
@@ -2830,7 +2831,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">-3.88 set potential (needs 3 more pieces)</div>
-      <div class="package-line">this swap alone: -13.14 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -13.14 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -5070,7 +5071,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">+0.55 set potential (needs 1 more piece)</div>
-      <div class="package-line">this swap alone: +7.66 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: +7.66 — 2pc package +11.31 (2 pieces) / 4pc package -6.83 (4 pieces) — each figure is that whole package of Lightbringer Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -5182,7 +5183,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">completes 2pc (included in delta)</div>
-      <div class="package-line">this swap alone: -5.61 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -5.61 — 4pc package -26.77 (3 pieces) — each figure is that whole package of Crystalforge Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     
@@ -5258,7 +5259,7 @@
     <div class="set-info">
       <p class="set-info-title">Set</p>
       <div class="set-potential">-3.88 set potential (needs 3 more pieces)</div>
-      <div class="package-line">this swap alone: -22.37 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase)</div>
+      <div class="package-line">this swap alone: -22.37 — 4pc package -80.56 (4 pieces) — each figure is that whole package of Justicar Battlegear pieces vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117))</div>
     </div>
     
     

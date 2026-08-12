@@ -183,7 +183,7 @@ export function formatSetBonusLine(b: SetBonusValue): string {
     b.unmeasured !== undefined
       ? UNMEASURED_REASON_TEXT[b.unmeasured]
       : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
-  const head = `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${formatBreaksPrefix(b)}${measured}`;
+  const head = `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${formatBreaksPrefix(b)}${formatSelfConfoundPrefix(b)}${measured}`;
   return `${head}${formatPackageDelta(b)}${formatPackageContents(b)}`;
 }
 
@@ -208,6 +208,50 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
 }
 
 /**
+ * Same front-loading rule as `formatBreaksPrefix`, for the self-set confound
+ * ticket 127 discloses: when `selfConfound` is present, this figure was
+ * computed with its own lower threshold's term missing (ticket 119 anomaly
+ * A), not merely inflated by an outside set. The two prefixes can coexist —
+ * a package can break another set *and* be missing its own lower term — so
+ * this is emitted independently and both may appear.
+ */
+export function formatSelfConfoundPrefix(b: SetBonusValue): string {
+  if (!b.selfConfound) return "";
+  return `[includes the unmeasured ${b.selfConfound.threshold}pc effect, can't be separated from it] `;
+}
+
+/**
+ * Back-fills `selfConfound` on a `SetBonusValue[]` that predates ticket 127
+ * (rank.ts now sets it directly; this exists for artifacts already committed
+ * before that, so an old JSON can be re-rendered without a new sim run).
+ *
+ * Derives the exact condition `rank.ts` checks live: a 4pc entry is missing
+ * its own 2pc term whenever this same set's 2pc entry is present and
+ * `unmeasured === "unmeasurable-at-this-worn-count"` — the case where every
+ * added single crosses the 2pc on its own (ticket 119 anomaly A). A no-op on
+ * an array that already carries `selfConfound`, so it is safe to run on
+ * fresh data too.
+ */
+export function withSelfConfoundDisclosed(
+  setBonuses: readonly SetBonusValue[]
+): SetBonusValue[] {
+  const twoPieceUnmeasurableSetIds = new Set(
+    setBonuses
+      .filter(
+        (b) =>
+          b.threshold === 2 &&
+          b.unmeasured === "unmeasurable-at-this-worn-count"
+      )
+      .map((b) => b.setId)
+  );
+  return setBonuses.map((b) => {
+    if (b.threshold !== 4 || b.selfConfound) return b;
+    if (!twoPieceUnmeasurableSetIds.has(b.setId)) return b;
+    return { ...b, selfConfound: { threshold: 2 as const } };
+  });
+}
+
+/**
  * The one wording for `packageDeltaDps`'s gem-model statement, shared by every
  * surface that states the figure (tickets 103, 111).
  *
@@ -224,7 +268,7 @@ export function formatBreaksPrefix(b: SetBonusValue): string {
  * different claims about one number.
  */
 export const GEM_POLICY_QUALIFIER =
-  "uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase";
+  "uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase; a swap that needs a meta gem's socket requirement re-lit may also have meta repair recolour worn coloured gems, drawing from that same rare-capped pool (ticket 117)";
 
 /**
  * The whole-package delta: one sim of the assembled package against the
@@ -319,6 +363,12 @@ export function setBonusEntry(b: SetBonusValue): SetBonusEntry {
     lines.push({
       kind: "qualifier",
       text: `breaks ${parts.join("; ")} — the set bonus figure is inflated by it, and is not counted in ranking`,
+    });
+  }
+  if (b.selfConfound) {
+    lines.push({
+      kind: "qualifier",
+      text: `this figure includes the unmeasured ${b.selfConfound.threshold}pc effect and cannot be separated from it — the completing pieces each cross the ${b.selfConfound.threshold}pc threshold on their own, so its bonus is folded into the set bonus figure above rather than subtracted out`,
     });
   }
   lines.push({

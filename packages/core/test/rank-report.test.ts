@@ -11,6 +11,7 @@ import {
 } from "../src/rank-report.js";
 import {
   curatedSetPhase,
+  formatSelfConfoundPrefix,
   formatSetBonusLine,
   GEM_POLICY_QUALIFIER,
   setBonusEntry,
@@ -19,6 +20,7 @@ import {
   formatPackageMembershipLine,
   packageSetPotentialDps,
   weightedSetPotentialDps,
+  withSelfConfoundDisclosed,
   wowsimsItemIdsJson,
 } from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
@@ -535,6 +537,18 @@ describe("rank-report", () => {
   });
 });
 
+// Finding 3-D2: since ticket 117, repairMeta (both call sites in rank.ts)
+// draws replacement gems from the same capped fill palette the candidate
+// auto-fill uses, and may overwrite worn coloured gems to keep a meta gem's
+// socket requirement lit — a disclosure the qualifier's wording never
+// covered.
+describe("GEM_POLICY_QUALIFIER", () => {
+  it("discloses that meta repair may recolour worn gems from the fill palette", () => {
+    expect(GEM_POLICY_QUALIFIER).toContain("meta");
+    expect(GEM_POLICY_QUALIFIER).toMatch(/recolour|recolor/);
+  });
+});
+
 describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", () => {
   it("renders a measured bonus, signed", () => {
     expect(
@@ -766,6 +780,101 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     // number away — the caveat cannot sit past the end of the sentence.
     expect(line.indexOf("breaks")).toBeLessThan(line.indexOf("193.89"));
     expect(line).toContain("Malorne Harness 2pc");
+  });
+
+  // Ticket 127: the Crystalforge 4pc-at-1-worn case from
+  // .scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.json —
+  // bonusDps computed with the 2pc term missing (ticket 119 anomaly A) must
+  // not read as a plain measurement.
+  it("qualifies a 4pc figure whose own lower threshold was unmeasurable at this worn count", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+      selfConfound: { threshold: 2 },
+    });
+    // Same front-loading rule as the cross-set break prefix: the qualifier
+    // must read before the figure, not after it.
+    expect(line.indexOf("unmeasured")).toBeLessThan(line.indexOf("-9.92"));
+    expect(line).toContain("2pc");
+  });
+
+  // Ticket 127: option (a) for the already-committed slamaltman-p3 artifact
+  // (predates this fix, no live sim rerun) — derive `selfConfound` at render
+  // time from the sibling 2pc row already in the same JSON.
+  describe("withSelfConfoundDisclosed", () => {
+    const twoPc = {
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 2 as const,
+      piecesWorn: 1,
+      packageItemIds: [30131],
+      packageDeltaDps: 0,
+      unmeasured: "unmeasurable-at-this-worn-count" as const,
+    };
+    const fourPc = {
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4 as const,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30133, 30132],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+    };
+
+    it("adds selfConfound to the 4pc entry when the sibling 2pc is unmeasurable-at-this-worn-count", () => {
+      const result = withSelfConfoundDisclosed([twoPc, fourPc]);
+      const patched4pc = result.find((b) => b.threshold === 4);
+      expect(patched4pc?.selfConfound).toEqual({ threshold: 2 });
+      // Nothing else about the entry moves — same arithmetic, only disclosed.
+      expect(patched4pc?.bonusDps).toBe(fourPc.bonusDps);
+      expect(patched4pc?.packageDeltaDps).toBe(fourPc.packageDeltaDps);
+      expect(patched4pc?.se).toBe(fourPc.se);
+    });
+
+    it("leaves the 0-worn case untouched — no sibling 2pc is unmeasurable", () => {
+      const clean2pc = {
+        setId: twoPc.setId,
+        setName: twoPc.setName,
+        threshold: twoPc.threshold,
+        piecesWorn: 0,
+        packageItemIds: twoPc.packageItemIds,
+        packageDeltaDps: 30,
+        bonusDps: 30,
+        se: 1,
+      };
+      const clean4pc = { ...fourPc, piecesWorn: 0, bonusDps: 40, se: 1 };
+      const result = withSelfConfoundDisclosed([clean2pc, clean4pc]);
+      expect(
+        result.find((b) => b.threshold === 4)?.selfConfound
+      ).toBeUndefined();
+    });
+
+    it("is a no-op when selfConfound is already present", () => {
+      const already = { ...fourPc, selfConfound: { threshold: 2 as const } };
+      const result = withSelfConfoundDisclosed([twoPc, already]);
+      expect(result.find((b) => b.threshold === 4)).toEqual(already);
+    });
+  });
+
+  it("has no self-confound prefix when the bonus carries no selfConfound", () => {
+    expect(
+      formatSelfConfoundPrefix({
+        setId: 629,
+        setName: "Crystalforge Battlegear",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [30129, 30131, 30132, 30133],
+        packageDeltaDps: 1,
+        bonusDps: 1,
+      })
+    ).toBe("");
   });
 
   it("renders a measured ≈0 bonus as a number, not as unmeasured (§2.3)", () => {
@@ -2448,6 +2557,56 @@ describe("Set potential presentation (grouping and order)", () => {
     });
     expect(parts.lines.map((l) => l.kind)).toEqual(["bonus"]);
     expect(parts.lines[0]?.text).toBe("not implemented in the pinned sim");
+  });
+
+  // Ticket 127: the panel's `.set-entry-line qualifier` for a self-set
+  // confound, mirroring the cross-set `breaks` qualifier already covered by
+  // "keeps every figure and qualifier the accreted line disclosed" above.
+  it("adds a qualifier line naming the missing lower threshold when selfConfound is present", () => {
+    const parts = setBonusEntry({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+      selfConfound: { threshold: 2 },
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+      "qualifier",
+    ]);
+    const qualifierText = parts.lines
+      .filter((l) => l.kind === "qualifier")
+      .map((l) => l.text)
+      .join("\n");
+    expect(qualifierText).toContain("2pc");
+    expect(qualifierText).toContain("unmeasured");
+  });
+
+  // The 0-worn control (ticket 127 acceptance): nothing crosses the 2pc on
+  // its own at 0 worn, so no qualifier line is added.
+  it("adds no self-confound qualifier at 0 worn", () => {
+    const parts = setBonusEntry({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [30129, 30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 40,
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+    ]);
   });
 
   /**

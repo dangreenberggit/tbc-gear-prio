@@ -30,6 +30,7 @@ import {
   SET_POTENTIAL_WEIGHTS,
   weightedSetPotentialDps,
   SLOT_ORDER,
+  withSelfConfoundDisclosed,
   type ReportItem,
   type RankReportMeta,
 } from "./rank-report-rules.js";
@@ -479,12 +480,21 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // surface a 4pc bonus at 0 pieces worn can reach at all (carry-forward 91).
   // Gating disclosure on the ranking toggle hid that figure from every default
   // reader — carry-forward 100.
+  // `withSelfConfoundDisclosed` is a no-op on data `rank.ts` already sets
+  // `selfConfound` on directly; it only does work for a JSON artifact
+  // generated before ticket 127, so it re-renders without a new sim run
+  // (ticket 127's option (a) — see the ticket for why a live rerun was ruled
+  // out here: it reproduced only a Go stack trace's goroutine id, not this
+  // figure).
+  const disclosedSetBonuses = ranking.setBonuses
+    ? withSelfConfoundDisclosed(ranking.setBonuses)
+    : undefined;
   const setPotentialPanel =
-    ranking.setBonuses && ranking.setBonuses.length > 0
+    disclosedSetBonuses && disclosedSetBonuses.length > 0
       ? `<details class="panel" open>
-  <summary>Set potential (${ranking.setBonuses.length})</summary>
+  <summary>Set potential (${disclosedSetBonuses.length})</summary>
   <p class="set-potential-assumption">${esc(setPotentialDisclosureLine())}</p>
-  <ul class="set-entries">${ranking.setBonuses
+  <ul class="set-entries">${disclosedSetBonuses
     .map((b) => {
       const entry = setBonusEntry(b);
       const lines = entry.lines

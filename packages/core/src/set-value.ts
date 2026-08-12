@@ -334,6 +334,18 @@ export type SynergyResult = {
 };
 
 /**
+ * Names the lower threshold whose term a `bonusDps` figure is missing
+ * (ticket 127, the disclosure half of ticket 119 anomaly A). Attached by the
+ * caller, never computed here — `computeSynergy` has no way to tell "no 2pc
+ * was measured" (this case) apart from "the 2pc really is 0", and inventing
+ * that distinction inside the formula is exactly what ticket 119's own
+ * `twoPieceBonus?: number` comment already warns against.
+ */
+export type SelfSetConfound = {
+  threshold: SetThreshold;
+};
+
+/**
  * §2.2's synergy formula:
  *   packageDelta(S,t) = D(P(S,t)) - D(baseline)
  *   bonus(S,2)         = packageDelta(S,2) - Σ singles

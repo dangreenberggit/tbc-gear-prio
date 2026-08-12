@@ -2886,6 +2886,62 @@ describe("rankUpgrades — set bonus at one piece short of a threshold (ticket 1
     );
   }
 
+  // Stock slamaltman gear already wears CF_CHEST (30129), which is exactly
+  // the threshold-1 confound this ticket is about — so the 0-worn control
+  // has to swap it out for a non-Crystalforge chest piece first.
+  const NON_CF_CHEST = 21848; // Spellfire Robe: a different set entirely
+
+  async function rankWithNoCfPieceWorn() {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const clearedEquipment = candidateEquipmentForTest(
+      equipment,
+      "chest",
+      NON_CF_CHEST,
+      2,
+      epWeights
+    );
+    const clearedLogged: LoggedGear = {
+      ...logged,
+      items: clearedEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", clearedLogged]]),
+        }),
+        sim: crystalforgeRespondingSim(),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CF_CHEST),
+          realPoolEntry(CF_HELM),
+          realPoolEntry(CF_HANDS),
+          realPoolEntry(CF_LEGS),
+        ],
+      }
+    );
+  }
+
   it("reports the 2pc as unmeasurable at this worn count, not as a measured 0.00", async () => {
     const ranking = await rankWithOneCfPieceWorn();
     const twoPc = ranking.setBonuses!.find(
@@ -2936,6 +2992,25 @@ describe("rankUpgrades — set bonus at one piece short of a threshold (ticket 1
       6
     );
     expect(fourPc!.bonusDps).toBeCloseTo(FOUR_PC - 2 * TWO_PC, 6);
+
+    // Ticket 127: the arithmetic above stays exactly as anomaly A pins it —
+    // this only asserts the figure now discloses that its own lower
+    // threshold's term is missing, so a reader cannot mistake it for a plain
+    // measurement.
+    expect(fourPc!.selfConfound).toEqual({ threshold: 2 });
+  });
+
+  it("carries no self-confound qualifier at 0 worn — nothing crosses the 2pc on its own", async () => {
+    const ranking = await rankWithNoCfPieceWorn();
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 2
+    );
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 4
+    );
+    expect(twoPc?.unmeasured).toBeUndefined();
+    expect(fourPc?.unmeasured).toBeUndefined();
+    expect(fourPc?.selfConfound).toBeUndefined();
   });
 });
 
