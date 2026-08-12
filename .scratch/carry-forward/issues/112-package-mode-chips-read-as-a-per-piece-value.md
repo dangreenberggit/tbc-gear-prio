@@ -154,19 +154,34 @@ and its `.pos` / `.n` / `.abs` spans. The JSON export reads `data-item-id`
 
 ## Acceptance criteria
 
-- [ ] Under package mode, a chip for a package member shows its own delta and a
+- [x] Under package mode, a chip for a package member shows its own delta and a
       separately-marked package figure in two distinct elements.
-- [ ] The Thunderheart Pauldrons chip (31048) shows `−106.16` and a package
+      Verified: closing section records the 31048 chip's `.d` = `-106.16` with
+      a separate `<span class="pkg">pkg +64.09</span>`.
+- [x] The Thunderheart Pauldrons chip (31048) shows `−106.16` and a package
       marker, not `+64.07` alone.
-- [ ] In `off`, `weighted`, and `full` modes the chip renders exactly as it does
+      Verified: same evidence as above, quoted directly against this item.
+- [x] In `off`, `weighted`, and `full` modes the chip renders exactly as it does
       today — no package span visible.
+      Verified: closing section records "Four states: off → own delta,
+      weighted → weighted potential, full → full potential, package → own
+      delta + visible `pkg` span."
 - [ ] A chip with no positive package is byte-identical to today in all four
       modes.
-- [ ] Chip sort order under package mode is unchanged (still on `data-package`).
-- [ ] The export panel's item list is unchanged for the same filters.
-- [ ] The digest golden's repin comment names the diff that was actually
+      Not verified: the closing section only walks through the package-member
+      (31048) chip and the four display states; it does not describe checking
+      a no-package chip against its prior byte-for-byte output.
+- [x] Chip sort order under package mode is unchanged (still on `data-package`).
+      Verified: closing section records "Sort still reads `data-package`."
+- [x] The export panel's item list is unchanged for the same filters.
+      Verified: closing section records "export path untouched."
+- [x] The digest golden's repin comment names the diff that was actually
       inspected.
+      Verified: closing section records the repin comment "records the
+      inspected diff (CSS + script only, zero body markup, confirming the
+      emit-only-with-a-package guard)."
 - [ ] `pnpm verify` green.
+      Not verified: not mentioned in the closing section.
 
 ## Re-run commands
 

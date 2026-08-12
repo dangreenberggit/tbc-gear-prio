@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 29a2f6c
 Type: docs
 Origin: pre-merge review of `feat/set-bonus-value`, round 3, 2026-08-12 (spec axis, 3-S1)
 Blocks: none
@@ -37,5 +38,18 @@ because that figure carries no break confound.
 
 ## Acceptance
 
-- [ ] ADR-0023 decision 5 names which figure it forbids restating.
-- [ ] A reader of either ADR alone reaches the behaviour the code implements.
+- [x] ADR-0023 decision 5 names which figure it forbids restating.
+- [x] A reader of either ADR alone reaches the behaviour the code implements.
+
+## CLOSED, 2026-08-12
+
+Commit `29a2f6c` on `feat/set-bonus-value`. Decision 5 in ADR-0023 now carries
+a "(Narrowed 2026-08-12, ticket 131)" clause naming `bonusDps` as the figure
+it forbids restating, and stating that ADR-0024's pointer restates
+`packageDeltaDps` instead, which decision 3 already calls the figure that is
+"genuinely net of any break." A header amendment line records the same date
+and reason. This resolves both acceptance boxes: a reader of ADR-0023 alone
+now sees the narrowed scope, and a reader of either ADR alone reaches the
+same conclusion the code implements (the pointer may state
+`packageDeltaDps`, never `bonusDps`). No decision history was rewritten —
+the original decision-5 text is unchanged, and the narrowing is appended.

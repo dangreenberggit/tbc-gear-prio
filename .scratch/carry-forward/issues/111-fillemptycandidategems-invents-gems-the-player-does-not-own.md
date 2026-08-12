@@ -282,17 +282,34 @@ deliberately not a dependency.
 
 - [ ] Every entry in `data/gems/palette.json` has a `quality` field, and running
       `pnpm data:items:generate` twice leaves the tree clean against `HEAD`.
+      Not verified: the closing section names the commit that adds the field
+      (`c57b034`) but does not record running the generator twice or checking
+      the tree against `HEAD`.
 - [ ] With the cap on, `fillEmptyCandidateGems` never returns a gem whose
       palette `quality` exceeds it — asserted directly in
       `candidate-gems.test.ts`.
+      Not verified: the closing section names the commit that adds the cap
+      (`97e07b4`) and cites one specific test pin (metas seating 32409), but
+      does not record that the general "never exceeds quality" assertion runs
+      or passes.
 - [ ] `git diff` touches no line of `packages/core/src/migrate-gems.ts`.
+      Not verified: not mentioned in the closing section.
 - [ ] `packages/core/test/meta-repair.test.ts` passes with no edits.
+      Not verified: not mentioned in the closing section.
 - [ ] `GEM_POLICY_QUALIFIER` no longer contains "may read low", and
       `grep -rn "GEM_POLICY_QUALIFIER" packages/core/src` still shows exactly
       one definition.
+      Not verified: the closing section names the commit that adds the new
+      qualifier (`9c35e48`) but does not record the grep result.
 - [ ] `pnpm verify` green.
-- [ ] Re-running the arm below shows the hands socket carrying a rare gem rather
+      Not verified: not mentioned in the closing section.
+- [x] Re-running the arm below shows the hands socket carrying a rare gem rather
       than 32194.
+      Verified: the "Post-fix measurement" section below reruns the production
+      package arm through the current engine and records the engine placing
+      24028 (rare) in item 31034's socket, not 32194, with a measured delta of
+      +111.72 and re-run commands (`build_postfix_arm_111.ts`,
+      `sim_postfix_111.py`).
 
 ### Re-run commands for every figure cited
 
