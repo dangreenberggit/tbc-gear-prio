@@ -7,7 +7,9 @@ import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
-import { metaStatus } from "../src/meta.js";
+import { gemColorMatchesSocket, metaStatus } from "../src/meta.js";
+import { socketsMatch } from "../src/meta-repair.js";
+import { GemColor } from "../src/proto/common_pb.js";
 import { Stat } from "../src/stats.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
@@ -1958,6 +1960,87 @@ describe("equipmentForCandidateSwap gem quality (ticket 117)", () => {
     for (const id of gemIds) {
       expect(getGem(id)?.quality, `gem ${id}`).toBeLessThanOrEqual(3);
     }
+  });
+});
+
+/**
+ * End-to-end cover for both branches of the socket-bonus predicate that the
+ * issue-1 slice changed (ticket 136 item 5, round-4 finding 4-S1). The
+ * round-4 blast-radius check was a null result: the branches were pinned by
+ * unit tests on `socketsMatch` / the fill, but no committed fixture reached
+ * either one through the production swap path, so a regression in how the
+ * predicate is *wired* would not have been caught.
+ *
+ * These drive `equipmentForCandidateSwap` — the same entry point `rank.ts`
+ * uses for every candidate row — rather than calling the predicates directly.
+ */
+describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", () => {
+  /**
+   * Strength-weighted so both items' socket bonuses (stat index 0) are
+   * visible to the fill's layout comparison; without a weight on the bonus
+   * stat the two layouts tie and the assertions go vacuous.
+   */
+  const strWeights = { "0": 10, "3": 1 };
+
+  function bareEquipment(): SimItemSpec[] {
+    return SIM_ORDER.map(() => ({ id: 0, gems: [] }));
+  }
+
+  /**
+   * Branch 1: an item whose sockets are meta-only (28559, the smallest of the
+   * 11 such items in db.json) must NOT be credited its +3 socket bonus while
+   * that lone socket sits empty. A palette with no meta gem cannot fill it,
+   * so the bonus has to stay off — the "skip meta sockets unconditionally"
+   * rule this branch diverges from would credit it vacuously (round-4 D1).
+   */
+  it("leaves a meta-only item's lone socket empty when the palette has no meta gem", () => {
+    const noMetas = gemsForPhase(3).filter(
+      (g) => g.colour !== GemColor.GemColorMeta
+    );
+    const swapped = equipmentForCandidateSwap(
+      bareEquipment(),
+      SIM_ORDER.indexOf("head"),
+      28559,
+      gemContext(noMetas, strWeights)
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    expect(head.id).toBe(28559);
+    expect(head.gems.filter((g) => g > 0)).toEqual([]);
+    // The predicate must report the bonus as inactive, not vacuously active.
+    expect(socketsMatch(28559, head.gems)).toBe(false);
+  });
+
+  /**
+   * Branch 2: on a mixed meta+coloured item, an unfilled meta socket does
+   * *not* forfeit the socket bonus — only the coloured sockets gate it. Same
+   * item and palette shape as the `socketsMatch` unit test, but reached
+   * through the swap path so the wiring is covered too.
+   */
+  it("still fills the coloured socket for the bonus on a mixed item with no meta gem available", () => {
+    const noMetas = gemsForPhase(3).filter(
+      (g) => g.colour !== GemColor.GemColorMeta
+    );
+    const swapped = equipmentForCandidateSwap(
+      bareEquipment(),
+      SIM_ORDER.indexOf("head"),
+      24545, // Gladiator's Plate Helm: [meta, yellow], +4 str bonus
+      gemContext(noMetas, strWeights)
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    const sockets = getItem(24545)!.sockets;
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const yellowIdx = sockets.indexOf(GemColor.GemColorYellow);
+
+    expect(head.gems[metaIdx] ?? 0).toBe(0);
+    const filled = head.gems[yellowIdx] ?? 0;
+    expect(filled).toBeGreaterThan(0);
+    expect(
+      gemColorMatchesSocket(getGem(filled)!.colour, GemColor.GemColorYellow)
+    ).toBe(true);
+    // Bonus is live despite the bare meta socket — the branch under test.
+    expect(socketsMatch(24545, head.gems)).toBe(true);
   });
 });
 
