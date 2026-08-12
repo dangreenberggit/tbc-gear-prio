@@ -41,6 +41,8 @@ Date: 2026-08-10 → 2026-08-11.
 | 20 | Apply review dispositions (blocker + 4 fixes) | sonnet | 111,029 | 56 | done |
 | 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | 63,250 + 70,113 + 107,763 (3 legs) | 147 | done |
 | 22 | Review-disposition worker's successor: orchestration-observations HTML | opus (med) | 136,365 | 30 | done |
+| 23 | Round-3 pre-merge review orchestrator (ran the skill, 3 axes) | opus | 160,978 | 92 | done — adversarial blocking on 3-A1 |
+| 24 | Round-3 findings judge (dispositions per the incorporating-reviews handoff) | fable (low) | pending | — | running |
 
 ## Correction from the observations document (2026-08-12)
 
