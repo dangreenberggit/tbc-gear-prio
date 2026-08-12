@@ -6,6 +6,8 @@ import { gemsForPhase, gemsForQuality, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
 import { gemColorCounts, metaStatus } from "../src/meta.js";
 import {
+  MetaInfeasibleError,
+  MetaRepairError,
   minimizeRegems,
   repairMeta,
   socketsMatch,
@@ -110,6 +112,25 @@ describe("repairMeta", () => {
     expect(result.metaAdjusted).toBe(true);
     expect(result.swaps.length).toBeGreaterThan(0);
     expect(metaStatus(head.sockets, allGems(result.items)).kind).toBe("active");
+  });
+
+  it("throws MetaInfeasibleError, not a generic MetaUnsolvableError, when no palette gem can ever help", () => {
+    // Same stripped-yellow layout as above, but an empty palette means no
+    // recolour exists — genuinely unsolvable, distinct from "gave up
+    // searching" (review-corrections.md item 4 / investigation2-comment
+    // finding 3: the two were previously the same error class).
+    const items = slamaltmanItems();
+    const chest = items.find((it) => it.itemId === 30129)!;
+    chest.gems = [24027, 24027, 24027];
+
+    let threw: unknown;
+    try {
+      repairMeta({ items, epWeights: retP2Ep, palette: [] });
+    } catch (err) {
+      threw = err;
+    }
+    expect(threw).toBeInstanceOf(MetaInfeasibleError);
+    expect(threw).toBeInstanceOf(MetaRepairError);
   });
 
   it("still solves from the rare-capped palette (ticket 117)", () => {

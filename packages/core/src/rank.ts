@@ -37,7 +37,7 @@ import {
   socketedItemsFromLoggedGear,
 } from "./logged-gear.js";
 import {
-  MetaUnsolvableError,
+  MetaRepairError,
   minimizeRegems,
   repairMeta,
   type MetaRepairSwap,
@@ -494,7 +494,12 @@ export async function rankUpgrades(
     metaAdjusted = minimized.metaAdjusted;
     metaSwaps = minimized.swaps;
   } catch (err) {
-    if (err instanceof MetaUnsolvableError) {
+    // The baseline gear is the character's own worn layout — there is no
+    // fallback to fall through to, so both MetaRepairError subclasses abort
+    // the whole ranking here (unlike the per-candidate path below, where a
+    // repair failure on one candidate must not take the rest of the run
+    // down with it).
+    if (err instanceof MetaRepairError) {
       throw new RankError("meta-unsolvable", err.message);
     }
     throw err;
@@ -645,6 +650,16 @@ export async function rankUpgrades(
       slot: string;
       reason: string;
     }[] = [];
+    // Distinct from simSkips: the sim never ran here, meta repair failed
+    // before a request could even be composed. Kept separate so the
+    // disclosure text names the right subsystem instead of blaming the sim
+    // for a gem-layout problem.
+    const repairSkips: {
+      itemId: number;
+      name: string;
+      slot: string;
+      reason: string;
+    }[] = [];
     /**
      * Every candidate's winning single-swap delta, by item id — the input
      * `selectPackage` (set-value.ts §2.2 step 1) needs to rank same-set
@@ -691,12 +706,28 @@ export async function rankUpgrades(
         // to fingers so trinkets and any later paired slot inherit it.
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
         if (wornAt >= 0 && wornAt !== slotIndex) continue;
-        const swapped = equipmentForCandidateSwap(
-          equipment,
-          slotIndex,
-          entry.itemId,
-          gems
-        );
+        let swapped: SimItemSpec[];
+        try {
+          swapped = equipmentForCandidateSwap(
+            equipment,
+            slotIndex,
+            entry.itemId,
+            gems
+          );
+        } catch (err) {
+          // A repair failure is a fact about this one candidate's gem layout,
+          // not about the character or the rest of the pool — it must skip
+          // this slot attempt exactly like a sim panic does below, not take
+          // the whole ranking down (review-corrections.md item 4).
+          if (!(err instanceof MetaRepairError)) throw err;
+          repairSkips.push({
+            itemId: entry.itemId,
+            name: entry.name,
+            slot: slotName,
+            reason: err.message,
+          });
+          continue;
+        }
         const candReq = compose(deps.raidSimSkeleton, {
           name: input.character.name.toLowerCase(),
           race,
@@ -877,6 +908,10 @@ export async function rankUpgrades(
         ...simSkips.map((s) => ({
           field: `candidate ${s.itemId} (${s.slot})`,
           detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
+        })),
+        ...repairSkips.map((s) => ({
+          field: `candidate ${s.itemId} (${s.slot})`,
+          detail: `${s.name} was dropped from the ranking: gem repair could not activate its meta — ${s.reason}`,
         })),
         ...packageSimSkips.map((s) => ({
           field: `${s.setName} ${s.threshold}pc completion package`,
@@ -1122,13 +1157,41 @@ async function buildSetBonuses(
       // every single-candidate swap uses — spec §2.2 step 1's byte-identical
       // gem/enchant policy.
       let packageEquipment: SimItemSpec[] = [...equipment];
-      for (const piece of addedPieces) {
-        packageEquipment = equipmentForCandidateSwap(
-          packageEquipment,
-          piece.slotIndex,
-          piece.itemId,
-          gems
-        );
+      try {
+        for (const piece of addedPieces) {
+          packageEquipment = equipmentForCandidateSwap(
+            packageEquipment,
+            piece.slotIndex,
+            piece.itemId,
+            gems
+          );
+        }
+      } catch (err) {
+        // Same reasoning as the single-candidate loop above: a repair
+        // failure on this package's gems must skip only this threshold row,
+        // not the rest of the set-value pass or the ranking as a whole.
+        if (!(err instanceof MetaRepairError)) throw err;
+        // No dedicated UnmeasuredReason exists for a repair failure (only
+        // "sim-failed" is available here — set-value.ts's UnmeasuredReason
+        // union is out of this fix's path scope) — the reason string is
+        // written to say what actually happened rather than let the
+        // disclosure line's "the sim failed" wording stand uncorrected.
+        packageSimSkips.push({
+          setId,
+          setName: label,
+          threshold,
+          reason: `gem repair could not activate its meta — ${err.message}`,
+        });
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: addedPieces.map((p) => p.itemId),
+          packageDeltaDps: 0,
+          unmeasured: "sim-failed",
+        });
+        continue;
       }
       const packageRequest = compose(deps.raidSimSkeleton, {
         name: input.character.name.toLowerCase(),
@@ -1516,19 +1579,15 @@ export function equipmentForCandidateSwap(
     itemId: spec.id ?? 0,
     gems: [...spec.gems],
   }));
-  let repaired;
-  try {
-    repaired = repairMeta({
-      items: socketed,
-      epWeights: gems.weights,
-      palette: gems.fillPalette,
-    });
-  } catch (err) {
-    if (err instanceof MetaUnsolvableError) {
-      throw new RankError("meta-unsolvable", err.message);
-    }
-    throw err;
-  }
+  // MetaRepairError propagates as-is rather than wrapping into RankError
+  // here: a repair failure on one candidate must skip only that candidate
+  // (both callers below catch it for exactly that), not abort the whole
+  // ranking the way a baseline-gear repair failure legitimately does.
+  const repaired = repairMeta({
+    items: socketed,
+    epWeights: gems.weights,
+    palette: gems.fillPalette,
+  });
   const headId = socketed[0]?.itemId;
   const minimized =
     repaired.swaps.length > 0 && headId !== undefined

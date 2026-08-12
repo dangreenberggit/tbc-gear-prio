@@ -38,10 +38,38 @@ export type MetaRepairResult = {
   swaps: MetaRepairSwap[];
 };
 
-export class MetaUnsolvableError extends Error {
+/**
+ * Common base so a caller that only wants "meta repair failed, skip this
+ * result" can still catch one type — RankError's meta-unsolvable branch does
+ * this today and stays a single branch. Callers that care about *why* (to
+ * decide whether widening the palette could help, say) catch the subclasses.
+ */
+export abstract class MetaRepairError extends Error {}
+
+/**
+ * No legal single-gem recolour ever reduces the deficit — e.g. the palette
+ * has no gem in a colour the meta condition needs. Retrying will not help;
+ * this layout genuinely cannot activate the meta with what is available.
+ */
+export class MetaInfeasibleError extends MetaRepairError {
   constructor(message: string) {
     super(message);
-    this.name = "MetaUnsolvableError";
+    this.name = "MetaInfeasibleError";
+  }
+}
+
+/**
+ * The loop kept finding strictly-improving moves but ran out of steps before
+ * reaching zero deficit. Distinct from MetaInfeasibleError: this is "gave up
+ * searching", not "no answer exists" — conflating them previously meant a
+ * pathological-but-solvable layout was reported the same way as a genuinely
+ * broken one (review-corrections.md item, upheld from investigation2-comment
+ * finding 3).
+ */
+export class MetaStepBudgetExceededError extends MetaRepairError {
+  constructor(message: string) {
+    super(message);
+    this.name = "MetaStepBudgetExceededError";
   }
 }
 
@@ -78,12 +106,12 @@ export function repairMeta(opts: {
       return { items, metaAdjusted: swaps.length > 0, swaps };
     }
     if (status.kind !== "inactive") {
-      throw new MetaUnsolvableError(`unexpected meta status ${status.kind}`);
+      throw new MetaInfeasibleError(`unexpected meta status ${status.kind}`);
     }
 
     const move = bestRepairMove(items, status.metaId, status.counts, opts);
     if (!move) {
-      throw new MetaUnsolvableError(
+      throw new MetaInfeasibleError(
         `no legal recolour activates meta ${status.metaId} (${status.description})`
       );
     }
@@ -99,7 +127,7 @@ export function repairMeta(opts: {
     });
   }
 
-  throw new MetaUnsolvableError("meta repair exceeded step budget");
+  throw new MetaStepBudgetExceededError("meta repair exceeded step budget");
 }
 
 function allGemIds(items: readonly SocketedItem[]): number[] {
