@@ -212,7 +212,16 @@
      (ADR-0024 amendment). Muted styling and the figure being the package's,
      not the swap's, keep them from reading as single-swap winners. */
   .chip.package-only { display: none; }
-  body.package .chip.package-only { display: inline-flex; }
+  /* Ticket 128: the reveal must lose to the source and BiS filters, not beat
+     them. Both filter conditions are folded into this same selector rather
+     than left to separate hide rules, because a later rule at equal or lower
+     specificity cannot override an earlier one that matches -- see the
+     specificity arithmetic in ticket 128. Matches the JavaScript visible
+     test in rank-report.ts, which is the other half of this same rule. */
+  body.package .chip.package-only:not(.source-hidden) {
+    display: inline-flex;
+  }
+  body.package.bis-only .chip.package-only:not(.is-bis) { display: none; }
   .chip.muted {
     background: var(--paper-2);
     border-color: var(--line);

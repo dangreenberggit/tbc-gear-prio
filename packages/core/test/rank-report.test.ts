@@ -529,10 +529,17 @@ describe("rank-report", () => {
     // `data-package-label` arm. No row in this fixture carries a
     // `setContext.packages`, so no `.pkg` span renders and nothing in the body
     // moved — which is what the emit-only-with-a-package guard promises.
+    // Repinned for ticket 128's source/BiS-filter fix. Both documents dumped
+    // and diffed (git stash the CSS change, dump, pop, dump again): the whole
+    // delta is inside `<style>` -- the old bare `body.package
+    // .chip.package-only { display: inline-flex; }` becomes `body.package
+    // .chip.package-only:not(.source-hidden) { ... }` plus a new
+    // `body.package.bis-only .chip.package-only:not(.is-bis) { display: none;
+    // }` guard and its explanatory comment. Nothing in the body moved.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "f2a56248d29bb6eae4a835a574ac1a1ef5f9ca1d810f76532100eb90a5485350",
-      length: 30336,
+        "e50bc66ab50d0502d92f6d2522c1e8ad75937d0f897f1587c87085ce596e5201",
+      length: 30890,
     });
   });
 });
@@ -2462,7 +2469,31 @@ describe("curated list under package mode (owner direction 2026-08-10)", () => {
     const html = renderRankHtml(t6Ranking(), meta());
     expect(html).toContain(".chip.package-only { display: none; }");
     expect(html).toContain(
-      "body.package .chip.package-only { display: inline-flex; }"
+      "body.package .chip.package-only:not(.source-hidden) {"
+    );
+  });
+
+  /**
+   * Ticket 128: in package mode, the reveal rule must lose to the source and
+   * BiS filters rather than beat them. Pinned at the string level, which is
+   * meaningful here because the whole bug was a specificity/order relationship
+   * between three selectors -- asserting the exact reveal and guard selectors
+   * exist is what makes a regression (e.g. someone reverting to the bare
+   * `body.package .chip.package-only`) fail this test. The cascade arithmetic
+   * itself isn't something jsdom evaluates, so this is the closest pin
+   * available; see the ticket for the specificity numbers by hand.
+   */
+  it("folds the source filter into the package-only reveal selector", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(
+      "body.package .chip.package-only:not(.source-hidden)"
+    );
+  });
+
+  it("folds the BiS filter into a higher-specificity guard over the reveal", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(
+      "body.package.bis-only .chip.package-only:not(.is-bis) { display: none; }"
     );
   });
 
