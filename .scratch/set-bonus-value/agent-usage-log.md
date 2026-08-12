@@ -40,6 +40,18 @@ Date: 2026-08-10 → 2026-08-11.
 | 19 | — resumed: finish 118, regenerate, review | fable (low) | 97,190 | 8 | done (per-worker rows in fix-round/DIRECTOR.md) |
 | 20 | Apply review dispositions (blocker + 4 fixes) | sonnet | 111,029 | 56 | done |
 | 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | 63,250 + 70,113 + 107,763 (3 legs) | 147 | done |
+| 22 | Review-disposition worker's successor: orchestration-observations HTML | opus (med) | 136,365 | 30 | done |
+
+## Correction from the observations document (2026-08-12)
+
+The fuller accounting in
+`orchestration-observations-2026-08-12.html` (which also counts the
+director logs' per-worker rows) puts the arc at ~4.71M visible subagent
+tokens across 36 completions, not this table's ~3.5M/21 — this table only
+has the completions the main session saw directly. Also note its pricing
+flag: Fable is the TOP price tier ($10/$50 per Mtok vs Opus $5/$25,
+retrieved 2026-08-12), so the "fable (low)" director runs were the most
+expensive model at constrained effort, not a budget lane.
 
 ## Notes
 
