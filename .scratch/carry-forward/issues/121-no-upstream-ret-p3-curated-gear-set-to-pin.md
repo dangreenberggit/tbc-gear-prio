@@ -36,6 +36,16 @@ P3 curated list. `--pin-bis` prints its no-P3-data note (cli.ts:455-460).
 
 Until either happens, the degrade + disclosure is the accepted behaviour.
 
+## Carried in from review round 3 (3-D3, 2026-08-12)
+
+Every ret figure this round rests on the one unverified fixture snapshot,
+including ADR-0024's +11.31 Lightbringer 2pc, which drives package-mode sort
+order. That bonus is a mana proc, so its value is unusually sensitive to how
+mana-starved the gear makes the rotation; a newer snapshot could move it.
+When this ticket is worked (either option), add a reference-gear caveat to
+ADR-0024 for the +11.31 figure, in the style ADR-0023 already carries for its
+own figures.
+
 ## Acceptance criteria (whichever option lands)
 
 - [ ] Ret max-phase-3 BiS tags come from a genuinely-P3 list, or this ticket
