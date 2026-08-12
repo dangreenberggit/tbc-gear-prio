@@ -38,6 +38,7 @@ import {
 } from "./logged-gear.js";
 import {
   MetaUnsolvableError,
+  minimizeRegems,
   repairMeta,
   type MetaRepairSwap,
   type SocketedItem,
@@ -462,7 +463,11 @@ export async function rankUpgrades(
   // PLAN.md §8.2 / race standing assumption: default to the preset skeleton's
   // race (ret P2 is Blood Elf), not a hardcoded Human — WCL does not carry race.
   const race = input.race ?? raceFromSkeleton(deps.raidSimSkeleton);
-  let socketed: SocketedItem[] = socketedItemsFromLoggedGear(logged);
+  // Captured before repairMeta so minimizeRegems has the player's actual
+  // worn gems to restore — `socketed` below is reassigned to the repaired
+  // layout in place, and once that happens the pre-repair state is gone.
+  const preRepairSocketed = socketedItemsFromLoggedGear(logged);
+  let socketed: SocketedItem[] = preRepairSocketed;
   let metaAdjusted = false;
   let metaSwaps: MetaRepairSwap[] = [];
   const gems = gemContext(
@@ -475,9 +480,19 @@ export async function rankUpgrades(
       epWeights: deps.epWeights,
       palette: gems.fillPalette,
     });
-    socketed = repaired.items;
-    metaAdjusted = repaired.metaAdjusted;
-    metaSwaps = repaired.swaps;
+    const headId = preRepairSocketed[0]?.itemId;
+    const minimized =
+      repaired.swaps.length > 0 && headId !== undefined
+        ? minimizeRegems({
+            original: preRepairSocketed,
+            repaired: repaired.items,
+            swaps: repaired.swaps,
+            headId,
+          })
+        : repaired;
+    socketed = minimized.items;
+    metaAdjusted = minimized.metaAdjusted;
+    metaSwaps = minimized.swaps;
   } catch (err) {
     if (err instanceof MetaUnsolvableError) {
       throw new RankError("meta-unsolvable", err.message);
@@ -1514,7 +1529,17 @@ export function equipmentForCandidateSwap(
     }
     throw err;
   }
-  return applyRepairedGems(swapped, repaired.items);
+  const headId = socketed[0]?.itemId;
+  const minimized =
+    repaired.swaps.length > 0 && headId !== undefined
+      ? minimizeRegems({
+          original: socketed,
+          repaired: repaired.items,
+          swaps: repaired.swaps,
+          headId,
+        })
+      : repaired;
+  return applyRepairedGems(swapped, minimized.items);
 }
 
 function swapItemAt(

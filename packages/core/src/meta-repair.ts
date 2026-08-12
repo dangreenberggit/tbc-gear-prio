@@ -113,6 +113,71 @@ function allGemIds(items: readonly SocketedItem[]): number[] {
 }
 
 /**
+ * After `repairMeta`, put the player's own gems back wherever the repaired
+ * layout still allows — recommendations should use gems they already own,
+ * not just the cheapest gems that would have solved the meta from scratch
+ * (investigation2-comment.md §1, "minimizeRegems spec").
+ *
+ * `repairMeta`'s greedy loop only ever makes a move that is individually
+ * necessary *at the moment it is made*, but a later swap can make an earlier
+ * one redundant in hindsight (see the `compareColors` case: two swaps that
+ * were each needed to close a 2-unit deficit can leave a 1-unit margin once
+ * both land, at which point either one alone could be undone). This checks
+ * each swap in turn — independently, against the fully repaired layout — and
+ * reverts it if the meta condition survives without it.
+ *
+ * Never touches the meta socket: `repairMeta` never recolours it either
+ * (`bestRepairMove` skips `GemColorMeta` sockets), so nothing here should
+ * treat it as optional.
+ */
+export function minimizeRegems(opts: {
+  original: readonly SocketedItem[];
+  repaired: readonly SocketedItem[];
+  swaps: readonly MetaRepairSwap[];
+  headId: number;
+}): MetaRepairResult {
+  const { original, repaired, swaps, headId } = opts;
+  const items = repaired.map((it) => ({
+    itemId: it.itemId,
+    gems: [...it.gems],
+  }));
+  const headItem = getItem(headId);
+  if (!headItem) {
+    return { items, metaAdjusted: swaps.length > 0, swaps: [...swaps] };
+  }
+
+  const originalByItem = new Map(original.map((it) => [it.itemId, it]));
+  const survivingSwaps: MetaRepairSwap[] = [];
+
+  for (const swap of swaps) {
+    const slot = items.find((it) => it.itemId === swap.itemId);
+    const orig = originalByItem.get(swap.itemId);
+    const originalGem = orig?.gems[swap.socketIndex];
+    if (!slot || originalGem == null) {
+      survivingSwaps.push(swap);
+      continue;
+    }
+
+    const before = slot.gems[swap.socketIndex];
+    slot.gems[swap.socketIndex] = originalGem;
+    const status = metaStatus(headItem.sockets, allGemIds(items));
+    if (status.kind === "active") {
+      // Revert kept — the swap is dropped from the report because the final
+      // layout no longer contains it, not appended alongside a stale entry.
+      continue;
+    }
+    slot.gems[swap.socketIndex] = before ?? 0;
+    survivingSwaps.push(swap);
+  }
+
+  return {
+    items,
+    metaAdjusted: survivingSwaps.length > 0,
+    swaps: survivingSwaps,
+  };
+}
+
+/**
  * Whether the item's socket bonus is active. The bonus is gated on the
  * *coloured* sockets only — the meta socket does not participate (matches
  * upstream `sim/core/reforge_optimizer/gear.go:socketBonusActive`, and the

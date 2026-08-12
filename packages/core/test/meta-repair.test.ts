@@ -6,8 +6,10 @@ import { gemsForPhase, gemsForQuality, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
 import { gemColorCounts, metaStatus } from "../src/meta.js";
 import {
+  minimizeRegems,
   repairMeta,
   socketsMatch,
+  type MetaRepairSwap,
   type SocketedItem,
 } from "../src/meta-repair.js";
 import { mapWclGearToSim, type WclGearEntry } from "../src/slots.js";
@@ -172,5 +174,100 @@ describe("repairMeta", () => {
     expect([1, 2]).toContain(chestSwap!.socketIndex);
     const newGem = gemsForPhase(2).find((g) => g.id === chestSwap!.to);
     expect([5, 8]).toContain(newGem?.colour); // Green or Prismatic
+  });
+});
+
+describe("minimizeRegems", () => {
+  // 25897 = "more red than blue" (compare-colour meta). Head (28559, meta-only
+  // socket) plus three single-socket items (23542 red-socket, 23506
+  // blue-socket ×2 roles reused here as generic recolourable slots) — hand-
+  // built rather than driven through repairMeta, because the bug this guards
+  // is repair leaving *more* swaps than the final layout needs, which needs a
+  // fixture with deliberate slack (repairMeta's own greedy loop only ever
+  // makes swaps that were individually necessary at the time, so it never
+  // manufactures the redundant case on its own; the redundancy investigation2
+  // describes arises from restoring a *different* piece's original gem after
+  // the fact, which is exactly what this pass does).
+  const headId = 28559;
+  const itemD = 30001; // stand-in id, only meta-repair.ts's socket lookups matter
+  const itemE = 30002;
+  const itemF = 30003;
+  const redGem = 24027;
+  const blueGem = 23118;
+
+  it("restores an original gem when the repair over-corrected past what the meta needs", () => {
+    const original: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [blueGem] },
+      { itemId: itemE, gems: [blueGem] },
+      { itemId: itemF, gems: [blueGem] },
+    ];
+    // Repair recoloured all three blue sockets to red (red 3 / blue 0) when
+    // two would have sufficed (red 2 / blue 1 already satisfies red > blue).
+    const repaired: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [redGem] },
+      { itemId: itemE, gems: [redGem] },
+      { itemId: itemF, gems: [redGem] },
+    ];
+    const swaps: MetaRepairSwap[] = [
+      { itemId: itemD, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+      { itemId: itemE, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+      { itemId: itemF, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+    ];
+
+    const result = minimizeRegems({ original, repaired, swaps, headId });
+
+    expect(
+      metaStatus(getItem(headId)!.sockets, allGems(result.items)).kind
+    ).toBe("active");
+    // Exactly one of the three redundant swaps reverts to the player's
+    // original blue gem; the other two stay, since dropping either of them
+    // would break red > blue again.
+    const revertedCount = result.items.filter(
+      (it) => it.itemId !== headId && it.gems[0] === blueGem
+    ).length;
+    expect(revertedCount).toBe(1);
+    // The report drops the reverted swap rather than listing a swap that no
+    // longer describes the final layout.
+    expect(result.swaps).toHaveLength(2);
+    expect(result.swaps.every((s) => s.to === redGem)).toBe(true);
+  });
+
+  it("never touches the meta socket itself", () => {
+    // If the meta gem were (hypothetically) listed as a "swap" candidate, the
+    // pass must refuse to revert it — the meta gem is never optional.
+    const original: SocketedItem[] = [{ itemId: headId, gems: [0] }];
+    const repaired: SocketedItem[] = [{ itemId: headId, gems: [25897] }];
+    const swaps: MetaRepairSwap[] = [
+      { itemId: headId, socketIndex: 0, from: 0, to: 25897, cost: 0 },
+    ];
+
+    const result = minimizeRegems({ original, repaired, swaps, headId });
+    expect(result.items[0]!.gems[0]).toBe(25897);
+    expect(result.swaps).toEqual(swaps);
+  });
+
+  it("is a no-op when every swap is load-bearing", () => {
+    const items: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [redGem] },
+    ];
+    const swaps: MetaRepairSwap[] = [
+      { itemId: itemD, socketIndex: 0, from: blueGem, to: redGem, cost: 0 },
+    ];
+    const original: SocketedItem[] = [
+      { itemId: headId, gems: [25897] },
+      { itemId: itemD, gems: [blueGem] },
+    ];
+
+    const result = minimizeRegems({
+      original,
+      repaired: items,
+      swaps,
+      headId,
+    });
+    expect(result.items).toEqual(items);
+    expect(result.swaps).toEqual(swaps);
   });
 });
