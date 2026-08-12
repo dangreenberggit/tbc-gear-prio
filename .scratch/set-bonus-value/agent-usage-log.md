@@ -53,6 +53,11 @@ flag: Fable is the TOP price tier ($10/$50 per Mtok vs Opus $5/$25,
 retrieved 2026-08-12), so the "fable (low)" director runs were the most
 expensive model at constrained effort, not a budget lane.
 
+Owner's clarification (2026-08-12): this was intentional, not a mistake —
+Fable was chosen for high judgment, and low effort chosen to cut cost and
+avoid unnecessary thinking. Treat "fable low" as a deliberate lane for
+orchestration/direction work, priced accordingly.
+
 ## Notes
 
 - "inherited" = child agents spawned by an orchestrator inherit the
