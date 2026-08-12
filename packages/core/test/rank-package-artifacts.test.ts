@@ -7,11 +7,14 @@ import {
 } from "../src/rank-report-rules.js";
 
 /**
- * Ticket 118 acceptance, against the two committed report artifacts. The
- * artifacts were generated before this change, so their `setContext` still
- * carries the old single-package shape — these tests re-run the attachment
- * over the artifacts' `setBonuses` (the measured data, which did not change)
- * and assert what a regenerated report's member rows carry.
+ * Ticket 118 acceptance, against the two committed report artifacts. Both
+ * artifacts are post-change: their `setContext` already carries the current
+ * plural `packages` shape (the ret artifact's Crystalforge 2pc already reads
+ * `unmeasured: "unmeasurable-at-this-worn-count"`, a ticket-119 output).
+ * These tests still re-derive from the artifacts' `setBonuses` (the measured
+ * data) rather than reading `setContext.packages` back off the JSON, because
+ * re-deriving is the more robust check regardless of which shape the fixture
+ * happens to hold.
  */
 type ArtifactRanking = {
   items: { itemId: number; deltaDps: number; name?: string }[];
@@ -30,7 +33,7 @@ const ret = loadArtifact(
   "../../../.scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.json"
 );
 const feral = loadArtifact(
-  "../../../.scratch/rank-reports/shredzepelin-p3.json"
+  "../../../.scratch/set-bonus-value/ret-catchup/artifacts/shredzepelin-p3.json"
 );
 
 function bonusesFor(artifact: ArtifactRanking, setId: number): SetBonusValue[] {
