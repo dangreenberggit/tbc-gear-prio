@@ -1170,11 +1170,6 @@ async function buildSetBonuses(
         // failure on this package's gems must skip only this threshold row,
         // not the rest of the set-value pass or the ranking as a whole.
         if (!(err instanceof MetaRepairError)) throw err;
-        // No dedicated UnmeasuredReason exists for a repair failure (only
-        // "sim-failed" is available here — set-value.ts's UnmeasuredReason
-        // union is out of this fix's path scope) — the reason string is
-        // written to say what actually happened rather than let the
-        // disclosure line's "the sim failed" wording stand uncorrected.
         packageSimSkips.push({
           setId,
           setName: label,
@@ -1188,7 +1183,7 @@ async function buildSetBonuses(
           piecesWorn,
           packageItemIds: addedPieces.map((p) => p.itemId),
           packageDeltaDps: 0,
-          unmeasured: "sim-failed",
+          unmeasured: "repair-failed",
         });
         continue;
       }

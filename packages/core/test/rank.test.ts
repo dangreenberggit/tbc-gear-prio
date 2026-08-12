@@ -2831,6 +2831,67 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     expect(sub!.field).not.toBe(String(626));
   });
 
+  /**
+   * Ticket 135 / round-4 finding 4-S3: a gem-repair failure while assembling
+   * the package is not a sim failure — no sim ran. Reporting it as
+   * `sim-failed` sends an operator to the sim logs for a fault that lives in
+   * the gem palette, and contradicts the prose reason sitting beside it.
+   */
+  it("reports a package gem-repair failure as repair-failed, not sim-failed", async () => {
+    // The failure must land on the *package*, not on the individual swaps —
+    // a candidate that already fails repair never reaches the pool, and the
+    // row would come back `insufficient-pieces` without ever exercising the
+    // push site under test.
+    //
+    // The palette holds only the meta gem, so repair can never mint a colour.
+    // Worn colours sit on the shoulder and legs — the two slots the 4pc
+    // package replaces — so each piece swapped alone still leaves Relentless's
+    // 2/2/2 satisfied, while assembling all four displaces the gems that were
+    // carrying it and leaves the repair nothing to work with.
+    const wornGems: Record<string, { id: number; gems: number[] }> = {
+      shoulder: { id: 28795, gems: [23094, 23118] },
+      legs: { id: 24022, gems: [23094, 23113, 23113] },
+      chest: { id: 23563, gems: [23118, 0, 0] },
+    };
+    const logged: LoggedGear = {
+      items: SIM_ORDER.map((slot) => {
+        const worn = wornGems[slot];
+        return worn
+          ? { id: worn.id, slot, gems: worn.gems }
+          : { id: 0, slot, gems: [] };
+      }),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim({ perItemDelta: PER_ITEM_DELTAS })),
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", logged]]),
+      }),
+      gemPalette: gemsForPhase(2).filter((g) => g.id === 32409),
+    });
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("repair-failed");
+    expect(fourPc!.bonusDps).toBeUndefined();
+
+    // The prose reason and the machine-readable tag must agree.
+    const sub = ranking.substitutions.find((s) =>
+      s.detail.includes("gem repair could not activate its meta")
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.field).toContain("4pc");
+  });
+
   it("names the whole package on failure, never a set id standing in for an item id (finding 5)", async () => {
     // An empty pool with only enough candidates to attempt the package but
     // fail it — the failure path historically fell back to `setId` when

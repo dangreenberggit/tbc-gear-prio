@@ -18,6 +18,13 @@ export type UnmeasuredReason =
   | "insufficient-pieces"
   | "sim-failed"
   /**
+   * Gem repair could not activate the meta while assembling the package, so
+   * no sim ever ran. Distinct from `sim-failed`: that tag sends an operator
+   * to the sim logs, and the fault here lives in the gem palette (ticket 135,
+   * round-4 finding 4-S3).
+   */
+  | "repair-failed"
+  /**
    * The package needs exactly one piece (worn count = threshold − 1), so the
    * "package" sim is that piece's own single-swap sim and
    * `packageDelta − Σ singles` is 0 whatever the bonus is worth. The bonus is
