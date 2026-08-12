@@ -21,6 +21,25 @@ the fact, and team Admin/Analytics APIs need team/enterprise keys and still
 won’t predict whether the next sharp spawn succeeds. Do not invent a fake
 meter — assume walls are **observed**, not predicted.
 
+### Budget the round at the phase boundary
+
+The window’s limit is **tokens**; time is only what resets them. So the
+question before a fan-out is whether the remaining budget covers the whole
+round — not how long the round will take, and not where you sit in the
+window. Reset timing is invisible from inside a session; estimate the spend
+instead.
+
+Estimate: implementation workers on this repo have run roughly 100k–240k
+tokens each (five measured workers, 2026-08-11, fix-round worker table in
+`.scratch/set-bonus-value/orchestration-observations-2026-08-12.html`).
+Multiply by slice count, add fan-in.
+
+If the round does not fit, **stop at the partition**. The fan-in brief is a
+complete, resumable artifact: a fresh window spawns from it at full
+strength, where a round killed mid-dispatch leaves workers in flight and
+fan-in lost (observed twice that day — `agent-usage-log.md` rows 16b and 18,
+both killed by the session limit).
+
 ## Two lanes
 
 This is the portable part. Every harness has both lanes; only the model
@@ -40,6 +59,19 @@ authoring agent is last resort and must be labeled in `docs/reviews/…`.
 Workhorse jobs **may** retry on a peer workhorse if one mid-tier is
 exhausted; they still must not jump to a toy model for implementation
 correctness without the user saying so.
+
+### Lane is per job, not per parent
+
+A worker’s lane follows the **worker’s** job. A mechanical implementation
+slice is workhorse whether its manager is workhorse or sharp.
+
+Name the model and effort on every spawn. The harness default is
+**inherit**: an unnamed worker runs its parent’s model at its parent’s
+price, so a sharp manager fanning out unnamed workers buys a fan-out of
+sharp workers. Observed 2026-08-11: a Fable-low director fanned out five
+implementation slices with no model named, and all five ran Fable at
+default effort — against this policy’s workhorse rule (fix-round worker
+table in `.scratch/set-bonus-value/orchestration-observations-2026-08-12.html`).
 
 **Read only your own harness’s section below.** The others exist because
 this repo gets worked on from more than one, not because an agent chooses

@@ -37,11 +37,13 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 
 3. **Spawn workers** — One isolated worktree or clone per slice. Give each worker the handoff template and its path scope.
 
-   **Done when:** delegator tree is clean; every worker prompt carries the same base SHA from `git rev-parse HEAD` (never hand-typed); every worker's first action asserts that SHA; `git worktree list` shows each worktree at that SHA.
+   **Done when:** delegator tree is clean; every worker prompt carries the same base SHA from `git rev-parse HEAD` (never hand-typed); every worker's first action asserts that SHA; `git worktree list` shows each worktree at that SHA; every worker prompt names its model and effort explicitly.
 
    **Isolation is load-bearing, not bookkeeping.** Workers sharing one checkout share one index: any worker's `git add` stages every other worker's dirty files, its `git commit` captures them, and lint-staged's `git stash`/`pop` clears staged files mid-command. Spawning without the isolation flag turns a merge into a silent sweep.
 
    **Your own tree must be clean first.** Workers branch from a *commit*, never from your working tree — uncommitted work is invisible to them. Commit it (preferred) or stash it before spawning.
+
+   **Budget the round before dispatching it.** A round costs tokens, not time — before spawning, check the remaining window against the estimate in [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) (§ Budget the round at the phase boundary). If it does not fit, stop at the partition and hand the fan-in brief to a fresh window.
 
    **Name the base commit and make every worker assert it.** Do not assume the harness bases the worktree where you are standing: some base from the repo's **default branch** regardless of your current branch. Resolve the SHA yourself (`git rev-parse HEAD`) and paste this into every worker prompt, verbatim:
 
