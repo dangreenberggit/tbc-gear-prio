@@ -51,3 +51,14 @@ sentence-level fix to the standing caveat text, not the per-row
 `substitutions` reporting this ticket is actually about — the 8 affected
 rows in `shredzepelin-p3.json` still carry `substitutions: []` with no
 mention of the four recoloured gems. This ticket's data work remains open.
+
+## Update (2026-08-12, issue-1 fan-in)
+
+The issue-1 gem cleanup added `minimizeRegems` (restore the player's original
+gems wherever the repaired layout allows), which should shrink the recolour
+set these rows would need to disclose — possibly to zero for some of the 8
+rows (**untested**; re-run the Reproduce command to re-measure). The
+per-candidate disclosure gap itself is unchanged: `rank.ts` folds only the
+*baseline* repair's `metaSwaps` into `substitutions`; swaps made inside
+`equipmentForCandidateSwap` for candidate/package arms are still discarded.
+Still open.
