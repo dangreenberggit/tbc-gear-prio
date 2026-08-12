@@ -1,0 +1,28 @@
+{
+  "error": null,
+  "iterationsDone": 3000,
+  "firstIterationDuration": 182.415648787,
+  "avgIterationDuration": 179.9662304177737,
+  "simVersion": "v0.0.101",
+  "raidMetrics": {
+    "dps": {
+      "avg": 2152.0765440146747,
+      "stdev": 127.9659250680645,
+      "min": 1422.0339831412346,
+      "max": 2446.9472082393186,
+      "minSeed": "329",
+      "maxSeed": "2678"
+    }
+  },
+  "playerMetrics": {
+    "name": "Shredzepelin",
+    "dps": {
+      "avg": 2152.0765440146747,
+      "stdev": 127.9659250680645,
+      "min": 1422.0339831412346,
+      "max": 2446.9472082393186,
+      "minSeed": "329",
+      "maxSeed": "2678"
+    }
+  }
+}
