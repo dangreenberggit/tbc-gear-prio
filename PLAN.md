@@ -647,7 +647,7 @@ Currently pinned: **v0.0.101** (`8aa378b3`), `currentPhase: 2`.
 
 ## 9. Gem and enchant policy
 
-The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. There is no upstream optimizer to borrow, so this is ours.
+The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. Upstream *does* have a gem/socket optimizer (`suggest_reforges` — the name is inherited; TBC has no reforging), but its active development lives on `feature/backend-reforge`, not the pinned tag, so our repair pass remains ours; upstream's `socketBonusActive` is reference material, not a dependency (ADR-0025, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`).
 
 **[P0] Gems and enchants are present in TBC Anniversary logs, and the apparent sparsity is not a data gap.** This was the plan's single largest risk (§15) and it is now retired. Both probe characters returned populated `permanentEnchant` / `temporaryEnchant` / `gems` keys — 10/19 and 9/19 enchanted slots, 7/19 and 6/19 gemmed. Cross-referencing every item ID against wowsims' `db.json` showed **exact agreement** between what a slot *can* carry and what WCL reported: items with 2 sockets reported 2 gems, items with none reported none, and neck/waist/trinket correctly showed no enchant because those slots aren't enchantable in TBC. Held across two classes and two characters.
 >
