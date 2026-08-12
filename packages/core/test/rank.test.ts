@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { gemContext } from "../src/candidate-gems.js";
+import {
+  gemContext,
+  missingMetaPreferenceNote,
+} from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
@@ -3338,6 +3341,72 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
  * `.scratch/rank-reports/shredzepelin-p3.json` stores `substitutions: []` while
  * 8 of its rows each silently recolour four gems.
  */
+/**
+ * Per-spec preferred meta (step6-meta-choice-spike.md option 1). Ret has an
+ * entry read from upstream's presets; feral has none, because all five
+ * vendored feral presets wear Wolfshead Helm 8345 and socket no meta at all.
+ *
+ * The fill behaviour for both cases is pinned directly in
+ * candidate-gems.test.ts. What is pinned here is the *wiring*: that
+ * `rankUpgrades` builds its `GemContext` with the requested spec, so the table
+ * is consulted for the spec actually being ranked rather than always for ret.
+ */
+describe("rankUpgrades per-spec meta preference", () => {
+  it("threads the requested spec into the gem context the swap path uses", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(29381)],
+      }
+    );
+
+    // Ret has a recorded preference, so nothing is disclosed. The negative is
+    // the assertion that matters: a bug threading `undefined` (or the wrong
+    // spec) would surface as this note appearing on a ret run.
+    expect(
+      ranking.substitutions.some((s) =>
+        s.detail.includes("no meta preference recorded")
+      )
+    ).toBe(false);
+  });
+
+  it("names the spec in the note a spec without an entry would carry", () => {
+    // The note text itself, at its own seam — building a full feral
+    // rankUpgrades harness to re-observe a pure function would test the
+    // harness, not the behaviour.
+    expect(missingMetaPreferenceNote("feral")).toContain("feral");
+    expect(missingMetaPreferenceNote("feral")).toContain(
+      "no meta preference recorded"
+    );
+    expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+  });
+});
+
 describe("rankUpgrades candidate-arm gem substitutions (ticket 107)", () => {
   const HEAD_CANDIDATE = 32461; // Furious Gizmatic Goggles: meta + blue
 

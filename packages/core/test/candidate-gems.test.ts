@@ -2,7 +2,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { fillEmptyCandidateGems, gemContext } from "../src/candidate-gems.js";
+import {
+  fillEmptyCandidateGems,
+  gemContext,
+  missingMetaPreferenceNote,
+  SPEC_PREFERRED_METAS,
+} from "../src/candidate-gems.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { socketsFor } from "../src/items.js";
 import { isKaelTempLegendary } from "../src/kael-temp.js";
@@ -151,6 +156,95 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
     expect(ctx.palette).toBe(full);
     expect(ctx.fillPalette.every((g) => g.quality <= 3)).toBe(true);
     expect(ctx.fillPalette.length).toBeLessThan(full.length);
+  });
+});
+
+/**
+ * Per-spec preferred meta (step6-meta-choice-spike.md option 1). Stat EP
+ * cannot rank meta gems — nine of eighteen score 0.00 and the multiplicative
+ * effects invert the additive ordering — so the choice is read from upstream's
+ * gear presets per spec, exactly as it already was for ret.
+ *
+ * The evidence for both entries below is in
+ * `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
+ * ("Local verification pass"), read from the vendored presets rather than from
+ * guides: all three ret presets socket 32409 and no other meta; all five feral
+ * presets wear Wolfshead Helm 8345, which has no sockets at all.
+ */
+describe("SPEC_PREFERRED_METAS", () => {
+  it("records ret's Relentless entry and no invented feral one", () => {
+    expect(SPEC_PREFERRED_METAS.ret).toEqual([32409]);
+    // Upstream has no feral meta to copy — the presets skip the socket
+    // entirely. An entry here would be a guess wearing the same clothes as
+    // ret's evidence-backed one.
+    expect(SPEC_PREFERRED_METAS.feral).toBeUndefined();
+    expect(SPEC_PREFERRED_METAS["feral-tank"]).toBeUndefined();
+  });
+
+  it("seats ret's preferred meta when the spec is known", () => {
+    const headId = 32461; // Furious Gizmatic Goggles: meta + blue
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const ctx = gemContext(gemsForPhase(3), retEpWeights, "ret");
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord,
+      { spec: ctx.spec! }
+    );
+    expect(gems[metaIdx]).toBe(32409);
+  });
+
+  /**
+   * The fail-loud path. A spec with no recorded preference must not inherit
+   * ret's gem — that is the silent-wrong outcome the spike rejected — and must
+   * not pick a meta by EP either, since EP cannot rank metas at all. It leaves
+   * the socket empty and says so, which a caller can disclose.
+   */
+  it("leaves the meta socket empty for a spec with no recorded preference", () => {
+    const headId = 32461;
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const ctx = gemContext(gemsForPhase(3), retEpWeights, "feral");
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord,
+      { spec: ctx.spec! }
+    );
+    expect(gems[metaIdx] ?? 0).toBe(0);
+    // The coloured socket is still filled — only the meta choice is withheld.
+    const blueIdx = sockets.indexOf(GemColor.GemColorBlue);
+    expect(gems[blueIdx]).toBeGreaterThan(0);
+  });
+
+  it("names the spec in its no-preference disclosure", () => {
+    expect(missingMetaPreferenceNote("feral")).toContain("feral");
+    expect(missingMetaPreferenceNote("feral")).toContain(
+      "no meta preference recorded"
+    );
+    expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+  });
+
+  /**
+   * Ret's behaviour must be byte-identical to before the table existed: the
+   * existing tests above call `gemContext` with no spec at all, and those must
+   * keep seating 32409 rather than falling into the fail-loud path.
+   */
+  it("keeps the specless default on ret's entry, so existing callers do not change", () => {
+    const headId = 32461;
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const ctx = gemContext(gemsForPhase(3), retEpWeights);
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord
+    );
+    expect(gems[metaIdx]).toBe(32409);
   });
 });
 

@@ -19,6 +19,7 @@ import {
 } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat, type EpWeights } from "./stats.js";
+import type { DetectedSpecId } from "./types.js";
 
 /**
  * Record-only weights. Narrower than `stats.ts`'s `EpWeights` union — this
@@ -52,17 +53,25 @@ export type GemContext = {
   readonly fillPalette: readonly GemEntry[];
   readonly weights: EpWeights;
   readonly weightRecord: EpWeightRecord;
+  /**
+   * Which spec's preferred meta applies. Absent means "unspecified", which
+   * keeps the pre-table behaviour — ret's entry — so every existing caller
+   * reads exactly as it did before `SPEC_PREFERRED_METAS` existed.
+   */
+  readonly spec?: DetectedSpecId;
 };
 
 export function gemContext(
   palette: readonly GemEntry[],
-  weights: EpWeights
+  weights: EpWeights,
+  spec?: DetectedSpecId
 ): GemContext {
   return {
     palette,
     fillPalette: fillEligibleGems(palette),
     weights,
     weightRecord: toWeightRecord(weights),
+    ...(spec !== undefined ? { spec } : {}),
   };
 }
 
@@ -103,6 +112,51 @@ const META_NEAR_EP = 1.0;
  */
 const PREFERRED_META_IDS: readonly number[] = [32409];
 
+/**
+ * Preferred meta gem per detected spec, read from upstream's gear presets.
+ *
+ * The evidence procedure is the one the ret comment above already describes,
+ * extended per spec (step6-meta-choice-spike.md option 1): read the meta
+ * socketed in that spec's presets, as of `wowsims/tbc-new` @ v0.0.101
+ * (`8aa378b3`). It is not an EP ranking, because stat EP cannot rank metas at
+ * all — the ordering it produces is the wrong one.
+ *
+ * **A spec with no entry is deliberate, not an oversight.** All five vendored
+ * feral presets (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear Wolfshead
+ * Helm 8345, which has no sockets, so upstream records no feral meta to copy.
+ * Inheriting ret's Relentless would be a guess dressed in the same clothes as
+ * ret's evidence, so uncovered specs take the fail-loud path instead: keep the
+ * worn meta, never fill or substitute one, and disclose
+ * `missingMetaPreferenceNote`. Verified against the vendored presets in
+ * `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
+ * ("Local verification pass"), which also settles that Chaotic Skyfire 34220
+ * is phase 1 in our own data — the one online claim that would have mattered
+ * here had a caster spec been detectable.
+ *
+ * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
+ * reach this code, so a row for one would be untestable decoration.
+ */
+export const SPEC_PREFERRED_METAS: Partial<
+  Record<DetectedSpecId, readonly number[]>
+> = {
+  ret: PREFERRED_META_IDS,
+};
+
+/**
+ * The disclosure for a spec whose meta preference is not recorded, or
+ * `undefined` when there is nothing to disclose.
+ *
+ * Fail loud, per the spike: silently leaving the socket empty looks identical
+ * to a palette that had no meta gem, and silently seating ret's would be
+ * wrong. Naming the spec is what lets a reader tell the two apart.
+ */
+export function missingMetaPreferenceNote(
+  spec: DetectedSpecId | undefined
+): string | undefined {
+  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return undefined;
+  return `no meta preference recorded for ${spec} — the meta socket was left as worn, and no meta gem was chosen for it`;
+}
+
 export type FillEmptyOpts = {
   /** Unique gem ids already socketed elsewhere on the set. */
   usedUnique?: ReadonlySet<number>;
@@ -112,6 +166,12 @@ export type FillEmptyOpts = {
    * colour and can zero the deficit before any candidate is scored.
    */
   meta?: { metaId: number; otherGemIds: readonly number[] };
+  /**
+   * Whose preferred meta to seat. Absent keeps the pre-table behaviour (ret's
+   * entry); a spec with no entry in `SPEC_PREFERRED_METAS` leaves the meta
+   * socket empty rather than inheriting another spec's gem.
+   */
+  spec?: DetectedSpecId;
 };
 
 /**
@@ -186,7 +246,8 @@ function fillEmpties(
             metaId: opts.meta.metaId,
             setGemIds: [...opts.meta.otherGemIds, ...placed],
           }
-        : undefined
+        : undefined,
+      opts.spec
     );
     if (pick) {
       out[i] = pick.id;
@@ -205,7 +266,8 @@ function bestGemForSocket(
   epWeights: EpWeightRecord,
   usedUnique: ReadonlySet<number>,
   matchColors: boolean,
-  metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined
+  metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined,
+  spec: DetectedSpecId | undefined
 ): GemEntry | undefined {
   const eligible: { gem: GemEntry; ep: number }[] = [];
 
@@ -226,7 +288,14 @@ function bestGemForSocket(
   if (eligible.length === 0) return undefined;
 
   if (socket === GemColor.GemColorMeta) {
-    for (const preferred of PREFERRED_META_IDS) {
+    const preferredIds =
+      spec === undefined ? PREFERRED_META_IDS : SPEC_PREFERRED_METAS[spec];
+    // No recorded preference: leave the socket empty rather than fall through
+    // to the EP pick below. EP cannot rank metas — nine of eighteen score
+    // 0.00 — so "best by EP" would be an arbitrary gem wearing the authority
+    // of a measurement, and inheriting another spec's meta would be worse.
+    if (!preferredIds) return undefined;
+    for (const preferred of preferredIds) {
       const hit = eligible.find((e) => e.gem.id === preferred);
       if (hit) return hit.gem;
     }

@@ -6,6 +6,7 @@
 import {
   fillEmptyCandidateGems,
   gemContext,
+  missingMetaPreferenceNote,
   type FillEmptyOpts,
   type GemContext,
 } from "./candidate-gems.js";
@@ -93,6 +94,7 @@ import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
   ContentPhase,
+  DetectedSpecId,
   FightRef,
   Race,
   SpecId,
@@ -488,7 +490,8 @@ export async function rankUpgrades(
   let metaSwaps: MetaRepairSwap[] = [];
   const gems = gemContext(
     deps.gemPalette ?? gemsForPhase(input.maxPhase),
-    deps.epWeights
+    deps.epWeights,
+    input.spec
   );
   try {
     const minimized = repairAndMinimize({
@@ -925,6 +928,7 @@ export async function rankUpgrades(
       caps,
       substitutions: [
         ...substitutionsFromMetaRepair(metaSwaps),
+        ...metaPreferenceDisclosure(gems.spec),
         ...candidateSkips.map((s) => ({
           field: `candidate ${s.itemId} (${s.slot})`,
           detail:
@@ -1646,7 +1650,7 @@ function swapItemAt(
           migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
           gemCtx.fillPalette,
           gemCtx.weightRecord,
-          fillOptsForSwap(equipment, slotIndex)
+          fillOptsForSwap(equipment, slotIndex, gemCtx.spec)
         );
     const out: SimItemSpec = { id: itemId, gems };
     // Bare worn slot → no enchant on the candidate (do not invent one), and
@@ -1659,9 +1663,23 @@ function swapItemAt(
   });
 }
 
+/**
+ * Fail loud when no meta preference is recorded for the ranked spec: an empty
+ * meta socket otherwise looks identical to a palette that simply had no meta
+ * gem, and seating another spec's meta would be silently wrong (the outcome
+ * step6-meta-choice-spike.md rejected).
+ */
+function metaPreferenceDisclosure(
+  spec: DetectedSpecId | undefined
+): Substitution[] {
+  const note = missingMetaPreferenceNote(spec);
+  return note ? [{ field: "gems.meta-preference", detail: note }] : [];
+}
+
 function fillOptsForSwap(
   equipment: readonly SimItemSpec[],
-  slotIndex: number
+  slotIndex: number,
+  spec: DetectedSpecId | undefined
 ): FillEmptyOpts {
   const usedUnique = new Set<number>();
   const otherGemIds: number[] = [];
@@ -1678,6 +1696,7 @@ function fillOptsForSwap(
   return {
     usedUnique,
     ...(metaId !== undefined ? { meta: { metaId, otherGemIds } } : {}),
+    ...(spec !== undefined ? { spec } : {}),
   };
 }
 
