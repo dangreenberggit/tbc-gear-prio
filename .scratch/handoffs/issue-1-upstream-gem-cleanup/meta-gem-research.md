@@ -5,7 +5,7 @@ Scope: TBC Classic (2007-era rules) DPS specs, cross-checked against wowsims tbc
 
 ## Method note
 
-I could not get full raw HTML for several target pages (icy-veins fetched fine via WebFetch; warcrafttavern and lootxphub 403'd WebFetch and had to be triangulated via WebSearch snippets instead, which are lower-fidelity than reading the page directly). Where a claim rests only on a WebSearch snippet rather than a directly fetched page, it is marked accordingly. I did not get filesystem-level access to `wowsims/tbc` or `wowsims/tbc-new` `ui/<class>/<spec>/presets.ts` file contents (GitHub tree/blob fetch returned only directory listings, not file bodies, within tool limits) — so the "does the upstream preset socket a different meta per phase gear set" question is **UNVERIFIED** for all specs below. This is a gap; if the owner wants it closed, someone needs to `gh api`/clone and grep `presets.ts` files directly rather than relying on web fetch of GitHub's rendered UI.
+I could not get full raw HTML for several target pages (icy-veins fetched fine via WebFetch; warcrafttavern and lootxphub 403'd WebFetch and had to be triangulated via WebSearch snippets instead, which are lower-fidelity than reading the page directly). Where a claim rests only on a WebSearch snippet rather than a directly fetched page, it is marked accordingly. I did not get filesystem-level access to `wowsims/tbc` or `wowsims/tbc-new` `ui/<class>/<spec>/presets.ts` file contents (GitHub tree/blob fetch returned only directory listings, not file bodies, within tool limits) — so the "does the upstream preset socket a different meta per phase gear set" question was **UNVERIFIED** for all specs below at the time of the online pass. **Closed 2026-08-12** for the only two specs that matter here — see "Local verification pass" below, which reads the vendored presets directly. It remains unverified for the eight non-detectable specs, which is harmless because they cannot reach this code.
 
 ## Table: recommended meta gem by spec
 
@@ -45,11 +45,78 @@ One warlock guide snippet claimed Chaotic Skyfire Diamond "become[s] available i
 
 Despite specifically searching for "before X% crit/hit use Y" style guide language (the pattern the task description called out), no source surfaced that framing for any spec. All "swap" language found was either (a) budget-vs-BiS (feral) or (b) skill/mechanics-based (shadow priest), not a crit/hit-rating breakpoint.
 
+## Local verification pass (2026-08-12, round-5 executor)
+
+The two gaps the online pass left open are closed here against **our own
+committed data**, which outranks the web sources above for anything the
+pipeline actually consumes.
+
+### Gap (a) — Chaotic Skyfire Diamond's phase: finding 3's "phase 3" claim is wrong for our data
+
+```
+python -c "import json; db=json.load(open('vendor/wowsims/db.json')); \
+print([{k:v for k,v in g.items() if k in ('id','name','phase','quality','color')} \
+for g in db['gems'] if g['id'] in (32409,34220)])"
+```
+
+yields `Relentless Earthstorm Diamond` 32409 → `phase 1, quality 3` and
+`Chaotic Skyfire Diamond` 34220 → `phase 1, quality 3`. The same values appear
+in the generated `data/gems/palette.json`. **All 18 meta gems (colour 1) in
+db.json are `phase: 1`** — and `phase` is not a constant default in this data
+(non-meta palette entries carry phases 1, 2 and 3), so this is a real recorded
+value rather than an unset field. The warlock-guide snippet claiming Chaotic
+Skyfire "becomes available in Phase 3" does **not** describe the phase model
+our pipeline filters on. No pre-P3 caster row needs special handling.
+
+### Gap (b) — do upstream presets carry one static meta per spec? Yes, and feral carries none
+
+The vendored subset (`vendor/wowsims/`, at the pin) contains gear presets for
+exactly the two specs this pipeline can detect. Reading every one of them:
+
+| Preset | Head | Meta gem socketed |
+|---|---|---|
+| `ret_preraid.gear.json` | 32087 | **32409** |
+| `ret_p1.gear.json` | 29073 | **32409** |
+| `ret_p2.gear.json` | 32461 | **32409** |
+| `feral_preraid.gear.json` | 8345 Wolfshead Helm | **none — head has no `gems` array at all** |
+| `feral_p2_6p` / `feral_p2_9p` / `feral_p3_6p` / `feral_p3_9p` | 8345 Wolfshead Helm | **none** |
+
+Re-runnable check:
+
+```
+cat vendor/wowsims/ret_*.gear.json vendor/wowsims/feral_*.gear.json
+```
+
+Two findings:
+
+1. **Ret is static across all three phases** — 32409, no other meta appears.
+   This is the same evidence already cited in `candidate-gems.ts`, now
+   re-confirmed at the current pin.
+2. **Feral has no upstream meta preference to read.** All five feral presets
+   wear Wolfshead Helm (8345), which carries no sockets — independently
+   confirming the online pass's "feral often skips the meta slot entirely"
+   claim from committed data rather than guide snippets. There is no preset
+   meta to copy, so feral must take the fail-loud "no meta preference
+   recorded" path, **not** an inherited 32409.
+
+### Scope correction to the table above
+
+The online table covers ten specs. This pipeline's `DetectedSpecId`
+(`packages/core/src/types.ts`) is `"ret" | "feral" | "feral-tank"` — the eight
+other specs in that table are not detectable, cannot reach the meta-selection
+code, and therefore must not become table rows. They are recorded above as
+research context only.
+
 ## Verdict
 
 **Mostly static per-spec table is sufficient, with two caveats to disclose rather than model as full per-phase table rows:**
 
 - All eight melee/physical DPS specs checked (Ret Pal, Fury Warr, Combat Rogue, BM Hunter, Enh Shaman, Feral Cat) consistently point to **Relentless Earthstorm Diamond (32409)** as the static best pick across phases, with Feral being a soft exception because it frequently skips a meta-socketed head entirely in favor of Wolfshead Helm — this is an item-choice question upstream of "which meta," not a meta-vs-meta switch, so it doesn't require a new table row, but a one-line caveat ("feral may not socket a meta head at all") is worth carrying.
 - All caster DPS specs checked (Fire/Arcane Mage, Destro/Affli Warlock, Elemental Shaman, Balance Druid) consistently point to **Chaotic Skyfire Diamond (34220)** as the static best pick, EXCEPT that (a) its exact TBC-Classic phase-of-availability is contested/unconfirmed (see finding 3) and needs a direct check before assuming it's usable from Phase 1, and (b) Shadow Priest has an unverified secondary lead suggesting a skill-gated alternative (Mystical Skyfire Diamond) that is not phase-driven and probably shouldn't be modeled as a table row even if confirmed — it's a playstyle preference, not a "correct" upgrade.
+
+**Both provisos below were discharged by the local verification pass** (see
+that section): (1) Chaotic Skyfire is `phase: 1` in our own data, so the
+pre-raid/P1 worry does not apply; (2) the upstream presets *were* inspected
+directly, confirming one static meta for ret and none at all for feral.
 
 No spec surfaced a genuine phase-to-phase static-best-changes (e.g. "P1-P2 use meta X, P3+ switch to meta Y") pattern, and no crit/hit-rating breakpoint language was found anywhere. A static per-spec table (one meta gem per spec) is therefore defensible, **provided**: (1) the table's caster-meta entries carry a note that Chaotic Skyfire Diamond's actual TBC-Classic-phase availability is unconfirmed by this research pass and should be re-checked against a TBC Classic-specific (not original-2007) patch/phase timeline before the table is treated as valid for pre-raid/P1 content, and (2) I was unable to inspect wowsims `presets.ts` file contents directly, so upstream sim-tool confirmation of "one static meta per spec across all gear-set presets" remains UNVERIFIED rather than confirmed — someone with direct repo access should grep `ui/<class>/<spec>/presets.ts` (or wherever gear_sets live in `wowsims/tbc-new`) for meta gem IDs across preraid/p1/p2+ preset objects to close this gap definitively.
