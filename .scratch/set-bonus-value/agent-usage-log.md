@@ -39,7 +39,7 @@ Date: 2026-08-10 → 2026-08-11.
 | 18 | Orchestrate fix round (117/118 + sweep) | fable (low) | unreported | — | killed by session limit mid-round; most commits landed first |
 | 19 | — resumed: finish 118, regenerate, review | fable (low) | 97,190 | 8 | done (per-worker rows in fix-round/DIRECTOR.md) |
 | 20 | Apply review dispositions (blocker + 4 fixes) | sonnet | 111,029 | 56 | done |
-| 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | pending | — | running |
+| 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | 63,250 + 70,113 + 107,763 (3 legs) | 147 | done |
 
 ## Notes
 
