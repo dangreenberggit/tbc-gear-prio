@@ -46,12 +46,53 @@ export function gemsForPhase(maxPhase: number): GemEntry[] {
  * data, so the quality filter lives here rather than at the call site
  * (ticket 111, revised by ticket 117 — both the auto-fill path and meta
  * repair now cap rarity, via `GemContext.fillPalette`).
+ *
+ * `null`/`undefined` `quality` used to take opposite paths: `null <= 3` is
+ * `true` in JS (the entry silently passed the cap), `undefined <= 3` is
+ * `false` (the entry silently dropped). Neither was reported, so a caller
+ * building its own palette (tests, or any future direct constructor) had no
+ * signal either way (ticket 114). A committed `data/gems/palette.json` entry
+ * always carries a number — the generator guarantees it — so this only fires
+ * on a malformed injected palette, and it fires loudly: a safety net that
+ * fabricates a verdict on missing data is worse than no net.
  */
 export function gemsForQuality(
   palette: readonly GemEntry[],
   maxQuality: number
 ): GemEntry[] {
-  return palette.filter((g) => g.quality <= maxQuality);
+  return palette.filter((g) => {
+    if (typeof g.quality !== "number") {
+      throw new Error(
+        `gem ${g.id} has non-numeric quality (${String(g.quality)}); cannot apply the rarity cap`
+      );
+    }
+    return g.quality <= maxQuality;
+  });
+}
+
+/**
+ * Auto-fill and meta repair both cap at rare (owner decision, ticket 111,
+ * extended to repair by ticket 117): a player's own epics ride through
+ * migration, but neither path assumes epics they may not own.
+ *
+ * The cap used to be call-site discipline — `candidate-gems.ts` held its own
+ * `MAX_FILL_QUALITY` constant and remembered to pass it to `gemsForQuality`
+ * on every palette it built. Two palettes existed on one `GemContext`
+ * (`palette` uncapped, `fillPalette` capped), type-indistinguishable from
+ * each other, so grabbing the wrong one compiled fine and only showed up as
+ * an epic gem nobody asked for (tickets 117/116, both since fixed at their
+ * call sites — this is the chokepoint that keeps the bug class from
+ * recurring at a new one). Moving the cap in here means there is exactly one
+ * way to get a fill-eligible palette, and it cannot be constructed by
+ * forgetting a filter call. Fixed default for now; a run-level option
+ * mirroring wowsims' rarity/phase dropdowns is future work.
+ */
+export const FILL_MAX_QUALITY = 3;
+
+export function fillEligibleGems(
+  palette: readonly GemEntry[]
+): readonly GemEntry[] {
+  return gemsForQuality(palette, FILL_MAX_QUALITY);
 }
 
 /**

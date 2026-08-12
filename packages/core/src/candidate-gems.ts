@@ -9,7 +9,7 @@
  * thrash). See `.scratch/handoffs/gem-optimizer-comparison.md`.
  */
 
-import { gemsForQuality, getGem, type GemEntry } from "./gems.js";
+import { fillEligibleGems, getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
 import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
@@ -49,22 +49,17 @@ export type GemContext = {
   readonly weightRecord: EpWeightRecord;
 };
 
-/**
- * Auto-fill caps at rare (owner decision, ticket 111): a player's own epics
- * ride through migration, but the fill never assumes epics they may not own —
- * the unconstrained fill overstated a measured swap by pricing a phase-3 epic
- * worn nowhere in the player's gear. Fixed default for now; a run-level
- * option mirroring wowsims' rarity/phase dropdowns is future work.
- */
-const MAX_FILL_QUALITY = 3;
-
 export function gemContext(
   palette: readonly GemEntry[],
   weights: EpWeights
 ): GemContext {
   return {
     palette,
-    fillPalette: gemsForQuality(palette, MAX_FILL_QUALITY),
+    // Chokepoint: `fillEligibleGems` (gems.ts) owns both the cap value and
+    // its enforcement, so there is exactly one way to build a fill-eligible
+    // palette rather than a call-site convention every caller has to
+    // remember (ticket 114).
+    fillPalette: fillEligibleGems(palette),
     weights,
     weightRecord: toWeightRecord(weights),
   };

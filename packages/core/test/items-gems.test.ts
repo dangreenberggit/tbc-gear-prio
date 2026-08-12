@@ -2,7 +2,13 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { findMetaGemId, gemPalette, getGem } from "../src/gems.js";
+import {
+  findMetaGemId,
+  gemPalette,
+  gemsForQuality,
+  getGem,
+  type GemEntry,
+} from "../src/gems.js";
 import { getItem, isEnchantable, socketsFor } from "../src/items.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -150,6 +156,37 @@ describe("gem palette", () => {
     // chose; 24028 (Delicate Living Ruby) is the rare the cap should pick.
     expect(getGem(32194)?.quality).toBe(4);
     expect(getGem(24028)?.quality).toBe(3);
+  });
+
+  it("treats null and undefined quality alike, loudly, not as opposite outcomes (ticket 114)", () => {
+    // Before the fix: `null <= 3` is `true` in JS (passes the cap silently),
+    // `undefined <= 3` is `false` (drops silently) — two malformed inputs,
+    // two different outcomes, neither reported. A safety net that fabricates
+    // a verdict on missing data is worse than no net (set-bonus-resolution
+    // handoff, 2026-08-10) — the chosen behaviour here is loud: throw for
+    // either, so a malformed injected palette cannot pass as good data.
+    const withNullQuality: GemEntry[] = [
+      {
+        id: 1,
+        colour: 2,
+        stats: [],
+        phase: 1,
+        quality: null as unknown as number,
+        unique: false,
+      },
+    ];
+    const withUndefinedQuality: GemEntry[] = [
+      {
+        id: 2,
+        colour: 2,
+        stats: [],
+        phase: 1,
+        quality: undefined as unknown as number,
+        unique: false,
+      },
+    ];
+    expect(() => gemsForQuality(withNullQuality, 3)).toThrow(/quality/i);
+    expect(() => gemsForQuality(withUndefinedQuality, 3)).toThrow(/quality/i);
   });
 
   it("renames db.json's `color` field to `colour`", () => {
