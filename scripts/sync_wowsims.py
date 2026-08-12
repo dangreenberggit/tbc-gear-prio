@@ -26,11 +26,27 @@ happens to be in -- a guild farming Karazhan for badges would read as P1.
     python scripts/sync_wowsims.py --restore  # fetch lock pin into vendor/ (CI / fresh tree)
     python scripts/sync_wowsims.py --update    # fetch latest tag, rewrite lockfile
     python scripts/sync_wowsims.py --update --tag v0.0.101
+    python scripts/sync_wowsims.py --update --ref feature/backend-reforge
+    python scripts/sync_wowsims.py --update --ref d09edaaf8
+    python scripts/sync_wowsims.py --watch-ref --ref feature/backend-reforge
+
+--ref (with --update) resolves a branch name or a commit sha via
+`gh api repos/<repo>/commits/<ref>` rather than the tags endpoint --tag uses.
+It writes the same lockfile shape (tag becomes the literal ref you passed, so
+`lock["tag"]` on a --ref pin is a branch name or sha rather than a release tag
+-- read it back and check before assuming it names a tag). This is how we
+track a branch under active development, e.g. feature/backend-reforge, without
+moving the tag pin used for building (issue #1).
+
+--watch-ref (with --ref) records a ref in lock["watchedRefs"] WITHOUT fetching
+files or touching vendor/ -- it is a pure drift tripwire, checked by --check,
+for a branch we build from the tag but want to know about if it moves.
 
 Exit codes: 0 in sync, 1 drift detected (--check), 2 error.
 """
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -119,6 +135,16 @@ def tag_sha(tag):
               f'.[] | select(.name=="{tag}") | .commit.sha')
 
 
+def ref_sha(ref):
+    """Resolve a branch name or commit sha to a commit sha via the commits
+    endpoint (not the tags endpoint tag_sha uses) -- this is how --ref covers
+    an unreleased branch like feature/backend-reforge, which has no tag."""
+    try:
+        return gh(f"repos/{REPO}/commits/{ref}", "--jq", ".sha")
+    except SystemExit as e:
+        raise SystemExit(f"ref {ref!r} not found on {REPO}: {e}")
+
+
 def fetch(sha, path):
     return pinned_fetch(REPO, sha, path)
 
@@ -147,6 +173,21 @@ def load_lock():
         return json.load(fh)
 
 
+def vendor_is_empty():
+    """True if VENDOR is missing or has no files.
+
+    vendor/ is gitignored, so a fresh clone or a worktree that never ran
+    --restore has none of the tracked files. Left unchecked, that reads to a
+    downstream consumer (e.g. build_feral_skeleton.py) as "upstream doesn't
+    have this file" -- issue #1's actual failure -- instead of "the sync never
+    ran here". --check and --restore both refuse loudly before doing anything
+    else that could produce that misdiagnosis.
+    """
+    if not os.path.isdir(VENDOR):
+        return True
+    return not any(os.scandir(VENDOR))
+
+
 # Keys in the lockfile that this script owns and rewrites on every --update.
 # Everything else in there belongs to another script -- data/proto/'s pin is
 # written by scripts/fetch_protos.py -- and must survive untouched. Rebuilding
@@ -154,7 +195,16 @@ def load_lock():
 # block once already; carry unknown keys forward rather than naming them, so
 # the next script to add a block doesn't have to edit this one.
 OWNED_KEYS = frozenset(
-    {"repo", "tag", "commit", "currentPhase", "defaultMaxPhase", "files", "_comment"}
+    {
+        "repo",
+        "tag",
+        "commit",
+        "currentPhase",
+        "defaultMaxPhase",
+        "files",
+        "_comment",
+        "watchedRefs",
+    }
 )
 
 
@@ -181,8 +231,15 @@ def merge_lock(prev, owned):
     return {**owned, **foreign}
 
 
-def do_update(tag):
-    if tag:
+def do_update(tag, ref=None):
+    if ref:
+        if tag:
+            raise SystemExit("--tag and --ref are mutually exclusive")
+        sha = ref_sha(ref)
+        if not sha:
+            raise SystemExit(f"ref {ref} not found on {REPO}")
+        tag = ref
+    elif tag:
         sha = tag_sha(tag)
         if not sha:
             raise SystemExit(f"tag {tag} not found on {REPO}")
@@ -228,6 +285,13 @@ def do_update(tag):
             "player's most recent log."
         ),
     }
+    # watchedRefs is owned by this script but not touched by a normal --update
+    # -- refreshing it is --check-refs' job (do_check_refs). Carry the previous
+    # value forward explicitly: merge_lock() only forwards keys NOT in
+    # OWNED_KEYS, so an owned key this call doesn't set would otherwise be
+    # dropped rather than preserved.
+    if prev and "watchedRefs" in prev:
+        owned["watchedRefs"] = prev["watchedRefs"]
     lock = merge_lock(prev, owned)
     # newline="" so Windows does not translate "\n" to "\r\n": the lockfile is
     # committed, and a CRLF rewrite makes every line of the diff look changed,
@@ -303,6 +367,11 @@ def do_check():
         print(f"  no {LOCKFILE} -- run --update first")
         return 1
 
+    if vendor_is_empty():
+        print(f"  {VENDOR}/ is empty or missing -- the source isn't here.", file=sys.stderr)
+        print("  run: python scripts/sync_wowsims.py --restore", file=sys.stderr)
+        return 2
+
     tag, sha = latest_tag()
     drift = []
 
@@ -332,6 +401,22 @@ def do_check():
             if sha256_of(fh.read()) != meta["sha256"]:
                 drift.append(f"checksum mismatch: {path}")
 
+    # Watched refs: branches under active upstream development that we don't
+    # build from but want to know when they move (issue #1 -- the optimizer
+    # that "didn't exist" was live on feature/backend-reforge the whole time).
+    for name, meta in lock.get("watchedRefs", {}).items():
+        try:
+            current_sha = ref_sha(name)
+        except SystemExit as e:
+            drift.append(f"watched ref {name}: could not resolve: {e}")
+            continue
+        if current_sha != meta.get("commit"):
+            drift.append(
+                f"watched ref {name} moved: {meta.get('commit', '?')[:12]} -> "
+                f"{current_sha[:12]} (informational -- not a build pin; re-review "
+                "before treating its features as still absent)"
+            )
+
     print()
     if not drift:
         print("  in sync.")
@@ -339,6 +424,30 @@ def do_check():
     for d in drift:
         print(f"  DRIFT: {d}")
     return 1
+
+
+def do_watch_ref(ref):
+    """Add or refresh one entry in lock["watchedRefs"]. Does not fetch files or
+    touch vendor/ -- a watched ref is tracked for drift, not built from."""
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+    sha = ref_sha(ref)
+    if not sha:
+        print(f"  ref {ref} not found on {REPO}", file=sys.stderr)
+        return 2
+    watched = dict(lock.get("watchedRefs") or {})
+    watched[ref] = {
+        "commit": sha,
+        "fetchedAt": datetime.date.today().isoformat(),
+    }
+    lock["watchedRefs"] = watched
+    with open(LOCKFILE, "w", encoding="utf-8", newline="") as fh:
+        json.dump(lock, fh, indent=2)
+        fh.write("\n")
+    print(f"  watching {ref} @ {sha[:12]}")
+    return 0
 
 
 def main():
@@ -351,10 +460,31 @@ def main():
         help="fetch pinned files into vendor/ from the lock (no lock rewrite)",
     )
     ap.add_argument("--tag", help="pin a specific tag instead of the latest")
+    ap.add_argument(
+        "--ref",
+        help="with --update: pin a branch name or commit sha instead of a tag "
+        "(e.g. feature/backend-reforge) -- mutually exclusive with --tag. "
+        "With --watch-ref: the ref to add/refresh as a watched ref.",
+    )
+    ap.add_argument(
+        "--watch-ref",
+        action="store_true",
+        help="add/refresh --ref in lock['watchedRefs'] for drift tracking "
+        "(does not fetch files or touch vendor/)",
+    )
     args = ap.parse_args()
 
-    if args.update:
-        sys.exit(do_update(args.tag))
+    if args.tag and args.ref and not args.watch_ref:
+        print("--tag and --ref are mutually exclusive", file=sys.stderr)
+        sys.exit(2)
+
+    if args.watch_ref:
+        if not args.ref:
+            print("--watch-ref requires --ref <branch-or-sha>", file=sys.stderr)
+            sys.exit(2)
+        sys.exit(do_watch_ref(args.ref))
+    elif args.update:
+        sys.exit(do_update(args.tag, ref=args.ref))
     elif args.restore:
         sys.exit(do_restore())
     elif args.check:
