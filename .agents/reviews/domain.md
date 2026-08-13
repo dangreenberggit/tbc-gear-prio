@@ -31,7 +31,7 @@ general knowledge wasn't.
 - **Spec is classified from talent-tree point plurality, and from nothing
   else.** There is no WCL spec-name string at actor level for any class
   (`subType` is class-level only), and **`CombatantInfo.specID` is unusable** —
-  [P0] every combatant reads `specID: 0` on TBC Anniversary, including confirmed
+  [S0] every combatant reads `specID: 0` on TBC Anniversary, including confirmed
   Ret (`docs/phase0-findings.md`, PLAN.md §5.2). Treating `0` as a real spec
   mis-specs the whole raid. The points live in `CombatantInfo.talents[].id`,
   which is **points spent, not a talent id** ([R18]) — `[{id:21},{id:40},{id:0}]`

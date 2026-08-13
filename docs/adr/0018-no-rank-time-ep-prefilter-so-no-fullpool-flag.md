@@ -88,7 +88,7 @@ universe grows past what a full sweep can carry.
   actually widens the simmed set.
 - §4's cost model ("~80 of a ~180-entry pool by default, or the whole pool
   under `fullPool`") does not describe the shipped engine and should be read
-  as a Phase 2+ target.
+  as a Stage 2+ target.
 
 ## Alternatives considered
 

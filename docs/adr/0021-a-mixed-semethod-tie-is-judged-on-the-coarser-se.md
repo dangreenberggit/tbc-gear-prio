@@ -79,7 +79,7 @@ The reasoning is that a tie is a claim about **both** rows. Row 9 carries a
 cannot be resolved more finely than its worse-measured member. `max` is the only
 scale both rows were actually measured on. Reading it the other way — the paired
 row's window governing — asserts a resolution row 9 never bought, which is
-exactly what §10 means by "resolution, not correctness": Phase 2's 5× budget was
+exactly what §10 means by "resolution, not correctness": Stage 2's 5× budget was
 spent on 8 rows and its resolution belongs to those 8 rows.
 
 `Math.min` survives within a method because point 2 in `view.ts` still applies
@@ -120,7 +120,7 @@ estimate of the delta**, which is different from re-deriving the bar itself.
 - **Ties at the boundary get wider, not narrower, than what shipped since
   9c62693.** On the measured run, rows 8 and 9 now read as tied. This is a
   behaviour change to the emitted grouping and is the intended one.
-- **Phase 2's resolution is bounded by what paid for it.** Tighter grouping
+- **Stage 2's resolution is bounded by what paid for it.** Tighter grouping
   applies among the 8 replicated rows and nowhere else.
 - **`PAIRED_REPLICATE_TOP_N` is now visible in the output.** Whether row 9 is
   tied to row 8 depends on where the budget of 8 fell. That is inherent in
@@ -146,12 +146,12 @@ paired figure small is explicitly _not observable_ from one pair of runs
 (PLAN.md §10:707). Any factor would be invented.
 
 **Widen the paired rows' reported SE to the independent scale.** Rejected: it
-throws away the measurement §10 Phase 2 exists to make, and `se` is a reported
+throws away the measurement §10 Stage 2 exists to make, and `se` is a reported
 field on `RankedItem`, not a grouping-only intermediate.
 
 **Keep `Math.min` and document it.** Rejected: documenting it would mean writing
 down that a pair is resolved to a precision one of its members does not have.
 The ticket is right that the direction is "not obviously wrong" — tighter groups
-at the top are what Phase 2 buys — but that argument justifies tighter grouping
+at the top are what Stage 2 buys — but that argument justifies tighter grouping
 _among replicated rows_, which `min`-within-method already delivers, not tighter
 grouping across the boundary.

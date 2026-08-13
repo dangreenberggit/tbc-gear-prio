@@ -145,7 +145,7 @@ synthesise.** PLAN.md §4 is amended to say so.
   stranding it `running`. This is the **handle** §7's second payoff needs, not
   the payoff: `Store.job` exposes only `create`/`update`/`read`-by-id, so there
   is no `findByContentHash` and two concurrent identical calls still both sim.
-  Attaching to a running job is Phase 2 web-path work.
+  Attaching to a running job is Stage 2 web-path work.
 - **`rankUpgrades` still does not read `deps.clock`.** An earlier draft of this
   ADR claimed it did; that was false. `MemoryStore` timestamps from its own
   constructor-injected clock, so the port is consumed only because `cli.ts` now

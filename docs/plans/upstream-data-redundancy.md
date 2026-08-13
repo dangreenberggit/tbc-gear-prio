@@ -265,8 +265,8 @@ after (§4.3 step 1).
 
 ### 4.2 Relating presets to the §14 boss filter
 
-PLAN.md §14 Phase 2 gates on a raid/boss filter (`ItemSource.boss`, "All bosses"
-default, line 739) and Phase 3 lists "per-boss encounter profiles" (line 845).
+PLAN.md §14 Stage 2 gates on a raid/boss filter (`ItemSource.boss`, "All bosses"
+default, line 739) and Stage 3 lists "per-boss encounter profiles" (line 845).
 The 3 real presets are exactly that data, for 3 bosses.
 
 Important scoping distinction, because they are easy to conflate:
@@ -503,5 +503,5 @@ Each step is independently landable and independently revertable.
 | 5   | Preset accessor + re-root the skeleton                                | `packages/core/src/`, `scripts/compose_slamaltman_raid_sim.py` | committed skeleton byte-identical, or the delta explained |
 | 6   | Boss presets behind a flag, in `contentHash`                          | engine + assumptions drawer                                    | PLAN.md §14 boss-filter gate items                        |
 
-Steps 1–3 are safe now. Step 5 is blocked on step 4. Step 6 is Phase 2/3 work
+Steps 1–3 are safe now. Step 5 is blocked on step 4. Step 6 is Stage 2/3 work
 and should not be pulled forward.

@@ -5,7 +5,7 @@ and data/enchants/index.json from the pinned vendor/wowsims/db.json
 (PLAN.md 5.1, 8.3, 9).
 
 All outputs are GENERATED, committed, and never read at runtime from db.json
-itself -- db.json is a build input only (PLAN.md 8.3 [P0]). Re-run this after
+itself -- db.json is a build input only (PLAN.md 8.3 [S0]). Re-run this after
 `pnpm sync:wowsims` moves the pin.
 
     python scripts/generate_item_gem_index.py

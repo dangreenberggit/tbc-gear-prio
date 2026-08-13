@@ -770,7 +770,7 @@ genuinely changes but the fill output cannot, and the second axis is asserted on
 
 ### 2 → 3 — the palette change reaching the sim request
 
-Phase 3's epic gems do win, so this pair closes the stricter reading of the box.
+T6's epic gems do win, so this pair closes the stricter reading of the box.
 Candidate **30104 Cobra-Lash Boots** against slamaltman's worn boots (30081,
 ungemmed, so every candidate socket arrives empty and the fill must consult the
 palette):

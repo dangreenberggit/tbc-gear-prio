@@ -83,7 +83,7 @@ instant".
 ### It would also promote noise
 
 The cutoff is not a display preference. It is `max(3.0, 2 × mean reported SE
-1.678)` from the Phase 1 five-seed spread experiment (PLAN.md §10,
+1.678)` from the Stage 1 five-seed spread experiment (PLAN.md §10,
 `docs/five-seed-spread.json`), i.e. the width below which a delta is not
 distinguishable from zero at the iteration counts this tool runs. A 2 DPS delta
 at SE ≈ 2 is noise; being the largest number in a filtered subset is a fact
@@ -118,7 +118,7 @@ second pass over `rows` is gone. `view.ts` no longer imports `meetsCutoff`, so
 Two reasons to keep it. It marks the boundary: the shortlist is a property of
 the **view**, and `ViewResult.shortlist`, `belowCutoffCount` and `cli.ts`'s
 grouped output read the view's own answer rather than reaching back into the
-`Ranking`. And a `ViewRow` is what the CLI and the Phase 3 web shell render, so
+`Ranking`. And a `ViewRow` is what the CLI and the Stage 3 web shell render, so
 the row carrying its own display verdict is what keeps the two callers from
 re-deriving it. What changes is only that the field is documented as what it is
 — carried, not recomputed.

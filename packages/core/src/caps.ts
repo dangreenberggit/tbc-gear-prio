@@ -48,7 +48,7 @@ import type { Race, SpecId } from "./types.js";
  * ui/core/constants/mechanics.ts @ wowsims/tbc-new
  * 8aa378b3671a0923fd11fb34b4b3753e53f20c9b (data/wowsims.lock.json).
  * Copied rather than imported: the vendor tree is a build input, never a
- * runtime dependency (PLAN.md §8.3 [P0]).
+ * runtime dependency (PLAN.md §8.3 [S0]).
  *
  * Must be the PHYSICAL constant. `SPELL_HIT_RATING_PER_HIT_PERCENT` is
  * 12.615385 and a melee hit cap built on it is wrong by ~28 rating.
