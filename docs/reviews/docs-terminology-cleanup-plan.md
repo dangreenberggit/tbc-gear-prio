@@ -53,8 +53,11 @@ still LF and executable; no semantic inversion; no test assertion changed.
 
 **D1 — `PLAN.md:168` "candidates: tier ≤ 2" should be "phase ≤ 2".** The
 strongest finding of the review, and it reverses an issue-04 decision. The
-control is 1–5, but P4 (Zul'Aman) and P5 (Sunwell) drop **no numbered tier
-token**, so "tier ≤ 4" cannot express what the filter does. The CLI flag is
+control is 1–5 and phase does not map one-to-one onto tier, so no single tier
+number identifies P5. (The reviewer's stated reason — that P4 and P5 drop no
+tier token — is **wrong for P5**: Sunwell drops the belt/boots/bracers of the
+same T6 sets P3 begins. Owner-corrected 2026-08-12; the conclusion stands on
+the split, not on absence.) The CLI flag is
 `--max-phase`, so labelling input "phase" and output "tier" contradicts itself.
 Confirmed against `data/phase_raids.json`. Also confirmed docs-only — no such
 string ships today.
@@ -140,18 +143,18 @@ fixed on the branch. Two judgment items are deferred as tickets.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                             |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | 54 files back to LF; `* text=auto eol=lf` pinned in `.gitattributes` (`40fc2df`, `54a0863`)                                               |
-| A2  | Adversarial | fixed       | `.gitignore:63` "have shipped" (`eb41a4b`)                                                                                                |
-| A3  | Adversarial | fixed       | 5 links → `stage0-findings.md`, both mirrors (`eb41a4b`)                                                                                  |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/137-rename-scan-stdout-encoding.md`                                                                        |
-| D1  | Domain      | fixed       | `PLAN.md:168` reverted to "phase ≤ 2" (`58fb5ce`)                                                                                         |
-| D2  | Domain      | fixed       | `CONTEXT.md` records the tier-set sense and the P4/P5 gap (`58fb5ce`)                                                                     |
-| D3  | Domain      | fixed       | gem figure now names `db.json` and the palette (`58fb5ce`)                                                                                |
-| S1  | Standards   | fixed       | `PLAN.md:631` `[**S0**]` (`eb41a4b`)                                                                                                      |
-| S2  | Standards   | fixed       | `cli.ts:407` "is built in Stage 2" (`eb41a4b`)                                                                                            |
-| S3  | Standards   | wontfix     | Within the user's 2026-08-12 §6.2 ruling; skipping would leave skills naming a deleted command                                            |
-| C1  | Commentary  | fixed       | `PLAN.md:906` `[S1]`, legend updated (`eb41a4b`)                                                                                          |
-| C2  | Commentary  | defer       | `.scratch/carry-forward/issues/138-stage-is-triple-booked.md`                                                                             |
-| C3  | Commentary  | defer       | `.scratch/carry-forward/issues/137-rename-scan-stdout-encoding.md` (same file: fix encoding, reassess whether the script earns its place) |
+| ID  | Axis        | Disposition | Ticket / note                                                                                  |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | 54 files back to LF; `* text=auto eol=lf` pinned in `.gitattributes` (`40fc2df`, `54a0863`)    |
+| A2  | Adversarial | fixed       | `.gitignore:63` "have shipped" (`eb41a4b`)                                                     |
+| A3  | Adversarial | fixed       | 5 links → `stage0-findings.md`, both mirrors (`eb41a4b`)                                       |
+| A4  | Adversarial | fixed       | stdout reconfigured to UTF-8 (`e39ba46`); ticket 137 closed                                    |
+| D1  | Domain      | fixed       | `PLAN.md:168` reverted to "phase ≤ 2" (`58fb5ce`)                                              |
+| D2  | Domain      | fixed       | `CONTEXT.md` records the tier-set sense and the P4/P5 gap (`58fb5ce`)                          |
+| D3  | Domain      | fixed       | gem figure now names `db.json` and the palette (`58fb5ce`)                                     |
+| S1  | Standards   | fixed       | `PLAN.md:631` `[**S0**]` (`eb41a4b`)                                                           |
+| S2  | Standards   | fixed       | `cli.ts:407` "is built in Stage 2" (`eb41a4b`)                                                 |
+| S3  | Standards   | wontfix     | Within the user's 2026-08-12 §6.2 ruling; skipping would leave skills naming a deleted command |
+| C1  | Commentary  | fixed       | `PLAN.md:906` `[S1]`, legend updated (`eb41a4b`)                                               |
+| C2  | Commentary  | fixed       | "stage" no longer names game content anywhere (`e39ba46`); ticket 138 closed                   |
+| C3  | Commentary  | fixed       | scanner now sees wrapped sentences and identical table cells (`e39ba46`)                       |

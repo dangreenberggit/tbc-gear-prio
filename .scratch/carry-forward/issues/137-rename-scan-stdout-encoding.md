@@ -1,6 +1,7 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/docs-terminology-cleanup-plan.md
+Closed: 2026-08-12
 
 # check_rename_contradictions.py: fix stdout encoding, then decide if it earns its place
 
@@ -53,3 +54,11 @@ report `CONTEXT.md:91` and nothing else:
     git stash -u && git checkout ee9e220
     python /path/to/fixed/check_rename_contradictions.py merge-to-dev
     git checkout docs/terminology-cleanup-plan && git stash pop
+
+
+## Resolution
+
+Fixed in e39ba46: stdout reconfigured to UTF-8, and the scan now joins
+hard-wrapped prose into logical blocks so a flattening across a line break is
+caught. Verified against ee9e220 -- still reports CONTEXT.md:91 and nothing
+else. Current tree drops from 4 hits to 1 (its own docstring).

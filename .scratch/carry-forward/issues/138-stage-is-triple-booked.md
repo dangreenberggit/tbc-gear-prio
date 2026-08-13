@@ -1,6 +1,7 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/docs-terminology-cleanup-plan.md
+Closed: 2026-08-12
 
 # "stage" means three things, and CONTEXT.md documents two
 
@@ -63,3 +64,13 @@ the one place the glossary contradicts itself.
 
 Every hit should be unambiguous from the sentence alone, without needing the
 capitalisation of the word to disambiguate it.
+
+
+## Resolution
+
+Fixed in e39ba46, not deferred. The owner ruled that TBC has no stages, so
+using the word for game content is broadening with nothing to weigh against
+it. ~40 sites now say "phase". The ProgressEvent `stage:` field and the
+eight-stage pipeline prose are untouched -- internal machinery, not game
+content. CONTEXT.md states the rule outright instead of relying on
+capitalisation.
