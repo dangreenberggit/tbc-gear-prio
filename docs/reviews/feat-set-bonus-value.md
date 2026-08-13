@@ -764,6 +764,78 @@ been read by an independent reviewer, while the merge gate passes green over
 them. That is a defect in how rounds chained their ranges, not in any one round;
 rounds 1–4 were rigorous where they looked.
 
+## Round 6 — closing coverage gaps B and C (2026-08-13)
+
+Diffed against: `3adbe4f..3f5e21b`, inclusive of `cfc77c9` — the commits round 5's
+coverage audit found had never been read (ticket 145 gaps B and C). One
+fresh-context Opus reviewer on the adversarial and domain axes, since the range
+is fix commits rather than new feature work. Read with `--ignore-cr-at-eol`.
+
+The range's highest-value target was **`cfc77c9`, the fix for round 2's two
+high-severity silent-failure bugs** — a fix that was itself never reviewed.
+Half of it holds; half reintroduced the failure in a new shape.
+
+### Adversarial
+
+- **6-A1 (high)** `cfc77c9` fixed 2-A1 (arbitrary worn-row pick could suppress a
+  real `set-break-toll`) by resolving ambiguity to `null` — and the caller then
+  **drops the slot entirely** (`dead-slots.ts:140,172`). An arbitrary pick became
+  a silent drop, with the same observable outcome: no classification, no
+  warning, clean-looking report. Reproduced by the delegator against `dist/`:
+  two equipped rings at `deltaDps: 0, owned: true` yield
+  `classifyDeadSlots(...) === []`. **Reachable on every run** for a common gear
+  shape — `owned` is item-id based (`rank.ts:704`) and the paired-slot dedupe
+  guard (`rank.ts:730`) leaves each worn ring with only its identity swap. The
+  ambiguity is an artifact of grouping by pool slot while `owned` is per item;
+  both rows _are_ correctly identified worn items. The fix's own tests never
+  construct a two-`owned` slot, which is why it shipped green.
+- **6-A2 (medium)** The no-`owned` fallback (`dead-slots.ts:141`) is still
+  exactly the pre-fix proxy, so the originally-reported shape without `owned`
+  flags still yields nothing. Live path is covered (`rank.ts:924` always sets
+  `owned`); the exposure is re-rendering an artifact predating the field.
+- **6-A3 (medium)** `withSelfConfoundDisclosed` (`rank-report-rules.ts:238`)
+  guards on threshold only, never on `b.unmeasured`, so an unmeasured 4pc row
+  gets the confound stamped on a figure that does not exist — the CLI prints
+  "includes the unmeasured 2pc effect" beside "not enough pieces to build the
+  package". The live `rank.ts` path is correct, so **the two paths disagree**,
+  defeating this function's docstring claim to derive the live condition. Only
+  the CLI leaks it; the HTML renderer returns early for unmeasured rows, which
+  is an incidental escape rather than a guard.
+- **6-A4 (low)** `tiedCandidates` — the field `cfc77c9` added to carry what the
+  gap is "silent about by construction" — has no consumer outside one test
+  assertion. The stated rationale is not delivered.
+
+### Domain
+
+- **6-D1 (low)** The `(k−1)·B` shape is stated correctly in ADR-0023, and
+  `102b425` is scoped to disclosure only, so the arithmetic is genuinely
+  unchanged — this does **not** repeat ticket 139's defect class. The
+  disclosure is accurate about _what_ is missing and silent on _how much_; the
+  ADR's magnitude estimate is correctly marked "hypothesis, untested".
+
+### Verified clean
+
+- **`cfc77c9`'s 2-A2 fix is real, not theatre** (verified by execution): a
+  missing item yields `cause: "unknown-item"`, checked before every other
+  branch and present in `WARNED_DEAD_SLOT_CAUSES`, so it warns. The confident
+  unfounded `unique-effect` verdict is genuinely dead.
+- `2f29cf9`'s chip-reveal cascade now outranks the reveal in both new rules and
+  mirrors the JS `visible` predicate exactly.
+- `29a2f6c`'s narrowed ADR-0023 decision 5 matches `formatCuratedPackagePointer`
+  and removes the ADR-0024 contradiction without rewriting decision history.
+- `034cb0e`'s line endings verified by byte count on the actual blobs
+  (`74762fd` CR=67 → `034cb0e` CR=0 → tip CR=0).
+- `3935d05`'s three docstring/test-name corrections all check out.
+
+### Summary
+
+Gaps B and C are now closed, and closing them was worth it: the single most
+valuable commit in the range — the fix for two silent-failure bugs — carried a
+**new silent failure of the same class**, reachable by any character wearing two
+pooled rings. That is the strongest possible evidence for ticket 145: a fix
+commit is exactly where a reviewer is most needed, and exactly what the old
+chaining rule skipped.
+
 ## Disposition
 
 | ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                  |
@@ -828,10 +900,10 @@ rounds 1–4 were rigorous where they looked.
 | 4-S1  | Spec        | fixed       | Ticket 136 item 5 delivered in `2e55dce`: two tests drive `equipmentForCandidateSwap`, non-vacuity established by mutation. Round 4's null result is now a real measurement. ADR-0025 wording corrected earlier (`c7e57c4`)                                                                                                                                                    |
 | 4-S2  | Spec        | fixed       | `c7e57c4` — head lookup replaced by socket inspection; `headId` param removed                                                                                                                                                                                                                                                                                                  |
 | 4-S3  | Spec        | fixed       | Ticket 135 closed in round 5 (`a6b911c`): `repair-failed` added to `UnmeasuredReason` and used at the `buildSetBonuses` catch site; renderer coverage is a compile-time exhaustive `Record`                                                                                                                                                                                    |
-| 5-A1  | Adversarial | defer       | `.scratch/carry-forward/issues/139-empty-meta-socket-flag-ignores-the-gems-actually-seated.md` — **blocking**; same defect as 5-D1                                                                                                                                                                                                                                             |
-| 5-A2  | Adversarial | defer       | `.scratch/carry-forward/issues/140-engine-version-not-bumped-for-the-per-spec-meta-change.md`                                                                                                                                                                                                                                                                                  |
-| 5-A3  | Adversarial | defer       | `.scratch/carry-forward/issues/141-no-feral-coverage-on-the-rankupgrades-path.md` — why 5-A1 shipped green                                                                                                                                                                                                                                                                     |
-| 5-D1  | Domain      | defer       | `.scratch/carry-forward/issues/139-empty-meta-socket-flag-ignores-the-gems-actually-seated.md` — same finding as 5-A1, reached independently from the game-model side                                                                                                                                                                                                          |
+| 5-A1  | Adversarial | fixed       | `metaSocketUnpriced` now reads the gems the candidate was priced with; ticket 139 closed. Red/green confirmed by mutation — the new test fails against the colour-only logic                                                                                                                                                                                                   |
+| 5-A2  | Adversarial | fixed       | `ENGINE_VERSION` 5 → 6, since the fix moves feral output; ticket 140 closed                                                                                                                                                                                                                                                                                                    |
+| 5-A3  | Adversarial | fixed       | Feral `rankUpgrades` case added asserting the flag and the run-level note as _positives_; non-vacuity confirmed by mutation (drop `spec` → the test fails). Ticket 141 closed                                                                                                                                                                                                  |
+| 5-D1  | Domain      | fixed       | Same defect as 5-A1, reached independently from the game-model side — fixed together; ticket 139 closed                                                                                                                                                                                                                                                                        |
 | 5-D2  | Domain      | defer       | `.scratch/carry-forward/issues/142-socketbonusactive-socketless-behaviour-is-new-and-unasserted.md`                                                                                                                                                                                                                                                                            |
 | 5-D3  | Domain      | defer       | `.scratch/carry-forward/issues/143-meta-gem-research-verdict-contradicts-its-closed-gaps.md`                                                                                                                                                                                                                                                                                   |
 | 5-D4  | Domain      | defer       | `.scratch/carry-forward/issues/142-socketbonusactive-socketless-behaviour-is-new-and-unasserted.md` — folded in: record what to do when `DetectedSpecId` widens                                                                                                                                                                                                                |
@@ -843,3 +915,8 @@ rounds 1–4 were rigorous where they looked.
 | P4    | Process     | defer       | `.scratch/carry-forward/issues/147-merge-ready-status-regex-misses-body-status-lines.md`                                                                                                                                                                                                                                                                                       |
 | P5    | Process     | defer       | `.scratch/carry-forward/issues/148-round-5-ran-no-review-axes-and-rounds-4-5-have-no-dispatch-log.md`                                                                                                                                                                                                                                                                          |
 | P6    | Process     | defer       | `.scratch/carry-forward/issues/149-six-worktrees-still-registered-after-fan-out.md`                                                                                                                                                                                                                                                                                            |
+| 6-A1  | Adversarial | defer       | `.scratch/carry-forward/issues/150-dead-slot-classifier-silently-drops-a-slot-with-two-owned-zero-rows.md` — **blocking**; the 2-A1 fix reintroduced the silent failure in a new shape                                                                                                                                                                                         |
+| 6-A2  | Adversarial | defer       | `.scratch/carry-forward/issues/151-dead-slot-owned-fallback-and-unread-tied-candidates.md`                                                                                                                                                                                                                                                                                     |
+| 6-A3  | Adversarial | defer       | `.scratch/carry-forward/issues/152-selfconfound-backfill-stamps-rows-that-have-no-figure.md`                                                                                                                                                                                                                                                                                   |
+| 6-A4  | Adversarial | defer       | `.scratch/carry-forward/issues/151-dead-slot-owned-fallback-and-unread-tied-candidates.md` — folded in: `tiedCandidates` has no consumer                                                                                                                                                                                                                                       |
+| 6-D1  | Domain      | wontfix     | The `(k−1)·B` arithmetic is unchanged and correctly stated; the ADR's magnitude estimate already carries "hypothesis, untested". Recorded so a later reader does not re-open it                                                                                                                                                                                                |

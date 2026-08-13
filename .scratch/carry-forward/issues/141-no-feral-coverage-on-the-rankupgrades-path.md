@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: see docs/reviews/feat-set-bonus-value.md round 5 disposition
 Type: bug
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (adversarial 5-A3)
 Blocks: none
