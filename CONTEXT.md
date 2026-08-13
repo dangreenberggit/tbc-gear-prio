@@ -18,6 +18,11 @@ written exit gate. Defined in `PLAN.md` §14.
 Never call one of these a "phase". That is the whole point of this glossary —
 see the invariant below.
 
+**Capital `Stage N` is the delivery step. Lowercase "stage" is something else:**
+the eight stages of the `rankUpgrades` pipeline (`PLAN.md` §3). Those were always
+called stages and keep the name. If you mean the pipeline, say "pipeline stage"
+where the sentence could be read either way.
+
 ### tier
 
 A TBC game content release: T4–T6, also written P1–P5. This is the

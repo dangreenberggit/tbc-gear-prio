@@ -143,7 +143,7 @@ def main() -> int:
         )
         return merge.returncode
 
-    print(f"\nlanded {branch} -> dev")
+    print(f"\nmerged {branch} -> dev")
     print("next: push dev when ready (`git push origin dev`); main stays gated")
     return 0
 

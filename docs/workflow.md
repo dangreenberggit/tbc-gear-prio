@@ -52,7 +52,7 @@ because that would need updating every time a tool changes.
 
 5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
    `dev` unless the user explicitly asks **after** the review file exists
-   and they have seen the summary. “Review and land” in one message means
+   and they have seen the summary. “Review and merge” in one message means
    run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
    the only supported door: verify → review/ticket check →
    `git merge --no-ff` into `dev`. Do not merge into `dev` by hand. On

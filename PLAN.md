@@ -445,7 +445,7 @@ expect(ranking.baseline.metaAdjusted).toBe(true)  // fixture has an inactive met
 
 Deterministic, offline, sub-second, and it exercises resolve→rank end to end. Tests assert on outcomes visible through the interface, never on stage internals — so the eight stages can be reorganized freely without touching a test.
 
-Stage-level tests exist only where the logic is genuinely intricate and independently valuable: the **gem solver** (including the socket-bonus case, §9), the **ranking statistics**, the **19→17 slot mapping** (§8.4 — asserted item-by-item against the fixture, because this one fails silently), and **`applyView`** (§4.1). All four are pure functions over in-memory data (dependency category: in-process), so they need no adapters at all.
+Pipeline-stage-level tests exist only where the logic is genuinely intricate and independently valuable: the **gem solver** (including the socket-bonus case, §9), the **ranking statistics**, the **19→17 slot mapping** (§8.4 — asserted item-by-item against the fixture, because this one fails silently), and **`applyView`** (§4.1). All four are pure functions over in-memory data (dependency category: in-process), so they need no adapters at all.
 
 `applyView` in particular is worth testing at this level rather than through the UI: the properties that matter — absolute `rank` survives filtering, filter composes before cutoff, pinned groups stay `deltaDps`-ordered — are all assertions about a returned array, and none of them need a browser to check.
 
