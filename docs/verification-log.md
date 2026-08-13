@@ -87,7 +87,7 @@ It is a separate namespace and is scored separately.
 
 **Gems:** all 12 socketed gems resolve against `db.json`, meta included
 (`32409` Relentless Earthstorm Diamond). Four are flagged `unique` and none
-require a profession. Highest gem phase in use is 1.
+require a profession. Highest gem tier in use is T4.
 
 ### ☒ R8 — race is NOT retrievable from Warcraft Logs
 
@@ -147,8 +147,8 @@ row.
   hunter *additionally* carries `builds/phase_N/*.build.json`. Upstream layout
   varies per spec; do not assume one shape when adding the second spec.
 - **`db.json` totals:** 8,257 items, 214 gems, 141 enchants, 107 consumables.
-  Gems by phase are **163 / 6 / 39 / 0 / 6**, matching the review's figures
-  exactly, and confirming the 39 phase-3 epic gems that `maxPhase` must gate.
+  Gems by tier are **163 / 6 / 39 / 0 / 6**, matching the review's figures
+  exactly, and confirming the 39 T6 epic gems that `maxPhase` must gate.
 - Gem records carry `unique` and `requiredProfession`, so §9's palette filter has
   the fields it needs.
 
@@ -425,7 +425,7 @@ Both halves work **in isolation**, and each is tested:
   from `rankUpgrades`; `rank.test.ts` asserts a phase-2 chest is dropped at
   `maxPhase: 1`.
 - Gem palette: `gemsForPhase` (`gems.ts`) is called from `rank.ts`;
-  `items-gems.test.ts` asserts phase-3 epic gems stay out of a maxPhase-2
+  `items-gems.test.ts` asserts T6 epic gems stay out of a maxPhase-2
   palette (by inspecting palette metadata, not by diffing two `gemsForPhase`
   calls).
 
@@ -761,8 +761,8 @@ phase-2 chest appears only at 2. Palette: `gemsForPhase(2)` adds exactly
 32634–32639 over `gemsForPhase(1)` (156 → 162 entries).
 
 **Limitation, measured not assumed.** All six gems phase 2 adds are EP-dominated
-by a phase-1 gem of their own colour under ret P2 fill weights — the strongest,
-32637 at 6.36 EP, loses to phase-1 30584 at 8.08. Running
+by a T4 gem of their own colour under ret P2 fill weights — the strongest,
+32637 at 6.36 EP, loses to T4 30584 at 8.08. Running
 `fillEmptyCandidateGems` at palette 1 vs 2 over all 1498 socketed items in
 `data/items/index.json` gives **zero** differences. So at 1→2 the palette
 genuinely changes but the fill output cannot, and the second axis is asserted on
