@@ -61,7 +61,7 @@ vendor/
 
 # handoffs/ is re-included above because live worker handoffs belong in git, but
 # these are session byproduct: process logs, superseded fix plans whose fixes have
-# merged, and scraper/diff residue. Durable investigations were moved to
+# shipped, and scraper/diff residue. Durable investigations were moved to
 # .scratch/archive/<month>/ on 2026-08-04 — put keepers there, not here.
 .scratch/handoffs/pipeline-loop-*
 .scratch/handoffs/*-fix-plan.md

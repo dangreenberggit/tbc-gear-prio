@@ -13,7 +13,7 @@ the code stops finding the code's mistakes.
 | Axis | Brief | Notes |
 |---|---|---|
 | Adversarial | [`.agents/reviews/adversarial.md`](../../../.agents/reviews/adversarial.md) | Correctness bugs, silent-failure modes, test theatre |
-| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/phase0-findings.md` |
+| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/stage0-findings.md` |
 | Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here |
 
 ## Process

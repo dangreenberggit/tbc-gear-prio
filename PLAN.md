@@ -3,7 +3,7 @@
 **Status:** for review, pre-implementation
 **Supersedes:** agent 1's `ARCHITECTURE.md`, agent 2's `tbc_upgrade_ranker_8c29d59f.plan.md`
 **Last updated:** 2026-07-26
-**Stage 0 findings applied:** [`docs/stage0-findings.md`](docs/stage0-findings.md). Sections carrying a verified fact are marked **[S0]**. Stage 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
+**Stage 0 findings applied:** [`docs/stage0-findings.md`](docs/stage0-findings.md). Sections carrying a verified fact are marked **[S0]** (**[S1]** where the fact was verified in Stage 1). Stage 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
 **Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections were applied to the pool, the preset pipeline, the gem solver, the statistics and the display layer.
 
 ---
@@ -628,7 +628,7 @@ That failure produces a valid `RaidSimRequest` and a wrong number with no error 
 
 Everything we take from wowsims — `db.json`, the protos, the curated gear sets, the APLs — is pinned to **one release tag**, recorded in `data/wowsims.lock.json`, and fetched into gitignored `vendor/`. What gets committed is the *generated* output plus the lockfile, so "which upstream release produced this data" is answerable from the repo alone. `scripts/sync_wowsims.py` does the fetching; `--check` reports drift and exits non-zero, which is the CI shape.
 
-**The load-bearing field is `CURRENT_PHASE`, and it settles where `DEFAULT_MAX_PHASE` comes from.** [**P0**] Verified in `ui/core/constants/other.ts`:
+**The load-bearing field is `CURRENT_PHASE`, and it settles where `DEFAULT_MAX_PHASE` comes from.** [**S0**] Verified in `ui/core/constants/other.ts`:
 
 ```ts
 export enum Phase { Phase1 = 1, Phase2, Phase3, Phase4, Phase5 }
@@ -903,7 +903,7 @@ Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guil
 | **19→17 slot mapping filters without reordering** | Most of the character silently mis-slotted; valid request, wrong number, no error | Mapping in its own file, verified against a fixture, asserted in a test (§8.4); Stage 0 gate item |
 | ~~Enchant/gem ID namespace mismatch~~ | ~~Every enchant silently absent from the baseline~~ | **[S0] RETIRED.** `permanentEnchant` is the `effectId` namespace — 10/10 resolved, 0 collisions, confirmed twice. No conversion layer |
 | **Hit cap is not exactly knowable** | Banner and `hitDriven` flags are off by up to ~16 rating for anyone grouped with a Draenei | **[S0]** Race unreadable from WCL and *Heroic Presence* untracked. Assumed race + `capUncertainty` + user override, disclosed as a standing substitution (§4). Do **not** present the cap as exact |
-| **Cutoff below the noise floor** | Most of the shortlist collapses into one tie group and reads as broken | **[P1] Mitigated.** Five-seed experiment recorded; cutoff **3.4 DPS or 0.15%** derived from mean reported SE 1.678 (§10) |
+| **Cutoff below the noise floor** | Most of the shortlist collapses into one tie group and reads as broken | **[S1] Mitigated.** Five-seed experiment recorded; cutoff **3.4 DPS or 0.15%** derived from mean reported SE 1.678 (§10) |
 | **Hit-cap path dependency misread as N independent upgrades** | User takes three "upgrades" and gets one | `CapState` banner + `hitDriven` rows (§4, §12); correct-but-misleading is still misleading |
 | **Epic gems recommended before they exist** | Impossible advice; obviously wrong to any player | `maxPhase` filters the gem palette on the same constant as the pool (§9) |
 | **Profession-locked gems/items recommended** | Advice the player can't act on | Excluded outright and disclosed as a standing assumption (§9) |
