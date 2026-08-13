@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 7104fb6
 Type: cleanup
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (domain 5-D2, 5-D4)
 Blocks: none
@@ -40,3 +41,15 @@ becomes detectable, the fail-loud path degrades it to an empty meta socket
 rather than seating the 34220 the research already establishes — a silent
 quality regression rather than an error. Add a line to the comment saying what
 to do when the union widens.
+
+## Resolution (7104fb6)
+
+**5-D2.** `socketBonusActive([], [])` is pinned as vacuously true *and* as
+contributing zero (a socketless item's `socketBonus` is all zeros, so
+`layoutScore` adds nothing). Characterization test -- behaviour unchanged.
+
+    pnpm vitest run packages/core/test/meta-repair.test.ts -t "socketless"
+
+**5-D4.** The `SPEC_PREFERRED_METAS` comment now states what to do when
+`DetectedSpecId` grows: add a row from the vendored presets or record why
+upstream has none; never leave a new spec to the fallback, never inherit ret's.

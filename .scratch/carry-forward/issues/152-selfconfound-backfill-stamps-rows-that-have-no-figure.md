@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f92a59c
 Type: bug
 Origin: docs/reviews/feat-set-bonus-value.md round 6 (adversarial 6-A3)
 Blocks: none
@@ -32,3 +33,20 @@ unmeasured rows), so only the CLI leaks it — an incidental escape, not a guard
 Add `b.unmeasured === undefined` to the backfill guard, matching what `rank.ts`
 does live. Then assert the two paths agree on an unmeasured 4pc row, so the
 docstring's claim is pinned by a test rather than by prose.
+
+## Resolution (f92a59c)
+
+`withSelfConfoundDisclosed` now returns early on `b.unmeasured !== undefined`,
+matching the live `rank.ts` path, which only sets the flag after its unmeasured
+branches bail out. The docstring's claim to derive "the exact condition rank.ts
+checks live" is now backed by a test.
+
+Observed failing before the fix, passing after:
+
+    pnpm vitest run packages/core/test/rank-report.test.ts -t "no figure at all"
+
+Pre-fix output: `expected { threshold: 2 } to be undefined`.
+
+The HTML renderer's early return on unmeasured rows is recorded in the
+docstring as luck rather than a safeguard, so simplifying it cannot quietly
+re-expose the line.

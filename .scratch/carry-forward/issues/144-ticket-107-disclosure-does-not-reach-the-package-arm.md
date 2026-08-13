@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: dfe4ae6
 Type: bug
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (spec 5-S1)
 Blocks: none
@@ -22,3 +23,17 @@ Route the package arm through `candidateSwapWithRepairs` (or an equivalent
 that preserves the swap list) and render the same per-row note. Check the
 interaction with ticket 139 first — both touch what a row claims about the
 gems it was priced with.
+
+## Resolution (dfe4ae6)
+
+The set-package loop calls `candidateSwapWithRepairs` instead of
+`equipmentForCandidateSwap` and accumulates the swaps across every added piece,
+excluding those landing on slots the package itself fills.
+`SetBonusValue.gemSubstitutions` carries them and `formatSetBonusLine` renders
+them as a suffix.
+
+Interaction with ticket 139 (merged, bcbc7fe): no conflict -- 139 touches
+`candidateGems` / `metaSocketUnpriced` on the per-item row; this adds a
+separate field on the set-bonus row.
+
+    pnpm vitest run packages/core/test/rank-report.test.ts -t "re-cut"
