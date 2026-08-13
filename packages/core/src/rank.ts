@@ -6,6 +6,7 @@
 import {
   fillEmptyCandidateGems,
   gemContext,
+  metaSocketUnpriced,
   missingMetaPreferenceNote,
   type FillEmptyOpts,
   type GemContext,
@@ -223,6 +224,13 @@ export type RankedItem = {
     from: number;
     to: number;
   }>;
+  /**
+   * This row's delta was measured with the candidate's meta socket empty —
+   * the ranked spec has no recorded meta preference (`SPEC_PREFERRED_METAS`),
+   * so no gem was seated and the price omits a meta's stats and effect. The
+   * per-row half of `missingMetaPreferenceNote`'s run-level disclosure.
+   */
+  emptyMetaSocket?: boolean;
   owned?: boolean;
   belowCutoff: boolean;
   /**
@@ -841,6 +849,9 @@ export async function rankUpgrades(
         }));
       }
       if (owned) item.owned = true;
+      if (metaSocketUnpriced(entry.itemId, gems.spec)) {
+        item.emptyMetaSocket = true;
+      }
       ranked.push(item);
       winningRequests.set(entry.itemId, best.request);
     }

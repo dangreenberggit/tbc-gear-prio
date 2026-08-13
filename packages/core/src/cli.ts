@@ -480,6 +480,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       if (item.setBonusNote) {
         console.log(`${indent}    set: ${item.setBonusNote}`);
       }
+      if (item.emptyMetaSocket) {
+        console.log(
+          `${indent}    meta: priced with an empty meta socket (no meta gem preference recorded for this spec)`
+        );
+      }
       if (args.view.withSetPotential === true) {
         const potential = formatSetPotentialLine(item);
         if (potential) console.log(`${indent}    ${potential}`);

@@ -399,6 +399,33 @@ describe("rank-report", () => {
     expect(html).toContain("30549");
   });
 
+  // A run-level footnote cannot tell the reader which rows it moved; the row
+  // itself must say its number was measured with the meta socket empty.
+  it("marks a row priced with an empty meta socket, and only such rows", () => {
+    const flagged = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 29098,
+            name: "Stag-Helm of Malorne",
+            slot: "head",
+            deltaDps: -262.3,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            emptyMetaSocket: true,
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(flagged).toContain("empty meta socket");
+
+    const unflagged = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    expect(unflagged).not.toContain("empty meta socket");
+  });
+
   it("renders no gem-substitution note when a row needed none (ticket 107)", () => {
     const html = renderRankHtml(
       {
@@ -601,10 +628,15 @@ describe("rank-report", () => {
     // slot interpolates empty. No row in this fixture carries
     // `gemSubstitutions`, so no note renders and nothing in the body moved —
     // which is what the emit-only-when-non-empty guard promises.
+    // Repinned for the empty-meta-socket row note. The delta is exactly the
+    // new `${emptyMeta}` slot interpolating empty on this fixture's two rows:
+    // +10 chars = 2 × ("\n" + 4-space indent), no CSS added (the note reuses
+    // `.gem-subs`), and no row here carries `emptyMetaSocket` so no note
+    // renders.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "85ddccf51aeb0219ad7a81713b10984bf4bfb46b7e896b81f6b77b20ed048487",
-      length: 30995,
+        "145ef7465b55a82c956beb63a2ca9148b384dcf28f319a8b7f66df2f9b5739c6",
+      length: 31005,
     });
   });
 });

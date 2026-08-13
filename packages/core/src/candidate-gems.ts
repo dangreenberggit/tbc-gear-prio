@@ -154,7 +154,21 @@ export function missingMetaPreferenceNote(
   spec: DetectedSpecId | undefined
 ): string | undefined {
   if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return undefined;
-  return `no meta preference recorded for ${spec} — the meta socket was left as worn, and no meta gem was chosen for it`;
+  return `no meta preference recorded for ${spec} — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect`;
+}
+
+/**
+ * Whether this candidate's price omits a meta gem: it has a meta socket and
+ * the ranked spec has no recorded preference to seat in it. The per-row half
+ * of the disclosure above — the run-level note cannot tell a reader which
+ * rows it moved.
+ */
+export function metaSocketUnpriced(
+  itemId: number,
+  spec: DetectedSpecId | undefined
+): boolean {
+  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return false;
+  return socketsFor(itemId).includes(GemColor.GemColorMeta);
 }
 
 export type FillEmptyOpts = {

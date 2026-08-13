@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   fillEmptyCandidateGems,
   gemContext,
+  metaSocketUnpriced,
   missingMetaPreferenceNote,
   SPEC_PREFERRED_METAS,
 } from "../src/candidate-gems.js";
@@ -218,6 +219,17 @@ describe("SPEC_PREFERRED_METAS", () => {
     // The coloured socket is still filled — only the meta choice is withheld.
     const blueIdx = sockets.indexOf(GemColor.GemColorBlue);
     expect(gems[blueIdx]).toBeGreaterThan(0);
+  });
+
+  it("flags a meta-socketed candidate as unpriced only for a spec with no recorded preference", () => {
+    // 29098 Stag-Helm of Malorne: [yellow, meta]. 8345 Wolfshead Helm: no
+    // sockets. The flag is what lets a report row say "this number was
+    // measured with the meta socket empty" instead of leaving the run-level
+    // footnote to explain twelve rows it never points at.
+    expect(metaSocketUnpriced(29098, "feral")).toBe(true);
+    expect(metaSocketUnpriced(29098, "ret")).toBe(false);
+    expect(metaSocketUnpriced(8345, "feral")).toBe(false);
+    expect(metaSocketUnpriced(29098, undefined)).toBe(false);
   });
 
   it("names the spec in its no-preference disclosure", () => {

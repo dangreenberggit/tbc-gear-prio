@@ -379,6 +379,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
                   .join(", ")
               )}</div>`
             : "";
+          // The run-level no-meta-preference note cannot say which rows it
+          // moved; this is the row saying it about itself.
+          const emptyMeta = item.emptyMetaSocket
+            ? `<div class="gem-subs">priced with an empty meta socket — no meta gem preference is recorded for this spec</div>`
+            : "";
           const owned = item.owned
             ? `<span class="pill owned">owned</span>`
             : "";
@@ -440,6 +445,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${hitNote}
     ${hitLoss}
     ${gemSubs}
+    ${emptyMeta}
   </div>
   <div class="nums">
     <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>
