@@ -19,7 +19,7 @@ become:
 .scratch/carry-forward/issues/<NN>-<slug>.md
 ```
 
-Each file starts with these lines (machine-readable; `pnpm land` / `merge-ready` parse them):
+Each file starts with these lines (machine-readable; `pnpm merge-to-dev` / `merge-ready` parse them):
 
 ```
 Status: open
@@ -32,7 +32,7 @@ Blocked by: none
 - **`Status:`** — `open` / `claimed` / `resolved` (same vocabulary as wayfinding).
 - **`Origin:`** — the review that created it.
 - **`Blocks:`** — which phase must deal with this (e.g. `phase-1`). On
-  `phase-N/*`, `pnpm land` refuses while matching tickets are still open,
+  `phase-N/*`, `pnpm merge-to-dev` refuses while matching tickets are still open,
   unless you pass `--ack-open-blockers`. Prefer closing or rewriting
   `Blocks:` with a note over ritual acknowledgment.
 - **`Blocked by:`** — what must exist before this ticket can be _started_, or
@@ -40,7 +40,7 @@ Blocked by: none
   **component that does not exist yet**, named with its PLAN.md section:
   `compose stage (PLAN.md §8.2) — not yet built`. It is the inverse of `Blocks:`
   — `Blocks:` says which phase must deal with the ticket, `Blocked by:` says what
-  the ticket is waiting on. **Convention, not a gate:** `pnpm land` never reads
+  the ticket is waiting on. **Convention, not a gate:** `pnpm merge-to-dev` never reads
   it, because "is the compose stage built?" is not machine-checkable. It exists
   so `pnpm issues:open` can show that a ticket is unstartable _before_ someone
   sizes it. Write it when you file the ticket; a review that defers a finding

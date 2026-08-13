@@ -44,7 +44,7 @@ ENCHANTS_OUT = ROOT / "data/enchants/index.json"
 # ("From sim/core/proto/common.proto"), which is corroborating precedent, not
 # the source of truth -- the two-way cross-check above is what earned it.
 # Proto files are not yet pinned into this repo (PLAN.md 8.1); reconcile this
-# table against sim/core/proto/common.proto once that lands.
+# table against sim/core/proto/common.proto once that ships.
 ITEM_TYPE_SLOT = {
     1: "head",
     2: "neck",

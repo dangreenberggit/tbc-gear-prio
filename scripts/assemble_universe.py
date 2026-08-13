@@ -902,7 +902,7 @@ def canonical_boss(boss: str) -> str:
 
 
 # Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
-# to land in `boss` -- a shipped ViewOptions filter control listing an item as
+# to appear in `boss` -- a shipped ViewOptions filter control listing an item as
 # a boss (carry-forward 48). The token half is dropped rather than emitted:
 # every affected piece already carries a `kind: token` row from the curated
 # data/two-hop/*-tokens.json, which is the side measured to be correct where

@@ -35,7 +35,7 @@
     "sim-defaults:check": "node scripts/extract_sim_defaults.mjs --spec feral --check",
     "skeleton:check": "python scripts/check_raid_sim_skeleton.py && python scripts/check_raid_sim_skeleton.py --spec feral",
     "universe:assemble": "python scripts/assemble_universe.py",
-    "land": "python scripts/land.py",
+    "merge-to-dev": "python scripts/merge_to_dev.py",
     "merge-ready": "python scripts/check_merge_ready.py",
     "issues:open": "python scripts/check_merge_ready.py --list-only",
     "boss-aliases:check": "python scripts/check_boss_aliases.py",

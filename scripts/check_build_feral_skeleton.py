@@ -57,7 +57,7 @@ def check_rejects_time_to_next_energy_tick() -> list[str]:
     if "timeToNextEnergyTick" not in unknown:
         return [
             "unknown_field_keys() did not flag timeToNextEnergyTick -- either the "
-            "field has been added to data/proto/apl.proto (re-pin landed, this "
+            "field has been added to data/proto/apl.proto (re-pin applied, this "
             "check is stale) or the walk/extraction regressed"
         ]
     return []

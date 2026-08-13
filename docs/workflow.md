@@ -31,7 +31,7 @@ because that would need updating every time a tool changes.
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
    tool.
-4. Run the `pre-merge-review` skill **before** any land. Three independent
+4. Run the `pre-merge-review` skill **before** any merge to `dev`. Three independent
    axes review the diff, each with fresh context (no memory of writing the
    code):
    - **Adversarial** — correctness bugs, silent-failure modes, test theatre
@@ -42,23 +42,23 @@ because that would need updating every time a tool changes.
      ([`.agents/reviews/domain.md`](../.agents/reviews/domain.md))
    - **Standards + Spec** — the existing `code-review` skill, unchanged
 
-   Findings land in `docs/reviews/<branch>.md` (commit that file on the
-   feature branch). **`pnpm land` does not run this review** — it only
+   Findings go in `docs/reviews/<branch>.md` (commit that file on the
+   feature branch). **`pnpm merge-to-dev` does not run this review** — it only
    checks that the file and Disposition table exist. **Tickets are the
    source of truth for deferred work** — every `defer` creates
    `.scratch/carry-forward/issues/<NN>-<slug>.md` and the Disposition table
    only links it. See [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
    List anytime: `pnpm issues:open`.
 
-5. **Ask the user, then `pnpm land`.** Agents must not land or merge into
+5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
    `dev` unless the user explicitly asks **after** the review file exists
    and they have seen the summary. “Review and land” in one message means
-   run the review and stop — wait for a separate land ask. `pnpm land` is
+   run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
    the only supported door: verify → review/ticket check →
    `git merge --no-ff` into `dev`. Do not merge into `dev` by hand. On
    `phase-N/*`, open `Blocks: phase-N` tickets require
    `--ack-open-blockers` (or close / re-block them first). Check without
-   merging: `pnpm land --check-only` (or `pnpm merge-ready`).
+   merging: `pnpm merge-to-dev --check-only` (or `pnpm merge-ready`).
 
 6. When a phase gate closes, merge `dev` → `main` and tag it.
 
@@ -69,30 +69,30 @@ When a feature or phase branch has independent slices, use the
 Workers get their own worktree or clone; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
-then `pre-merge-review`, then **ask** before `pnpm land` into `dev`. The
+then `pre-merge-review`, then **ask** before `pnpm merge-to-dev` into `dev`. The
 skill is harness-agnostic: plain git plus optional Claude Code / Codex /
 Cursor adapters. See
 [`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
 
 ## Gates — what's enforced vs. advisory
 
-| Gate                                                                           | Enforcement                                                                             | Escape hatch                                                  |
-| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure                                        | `git push --no-verify`                                        |
-| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                                               | `git commit --no-verify`                                      |
-| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)                                         | none — this is the backstop                                   |
-| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`                                  | none, short of disabling the rule inline                      |
-| Land on `dev`                                                                  | `pnpm land` + pre-commit refuses merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1` | `TBC_ALLOW_DEV_MERGE=1 git merge …`; `git commit --no-verify` |
-| Deferred findings filed as tickets                                             | `pnpm land` / `merge-ready` — every `defer` links an open carry-forward ticket          | `wontfix` with a reason, or fix on branch                     |
-| Phase open-blockers seen                                                       | `pnpm land` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                  | `--ack-open-blockers`                                         |
-| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                | —                                                             |
+| Gate                                                                           | Enforcement                                                                                     | Escape hatch                                                  |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure                                                | `git push --no-verify`                                        |
+| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                                                       | `git commit --no-verify`                                      |
+| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)                                                 | none — this is the backstop                                   |
+| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`                                          | none, short of disabling the rule inline                      |
+| Merge to `dev`                                                                 | `pnpm merge-to-dev` + pre-commit refuses merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1` | `TBC_ALLOW_DEV_MERGE=1 git merge …`; `git commit --no-verify` |
+| Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket          | `wontfix` with a reason, or fix on branch                     |
+| Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                  | `--ack-open-blockers`                                         |
+| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                        | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically
 because it only skips the _local_ hook: a branch pushed with `--no-verify`
-still hits CI, which has no bypass. Never use `--no-verify` / `land --no-verify`
-/ `TBC_ALLOW_DEV_MERGE=1` on `dev` or `main` for real work. Never land on
-`dev` with a raw `git merge` when `pnpm land` exists — that bypasses the
+still hits CI, which has no bypass. Never use `--no-verify` / `merge-to-dev --no-verify`
+/ `TBC_ALLOW_DEV_MERGE=1` on `dev` or `main` for real work. Never merge to
+`dev` with a raw `git merge` when `pnpm merge-to-dev` exists — that bypasses the
 ticket check (the pre-commit hook blocks it unless the escape env is set).
 
 ## Why no coverage threshold

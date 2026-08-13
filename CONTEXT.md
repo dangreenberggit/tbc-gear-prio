@@ -88,7 +88,7 @@ Say the thing you actually mean:
 | "the corrections landed"    | "the corrections were applied"                     |
 | "rows fill in as sims land" | "rows fill in as sims finish"                      |
 
-The command is **`pnpm merge-to-dev`**, never `pnpm land`.
+The command is **`pnpm merge-to-dev`**, never `pnpm merge-to-dev`.
 
 "Land" was doing four jobs at once — merge, ship, build, and arrive — which is
 exactly the ambiguity the word buys you. It saves no characters over the verb
