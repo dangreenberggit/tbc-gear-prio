@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: b16e0b1
 Type: bug
 Origin: docs/reviews/feat-set-bonus-value.md round 6 (adversarial 6-A1)
 Blocks: none
@@ -50,3 +51,17 @@ original finding was filed about.
 
 Cross-reference open ticket 86: different call site (`piecesAfterSwap` in
 `applySetContext`), same root ambiguity in what `owned` means.
+
+## Resolution (b16e0b1)
+
+`wornRowOf` became `wornRowsOf`, returning every owned zero row, and
+`classifyDeadSlots` emits one entry per worn item instead of dropping the slot.
+The ambiguity was an artifact of grouping by pool slot while `owned` is per item
+id -- both rows were correctly identified worn items.
+
+Test observed failing before the fix and passing after:
+
+    pnpm vitest run packages/core/test/dead-slots.test.ts \
+      -t "classifies both worn rings"
+
+Pre-fix output: `AssertionError: expected [] to deeply equal [ 11934, 11979 ]`.

@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: b16e0b1
 Type: cleanup
 Origin: docs/reviews/feat-set-bonus-value.md round 6 (adversarial 6-A2, 6-A4)
 Blocks: none
@@ -37,3 +38,21 @@ now resting on a field nobody reads.
 
 Decide whether the no-`owned` fallback should classify or refuse, and say so in
 the code. Either surface `tiedCandidates` in the warning text or drop the field.
+
+## Resolution (b16e0b1)
+
+**6-A2.** The `owned.length > 0 ? owned : slotRows` fallback is gone. With no
+row carrying `owned` the classifier now refuses explicitly and emits the new
+`unidentified-worn-item` cause, which `deadSlotWarnings` warns on -- the
+refusal reaches a reader rather than dropping the slot.
+
+**6-A4.** `deadSlotWarnings` now appends the tie count to the warning message,
+so `tiedCandidates` has a reader outside its own test. The
+all-candidates-tie -> `benign-nothing-better` suppression is pinned by
+"carries the tie count when every candidate ties the worn item" in
+`packages/core/test/dead-slots.test.ts`.
+
+Re-runnable:
+
+    pnpm vitest run packages/core/test/dead-slots.test.ts \
+      packages/core/test/plausibility.test.ts
