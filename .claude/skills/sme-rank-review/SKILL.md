@@ -20,7 +20,7 @@ This skill is **not** for explaining our pipeline (pools, EP filters, how
 candidates are chosen). If something looks missing or wrong, state the **game
 fact**. Leave “why our code did that” to engineering follow-up.
 
-Sharp model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
+Review model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
 
 ## When to run
 

@@ -158,9 +158,9 @@ Green CI is the standing proof that the recorded-fixture path still works.
 Each of the three axes is dispatched with **no context beyond the diff and
 its own brief** — that's deliberate. A reviewer that remembers writing the
 code stops finding the code's mistakes; a fresh one doesn't have that
-blind spot. Reviewers stay on the **sharp** model lane (see
+blind spot. Reviewers stay on the **review** model lane (see
 [`docs/agents/model-policy.md`](agents/model-policy.md)): `codex exec` if
-installed, otherwise fresh sharp subagents (parallel when healthy, **one
+installed, otherwise fresh review-lane subagents (parallel when healthy, **one
 axis at a time** after a rate-limit wall), otherwise print briefs for a
 fresh session. Never silently swap in a weaker model to finish the review;
 same-session authoring-agent review only with an explicit user opt-in.

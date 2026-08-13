@@ -29,31 +29,33 @@ Three-dot diff against the merge-base, same convention as `code-review`.
 Confirm the diff is non-empty before dispatching anything — an empty diff
 means there's nothing to review, not three empty reports.
 
-### 2. Dispatch (sharp lane — slow is fine)
+### 2. Dispatch (review lane — slow is fine)
 
-Reviewers are on the **sharp** model lane — see
+Reviewers are on the **review** model lane — see
 [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
 
-**Ceiling vs wall:** A **ceiling** is the harness declining a model above its
-own sharp lane — e.g. Cursor refusing Sol/Opus and offering Grok high. Run on
-the harness's sharp lane, note it in the dispatch line, and continue; that is
-not a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
-a swap to something *below* the harness's sharp lane — then wait, serialise,
-or hand off; do not invent a weaker model to finish.
+**Ceiling vs wall:** A **ceiling** is the harness having no taller model in its
+review lane than the one it gave you — e.g. Cursor topping out at Grok high.
+Run on the harness's review lane, note it in the dispatch line, and continue;
+that is not a downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
+a swap to something *weaker* than the harness's review lane — then wait,
+serialise, or hand off; do not invent a weaker model to finish. A model in the
+**design** lane is not an upgrade for a review axis — it is a different kind of
+model, and review axes do not run there.
 
 Try in order:
 
-1. **`codex exec`**, if the binary is on `PATH` — cross-vendor sharp review.
+1. **`codex exec`**, if the binary is on `PATH` — cross-vendor review-lane review.
    Pipe the brief + diff to it directly.
-2. **Fresh subagents on a sharp model** (explicit id) — Claude Code: Opus at
-   effort `medium`; Codex: top tier; Cursor: Grok high (prefer non-fast; else
-   the current `…-high-fast` slug); anywhere else: the top reasoning tier the
-   harness will actually run. Prefer all three axes in one parallel batch when
-   the harness is healthy.
+2. **Fresh subagents on a review-lane model** (explicit id) — Claude Code: Opus at
+   effort `medium` (**not** Fable — that is the design lane); Codex: top tier;
+   Cursor: Grok high (prefer non-fast; else the current `…-high-fast` slug);
+   anywhere else: the model your harness section names for review. Prefer all
+   three axes in one parallel batch when the harness is healthy.
 3. **On a wall** (see above):
-   - Retry once after a short wait on the **same sharp class**.
+   - Retry once after a short wait on the **same review class**.
    - Then run axes **one at a time** (adversarial → domain → code-review),
-     still sharp — slower wall-clock is acceptable.
+     still on the review lane — slower wall-clock is acceptable.
    - Then **print and hand off**: each brief + `git diff dev...HEAD` for a
      fresh session or other tool (no memory of writing this code).
 4. **Same-session review by the authoring agent** only if the user

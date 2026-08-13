@@ -12,7 +12,7 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root, created lazi
 
 ### SME rank review
 
-For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-review` skill. Audience is the **engineering team** (gate and bugs), not player loot advice. Sharp lane.
+For domain judgment of a ranking / shortlist / pool output, use the `sme-rank-review` skill. Audience is the **engineering team** (gate and bugs), not player loot advice. Review lane.
 
 ### Data pipeline work
 
@@ -52,7 +52,7 @@ Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd 
 
 Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBuiltDependencies`. A permission denial is evidence about that call, not a capability model — if a fan-out or land precondition cannot be established, stop and report the exact blocked command rather than silently dropping or rewriting the plan.
 
-**A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a sharp question (does this measurement support this conclusion?) still needs a sharp model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
+**A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a question that needs judgment (does this measurement support this conclusion?) still needs a review-lane model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
 
 ### Types from JSON
 
@@ -90,7 +90,7 @@ When you stash WIP, say what you parked and what tip is missing because of it. N
 
 ### Models and walls
 
-Two lanes, every harness: **workhorse** for implementation / parallel workers, **sharp** for pre-merge review. Go slower or serial on walls; never invent a weaker substitute for a _sharp_ job — if waiting and serialising both fail, stop and say so rather than downgrading. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Manager / multi-step fan-out). Filling the lanes: on **Claude Code**, Sonnet-class workhorse and sharp Opus at **effort `medium`** (not a model slug — set Opus and `/effort medium`), reserving effort `high`+ for niche cases like a single adversarial review axis; on **Codex**, mid tier for workers and `codex exec` / top tier for review; on **Cursor**, workhorse = **Composer** (pinned, not merely preferred, because on Pro the Other-pool Terra/Sol models often die at spawn) and sharp = **Grok high** (prefer non-fast; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
+Three lanes, every harness, sorted by **kind of work, not model height**: **workhorse** for implementation / parallel workers, **review** for pre-merge review axes and adversarial judgment, **design** for planning and architecture. Go slower or serial on walls; never invent a weaker substitute for a _review_ job — if waiting and serialising both fail, stop and say so rather than downgrading; and never promote a job to a taller lane it does not belong in. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Manager / multi-step fan-out). Filling the lanes: on **Claude Code**, Sonnet-class workhorse, **Opus at effort `medium`** for review (not a model slug — set Opus and `/effort medium`, reserving effort `high`+ for a single narrow adversarial axis), and **Fable for design only** — Fable is the top price tier, so an unnamed subagent inherits it, and review axes run Opus, not Fable; on **Codex**, mid tier for workers and `codex exec` / top tier for review; on **Cursor**, workhorse = **Composer** (pinned, not merely preferred, because on Pro the Other-pool Terra/Sol models often die at spawn) and review = **Grok high** (prefer non-fast; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 
