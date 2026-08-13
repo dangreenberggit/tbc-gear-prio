@@ -135,6 +135,19 @@ const PREFERRED_META_IDS: readonly number[] = [32409];
  *
  * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
  * reach this code, so a row for one would be untestable decoration.
+ *
+ * **When the detectable-spec list grows, this table must grow with it**
+ * (ticket 142, review row 5-D4). The safety above rests entirely on
+ * `DetectedSpecId` staying `ret | feral | feral-tank`: today the two feral
+ * entries are absent on purpose because upstream records no feral meta, and
+ * `missingMetaPreferenceNote` makes that absence loud. A newly detectable spec
+ * -- a caster one especially -- would fall into the same "no preference
+ * recorded" branch, but there the outcome is a quiet quality regression (an
+ * empty meta socket where a real preference exists upstream) rather than a
+ * fact about the game. So on adding a `DetectedSpecId`: find that spec's meta
+ * in the vendored presets and add a row, or, if upstream genuinely records
+ * none, say so here in the same terms the feral entries are explained -- do
+ * not leave it to the fallback and do not inherit ret's.
  */
 export const SPEC_PREFERRED_METAS: Partial<
   Record<DetectedSpecId, readonly number[]>

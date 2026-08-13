@@ -86,6 +86,31 @@ describe("socketsMatch", () => {
   });
 
   /**
+   * Ticket 142 / review row 5-D2. `2f32a2b` merged `socketsMatch` and
+   * `allSocketsMatched` into `socketBonusActive`, described as
+   * one-definition-from-two. One predecessor opened with
+   * `if (sockets.length === 0) return true` and the other returned `false`
+   * there, so the merged version gave one call path a third behaviour neither
+   * original had, with no test and no comment.
+   *
+   * It is safe only because a socketless item's `socketBonus` is all zeros, so
+   * `layoutScore` adds nothing for it. Both halves are pinned here: a future
+   * change to socket-bonus scoring must not be able to quietly credit a bonus
+   * to an item with nowhere to put a gem.
+   */
+  it("treats a socketless item as vacuously active but contributing zero", () => {
+    expect(socketBonusActive([], [])).toBe(true);
+
+    // Wolfshead Helm: socketless, and the item every vendored feral preset
+    // wears — the same fact `SPEC_PREFERRED_METAS` rests on.
+    const wolfshead = getItem(8345)!;
+    expect(wolfshead.sockets).toHaveLength(0);
+    expect(socketBonusActive(wolfshead.sockets, [])).toBe(true);
+    // Nothing to credit: the vacuous `true` must not be able to add score.
+    expect(wolfshead.socketBonus.every((v) => v === 0)).toBe(true);
+  });
+
+  /**
    * Ticket 136 item 1: this rule was implemented twice — here and as
    * `allSocketsMatched` in candidate-gems.ts — kept in lockstep by a comment
    * asking the next editor to remember. Both now delegate to
