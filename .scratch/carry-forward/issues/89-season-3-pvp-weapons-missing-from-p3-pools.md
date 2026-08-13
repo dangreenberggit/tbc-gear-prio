@@ -1,6 +1,6 @@
 # 89 — Season 3 PvP weapons are missing from the P3 pool
 
-**Status:** open
+Status: open
 **Found:** 2026-08-10, reviewing the feral P3 rank report.
 
 ## Scope correction up front

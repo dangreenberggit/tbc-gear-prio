@@ -1,6 +1,6 @@
 # 88 — `curated_set_phase` docstring calls the `_6p`/`_9p` suffix a tier-bonus count
 
-**Status:** open
+Status: open
 **Found:** 2026-08-10, while adding the report's BiS filter.
 
 ## The claim in the code
