@@ -50,11 +50,15 @@ names change.
 | **Workhorse** | Implement plans, TDD slices, parallel-phase workers, merges, mechanical edits | Strong mid tier the harness will **actually run** — see the per-harness sections for who that is here                     | Prefer parallel when slices are independent                                   |
 | **Sharp**     | Pre-merge review axes, adversarial/domain judgment, hard design calls         | Top reasoning tier **actually available** on this harness (not aspirational) — again, per-harness sections name the model | **Slow is fine**: sequential axes, wait/retry, or hand off to a fresh session |
 
-Never silently **downgrade** a sharp job to a weaker model to “get unblocked.”
-That trades a visible delay for invisible review theatre. Prefer: wait and
-retry the same class → run axes **one at a time** → print briefs for a
-fresh session / other harness → ask the user. Same-session review by the
-authoring agent is last resort and must be labeled in `docs/reviews/…`.
+When the sharp lane is walled, spend the delay: wait and retry the same
+class → run axes **one at a time** → print briefs for a fresh session /
+other harness → ask the user. Work down that ladder in order; a visible
+delay is the correct outcome. Same-session review by the authoring agent is
+the last rung, and must be labeled in `docs/reviews/…`.
+
+A sharp job **stays** in the sharp lane. Substituting a weaker model buys
+review theatre — a `docs/reviews/…` file that reads complete and carries no
+judgment — which is why the delay is cheaper than it looks.
 
 Workhorse jobs **may** retry on a peer workhorse if one mid-tier is
 exhausted; they still must not jump to a toy model for implementation
@@ -78,17 +82,24 @@ this repo gets worked on from more than one, not because an agent chooses
 between them mid-task — you cannot switch harness, only the user can.
 So when the sharp lane is walled and waiting or serialising has not
 cleared it, the move is to **say so and stop**, optionally leaving a brief
-under `.scratch/handoffs/` the user can run elsewhere. Do not substitute a
-weaker model to keep going.
+under `.scratch/handoffs/` the user can run elsewhere.
 
 ## Parallelism vs serial
 
 - **Implementation (`parallel-phase`):** parallel worktrees with **workhorse**
   models is the point — often faster _and_ better than one long chain. Cap
-  around **3–5** workers. Do **not** fan out a swarm of high-ticket sharp
-  models (Opus at effort `high`+, Fable, Sol, Grok high, etc.) — they burn
-  usage limits before fan-in finishes. Workers stay workhorse; sharp is for
-  review axes.
+  around **3–5** workers. Every worker gets the workhorse model named in your
+  harness section, stated explicitly on the spawn; sharp is for review axes.
+  A fan-out of sharp models burns the usage limit before fan-in finishes, so
+  the swarm dies half-merged.
+
+  **Price tier is not inferable — never guess it.** Do not rank a model by
+  its name, its reputation, or which lane you assume it fills: this repo
+  wrote Fable into the cheap lane and Fable is the **top** price tier, which
+  cost a real round (2026-08-11, five workers dispatched on Fable by
+  `model: inherit`). If you cannot name a model's lane from your harness
+  section below, it is not a workhorse — ask the user.
+
 - **Review (`pre-merge-review`):** parallel sharp reviewers when the
   harness allows; on a wall, **serialise** (one axis, wait, next) rather
   than three weak ones. Wall clock can grow; finding quality must not drop.

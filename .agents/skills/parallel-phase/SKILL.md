@@ -11,7 +11,7 @@ Fan out independent slices to isolated workers, merge them back onto the **featu
 
 Fan out only when slices are **mostly independent**: different kinds of work, and mostly different files or clear regions of a file. If two slices would thrash the same module, keep them sequential.
 
-Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers use the **workhorse** model lane — do not fan out a swarm of high-ticket sharp models (Opus at effort `high`+, Fable, Sol, Grok high). Which model fills the workhorse lane is per-harness; your [adapter](adapters/) names it, and [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) has the reasoning. On a rate-limit wall, serialise or wait — do not silently drop to a toy model for implementation.
+Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers run the **workhorse** lane, sharp is for review axes. Which model fills workhorse is per-harness: your [adapter](adapters/) names it, and [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) § Parallelism vs serial is the authority on lane and price tier — read it before naming worker models, and never infer a model's tier from its name. On a rate-limit wall, serialise or wait.
 
 **If you are a manager spawning workers and then running fan-in,** do not background the workers and end your turn "waiting" — background completions notify the parent session, not a finished manager, and fan-in is simply lost. Either hold ownership through fan-in, or write a `PROCESS.md` handoff naming the exact next spawn before you end. This is not harness-specific.
 
