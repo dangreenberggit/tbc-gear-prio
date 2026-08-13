@@ -4,7 +4,7 @@
 **Supersedes:** agent 1's `ARCHITECTURE.md`, agent 2's `tbc_upgrade_ranker_8c29d59f.plan.md`
 **Last updated:** 2026-07-26
 **Stage 0 findings applied:** [`docs/stage0-findings.md`](docs/stage0-findings.md). Sections carrying a verified fact are marked **[S0]**. Stage 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
-**Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections landed in the pool, the preset pipeline, the gem solver, the statistics and the display layer.
+**Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections were applied to the pool, the preset pipeline, the gem solver, the statistics and the display layer.
 
 ---
 
@@ -283,7 +283,7 @@ Three, and only three. The discipline being applied: *one adapter is a hypotheti
 
 ### 5.1 What is not a seam
 
-`packages/sim` and `packages/db` (draft 2, rev 1) fail the deletion test. Delete `packages/sim`: the complexity doesn't spread across callers, it lands back in one file — `spawn`, two temp files, `JSON.parse`. Delete `packages/db`: four table definitions move into core. A package boundary with nothing varying across it is indirection with a `package.json` attached, and it costs you a build step, a version, and a jump every time you read the code.
+`packages/sim` and `packages/db` (draft 2, rev 1) fail the deletion test. Delete `packages/sim`: the complexity doesn't spread across callers, it collapses back into one file — `spawn`, two temp files, `JSON.parse`. Delete `packages/db`: four table definitions move into core. A package boundary with nothing varying across it is indirection with a `package.json` attached, and it costs you a build step, a version, and a jump every time you read the code.
 
 Final layout is **one package and one app**, and the split between them is real because it has two callers:
 
@@ -731,7 +731,7 @@ kv              key, value_json, created_at        -- content-addressed cache (�
 
 Two tables. Draft 2's `rankings` table is dropped — the ranking is the job's result, and a separate table means two rows to keep consistent for no gain. Gear snapshots and sim results both live in `kv` under their content addresses.
 
-Retention: gear snapshots and sim results are immutable and permanent (a sim result for a given request + version can never change). Job rows are kept for local debugging. The gear cache is the primary defence of the WCL point budget and must land in Stage 2 at the latest.
+Retention: gear snapshots and sim results are immutable and permanent (a sim result for a given request + version can never change). Job rows are kept for local debugging. The gear cache is the primary defence of the WCL point budget and must ship in Stage 2 at the latest.
 
 ---
 
@@ -750,7 +750,7 @@ This route is the single highest-value addition from draft 1 and it does three j
 **`/run/$id` — the wait, then the answer.**
 
 - All rows render as **skeletons up front**, one per pool candidate, so the layout is final before any result arrives. Zero layout shift for the entire run.
-- Rows fill in as sims land. **No re-sorting during the run** — a list that reshuffles while you're reading it is unreadable.
+- Rows fill in as sims finish. **No re-sorting during the run** — a list that reshuffles while you're reading it is unreadable.
 - Exactly **one animated re-sort at completion**. That single motion communicates "done" better than any spinner, and it's the only *unprompted* motion on the page. **A user-initiated re-sort is a third case and is fine** — the objection is to lists reshuffling while you're reading them, not to a control doing what you just asked it to.
 - Progress is honest and derived from real counts: `resolving → reading gear → building pool → simming 12/40 → ranking`.
 - Assumptions drawer one click away: encounter, preset, seeds, iterations, sim version, content hash, substitutions, and a link to the WCL report.
@@ -780,7 +780,7 @@ Restraint elsewhere: no purple gradients, no glass, no dense chrome, no serif-an
 
 **Server side:** `POST /api/jobs` (dedupes on `contentHash` — attaches to a running job rather than starting a second), `GET /api/jobs/:id`, in-process worker. TanStack Query `refetchInterval` while `queued|running`. Exports: `IndividualSimSettings` JSON download and a wowsims share link (zlib+base64 after `#`) — note `IndividualSimSettings` ≠ `RaidSimRequest`; both are needed eventually, Stage 1 needs only the latter.
 
-Emitting wowsims-shaped JSON is deliberate: wowsims → That's My BiS is an import path guilds already use, so our output lands in an existing loot workflow without TMB having to cooperate or expose an API (it has none). TMB is downstream only.
+Emitting wowsims-shaped JSON is deliberate: wowsims → That's My BiS is an import path guilds already use, so our output drops into an existing loot workflow without TMB having to cooperate or expose an API (it has none). TMB is downstream only.
 
 ---
 
@@ -848,15 +848,15 @@ The two human-check boxes closed later the same day against a fresh P3 ranking o
 
 Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tags, tiebreaks and the `pinBis` sort; `applyView` with the raid/boss filter behind CLI flags; the hit-cap banner; paired-replicate SE for the top 8; the report-events fallback route; below-cutoff expand.
 
-`applyView` lands here rather than in Stage 3 on purpose: it is pure and the CLI can exercise every option, so the web shell inherits a tested view layer instead of being where filtering logic is written for the first time.
+`applyView` is built here rather than in Stage 3 on purpose: it is pure and the CLI can exercise every option, so the web shell inherits a tested view layer instead of being where filtering logic is written for the first time.
 
 **And feral cat** — which is the real gate. Adding a spec should be a preset JSON plus the disambiguation confidence field, and nothing else.
 
-**Decomposed into five subplans, 2026-08-04.** This stage is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` lands on `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
+**Decomposed into five subplans, 2026-08-04.** This stage is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` merges to `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
 
 **Gate:** ☑ re-run hits cache; deltas stable ☑ inactive-meta baseline auto-repaired and disclosed ☑ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☐ ≥3 real characters produce believable shortlists ☑ fallback route exercised on a character with no ranked kills ☑ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☑ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☑ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Stage 3
 
-**7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work: only shredzepelin has been through `sme-rank-review` (trust-with-caveats, filed carry-forward 41), so slamaltman and nexess still need a pass. Run it *after* this branch lands — the feral universe it reads does not exist on `dev`.
+**7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work: only shredzepelin has been through `sme-rank-review` (trust-with-caveats, filed carry-forward 41), so slamaltman and nexess still need a pass. Run it *after* this branch merges to `dev` — the feral universe it reads does not exist on `dev`.
 
 ### Stage 3 — Web shell
 
@@ -883,7 +883,7 @@ One container: Node app + platform-correct `wowsimcli` + SQLite volume. Concurre
 
 Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guild roster mode (same engine, different fan-out).
 
-**New content tiers are explicitly *not* a stage here, and that is the payoff of R2.** T6/P3 is a **data-only change**, and you find out it landed because `sync_wowsims.py --check` reports `CURRENT_PHASE` moved (§8.5) — not because someone remembered a date. Add the P3 items to `data/pools/<spec>.json`, add the 39 epic gems to the palette, bump `engineVersion` to invalidate cached rankings. No code change, no migration, no dated risk row. Users who haven't reached P3 are unaffected, because they select a lower `maxPhase` and the inclusive filter does the rest.
+**New content tiers are explicitly *not* a stage here, and that is the payoff of R2.** T6/P3 is a **data-only change**, and you find out it shipped because `sync_wowsims.py --check` reports `CURRENT_PHASE` moved (§8.5) — not because someone remembered a date. Add the P3 items to `data/pools/<spec>.json`, add the 39 epic gems to the palette, bump `engineVersion` to invalidate cached rankings. No code change, no migration, no dated risk row. Users who haven't reached P3 are unaffected, because they select a lower `maxPhase` and the inclusive filter does the rest.
 
 ---
 
@@ -1021,7 +1021,7 @@ Decisions here that a future architecture review must not re-litigate:
 ## 18. Still open for you
 
 - **Content hash `engineVersion` bumps** — manual, or derived from a hash of `packages/core/src`? Manual is simpler and lets you decide what's a semantic change; derived is safer and noisier. I'd go manual with a CI reminder on `stages/**` changes.
-- **Fixture character** — ~~Stage 0 needs one~~ **[S0] Have two**: `slamaltman` (paladin) and `shredzepelin` (warrior), both Dreamscythe-US, both Hydross in SSC/TK. Still wanted: one with an *inactive* meta so the solver has something to repair on day one, and a **third sample on a different encounter/tier** — both probe runs landed on the same fight, so slot-eligibility logic is verified broadly but not across content.
+- **Fixture character** — ~~Stage 0 needs one~~ **[S0] Have two**: `slamaltman` (paladin) and `shredzepelin` (warrior), both Dreamscythe-US, both Hydross in SSC/TK. Still wanted: one with an *inactive* meta so the solver has something to repair on day one, and a **third sample on a different encounter/tier** — both probe runs covered the same fight, so slot-eligibility logic is verified broadly but not across content.
 - **`data/` in git** — presets and pools are small and diffable, so yes. **[S0] The item-DB line was wrong**: `wowsimcli` has three subcommands (`sim`, `decodelink`, `version`) and no dump mode, so `--tags=with_db` gives the *simulator* item lookup and gives us nothing. `db.json` is a pinned **build input**; what we commit is the generated `data/items/index.json` (§5.1), not the DB itself. §18's intent survives, its mechanism doesn't.
 
 **[S0] Resolved since the last revision — no longer open:**

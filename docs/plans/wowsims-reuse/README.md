@@ -48,7 +48,7 @@ answer, corrected 2026-08-04.** Their importer throws on our fixtures, and
 `PLAN.md` §5.2 already specifies our own adapter. Reasons and repro commands live
 in one place: [`take-list.md`](take-list.md) §1. Do not restate them here — this
 fact already appears in more files than is comfortable, and one copy drifted
-before the branch landed.
+before the branch merged.
 
 ---
 

@@ -445,7 +445,7 @@ done
 ```
 
 **Acceptance:** both diffs empty. A non-empty diff means the change altered
-membership and must be understood before landing — it is not a rebaseline.
+membership and must be understood before merging — it is not a rebaseline.
 
 Also diff `data/universes/ret-p*.report.json`; `universeTotal`, `phaseZones`,
 and the membership counters should be unchanged.
@@ -464,7 +464,7 @@ pin, §2.2).
 | Coupling the §14 boss _filter_ to encounter presets, shrinking it from ~10 raids to 3 bosses             | medium                                                    | §4.2 keeps the two axes independent.                                                                                                                |
 | `stats[27] = 54` is load-bearing and re-rooting the skeleton silently changes DPS                        | medium — **currently untested**                           | §4.3 step 1 measures before changing.                                                                                                               |
 | Preset path `Serpent Shrine Cavern` fails to join `Serpentshrine Cavern`                                 | medium                                                    | explicit alias table (§4.2); never fuzzy-match.                                                                                                     |
-| The new phase assertion is too strict and fails on a legitimate carryover item                           | low                                                       | Assertion is `<=`, matching the union carryover policy in `phase_raids.json`'s `specNote`. Land it as a warning for one cycle if that proves noisy. |
+| The new phase assertion is too strict and fails on a legitimate carryover item                           | low                                                       | Assertion is `<=`, matching the union carryover policy in `phase_raids.json`'s `specNote`. Ship it as a warning for one cycle if that proves noisy. |
 | A future pin adds a meta gem with both compare-colors and min-colors, breaking the `meta.ts` equivalence | low                                                       | The §3.2 regression test is exactly this tripwire.                                                                                                  |
 
 ---

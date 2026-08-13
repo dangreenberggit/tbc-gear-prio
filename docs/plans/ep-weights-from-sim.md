@@ -237,7 +237,7 @@ toolchain install.
 | 1   | **Vendor upstream's preset weights, completely** — copy all ten terms including `PseudoStatMainHandDps: 5.34`, and teach the scorer a synthetic weapon-DPS pseudo-stat | Low. One data file + one scorer change (`stats.ts`, `assemble_universe.py`)                                                                                                                                                                        | Low. Weights are hand-tuned by upstream, not sim-derived, and are P2-specific — but they are the same numbers the upstream UI ships        | **Do this now.** Fixes the known concrete defect; unblocks nothing else                                                           |
 | 2   | **Finite-difference weights from our own `sim` calls** — perturb one stat at a time on the preset gear via `compose`, sim, divide ΔDPS by Δstat                        | Medium. N+1 sim runs per spec/tier (~10 stats → 11 runs at 3000 iters); pure orchestration over the existing seam, no new binary                                                                                                                   | Medium. Step size and iteration count drive noise; needs enough iterations that the signal exceeds SE. Is _our_ number, fully reproducible | **Best available today.** Only option that yields genuinely sim-derived weights with the current toolchain                        |
 | 3   | **Build our own Go binary exposing StatWeights** — add a `statweights` cobra command against the pinned upstream, vendor the built exe                                 | High. Go toolchain (absent here), a fork/patch to maintain, per-platform builds, and a new vendored binary that CI's `sync:wowsims:restore` explicitly does _not_ handle (`docs/workflow.md`: "no secrets and no native binary")                   | High. Breaks the "CI has no native binary" property                                                                                        | Defer                                                                                                                             |
-| 4   | **Drive the WASM export** (`statWeights` / `statWeightCompute`) from Node                                                                                              | Medium–High, and **[blocked on compute-topology]** — the wasm artifact is not vendored (`ls vendor/wowsims/` shows only `db.json`, `constants_other.ts`, three gear jsons, one apl json), and running Go-WASM needs upstream's `wasm_exec.js` shim | Medium. Upstream-authored algorithm, so the numbers match the UI. But it introduces a fourth execution surface                             | **Revisit after compute-topology.** If that plan lands a WASM runtime for other reasons, this becomes the cheapest correct answer |
+| 4   | **Drive the WASM export** (`statWeights` / `statWeightCompute`) from Node                                                                                              | Medium–High, and **[blocked on compute-topology]** — the wasm artifact is not vendored (`ls vendor/wowsims/` shows only `db.json`, `constants_other.ts`, three gear jsons, one apl json), and running Go-WASM needs upstream's `wasm_exec.js` shim | Medium. Upstream-authored algorithm, so the numbers match the UI. But it introduces a fourth execution surface                             | **Revisit after compute-topology.** If that plan ships a WASM runtime for other reasons, this becomes the cheapest correct answer |
 
 Options 1 and 2 are **not exclusive**: 1 is the immediate correctness fix and
 the fallback/comparison baseline, 2 is the durable generator. Ship 1, then
@@ -307,7 +307,7 @@ baseline, then for each stat in the ret stat set sim a perturbed copy with
 `+Δ` of that stat, and take `w_i = (ΔDPS_i / Δ_i)` normalised so
 `w[StatStrength] = 1.0` (matching upstream's convention, which anchors on
 Strength — see the table in §1.1). Main-hand DPS gets the same treatment via
-weapon-damage perturbation rather than a `Stat` index, and lands in
+weapon-damage perturbation rather than a `Stat` index, and arrives in
 `pseudoWeights`.
 
 **Untested:** whether 30000 iterations is enough for the smaller weights
@@ -479,7 +479,7 @@ assertion above. That is what §4.2's `se` field and a periodic re-run of the
 
 **Blocked on [`compute-topology.md`].**
 
-- **P2-a.** Option 4 (WASM `statWeightCompute`). If compute-topology lands a
+- **P2-a.** Option 4 (WASM `statWeightCompute`). If compute-topology ships a
   WASM runtime, this becomes the cheapest way to get upstream-identical weights
   and probably supersedes P1's finite-difference generator. Do not build a WASM
   path _for this reason alone_ — the cost only makes sense amortised across

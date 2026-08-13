@@ -1469,7 +1469,7 @@ seven written-up boxes, because the five from `caches` / `disclosure-and-caps` /
 `phase-2/trust` and merged into no branch until then. Ticking the line was the
 whole reconciliation; no box's evidence changed.
 
-**Run the two SME passes after this branch lands on `dev`, not before.** The
+**Run the two SME passes after this branch merges to `dev`, not before.** The
 feral universe and the nexess shortlist exist only here — `data/universes/feral-*`
 is absent from `dev` — so a pass run there could not read them. The carry-forward
 work also fixed source data an SME reads first: before it, ret P5 showed
