@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: d8b0698
 Type: task
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (process P5)
 Blocks: none
@@ -50,3 +51,26 @@ unrecorded. Add the disjointness check as an explicit written step in
 `parallel-phase`, and make worker model an explicit spawn argument rather than
 `inherit` (partly done at `d8b0698`/`ff5ca69` — verify it covers the fix-round
 path).
+
+## Disposition (2026-08-13)
+
+Observation 4 (five implementation workers on the top tier by inheritance) is
+**verified fixed** by `d8b0698` / `ff5ca69`. Checked that the fix covers the
+inheritance path the workers actually took, not merely the prohibition list:
+
+- `docs/agents/model-policy.md` "Lane is per job, not per parent" names the
+  `model: inherit` default as the mechanism and cites the 2026-08-11 incident.
+- `.agents/skills/parallel-phase/SKILL.md` step 3's "Done when" carries the
+  checkable bound -- every worker prompt names its model and effort -- which is
+  what would have caught it. Mirrored to `.claude/skills/`.
+
+    grep -n "Lane is per job" -A 12 docs/agents/model-policy.md
+    grep -n "names its model and effort" .agents/skills/parallel-phase/SKILL.md
+
+The other four observations are records of what happened in rounds 2, 4 and 5
+(no review axes on round 5, no dispatch log for rounds 4-5, round 2's
+unbacked re-run claim, the unwritten disjointness check). They are historical
+facts about completed rounds -- nothing further is actionable on them, which is
+why this ticket closes. The forward-looking rule they argue for is ticket 145's
+chaining-rule change, which remains open pending owner approval of a skill
+edit.

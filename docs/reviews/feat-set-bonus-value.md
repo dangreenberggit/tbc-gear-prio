@@ -712,6 +712,10 @@ correctly to a negative.
   is 117 lines of real uncommitted work, including three verified `gh api`
   probes, that `git clean -fdx` would destroy, and it substantially overlaps
   open ticket 121 while adding material 121 lacks.
+  **Resolved 2026-08-13:** the file was committed at `9e36b25` and renamed to
+  `153-p3-curated-list-pinned-to-p2-set.md` at `016b019`; 153 and 121 are
+  cross-linked (not merged) at `a1d3ef6`. The filename above is the pre-rename
+  one and is left as written, because this bullet records what round 5 found.
 - **P4 (medium, latent)** Tickets 88 and 89 write `**Status:** open` in the body
   rather than at line start, so `STATUS_RE` misses both: `--list-only` reports
   36 open when 38 are. Same class as open ticket 85.

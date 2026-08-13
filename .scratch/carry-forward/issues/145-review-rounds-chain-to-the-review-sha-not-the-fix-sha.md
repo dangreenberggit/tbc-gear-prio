@@ -57,3 +57,40 @@ Two parts, and the second is what stops it recurring.
    Consider having `check_merge_ready.py` verify that the union of reviewed
    ranges covers `dev..HEAD`, which would have caught all three gaps
    mechanically.
+
+## Status update (2026-08-13) — stays open, partially addressed
+
+**Part 2 (the gate).** Investigated and deliberately not built. The plan asked
+for a coverage check only *if* the review file records reviewed ranges in a
+parseable form. It does not. Measured over
+`docs/reviews/feat-set-bonus-value.md`:
+
+    python - <<'PY'
+    import re, io
+    t = io.open('docs/reviews/feat-set-bonus-value.md', encoding='utf-8').read()
+    for m in re.finditer(r'Diffed against:(.{0,200})', t, re.S):
+        print(re.findall(r'`([0-9a-f]{7,40})(?:\.\.\.?([0-9a-f]{7,40}|HEAD))?`', m.group(1)))
+    PY
+
+Rounds 4-6 yield a range (`3f5e21b...HEAD`, `a38fbf4..5d5dffa`,
+`3adbe4f..3f5e21b`). Rounds 1-3 yield only bare shas whose meaning lives in
+prose -- "merge-base", "reviewed at", "fixes verified through" -- and round 1
+carries three of them. That distinction between *reviewed at* and *verified
+through* is exactly what gap C turned on, so a parser guessing between them
+would re-create this bug in tooling. `3f5e21b...HEAD` is worse still: HEAD has
+moved, so the range cannot be resolved retroactively at all.
+
+Inventing a format here was explicitly out of scope: the format decision
+belongs with the part-1 skill change, since the skill is what would make rounds
+emit it. **Sequence: approve and land part 1, let one round write the new
+machine-readable line, then build the gate against it.**
+
+**Part 1 (the chaining rule).** Drafted, not applied -- editing
+`.agents/skills/pre-merge-review/SKILL.md` and its `.claude/skills/` mirror
+requires the owner's approval first. The proposed text was delivered in the
+run's final report for approval.
+
+**What shipped in the meantime:** `1f03344` widened `check_merge_ready.py`'s
+status parsing and made an unreadable status an error (ticket 147). That closes
+a different silent-under-reporting hole in the same gate, but it does not check
+review coverage -- the gate still passes when a review file merely exists.
