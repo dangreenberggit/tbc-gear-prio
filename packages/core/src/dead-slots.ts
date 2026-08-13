@@ -79,8 +79,13 @@ export type DeadSlotRow = {
 export type DeadSlot = {
   slot: string;
   cause: DeadSlotCause;
-  wornItemId: number;
-  wornItemName: string;
+  /**
+   * `null` only on `unidentified-worn-item`, where no row said which item is
+   * worn. Null rather than a sentinel id or `"unknown"`: a consumer must be
+   * unable to print a fabricated item as though it were read from the data.
+   */
+  wornItemId: number | null;
+  wornItemName: string | null;
   /** The worn item's set, or `null` when it belongs to none. */
   wornSetId: number | null;
   wornSetName: string | null;
@@ -92,15 +97,17 @@ export type DeadSlot = {
   /**
    * Best *strictly worse* candidate's delta: how much the nearest real
    * alternative loses by. Candidates tying the worn item at 0 are excluded, so
-   * a clone cannot report a gap of 0 — see `tiedCandidates`.
+   * a clone cannot report a gap of 0 — see `tiedCandidates`. `null` when no
+   * worn row was identified, so nothing was measured against.
    */
-  runnerUpGapDps: number;
+  runnerUpGapDps: number | null;
   /**
    * Candidates measuring the worn item's delta exactly. At 3000 iterations a
    * genuine tie is ordinary, and the gap is silent about them by construction,
-   * so the count is carried rather than folded into `runnerUpGapDps`.
+   * so the count is carried rather than folded into `runnerUpGapDps`. `null`
+   * when no worn row was identified, so no tie could be counted.
    */
-  tiedCandidates: number;
+  tiedCandidates: number | null;
   /** Candidates considered, excluding the worn item itself. */
   poolSize: number;
 };
@@ -165,7 +172,8 @@ function wornRowsOf(slotRows: readonly DeadSlotRow[]): DeadSlotRow[] {
  * Slots with a positive candidate are not dead and are omitted entirely. Every
  * other slot yields at least one entry, including the two cases where no cause
  * can be established: `unknown-item` (worn item identified but absent from the
- * item index) and `unidentified-worn-item` (no row records ownership). Both
+ * item index) and `unidentified-worn-item` (no row anchors the worn item —
+ * either none records ownership, or none of the owned rows measures 0). Both
  * report the absence rather than being dropped — a slot missing from the output
  * is indistinguishable from a healthy one, which is how a real problem left no
  * trace (ticket 150).
@@ -192,19 +200,25 @@ export function classifyDeadSlots(
     const wornRows = wornRowsOf(slotRows);
     if (wornRows.length === 0) {
       // Refuse to classify, but say so. Dropping the slot here is what let a
-      // genuine problem leave no trace at all.
-      if (slotRows.some((r) => r.owned === true)) continue;
-      const first = slotRows[0];
-      if (first === undefined) continue;
+      // genuine problem leave no trace at all — and it applies whether or not
+      // any row carried `owned`. An owned row that does not measure 0 (noise,
+      // rounding, or a baseline this item was not part of) is still a worn
+      // item the classifier could not anchor to, so it takes the same
+      // refuse-out-loud path rather than a silent `continue`.
+      if (slotRows.length === 0) continue;
       dead.push({
         slot,
         cause: "unidentified-worn-item",
-        wornItemId: -1,
-        wornItemName: "unknown",
+        // Not computed, so not stated as a figure: with no worn row to measure
+        // against there is no runner-up gap and no tie count, and emitting 0
+        // for either would read as "measured, none" to anything consuming the
+        // JSON. `null` says the classifier never got that far.
+        wornItemId: null,
+        wornItemName: null,
         wornSetId: null,
         wornSetName: null,
-        runnerUpGapDps: 0,
-        tiedCandidates: 0,
+        runnerUpGapDps: null,
+        tiedCandidates: null,
         poolSize: slotRows.length,
       });
       continue;
@@ -215,7 +229,10 @@ export function classifyDeadSlots(
       // are already wearing is not an alternative to this ring, and counting it
       // would report it as a candidate tying at 0.
       const candidates = slotRows.filter((r) => !wornRows.includes(r));
-      if (candidates.length === 0) continue;
+      // No `continue` on an empty candidate list: a slot whose only rows are
+      // the items already worn has a pool of zero alternatives, which is the
+      // strongest possible `thin-pool` and exactly what a reader needs told.
+      // Skipping it here dropped the slot in silence.
 
       // Only strictly-worse rows can be the runner-up. A tie leaves the gap
       // undefined rather than 0: reporting 0 would say "an alternative is this

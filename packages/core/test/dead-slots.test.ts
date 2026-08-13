@@ -195,9 +195,9 @@ describe("classifyDeadSlots", () => {
       cand(11980, "Opal Ring", "finger", -300),
     ];
     const fingers = classifyDeadSlots(rows, { wornSetCounts: new Map() });
-    expect(fingers.map((d) => d.wornItemId).sort((a, b) => a - b)).toEqual([
-      11934, 11979,
-    ]);
+    expect(
+      fingers.map((d) => d.wornItemId).sort((a, b) => (a ?? 0) - (b ?? 0))
+    ).toEqual([11934, 11979]);
     for (const f of fingers) expect(f.slot).toBe("finger");
   });
 
@@ -217,6 +217,40 @@ describe("classifyDeadSlots", () => {
     expect(wrist?.cause).toBe("benign-nothing-better");
     expect(wrist?.runnerUpGapDps).toBe(0);
     expect(wrist?.tiedCandidates).toBe(6);
+  });
+
+  it("still reports when an owned row exists but none measures zero", () => {
+    // Adversarial round over b16e0b1. `wornRowsOf` keeps only owned rows at
+    // exactly 0, so an owned row at -3.2 (noise, rounding, or a worn item the
+    // baseline was not built from) left `wornRows` empty while ownership was
+    // plainly recorded -- and the slot was dropped with no entry at all. That
+    // is the same silent drop ticket 150 removed, one branch further down.
+    const rows: DeadSlotRow[] = [
+      {
+        itemId: 11934,
+        name: "Emperor's Seal",
+        slot: "finger",
+        deltaDps: -3.2,
+        owned: true,
+      },
+      cand(11980, "Opal Ring", "finger", -300),
+    ];
+    const found = classifyDeadSlots(rows, { wornSetCounts: new Map() });
+    expect(found).toHaveLength(1);
+    expect(found[0]?.cause).toBe("unidentified-worn-item");
+  });
+
+  it("still reports a slot whose every row is a worn item", () => {
+    // Two pooled rings and nothing else in `finger`: every row is worn, so the
+    // candidate list is empty for both and the slot produced no entry. A pool
+    // with zero alternatives is precisely what a reader needs told.
+    const rows: DeadSlotRow[] = [
+      worn(11934, "Emperor's Seal", "finger"),
+      worn(11979, "Peridot Circle", "finger"),
+    ];
+    const found = classifyDeadSlots(rows, { wornSetCounts: new Map() });
+    expect(found.length).toBeGreaterThan(0);
+    expect(found.every((d) => d.slot === "finger")).toBe(true);
   });
 
   it("refuses out loud when no row identifies the worn item", () => {

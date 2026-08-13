@@ -202,7 +202,9 @@ export function formatSetBonusLine(b: SetBonusValue): string {
 export function formatPackageGemSubstitutions(b: SetBonusValue): string {
   const subs = b.gemSubstitutions;
   if (!subs || subs.length === 0) return "";
-  const items = new Set(subs.map((s) => s.itemId));
+  // Counted by equipment position, not item id: two worn rings share an id,
+  // and counting by id would report "1 other item" for re-cuts on both.
+  const items = new Set(subs.map((s) => s.itemIndex));
   return (
     ` [priced with ${subs.length} gem${subs.length === 1 ? "" : "s"} re-cut ` +
     `on ${items.size} other item${items.size === 1 ? "" : "s"} to activate this meta]`

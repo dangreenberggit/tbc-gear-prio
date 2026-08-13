@@ -333,6 +333,8 @@ export type SetBonusValue = {
    */
   gemSubstitutions?: Array<{
     itemId: number;
+    /** Equipment-array position: two worn rings share an id but not this. */
+    itemIndex: number;
     socketIndex: number;
     from: number;
     to: number;
@@ -1347,6 +1349,12 @@ async function buildSetBonuses(
           ? {
               gemSubstitutions: packageRepairSwaps.map((s) => ({
                 itemId: s.itemId,
+                // Carried, not dropped: the same item id can legally sit in
+                // two slots (paired rings/trinkets), so counting distinct
+                // items by id alone collapses two worn rings into one and
+                // under-reports the disclosure. `MetaRepairSwap.itemIndex`
+                // exists for exactly this (round-4 review, A2).
+                itemIndex: s.itemIndex,
                 socketIndex: s.socketIndex,
                 from: s.from,
                 to: s.to,

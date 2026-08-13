@@ -920,15 +920,43 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       bonusDps: 12,
       se: 3,
       gemSubstitutions: [
-        { itemId: 29096, socketIndex: 0, from: 24028, to: 24058 },
-        { itemId: 29096, socketIndex: 1, from: 24028, to: 24058 },
-        { itemId: 29100, socketIndex: 0, from: 24028, to: 24058 },
+        { itemId: 29096, itemIndex: 4, socketIndex: 0, from: 24028, to: 24058 },
+        { itemId: 29096, itemIndex: 4, socketIndex: 1, from: 24028, to: 24058 },
+        { itemId: 29100, itemIndex: 2, socketIndex: 0, from: 24028, to: 24058 },
       ],
     });
     expect(line).toContain("3 gems re-cut on 2 other items");
     // A cost of taking the offer, not a qualifier on the figure: it must not
     // displace the number the way the break and self-confound prefixes do.
     expect(line.indexOf("12.00")).toBeLessThan(line.indexOf("re-cut"));
+  });
+
+  it("counts two worn rings sharing an item id as two items", () => {
+    // Adversarial round: `MetaRepairSwap.itemIndex` exists because the same id
+    // can sit in two slots (round-4 review, A2). Counting distinct items by
+    // `itemId` collapsed a pair of rings into one and under-reported the
+    // disclosure -- silently, since the sentence still reads plausibly.
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+      gemSubstitutions: [
+        { itemId: 29383, itemIndex: 9, socketIndex: 0, from: 24028, to: 24058 },
+        {
+          itemId: 29383,
+          itemIndex: 10,
+          socketIndex: 0,
+          from: 24028,
+          to: 24058,
+        },
+      ],
+    });
+    expect(line).toContain("2 gems re-cut on 2 other items");
   });
 
   it("stays silent when a package needed no gem re-cuts", () => {

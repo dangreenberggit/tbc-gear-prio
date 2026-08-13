@@ -163,8 +163,10 @@ export function setBonusMagnitudeWarnings(
  * candidate ties, the runner-up gap is 0 and the slot reads `benign-nothing-
  * better`, which is exactly the suppression this field was meant to expose.
  */
-function tieNote(tiedCandidates: number): string {
-  if (tiedCandidates <= 0) return "";
+function tieNote(tiedCandidates: number | null): string {
+  // `null` means no tie count was computed (no worn row to compare against),
+  // which is a different statement from "no ties" and must stay silent.
+  if (tiedCandidates === null || tiedCandidates <= 0) return "";
   return (
     ` ${tiedCandidates} candidate${tiedCandidates === 1 ? "" : "s"} measured ` +
     `identically to the worn item and are excluded from the runner-up gap.`
@@ -219,10 +221,18 @@ export function deadSlotWarnings(
       kind: "dead-slot" as const,
       slot: d.slot,
       cause: d.cause,
-      wornItemName: d.wornItemName,
+      // `null` only on `unidentified-worn-item`, whose message names no item.
+      // Rendered as "unknown" here rather than in the classifier: the string
+      // is a presentation choice, and the data must stay honest that nothing
+      // was read.
+      wornItemName: d.wornItemName ?? "unknown",
       message:
-        deadSlotMessage(d.cause, d.slot, d.wornItemName, d.wornSetName) +
-        tieNote(d.tiedCandidates),
+        deadSlotMessage(
+          d.cause,
+          d.slot,
+          d.wornItemName ?? "unknown",
+          d.wornSetName
+        ) + tieNote(d.tiedCandidates),
     }));
 }
 
