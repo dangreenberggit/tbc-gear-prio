@@ -234,6 +234,17 @@ export function formatSelfConfoundPrefix(b: SetBonusValue): string {
  * added single crosses the 2pc on its own (ticket 119 anomaly A). A no-op on
  * an array that already carries `selfConfound`, so it is safe to run on
  * fresh data too.
+ *
+ * The 4pc row must itself be measured (ticket 152). The disclosure says the
+ * figure *includes* something inseparable, which is a false claim about a row
+ * that has no figure — the CLI printed it directly before "not enough pieces
+ * in the pool to build the package". `rank.ts` gets this right only because it
+ * sets the flag after its unmeasured branches have already bailed out, so
+ * without this check the two paths disagree and the paragraph above is untrue.
+ *
+ * The HTML renderer never showed the bad line because it returns early for
+ * unmeasured rows. That is luck, not a safeguard: it is not a reason to relax
+ * this check, and simplifying that early return would expose the same claim.
  */
 export function withSelfConfoundDisclosed(
   setBonuses: readonly SetBonusValue[]
@@ -249,6 +260,7 @@ export function withSelfConfoundDisclosed(
   );
   return setBonuses.map((b) => {
     if (b.threshold !== 4 || b.selfConfound) return b;
+    if (b.unmeasured !== undefined) return b;
     if (!twoPieceUnmeasurableSetIds.has(b.setId)) return b;
     return { ...b, selfConfound: { threshold: 2 as const } };
   });

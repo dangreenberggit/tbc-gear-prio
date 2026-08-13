@@ -960,6 +960,29 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
       ).toBeUndefined();
     });
 
+    it("does not disclose a confound on a 4pc row that has no figure at all", () => {
+      // Ticket 152. The disclosure says the figure "includes" an inseparable
+      // 2pc effect. On an unmeasured 4pc row there is no figure to include
+      // anything, and the CLI printed the claim immediately before saying so:
+      //   "[includes the unmeasured 2pc effect, can't be separated from it]
+      //    not enough pieces in the pool to build the package"
+      // The live path in rank.ts only sets the flag after the unmeasured
+      // branches have bailed out, so this is where the two paths diverged.
+      const unmeasured4pc = {
+        setId: fourPc.setId,
+        setName: fourPc.setName,
+        threshold: fourPc.threshold,
+        piecesWorn: fourPc.piecesWorn,
+        packageItemIds: fourPc.packageItemIds,
+        packageDeltaDps: 0,
+        unmeasured: "insufficient-pieces" as const,
+      };
+      const result = withSelfConfoundDisclosed([twoPc, unmeasured4pc]);
+      expect(
+        result.find((b) => b.threshold === 4)?.selfConfound
+      ).toBeUndefined();
+    });
+
     it("is a no-op when selfConfound is already present", () => {
       const already = { ...fourPc, selfConfound: { threshold: 2 as const } };
       const result = withSelfConfoundDisclosed([twoPc, already]);
