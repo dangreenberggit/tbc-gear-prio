@@ -119,6 +119,70 @@ function slamaltmanLoggedGear(): LoggedGear {
   throw new Error("slamaltman not found");
 }
 
+const FERAL_CHAR = {
+  region: "US" as const,
+  realm: "dreamscythe",
+  name: "shredzepelin",
+};
+
+const FERAL_SUMMARY: FightSummary = {
+  reportCode: "def456",
+  fightId: 3,
+  encounterName: "Hydross the Unstable",
+  killedAt: "2026-07-01T00:00:00.000Z",
+  route: "ranked",
+  confidence: 1,
+};
+
+const feralWeights = (
+  JSON.parse(
+    readFileSync(join(root, "data/presets/feral/p1.ep-weights.json"), "utf8")
+  ) as { weights: Record<string, number> }
+).weights;
+
+const feralSkeleton = JSON.parse(
+  readFileSync(
+    join(root, "data/presets/feral/p2.raid-sim-skeleton.json"),
+    "utf8"
+  )
+) as RaidSimRequest;
+
+function shredzepelinLoggedGear(): LoggedGear {
+  const raw = JSON.parse(
+    readFileSync(join(root, "test/fixtures/shredzepelin-cat.raw.json"), "utf8")
+  ) as {
+    actors: Array<{ id: number; name: string }>;
+    combatant_info_events: Array<{
+      sourceID: number;
+      gear: WclGearEntry[];
+    }>;
+  };
+  const actors = new Map(raw.actors.map((a) => [a.id, a]));
+  for (const ev of raw.combatant_info_events) {
+    if (actors.get(ev.sourceID)?.name.toLowerCase() !== "shredzepelin")
+      continue;
+    const mapped = mapWclGearToSim(ev.gear);
+    return {
+      items: mapped.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+      talentPointsByTree: [0, 45, 16],
+      provenance: {
+        reportCode: FERAL_SUMMARY.reportCode,
+        fightId: FERAL_SUMMARY.fightId,
+        sourceID: ev.sourceID,
+      },
+    };
+  }
+  throw new Error("shredzepelin not found");
+}
+
 class CapturingSimRunner implements SimRunner {
   readonly requests: RaidSimRequest[] = [];
 
@@ -3404,6 +3468,65 @@ describe("rankUpgrades per-spec meta preference", () => {
       "no meta preference recorded"
     );
     expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+  });
+
+  /**
+   * Ticket 141: every other `rankUpgrades` case in this file ranks ret — the
+   * one spec *with* a table entry — so nothing drove the branch the per-spec
+   * meta added, and ticket 139 shipped under a green suite. The ret case above
+   * asserts a *negative* (no note on a ret run), which passes identically if
+   * `spec` were dropped on the floor, since `missingMetaPreferenceNote`
+   * returns undefined for both `"ret"` and `undefined`. This is the positive.
+   *
+   * Shredzepelin wears socketless Wolfshead 8345, so migration carries no meta
+   * onto the candidate and the socket genuinely ends up empty — the flag
+   * should fire. Ticket 139's converse (a worn meta migrating in, so the
+   * socket is full and the flag must *not* fire) is pinned directly on
+   * `metaSocketUnpriced` in candidate-gems.test.ts.
+   */
+  it("discloses the unpriced meta socket on a feral run, per row and per run", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: FERAL_CHAR,
+        spec: "feral",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceTauren",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([
+            ["US|dreamscythe|shredzepelin|feral", [FERAL_SUMMARY]],
+          ]),
+          gear: new Map([["def456|3", shredzepelinLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: feralSkeleton,
+        epWeights: feralWeights,
+        // 29098 Stag-Helm of Malorne: [yellow, meta].
+        pool: [realPoolEntry(29098, "feral-p3")],
+      }
+    );
+
+    const row = ranking.items.find((i) => i.itemId === 29098);
+    expect(row?.emptyMetaSocket).toBe(true);
+    expect(
+      ranking.substitutions.some((s) =>
+        s.detail.includes("no meta preference recorded")
+      )
+    ).toBe(true);
   });
 });
 

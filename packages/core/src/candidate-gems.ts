@@ -158,17 +158,27 @@ export function missingMetaPreferenceNote(
 }
 
 /**
- * Whether this candidate's price omits a meta gem: it has a meta socket and
- * the ranked spec has no recorded preference to seat in it. The per-row half
- * of the disclosure above — the run-level note cannot tell a reader which
- * rows it moved.
+ * Whether this candidate's price omits a meta gem. The per-row half of the
+ * disclosure above — the run-level note cannot tell a reader which rows it
+ * moved.
+ *
+ * Reads `gems` — the array the candidate was actually priced with — rather
+ * than deciding from socket colours and the spec table alone. `swapItemAt`
+ * fills from `migrateGemsToItem`, which carries a worn meta onto the
+ * candidate, so a spec with no recorded preference can still end up with a
+ * full socket. Ticket 139: the colour-only test printed "priced with an empty
+ * meta socket" over a seated gem, which is the failure this flag exists to
+ * prevent.
  */
 export function metaSocketUnpriced(
   itemId: number,
+  gems: readonly number[],
   spec: DetectedSpecId | undefined
 ): boolean {
   if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return false;
-  return socketsFor(itemId).includes(GemColor.GemColorMeta);
+  const metaIdx = socketsFor(itemId).indexOf(GemColor.GemColorMeta);
+  if (metaIdx < 0) return false;
+  return !gems[metaIdx];
 }
 
 export type FillEmptyOpts = {

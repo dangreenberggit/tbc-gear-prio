@@ -226,10 +226,19 @@ describe("SPEC_PREFERRED_METAS", () => {
     // sockets. The flag is what lets a report row say "this number was
     // measured with the meta socket empty" instead of leaving the run-level
     // footnote to explain twelve rows it never points at.
-    expect(metaSocketUnpriced(29098, "feral")).toBe(true);
-    expect(metaSocketUnpriced(29098, "ret")).toBe(false);
-    expect(metaSocketUnpriced(8345, "feral")).toBe(false);
-    expect(metaSocketUnpriced(29098, undefined)).toBe(false);
+    expect(metaSocketUnpriced(29098, [24028, 0], "feral")).toBe(true);
+    expect(metaSocketUnpriced(29098, [24028, 32409], "ret")).toBe(false);
+    expect(metaSocketUnpriced(8345, [], "feral")).toBe(false);
+    expect(metaSocketUnpriced(29098, [24028, 0], undefined)).toBe(false);
+  });
+
+  it("does not flag a row whose meta socket the fill actually left filled", () => {
+    // Ticket 139: the flag is a claim about what was *priced*, so it must read
+    // the gems the candidate ended up with. `migrateGemsToItem` carries a worn
+    // meta onto the candidate before fill runs, so a feral player who already
+    // wears one leaves the socket full even with no recorded preference —
+    // deciding from socket colours alone printed "empty" over a seated gem.
+    expect(metaSocketUnpriced(29098, [24028, 34220], "feral")).toBe(false);
   });
 
   it("names the spec in its no-preference disclosure", () => {

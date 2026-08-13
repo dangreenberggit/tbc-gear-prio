@@ -393,6 +393,12 @@ type BestSwap = {
   hitRegression: { lost: number; gapAfter: number } | null;
   /** Repair swaps on other worn items, per the winning slot attempt (107). */
   repairSwaps: readonly MetaRepairSwap[];
+  /**
+   * The gems the winning attempt actually priced the candidate with, so a
+   * disclosure can describe what was measured rather than what the socket
+   * colours imply (ticket 139).
+   */
+  candidateGems: readonly number[];
 };
 
 const DEFAULT_ITERATIONS = 3000;
@@ -790,6 +796,7 @@ export async function rankUpgrades(
             hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
             hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
             repairSwaps,
+            candidateGems: swapped[slotIndex]?.gems ?? [],
           };
           if (slotNames.length > 1) {
             next.slotChoice = slotName;
@@ -849,7 +856,7 @@ export async function rankUpgrades(
         }));
       }
       if (owned) item.owned = true;
-      if (metaSocketUnpriced(entry.itemId, gems.spec)) {
+      if (metaSocketUnpriced(entry.itemId, best.candidateGems, gems.spec)) {
         item.emptyMetaSocket = true;
       }
       ranked.push(item);
