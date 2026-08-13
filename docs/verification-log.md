@@ -1,12 +1,12 @@
 # Verification log
 
-PLAN.md §14: *"No phase starts until the previous gate is written into
+PLAN.md §14: *"No stage starts until the previous gate is written into
 `docs/verification-log.md`."* This is that file. One entry per gate box, each
 recording what was actually run and what came back — not what was expected.
 
 ---
 
-## 2026-07-26 — Phase 0, second sitting
+## 2026-07-26 — Stage 0, second sitting
 
 Closes three review findings against data on disk. Reproduce with:
 
@@ -87,7 +87,7 @@ It is a separate namespace and is scored separately.
 
 **Gems:** all 12 socketed gems resolve against `db.json`, meta included
 (`32409` Relentless Earthstorm Diamond). Four are flagged `unique` and none
-require a profession. Highest gem phase in use is 1.
+require a profession. Highest gem tier in use is T4.
 
 ### ☒ R8 — race is NOT retrievable from Warcraft Logs
 
@@ -147,8 +147,10 @@ row.
   hunter *additionally* carries `builds/phase_N/*.build.json`. Upstream layout
   varies per spec; do not assume one shape when adding the second spec.
 - **`db.json` totals:** 8,257 items, 214 gems, 141 enchants, 107 consumables.
-  Gems by phase are **163 / 6 / 39 / 0 / 6**, matching the review's figures
-  exactly, and confirming the 39 phase-3 epic gems that `maxPhase` must gate.
+  Gems by content phase P1–P5 are **163 / 6 / 39 / 0 / 6** (from `db.json`;
+  the curated `data/gems/palette.json` is 156 / 6 / 39 / 0 / 6), matching the
+  review's figures exactly, and confirming the 39 T6 (P3) epic gems that
+  `maxPhase` must gate.
 - Gem records carry `unique` and `requiredProfession`, so §9's palette filter has
   the fields it needs.
 
@@ -158,7 +160,7 @@ The two `wowsimcli` boxes — closed in the third sitting below.
 
 ---
 
-## 2026-07-26 — Phase 0, third sitting (close the last two boxes)
+## 2026-07-26 — Stage 0, third sitting (close the last two boxes)
 
 Vendored `wowsimcli` v0.0.101, confirmed `decodelink`, and ran a hand-composed
 `RaidSimRequest` built from Slamaltman's real logged gear through the binary.
@@ -235,14 +237,14 @@ Slot mapping assertion embedded in the compose script: `sim[3].id == wcl[14].id`
 - Probe summaries moved off the repo root:
   `docs/phase0-probe-summaries/{slamaltman,shredzepelin}.json`
 
-### Phase 0 gate
+### Stage 0 gate
 
-Both remaining boxes closed. Phase 1 may start once this log is on `dev` and the
-§14 checklist in PLAN.md / `docs/phase0-findings.md` is ticked to match.
+Both remaining boxes closed. Stage 1 may start once this log is on `dev` and the
+§14 checklist in PLAN.md / `docs/stage0-findings.md` is ticked to match.
 
 ---
 
-## 2026-07-26 — Phase 1, first sitting (five-seed spread)
+## 2026-07-26 — Stage 1, first sitting (five-seed spread)
 
 PLAN.md §14: run the §10 / R5 experiment *before* fixing the cutoff. Identical
 logged ret gear, five independent seeds vs five repeats of one shared seed, at
@@ -290,12 +292,12 @@ cutoff = { absDps: 3.4, pct: 0.15 }
 ```
 
 At slamaltman's ~2042 DPS baseline, 0.15% is ~3.06 DPS — same order as
-`absDps`. Phase 1 engine code should pin this pair as one constant (not
-re-provisional 3.0). Paired-replicate SE for the top ~8 stays Phase 2.
+`absDps`. Stage 1 engine code should pin this pair as one constant (not
+re-provisional 3.0). Paired-replicate SE for the top ~8 stays Stage 2.
 
-### Where this leaves Phase 1
+### Where this leaves Stage 1
 
-One gate box closed. Remaining Phase 1 work: scaffold, generated protos, three
+One gate box closed. Remaining Stage 1 work: scaffold, generated protos, three
 seams + adapters, eight stages, slot-mapping test, gem solver, curated pool,
 `pnpm rank`, and the human-trust checks on a real shortlist.
 
@@ -318,16 +320,16 @@ Reproduce (pinned `wowsimcli` v0.0.101, fixture request, 3000 iter, seed 42):
 | Rotation replaced with vendor APL only | **2042.847593** |
 
 **Conclusion:** the APL block — especially `prepullActions` — is active. The
-`TypeSimple` label is not what the Go sim is running for the Phase 0 baseline.
+`TypeSimple` label is not what the Go sim is running for the Stage 0 baseline.
 Compose / the skeleton generator must merge the pinned APL; `type`+`simple`
 alone is wrong. PLAN.md §8.2 updated to the build-time generator + golden
 skeleton shape (design C).
 
 ---
 
-## 2026-07-28 — Phase 1 gate reconciliation (audit, no new engine work)
+## 2026-07-28 — Stage 1 gate reconciliation (audit, no new engine work)
 
-The Phase 1 gate in PLAN.md §14 showed 2 of 10 boxes checked. Several were
+The Stage 1 gate in PLAN.md §14 showed 2 of 10 boxes checked. Several were
 already met by code on `phase-1/five-seed-spread` but had never been written
 down. This sitting audits each box against what exists today. **No box below is
 closed by new implementation** — only by recording evidence that already passes,
@@ -425,7 +427,7 @@ Both halves work **in isolation**, and each is tested:
   from `rankUpgrades`; `rank.test.ts` asserts a phase-2 chest is dropped at
   `maxPhase: 1`.
 - Gem palette: `gemsForPhase` (`gems.ts`) is called from `rank.ts`;
-  `items-gems.test.ts` asserts phase-3 epic gems stay out of a maxPhase-2
+  `items-gems.test.ts` asserts T6 epic gems stay out of a maxPhase-2
   palette (by inspecting palette metadata, not by diffing two `gemsForPhase`
   calls).
 
@@ -449,7 +451,7 @@ both **deleted** in `88465cf` along with every `data/pools/ret*.json`. Neither
 cause can still fire against `assemble_universe.py`. The memory is now marked
 superseded, pointing at tickets 17 and 18 for what actually remains.
 
-### Where this leaves Phase 1
+### Where this leaves Stage 1
 
 Gate now stands at **7 of 10** recorded, up from 2 — six boxes were already
 satisfied and merely unwritten, one (`source: null`) was closed by measuring the
@@ -474,7 +476,7 @@ precisely why the filter is not applied.
 
 ## 2026-07-28 — Held-out Wowhead recall (ticket 18 instrument)
 
-PLAN.md §14's Phase 1 gate asks that top items survive a check against
+PLAN.md §14's Stage 1 gate asks that top items survive a check against
 "Wowhead's per-tier ret guide". But PLAN.md §530 also has Wowhead as a *curation
 input*, and `assemble_universe.py` consumes `data/wowhead-lists/ret/*.json` as a
 membership origin. Grading recall against a list that also populates the universe
@@ -533,7 +535,7 @@ This does **not** say the shipping universe should drop Wowhead — losing those
 what ships; use the held-out number as the diagnostic. Two runs, one to ship and
 one to grade.
 
-It does say the Phase 1 gate box cannot be closed by quoting 76.4%. The honest
+It does say the Stage 1 gate box cannot be closed by quoting 76.4%. The honest
 figure for "would our pipeline find the right items on its own" is 58.5%, and
 the trinket/libram gap is a concrete, ownable defect rather than a vague recall
 worry. Ticket 18 now has its instrument and its first measurement.
@@ -677,7 +679,7 @@ Three crafted, one reputation, one badge, one heroic dungeon. Zero raid misses.
 entirely the non-raid source categories that are known, deferred, and tracked —
 badge/rep vendors (ticket 17; user scoped these to P1 and possibly P4, not P3)
 and crafting (ticket 13, `13-raid-recipe-crafts.md`). This is the measurement the
-Phase 1 gate box asks for, and it passes on the axis the design targets.
+Stage 1 gate box asks for, and it passes on the axis the design targets.
 
 Quote **14/14 raid-sourced**, or **15/21 Best-family held out** if a single
 headline number is wanted. Do not quote 63.4% as a quality figure — that grades
@@ -748,7 +750,7 @@ answered on the axis the design targets.
 
 ---
 
-## 2026-07-29 — `maxPhase` A/B: the last Phase 1 gate box
+## 2026-07-29 — `maxPhase` A/B: the last Stage 1 gate box
 
 Two tests in `packages/core/test/rank.test.ts`, because one phase pair could not
 carry the whole claim.
@@ -760,7 +762,7 @@ One character, one `deps`, two `rankUpgrades` calls differing only in
 phase-2 chest appears only at 2. Palette: `gemsForPhase(2)` adds exactly
 32634–32639 over `gemsForPhase(1)` (156 → 162 entries).
 
-**Limitation, measured not assumed.** All six gems phase 2 adds are EP-dominated
+**Limitation, measured not assumed.** All six gems `gemsForPhase(2)` adds are EP-dominated
 by a phase-1 gem of their own colour under ret P2 fill weights — the strongest,
 32637 at 6.36 EP, loses to phase-1 30584 at 8.08. Running
 `fillEmptyCandidateGems` at palette 1 vs 2 over all 1498 socketed items in
@@ -770,7 +772,7 @@ genuinely changes but the fill output cannot, and the second axis is asserted on
 
 ### 2 → 3 — the palette change reaching the sim request
 
-Phase 3's epic gems do win, so this pair closes the stricter reading of the box.
+T6's epic gems do win, so this pair closes the stricter reading of the box.
 Candidate **30104 Cobra-Lash Boots** against slamaltman's worn boots (30081,
 ungemmed, so every candidate socket arrives empty and the fill must consult the
 palette):
@@ -796,7 +798,7 @@ because the worn item is ungemmed.
 `filterPoolByPhase` fails the 1→2 candidate-set assertion. `gems.ts` restored;
 `git diff packages/core/src/` clean.
 
-### Phase 1 gate: 10 of 10
+### Stage 1 gate: 10 of 10
 
 All boxes are now checked. `pnpm verify` green at this tip.
 
@@ -915,7 +917,7 @@ gap is still there for any future use of `curationHint` on weapons.
 
 ---
 
-## 2026-08-06 — Phase 2 gate: the five boxes closed by the merged slices
+## 2026-08-06 — Stage 2 gate: the five boxes closed by the merged slices
 
 Five gate boxes were closed by work already merged into `phase-2/trust`
 (`caches`, `disclosure-and-caps`, `apply-view`) but never written into this log.
@@ -939,7 +941,7 @@ Owned by `.scratch/phase-2/issues/01-caches.md`.
 measurement rather than suspicion.** `rank.test.ts`'s "serves the second
 identical call from the store without simming" passed *before* either new cache
 existed and still passes with both reverted: a second identical call returns at
-the Phase 1 ranking cache before gear is read or a sim is spawned, so "zero
+the Stage 1 ranking cache before gear is read or a sim is spawned, so "zero
 reads, zero runs" is satisfied without any of this ticket's work.
 
 The evidence is therefore the two **hash-miss** cases, where the ranking cache
@@ -966,7 +968,7 @@ raids, so it is not immutable.
 
 **"Deltas stable" had teeth only after the review.** The pre-merge review found
 the sole deep-equal sat inside the identical-re-run test, i.e. it covered the
-Phase 1 ranking cache and not the new ones — a sim cache returning a mismatched
+Stage 1 ranking cache and not the new ones — a sim cache returning a mismatched
 observation would have moved every `deltaDps` while the run-count assertions
 still passed. The pool-grows test now deep-equals the cached candidate's
 `RankedItem` across runs; the assertion entered in `8ca148c` (whose subject
@@ -978,7 +980,7 @@ change it carried — `git log -S "expect(after).toEqual(before)"` locates it).
 that reads a blob back through a second connection to the same file.
 
 **Scope limit:** `SqliteStore` has **zero production call sites**; `cli.ts` still
-constructs `MemoryStore`. Deployment is Phase 4. Two defects are known and
+constructs `MemoryStore`. Deployment is Stage 4. Two defects are known and
 deferred to `.scratch/carry-forward/issues/31-sqlitestore-job-ids-and-kv-created-at.md`
 (`Blocks: phase-4`): `kv` omits §11's `created_at`, and job ids from
 `SELECT COUNT(*)` race two writers and reuse ids after a delete. Neither can
@@ -1120,9 +1122,9 @@ Groups are now leader-anchored and bounded at 2×SE, with a regression test
 **Deferred:** `groupBy: 'raid'` keys off the first zone-bearing source, arbitrary
 for a multi-zone item (ticket 35); the below-cutoff expand is modelled as data
 (`belowCutoffInView`, hidden never deleted) rather than as a UI affordance,
-since there is no UI until Phase 3.
+since there is no UI until Stage 3.
 
-### Where this leaves the Phase 2 gate
+### Where this leaves the Stage 2 gate
 
 **6 of 8 boxes** recorded by this sitting, up from 1. The other two are owned by
 `.scratch/phase-2/issues/05-feral.md`, the last slice, which merged into
@@ -1146,12 +1148,12 @@ neighbouring entry summarising a verdict file.
 > this paragraph was waiting for. The gate now stands at **7 of 8 recorded**,
 > and PLAN.md §14 is ticked to match. The one open box — ≥3 characters produce
 > believable shortlists — remains a live domain decision, not a formality, and
-> §14's "no phase starts until the previous gate is written" still binds Phase 3
+> §14's "no stage starts until the previous gate is written" still binds Stage 3
 > until it closes.
 
 ---
 
-## 2026-08-05 — Phase 2 gate: the report-events fallback route
+## 2026-08-05 — Stage 2 gate: the report-events fallback route
 
 Closes:
 
@@ -1267,7 +1269,7 @@ and the throw still happens when neither route has a fight.
 
 ---
 
-## 2026-08-06 — Phase 2, ticket 05: feral as the second spec (gate boxes)
+## 2026-08-06 — Stage 2, ticket 05: feral as the second spec (gate boxes)
 
 Branch `phase-2/feral`, merged into `phase-2/trust` as `e841a67`. Full verdict
 in `.scratch/phase-2/feral-gate-verdict.md`, measurements in
@@ -1413,7 +1415,7 @@ So: **no row was deleted**, but **every surviving row was altered**, in three
 ways, all intended.
 
 1. `sources` — every row gained an `origin` field (`"db"`, `"atlasloot"`,
-   `"wowhead"`, …). That is the provenance work this phase shipped; it accounts
+   `"wowhead"`, …). That is the provenance work this stage shipped; it accounts
    for all 1473 altered rows on its own.
 2. `curatedSets` (23–26 rows/file) — added, naming which wowsims presets equip
    the item.
@@ -1437,7 +1439,7 @@ entered with the vendor slice.
 
 The phase-2 spec's boundary (`.scratch/phase-2/spec.md:84`) says a byte-level
 change to `ret-p*.json` "is a finding to report". It is reported here: the
-change is real, large, and attributable to this phase's own provenance and
+change is real, large, and attributable to this stage's own provenance and
 BiS-scoping work rather than to feral's slice.
 
 ### A silent wrong answer, caught by review and fixed
@@ -1457,9 +1459,9 @@ source-stability tests and one asserting a Wowhead-listed item never ships as
 
 `pnpm verify` green on the merged tip: **357 tests, 32 files**.
 
-### Where this leaves Phase 2
+### Where this leaves Stage 2
 
-Seven of the eight §14 Phase 2 boxes are closed by their owning tickets. The
+Seven of the eight §14 Stage 2 boxes are closed by their owning tickets. The
 open one is **"≥3 real characters produce believable shortlists"**, above, and
 it needs a human/SME reading of two shortlists rather than code.
 
@@ -1469,7 +1471,7 @@ seven written-up boxes, because the five from `caches` / `disclosure-and-caps` /
 `phase-2/trust` and merged into no branch until then. Ticking the line was the
 whole reconciliation; no box's evidence changed.
 
-**Run the two SME passes after this branch lands on `dev`, not before.** The
+**Run the two SME passes after this branch merges to `dev`, not before.** The
 feral universe and the nexess shortlist exist only here — `data/universes/feral-*`
 is absent from `dev` — so a pass run there could not read them. The carry-forward
 work also fixed source data an SME reads first: before it, ret P5 showed
@@ -1536,5 +1538,5 @@ emergency cast and presence must not be read as a fight-long buff).
 The Morogrim fixture is **kept, not dropped** — `shredzepelin.raw.json` is now
 the regression fixture for the off-tank warning itself, and the feral form tests
 bind it as `offtank` rather than `cat` so the name stops asserting the wrong
-thing. This closes the last open Phase 2 §14 gate box's shredzepelin half; the
+thing. This closes the last open Stage 2 §14 gate box's shredzepelin half; the
 SME re-read of the corrected shortlist is still a human step.

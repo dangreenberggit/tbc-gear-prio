@@ -58,7 +58,7 @@ describe("items index", () => {
   it("marks rings as enchantable, correcting PLAN.md §9's stated rule", () => {
     // PLAN.md §9 states neck/finger/trinket are all non-enchantable in TBC.
     // Cross-checking the full slamaltman fixture (25 combatants, not just
-    // the two Phase-0 probe characters) shows ring slots carrying a real
+    // the two Stage-0 probe characters) shows ring slots carrying a real
     // "Enchant Ring - *" permanentEnchant in 14/50 cases. Band of Eternity
     // is one of the ring ids observed enchanted in that fixture.
     const item = getItem(29302);

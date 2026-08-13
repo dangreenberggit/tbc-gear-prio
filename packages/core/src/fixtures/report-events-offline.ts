@@ -167,7 +167,7 @@ export function reportEventsOfflineRecordings(
      * ranked parse: nothing measured it against anything.
      */
     0.5,
-    // One fight holds every raider's gear (phase0-findings §11), so a
+    // One fight holds every raider's gear (stage0-findings §11), so a
     // fixture that does not contain *this* character is a mis-capture rather
     // than a character with no gear — say so instead of returning an empty
     // recording that would surface later as an unrelated

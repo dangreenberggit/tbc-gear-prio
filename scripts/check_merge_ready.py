@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-check_merge_ready.py — checks that a branch is allowed to land on dev.
+check_merge_ready.py — checks that a branch is allowed to merge to dev.
 
 Tickets are the source of truth for deferred work. The review file is the
 judgment record; its Disposition table must link every `defer` to a real
 open carry-forward ticket.
 
-Used by `pnpm land` (the only supported door into dev). Also:
+Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
     pnpm merge-ready              # check only, no merge
     pnpm issues:open              # list open carry-forward tickets
 
-Phase-N branches: open tickets with `Blocks: phase-N` are listed. Landing
+Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
 requires an explicit `--ack-open-blockers` (conscious opt-in), not a fake
 "path mentioned in the review" check. Fix or re-block the ticket for real.
 """
@@ -139,7 +139,7 @@ def check(
     review: Path | None = None,
     ack_open_blockers: bool = False,
 ) -> int:
-    """Return 0 if the branch may land on dev."""
+    """Return 0 if the branch may merge to dev."""
     branch = branch or branch_name()
     review = review or review_path(branch)
     if not review.is_absolute():
@@ -203,7 +203,7 @@ def check(
             if not ack_open_blockers:
                 errors.append(
                     f"{len(blockers)} open Blocks: {phase} ticket(s). "
-                    f"Close/re-block them, or land with --ack-open-blockers "
+                    f"Close/re-block them, or merge with --ack-open-blockers "
                     f"to proceed consciously."
                 )
             else:
@@ -226,7 +226,7 @@ def main() -> int:
     ap.add_argument(
         "--ack-open-blockers",
         action="store_true",
-        help="on phase-N/*: allow landing while Blocks: phase-N tickets are still open",
+        help="on phase-N/*: allow merging while Blocks: phase-N tickets are still open",
     )
     ap.add_argument("--list-only", action="store_true")
     ap.add_argument("--review", type=Path)

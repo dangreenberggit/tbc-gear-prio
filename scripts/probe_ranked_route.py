@@ -4,7 +4,7 @@ probe_ranked_route.py -- is a character reachable through the RANKED route?
 
 `FightSummary.route` (packages/core/src/seams/gear-source.ts) distinguishes
 'ranked' -- resolved through WCL's encounterRankings -- from 'report-events',
-which walks a report's fights instead. The Phase 2 gate box
+which walks a report's fights instead. The Stage 2 gate box
 
     fallback route exercised on a character with no ranked kills
 

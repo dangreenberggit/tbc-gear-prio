@@ -2,7 +2,7 @@
 
 **Context.** An audit of `wowsims/tbc-new` beyond `wowsimcli`, asking one
 question: _what already exists upstream that we would otherwise write ourselves?_
-Prompted by Phase 1 taking longer than expected. These are **reference notes and
+Prompted by Stage 1 taking longer than expected. These are **reference notes and
 proposals** — nothing here is implemented, and none of it changes `PLAN.md`.
 
 **Standing rule:** don't rebuild what upstream has, unless ours is substantially
@@ -33,7 +33,7 @@ wc -l packages/core/src/seams/gear-source.ts   # 73
 Those 73 lines are a two-method interface (`findFights`, `readGear`) plus
 `RecordedGearSource`, which replays committed JSON fixtures. `cli.ts:240`
 constructs it; there is one fixture character (`slamaltman`). Every test and CLI
-run replays canned gear captured in Phase 0 by a throwaway Python script
+run replays canned gear captured in Stage 0 by a throwaway Python script
 (`wcl_probe.py`).
 
 That is the seam working as designed — the engine runs offline and
@@ -48,7 +48,7 @@ answer, corrected 2026-08-04.** Their importer throws on our fixtures, and
 `PLAN.md` §5.2 already specifies our own adapter. Reasons and repro commands live
 in one place: [`take-list.md`](take-list.md) §1. Do not restate them here — this
 fact already appears in more files than is comfortable, and one copy drifted
-before the branch landed.
+before the branch merged.
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * The two Phase 2 gate boxes owned by `.scratch/phase-2/issues/03-apply-view.md`,
+ * The two Stage 2 gate boxes owned by `.scratch/phase-2/issues/03-apply-view.md`,
  * asserted at the altitude those tickets name.
  *
  * `packages/core/test/view.test.ts` covers `applyView` as a pure function.
@@ -241,7 +241,7 @@ const VIEWS: ViewOptions[] = [
   },
 ];
 
-describe("Phase 2 gate: ViewOptions never changes a number", () => {
+describe("Stage 2 gate: ViewOptions never changes a number", () => {
   it("toggling any ViewOptions field changes neither contentHash nor the sim count", async () => {
     const { ranking, sim } = await rankOnce();
 
@@ -299,7 +299,7 @@ describe("Phase 2 gate: ViewOptions never changes a number", () => {
   });
 });
 
-describe("Phase 2 gate: a raid filter on a tier-token slot returns the tier piece", () => {
+describe("Stage 2 gate: a raid filter on a tier-token slot returns the tier piece", () => {
   it("returns the token-sourced T4 piece under a Karazhan filter", async () => {
     const { ranking } = await rankOnce();
     // Guard the premise: 29072 must be in the ranking at all, or the filter

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-five_seed_spread.py — Phase 1 §10 / R5 experiment, per spec.
+five_seed_spread.py — Stage 1 §10 / R5 experiment, per spec.
 
 Measure DPS spread on *identical* logged gear across five independent seeds
 vs five repeats of one shared seed. That number is the input to the cutoff

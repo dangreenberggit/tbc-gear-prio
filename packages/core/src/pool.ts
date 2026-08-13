@@ -120,13 +120,13 @@ export type PoolEntry = {
   bisTags?: Array<"BiS" | "Alt" | "Realistic">;
   /**
    * Every pinned upstream gear set that equips this item (e.g. `["p1","p2"]`),
-   * regardless of stage. Full provenance: an item curated only for an earlier
-   * stage keeps this and loses `bisTags`.
+   * regardless of phase. Full provenance: an item curated only for an earlier
+   * phase keeps this and loses `bisTags`.
    */
   curatedSets?: string[];
   /**
-   * The current-stage sets behind `bisTags`. Present only alongside a `BiS`
-   * tag — "BiS" is a claim about a stage, never absolute, so the row names
+   * The current-phase sets behind `bisTags`. Present only alongside a `BiS`
+   * tag — "BiS" is a claim about a phase, never absolute, so the row names
    * which one. See `bis_set_labels_for_max_phase` in
    * `scripts/assemble_universe.py`.
    */

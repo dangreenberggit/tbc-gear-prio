@@ -43,7 +43,7 @@ export type LoggedGear = {
   talentPointsByTree: [number, number, number];
   /**
    * WCL `actors[].subType`, which is **class-level only** — `Paladin`, never
-   * `Retribution` (docs/phase0-findings.md). Present because talent plurality
+   * `Retribution` (docs/stage0-findings.md). Present because talent plurality
    * cannot name a spec without it: 45 points in the third tree is ret on a
    * paladin and nothing of the sort on another class. Optional so a source
    * that cannot supply it degrades to "cannot classify" rather than throwing
@@ -91,13 +91,13 @@ export function fightGearKey(f: FightRef): string {
  * Scoped to one character because `readGear` takes only a `FightRef`, and a
  * fight is a raid rather than a player: 25 people share one (reportCode,
  * fightId). This repo has already been bitten by that ambiguity once — the
- * `events[0]` footgun in docs/phase0-findings.md §11, where a warrior's gear
+ * `events[0]` footgun in docs/stage0-findings.md §11, where a warrior's gear
  * was reported for a slamaltman run — and a cache keyed on the fight alone
  * would make it permanent instead of merely wrong once.
  *
  * `findFights` is deliberately not cached: a fight list grows as a character
  * raids, so it is not immutable. PLAN.md §12 [R9] calls it a live query and
- * wants a short TTL *and* per-IP rate limiting, both Phase 3.
+ * wants a short TTL *and* per-IP rate limiting, both Stage 3.
  */
 export class CachingGearSource implements GearSource {
   constructor(
@@ -124,7 +124,7 @@ export class CachingGearSource implements GearSource {
 /**
  * A completed fight's logged gear never changes, so no TTL — but the fight is
  * only half the address. The character is the other half, because one fight
- * holds every raider's gear (phase0-findings §11). Built from the two existing
+ * holds every raider's gear (stage0-findings §11). Built from the two existing
  * key helpers so it cannot drift from what RecordedGearSource replays.
  */
 export function gearCacheKey(

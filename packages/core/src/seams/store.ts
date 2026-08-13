@@ -104,7 +104,7 @@ export class MemoryStore implements Store {
  *
  * Retention is deliberately absent: §11 makes gear snapshots and sim results
  * immutable and permanent, and keeps job rows. The TTL that does exist (§12,
- * on the fight-list query) is Phase 3 and belongs to the WCL client.
+ * on the fight-list query) is Stage 3 and belongs to the WCL client.
  */
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS kv (

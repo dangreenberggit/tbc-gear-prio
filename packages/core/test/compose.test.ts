@@ -29,7 +29,7 @@ function slamaltmanGear(): WclGearEntry[] {
 }
 
 describe("compose", () => {
-  it("matches the Phase 0 slamaltman RaidSimRequest minus simOptions", () => {
+  it("matches the Stage 0 slamaltman RaidSimRequest minus simOptions", () => {
     const skeleton = loadJson(
       "data/presets/ret/p2.raid-sim-skeleton.json"
     ) as RaidSimRequest;

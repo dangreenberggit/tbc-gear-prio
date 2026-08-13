@@ -5,12 +5,12 @@
 **Relates to:** PLAN.md §9 (gem and enchant policy), §8 (upstream pin)
 **Tickets:** [issue #1](https://github.com/dangreenberggit/tbc-gear-prio/issues/1) (canonical record);
 `.scratch/handoffs/issue-1-upstream-gem-cleanup/` (snapshots and worker handoffs)
-**Origin:** Phase 2's gem repair was built on the belief "there is no upstream
+**Origin:** Stage 2's gem repair was built on the belief "there is no upstream
 optimizer to borrow" (PLAN.md §9, now corrected)
 
 ## Context
 
-Phase 2 built its own meta-gem repair because we believed upstream wowsims had
+Stage 2 built its own meta-gem repair because we believed upstream wowsims had
 no gem optimizer. That belief was false twice over:
 
 1. The optimizer exists, named `suggest_reforges` — TBC has no reforging; the

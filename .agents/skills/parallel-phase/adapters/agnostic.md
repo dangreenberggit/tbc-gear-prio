@@ -20,7 +20,7 @@ Point the worker session at that worktree directory. Install deps in the worktre
 
 - Commit on `${FEATURE}/${SLICE}` only.
 - End with the handoff template (`Status`, `Branch`, `Base`, what, verify).
-- Do not merge into `dev` / `main` or run `pnpm land`.
+- Do not merge into `dev` / `main` or run `pnpm merge-to-dev`.
 
 ## Merge (delegator preferred)
 

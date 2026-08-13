@@ -5,7 +5,7 @@ and data/enchants/index.json from the pinned vendor/wowsims/db.json
 (PLAN.md 5.1, 8.3, 9).
 
 All outputs are GENERATED, committed, and never read at runtime from db.json
-itself -- db.json is a build input only (PLAN.md 8.3 [P0]). Re-run this after
+itself -- db.json is a build input only (PLAN.md 8.3 [S0]). Re-run this after
 `pnpm sync:wowsims` moves the pin.
 
     python scripts/generate_item_gem_index.py
@@ -44,7 +44,7 @@ ENCHANTS_OUT = ROOT / "data/enchants/index.json"
 # ("From sim/core/proto/common.proto"), which is corroborating precedent, not
 # the source of truth -- the two-way cross-check above is what earned it.
 # Proto files are not yet pinned into this repo (PLAN.md 8.1); reconcile this
-# table against sim/core/proto/common.proto once that lands.
+# table against sim/core/proto/common.proto once that ships.
 ITEM_TYPE_SLOT = {
     1: "head",
     2: "neck",
@@ -72,7 +72,7 @@ ITEM_TYPE_SLOT = {
 # PLAN.md 9 states the TBC rule as "neck, finger (rings), and trinket cannot
 # carry a permanent enchant." Cross-checking the real fixture
 # (test/fixtures/slamaltman.raw.json, 25 combatants, all `combatant_info_events`
-# entries -- not just the two Phase-0 probe characters docs/phase0-findings.md
+# entries -- not just the two Stage-0 probe characters docs/stage0-findings.md
 # spot-checked) shows finger slots WITH a permanentEnchant in 14/50 cases,
 # every one resolving to a real "Enchant Ring - *" record
 # (effectId 2928/2929/2930/2931, requiredProfession 3 = Enchanting). Neck and

@@ -23,7 +23,7 @@ Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents
 
 ## Orchestrate (optional, large fan-out)
 
-Ports of Cursor-style orchestrate (e.g. claude-orchestrate) are allowed for large trees. Same land rule: feature-branch fan-in, `pre-merge-review`, then **ask** before `pnpm land`.
+Ports of Cursor-style orchestrate (e.g. claude-orchestrate) are allowed for large trees. Same merge rule: feature-branch fan-in, `pre-merge-review`, then **ask** before `pnpm merge-to-dev`.
 
 ## Merge
 

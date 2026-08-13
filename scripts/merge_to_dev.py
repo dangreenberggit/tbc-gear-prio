@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-land.py — the only supported door from a feature/phase branch into dev.
+merge_to_dev.py — the only supported door from a feature/phase branch into dev.
 
-    pnpm land
-    pnpm land --ack-open-blockers   # phase-N/* with open Blocks: still open
-    pnpm land --check-only          # verify + merge-ready, no merge
-    pnpm land --no-verify           # skip pnpm verify (escape hatch; not for real landings)
+    pnpm merge-to-dev
+    pnpm merge-to-dev --ack-open-blockers   # phase-N/* with open Blocks: still open
+    pnpm merge-to-dev --check-only          # verify + merge-ready, no merge
+    pnpm merge-to-dev --no-verify           # skip pnpm verify (escape hatch; not for real merges)
 
 Steps:
-  1. Refuse detaching / landing from dev or main
+  1. Refuse detaching / merging from dev or main
   2. Require a clean working tree
   3. pnpm verify
   4. merge-ready check (review + deferred tickets filed)
@@ -92,7 +92,7 @@ def main() -> int:
 
     branch = check_merge_ready.branch_name()
     if branch in ("dev", "main"):
-        die(f"refuse to land from {branch!r} — check out a feature/phase branch")
+        die(f"refuse to merge from {branch!r} — check out a feature/phase branch")
 
     dirty = run(["git", "status", "--porcelain"], capture_output=True, text=True)
     if dirty.returncode != 0:
@@ -143,7 +143,7 @@ def main() -> int:
         )
         return merge.returncode
 
-    print(f"\nlanded {branch} -> dev")
+    print(f"\nmerged {branch} -> dev")
     print("next: push dev when ready (`git push origin dev`); main stays gated")
     return 0
 

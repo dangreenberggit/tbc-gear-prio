@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-compose_slamaltman_raid_sim.py — Phase 0 Box 1.
+compose_slamaltman_raid_sim.py — Stage 0 Box 1.
 
 Hand-compose a RaidSimRequest from slamaltman's logged CombatantInfo gear,
 run it through the pinned wowsimcli, and write request/result fixtures.

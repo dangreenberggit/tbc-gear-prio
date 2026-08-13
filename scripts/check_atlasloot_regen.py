@@ -5,7 +5,7 @@
 `data/faction_ids.json` are generated output committed to the tree, while their
 source (`vendor/atlasloot/`) is gitignored. Nothing else re-derives them, so
 between one `--update` and the next a committed file can drift from the Lua it
-claims to come from -- a hand edit, a bad merge, or a parser change landed
+claims to come from -- a hand edit, a bad merge, or a parser change shipped
 without a regen -- and every gate downstream keeps reporting green.
 
 `faction_ids.json` is why this is worth a gate rather than a convention. It

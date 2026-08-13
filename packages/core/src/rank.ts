@@ -1,6 +1,6 @@
 /**
  * rankUpgrades — the deep module interface (PLAN.md §4).
- * Stages land behind this; callers only see RankInput → Ranking.
+ * Stages sit behind this; callers only see RankInput → Ranking.
  */
 
 import {
@@ -187,12 +187,12 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
-  /** Every pinned upstream gear set equipping this item, any stage. */
+  /** Every pinned upstream gear set equipping this item, any phase. */
   curatedSets?: string[];
   /**
-   * The current-stage sets behind a `BiS` tag. Rendered instead of a bare
-   * `BiS` pill so the badge names the stage it is BiS *for* — upstream scopes
-   * BiS per stage and there is no absolute BiS (carry-forward 47 §1).
+   * The current-phase sets behind a `BiS` tag. Rendered instead of a bare
+   * `BiS` pill so the badge names the phase it is BiS *for* — upstream scopes
+   * BiS per phase and there is no absolute BiS (carry-forward 47 §1).
    */
   bisSets?: string[];
   /**
@@ -398,10 +398,10 @@ type BestSwap = {
 const DEFAULT_ITERATIONS = 3000;
 /**
  * Five distinct seeds, because `usesPairedReplication` is what switches §10
- * Phase 2 on and it keys off `seeds.length > 1` (`se.ts`). A single default
+ * Stage 2 on and it keys off `seeds.length > 1` (`se.ts`). A single default
  * seed left the whole paired-replicate path implemented, tested and dead: no
  * caller passes `seeds`, so `replicateTopItems` returned at its first line on
- * every real run and the shortlist shipped the Phase 1 `independent` SE that
+ * every real run and the shortlist shipped the Stage 1 `independent` SE that
  * §10:705 records as overstating a shared-seed delta's variance.
  *
  * These are the five seed values `docs/five-seed-spread.json` measured
@@ -603,7 +603,7 @@ export async function rankUpgrades(
   await deps.store.job.update(job.id, { status: "running" });
 
   // One catch for every exit after the row exists, rather than one per throw
-  // site: a stranded `running` row is a job the Phase 2 API would attach to
+  // site: a stranded `running` row is a job the Stage 2 API would attach to
   // and wait on forever, and per-site handling means the next throw added
   // below re-opens that hole silently (ticket 29).
   try {
@@ -827,7 +827,7 @@ export async function rankUpgrades(
         source: entry.source,
         deltaDps: best.deltaDps,
         deltaPct,
-        // PLAN.md §10 Phase 1: independent SE of the mean = stdev / √n
+        // PLAN.md §10 Stage 1: independent SE of the mean = stdev / √n
         se: best.stdev / Math.sqrt(iterations),
         seMethod: "independent",
         bisTags: entry.bisTags ?? [],
@@ -969,7 +969,7 @@ export async function rankUpgrades(
   }
 
   /**
-   * PLAN.md §10 Phase 2, with the method's rationale in `se.ts`.
+   * PLAN.md §10 Stage 2, with the method's rationale in `se.ts`.
    *
    * Three constraints that are easy to break and silent when broken:
    *

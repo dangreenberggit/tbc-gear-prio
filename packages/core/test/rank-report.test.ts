@@ -315,7 +315,7 @@ describe("rank-report", () => {
     expect(html).not.toContain("ret-p3");
   });
 
-  it("names the stage a BiS badge is BiS for (carry-forward 47)", () => {
+  it("names the phase a BiS badge is BiS for (carry-forward 47)", () => {
     const html = renderRankHtml(
       {
         ...rankingWithPvpWeaponAboveCutoff(),
@@ -336,7 +336,7 @@ describe("rank-report", () => {
       },
       meta()
     );
-    // The bare pill is what overstated the claim; the stage is the whole fix.
+    // The bare pill is what overstated the claim; the phase is the whole fix.
     expect(html).toContain("p2 BiS");
     expect(html).not.toMatch(/<span class="pill tag">BiS<\/span>/);
   });
@@ -1693,7 +1693,7 @@ describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
 });
 
 describe("isCuratedBis", () => {
-  it("is true only for a current-stage BiS tag", () => {
+  it("is true only for a current-phase BiS tag", () => {
     expect(isCuratedBis({ bisTags: ["BiS"] })).toBe(true);
     expect(isCuratedBis({ bisTags: ["BiS", "Alt"] })).toBe(true);
     expect(isCuratedBis({ bisTags: [] })).toBe(false);
@@ -1702,7 +1702,7 @@ describe("isCuratedBis", () => {
   });
 
   it("does not read curatedSets", () => {
-    // `curatedSets` also carries earlier-stage sets (feral P2 has five
+    // `curatedSets` also carries earlier-phase sets (feral P2 has five
     // `preraid` rows). "Was in the pre-raid set" is not "BiS now".
     expect(
       isCuratedBis({ bisTags: [], curatedSets: ["preraid"] } as Pick<
@@ -2224,12 +2224,12 @@ describe("curatedSetPhase", () => {
   });
 
   /**
-   * Every stage `assemble_universe.py` can emit must resolve. A label the map
+   * Every phase `assemble_universe.py` can emit must resolve. A label the map
    * does not know returns null, which makes `bisStale` false and silently
    * withholds the "no curated set is pinned for PN" warning — it fails in the
    * direction that looks correct (carry-forward 102).
    */
-  it("resolves every stage the Python source can label", () => {
+  it("resolves every phase the Python source can label", () => {
     expect(curatedSetPhase("p3")).toBe(3);
     expect(curatedSetPhase("p3_9p")).toBe(3);
   });

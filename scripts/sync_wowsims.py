@@ -80,18 +80,18 @@ VENDOR = "vendor/wowsims"
 #   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
 #
 # Feral cat is not shaped like ret upstream. Retribution ships one curated set
-# per stage and genuinely stops at p2; feral cat ships sixteen, split
+# per phase and genuinely stops at p2; feral cat ships sixteen, split
 # BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus, and runs
 # to p5.
 #
-# The p2 *and p3* pairs are tracked, plus pre-raid: those are the stages this
+# The p2 *and p3* pairs are tracked, plus pre-raid: those are the phases this
 # repo assembles universes for, and a max-phase-3 run tagging its BiS rows from
 # p2's list silently presents a stale curated set as the current one. p4/p5
 # stay untracked until a universe is assembled for them — the point is to cover
 # the phases we rank, not to mirror upstream's whole catalogue.
 #
 # The `_6p`/`_9p` suffix is a hit percentage, not a piece count (carry-forward
-# 88). Only the BiS pair per stage is tracked; upstream's Alt/Realistic
+# 88). Only the BiS pair per phase is tracked; upstream's Alt/Realistic
 # variants are a different claim and would need their own tag vocabulary.
 TRACKED = {
     "db.json": "assets/database/db.json",
@@ -306,7 +306,7 @@ def do_update(tag, ref=None):
 
     if prev and prev.get("currentPhase") != current_phase:
         print(f"\n  *** CONTENT TIER CHANGED: {prev.get('currentPhase')} -> {current_phase} ***")
-        print("  This is the P3 launch signal. Required follow-up (PLAN.md 14, Phase 5+):")
+        print("  This is the P3 launch signal. Required follow-up (PLAN.md 14, Stage 5+):")
         print("    1. regenerate data/items/index.json and data/gems/palette.json")
         print("    2. curate the new tier's items into data/pools/<spec>.json, with `source`")
         print("    3. bump engineVersion to invalidate cached rankings")

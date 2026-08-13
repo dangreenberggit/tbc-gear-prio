@@ -1,11 +1,11 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any land ask.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask.
 ---
 
 # Pre-Merge Review
 
-Three independent axes review the branch before it lands on `dev`. Each
+Three independent axes review the branch before it merges to `dev`. Each
 reviewer gets **fresh context** — the diff and its own brief only, no access
 to this conversation. That's the point: a reviewer that remembers writing
 the code stops finding the code's mistakes.
@@ -13,7 +13,7 @@ the code stops finding the code's mistakes.
 | Axis | Brief | Notes |
 |---|---|---|
 | Adversarial | [`.agents/reviews/adversarial.md`](../../../.agents/reviews/adversarial.md) | Correctness bugs, silent-failure modes, test theatre |
-| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/phase0-findings.md` |
+| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/stage0-findings.md` |
 | Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here |
 
 ## Process
@@ -95,7 +95,7 @@ Diffed against: dev...<branch> (<short-sha>)
 
 | ID | Axis | Disposition | Ticket / note |
 | --- | --- | --- | --- |
-| A1 | Adversarial | fixed | <what landed> |
+| A1 | Adversarial | fixed | <what was fixed> |
 | A2 | Adversarial | defer | `.scratch/carry-forward/issues/0N-slug.md` |
 | D1 | Domain | wontfix | <why> |
 ```
@@ -106,21 +106,21 @@ to `.scratch/carry-forward/map.md` when filing tickets.
 ### 4. Prove the check (do not merge here)
 
 ```bash
-pnpm land --check-only
+pnpm merge-to-dev --check-only
 ```
 
 On `phase-N/*` with open `Blocks: phase-N` tickets still open:
 
 ```bash
-pnpm land --check-only --ack-open-blockers
+pnpm merge-to-dev --check-only --ack-open-blockers
 ```
 
 ### 5. Report — then stop
 
 Tell the user where the review file is, the summary, and that
-`pnpm land --check-only` is green. **Stop there.** Do not run `pnpm land`,
+`pnpm merge-to-dev --check-only` is green. **Stop there.** Do not run `pnpm merge-to-dev`,
 do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
-unless the user has **explicitly asked to land after seeing the review
+unless the user has **explicitly asked to merge after seeing the review
 summary**. “Review and land” / “the branch looks done” / “commit this” /
-finishing this skill is **not** permission to land — wait for a separate
-ask. When they do ask, use `pnpm land` only — never a raw merge into `dev`.
+finishing this skill is **not** permission to merge — wait for a separate
+ask. When they do ask, use `pnpm merge-to-dev` only — never a raw merge into `dev`.

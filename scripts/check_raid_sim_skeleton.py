@@ -9,7 +9,7 @@ The golden RaidSimRequest skeleton is assembled from:
 Full byte-identical regeneration is blocked on the exported consumables
 menus (potions[] / conjuredItems[]) — inert for ret, unknown filter.
 This script checks the regenerable invariants so a preset refresh or APL
-pin bump fails loudly instead of silently drifting the Phase 0 baseline.
+pin bump fails loudly instead of silently drifting the Stage 0 baseline.
 
     python scripts/check_raid_sim_skeleton.py --spec ret --tier p2
 
