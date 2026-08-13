@@ -32,7 +32,13 @@ DISPOSITION_RE = re.compile(
     r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
     re.IGNORECASE | re.MULTILINE,
 )
-STATUS_RE = re.compile(r"(?im)^\s*Status:\s*(\S+)")
+# Bold (`**Status:** open`) and plain (`Status: open`) both parse: tickets 88
+# and 89 used the bold form and the anchored pattern missed them, so both
+# reported as having no status and vanished from the open count and from
+# `pnpm issues:open` (ticket 147). A ticket the tooling cannot see cannot block
+# a merge -- silent under-reporting, the same shape as open ticket 85.
+STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
+KNOWN_STATUSES = ("open", "claimed", "closed", "resolved", "wontfix")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
 BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
@@ -85,7 +91,25 @@ def ticket_path_from_note(note: str) -> Path | None:
 
 def read_status(path: Path) -> str | None:
     m = STATUS_RE.search(path.read_text(encoding="utf-8"))
-    return m.group(1).lower() if m else None
+    return m.group(1).lower().strip("*_`") if m else None
+
+
+def unparseable_status_tickets() -> list[tuple[Path, str]]:
+    """Tickets whose status cannot be read, or reads as something unknown.
+
+    The widened pattern above fixes the two formats that exist today; this is
+    what stops the next unusual one disappearing the same way. Treating an
+    unreadable status as absent is what made tickets 88 and 89 invisible to
+    every gate that consumes them, so it is an error rather than a shrug.
+    """
+    bad = []
+    for path in iter_issue_files():
+        status = read_status(path)
+        if status is None:
+            bad.append((path, "no Status: line found"))
+        elif status not in KNOWN_STATUSES:
+            bad.append((path, f"unknown status {status!r}"))
+    return bad
 
 
 def iter_issue_files() -> list[Path]:
@@ -191,6 +215,14 @@ def check(
                 print(f"  ok  {row['id']}: {disp}")
             else:
                 errors.append(f"{row['id']}: unknown disposition {disp!r}")
+
+    unparseable = unparseable_status_tickets()
+    if unparseable:
+        print("\ntickets with an unreadable Status:")
+        for path, why in unparseable:
+            rel = path.relative_to(ROOT).as_posix()
+            print(f"  - {rel} — {why}")
+            errors.append(f"{rel}: {why} (a ticket the gate cannot read cannot block a merge)")
 
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
