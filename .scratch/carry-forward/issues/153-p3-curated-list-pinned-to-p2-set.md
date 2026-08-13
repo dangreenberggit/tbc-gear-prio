@@ -114,3 +114,15 @@ order of confidence:
    Why most p2 picks are absent from the P3 candidate pool has not been
    investigated, and until it is, it is not established that this is purely a
    display problem.
+
+## Relationship to ticket 121
+
+Ticket 121 (`121-no-upstream-ret-p3-curated-gear-set-to-pin.md`) covers the
+same upstream gap — no ret P3 curated set exists to pin — and its own
+acceptance criteria already point back here. This ticket adds two things 121
+does not have: (1) the `bisStale` placement critique above (point 1) — the
+warning sits in the note *below* the checkbox it corrects, subordinate to the
+claim it contradicts, and (2) the observation (point 2) that `bisStale` can
+only detect a curated set as *older*, never *absent* — it has no way to
+distinguish "upstream will never ship a P3 ret set" from "we have not
+vendored P3 yet." Not a duplicate; not merging.

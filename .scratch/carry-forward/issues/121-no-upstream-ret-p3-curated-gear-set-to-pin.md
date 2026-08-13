@@ -46,6 +46,17 @@ When this ticket is worked (either option), add a reference-gear caveat to
 ADR-0024 for the +11.31 figure, in the style ADR-0023 already carries for its
 own figures.
 
+## Relationship to ticket 153
+
+Ticket 153 (`153-p3-curated-list-pinned-to-p2-set.md`, formerly filed as an
+id-colliding `100-`) covers the same upstream gap — no ret P3 curated set
+exists to pin — from the report-display side. It adds two things this ticket
+lacks: a critique of where the `bisStale` warning sits in
+`packages/core/src/rank-report.ts` (below the checkbox it corrects, so
+subordinate to the claim it contradicts), and the observation that `bisStale`
+can only detect a curated set as *older*, never *absent*. Not a duplicate;
+not merging.
+
 ## Acceptance criteria (whichever option lands)
 
 - [ ] Ret max-phase-3 BiS tags come from a genuinely-P3 list, or this ticket
