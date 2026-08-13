@@ -246,6 +246,32 @@ describe("deadSlotWarnings", () => {
     expect(found[0]?.message).toContain("could not be resolved");
   });
 
+  it("reaches a reader with the tie count (ticket 151)", () => {
+    // Review row 6-A4: `tiedCandidates` existed to carry what the report is
+    // "silent about by construction", but no renderer or message read it, so
+    // the count never reached a human. It must appear in the warning text.
+    const rows: DeadSlotRow[] = [
+      worn(8345, "Wolfshead Helm", "head"),
+      cand(50001, "head clone", "head", 0),
+      ...Array.from({ length: 10 }, (_, i) =>
+        cand(50400 + i, `head filler ${i}`, "head", -300 - i)
+      ),
+    ];
+    const found = deadSlotWarnings(rows, { wornSetCounts: new Map() });
+    expect(found[0]?.message).toContain("1 candidate measured identically");
+  });
+
+  it("warns instead of dropping a slot whose worn item is unidentified", () => {
+    // Ticket 151 / 4b. No row carries `owned`, as in an older saved report.
+    const rows: DeadSlotRow[] = [
+      cand(33675, "a", "chest", -10),
+      cand(31042, "b", "chest", -20),
+    ];
+    const found = deadSlotWarnings(rows, { wornSetCounts: new Map() });
+    expect(found.map((w) => w.cause)).toEqual(["unidentified-worn-item"]);
+    expect(found[0]?.message).toContain("no row records which item is worn");
+  });
+
   it("does NOT warn when a deep pool simply has nothing better", () => {
     expect(deadSlotWarnings(BENIGN, { wornSetCounts: new Map() })).toEqual([]);
   });

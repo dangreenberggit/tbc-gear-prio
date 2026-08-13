@@ -69,6 +69,10 @@ const WARNED_DEAD_SLOT_CAUSES: readonly DeadSlotCause[] = [
   // finding, but the absence of one. Silence would hide a data gap behind a
   // clean report, and the wording below is careful to claim no cause at all.
   "unknown-item",
+  // Same reasoning as `unknown-item`, one step earlier: the classifier could
+  // not even identify the worn item, so it has no cause to report. It must
+  // still warn — a dropped slot is indistinguishable from a healthy one.
+  "unidentified-worn-item",
 ];
 
 export type ImplausibleSetBonusWarning = {
@@ -149,12 +153,38 @@ export function setBonusMagnitudeWarnings(
   return warnings;
 }
 
+/**
+ * The tie count, stated only when there is one (ticket 151).
+ *
+ * `tiedCandidates` was added to carry information the report is otherwise
+ * "silent about by construction", but nothing read it, so the count never
+ * reached a human and the stated reason for the field went undelivered. It
+ * matters most in the case that produces no warning of its own: when every
+ * candidate ties, the runner-up gap is 0 and the slot reads `benign-nothing-
+ * better`, which is exactly the suppression this field was meant to expose.
+ */
+function tieNote(tiedCandidates: number): string {
+  if (tiedCandidates <= 0) return "";
+  return (
+    ` ${tiedCandidates} candidate${tiedCandidates === 1 ? "" : "s"} measured ` +
+    `identically to the worn item and are excluded from the runner-up gap.`
+  );
+}
+
 function deadSlotMessage(
   cause: DeadSlotCause,
   slot: string,
   wornItemName: string,
   setName: string | null
 ): string {
+  if (cause === "unidentified-worn-item") {
+    return (
+      `No positive candidate in ${slot}, and no row records which item is worn, ` +
+      `so the slot could not be classified at all. This usually means an older saved ` +
+      `report that predates per-item ownership; re-run the ranking before reading anything ` +
+      `into this slot.`
+    );
+  }
   if (cause === "set-break-toll") {
     return (
       `No positive candidate in ${slot}: every alternative displaces ${wornItemName} ` +
@@ -190,7 +220,9 @@ export function deadSlotWarnings(
       slot: d.slot,
       cause: d.cause,
       wornItemName: d.wornItemName,
-      message: deadSlotMessage(d.cause, d.slot, d.wornItemName, d.wornSetName),
+      message:
+        deadSlotMessage(d.cause, d.slot, d.wornItemName, d.wornSetName) +
+        tieNote(d.tiedCandidates),
     }));
 }
 

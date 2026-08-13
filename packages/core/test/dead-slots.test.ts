@@ -182,12 +182,56 @@ describe("classifyDeadSlots", () => {
     expect(head?.wornSetId).toBeNull();
   });
 
-  it("omits a slot with no worn row at all", () => {
+  it("classifies both worn rings rather than dropping the finger slot", () => {
+    // Ticket 150. `owned` is per item id but the grouping key is the pool slot,
+    // so a player wearing two pooled rings produces two `owned, deltaDps: 0`
+    // rows in one `finger` group. The old `wornRowOf` called that ambiguous and
+    // returned null, and the caller dropped the whole slot: no entry, no
+    // warning, a report that looks complete. Both rows are correctly identified
+    // worn items, so both get classified.
+    const rows: DeadSlotRow[] = [
+      worn(11934, "Emperor's Seal", "finger"),
+      worn(11979, "Peridot Circle", "finger"),
+      cand(11980, "Opal Ring", "finger", -300),
+    ];
+    const fingers = classifyDeadSlots(rows, { wornSetCounts: new Map() });
+    expect(fingers.map((d) => d.wornItemId).sort((a, b) => a - b)).toEqual([
+      11934, 11979,
+    ]);
+    for (const f of fingers) expect(f.slot).toBe("finger");
+  });
+
+  it("carries the tie count when every candidate ties the worn item", () => {
+    // Ticket 151 / review row 6-A4. All candidates tie, so there is no
+    // strictly-worse runner-up, the gap is 0, and the slot reads benign — no
+    // warning. That suppression is deliberate (nothing is measurably worse),
+    // but it must not be invisible: `tiedCandidates` is what records it, and
+    // `deadSlotWarnings` surfaces the count wherever a warning does fire.
+    const rows: DeadSlotRow[] = [
+      { ...worn(29390, "worn wrist", "wrist"), owned: true },
+      ...Array.from({ length: 6 }, (_, i) =>
+        cand(62000 + i, `wrist tie ${i}`, "wrist", 0)
+      ),
+    ];
+    const wrist = classifyDeadSlots(rows, { wornSetCounts: new Map() })[0];
+    expect(wrist?.cause).toBe("benign-nothing-better");
+    expect(wrist?.runnerUpGapDps).toBe(0);
+    expect(wrist?.tiedCandidates).toBe(6);
+  });
+
+  it("refuses out loud when no row identifies the worn item", () => {
+    // Ticket 151. Reached by re-rendering a report saved before `rank.ts` set
+    // `owned`. The old code fell back to guessing from zero deltas, and where
+    // that guess found nothing it dropped the slot silently. Neither is
+    // acceptable: it classifies nothing, and it says so.
     const rows: DeadSlotRow[] = [
       cand(33675, "a", "chest", -10),
       cand(31042, "b", "chest", -20),
     ];
-    expect(classifyDeadSlots(rows, { wornSetCounts: new Map() })).toEqual([]);
+    const found = classifyDeadSlots(rows, { wornSetCounts: new Map() });
+    expect(found).toHaveLength(1);
+    expect(found[0]?.cause).toBe("unidentified-worn-item");
+    expect(found[0]?.slot).toBe("chest");
   });
 
   it("puts THIN_POOL_CANDIDATES at the boundary between thin and deep", () => {
