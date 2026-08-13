@@ -1,0 +1,52 @@
+{
+  "simVersion": "v0.0.101",
+  "spec": "feral",
+  "fixture": "test/fixtures/shredzepelin-cat.raid-sim-request.json",
+  "iterations": 5000,
+  "independentSeeds": ["11", "22", "33", "44", "55"],
+  "sharedSeed": "42",
+  "sharedRepeats": 5,
+  "independent": {
+    "avgs": [
+      2151.364314186409, 2151.3502765391972, 2151.301379184513,
+      2151.3226549352885, 2151.485119921452
+    ],
+    "meanAvg": 2151.364748953372,
+    "spreadMaxMin": 0.18374073693939863,
+    "sampleSdOfAvgs": 0.07156543110086193,
+    "meanReportedSe": 1.7739057919066084,
+    "reportedSes": [
+      1.7746420142551207, 1.7746669887074404, 1.775070080006477,
+      1.774790107932164, 1.7703597686318395
+    ]
+  },
+  "shared": {
+    "avgs": [
+      2151.316964893121, 2151.316964893121, 2151.316964893121,
+      2151.316964893121, 2151.316964893121
+    ],
+    "meanAvg": 2151.316964893121,
+    "spreadMaxMin": 0.0,
+    "sampleSdOfAvgs": 0.0,
+    "meanReportedSe": 1.7747496579351782,
+    "reportedSes": [
+      1.7747496579351782, 1.7747496579351782, 1.7747496579351782,
+      1.7747496579351782, 1.7747496579351782
+    ]
+  },
+  "spreadRatioIndependentOverShared": null,
+  "recommendedCutoff": {
+    "absDps": 3.6,
+    "pct": 0.15,
+    "noiseFloorSe": 1.7739057919066084,
+    "observedMeanSpreadMaxMin": 0.18374073693939863,
+    "basis": "max(3.0, 2\u00d7 mean reported SE 1.774) \u2192 3.6; observed max\u2212min of five means was only 0.184 (not the tie-group scale); pct fixed at 0.15% of baseline (~3.23 DPS at 2151.4)"
+  },
+  "retReference": {
+    "note": "docs/five-seed-spread.json \u2014 ret's derivation on the slamaltman fixture",
+    "recommendedCutoff": {
+      "absDps": 3.4,
+      "pct": 0.15
+    }
+  }
+}

@@ -114,3 +114,34 @@ The second item in "Done when" — `metaDeficit` scoring meta candidates against
 that block, so it only runs for non-meta sockets, where scoring against the
 worn meta's condition is correct. Verified: with `metaCtx.metaId = 25894`
 supplied, an empty meta socket still fills 32409.
+
+## A number for the blindness, 2026-08-10
+
+The combined 103/106 loop measured what the EP model is failing to see, so the
+next agent does not have to re-derive it
+(`.scratch/set-bonus-value/loop-103-106/05-meta-tax.md`).
+
+Isolating the head socket on shredzepelin's gear
+(`python .scratch/set-bonus-value/loop-103-106/sim_meta_arms.py`, seeds
+[11,22,33,44,55] @ 3000 iters):
+
+- `ISO_32194 − ISO_24028 = +3.66 DPS` for +2 agility, giving a local rate of
+  **1 agi ≈ 1.83 DPS**.
+- `ISO_META − ISO_32194 = +39.25 DPS` for +2 agility, where that rate predicts
+  ~+3.7.
+
+The unexplained **~35 DPS** is meta gem 32409's +3% crit damage. Its db stat
+vector is agility 12 and nothing else, so `epScore` against
+`data/presets/feral/p1.ep-weights.json` prices that ~35 DPS at exactly **0**.
+
+Two consequences worth carrying:
+
+1. This is why `meta-repair.ts` optimises *EP loss among recolour candidates*
+   (`:193-197`, ranked at `:206`) rather than deciding whether to repair at all
+   (`:67-70`, whose only gate is `initial.kind !== "inactive"`). Given the
+   benefit side reads as 0, **a naive "only repair if EP-positive" change would
+   reach the wrong answer** — the loop measured actual activation here as a net
+   **+22.40 DPS gain**. The always-activate policy (PLAN.md:37, §9 policy item
+   1) is doing real work; do not relax it on EP evidence alone.
+2. `PREFERRED_META_IDS` is load-bearing for more than it appears, precisely
+   because EP cannot rank metas by their conditional effects.

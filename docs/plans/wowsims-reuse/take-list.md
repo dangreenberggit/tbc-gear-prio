@@ -26,7 +26,7 @@ can re-run, or is labelled **hypothesis** / **untested** in the same sentence.
 > — see [`README.md`](README.md) — but upstream is not the answer to it.
 
 **Upstream:** `ui/raid/components/importers/raid_wcl_importer.tsx`, 776 lines.
-**Ours:** `PLAN.md` §5.2 specifies `WclGearSource` in detail, with [P0]-verified
+**Ours:** `PLAN.md` §5.2 specifies `WclGearSource` in detail, with [S0]-verified
 endpoints and a classifier. Unbuilt, but specified.
 
 **Verdict: take ~nothing. Read it as a reference for the report-scoped GraphQL
@@ -57,7 +57,7 @@ w(d)"
 `data.icon.split('-')[1]` is `undefined`, `fullType` becomes
 `"Paladinundefined"`, and their constructor throws `Player type not implemented`.
 
-This is not a stylistic difference. **§5.2's [P0] talent-plurality classifier is
+This is not a stylistic difference. **§5.2's [S0] talent-plurality classifier is
 the only one that works here**, and `packages/core/src/spec.ts` already
 implements it correctly.
 
@@ -112,7 +112,7 @@ the browser bundle (`getWCLBearerToken`). We want our own (`WCL_CLIENT_ID` /
 
 ### 1.5 Open: the OAuth host
 
-Upstream uses `classic.warcraftlogs.com/oauth/token`; §5.2 [P0] records
+Upstream uses `classic.warcraftlogs.com/oauth/token`; §5.2 [S0] records
 `www.warcraftlogs.com/oauth/token` and says "_not_ a classic-specific one".
 `wcl_probe.py` tries `www` first and records its success — that is a
 first-success record, **not** evidence that `classic` fails. **Hypothesis,
@@ -194,7 +194,7 @@ against a fixed baseline, item 3 above shrinks and this section needs revisiting
 
 ---
 
-## 6. Why Phase 1 has been slow — what the numbers say
+## 6. Why Stage 1 has been slow — what the numbers say
 
 | Ours                                                           | Lines | Upstream counterpart                        |      Bytes |
 | -------------------------------------------------------------- | ----: | ------------------------------------------- | ---------: |

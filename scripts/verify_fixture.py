@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-verify_fixture.py -- closes three PLAN.md Phase 0 gate boxes against data on disk.
+verify_fixture.py -- closes three PLAN.md Stage 0 gate boxes against data on disk.
 
   R17  The 19 -> 17 slot reconciliation. WCL hands back 19 client-order entries;
        the sim wants 17 in its own order. Resolve every logged item against

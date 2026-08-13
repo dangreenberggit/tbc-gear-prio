@@ -21,6 +21,8 @@ export type GemEntry = {
   /** Raw stat-index array, same shape as db.json's gems[].stats. */
   stats: number[];
   phase: number;
+  /** db.json item quality: 2 uncommon, 3 rare, 4 epic (ticket 111). */
+  quality: number;
   /** Unique gems are excluded from multi-socket consideration (§9 R4.2). */
   unique: boolean;
 };
@@ -37,6 +39,52 @@ export function getGem(gemId: number): GemEntry | undefined {
 
 export function gemsForPhase(maxPhase: number): GemEntry[] {
   return PALETTE.filter((g) => g.phase <= maxPhase);
+}
+
+/**
+ * Like gemsForPhase, what counts as an available gem is a fact about gem
+ * data, so the quality filter lives here rather than at the call site
+ * (ticket 111, revised by ticket 117 — both the auto-fill path and meta
+ * repair now cap rarity, via `GemContext.fillPalette`).
+ *
+ * A non-number `quality` has no safe default under `<=` — `null` and
+ * `undefined` coerce in opposite directions, each silently — so the guard
+ * throws rather than fabricating a verdict (ticket 114). Committed palette
+ * entries always carry a number; this fires only on a malformed injected
+ * palette.
+ */
+export function gemsForQuality(
+  palette: readonly GemEntry[],
+  maxQuality: number
+): GemEntry[] {
+  return palette.filter((g) => {
+    if (typeof g.quality !== "number") {
+      throw new Error(
+        `gem ${g.id} has non-numeric quality (${String(g.quality)}); cannot apply the rarity cap`
+      );
+    }
+    return g.quality <= maxQuality;
+  });
+}
+
+/**
+ * Auto-fill and meta repair both cap at rare (owner decision, ticket 111,
+ * extended to repair by ticket 117): a player's own epics ride through
+ * migration, but neither path assumes epics they may not own.
+ *
+ * Chokepoint: the cap value and its enforcement live together so a
+ * fill-eligible palette cannot be constructed by forgetting a filter call —
+ * an uncapped and a capped palette are type-indistinguishable, so call-site
+ * discipline only ever fails silently (tickets 116/117). Fixed default for
+ * now; a run-level option mirroring wowsims' rarity/phase dropdowns is
+ * future work.
+ */
+export const FILL_MAX_QUALITY = 3;
+
+export function fillEligibleGems(
+  palette: readonly GemEntry[]
+): readonly GemEntry[] {
+  return gemsForQuality(palette, FILL_MAX_QUALITY);
 }
 
 /**

@@ -226,6 +226,8 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
       "feral_preraid.gear.json",
       "feral_p2_6p.gear.json",
       "feral_p2_9p.gear.json",
+      "feral_p3_6p.gear.json",
+      "feral_p3_9p.gear.json",
     ],
   };
 
@@ -259,8 +261,8 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
       }
     });
 
-    it(`${spec}: every BiS row names the stage it is BiS for`, () => {
-      // A `BiS` tag with no stage behind it is the absolute claim upstream
+    it(`${spec}: every BiS row names the phase it is BiS for`, () => {
+      // A `BiS` tag with no phase behind it is the absolute claim upstream
       // never makes, so the two fields travel together.
       for (const entry of loadUniverse(file).raw.entries) {
         if (!(entry.bisTags ?? []).includes("BiS")) {
@@ -273,9 +275,9 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
     });
   }
 
-  it("does not badge earlier-stage gear as BiS on a later-phase list", () => {
+  it("does not badge earlier-phase gear as BiS on a later-phase list", () => {
     // The defect in the round: the union of preraid/p1/p2 flattened three
-    // stage verdicts into one, so a phase-5 ret list badged Justicar (T4) and
+    // phase verdicts into one, so a phase-5 ret list badged Justicar (T4) and
     // pre-raid pieces `BiS`. They stay in the pool and keep `curatedSets` —
     // only the claim is withdrawn.
     const p5 = loadUniverse("data/universes/ret-p5.json").raw.entries;
@@ -290,10 +292,31 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
     }
   });
 
+  it("tags feral p3 from the p3 sets, not a carried-over p2 list", () => {
+    // Ret degrades to p2 above because upstream genuinely ships no later ret
+    // set. Feral does not have that excuse — upstream runs to p5 — so a feral
+    // p3 list tagged from p2 means the phase is simply not vendored, and the
+    // fix is to pin it (scripts/sync_wowsims.py TRACKED) rather than to accept
+    // the fallback. This pins that the p3 pair is in fact vendored and used.
+    const p3 = loadUniverse("data/universes/feral-p3.json").raw.entries;
+    const tagged = p3.filter((e) => (e.bisTags ?? []).includes("BiS"));
+    expect(tagged.length).toBeGreaterThan(0);
+    for (const entry of tagged) {
+      expect(entry.bisSets?.every((s) => s.startsWith("p3_"))).toBe(true);
+    }
+    // T6 replaced T5 in the curated list: Malorne (T5) keeps its provenance
+    // but loses the current-phase claim, and Thunderheart (T6) gains it.
+    const malorneChest = p3.find((e) => e.itemId === 29096);
+    expect(malorneChest?.curatedSets).toContain("p2_6p");
+    expect(malorneChest?.bisTags ?? []).not.toContain("BiS");
+    const thunderheartChest = p3.find((e) => e.itemId === 31042);
+    expect(thunderheartChest?.bisTags).toContain("BiS");
+  });
+
   it("keeps the ret and feral verdicts on the shared ring distinguishable", () => {
     // Shapeshifter's Signet is the item that opened the ticket. Upstream
     // really does equip it in all three ret sets — it was never a cross-spec
-    // leak — so it keeps the tag, but now says which stage vouches for it.
+    // leak — so it keeps the tag, but now says which phase vouches for it.
     // Feral curates it pre-raid only, so at p3 it carries no BiS claim there.
     const ret = loadUniverse("data/universes/ret-p3.json").raw.entries.find(
       (e) => e.itemId === 30834
@@ -619,14 +642,14 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   // Ticket 17's triage measured all 12 as phase 1, appearing on the Wowhead
-  // *pre-raid* stage list — BiS before you raid, which is why a P2+ universe
+  // *pre-raid* list — BiS before you raid, which is why a P2+ universe
   // omitting them is defensible. Deliberately not "they are dungeon/crafted
   // so they are out of scope": content type is not the test, power at the
   // tier is (see the ticket's 2026-08-02 correction).
   it.todo(
     "admits all 36 wowsims curated ret gear-set items — deferred: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
-      " are phase 1 pre-raid-stage items (ticket 17 triage)"
+      " are phase 1 pre-raid items (ticket 17 triage)"
   );
 
   it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
@@ -637,8 +660,8 @@ describe("data/universes/ret-p3.json hardening", () => {
 
     // Every curated member is still *admitted* — ticket 12's widening is about
     // membership and is unchanged, which `curatedSets` records. The `BiS`
-    // claim itself is now stage-scoped (carry-forward 47): at p3 the current
-    // curated stage is p2, so a member curated only for pre-raid or p1 keeps
+    // claim itself is now phase-scoped (carry-forward 47): at p3 the current
+    // curated phase is p2, so a member curated only for pre-raid or p1 keeps
     // its provenance and drops the badge.
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
       const entry = raw.entries.find((e) => e.itemId === id);
@@ -647,7 +670,7 @@ describe("data/universes/ret-p3.json hardening", () => {
         `${id} should be recorded as curated`
       ).toBeGreaterThan(0);
       const expected = entry?.curatedSets?.includes("p2") ? ["BiS"] : undefined;
-      expect(entry?.bisTags, `${id} BiS tag should follow its stage`).toEqual(
+      expect(entry?.bisTags, `${id} BiS tag should follow its phase`).toEqual(
         expected
       );
     }
@@ -695,7 +718,7 @@ describe("data/universes/ret-p3.json hardening", () => {
 
   it.todo(
     "includes Shattrath Leggings (30257, leather legs) — deferred: phase 1 " +
-      "pre-raid-stage item, and db.json gives it sources: null so no " +
+      "pre-raid item, and db.json gives it sources: null so no " +
       "AtlasLoot/Wowhead coverage resolves it (ticket 17 triage)"
   );
 

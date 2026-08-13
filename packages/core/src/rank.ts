@@ -1,11 +1,13 @@
 /**
  * rankUpgrades — the deep module interface (PLAN.md §4).
- * Stages land behind this; callers only see RankInput → Ranking.
+ * Stages sit behind this; callers only see RankInput → Ranking.
  */
 
 import {
   fillEmptyCandidateGems,
   gemContext,
+  metaSocketUnpriced,
+  missingMetaPreferenceNote,
   type FillEmptyOpts,
   type GemContext,
 } from "./candidate-gems.js";
@@ -23,7 +25,7 @@ import {
   statDeltaBetween,
   type CapState,
 } from "./caps.js";
-import { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+import { cutoffForSpec, meetsCutoff, type Cutoff } from "./cutoff.js";
 import {
   buildStandingAssumptions,
   substitutionsFromMetaRepair,
@@ -37,8 +39,8 @@ import {
   socketedItemsFromLoggedGear,
 } from "./logged-gear.js";
 import {
-  MetaUnsolvableError,
-  repairMeta,
+  MetaRepairError,
+  repairAndMinimize,
   type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
@@ -67,11 +69,33 @@ import {
   usesPairedReplication,
 } from "./se.js";
 import { setBreakNote } from "./set-bonus.js";
+import {
+  brokenSetBonuses,
+  computeSynergy,
+  isBonusImplemented,
+  nextMeasurableThreshold,
+  selectPackage,
+  setCounts,
+  setLabel,
+  SET_THRESHOLDS,
+  type BrokenSetBonus,
+  type DpsSample,
+  type IndividualDelta,
+  type SelfSetConfound,
+  type SetThreshold,
+  type UnmeasuredReason,
+} from "./set-value.js";
+import {
+  plausibilityWarnings,
+  type PlausibilityWarning,
+} from "./plausibility.js";
+import { getItem } from "./items.js";
 import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
   CharacterRef,
   ContentPhase,
+  DetectedSpecId,
   FightRef,
   Race,
   SpecId,
@@ -163,12 +187,12 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
-  /** Every pinned upstream gear set equipping this item, any stage. */
+  /** Every pinned upstream gear set equipping this item, any phase. */
   curatedSets?: string[];
   /**
-   * The current-stage sets behind a `BiS` tag. Rendered instead of a bare
-   * `BiS` pill so the badge names the stage it is BiS *for* — upstream scopes
-   * BiS per stage and there is no absolute BiS (carry-forward 47 §1).
+   * The current-phase sets behind a `BiS` tag. Rendered instead of a bare
+   * `BiS` pill so the badge names the phase it is BiS *for* — upstream scopes
+   * BiS per phase and there is no absolute BiS (carry-forward 47 §1).
    */
   bisSets?: string[];
   /**
@@ -186,8 +210,135 @@ export type RankedItem = {
    */
   hitRegression?: { lost: number; gapAfter: number };
   setBonusNote?: string;
+  /**
+   * Gems meta repair recoloured on *other* worn items to activate this
+   * candidate's meta — the per-row half of PLAN.md §9 policy item 5
+   * (ticket 107). Absent, never an empty array, when the swap needed no
+   * adjustment: a row carrying `[]` reads as a disclosure that was considered
+   * and came back empty, which is a different claim from "nothing to
+   * disclose" only when the field is present.
+   */
+  gemSubstitutions?: Array<{
+    itemId: number;
+    socketIndex: number;
+    from: number;
+    to: number;
+  }>;
+  /**
+   * This row's delta was measured with the candidate's meta socket empty —
+   * the ranked spec has no recorded meta preference (`SPEC_PREFERRED_METAS`),
+   * so no gem was seated and the price omits a meta's stats and effect. The
+   * per-row half of `missingMetaPreferenceNote`'s run-level disclosure.
+   */
+  emptyMetaSocket?: boolean;
   owned?: boolean;
   belowCutoff: boolean;
+  /**
+   * Present when this item's set has any measured/attempted `SetBonusValue`
+   * (spec §3) — including the crossing case, so a renderer can say "completes
+   * 2pc (included in delta)" instead of silently having nothing to say.
+   */
+  setContext?: SetContext;
+};
+
+export type SetContext = {
+  setId: number;
+  setName: string;
+  piecesWornBefore: number;
+  piecesAfterSwap: number;
+  nextThreshold: SetThreshold | null;
+  /** True ⇒ the bonus is already inside `deltaDps`; no `prospectiveBonusDps`. */
+  crossesThreshold: boolean;
+  prospectiveBonusDps?: number;
+  /**
+   * Other sets the measured package displaced, carried from the source
+   * `SetBonusValue.breaks`. Non-empty ⇒ `prospectiveBonusDps` is confounded:
+   * the lost bonus is charged once in `packageDelta` but k times across
+   * `Σ singles`, inflating by `(k−1)·B` with no way to separate it after the
+   * fact. Such a figure is disclosed but never ranked on — ticket 90.
+   */
+  prospectiveBonusBreaks?: BrokenSetBonus[];
+  /**
+   * The set's measured completion packages, one entry per measured threshold,
+   * smallest first — present when the item's id appears in any of them
+   * (owner decisions, 2026-08-10 and 2026-08-11; spec §4).
+   *
+   * Every measured threshold rides along, not just the largest. Ticket 118:
+   * the largest-threshold-first rule meant a positive 2pc package reached no
+   * row whenever the 4pc measured negative — on the ret artifact every
+   * Lightbringer row carried -6.83 while +11.31 was visible only in the
+   * panel. Both figures are data; the reader sees them side by side, and
+   * package mode sorts by the best of them.
+   *
+   * Membership is keyed on `packageItemIds` rather than on `nextThreshold`
+   * because the two disagree exactly where the feature matters: at 0 pieces
+   * worn every single swap lands at `piecesAfterSwap === 1`, so
+   * `nextThreshold` pins to an implemented 2pc and a threshold-keyed lookup
+   * reaches only the 2pc package's members (ADR-0023's ticket-91 case). The
+   * four-piece package's other members would carry nothing.
+   *
+   * `deltaDps` is `SetBonusValue.packageDeltaDps` — one sim of the assembled
+   * package against the baseline, with any broken set's cost already inside the
+   * measurement. It is deliberately **not** `bonusDps`, the derived
+   * `packageDelta − Σ singles` split that carries the `(k−1)·B` inflation
+   * ticket 90 suppresses from ranking.
+   */
+  packages?: SetPackageContext[];
+};
+
+export type SetPackageContext = {
+  threshold: SetThreshold;
+  /** `SetBonusValue.packageDeltaDps`: sim-measured, breaks netted in. */
+  deltaDps: number;
+  /** The package's members, canonical-slot order — this row among them. */
+  itemIds: number[];
+  /** How many pieces the package assembles, for the row's label. */
+  piecesNeeded: number;
+};
+
+export type SetBonusValue = {
+  setId: number;
+  setName: string;
+  threshold: SetThreshold;
+  piecesWorn: number;
+  packageItemIds: number[];
+  packageDeltaDps: number;
+  bonusDps?: number;
+  se?: number;
+  unmeasured?: UnmeasuredReason;
+  /**
+   * Other sets' implemented thresholds this package drops below. Present only
+   * when non-empty. `bonusDps` nets the loss in and cannot separate it, so a
+   * reader must see it rather than read the number as the bonus alone.
+   */
+  breaks?: BrokenSetBonus[];
+  /**
+   * Present when this bonus was computed with its own lower threshold's term
+   * missing — the lower threshold was `unmeasurable-at-this-worn-count` for
+   * the same set, so `computeSynergy` subtracted nothing where it should have
+   * subtracted that bonus (ticket 119 anomaly A, disclosed per ticket 127).
+   * The arithmetic is unchanged; this only names what `bonusDps` is missing.
+   */
+  selfConfound?: SelfSetConfound;
+  /**
+   * Gem swaps meta repair had to make on *other* worn items to price this
+   * package, accumulated over every piece the package adds (ticket 144).
+   *
+   * The same disclosure `RankedItem.gemSubstitutions` carries for single-item
+   * rows. PLAN.md §9 policy item 5 is written over adjustments generally, but
+   * the package arm went through `equipmentForCandidateSwap`, which discards
+   * the swap list, so these rows stayed silent where the policy says they
+   * should speak. Absent, never an empty array, when the package needed no
+   * adjustment — same reasoning as the per-row field.
+   */
+  gemSubstitutions?: Array<{
+    itemId: number;
+    /** Equipment-array position: two worn rings share an id but not this. */
+    itemIndex: number;
+    socketIndex: number;
+    from: number;
+    to: number;
+  }>;
 };
 
 /**
@@ -232,6 +383,14 @@ export type Ranking = {
   /** Required by §4 — a Ranking you can't audit is not a Ranking. */
   caps: CapState;
   items: RankedItem[];
+  /** Completion-package synergy per (set, threshold) — spec §2.2. */
+  setBonuses?: SetBonusValue[];
+  /**
+   * Sanity checks that fired on this run (ticket 98). Computed here rather
+   * than at render time because both need the worn `equipment`, which a
+   * `Ranking` does not carry. Present only when non-empty.
+   */
+  plausibilityWarnings?: PlausibilityWarning[];
 };
 
 /** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
@@ -246,18 +405,28 @@ type BestSwap = {
    */
   request: RaidSimRequest;
   slotChoice?: SimSlotName;
+  /** The SIM_ORDER index the winning attempt swapped, for set-package selection. */
+  slotIndex: number;
   setBonusNote?: string;
   hitDriven: boolean;
   hitRegression: { lost: number; gapAfter: number } | null;
+  /** Repair swaps on other worn items, per the winning slot attempt (107). */
+  repairSwaps: readonly MetaRepairSwap[];
+  /**
+   * The gems the winning attempt actually priced the candidate with, so a
+   * disclosure can describe what was measured rather than what the socket
+   * colours imply (ticket 139).
+   */
+  candidateGems: readonly number[];
 };
 
 const DEFAULT_ITERATIONS = 3000;
 /**
  * Five distinct seeds, because `usesPairedReplication` is what switches §10
- * Phase 2 on and it keys off `seeds.length > 1` (`se.ts`). A single default
+ * Stage 2 on and it keys off `seeds.length > 1` (`se.ts`). A single default
  * seed left the whole paired-replicate path implemented, tested and dead: no
  * caller passes `seeds`, so `replicateTopItems` returned at its first line on
- * every real run and the shortlist shipped the Phase 1 `independent` SE that
+ * every real run and the shortlist shipped the Stage 1 `independent` SE that
  * §10:705 records as overstating a shared-seed delta's variance.
  *
  * These are the five seed values `docs/five-seed-spread.json` measured
@@ -286,6 +455,7 @@ export async function rankUpgrades(
   onProgress?: (p: Progress) => void
 ): Promise<Ranking> {
   onProgress?.({ stage: "resolving" });
+  const cutoff = cutoffForSpec(input.spec);
   const fights = await deps.gear.findFights(input.character, input.spec);
   const maybeResolved = resolveFight(fights, input.fight);
   if (!maybeResolved) {
@@ -344,29 +514,38 @@ export async function rankUpgrades(
   // PLAN.md §8.2 / race standing assumption: default to the preset skeleton's
   // race (ret P2 is Blood Elf), not a hardcoded Human — WCL does not carry race.
   const race = input.race ?? raceFromSkeleton(deps.raidSimSkeleton);
-  let socketed: SocketedItem[] = socketedItemsFromLoggedGear(logged);
+  // Captured before repairMeta so minimizeRegems has the player's actual
+  // worn gems to restore — `socketed` below is reassigned to the repaired
+  // layout in place, and once that happens the pre-repair state is gone.
+  const preRepairSocketed = socketedItemsFromLoggedGear(logged);
+  let socketed: SocketedItem[] = preRepairSocketed;
   let metaAdjusted = false;
   let metaSwaps: MetaRepairSwap[] = [];
+  const gems = gemContext(
+    deps.gemPalette ?? gemsForPhase(input.maxPhase),
+    deps.epWeights,
+    input.spec
+  );
   try {
-    const repaired = repairMeta({
-      items: socketed,
+    const minimized = repairAndMinimize({
+      items: preRepairSocketed,
       epWeights: deps.epWeights,
-      palette: deps.gemPalette ?? gemsForPhase(input.maxPhase),
+      palette: gems.fillPalette,
     });
-    socketed = repaired.items;
-    metaAdjusted = repaired.metaAdjusted;
-    metaSwaps = repaired.swaps;
+    socketed = minimized.items;
+    metaAdjusted = minimized.metaAdjusted;
+    metaSwaps = minimized.swaps;
   } catch (err) {
-    if (err instanceof MetaUnsolvableError) {
+    // The baseline gear is the character's own worn layout — there is no
+    // fallback to fall through to, so both MetaRepairError subclasses abort
+    // the whole ranking here (unlike the per-candidate path below, where a
+    // repair failure on one candidate must not take the rest of the run
+    // down with it).
+    if (err instanceof MetaRepairError) {
       throw new RankError("meta-unsolvable", err.message);
     }
     throw err;
   }
-
-  const gems = gemContext(
-    deps.gemPalette ?? gemsForPhase(input.maxPhase),
-    deps.epWeights
-  );
 
   const equipment = applyRepairedGems(
     equipmentFromLoggedGear(logged),
@@ -449,7 +628,7 @@ export async function rankUpgrades(
   await deps.store.job.update(job.id, { status: "running" });
 
   // One catch for every exit after the row exists, rather than one per throw
-  // site: a stranded `running` row is a job the Phase 2 API would attach to
+  // site: a stranded `running` row is a job the Stage 2 API would attach to
   // and wait on forever, and per-site handling means the next throw added
   // below re-opens that hole silently (ticket 29).
   try {
@@ -507,12 +686,29 @@ export async function rankUpgrades(
      * `ranked` reorders the rows but never this association.
      */
     const winningRequests = new Map<number, RaidSimRequest>();
-    const simSkips: {
+    /**
+     * Candidates dropped before they could be ranked. `kind` carries why:
+     * `sim` means the sim panicked on the composed swap, `repair` means the
+     * sim never ran at all because meta repair could not activate the gem
+     * layout. The distinction is load-bearing in the disclosure text —
+     * blaming the sim for a gem problem sends an operator to the wrong
+     * subsystem — but it is one sentence's difference over an identical
+     * shape, which is why these were two parallel arrays (ticket 136 item 3).
+     */
+    const candidateSkips: {
+      kind: "sim" | "repair";
       itemId: number;
       name: string;
       slot: string;
       reason: string;
     }[] = [];
+    /**
+     * Every candidate's winning single-swap delta, by item id — the input
+     * `selectPackage` (set-value.ts §2.2 step 1) needs to rank same-set
+     * candidates by their own measured `deltaDps`. Populated alongside `best`
+     * in the candidate loop below.
+     */
+    const individualDeltasByItemId = new Map<number, IndividualDelta>();
 
     // From the repaired layout, which is what the sim actually ran. Hoisted
     // above the loop because `hitDriven` prices each candidate against it.
@@ -552,19 +748,39 @@ export async function rankUpgrades(
         // to fingers so trinkets and any later paired slot inherit it.
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
         if (wornAt >= 0 && wornAt !== slotIndex) continue;
-        const swapped = equipmentForCandidateSwap(
-          equipment,
-          slotIndex,
-          entry.itemId,
-          gems
-        );
+        let swapped: SimItemSpec[];
+        let repairSwaps: readonly MetaRepairSwap[];
+        try {
+          const outcome = candidateSwapWithRepairs(
+            equipment,
+            slotIndex,
+            entry.itemId,
+            gems
+          );
+          swapped = outcome.equipment;
+          repairSwaps = outcome.swaps;
+        } catch (err) {
+          // A repair failure is a fact about this one candidate's gem layout,
+          // not about the character or the rest of the pool — it must skip
+          // this slot attempt exactly like a sim panic does below, not take
+          // the whole ranking down (review-corrections.md item 4).
+          if (!(err instanceof MetaRepairError)) throw err;
+          candidateSkips.push({
+            kind: "repair",
+            itemId: entry.itemId,
+            name: entry.name,
+            slot: slotName,
+            reason: err.message,
+          });
+          continue;
+        }
         const candReq = compose(deps.raidSimSkeleton, {
           name: input.character.name.toLowerCase(),
           race,
           equipment: swapped,
         });
         // Outside the catch below: only a failing *sim* may skip a candidate.
-        // A failing store read routed in there would push a simSkips row
+        // A failing store read routed in there would push a `sim`-kind skip
         // blaming the sim, drop the item, and return a ranking one place
         // short with no error anywhere.
         let candObs = await readCachedSim(deps, candReq, simVersion, runOpts);
@@ -576,7 +792,8 @@ export async function rankUpgrades(
             // wowsimcli when equipped on ret — skip this slot attempt. Recorded
             // rather than swallowed: a candidate that never simmed must not be
             // indistinguishable from one that simmed badly.
-            simSkips.push({
+            candidateSkips.push({
+              kind: "sim",
               itemId: entry.itemId,
               name: entry.name,
               slot: slotName,
@@ -594,8 +811,11 @@ export async function rankUpgrades(
             deltaDps,
             stdev: candObs.stdev,
             request: candReq,
+            slotIndex,
             hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
             hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
+            repairSwaps,
+            candidateGems: swapped[slotIndex]?.gems ?? [],
           };
           if (slotNames.length > 1) {
             next.slotChoice = slotName;
@@ -610,9 +830,21 @@ export async function rankUpgrades(
 
       if (!best) continue;
 
+      // Recorded before the cutoff/rank logic below: package selection needs
+      // every candidate's own measured delta, including below-cutoff rows —
+      // a set piece that is individually a downgrade can still be the best
+      // available filler for a completion package (V0b: all four Thunderheart
+      // singles were negative, and the package was still worth +91.68 DPS).
+      individualDeltasByItemId.set(entry.itemId, {
+        itemId: entry.itemId,
+        slotIndex: best.slotIndex,
+        deltaDps: best.deltaDps,
+        se: best.stdev / Math.sqrt(iterations),
+      });
+
       const deltaPct =
         baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
-      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, CUTOFF);
+      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, cutoff);
       const item: RankedItem = {
         rank: null,
         itemId: entry.itemId,
@@ -621,7 +853,7 @@ export async function rankUpgrades(
         source: entry.source,
         deltaDps: best.deltaDps,
         deltaPct,
-        // PLAN.md §10 Phase 1: independent SE of the mean = stdev / √n
+        // PLAN.md §10 Stage 1: independent SE of the mean = stdev / √n
         se: best.stdev / Math.sqrt(iterations),
         seMethod: "independent",
         bisTags: entry.bisTags ?? [],
@@ -634,10 +866,50 @@ export async function rankUpgrades(
       if (best.hitRegression) item.hitRegression = best.hitRegression;
       if (best.slotChoice) item.slotChoice = best.slotChoice;
       if (best.setBonusNote) item.setBonusNote = best.setBonusNote;
+      if (best.repairSwaps.length > 0) {
+        item.gemSubstitutions = best.repairSwaps.map((s) => ({
+          itemId: s.itemId,
+          socketIndex: s.socketIndex,
+          from: s.from,
+          to: s.to,
+        }));
+      }
       if (owned) item.owned = true;
+      if (metaSocketUnpriced(entry.itemId, best.candidateGems, gems.spec)) {
+        item.emptyMetaSocket = true;
+      }
       ranked.push(item);
       winningRequests.set(entry.itemId, best.request);
     }
+
+    /**
+     * Package-level sim failures (Finding 5): a whole completion package has
+     * no single item to blame, and its `setId` must never masquerade as an
+     * `itemId` in the per-candidate `candidateSkips` shape — so this is a
+     * distinct collection, named by set + threshold, folded into
+     * `substitutions` alongside it rather than forced into its shape.
+     */
+    const packageSimSkips: {
+      setId: number;
+      setName: string;
+      threshold: SetThreshold;
+      reason: string;
+    }[] = [];
+
+    const setBonuses = await buildSetBonuses(
+      deps,
+      candidates,
+      equipment,
+      gems,
+      race,
+      input,
+      individualDeltasByItemId,
+      { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
+      simVersion,
+      runOpts,
+      packageSimSkips
+    );
+    if (setBonuses.length > 0) applySetContext(ranked, setBonuses, equipment);
 
     onProgress?.({ stage: "ranking" });
     // Sorted first so replication can pick the contested top of the list, then
@@ -658,9 +930,24 @@ export async function rankUpgrades(
       }
     }
 
+    // Run over the finished rows and the final `setBonuses`, so a warning
+    // describes what the report will actually show rather than an intermediate.
+    const warnings = plausibilityWarnings({
+      baselineDps: observation.dps,
+      setBonuses,
+      rows: ranked.map((i) => ({
+        itemId: i.itemId,
+        name: i.name,
+        slot: i.slot,
+        deltaDps: i.deltaDps,
+        ...(i.owned === true ? { owned: true } : {}),
+      })),
+      wornSetCounts: setCounts(equipment),
+    });
+
     const ranking: Ranking = {
       contentHash,
-      cutoff: CUTOFF,
+      cutoff,
       fight: resolved,
       baseline: {
         dps: observation.dps,
@@ -678,12 +965,25 @@ export async function rankUpgrades(
       caps,
       substitutions: [
         ...substitutionsFromMetaRepair(metaSwaps),
-        ...simSkips.map((s) => ({
+        ...metaPreferenceDisclosure(gems.spec),
+        ...candidateSkips.map((s) => ({
           field: `candidate ${s.itemId} (${s.slot})`,
-          detail: `${s.name} was dropped from the ranking: the sim failed on this swap — ${s.reason}`,
+          detail:
+            `${s.name} was dropped from the ranking: ` +
+            (s.kind === "sim"
+              ? `the sim failed on this swap — ${s.reason}`
+              : `gem repair could not activate its meta — ${s.reason}`),
+        })),
+        ...packageSimSkips.map((s) => ({
+          field: `${s.setName} ${s.threshold}pc completion package`,
+          detail:
+            `the ${s.setName} ${s.threshold}pc completion package could not ` +
+            `be measured: the sim failed — ${s.reason}`,
         })),
       ],
       items: ranked,
+      ...(setBonuses.length > 0 ? { setBonuses } : {}),
+      ...(warnings.length > 0 ? { plausibilityWarnings: warnings } : {}),
     };
 
     await deps.store.put(rankingCacheKey(contentHash), ranking);
@@ -695,7 +995,7 @@ export async function rankUpgrades(
   }
 
   /**
-   * PLAN.md §10 Phase 2, with the method's rationale in `se.ts`.
+   * PLAN.md §10 Stage 2, with the method's rationale in `se.ts`.
    *
    * Three constraints that are easy to break and silent when broken:
    *
@@ -753,7 +1053,7 @@ export async function rankUpgrades(
       // Re-evaluated against the mean rather than left at the first seed's
       // verdict: a row whose replicated estimate crosses the cutoff must not
       // keep a `belowCutoff` computed from a number no longer reported.
-      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, CUTOFF);
+      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, cutoff);
     }
   }
 
@@ -791,6 +1091,389 @@ export async function rankUpgrades(
     }
     await cacheSimResult(deps, req, simVersion, opts, obs);
     return obs;
+  }
+}
+
+/**
+ * Completion-package synergy (spec §2.2/§2.3): for every set with at least
+ * one candidate present in this run's pool, and every threshold above the
+ * pieces currently worn, build the completion package, sim it once through
+ * the shared cache, and record `SetBonusValue`. Cost target §2.4: at most
+ * ~4 extra sims per run — bounded by only building for sets with candidate
+ * presence and skipping `not-implemented-in-sim` thresholds entirely.
+ */
+async function buildSetBonuses(
+  deps: Deps,
+  candidates: readonly PoolEntry[],
+  equipment: readonly SimItemSpec[],
+  gems: GemContext,
+  race: Race,
+  input: RankInput,
+  individualDeltasByItemId: ReadonlyMap<number, IndividualDelta>,
+  baseline: DpsSample,
+  simVersion: string,
+  runOpts: SimRunOpts,
+  packageSimSkips: {
+    setId: number;
+    setName: string;
+    threshold: SetThreshold;
+    reason: string;
+  }[]
+): Promise<SetBonusValue[]> {
+  // Which sets actually have a pool candidate this run — §2.4's "do not build
+  // packages for sets with no candidate presence".
+  const setIdsWithCandidates = new Set<number>();
+  for (const entry of candidates) {
+    const setId = getItem(entry.itemId)?.setId;
+    if (setId != null) setIdsWithCandidates.add(setId);
+  }
+  if (setIdsWithCandidates.size === 0) return [];
+
+  const wornCounts = setCounts(equipment);
+  const slotIndexForPoolEntry = (entry: PoolEntry): number | undefined => {
+    for (const slotName of simSlotsForPoolSlot(entry.slot)) {
+      const idx = SIM_ORDER.indexOf(slotName);
+      if (idx >= 0) return idx;
+    }
+    return undefined;
+  };
+
+  const results: SetBonusValue[] = [];
+  for (const setId of setIdsWithCandidates) {
+    const piecesWorn = wornCounts.get(setId) ?? 0;
+    const label = setLabel(
+      equipment,
+      setId,
+      candidates.map((entry) => entry.itemId)
+    );
+    let twoPieceBonus: number | undefined;
+    // Set only when the 2pc row itself came back `unmeasurable-at-this-worn-
+    // count` (ticket 119 anomaly B) — the specific case where `twoPieceBonus`
+    // stays undefined not because no 2pc exists, but because it could not be
+    // measured from here. Distinguishing this from "no 2pc bonus" (e.g.
+    // not-implemented-in-sim) is the whole point: only this case means the
+    // 4pc figure below is missing a real, non-zero term (ticket 127).
+    let twoPieceUnmeasurableAtThisWornCount = false;
+
+    for (const threshold of SET_THRESHOLDS) {
+      if (threshold <= piecesWorn) continue;
+
+      if (!isBonusImplemented(setId, threshold)) {
+        // §2.3: never burn a sim measuring a bonus known to be absent.
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: [],
+          packageDeltaDps: 0,
+          unmeasured: "not-implemented-in-sim",
+        });
+        continue;
+      }
+
+      const selection = selectPackage(
+        setId,
+        threshold,
+        equipment,
+        candidates,
+        [...individualDeltasByItemId.values()],
+        slotIndexForPoolEntry
+      );
+      if (!selection.ok) {
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: [],
+          packageDeltaDps: 0,
+          unmeasured: "insufficient-pieces",
+        });
+        continue;
+      }
+
+      const addedPieces = selection.addedPieces;
+      // One added piece means the "package" is that piece's own single swap:
+      // identical equipment, so packageDelta − Σ singles is 0 by construction
+      // and the real bonus is buried inside the single's delta where this
+      // method cannot reach it. Reporting that 0 with an SE printed it as a
+      // measurement (ticket 119 anomaly B); say it is unmeasurable instead,
+      // and spend no sim. The completing piece is still named so a renderer
+      // can say which item would finish the threshold.
+      if (addedPieces.length === 1) {
+        if (threshold === 2) twoPieceUnmeasurableAtThisWornCount = true;
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: addedPieces.map((p) => p.itemId),
+          packageDeltaDps: 0,
+          unmeasured: "unmeasurable-at-this-worn-count",
+        });
+        continue;
+      }
+      // Applied sequentially, one slot at a time, through the same helper
+      // every single-candidate swap uses — spec §2.2 step 1's byte-identical
+      // gem/enchant policy.
+      let packageEquipment: SimItemSpec[] = [...equipment];
+      // Accumulated across pieces, not per piece: the reader is being offered
+      // the whole package, so the disclosure is every adjustment the package
+      // cost. A later piece can re-swap a socket an earlier one touched, so
+      // this is the sequence of swaps that happened, not a set.
+      const packageRepairSwaps: MetaRepairSwap[] = [];
+      try {
+        for (const piece of addedPieces) {
+          const outcome = candidateSwapWithRepairs(
+            packageEquipment,
+            piece.slotIndex,
+            piece.itemId,
+            gems
+          );
+          packageEquipment = outcome.equipment;
+          // Swaps landing on a slot the package itself fills are the offer,
+          // not an adjustment to gear the player keeps — the same exclusion
+          // `candidateSwapWithRepairs` already applies to the swapped slot.
+          const packageSlots = new Set(addedPieces.map((p) => p.slotIndex));
+          packageRepairSwaps.push(
+            ...outcome.swaps.filter((s) => !packageSlots.has(s.itemIndex))
+          );
+        }
+      } catch (err) {
+        // Same reasoning as the single-candidate loop above: a repair
+        // failure on this package's gems must skip only this threshold row,
+        // not the rest of the set-value pass or the ranking as a whole.
+        if (!(err instanceof MetaRepairError)) throw err;
+        packageSimSkips.push({
+          setId,
+          setName: label,
+          threshold,
+          reason: `gem repair could not activate its meta — ${err.message}`,
+        });
+        results.push({
+          setId,
+          setName: label,
+          threshold,
+          piecesWorn,
+          packageItemIds: addedPieces.map((p) => p.itemId),
+          packageDeltaDps: 0,
+          unmeasured: "repair-failed",
+        });
+        continue;
+      }
+      const packageRequest = compose(deps.raidSimSkeleton, {
+        name: input.character.name.toLowerCase(),
+        race,
+        equipment: packageEquipment,
+      });
+
+      let packageObs = await readCachedSim(
+        deps,
+        packageRequest,
+        simVersion,
+        runOpts
+      );
+      if (!packageObs) {
+        try {
+          packageObs = await deps.sim.run(packageRequest, runOpts);
+        } catch (err) {
+          packageSimSkips.push({
+            setId,
+            setName: label,
+            threshold,
+            reason: err instanceof Error ? err.message : String(err),
+          });
+          results.push({
+            setId,
+            setName: label,
+            threshold,
+            piecesWorn,
+            packageItemIds: addedPieces.map((p) => p.itemId),
+            packageDeltaDps: 0,
+            unmeasured: "sim-failed",
+          });
+          continue;
+        }
+        await cacheSimResult(
+          deps,
+          packageRequest,
+          simVersion,
+          runOpts,
+          packageObs
+        );
+      }
+
+      const addedPieceSamples = addedPieces.map((p) => {
+        const individual = individualDeltasByItemId.get(p.itemId);
+        return {
+          deltaDps: individual?.deltaDps ?? 0,
+          se: individual?.se ?? 0,
+        };
+      });
+      const packageSample: DpsSample = {
+        dps: packageObs.dps,
+        se: packageObs.stdev / Math.sqrt(runOpts.iterations),
+      };
+      const synergy = computeSynergy({
+        baseline,
+        packageSample,
+        addedPieceSamples,
+        ...(threshold === 4 && twoPieceBonus !== undefined
+          ? { twoPieceBonus }
+          : {}),
+      });
+      if (threshold === 2) twoPieceBonus = synergy.bonusDps;
+
+      const breaks = brokenSetBonuses(equipment, addedPieces, setId);
+      // The 2pc term is missing from this 4pc figure exactly when the 2pc row
+      // was `unmeasurable-at-this-worn-count` for the *same* set — not merely
+      // whenever `twoPieceBonus` is undefined, which is also true (correctly,
+      // with nothing missing) for `not-implemented-in-sim`.
+      const selfConfound: SelfSetConfound | undefined =
+        threshold === 4 && twoPieceUnmeasurableAtThisWornCount
+          ? { threshold: 2 }
+          : undefined;
+      results.push({
+        setId,
+        setName: label,
+        threshold,
+        piecesWorn,
+        packageItemIds: addedPieces.map((p) => p.itemId),
+        packageDeltaDps: synergy.packageDeltaDps,
+        bonusDps: synergy.bonusDps,
+        se: synergy.se,
+        ...(breaks.length > 0 ? { breaks } : {}),
+        ...(selfConfound ? { selfConfound } : {}),
+        ...(packageRepairSwaps.length > 0
+          ? {
+              gemSubstitutions: packageRepairSwaps.map((s) => ({
+                itemId: s.itemId,
+                // Carried, not dropped: the same item id can legally sit in
+                // two slots (paired rings/trinkets), so counting distinct
+                // items by id alone collapses two worn rings into one and
+                // under-reports the disclosure. `MetaRepairSwap.itemIndex`
+                // exists for exactly this (round-4 review, A2).
+                itemIndex: s.itemIndex,
+                socketIndex: s.socketIndex,
+                from: s.from,
+                to: s.to,
+              })),
+            }
+          : {}),
+      });
+    }
+  }
+  return results;
+}
+
+/**
+ * The completion packages a member row carries (ticket 118, owner decision
+ * 2026-08-11). A row is a member when its item id appears in any of its set's
+ * measured packages. A member carries EVERY measured threshold's package for
+ * the set, smallest threshold first — both the 2pc and the 4pc figure reach
+ * the row as data. The old rule kept only the largest threshold's package, so
+ * on the ret artifact every Lightbringer row carried the negative 4pc figure
+ * (-6.83) while the positive 2pc figure (+11.31) reached no row at all.
+ *
+ * Exported for direct testing against the committed report artifacts.
+ */
+export function memberPackages(
+  itemId: number,
+  bonusesForSet: readonly SetBonusValue[]
+): SetPackageContext[] | undefined {
+  const measured = bonusesForSet.filter((b) => b.unmeasured === undefined);
+  if (!measured.some((b) => b.packageItemIds.includes(itemId))) {
+    return undefined;
+  }
+  return measured
+    .slice()
+    .sort((a, b) => a.threshold - b.threshold)
+    .map((b) => ({
+      threshold: b.threshold,
+      deltaDps: b.packageDeltaDps,
+      itemIds: b.packageItemIds,
+      piecesNeeded: b.packageItemIds.length,
+    }));
+}
+
+/**
+ * Populate `RankedItem.setContext` for every candidate whose item belongs to
+ * a set with any attempted `SetBonusValue` (spec §3) — including the
+ * crossing case, so a renderer can say "completes 2pc (included in delta)".
+ */
+function applySetContext(
+  ranked: RankedItem[],
+  setBonuses: readonly SetBonusValue[],
+  equipment: readonly SimItemSpec[]
+): void {
+  const wornCounts = setCounts(equipment);
+  const bonusesBySet = new Map<number, SetBonusValue[]>();
+  for (const b of setBonuses) {
+    const list = bonusesBySet.get(b.setId) ?? [];
+    list.push(b);
+    bonusesBySet.set(b.setId, list);
+  }
+
+  for (const item of ranked) {
+    const setId = getItem(item.itemId)?.setId;
+    if (setId == null) continue;
+    const bonusesForSet = bonusesBySet.get(setId);
+    if (!bonusesForSet) continue;
+
+    const piecesWornBefore = wornCounts.get(setId) ?? 0;
+    // The candidate's own item joins the set on this swap: worn count + 1,
+    // unless it was already worn (then the count is unchanged).
+    const piecesAfterSwap = item.owned
+      ? piecesWornBefore
+      : piecesWornBefore + 1;
+    // Whether *this swap* crosses a threshold is judged against the nearest
+    // measurable threshold from *before* the swap — that is the bonus the
+    // swap could newly deliver. `nextThreshold` recorded on the context is
+    // the forward-looking one from *after* the swap (spec §2.3/§3, finding
+    // 3): the smallest implemented threshold still ahead, for a "needs N
+    // more" prompt. The two are deliberately evaluated from different counts.
+    const thresholdBeforeSwap = nextMeasurableThreshold(
+      setId,
+      piecesWornBefore
+    );
+    const crossesThreshold =
+      thresholdBeforeSwap !== null && piecesAfterSwap >= thresholdBeforeSwap;
+    const nextThreshold = nextMeasurableThreshold(setId, piecesAfterSwap);
+
+    const setContext: SetContext = {
+      setId,
+      // The set's SetBonusValue rows already resolved this name against the
+      // package pieces, which is the only place it is findable for a set the
+      // player wears none of. Recomputing from worn gear alone regresses to
+      // the bare `set <id>` fallback.
+      setName:
+        bonusesForSet[0]?.setName ?? setLabel(equipment, setId, [item.itemId]),
+      piecesWornBefore,
+      piecesAfterSwap,
+      nextThreshold,
+      crossesThreshold,
+    };
+    // A swap that leaves the piece count where it found it (re-equipping an
+    // item already worn) advances nothing toward `nextThreshold`, so it has no
+    // prospective bonus to offer even though its set does — ticket 95.
+    const advancesPieceCount = piecesAfterSwap > piecesWornBefore;
+    if (advancesPieceCount && !crossesThreshold && nextThreshold !== null) {
+      const matching = bonusesForSet.find((b) => b.threshold === nextThreshold);
+      if (matching?.bonusDps !== undefined) {
+        setContext.prospectiveBonusDps = matching.bonusDps;
+        if (matching.breaks && matching.breaks.length > 0) {
+          setContext.prospectiveBonusBreaks = matching.breaks;
+        }
+      }
+    }
+    // Package membership is independent of everything above: it asks only
+    // "is this item one of the pieces a measured package assembles", so it
+    // reaches rows whose `nextThreshold` points elsewhere. Every measured
+    // threshold's figure rides along (ticket 118) — see `memberPackages`.
+    const pkgs = memberPackages(item.itemId, bonusesForSet);
+    if (pkgs) setContext.packages = pkgs;
+    item.setContext = setContext;
   }
 }
 
@@ -976,25 +1659,45 @@ export function equipmentForCandidateSwap(
   itemId: number,
   gems: GemContext
 ): SimItemSpec[] {
+  return candidateSwapWithRepairs(equipment, slotIndex, itemId, gems).equipment;
+}
+
+/**
+ * The swap plus the gem swaps meta repair had to make on *other* worn items
+ * to activate the candidate's meta.
+ *
+ * Those swaps are the disclosure PLAN.md §9 policy item 5 requires and
+ * ticket 107 found missing: pricing a helm "given four changes to two other
+ * items" without saying so misreports what the player is being offered.
+ * `equipmentForCandidateSwap` discarded them, so only the *baseline* repair
+ * ever reached the report.
+ */
+export function candidateSwapWithRepairs(
+  equipment: readonly SimItemSpec[],
+  slotIndex: number,
+  itemId: number,
+  gems: GemContext
+): { equipment: SimItemSpec[]; swaps: readonly MetaRepairSwap[] } {
   const swapped = swapItemAt(equipment, slotIndex, itemId, gems);
   const socketed: SocketedItem[] = swapped.map((spec) => ({
     itemId: spec.id ?? 0,
     gems: [...spec.gems],
   }));
-  let repaired;
-  try {
-    repaired = repairMeta({
-      items: socketed,
-      epWeights: gems.weights,
-      palette: gems.palette,
-    });
-  } catch (err) {
-    if (err instanceof MetaUnsolvableError) {
-      throw new RankError("meta-unsolvable", err.message);
-    }
-    throw err;
-  }
-  return applyRepairedGems(swapped, repaired.items);
+  // MetaRepairError propagates as-is rather than wrapping into RankError
+  // here: a repair failure on one candidate must skip only that candidate
+  // (both callers below catch it for exactly that), not abort the whole
+  // ranking the way a baseline-gear repair failure legitimately does.
+  const minimized = repairAndMinimize({
+    items: socketed,
+    epWeights: gems.weights,
+    palette: gems.fillPalette,
+  });
+  return {
+    equipment: applyRepairedGems(swapped, minimized.items),
+    // The swapped-in candidate's own sockets are the offer itself, not an
+    // adjustment to gear the player already had on.
+    swaps: minimized.swaps.filter((s) => s.itemIndex !== slotIndex),
+  };
 }
 
 function swapItemAt(
@@ -1011,9 +1714,9 @@ function swapItemAt(
       : fillEmptyCandidateGems(
           itemId,
           migrateGemsToItem(spec.gems ?? [], spec.id ?? 0, itemId),
-          gemCtx.palette,
+          gemCtx.fillPalette,
           gemCtx.weightRecord,
-          fillOptsForSwap(equipment, slotIndex)
+          fillOptsForSwap(equipment, slotIndex, gemCtx.spec)
         );
     const out: SimItemSpec = { id: itemId, gems };
     // Bare worn slot → no enchant on the candidate (do not invent one), and
@@ -1026,9 +1729,23 @@ function swapItemAt(
   });
 }
 
+/**
+ * Fail loud when no meta preference is recorded for the ranked spec: an empty
+ * meta socket otherwise looks identical to a palette that simply had no meta
+ * gem, and seating another spec's meta would be silently wrong (the outcome
+ * step6-meta-choice-spike.md rejected).
+ */
+function metaPreferenceDisclosure(
+  spec: DetectedSpecId | undefined
+): Substitution[] {
+  const note = missingMetaPreferenceNote(spec);
+  return note ? [{ field: "gems.meta-preference", detail: note }] : [];
+}
+
 function fillOptsForSwap(
   equipment: readonly SimItemSpec[],
-  slotIndex: number
+  slotIndex: number,
+  spec: DetectedSpecId | undefined
 ): FillEmptyOpts {
   const usedUnique = new Set<number>();
   const otherGemIds: number[] = [];
@@ -1045,6 +1762,7 @@ function fillOptsForSwap(
   return {
     usedUnique,
     ...(metaId !== undefined ? { meta: { metaId, otherGemIds } } : {}),
+    ...(spec !== undefined ? { spec } : {}),
   };
 }
 

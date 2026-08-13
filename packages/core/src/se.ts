@@ -1,5 +1,5 @@
 /**
- * Paired-replicate standard error (PLAN.md §10, Phase 2).
+ * Paired-replicate standard error (PLAN.md §10, Stage 2).
  *
  * Pure and separate from `rank.ts` because §10's claim is a statistical one
  * that stands or falls on its own: replicate a delta across distinct seeds and

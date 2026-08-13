@@ -1,0 +1,13 @@
+CLI: C:\Users\dgree\Code\lulz\tbc-gear-prio\vendor\wowsimcli-v0.0.101-win32-x64\wowsimcli-windows.exe True
+  OWNER2_BASE     2219.84   2219.84   2219.71   2219.79   2219.90  mean=  2219.82
+  CURSED          2062.64   2062.54   2062.43   2062.61   2062.60  mean=  2062.56
+  VENG            2055.87   2055.86   2055.75   2055.77   2055.76  mean=  2055.80
+  BELT100         2270.22   2270.26   2270.13   2270.34   2270.39  mean=  2270.27
+
+  baseline            =   2219.82
+  CURSED - VENG       =    +6.76   (owner web +10.69)
+        per-seed ['6.778', '6.675', '6.677', '6.837', '6.838']
+  CURSED - BASE       =  -157.25
+  VENG   - BASE       =  -164.02
+  BELT100 - BASE      =   +50.45   (prediction)
+        per-seed ['50.372', '50.420', '50.417', '50.550', '50.490']

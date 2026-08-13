@@ -164,6 +164,12 @@ export const REPORT_CSS = `
     background: var(--accent-soft);
     font-size: 0.92rem;
   }
+  /* Questions a figure the reader is about to act on, so it carries the
+     warning colour rather than the accent the cap banner uses. */
+  .panel.plausibility {
+    border-left: 3px solid var(--down);
+    background: var(--down-bg);
+  }
   .provenance {
     margin: 0 0 1.5rem;
     font-size: 0.85rem;
@@ -185,7 +191,51 @@ export const REPORT_CSS = `
   }
   .chip:hover { transform: translateY(-1px); }
   .chip .n { font-family: var(--font-display); font-weight: 700; }
+  /* Position in this list, renumbered by the script. Given the accent so the
+     eye reads the order first; the absolute rank sits dimmed after the name
+     so the two numbers cannot be mistaken for each other. */
+  .chip .pos {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 1ch;
+  }
+  .chip .abs {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
   .chip .d { font-family: var(--font-mono); font-size: 0.85rem; color: var(--up); }
+  /* The package figure on a member chip (ticket 112). Shown only under package
+     mode, and deliberately smaller and muted with its literal "pkg" marker: it
+     is the whole group's number sitting next to the piece's own delta, and the
+     two must never read as one value or a range. */
+  .chip .pkg { display: none; font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); }
+  body.package .chip .pkg { display: inline; }
+  /* Chips admitted into the curated list for package mode only: below cutoff
+     as single swaps, so every other mode must render the list it always did.
+     Hidden rather than absent, because the client script can re-sort chips but
+     cannot create them -- which is exactly why these were unreachable before
+     (ADR-0024 amendment). Muted styling and the figure being the package's,
+     not the swap's, keep them from reading as single-swap winners. */
+  .chip.package-only { display: none; }
+  /* Ticket 128: the reveal must lose to the source and BiS filters, not beat
+     them. Both filter conditions are folded into this same selector rather
+     than left to separate hide rules, because a later rule at equal or lower
+     specificity cannot override an earlier one that matches -- see the
+     specificity arithmetic in ticket 128. Matches the JavaScript visible
+     test in rank-report.ts, which is the other half of this same rule. */
+  body.package .chip.package-only:not(.source-hidden) {
+    display: inline-flex;
+  }
+  body.package.bis-only .chip.package-only:not(.is-bis) { display: none; }
+  .chip.muted {
+    background: var(--paper-2);
+    border-color: var(--line);
+    opacity: 0.85;
+  }
+  .chip.muted .pos { color: var(--muted); }
+  .list-count { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); font-weight: 400; }
   .slot { margin-bottom: 2.25rem; scroll-margin-top: 3.5rem; }
   .slot-head {
     display: flex;
@@ -277,6 +327,152 @@ export const REPORT_CSS = `
     color: var(--ink-soft);
   }
   .hit-note.down { color: var(--down); }
+  .gem-subs {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .set-potential {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .curated-pointer {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  /* Shown in every mode, not only under package mode: it is the one place a
+     reader sees the row's own swap delta beside the package figure, and under
+     package mode the .nums column has switched to the package number. */
+  .package-line {
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  /* One secondary block per row instead of four sibling clauses. The rule is
+     the hierarchy: the row's own delta is primary and lives in .nums, and
+     everything about the row's sets is one indented, labelled subject under
+     it. */
+  .set-info {
+    margin-top: 0.4rem;
+    padding: 0.35rem 0 0.35rem 0.6rem;
+    border-left: 2px solid var(--line);
+  }
+  .set-info-title {
+    margin: 0 0 0.2rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  /* Inside the block the clauses are already grouped, so their own top margins
+     would re-space what the block just spaced. */
+  .set-info > .set,
+  .set-info > .set-potential,
+  .set-info > .package-line,
+  .set-info > .curated-pointer { margin-top: 0.15rem; }
+  .set-info > :nth-child(2) { margin-top: 0; }
+  /* Panel entries: one heading, then a fixed line order. The figures lead, the
+     contents are the actionable part, and the qualifiers are small print that
+     constrains both -- ranked by weight so the order is visible, not just
+     implied. */
+  .set-entries { list-style: none; margin: 0; padding: 0; }
+  .set-entry {
+    margin: 0 0 0.7rem;
+    padding-left: 0.6rem;
+    border-left: 2px solid var(--line);
+  }
+  .set-entry:last-child { margin-bottom: 0; }
+  .set-entry-head {
+    margin: 0 0 0.2rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .set-entry-line { font-size: 0.8rem; }
+  .set-entry-line.bonus { font-family: var(--font-mono); color: var(--ink); }
+  .set-entry-line.package { font-family: var(--font-mono); color: var(--accent); }
+  .set-entry-line.contents { color: var(--ink-soft); }
+  .set-entry-line.qualifier { font-size: 0.75rem; color: var(--muted); }
+  .set-potential-assumption {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+  .set-weight-toggle {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .set-weight-title {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+  .set-weight-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.1rem 0;
+  }
+  .set-weight-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .source-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.1rem 0.75rem;
+  }
+  .source-n { color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem; }
+  .set-weight-toggle button {
+    font: inherit;
+    font-size: 0.78rem;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .set-weight-toggle button:hover { background: var(--paper-2); }
+  #export-json {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 0.5rem;
+    resize: vertical;
+  }
+  .export-status { font-size: 0.78rem; color: var(--up); }
+  /* Source filter and the "nothing left in this slot" case, both driven by a
+     class rather than by deleting nodes — see the BiS note below. */
+  .source-hidden,
+  .empty-under-filter { display: none; }
+  /* The BiS filter hides rather than deletes: every row stays in the
+     document, so the artifact is whole and the filter is a pure view. */
+  .slot-count-bis { display: none; }
+  body.bis-only .slot-count-all { display: none; }
+  body.bis-only .slot-count-bis { display: block; }
+  body.bis-only .row:not(.is-bis),
+  body.bis-only .chip:not(.is-bis),
+  body.bis-only .slot.no-bis,
+  body.bis-only .nav-slot.no-bis { display: none; }
+  /* Exactly one of the three figures is live at a time, so the row never shows
+     a number whose meaning depends on remembering the control's state. */
+  .delta-weighted, .delta-full, .delta-package { display: none; }
+  body.weighted .delta-plain, body.full .delta-plain, body.package .delta-plain { display: none; }
+  body.weighted .delta-weighted { display: block; }
+  body.full .delta-full { display: block; }
+  body.package .delta-package { display: block; }
   .nums { text-align: right; white-space: nowrap; }
   .delta { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; }
   .delta .unit { font-size: 0.7rem; color: var(--muted); }
@@ -284,6 +480,13 @@ export const REPORT_CSS = `
   .delta.down { color: var(--down); }
   .delta.flat { color: var(--muted); }
   .pct { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); margin-top: 0.15rem; }
+  /* The percentage is derived from the row's own swap, so under any mode that
+     credits a different figure it stacks a "-4.93%" under a "+64.07 DPS". No
+     percentage was measured for any credited mode -- prospectiveBonusDps is
+     absolute DPS and the weights scale DPS, not a ratio -- so showing none
+     beats showing one that describes a different quantity than the figure
+     above it (carry-forward 104). */
+  body.weighted .pct, body.full .pct, body.package .pct { display: none; }
   footer {
     margin-top: 2.5rem;
     padding-top: 1rem;

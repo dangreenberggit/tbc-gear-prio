@@ -1,11 +1,11 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any land ask.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask.
 ---
 
 # Pre-Merge Review
 
-Three independent axes review the branch before it lands on `dev`. Each
+Three independent axes review the branch before it merges to `dev`. Each
 reviewer gets **fresh context** — the diff and its own brief only, no access
 to this conversation. That's the point: a reviewer that remembers writing
 the code stops finding the code's mistakes.
@@ -13,7 +13,7 @@ the code stops finding the code's mistakes.
 | Axis | Brief | Notes |
 |---|---|---|
 | Adversarial | [`.agents/reviews/adversarial.md`](../../../.agents/reviews/adversarial.md) | Correctness bugs, silent-failure modes, test theatre |
-| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/phase0-findings.md` |
+| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/stage0-findings.md` |
 | Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here |
 
 ## Process
@@ -25,37 +25,55 @@ git diff dev...HEAD
 git log dev..HEAD --oneline
 ```
 
-Three-dot diff against the merge-base, same convention as `code-review`.
-Confirm the diff is non-empty before dispatching anything — an empty diff
-means there's nothing to review, not three empty reports.
+Round 1 diffs `dev...HEAD` — three-dot against the merge-base, same convention
+as `code-review`. Later rounds diff `<through-sha>..HEAD`, where `<through-sha>`
+is the previous round's recorded `<through-sha>`.
 
-### 2. Dispatch (sharp lane — slow is fine)
+Why a recorded sha: fixes for a round's findings land after that round is
+dispatched, so a round that guesses its own starting point leaves those fix
+commits between rounds, unreviewed. Chaining from the recorded sha puts every
+commit inside some round's window.
 
-Reviewers are on the **sharp** model lane — see
+Before dispatching, record this round's `<through-sha>` on the review file's
+`Reviewed range:` line — it is the next round's starting point:
+
+```bash
+git rev-parse HEAD
+```
+
+Confirm the diff is non-empty before dispatching — an empty diff means there is
+nothing to review, not three empty reports.
+
+### 2. Dispatch (review lane — slow is fine)
+
+Reviewers are on the **review** model lane — see
 [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
 
-**Ceiling vs wall:** A **ceiling** is the harness declining a model above its
-own sharp lane — e.g. Cursor refusing Sol/Opus and offering Grok high. Run on
-the harness's sharp lane, note it in the dispatch line, and continue; that is
-not a silent downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
-a swap to something *below* the harness's sharp lane — then wait, serialise,
-or hand off; do not invent a weaker model to finish.
+**Ceiling vs wall:** A **ceiling** is the harness having no taller model in its
+review lane than the one it gave you — e.g. Cursor topping out at Grok high.
+Run on the harness's review lane, note it in the dispatch line, and continue;
+that is not a downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
+a swap to something *weaker* than the harness's review lane — then wait,
+serialise, or hand off; do not invent a weaker model to finish. A model in the
+**design** lane is not an upgrade for a review axis — it is a different kind of
+model, and review axes do not run there.
 
 Try in order:
 
-1. **`codex exec`**, if the binary is on `PATH` — cross-vendor sharp review.
+1. **`codex exec`**, if the binary is on `PATH` — cross-vendor review-lane review.
    Pipe the brief + diff to it directly.
-2. **Fresh subagents on a sharp model** (explicit id) — Claude Code: Opus at
-   effort `medium`; Codex: top tier; Cursor: Grok high (prefer non-fast; else
-   the current `…-high-fast` slug); anywhere else: the top reasoning tier the
-   harness will actually run. Prefer all three axes in one parallel batch when
-   the harness is healthy.
+2. **Fresh subagents on a review-lane model** (explicit id) — Claude Code: Opus at
+   effort `medium` (**not** Fable — that is the design lane); Codex: top tier;
+   Cursor: Grok high (prefer non-fast; else the current `…-high-fast` slug);
+   anywhere else: the model your harness section names for review. Prefer all
+   three axes in one parallel batch when the harness is healthy.
 3. **On a wall** (see above):
-   - Retry once after a short wait on the **same sharp class**.
+   - Retry once after a short wait on the **same review class**.
    - Then run axes **one at a time** (adversarial → domain → code-review),
-     still sharp — slower wall-clock is acceptable.
-   - Then **print and hand off**: each brief + `git diff dev...HEAD` for a
-     fresh session or other tool (no memory of writing this code).
+     still on the review lane — slower wall-clock is acceptable.
+   - Then **print and hand off**: each brief + `git diff <from-sha>..HEAD`
+     over this round's pinned range, for a fresh session or other tool (no
+     memory of writing this code).
 4. **Same-session review by the authoring agent** only if the user
    explicitly opts in. Label it in the review file’s dispatch note.
 
@@ -75,7 +93,7 @@ Write `docs/reviews/<branch-name>.md` (slashes → dashes):
 ```markdown
 # Pre-merge review — <branch>
 
-Diffed against: dev...<branch> (<short-sha>)
+Reviewed range: `<from-sha>..<through-sha>`
 
 ## Adversarial
 …
@@ -93,10 +111,16 @@ Diffed against: dev...<branch> (<short-sha>)
 
 | ID | Axis | Disposition | Ticket / note |
 | --- | --- | --- | --- |
-| A1 | Adversarial | fixed | <what landed> |
+| A1 | Adversarial | fixed | <what was fixed> |
 | A2 | Adversarial | defer | `.scratch/carry-forward/issues/0N-slug.md` |
 | D1 | Domain | wontfix | <why> |
 ```
+
+`<through-sha>` is `git rev-parse HEAD` at dispatch; `<from-sha>` is the
+merge-base for round 1, or the previous round's `<through-sha>` after that.
+Both are resolved shas, never `HEAD` — a moved `HEAD` cannot be resolved
+retroactively. One `Reviewed range:` line per round in exactly this form, so
+coverage is checkable mechanically.
 
 `Disposition` is exactly `fixed`, `defer`, or `wontfix`. Append a one-liner
 to `.scratch/carry-forward/map.md` when filing tickets.
@@ -104,21 +128,21 @@ to `.scratch/carry-forward/map.md` when filing tickets.
 ### 4. Prove the check (do not merge here)
 
 ```bash
-pnpm land --check-only
+pnpm merge-to-dev --check-only
 ```
 
 On `phase-N/*` with open `Blocks: phase-N` tickets still open:
 
 ```bash
-pnpm land --check-only --ack-open-blockers
+pnpm merge-to-dev --check-only --ack-open-blockers
 ```
 
 ### 5. Report — then stop
 
 Tell the user where the review file is, the summary, and that
-`pnpm land --check-only` is green. **Stop there.** Do not run `pnpm land`,
+`pnpm merge-to-dev --check-only` is green. **Stop there.** Do not run `pnpm merge-to-dev`,
 do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
-unless the user has **explicitly asked to land after seeing the review
+unless the user has **explicitly asked to merge after seeing the review
 summary**. “Review and land” / “the branch looks done” / “commit this” /
-finishing this skill is **not** permission to land — wait for a separate
-ask. When they do ask, use `pnpm land` only — never a raw merge into `dev`.
+finishing this skill is **not** permission to merge — wait for a separate
+ask. When they do ask, use `pnpm merge-to-dev` only — never a raw merge into `dev`.

@@ -3,8 +3,8 @@
 **Status:** for review, pre-implementation
 **Supersedes:** agent 1's `ARCHITECTURE.md`, agent 2's `tbc_upgrade_ranker_8c29d59f.plan.md`
 **Last updated:** 2026-07-26
-**Phase 0 findings applied:** [`docs/phase0-findings.md`](docs/phase0-findings.md). Sections carrying a verified fact are marked **[P0]**. Phase 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
-**Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections landed in the pool, the preset pipeline, the gem solver, the statistics and the display layer.
+**Stage 0 findings applied:** [`docs/stage0-findings.md`](docs/stage0-findings.md). Sections carrying a verified fact are marked **[S0]** (**[S1]** where the fact was verified in Stage 1). Stage 0's gate is **closed** — see §14 and [`docs/verification-log.md`](docs/verification-log.md).
+**Domain review applied:** [`PLAN-REVIEW.md`](PLAN-REVIEW.md). Corrections carry an **[Rn]** marker naming the finding. Nothing in that review changed §3's architecture — the deep module, the three seams and the content hash all survive intact; the corrections were applied to the pool, the preset pipeline, the gem solver, the statistics and the display layer.
 
 ---
 
@@ -27,8 +27,8 @@ Where the drafts agreed, this document states the decision once and moves on. Wh
 | Product question | "What should I want to drop tonight?" — ranked single-item swaps against real logged gear |
 | First spec | **Retribution paladin**. No content tier is baked in — see the next row |
 | Content tier | **A user input, never a build target** (review R2). `maxPhase: 1–5`, filtered **inclusively**. The default is **not hand-maintained and not inferred from the player's log** — it is wowsims' own `CURRENT_PHASE`, synced and pinned (§8.5). Currently **2** |
-| Second spec | Feral cat — and it is a **gate**, not a backlog item (§14, Phase 2) |
-| Delivery | Phases with recorded exit gates; no phase N+1 before N's gate is written down |
+| Second spec | Feral cat — and it is a **gate**, not a backlog item (§14, Stage 2) |
+| Delivery | Stages with recorded exit gates; no stage N+1 before N's gate is written down |
 | Repo | **this one** (`tbc-gear-prio`); rename later if the product name sticks |
 | Runtime | One always-on Node container. Not serverless — the sim is a ~50 MB native binary that needs process spawn and multiple cores |
 | Web | TanStack Start (Nitro `node-server`) + Tailwind v4 + shadcn |
@@ -38,7 +38,7 @@ Where the drafts agreed, this document states the decision once and moves on. Wh
 | Output | Shortlist + cutoff. The top three rows are the product |
 | Views | Pin-BiS, raid/boss filter, slot grouping, hide-owned. **Display-only** — outside `RankInput`, outside `contentHash` (§4.1) |
 
-**Terminology (review R2).** "Phase" was overloaded in earlier revisions. From here: **Phase N**, capitalised, is always a *delivery* phase (§14). The game's content is a **tier**, written `maxPhase` in code and T4/P1 … T6/P5 in prose. §14's old heading "Phase 1 — the engine (ret, P1, no web)" used both senses in six words; it doesn't any more.
+**Terminology [R2].** "Phase" was overloaded in earlier revisions. Delivery steps are now **Stage N** (§14) and the game's content is a **tier**; see [`CONTEXT.md`](CONTEXT.md) for the glossary and the banned-words list. R2's original fix — capitalisation alone — failed, and was replaced by the rename.
 
 **Not the goal:** full BiS solving, parse analysis, rotation/talent optimization, or any claim that baseline sim DPS equals the player's logged DPS.
 
@@ -46,7 +46,7 @@ Where the drafts agreed, this document states the decision once and moves on. Wh
 
 | Question | Draft 1 | Draft 2 | Call |
 |---|---|---|---|
-| First spec | Feral cat | Ret (locked) | **Ret.** Ret needs no *behavioural* disambiguation — no uptime or cast heuristics, which is the expensive part. Feral's value is as the *second* spec: it's what proves the spec seam is real rather than hypothetical (§5.4). **[P0] The original reason given here was wrong** and is corrected in §5.2: WCL exposes no spec-level label for any class, so ret still needs a cheap classification step |
+| First spec | Feral cat | Ret (locked) | **Ret.** Ret needs no *behavioural* disambiguation — no uptime or cast heuristics, which is the expensive part. Feral's value is as the *second* spec: it's what proves the spec seam is real rather than hypothetical (§5.4). **[S0] The original reason given here was wrong** and is corrected in §5.2: WCL exposes no spec-level label for any class, so ret still needs a cheap classification step |
 | Proto types | Generate from pinned `.proto` | Hand-written TS types | **Generate.** §8.1 |
 | Spec presets | `decodelink` a share link, commit the JSON | Port/vendor wowsims preset data | **Decode.** Biggest scope collapse in the plan. §8.2 |
 | Candidate pool | Generate-then-curate | Curate-then-EP-shadow-check | **Same idea, better workflow in draft 1.** §8.3 |
@@ -110,7 +110,7 @@ flowchart TB
 
 Why this shape earns its keep:
 
-- **Leverage.** A caller learns one function and gets the entire engine. The CLI is ~40 lines. The web worker is ~40 lines. Both are genuinely thin, which is the point of Phase 1's "no web polish before a ranking you trust" rule — the web shell can't be where the logic hides if there's nowhere for it to hide.
+- **Leverage.** A caller learns one function and gets the entire engine. The CLI is ~40 lines. The web worker is ~40 lines. Both are genuinely thin, which is the point of Stage 1's "no web polish before a ranking you trust" rule — the web shell can't be where the logic hides if there's nowhere for it to hide.
 - **Locality.** A change to how rings are collapsed, or how ties are grouped, touches one file and is verified in one place. Neither caller notices.
 - **The interface is the test surface.** With the recorded adapters at all three seams (§6), the full engine runs deterministically in a unit test, offline, in milliseconds, with no WCL points spent and no 60-second sim. That single fact is worth more than every other testing decision in this plan.
 
@@ -134,7 +134,7 @@ export type RankInput = {
   maxPhase: ContentPhase             // 1–5, INCLUSIVE filter. Default DEFAULT_MAX_PHASE
   fight?: FightRef                   // omitted = most recent qualifying kill
   race?: Race                        // override; defaults to the preset's. NOT
-                                     // readable from WCL (P0) — and it changes the
+                                     // readable from WCL (S0) — and it changes the
                                      // sim, so it is an input and it is hashed
   iterations?: number                // default 5000
   seeds?: number[]                   // default [<fixed>]; >1 enables paired replication (§10)
@@ -168,7 +168,7 @@ Everything a caller must know, stated as part of the interface:
 - **`maxPhase` is inclusive, and inclusive is the load-bearing word** (review R2). `poolItems.filter(i => i.phase <= input.maxPhase)`. At `maxPhase: 2` the player still sees Karazhan drops and Badge of Justice gear, much of which is still competitive at T5; a per-tier pool would have wrongly excluded all of it. The same filter applies to the gem palette (§9), so a user simming at 2 is never told to socket an epic gem. It is in `contentHash` and in `assumptions`, displayed as *"candidates: phase ≤ 2"*.
 - **Display options are not inputs.** Pinning, filtering, grouping and hiding-owned live in `ViewOptions` (§4.1), never here. Anything on `RankInput` changes a number and forces a re-sim; anything on `ViewOptions` cannot and does not.
 - **Error modes.** Throws `RankError` with a discriminated `kind`: `character-not-found`, `no-qualifying-fight`, `gear-unreadable`, `meta-unsolvable`, `sim-failed`, `wcl-budget-exhausted`. Each maps to a specific UI empty-state; that mapping is the whole reason the kinds are enumerated rather than free-text.
-- **Cost.** **[P0]** Stated in **points**, not queries (per review R9): a full resolve — character → recent reports → `CombatantInfo` → buffs table — measured at **~10.6 points** against a **3,600 points/hour** budget, i.e. ~340 cold resolves per hour. 0 on gear-cache hit. Plus up to `|simmed| × |seeds| + 1` sim runs (0 on ranking-cache hit), where `|simmed|` is the pool *after* the rank-time EP prefilter — ~80 of a ~180-entry pool by default, or the whole pool under `fullPool` (§8.3). Tens of seconds to a couple of minutes. This is a **job**, and the interface says so by taking `onProgress`.
+- **Cost.** **[S0]** Stated in **points**, not queries (per review R9): a full resolve — character → recent reports → `CombatantInfo` → buffs table — measured at **~10.6 points** against a **3,600 points/hour** budget, i.e. ~340 cold resolves per hour. 0 on gear-cache hit. Plus up to `|simmed| × |seeds| + 1` sim runs (0 on ranking-cache hit), where `|simmed|` is the pool *after* the rank-time EP prefilter — ~80 of a ~180-entry pool by default, or the whole pool under `fullPool` (§8.3). Tens of seconds to a couple of minutes. This is a **job**, and the interface says so by taking `onProgress`.
 - **Purity.** No filesystem, no network, no `process.env`, no React, no `console` — all I/O crosses one of the three seams. Enforced by lint rule, not by good intentions.
 
 ```ts
@@ -227,7 +227,7 @@ export type CapState = {
     rating: number; capRating: number; gap: number   // gap > 0 = under cap
     assumedRace: Race                                // NOT read from the log — see below
     capUncertainty: number                           // ±16: Heroic Presence is
-                                                     // unobservable (P0)
+                                                     // unobservable (S0)
   }
   expertise: { rating: number; capRating: number; gap: number }
 }
@@ -237,7 +237,7 @@ export type CapState = {
 
 **Take the rating conversions from upstream rather than deriving them.** `ui/core/constants/mechanics.ts` (at the pinned commit) carries `PHYSICAL_HIT_RATING_PER_HIT_PERCENT = 15.769233` and the crit/haste/expertise equivalents; none of these constants currently exist in `packages/core/src`. They corroborate this section exactly — `9 × 15.769233 = 141.92`, i.e. the ~142 cap above, and 1% ≈ 15.77, i.e. `capUncertainty: 16`. Copy the values with the pin SHA in a comment rather than importing across the vendor boundary: that file is level-scoped (`CHARACTER_LEVEL = 70`, `BOSS_LEVEL = 73`) and would silently change meaning if the pin ever moved to a later-expansion upstream. Note also that `SPELL_HIT_RATING_PER_HIT_PERCENT` (12.615385) differs from the physical constant — a ret hit cap must use the physical one. See [`docs/plans/wowsims-reuse/take-list.md`](docs/plans/wowsims-reuse/take-list.md) §2.
 
-**[R8, P0] The hit cap moves with race — and race is NOT retrievable from Warcraft Logs.** This was probed properly and the answer is a clean no: no race field on `ReportActor`, none on the `CombatantInfo` event, and `Character.gameData` returns *"This game does not support cached game data."*
+**[R8, S0] The hit cap moves with race — and race is NOT retrievable from Warcraft Logs.** This was probed properly and the answer is a clean no: no race field on `ReportActor`, none on the `CombatantInfo` event, and `Character.gameData` returns *"This game does not support cached game data."*
 
 The promising fallback also failed, and it's worth recording why, because it would have been *better* than race. TBC's *Heroic Presence* is a **party-wide** +1% hit aura — so a non-Draenei grouped with a Draenei still gets it, and reading race alone gives the wrong answer in both directions. The buff is the ground truth that race only proxies for. It is **not tracked**: absent from 6/6 reports across two zones, while the same tables carry 163 auras including passive party auras of identical shape (*Blood Pact*, *Unleashed Rage*). And the sample isn't ambiguous — both fixture characters are **Alliance**, every Alliance shaman in TBC is a Draenei, and those raids are full of shaman auras. There were Draenei present. The aura still never appears.
 
@@ -279,11 +279,11 @@ Three consequences, all of which are easy to get backwards:
 
 ## 5. The seams
 
-Three, and only three. The discipline being applied: *one adapter is a hypothetical seam; two adapters is a real one.* Each seam below has two adapters that both actually get built, in Phase 1, and both actually get used.
+Three, and only three. The discipline being applied: *one adapter is a hypothetical seam; two adapters is a real one.* Each seam below has two adapters that both actually get built, in Stage 1, and both actually get used.
 
 ### 5.1 What is not a seam
 
-`packages/sim` and `packages/db` (draft 2, rev 1) fail the deletion test. Delete `packages/sim`: the complexity doesn't spread across callers, it lands back in one file — `spawn`, two temp files, `JSON.parse`. Delete `packages/db`: four table definitions move into core. A package boundary with nothing varying across it is indirection with a `package.json` attached, and it costs you a build step, a version, and a jump every time you read the code.
+`packages/sim` and `packages/db` (draft 2, rev 1) fail the deletion test. Delete `packages/sim`: the complexity doesn't spread across callers, it collapses back into one file — `spawn`, two temp files, `JSON.parse`. Delete `packages/db`: four table definitions move into core. A package boundary with nothing varying across it is indirection with a `package.json` attached, and it costs you a build step, a version, and a jump every time you read the code.
 
 Final layout is **one package and one app**, and the split between them is real because it has two callers:
 
@@ -319,7 +319,7 @@ tbc-gear-prio/
     items/index.json            GENERATED from db.json — id → name, slot, sockets,
                                 socketBonus, enchantable, setId, phase, unique,
                                 requiredProfession. Every item, not just pool
-                                members (§9 [P0])
+                                members (§9 [S0])
     gems/palette.json           GENERATED from db.json — id, colour, stats, phase,
                                 unique, requiredProfession (§9, R4)
     wowsims.lock.json           COMMITTED — pinned upstream tag, commit, per-file
@@ -329,12 +329,12 @@ tbc-gear-prio/
     sync_wowsims.py             pin/verify/update the upstream inputs (§8.5)
     verify_fixture.py           resolves a captured fixture against db.json —
                                 slot mapping, enchant namespace, gems (§8.4)
-  wcl_probe.py                  Phase 0 WCL probe. --raw-out writes the fixture
+  wcl_probe.py                  Stage 0 WCL probe. --raw-out writes the fixture
     proto/                      pinned .proto files from the wowsims release
   vendor/wowsimcli-<version>-<platform>   gitignored; fetched by script
   docs/
     adr/                        decisions that must not be re-litigated
-    phase0-findings.md
+    stage0-findings.md
     verification-log.md
 ```
 
@@ -353,7 +353,7 @@ export interface GearSource {
 
 Two methods. Behind them: OAuth2 client-credentials with token reuse, the classic-vs-retail endpoint choice, `encounterRankings` with `includeCombatantInfo`, the `report.events(dataType: CombatantInfo)` fallback when there are no ranked kills, **spec classification (below)**, `rateLimitData` accounting, retry/backoff, and the permanent immutable gear cache. None of that is in the interface, because none of it is something the caller can act on.
 
-**[P0] Endpoints, confirmed against the live API:**
+**[S0] Endpoints, confirmed against the live API:**
 
 | | |
 |---|---|
@@ -363,7 +363,7 @@ Two methods. Behind them: OAuth2 client-credentials with token reuse, the classi
 
 `Character.recentReports`, `Character.encounterRankings`, `Character.zoneRankings`, `EventDataType.CombatantInfo`/`.Buffs`/`.Casts` and `TableDataType.Buffs` are all present in the schema, so both the resolve route and the events-fallback route are viable as drafted.
 
-**[P0] Spec classification — WCL has no spec label.** The actor-level `subType` field returns **class-level strings only** (`Paladin`, `Druid`, `Warrior`, …). There is no `Retribution` or `Feral`, for any class.
+**[S0] Spec classification — WCL has no spec label.** The actor-level `subType` field returns **class-level strings only** (`Paladin`, `Druid`, `Warrior`, …). There is no `Retribution` or `Feral`, for any class.
 
 - **Classifier (source of truth):** `CombatantInfo.talents` — a three-entry array of `{id, icon}` where **`id` is points spent in that tree** (`[{id:21},{id:40},{id:0}]` reads 21/40/0). The `talentPoints` field the plan assumed is **absent**; this array is where the distribution actually lives. Spec falls out of whichever tree holds the plurality (`classifySpec` in `packages/core/src/spec.ts` — Paladin-only today; other classes return `unsupported-class` until a fixture verifies their tree order).
 - **`CombatantInfo.specID` is unusable on TBC Anniversary** in our fixtures: **every** combatant has `specID: 0`, including confirmed Ret (slamaltman `5/11/45`). Do **not** branch on `specID` alone — treating `0` as Holy (or any real spec) mis-specs the whole raid. Re-probe before ever trusting it; until then it is noise.
@@ -374,7 +374,7 @@ Per review R7, the field on `LoggedGear` is named **`talentPointsByTree: [number
 
 **[R18] Normalize at the seam boundary — WCL's raw `talents` array must not escape the adapter.** A field called `id` nested under a field called `talents`, which actually means "points spent", is a trap with a very high hit rate: `talents.map(t => t.id)` returns `[21, 40, 0]`, which looks entirely plausible as a list of talent identifiers and is nonsense. `GearSource` returns `talentPointsByTree` and nothing else; there is no code path by which the WCL shape reaches a caller who could misread it.
 
-**[R8, P0] `race` is NOT here, because WCL does not have it.** Probed and settled — see §4 and [`docs/verification-log.md`](docs/verification-log.md). `LoggedGear` must not carry a `race` field at all, not even an optional one: the whole lesson of R18 is that a field which *looks* readable will be read, and a silently-wrong race shifts every hit-adjacent ranking. Race enters through `RankInput`, where its status as an assumption is explicit.
+**[R8, S0] `race` is NOT here, because WCL does not have it.** Probed and settled — see §4 and [`docs/verification-log.md`](docs/verification-log.md). `LoggedGear` must not carry a `race` field at all, not even an optional one: the whole lesson of R18 is that a field which *looks* readable will be read, and a silently-wrong race shifts every hit-adjacent ranking. Race enters through `RankInput`, where its status as an assumption is explicit.
 
 > **Caution on `specID`.** TBC has no native client specialization ID. On Anniversary logs the field is present but **always 0** in captured fixtures, so it is not even a useful cross-check today. **Talent-tree plurality is the only classifier.**
 
@@ -403,16 +403,16 @@ Concurrency lives in the caller, not the runner: `SIM_CONCURRENCY` (default `cor
 
 Everything spec-specific — talents, APL, buffs, consumes, EP weights, gem palette, meta policy, enchant defaults, encounter defaults — is **data**, loaded from `data/presets/<spec>/<tier>.individual-sim-settings.json`. There is no `SpecStrategy` interface and no per-spec code path.
 
-This is the payoff of §8.2, and it's why feral is a Phase 2 *gate* rather than a Phase 4 item: adding a spec should be dropping in a JSON file and nothing else. If feral requires a code change beyond the spec-detection layer, the seam was in the wrong place and we want to find that out before the web shell exists, not after.
+This is the payoff of §8.2, and it's why feral is a Stage 2 *gate* rather than a Stage 4 item: adding a spec should be dropping in a JSON file and nothing else. If feral requires a code change beyond the spec-detection layer, the seam was in the wrong place and we want to find that out before the web shell exists, not after.
 
-**[P0] Two levels of spec detection, not one.** The plan previously treated spec detection as a feral-only concern. It isn't:
+**[S0] Two levels of spec detection, not one.** The plan previously treated spec detection as a feral-only concern. It isn't:
 
 1. **Classification — every spec, ret included.** Derive the spec from `talentPointsByTree` plurality (§5.2). Cheap, always runs. Do not use `specID` (0 on Anniversary).
-2. **Behavioural disambiguation — feral only.** Bear vs cat can't be separated by talents, so it needs form uptime. **[P0] Confirmed available:** the `Buffs` table returns `Dire Bear Form`, `Bear Form`, `Cat Form` and `Moonkin` entries for TBC fights, so the Phase 2 gate is unblocked on data.
+2. **Behavioural disambiguation — feral only.** Bear vs cat can't be separated by talents, so it needs form uptime. **[S0] Confirmed available:** the `Buffs` table returns `Dire Bear Form`, `Bear Form`, `Cat Form` and `Moonkin` entries for TBC fights, so the Stage 2 gate is unblocked on data.
 
 Per review R12, the rule for (2) is **declared in the preset**, e.g. `{ disambiguate: { buff: 'Bear Form', maxUptime: 0.2 } }`, and evaluated behind `GearSource.findFights` as a per-spec *confidence* field. Neither level is a branch in the engine.
 
-**[P0] Talent presets are one default per spec/tier, not closest-variant.** Because the raw payload carries only per-tree totals (21/40/0), there is no way to match a logged build against specific preset variants. This was already the plan's fallback; it is now known to be the only option, so nothing should be built expecting finer granularity.
+**[S0] Talent presets are one default per spec/tier, not closest-variant.** Because the raw payload carries only per-tree totals (21/40/0), there is no way to match a logged build against specific preset variants. This was already the plan's fallback; it is now known to be the only option, so nothing should be built expecting finer granularity.
 
 ### 5.5 `Store` — local-substitutable
 
@@ -445,7 +445,7 @@ expect(ranking.baseline.metaAdjusted).toBe(true)  // fixture has an inactive met
 
 Deterministic, offline, sub-second, and it exercises resolve→rank end to end. Tests assert on outcomes visible through the interface, never on stage internals — so the eight stages can be reorganized freely without touching a test.
 
-Stage-level tests exist only where the logic is genuinely intricate and independently valuable: the **gem solver** (including the socket-bonus case, §9), the **ranking statistics**, the **19→17 slot mapping** (§8.4 — asserted item-by-item against the fixture, because this one fails silently), and **`applyView`** (§4.1). All four are pure functions over in-memory data (dependency category: in-process), so they need no adapters at all.
+Pipeline-stage-level tests exist only where the logic is genuinely intricate and independently valuable: the **gem solver** (including the socket-bonus case, §9), the **ranking statistics**, the **19→17 slot mapping** (§8.4 — asserted item-by-item against the fixture, because this one fails silently), and **`applyView`** (§4.1). All four are pure functions over in-memory data (dependency category: in-process), so they need no adapters at all.
 
 `applyView` in particular is worth testing at this level rather than through the UI: the properties that matter — absolute `rank` survives filtering, filter composes before cutoff, pinned groups stay `deltaDps`-ordered — are all assertions about a returned array, and none of them need a browser to check.
 
@@ -465,7 +465,7 @@ Draft 1 proposed `dedupeHash` over (gear + settings + pool). Draft 2 proposed id
 ```ts
 contentHash = sha256(canonicalJson({
   gearSnapshot,        // exact items/gems/enchants read from the log
-  race,                // ASSUMED, not read (P0). Changes the sim, so it is hashed
+  race,                // ASSUMED, not read (S0). Changes the sim, so it is hashed
   presetId, presetVersion,
   encounterProfile,
   poolId, poolVersion,
@@ -511,13 +511,13 @@ Do **not** port `presets.ts` per spec. Instead: configure the spec once in the w
 
 This collapses the largest per-spec chunk of work from "read and port a TypeScript file, then keep it in sync" to "two minutes in a web UI". The committed JSON is human-auditable and diffable, so a preset change shows up in review as a data diff rather than hiding in a code change. Refreshing a preset after a sim balance patch is the same two minutes.
 
-> **Phase 0 must verify** that the pinned `wowsimcli` actually exposes a link-decoding subcommand (draft 1 asserts `decodelink`; review R10 confirms the subcommand exists, but that is a claim about the tool rather than an observation of ours — run it against the pinned binary). If it doesn't, the fallback is to decode the share link ourselves — it's zlib+base64 over `IndividualSimSettings`, and we already have generated types for that from §8.1, so the fallback is ~20 lines rather than a re-plan. **Keep the fallback scoped regardless:** the same zlib+base64 codec is needed for the *export* side (§12), so it is not wasted work either way.
+> **Stage 0 must verify** that the pinned `wowsimcli` actually exposes a link-decoding subcommand (draft 1 asserts `decodelink`; review R10 confirms the subcommand exists, but that is a claim about the tool rather than an observation of ours — run it against the pinned binary). If it doesn't, the fallback is to decode the share link ourselves — it's zlib+base64 over `IndividualSimSettings`, and we already have generated types for that from §8.1, so the fallback is ~20 lines rather than a re-plan. **Keep the fallback scoped regardless:** the same zlib+base64 codec is needed for the *export* side (§12), so it is not wasted work either way.
 
 **[R6] The import path crosses a protobuf message boundary, and the plan previously didn't say so.** Share links carry **`IndividualSimSettings`**. `wowsimcli sim` consumes **`RaidSimRequest`**. Different messages. §12 noted the distinction for the *export* path and §8.2 silently skipped it for the *import* path — and confusing these two is exactly the mistake the domain reference calls out as easy and common.
 
 So, named explicitly: `data/presets/<spec>/<tier>.individual-sim-settings.json` holds `IndividualSimSettings`. Keep that file committed regardless — it is the reviewable, `decodelink`-reproducible, share-link-traceable artifact. A hand-exported `RaidSimRequest` is not a substitute for it.
 
-**Compose shape (chosen):** build-time generator + golden skeleton; compose at runtime is a pure patch. A script assembles `data/presets/<spec>/<tier>.raid-sim-skeleton.json` from the IndividualSimSettings preset plus the pinned wowsims APL (`vendor/wowsims/<spec>_default.apl.json`), and CI diffs that output against the committed golden (the Phase 0 manual CLI export, promoted out of `test/fixtures/`). Runtime `compose` then patches only `name` / `race` / `equipment` onto that skeleton and **must not** emit `simOptions` (`CliSimRunner` injects those for the spawn; cache keys hash the pre-injection request — §7 / R6).
+**Compose shape (chosen):** build-time generator + golden skeleton; compose at runtime is a pure patch. A script assembles `data/presets/<spec>/<tier>.raid-sim-skeleton.json` from the IndividualSimSettings preset plus the pinned wowsims APL (`vendor/wowsims/<spec>_default.apl.json`), and CI diffs that output against the committed golden (the Stage 0 manual CLI export, promoted out of `test/fixtures/`). Runtime `compose` then patches only `name` / `race` / `equipment` onto that skeleton and **must not** emit `simOptions` (`CliSimRunner` injects those for the spawn; cache keys hash the pre-injection request — §7 / R6).
 
 This satisfies the real §8.2 constraint — *do not port `presets.ts` and keep it in sync* — without requiring a manual browser re-export every time the lift is checked. Assembling pinned upstream files is not reimplementing wowsims logic. Runtime lift from IndividualSimSettings (literal earlier wording of this section) remains the eventual end state once the exported `consumables.potions[]` / `conjuredItems[]` menus are understood; those menus are inert for ret today (the APL never references them) but are not yet regenerable.
 
@@ -531,7 +531,7 @@ The wowsims item DB has incomplete `sources` — tier pieces frequently have `so
 
 Generate-then-curate:
 
-**[P0] `db.json` is a build input with two consumers now, not one.** The pool generator is the obvious one. The second is `data/items/index.json` (§5.1, §9) — the socket/enchantability metadata the normalize stage needs for gear the player is *already wearing*, which the pool by definition doesn't cover. Both are generated from the same pinned wowsims release as the binary; nothing reads `db.json` at runtime. (This is review R3, reinforced: Phase 0 makes it blocking for gear-reading, not just for pool generation.)
+**[S0] `db.json` is a build input with two consumers now, not one.** The pool generator is the obvious one. The second is `data/items/index.json` (§5.1, §9) — the socket/enchantability metadata the normalize stage needs for gear the player is *already wearing*, which the pool by definition doesn't cover. Both are generated from the same pinned wowsims release as the binary; nothing reads `db.json` at runtime. (This is review R3, reinforced: Stage 0 makes it blocking for gear-reading, not just for pool generation.)
 
 1. `pnpm pool:generate --spec ret` EP-scores every equippable item **across all tiers** and writes top-N-per-slot to `data/pools/ret.json`. One file per spec, not per tier (R2) — every entry carries its own `phase` and filtering happens at rank time, so curation accumulates instead of being redone each tier.
 2. A human edits that file — adds tier via token mapping, adds the crafted and rep pieces that matter, removes noise, fills `source` gaps (§8.3.2). Target density **~8 real options per slot**, ~180 entries (§8.3.3).
@@ -545,7 +545,7 @@ BiS tags are imported from **wowsims' own curated gear sets** (`ui/<class>/<spec
 
 §1.1's product question — *"what should I want to drop tonight?"* — is **inherently raid-scoped**. Someone raiding Hyjal tonight wants Hyjal drops, and TMB's own wishlist pages label every item with exactly this (`Kara`, `Gruul`, `Mag`, `SSC`, `TK`, `BT`, `Hyjal`). So a source filter is core to the framing, not a nice-to-have — which makes `source` a **required** field on every pool entry.
 
-The catch, and it inverts the plan's existing defence: `sources` is null on **1,169 of 2,167 phase-1 epics, including every tier piece**. §8.3's response was to never derive the *pool* from `sources`, which works because the pool is built from stats and missing source data is simply harmless there. A user-facing **filter** flips the sign. Missing source no longer means "item still included" — it means **the item silently vanishes from the view**. A "Karazhan" filter that omits every T4 piece is a worse and quieter failure than the one we already guarded against.
+The catch, and it inverts the plan's existing defence: `sources` is null on **1,169 of 2,167 T4 epics, including every tier piece**. §8.3's response was to never derive the *pool* from `sources`, which works because the pool is built from stats and missing source data is simply harmless there. A user-facing **filter** flips the sign. Missing source no longer means "item still included" — it means **the item silently vanishes from the view**. A "Karazhan" filter that omits every T4 piece is a worse and quieter failure than the one we already guarded against.
 
 #### 8.3.2 Where the source data actually comes from
 
@@ -601,7 +601,7 @@ That's My BiS is **not** a data source here and is never read from. It has no pu
 
 ### 8.4 The 19 → 17 slot reconciliation is a mapping table, not a filter
 
-Phase 0 logged this as "slot-count reconciliation … a manual TODO" (§18). It is less open than it looks, and more dangerous. WoW's equipment array is 19 entries, 0-indexed:
+Stage 0 logged this as "slot-count reconciliation … a manual TODO" (§18). It is less open than it looks, and more dangerous. WoW's equipment array is 19 entries, 0-indexed:
 
 ```
  0 head    1 neck     2 shoulder   3 SHIRT     4 chest     5 waist    6 legs
@@ -620,7 +620,7 @@ That failure produces a valid `RaidSimRequest` and a wrong number with no error 
 - **WCL's 19-entry order: 19/19 agree.** Every logged item resolved against `db.json`; indices 3 and 18 are the only two absent, and they are exactly shirt (`859`) and tabard (`5976`).
 - **The sim's 17-entry order: 16/16 non-empty entries agree** — established without the binary, using wowsims' own curated ret set. It is 17 entries in the sim's order carrying an enchant `effectId` per slot, and TBC enchants are slot-typed, so the names must land on the slots they describe. *Enchant Cloak* sits at index 3, *Enchant Gloves* at index 6, *Nethercobra Leg Armor* at index 8.
 
-**And the danger was understated.** The review flagged `back` as *the* reordered slot. Measured, a drop-only implementation gets **11 of 17 positions wrong** — only head, neck, shoulder and the three weapon slots survive by accident. `scripts/verify_fixture.py` prints the full divergence; port that assertion into the Phase 1 test suite rather than rewriting it.
+**And the danger was understated.** The review flagged `back` as *the* reordered slot. Measured, a drop-only implementation gets **11 of 17 positions wrong** — only head, neck, shoulder and the three weapon slots survive by accident. `scripts/verify_fixture.py` prints the full divergence; port that assertion into the Stage 1 test suite rather than rewriting it.
 
 ---
 
@@ -628,7 +628,7 @@ That failure produces a valid `RaidSimRequest` and a wrong number with no error 
 
 Everything we take from wowsims — `db.json`, the protos, the curated gear sets, the APLs — is pinned to **one release tag**, recorded in `data/wowsims.lock.json`, and fetched into gitignored `vendor/`. What gets committed is the *generated* output plus the lockfile, so "which upstream release produced this data" is answerable from the repo alone. `scripts/sync_wowsims.py` does the fetching; `--check` reports drift and exits non-zero, which is the CI shape.
 
-**The load-bearing field is `CURRENT_PHASE`, and it settles where `DEFAULT_MAX_PHASE` comes from.** [**P0**] Verified in `ui/core/constants/other.ts`:
+**The load-bearing field is `CURRENT_PHASE`, and it settles where `DEFAULT_MAX_PHASE` comes from.** [**S0**] Verified in `ui/core/constants/other.ts`:
 
 ```ts
 export enum Phase { Phase1 = 1, Phase2, Phase3, Phase4, Phase5 }
@@ -647,11 +647,11 @@ Currently pinned: **v0.0.101** (`8aa378b3`), `currentPhase: 2`.
 
 ## 9. Gem and enchant policy
 
-The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. There is no upstream optimizer to borrow, so this is ours.
+The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. Upstream *does* have a gem/socket optimizer (`suggest_reforges` — the name is inherited; TBC has no reforging), but its active development lives on `feature/backend-reforge`, not the pinned tag, so our repair pass remains ours; upstream's `socketBonusActive` is reference material, not a dependency (ADR-0025, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`).
 
-**[P0] Gems and enchants are present in TBC Anniversary logs, and the apparent sparsity is not a data gap.** This was the plan's single largest risk (§15) and it is now retired. Both probe characters returned populated `permanentEnchant` / `temporaryEnchant` / `gems` keys — 10/19 and 9/19 enchanted slots, 7/19 and 6/19 gemmed. Cross-referencing every item ID against wowsims' `db.json` showed **exact agreement** between what a slot *can* carry and what WCL reported: items with 2 sockets reported 2 gems, items with none reported none, and neck/waist/trinket correctly showed no enchant because those slots aren't enchantable in TBC. Held across two classes and two characters.
+**[S0] Gems and enchants are present in TBC Anniversary logs, and the apparent sparsity is not a data gap.** This was the plan's single largest risk (§15) and it is now retired. Both probe characters returned populated `permanentEnchant` / `temporaryEnchant` / `gems` keys — 10/19 and 9/19 enchanted slots, 7/19 and 6/19 gemmed. Cross-referencing every item ID against wowsims' `db.json` showed **exact agreement** between what a slot *can* carry and what WCL reported: items with 2 sockets reported 2 gems, items with none reported none, and neck/waist/trinket correctly showed no enchant because those slots aren't enchantable in TBC. Held across two classes and two characters.
 >
-> **Correction (Phase 1, `data/items/index.json` generation):** "finger" does not belong on this list. TBC has four "Enchant Ring - *" recipes (Spellpower/Striking/Healing Power/Stats, effect ids 2928–2931), and the 25-combatant `slamaltman.raw.json` fixture shows finger slots enchanted in 14/50 cases, all resolving to real ring-enchant records in `db.json`. The non-enchantable set is **neck, waist, trinket** — verified two ways: `db.json`'s own `enchants[]` table has zero records targeting those three slots, and zero of those three slots are ever enchanted across all 25 combatants in the fixture. `packages/core/src/items.ts`'s `enchantable` field implements the corrected rule.
+> **Correction (Stage 1, `data/items/index.json` generation):** "finger" does not belong on this list. TBC has four "Enchant Ring - *" recipes (Spellpower/Striking/Healing Power/Stats, effect ids 2928–2931), and the 25-combatant `slamaltman.raw.json` fixture shows finger slots enchanted in 14/50 cases, all resolving to real ring-enchant records in `db.json`. The non-enchantable set is **neck, waist, trinket** — verified two ways: `db.json`'s own `enchants[]` table has zero records targeting those three slots, and zero of those three slots are ever enchanted across all 25 combatants in the fixture. `packages/core/src/items.ts`'s `enchantable` field implements the corrected rule.
 >
 > **Why the two-character probe missed it, and why that matters:** not chance. Ring enchants are **enchanter-only** — those four records are the *only* four in the entire 141-record `enchants[]` table carrying `requiredProfession` (`3` = `Enchanting`, `common.proto:117`). Most players cannot have them, so a small probe is *expected* to show bare rings. This makes the finger slot the one place where "eligible" is a property of the **player**, not of the item.
 
@@ -665,14 +665,14 @@ The Go sim does **not** enforce meta gem activation. Drive it naively and you ge
 
 **Synthesis is therefore eligibility-aware, not gap-filling.** The normalize stage must not treat every empty slot as missing data. For each slot it first asks the item DB *can this item carry an enchant / does it have sockets*, and only synthesizes from the preset when an **eligible** slot is genuinely empty. Getting this backwards invents enchants for rings and reports them as substitutions, which is precisely the disclosure noise that destroys the assumptions drawer's credibility.
 
-> **This moves a dependency.** Socket and enchantability metadata is now load-bearing for **gear reading at Phase 1**, not only for pool curation (§8.3). It must cover **every item a player might be wearing**, which is a strictly larger set than the candidate pool — so it cannot be satisfied by baking metadata into `data/pools/<spec>.json` alone. See the `data/items/index.json` entry in §5.1.
+> **This moves a dependency.** Socket and enchantability metadata is now load-bearing for **gear reading at Stage 1**, not only for pool curation (§8.3). It must cover **every item a player might be wearing**, which is a strictly larger set than the candidate pool — so it cannot be satisfied by baking metadata into `data/pools/<spec>.json` alone. See the `data/items/index.json` entry in §5.1.
 
 **Policy** — applied identically to baseline and every candidate, which is the part that actually matters:
 
 1. If the head has a meta socket, assume the player keeps the meta active.
 2. If baseline or a candidate would deactivate it, repair by **minimum EP loss** from the *current* gem layout. Repair, not re-optimization — the output must stay recognisably the player's gear, or the recommendation reads as a different character's.
 3. Head with no meta socket (Wolfshead and friends): no meta condition, skip.
-4. Enchants on a swapped slot inherit from the spec preset for that phase/slot. A valid logged enchant is kept on the baseline.
+4. Enchants on a swapped slot inherit from the spec preset for that tier/slot. A valid logged enchant is kept on the baseline.
 5. Every adjustment is recorded as a `Substitution` and shown. `baseline.metaAdjusted` is a first-class field because "we changed your gems to make this legal" is exactly the kind of thing that destroys trust when discovered rather than disclosed.
 
 **[R7] Design the drawer for five substitutions on a clean run, not zero.** §4 defines `substitutions` as "every field we invented rather than read", and this section uses it for meta repairs — which frames substitution as *exceptional*. It isn't. **Talents, APL, buffs, consumes and the encounter profile are all invented on every single run**, and that gap is far larger than a gem recolour. If `substitutions` is honest, every ranking carries roughly five entries before anything unusual has happened, plus the profession exclusion above.
@@ -691,7 +691,7 @@ It has to be **inside** the cost function. A post-hoc check picks the wrong move
 
 **[R4] Palette filtering, which was previously unspecified.** `data/gems/palette.json` (§5.1) is generated from `db.json` and filtered on four things — wowsims' own gem filter does the first three:
 
-1. **Phase ≤ `maxPhase`** (R2). This is the consistency point that matters most: gem counts by tier are 163 / 6 / 39 / 0 / 6 for P1–P5, and the 39 phase-3 gems are the **epic gems arriving 2026-08-27**. A user simming at `maxPhase: 2` must never be told to socket an epic gem. (Meta gems are unaffected — all 18 are phase 1.)
+1. **Tier ≤ `maxPhase`** (R2). This is the consistency point that matters most: gem counts by tier are 163 / 6 / 39 / 0 / 6 for P1–P5, and the 39 T6 gems are the **epic gems arriving 2026-08-27**. A user simming at `maxPhase: 2` must never be told to socket an epic gem. (Meta gems are unaffected — all 18 are T4.)
 2. **Unique gems** — excluded from multi-socket consideration.
 3. **Jewelcrafting-restricted gems** — excluded outright, see below.
 4. Colour, for the meta condition itself.
@@ -710,12 +710,12 @@ It can't simply be fixed by algebra either: `wowsimcli` returns per-run mean and
 
 **[R5] How much the shared seed buys is now measured, and it is a lot.** At 5,000 iterations on ret gear, repeated runs of *identical* gear spread across **1.58 DPS** with independent seeds and **0.06 DPS** with a shared seed. Roughly 25×. The earlier hedge that "the variance reduction may be small" was wrong in the direction that matters.
 
-**The Phase 1 consequence is concrete.** We share seeds (correct) but *report* independent SE, which is on the ~1.5 DPS scale. Tie groups form from overlapping intervals, and a cutoff of "~1 DPS or 0.15%" sits *below* that scale — so a large part of the shortlist collapses into a single undifferentiated tie group no matter how long the list is. The tool would look broken while being statistically conservative.
+**The Stage 1 consequence is concrete.** We share seeds (correct) but *report* independent SE, which is on the ~1.5 DPS scale. Tie groups form from overlapping intervals, and a cutoff of "~1 DPS or 0.15%" sits *below* that scale — so a large part of the shortlist collapses into a single undifferentiated tie group no matter how long the list is. The tool would look broken while being statistically conservative.
 
 The plan:
 
-- **Phase 1** — use the independent-SE formula, mark it `seMethod: 'independent'`, and accept conservative tie groups. **Five-seed spread experiment: done** ([`docs/five-seed-spread.json`](docs/five-seed-spread.json), [`docs/verification-log.md`](docs/verification-log.md)). On slamaltman's logged ret gear at 5,000 iterations, mean reported SE is **1.678 DPS**; observed max−min of five independent-seed means is only **0.099 DPS**; a shared seed repeats bit-identical. The cutoff constant derived from that is **`{ absDps: 3.4, pct: 0.15 }`** — `max(3.0, 2× mean reported SE)`. R5's cited 1.58/0.06 spreads were measuring near the *reported-SE* scale, not max−min of means; our shared-seed arm is fully deterministic (0.00), not 0.06.
-- **Phase 2** — for the top ~8 items only, replicate across 5 seeds and use `SE = sd(deltas) / sqrt(5)`, marked `seMethod: 'paired-replicate'`. Correct by construction, no distributional assumptions, and it costs 5× sims on 8 items rather than on 180. This buys **resolution, not correctness** — it is a refinement, not a fix, and it should not be pulled forward at the expense of the gate items above it.
+- **Stage 1** — use the independent-SE formula, mark it `seMethod: 'independent'`, and accept conservative tie groups. **Five-seed spread experiment: done** ([`docs/five-seed-spread.json`](docs/five-seed-spread.json), [`docs/verification-log.md`](docs/verification-log.md)). On slamaltman's logged ret gear at 5,000 iterations, mean reported SE is **1.678 DPS**; observed max−min of five independent-seed means is only **0.099 DPS**; a shared seed repeats bit-identical. The cutoff constant derived from that is **`{ absDps: 3.4, pct: 0.15 }`** — `max(3.0, 2× mean reported SE)`. R5's cited 1.58/0.06 spreads were measuring near the *reported-SE* scale, not max−min of means; our shared-seed arm is fully deterministic (0.00), not 0.06.
+- **Stage 2** — for the top ~8 items only, replicate across 5 seeds and use `SE = sd(deltas) / sqrt(5)`, marked `seMethod: 'paired-replicate'`. Correct by construction, no distributional assumptions, and it costs 5× sims on 8 items rather than on 180. This buys **resolution, not correctness** — it is a refinement, not a fix, and it should not be pulled forward at the expense of the gate items above it.
 
 Tie handling: overlapping intervals form a `tieGroupId`, broken by BiS-tag richness then item id, and **displayed as a tie** rather than as a false ordering. Cutoff rows are hidden behind an expand — hidden, never deleted.
 
@@ -731,7 +731,7 @@ kv              key, value_json, created_at        -- content-addressed cache (�
 
 Two tables. Draft 2's `rankings` table is dropped — the ranking is the job's result, and a separate table means two rows to keep consistent for no gain. Gear snapshots and sim results both live in `kv` under their content addresses.
 
-Retention: gear snapshots and sim results are immutable and permanent (a sim result for a given request + version can never change). Job rows are kept for local debugging. The gear cache is the primary defence of the WCL point budget and must land in Phase 2 at the latest.
+Retention: gear snapshots and sim results are immutable and permanent (a sim result for a given request + version can never change). Job rows are kept for local debugging. The gear cache is the primary defence of the WCL point budget and must ship in Stage 2 at the latest.
 
 ---
 
@@ -750,7 +750,7 @@ This route is the single highest-value addition from draft 1 and it does three j
 **`/run/$id` — the wait, then the answer.**
 
 - All rows render as **skeletons up front**, one per pool candidate, so the layout is final before any result arrives. Zero layout shift for the entire run.
-- Rows fill in as sims land. **No re-sorting during the run** — a list that reshuffles while you're reading it is unreadable.
+- Rows fill in as sims finish. **No re-sorting during the run** — a list that reshuffles while you're reading it is unreadable.
 - Exactly **one animated re-sort at completion**. That single motion communicates "done" better than any spinner, and it's the only *unprompted* motion on the page. **A user-initiated re-sort is a third case and is fine** — the objection is to lists reshuffling while you're reading them, not to a control doing what you just asked it to.
 - Progress is honest and derived from real counts: `resolving → reading gear → building pool → simming 12/40 → ranking`.
 - Assumptions drawer one click away: encounter, preset, seeds, iterations, sim version, content hash, substitutions, and a link to the WCL report.
@@ -767,7 +767,7 @@ This route is the single highest-value addition from draft 1 and it does three j
 | Already have it | received items shown greyed, not removed | `owned` — greyed, never dropped (§8.3.3) |
 | Pin BiS | — (ours; §4.1) | `pinBis` |
 
-> Sourced from TMB's public wishlist pages and the companion addon's description, not from inspecting a live guild view. Confirm the exact control set and labels before building the UI in Phase 3 — this is a Phase 3 detail, and nothing before it depends on being right.
+> Sourced from TMB's public wishlist pages and the companion addon's description, not from inspecting a live guild view. Confirm the exact control set and labels before building the UI in Stage 3 — this is a Stage 3 detail, and nothing before it depends on being right.
 
 Two interactions that are easy to get wrong, both settled here:
 
@@ -778,9 +778,9 @@ Two interactions that are easy to get wrong, both settled here:
 
 Restraint elsewhere: no purple gradients, no glass, no dense chrome, no serif-and-terracotta. The page should look like a tool made by someone who plays the game.
 
-**Server side:** `POST /api/jobs` (dedupes on `contentHash` — attaches to a running job rather than starting a second), `GET /api/jobs/:id`, in-process worker. TanStack Query `refetchInterval` while `queued|running`. Exports: `IndividualSimSettings` JSON download and a wowsims share link (zlib+base64 after `#`) — note `IndividualSimSettings` ≠ `RaidSimRequest`; both are needed eventually, Phase 1 needs only the latter.
+**Server side:** `POST /api/jobs` (dedupes on `contentHash` — attaches to a running job rather than starting a second), `GET /api/jobs/:id`, in-process worker. TanStack Query `refetchInterval` while `queued|running`. Exports: `IndividualSimSettings` JSON download and a wowsims share link (zlib+base64 after `#`) — note `IndividualSimSettings` ≠ `RaidSimRequest`; both are needed eventually, Stage 1 needs only the latter.
 
-Emitting wowsims-shaped JSON is deliberate: wowsims → That's My BiS is an import path guilds already use, so our output lands in an existing loot workflow without TMB having to cooperate or expose an API (it has none). TMB is downstream only.
+Emitting wowsims-shaped JSON is deliberate: wowsims → That's My BiS is an import path guilds already use, so our output drops into an existing loot workflow without TMB having to cooperate or expose an API (it has none). TMB is downstream only.
 
 ---
 
@@ -799,11 +799,11 @@ Node 22 LTS, pnpm, TypeScript throughout. Dev machine is Windows, deploy target 
 
 ---
 
-## 14. Phases and gates
+## 14. Stages and gates
 
-No phase starts until the previous gate is written into `docs/verification-log.md`.
+No stage starts until the previous gate is written into `docs/verification-log.md`.
 
-### Phase 0 — De-risk (scripts only)
+### Stage 0 — De-risk (scripts only)
 
 Nothing else in this plan is worth starting until a real `CombatantInfo` payload is on disk. If gems and enchants are absent from TBC Anniversary logs, the baseline is wrong and **every delta inherits that error**.
 
@@ -811,7 +811,7 @@ Nothing else in this plan is worth starting until a real `CombatantInfo` payload
 - Dump `CombatantInfo` for a known ret paladin; inspect raw
 - Hand-compose a `RaidSimRequest` from that gear; run it through the pinned binary
 - Confirm the link-decoding path for presets (§8.2)
-- Write `docs/phase0-findings.md`, including the synthesis policy if fields are missing
+- Write `docs/stage0-findings.md`, including the synthesis policy if fields are missing
 
 **Gate — met.** Recorded in [`docs/verification-log.md`](docs/verification-log.md).
 
@@ -828,57 +828,62 @@ Nothing else in this plan is worth starting until a real `CombatantInfo` payload
 | ☑ | **content tier default sourced from upstream** — wowsims `CURRENT_PHASE`, pinned via `scripts/sync_wowsims.py` / `pnpm sync:wowsims` and `data/wowsims.lock.json` (§8.5) |
 | ☒ | **[R8] `race` is NOT retrievable** — probed four routes, all negative, including the *Heroic Presence* aura across 6/6 reports on two confirmed-Alliance characters. **This box closes as a documented "no", not as a pass**: the design changed to suit (assumed race + `capUncertainty` + user override, §4) rather than the finding being deferred |
 
-**Where this leaves Phase 0.** Closed. Phase 1 may start.
+**Where this leaves Stage 0.** Closed. Stage 1 may start.
 
-### Phase 1 — The engine (ret, CLI only)
+### Stage 1 — The engine (ret, CLI only)
 
 Scaffold; generated protos; the three seams with both adapters each; the eight stages; slot mapping; gem solver; generated-then-curated pool with `source` filled; `pnpm rank`.
 
-**Do the §10 five-seed spread experiment first**, not last — it is the input to the cutoff constant, so running it at the end of the phase means shipping a guessed cutoff and then changing the numbers under yourself. **Done** — cutoff `{ absDps: 3.4, pct: 0.15 }` derived; see verification log.
+**Do the §10 five-seed spread experiment first**, not last — it is the input to the cutoff constant, so running it at the end of the stage means shipping a guessed cutoff and then changing the numbers under yourself. **Done** — cutoff `{ absDps: 3.4, pct: 0.15 }` derived; see verification log.
 
 **Gate:** ☑ one real character produces a ranking **you would act on tonight** ☑ top items survive a human check against judgment / **wowsims curated BiS gear sets** / Wowhead's per-tier ret guide ☑ a known set-break case shows an explanatory `setBonusNote` ☑ same input, same seed, same deltas across runs ☑ the full engine runs offline from fixtures in a unit test ☑ the 5-seed spread experiment is recorded **and the cutoff constant derived from it** ☑ **the slot mapping is asserted in a test** (§8.4) ☑ **`maxPhase` demonstrably changes the candidate set and the gem palette together** — run the same character at two `maxPhase` values and diff ☑ **no pool entry ships with `source: null`** (§8.3.2)
 
-**Amended 2026-07-29 (pre-merge review, Spec finding).** This box originally said "at 1 and at 2". At those two values the gem axis provably *cannot* move: every gem phase 2 adds (32634–32639) is EP-dominated by a phase-1 gem of its colour under ret fill weights, so all 1498 socketed items fill identically — measured, not assumed. The 1→2 test therefore proves both axes hang off the same `maxPhase` but asserts the palette on `gemsForPhase` directly, and a second test at **2→3** shows the palette reaching the `RaidSimRequest` (`[28362,30584]` → `[32193,32193]` on the same item). The wording is amended to match what the data can demonstrate rather than checking the original box on a technicality.
+**Amended 2026-07-29 (pre-merge review, Spec finding).** This box originally said "at 1 and at 2". At those two values the gem axis provably *cannot* move: every gem T5 adds (32634–32639) is EP-dominated by a T4 gem of its colour under ret fill weights, so all 1498 socketed items fill identically — measured, not assumed. The 1→2 test therefore proves both axes hang off the same `maxPhase` but asserts the palette on `gemsForPhase` directly, and a second test at **2→3** shows the palette reaching the `RaidSimRequest` (`[28362,30584]` → `[32193,32193]` on the same item). The wording is amended to match what the data can demonstrate rather than checking the original box on a technicality.
 
 Six boxes were closed on 2026-07-28 by *recording* evidence that already passed, not by new engine work — see the gate-reconciliation entry in [`docs/verification-log.md`](docs/verification-log.md) for the evidence and the scope limits on each claim.
 
 The two human-check boxes closed later the same day against a fresh P3 ranking on the fixed universe. **Scope limit worth knowing:** this box names "wowsims curated BiS gear sets", but wowsims has no ret P3 set — upstream `master` carries only `preraid`/`p1`/`p2` for retribution (prot, balance, feral and hunter all have p3+). The check therefore used **Wowhead's P3 ret guide** as the reference, scored on `Best`-family picks and controlled for gear already worn: 7 already worn, 11 above cutoff, 3 marginally below, **0 absent**. Membership was separately verified held-out at **14/14 raid-sourced Best picks**. Both numbers and their limits are in the verification log.
 
-### Phase 2 — Trust, and the second spec
+### Stage 2 — Trust, and the second spec
 
 Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tags, tiebreaks and the `pinBis` sort; `applyView` with the raid/boss filter behind CLI flags; the hit-cap banner; paired-replicate SE for the top 8; the report-events fallback route; below-cutoff expand.
 
-`applyView` lands here rather than in Phase 3 on purpose: it is pure and the CLI can exercise every option, so the web shell inherits a tested view layer instead of being where filtering logic is written for the first time.
+`applyView` is built here rather than in Stage 3 on purpose: it is pure and the CLI can exercise every option, so the web shell inherits a tested view layer instead of being where filtering logic is written for the first time.
 
 **And feral cat** — which is the real gate. Adding a spec should be a preset JSON plus the disambiguation confidence field, and nothing else.
 
-**Decomposed into five subplans, 2026-08-04.** This phase is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` lands on `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
+**Decomposed into five subplans, 2026-08-04.** This stage is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` merges to `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
 
-**Gate:** ☑ re-run hits cache; deltas stable ☑ inactive-meta baseline auto-repaired and disclosed ☑ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☐ ≥3 real characters produce believable shortlists ☑ fallback route exercised on a character with no ranked kills ☑ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☑ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☑ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Phase 3
+**Gate:** ☑ re-run hits cache; deltas stable ☑ inactive-meta baseline auto-repaired and disclosed ☑ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☐ ≥3 real characters produce believable shortlists ☑ fallback route exercised on a character with no ranked kills ☑ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☑ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☑ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Stage 3
 
-**7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work: only shredzepelin has been through `sme-rank-review` (trust-with-caveats, filed carry-forward 41), so slamaltman and nexess still need a pass. Run it *after* this branch lands — the feral universe it reads does not exist on `dev`.
+**7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work: only shredzepelin has been through `sme-rank-review` (trust-with-caveats, filed carry-forward 41), so slamaltman and nexess still need a pass. Run it *after* this branch merges to `dev` — the feral universe it reads does not exist on `dev`.
 
-### Phase 3 — Web shell
+### Stage 3 — Web shell
 
-**Flagged, not planned: going live on `GearSource`.** `WclGearSource` is fully speced (§5.2) but no phase gate anywhere in this document commits to actually building it and flipping the CLI/web shell off `--offline`. Phase 0/1/2 all run on recorded fixtures by design; Phase 4's gate only checks the deployed job/point-budget/cache story, not the switch itself. This needs its own real planning pass before Phase 3 closes — not scoped here. One input for that pass: `FightSummary.salvationUptime` (ticket 06) means the live source has to fetch per-player buff uptimes, not just gear and fights. It is optional, so a source that omits it degrades to "never measured" rather than reporting a false zero — but the off-tank flag is silent until it is wired.
+**Flagged, not planned: going live on `GearSource`.** `WclGearSource` is fully speced (§5.2) but no stage gate anywhere in this document commits to actually building it and flipping the CLI/web shell off `--offline`. Stage 0/1/2 all run on recorded fixtures by design; Stage 4's gate only checks the deployed job/point-budget/cache story, not the switch itself. This needs its own real planning pass before Stage 3 closes — not scoped here. One input for that pass: `FightSummary.salvationUptime` (ticket 06) means the live source has to fetch per-player buff uptimes, not just gear and fights. It is optional, so a source that omits it degrades to "never measured" rather than reporting a false zero — but the off-tank flag is silent until it is wired.
 
-**Flagged, not planned: simulate set bonuses gained, not just broken.** `setBonusNote` (§4, and the Phase 1 gate box for it) only explains the loss case — a recommended item breaking a set bonus the player currently has. It does not simulate the gain case: a tier item in the recommended options that would complete or newly unlock a set bonus. A player can't currently weigh that value from the ranking. Mechanism not decided — not scoped here.
+**Amended 2026-08-09 (set-bonus prospective value, shipped).** This stage previously flagged
+"simulate set bonuses gained, not just broken" with the mechanism undecided. It is now
+implemented: for each (set, threshold) above worn pieces, the engine sims a completion package once
+and reports `packageDelta − Σ individual deltas` as the bonus, attached whole at the threshold (not
+split per piece). Display is opt-in via `ViewOptions.withSetPotential` / `--with-set-potential`; the
+default ranking output is unchanged. See `.scratch/set-bonus-value/spec.md`.
 
-Three routes; job submit/poll; skeleton-then-fill results; assumptions drawer; view controls over the Phase 2 `applyView`; exports and share link; attribution. Confirm TMB's actual control labels before building the filter UI (§12).
+Three routes; job submit/poll; skeleton-then-fill results; assumptions drawer; view controls over the Stage 2 `applyView`; exports and share link; attribution. Confirm TMB's actual control labels before building the filter UI (§12).
 
-**Gate:** ☐ type a character, wait, trust the top recommendation ☐ feels calm during multi-minute work ☐ zero layout shift during a run ☐ **filters and pins re-render without a network round trip** ☐ **the pin control is hidden, not inert, where no curated set exists** (§4.1) ☐ every Phase 1 CLI check still passes unchanged against the same core
+**Gate:** ☐ type a character, wait, trust the top recommendation ☐ feels calm during multi-minute work ☐ zero layout shift during a run ☐ **filters and pins re-render without a network round trip** ☐ **the pin control is hidden, not inert, where no curated set exists** (§4.1) ☐ every Stage 1 CLI check still passes unchanged against the same core
 
-### Phase 4 — Deploy
+### Stage 4 — Deploy
 
 One container: Node app + platform-correct `wowsimcli` + SQLite volume. Concurrency caps and queue backpressure. Env secrets. **Hetzner over Fly** — this is a single always-on box with a volume and a CPU-bound workload, which is precisely where Fly's per-machine pricing stops being a bargain and its scale-to-zero story stops being relevant. Revisit only if you need multi-region, which you don't.
 
 **Gate:** ☐ deployed instance completes a job end to end ☐ point budget survives expected concurrency ☐ caches survive restart
 
-### Phase 5+
+### Stage 5+
 
 Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guild roster mode (same engine, different fan-out).
 
-**New content tiers are explicitly *not* a phase here, and that is the payoff of R2.** T6/P3 is a **data-only change**, and you find out it landed because `sync_wowsims.py --check` reports `CURRENT_PHASE` moved (§8.5) — not because someone remembered a date. Add the P3 items to `data/pools/<spec>.json`, add the 39 epic gems to the palette, bump `engineVersion` to invalidate cached rankings. No code change, no migration, no dated risk row. Users who haven't reached P3 are unaffected, because they select a lower `maxPhase` and the inclusive filter does the rest.
+**New content tiers are explicitly *not* a stage here, and that is the payoff of R2.** T6/P3 is a **data-only change**, and you find out it shipped because `sync_wowsims.py --check` reports `CURRENT_PHASE` moved (§8.5) — not because someone remembered a date. Add the P3 items to `data/pools/<spec>.json`, add the 39 epic gems to the palette, bump `engineVersion` to invalidate cached rankings. No code change, no migration, no dated risk row. Users who haven't reached P3 are unaffected, because they select a lower `maxPhase` and the inclusive filter does the rest.
 
 ---
 
@@ -886,7 +891,7 @@ Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guil
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| ~~Gems/enchants absent from TBC WCL~~ | ~~Baseline wrong; every delta inherits it~~ | **[P0] RETIRED.** Both present and complete; sparsity traced to slot eligibility, not missing data (§9) |
+| ~~Gems/enchants absent from TBC WCL~~ | ~~Baseline wrong; every delta inherits it~~ | **[S0] RETIRED.** Both present and complete; sparsity traced to slot eligibility, not missing data (§9) |
 | Slot eligibility read wrongly | Invented enchants/gems on ineligible slots; substitution noise buries the real disclosures | `data/items/index.json` consulted before any synthesis (§9); assert on a fixture with a known-unenchantable slot |
 | Sim silently misreads our request | Confidently wrong answers, no error | Generated proto types (§8.1); regeneration diff in CI |
 | Go sim ignores meta activation | Impossible stats | Own solver; identical policy on baseline and candidates |
@@ -895,14 +900,14 @@ Remaining DPS specs; fight picker refinements; per-boss encounter profiles; guil
 | Stale curated BiS lists | Bad tags and tiebreaks | Spot-check before tags ship; soften copy to "wowsims curated" |
 | Incomplete `sources` in item DB | Tier pieces silently missing | Never derive the pool from `sources`; generate-then-curate |
 | **Raid filter hides items with no curated `source`** | A "Karazhan" filter that omits every T4 piece — a quiet, highly visible-to-users failure | `source` required on every pool entry; generator reports unresolved nulls; **null is a build failure for a shipping pool** (§8.3.2) |
-| **19→17 slot mapping filters without reordering** | Most of the character silently mis-slotted; valid request, wrong number, no error | Mapping in its own file, verified against a fixture, asserted in a test (§8.4); Phase 0 gate item |
-| ~~Enchant/gem ID namespace mismatch~~ | ~~Every enchant silently absent from the baseline~~ | **[P0] RETIRED.** `permanentEnchant` is the `effectId` namespace — 10/10 resolved, 0 collisions, confirmed twice. No conversion layer |
-| **Hit cap is not exactly knowable** | Banner and `hitDriven` flags are off by up to ~16 rating for anyone grouped with a Draenei | **[P0]** Race unreadable from WCL and *Heroic Presence* untracked. Assumed race + `capUncertainty` + user override, disclosed as a standing substitution (§4). Do **not** present the cap as exact |
-| **Cutoff below the noise floor** | Most of the shortlist collapses into one tie group and reads as broken | **[P1] Mitigated.** Five-seed experiment recorded; cutoff **3.4 DPS or 0.15%** derived from mean reported SE 1.678 (§10) |
+| **19→17 slot mapping filters without reordering** | Most of the character silently mis-slotted; valid request, wrong number, no error | Mapping in its own file, verified against a fixture, asserted in a test (§8.4); Stage 0 gate item |
+| ~~Enchant/gem ID namespace mismatch~~ | ~~Every enchant silently absent from the baseline~~ | **[S0] RETIRED.** `permanentEnchant` is the `effectId` namespace — 10/10 resolved, 0 collisions, confirmed twice. No conversion layer |
+| **Hit cap is not exactly knowable** | Banner and `hitDriven` flags are off by up to ~16 rating for anyone grouped with a Draenei | **[S0]** Race unreadable from WCL and *Heroic Presence* untracked. Assumed race + `capUncertainty` + user override, disclosed as a standing substitution (§4). Do **not** present the cap as exact |
+| **Cutoff below the noise floor** | Most of the shortlist collapses into one tie group and reads as broken | **[S1] Mitigated.** Five-seed experiment recorded; cutoff **3.4 DPS or 0.15%** derived from mean reported SE 1.678 (§10) |
 | **Hit-cap path dependency misread as N independent upgrades** | User takes three "upgrades" and gets one | `CapState` banner + `hitDriven` rows (§4, §12); correct-but-misleading is still misleading |
 | **Epic gems recommended before they exist** | Impossible advice; obviously wrong to any player | `maxPhase` filters the gem palette on the same constant as the pool (§9) |
 | **Profession-locked gems/items recommended** | Advice the player can't act on | Excluded outright and disclosed as a standing assumption (§9) |
-| WCL points exhausted | Tool stalls | **[P0] Downgraded for solo use** — ~10.6 points per resolve against 3,600/hr is ~340 cold lookups per hour, so the gear cache is not urgent at hobby scale. It is still required before any public form ships (review R9: `/c/…` fires a *live* fight-list query for anyone who types a name). Permanent immutable gear cache; short TTL on fight lists; `rateLimitData` monitoring |
+| WCL points exhausted | Tool stalls | **[S0] Downgraded for solo use** — ~10.6 points per resolve against 3,600/hr is ~340 cold lookups per hour, so the gear cache is not urgent at hobby scale. It is still required before any public form ships (review R9: `/c/…` fires a *live* fight-list query for anyone who types a name). Permanent immutable gear cache; short TTL on fight lists; `rateLimitData` monitoring |
 | Sim balance patch | Stale cache serves old answers | Pin binary; version-stamp; `simVersion` inside `contentHash` |
 | Windows dev / Linux deploy | First deploy fails on binary or paths | Per-platform vendored binary and path-safe code from line one |
 | Commercial use without approval | API access revoked | Stay free, or get approval first |
@@ -1001,25 +1006,25 @@ Decisions here that a future architecture review must not re-litigate:
 4. Pool generated-then-curated; `sources` is never authoritative (§8.3)
 5. Meta repair at minimum EP loss, not re-optimization (§9)
 6. Single container + SQLite; no Redis, no separate worker (§1.1)
-7. **[P0]** Spec is classified from talent-tree plurality, never `specID` (always 0 on Anniversary) or a WCL spec string — no such string exists at actor level (§5.2)
-8. **[P0]** Enchant/gem synthesis is eligibility-aware, gated on item-DB socket and enchantability metadata (§9)
+7. **[S0]** Spec is classified from talent-tree plurality, never `specID` (always 0 on Anniversary) or a WCL spec string — no such string exists at actor level (§5.2)
+8. **[S0]** Enchant/gem synthesis is eligibility-aware, gated on item-DB socket and enchantability metadata (§9)
 9. **[R2]** Content tier is a user input (`maxPhase`, inclusive), never a build target; pools are per-spec, not per-tier (§1.1, §8.3)
 10. **[R16]** `ItemSource` is a discriminated union with tier tokens carrying the **token's drop zone**; `source` is curated, required, and build-gated (§8.3.2)
 11. **[R15/R16]** The `RankInput` / `ViewOptions` split — anything that changes a number is an input and is hashed; anything that changes only presentation is a view and is not (§2, §4.1, §7)
 12. **[R13]** The rank-time EP prefilter is evaluated at the *player's* gear with cap-clipped hit/expertise weights, not on reference gear — this is what justifies letting EP gate at all (§8.3.3)
-13. **[R14/R19]** Enchant ID namespaces: `wowsims/tbc` stores enchants by **item ID**, `tbc-new` by **effect ID**. **[P0] Verified: WCL reports `effectId`, matching `tbc-new`.** We use that namespace throughout and do not port old presets. Written down so that a future *"let's just borrow the old repo's presets, they cover all five tiers"* doesn't silently break every enchant (§8.3)
-14. **[P0]** `DEFAULT_MAX_PHASE` comes from wowsims' `CURRENT_PHASE` via a pinned lockfile, **never** from the tier of the player's most recent log (§8.5)
-15. **[P0]** Race is an assumption with an override, not a field — WCL has no race, and *Heroic Presence* (party-wide, so the better signal) is untracked. The hit cap is presented with uncertainty, never as exact (§4)
+13. **[R14/R19]** Enchant ID namespaces: `wowsims/tbc` stores enchants by **item ID**, `tbc-new` by **effect ID**. **[S0] Verified: WCL reports `effectId`, matching `tbc-new`.** We use that namespace throughout and do not port old presets. Written down so that a future *"let's just borrow the old repo's presets, they cover all five tiers"* doesn't silently break every enchant (§8.3)
+14. **[S0]** `DEFAULT_MAX_PHASE` comes from wowsims' `CURRENT_PHASE` via a pinned lockfile, **never** from the tier of the player's most recent log (§8.5)
+15. **[S0]** Race is an assumption with an override, not a field — WCL has no race, and *Heroic Presence* (party-wide, so the better signal) is untracked. The hit cap is presented with uncertainty, never as exact (§4)
 
 ---
 
 ## 18. Still open for you
 
 - **Content hash `engineVersion` bumps** — manual, or derived from a hash of `packages/core/src`? Manual is simpler and lets you decide what's a semantic change; derived is safer and noisier. I'd go manual with a CI reminder on `stages/**` changes.
-- **Fixture character** — ~~Phase 0 needs one~~ **[P0] Have two**: `slamaltman` (paladin) and `shredzepelin` (warrior), both Dreamscythe-US, both Hydross in SSC/TK. Still wanted: one with an *inactive* meta so the solver has something to repair on day one, and a **third sample on a different encounter/tier** — both probe runs landed on the same fight, so slot-eligibility logic is verified broadly but not across content.
-- **`data/` in git** — presets and pools are small and diffable, so yes. **[P0] The item-DB line was wrong**: `wowsimcli` has three subcommands (`sim`, `decodelink`, `version`) and no dump mode, so `--tags=with_db` gives the *simulator* item lookup and gives us nothing. `db.json` is a pinned **build input**; what we commit is the generated `data/items/index.json` (§5.1), not the DB itself. §18's intent survives, its mechanism doesn't.
+- **Fixture character** — ~~Stage 0 needs one~~ **[S0] Have two**: `slamaltman` (paladin) and `shredzepelin` (warrior), both Dreamscythe-US, both Hydross in SSC/TK. Still wanted: one with an *inactive* meta so the solver has something to repair on day one, and a **third sample on a different encounter/tier** — both probe runs covered the same fight, so slot-eligibility logic is verified broadly but not across content.
+- **`data/` in git** — presets and pools are small and diffable, so yes. **[S0] The item-DB line was wrong**: `wowsimcli` has three subcommands (`sim`, `decodelink`, `version`) and no dump mode, so `--tags=with_db` gives the *simulator* item lookup and gives us nothing. `db.json` is a pinned **build input**; what we commit is the generated `data/items/index.json` (§5.1), not the DB itself. §18's intent survives, its mechanism doesn't.
 
-**[P0] Resolved since the last revision — no longer open:**
+**[S0] Resolved since the last revision — no longer open:**
 
 - ~~**Slot-count reconciliation.**~~ Mapped in §8.4 and verified both directions; drop-only is wrong in 11/17 positions.
 - ~~**Race is not captured.**~~ Probed and settled as a **negative**: not retrievable by any route. Design changed in §4 rather than the question staying open.

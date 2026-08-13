@@ -1,0 +1,15 @@
+  BASE          2152.10   2152.02   2152.16   2152.07   2152.31   mean=  2152.13  seed11=  2152.10
+  META_ACTIVE   1949.97   1949.78   1950.23   1950.37   1950.38   mean=  1950.15  seed11=  1949.97
+  META_DEAD     1966.70   1966.40   1966.55   1966.87   1966.83   mean=  1966.67  seed11=  1966.70
+  NO_META       1927.80   1927.47   1927.63   1927.94   1927.90   mean=  1927.75  seed11=  1927.80
+
+  META_ACTIVE  delta vs BASE: 5-seed mean  -201.98   seed11  -202.13
+  META_DEAD    delta vs BASE: 5-seed mean  -185.46   seed11  -185.40
+  NO_META      delta vs BASE: 5-seed mean  -224.38   seed11  -224.30
+
+  META_ACTIVE - META_DEAD (5-seed) =   -16.52   (conditional meta bonus MINUS recolouring cost)
+  META_ACTIVE - NO_META    (5-seed) =   +22.40   (whole meta-gem decision vs best ordinary red)
+  META_DEAD   - NO_META    (5-seed) =   +38.92   (dead meta's own unconditional stats vs 32194)
+
+  paired per-seed META_ACTIVE - META_DEAD:  -16.74   -16.61   -16.31   -16.49   -16.45
+  paired per-seed META_ACTIVE - NO_META   :  +22.17   +22.31   +22.60   +22.43   +22.48

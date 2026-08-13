@@ -1,0 +1,554 @@
+
+> tbc-gear-prio@0.1.0 rank C:\Users\dgree\Code\lulz\tbc-gear-prio
+> tsx packages/core/src/cli.ts "--offline" "--region" "US" "--realm" "dreamscythe" "--character" "shredzepelin" "--spec" "feral" "--max-phase" "3" "--with-set-potential" "--report" ".scratch/rank-reports/shredzepelin-p3.html"
+
+(node:51808) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+rank shredzepelin@dreamscythe-US (offline) maxPhase=3 universe=407 cutoff=3.4 DPS / 0.15%
+simming 0/444
+simming 1/444
+simming 2/444
+simming 3/444
+simming 4/444
+simming 5/444
+simming 6/444
+simming 7/444
+simming 8/444
+simming 9/444
+simming 10/444
+simming 11/444
+simming 12/444
+simming 13/444
+simming 14/444
+simming 15/444
+simming 16/444
+simming 17/444
+simming 18/444
+simming 19/444
+simming 20/444
+simming 21/444
+simming 22/444
+simming 23/444
+simming 24/444
+simming 25/444
+simming 26/444
+simming 27/444
+simming 28/444
+simming 29/444
+simming 30/444
+simming 31/444
+simming 32/444
+simming 33/444
+simming 34/444
+simming 35/444
+simming 36/444
+simming 37/444
+simming 38/444
+simming 39/444
+simming 40/444
+simming 41/444
+simming 42/444
+simming 43/444
+simming 44/444
+simming 45/444
+simming 46/444
+simming 47/444
+simming 48/444
+simming 49/444
+simming 50/444
+simming 51/444
+simming 52/444
+simming 53/444
+simming 54/444
+simming 55/444
+simming 56/444
+simming 57/444
+simming 58/444
+simming 59/444
+simming 60/444
+simming 61/444
+simming 62/444
+simming 63/444
+simming 64/444
+simming 65/444
+simming 66/444
+simming 67/444
+simming 68/444
+simming 69/444
+simming 70/444
+simming 71/444
+simming 72/444
+simming 73/444
+simming 74/444
+simming 75/444
+simming 76/444
+simming 77/444
+simming 78/444
+simming 79/444
+simming 80/444
+simming 81/444
+simming 82/444
+simming 83/444
+simming 84/444
+simming 85/444
+simming 86/444
+simming 87/444
+simming 88/444
+simming 89/444
+simming 90/444
+simming 91/444
+simming 92/444
+simming 93/444
+simming 94/444
+simming 95/444
+simming 96/444
+simming 97/444
+simming 98/444
+simming 99/444
+simming 100/444
+simming 101/444
+simming 102/444
+simming 103/444
+simming 104/444
+simming 105/444
+simming 106/444
+simming 107/444
+simming 108/444
+simming 109/444
+simming 110/444
+simming 111/444
+simming 112/444
+simming 113/444
+simming 114/444
+simming 115/444
+simming 116/444
+simming 117/444
+simming 118/444
+simming 119/444
+simming 120/444
+simming 121/444
+simming 122/444
+simming 123/444
+simming 124/444
+simming 125/444
+simming 126/444
+simming 127/444
+simming 128/444
+simming 129/444
+simming 130/444
+simming 131/444
+simming 132/444
+simming 133/444
+simming 134/444
+simming 135/444
+simming 136/444
+simming 137/444
+simming 138/444
+simming 139/444
+simming 140/444
+simming 141/444
+simming 142/444
+simming 143/444
+simming 144/444
+simming 145/444
+simming 146/444
+simming 147/444
+simming 148/444
+simming 149/444
+simming 150/444
+simming 151/444
+simming 152/444
+simming 153/444
+simming 154/444
+simming 155/444
+simming 156/444
+simming 157/444
+simming 158/444
+simming 159/444
+simming 160/444
+simming 161/444
+simming 162/444
+simming 163/444
+simming 164/444
+simming 165/444
+simming 166/444
+simming 167/444
+simming 168/444
+simming 169/444
+simming 170/444
+simming 171/444
+simming 172/444
+simming 173/444
+simming 174/444
+simming 175/444
+simming 176/444
+simming 177/444
+simming 178/444
+simming 179/444
+simming 180/444
+simming 181/444
+simming 182/444
+simming 183/444
+simming 184/444
+simming 185/444
+simming 186/444
+simming 187/444
+simming 188/444
+simming 189/444
+simming 190/444
+simming 191/444
+simming 192/444
+simming 193/444
+simming 194/444
+simming 195/444
+simming 196/444
+simming 197/444
+simming 198/444
+simming 199/444
+simming 200/444
+simming 201/444
+simming 202/444
+simming 203/444
+simming 204/444
+simming 205/444
+simming 206/444
+simming 207/444
+simming 208/444
+simming 209/444
+simming 210/444
+simming 211/444
+simming 212/444
+simming 213/444
+simming 214/444
+simming 215/444
+simming 216/444
+simming 217/444
+simming 218/444
+simming 219/444
+simming 220/444
+simming 221/444
+simming 222/444
+simming 223/444
+simming 224/444
+simming 225/444
+simming 226/444
+simming 227/444
+simming 228/444
+simming 229/444
+simming 230/444
+simming 231/444
+simming 232/444
+simming 233/444
+simming 234/444
+simming 235/444
+simming 236/444
+simming 237/444
+simming 238/444
+simming 239/444
+simming 240/444
+simming 241/444
+simming 242/444
+simming 243/444
+simming 244/444
+simming 245/444
+simming 246/444
+simming 247/444
+simming 248/444
+simming 249/444
+simming 250/444
+simming 251/444
+simming 252/444
+simming 253/444
+simming 254/444
+simming 255/444
+simming 256/444
+simming 257/444
+simming 258/444
+simming 259/444
+simming 260/444
+simming 261/444
+simming 262/444
+simming 263/444
+simming 264/444
+simming 265/444
+simming 266/444
+simming 267/444
+simming 268/444
+simming 269/444
+simming 270/444
+simming 271/444
+simming 272/444
+simming 273/444
+simming 274/444
+simming 275/444
+simming 276/444
+simming 277/444
+simming 278/444
+simming 279/444
+simming 280/444
+simming 281/444
+simming 282/444
+simming 283/444
+simming 284/444
+simming 285/444
+simming 286/444
+simming 287/444
+simming 288/444
+simming 289/444
+simming 290/444
+simming 291/444
+simming 292/444
+simming 293/444
+simming 294/444
+simming 295/444
+simming 296/444
+simming 297/444
+simming 298/444
+simming 299/444
+simming 300/444
+simming 301/444
+simming 302/444
+simming 303/444
+simming 304/444
+simming 305/444
+simming 306/444
+simming 307/444
+simming 308/444
+simming 309/444
+simming 310/444
+simming 311/444
+simming 312/444
+simming 313/444
+simming 314/444
+simming 315/444
+simming 316/444
+simming 317/444
+simming 318/444
+simming 319/444
+simming 320/444
+simming 321/444
+simming 322/444
+simming 323/444
+simming 324/444
+simming 325/444
+simming 326/444
+simming 327/444
+simming 328/444
+simming 329/444
+simming 330/444
+simming 331/444
+simming 332/444
+simming 333/444
+simming 334/444
+simming 335/444
+simming 336/444
+simming 337/444
+simming 338/444
+simming 339/444
+simming 340/444
+simming 341/444
+simming 342/444
+simming 343/444
+simming 344/444
+simming 345/444
+simming 346/444
+simming 347/444
+simming 348/444
+simming 349/444
+simming 350/444
+simming 351/444
+simming 352/444
+simming 353/444
+simming 354/444
+simming 355/444
+simming 356/444
+simming 357/444
+simming 358/444
+simming 359/444
+simming 360/444
+simming 361/444
+simming 362/444
+simming 363/444
+simming 364/444
+simming 365/444
+simming 366/444
+simming 367/444
+simming 368/444
+simming 369/444
+simming 370/444
+simming 371/444
+simming 372/444
+simming 373/444
+simming 374/444
+simming 375/444
+simming 376/444
+simming 377/444
+simming 378/444
+simming 379/444
+simming 380/444
+simming 381/444
+simming 382/444
+simming 383/444
+simming 384/444
+simming 385/444
+simming 386/444
+simming 387/444
+simming 388/444
+simming 389/444
+simming 390/444
+simming 391/444
+simming 392/444
+simming 393/444
+simming 394/444
+simming 395/444
+simming 396/444
+simming 397/444
+simming 398/444
+simming 399/444
+simming 400/444
+simming 401/444
+simming 402/444
+simming 403/444
+simming 404/444
+simming 405/444
+simming 406/444
+simming 407/444
+simming 408/444
+simming 409/444
+simming 410/444
+simming 411/444
+simming 412/444
+simming 413/444
+simming 414/444
+simming 415/444
+simming 416/444
+simming 417/444
+simming 418/444
+simming 419/444
+simming 420/444
+simming 421/444
+simming 422/444
+simming 423/444
+simming 424/444
+simming 425/444
+simming 426/444
+simming 427/444
+simming 428/444
+simming 429/444
+simming 430/444
+simming 431/444
+simming 432/444
+simming 433/444
+simming 434/444
+simming 435/444
+simming 436/444
+simming 437/444
+simming 438/444
+simming 439/444
+simming 440/444
+simming 441/444
+simming 442/444
+simming 443/444
+simming 444/444
+gear read from Void Reaver (YwahQLgv2jBrZGn6 fight 63, ranked route), spec confidence 100%
+baseline 2152.10 ± 128.18 (metaAdjusted=false)
+~17 rating under the hit cap — Heroic Presence in your party would lower the cap by ~16. The real shortfall may be smaller than this.
+assumptions: 4 standing (--assumptions to expand)
+plausibility warnings (5):
+  Thunderheart Harness 4pc reports 196.29 DPS — ~9.1% of a 2152.10 baseline, above the 7.5% plausibility band. Treat as a suspected confound, not a bonus this large; check what the package breaks.
+  Nordrassil Harness 4pc reports 185.10 DPS — ~8.6% of a 2152.10 baseline, above the 7.5% plausibility band. Treat as a suspected confound, not a bonus this large; check what the package breaks.
+  No positive candidate in chest: every alternative displaces Breastplate of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot.
+  No positive candidate in head: nothing in a full pool matches Wolfshead Helm's effect. Expected for a unique effect, but worth confirming it is not a measurement fault.
+  No positive candidate in shoulder: every alternative displaces Mantle of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot.
+assumption: set potential is measured with the completion-package synergy method, shared seeds — see PLAN.md §14's 2026-08-09 amendment
+set potential (13):
+  Gladiator's Sanctuary 2pc (0 worn) — not implemented in the pinned sim
+  Gladiator's Sanctuary 4pc (0 worn) — not implemented in the pinned sim
+  Primal Intent 2pc (0 worn) — not implemented in the pinned sim
+  Primal Intent 4pc (0 worn) — not implemented in the pinned sim
+  Thunderheart Harness 2pc (0 worn) — +32.26 DPS — whole package +74.11 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Thunderheart Gauntlets, Thunderheart Leggings
+  Thunderheart Harness 4pc (0 worn) — [breaks Malorne Harness 2pc (2→0); figure inflated by it] +196.29 DPS — whole package +64.09 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Thunderheart Pauldrons, Thunderheart Chestguard, Thunderheart Gauntlets, Thunderheart Leggings
+  Nordrassil Harness 2pc (0 worn) — not implemented in the pinned sim
+  Nordrassil Harness 4pc (0 worn) — [breaks Malorne Harness 2pc (2→0); figure inflated by it] +185.10 DPS — whole package -21.18 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Nordrassil Feral-Mantle, Nordrassil Chestplate, Nordrassil Handgrips, Nordrassil Feral-Kilt
+  Malorne Harness 4pc (2 worn) — +18.04 DPS — whole package +14.78 DPS vs current gear (uses our gem model: worn gems are kept, and sockets a swap leaves empty are auto-gemmed with rare-or-lower gems of the run's phase) — add Gauntlets of Malorne, Greaves of Malorne
+  Fel Skin 2pc (0 worn) — not implemented in the pinned sim
+  Fel Skin 4pc (0 worn) — not implemented in the pinned sim
+  The Fists of Fury 2pc (0 worn) — not implemented in the pinned sim
+  The Fists of Fury 4pc (0 worn) — not implemented in the pinned sim
+#1 Vengeful Gladiator's Staff (weapon) Δ86.95 (4.04%)
+    costs hit: -3 hit rating, widening the gap above to 19.923096999999984
+#12 Thunderheart Leggings (legs) Δ23.29 (1.08%)  (tied)
+    costs hit: -1 hit rating, widening the gap above to 17.923096999999984
+    +32.26 set potential (needs 1 more piece)
+#2 Pillar of Ferocity (weapon) Δ52.54 (2.44%)  (tied)
+    costs hit: -25 hit rating, widening the gap above to 41.923096999999984
+#17 Thunderheart Gauntlets (hands) Δ18.57 (0.86%)  (tied)
+    +32.26 set potential (needs 1 more piece)
+#3 Merciless Gladiator's Maul (weapon) Δ47.37 (2.20%)  (tied)
+    costs hit: -7 hit rating, widening the gap above to 23.923096999999984
+#4 Belt of One-Hundred Deaths (waist) Δ41.66 (1.94%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#5 Vindicator's Dragonhide Belt (waist) Δ37.93 (1.76%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#6 Don Alejandro's Money Belt (waist) Δ35.22 (1.64%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#7 Vengeful Gladiator's Dragonhide Legguards (legs) Δ32.97 (1.53%)
+    costs hit: -16 hit rating, widening the gap above to 32.923096999999984
+#8 Shady Dealer's Pantaloons (legs) Δ30.25 (1.41%)
+    costs hit: -28 hit rating, widening the gap above to 44.923096999999984
+#30 Greaves of Malorne (legs) Δ8.27 (0.38%)  (tied)
+    costs hit: -28 hit rating, widening the gap above to 44.923096999999984
+    +18.04 set potential (needs 1 more piece)
+#9 Belt of Deep Shadow (waist) Δ25.11 (1.17%)  (tied)
+    costs hit: -2 hit rating, widening the gap above to 18.923096999999984
+#10 Vindicator's Dragonhide Boots (feet) Δ24.17 (1.12%)  (tied)
+    costs hit: -13 hit rating, widening the gap above to 29.923096999999984
+#11 Belt of Natural Power (waist) Δ23.77 (1.10%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#13 Leggings of Murderous Intent (legs) Δ22.52 (1.05%)  (tied)
+    costs hit: -28 hit rating, widening the gap above to 44.923096999999984
+#14 Shadowmaster's Boots (feet) Δ22.29 (1.04%)  (tied)
+    costs hit: -13 hit rating, widening the gap above to 29.923096999999984
+#15 Shadow-walker's Cord (waist) Δ20.81 (0.97%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#16 Band of the Eternal Champion (finger) Δ18.70 (0.87%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#18 Nordrassil Feral-Kilt (legs) Δ17.06 (0.79%)  (tied)
+    costs hit: -10 hit rating, widening the gap above to 26.923096999999984
+    +185.10 set potential (needs 3 more pieces) — inflated by breaking Malorne Harness 2pc, not counted in ranking
+#19 Telonicus's Pendant of Mayhem (neck) Δ14.15 (0.66%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#20 Treads of the Den Mother (feet) Δ13.57 (0.63%)  (tied)
+    costs hit: -13 hit rating, widening the gap above to 29.923096999999984
+#21 Girdle of Treachery (waist) Δ11.78 (0.55%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#22 Vindicator's Dragonhide Bracers (wrist) Δ10.87 (0.51%)  (tied)
+#23 Gronn-Stitched Girdle (waist) Δ10.38 (0.48%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#24 Band of Eternity (finger) Δ10.36 (0.48%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#25 Tsunami Talisman (trinket) Δ10.34 (0.48%)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#26 Thalassian Wildercloak (back) Δ9.27 (0.43%)  (tied)
+#27 Haramad's Bargain (neck) Δ8.61 (0.40%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#28 Choker of Serrated Blades (neck) Δ8.38 (0.39%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#29 Insidious Bands (wrist) Δ8.29 (0.39%)  (tied)
+#31 Band of Eternity (finger) Δ7.37 (0.34%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#32 Unstoppable Aggressor's Ring (finger) Δ6.59 (0.31%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#- Gauntlets of Malorne (hands) Δ-11.52 (-0.54%)  (tied)
+    +18.04 set potential (needs 1 more piece)
+#33 Dragonspine Trophy (trinket) Δ5.76 (0.27%)  (tied)
+#34 Choker of Endless Nightmares (neck) Δ4.78 (0.22%)  (tied)
+#35 Ancestral Ring of Conquest (finger) Δ4.50 (0.21%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#36 Mithril Chain of Heroism (neck) Δ4.37 (0.20%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#37 Razor-Scale Battlecloak (back) Δ4.10 (0.19%)  (tied)
+#38 Grips of Damnation (hands) Δ3.96 (0.18%)  (tied)
+368 row(s) below cutoff hidden; --show-below-cutoff to list them
+report .scratch/rank-reports/shredzepelin-p3.html
+report-json .scratch/rank-reports/shredzepelin-p3.json

@@ -321,6 +321,266 @@ describe("applyView", () => {
     });
   });
 
+  describe("withSetPotential (spec §4)", () => {
+    it("does not change sort order or rank when off (default)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const off = applyView(r);
+      expect(off.rows.map((x) => x.itemId)).toEqual([2, 1]);
+      const explicitOff = applyView(r, { withSetPotential: false });
+      expect(explicitOff.rows.map((x) => x.itemId)).toEqual([2, 1]);
+    });
+
+    it("sorts on deltaDps + prospectiveBonusDps when on, reordering the rows", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // itemId 1: 10 + 50 = 60, beats itemId 2's bare 20 — order flips.
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+    });
+
+    it("keeps a confounded bonus out of the sort key (ticket 90)", () => {
+      // A bonus whose package breaks another worn set is inflated by (k-1)·B
+      // and cannot be corrected after the fact, so it must not reorder rows.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+            prospectiveBonusBreaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // Without the confound gate this would flip to [1, 2] on 10 + 50 = 60.
+      expect(rows.map((x) => x.itemId)).toEqual([2, 1]);
+    });
+
+    it("keeps a confounded bonus out of the cutoff comparison (ticket 90)", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
+        item({
+          itemId: 2,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 90,
+            prospectiveBonusBreaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      // The unconfounded version of this row is promoted; this one must not be.
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([1]);
+      expect(on.belowCutoffCount).toBe(1);
+    });
+
+    it("keeps rank absolute even though the toggle reorders rows (§12)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 10,
+          rank: 2,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 50,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 1 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      // Reordered [1, 2] in display, but ranks stay their absolute default
+      // values — non-monotonic in the new order, proving no renumbering.
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+      expect(rows.map((x) => x.rank)).toEqual([2, 1]);
+    });
+
+    it("does not double-count a candidate that already crosses its threshold (§2.1)", () => {
+      // crossesThreshold: true carries no prospectiveBonusDps — the value is
+      // already inside deltaDps — so `?? 0` must not invent one.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 30,
+          rank: 1,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 3,
+            piecesAfterSwap: 4,
+            nextThreshold: null,
+            crossesThreshold: true,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, rank: 2 }),
+      ]);
+      const { rows } = applyView(r, { withSetPotential: true });
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+    });
+
+    /**
+     * The finding this toggle existed to serve and originally defeated: a first
+     * tier piece is normally below cutoff *on its own stats* (V0b's Thunderheart
+     * singles are all negative), so carrying `belowCutoff` had the shortlist
+     * filter out exactly the rows the toggle surfaces.
+     */
+    it("promotes a below-cutoff row whose prospective value clears the bar", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 40, deltaPct: 2, rank: 1 }),
+        item({
+          itemId: 2,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 90,
+          },
+        }),
+      ]);
+
+      const off = applyView(r);
+      expect(off.shortlist.map((x) => x.itemId)).toEqual([1]);
+      expect(off.belowCutoffCount).toBe(1);
+
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([2, 1]);
+      expect(on.belowCutoffCount).toBe(0);
+    });
+
+    it("leaves a row below cutoff when even its prospective value is noise", () => {
+      const r = ranking([
+        item({
+          itemId: 3,
+          deltaDps: -1,
+          deltaPct: -0.05,
+          belowCutoff: true,
+          setContext: {
+            setId: 629,
+            setName: "Crystalforge Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 1.2,
+          },
+        }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist).toEqual([]);
+      expect(on.rows[0]!.belowCutoffInView).toBe(true);
+    });
+
+    /**
+     * The bar itself never moves — only the quantity measured against it
+     * (ADR-0020's rejected alternative was a threshold derived from the row
+     * *set*, which this is not).
+     */
+    it("uses the same absolute cutoff, not a relative one", () => {
+      // Under both arms: 2.0 DPS < 3.4, and 2.0/2000 = 0.1% < 0.15%.
+      const r = ranking([
+        item({
+          itemId: 4,
+          deltaDps: 0,
+          deltaPct: 0,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 2,
+          },
+        }),
+      ]);
+      // Sole row, so a set-relative bar would promote it; the absolute one does not.
+      expect(applyView(r, { withSetPotential: true }).shortlist).toEqual([]);
+    });
+
+    it("leaves rows without set context on their ranking verdict", () => {
+      const r = ranking([
+        item({ itemId: 5, deltaDps: 2, deltaPct: 0.1, belowCutoff: true }),
+        item({ itemId: 6, deltaDps: 40, deltaPct: 2, rank: 1 }),
+      ]);
+      const on = applyView(r, { withSetPotential: true });
+      expect(on.shortlist.map((x) => x.itemId)).toEqual([6]);
+    });
+  });
+
   describe("hideOwned", () => {
     it("removes equipped rows only when asked", () => {
       const r = ranking([
@@ -542,7 +802,7 @@ describe("applyView", () => {
     it("keeps the narrower SE within a single seMethod", () => {
       // The mixed-method rule must not weaken the same-scale case: two
       // paired-replicate rows 0.44 apart are genuinely resolved, and widening
-      // to `max` there would re-collapse exactly what Phase 2 bought.
+      // to `max` there would re-collapse exactly what Stage 2 bought.
       const r = ranking([
         item({
           itemId: 1,

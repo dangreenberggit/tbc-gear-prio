@@ -20,6 +20,7 @@ describe("disclosure", () => {
       substitutionsFromMetaRepair([
         {
           itemId: 1,
+          itemIndex: 0,
           socketIndex: 0,
           from: 10,
           to: 20,

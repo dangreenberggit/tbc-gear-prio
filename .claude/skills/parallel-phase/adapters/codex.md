@@ -7,7 +7,8 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
 
 - **Workhorse / simple:** mid tier — parallel implement workers, mechanical edits.
-- **Sharp:** top tier / `codex exec` — design, review, hard judgment. No plan-specific spawn-death quirks are recorded for Codex in this repo; if you hit one, record it in the model policy.
+- **Review:** top tier / `codex exec` — pre-merge axes, adversarial and domain judgment. No plan-specific spawn-death quirks are recorded for Codex in this repo; if you hit one, record it in the model policy.
+- **Design:** top tier with extended reasoning — planning and architecture calls.
 
 ## Isolate
 
@@ -19,6 +20,6 @@ Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents
 
 Run merge commands from a Codex session checked out on the **feature branch** (delegator session preferred). After all merges: `pnpm verify`. If using a separate merger agent, feed it every handoff body and the conflict policy; acceptance is verify-green on the feature tip.
 
-## Review / land
+## Review / merge
 
-Unchanged land path: `pre-merge-review`, then **ask** before `pnpm land`. Codex may already be used as a cross-vendor reviewer inside pre-merge-review — that is separate from this fan-out skill.
+Unchanged merge path: `pre-merge-review`, then **ask** before `pnpm merge-to-dev`. Codex may already be used as a cross-vendor reviewer inside pre-merge-review — that is separate from this fan-out skill.

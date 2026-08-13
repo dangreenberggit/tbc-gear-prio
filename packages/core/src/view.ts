@@ -1,10 +1,12 @@
 /**
  * The view layer (PLAN.md §4.1). Pure: a re-render of a `Ranking` that already
  * exists. No seam, no I/O, no sim, and nothing here reaches `contentHash` —
- * that is the property the Phase 2 gate box asserts, and the reason this is the
+ * that is the property the Stage 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
+import { meetsCutoff, type Cutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
+import { setPotentialIsConfounded } from "./rank-report-rules.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export type ViewOptions = {
@@ -16,6 +18,14 @@ export type ViewOptions = {
   boss?: string;
   groupBy?: "rank" | "slot" | "raid";
   hideOwned?: boolean;
+  /**
+   * Sort by `deltaDps + (setContext?.prospectiveBonusDps ?? 0)` instead of
+   * `deltaDps` alone (spec §4). Default off, so the default view is exactly
+   * today's. Pure: `rank` is never renumbered by this toggle (§12) — a row
+   * keeps the absolute rank `rankUpgrades` assigned it, even though the
+   * toggle can move it to a different position in `rows`.
+   */
+  withSetPotential?: boolean;
 };
 
 /**
@@ -35,14 +45,20 @@ export type ViewRow = RankedItem & {
    */
   tieGroupId?: string;
   /**
-   * Whether the cutoff hides this row — the view's own copy of `belowCutoff`,
-   * carried rather than recomputed.
+   * Whether the cutoff hides this row, as this view values it. Carried from
+   * `belowCutoff` for every view except `withSetPotential`.
    *
    * The cutoff is absolute and no view moves it (ADR-0020, amending §12).
    * "Filter first, then apply the cutoff within the filtered view" fixes the
    * *ordering* of the two hiding mechanisms, and the ordering is what matters:
    * filtering never *deletes* a row, so a 2 DPS gain that is the best thing in
    * one raid still appears under that raid's filter — flagged, not absent.
+   *
+   * `withSetPotential` re-derives this against the **same absolute `CUTOFF`**,
+   * substituting only the quantity measured — the effective value the toggle
+   * displays. ADR-0020 forbids a threshold that depends on the row *set*; this
+   * changes the row's own value, not the bar, so the filtered-relative
+   * alternative that ADR rejected stays rejected.
    *
    * The field stays because the shortlist is a property of the view, so
    * `ViewResult` and the CLI read a row's own display verdict rather than
@@ -67,7 +83,7 @@ export type ViewResult = {
   /** How many rows the shortlist hides, so a caller can label the expand. */
   belowCutoffCount: number;
   /**
-   * Whether a `pinBis` toggle has anything to act on. The Phase 3 gate box
+   * Whether a `pinBis` toggle has anything to act on. The Stage 3 gate box
    * "the pin control is hidden, not inert, where no curated set exists" needs
    * this answerable here — ret's curated sets stop at P2, so above
    * `maxPhase: 2` there is nothing to pin and the control must degrade to
@@ -140,7 +156,7 @@ function zoneKeyOf(item: RankedItem): string {
  * rows were actually measured on. `Math.min` is kept **within** a method, where
  * point 2 above still applies and both figures mean the same thing.
  *
- * This deliberately does not let Phase 2's resolution leak past the 8 rows that
+ * This deliberately does not let Stage 2's resolution leak past the 8 rows that
  * paid for it: §10 buys "resolution, not correctness", and a tighter tie at the
  * boundary would be resolution row 9 never bought. Re-measure with:
  *
@@ -178,8 +194,11 @@ function tieWindow(a: ViewRow, b: ViewRow): number {
  *    SE measures 2.149 DPS while adjacent deltas differ by far less; §10
  *    records 1.678 DPS at 5,000 iterations, and SE grows as iterations fall.
  */
-function assignTieGroups(rows: ViewRow[]): void {
-  const byDelta = [...rows].sort((a, b) => b.deltaDps - a.deltaDps);
+function assignTieGroups(
+  rows: ViewRow[],
+  sortKey: (r: ViewRow) => number
+): void {
+  const byDelta = [...rows].sort((a, b) => sortKey(b) - sortKey(a));
   let groupStart = 0;
   let groupId = 0;
 
@@ -196,7 +215,7 @@ function assignTieGroups(rows: ViewRow[]): void {
     const row = byDelta[i];
     const overlapsLeader =
       row !== undefined &&
-      leader.deltaDps - row.deltaDps <= tieWindow(row, leader);
+      sortKey(leader) - sortKey(row) <= tieWindow(row, leader);
     if (!overlapsLeader) {
       flush(i);
       groupStart = i;
@@ -213,13 +232,77 @@ function assignTieGroups(rows: ViewRow[]): void {
  * common case. Ties break on BiS-tag richness then item id, so the order is
  * total and stable rather than dependent on the input's order.
  */
-function compareRows(a: ViewRow, b: ViewRow, pinBis: boolean): number {
+/**
+ * `deltaDps` alone by default; with `withSetPotential` on, add the
+ * prospective bonus a below-threshold candidate would unlock (spec §4). A
+ * candidate that already crosses its threshold carries no
+ * `prospectiveBonusDps` — that value is already inside `deltaDps` (§2.1) —
+ * so `?? 0` never double-counts it.
+ */
+/**
+ * The cutoff verdict for a row as this view values it.
+ *
+ * Default: carried from the `Ranking`, which is all ADR-0020 permits — a filter
+ * selects rows and never moves the bar.
+ *
+ * Under `withSetPotential` the **bar is still the ranking's own absolute
+ * cutoff** (per-spec since issue #1 step 0, carried on the `Ranking`);
+ * what changes is the quantity measured against it, from `deltaDps` to the
+ * effective value the toggle exists to display. Carrying the default verdict
+ * here would have the shortlist hide exactly the rows the toggle surfaces: a
+ * first tier piece is normally below cutoff *on its own stats* — V0b's
+ * Thunderheart singles are all negative — and its whole point is the bonus it
+ * unlocks. That is not a per-view threshold, so ADR-0020's rejected
+ * "derive the bar from the filtered set" alternative is untouched.
+ */
+function belowCutoffUnderView(
+  item: RankedItem,
+  withSetPotential: boolean,
+  baselineDps: number,
+  cutoff: Cutoff
+): boolean {
+  if (!withSetPotential) return item.belowCutoff;
+  const prospective = rankableSetPotential(item);
+  if (prospective === 0) return item.belowCutoff;
+  const effectiveDps = item.deltaDps + prospective;
+  // Percentage arm scaled off the same baseline `rank.ts` used for `deltaPct`,
+  // so both arms of the cutoff see the effective value.
+  const effectivePct =
+    baselineDps === 0 ? item.deltaPct : (effectiveDps / baselineDps) * 100;
+  return !meetsCutoff(effectiveDps, effectivePct, cutoff);
+}
+
+/**
+ * The prospective bonus this view is allowed to rank on. A figure whose package
+ * breaks another worn set is inflated by an amount no sim can separate after
+ * the fact, so it contributes nothing here — it is still disclosed on the row
+ * and in the Set potential panel (ticket 90).
+ */
+function rankableSetPotential(item: Pick<RankedItem, "setContext">): number {
+  if (setPotentialIsConfounded(item)) return 0;
+  return item.setContext?.prospectiveBonusDps ?? 0;
+}
+
+function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {
+  return withSetPotential
+    ? (r) => r.deltaDps + rankableSetPotential(r)
+    : (r) => r.deltaDps;
+}
+
+function compareRows(
+  a: ViewRow,
+  b: ViewRow,
+  pinBis: boolean,
+  sortKey: (r: ViewRow) => number
+): number {
   if (pinBis) {
     const ap = a.bisTags.includes("BiS") ? 0 : 1;
     const bp = b.bisTags.includes("BiS") ? 0 : 1;
     if (ap !== bp) return ap - bp;
   }
-  if (a.deltaDps !== b.deltaDps) return b.deltaDps - a.deltaDps;
+  const ak = sortKey(a);
+  const bk = sortKey(b);
+  if (ak !== bk) return bk - ak;
   const richness = b.bisTags.length - a.bisTags.length;
   if (richness !== 0) return richness;
   return a.itemId - b.itemId;
@@ -229,6 +312,7 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const pinBis = v.pinBis ?? false;
   const zone = v.raid === undefined || v.raid === "all" ? undefined : v.raid;
   const boss = v.boss === undefined || v.boss === "all" ? undefined : v.boss;
+  const sortKey = sortKeyFor(v.withSetPotential ?? false);
 
   const rows: ViewRow[] = r.items
     .filter((item) => {
@@ -237,11 +321,19 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
       if (boss !== undefined && !matchesBoss(item, zone, boss)) return false;
       return true;
     })
-    .map((item) => ({ ...item, belowCutoffInView: item.belowCutoff }));
+    .map((item) => ({
+      ...item,
+      belowCutoffInView: belowCutoffUnderView(
+        item,
+        v.withSetPotential ?? false,
+        r.baseline.dps,
+        r.cutoff
+      ),
+    }));
 
-  rows.sort((a, b) => compareRows(a, b, pinBis));
+  rows.sort((a, b) => compareRows(a, b, pinBis, sortKey));
 
-  assignTieGroups(rows);
+  assignTieGroups(rows, sortKey);
 
   const pinBisAvailable = r.items.some((i) => i.bisTags.includes("BiS"));
   const shortlist = rows.filter((row) => !row.belowCutoffInView);

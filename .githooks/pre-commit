@@ -8,12 +8,12 @@ if [ "$branch" = "main" ]; then
   exit 1
 fi
 
-# Merges into dev must go through `pnpm land` (sets TBC_ALLOW_DEV_MERGE=1).
+# Merges into dev must go through `pnpm merge-to-dev` (sets TBC_ALLOW_DEV_MERGE=1).
 # Direct commits on dev (tiny workflow fixes) are still allowed.
 merge_head=$(git rev-parse --git-path MERGE_HEAD 2>/dev/null)
 if [ "$branch" = "dev" ] && [ -n "$merge_head" ] && [ -f "$merge_head" ]; then
   if [ "$TBC_ALLOW_DEV_MERGE" != "1" ]; then
-    echo "Refusing merge into dev — use: pnpm land" >&2
+    echo "Refusing merge into dev — use: pnpm merge-to-dev" >&2
     echo "(escape hatch: TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>)" >&2
     echo "(or: git commit --no-verify after a raw merge — spikes only)" >&2
     exit 1

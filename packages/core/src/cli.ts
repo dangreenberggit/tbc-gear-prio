@@ -7,11 +7,12 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
-import { CUTOFF } from "./cutoff.js";
+import { cutoffForSpec } from "./cutoff.js";
 import {
   fightProvenanceLines,
   hitCapBanner,
   renderDisclosure,
+  setPotentialDisclosureLine,
 } from "./disclosure.js";
 import {
   slamaltmanOfflineRecordings,
@@ -29,6 +30,10 @@ import {
   type FeralRawFixture,
 } from "./fixtures/feral-offline.js";
 import { renderRankHtml } from "./rank-report.js";
+import {
+  formatSetBonusLine,
+  formatSetPotentialLine,
+} from "./rank-report-rules.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
   bossesInPool,
@@ -71,7 +76,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--report-events] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--spec ret|feral] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--with-set-potential] [--report-events] [--assumptions] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -134,6 +139,10 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--show-below-cutoff") {
       out.showBelowCutoff = true;
+      continue;
+    }
+    if (arg === "--with-set-potential") {
+      out.view.withSetPotential = true;
       continue;
     }
     if (arg === "--report-events") {
@@ -368,7 +377,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
 
   const raidNote = args.raid ? ` raid=${args.raid}` : "";
   console.log(
-    `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${CUTOFF.absDps} DPS / ${CUTOFF.pct}%`
+    `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${cutoffForSpec(args.spec).absDps} DPS / ${cutoffForSpec(args.spec).pct}%`
   );
 
   // One time source for the run: the store's job rows, the engine and the
@@ -395,7 +404,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     );
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
-    // layer lands in Phase 2 rather than in the web shell.
+    // layer is built in Stage 2 rather than in the web shell.
     // Every run names its source fight (ticket 06) — the route note below is
     // the older, narrower case of the same idea.
     for (const line of fightProvenanceLines(ranking.fight)) {
@@ -426,6 +435,23 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     })) {
       console.log(line);
     }
+    // Unconditional, unlike the set-potential block below: a warning qualifies
+    // figures the reader sees whether or not they asked for the set lens.
+    if (ranking.plausibilityWarnings?.length) {
+      console.log(
+        `plausibility warnings (${ranking.plausibilityWarnings.length}):`
+      );
+      for (const w of ranking.plausibilityWarnings) {
+        console.log(`  ${w.message}`);
+      }
+    }
+    if (args.view.withSetPotential === true && ranking.setBonuses) {
+      console.log(`assumption: ${setPotentialDisclosureLine()}`);
+      console.log(`set potential (${ranking.setBonuses.length}):`);
+      for (const b of ranking.setBonuses) {
+        console.log(`  ${formatSetBonusLine(b)}`);
+      }
+    }
     if (args.view.pinBis === true && !view.pinBisAvailable) {
       // Disabled, not silently inert (§4.1): ret's curated sets stop at P2.
       console.log(
@@ -453,6 +479,15 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       }
       if (item.setBonusNote) {
         console.log(`${indent}    set: ${item.setBonusNote}`);
+      }
+      if (item.emptyMetaSocket) {
+        console.log(
+          `${indent}    meta: priced with an empty meta socket (no meta gem preference recorded for this spec)`
+        );
+      }
+      if (args.view.withSetPotential === true) {
+        const potential = formatSetPotentialLine(item);
+        if (potential) console.log(`${indent}    ${potential}`);
       }
     };
 

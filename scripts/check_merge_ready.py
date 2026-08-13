@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-check_merge_ready.py — checks that a branch is allowed to land on dev.
+check_merge_ready.py — checks that a branch is allowed to merge to dev.
 
 Tickets are the source of truth for deferred work. The review file is the
 judgment record; its Disposition table must link every `defer` to a real
 open carry-forward ticket.
 
-Used by `pnpm land` (the only supported door into dev). Also:
+Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
     pnpm merge-ready              # check only, no merge
     pnpm issues:open              # list open carry-forward tickets
 
-Phase-N branches: open tickets with `Blocks: phase-N` are listed. Landing
+Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
 requires an explicit `--ack-open-blockers` (conscious opt-in), not a fake
 "path mentioned in the review" check. Fix or re-block the ticket for real.
 """
@@ -32,7 +32,13 @@ DISPOSITION_RE = re.compile(
     r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
     re.IGNORECASE | re.MULTILINE,
 )
-STATUS_RE = re.compile(r"(?im)^\s*Status:\s*(\S+)")
+# Bold (`**Status:** open`) and plain (`Status: open`) both parse: tickets 88
+# and 89 used the bold form and the anchored pattern missed them, so both
+# reported as having no status and vanished from the open count and from
+# `pnpm issues:open` (ticket 147). A ticket the tooling cannot see cannot block
+# a merge -- silent under-reporting, the same shape as open ticket 85.
+STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
+KNOWN_STATUSES = ("open", "claimed", "closed", "resolved", "wontfix")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
 BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
@@ -85,7 +91,25 @@ def ticket_path_from_note(note: str) -> Path | None:
 
 def read_status(path: Path) -> str | None:
     m = STATUS_RE.search(path.read_text(encoding="utf-8"))
-    return m.group(1).lower() if m else None
+    return m.group(1).lower().strip("*_`") if m else None
+
+
+def unparseable_status_tickets() -> list[tuple[Path, str]]:
+    """Tickets whose status cannot be read, or reads as something unknown.
+
+    The widened pattern above fixes the two formats that exist today; this is
+    what stops the next unusual one disappearing the same way. Treating an
+    unreadable status as absent is what made tickets 88 and 89 invisible to
+    every gate that consumes them, so it is an error rather than a shrug.
+    """
+    bad = []
+    for path in iter_issue_files():
+        status = read_status(path)
+        if status is None:
+            bad.append((path, "no Status: line found"))
+        elif status not in KNOWN_STATUSES:
+            bad.append((path, f"unknown status {status!r}"))
+    return bad
 
 
 def iter_issue_files() -> list[Path]:
@@ -139,7 +163,7 @@ def check(
     review: Path | None = None,
     ack_open_blockers: bool = False,
 ) -> int:
-    """Return 0 if the branch may land on dev."""
+    """Return 0 if the branch may merge to dev."""
     branch = branch or branch_name()
     review = review or review_path(branch)
     if not review.is_absolute():
@@ -192,6 +216,14 @@ def check(
             else:
                 errors.append(f"{row['id']}: unknown disposition {disp!r}")
 
+    unparseable = unparseable_status_tickets()
+    if unparseable:
+        print("\ntickets with an unreadable Status:")
+        for path, why in unparseable:
+            rel = path.relative_to(ROOT).as_posix()
+            print(f"  - {rel} — {why}")
+            errors.append(f"{rel}: {why} (a ticket the gate cannot read cannot block a merge)")
+
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
         phase = phase_m.group(1).lower()
@@ -203,7 +235,7 @@ def check(
             if not ack_open_blockers:
                 errors.append(
                     f"{len(blockers)} open Blocks: {phase} ticket(s). "
-                    f"Close/re-block them, or land with --ack-open-blockers "
+                    f"Close/re-block them, or merge with --ack-open-blockers "
                     f"to proceed consciously."
                 )
             else:
@@ -226,7 +258,7 @@ def main() -> int:
     ap.add_argument(
         "--ack-open-blockers",
         action="store_true",
-        help="on phase-N/*: allow landing while Blocks: phase-N tickets are still open",
+        help="on phase-N/*: allow merging while Blocks: phase-N tickets are still open",
     )
     ap.add_argument("--list-only", action="store_true")
     ap.add_argument("--review", type=Path)

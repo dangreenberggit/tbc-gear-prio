@@ -1,5 +1,6 @@
 {
   "simVersion": "v0.0.101",
+  "spec": "ret",
   "fixture": "test/fixtures/slamaltman.raid-sim-request.json",
   "iterations": 5000,
   "independentSeeds": ["11", "22", "33", "44", "55"],

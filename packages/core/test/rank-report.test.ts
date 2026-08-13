@@ -9,6 +9,20 @@ import {
   renderRankHtml,
   type RankReportMeta,
 } from "../src/rank-report.js";
+import {
+  curatedSetPhase,
+  formatSelfConfoundPrefix,
+  formatSetBonusLine,
+  GEM_POLICY_QUALIFIER,
+  setBonusEntry,
+  formatSetPotentialLine,
+  isCuratedBis,
+  formatPackageMembershipLine,
+  packageSetPotentialDps,
+  weightedSetPotentialDps,
+  withSelfConfoundDisclosed,
+  wowsimsItemIdsJson,
+} from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
 
 type TestItem = RankedItem & {
@@ -142,10 +156,10 @@ describe("rank-report", () => {
 
   it("raid shortlist excludes pvp sources", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
-    expect(html).toContain("Act on tonight");
+    expect(html).toContain("Curated ranked list");
     const raidShortlist =
       html.match(
-        /<div class="shortlist">\s*<h2>Act on tonight<\/h2>[\s\S]*?<\/div>\s*<\/div>/
+        /<div class="shortlist">\s*<h2>Curated ranked list[\s\S]*?<\/div>\s*<\/div>/
       )?.[0] ?? "";
     expect(raidShortlist).not.toContain("Vengeful Gladiator's Bonegrinder");
     expect(html).toContain("PvP upgrades");
@@ -194,7 +208,7 @@ describe("rank-report", () => {
     expect(html).toContain("Gorehowl");
   });
 
-  it("excludes magnitude-flagged weapons from Act on tonight", () => {
+  it("excludes magnitude-flagged weapons from the curated ranked list", () => {
     const html = renderRankHtml(
       ranking([
         item({
@@ -219,11 +233,11 @@ describe("rank-report", () => {
       ]),
       meta()
     );
-    expect(html).toContain("Act on tonight");
+    expect(html).toContain("Curated ranked list");
     expect(html).toContain("Torch of the Damned");
     const raidShortlist =
       html.match(
-        /<div class="shortlist">\s*<h2>Act on tonight<\/h2>[\s\S]*?<\/div>\s*<\/div>/
+        /<div class="shortlist">\s*<h2>Curated ranked list[\s\S]*?<\/div>\s*<\/div>/
       )?.[0] ?? "";
     expect(raidShortlist).not.toContain("Gorehowl");
   });
@@ -288,7 +302,20 @@ describe("rank-report", () => {
     expect(html).not.toContain("EP prefilter");
   });
 
-  it("names the stage a BiS badge is BiS for (carry-forward 47)", () => {
+  it("names the ranked spec's pool, not a hardcoded ret", () => {
+    // The spec was interpolated as a literal `ret`, so every feral report
+    // claimed a `ret-pN` pool while the CLI had loaded `feral-pN.json`. The
+    // ret fixture above passes either way, which is why it never caught this.
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), {
+      ...meta(),
+      spec: "feral",
+      maxPhase: 3,
+    });
+    expect(html).toContain("Universe pool (feral-p3).");
+    expect(html).not.toContain("ret-p3");
+  });
+
+  it("names the phase a BiS badge is BiS for (carry-forward 47)", () => {
     const html = renderRankHtml(
       {
         ...rankingWithPvpWeaponAboveCutoff(),
@@ -309,7 +336,7 @@ describe("rank-report", () => {
       },
       meta()
     );
-    // The bare pill is what overstated the claim; the stage is the whole fix.
+    // The bare pill is what overstated the claim; the phase is the whole fix.
     expect(html).toContain("p2 BiS");
     expect(html).not.toMatch(/<span class="pill tag">BiS<\/span>/);
   });
@@ -335,6 +362,91 @@ describe("rank-report", () => {
     );
     expect(html).toContain("costs 17 hit rating");
     expect(html).toContain("widens your gap to 87");
+  });
+
+  // Ticket 107 / PLAN.md §9 policy item 5. The standing gem-policy qualifier
+  // says meta repair *may* recolour worn gems; that is the caveat, not the
+  // disclosure. A row priced given four changes to two other items has to say
+  // which gems moved, or the player cannot tell this row's offer from a row
+  // that needed no adjustment at all.
+  it("names the gems a candidate's meta repair recoloured on other items (ticket 107)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            gemSubstitutions: [
+              { itemId: 29100, socketIndex: 0, from: 24028, to: 32220 },
+              { itemId: 29096, socketIndex: 1, from: 24028, to: 30549 },
+            ],
+          }),
+        ],
+      },
+      meta()
+    );
+    // The count is the headline — "this price assumes N changes elsewhere".
+    expect(html).toContain("2 gem");
+    // Both the displaced gem and its replacement are named, on both items.
+    expect(html).toContain("24028");
+    expect(html).toContain("32220");
+    expect(html).toContain("30549");
+  });
+
+  // A run-level footnote cannot tell the reader which rows it moved; the row
+  // itself must say its number was measured with the meta socket empty.
+  it("marks a row priced with an empty meta socket, and only such rows", () => {
+    const flagged = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 29098,
+            name: "Stag-Helm of Malorne",
+            slot: "head",
+            deltaDps: -262.3,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+            emptyMetaSocket: true,
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(flagged).toContain("empty meta socket");
+
+    const unflagged = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    expect(unflagged).not.toContain("empty meta socket");
+  });
+
+  it("renders no gem-substitution note when a row needed none (ticket 107)", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 30098,
+            name: "Razor-Scale Battlecloak",
+            slot: "back",
+            deltaDps: 20.68,
+            belowCutoff: false,
+            source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+          }),
+        ],
+      },
+      meta()
+    );
+    // The stylesheet always carries the rule; what must not appear is the
+    // row-level div that would claim gems moved.
+    expect(html).not.toContain('<div class="gem-subs">');
   });
 
   // The real cap is 9 * 15.769233, so a live `gapAfter` is essentially never
@@ -421,11 +533,2397 @@ describe("rank-report", () => {
     // and the fight-provenance line it was only ever printing to the CLI.
     // Diffed before/after to confirm the delta is exactly those two <p>
     // elements plus their CSS rules — nothing else in the document moved.
+    // Repinned for set-bonus-value Slice C: every row now interpolates a
+    // `${setPotential}` div (empty string when `--with-set-potential` is off,
+    // as this fixture renders), and the document gains an always-present but
+    // empty `${setPotentialPanel}` slot next to `${subs}`. Diffed before/after
+    // to confirm the delta is exactly those interpolation points' whitespace —
+    // no visible markup changes with the toggle off.
+    // Repinned for the set-weight toggle: rows and chips now carry
+    // `data-delta`/`data-weighted`, the row's delta div is split into a
+    // `.delta-plain`/`.delta-weighted` pair, and the stylesheet gains the
+    // toggle's rules. This fixture has no `setContext` on any row, so the
+    // toggle control and its <script> do not render at all here (both
+    // interpolate to ""), and every weighted value equals its plain one.
+    // Diffed before/after to confirm the delta is exactly those attributes,
+    // the paired delta divs, the new CSS block, and the empty interpolation
+    // slots — no visible markup moved.
+    // Repinned again for the `full` credit mode: rows and chips gain
+    // `data-full`/`data-full-label`, the delta pair becomes a triple with
+    // `.delta-full`, and the toggle's CSS grows a `.set-weight-title` rule and
+    // a third display arm. This fixture still renders no control and no
+    // <script>, and all three values are equal on every row here. Diffed
+    // before/after to confirm the delta is exactly that.
+    // Repinned for the BiS-only filter: nav links gain
+    // `class`/`data-hits`/`data-bis-hits`, slot sections gain a `no-bis`
+    // marker and a second (hidden) count paragraph, and the stylesheet gains
+    // the filter's rules. No row here is curated, so the filter control and
+    // the <script> still do not render for this fixture. Diffed before/after
+    // to confirm that is the whole delta.
+    // Repinned for the curated-ranked-list rename: the heading changes, chips
+    // split the old "#N Name" into an empty `.pos` (the script writes the
+    // position), the name, and a dimmed `.abs` carrying the absolute rank,
+    // plus a title tooltip and the renumbering pass in the script.
+    // Repinned for the source filter and the JSON export: rows gain
+    // `data-item-id`/`data-sources`, chips gain `data-sources`, the page gains
+    // the Sources and Export panels, and the <script> is now unconditional
+    // (the export panel needs it on every page, where before it only shipped
+    // alongside a set or BiS control). This fixture has two source buckets, so
+    // unlike the previous repins it *does* render a new control. Diffed
+    // before/after to confirm the delta is those attributes, the two panels,
+    // the script, and the new CSS block.
+    // Repinned for carry-forward 96's curated-package pointer: the stylesheet
+    // gains the `.curated-pointer` rule and every row interpolates an empty
+    // pointer slot. No row in this fixture is both curated-BiS and carries a
+    // `setContext`, so nothing visible renders — diffed before/after, where the
+    // whole delta is those five CSS lines and two blank slots.
+    // Repinned for ticket 98's plausibility panel: the stylesheet gains the
+    // `.panel.plausibility` rule. This fixture trips neither gate, so the panel
+    // itself does not render — verified by dumping the document on both sides,
+    // where the whole diff is those six CSS lines and nothing in the body.
+    // Repinned for the owner's package mode (2026-08-10): rows and chips gain
+    // `data-package`/`data-package-label`, the delta triple becomes a quadruple
+    // with `.delta-package`, every row interpolates an empty package-line slot,
+    // the stylesheet gains `.package-line` and a fourth display arm, and the
+    // script gains a `package` arm on the sort attribute and the label swap.
+    // No row in this fixture carries a `setContext.packages`, so the control's
+    // fourth radio does not render here and every package value equals its
+    // plain delta. Diffed before/after to confirm the delta is exactly that and
+    // nothing visible moves with the toggle off. Extended again in the same
+    // change for the `body.package .pct` rule, which hides the row's own
+    // percentage under package mode -- four more CSS lines, nothing in the body.
+    // Repinned again for carry-forward 104, which widens that rule to
+    // `weighted` and `full`: the length moved by exactly the 186 characters the
+    // CSS edit adds, so the whole delta is inside `<style>` and no markup moved.
+    // Repinned once more for the Set potential reorganisation. Both documents
+    // were dumped and diffed: the entire body delta is the removal of six empty
+    // interpolation slots (this fixture carries no set data, so no `.set-info`
+    // block and no panel entry render at all), and the remaining +1744 is
+    // inside `<style>`. Body 13909 -> 13879, CSS 12342 -> 14086.
+    // Repinned once more for the package-mode curated-list admission. Diffed
+    // again: the entire body delta is one `data-item-id` attribute per chip,
+    // which the admission needs to identify a chip. This fixture has no
+    // package-carrying row, so no admitted chip renders and the chip list is
+    // the same two chips in the same order. The rest is the new CSS.
+    // Repinned for the export-order fix. Diffed with `<style>` and `<script>`
+    // elided: the only body change is the export panel's caption, rewritten to
+    // say what the export now is. Everything else in the delta is the script.
+    // Repinned for ticket 112's chip `.pkg` span. Both documents dumped and
+    // diffed: the whole delta is the two `.chip .pkg` CSS rules (plus comment)
+    // inside `<style>` and, inside `<script>`, the label swap losing its
+    // `data-package-label` arm. No row in this fixture carries a
+    // `setContext.packages`, so no `.pkg` span renders and nothing in the body
+    // moved — which is what the emit-only-with-a-package guard promises.
+    // Repinned for ticket 128's source/BiS-filter fix. Both documents dumped
+    // and diffed (git stash the CSS change, dump, pop, dump again): the whole
+    // delta is inside `<style>` -- the old bare `body.package
+    // .chip.package-only { display: inline-flex; }` becomes `body.package
+    // .chip.package-only:not(.source-hidden) { ... }` plus a new
+    // `body.package.bis-only .chip.package-only:not(.is-bis) { display: none;
+    // }` guard and its explanatory comment. Nothing in the body moved.
+    // Repinned for ticket 107's per-row gem-substitution disclosure. Both
+    // documents dumped and diffed (git stash the two renderer files, dump,
+    // pop, dump again): the delta is the five-line `.gem-subs` rule inside
+    // `<style>`, plus two whitespace-only lines where the new `${gemSubs}`
+    // slot interpolates empty. No row in this fixture carries
+    // `gemSubstitutions`, so no note renders and nothing in the body moved —
+    // which is what the emit-only-when-non-empty guard promises.
+    // Repinned for the empty-meta-socket row note. The delta is exactly the
+    // new `${emptyMeta}` slot interpolating empty on this fixture's two rows:
+    // +10 chars = 2 × ("\n" + 4-space indent), no CSS added (the note reuses
+    // `.gem-subs`), and no row here carries `emptyMetaSocket` so no note
+    // renders.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "2bca97bff348944591b448e33ffebb512211b79cba5269175d50292fc047f36c",
-      length: 11450,
+        "145ef7465b55a82c956beb63a2ca9148b384dcf28f319a8b7f66df2f9b5739c6",
+      length: 31005,
     });
+  });
+});
+
+// Finding 3-D2: since ticket 117, repairMeta (both call sites in rank.ts)
+// draws replacement gems from the same capped fill palette the candidate
+// auto-fill uses, and may overwrite worn coloured gems to keep a meta gem's
+// socket requirement lit — a disclosure the qualifier's wording never
+// covered.
+describe("GEM_POLICY_QUALIFIER", () => {
+  it("discloses that meta repair may recolour worn gems from the fill palette", () => {
+    expect(GEM_POLICY_QUALIFIER).toContain("meta");
+    expect(GEM_POLICY_QUALIFIER).toMatch(/recolour|recolor/);
+  });
+});
+
+describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", () => {
+  it("renders a measured bonus, signed", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [1, 2, 3, 4],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+      })
+    ).toBe(
+      "Thunderheart Harness 4pc (0 worn) — +91.68 DPS — " +
+        "whole package -317.24 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — ` +
+        "add item 1, item 2, item 3, item 4"
+    );
+  });
+
+  /**
+   * A package that displaces another worn set inflates the reported figure by
+   * `(k−1)·B` (the closed form on `brokenSetBonuses`), which no sim can
+   * separate after the fact — so the line has to say so. The qualifier leads
+   * the figure rather than trailing it (ticket 91).
+   */
+  it("names an other-set bonus the package breaks", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [31039, 31048, 31034, 31044],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+        breaks: [
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 2,
+            piecesBefore: 2,
+            piecesAfter: 1,
+          },
+        ],
+      })
+    ).toBe(
+      "Thunderheart Harness 4pc (0 worn) — " +
+        "[breaks Malorne Harness 2pc (2→1); figure inflated by it] +91.68 DPS — " +
+        "whole package -317.24 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — ` +
+        "add Thunderheart Cover, Thunderheart Pauldrons, " +
+        "Thunderheart Gauntlets, Thunderheart Leggings"
+    );
+  });
+
+  /**
+   * The break qualifier must not claim the figure it introduces is net of the
+   * break. `bonusDps = packageDelta − Σ singles` is the quantity ADR-0023
+   * decision 3 suppresses *because* it is inflated by `(k−1)·B`; on the
+   * shredzepelin P3 artifact it reads 193.89 where the de-confounded value is
+   * ~62.8. "nets this in" promised the opposite of what the number does.
+   */
+  it("does not claim the confounded figure is net of the break it names", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(line).not.toContain("nets this in");
+    expect(line).toContain("inflated by");
+  });
+
+  /**
+   * The question a reader actually arrives with is "what happens if I equip the
+   * whole package?", and `packageDeltaDps` is the only stored figure that
+   * answers it: one sim of the assembled package against the baseline, with the
+   * break already inside the measurement rather than derived back out. It
+   * reached no surface at all before this — the panel showed only the
+   * confounded `bonusDps`, so the member rows' large negatives had nothing
+   * positive to be read against (loop log iteration 5, defect A).
+   */
+  it("states the whole-package delta, the figure that is net of any break", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(line).toContain("whole package +64.07 DPS vs current gear");
+  });
+
+  /**
+   * Ticket 103's disclosure, on the surface the ticket was filed against. The
+   * per-row package line already carries this qualifier; the panel's own
+   * package figure is the same quantity assembled the same way, so a reader
+   * comparing it against their own re-gemmed wowsims run needs the same
+   * warning — the gap is ~30 DPS on a ~2150 baseline.
+   */
+  it("qualifies the panel's package figure as holding current gems fixed", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+    });
+    expect(line).toContain(GEM_POLICY_QUALIFIER);
+  });
+
+  it("states a negative whole-package delta with its sign", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [1, 2, 3, 4],
+        packageDeltaDps: -317.24,
+        bonusDps: 91.68,
+      })
+    ).toContain("whole package -317.24 DPS vs current gear");
+  });
+
+  /**
+   * An unmeasured bonus has no package sim behind it, so `packageDeltaDps` is a
+   * structural zero rather than a measurement. Rendering it would state a
+   * measured-looking 0.00 for a package that was never simmed.
+   */
+  it("omits the whole-package delta when the bonus is unmeasured", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 641,
+        setName: "Nordrassil Harness",
+        threshold: 2,
+        piecesWorn: 0,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "not-implemented-in-sim",
+      })
+    ).not.toContain("whole package");
+  });
+
+  it("says nothing about breakage when the package breaks nothing", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 640,
+        setName: "Malorne Harness",
+        threshold: 4,
+        piecesWorn: 2,
+        packageItemIds: [29098, 29097],
+        packageDeltaDps: -282.29,
+        bonusDps: 20.89,
+      })
+    ).not.toContain("breaks");
+  });
+
+  /**
+   * Ticket 91: at 0 worn pieces every single-swap candidate lands at
+   * `piecesAfterSwap === 1`, and `nextMeasurableThreshold` stops at
+   * Thunderheart's implemented 2pc — so no row anywhere carries the 4pc figure.
+   * The panel is the only surface that can show it, which makes naming the
+   * package contents the actionable part: the reader needs to know *which four
+   * items* the number is about.
+   */
+  it("names the package contents so a bonus no row carries is still actionable", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+    });
+    expect(line).toContain("Thunderheart Pauldrons");
+    expect(line).toContain("Thunderheart Chestguard");
+    expect(line).toContain("Thunderheart Gauntlets");
+    expect(line).toContain("Thunderheart Leggings");
+  });
+
+  it("leads with the breakage rather than trailing it after the figure", () => {
+    const line = formatSetBonusLine({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [31048, 31042, 31034, 31044],
+      packageDeltaDps: 64.07,
+      bonusDps: 193.89,
+      breaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    // A qualified figure must read as qualified before the reader has taken the
+    // number away — the caveat cannot sit past the end of the sentence.
+    expect(line.indexOf("breaks")).toBeLessThan(line.indexOf("193.89"));
+    expect(line).toContain("Malorne Harness 2pc");
+  });
+
+  // Ticket 127: the Crystalforge 4pc-at-1-worn case from
+  // .scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.json —
+  // bonusDps computed with the 2pc term missing (ticket 119 anomaly A) must
+  // not read as a plain measurement.
+  it("qualifies a 4pc figure whose own lower threshold was unmeasurable at this worn count", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+      selfConfound: { threshold: 2 },
+    });
+    // Same front-loading rule as the cross-set break prefix: the qualifier
+    // must read before the figure, not after it.
+    expect(line.indexOf("unmeasured")).toBeLessThan(line.indexOf("-9.92"));
+    expect(line).toContain("2pc");
+  });
+
+  // Ticket 144: the ticket-107 gem disclosure reaches the package arm.
+  it("names the gem re-cuts a package was priced with", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+      gemSubstitutions: [
+        { itemId: 29096, itemIndex: 4, socketIndex: 0, from: 24028, to: 24058 },
+        { itemId: 29096, itemIndex: 4, socketIndex: 1, from: 24028, to: 24058 },
+        { itemId: 29100, itemIndex: 2, socketIndex: 0, from: 24028, to: 24058 },
+      ],
+    });
+    expect(line).toContain("3 gems re-cut on 2 other items");
+    // A cost of taking the offer, not a qualifier on the figure: it must not
+    // displace the number the way the break and self-confound prefixes do.
+    expect(line.indexOf("12.00")).toBeLessThan(line.indexOf("re-cut"));
+  });
+
+  it("counts two worn rings sharing an item id as two items", () => {
+    // Adversarial round: `MetaRepairSwap.itemIndex` exists because the same id
+    // can sit in two slots (round-4 review, A2). Counting distinct items by
+    // `itemId` collapsed a pair of rings into one and under-reported the
+    // disclosure -- silently, since the sentence still reads plausibly.
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+      gemSubstitutions: [
+        { itemId: 29383, itemIndex: 9, socketIndex: 0, from: 24028, to: 24058 },
+        {
+          itemId: 29383,
+          itemIndex: 10,
+          socketIndex: 0,
+          from: 24028,
+          to: 24058,
+        },
+      ],
+    });
+    expect(line).toContain("2 gems re-cut on 2 other items");
+  });
+
+  it("stays silent when a package needed no gem re-cuts", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+    });
+    expect(line).not.toContain("re-cut");
+  });
+
+  // Ticket 127: option (a) for the already-committed slamaltman-p3 artifact
+  // (predates this fix, no live sim rerun) — derive `selfConfound` at render
+  // time from the sibling 2pc row already in the same JSON.
+  describe("withSelfConfoundDisclosed", () => {
+    const twoPc = {
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 2 as const,
+      piecesWorn: 1,
+      packageItemIds: [30131],
+      packageDeltaDps: 0,
+      unmeasured: "unmeasurable-at-this-worn-count" as const,
+    };
+    const fourPc = {
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4 as const,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30133, 30132],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+    };
+
+    it("adds selfConfound to the 4pc entry when the sibling 2pc is unmeasurable-at-this-worn-count", () => {
+      const result = withSelfConfoundDisclosed([twoPc, fourPc]);
+      const patched4pc = result.find((b) => b.threshold === 4);
+      expect(patched4pc?.selfConfound).toEqual({ threshold: 2 });
+      // Nothing else about the entry moves — same arithmetic, only disclosed.
+      expect(patched4pc?.bonusDps).toBe(fourPc.bonusDps);
+      expect(patched4pc?.packageDeltaDps).toBe(fourPc.packageDeltaDps);
+      expect(patched4pc?.se).toBe(fourPc.se);
+    });
+
+    it("leaves the 0-worn case untouched — no sibling 2pc is unmeasurable", () => {
+      const clean2pc = {
+        setId: twoPc.setId,
+        setName: twoPc.setName,
+        threshold: twoPc.threshold,
+        piecesWorn: 0,
+        packageItemIds: twoPc.packageItemIds,
+        packageDeltaDps: 30,
+        bonusDps: 30,
+        se: 1,
+      };
+      const clean4pc = { ...fourPc, piecesWorn: 0, bonusDps: 40, se: 1 };
+      const result = withSelfConfoundDisclosed([clean2pc, clean4pc]);
+      expect(
+        result.find((b) => b.threshold === 4)?.selfConfound
+      ).toBeUndefined();
+    });
+
+    it("does not disclose a confound on a 4pc row that has no figure at all", () => {
+      // Ticket 152. The disclosure says the figure "includes" an inseparable
+      // 2pc effect. On an unmeasured 4pc row there is no figure to include
+      // anything, and the CLI printed the claim immediately before saying so:
+      //   "[includes the unmeasured 2pc effect, can't be separated from it]
+      //    not enough pieces in the pool to build the package"
+      // The live path in rank.ts only sets the flag after the unmeasured
+      // branches have bailed out, so this is where the two paths diverged.
+      const unmeasured4pc = {
+        setId: fourPc.setId,
+        setName: fourPc.setName,
+        threshold: fourPc.threshold,
+        piecesWorn: fourPc.piecesWorn,
+        packageItemIds: fourPc.packageItemIds,
+        packageDeltaDps: 0,
+        unmeasured: "insufficient-pieces" as const,
+      };
+      const result = withSelfConfoundDisclosed([twoPc, unmeasured4pc]);
+      expect(
+        result.find((b) => b.threshold === 4)?.selfConfound
+      ).toBeUndefined();
+    });
+
+    it("is a no-op when selfConfound is already present", () => {
+      const already = { ...fourPc, selfConfound: { threshold: 2 as const } };
+      const result = withSelfConfoundDisclosed([twoPc, already]);
+      expect(result.find((b) => b.threshold === 4)).toEqual(already);
+    });
+  });
+
+  it("has no self-confound prefix when the bonus carries no selfConfound", () => {
+    expect(
+      formatSelfConfoundPrefix({
+        setId: 629,
+        setName: "Crystalforge Battlegear",
+        threshold: 4,
+        piecesWorn: 0,
+        packageItemIds: [30129, 30131, 30132, 30133],
+        packageDeltaDps: 1,
+        bonusDps: 1,
+      })
+    ).toBe("");
+  });
+
+  it("renders a measured ≈0 bonus as a number, not as unmeasured (§2.3)", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 629,
+        setName: "Crystalforge Battlegear",
+        threshold: 2,
+        piecesWorn: 1,
+        packageItemIds: [1],
+        packageDeltaDps: 0.1,
+        bonusDps: 0,
+      })
+    ).toBe(
+      "Crystalforge Battlegear 2pc (1 worn) — 0.00 DPS — " +
+        "whole package +0.10 DPS vs current gear " +
+        `(${GEM_POLICY_QUALIFIER}) — add item 1`
+    );
+  });
+
+  it("renders each unmeasured reason as readable text", () => {
+    expect(
+      formatSetBonusLine({
+        setId: 626,
+        setName: "Justicar Battlegear",
+        threshold: 2,
+        piecesWorn: 1,
+        packageItemIds: [1],
+        packageDeltaDps: 0,
+        unmeasured: "not-implemented-in-sim",
+      })
+    ).toBe(
+      "Justicar Battlegear 2pc (1 worn) — not implemented in the pinned sim"
+    );
+    expect(
+      formatSetBonusLine({
+        setId: 641,
+        setName: "Nordrassil Harness",
+        threshold: 4,
+        piecesWorn: 1,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "insufficient-pieces",
+      })
+    ).toBe(
+      "Nordrassil Harness 4pc (1 worn) — not enough pieces in the pool to build the package"
+    );
+    expect(
+      formatSetBonusLine({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        piecesWorn: 2,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "sim-failed",
+      })
+    ).toBe("Thunderheart Harness 4pc (2 worn) — the package sim failed");
+  });
+
+  it("formats the per-item potential line with the pieces-needed count", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 2 more pieces)");
+  });
+
+  it("points at the 4pc threshold and says needs 2 more for a 1-worn candidate crossing to 2 (finding 3)", () => {
+    // piecesWornBefore=1, piecesAfterSwap=2, but 2pc is not-implemented-in-sim
+    // so nextThreshold is the nearest *measurable* one: 4pc. needed must be
+    // nextThreshold - piecesAfterSwap = 2, never 0.
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 2 more pieces)");
+  });
+
+  it("singularizes 'piece' when exactly one more is needed", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 3,
+          piecesAfterSwap: 3,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps: 45,
+        },
+      })
+    ).toBe("+45.00 set potential (needs 1 more piece)");
+  });
+
+  it("is undefined for a crossing candidate (value already in deltaDps)", () => {
+    expect(
+      formatSetPotentialLine({
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 3,
+          piecesAfterSwap: 4,
+          nextThreshold: null,
+          crossesThreshold: true,
+        },
+      })
+    ).toBeUndefined();
+  });
+
+  it("is undefined with no setContext at all", () => {
+    expect(formatSetPotentialLine({})).toBeUndefined();
+  });
+
+  it("still discloses a confounded figure, qualified by what it breaks", () => {
+    // Ticket 90: the number is kept out of ranking, but the reader must still
+    // see it and see why it is not being counted.
+    const line = formatSetPotentialLine({
+      setContext: {
+        setId: 676,
+        setName: "Thunderheart Harness",
+        piecesWornBefore: 0,
+        piecesAfterSwap: 1,
+        nextThreshold: 4,
+        crossesThreshold: false,
+        prospectiveBonusDps: 193.89,
+        prospectiveBonusBreaks: [
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 2,
+            piecesBefore: 2,
+            piecesAfter: 0,
+          },
+        ],
+      },
+    });
+    expect(line).toBeDefined();
+    expect(line).toContain("193.89");
+    expect(line).toContain("Malorne Harness");
+    expect(line).toContain("not counted in ranking");
+  });
+});
+
+describe("weightedSetPotentialDps", () => {
+  const ctx = (over: Partial<NonNullable<RankedItem["setContext"]>> = {}) => ({
+    setId: 626,
+    setName: "Justicar Battlegear",
+    piecesWornBefore: 1,
+    piecesAfterSwap: 2,
+    nextThreshold: 4 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 100,
+    ...over,
+  });
+
+  it("adds a quarter of a 4pc bonus", () => {
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: ctx() })
+    ).toBeCloseTo(35);
+  });
+
+  it("adds half of a 2pc bonus", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ piecesAfterSwap: 1, nextThreshold: 2 }),
+      })
+    ).toBeCloseTo(60);
+  });
+
+  it("weights flatly, ignoring how many pieces are still missing", () => {
+    // One piece away and three pieces away both take the same 0.25x credit —
+    // the documented consequence of a flat weight, asserted so a later change
+    // to a pieces-remaining divisor cannot land silently.
+    const oneAway = weightedSetPotentialDps({
+      deltaDps: 0,
+      setContext: ctx({ piecesAfterSwap: 3 }),
+    });
+    const threeAway = weightedSetPotentialDps({
+      deltaDps: 0,
+      setContext: ctx({ piecesAfterSwap: 1 }),
+    });
+    expect(oneAway).toBeCloseTo(25);
+    expect(threeAway).toBeCloseTo(25);
+  });
+
+  it("falls back to deltaDps when the bonus is already inside it", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ crossesThreshold: true, nextThreshold: null }),
+      })
+    ).toBe(10);
+  });
+
+  it("falls back to deltaDps when the threshold was never measured", () => {
+    // `prospectiveBonusDps` absent, not set to undefined —
+    // `exactOptionalPropertyTypes` distinguishes the two, and an unmeasured
+    // bonus is genuinely an absent key.
+    const unmeasured = ctx();
+    delete (unmeasured as { prospectiveBonusDps?: number }).prospectiveBonusDps;
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: unmeasured })
+    ).toBe(10);
+  });
+
+  it("falls back to deltaDps with no setContext", () => {
+    expect(weightedSetPotentialDps({ deltaDps: 10 })).toBe(10);
+  });
+
+  it("credits nothing for a confounded bonus, under either credit mode", () => {
+    // Ticket 90: `bonus = packageDelta - Σ singles` charges a displaced set's
+    // lost bonus once in packageDelta and k times across the singles, so a
+    // figure with non-empty `breaks` is inflated by (k-1)·B and must not move
+    // a row's value. B is disputed, so this suppresses rather than corrects.
+    const confounded = ctx({
+      prospectiveBonusBreaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: confounded })
+    ).toBe(10);
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: confounded }, "full")
+    ).toBe(10);
+  });
+
+  it("still credits a bonus whose breaks list is empty", () => {
+    // An empty `breaks` is the unconfounded case (k=0), not a missing field.
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: 10,
+        setContext: ctx({ prospectiveBonusBreaks: [] }),
+      })
+    ).toBeCloseTo(35);
+  });
+
+  it("credits the whole bonus under `full`, at either threshold", () => {
+    expect(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: ctx() }, "full")
+    ).toBeCloseTo(110);
+    expect(
+      weightedSetPotentialDps(
+        { deltaDps: 10, setContext: ctx({ nextThreshold: 2 }) },
+        "full"
+      )
+    ).toBeCloseTo(110);
+  });
+
+  it("still falls back to deltaDps under `full` with nothing to credit", () => {
+    // `full` widens the credit, never the set of rows eligible for one — a
+    // crossing candidate's bonus is already inside deltaDps either way.
+    expect(
+      weightedSetPotentialDps(
+        {
+          deltaDps: 10,
+          setContext: ctx({ crossesThreshold: true, nextThreshold: null }),
+        },
+        "full"
+      )
+    ).toBe(10);
+    expect(weightedSetPotentialDps({ deltaDps: 10 }, "full")).toBe(10);
+  });
+
+  it("defaults to the weighted credit when no mode is given", () => {
+    const c = ctx();
+    expect(weightedSetPotentialDps({ deltaDps: 10, setContext: c })).toBe(
+      weightedSetPotentialDps({ deltaDps: 10, setContext: c }, "weighted")
+    );
+  });
+
+  it("keeps a negative row negative when the weighted credit is too small", () => {
+    expect(
+      weightedSetPotentialDps({
+        deltaDps: -220,
+        setContext: ctx({ prospectiveBonusDps: 18 }),
+      })
+    ).toBeCloseTo(-215.5);
+  });
+});
+
+describe("packageSetPotentialDps", () => {
+  // The owner's decision (2026-08-10, spec §4): under the opt-in view, a member
+  // row of an incomplete set scores by the WHOLE-PACKAGE net figure. Membership
+  // is `packageItemIds`, not `nextThreshold` — at 0 pieces worn every single
+  // swap lands at `piecesAfterSwap === 1`, so `nextThreshold` pins to 2pc and a
+  // threshold-keyed lookup would reach only two of the four T6 rows (ticket 91).
+  const pkg = (over: Partial<NonNullable<RankedItem["setContext"]>> = {}) => ({
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 31.46,
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
+    ...over,
+  });
+
+  it("scores a member row by the whole-package figure, not its own delta", () => {
+    // The marquee case: the T6 shoulders sim at -106.16 as a single swap while
+    // the package they belong to is +64.07.
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: pkg() })
+    ).toBeCloseTo(64.07);
+  });
+
+  it("gives every member row of one package the same figure", () => {
+    // Not a per-piece split (spec §2.1 stands): all four rows carry the
+    // identical whole-package number, which is why it must be labelled as one.
+    const rows = [-106.16, -100.16, 21.75, 23.29].map((deltaDps) =>
+      packageSetPotentialDps({ deltaDps, setContext: pkg() })
+    );
+    for (const v of rows) expect(v).toBeCloseTo(64.07);
+  });
+
+  it("falls back to deltaDps when no package value is positive", () => {
+    // Only a measured, positive package is credited. Nordrassil's 4pc package
+    // measures -21.18 on this gear; crediting it would demote the row below its
+    // own honest delta.
+    const negative = (deltaDps: number) =>
+      pkg({ packages: [{ ...pkg().packages![0]!, deltaDps }] });
+    expect(
+      packageSetPotentialDps({
+        deltaDps: -110.9,
+        setContext: negative(-21.18),
+      })
+    ).toBe(-110.9);
+    expect(
+      packageSetPotentialDps({
+        deltaDps: 5,
+        setContext: negative(0),
+      })
+    ).toBe(5);
+  });
+
+  it("falls back to deltaDps with no packages on the context", () => {
+    const bare = pkg();
+    delete (bare as { packages?: unknown }).packages;
+    expect(packageSetPotentialDps({ deltaDps: 5, setContext: bare })).toBe(5);
+    expect(packageSetPotentialDps({ deltaDps: 5 })).toBe(5);
+  });
+
+  it("does not suppress a package whose bonusDps split is confounded", () => {
+    // Ticket 90 suppresses `bonusDps` — the DERIVED `packageDelta - Σ singles`
+    // split, which carries the (k-1)·B inflation. `packageDeltaDps` is one
+    // simmed measurement with the break's cost already inside it, so the
+    // confound never lands on it and the suppression does not apply.
+    const confounded = pkg({
+      prospectiveBonusBreaks: [
+        {
+          setId: 640,
+          setName: "Malorne Harness",
+          threshold: 2,
+          piecesBefore: 2,
+          piecesAfter: 0,
+        },
+      ],
+    });
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: confounded })
+    ).toBeCloseTo(64.07);
+  });
+
+  it("still credits a row whose own delta already beats the package", () => {
+    // The package figure replaces the row's own value rather than maxing with
+    // it, so the whole set of member rows sorts as one block — which is the
+    // point of the view.
+    expect(
+      packageSetPotentialDps({ deltaDps: 23.29, setContext: pkg() })
+    ).toBeCloseTo(64.07);
+  });
+
+  it("ignores a NaN package figure instead of letting it hide a real positive sibling", () => {
+    // Math.max returns NaN if any input is NaN, and NaN > 0 is false, so
+    // without filtering, one corrupt figure would fall the row back to its
+    // own delta and throw away a perfectly good positive figure from the
+    // other threshold.
+    const twoThresholds = pkg({
+      packages: [
+        {
+          threshold: 2 as const,
+          deltaDps: NaN,
+          itemIds: [31048],
+          piecesNeeded: 2,
+        },
+        {
+          threshold: 4 as const,
+          deltaDps: 64.07,
+          itemIds: [31048, 31042, 31034, 31044],
+          piecesNeeded: 4,
+        },
+      ],
+    });
+    expect(
+      packageSetPotentialDps({ deltaDps: -106.16, setContext: twoThresholds })
+    ).toBeCloseTo(64.07);
+  });
+});
+
+describe("formatPackageMembershipLine", () => {
+  const ctx = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
+  };
+
+  it("states the package figure and keeps the row's own swap visible", () => {
+    const line = formatPackageMembershipLine({
+      deltaDps: -106.16,
+      setContext: ctx,
+    });
+    expect(line).toBeDefined();
+    expect(line).toContain("this swap alone: -106.16");
+    expect(line).toContain("4pc package +64.07");
+    expect(line).toContain("Thunderheart Harness");
+  });
+
+  it("labels the figure as the whole package, never as this piece's share", () => {
+    // Spec §2.1 is unchanged: no per-piece split exists. Every member row shows
+    // the same number, so the wording has to say it is the package's.
+    const line = formatPackageMembershipLine({
+      deltaDps: 21.75,
+      setContext: ctx,
+    })!;
+    expect(line).toContain("whole package");
+    expect(line).not.toContain("share");
+  });
+
+  it("states the package figure's gem model where the figure is shown", () => {
+    // Ticket 111: the qualifier states the model (migrate worn gems, rare-cap
+    // the auto-fill) rather than apologising for it, and claims no match to a
+    // wowsims run — that has never been measured.
+    const line = formatPackageMembershipLine({
+      deltaDps: -106.16,
+      setContext: ctx,
+    })!;
+    expect(line).toContain(GEM_POLICY_QUALIFIER);
+  });
+
+  it("is absent when the row is in no measured package", () => {
+    expect(formatPackageMembershipLine({ deltaDps: 5 })).toBeUndefined();
+  });
+
+  it("renders a negative package figure rather than hiding it (ticket 118)", () => {
+    // We sim things and present data: a package that measured badly is a
+    // measurement. Only the sort key ignores non-positive packages.
+    const line = formatPackageMembershipLine({
+      deltaDps: 5,
+      setContext: {
+        ...ctx,
+        packages: [{ ...ctx.packages[0]!, deltaDps: -21.18 }],
+      },
+    });
+    expect(line).toContain("4pc package -21.18");
+  });
+});
+
+describe("set-weight toggle (client-side re-sort)", () => {
+  const withPotential = item({
+    name: "Tier piece",
+    slot: "head",
+    deltaDps: -100,
+    itemId: 30229,
+    setContext: {
+      setId: 641,
+      setName: "Nordrassil Harness",
+      piecesWornBefore: 0,
+      piecesAfterSwap: 1,
+      nextThreshold: 4,
+      crossesThreshold: false,
+      prospectiveBonusDps: 200,
+    },
+  });
+
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 2,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  it("emits all three values and the control when some row would move", () => {
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain('name="set-weight"');
+    expect(html).toContain('data-delta="-100"');
+    // -100 + 200 * 0.25
+    expect(html).toContain('data-weighted="-50"');
+    // -100 + 200 * 1
+    expect(html).toContain('data-full="100"');
+  });
+
+  it("offers the three modes as radios, defaulting to off", () => {
+    // Radios, not checkboxes: the modes are alternatives, and the markup has
+    // to make picking both impossible rather than policing it in script.
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain(
+      'type="radio" name="set-weight" value="off" checked'
+    );
+    expect(html).toContain('type="radio" name="set-weight" value="weighted"');
+    expect(html).toContain('type="radio" name="set-weight" value="full"');
+    expect(html).not.toContain('type="checkbox" name="set-weight"');
+  });
+
+  it("omits the control entirely when no row would move", () => {
+    const html = renderRankHtml(
+      ranking([item({ name: "plain", slot: "head", deltaDps: 5 })]),
+      meta
+    );
+    // The stylesheet always carries the control's rules, so the absence check
+    // is on the control markup. The <script> is now unconditional — the export
+    // panel needs it on every page — so its presence says nothing here.
+    expect(html).not.toContain('type="radio" name="set-weight"');
+  });
+
+  it("offers the control for a row only `full` would move", () => {
+    // A 4pc bonus small enough that the 0.25x weighted credit rounds to the
+    // same displayed value would still move materially under `full`; gating
+    // availability on `weighted` alone would hide a live control.
+    const html = renderRankHtml(
+      ranking([
+        item({
+          name: "Tier piece",
+          slot: "head",
+          deltaDps: 0,
+          setContext: {
+            setId: 641,
+            setName: "Nordrassil Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 80,
+          },
+        }),
+      ]),
+      meta
+    );
+    expect(html).toContain('name="set-weight"');
+    expect(html).toContain('data-full="80"');
+  });
+
+  it("does not change which rows are above cutoff", () => {
+    // The toggle is display-only: a row's `belowCutoff` class is rendered from
+    // the ranking, never from the weighted value.
+    const html = renderRankHtml(ranking([withPotential]), meta);
+    expect(html).toContain('class="row muted"');
+  });
+});
+
+describe("package mode (in-browser toggle, owner decision 2026-08-10)", () => {
+  const pkgContext = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    piecesWornBefore: 0,
+    piecesAfterSwap: 1,
+    nextThreshold: 2 as const,
+    crossesThreshold: false,
+    prospectiveBonusDps: 31.46,
+    packages: [
+      {
+        threshold: 4 as const,
+        deltaDps: 64.07,
+        itemIds: [31048, 31042, 31034, 31044],
+        piecesNeeded: 4,
+      },
+    ],
+  };
+
+  const shoulders = item({
+    name: "Thunderheart Pauldrons",
+    slot: "shoulder",
+    itemId: 31048,
+    deltaDps: -106.16,
+    setContext: pkgContext,
+  });
+  // A plain row that outranks the shoulders by delta but is beaten by the
+  // package figure — the pair that proves the toggle actually reorders.
+  const plain = item({
+    name: "Plain shoulders",
+    slot: "shoulder",
+    itemId: 999,
+    deltaDps: 30,
+    belowCutoff: false,
+  });
+
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  it("embeds both orders as data, so the toggle needs no shell re-run", () => {
+    // The delivery shape from `.scratch/handoffs/set-potential-weighted-toggle
+    // -scope-miss.md`: both sort keys ride on the row at generation time and
+    // the browser re-sorts DOM it already has.
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('data-delta="-106.16"');
+    expect(html).toContain('data-package="64.07"');
+    // The unaffected row carries its own delta under both keys, so a sort on
+    // either attribute is total over every row.
+    expect(html).toContain('data-package="30"');
+  });
+
+  it("offers package as a fourth radio in the existing set-weight control", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('type="radio" name="set-weight" value="package"');
+    expect(html).toContain(
+      'type="radio" name="set-weight" value="off" checked'
+    );
+  });
+
+  it("ships the client-side script that re-sorts on the package key", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain("<script>");
+    expect(html).toContain("data-package");
+    // No shell re-run: the script sorts children already in the DOM.
+    expect(html).toContain("appendChild");
+  });
+
+  it("shows the package framing on the row with its own swap delta", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain("this swap alone: -106.16");
+    expect(html).toContain("4pc package +64.07");
+  });
+
+  it("offers the control when only the package figure would move a row", () => {
+    // A member row with no prospective bonus at all still moves under package
+    // mode, so availability cannot be gated on the weighted/full credits.
+    const bonusless = { ...pkgContext };
+    delete (bonusless as { prospectiveBonusDps?: number }).prospectiveBonusDps;
+    const html = renderRankHtml(
+      ranking([item({ ...shoulders, setContext: bonusless })]),
+      meta
+    );
+    expect(html).toContain('type="radio" name="set-weight" value="package"');
+  });
+
+  /**
+   * Carry-forward 104. `weighted` and `full` have the same shape as `package`
+   * and predate it, so `5b7ee96`'s fix applies to all three: the DPS column
+   * switches to a credited figure while `.pct` keeps showing `deltaPct` from
+   * the row's own swap. No percentage was measured for any credited mode —
+   * `prospectiveBonusDps` is absolute DPS and the weights scale DPS, not a
+   * ratio — so showing none beats deriving one the pipeline never computed.
+   */
+  it("hides the row's own percentage under every credited mode", () => {
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain(
+      "body.weighted .pct, body.full .pct, body.package .pct { display: none; }"
+    );
+  });
+
+  it("leaves the default order and the cutoff untouched", () => {
+    // Default view (toggle off) is exactly today's: the row renders muted from
+    // its own `belowCutoff`, and the plain +30 row precedes it in the DOM.
+    const html = renderRankHtml(ranking([shoulders, plain]), meta);
+    expect(html).toContain('class="row muted"');
+    expect(html.indexOf("Plain shoulders")).toBeLessThan(
+      html.indexOf("Thunderheart Pauldrons")
+    );
+  });
+});
+
+describe("isCuratedBis", () => {
+  it("is true only for a current-phase BiS tag", () => {
+    expect(isCuratedBis({ bisTags: ["BiS"] })).toBe(true);
+    expect(isCuratedBis({ bisTags: ["BiS", "Alt"] })).toBe(true);
+    expect(isCuratedBis({ bisTags: [] })).toBe(false);
+    expect(isCuratedBis({ bisTags: ["Alt"] })).toBe(false);
+    expect(isCuratedBis({ bisTags: ["Realistic"] })).toBe(false);
+  });
+
+  it("does not read curatedSets", () => {
+    // `curatedSets` also carries earlier-phase sets (feral P2 has five
+    // `preraid` rows). "Was in the pre-raid set" is not "BiS now".
+    expect(
+      isCuratedBis({ bisTags: [], curatedSets: ["preraid"] } as Pick<
+        RankedItem,
+        "bisTags"
+      >)
+    ).toBe(false);
+  });
+});
+
+describe("BiS-only filter", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 2,
+    poolSize: 3,
+    generatedAt: "now",
+  };
+
+  const bisAbove = item({
+    name: "Curated hit",
+    slot: "head",
+    deltaDps: 20,
+    itemId: 11,
+    belowCutoff: false,
+    bisTags: ["BiS"],
+    bisSets: ["p2_6p"],
+  });
+  const bisBelow = item({
+    name: "Curated but a downgrade alone",
+    slot: "head",
+    deltaDps: -30,
+    itemId: 12,
+    belowCutoff: true,
+    bisTags: ["BiS"],
+    bisSets: ["p2_6p"],
+  });
+  const notBis = item({
+    name: "Uncurated",
+    slot: "waist",
+    deltaDps: 5,
+    itemId: 13,
+    belowCutoff: false,
+  });
+
+  it("marks curated rows and offers the filter", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain('id="bis-only"');
+    expect(html).toContain("is-bis");
+  });
+
+  it("marks a slot with no curated row so it can be hidden wholesale", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    // head has a curated row, waist does not.
+    expect(html).toContain('<section class="slot" id="slot-head">');
+    expect(html).toContain('<section class="slot no-bis" id="slot-waist">');
+  });
+
+  it("keeps below-cutoff curated rows marked, so the filter shows all of them", () => {
+    // An item is BiS as a member of a whole optimized set, so some curated
+    // picks are downgrades as a single swap. Dropping them would misdescribe
+    // the very list the control names.
+    const html = renderRankHtml(ranking([bisAbove, bisBelow]), meta);
+    expect(html).toContain('class="row muted is-bis"');
+    expect(html).toContain('class="row hit is-bis"');
+    expect(html).toContain("2 BiS candidates");
+  });
+
+  it("carries both nav counts so the badge can follow the filter", () => {
+    const html = renderRankHtml(ranking([bisAbove, bisBelow, notBis]), meta);
+    // head: 1 above cutoff, 2 curated.
+    expect(html).toContain('data-hits="1" data-bis-hits="2"');
+    // waist: 1 above cutoff, 0 curated — and marked so the link hides.
+    expect(html).toContain('class="nav-slot no-bis" data-hits="1"');
+  });
+
+  it("omits the filter when nothing is curated", () => {
+    const html = renderRankHtml(ranking([notBis]), meta);
+    expect(html).not.toContain('id="bis-only"');
+  });
+
+  it("names the sets the tags came from, not the requested phase", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain("(p2_6p)");
+  });
+
+  it("warns when the curated list is older than the ranked phase", () => {
+    // Where no set is pinned for the ranked phase the tags degrade to the
+    // newest one that is. Calling that "P3 BiS" would assert a curation
+    // nobody made — the overclaim carry-forward 47 §1 was filed for.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), {
+      ...meta,
+      maxPhase: 3,
+    });
+    expect(html).toContain("No curated set is pinned for P3");
+  });
+
+  it("does not warn when the curated list matches the ranked phase", () => {
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).not.toContain("No curated set is pinned");
+  });
+
+  it("still ships the script when only the BiS filter is present", () => {
+    // The two controls are independent: a page with curated rows but no
+    // unrealised set bonus still needs the script for the filter to work.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    // The script's own querySelectorAll mentions `set-weight`, so the absence
+    // check has to target the radio markup rather than the bare string.
+    expect(html).not.toContain('type="radio" name="set-weight"');
+    expect(html).toContain("<script>");
+    expect(html).toContain('getElementById("bis-only")');
+  });
+
+  it("does not filter rows out of the emitted document", () => {
+    // Hidden, never deleted (§10): the artifact holds every row and the
+    // filter is CSS over classes.
+    const html = renderRankHtml(ranking([bisAbove, notBis]), meta);
+    expect(html).toContain("Uncurated");
+  });
+});
+
+describe("curated ranked list chips", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 2,
+    generatedAt: "now",
+  };
+
+  const chipItems = [
+    item({
+      name: "First",
+      slot: "head",
+      deltaDps: 20,
+      itemId: 41,
+      rank: 1,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+    }),
+    item({
+      name: "Third overall",
+      slot: "waist",
+      deltaDps: 10,
+      itemId: 42,
+      rank: 7,
+      belowCutoff: false,
+      source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+    }),
+  ];
+
+  it("carries the absolute rank separately from the rendered position", () => {
+    // The position itself is written by the script, so the served markup has
+    // an empty `.pos` and the absolute rank alongside it — never the absolute
+    // rank *as* the position, which is what it used to render.
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain('data-abs-rank="#7"');
+    expect(html).toContain('<span class="pos"></span>');
+    expect(html).toContain('<span class="abs">#7</span>');
+  });
+
+  it("explains the absolute rank in the chip's tooltip", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain('title="#7 of every candidate simmed"');
+  });
+
+  it("does not renumber RankedItem.rank itself (§12)", () => {
+    // §12 forbids renumbering `rank` inside a filter. The row in the slot
+    // section still shows the absolute rank; only the chip shows position.
+    const html = renderRankHtml(ranking(chipItems), meta);
+    // `soft-rank` rides along when |delta| < stdev, so match the rank span
+    // without pinning that unrelated class.
+    expect(html).toMatch(/<span class="rank[^"]*">#7<\/span>/);
+  });
+
+  it("names an unranked chip's tooltip rather than emitting #null", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          name: "Unranked",
+          slot: "head",
+          deltaDps: 5,
+          itemId: 43,
+          belowCutoff: false,
+          source: { kind: "raid", zone: "Karazhan" },
+        }),
+      ]),
+      meta
+    );
+    expect(html).toContain('title="not ranked overall"');
+    expect(html).toContain('data-abs-rank=""');
+    expect(html).not.toContain("#null");
+  });
+
+  it("gives each strip its own live counter element", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).toContain(
+      '<h2>Curated ranked list <span class="list-count"></span></h2>'
+    );
+  });
+
+  // Ticket 112: under package mode the chip used to overwrite `.d` with the
+  // package figure, so four member chips read as four identical per-piece
+  // values. The package figure is a group's number and gets its own element.
+  it("shows a package member's own delta and the package figure in separate elements", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: -106.16,
+          belowCutoff: false,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            prospectiveBonusDps: 31.46,
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip, "chip for 31048").not.toBeNull();
+    // Own delta stays in `.d` — the script must not swap the package figure in.
+    expect(chip?.[0]).toContain('data-plain="-106.16"');
+    // The package figure is subordinate, marked as the package's, and its own
+    // element, so the two numbers can never read as one value or a range.
+    expect(chip?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
+    // The client script no longer selects data-package-label for `.d`: under
+    // package mode `.d` falls through to the plain delta.
+    expect(html).not.toContain('"data-package-label"');
+    // The span is package-mode-only, via the same CSS pattern as .package-only.
+    expect(html).toContain(".chip .pkg { display: none;");
+    expect(html).toContain("body.package .chip .pkg");
+  });
+
+  // Ticket 118: each measured threshold's figure appears separately in the
+  // marker, and the sort key is the best of them — the ret Lightbringer case,
+  // where the 2pc measures +11.31 and the 4pc -6.83.
+  it("shows each measured threshold's figure in the package marker", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 30990,
+          name: "Lightbringer Breastplate",
+          slot: "chest",
+          deltaDps: -0.55,
+          belowCutoff: false,
+          setContext: {
+            setId: 680,
+            setName: "Lightbringer Battlegear",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            packages: [
+              {
+                threshold: 2,
+                deltaDps: 11.31,
+                piecesNeeded: 2,
+                itemIds: [30990, 30993],
+              },
+              {
+                threshold: 4,
+                deltaDps: -6.83,
+                piecesNeeded: 4,
+                itemIds: [30989, 30997, 30990, 30993],
+              },
+            ],
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="30990"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip?.[0]).toContain(
+      '<span class="pkg">pkg 2pc +11.31 / 4pc -6.83</span>'
+    );
+    // The sort key is the best measured package value, not the largest
+    // threshold's.
+    expect(chip?.[0]).toContain('data-package="11.31"');
+  });
+
+  it("emits no .pkg span on a chip that is in no measured package", () => {
+    const html = renderRankHtml(ranking(chipItems), meta);
+    expect(html).not.toContain('<span class="pkg">');
+  });
+
+  // Ticket 115: the emit decision used to be a number comparison (package
+  // figure differs from the row's own delta), so a package figure that landed
+  // exactly on the row's own delta hid the marker. The decision is now the
+  // membership fact — the row is in a measured package — so an exact tie
+  // still shows the marker.
+  it("keeps the package marker when the package figure equals the row's own delta", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: 64.07,
+          belowCutoff: false,
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
+          },
+        }),
+      ]),
+      meta
+    );
+    const chip =
+      /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>.*?<\/a>/.exec(html);
+    expect(chip?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
+    expect(chip?.[0]).toContain('data-plain="+64.07"');
+  });
+});
+
+describe("wowsimsItemIdsJson", () => {
+  it("emits the wowsims envelope with ids in display order", () => {
+    expect(wowsimsItemIdsJson([{ itemId: 30229 }, { itemId: 32014 }])).toBe(`{
+  "items": [
+    {
+      "id": 30229
+    },
+    {
+      "id": 32014
+    }
+  ]
+}`);
+  });
+
+  it("emits an empty items array rather than null when nothing is visible", () => {
+    expect(JSON.parse(wowsimsItemIdsJson([]))).toEqual({ items: [] });
+  });
+
+  it("carries ids only — no enchant or gems invented for unowned items", () => {
+    const parsed = JSON.parse(wowsimsItemIdsJson([{ itemId: 1 }])) as {
+      items: Array<Record<string, unknown>>;
+    };
+    expect(Object.keys(parsed.items[0]!)).toEqual(["id"]);
+  });
+});
+
+describe("source filter", () => {
+  const meta: RankReportMeta = {
+    character: "c",
+    realm: "r",
+    region: "US",
+    spec: "feral",
+    maxPhase: 3,
+    poolSize: 3,
+    generatedAt: "now",
+  };
+
+  const karaDrop = item({
+    name: "Kara drop",
+    slot: "head",
+    deltaDps: 10,
+    itemId: 21,
+    belowCutoff: false,
+    source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+  });
+  const crafted = item({
+    name: "Crafted thing",
+    slot: "waist",
+    deltaDps: 5,
+    itemId: 22,
+    belowCutoff: false,
+    source: { kind: "crafted", profession: "Leatherworking" },
+  });
+
+  it("tags a row with a zone key per raid it drops in", () => {
+    const html = renderRankHtml(ranking([karaDrop, crafted]), meta);
+    expect(html).toContain('data-sources="zone:Karazhan"');
+    expect(html).toContain('data-sources="kind:crafted"');
+  });
+
+  it("reaches a tier piece's raid through its token source, not just the primary", () => {
+    // The two-hop case §15's risk table names: filtering on `source` alone
+    // gives a Karazhan filter that omits every T4 piece.
+    const tierPiece = item({
+      name: "Tier piece",
+      slot: "chest",
+      deltaDps: 3,
+      itemId: 23,
+      source: { kind: "unknown" },
+      sources: [
+        {
+          kind: "token",
+          zone: "Serpentshrine Cavern",
+          token: "Chest of the Vanquished",
+          boss: "Vashj",
+        },
+      ],
+    });
+    const html = renderRankHtml(ranking([tierPiece]), meta);
+    expect(html).toContain('data-sources="zone:Serpentshrine Cavern"');
+  });
+
+  it("separates source keys with a tab, so multi-word zones survive", () => {
+    // Space-separated was the first cut, and every multi-word zone ("Black
+    // Temple") then split into keys matching no checkbox — 236 of 407 rows
+    // vanished with their own filter switched on. Caught in a browser, not by
+    // a test, which is why this one exists.
+    const twoZones = item({
+      name: "Two zones",
+      slot: "head",
+      deltaDps: 1,
+      itemId: 24,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+      sources: [
+        { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+        { kind: "raid", zone: "Hyjal Summit", boss: "Archimonde" },
+      ],
+    });
+    const html = renderRankHtml(ranking([twoZones]), meta);
+    expect(html).toContain(
+      'data-sources="zone:Black Temple\tzone:Hyjal Summit"'
+    );
+    // The delimiter must not appear inside a key, or the split re-breaks.
+    for (const key of ["zone:Black Temple", "zone:Hyjal Summit"]) {
+      expect(key).not.toContain("\t");
+    }
+  });
+
+  it("offers one checkbox per bucket, all checked, with a count", () => {
+    const html = renderRankHtml(ranking([karaDrop, crafted]), meta);
+    expect(html).toContain('class="source-box" value="zone:Karazhan" checked');
+    expect(html).toContain('class="source-box" value="kind:crafted" checked');
+    // Zone-less kinds get the reader-facing label, not the bare kind.
+    expect(html).toContain("Crafted");
+  });
+
+  it("omits the filter when every row shares one source bucket", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).not.toContain('class="source-box"');
+  });
+
+  it("always ships the export panel and its script", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).toContain('id="export-json"');
+    expect(html).toContain('id="export-copy"');
+    expect(html).toContain('data-item-id="21"');
+    expect(html).toContain("<script>");
+  });
+
+  /**
+   * The export's payload is the *ranked order*, because it is pasted into
+   * thatsmybis as an upgrade priority list. It read
+   * `document.querySelectorAll("article.row")` — the per-slot detail rows in
+   * document order — so it emitted every visible row grouped slot by slot and
+   * never reflected the curated list's global cross-slot order. On the
+   * shredzepelin P3 report that was 407 ids starting from a below-cutoff row,
+   * against a 36-chip curated list.
+   */
+  it("builds the export from the curated chips, not the slot rows", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    // The export is handed the chips the strip pass just collected, and the
+    // slot rows are no longer gathered for it at all.
+    expect(html).toContain("updateExport(exportChips)");
+    expect(html).toContain("exportChips.push(c)");
+    expect(html).not.toContain("var visibleRows");
+  });
+
+  /**
+   * Strips are read in document order (raid, then PvP), which the caption has
+   * to say — the two strips renumber from 1 independently on screen, so a
+   * reader seeing "1" twice needs to know which one the export leads with.
+   */
+  it("says what the export is and how strips concatenate", () => {
+    const html = renderRankHtml(ranking([karaDrop]), meta);
+    expect(html).toContain("the curated list, top to bottom");
+    expect(html).toContain("as currently filtered and sorted");
+  });
+});
+
+describe("curatedSetPhase", () => {
+  it("reads the phase from a label, ignoring the variant suffix", () => {
+    expect(curatedSetPhase("p2")).toBe(2);
+    expect(curatedSetPhase("p2_6p")).toBe(2);
+    expect(curatedSetPhase("p2_9p")).toBe(2);
+    expect(curatedSetPhase("p1")).toBe(1);
+    // Pre-raid is phase 1: it is the set you take *into* a phase-1 raid.
+    expect(curatedSetPhase("preraid")).toBe(1);
+  });
+
+  /**
+   * Every phase `assemble_universe.py` can emit must resolve. A label the map
+   * does not know returns null, which makes `bisStale` false and silently
+   * withholds the "no curated set is pinned for PN" warning — it fails in the
+   * direction that looks correct (carry-forward 102).
+   */
+  it("resolves every phase the Python source can label", () => {
+    expect(curatedSetPhase("p3")).toBe(3);
+    expect(curatedSetPhase("p3_9p")).toBe(3);
+  });
+
+  it("is null for a label it does not recognise", () => {
+    expect(curatedSetPhase("p9")).toBeNull();
+    expect(curatedSetPhase("")).toBeNull();
+  });
+});
+
+describe("set potential (§4)", () => {
+  it("renders the panel with the toggle off — disclosure is not gated on the ranking change", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            threshold: 4,
+            piecesWorn: 1,
+            packageItemIds: [1, 2, 3],
+            packageDeltaDps: 10,
+            bonusDps: 5,
+          },
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain("Set potential (1)");
+    expect(html).toContain("Justicar Battlegear");
+  });
+
+  it("renders the set block and the measured bonus under the toggle", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31039, 31048, 31034, 31044],
+            packageDeltaDps: -317.24,
+            bonusDps: 91.68,
+          },
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    expect(html).toContain("Set potential (1)");
+    expect(html).toContain("Thunderheart Harness 4pc — 0 worn");
+    expect(html).toContain("+91.68 DPS");
+    expect(html).toContain("completion-package synergy");
+  });
+
+  /**
+   * Ticket 91's user-facing fix. With 0 pieces worn and an implemented 2pc, the
+   * 4pc bonus reaches no row in any display mode (`off`, `weighted`, `full`) —
+   * the walk stops at 2. The Set potential panel is where it stays visible, so
+   * the panel must carry both thresholds and name what completes each.
+   */
+  it("shows a 4pc bonus no row can carry, for a set worn 0 pieces of", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 2,
+            piecesWorn: 0,
+            packageItemIds: [31034, 31044],
+            packageDeltaDps: 76.5,
+            bonusDps: 31.46,
+          },
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31048, 31042, 31034, 31044],
+            packageDeltaDps: 64.07,
+            bonusDps: 193.89,
+            breaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                piecesBefore: 2,
+                piecesAfter: 0,
+              },
+            ],
+          },
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+
+    expect(html).toContain("Set potential (2)");
+    expect(html).toContain("Thunderheart Harness 4pc — 0 worn");
+    expect(html).toContain("193.89");
+    // The four items that complete it — the actionable part a per-row number
+    // was failing to convey.
+    expect(html).toContain("Thunderheart Pauldrons");
+    expect(html).toContain("Thunderheart Chestguard");
+    // And the figure stays qualified by what completing it would break.
+    expect(html).toContain("Malorne Harness 2pc");
+  });
+
+  /**
+   * Carry-forward 96. A curated-BiS row can rank far below cutoff as a single
+   * swap and still be genuinely BiS as part of a completed package — both
+   * figures are correct, and the row shows them side by side with no
+   * reconciliation. The Set potential panel holds the explanation; this is the
+   * pointer from the row to it. A pointer, never a recomputed number.
+   */
+  it("points a below-cutoff curated row at the panel that reconciles its BiS tag", () => {
+    const html = renderRankHtml(
+      {
+        ...ranking([
+          item({
+            rank: 40,
+            name: "Thunderheart Chestguard",
+            slot: "chest",
+            deltaDps: -100.16,
+            belowCutoff: true,
+            bisTags: ["BiS"],
+            setBonusNote: "breaks 2-piece Malorne Harness (below 2)",
+            setContext: {
+              setId: 676,
+              setName: "Thunderheart Harness",
+              piecesWornBefore: 0,
+              piecesAfterSwap: 1,
+              nextThreshold: 2,
+              crossesThreshold: false,
+              prospectiveBonusDps: 31.46,
+            },
+          }),
+        ]),
+        setBonuses: [
+          {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            threshold: 4,
+            piecesWorn: 0,
+            packageItemIds: [31048, 31042, 31034, 31044],
+            packageDeltaDps: 64.07,
+            bonusDps: 193.89,
+          },
+        ],
+      },
+      meta()
+    );
+
+    expect(html).toContain("BiS as part of Thunderheart Harness");
+    expect(html).toContain("Set potential");
+  });
+
+  it("renders each unmeasured reason as text, never a blank or a 0", () => {
+    const reasons = [
+      "not-implemented-in-sim",
+      "insufficient-pieces",
+      "sim-failed",
+    ] as const;
+    for (const reason of reasons) {
+      const html = renderRankHtml(
+        {
+          ...rankingWithPvpWeaponAboveCutoff(),
+          setBonuses: [
+            {
+              setId: 641,
+              setName: "Nordrassil Harness",
+              threshold: 2,
+              piecesWorn: 1,
+              packageItemIds: [1],
+              packageDeltaDps: 0,
+              unmeasured: reason,
+            },
+          ],
+        },
+        { ...meta(), view: { withSetPotential: true } }
+      );
+      expect(html).not.toMatch(/Nordrassil Harness 2pc \(1 worn\) — <\/li>/);
+      expect(html).not.toContain("Nordrassil Harness 2pc (1 worn) — 0.00 DPS");
+      expect(html.match(/Nordrassil Harness/g)?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("shows the per-item set-potential annotation, and the crossing case as included-in-delta", () => {
+    const html = renderRankHtml(
+      {
+        ...rankingWithPvpWeaponAboveCutoff(),
+        items: [
+          item({
+            rank: 1,
+            itemId: 29073,
+            name: "Justicar Crown",
+            slot: "head",
+            deltaDps: 12,
+            belowCutoff: false,
+            setContext: {
+              setId: 626,
+              setName: "Justicar Battlegear",
+              piecesWornBefore: 1,
+              piecesAfterSwap: 2,
+              nextThreshold: 4,
+              crossesThreshold: false,
+              prospectiveBonusDps: 45,
+            },
+          }),
+          item({
+            rank: 2,
+            itemId: 29074,
+            name: "Justicar Legplates",
+            slot: "legs",
+            deltaDps: 8,
+            belowCutoff: false,
+            setContext: {
+              setId: 626,
+              setName: "Justicar Battlegear",
+              piecesWornBefore: 3,
+              piecesAfterSwap: 4,
+              nextThreshold: null,
+              crossesThreshold: true,
+            },
+          }),
+        ],
+      },
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    expect(html).toContain("+45.00 set potential (needs 2 more pieces)");
+    expect(html).toContain("completes 4pc (included in delta)");
+  });
+});
+
+/**
+ * The Set potential surfaces grew across five commits and read as accreted
+ * clauses: a panel entry was one em-dash chain whose order fell out of the
+ * order the parts were added, and a member row hung three loose divs off the
+ * body with nothing saying they were one subject.
+ *
+ * These tests pin the *organisation*, not the numbers. Every figure and every
+ * qualifier that was disclosed before is still disclosed — the no-information-
+ * loss assertions below are the guard on that.
+ */
+/**
+ * The curated ranked list is the report's shopping-list area, and package mode
+ * exists to organise it. It could not: chips are rendered from
+ * `partitionShortlist`, which keeps only above-cutoff rows, so a package-
+ * positive member that is a downgrade as a single swap (31048, 31042) had no
+ * chip element at all and the client script had nothing to re-sort into view.
+ *
+ * The fix is render-but-hide, at the owner's direction (ADR-0024 amendment):
+ * these chips exist in every document and are visible only under package mode.
+ * Cutoff data is untouched — this is admission into a presentation area, the
+ * same re-sort-not-repartition principle ADR-0024 already applies to rows.
+ */
+describe("curated list under package mode (owner direction 2026-08-10)", () => {
+  function t6Ranking(): Ranking {
+    const pkg = {
+      threshold: 4 as const,
+      deltaDps: 64.07,
+      piecesNeeded: 4,
+      itemIds: [31048, 31042, 31034, 31044],
+    };
+    const ctx = (piecesAfterSwap: number) => ({
+      setId: 676,
+      setName: "Thunderheart Harness",
+      piecesWornBefore: 0,
+      piecesAfterSwap,
+      nextThreshold: 2 as const,
+      crossesThreshold: false,
+      prospectiveBonusDps: 31.46,
+      packages: [pkg],
+    });
+    return ranking([
+      item({
+        rank: 1,
+        itemId: 999,
+        name: "Plain Upgrade",
+        slot: "neck",
+        deltaDps: 30,
+        belowCutoff: false,
+      }),
+      item({
+        itemId: 31048,
+        name: "Thunderheart Pauldrons",
+        slot: "shoulder",
+        deltaDps: -106.16,
+        belowCutoff: true,
+        bisTags: ["BiS"],
+        setContext: ctx(1),
+      }),
+      item({
+        itemId: 31042,
+        name: "Thunderheart Chestguard",
+        slot: "chest",
+        deltaDps: -100.16,
+        belowCutoff: true,
+        bisTags: ["BiS"],
+        setContext: ctx(1),
+      }),
+    ]);
+  }
+
+  it("renders chips for package-positive members that miss the cutoff", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    for (const id of [31048, 31042]) {
+      const chip = new RegExp(
+        `<a class="chip[^"]*"[^>]*data-item-id="${id}"[^>]*>`
+      ).exec(html);
+      expect(chip, `chip for ${id}`).not.toBeNull();
+      // Carries the package figure the client sorts on, and is marked so CSS
+      // can keep it out of every mode that did not ask for it.
+      expect(chip?.[0]).toContain('data-package="64.07"');
+      expect(chip?.[0]).toContain("package-only");
+      // Ticket 112: the admitted chip too shows its own delta in `.d` and the
+      // package figure in a separate marked span.
+      const full = new RegExp(
+        `<a class="chip[^"]*"[^>]*data-item-id="${id}"[^>]*>.*?</a>`
+      ).exec(html);
+      expect(full?.[0]).toContain('<span class="pkg">pkg 4pc +64.07</span>');
+    }
+  });
+
+  /**
+   * The other three modes must stay byte-identical to today, which is what
+   * "hidden by default" has to mean here — the chips exist in the document but
+   * no mode except `package` shows them.
+   */
+  it("hides those chips outside package mode", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(".chip.package-only { display: none; }");
+    expect(html).toContain(
+      "body.package .chip.package-only:not(.source-hidden) {"
+    );
+  });
+
+  /**
+   * Ticket 128: in package mode, the reveal rule must lose to the source and
+   * BiS filters rather than beat them. Pinned at the string level, which is
+   * meaningful here because the whole bug was a specificity/order relationship
+   * between three selectors -- asserting the exact reveal and guard selectors
+   * exist is what makes a regression (e.g. someone reverting to the bare
+   * `body.package .chip.package-only`) fail this test. The cascade arithmetic
+   * itself isn't something jsdom evaluates, so this is the closest pin
+   * available; see the ticket for the specificity numbers by hand.
+   */
+  it("folds the source filter into the package-only reveal selector", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(
+      "body.package .chip.package-only:not(.source-hidden)"
+    );
+  });
+
+  it("folds the BiS filter into a higher-specificity guard over the reveal", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    expect(html).toContain(
+      "body.package.bis-only .chip.package-only:not(.is-bis) { display: none; }"
+    );
+  });
+
+  /**
+   * The admitted chips must not disturb the list the report has always shown:
+   * a package member that already cleared the cutoff keeps its ordinary chip,
+   * and the above-cutoff chips keep their generation-time order.
+   */
+  it("leaves the above-cutoff chip list unchanged", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    const chips = [...html.matchAll(/<a class="chip([^"]*)"[^>]*>/g)];
+    const ordinary = chips.filter((c) => !c[1]?.includes("package-only"));
+    expect(ordinary).toHaveLength(1);
+  });
+
+  /** BiS-only must not strand them: 31042/31048 carry BiS tags. */
+  it("keeps them in the BiS-only filter", () => {
+    const html = renderRankHtml(t6Ranking(), meta());
+    const chip = /<a class="chip[^"]*"[^>]*data-item-id="31048"[^>]*>/.exec(
+      html
+    );
+    expect(chip?.[0]).toContain("is-bis");
+  });
+});
+
+describe("Set potential presentation (grouping and order)", () => {
+  const thunderheart = {
+    setId: 676,
+    setName: "Thunderheart Harness",
+    threshold: 4 as const,
+    piecesWorn: 0,
+    packageItemIds: [31048, 31042, 31034, 31044],
+    packageDeltaDps: 64.07,
+    bonusDps: 193.89,
+    breaks: [
+      {
+        setId: 640,
+        setName: "Malorne Harness",
+        threshold: 2 as const,
+        piecesBefore: 2,
+        piecesAfter: 0,
+      },
+    ],
+  };
+
+  /**
+   * One consistent order for every entry, so a reader scanning the panel finds
+   * the same fact in the same place in each: what the set is, the bonus figure,
+   * the package figure, what completes it, then the qualifiers that constrain
+   * both figures.
+   */
+  it("orders a panel entry: bonus, package, contents, then qualifiers", () => {
+    const parts = setBonusEntry(thunderheart);
+    expect(parts.heading).toBe("Thunderheart Harness 4pc — 0 worn");
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+      "qualifier",
+    ]);
+  });
+
+  /** No information loss: every figure and caveat the flat line carried. */
+  it("keeps every figure and qualifier the accreted line disclosed", () => {
+    const text = [
+      setBonusEntry(thunderheart).heading,
+      ...setBonusEntry(thunderheart).lines.map((l) => l.text),
+    ].join("\n");
+    expect(text).toContain("+193.89 DPS");
+    expect(text).toContain("+64.07 DPS");
+    expect(text).toContain("Thunderheart Pauldrons");
+    expect(text).toContain("Thunderheart Leggings");
+    expect(text).toContain("Malorne Harness 2pc");
+    expect(text).toContain("inflated");
+    expect(text).toContain(GEM_POLICY_QUALIFIER);
+  });
+
+  /**
+   * An unmeasured bonus has no package sim and nothing to chase, so it stays a
+   * bare reason rather than acquiring empty package and contents rows.
+   */
+  it("renders an unmeasured entry as a reason alone", () => {
+    const parts = setBonusEntry({
+      setId: 641,
+      setName: "Nordrassil Harness",
+      threshold: 2,
+      piecesWorn: 0,
+      packageItemIds: [],
+      packageDeltaDps: 0,
+      unmeasured: "not-implemented-in-sim",
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual(["bonus"]);
+    expect(parts.lines[0]?.text).toBe("not implemented in the pinned sim");
+  });
+
+  // Ticket 127: the panel's `.set-entry-line qualifier` for a self-set
+  // confound, mirroring the cross-set `breaks` qualifier already covered by
+  // "keeps every figure and qualifier the accreted line disclosed" above.
+  it("adds a qualifier line naming the missing lower threshold when selfConfound is present", () => {
+    const parts = setBonusEntry({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: -26.77179572189698,
+      bonusDps: -9.924693454980343,
+      se: 4.9633230225772005,
+      selfConfound: { threshold: 2 },
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+      "qualifier",
+    ]);
+    const qualifierText = parts.lines
+      .filter((l) => l.kind === "qualifier")
+      .map((l) => l.text)
+      .join("\n");
+    expect(qualifierText).toContain("2pc");
+    expect(qualifierText).toContain("unmeasured");
+  });
+
+  // The 0-worn control (ticket 127 acceptance): nothing crosses the 2pc on
+  // its own at 0 worn, so no qualifier line is added.
+  it("adds no self-confound qualifier at 0 worn", () => {
+    const parts = setBonusEntry({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 0,
+      packageItemIds: [30129, 30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 40,
+    });
+    expect(parts.lines.map((l) => l.kind)).toEqual([
+      "bonus",
+      "package",
+      "contents",
+      "qualifier",
+    ]);
+  });
+
+  /**
+   * The row's own delta stays primary. The set clauses become one labelled
+   * block instead of three sibling divs, so the reader sees one secondary
+   * subject rather than three unrelated sentences competing with the name.
+   */
+  it("groups a row's set clauses into one block", () => {
+    const html = renderRankHtml(
+      ranking([
+        item({
+          itemId: 31048,
+          name: "Thunderheart Pauldrons",
+          slot: "shoulder",
+          deltaDps: -106.16,
+          belowCutoff: true,
+          bisTags: ["BiS"],
+          setBonusNote: "breaks 2-piece Malorne Harness (below 2)",
+          setContext: {
+            setId: 676,
+            setName: "Thunderheart Harness",
+            piecesWornBefore: 0,
+            piecesAfterSwap: 1,
+            nextThreshold: 2,
+            crossesThreshold: false,
+            prospectiveBonusDps: 31.46,
+            packages: [
+              {
+                threshold: 4,
+                deltaDps: 64.07,
+                piecesNeeded: 4,
+                itemIds: [31048, 31042, 31034, 31044],
+              },
+            ],
+          },
+        }),
+      ]),
+      { ...meta(), view: { withSetPotential: true } }
+    );
+    const block = /<div class="set-info">([\s\S]*?)<\/div>\s*<\/div>/.exec(
+      html
+    );
+    expect(block).not.toBeNull();
+    const inner = block?.[1] ?? "";
+    expect(inner).toContain("Thunderheart Harness");
+    expect(inner).toContain("31.46");
+    expect(inner).toContain("64.07");
+    // The row's own figure stays in the numbers column, not inside the block.
+    expect(html).toContain('class="delta down delta-plain">-106.16');
+  });
+});
+
+/**
+ * Ticket 123: a failed sim's substitution entry can carry a whole Go crash
+ * trace (2.4KB of goroutine frames on the ret artifact). The first line of the
+ * error says everything a reader needs; the JSON artifact keeps the full text,
+ * so only the HTML rendering trims.
+ */
+describe("substitutions drawer (ticket 123)", () => {
+  // The crash text arrives with the newlines written out as backslash-n
+  // character pairs (the sim's error object is stringified into the detail),
+  // so in this fixture "\\n" is the two characters backslash and n — exactly
+  // what the artifact holds.
+  const goCrashDetail =
+    "Beast-tamer's Shoulders was dropped from the ranking: the sim failed " +
+    'on this swap — sim error: {"type":"ErrorOutcomeError","message":' +
+    '"interface conversion: *retribution.RetributionPaladin is not ' +
+    "hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\n" +
+    "goroutine 54 [running]:\\nruntime/debug.Stack()\\n\\t/opt/go/stack.go:26";
+
+  const withSubs = (detail: string): Ranking => ({
+    ...ranking([]),
+    substitutions: [{ field: "candidate 30892 (shoulder)", detail }],
+  });
+
+  it("shows only the first line of a crash trace, with a pointer to the full text", () => {
+    const html = renderRankHtml(withSubs(goCrashDetail), meta());
+    expect(html).toContain("missing method GetHunter");
+    expect(html).not.toContain("goroutine 54");
+    expect(html).not.toContain("Stack Trace");
+    expect(html).toContain("full text in the JSON report");
+  });
+
+  it("also trims on real newlines", () => {
+    const html = renderRankHtml(
+      withSubs("first line of the error\nsecond line the reader can skip"),
+      meta()
+    );
+    expect(html).toContain("first line of the error");
+    expect(html).not.toContain("second line the reader can skip");
+  });
+
+  it("leaves a one-line detail exactly as it was", () => {
+    const html = renderRankHtml(
+      withSubs("swapped gem 24061 in for 32220 to keep the meta active"),
+      meta()
+    );
+    expect(html).toContain(
+      "swapped gem 24061 in for 32220 to keep the meta active"
+    );
+    expect(html).not.toContain("full text in the JSON report");
   });
 });
 

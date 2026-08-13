@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-five_seed_spread.py — Phase 1 §10 / R5 experiment.
+five_seed_spread.py — Stage 1 §10 / R5 experiment, per spec.
 
-Measure DPS spread on *identical* logged ret gear across five independent
-seeds vs five repeats of one shared seed. That number is the input to the
-cutoff constant: if independent-seed noise is ~1.5 DPS, a 1 DPS cutoff sits
-below the floor and the shortlist collapses into one tie group.
+Measure DPS spread on *identical* logged gear across five independent seeds
+vs five repeats of one shared seed. That number is the input to the cutoff
+constant: if independent-seed noise is ~1.5 DPS, a 1 DPS cutoff sits below
+the floor and the shortlist collapses into one tie group.
 
-Uses the committed slamaltman RaidSimRequest fixture (equipment already
-mapped). Only simOptions.iterations / randomSeed change.
+Uses the committed RaidSimRequest fixture for the chosen spec (equipment
+already mapped). Only simOptions.iterations / randomSeed change.
 
     python scripts/five_seed_spread.py
+    python scripts/five_seed_spread.py --spec feral
     python scripts/five_seed_spread.py --iterations 5000
+
+Ret's derivation produced 3.4 dps / 0.15%; feral's, on its noisier rotation,
+3.6 (issue #1 step 0). Feral was a 245-line near-copy of this file until
+ticket 136 item 4 collapsed the two behind --spec.
 """
 
 from __future__ import annotations
@@ -26,9 +31,35 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = ROOT / "data/wowsims.lock.json"
-REQ = ROOT / "test/fixtures/slamaltman.raid-sim-request.json"
-OUT_JSON = ROOT / "docs/five-seed-spread.json"
-OUT_SCRATCH = ROOT / ".scratch/phase1-five-seed"
+# Everything that differs between specs. The derivation below is identical
+# for both — that identity is the point, since the feral cutoff's claim to
+# be comparable to ret's rests on the same method producing both numbers.
+SPECS = {
+    "ret": {
+        "req": "test/fixtures/slamaltman.raid-sim-request.json",
+        "out_json": "docs/five-seed-spread.json",
+        "out_scratch": ".scratch/phase1-five-seed",
+        "regen_hint": None,
+        "reference_key": "planR5Reference",
+        "reference": {
+            "note": "prior measurement cited in PLAN.md §10 / PLAN-REVIEW R5",
+            "independentSpreadDps": 1.58,
+            "sharedSpreadDps": 0.06,
+            "iterations": 5000,
+        },
+    },
+    "feral": {
+        "req": "test/fixtures/shredzepelin-cat.raid-sim-request.json",
+        "out_json": "docs/five-seed-spread-feral.json",
+        "out_scratch": ".scratch/phase1-five-seed-feral",
+        "regen_hint": "regen: python scripts/compose_feral_raid_sim.py",
+        "reference_key": "retReference",
+        "reference": {
+            "note": "docs/five-seed-spread.json — ret's derivation on the slamaltman fixture",
+            "recommendedCutoff": {"absDps": 3.4, "pct": 0.15},
+        },
+    },
+}
 
 CLI_BINARIES = {
     "win32-x64": "wowsimcli-windows.exe",
@@ -92,10 +123,11 @@ def recommend_cutoff(independent: dict, baseline_dps: float) -> dict:
     """Cutoff must sit above the *reported* independent-SE noise floor.
 
     Tie groups form from overlapping ±SE intervals (PLAN.md §10). The SE the
-    engine will report is stdev/sqrt(iterations) ≈ 1.7 DPS here — not the
+    engine will report is stdev/sqrt(iterations) ≈ 1.7 DPS on ret — not the
     tiny max−min of five means (seeds barely move the mean at 5k iters).
-    absDps is ~2× that SE, floored at the plan's provisional 3.
-    pct stays 0.15% of baseline (the dual threshold).
+    absDps is ~2× that SE, floored at the plan's provisional 3, one decimal.
+    pct stays 0.15% of baseline (the dual threshold); issue #1 step 0 asked
+    only to re-derive the noise floor for feral, not the pct side.
     """
     se = independent["meanReportedSe"]
     floor = se * 2.0
@@ -119,6 +151,12 @@ def recommend_cutoff(independent: dict, baseline_dps: float) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--spec",
+        choices=sorted(SPECS),
+        default="ret",
+        help="which spec's fixture to measure (default ret)",
+    )
+    parser.add_argument(
         "--iterations",
         type=int,
         default=DEFAULT_ITERATIONS,
@@ -126,22 +164,29 @@ def main() -> int:
     )
     args = parser.parse_args()
     iterations = args.iterations
+    spec = SPECS[args.spec]
+    req_path = ROOT / spec["req"]
+    out_json = ROOT / spec["out_json"]
+    out_scratch = ROOT / spec["out_scratch"]
 
     cli = resolve_cli()
     if not cli.is_file():
         print(f"missing wowsimcli at {cli}", file=sys.stderr)
         print("fetch: pnpm fetch:wowsimcli", file=sys.stderr)
         return 2
-    if not REQ.is_file():
-        print(f"missing request fixture at {REQ}", file=sys.stderr)
+    if not req_path.is_file():
+        print(f"missing request fixture at {req_path}", file=sys.stderr)
+        if spec["regen_hint"]:
+            print(spec["regen_hint"], file=sys.stderr)
         return 2
 
-    base = json.loads(REQ.read_text(encoding="utf-8"))
+    base = json.loads(req_path.read_text(encoding="utf-8"))
     version = subprocess.check_output([str(cli), "version"], text=True).strip()
-    OUT_SCRATCH.mkdir(parents=True, exist_ok=True)
+    out_scratch.mkdir(parents=True, exist_ok=True)
 
     print(f"wowsimcli {version}")
-    print(f"fixture {REQ.relative_to(ROOT)}")
+    print(f"spec {args.spec}")
+    print(f"fixture {req_path.relative_to(ROOT)}")
     print(f"iterations={iterations}")
     print()
 
@@ -155,7 +200,7 @@ def main() -> int:
             "randomSeed": seed,
             "debugFirstIteration": False,
         }
-        out = OUT_SCRATCH / f"indep-{seed}.json"
+        out = out_scratch / f"indep-{seed}.json"
         print(f"  seed={seed} …", end="", flush=True)
         result = run_sim(cli, req, out)
         avg, stdev, done = extract_dps(result)
@@ -178,7 +223,7 @@ def main() -> int:
             "randomSeed": SHARED_SEED,
             "debugFirstIteration": False,
         }
-        out = OUT_SCRATCH / f"shared-{SHARED_SEED}-{i}.json"
+        out = out_scratch / f"shared-{SHARED_SEED}-{i}.json"
         print(f"  run {i + 1}/{len(INDEPENDENT_SEEDS)} …", end="", flush=True)
         result = run_sim(cli, req, out)
         avg, stdev, done = extract_dps(result)
@@ -219,7 +264,8 @@ def main() -> int:
 
     payload = {
         "simVersion": version,
-        "fixture": str(REQ.relative_to(ROOT)).replace("\\", "/"),
+        "spec": args.spec,
+        "fixture": str(req_path.relative_to(ROOT)).replace("\\", "/"),
         "iterations": iterations,
         "independentSeeds": list(INDEPENDENT_SEEDS),
         "sharedSeed": SHARED_SEED,
@@ -228,16 +274,11 @@ def main() -> int:
         "shared": shared,
         "spreadRatioIndependentOverShared": ratio,
         "recommendedCutoff": cutoff,
-        "planR5Reference": {
-            "note": "prior measurement cited in PLAN.md §10 / PLAN-REVIEW R5",
-            "independentSpreadDps": 1.58,
-            "sharedSpreadDps": 0.06,
-            "iterations": 5000,
-        },
+        spec["reference_key"]: spec["reference"],
     }
-    OUT_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    out_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print()
-    print(f"wrote {OUT_JSON.relative_to(ROOT)}")
+    print(f"wrote {out_json.relative_to(ROOT)}")
     return 0
 
 

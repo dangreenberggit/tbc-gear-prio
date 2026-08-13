@@ -2,10 +2,18 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { gemContext } from "../src/candidate-gems.js";
+import {
+  gemContext,
+  missingMetaPreferenceNote,
+} from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
 import { CUTOFF } from "../src/cutoff.js";
-import { gemsForPhase } from "../src/gems.js";
+import { gemsForPhase, getGem } from "../src/gems.js";
+import { getItem } from "../src/items.js";
+import { gemColorMatchesSocket, metaStatus } from "../src/meta.js";
+import { socketsMatch } from "../src/meta-repair.js";
+import { GemColor } from "../src/proto/common_pb.js";
+import { Stat } from "../src/stats.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
   equipmentForCandidateSwap,
@@ -109,6 +117,70 @@ function slamaltmanLoggedGear(): LoggedGear {
     };
   }
   throw new Error("slamaltman not found");
+}
+
+const FERAL_CHAR = {
+  region: "US" as const,
+  realm: "dreamscythe",
+  name: "shredzepelin",
+};
+
+const FERAL_SUMMARY: FightSummary = {
+  reportCode: "def456",
+  fightId: 3,
+  encounterName: "Hydross the Unstable",
+  killedAt: "2026-07-01T00:00:00.000Z",
+  route: "ranked",
+  confidence: 1,
+};
+
+const feralWeights = (
+  JSON.parse(
+    readFileSync(join(root, "data/presets/feral/p1.ep-weights.json"), "utf8")
+  ) as { weights: Record<string, number> }
+).weights;
+
+const feralSkeleton = JSON.parse(
+  readFileSync(
+    join(root, "data/presets/feral/p2.raid-sim-skeleton.json"),
+    "utf8"
+  )
+) as RaidSimRequest;
+
+function shredzepelinLoggedGear(): LoggedGear {
+  const raw = JSON.parse(
+    readFileSync(join(root, "test/fixtures/shredzepelin-cat.raw.json"), "utf8")
+  ) as {
+    actors: Array<{ id: number; name: string }>;
+    combatant_info_events: Array<{
+      sourceID: number;
+      gear: WclGearEntry[];
+    }>;
+  };
+  const actors = new Map(raw.actors.map((a) => [a.id, a]));
+  for (const ev of raw.combatant_info_events) {
+    if (actors.get(ev.sourceID)?.name.toLowerCase() !== "shredzepelin")
+      continue;
+    const mapped = mapWclGearToSim(ev.gear);
+    return {
+      items: mapped.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+      talentPointsByTree: [0, 45, 16],
+      provenance: {
+        reportCode: FERAL_SUMMARY.reportCode,
+        fightId: FERAL_SUMMARY.fightId,
+        sourceID: ev.sourceID,
+      },
+    };
+  }
+  throw new Error("shredzepelin not found");
 }
 
 class CapturingSimRunner implements SimRunner {
@@ -1269,10 +1341,11 @@ describe("rankUpgrades", () => {
     });
 
     it("errors the job row when the run throws after the row is created", async () => {
-      // Ticket 29: once the Phase 2 job API attaches to a `running` row, a
+      // Ticket 29: once the Stage 2 job API attaches to a `running` row, a
       // stranded one is a job that never finishes and never fails, so the
-      // caller waits forever. `equipmentForCandidateSwap`'s meta-unsolvable
-      // throw escapes by this same route.
+      // caller waits forever. The baseline repair's meta-unsolvable throw
+      // escapes by this same route (the per-candidate path no longer aborts
+      // the ranking at all — it now skips just the affected candidate).
       class ExplodingBlobStore extends MemoryStore {
         override async put(): Promise<void> {
           throw new Error("blob write exploded");
@@ -1337,7 +1410,7 @@ describe("rankUpgrades", () => {
   });
 
   it("maxPhase changes the candidate set and the gem palette together", async () => {
-    // PLAN.md §14 Phase 1 gate: one character, two maxPhase values, both axes
+    // PLAN.md §14 Stage 1 gate: one character, two maxPhase values, both axes
     // diffed in one place. Gem axis note — every gem phase 2 adds (32634-32639)
     // is EP-dominated by a phase-1 gem of its colour under ret P2 weights, so
     // no socketed item in data/items/index.json fills differently at 1 vs 2.
@@ -1442,7 +1515,7 @@ describe("rankUpgrades", () => {
     expect(ids1).not.toContain(chestId);
     expect(ids2).toContain(chestId);
 
-    // Axis 2 — gem palette. Phase 2 admits six gems phase 1 does not.
+    // Axis 2 — gem palette. maxPhase 2 admits six gems phase 1 does not.
     const palette1 = gemsForPhase(1).map((g) => g.id);
     const palette2 = gemsForPhase(2).map((g) => g.id);
     expect(palette2).not.toEqual(palette1);
@@ -1485,14 +1558,16 @@ describe("rankUpgrades", () => {
     }
   });
 
-  it("maxPhase 2 vs 3 moves the palette all the way into the sim request", async () => {
-    // The 1->2 case above proves the two axes are wired to the same maxPhase,
-    // but phase 2's six additions are all EP-dominated by phase-1 gems, so the
-    // fill output is identical and the palette move never reaches the request.
-    // Phase 3's epic gems do win, so this is where "the gem palette changed"
-    // is observable end to end rather than asserted on gemsForPhase alone.
+  it("maxPhase 3 leaves auto-filled gems rare-capped in the sim request (ticket 111)", async () => {
+    // This test used to assert the opposite: that phase 3's epic gems win the
+    // fill, making maxPhase observable end to end. That behaviour WAS ticket
+    // 111's defect — the unconstrained fill priced epics the player owns
+    // nowhere. Under the rarity cap, phase 3 unlocks only epic gems
+    // ((quality,phase) counts: the sole (3,x>2) rares are phase 5), so the P2
+    // and P3 fills must now be identical, and every auto-filled gem rare or
+    // below — asserted here at the seam, on the request the engine sims.
     //
-    // The candidate must also leave the fill something to do: the rank path is
+    // The candidate must leave the fill something to do: the rank path is
     // migrate-then-fill-empties, so a candidate whose sockets the worn gems
     // fully cover never consults the palette. Slamaltman's worn boots (30081)
     // are ungemmed, so every socket on the candidate arrives empty.
@@ -1596,16 +1671,133 @@ describe("rankUpgrades", () => {
 
     expect(gems2.length).toBeGreaterThan(0);
     expect(gems3.length).toBe(gems2.length);
-    // Same item, same character, same seed — only maxPhase differs, and the
-    // gems the engine actually sent to the sim are different.
-    expect(gems3).not.toEqual(gems2);
+    // Same item, same character, same seed — raising maxPhase to 3 no longer
+    // changes the fill, because its only unlocks are epics the cap refuses.
+    expect(gems3).toEqual(gems2);
 
     const palette2 = gemsForPhase(2).map((g) => g.id);
-    const palette3 = gemsForPhase(3).map((g) => g.id);
-    for (const id of gems2) expect(palette2).toContain(id);
-    for (const id of gems3) expect(palette3).toContain(id);
-    // At least one placed gem is one phase 3 unlocked.
-    expect(gems3.some((id) => !palette2.includes(id))).toBe(true);
+    for (const id of gems3) {
+      expect(id).toBeGreaterThan(0);
+      expect(palette2).toContain(id);
+      expect(getGem(id)?.quality).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("maxPhase still reaches the fill: phase-5 rares appear only at maxPhase 5 (ticket 111)", async () => {
+    // Compensates for the rare-cap test above, whose fills are identical at 2
+    // and 3 by design — alone it would also pass if the engine ignored
+    // maxPhase entirely. The palette's only rares above phase 2 are the three
+    // phase-5 jewels (35315/35316/35318), and 35315 is the sole gem of any
+    // rarity carrying spell haste (stat 14), so under haste-leaning weights a
+    // maxPhase 5 run must fill it where a maxPhase 2 run cannot — proving the
+    // input's maxPhase flows through gemContext into the simmed request.
+    const hasteWeights = {
+      [String(Stat.StatSpellHasteRating)]: 1,
+      [String(Stat.StatStrength)]: 0.01,
+    };
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+    const baselineKey = simCacheKey(
+      compose(skeleton, { name: "slamaltman", race: "RaceHuman", equipment }),
+      "v0.0.101",
+      opts
+    );
+    const bootId = 30104;
+    const bootIdx = SIM_ORDER.indexOf("feet");
+    const gemsAt = (maxPhase: 2 | 5) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: candidateEquipmentForTest(
+            equipment,
+            "feet",
+            bootId,
+            maxPhase,
+            hasteWeights
+          ),
+        }),
+        "v0.0.101",
+        opts
+      );
+    const obs = (dps: number) => ({
+      dps,
+      stdev: 92.0,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+    const pool = [realPoolEntry(bootId, "ret-p3")];
+
+    const socketedBootGems = async (maxPhase: 2 | 5) => {
+      const sim = new CapturingSimRunner(
+        "v0.0.101",
+        new Map([
+          [baselineKey, obs(2042.85)],
+          [gemsAt(maxPhase), obs(2075.0)],
+        ])
+      );
+      await rankUpgrades(
+        {
+          character: CHAR,
+          spec: "ret",
+          maxPhase,
+          iterations: 3000,
+          seeds: [42],
+          race: "RaceHuman",
+        },
+        {
+          gear: new RecordedGearSource({
+            fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+            gear: new Map([["abc123|7", logged]]),
+          }),
+          sim,
+          store: new MemoryStore(),
+          clock: () => new Date("2026-07-26T12:00:00.000Z"),
+          raidSimSkeleton: skeleton,
+          epWeights: hasteWeights,
+          pool,
+        }
+      );
+      const req = sim.requests.find((r) => {
+        const items =
+          (
+            r.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number; gems: number[] }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        return items[bootIdx]?.id === bootId;
+      });
+      expect(req).toBeDefined();
+      return (
+        (
+          req!.raid as {
+            parties: Array<{
+              players: Array<{
+                equipment: { items: Array<{ id: number; gems: number[] }> };
+              }>;
+            }>;
+          }
+        ).parties[0]?.players[0]?.equipment.items[bootIdx]?.gems ?? []
+      );
+    };
+
+    const gems2 = await socketedBootGems(2);
+    const gems5 = await socketedBootGems(5);
+
+    expect(gems2.length).toBeGreaterThan(0);
+    expect(gems5).not.toEqual(gems2);
+    expect(gems5).toContain(35315);
+    expect(gems2).not.toContain(35315);
+    // Both sides stay under the rarity cap — maxPhase widens the phase axis
+    // only, never the quality one.
+    for (const id of [...gems2, ...gems5]) {
+      expect(getGem(id)?.quality).toBeLessThanOrEqual(3);
+    }
   });
 
   it("migrates worn gems onto socketed candidates before simming", async () => {
@@ -1789,7 +1981,138 @@ describe("rankUpgrades", () => {
 });
 
 /**
- * Paired-replicate SE (PLAN.md §10, Phase 2).
+ * Ticket 117: the meta-repair step used to pick replacement gems from the
+ * full palette, so a swap onto a meta-socket helm could quietly hand the
+ * player epic gems the rare-capped auto-fill had deliberately avoided.
+ * Repair must shop from the same rare-capped list the fill uses.
+ */
+describe("equipmentForCandidateSwap gem quality (ticket 117)", () => {
+  const feralP1Weights = (
+    JSON.parse(
+      readFileSync(join(root, "data/presets/feral/p1.ep-weights.json"), "utf8")
+    ) as { weights: Record<string, number> }
+  ).weights;
+
+  function bareEquipmentWithChestGems(): SimItemSpec[] {
+    const equipment: SimItemSpec[] = SIM_ORDER.map(() => ({
+      id: 0,
+      gems: [],
+    }));
+    // Worn head has no sockets, so the candidate helm is filled from scratch.
+    equipment[SIM_ORDER.indexOf("head")] = { id: 8345, gems: [] };
+    // Two red + one blue on the chest leaves Relentless (2R/2Y/2B) short of
+    // yellow, so the repair step must recolour body sockets to activate it.
+    equipment[SIM_ORDER.indexOf("chest")] = {
+      id: 30129,
+      gems: [24027, 24027, 24054],
+    };
+    return equipment;
+  }
+
+  it("meta repair never places a gem above the rare fill cap", () => {
+    const equipment = bareEquipmentWithChestGems();
+    const swapped = equipmentForCandidateSwap(
+      equipment,
+      SIM_ORDER.indexOf("head"),
+      32235, // Cursed Vision of Sargeras: meta + yellow socket
+      gemContext(gemsForPhase(3), feralP1Weights)
+    );
+
+    const gemIds = swapped.flatMap((s) => s.gems ?? []).filter((g) => g > 0);
+    // Guard against a vacuous pass: the meta must be seated and active,
+    // i.e. the repair really had to do its job here.
+    expect(gemIds).toContain(32409);
+    expect(metaStatus(getItem(32235)!.sockets, gemIds).kind).toBe("active");
+
+    for (const id of gemIds) {
+      expect(getGem(id)?.quality, `gem ${id}`).toBeLessThanOrEqual(3);
+    }
+  });
+});
+
+/**
+ * End-to-end cover for both branches of the socket-bonus predicate that the
+ * issue-1 slice changed (ticket 136 item 5, round-4 finding 4-S1). The
+ * round-4 blast-radius check was a null result: the branches were pinned by
+ * unit tests on `socketsMatch` / the fill, but no committed fixture reached
+ * either one through the production swap path, so a regression in how the
+ * predicate is *wired* would not have been caught.
+ *
+ * These drive `equipmentForCandidateSwap` — the same entry point `rank.ts`
+ * uses for every candidate row — rather than calling the predicates directly.
+ */
+describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", () => {
+  /**
+   * Strength-weighted so both items' socket bonuses (stat index 0) are
+   * visible to the fill's layout comparison; without a weight on the bonus
+   * stat the two layouts tie and the assertions go vacuous.
+   */
+  const strWeights = { "0": 10, "3": 1 };
+
+  function bareEquipment(): SimItemSpec[] {
+    return SIM_ORDER.map(() => ({ id: 0, gems: [] }));
+  }
+
+  /**
+   * Branch 1: an item whose sockets are meta-only (28559, the smallest of the
+   * 11 such items in db.json) must NOT be credited its +3 socket bonus while
+   * that lone socket sits empty. A palette with no meta gem cannot fill it,
+   * so the bonus has to stay off — the "skip meta sockets unconditionally"
+   * rule this branch diverges from would credit it vacuously (round-4 D1).
+   */
+  it("leaves a meta-only item's lone socket empty when the palette has no meta gem", () => {
+    const noMetas = gemsForPhase(3).filter(
+      (g) => g.colour !== GemColor.GemColorMeta
+    );
+    const swapped = equipmentForCandidateSwap(
+      bareEquipment(),
+      SIM_ORDER.indexOf("head"),
+      28559,
+      gemContext(noMetas, strWeights)
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    expect(head.id).toBe(28559);
+    expect(head.gems.filter((g) => g > 0)).toEqual([]);
+    // The predicate must report the bonus as inactive, not vacuously active.
+    expect(socketsMatch(28559, head.gems)).toBe(false);
+  });
+
+  /**
+   * Branch 2: on a mixed meta+coloured item, an unfilled meta socket does
+   * *not* forfeit the socket bonus — only the coloured sockets gate it. Same
+   * item and palette shape as the `socketsMatch` unit test, but reached
+   * through the swap path so the wiring is covered too.
+   */
+  it("still fills the coloured socket for the bonus on a mixed item with no meta gem available", () => {
+    const noMetas = gemsForPhase(3).filter(
+      (g) => g.colour !== GemColor.GemColorMeta
+    );
+    const swapped = equipmentForCandidateSwap(
+      bareEquipment(),
+      SIM_ORDER.indexOf("head"),
+      24545, // Gladiator's Plate Helm: [meta, yellow], +4 str bonus
+      gemContext(noMetas, strWeights)
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    const sockets = getItem(24545)!.sockets;
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const yellowIdx = sockets.indexOf(GemColor.GemColorYellow);
+
+    expect(head.gems[metaIdx] ?? 0).toBe(0);
+    const filled = head.gems[yellowIdx] ?? 0;
+    expect(filled).toBeGreaterThan(0);
+    expect(
+      gemColorMatchesSocket(getGem(filled)!.colour, GemColor.GemColorYellow)
+    ).toBe(true);
+    // Bonus is live despite the bare meta socket — the branch under test.
+    expect(socketsMatch(24545, head.gems)).toBe(true);
+  });
+});
+
+/**
+ * Paired-replicate SE (PLAN.md §10, Stage 2).
  *
  * Driven through `rankUpgrades` rather than only against `pairedReplicateSe`,
  * because the arithmetic passing says nothing about the two things that make
@@ -1996,7 +2319,7 @@ describe("rankUpgrades paired-replicate SE", () => {
   });
 
   /**
-   * §10 Phase 2 is only a real method if a caller who passes no seeds gets it.
+   * §10 Stage 2 is only a real method if a caller who passes no seeds gets it.
    * It shipped implemented, tested and *unreachable*: `DEFAULT_SEEDS` was a
    * single seed, so `usesPairedReplication` was false on every production run
    * and `replicateTopItems` returned at its first line. Every other test in
@@ -2173,5 +2496,1168 @@ describe("rankUpgrades paired-replicate SE", () => {
     for (const row of rows) {
       expect(row.belowCutoffInView).toBe(byId.get(row.itemId));
     }
+  });
+});
+
+describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
+  // Justicar Battlegear (setId 626): 2pc is not-implemented-in-sim, 4pc is
+  // implemented (verification.md V1). Four pieces, all in data/universes/ret-p2.
+  const HEAD_ID = 29073;
+  const SHOULDER_ID = 29075;
+  const HANDS_ID = 29072;
+  const LEGS_ID = 29074;
+  const SET_BONUS_X = 40; // synthetic 4pc bonus magnitude
+
+  /**
+   * Responds to every sim request with `baseline + individual item deltas
+   * (via a per-item table) + X when equipment holds >=4 Justicar pieces`.
+   * Deterministic and self-contained: no recordings to key, so the same
+   * fixture works across seeds/iterations without a keyed map.
+   */
+  function justicarRespondingSim(opts?: {
+    perItemDelta?: Record<number, number>;
+    failOnPackage?: boolean;
+  }): SimRunner {
+    const perItemDelta = opts?.perItemDelta ?? {};
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const justicarCount = [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].filter(
+          (id) => ids.includes(id)
+        ).length;
+
+        let dps = 2000;
+        for (const id of ids) {
+          dps += perItemDelta[id] ?? 0;
+        }
+        if (justicarCount >= 4) {
+          if (opts?.failOnPackage) {
+            throw new Error("synthetic package sim failure");
+          }
+          dps += SET_BONUS_X;
+        }
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  const justicarPool = [
+    realPoolEntry(HEAD_ID),
+    realPoolEntry(SHOULDER_ID),
+    realPoolEntry(HANDS_ID),
+    realPoolEntry(LEGS_ID),
+  ];
+
+  const input = {
+    character: CHAR,
+    spec: "ret" as const,
+    maxPhase: 2 as const,
+    iterations: 3000,
+    seeds: [42],
+    race: "RaceHuman" as const,
+  };
+
+  function depsWith(sim: SimRunner, pool = justicarPool) {
+    const logged = slamaltmanLoggedGear();
+    return {
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", logged]]),
+      }),
+      sim,
+      store: new MemoryStore(),
+      clock: () => new Date("2026-07-26T12:00:00.000Z"),
+      raidSimSkeleton: skeleton,
+      epWeights,
+      pool,
+    };
+  }
+
+  // Finding 7: with every candidate's individual delta at 0, Σ singles is 0
+  // and bonusDps collapses to packageDeltaDps — the subtraction the whole
+  // feature rests on is never exercised. Nonzero per-item deltas force it.
+  const PER_ITEM_DELTAS = {
+    [HEAD_ID]: 5,
+    [SHOULDER_ID]: 3,
+    [HANDS_ID]: 2,
+    [LEGS_ID]: 4,
+  };
+  const SUM_SINGLES = Object.values(PER_ITEM_DELTAS).reduce((a, b) => a + b, 0);
+
+  it("records a measured SetBonusValue whose bonusDps equals packageDelta minus the singles", async () => {
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim({ perItemDelta: PER_ITEM_DELTAS }))
+    );
+
+    expect(ranking.setBonuses).toBeDefined();
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBeUndefined();
+    // packageDeltaDps = Σ singles + SET_BONUS_X (the synthetic fixture adds
+    // both); bonusDps must subtract Σ singles back out, proving the
+    // subtraction actually ran rather than netting to packageDeltaDps.
+    expect(fourPc!.packageDeltaDps).toBeCloseTo(SUM_SINGLES + SET_BONUS_X, 6);
+    expect(fourPc!.bonusDps).toBeCloseTo(SET_BONUS_X, 6);
+    expect(fourPc!.bonusDps).not.toBeCloseTo(fourPc!.packageDeltaDps, 6);
+    expect(fourPc!.bonusDps).toBeCloseTo(
+      fourPc!.packageDeltaDps - SUM_SINGLES,
+      6
+    );
+    expect(fourPc!.packageItemIds.sort()).toEqual(
+      [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].sort()
+    );
+
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 2
+    );
+    expect(twoPc).toBeDefined();
+    expect(twoPc!.unmeasured).toBe("not-implemented-in-sim");
+    expect(twoPc!.bonusDps).toBeUndefined();
+  });
+
+  it("gives a crossing candidate crossesThreshold true and no prospective bonus", async () => {
+    // Player already wears 3 Justicar pieces; the 4th candidate's own swap
+    // crosses the 4pc threshold, so its deltaDps already includes the bonus.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      candidateEquipmentForTest(
+        candidateEquipmentForTest(equipment, "head", HEAD_ID, 2, epWeights),
+        "shoulder",
+        SHOULDER_ID,
+        2,
+        epWeights
+      ),
+      "hands",
+      HANDS_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [realPoolEntry(LEGS_ID)],
+    });
+
+    const legsRow = ranking.items.find((i) => i.itemId === LEGS_ID);
+    expect(legsRow).toBeDefined();
+    expect(legsRow!.setContext).toBeDefined();
+    expect(legsRow!.setContext!.crossesThreshold).toBe(true);
+    expect(legsRow!.setContext!.prospectiveBonusDps).toBeUndefined();
+    // The crossing swap's own deltaDps already carries the bonus.
+    expect(legsRow!.deltaDps).toBeGreaterThan(SET_BONUS_X - 1);
+  });
+
+  it("gives a below-threshold candidate a prospectiveBonusDps equal to the matching SetBonusValue", async () => {
+    // Full pool so the package can actually be built (4 pieces needed for
+    // 4pc); the head candidate alone still only reaches 1 piece worn, well
+    // below the 4pc threshold, so it should carry the prospective value
+    // rather than cross it.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim())
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc?.bonusDps).toBeDefined();
+
+    const headRow = ranking.items.find((i) => i.itemId === HEAD_ID);
+    expect(headRow).toBeDefined();
+    expect(headRow!.setContext).toBeDefined();
+    expect(headRow!.setContext!.crossesThreshold).toBe(false);
+    expect(headRow!.setContext!.prospectiveBonusDps).toBeCloseTo(
+      fourPc!.bonusDps!,
+      6
+    );
+  });
+
+  it("computes nextThreshold from piecesAfterSwap, not piecesWornBefore (finding 3)", async () => {
+    // Player wears 1 Justicar piece (head); the shoulder candidate's swap
+    // takes them to 2 worn. 2pc is not-implemented-in-sim, so the nearest
+    // *measurable* threshold above piecesAfterSwap=2 is 4pc, not 2pc — using
+    // piecesWornBefore=1 would wrongly land on 2pc (still unimplemented) or
+    // otherwise mis-point the "needs N more" arithmetic.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "head",
+      HEAD_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [
+        realPoolEntry(SHOULDER_ID),
+        realPoolEntry(HANDS_ID),
+        realPoolEntry(LEGS_ID),
+      ],
+    });
+
+    const shoulderRow = ranking.items.find((i) => i.itemId === SHOULDER_ID);
+    expect(shoulderRow).toBeDefined();
+    expect(shoulderRow!.setContext).toBeDefined();
+    expect(shoulderRow!.setContext!.piecesWornBefore).toBe(1);
+    expect(shoulderRow!.setContext!.piecesAfterSwap).toBe(2);
+    expect(shoulderRow!.setContext!.nextThreshold).toBe(4);
+  });
+
+  it("gives an already-worn set piece no prospectiveBonusDps (its swap advances nothing)", async () => {
+    // Player wears the Justicar head; offering that same head back as a
+    // candidate is a swap for itself — piecesAfterSwap === piecesWornBefore,
+    // so it moves the player no closer to the 4pc it would otherwise advertise.
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "head",
+      HEAD_ID,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    const gear = new RecordedGearSource({
+      fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+      gear: new Map([["abc123|7", wornLogged]]),
+    });
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim()),
+      gear,
+      pool: [
+        realPoolEntry(HEAD_ID),
+        realPoolEntry(SHOULDER_ID),
+        realPoolEntry(HANDS_ID),
+        realPoolEntry(LEGS_ID),
+      ],
+    });
+
+    const headRow = ranking.items.find((i) => i.itemId === HEAD_ID);
+    expect(headRow).toBeDefined();
+    expect(headRow!.owned).toBe(true);
+    expect(headRow!.setContext).toBeDefined();
+    expect(headRow!.setContext!.piecesAfterSwap).toBe(
+      headRow!.setContext!.piecesWornBefore
+    );
+    expect(headRow!.setContext!.prospectiveBonusDps).toBeUndefined();
+
+    // A not-yet-worn piece of the same set still gets its prospective value —
+    // the gate is about advancing the count, not about the set.
+    const shoulderRow = ranking.items.find((i) => i.itemId === SHOULDER_ID);
+    expect(shoulderRow!.setContext!.prospectiveBonusDps).toBeDefined();
+  });
+
+  it("reports insufficient-pieces when the pool cannot supply enough Justicar pieces", async () => {
+    // Only two of the four pieces are offered — 4pc cannot be built.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim(), [
+        realPoolEntry(HEAD_ID),
+        realPoolEntry(SHOULDER_ID),
+      ])
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("insufficient-pieces");
+    expect(fourPc!.bonusDps).toBeUndefined();
+    // Never a zero standing in for the missing reason.
+    expect(fourPc!.packageDeltaDps).toBe(0);
+  });
+
+  it("reports not-implemented-in-sim for Justicar 2pc with no sim spent on it", async () => {
+    let packageSimCalls = 0;
+    const base = justicarRespondingSim();
+    const counting: SimRunner = {
+      version: () => base.version(),
+      run: async (req, opts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const justicarCount = [HEAD_ID, SHOULDER_ID, HANDS_ID, LEGS_ID].filter(
+          (id) => ids.includes(id)
+        ).length;
+        // A 2pc-only package (exactly 2 Justicar pieces, below the 4pc
+        // package built by this same run) would prove a sim was spent
+        // measuring the unimplemented bonus.
+        if (justicarCount === 2) packageSimCalls++;
+        return base.run(req, opts);
+      },
+    };
+
+    const ranking = await rankUpgrades(input, depsWith(counting));
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 2
+    );
+    expect(twoPc!.unmeasured).toBe("not-implemented-in-sim");
+    expect(packageSimCalls).toBe(0);
+  });
+
+  it("surfaces a package sim failure as unmeasured sim-failed, not silently", async () => {
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim({ failOnPackage: true }))
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("sim-failed");
+    expect(fourPc!.bonusDps).toBeUndefined();
+
+    // Recorded in the substitutions surface, the existing simSkips pattern —
+    // never a silent drop.
+    const sub = ranking.substitutions.find((s) =>
+      s.detail.includes("synthetic package sim failure")
+    );
+    expect(sub).toBeDefined();
+    // Finding 5: the failure names the whole package (set + threshold), not
+    // one arbitrary added piece, and no field carries a raw set id where an
+    // item id would be expected.
+    expect(sub!.field).toContain("4pc");
+    expect(sub!.field).not.toBe(String(626));
+  });
+
+  /**
+   * Ticket 135 / round-4 finding 4-S3: a gem-repair failure while assembling
+   * the package is not a sim failure — no sim ran. Reporting it as
+   * `sim-failed` sends an operator to the sim logs for a fault that lives in
+   * the gem palette, and contradicts the prose reason sitting beside it.
+   */
+  it("reports a package gem-repair failure as repair-failed, not sim-failed", async () => {
+    // The failure must land on the *package*, not on the individual swaps —
+    // a candidate that already fails repair never reaches the pool, and the
+    // row would come back `insufficient-pieces` without ever exercising the
+    // push site under test.
+    //
+    // The palette holds only the meta gem, so repair can never mint a colour.
+    // Worn colours sit on the shoulder and legs — the two slots the 4pc
+    // package replaces — so each piece swapped alone still leaves Relentless's
+    // 2/2/2 satisfied, while assembling all four displaces the gems that were
+    // carrying it and leaves the repair nothing to work with.
+    const wornGems: Record<string, { id: number; gems: number[] }> = {
+      shoulder: { id: 28795, gems: [23094, 23118] },
+      legs: { id: 24022, gems: [23094, 23113, 23113] },
+      chest: { id: 23563, gems: [23118, 0, 0] },
+    };
+    const logged: LoggedGear = {
+      items: SIM_ORDER.map((slot) => {
+        const worn = wornGems[slot];
+        return worn
+          ? { id: worn.id, slot, gems: worn.gems }
+          : { id: 0, slot, gems: [] };
+      }),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+
+    const ranking = await rankUpgrades(input, {
+      ...depsWith(justicarRespondingSim({ perItemDelta: PER_ITEM_DELTAS })),
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", logged]]),
+      }),
+      gemPalette: gemsForPhase(2).filter((g) => g.id === 32409),
+    });
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBe("repair-failed");
+    expect(fourPc!.bonusDps).toBeUndefined();
+
+    // The prose reason and the machine-readable tag must agree.
+    const sub = ranking.substitutions.find((s) =>
+      s.detail.includes("gem repair could not activate its meta")
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.field).toContain("4pc");
+  });
+
+  it("names the whole package on failure, never a set id standing in for an item id (finding 5)", async () => {
+    // An empty pool with only enough candidates to attempt the package but
+    // fail it — the failure path historically fell back to `setId` when
+    // `addedPieces[0]` was empty, landing a set id in an item-id field.
+    const ranking = await rankUpgrades(
+      input,
+      depsWith(justicarRespondingSim({ failOnPackage: true }))
+    );
+
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 626 && b.threshold === 4
+    );
+    expect(fourPc!.unmeasured).toBe("sim-failed");
+
+    for (const sub of ranking.substitutions) {
+      // The set id (626) must never appear as a bare numeric field value
+      // standing in for an item id.
+      expect(sub.field).not.toBe("626");
+      expect(sub.field).not.toMatch(/^candidate 626\b/);
+    }
+    const packageSub = ranking.substitutions.find((s) =>
+      s.field.includes("Justicar Battlegear 4pc")
+    );
+    expect(packageSub).toBeDefined();
+  });
+
+  it("is deterministic: same input, same seeds, two runs deep-equal setBonuses (V2)", async () => {
+    const deps = depsWith(justicarRespondingSim());
+    const a = await rankUpgrades(input, deps);
+    const b = await rankUpgrades(input, deps);
+    expect(a.setBonuses).toEqual(b.setBonuses);
+  });
+});
+
+/**
+ * Ticket 119: with 1 worn piece of a set whose 2pc is implemented, the 2pc
+ * "completion package" is a single added piece — the package sim is that
+ * piece's own single-swap sim, so `packageDelta − Σ singles` is 0 no matter
+ * what the bonus is worth. The old behaviour printed that 0.00 with an SE as
+ * if measured. The chosen behaviour (option B): any package needing exactly
+ * one piece reports the bonus as unmeasurable from this starting gear, and no
+ * sim is spent on it.
+ */
+describe("rankUpgrades — set bonus at one piece short of a threshold (ticket 119)", () => {
+  // Crystalforge Battlegear (setId 629): both 2pc and 4pc implemented in the
+  // pinned sim (verification.md V1), all pieces in data/universes/ret-p2.
+  const CF_CHEST = 30129;
+  const CF_HANDS = 30130;
+  const CF_HELM = 30131;
+  const CF_LEGS = 30132;
+  const CF_IDS = [CF_CHEST, CF_HANDS, CF_HELM, CF_LEGS, 30133];
+  const TWO_PC = 30; // synthetic 2pc bonus magnitude
+  const FOUR_PC = 50; // synthetic 4pc bonus magnitude
+  const PER_ITEM_DELTAS: Record<number, number> = {
+    [CF_HELM]: 5,
+    [CF_LEGS]: 4,
+    [CF_HANDS]: 2,
+  };
+
+  function crystalforgeRespondingSim(): SimRunner {
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        const ids = items.map((i) => i.id);
+        const cfCount = CF_IDS.filter((id) => ids.includes(id)).length;
+        let dps = 2000;
+        for (const id of ids) dps += PER_ITEM_DELTAS[id] ?? 0;
+        if (cfCount >= 2) dps += TWO_PC;
+        if (cfCount >= 4) dps += FOUR_PC;
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  async function rankWithOneCfPieceWorn() {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const wornEquipment = candidateEquipmentForTest(
+      equipment,
+      "chest",
+      CF_CHEST,
+      2,
+      epWeights
+    );
+    const wornLogged: LoggedGear = {
+      ...logged,
+      items: wornEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", wornLogged]]),
+        }),
+        sim: crystalforgeRespondingSim(),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CF_HELM),
+          realPoolEntry(CF_HANDS),
+          realPoolEntry(CF_LEGS),
+        ],
+      }
+    );
+  }
+
+  // Stock slamaltman gear already wears CF_CHEST (30129), which is exactly
+  // the threshold-1 confound this ticket is about — so the 0-worn control
+  // has to swap it out for a non-Crystalforge chest piece first.
+  const NON_CF_CHEST = 21848; // Spellfire Robe: a different set entirely
+
+  async function rankWithNoCfPieceWorn() {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const clearedEquipment = candidateEquipmentForTest(
+      equipment,
+      "chest",
+      NON_CF_CHEST,
+      2,
+      epWeights
+    );
+    const clearedLogged: LoggedGear = {
+      ...logged,
+      items: clearedEquipment.map((spec, i) => {
+        const item: LoggedItem = {
+          id: spec.id ?? 0,
+          slot: SIM_ORDER[i]!,
+          gems: spec.gems,
+        };
+        if (spec.enchant) item.enchant = spec.enchant;
+        return item;
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", clearedLogged]]),
+        }),
+        sim: crystalforgeRespondingSim(),
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CF_CHEST),
+          realPoolEntry(CF_HELM),
+          realPoolEntry(CF_HANDS),
+          realPoolEntry(CF_LEGS),
+        ],
+      }
+    );
+  }
+
+  it("reports the 2pc as unmeasurable at this worn count, not as a measured 0.00", async () => {
+    const ranking = await rankWithOneCfPieceWorn();
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 2
+    );
+    expect(twoPc).toBeDefined();
+    expect(twoPc!.piecesWorn).toBe(1);
+    expect(twoPc!.unmeasured).toBe("unmeasurable-at-this-worn-count");
+    // Never a zero-by-construction figure wearing a fabricated SE.
+    expect(twoPc!.bonusDps).toBeUndefined();
+    expect(twoPc!.se).toBeUndefined();
+    expect(twoPc!.packageDeltaDps).toBe(0);
+    // The one piece that would complete the threshold is still named — the
+    // best-single selection (helm carries the largest individual delta).
+    expect(twoPc!.packageItemIds).toEqual([CF_HELM]);
+  });
+
+  it("keeps the 4pc measured, with the self-set 2pc confound intact and documented", async () => {
+    const ranking = await rankWithOneCfPieceWorn();
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 4
+    );
+    expect(fourPc).toBeDefined();
+    expect(fourPc!.unmeasured).toBeUndefined();
+    expect(fourPc!.packageItemIds.slice().sort()).toEqual(
+      [CF_HELM, CF_HANDS, CF_LEGS].sort()
+    );
+
+    // With 1 piece worn, every single swap reaches 2 pieces and carries the
+    // 2pc, so Σ singles charges the 2pc three times while the package holds
+    // it once: the reported figure is 4pc − 2·2pc, not the 4pc alone. This is
+    // ticket 119's anomaly A — same (k−1)·B arithmetic as ADR-0023's
+    // cross-set breaks, inside the completing set. Option B (this round) only
+    // stops the fabricated 2pc "0.00"; the 4pc stays confounded, pinned here
+    // as the current behaviour until option A is decided.
+    const sumSingles = Object.values(PER_ITEM_DELTAS).reduce(
+      (a, b) => a + b + TWO_PC,
+      0
+    );
+    expect(fourPc!.packageDeltaDps).toBeCloseTo(
+      Object.values(PER_ITEM_DELTAS).reduce((a, b) => a + b, 0) +
+        TWO_PC +
+        FOUR_PC,
+      6
+    );
+    expect(fourPc!.bonusDps).toBeCloseTo(
+      fourPc!.packageDeltaDps - sumSingles,
+      6
+    );
+    expect(fourPc!.bonusDps).toBeCloseTo(FOUR_PC - 2 * TWO_PC, 6);
+
+    // Ticket 127: the arithmetic above stays exactly as anomaly A pins it —
+    // this only asserts the figure now discloses that its own lower
+    // threshold's term is missing, so a reader cannot mistake it for a plain
+    // measurement.
+    expect(fourPc!.selfConfound).toEqual({ threshold: 2 });
+  });
+
+  it("carries no self-confound qualifier at 0 worn — nothing crosses the 2pc on its own", async () => {
+    const ranking = await rankWithNoCfPieceWorn();
+    const twoPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 2
+    );
+    const fourPc = ranking.setBonuses!.find(
+      (b) => b.setId === 629 && b.threshold === 4
+    );
+    expect(twoPc?.unmeasured).toBeUndefined();
+    expect(fourPc?.unmeasured).toBeUndefined();
+    expect(fourPc?.selfConfound).toBeUndefined();
+  });
+});
+
+/**
+ * Ticket 122 (accepted behaviour, pinned here): some items are locked to a
+ * class only inside the sim's Go code — the pinned db.json entry carries
+ * `classAllowlist: null`, so ticket 25's universe filter cannot see the lock
+ * and the item enters another class's candidate list. 30892 Beast-tamer's
+ * Shoulders (hunter-only via a Go item-effect registration) reached the ret
+ * P3 universe this way, and its swap sim crashes. The accepted, durable
+ * behaviour is the engine backstop: drop the candidate, keep ranking, and
+ * disclose the drop in `substitutions` — never a silent disappearance and
+ * never an aborted run.
+ */
+describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)", () => {
+  const CROSS_CLASS_ID = 30892; // Beast-tamer's Shoulders, hunter-only in Go
+  const GO_PANIC =
+    "interface conversion: *retribution.RetributionPaladin is not " +
+    "hunter.HunterAgent: missing method GetHunter";
+
+  it("drops the candidate, finishes the ranking, and discloses the drop", async () => {
+    const crashingSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const items =
+          (
+            req.raid as {
+              parties: Array<{
+                players: Array<{
+                  equipment: { items: Array<{ id: number }> };
+                }>;
+              }>;
+            }
+          ).parties[0]?.players[0]?.equipment.items ?? [];
+        if (items.some((i) => i.id === CROSS_CLASS_ID)) {
+          throw new Error(GO_PANIC);
+        }
+        return {
+          dps: 2000,
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+
+    const logged = slamaltmanLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: crashingSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [
+          realPoolEntry(CROSS_CLASS_ID, "ret-p3"),
+          // A healthy candidate proves the run carried on past the crash.
+          realPoolEntry(29381),
+        ],
+      }
+    );
+
+    expect(ranking.items.some((i) => i.itemId === CROSS_CLASS_ID)).toBe(false);
+    expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
+
+    const sub = ranking.substitutions.find(
+      (s) => s.field === `candidate ${CROSS_CLASS_ID} (shoulder)`
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.detail).toContain(
+      "Beast-tamer's Shoulders was dropped from the ranking"
+    );
+    expect(sub!.detail).toContain(GO_PANIC);
+  });
+});
+
+describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
+  const META_SOCKET_HEAD_ID = 32461; // Furious Gizmatic Goggles: meta + blue
+
+  /**
+   * Every slot bare (no item, no gems) except head, which stays empty too —
+   * `repairMeta`'s own head-item lookup (`getItem(0)`) returns undefined for
+   * an empty head, so the baseline path's `!headItem?.sockets.includes(...)`
+   * guard returns early without attempting a repair. Colour counts are zero
+   * everywhere, so once the candidate swap seats a head with a meta socket,
+   * nothing on the character can ever satisfy Relentless's 2/2/2 — genuinely
+   * infeasible, not a step-budget or sim failure.
+   */
+  function bareLoggedGear(): LoggedGear {
+    return {
+      items: SIM_ORDER.map((slot) => ({ id: 0, slot, gems: [] })),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+  }
+
+  it("drops only the affected candidate instead of aborting the whole ranking", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+
+    const logged = bareLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        // Only the meta gem — no coloured gem exists to fill the blue
+        // socket once fill seats Relentless, so repair on the head candidate
+        // is genuinely infeasible (MetaInfeasibleError), not a sim crash.
+        gemPalette: gemsForPhase(3).filter((g) => g.id === 32409),
+        pool: [
+          realPoolEntry(META_SOCKET_HEAD_ID, "ret-p3"),
+          // A healthy candidate proves the run carried on past the failure.
+          realPoolEntry(29381),
+        ],
+      }
+    );
+
+    expect(ranking.items.some((i) => i.itemId === META_SOCKET_HEAD_ID)).toBe(
+      false
+    );
+    expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
+
+    const sub = ranking.substitutions.find(
+      (s) => s.field === `candidate ${META_SOCKET_HEAD_ID} (head)`
+    );
+    expect(sub).toBeDefined();
+    expect(sub!.detail).toContain(
+      "Furious Gizmatic Goggles was dropped from the ranking"
+    );
+    expect(sub!.detail).toContain("gem repair could not activate its meta");
+  });
+});
+
+/**
+ * Ticket 107 / PLAN.md §9 policy item 5: when a candidate helm brings a meta
+ * socket, `repairMeta` satisfies the new meta's colour condition by recolouring
+ * gems on *other* worn items. Those swaps happened inside
+ * `equipmentForCandidateSwap` and were discarded — the player was told what a
+ * helm is worth given several changes to other slots, and nothing said so.
+ *
+ * Only the baseline repair's swaps ever reached `substitutions`, which is why
+ * `.scratch/rank-reports/shredzepelin-p3.json` stores `substitutions: []` while
+ * 8 of its rows each silently recolour four gems.
+ */
+/**
+ * Per-spec preferred meta (step6-meta-choice-spike.md option 1). Ret has an
+ * entry read from upstream's presets; feral has none, because all five
+ * vendored feral presets wear Wolfshead Helm 8345 and socket no meta at all.
+ *
+ * The fill behaviour for both cases is pinned directly in
+ * candidate-gems.test.ts. What is pinned here is the *wiring*: that
+ * `rankUpgrades` builds its `GemContext` with the requested spec, so the table
+ * is consulted for the spec actually being ranked rather than always for ret.
+ */
+describe("rankUpgrades per-spec meta preference", () => {
+  it("threads the requested spec into the gem context the swap path uses", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(29381)],
+      }
+    );
+
+    // Ret has a recorded preference, so nothing is disclosed. The negative is
+    // the assertion that matters: a bug threading `undefined` (or the wrong
+    // spec) would surface as this note appearing on a ret run.
+    expect(
+      ranking.substitutions.some((s) =>
+        s.detail.includes("no meta preference recorded")
+      )
+    ).toBe(false);
+  });
+
+  it("names the spec in the note a spec without an entry would carry", () => {
+    // The note text itself, at its own seam — building a full feral
+    // rankUpgrades harness to re-observe a pure function would test the
+    // harness, not the behaviour.
+    expect(missingMetaPreferenceNote("feral")).toContain("feral");
+    expect(missingMetaPreferenceNote("feral")).toContain(
+      "no meta preference recorded"
+    );
+    expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+  });
+
+  /**
+   * Ticket 141: every other `rankUpgrades` case in this file ranks ret — the
+   * one spec *with* a table entry — so nothing drove the branch the per-spec
+   * meta added, and ticket 139 shipped under a green suite. The ret case above
+   * asserts a *negative* (no note on a ret run), which passes identically if
+   * `spec` were dropped on the floor, since `missingMetaPreferenceNote`
+   * returns undefined for both `"ret"` and `undefined`. This is the positive.
+   *
+   * Shredzepelin wears socketless Wolfshead 8345, so migration carries no meta
+   * onto the candidate and the socket genuinely ends up empty — the flag
+   * should fire. Ticket 139's converse (a worn meta migrating in, so the
+   * socket is full and the flag must *not* fire) is pinned directly on
+   * `metaSocketUnpriced` in candidate-gems.test.ts.
+   */
+  it("discloses the unpriced meta socket on a feral run, per row and per run", async () => {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: FERAL_CHAR,
+        spec: "feral",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceTauren",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([
+            ["US|dreamscythe|shredzepelin|feral", [FERAL_SUMMARY]],
+          ]),
+          gear: new Map([["def456|3", shredzepelinLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: feralSkeleton,
+        epWeights: feralWeights,
+        // 29098 Stag-Helm of Malorne: [yellow, meta].
+        pool: [realPoolEntry(29098, "feral-p3")],
+      }
+    );
+
+    const row = ranking.items.find((i) => i.itemId === 29098);
+    expect(row?.emptyMetaSocket).toBe(true);
+    expect(
+      ranking.substitutions.some((s) =>
+        s.detail.includes("no meta preference recorded")
+      )
+    ).toBe(true);
+  });
+});
+
+describe("rankUpgrades candidate-arm gem substitutions (ticket 107)", () => {
+  const HEAD_CANDIDATE = 32461; // Furious Gizmatic Goggles: meta + blue
+
+  /**
+   * Worn gems are every-socket red, which cannot satisfy Relentless's
+   * 2 red / 2 yellow / 2 blue. The worn head (Wolfshead Helm 8345) has no
+   * sockets, so no meta is active at baseline and the baseline repair is a
+   * no-op — any swaps observed therefore belong to the candidate arm, which
+   * is the thing under test. Swapping in a meta-socketed helm forces the
+   * repair to recolour gems on the chest and legs.
+   */
+  function allRedLoggedGear(): LoggedGear {
+    const worn: Record<string, { id: number; gems: number[] }> = {
+      head: { id: 8345, gems: [] },
+      chest: { id: 23563, gems: [23094, 23094, 23094] },
+      legs: { id: 24022, gems: [23094, 23094, 23094] },
+    };
+    return {
+      items: SIM_ORDER.map((slot) => {
+        const w = worn[slot];
+        return w ? { id: w.id, slot, gems: w.gems } : { id: 0, slot, gems: [] };
+      }),
+      talentPointsByTree: [5, 11, 45],
+      provenance: {
+        reportCode: SUMMARY.reportCode,
+        fightId: SUMMARY.fightId,
+        sourceID: 1,
+      },
+    };
+  }
+
+  async function rankWithAllRedGear() {
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    return rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", allRedLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(HEAD_CANDIDATE, "ret-p3")],
+      }
+    );
+  }
+
+  it("discloses the recoloured gems on the row whose swap caused them", async () => {
+    const ranking = await rankWithAllRedGear();
+
+    const row = ranking.items.find((i) => i.itemId === HEAD_CANDIDATE);
+    expect(row).toBeDefined();
+    // Guard against a vacuous pass: this fixture must really provoke a
+    // recolour, or the assertion below would hold for the wrong reason.
+    expect(row!.gemSubstitutions).toBeDefined();
+    expect(row!.gemSubstitutions!.length).toBeGreaterThan(0);
+
+    // Each disclosed swap names the item it lands on and both gem ids, so a
+    // reader can tell which of their own gems moved and to what.
+    for (const swap of row!.gemSubstitutions!) {
+      expect(swap.itemId).toBeGreaterThan(0);
+      expect(swap.itemId).not.toBe(HEAD_CANDIDATE);
+      expect(swap.from).toBeGreaterThan(0);
+      expect(swap.to).toBeGreaterThan(0);
+      expect(swap.from).not.toBe(swap.to);
+    }
+
+    // The swaps land on other worn items, which is the whole complaint.
+    const touched = new Set(row!.gemSubstitutions!.map((s) => s.itemId));
+    expect([...touched].sort()).toEqual([23563, 24022]);
+  });
+
+  it("leaves gemSubstitutions absent when the candidate arm recoloured nothing", async () => {
+    // slamaltman's own gear already satisfies its meta, so no candidate swap
+    // needs to recolour anything — the field must not appear as an empty
+    // array on every row.
+    const echoSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
+        dps: 2000,
+        stdev: 90,
+        iterationsDone: runOpts.iterations,
+        simVersion: "v0.0.101",
+      }),
+    };
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: echoSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(29381)],
+      }
+    );
+
+    const row = ranking.items.find((i) => i.itemId === 29381);
+    expect(row).toBeDefined();
+    expect(row!.gemSubstitutions).toBeUndefined();
   });
 });

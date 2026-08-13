@@ -1,0 +1,27 @@
+wowsimcli v0.0.101
+gear      test\fixtures\shredzepelin-cat.raw.json (actor 'shredzepelin')
+skeleton  data\presets\feral\p2.raid-sim-skeleton.json
+seeds=['11', '22', '33', '44', '55']
+helm gems=[32409, 32194] enchant=3003
+
+=== guard sim: shredzepelin's unmodified gear (BASE), 3000 iters ===
+  [3k] BASE      2152.10  2152.02  2152.16  2152.07  2152.31   mean= 2152.13  spread= 0.29  SE~= 2.33
+  guard OK: 2152.13 vs target 2152.10 (diff +0.03)
+
+=== helm arms, 3000 iters ===
+  [3k] CURSED    1966.70  1966.40  1966.55  1966.87  1966.83   mean= 1966.67  spread= 0.47  SE~= 3.49
+  [3k] VENG      1963.80  1963.91  1964.03  1963.97  1963.42   mean= 1963.83  spread= 0.62  SE~= 3.42
+
+=== deltas vs BASE (3000 iters) ===
+  CURSED   delta =  -185.46 DPS
+  VENG     delta =  -188.30 DPS
+  CURSED - VENG =    +2.84 DPS
+
+=== high-precision confirmation: CURSED vs VENG, 20000 iters ===
+  [20k] CURSED    1964.17  1964.14  1964.22  1964.33  1964.36   mean= 1964.24  spread= 0.22  SE~= 1.36
+  [20k] VENG      1959.26  1959.26  1959.27  1959.31  1959.29   mean= 1959.28  spread= 0.05  SE~= 1.35
+
+=== CURSED - VENG (20000 iters) ===
+  CURSED - VENG =    +4.97 DPS
+
+wrote .scratch\set-bonus-value\loop-103-106\measurements-106-helms.json

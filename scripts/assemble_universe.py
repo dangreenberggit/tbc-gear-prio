@@ -182,7 +182,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     "ret": SpecProfile(
         "ret",
         ep_weights=ROOT / "data/presets/ret/p2.ep-weights.json",
-        # Upstream tbc-new ships one curated set per stage for retribution --
+        # Upstream tbc-new ships one curated set per phase for retribution --
         # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
         # Feral cat does have that split; see its own entry below.
         gear_sets=[
@@ -208,16 +208,22 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     ),
     "feral": SpecProfile(
         "feral",
-        # Phase 1, because upstream ships no P2 EP preset for feral cat.
+        # Stage 1, because upstream ships no P2 EP preset for feral cat.
         ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
         # Upstream ships sixteen curated cat sets against ret's three, split
-        # BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus.
-        # Only the p2 pair plus pre-raid is vendored, so "BiS" here means
-        # "in an upstream p2 or pre-raid cat set" rather than a single verdict.
+        # BiS/Alt/Realistic and again by 6-piece against 9-piece hit variant
+        # (carry-forward 88 — the suffix is a hit percentage, not a piece
+        # count). The BiS pair for each phase this repo assembles a universe
+        # for is vendored, plus pre-raid; the Alt/Realistic variants are a
+        # different claim and would need their own tag vocabulary. So "BiS"
+        # here means "in an upstream cat set for this phase" rather than a
+        # single verdict, and `bis_set_labels_for_max_phase` picks the phase.
         gear_sets=[
             ROOT / "vendor/wowsims/feral_preraid.gear.json",
             ROOT / "vendor/wowsims/feral_p2_6p.gear.json",
             ROOT / "vendor/wowsims/feral_p2_9p.gear.json",
+            ROOT / "vendor/wowsims/feral_p3_6p.gear.json",
+            ROOT / "vendor/wowsims/feral_p3_9p.gear.json",
         ],
         wowhead_dir=ROOT / "data/wowhead-lists/feral",
         two_hop=ROOT / "data/two-hop/feral-tokens.json",
@@ -342,10 +348,10 @@ def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
     return set(wowsims_curated_sets_by_item(profile))
 
 
-# Upstream names its gear sets by the stage they are BiS *for*: `preraid`
+# Upstream names its gear sets by the phase they are BiS *for*: `preraid`
 # before Karazhan, `p1` for T4 content, `p2` for T5. Pre-raid is phase 1 --
 # it is the set you take into a phase-1 raid.
-CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2}
+CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2, "p3": 3}
 
 
 def curated_set_phase(label: str) -> int | None:
@@ -362,16 +368,20 @@ def bis_set_labels_for_max_phase(
 ) -> dict[int, list[str]]:
     """Curated sets that still make a *current* BiS claim at `max_phase`.
 
-    "BiS" is a claim about a stage, exactly as wowsims scopes it -- there is no
-    absolute BiS. A set for an earlier stage says "this was BiS before the
+    "BiS" is a claim about a phase, exactly as wowsims scopes it -- there is no
+    absolute BiS. A set for an earlier phase says "this was BiS before the
     content you are now running", which is the opposite of a recommendation.
     Without this, a phase-5 ret list badged Justicar (T4) chest, boots and
     crown plus five pre-raid pieces as `BiS`, because the union flattened three
-    stage sets into one verdict (carry-forward 47 §1).
+    phase sets into one verdict (carry-forward 47 §1).
 
-    Upstream vendors no set past `p2`, so beyond phase 2 the newest available
-    stage is used rather than tagging nothing: the claim degrades to "the
-    latest curated set upstream ships", which `curatedSets` then names.
+    Where no set is vendored for `max_phase`, the newest available phase is
+    used rather than tagging nothing: the claim degrades to "the latest curated
+    set we vendor", which `curatedSets` then names and the HTML report warns
+    about. Ret genuinely stops at `p2` upstream and still degrades this way;
+    feral cat runs to `p5` upstream, so a gap there means the phase is simply
+    not vendored yet (see `TRACKED` in scripts/sync_wowsims.py) and is fixed by
+    pinning it, not by widening this fallback.
     """
     known = {
         iid: [s for s in labels if curated_set_phase(s) is not None]
@@ -892,7 +902,7 @@ def canonical_boss(boss: str) -> str:
 
 
 # Tier rows read "Drop: <Token> - <Boss> (<Zone>)", and the whole phrase used
-# to land in `boss` -- a shipped ViewOptions filter control listing an item as
+# to appear in `boss` -- a shipped ViewOptions filter control listing an item as
 # a boss (carry-forward 48). The token half is dropped rather than emitted:
 # every affected piece already carries a `kind: token` row from the curated
 # data/two-hop/*-tokens.json, which is the side measured to be correct where
@@ -1273,9 +1283,9 @@ def assemble(
     }
     db_by_id = {int(it["id"]): it for it in db["items"]}
     curated_sets_by_item = wowsims_curated_sets_by_item(profile)
-    # Membership stays the union: an item upstream equips at any stage is still
+    # Membership stays the union: an item upstream equips at any phase is still
     # a real candidate to rank (that is ticket 12's widening). Only the *claim*
-    # narrows to the current stage.
+    # narrows to the current phase.
     bis_ids = set(curated_sets_by_item)
     bis_sets_at_phase = bis_set_labels_for_max_phase(
         curated_sets_by_item, max_phase
@@ -1767,7 +1777,7 @@ def main() -> int:
         help=(
             "Drop the caster-only / EP-floor rejects from the universe instead "
             "of only measuring them. Off by default: the committed universes "
-            "and the Phase 1 gate figures are built unfiltered."
+            "and the Stage 1 gate figures are built unfiltered."
         ),
     )
     args = ap.parse_args()

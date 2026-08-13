@@ -1,5 +1,5 @@
 /**
- * Build RecordedGearSourceData from the Phase 0 slamaltman raw fixture, via
+ * Build RecordedGearSourceData from the Stage 0 slamaltman raw fixture, via
  * the **ranked** route.
  *
  * The shared walk — actors, gear mapping, talent reading — lives in

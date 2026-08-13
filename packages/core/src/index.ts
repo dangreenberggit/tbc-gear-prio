@@ -1,5 +1,11 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
-export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
+export {
+  CUTOFF,
+  CUTOFF_FERAL,
+  cutoffForSpec,
+  meetsCutoff,
+  type Cutoff,
+} from "./cutoff.js";
 export {
   DegenerateSeedsError,
   PAIRED_REPLICATE_TOP_N,
@@ -125,7 +131,6 @@ export type {
   SpecId,
 } from "./types.js";
 export {
-  fillCandidateGems,
   fillEmptyCandidateGems,
   gemEp,
   gemFillWeights,
@@ -161,6 +166,41 @@ export {
 } from "./enchants.js";
 export { compose, type ComposePlayer } from "./compose.js";
 export { setBreakNote } from "./set-bonus.js";
+export {
+  classifyDeadSlots,
+  THIN_POOL_CANDIDATES,
+  UNIQUE_EFFECT_GAP_DPS,
+  type DeadSlot,
+  type DeadSlotCause,
+  type DeadSlotRow,
+} from "./dead-slots.js";
+export {
+  IMPLAUSIBLE_BONUS_FRACTION,
+  deadSlotWarnings,
+  plausibilityWarnings,
+  setBonusMagnitudeWarnings,
+  type DeadSlotWarning,
+  type ImplausibleSetBonusWarning,
+  type PlausibilityWarning,
+} from "./plausibility.js";
+export {
+  SET_THRESHOLDS,
+  combineSe,
+  computeSynergy,
+  isBonusImplemented,
+  nextMeasurableThreshold,
+  selectPackage,
+  setCounts,
+  setLabel,
+  type DpsSample,
+  type IndividualDelta,
+  type PackagePiece,
+  type PackageSelectionResult,
+  type SetThreshold,
+  type SynergyInput,
+  type SynergyResult,
+  type UnmeasuredReason,
+} from "./set-value.js";
 export { Stat, epScore, statAt } from "./stats.js";
 export {
   gemColorCounts,
@@ -172,7 +212,10 @@ export {
   type MetaStatus,
 } from "./meta.js";
 export {
-  MetaUnsolvableError,
+  MetaInfeasibleError,
+  MetaRepairError,
+  MetaStepBudgetExceededError,
+  minimizeRegems,
   repairMeta,
   type MetaRepairResult,
   type MetaRepairSwap,

@@ -9,11 +9,17 @@
  * thrash). See `.scratch/handoffs/gem-optimizer-comparison.md`.
  */
 
-import { getGem, type GemEntry } from "./gems.js";
+import { fillEligibleGems, getGem, type GemEntry } from "./gems.js";
 import { getItem, socketsFor } from "./items.js";
-import { gemColorCounts, gemColorMatchesSocket, metaDeficit } from "./meta.js";
+import {
+  gemColorCounts,
+  gemColorMatchesSocket,
+  metaDeficit,
+  socketBonusActive,
+} from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat, type EpWeights } from "./stats.js";
+import type { DetectedSpecId } from "./types.js";
 
 /**
  * Record-only weights. Narrower than `stats.ts`'s `EpWeights` union — this
@@ -36,15 +42,37 @@ type EpWeightRecord = Readonly<Record<string, number>>;
  */
 export type GemContext = {
   readonly palette: readonly GemEntry[];
+  /**
+   * The palette both auto-fill and meta repair may draw from — `palette`
+   * capped at rare. Ticket 111 left repair on the full `palette`, but repair
+   * only ever touches coloured sockets (never the meta socket), and on those
+   * it was quietly handing out epic gems the fill had deliberately avoided
+   * (ticket 117). Every colour exists at rare and all 18 TBC meta gems are
+   * quality 3, so nothing becomes unsolvable under the cap.
+   */
+  readonly fillPalette: readonly GemEntry[];
   readonly weights: EpWeights;
   readonly weightRecord: EpWeightRecord;
+  /**
+   * Which spec's preferred meta applies. Absent means "unspecified", which
+   * keeps the pre-table behaviour — ret's entry — so every existing caller
+   * reads exactly as it did before `SPEC_PREFERRED_METAS` existed.
+   */
+  readonly spec?: DetectedSpecId;
 };
 
 export function gemContext(
   palette: readonly GemEntry[],
-  weights: EpWeights
+  weights: EpWeights,
+  spec?: DetectedSpecId
 ): GemContext {
-  return { palette, weights, weightRecord: toWeightRecord(weights) };
+  return {
+    palette,
+    fillPalette: fillEligibleGems(palette),
+    weights,
+    weightRecord: toWeightRecord(weights),
+    ...(spec !== undefined ? { spec } : {}),
+  };
 }
 
 /** Dense-array weights are index-keyed; the record form keys by the same index. */
@@ -84,6 +112,88 @@ const META_NEAR_EP = 1.0;
  */
 const PREFERRED_META_IDS: readonly number[] = [32409];
 
+/**
+ * Preferred meta gem per detected spec, read from upstream's gear presets.
+ *
+ * The evidence procedure is the one the ret comment above already describes,
+ * extended per spec (step6-meta-choice-spike.md option 1): read the meta
+ * socketed in that spec's presets, as of `wowsims/tbc-new` @ v0.0.101
+ * (`8aa378b3`). It is not an EP ranking, because stat EP cannot rank metas at
+ * all — the ordering it produces is the wrong one.
+ *
+ * **A spec with no entry is deliberate, not an oversight.** All five vendored
+ * feral presets (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear Wolfshead
+ * Helm 8345, which has no sockets, so upstream records no feral meta to copy.
+ * Inheriting ret's Relentless would be a guess dressed in the same clothes as
+ * ret's evidence, so uncovered specs take the fail-loud path instead: keep the
+ * worn meta, never fill or substitute one, and disclose
+ * `missingMetaPreferenceNote`. Verified against the vendored presets in
+ * `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
+ * ("Local verification pass"), which also settles that Chaotic Skyfire 34220
+ * is phase 1 in our own data — the one online claim that would have mattered
+ * here had a caster spec been detectable.
+ *
+ * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
+ * reach this code, so a row for one would be untestable decoration.
+ *
+ * **When the detectable-spec list grows, this table must grow with it**
+ * (ticket 142, review row 5-D4). The safety above rests entirely on
+ * `DetectedSpecId` staying `ret | feral | feral-tank`: today the two feral
+ * entries are absent on purpose because upstream records no feral meta, and
+ * `missingMetaPreferenceNote` makes that absence loud. A newly detectable spec
+ * -- a caster one especially -- would fall into the same "no preference
+ * recorded" branch, but there the outcome is a quiet quality regression (an
+ * empty meta socket where a real preference exists upstream) rather than a
+ * fact about the game. So on adding a `DetectedSpecId`: find that spec's meta
+ * in the vendored presets and add a row, or, if upstream genuinely records
+ * none, say so here in the same terms the feral entries are explained -- do
+ * not leave it to the fallback and do not inherit ret's.
+ */
+export const SPEC_PREFERRED_METAS: Partial<
+  Record<DetectedSpecId, readonly number[]>
+> = {
+  ret: PREFERRED_META_IDS,
+};
+
+/**
+ * The disclosure for a spec whose meta preference is not recorded, or
+ * `undefined` when there is nothing to disclose.
+ *
+ * Fail loud, per the spike: silently leaving the socket empty looks identical
+ * to a palette that had no meta gem, and silently seating ret's would be
+ * wrong. Naming the spec is what lets a reader tell the two apart.
+ */
+export function missingMetaPreferenceNote(
+  spec: DetectedSpecId | undefined
+): string | undefined {
+  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return undefined;
+  return `no meta preference recorded for ${spec} — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect`;
+}
+
+/**
+ * Whether this candidate's price omits a meta gem. The per-row half of the
+ * disclosure above — the run-level note cannot tell a reader which rows it
+ * moved.
+ *
+ * Reads `gems` — the array the candidate was actually priced with — rather
+ * than deciding from socket colours and the spec table alone. `swapItemAt`
+ * fills from `migrateGemsToItem`, which carries a worn meta onto the
+ * candidate, so a spec with no recorded preference can still end up with a
+ * full socket. Ticket 139: the colour-only test printed "priced with an empty
+ * meta socket" over a seated gem, which is the failure this flag exists to
+ * prevent.
+ */
+export function metaSocketUnpriced(
+  itemId: number,
+  gems: readonly number[],
+  spec: DetectedSpecId | undefined
+): boolean {
+  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return false;
+  const metaIdx = socketsFor(itemId).indexOf(GemColor.GemColorMeta);
+  if (metaIdx < 0) return false;
+  return !gems[metaIdx];
+}
+
 export type FillEmptyOpts = {
   /** Unique gem ids already socketed elsewhere on the set. */
   usedUnique?: ReadonlySet<number>;
@@ -93,26 +203,23 @@ export type FillEmptyOpts = {
    * colour and can zero the deficit before any candidate is scored.
    */
   meta?: { metaId: number; otherGemIds: readonly number[] };
+  /**
+   * Whose preferred meta to seat. Absent keeps the pre-table behaviour (ret's
+   * entry); a spec with no entry in `SPEC_PREFERRED_METAS` leaves the meta
+   * socket empty rather than inheriting another spec's gem.
+   */
+  spec?: DetectedSpecId;
 };
-
-export function fillCandidateGems(
-  itemId: number,
-  palette: readonly GemEntry[],
-  epWeights: EpWeightRecord
-): number[] {
-  const sockets = socketsFor(itemId);
-  if (sockets.length === 0) return [];
-
-  const weights = gemFillWeights(epWeights);
-  const matched = fillSockets(sockets, palette, weights, true, new Set());
-  const free = fillSockets(sockets, palette, weights, false, new Set());
-  const matchedScore = layoutScore(itemId, sockets, matched, weights);
-  const freeScore = layoutScore(itemId, sockets, free, weights);
-  return freeScore > matchedScore ? free : matched;
-}
 
 /**
  * Keep already-placed gems; EP-fill only empty sockets (after UI-style migrate).
+ *
+ * Deliberate simplification, not a mirror of wowsims' suggest-gems button
+ * (ticket 111 "Two behavioural facts", observed in the owner's web session):
+ * the button re-gems existing body gems and skips meta sockets, whereas we
+ * keep every worn gem and fill only what migration left empty. Do not "fix"
+ * this toward the button — silently re-gemming worn slots breaks the owner's
+ * consistency principle (the user must know which gems were used).
  */
 export function fillEmptyCandidateGems(
   itemId: number,
@@ -176,7 +283,8 @@ function fillEmpties(
             metaId: opts.meta.metaId,
             setGemIds: [...opts.meta.otherGemIds, ...placed],
           }
-        : undefined
+        : undefined,
+      opts.spec
     );
     if (pick) {
       out[i] = pick.id;
@@ -189,43 +297,14 @@ function fillEmpties(
   return out;
 }
 
-function fillSockets(
-  sockets: readonly number[],
-  palette: readonly GemEntry[],
-  epWeights: EpWeightRecord,
-  matchColors: boolean,
-  usedUnique: ReadonlySet<number>
-): number[] {
-  const gems: number[] = [];
-  const used = new Set(usedUnique);
-
-  for (const socket of sockets) {
-    const pick = bestGemForSocket(
-      socket,
-      palette,
-      epWeights,
-      used,
-      matchColors,
-      undefined
-    );
-    if (pick) {
-      gems.push(pick.id);
-      if (pick.unique) used.add(pick.id);
-    } else {
-      gems.push(0);
-    }
-  }
-
-  return gems;
-}
-
 function bestGemForSocket(
   socket: number,
   palette: readonly GemEntry[],
   epWeights: EpWeightRecord,
   usedUnique: ReadonlySet<number>,
   matchColors: boolean,
-  metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined
+  metaCtx: { metaId: number; setGemIds: readonly number[] } | undefined,
+  spec: DetectedSpecId | undefined
 ): GemEntry | undefined {
   const eligible: { gem: GemEntry; ep: number }[] = [];
 
@@ -246,7 +325,14 @@ function bestGemForSocket(
   if (eligible.length === 0) return undefined;
 
   if (socket === GemColor.GemColorMeta) {
-    for (const preferred of PREFERRED_META_IDS) {
+    const preferredIds =
+      spec === undefined ? PREFERRED_META_IDS : SPEC_PREFERRED_METAS[spec];
+    // No recorded preference: leave the socket empty rather than fall through
+    // to the EP pick below. EP cannot rank metas — nine of eighteen score
+    // 0.00 — so "best by EP" would be an arbitrary gem wearing the authority
+    // of a measurement, and inheriting another spec's meta would be worse.
+    if (!preferredIds) return undefined;
+    for (const preferred of preferredIds) {
       const hit = eligible.find((e) => e.gem.id === preferred);
       if (hit) return hit.gem;
     }
@@ -294,33 +380,12 @@ function layoutScore(
     if (gem) score += epScore(gem.stats, epWeights);
   }
 
-  if (allSocketsMatched(sockets, gemIds)) {
+  if (socketBonusActive(sockets, gemIds)) {
     const bonus = getItem(itemId)?.socketBonus;
     if (bonus) score += epScore(bonus, epWeights);
   }
 
   return score;
-}
-
-function allSocketsMatched(
-  sockets: readonly number[],
-  gemIds: readonly number[]
-): boolean {
-  if (gemIds.length < sockets.length) return false;
-
-  for (let i = 0; i < sockets.length; i++) {
-    const gem = getGem(gemIds[i] ?? 0);
-    if (!gem) return false;
-
-    if (sockets[i] === GemColor.GemColorMeta) {
-      if (gem.colour !== GemColor.GemColorMeta) return false;
-      continue;
-    }
-
-    if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
-  }
-
-  return true;
 }
 
 /** Test helper — resolve palette gem by id after fill. */

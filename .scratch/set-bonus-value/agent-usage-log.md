@@ -1,0 +1,79 @@
+# Agent usage log — set-bonus feature arc
+
+Kept by the main (reviewing) session. One row per agent completion, as
+reported by the harness. Numbers are the tokens the subagent itself spent
+(not the main session's). Resumed agents report per-completion; rows with
+the same name are the same agent resumed. Failed-mid-run agents may have
+spent tokens that were never reported — noted where known. The main
+session's own usage is not visible to itself and is not in this table.
+
+Date: 2026-08-10 → 2026-08-11.
+
+| # | task | model (effort) | tokens | tool uses | outcome |
+|---|---|---|---|---|---|
+| 1 | Orchestrate ticket 90–99 resolution (sims, fixes, review) | opus (high) | 312,420 | 176 | done |
+| 2 | Practical-outcome report | opus (med) | 74,701 | 7 | done |
+| 3 | Rerender scratch HTML (flagged) | sonnet | 72,222 | 15 | done |
+| 3b | — resumed: default-mode render check | sonnet | 79,851 | 5 | done |
+| 4 | Resolve tickets 100/96/101/102 | opus (high) | 146,407 | 97 | done |
+| 5 | Loop: why T6 shoulders never surface | opus (high) | 142,250 | 61 | done |
+| 6 | Design note: sim-process vs UI-only | opus (med) | 101,410 | 13 | done |
+| 7 | Panel qualifier + pct ticket + UI cleanup + curated-list + export fixes | opus (high) | 213,229 | 194 | done |
+| 8 | Gear-snapshot provenance hunt | opus (med) | 84,738 | 25 | done (later corrected by v2 gear) |
+| 9 | Director: combined 103/106 loop | opus (high) | 112,812 | 32 | done |
+| 9b | — resumed: owner settings diff | opus (high) | 131,633 | 10 | done |
+| 9c | — resumed: corrected gear re-price | opus (high) | 166,167 | 19 | done |
+| 9d | — resumed: web-results analysis, close-out | opus (high) | 201,488 | 23 | done |
+| 10 | Ticket specs: gem two-step (111) + chips (112→filed as 112) | opus (med) | 136,722 | 59 | done |
+| 11 | Owner's wowsims simming instructions | opus (med) | 108,041 | 26 | done |
+| 12 | Orchestrate tickets 111+112 implementation | fable (low) | 95,857 | 26 | phase 1 |
+| 12b | — resumed: chip verification | fable (low) | 106,169 | 6 | done |
+| 12c | — resumed: close-out after review fixes | fable (low) | 131,422 | 16 | done |
+| 13 | Implement ticket 111 review fixes (child of 12, surfaced to main) | inherited (opus-class) | 180,401 | 37 | done |
+| 14 | Review two-ticket increment (child of 12) | inherited | 106,480 | 26 | done |
+| 15 | Convergence check vs web results | opus (med) | 107,131 | 38 | done (found ticket 117) |
+| 16 | Orchestrate ret catch-up | fable (low) | 90,221 | 25 | stalled (dead monitor) |
+| 16b | — resumed after stall | fable (low) | 109,493 | 3 | killed by session limit |
+| 16c | — resumed after limit | fable (low) | 132,447 | 16 | done |
+| 17 | W4 ret HTML surfaces check (child of 16) | inherited | 115,430 | 12 | done |
+| 18 | Orchestrate fix round (117/118 + sweep) | fable (low) | unreported | — | killed by session limit mid-round; most commits landed first |
+| 19 | — resumed: finish 118, regenerate, review | fable (low) | 97,190 | 8 | done (per-worker rows in fix-round/DIRECTOR.md) |
+| 20 | Apply review dispositions (blocker + 4 fixes) | sonnet | 111,029 | 56 | done |
+| 21 | Two-character report page (shredzepelin/slamaltman toggle) | sonnet (high) | 63,250 + 70,113 + 107,763 (3 legs) | 147 | done |
+| 22 | Review-disposition worker's successor: orchestration-observations HTML | opus (med) | 136,365 | 30 | done |
+| 23 | Round-3 pre-merge review orchestrator (ran the skill, 3 axes) | opus | 160,978 | 92 | done — adversarial blocking on 3-A1 |
+| 24 | Round-3 findings judge (dispositions per the incorporating-reviews handoff) | fable (low) | 97,922 | 22 | done — blocker cleared |
+| 24a | — worker A: 3-A1 disclosure + 3-D2 qualifier | sonnet | 249,388 | 177 | done |
+| 24b | — worker B: standards fixes St1–St4 | sonnet | 84,935 | 44 | done |
+| 24c | — worker C: 3-A2 chip filter CSS | sonnet | 131,625 | 81 | done |
+| 24d | — worker D: 3-S1 ADR narrowing + 3-S3 checkboxes | sonnet | 105,007 | 31 | done |
+
+## Correction from the observations document (2026-08-12)
+
+The fuller accounting in
+`orchestration-observations-2026-08-12.html` (which also counts the
+director logs' per-worker rows) puts the arc at ~4.71M visible subagent
+tokens across 36 completions, not this table's ~3.5M/21 — this table only
+has the completions the main session saw directly. Also note its pricing
+flag: Fable is the TOP price tier ($10/$50 per Mtok vs Opus $5/$25,
+retrieved 2026-08-12), so the "fable (low)" director runs were the most
+expensive model at constrained effort, not a budget lane.
+
+Owner's clarification (2026-08-12): the Fable choice was intentional — top
+judgment, low effort to cut cost and unnecessary thinking. Refined the same
+day: the owner's usual pattern is Fable-low for PLANNING and for receiving/
+judging orchestrated outcomes against the plan, with OPUS running the
+orchestration itself. This arc's fable-low directors did both jobs; treat
+that as tolerated here, not the template.
+
+## Notes
+
+- "inherited" = child agents spawned by an orchestrator inherit the
+  orchestrator's session model unless it overrode them; the orchestrators
+  were not asked to record per-child model choices before 2026-08-11.
+  From here on, orchestrator briefs ask for per-worker model + token rows
+  in their DIRECTOR.md logs.
+- Two session-limit kills (16b, 18) mean some spent tokens were never
+  reported and are missing from this table.
+- Rough visible total for the arc so far: ~3.1M subagent tokens across
+  ~20 completions, before the main session's own usage.

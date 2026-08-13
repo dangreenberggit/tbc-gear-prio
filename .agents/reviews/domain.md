@@ -2,7 +2,7 @@
 
 You are reviewing a diff against subject-area truth about TBC Classic,
 Warcraft Logs, and wowsims — not against code style or the product spec.
-Your source of truth is `docs/phase0-findings.md` and
+Your source of truth is `docs/stage0-findings.md` and
 `docs/verification-log.md`, both committed in this repo. Read them before
 reviewing the diff. Do not rely on general WoW/TBC knowledge where those
 files state something more specific — they were verified against live data,
@@ -31,8 +31,8 @@ general knowledge wasn't.
 - **Spec is classified from talent-tree point plurality, and from nothing
   else.** There is no WCL spec-name string at actor level for any class
   (`subType` is class-level only), and **`CombatantInfo.specID` is unusable** —
-  [P0] every combatant reads `specID: 0` on TBC Anniversary, including confirmed
-  Ret (`docs/phase0-findings.md`, PLAN.md §5.2). Treating `0` as a real spec
+  [S0] every combatant reads `specID: 0` on TBC Anniversary, including confirmed
+  Ret (`docs/stage0-findings.md`, PLAN.md §5.2). Treating `0` as a real spec
   mis-specs the whole raid. The points live in `CombatantInfo.talents[].id`,
   which is **points spent, not a talent id** ([R18]) — `[{id:21},{id:40},{id:0}]`
   reads 21/40/0, and the three sum to 61 at level 70.
@@ -54,7 +54,7 @@ general knowledge wasn't.
 ## Report format
 
 For each finding: file + line, the fact it contradicts (quote
-`docs/phase0-findings.md` or `docs/verification-log.md`), and the concrete
+`docs/stage0-findings.md` or `docs/verification-log.md`), and the concrete
 consequence (wrong number, wrong slot, invented data). If a new WCL
 assumption shows up that isn't covered by existing findings, flag it as
 **unverified** separately from actual contradictions.

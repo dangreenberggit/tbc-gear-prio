@@ -132,3 +132,24 @@ count assertion (`expected 362 to be 354`) and the named-item assertion
 Settles an open question from an earlier session: whether ret "genuinely uses"
 Void Star Talisman was previously hedged as untested. It is Warlock-only, so
 the answer is no — a paladin cannot equip it at all.
+
+## Known limit of this filter (2026-08-11, ticket 122)
+
+The allowlist filter can only see class locks that exist as data. Some items
+are locked to a class **only inside the sim's Go code**: their pinned
+`db.json` entry carries `classAllowlist: null`, and the lock is a Go
+item-effect registration that crashes when the effect is applied to another
+class. Example: 30892 Beast-tamer's Shoulders (hunter-only via
+`sim/hunter/item_sets.go`) is ordinary epic mail in `db.json`, so it passed
+this filter into `data/universes/ret-p3.json`.
+
+Owner decision on ticket 122: the engine backstop is the accepted, durable
+behaviour for these — the crashing swap is dropped from the ranking, the run
+continues, and the drop is disclosed in `ranking.substitutions` (the HTML
+report shows the first line of the crash text). Pinned by "rankUpgrades —
+cross-class candidate whose sim crashes (ticket 122)" in
+`packages/core/test/rank.test.ts`. Cost per affected item per run: one wasted
+sim and one substitutions entry — no wrong numbers. A hand-maintained
+denylist against the Go source was considered and turned down as upkeep
+without a measured payoff; nobody has swept the pinned Go source for siblings
+of 30892 (untested how many exist).

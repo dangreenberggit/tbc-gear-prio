@@ -58,7 +58,7 @@ parity as established.
 | wowsims proves the browser path works                   | **Confirmed**                         | `sim/wasm/main.go` compiles the _same_ Go sim to WASM and exports `raidSim`, `raidSimAsync`, `raidSimRequestSplit`, `raidSimResultCombination`, `statWeights`, `abortById` to JS globals. `ui/worker/sim_worker.ts` wraps it; `ui/core/worker_pool.ts` pools it |
 | The "needs process spawn" justification is load-bearing | **Wrong, and it is the actual error** | Process spawn is an artifact of choosing the _CLI_ adapter. The same sim runs in-browser with no process at all. §1.1 states an implementation detail as if it were a constraint                                                                                |
 | "~50 MB native binary"                                  | **Wrong number**                      | The pinned binary is **22,222,336 bytes (21.2 MiB)**. Re-check: `ls -la vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe`                                                                                                                              |
-| The gap is urgent / blocks current work                 | **Partly — no**                       | See §3. The _cheap_ win is unrelated to topology, and doing topology first would stall Phase 1                                                                                                                                                                  |
+| The gap is urgent / blocks current work                 | **Partly — no**                       | See §3. The _cheap_ win is unrelated to topology, and doing topology first would stall Stage 1                                                                                                                                                                  |
 
 **Correction 1 — the bottleneck named in §1.1 is not the real bottleneck.**
 `cmd/wowsimcli/cmd/basic_sim.go` registers only `--infile`, `--outfile`,
@@ -276,19 +276,19 @@ as the WASM build, so one interface serves both.
 
 **Client-uploaded sim results are untrusted input.** A shared server cache
 written by clients is poisonable. Either (a) keep the client cache client-local,
-or (b) only trust server-computed entries. **Recommend (a) for Phase 3** —
+or (b) only trust server-computed entries. **Recommend (a) for Stage 3** —
 it keeps the trust model trivial.
 
 ### 5.3 Migration order — cheap first, replan last
 
-| #     | Change                                                                             | Cost                                                   | Blocks Phase 1?                | Do when             |
+| #     | Change                                                                             | Cost                                                   | Blocks Stage 1?                | Do when             |
 | ----- | ---------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------ | ------------------- |
 | **0** | **Fix the serial loop in `rank.ts:258`** — bounded-concurrency map over candidates | **Cheap.** One function, no port change                | It _is_ the current bottleneck | **Now**             |
 | 0b    | Hoist `version()` out of `CliSimRunner.run()` (cache it per instance)              | Trivial                                                | No                             | With #0             |
 | 1     | Correct PLAN.md §1.1 + §5.3 wording (§6 below)                                     | Doc-only                                               | No                             | Now                 |
-| 2     | Add `AbortSignal` to the `SimRunner` port                                          | Small, but breaking                                    | No                             | Before Phase 3      |
-| 3     | Make `simCacheKey` runtime-agnostic (drop `node:crypto`)                           | Medium — async ripple                                  | No                             | Before Phase 3      |
-| 4     | `WasmSimRunner` adapter + worker pool                                              | **Replan-adjacent**, new build pipeline for `lib.wasm` | No                             | Phase 3/4, after E1 |
+| 2     | Add `AbortSignal` to the `SimRunner` port                                          | Small, but breaking                                    | No                             | Before Stage 3      |
+| 3     | Make `simCacheKey` runtime-agnostic (drop `node:crypto`)                           | Medium — async ripple                                  | No                             | Before Stage 3      |
+| 4     | `WasmSimRunner` adapter + worker pool                                              | **Replan-adjacent**, new build pipeline for `lib.wasm` | No                             | Stage 3/4, after E1 |
 | 5     | Client/server split of the cache                                                   | Medium                                                 | No                             | With #4             |
 
 **Critical caveat on #0.** Because each `wowsimcli sim` already uses
@@ -299,7 +299,7 @@ gives no flag for. Measure before picking a number (E3). This directly
 contradicts PLAN.md §5.3's current sentence and is the most likely way to make
 things _slower_ while believing they got faster.
 
-**Nothing in rows 2–5 blocks Phase 1.** Row 0 is the only urgent item, and it is
+**Nothing in rows 2–5 blocks Stage 1.** Row 0 is the only urgent item, and it is
 not a topology change at all.
 
 ---
@@ -313,7 +313,7 @@ not a topology change at all.
 with wording that states the _credential_ constraint (which is real) instead of
 the process constraint (which is not), and names the client path as the target:
 
-> | Runtime | One always-on Node container, pinned there by **WCL credentials and the shared cache**, not by the sim. The sim is a **21 MiB** native binary today (`CliSimRunner`); upstream compiles the same simulator to WASM (`sim/wasm/main.go`), so a `WasmSimRunner` running in the client's browser is the intended Phase 3+ target — see [`docs/plans/compute-topology.md`](plans/compute-topology.md) |
+> | Runtime | One always-on Node container, pinned there by **WCL credentials and the shared cache**, not by the sim. The sim is a **21 MiB** native binary today (`CliSimRunner`); upstream compiles the same simulator to WASM (`sim/wasm/main.go`), so a `WasmSimRunner` running in the client's browser is the intended Stage 3+ target — see [`docs/plans/compute-topology.md`](plans/compute-topology.md) |
 
 **E2 — `PLAN.md:371`, §5.3 heading.** "`SimRunner` — true external (native
 binary)" → "`SimRunner` — true external (simulator; native binary _or_ WASM)".
@@ -329,7 +329,7 @@ uses every core:
 
 **E4 — `PLAN.md:380`, §5.3 adapter list.** Add a third bullet:
 
-> - `WasmSimRunner` _(Phase 3+, not built)_ — drives upstream's `lib.wasm` in a pool of web workers via `raidSimAsync` / `raidSimRequestSplit` / `raidSimResultCombination`. Zero marginal server cost; requires `simCacheKey` to stop importing `node:crypto`.
+> - `WasmSimRunner` _(Stage 3+, not built)_ — drives upstream's `lib.wasm` in a pool of web workers via `raidSimAsync` / `raidSimRequestSplit` / `raidSimResultCombination`. Zero marginal server cost; requires `simCacheKey` to stop importing `node:crypto`.
 
 **E5 — §7, after the reproducibility-stamp paragraph.** Add the measured
 determinism bound:

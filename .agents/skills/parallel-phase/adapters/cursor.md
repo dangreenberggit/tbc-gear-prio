@@ -7,7 +7,7 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
 
 - **Workhorse / simple:** **Composer** (`composer-2.5-fast` or current slug) — parallel implement workers, mechanical edits.
-- **Sharp:** **Grok high** — design, review, hard judgment. Do not open fan-out with Sol/Opus “for quality.”
+- **Review / design:** **Grok high** — pre-merge axes, hard judgment, design calls. Cursor has no distinct design tier that reliably spawns, so one fill covers both. Do not open fan-out with Sol/Opus “for quality.”
 
 Do **not** request Terra/Sol/Other-pool models for N-way fan-out on Pro —
 they often die at spawn with a usage wall even though they appear in the
@@ -26,7 +26,7 @@ Cursor Task managers hit the background-then-end-turn fan-in loss described in S
 
 ## Orchestrate (optional, large fan-out)
 
-For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this repo’s rules: merge onto the **feature branch**, never land workers to `dev`; after fan-in, run `pre-merge-review`, then **ask** before `pnpm land`.
+For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this repo’s rules: merge onto the **feature branch**, never merge workers to `dev`; after fan-in, run `pre-merge-review`, then **ask** before `pnpm merge-to-dev`.
 
 ## Merge
 

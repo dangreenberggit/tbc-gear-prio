@@ -49,7 +49,27 @@ const CONDITIONS = new Map<number, Condition>(
   (conditions as Condition[]).map((c) => [c.id, c])
 );
 
-/** Socket colour → gem colours that match it for meta counting / socket bonus. */
+/**
+ * Socket colour -> gem colours that match it for meta counting / socket
+ * bonus. Note Prismatic appearing in the Red, Yellow, *and* Blue sets below —
+ * that is deliberate and correct, not a bug to "fix" toward parity with
+ * upstream. In TBC, a Prismatic gem satisfies all three primary meta
+ * colours simultaneously; that is the defining property of the colour, not
+ * an approximation of it. Upstream wowsims' `metaGemActivationColorContribution`
+ * (`sim/core/meta_gem_constraints.go`) has a `default: return 0,0,0` branch
+ * that credits Prismatic with nothing — that looks like upstream's own
+ * oversight, not a rule we should match (issue #1 investigation, upheld by
+ * independent review). Confirmed against community-documented game rules, not
+ * verifiable from either repo's data files — neither db.json carries
+ * activation prose.
+ *
+ * Low-impact either way in practice: the only two Prismatic gems in TBC
+ * (Void Sphere 22459, Prismatic Sphere 22460) carry resistance-only stats,
+ * which score 0 EP under every weight set here, so an EP-driven fill or
+ * repair never selects them — this matters only for a player who already
+ * wears one. That reasoning survives only as long as resistances stay
+ * unweighted; if EP ever prices resistance, revisit.
+ */
 const SOCKET_TO_MATCHING: ReadonlyMap<
   GemColour,
   ReadonlySet<GemColour>
@@ -102,6 +122,50 @@ export function gemColorMatchesSocket(
 ): boolean {
   if (gemColor === socketColor) return true;
   return SOCKET_TO_MATCHING.get(socketColor)?.has(gemColor) ?? false;
+}
+
+/**
+ * Whether an item's socket bonus is active, given its socket colours and the
+ * gems sitting in them.
+ *
+ * The bonus is gated on the *coloured* sockets — an unfilled meta socket does
+ * not forfeit it (issue #1 step 2; upstream
+ * `sim/core/reforge_optimizer/gear.go:socketBonusActive` skips non-coloured
+ * sockets, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`). Exception: an item
+ * whose sockets are meta-only (11 exist in db.json, e.g. 28559) has nothing
+ * else to gate on, and an empty socket grants no bonus in-game — skipping it
+ * unconditionally would credit the bonus vacuously (round-4 review, D1).
+ *
+ * One definition because there were two: `socketsMatch` (meta-repair.ts) and
+ * `allSocketsMatched` (candidate-gems.ts) implemented this rule separately,
+ * kept in lockstep by a comment asking the next editor to remember
+ * (ticket 136 item 1). It lives here rather than in either caller because both
+ * already depend on this module, and it needs only socket colours and gems.
+ *
+ * Takes sockets rather than an item id so it stays independent of item
+ * lookup; `socketsMatch` is the id-keyed wrapper.
+ */
+export function socketBonusActive(
+  sockets: readonly number[],
+  gemIds: readonly number[]
+): boolean {
+  if (sockets.length === 0) return true;
+  if (gemIds.length < sockets.length) return false;
+
+  let sawColoured = false;
+  let metaEmpty = false;
+  for (let i = 0; i < sockets.length; i++) {
+    if (sockets[i] === GemColor.GemColorMeta) {
+      if (!gemIds[i]) metaEmpty = true;
+      continue;
+    }
+    sawColoured = true;
+    const gem = getGem(gemIds[i] ?? 0);
+    if (!gem) return false;
+    if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
+  }
+
+  return sawColoured || !metaEmpty;
 }
 
 export function gemColorCounts(gemIds: readonly number[]): GemColorCounts {

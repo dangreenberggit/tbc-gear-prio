@@ -1,0 +1,26 @@
+MODE=simplerot CLI=C:\Users\dgree\Code\lulz\tbc-gear-prio\vendor\wowsimcli-v0.0.101-win32-x64\wowsimcli-windows.exe
+  OURS_BASE               2202.35   2202.39   2202.34   2202.37   2202.43   mean=  2202.38
+  OURS_PKG                2316.07   2315.98   2316.11   2316.17   2316.22   mean=  2316.11
+  OURS_CURSED             2047.90   2047.85   2047.74   2047.89   2047.86   mean=  2047.85
+  OURS_VENG               2041.21   2041.13   2041.01   2041.04   2041.08   mean=  2041.10
+  OWNER2_BASE             2219.84   2219.84   2219.71   2219.79   2219.90   mean=  2219.82
+  OWNER2_PKG              2333.09   2333.11   2333.28   2333.32   2333.39   mean=  2333.24
+  OWNER2_CURSED           2070.45   2070.35   2070.18   2070.28   2070.19   mean=  2070.29
+  OWNER2_VENG             2061.74   2061.73   2061.51   2061.73   2061.71   mean=  2061.68
+  OWNER2_BASE_NOAHUNE     2122.73   2122.77   2122.43   2122.49   2122.64   mean=  2122.61
+  OURS_BASE_NOAHUNE       2106.26   2106.31   2105.98   2105.98   2106.13   mean=  2106.13
+
+  [OURS] baseline         =   2202.38
+  [OURS] T6 4pc pkg delta =  +113.73   (ground truth +97)
+           per-seed ['113.72', '113.59', '113.76', '113.80', '113.79']
+  [OURS] CURSED - VENG    =    +6.75   (ground truth ~+10)
+           per-seed ['6.68', '6.72', '6.73', '6.85', '6.78']
+  [OURS] Ahune neck+back worth =   +96.25  (base 2202.38 vs stripped 2106.13)
+
+  [OWNER2] baseline         =   2219.82
+  [OWNER2] T6 4pc pkg delta =  +113.42   (ground truth +97)
+           per-seed ['113.25', '113.27', '113.56', '113.53', '113.49']
+  [OWNER2] CURSED - VENG    =    +8.61   (ground truth ~+10)
+           per-seed ['8.71', '8.62', '8.67', '8.55', '8.48']
+  [OWNER2] Ahune neck+back worth =   +97.20  (base 2219.82 vs stripped 2122.61)
+

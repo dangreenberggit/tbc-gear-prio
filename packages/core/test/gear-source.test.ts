@@ -108,7 +108,7 @@ describe("CachingGearSource", () => {
   });
 
   it("does not serve one raider's gear to another in the same fight", async () => {
-    // docs/phase0-findings.md §11: this repo already quoted a warrior's gear
+    // docs/stage0-findings.md §11: this repo already quoted a warrior's gear
     // for a slamaltman run, because a fight holds all 25 raiders. A cache
     // keyed on (reportCode, fightId) alone would make that permanent — the
     // second character asked for would get the first one's 17 slots, with no

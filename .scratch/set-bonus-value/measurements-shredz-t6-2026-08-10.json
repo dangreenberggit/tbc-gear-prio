@@ -1,0 +1,148 @@
+{
+  "simVersion": "v0.0.101",
+  "gearSource": "test/fixtures/shredzepelin-cat.raw.json",
+  "gearSourceActor": "shredzepelin",
+  "skeleton": "data/presets/feral/p2.raid-sim-skeleton.json",
+  "seeds": [
+    "11",
+    "22",
+    "33",
+    "44",
+    "55"
+  ],
+  "iterations": 3000,
+  "guardTargetDps": 2152.0998,
+  "guardToleranceDps": 15.0,
+  "wornItemIds": {
+    "shoulder": 29100,
+    "chest": 29096,
+    "hands": 29947,
+    "legs": 28741
+  },
+  "tierItems": {
+    "shoulder": 31048,
+    "chest": 31042,
+    "hands": 31034,
+    "legs": 31044
+  },
+  "fillerGem": 32194,
+  "socketDeltaTierMinusWorn": {
+    "shoulder": 0,
+    "chest": 0,
+    "hands": 1,
+    "legs": -2
+  },
+  "arms": {
+    "BASE": {
+      "label": "BASE",
+      "substituted": [],
+      "perSeed": [
+        2152.099805582717,
+        2152.017198044096,
+        2152.1590382068075,
+        2152.0704976234797,
+        2152.3097424328103
+      ],
+      "mean": 2152.131256377982,
+      "spreadMaxMin": 0.29254438871430466,
+      "meanReportedSe": 2.3344758852005336,
+      "resourcesLenSeed0": 19
+    },
+    "T6_ALL": {
+      "label": "T6_ALL",
+      "substituted": [
+        "shoulder",
+        "chest",
+        "hands",
+        "legs"
+      ],
+      "perSeed": [
+        2232.649962032225,
+        2233.0875922522246,
+        2233.3348861492796,
+        2232.8841718307035,
+        2232.6824489231353
+      ],
+      "mean": 2232.9278122375135,
+      "spreadMaxMin": 0.6849241170543792,
+      "meanReportedSe": 2.6867493246987184,
+      "resourcesLenSeed0": 18
+    },
+    "T6_shoulder": {
+      "label": "T6_shoulder",
+      "substituted": [
+        "shoulder"
+      ],
+      "perSeed": [
+        2052.4504361622544,
+        2051.983627991346,
+        2051.8366170820227,
+        2051.712003422142,
+        2051.534460161952
+      ],
+      "mean": 2051.9034289639435,
+      "spreadMaxMin": 0.9159760003021802,
+      "meanReportedSe": 3.0512649937394074,
+      "resourcesLenSeed0": 18
+    },
+    "T6_chest": {
+      "label": "T6_chest",
+      "substituted": [
+        "chest"
+      ],
+      "perSeed": [
+        2056.4769798901943,
+        2056.3803927639806,
+        2056.2724375100192,
+        2056.4092693307334,
+        2056.0833675238505
+      ],
+      "mean": 2056.3244894037557,
+      "spreadMaxMin": 0.3936123663438593,
+      "meanReportedSe": 3.1479884446947897,
+      "resourcesLenSeed0": 18
+    },
+    "T6_hands": {
+      "label": "T6_hands",
+      "substituted": [
+        "hands"
+      ],
+      "perSeed": [
+        2173.850215643298,
+        2173.550596649724,
+        2173.28351458128,
+        2173.042809549516,
+        2173.1321903935714
+      ],
+      "mean": 2173.371865363478,
+      "spreadMaxMin": 0.8074060937819922,
+      "meanReportedSe": 1.8609264288364065,
+      "resourcesLenSeed0": 19
+    },
+    "T6_legs": {
+      "label": "T6_legs",
+      "substituted": [
+        "legs"
+      ],
+      "perSeed": [
+        2178.606757721673,
+        2178.643605803698,
+        2178.5260189383234,
+        2178.5997371639655,
+        2178.637690984882
+      ],
+      "mean": 2178.6027621225085,
+      "spreadMaxMin": 0.11758686537450558,
+      "meanReportedSe": 1.9731512861370615,
+      "resourcesLenSeed0": 19
+    }
+  },
+  "deltasVsBase": {
+    "T6_ALL": 80.79655585953151,
+    "T6_shoulder": -100.22782741403853,
+    "T6_chest": -95.80676697422632,
+    "T6_hands": 21.240608985495783,
+    "T6_legs": 26.47150574452644
+  },
+  "sumOfSingles": -148.32247965824263
+}
