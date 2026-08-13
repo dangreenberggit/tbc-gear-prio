@@ -908,6 +908,43 @@ describe("formatSetBonusLine / formatSetPotentialLine (pure rendering rules)", (
     expect(line).toContain("2pc");
   });
 
+  // Ticket 144: the ticket-107 gem disclosure reaches the package arm.
+  it("names the gem re-cuts a package was priced with", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+      gemSubstitutions: [
+        { itemId: 29096, socketIndex: 0, from: 24028, to: 24058 },
+        { itemId: 29096, socketIndex: 1, from: 24028, to: 24058 },
+        { itemId: 29100, socketIndex: 0, from: 24028, to: 24058 },
+      ],
+    });
+    expect(line).toContain("3 gems re-cut on 2 other items");
+    // A cost of taking the offer, not a qualifier on the figure: it must not
+    // displace the number the way the break and self-confound prefixes do.
+    expect(line.indexOf("12.00")).toBeLessThan(line.indexOf("re-cut"));
+  });
+
+  it("stays silent when a package needed no gem re-cuts", () => {
+    const line = formatSetBonusLine({
+      setId: 629,
+      setName: "Crystalforge Battlegear",
+      threshold: 4,
+      piecesWorn: 1,
+      packageItemIds: [30131, 30132, 30133],
+      packageDeltaDps: 40,
+      bonusDps: 12,
+      se: 3,
+    });
+    expect(line).not.toContain("re-cut");
+  });
+
   // Ticket 127: option (a) for the already-committed slamaltman-p3 artifact
   // (predates this fix, no live sim rerun) — derive `selfConfound` at render
   // time from the sibling 2pc row already in the same JSON.

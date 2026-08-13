@@ -320,6 +320,23 @@ export type SetBonusValue = {
    * The arithmetic is unchanged; this only names what `bonusDps` is missing.
    */
   selfConfound?: SelfSetConfound;
+  /**
+   * Gem swaps meta repair had to make on *other* worn items to price this
+   * package, accumulated over every piece the package adds (ticket 144).
+   *
+   * The same disclosure `RankedItem.gemSubstitutions` carries for single-item
+   * rows. PLAN.md §9 policy item 5 is written over adjustments generally, but
+   * the package arm went through `equipmentForCandidateSwap`, which discards
+   * the swap list, so these rows stayed silent where the policy says they
+   * should speak. Absent, never an empty array, when the package needed no
+   * adjustment — same reasoning as the per-row field.
+   */
+  gemSubstitutions?: Array<{
+    itemId: number;
+    socketIndex: number;
+    from: number;
+    to: number;
+  }>;
 };
 
 /**
@@ -1199,13 +1216,26 @@ async function buildSetBonuses(
       // every single-candidate swap uses — spec §2.2 step 1's byte-identical
       // gem/enchant policy.
       let packageEquipment: SimItemSpec[] = [...equipment];
+      // Accumulated across pieces, not per piece: the reader is being offered
+      // the whole package, so the disclosure is every adjustment the package
+      // cost. A later piece can re-swap a socket an earlier one touched, so
+      // this is the sequence of swaps that happened, not a set.
+      const packageRepairSwaps: MetaRepairSwap[] = [];
       try {
         for (const piece of addedPieces) {
-          packageEquipment = equipmentForCandidateSwap(
+          const outcome = candidateSwapWithRepairs(
             packageEquipment,
             piece.slotIndex,
             piece.itemId,
             gems
+          );
+          packageEquipment = outcome.equipment;
+          // Swaps landing on a slot the package itself fills are the offer,
+          // not an adjustment to gear the player keeps — the same exclusion
+          // `candidateSwapWithRepairs` already applies to the swapped slot.
+          const packageSlots = new Set(addedPieces.map((p) => p.slotIndex));
+          packageRepairSwaps.push(
+            ...outcome.swaps.filter((s) => !packageSlots.has(s.itemIndex))
           );
         }
       } catch (err) {
@@ -1313,6 +1343,16 @@ async function buildSetBonuses(
         se: synergy.se,
         ...(breaks.length > 0 ? { breaks } : {}),
         ...(selfConfound ? { selfConfound } : {}),
+        ...(packageRepairSwaps.length > 0
+          ? {
+              gemSubstitutions: packageRepairSwaps.map((s) => ({
+                itemId: s.itemId,
+                socketIndex: s.socketIndex,
+                from: s.from,
+                to: s.to,
+              })),
+            }
+          : {}),
       });
     }
   }

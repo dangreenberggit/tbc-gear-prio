@@ -187,7 +187,26 @@ export function formatSetBonusLine(b: SetBonusValue): string {
       ? UNMEASURED_REASON_TEXT[b.unmeasured]
       : `${sign}${(b.bonusDps ?? 0).toFixed(2)} DPS`;
   const head = `${b.setName} ${b.threshold}pc (${b.piecesWorn} worn) — ${formatBreaksPrefix(b)}${formatSelfConfoundPrefix(b)}${measured}`;
-  return `${head}${formatPackageDelta(b)}${formatPackageContents(b)}`;
+  return `${head}${formatPackageDelta(b)}${formatPackageContents(b)}${formatPackageGemSubstitutions(b)}`;
+}
+
+/**
+ * The package arm's half of the ticket-107 gem disclosure (ticket 144).
+ *
+ * A suffix rather than a prefix, unlike `formatBreaksPrefix`: this does not
+ * qualify what the figure means, it names a cost attached to taking the offer,
+ * so a reader who stops at the number has not been misled. PLAN.md §9 policy
+ * item 5 asks for it on adjustments generally; the package rows were silent
+ * only because `equipmentForCandidateSwap` discarded the swap list.
+ */
+export function formatPackageGemSubstitutions(b: SetBonusValue): string {
+  const subs = b.gemSubstitutions;
+  if (!subs || subs.length === 0) return "";
+  const items = new Set(subs.map((s) => s.itemId));
+  return (
+    ` [priced with ${subs.length} gem${subs.length === 1 ? "" : "s"} re-cut ` +
+    `on ${items.size} other item${items.size === 1 ? "" : "s"} to activate this meta]`
+  );
 }
 
 /**
