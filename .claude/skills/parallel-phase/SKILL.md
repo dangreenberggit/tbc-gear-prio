@@ -61,7 +61,7 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 
 7. **Verify the integrated tip** (delegator or merger) — `pnpm verify`. Per-worker green is not enough.
 
-8. **Review, then ask** — run `pre-merge-review`, commit the review file, then **ask** before `pnpm merge-to-dev`. Every **actionable** worker concern (defect, risk, missing ticket, scope breach) becomes a row in that review's `## Disposition` table — `fixed`, `defer` with a ticket path, or `wontfix` with a reason. Soft observations need not. `scripts/check_merge_ready.py` already enforces that table at merge time. Workers and mergers do not merge to `dev`; the delegator does not merge without an explicit user ask.
+8. **Review, then ask** — run `pre-merge-review`, commit the review file, then **ask** before `pnpm merge-to-dev`. Every **actionable** worker concern (defect, risk, missing ticket, scope breach) becomes a row in that review's `## Disposition` table — `fixed`, `defer` with a ticket path, or `wontfix` with a reason. Soft observations need not. `scripts/check_merge_ready.py` already enforces that table when `pnpm merge-to-dev` runs. Workers and mergers do not merge to `dev`; the delegator does not merge without an explicit user ask.
 
 ### Completion criteria
 
