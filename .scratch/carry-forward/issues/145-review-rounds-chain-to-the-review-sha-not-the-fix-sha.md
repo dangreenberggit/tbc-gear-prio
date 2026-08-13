@@ -85,10 +85,13 @@ belongs with the part-1 skill change, since the skill is what would make rounds
 emit it. **Sequence: approve and land part 1, let one round write the new
 machine-readable line, then build the gate against it.**
 
-**Part 1 (the chaining rule).** Drafted, not applied -- editing
-`.agents/skills/pre-merge-review/SKILL.md` and its `.claude/skills/` mirror
-requires the owner's approval first. The proposed text was delivered in the
-run's final report for approval.
+**Part 1 (the chaining rule).** Landed in `629976b` after owner approval in
+chat (2026-08-13). Both mirrors now instruct: round 1 diffs `dev...HEAD`,
+later rounds diff `<through-sha>..HEAD`, each round records
+`Reviewed range: <from-sha>..<through-sha>` (resolved shas, never `HEAD`) in
+the review file, and the wall-path handoff uses the pinned range. Verify:
+`pnpm mirrors:check` green at that commit. Remaining before close: one review
+round emits the line, then build the part-2 coverage gate against it.
 
 **What shipped in the meantime:** `1f03344` widened `check_merge_ready.py`'s
 status parsing and made an unreadable status an error (ticket 147). That closes
