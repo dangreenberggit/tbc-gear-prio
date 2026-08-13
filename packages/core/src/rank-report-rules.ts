@@ -453,8 +453,8 @@ export function curatedSetPhase(label: string): number | null {
 /**
  * Is this row on a curated BiS list for the ranked phase?
  *
- * Reads `bisTags`, which `assemble_universe.py` scopes to the *current* stage
- * — an item BiS for an earlier stage keeps `curatedSets` and loses its tag, so
+ * Reads `bisTags`, which `assemble_universe.py` scopes to the *current* phase
+ * — an item BiS for an earlier phase keeps `curatedSets` and loses its tag, so
  * this never badges "was BiS two phases ago" as a recommendation
  * (carry-forward 47 §1).
  *

@@ -39,7 +39,7 @@ describe("maxPhase filters universe pool and gem palette together", () => {
  * "missing universe file". p4/p5 were advertised and absent (ticket 23).
  *
  * Stage 1 is deliberately out of scope: assemble_universe.py only accepts
- * --max-phase 2..5, because the Wowhead list stages start at "p1-p2".
+ * --max-phase 2..5, because the Wowhead list phases start at "p1-p2".
  */
 describe("every advertised tier has a universe", () => {
   const advertised = [

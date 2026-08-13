@@ -18,10 +18,15 @@ written exit gate. Defined in `PLAN.md` §14.
 Never call one of these a "phase". That is the whole point of this glossary —
 see the invariant below.
 
-**Capital `Stage N` is the delivery step. Lowercase "stage" is something else:**
-the eight stages of the `rankUpgrades` pipeline (`PLAN.md` §3). Those were always
-called stages and keep the name. If you mean the pipeline, say "pipeline stage"
-where the sentence could be read either way.
+**"Stage" is ours, and it never describes the game.** TBC has no stages — it has
+phases and tiers. If a sentence is about game content (curated sets, BiS scope,
+gear, gems, loot), the word is **phase**, never "stage", whatever its case.
+
+The one other legitimate use is internal: the eight stages of the `rankUpgrades`
+pipeline (`PLAN.md` §3), and the `stage:` field on its progress events. Those
+were always called stages and keep the name. Say "pipeline stage" where a
+sentence could be read either way — do not rely on capitalisation to carry the
+difference, for the same reason the R2 rule failed.
 
 ### tier
 
@@ -30,21 +35,28 @@ player-facing term and the one to use in prose.
 
 The two notations map like this:
 
-| Content phase | Tier                 |
-| ------------- | -------------------- |
-| P1            | T4                   |
-| P2            | T5                   |
-| P3            | T6                   |
-| P4, P5        | later T6-era content |
+| Content phase | Tier                                    |
+| ------------- | --------------------------------------- |
+| P1            | T4                                      |
+| P2            | T5                                      |
+| P3            | T6 — head, shoulder, chest, legs, hands |
+| P4            | no tier token (Zul'Aman)                |
+| P5            | T6 — belt, boots, bracers (Sunwell)     |
 
 The `T4/P1 … T6/P5` shorthand is established player language and is not being
 retired.
 
-**P4 and P5 have no tier number.** Zul'Aman (P4) and Sunwell (P5) drop no
-numbered tier token, which is why the _filter_ is labelled by phase, not tier:
-"candidates: phase ≤ 2" can express all five values and "tier ≤ 2" cannot. Use
-"tier" when explaining which gear a phase corresponds to; use "phase" when
-naming the 1–5 control itself, which the CLI spells `--max-phase`.
+**Phase and tier are not one-to-one.** T6 is split across two phases: P3 drops
+the five token slots, and P5 (Sunwell) drops the remaining three of the _same_
+set — Absolution Regalia, Lightbringer Battlegear, Thunderheart Harness all
+carry `phase: 3` and `phase: 5` pieces in `db.json`. P4 (Zul'Aman) drops no
+tier token at all.
+
+So the 1–5 control is labelled by **phase**, not tier: "candidates: phase ≤ 2"
+names a value the filter actually takes, and "tier ≤ 2" would be wrong twice
+over — it is the wrong number, and no single tier number identifies P5. Use
+"tier" when naming which gear a phase yields; use "phase" for the control
+itself, which the CLI spells `--max-phase`.
 
 **"tier" also means the armour set** — _tier set_, _tier piece_, _tier token_
 (Justicar, Crystalforge, Lightbringer). The compound form is what tells the two

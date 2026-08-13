@@ -1,6 +1,6 @@
 /**
  * rankUpgrades — the deep module interface (PLAN.md §4).
- * Stages land behind this; callers only see RankInput → Ranking.
+ * Stages sit behind this; callers only see RankInput → Ranking.
  */
 
 import {
@@ -187,12 +187,12 @@ export type RankedItem = {
   se: number;
   seMethod: "independent" | "paired-replicate";
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
-  /** Every pinned upstream gear set equipping this item, any stage. */
+  /** Every pinned upstream gear set equipping this item, any phase. */
   curatedSets?: string[];
   /**
-   * The current-stage sets behind a `BiS` tag. Rendered instead of a bare
-   * `BiS` pill so the badge names the stage it is BiS *for* — upstream scopes
-   * BiS per stage and there is no absolute BiS (carry-forward 47 §1).
+   * The current-phase sets behind a `BiS` tag. Rendered instead of a bare
+   * `BiS` pill so the badge names the phase it is BiS *for* — upstream scopes
+   * BiS per phase and there is no absolute BiS (carry-forward 47 §1).
    */
   bisSets?: string[];
   /**

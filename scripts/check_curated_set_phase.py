@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Keep the TypeScript CURATED_SET_PHASE mirror in step with its Python source.
 
-`scripts/assemble_universe.py` produces the curated-set stage labels; the map in
+`scripts/assemble_universe.py` produces the curated-set phase labels; the map in
 `packages/core/src/rank-report-rules.ts` reads them back to decide whether to
 warn that a BiS list is older than the ranked phase. Two copies of one table,
 hand-kept.
@@ -53,7 +53,7 @@ def ts_phases() -> dict[str, int]:
 def main() -> int:
     ts = ts_phases()
     if ts == PY_PHASES:
-        print(f"curated set phase mirror ok: {len(ts)} stages in step")
+        print(f"curated set phase mirror ok: {len(ts)} phases in step")
         return 0
 
     for label in sorted(set(PY_PHASES) | set(ts)):

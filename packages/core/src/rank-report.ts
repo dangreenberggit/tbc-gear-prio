@@ -394,8 +394,8 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const magnitude = reportItem.magnitudeWarning
             ? `<span class="pill warn">sim magnitude</span>`
             : "";
-          // "BiS" is a claim about a stage, exactly as upstream scopes it, so
-          // the badge names the stage rather than implying an absolute verdict
+          // "BiS" is a claim about a phase, exactly as upstream scopes it, so
+          // the badge names the phase rather than implying an absolute verdict
           // (carry-forward 47 §1).
           const bisSets = item.bisSets;
           const tags = (item.bisTags ?? [])
@@ -582,7 +582,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // Name the sets the tags actually came from, never the requested phase.
   // Where no set is vendored for the ranked phase,
   // `bis_set_labels_for_max_phase` degrades to the newest one that is, so the
-  // rows can carry an older stage's list. Labelling that "P3 BiS" would assert
+  // rows can carry an older phase's list. Labelling that "P3 BiS" would assert
   // a curation nobody made — the per-item overclaim carry-forward 47 §1 was
   // filed for, one level up. The warning below says so rather than hiding it.
   const bisSetLabels = [
