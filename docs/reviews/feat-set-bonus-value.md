@@ -554,6 +554,216 @@ tested divergence from upstream's unconditional skip. `ENGINE_VERSION` bumped
 to 5 (4-A4). The watched-ref regen (4-D2) also surfaced real drift:
 `feature/backend-reforge` has moved to `33970a8f` since the investigation.
 
+## Round 5 — the meta-preference round, and a coverage audit (2026-08-13)
+
+Diffed against: `a38fbf4..5d5dffa` for the code axes — the 19 commits of
+round-5 work (tickets 107/135/136, per-spec preferred meta, the `--spec`
+collapse). Read with `--ignore-cr-at-eol`: `rank.ts` was CRLF at `5d5dffa` and
+normalised only by the terminology branch, so raw diffs read ~10x the real
+content. Real content in range: **403/389 lines across 10 source files.**
+
+Four fresh-context Opus subagents at effort medium, none with access to the
+authoring session: adversarial, domain, standards + spec, and a fourth auditing
+**the process and its artifacts** rather than the code. `codex` not on `PATH`.
+
+This round was commissioned because much of the branch was already reviewed;
+the brief was to establish what was covered, deprioritise it, and spend the
+effort on what was not. That framing is what found the coverage bug below.
+
+### Coverage audit — three unreviewed windows, not one
+
+Every round chained its range to the previous round's **review sha** rather
+than its **fix sha**. Fixes applied _in response to_ a round therefore fall
+between the two, and no round ever picked them up. Verified with
+`git merge-base --is-ancestor` on each commit:
+
+- **Gap A — `a38fbf4..5d5dffa` (19 commits).** The round-5 work itself. No
+  review axis had ever run over it; `grep -riE 'round[- ]5' docs/reviews/`
+  returned nothing, and the review file's last edit (`9c90dba`) predates every
+  round-5 commit. Its only coverage was a **self-authored execution log**
+  written by the agent that wrote the code — the exact substitution
+  `pre-merge-review/SKILL.md` exists to prevent.
+- **Gap B — `3adbe4f..3f5e21b` (13 commits, ~119/12 lines of source).** Round 4
+  asserts "rounds 1–3 covered `dev..3f5e21b`". That claim is **false**: the five
+  round-3 fix commits (`102b425`, `2f29cf9`, `3935d05`, `29a2f6c`, `034cb0e`)
+  are all ancestors of `3f5e21b` but postdate round 3's reviewed-at sha. They
+  touch `rank.ts`, `set-value.ts`, `rank-report-rules.ts`, `rank-report-css.ts`
+  and `gems.ts`.
+- **Gap C — `cfc77c9` itself.** Round 3's range `cfc77c9...HEAD` excludes its
+  own lower bound — the commit that fixed round 2's two high-severity
+  silent-failure bugs. Never re-reviewed by any round.
+
+`pnpm merge-ready` passes green over all three, because it only checks that a
+review file exists and that defer rows link open tickets. It has no notion of
+commit-range coverage. AGENTS.md already warns of exactly this.
+
+### Adversarial
+
+- **5-A1 (blocking)** `emptyMetaSocket` misreports. `metaSocketUnpriced`
+  (`candidate-gems.ts:167`) decides purely from `socketsFor(itemId)` and the
+  spec table — it never inspects the gems the candidate actually ends up
+  with. But `swapItemAt` fills from `migrateGemsToItem`, which **carries the
+  player's worn meta onto the candidate**. Reproduced independently by the
+  delegator against `dist/`: migrating meta 34220 onto 29073 for feral yields
+  `[0, 34220]` — socket filled, row priced _with_ that gem — while
+  `metaSocketUnpriced(29073, "feral")` returns `true`. The report then prints
+  "priced with an empty meta socket" (`rank-report.ts:384`) for a row priced
+  with a meta in it. The fill logic is correct; only the label is derived
+  independently of the fill, so the two disagree. Marks all 268 meta-socket
+  items in `db.json` for feral (count reproduced by the delegator).
+- **5-A2 (medium)** `ENGINE_VERSION` still `5` at both ends of the range
+  (`content-hash.ts:52`; `git diff c7e57c4..5d5dffa` on that file is empty),
+  though round 5 changed which gems get seated. `spec` is hashed, but that
+  separates feral from ret — not old-feral from new-feral. Same defect class
+  as round-4's **4-A4**, which was fixed by a bump. Recurring, not duplicate.
+- **5-A3 (medium)** Test theatre, and the reason 5-A1 shipped green. All 29
+  `rankUpgrades` invocations in `rank.test.ts` use `spec: "ret"`;
+  `grep -c 'spec: "feral"'` returns **0** (delegator-verified). Ret is the one
+  spec _with_ a table entry, so no test drives the branch round 5 added. The
+  "threads the requested spec" test asserts only that a note is **absent** on a
+  ret run — which passes identically if `spec` were dropped on the floor, since
+  `missingMetaPreferenceNote(undefined)` is also `undefined`. `emptyMetaSocket`
+  has no `rankUpgrades` coverage at all: it appears in tests only as a
+  hand-written fixture literal (`rank-report.test.ts:417`). Its unit test
+  (`candidate-gems.test.ts:224`) passes bare item ids and so structurally
+  asserts the buggy behaviour is correct.
+- Clean, each verified by execution: the `--spec` collapse lost nothing (every
+  divergence of the deleted `five_seed_spread_feral.py` preserved in the
+  `SPECS` table); the socket-bonus predicate unification is behaviour-
+  preserving; the `kind`-field fold does not conflate; `repair-failed` is
+  compiler-enforced via a total `Record`; the ticket-107 swap filter is
+  index-keyed, honouring round-4's 4-A2 paired-rings fix.
+
+### Domain
+
+- **5-D1 (medium)** — the same defect as 5-A1, found independently from the
+  game-model side. Two axes converging on it from different directions is the
+  strongest signal in this round.
+- **5-D2 (low)** `socketBonusActive` (`meta.ts`) gained
+  `if (sockets.length === 0) return true` — present in the old `socketsMatch`
+  but **not** in `allSocketsMatched`, which returned `false` for a socketless
+  item. So `layoutScore` flipped `false`→`true` on that path: a third behaviour
+  neither predecessor had, in a commit framed as one-definition-from-two. Benign
+  today (a socketless item's bonus scores 0 EP), unasserted and undocumented.
+- **5-D3 (low)** `meta-gem-research.md`'s Verdict still states its two provisos
+  in the present tense though the Local verification pass discharged both and
+  line 117 says so. A reader landing on the Verdict gets the stale conclusion;
+  `23df60f` claims to close both gaps and the body does, the tail does not.
+- **5-D4 (informational)** The 1-row `SPEC_PREFERRED_METAS` is safe only while
+  `DetectedSpecId` stays narrow. If a caster spec becomes detectable, fail-loud
+  degrades it to an empty meta socket rather than seating the 34220 the research
+  already establishes — a silent quality regression, not an error.
+- Verified clean against committed data: the meta-gem research table reproduces
+  **exactly** (all three ret presets socket 32409; all five feral presets wear
+  socketless Wolfshead 8345 with no meta — so "no feral meta to copy" is a fact
+  about the pin, not an inference); all 18 metas are `phase: 1` while non-metas
+  spread `{1:145, 3:39, 2:6, 5:6}`, so the doc's load-bearing guard holds; ret
+  output is byte-identical; round-4's 4-D1 survived the consolidation
+  (`socketsMatch(28559,[0]) === false`, 11 meta-only items confirmed).
+- **The feral fail-loud is the right call, not the ticket-100 antipattern.**
+  `missingMetaPreferenceNote` returns a disclosure, not a throw; ranking
+  proceeds. Inheriting ret's Relentless for a spec upstream never socketed
+  would be the actual error.
+
+### Standards + Spec
+
+**Spec — every closed ticket verified item by item, and all three delivered.**
+Ticket 136's five items are each real (the `--spec` collapse's re-run evidence
+is the strongest in the round; item 5 establishes non-vacuity by mutation
+rather than assertion, converting round-4's null result 4-S1 into a real
+measurement). Ticket 135's four boxes are real, and the renderer check landed
+as a compile-time exhaustive `Record` — stronger than the ticket asked for.
+Ticket 107 is delivered for its stated scope and **discloses its own residual**:
+the Reproduce command was not re-run and the closing note says so, marking the
+`minimizeRegems` shrink claim untested. That is the durable-claims rule applied
+correctly to a negative.
+
+- **5-S1 (low)** Ticket 107's disclosure does not reach the package arm —
+  `rank.ts:1197` still calls `equipmentForCandidateSwap`, so set-completion
+  package rows carry no `gemSubstitutions`. Not a false statement (those rows
+  simply carry no note), unlike the pre-fix candidate rows.
+- **5-St1 (low)** `rank-report.ts:368` — the trailing clause restates the
+  interpolation below it. Borderline; the pointer-to-the-finding half is what
+  the comment policy allows.
+- Clean: skill mirrors byte-identical (`diff -r .agents/skills .claude/skills`);
+  no dead exports (all six new ones have production callers); no type derived
+  from a JSON import; no assertions on stage internals; duplication genuinely
+  **reduced** — this round removes three of the four 4-St4 smells. Durable
+  claims were re-executed rather than trusted, and every checkable one
+  reproduced.
+- **AGENTS.md / skill approval: unverifiable from artifacts.** `round5-plan.md`
+  records "Owner-approved 2026-08-12" for the round's scope, and the skill edits
+  are the mechanical sharp→review/design lane rename. No transcript is available
+  to the reviewers, so the propose-and-wait step for the AGENTS.md edit itself
+  cannot be confirmed. Flagged unverifiable, **not** a violation — consistent
+  with how round-4's S3 was dispositioned.
+
+### Process
+
+- **P1 (high)** The three coverage gaps above.
+- **P2** Disposition integrity is **sound**. All 19 named shas exist
+  (`git cat-file -t`); 8 were content-checked weighted toward "fixed" and each
+  does what it claims. **No fabricated fix was found.** The table is honest —
+  the failure is coverage accounting, not dishonesty.
+- **P3 (medium)** Ticket **100 collides**: the tracked
+  `100-set-potential-panel-…md` is closed at `b51f08c`, while an **untracked**
+  `100-p3-curated-list-pinned-to-p2-set.md` is open in the working tree. Exactly
+  one collision across 139 files (delegator-verified; next free id is 139). It
+  is 117 lines of real uncommitted work, including three verified `gh api`
+  probes, that `git clean -fdx` would destroy, and it substantially overlaps
+  open ticket 121 while adding material 121 lacks.
+- **P4 (medium, latent)** Tickets 88 and 89 write `**Status:** open` in the body
+  rather than at line start, so `STATUS_RE` misses both: `--list-only` reports
+  36 open when 38 are. Same class as open ticket 85.
+- **P5** Round 5 ran **no review axes at all**, with no recorded opt-in — the
+  drift this round exists to correct. No dispatch log covers rounds 4–5
+  (`agent-usage-log.md` stops at 2026-08-11), so their model claims are
+  self-reported. Round 2's "domain axis died mid-stream" has no corroborating
+  evidence anywhere — plausible, but a durable claim in a committed artifact.
+  The issue-1 fan-out has **no written pre-spawn disjointness check**; slices
+  were in fact disjoint, but two exceeded their declared paths, so disjointness
+  held by the partition's shape rather than by the mandated check. Five
+  implementation workers ran on Fable via `inherit` — the top price tier on
+  workhorse jobs, `model-policy.md`'s own named cautionary case, actually
+  occurring. The round-4 Fable **delegator** is _not_ a violation: the policy
+  scopes the prohibition to review axes, and those ran Opus.
+- **P6** Six worktrees remain registered (delegator-verified via
+  `git worktree list`), including `.scratch/wt-fan-out-retro` — a stale full
+  checkout **inside `.scratch/`**, the vitest hazard `parallel-phase/SKILL.md`
+  warns about — and `terminology-cleanup-plan-82f471`, whose branch is already
+  merged into HEAD. Content is safe (all branches merged); this is teardown
+  debris, not lost work.
+
+### Gate state
+
+`pnpm verify` **green at the tip** (exit 0, 39 files / 746 passed / 2 todo),
+re-run by the delegator on a clean tree. An earlier red was a reviewer's
+transient probe file, not branch work.
+
+`pnpm merge-ready` **fails** (exit 1), found by running it:
+
+    FAIL: 4-St4 / 4-S1: ...136-issue1-cleanup...md has Status: 'closed'
+    FAIL: 4-S3:        ...135-unmeasured-reason...md has Status: 'closed'
+
+Round 5 closed tickets 135 and 136; the round-4 Disposition still records those
+rows as `defer`, and the gate requires defer tickets to be open. The deferred
+work was genuinely done (`a6b911c`, `2e55dce`, `2f32a2b`, `c196c47`, `cc5b4b3`
+all verified) — the table is stale, not wrong. Rows corrected to `fixed` below.
+
+### Summary
+
+The round-5 code is good work: it _removes_ duplication, adds honest-uncertainty
+machinery, and its evidence discipline held under re-execution — every claim the
+standards axis re-ran reproduced. Ticket delivery is real on all three tickets.
+
+Two things outrank that. **5-A1/5-D1** is blocking on the same grounds round 3's
+3-A1 was: a disclosure that misreports is worse than no disclosure, because it
+spends the reader's trust — and 5-A3 explains why 746 green tests never saw it.
+And the **coverage audit** found that ~32 commits across three windows have never
+been read by an independent reviewer, while the merge gate passes green over
+them. That is a defect in how rounds chained their ranges, not in any one round;
+rounds 1–4 were rigorous where they looked.
+
 ## Disposition
 
 | ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                  |
@@ -614,7 +824,22 @@ to 5 (4-A4). The watched-ref regen (4-D2) also surfaced real drift:
 | 4-St1 | Standards   | fixed       | `c7e57c4` — changelog comments compressed to load-bearing why; duplicate chokepoint comment deleted; review quote dropped                                                                                                                                                                                                                                                      |
 | 4-St2 | Standards   | fixed       | `c7e57c4` — ADR-0025 decision 3 inlines the re-runnable CLI commands and names the null result as one                                                                                                                                                                                                                                                                          |
 | 4-St3 | Standards   | fixed       | `c7e57c4` — 114's verify box resolved against the integrated tip's green `pnpm verify`; the extra `Closed:` header line is left as-is (parsers key on `Status:`)                                                                                                                                                                                                               |
-| 4-St4 | Standards   | defer       | `.scratch/carry-forward/issues/136-issue1-cleanup-duplication-and-fixture-followups.md`                                                                                                                                                                                                                                                                                        |
-| 4-S1  | Spec        | defer       | `.scratch/carry-forward/issues/136-issue1-cleanup-duplication-and-fixture-followups.md` — item 5: a fixture that exercises the changed predicate branches; ADR-0025 wording already corrected (`c7e57c4`)                                                                                                                                                                      |
+| 4-St4 | Standards   | fixed       | Ticket 136 closed in round 5: `2f32a2b` (shared predicate + `repairAndMinimize`), `c196c47` (skip-array fold), `cc5b4b3` (`--spec` collapse). Row was `defer` against a now-closed ticket, which failed `pnpm merge-ready`                                                                                                                                                     |
+| 4-S1  | Spec        | fixed       | Ticket 136 item 5 delivered in `2e55dce`: two tests drive `equipmentForCandidateSwap`, non-vacuity established by mutation. Round 4's null result is now a real measurement. ADR-0025 wording corrected earlier (`c7e57c4`)                                                                                                                                                    |
 | 4-S2  | Spec        | fixed       | `c7e57c4` — head lookup replaced by socket inspection; `headId` param removed                                                                                                                                                                                                                                                                                                  |
-| 4-S3  | Spec        | defer       | `.scratch/carry-forward/issues/135-unmeasured-reason-misreports-repair-failure-as-sim-failed.md`                                                                                                                                                                                                                                                                               |
+| 4-S3  | Spec        | fixed       | Ticket 135 closed in round 5 (`a6b911c`): `repair-failed` added to `UnmeasuredReason` and used at the `buildSetBonuses` catch site; renderer coverage is a compile-time exhaustive `Record`                                                                                                                                                                                    |
+| 5-A1  | Adversarial | defer       | `.scratch/carry-forward/issues/139-empty-meta-socket-flag-ignores-the-gems-actually-seated.md` — **blocking**; same defect as 5-D1                                                                                                                                                                                                                                             |
+| 5-A2  | Adversarial | defer       | `.scratch/carry-forward/issues/140-engine-version-not-bumped-for-the-per-spec-meta-change.md`                                                                                                                                                                                                                                                                                  |
+| 5-A3  | Adversarial | defer       | `.scratch/carry-forward/issues/141-no-feral-coverage-on-the-rankupgrades-path.md` — why 5-A1 shipped green                                                                                                                                                                                                                                                                     |
+| 5-D1  | Domain      | defer       | `.scratch/carry-forward/issues/139-empty-meta-socket-flag-ignores-the-gems-actually-seated.md` — same finding as 5-A1, reached independently from the game-model side                                                                                                                                                                                                          |
+| 5-D2  | Domain      | defer       | `.scratch/carry-forward/issues/142-socketbonusactive-socketless-behaviour-is-new-and-unasserted.md`                                                                                                                                                                                                                                                                            |
+| 5-D3  | Domain      | defer       | `.scratch/carry-forward/issues/143-meta-gem-research-verdict-contradicts-its-closed-gaps.md`                                                                                                                                                                                                                                                                                   |
+| 5-D4  | Domain      | defer       | `.scratch/carry-forward/issues/142-socketbonusactive-socketless-behaviour-is-new-and-unasserted.md` — folded in: record what to do when `DetectedSpecId` widens                                                                                                                                                                                                                |
+| 5-S1  | Spec        | defer       | `.scratch/carry-forward/issues/144-ticket-107-disclosure-does-not-reach-the-package-arm.md`                                                                                                                                                                                                                                                                                    |
+| 5-St1 | Standards   | wontfix     | `rank-report.ts:368` — the pointer-to-the-finding half is load-bearing and permitted by the comment policy; the restating clause is not worth a churn commit                                                                                                                                                                                                                   |
+| P1    | Process     | defer       | `.scratch/carry-forward/issues/145-review-rounds-chain-to-the-review-sha-not-the-fix-sha.md` — **blocking**: ~32 commits across three windows unreviewed                                                                                                                                                                                                                       |
+| P2    | Process     | fixed       | No action — disposition table audited across 19 shas and found honest; the three stale `defer` rows above are corrected in this round                                                                                                                                                                                                                                          |
+| P3    | Process     | defer       | `.scratch/carry-forward/issues/146-ticket-100-id-collision-and-uncommitted-work.md`                                                                                                                                                                                                                                                                                            |
+| P4    | Process     | defer       | `.scratch/carry-forward/issues/147-merge-ready-status-regex-misses-body-status-lines.md`                                                                                                                                                                                                                                                                                       |
+| P5    | Process     | defer       | `.scratch/carry-forward/issues/148-round-5-ran-no-review-axes-and-rounds-4-5-have-no-dispatch-log.md`                                                                                                                                                                                                                                                                          |
+| P6    | Process     | defer       | `.scratch/carry-forward/issues/149-six-worktrees-still-registered-after-fan-out.md`                                                                                                                                                                                                                                                                                            |
