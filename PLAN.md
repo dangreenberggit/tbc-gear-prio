@@ -38,7 +38,7 @@ Where the drafts agreed, this document states the decision once and moves on. Wh
 | Output | Shortlist + cutoff. The top three rows are the product |
 | Views | Pin-BiS, raid/boss filter, slot grouping, hide-owned. **Display-only** — outside `RankInput`, outside `contentHash` (§4.1) |
 
-**Terminology (review R2).** "Phase" was overloaded in earlier revisions. From here: **Phase N**, capitalised, is always a *delivery* phase (§14). The game's content is a **tier**, written `maxPhase` in code and T4/P1 … T6/P5 in prose. §14's old heading "Phase 1 — the engine (ret, P1, no web)" used both senses in six words; it doesn't any more.
+**Terminology [R2].** "Phase" was overloaded in earlier revisions. Delivery steps are now **Stage N** (§14) and the game's content is a **tier**; see [`CONTEXT.md`](CONTEXT.md) for the glossary and the banned-words list. R2's original fix — capitalisation alone — failed, and was replaced by the rename.
 
 **Not the goal:** full BiS solving, parse analysis, rotation/talent optimization, or any claim that baseline sim DPS equals the player's logged DPS.
 
