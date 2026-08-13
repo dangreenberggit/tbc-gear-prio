@@ -11,3 +11,9 @@ packages/core/src/proto/** text eol=lf
 # rather than widening to *.json, which would also catch data/ fixtures this
 # ticket never measured.
 package.json text eol=lf
+
+# Everything text stays LF. Prettier via lint-staged rewrote 54 files to CRLF
+# during the terminology cleanup, which turned a ~550-line diff into ~12,900 and
+# reassigned blame for every line it touched. Ticket 129 was the same bug on
+# package.json alone; pinning one file at a time did not stop it recurring.
+* text=auto eol=lf
