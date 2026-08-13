@@ -1,7 +1,7 @@
 import type { SpecId } from "./types.js";
 
 /**
- * Cutoff derived from the Phase 1 five-seed spread experiment
+ * Cutoff derived from the Stage 1 five-seed spread experiment
  * (docs/five-seed-spread.json, PLAN.md §10): max(3.0, 2× mean reported SE 1.678).
  *
  * That 1.678 is an `independent` SE, and it stays one now that paired

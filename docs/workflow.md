@@ -37,7 +37,7 @@ because that would need updating every time a tool changes.
    - **Adversarial** — correctness bugs, silent-failure modes, test theatre
      ([`.agents/reviews/adversarial.md`](../.agents/reviews/adversarial.md))
    - **Domain** — TBC/WCL/wowsims facts checked against
-     [`phase0-findings.md`](phase0-findings.md) and
+     [`stage0-findings.md`](stage0-findings.md) and
      [`verification-log.md`](verification-log.md)
      ([`.agents/reviews/domain.md`](../.agents/reviews/domain.md))
    - **Standards + Spec** — the existing `code-review` skill, unchanged

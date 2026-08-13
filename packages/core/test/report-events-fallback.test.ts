@@ -1,5 +1,5 @@
 /**
- * The Phase 2 gate box owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`:
+ * The Stage 2 gate box owned by `.scratch/phase-2/issues/04-resolution-and-fallback.md`:
  *
  *   ☐ fallback route exercised on a character with no ranked kills
  *

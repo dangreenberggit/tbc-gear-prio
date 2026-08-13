@@ -1,7 +1,7 @@
 /**
  * The view layer (PLAN.md §4.1). Pure: a re-render of a `Ranking` that already
  * exists. No seam, no I/O, no sim, and nothing here reaches `contentHash` —
- * that is the property the Phase 2 gate box asserts, and the reason this is the
+ * that is the property the Stage 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
 import { meetsCutoff, type Cutoff } from "./cutoff.js";
@@ -83,7 +83,7 @@ export type ViewResult = {
   /** How many rows the shortlist hides, so a caller can label the expand. */
   belowCutoffCount: number;
   /**
-   * Whether a `pinBis` toggle has anything to act on. The Phase 3 gate box
+   * Whether a `pinBis` toggle has anything to act on. The Stage 3 gate box
    * "the pin control is hidden, not inert, where no curated set exists" needs
    * this answerable here — ret's curated sets stop at P2, so above
    * `maxPhase: 2` there is nothing to pin and the control must degrade to
@@ -156,7 +156,7 @@ function zoneKeyOf(item: RankedItem): string {
  * rows were actually measured on. `Math.min` is kept **within** a method, where
  * point 2 above still applies and both figures mean the same thing.
  *
- * This deliberately does not let Phase 2's resolution leak past the 8 rows that
+ * This deliberately does not let Stage 2's resolution leak past the 8 rows that
  * paid for it: §10 buys "resolution, not correctness", and a tighter tie at the
  * boundary would be resolution row 9 never bought. Re-measure with:
  *

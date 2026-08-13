@@ -12,7 +12,7 @@ import { characterFightKey, fightGearKey } from "../src/seams/gear-source.js";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 describe("slamaltmanOfflineRecordings", () => {
-  it("loads the Phase 0 raw fixture into GearSource recordings", () => {
+  it("loads the Stage 0 raw fixture into GearSource recordings", () => {
     const raw = JSON.parse(
       readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")
     ) as SlamaltmanRawFixture;
@@ -42,7 +42,7 @@ describe("slamaltmanOfflineRecordings", () => {
   it("carries the actor's class through the seam, since classifySpec needs it", () => {
     // carry-forward 61: talent plurality alone cannot name a spec — 45 points
     // in tree 2 is ret on a paladin and something else entirely elsewhere.
-    // WCL's actors[].subType is class-level only (phase0-findings.md), which
+    // WCL's actors[].subType is class-level only (stage0-findings.md), which
     // is exactly what classifySpec wants.
     const raw = JSON.parse(
       readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")

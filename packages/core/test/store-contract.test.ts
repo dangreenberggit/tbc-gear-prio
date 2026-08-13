@@ -1,7 +1,7 @@
 /**
  * One suite, both adapters (ticket 01 scope 3). The point is not coverage of
  * MemoryStore — store.test.ts already has that — it is that the two adapters
- * are provably interchangeable, so swapping SqliteStore in for Phase 4
+ * are provably interchangeable, so swapping SqliteStore in for Stage 4
  * deployment cannot change rankUpgrades' behaviour.
  */
 

@@ -802,7 +802,7 @@ describe("applyView", () => {
     it("keeps the narrower SE within a single seMethod", () => {
       // The mixed-method rule must not weaken the same-scale case: two
       // paired-replicate rows 0.44 apart are genuinely resolved, and widening
-      // to `max` there would re-collapse exactly what Phase 2 bought.
+      // to `max` there would re-collapse exactly what Stage 2 bought.
       const r = ranking([
         item({
           itemId: 1,

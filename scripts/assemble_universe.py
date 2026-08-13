@@ -208,7 +208,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     ),
     "feral": SpecProfile(
         "feral",
-        # Phase 1, because upstream ships no P2 EP preset for feral cat.
+        # Stage 1, because upstream ships no P2 EP preset for feral cat.
         ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
         # Upstream ships sixteen curated cat sets against ret's three, split
         # BiS/Alt/Realistic and again by 6-piece against 9-piece hit variant
@@ -1777,7 +1777,7 @@ def main() -> int:
         help=(
             "Drop the caster-only / EP-floor rejects from the universe instead "
             "of only measuring them. Off by default: the committed universes "
-            "and the Phase 1 gate figures are built unfiltered."
+            "and the Stage 1 gate figures are built unfiltered."
         ),
     )
     args = ap.parse_args()

@@ -1277,7 +1277,7 @@ describe("rankUpgrades", () => {
     });
 
     it("errors the job row when the run throws after the row is created", async () => {
-      // Ticket 29: once the Phase 2 job API attaches to a `running` row, a
+      // Ticket 29: once the Stage 2 job API attaches to a `running` row, a
       // stranded one is a job that never finishes and never fails, so the
       // caller waits forever. The baseline repair's meta-unsolvable throw
       // escapes by this same route (the per-candidate path no longer aborts
@@ -1346,7 +1346,7 @@ describe("rankUpgrades", () => {
   });
 
   it("maxPhase changes the candidate set and the gem palette together", async () => {
-    // PLAN.md §14 Phase 1 gate: one character, two maxPhase values, both axes
+    // PLAN.md §14 Stage 1 gate: one character, two maxPhase values, both axes
     // diffed in one place. Gem axis note — every gem phase 2 adds (32634-32639)
     // is EP-dominated by a phase-1 gem of its colour under ret P2 weights, so
     // no socketed item in data/items/index.json fills differently at 1 vs 2.
@@ -1451,7 +1451,7 @@ describe("rankUpgrades", () => {
     expect(ids1).not.toContain(chestId);
     expect(ids2).toContain(chestId);
 
-    // Axis 2 — gem palette. Phase 2 admits six gems phase 1 does not.
+    // Axis 2 — gem palette. maxPhase 2 admits six gems phase 1 does not.
     const palette1 = gemsForPhase(1).map((g) => g.id);
     const palette2 = gemsForPhase(2).map((g) => g.id);
     expect(palette2).not.toEqual(palette1);
@@ -2048,7 +2048,7 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
 });
 
 /**
- * Paired-replicate SE (PLAN.md §10, Phase 2).
+ * Paired-replicate SE (PLAN.md §10, Stage 2).
  *
  * Driven through `rankUpgrades` rather than only against `pairedReplicateSe`,
  * because the arithmetic passing says nothing about the two things that make
@@ -2255,7 +2255,7 @@ describe("rankUpgrades paired-replicate SE", () => {
   });
 
   /**
-   * §10 Phase 2 is only a real method if a caller who passes no seeds gets it.
+   * §10 Stage 2 is only a real method if a caller who passes no seeds gets it.
    * It shipped implemented, tested and *unreachable*: `DEFAULT_SEEDS` was a
    * single seed, so `usesPairedReplication` was false on every production run
    * and `replicateTopItems` returned at its first line. Every other test in

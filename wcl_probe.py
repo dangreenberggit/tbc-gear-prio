@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wcl_probe.py — Phase 0 validation probe for the TBC gear priority project.
+wcl_probe.py — Stage 0 validation probe for the TBC gear priority project.
 
 Answers the open questions from the plan:
   1. Does auth work against the Classic endpoint?
@@ -559,7 +559,7 @@ def probe_buff_uptime(p, code, fight):
 # ---------------------------------------------------------------- main
 
 def main():
-    ap = argparse.ArgumentParser(description="Phase 0 Warcraft Logs probe")
+    ap = argparse.ArgumentParser(description="Stage 0 Warcraft Logs probe")
     ap.add_argument("--name")
     ap.add_argument("--server-slug", help="lowercase, hyphenated, e.g. 'faerlina'")
     ap.add_argument("--region", default="US", help="US, EU, KR, TW, CN")

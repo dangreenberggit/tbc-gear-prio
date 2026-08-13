@@ -404,7 +404,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     );
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
-    // layer lands in Phase 2 rather than in the web shell.
+    // layer lands in Stage 2 rather than in the web shell.
     // Every run names its source fight (ticket 06) — the route note below is
     // the older, narrower case of the same idea.
     for (const line of fightProvenanceLines(ranking.fight)) {

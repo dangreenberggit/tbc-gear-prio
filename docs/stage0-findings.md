@@ -1,4 +1,4 @@
-# Phase 0 findings
+# Stage 0 findings
 
 **Status:** de-risking probe run against the live Warcraft Logs API. Converts the plan's Warcraft-Logs-side assumptions from documented-but-unproven to verified.
 **Probe script:** [`wcl_probe.py`](../wcl_probe.py) (handoff doc for the script's own design lives in the session that produced it; not duplicated here — see script docstring).
@@ -7,7 +7,7 @@
 
 ---
 
-## Gate checklist (PLAN.md §14, Phase 0)
+## Gate checklist (PLAN.md §14, Stage 0)
 
 - [x] real logged gear produced a valid, inspectable `CombatantInfo` payload
 - [x] present/absent fields documented, with a synthesis policy for what's absent
@@ -25,7 +25,7 @@
 
 - Token endpoint: `https://www.warcraftlogs.com/oauth/token` (the shared endpoint, not a classic-specific one) works with the confidential client credentials flow.
 - GraphQL endpoint: `https://classic.warcraftlogs.com/api/v2/client` is the one that actually resolves TBC data.
-- `.env` originally stored credentials as `WARCRAFTLOGS_CLIENT_ID`/`WARCRAFTLOGS_CLIENT_SECRET`; renamed to `WCL_CLIENT_ID`/`WCL_CLIENT_SECRET` to match the probe script and (presumably) whatever Phase 1 code reads next.
+- `.env` originally stored credentials as `WARCRAFTLOGS_CLIENT_ID`/`WARCRAFTLOGS_CLIENT_SECRET`; renamed to `WCL_CLIENT_ID`/`WCL_CLIENT_SECRET` to match the probe script and (presumably) whatever Stage 1 code reads next.
 
 ## 2. Rate limit
 
@@ -44,7 +44,7 @@
 
 The actor-level `subType` field on report players (used in the plan as "WCL's spec label") only returns **class-level** strings: `Druid, Hunter, Mage, Paladin, Priest, Rogue, Shaman, Unknown, Warlock, Warrior`. There is no `Retribution` or `Feral` string at this level.
 
-PLAN.md §1.2 arbitrates the first-spec choice partly on the claim that "WCL's spec label is unambiguous for ret, so Phase 1 carries no spec-disambiguation layer at all." That claim needs revisiting: spec-level detail isn't in `subType` at all, for any class, not just feral. What does carry spec signal:
+PLAN.md §1.2 arbitrates the first-spec choice partly on the claim that "WCL's spec label is unambiguous for ret, so Stage 1 carries no spec-disambiguation layer at all." That claim needs revisiting: spec-level detail isn't in `subType` at all, for any class, not just feral. What does carry spec signal:
 
 - `CombatantInfo.specID` — a numeric spec identifier, present on every combatant event in both test runs.
 - `CombatantInfo.talentTree` and the `talents` array (see §5) — the actual talent point allocation, from which spec can be derived by whichever tree has the plurality of points.
@@ -85,11 +85,11 @@ Every item matches: sockets in the item DB → gems present in the log; no socke
 
 **Synthesis policy, confirmed:** the normalization layer does not need to treat every slot as "should have an enchant/gem, flag if missing." It needs to be **eligibility-aware**: for each slot, first determine from the item DB whether it *can* carry an enchant / has sockets, and only synthesize (from the curated preset) when an eligible slot is genuinely empty in the log. The plan's existing rule — apply the same synthesis to baseline and every candidate alike — still stands and is now known to trigger rarely rather than constantly, since most of what looked like "missing" data was never expected to be there.
 
-One practical consequence: this also means the item DB (or at least its socket/enchantability metadata) needs to be available to the normalization layer at Phase 1, not just to the pool generator (§8.3 of the plan) — it's now load-bearing for gear-reading, not only for pool curation.
+One practical consequence: this also means the item DB (or at least its socket/enchantability metadata) needs to be available to the normalization layer at Stage 1, not just to the pool generator (§8.3 of the plan) — it's now load-bearing for gear-reading, not only for pool curation.
 
 ## 7. Buff / form uptime (feral gate)
 
-The `Buffs` table for both fights contains `Dire Bear Form`, `Bear Form`, `Cat Form`, and `Moonkin` entries. Form uptime is derivable from this table, which unblocks the feral bear/cat disambiguation planned for Phase 2 (§5.4, §14 Phase 2 gate).
+The `Buffs` table for both fights contains `Dire Bear Form`, `Bear Form`, `Cat Form`, and `Moonkin` entries. Form uptime is derivable from this table, which unblocks the feral bear/cat disambiguation planned for Stage 2 (§5.4, §14 Stage 2 gate).
 
 ## 8. Zone / encounter IDs
 
@@ -100,7 +100,7 @@ Captured for all raid tiers exposed by the endpoint: Karazhan, Gruul/Magtheridon
 - ~~Share-link `decodelink` path~~ — **closed 2026-07-26**, third sitting.
 - ~~Slot-count reconciliation~~ — **closed 2026-07-26**, see §10.
 - ~~Real logged gear → `RaidSimResult`~~ — **closed 2026-07-26**, third sitting.
-- This was sampled from one fight (Hydross, SSC/TK) per character. Both characters happened to be on the same encounter; worth a third fixture against a different encounter/raid tier (and ideally an inactive meta) before treating slot-eligibility logic as fully general. Deferred — not a Phase 0 gate.
+- This was sampled from one fight (Hydross, SSC/TK) per character. Both characters happened to be on the same encounter; worth a third fixture against a different encounter/raid tier (and ideally an inactive meta) before treating slot-eligibility logic as fully general. Deferred — not a Stage 0 gate.
 
 ---
 

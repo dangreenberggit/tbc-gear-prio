@@ -72,7 +72,7 @@ ITEM_TYPE_SLOT = {
 # PLAN.md 9 states the TBC rule as "neck, finger (rings), and trinket cannot
 # carry a permanent enchant." Cross-checking the real fixture
 # (test/fixtures/slamaltman.raw.json, 25 combatants, all `combatant_info_events`
-# entries -- not just the two Phase-0 probe characters docs/phase0-findings.md
+# entries -- not just the two Stage-0 probe characters docs/stage0-findings.md
 # spot-checked) shows finger slots WITH a permanentEnchant in 14/50 cases,
 # every one resolving to a real "Enchant Ring - *" record
 # (effectId 2928/2929/2930/2931, requiredProfession 3 = Enchanting). Neck and

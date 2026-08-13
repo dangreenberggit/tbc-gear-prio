@@ -306,7 +306,7 @@ def do_update(tag, ref=None):
 
     if prev and prev.get("currentPhase") != current_phase:
         print(f"\n  *** CONTENT TIER CHANGED: {prev.get('currentPhase')} -> {current_phase} ***")
-        print("  This is the P3 launch signal. Required follow-up (PLAN.md 14, Phase 5+):")
+        print("  This is the P3 launch signal. Required follow-up (PLAN.md 14, Stage 5+):")
         print("    1. regenerate data/items/index.json and data/gems/palette.json")
         print("    2. curate the new tier's items into data/pools/<spec>.json, with `source`")
         print("    3. bump engineVersion to invalidate cached rankings")
