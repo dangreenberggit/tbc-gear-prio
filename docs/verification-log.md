@@ -147,7 +147,8 @@ row.
   hunter *additionally* carries `builds/phase_N/*.build.json`. Upstream layout
   varies per spec; do not assume one shape when adding the second spec.
 - **`db.json` totals:** 8,257 items, 214 gems, 141 enchants, 107 consumables.
-  Gems by content phase P1–P5 are **163 / 6 / 39 / 0 / 6**, matching the
+  Gems by content phase P1–P5 are **163 / 6 / 39 / 0 / 6** (from `db.json`;
+  the curated `data/gems/palette.json` is 156 / 6 / 39 / 0 / 6), matching the
   review's figures exactly, and confirming the 39 T6 (P3) epic gems that
   `maxPhase` must gate.
 - Gem records carry `unique` and `requiredProfession`, so §9's palette filter has

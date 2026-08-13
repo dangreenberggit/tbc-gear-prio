@@ -40,6 +40,17 @@ The two notations map like this:
 The `T4/P1 … T6/P5` shorthand is established player language and is not being
 retired.
 
+**P4 and P5 have no tier number.** Zul'Aman (P4) and Sunwell (P5) drop no
+numbered tier token, which is why the _filter_ is labelled by phase, not tier:
+"candidates: phase ≤ 2" can express all five values and "tier ≤ 2" cannot. Use
+"tier" when explaining which gear a phase corresponds to; use "phase" when
+naming the 1–5 control itself, which the CLI spells `--max-phase`.
+
+**"tier" also means the armour set** — _tier set_, _tier piece_, _tier token_
+(Justicar, Crystalforge, Lightbringer). The compound form is what tells the two
+apart. That sense is not being retired either; in TBC the two align, because P3
+content drops the T6 set.
+
 ### `phase`
 
 The _identifier_ for a content tier, in code and on the wire only.
