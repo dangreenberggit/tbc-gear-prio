@@ -25,9 +25,24 @@ git diff dev...HEAD
 git log dev..HEAD --oneline
 ```
 
-Three-dot diff against the merge-base, same convention as `code-review`.
-Confirm the diff is non-empty before dispatching anything — an empty diff
-means there's nothing to review, not three empty reports.
+Round 1 diffs `dev...HEAD` — three-dot against the merge-base, same convention
+as `code-review`. Later rounds diff `<through-sha>..HEAD`, where `<through-sha>`
+is the previous round's recorded `<through-sha>`.
+
+Why a recorded sha: fixes for a round's findings land after that round is
+dispatched, so a round that guesses its own starting point leaves those fix
+commits between rounds, unreviewed. Chaining from the recorded sha puts every
+commit inside some round's window.
+
+Before dispatching, record this round's `<through-sha>` on the review file's
+`Reviewed range:` line — it is the next round's starting point:
+
+```bash
+git rev-parse HEAD
+```
+
+Confirm the diff is non-empty before dispatching — an empty diff means there is
+nothing to review, not three empty reports.
 
 ### 2. Dispatch (review lane — slow is fine)
 
@@ -56,8 +71,9 @@ Try in order:
    - Retry once after a short wait on the **same review class**.
    - Then run axes **one at a time** (adversarial → domain → code-review),
      still on the review lane — slower wall-clock is acceptable.
-   - Then **print and hand off**: each brief + `git diff dev...HEAD` for a
-     fresh session or other tool (no memory of writing this code).
+   - Then **print and hand off**: each brief + `git diff <from-sha>..HEAD`
+     over this round's pinned range, for a fresh session or other tool (no
+     memory of writing this code).
 4. **Same-session review by the authoring agent** only if the user
    explicitly opts in. Label it in the review file’s dispatch note.
 
@@ -77,7 +93,7 @@ Write `docs/reviews/<branch-name>.md` (slashes → dashes):
 ```markdown
 # Pre-merge review — <branch>
 
-Diffed against: dev...<branch> (<short-sha>)
+Reviewed range: `<from-sha>..<through-sha>`
 
 ## Adversarial
 …
@@ -99,6 +115,12 @@ Diffed against: dev...<branch> (<short-sha>)
 | A2 | Adversarial | defer | `.scratch/carry-forward/issues/0N-slug.md` |
 | D1 | Domain | wontfix | <why> |
 ```
+
+`<through-sha>` is `git rev-parse HEAD` at dispatch; `<from-sha>` is the
+merge-base for round 1, or the previous round's `<through-sha>` after that.
+Both are resolved shas, never `HEAD` — a moved `HEAD` cannot be resolved
+retroactively. One `Reviewed range:` line per round in exactly this form, so
+coverage is checkable mechanically.
 
 `Disposition` is exactly `fixed`, `defer`, or `wontfix`. Append a one-liner
 to `.scratch/carry-forward/map.md` when filing tickets.
