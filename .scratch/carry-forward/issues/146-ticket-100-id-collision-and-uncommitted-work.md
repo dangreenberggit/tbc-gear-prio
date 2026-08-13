@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: a1d3ef6
 Type: task
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (process P3)
 Blocks: none
@@ -32,3 +33,20 @@ Not a duplicate and not a conflict — a numbering accident. Two problems:
 Renumber to 139+ (pick a free id at the time) and fold the non-overlapping
 material into 121 with a cross-link, or commit it as its own ticket and
 cross-link both ways. Either is fine; leaving it untracked at id 100 is not.
+
+## CLOSED, 2026-08-13
+
+`git mv`'d the untracked file to
+`.scratch/carry-forward/issues/153-p3-curated-list-pinned-to-p2-set.md`
+(commit `016b019`), then cross-linked it with ticket 121 both ways (commit
+`a1d3ef6`) rather than merging — each keeps material the other lacks. The
+`docs/reviews/feat-set-bonus-value.md` Disposition row 2-S1 was checked and
+already points at the closed `100-set-potential-panel-...` ticket (its cited
+sha `b51f08c` matches that ticket's own `Closed:` line), so it needed no
+change. Two other references to the old `100-p3-curated-list-pinned-to-p2-set`
+filename remain outside this pass's edit scope:
+`docs/reviews/feat-set-bonus-value.md:710` and
+`.scratch/handoffs/set-bonus-value-remaining-work.md:317` — both should be
+updated to `153-` but neither file was in this task's allowed-edit list.
+
+Verify: `git log --oneline -1 -- .scratch/carry-forward/issues/153-p3-curated-list-pinned-to-p2-set.md`

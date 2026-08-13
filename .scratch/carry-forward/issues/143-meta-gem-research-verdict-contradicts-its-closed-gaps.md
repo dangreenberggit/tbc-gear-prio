@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 016b019
 Type: task
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (domain 5-D3)
 Blocks: none
@@ -24,3 +25,14 @@ live hazard, not just untidiness.
 
 Strike the superseded provisos or mark them closed in place, citing the Local
 verification pass that closed each.
+
+## CLOSED, 2026-08-13
+
+Commit `016b019` on `feat/set-bonus-value`. Struck both stale provisos from
+the Verdict section of
+`.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md` and
+replaced them with a short paragraph pointing at the "Local verification
+pass" section and commit `23df60f`, which is what actually closed each gap.
+No new findings were added.
+
+Verify: `git show 016b019 -- .scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
