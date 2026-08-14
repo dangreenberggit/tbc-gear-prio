@@ -243,14 +243,74 @@ needed a user decision mid-stream — a worker would have hit the same wall and
 handed it straight back. The **build + tab-registration** portion of slice 1
 is still worker-shaped and gets dispatched once the toolchain is verified.
 
-## Still open before §9.1 done-when
+## §9.1 done-when: met
 
-- [ ] Go / protoc / make installed and versions recorded
-- [ ] `WATCH=1 make devmode` (or the underlying commands) builds and serves
-- [ ] Empty Upgrades tab registered with sub-tab strip, visible after Batch
-- [ ] `data/wowsims-fork.lock.json` committed **in this repo** by the
-      orchestrator (not the worker) — branch `feat/upgrades-tab` + the fork
-      commit the branch head lands on
+- [x] Go / protoc / make installed and versions recorded — plus `protoc-gen-go`
+- [x] The site builds and serves locally — see "Serving the site" below
+- [x] Empty Upgrades tab registered with sub-tab strip, visible after Batch —
+      fork commit `5590dee70`
+- [x] `data/wowsims-fork.lock.json` committed in this repo by the orchestrator
+
+## The tab
+
+Fork commit `5590dee7048df754703f7a01dc037b16542a07d3` on `feat/upgrades-tab`,
+three files, +13 lines in the two existing ones:
+
+- `ui/core/components/individual_sim_ui/upgrades_tab.tsx` — new. `SimTab`
+  subclass; sub-tab strip copies `BulkTab`'s hand-rolled Bootstrap
+  `nav-tabs`/`tab-pane` markup verbatim rather than abstracting it (plan §4:
+  "copy the idiom, don't abstract it").
+- `ui/core/individual_sim_ui.tsx` — import, `addUpgradesTab()`, and the call
+  immediately after `this.bt = this.addBulkTab();`.
+- `assets/locales/en/translation.json` — `upgrades_tab` strings. **Every**
+  upstream tab titles itself through `i18n.t(...)`; a literal would have been
+  the odd one out. Only the `en` locale exists, so one entry suffices.
+
+### Verified in a browser, not merely compiled
+
+```js
+Array.from(document.querySelectorAll('.nav-link')).map(b => b.textContent.trim())
+// ["Gear","Settings","Talents","Rotation","Results","Batch (New)","Upgrades","Priority List", …]
+```
+
+Upgrades sits **immediately after "Batch (New)"** — plan §4's "last content
+tab". Clicking it yields `#upgrades-tab` with classes
+`sim-tab upgrades-tab tab-pane fade active show`, the "Shopping List" sub-tab,
+and the placeholder text. Vite's checker plugin printed
+`[TypeScript] Found 0 errors`, and a standalone `npx tsc --noEmit` is exit 0.
+
+**Console errors seen, none from this tab:** two `reforge_worker` 404s and a
+Wowhead tooltip fetch failure. The worker 404s are this environment's doing —
+`dist/tbc/*.js` was never built, since `vite.build-workers.mts` was not run.
+The Wowhead call is external. **Untested:** whether the workers load once
+built; nothing here depends on them yet.
+
+## Serving the site
+
+Two steps the Makefile does that had to be done by hand, because `make devmode`
+needs `air` (installed by piping a remote script to `sh` — deliberately not
+run):
+
+```bash
+cp -r assets dist/tbc/            # Makefile's $(OUT_DIR)/assets rule
+sed -e 's/@@CLASS@@/paladin/g' -e 's/@@SPEC@@/retribution/g' \
+    ui/index_template.html > ui/paladin/retribution/index.html
+npx vite serve --port 5173        # then http://localhost:5173/tbc/paladin/retribution/
+```
+
+The per-spec `index.html` is generated, and gitignored, so it does not appear
+in the branch. **Without it vite serves the landing page for the spec URL** —
+which looks like a routing bug and is not one. The base path is `/tbc/`;
+plain `/paladin/retribution/` 302s.
+
+`.claude/launch.json` in this repo gained a `wowsims-fork` entry for the dev
+server.
+
+## Not done here
+
+`make devmode` / `make wasm` **through make** remain unrun, so Makefile
+portability on Windows is still unproven — every step above was a direct
+command. `air` is not installed. The worker JS bundles are not built.
 
 ## Push policy
 

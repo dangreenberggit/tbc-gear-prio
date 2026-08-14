@@ -1,0 +1,10 @@
+{
+  "repo": "dangreenberggit/tbc-new",
+  "upstream": "wowsims/tbc-new",
+  "branch": "feat/upgrades-tab",
+  "commit": "5590dee7048df754703f7a01dc037b16542a07d3",
+  "branchedFrom": "8aa378b3671a0923fd11fb34b4b3753e53f20c9b",
+  "clonePath": "vendor/tbc-new-fork",
+  "pushed": false,
+  "_comment": "Which fork commit pairs with this repo's state. Same pattern as wowsims.lock.json (plan decision D1). branchedFrom is the v0.0.101 pin from wowsims.lock.json, not upstream master: decision D2 keeps the fork on the pin so every verified fact and committed datum traces to one commit. The clone at clonePath is gitignored (vendor/) and has its own .git pushing to the personal fork. pushed:false records that nothing has left this machine -- plan section 1 keeps any push behind a separate explicit ask, so flipping this flag is a deliberate act, not a side effect."
+}

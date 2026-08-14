@@ -12,7 +12,20 @@ User created the personal fork and supplied the URL:
 `https://github.com/dangreenberggit/tbc-new`. Verified via `gh repo view`:
 `isFork: true`, parent `wowsims/tbc-new`, default branch `master`.
 
-## Slice 1 — fork scaffold: mostly done, one gate open
+## Slice 1 — fork scaffold: DONE (plan §9.1 done-when met)
+
+The Upgrades tab is registered and renders after "Batch (New)", verified in a
+browser at `http://localhost:5173/tbc/paladin/retribution/`. Fork commit
+`5590dee70` on `feat/upgrades-tab`. `data/wowsims-fork.lock.json` is committed
+here. `pnpm verify` green in this repo; `npx tsc --noEmit` exit 0 in the fork.
+
+Two environment steps are **not** captured by any committed file, because the
+Makefile paths they replace need `air`: copying `assets/` into `dist/tbc/` and
+generating the per-spec `index.html` from `ui/index_template.html`. Both are in
+slice 1's handoff. Without the second one, vite serves the landing page for the
+spec URL — which reads as a routing bug and is not one.
+
+## Slice 1 — original scaffold notes
 
 Details in [`slice-1/HANDOFF.md`](slice-1/HANDOFF.md). Summary:
 
@@ -90,6 +103,20 @@ decision was right; only the arithmetic was wrong. Corrected in `9004654`.
 **Carried forward (needs a feral-owning session):** `feral-p2.json` is stale
 against its own generator — five entries differ, e.g. `29994` regen
 `['p2_6p','p3_6p']` vs committed `['p2_6p']`. Unrelated to this detour.
+
+## Slice 6 — PARKED at "data done, review pending" (user decision, 2026-08-14)
+
+The data work is complete and verified; the branch `feat/ret-p3-data` is
+green and sits unmerged. **What remains before slice 6 can be called done per
+plan §9.6:**
+
+1. `sme-rank-review` (review lane, **Opus** — never substitute a workhorse)
+   on the refreshed ret-p3 ranking. Not run.
+2. `pre-merge-review` on `feat/ret-p3-data` → `docs/reviews/feat-ret-p3-data.md`.
+3. Then, and only as a **separate ask**, the merge-to-dev question.
+
+Parked deliberately: the fork chain (slices 1→2→3→4) is the critical path and
+none of it depends on this review. The user chose this ordering explicitly.
 
 ## Not started
 

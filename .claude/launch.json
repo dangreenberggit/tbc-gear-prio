@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "rank-reports",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", ".scratch/rank-reports", "-p", "4173", "-c-1", "--silent"],
+      "port": 4173
+    },
+    {
+      "name": "wowsims-fork",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "serve", "--port", "5173"],
+      "cwd": "vendor/tbc-new-fork",
+      "port": 5173
+    }
+  ]
+}
