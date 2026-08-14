@@ -98,6 +98,7 @@ TRACKED = {
     "constants_other.ts": "ui/core/constants/other.ts",
     "ret_p1.gear.json": "ui/paladin/retribution/gear_sets/p1.gear.json",
     "ret_p2.gear.json": "ui/paladin/retribution/gear_sets/p2.gear.json",
+    "ret_p3.gear.json": "ui/paladin/retribution/gear_sets/p3.gear.json",
     "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
     "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
     "feral_p2_6p.gear.json": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
@@ -113,6 +114,27 @@ TRACKED = {
     # instead of silently invalidating data/presets/*/buff-defaults.json.
     "feral_sim.ts": "ui/druid/feralcat/sim.ts",
     "proto_utils.ts": "ui/core/proto_utils/utils.ts",
+}
+
+# Per-file commit overrides for a TRACKED entry that must be fetched from a ref
+# newer than the main `commit` pin, without moving that pin for every other
+# file (D2 keeps `commit` at 8aa378b3671a0923fd11fb34b4b3753e53f20c9b
+# deliberately -- a plain `--update` bump was rejected as "not obviously
+# correct" when this override was added; see PLAN.md D2 and
+# .scratch/handoffs/wowsims-tab/slice-6/HANDOFF.md, slice 6b).
+#
+# ret_p3.gear.json does not exist at the pin: upstream shipped it in
+# 5c7491899 ("missed jsons", 2026-08-13T18:41:45Z), three weeks after
+# 8aa378b3. Everything else in TRACKED keeps fetching from the main pin.
+#
+# do_update() fetches each file at PER_FILE_PIN.get(local, sha) and records
+# the override in that file's own lock entry as "commit" only when it differs
+# from the top-level pin, so a plain `--update --tag <pin>` (no PER_FILE_PIN
+# entry touched) leaves this file's provenance exactly where it is. do_restore
+# reads the same per-entry "commit" back. Promote a file out of this dict once
+# its ref reaches the main pin -- the override then becomes a no-op diff.
+PER_FILE_PIN = {
+    "ret_p3.gear.json": "5c7491899b5d71adecdc8de28d4fb2f77f0571b8",
 }
 
 def gh(*args):
@@ -252,8 +274,14 @@ def do_update(tag, ref=None):
 
     files, current_phase = {}, None
     for local, path in TRACKED.items():
+        # PER_FILE_PIN wins over the ref/tag this call resolved: a file listed
+        # there is deliberately ahead of the main pin (see its comment), and a
+        # plain `--update --tag <pin>` must not silently drag it backward to
+        # whatever the main pin fetches. Re-pinning that file forward is a
+        # PER_FILE_PIN edit, not a side effect of an unrelated --update.
+        file_sha = PER_FILE_PIN.get(local, sha)
         try:
-            blob = fetch(sha, path)
+            blob = fetch(file_sha, path)
         except Exception as e:
             print(f"    !! {path}: {e}")
             continue
@@ -261,9 +289,12 @@ def do_update(tag, ref=None):
         with open(dest, "wb") as fh:
             fh.write(blob)
         entry = lock_entry(path, blob)
+        if file_sha != sha:
+            entry["commit"] = file_sha
         files[local] = entry
         digest = entry["sha256"]
-        print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}")
+        pin_note = "  (pinned separately)" if file_sha != sha else ""
+        print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}{pin_note}")
         if local == "constants_other.ts":
             current_phase = parse_current_phase(blob.decode("utf-8"))
 
@@ -339,8 +370,11 @@ def do_restore():
         if not path or not meta.get("sha256"):
             errors.append(f"{local}: lock entry missing path/sha256")
             continue
+        # A file's own "commit" (see PER_FILE_PIN in do_update) overrides the
+        # top-level pin -- that is the whole point of pinning it separately.
+        file_sha = meta.get("commit", sha)
         try:
-            blob = fetch(sha, path)
+            blob = fetch(file_sha, path)
         except Exception as e:
             errors.append(f"{local}: fetch failed: {e}")
             continue
