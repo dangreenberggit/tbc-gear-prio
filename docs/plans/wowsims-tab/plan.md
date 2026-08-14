@@ -336,8 +336,36 @@ per the original ask — not redesigned into a full importer.
 |---|---|---|---|
 | E-W1 | Does WASM agree with native? | Build `lib.wasm` at the pin (`make wasm`), run `test/fixtures/slamaltman.raid-sim-request.json` seed 42 through it, diff against native `2042.3926…` (compute-topology §7 E1 — unchanged, still unrun) | Slice 3 results shown to anyone |
 | E-W2 | Wall-clock per candidate in-browser | Time baseline + 20 candidates at 3,000 and 5,000 iterations on this machine, ≤4 workers | D7's default; candidate-count budget |
-| E-W3 | Did the port preserve behaviour? | Fork-side test: ported engine + ported `RecordedSimRunner` reproduces the committed slamaltman fixture ranking (same deltas) from the same recorded observations | Slice 2 merge; re-run on every fork engine edit |
+| E-W3 | Did the port preserve behaviour? | **This-repo** test (see note below): ported engine + ported `RecordedSimRunner` reproduces the committed slamaltman fixture ranking (same deltas) from the same recorded observations | Slice 2 merge; re-run on every fork engine edit |
 | E-W4 | Does gear-only import disturb settings? | Apply a category-filtered import on a configured page; diff the full settings proto before/after (gear fields excepted) | §6 slice ships vs shelves |
+
+### E-W3 runs here, not in the fork — decided 2026-08-14
+
+Rev 1 and 2 of this plan said E-W3 was "a test in the fork's own test setup, so
+it travels with the fork". **The fork has no such setup.** Checked at the pin:
+no vitest/jest/mocha in `package.json`, **zero** `.test.ts`/`.spec.ts` files
+anywhere under `ui/`, and the only `test`-ish script is `test:locales`, an Ajv
+schema check. Go has tests; the TypeScript UI does not.
+
+Decision (user, 2026-08-14): **the parity test lives in this repo**, which
+already runs vitest. The fork stays dependency-free — we do not change its test
+approach even though we use our own tests for development. That keeps the
+eventual upstream PR free of a test-infrastructure change upstream never asked
+for.
+
+**The cost, stated plainly:** the check no longer travels with the fork, so a
+future fork-only edit to `engine/` could break parity with nothing failing
+inside the fork. §3's mitigation ladder leaned on E-W3 travelling; it no longer
+does.
+
+**The compensating gate.** Because silent breakage was the whole point of E-W3,
+slice 2 also adds a `check_*` script wired into `pnpm verify`, in the same idiom
+as `check_curated_set_phase.py` and friends: it records a content hash per
+ported file in `engine/PROVENANCE.md` and fails when a ported file's content
+changes without its recorded hash changing. That does not prove behaviour — only
+the parity test does — but it converts "someone edited the fork's engine and we
+never noticed" from silent into a red `pnpm verify` the next time this repo is
+built. **Untested** until slice 2 implements it.
 
 ---
 
