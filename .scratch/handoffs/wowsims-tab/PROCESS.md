@@ -118,6 +118,29 @@ plan §9.6:**
 Parked deliberately: the fork chain (slices 1→2→3→4) is the critical path and
 none of it depends on this review. The user chose this ordering explicitly.
 
+## Slice 2 — engine port: IN FLIGHT
+
+Dispatched 2026-08-14 to a Sonnet workhorse. Ports plan §2.1's surface into
+`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`,
+writes `PROVENANCE.md`, stands up E-W3, and adds the drift gate.
+
+**Plan change it is executing (user decision, 2026-08-14):** E-W3 runs **in
+this repo**, not the fork. The fork has no TypeScript test runner — no
+vitest/jest, zero `.test.ts` under `ui/`, only an Ajv locale check — and it is
+**staying dependency-free** so the eventual upstream PR carries no test-infra
+change. Plan §8 now records this and its cost.
+
+Because the parity check no longer travels with the fork, slice 2 also adds a
+`check_*` gate in `pnpm verify` that content-hashes each ported file against
+`PROVENANCE.md`. That catches *silent edits*, not behaviour changes — only the
+parity test does the latter. Both must skip cleanly when the gitignored fork is
+absent (fresh clone, CI).
+
+**When reviewing it, check specifically:** that E-W3 genuinely fails on a
+behaviour change rather than being tuned until green; that the skip-when-absent
+path cannot silently pass as success; and that `packages/core/` is untouched
+(plan §3 says this detour needs no changes there).
+
 ## Not started
 
 Slices 2 (engine port), 3 (adapters + first ranking, where E-W1/E-W2 run),
