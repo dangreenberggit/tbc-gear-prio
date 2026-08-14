@@ -180,10 +180,42 @@ That last artifact is the one **E-W1** has been waiting on — plan §8 and
 build. The binary now exists; running the slamaltman fixture through it and
 diffing against native `2042.3926…` is slice 3's job and is **still not done**.
 
+### Generate all three TS protos, not just `api`
+
+`Makefile:73-75` runs protoc **three times** — `api.proto`, `test.proto`,
+`ui.proto`. Generating only `api` leaves `ui/core/proto/ui.ts` absent and
+`npx tsc --noEmit` fails with ~15 × `TS2307: Cannot find module '../core/proto/ui'`
+across raid/rogue/shaman/warlock/warrior. Easy to misread as a broken checkout.
+After generating all three:
+
+```bash
+npx tsc --noEmit    # exit 0
+```
+
+**The fork typechecks clean at the pin.** This is the baseline slice 2 needs:
+any type error a worker sees after this point is its own, not inherited.
+
+### Toolchain status: proven
+
+| Step                     | Command                                                       | Result           |
+| ------------------------ | ------------------------------------------------------------- | ---------------- |
+| Go proto generation      | `protoc -I=./proto --go_out=./sim/core ./proto/*.proto`        | exit 0           |
+| Go compile               | `go build ./sim/core/...`                                      | exit 0           |
+| TS proto generation (×3) | `protoc --ts_out ui/core/proto --proto_path proto proto/*.proto` | exit 0         |
+| TS typecheck             | `npx tsc --noEmit`                                             | exit 0           |
+| WASM build               | `GOOS=js GOARCH=wasm go build -o ./dist/tbc/lib.wasm ./sim/wasm/` | 20,293,865 bytes |
+
+`git status` in the clone is **clean** after all of it — upstream's `.gitignore`
+already covers every generated artifact, so builds do not pollute the branch.
+
 **Still untested:** `WATCH=1 make devmode` actually serving the site in a
-browser, and whether `make` (GNU Make 3.81, a 2006 build) drives the full
-Makefile on Windows — the commands above were run directly rather than through
-`make`, so Makefile-level portability is unproven.
+browser. It depends on `air` (a Go live-reload tool) which `make setup` fetches
+by piping a remote install script to `sh` — not run, since installing it is a
+judgement call rather than a mechanical step. The no-watch path
+(`./wowsimtbc --usefs=true --launch=false --host=":3333"`) needs `make devserver`
+first. Also unproven: whether GNU Make 3.81 (a 2006 build) drives this Makefile
+on Windows at all — every command above was run **directly**, so Makefile-level
+portability carries no evidence either way.
 
 Node mismatch is minor but real: `.nvmrc` pins 22.17.1, the machine has
 22.16.0. `fnm` is installed and intercepts commands run inside the clone —
