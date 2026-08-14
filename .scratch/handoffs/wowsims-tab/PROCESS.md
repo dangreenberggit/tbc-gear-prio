@@ -174,6 +174,32 @@ is exit 0 in the fork. `packages/core/` is untouched, confirmed by
 generated files by inspection only — nothing catches the two drifting apart
 if a union grows in this repo. Recorded in the handoff's "Untested" section.
 
+## Slice 3 — adapters + first ranking: IN FLIGHT
+
+Dispatched 2026-08-14 to a Sonnet workhorse. Builds `PlayerGearSource`,
+skeleton serialization (D5), and `WasmSimRunner`, then wires them into
+`upgrades_tab.tsx` behind a Run button. **This is where E-W1 and E-W2 run.**
+
+**E-W1 matters more than the rest of the slice.** It has never been run —
+compute-topology named it the gate on every number, and it stayed unrun for
+want of a wasm build. That build now exists (`dist/tbc/lib.wasm`, 20 MB), the
+fixture is `test/fixtures/slamaltman.raid-sim-request.json`, seed 42, and the
+native reference is `2042.3926145882197`. Gate: delta inside the 3.4 DPS
+cutoff.
+
+**When it reports, check for these specifically:**
+
+1. **An actual observed number for E-W1**, not a claim that it passed. A
+   disagreement is a *more* valuable result than a pass and must not be tuned
+   away. If the worker could not run it, the handoff must say so plainly.
+2. **Real E-W2 timings** written into plan §5's budget comment, with worker
+   count and machine — not estimates.
+3. **`talentPointsByTree`** — plan §2.2 calls it untested; the brief asked for
+   it to be resolved or explained.
+4. **Ported files unchanged** unless E-W3 was re-run *and* PROVENANCE.md hashes
+   updated. `pnpm engine-port-drift:check` catches this; run it during review.
+5. **`packages/core/src/` untouched.**
+
 ## Not started
 
 Slice 3 (adapters + first ranking, where E-W1/E-W2 run), 4 (UI completion),
