@@ -1,9 +1,13 @@
 # Shopping-list tab inside the wowsims site — architectural plan
 
-Status: **proposal, for review**. Nothing here is implemented. No PLAN.md stage
-gate is touched; this is a detour that reuses the engine, not a change to it.
+Status: **approved direction, pre-implementation** (decisions resolved
+2026-08-14; see §1). Nothing here is implemented. No PLAN.md stage gate is
+touched; this is a detour that reuses the engine's design and code, not a
+change to the standing plan.
 
-Date: 2026-08-14.
+Date: 2026-08-14 (rev 2 — decisions D1–D7 resolved with the user; D3 flipped
+the code-ownership direction and this revision reworks §2, §3, §6 and §9 to
+match).
 
 Upstream pin throughout: `wowsims/tbc-new` @
 `8aa378b3671a0923fd11fb34b4b3753e53f20c9b` (tag `v0.0.101`,
@@ -26,212 +30,179 @@ plus the earlier local audits
 ## 0. What is being built, in one paragraph
 
 A new top-level tab in the wowsims TBC individual sim UI — working name
-**"Upgrades"**, product name to be decided — sitting between "Batch" and the
-header's Import/Export controls. It takes the gear currently on the site's Gear
-tab and the user's current sim settings, runs our `rankUpgrades` engine with
-sims executed by the site's own in-browser WASM simulator, and renders the
-result as a **shopping list** (the ranked shortlist) plus **per-slot sub-tabs**
-(upgrade options for each gear slot). Ret and feral first. Everything stays
-local until the user says otherwise; if it is ever pushed, it goes to a
-**personal fork** of `wowsims/tbc-new` under the user's GitHub account — never
-to the upstream org without an explicit, separate decision.
+**"Upgrades"**, product name to be decided — sitting after "Batch". It takes
+the gear currently on the site's Gear tab and the user's current sim settings,
+runs our ranking engine with sims executed by the site's own in-browser WASM
+simulator, and renders the result as a **shopping list** (the ranked
+shortlist) plus **per-slot sub-tabs** (upgrade options for each gear slot).
+Ret and feral first. Everything stays local until the user says otherwise; if
+it is ever pushed, it goes to a **personal fork** of `wowsims/tbc-new` under
+the user's GitHub account — never to the upstream org without an explicit,
+separate decision.
 
-Why this is cheap rather than a rewrite: the engine was built as one deep
-module behind three seams precisely so callers stay thin (PLAN.md §3). The
-wowsims site becomes the third caller after the CLI and the planned web shell —
-it supplies different adapters, not different logic.
+The engine's design carries over intact — one deep module, thin callers,
+sims produce every number (PLAN.md §3). What changes under D3 is *where the
+code lives*: the tab and the engine modules it needs are **fork code**,
+ported once from `packages/core`, so that the fork is self-contained and a
+future upstream PR carries no external dependency.
 
 ---
 
-## 1. Decisions
+## 1. Decisions — resolved 2026-08-14
 
-### 1.1 Recommended (need your sign-off before implementation)
+| # | Question | Decision |
+|---|---|---|
+| D1 | Where does the fork's working copy sit on disk? | **Nested gitignored clone inside this project**, at `vendor/tbc-new-fork/` (the repo already gitignores `vendor/` for upstream inputs; the inner repo has its own `.git` and pushes to the personal fork). A small committed lockfile, `data/wowsims-fork.lock.json` (branch + commit, same pattern as `wowsims.lock.json`), records which fork commit pairs with which state here |
+| D2 | Which commit does the fork branch from? | **The pin, `8aa378b3` (v0.0.101).** Every verified fact and our committed data trace to it. Rebase onto `master` is a single named PR-checklist item (§9 slice 7), not a standing chore |
+| D3 | Where does the engine code the tab uses live? | **In the fork, as ordinary wowsims UI code**, ported once from `packages/core` — not consumed as an external package. Reason: fork code must be self-contained for other wowsims developers; a dependency on a package of ours that isn't publicly consumable would be a PR blocker. The relationship inverts later: **this repo can consume the fork** (the nested clone makes that natural) when the standalone app wants the browser runner. Drift between the two copies is real and accepted — §3 names the mitigations |
+| D4 | Hashing (core's two `node:crypto` imports) | **Moot in the fork, unchanged here.** The ported engine needs cache keys, not digests: in-memory `Map` keys use the canonical-JSON string itself (uniqueness is the requirement; compression was only ever a storage nicety). Where a short digest is *displayed* (assumptions drawer), the browser-native `SubtleCrypto` runs once per completed run, where async costs nothing. Upstream brings no hashing library to conflict with, and `packages/core` in this repo keeps `node:crypto` untouched |
+| D5 | Where does the sim request skeleton come from? | **The user's own current settings, serialized from the page.** Our sim must match theirs by construction. Any *intentional* divergence (something we believe makes ours better) is a named, written-down decision to be discussed first — never a silent difference |
+| D6 | WCL import scope for v1 | **Report-URL, gear-only, as a separate slice.** Plain meaning in §6. Shelve (not redesign) if gear-only application proves impossible in practice (E-W4) |
+| D7 | In-browser iteration default | **3,000 with a visible control.** Raise only after E-W2 measures the budget |
 
-| # | Question | Recommendation | Why |
-|---|---|---|---|
-| D1 | Where does the host code live? | A personal fork of `wowsims/tbc-new` (e.g. `dangreenberggit/tbc-new`), branch `feat/upgrades-tab`. Local-only until you say push | The tab is upstream-shaped code (tsx-vanilla, their `SimTab` contract). It cannot live in this repo without vendoring their entire UI |
-| D2 | Which commit does the fork branch from? | **The pin, `8aa378b3` (v0.0.101)** — not `master` | Every verified fact — file:line references, `db.json` content our universes were generated from, the 2042.85 parity fixture — is at the pin. Master is 112 commits ahead and moving ~5/day; chasing it buys nothing while the work is local. Rebase is a named step in the PR checklist (§9), not a standing chore |
-| D3 | How does the fork get our engine? | `packages/core` as a local pnpm `file:` dependency from the fork's `ui/` package | One source of truth. Copying files into the fork guarantees drift; a git submodule adds ceremony without solving the build problem. Cost: core's entry path must become browser-clean first (§3) |
-| D4 | `sha256` replacement (core imports `node:crypto` in two files) | Bundle a small pure-TS sync sha256; do **not** switch to `SubtleCrypto` | `SubtleCrypto.digest` is async, and `docs/plans/compute-topology.md` §2 already flagged that ripple as "the single most annoying item" — every `simCacheKey`/`contentHash` caller changes signature. A ~1 KB sync implementation keeps both call sites untouched |
-| D5 | Where does the sim request skeleton come from? | **The user's own current settings**, serialized from the page — not our committed per-spec skeleton | This is carry-forward ticket 72's mechanism (`Deps.raidSimSkeleton` is already an injected value, `rank.ts` never reads disk). It also dissolves ticket 72's motivating problem for this surface: baseline and candidates are simmed with the settings the user is looking at, so our baseline should match their own Simulate button (parity experiment E-W1 still required before claiming it) |
-| D6 | WCL import scope for v1 | A **separate slice**, gear-only, report-URL input, using the category-filtered import API. Shelve without redesign if gear-only proves impossible | Gear-only is achievable with existing upstream API — `Player.fromProto(eventID, proto, [SimSettingCategories.Gear])` or `player.setGear(...)` ([research-import-wcl.md](research/research-import-wcl.md) §2). Report-URL first because that is upstream's proven input shape; character-first discovery is our WCL vocabulary and can come later |
-| D7 | In-browser iteration default | 3,000 with a visible control, not 5,000 | Browser wall-clock per candidate is unmeasured (E-W2). 3,000 is the CLI floor the Stage 0 fixture used; raise the default only after E-W2 says the budget allows it |
-
-### 1.2 Locked by circumstance (not up for debate)
+Locked by circumstance (not up for debate):
 
 - **No PR to `wowsims/tbc-new` in this detour.** A PR is a separate future
-  decision with its own checklist (§9). Nothing is pushed anywhere without an
-  explicit ask.
+  decision with its own checklist (§9 slice 7). Nothing is pushed anywhere
+  without an explicit ask.
 - **The WCL credentials in `.env` are personal dev credentials.** They never
   enter the fork's source, its build output, or any commit. (Upstream itself
-  ships a hardcoded client id+secret in the public browser bundle for its raid
-  WCL importer — that is their credential and their call; we do not copy the
-  pattern with ours. See §6.)
-- **Engine logic does not fork.** Anything the tab needs from the engine is
-  either already exported or becomes a change in *this* repo, on its own
-  branch, gated by `pnpm verify` like any other change.
+  ships a hardcoded client id+secret in its public bundle for the raid WCL
+  importer — their credential, their call; we do not copy the pattern with
+  ours. See §6.)
+- **Engine *design* does not fork.** The port copies module boundaries,
+  interfaces and rules as they are. If the fork copy needs a structural change
+  (a new seam, a changed `Ranking` shape), that is a design discussion here
+  first, then applied to both copies.
 
 ---
 
-## 2. The shape: one engine, a fourth caller, four adapters
+## 2. The shape: the engine ported into a fourth host
 
-Everything below hangs off the facts that the engine's public surface is
-`rankUpgrades(input, deps, onProgress)` + `applyView`, and that
 [`research-core-portability.md`](research/research-core-portability.md) found
-exactly four Node-bound files in `packages/core/src` — two of them only for
-`createHash` — with the entire 8-stage pipeline pure.
+the entire 8-stage pipeline pure — only four files touch Node built-ins, all
+of them adapters or entry points that the fork does not port. So the port is
+a copy-and-adapt of pure TypeScript, not a rewrite.
 
 ```
-wowsims site (fork)                              tbc-gear-prio (this repo)
-┌──────────────────────────────┐                 ┌──────────────────────────┐
-│ UpgradesTab (SimTab subclass)│   pnpm file:    │ packages/core            │
-│  ├─ run button, progress     │ ──dependency──▶ │  rankUpgrades, applyView │
-│  ├─ shopping-list sub-tab    │                 │  (unchanged logic)       │
-│  └─ per-slot sub-tabs        │                 └──────────────────────────┘
-│                              │
-│ Deps assembled page-side:    │
-│  gear:  PlayerGearSource ────┼── reads simUI.player.getGear()
-│  sim:   WasmSimRunner ───────┼── drives WorkerPool.raidSimAsync (lib.wasm)
-│  store: MemoryStore          │   (already pure, already in core)
-│  raidSimSkeleton ────────────┼── serialized from the page's current settings
-│  epWeights / universe data ──┼── bundled JSON from this repo's data/
-└──────────────────────────────┘
+vendor/tbc-new-fork/  (nested clone, own git, pushes to personal fork)
+┌────────────────────────────────────────────────────────────┐
+│ ui/core/components/individual_sim_ui/upgrades/             │
+│  ├─ upgrades_tab.tsx        SimTab subclass, sub-tab strip │
+│  ├─ engine/                 PORTED from packages/core:     │
+│  │    rank, compose, pool, gems, meta-repair, set-bonus,   │
+│  │    stats/se/cutoff, view, caps, enchants eligibility    │
+│  ├─ adapters/                                              │
+│  │    player_gear_source    reads simUI.player.getGear()   │
+│  │    wasm_sim_runner       drives WorkerPool.raidSimAsync │
+│  │    (Store: ported MemoryStore, string keys)             │
+│  └─ data/                   universes + EP weights, copied │
+│                             from this repo's data/          │
+└────────────────────────────────────────────────────────────┘
+       provenance: engine/PROVENANCE.md maps every ported file
+       to its packages/core source file @ commit
 ```
 
-What this deliberately is **not**: a port of the eight stages into the wowsims
-codebase, a fourth seam, or a second ranking implementation. The tab is a
-caller, like `cli.ts` is a caller.
+### 2.1 What is ported, what is not
 
-### 2.1 `PlayerGearSource`
+**Ported** (pure, intricate, independently tested here): `rank.ts`'s
+orchestration and its stages, `compose`, `pool`, the gem solver
+(`gems`/`candidate-gems`/`meta`/`meta-repair`), `set-bonus`/`set-value`,
+`stats`/`se`/`cutoff`, `view` (`applyView`), `caps`, enchant/socket
+eligibility, the seam *interfaces* (`GearSource`, `SimRunner`, `Store`) and
+the pure `MemoryStore`/`RecordedSimRunner` adapters (the recorded runner is
+what makes E-W3's fixture-parity gate possible fork-side).
 
-Implements the existing two-method `GearSource` port
-(`packages/core/src/seams/gear-source.ts`). `findFights` returns one synthetic
-entry ("current gear on this page"); `readGear` maps `player.getGear()` to our
-`LoggedGear` shape.
+**Not ported** (WCL-compensation or Node-bound, per the portability audit):
+`spec.ts` (talent-plurality classification — the page *is* a spec),
+`slots.ts` (19→17 mapping — the page's `Gear` is already sim-native),
+`cli.ts`, `CliSimRunner`, `SqliteStore`, `content-hash`'s digest (D4), and
+`items.ts`'s 6.8 MB static index — item metadata comes from the site's own
+`Database` (`sim.db`), which the page has already loaded.
 
-Most of what makes WCL gear-reading hard disappears here, because the source is
-the sim's own data model:
+### 2.2 `PlayerGearSource`
 
-- **No spec classification.** Each wowsims page *is* a spec. The
-  talent-plurality classifier (`spec.ts`) is WCL-compensation and is not
-  invoked.
-- **No 19→17 slot mapping.** The site's `Gear` object is already in sim slot
-  vocabulary. `slots.ts` is WCL-compensation and is not invoked.
-- **Kept:** item-metadata gating for enchant/socket eligibility and the
-  plausibility checks — those guard the engine's own synthesis logic, not the
-  transport ([research-core-portability.md](research/research-core-portability.md) §4).
+Implements the two-method `GearSource` port. `findFights` returns one
+synthetic entry ("current gear on this page"); `readGear` maps
+`player.getGear()` to the engine's gear shape. Kept from normalize:
+enchant/socket eligibility gating and plausibility checks — those guard the
+engine's own synthesis logic, not the transport. Open verification item:
+confirm every field the engine reads (gems, enchants, talent totals) is
+populatable from `Player` state; what stands in for `talentPointsByTree` on a
+page (likely the page's own talent totals) is **untested**.
 
-Open verification item: confirm `LoggedGear`'s required fields (gems, enchants,
-`talentPointsByTree`) can all be populated from `Player` state, and decide what
-`talentPointsByTree` carries when the source is a page rather than a log
-(likely the page's own talent string totals; **untested**).
+### 2.3 Skeleton from the page (D5)
 
-### 2.2 Skeleton from the page (D5)
+The adapter serializes current sim state to a `RaidSimRequest` protojson
+**without `simOptions`** (preserving the engine's rule that the runner injects
+seed/iterations after the cache key is formed — PLAN.md §7 [R6]). Upstream's
+`Sim.makeRaidSimRequest` (`ui/core/sim.ts:246`) is the reference; inside the
+fork we may be able to call it directly. Consequence: ticket 72's APL problem
+does not exist on this surface — the page's own request is what the user's
+Simulate button runs, so there is nothing to lift or repair.
 
-The engine takes `Deps.raidSimSkeleton` as a value — carry-forward ticket 72
-already establishes that an externally supplied skeleton "flows through
-untouched" and is hashed by value, so cache behaviour is correct for free
-(ticket 72, "Architectural constraint: no fourth seam").
+### 2.4 `WasmSimRunner`
 
-The adapter builds that value from the site: serialize the current sim state to
-a `RaidSimRequest` protojson **without `simOptions`** (matching the engine's
-rule that the runner injects those after the cache key is computed — PLAN.md
-§7 [R6]). Upstream's `Sim.makeRaidSimRequest` (`ui/core/sim.ts:246`) is the
-reference for what "current sim state" means; whether we can call it directly
-or need a trimmed variant is an implementation detail to settle in the spike.
+Implements the `SimRunner` port over `WorkerPool.raidSimAsync`
+([research-sim-execution.md](research/research-sim-execution.md)): inject
+`simOptions` (fixed seed — `SimOptions.random_seed` nonzero is honored),
+submit, map `raidMetrics.dps.avg/stdev` to the engine's observation shape.
+Facts this leans on: there is **no bulk RPC** — upstream's own Batch tab loops
+one ordinary sim per combination client-side, so the per-candidate loop is
+the native idiom; `WorkerPool` runs ≤4 WASM workers and streams progress per
+request, mapping directly onto the engine's `simming {done, total}` progress
+events. Inside the fork the request can be upstream's own proto object
+end-to-end; the protojson boundary our CLI needed disappears with the
+dependency.
 
-Consequence worth stating: **the APL problem from ticket 72 does not exist on
-this surface.** The page's own request is what the user's Simulate button runs,
-so there is no `TypeSimple`-without-APL lift to repair.
+### 2.5 Store, EP weights, universe data, maxPhase
 
-### 2.3 `WasmSimRunner`
-
-Implements the `SimRunner` port (`version()`, `run(req, {seed, iterations})`).
-Internally: convert the protojson record to upstream's `RaidSimRequest` proto
-(`fromJson`), inject `simOptions` (fixed seed — supported, `SimOptions.
-random_seed` nonzero is honored, [research-sim-execution.md](research/research-sim-execution.md) §4),
-submit via `WorkerPool.raidSimAsync(request, onProgress)`, and map the result's
-`raidMetrics.dps.avg/stdev` to `SimObservation` the same way `CliSimRunner`
-parses the CLI output.
-
-Key facts this leans on (all from
-[research-sim-execution.md](research/research-sim-execution.md)):
-
-- There is **no bulk RPC**. Upstream's own Batch tab loops one ordinary sim per
-  combination client-side. Our per-candidate loop is therefore exactly the
-  native idiom of this codebase, not an abuse of it.
-- `WorkerPool` load-balances across up to
-  `min(4, floor(hardwareConcurrency / 2))` WASM workers; progress streams per
-  request. Our `Progress.simming {done, total}` maps onto that directly.
-- `version()` is a build constant in WASM — no per-run cost (the CLI adapter's
-  per-run `version()` spawn, flagged in compute-topology §2, is simply not
-  reproduced).
-
-Boundary rule: **their protos stay on their side of the adapter.** Core's
-`RaidSimRequest` is deliberately an opaque `Readonly<Record<string, unknown>>`;
-the adapter converts at the edge. Do not try to unify our protobuf-es
-generated types with theirs — structural compatibility at the JSON boundary is
-the contract, same as with the CLI.
-
-### 2.4 Store, EP weights, universe data
-
-- **Store:** `MemoryStore` (already pure, already used by every test). Cache
-  lives for the page session; per-sim dedupe within a run still works, which is
-  where the real savings are. IndexedDB is a later nicety, not scoped here.
-- **EP weights:** our committed per-spec weights ship with the tab (they feed
-  the prefilter and gem fill only — sims produce the numbers). Wiring
-  `player.getEpWeights()` in as an option is future work; note ret has EP
-  weights **only at p2** today, which §7 picks up.
+- **Store:** ported `MemoryStore`, canonical-JSON string keys (D4). Cache
+  lives for the page session; per-sim dedupe within and across runs is where
+  the savings are. IndexedDB is a later nicety, not scoped.
+- **EP weights:** our committed per-spec weights, copied into the fork's
+  `data/` (they feed the prefilter and gem fill only — sims produce the
+  numbers). Ret has weights **only at p2** today; §7 picks that up.
 - **Universe/pool data:** the committed `data/universes/<spec>-p<N>.json`
-  files (99–534 KB each) bundle into the tab as static JSON. They carry
-  `bisTags` and `source` per row, so the shopping list's tags and raid filter
-  come for free.
-- **Item metadata:** core currently static-imports `data/items/index.json`
-  (**6.8 MB**) in `items.ts`. Do not ship that to a page that already loaded
-  upstream's `db.json`. §3 makes the metadata injectable; the browser adapter
-  derives it from the site's own `Database` at runtime. (Alignment caveat: our
-  universes were generated from the pinned `db.json`; while the fork sits on
-  the same pin this is exact. After any future rebase, re-check.)
-
-### 2.5 maxPhase and spec gating
-
-`maxPhase` is a control inside the tab, defaulting to upstream's
-`CURRENT_PHASE` — which, uniquely on this surface, is available directly from
-the host bundle rather than via our lockfile sync. The tab renders only for
-specs with universe data (ret, feral); other specs get the standard "not yet
-implemented" affordance the site already uses for unfinished specs.
+  files (99–534 KB) copy into the fork and bundle as static JSON. They carry
+  `bisTags` and `source` per row — tags and raid filter come for free.
+  Copies are provenance-stamped (source repo commit) like the ported code.
+- **maxPhase:** a control inside the tab, defaulting to upstream's
+  `CURRENT_PHASE` — read directly from the host bundle here, no lockfile sync
+  needed. The tab renders only for specs with universe data (ret, feral).
 
 ---
 
-## 3. Changes required in this repo (`packages/core`)
+## 3. The drift problem D3 accepts, and its mitigations
 
-All on a normal feature branch here, gated by `pnpm verify`. Three items, in
-dependency order:
+After the port, ranking logic exists twice: `packages/core` (reference
+implementation, full test suite, drives the CLI and the standalone-app plan)
+and the fork's `engine/` (the shipping copy for the tab). Divergence is the
+cost of a self-contained fork, accepted deliberately. Mitigations, in order
+of force:
 
-1. **Runtime-agnostic sha256 (D4).** Replace the two `node:crypto` imports
-   (`content-hash.ts`, `seams/sim-runner.ts`) with a bundled sync
-   implementation. No signature changes.
-2. **Injectable item metadata.** `items.ts`'s module-level 6.8 MB JSON import
-   becomes a constructor/parameter-supplied provider; the CLI keeps loading the
-   committed index, the browser adapter supplies a `Database`-backed one.
-   This is the largest refactor in the plan and its blast radius (who reads
-   `items.ts` state, and when) is **unmeasured** — first task of the slice is
-   to measure it.
-3. **Browser-clean entry path.** `index.ts` must not transitively pull
-   `cli-sim-runner.ts`, `store.ts`'s `SqliteStore`, or `cli.ts`. Likely a
-   subpath-export split (`.` pure, `./node` for Node adapters). Enforced by a
-   lint rule or a build check, not by convention — same spirit as the existing
-   purity lint (PLAN.md §4).
+1. **E-W3, fixture parity, run fork-side:** the ported engine + ported
+   `RecordedSimRunner` must reproduce the committed slamaltman fixture
+   ranking — same deltas — from the same recorded observations. This is a
+   test in the fork's own test setup, so it travels with the fork and fails
+   loudly if a port edit changes behaviour.
+2. **`engine/PROVENANCE.md`:** every ported file maps to its
+   `packages/core` source file @ commit. A change to either side that matters
+   updates the map or is a conscious fork.
+3. **Design changes route through here first** (§1 "locked"): structure is
+   decided once, then applied to both copies.
+4. **The inversion is the end state:** once the fork's engine is proven, this
+   repo consumes the fork (nested clone + lockfile) for the browser runner,
+   and the duplicated modules here become candidates for retirement. That
+   reconciliation is future work (§9 slice 7), not part of the detour.
 
-Explicitly **not** changed: the eight stages, the seams' shapes, `applyView`,
-the statistics, the hash field list. If the tab appears to need a change
-there, stop and bring it back for design review.
-
-Nice-to-have alongside (small, independent): add `AbortSignal` to the
-`SimRunner` port while we are near it — browser tabs close mid-run, upstream
-exports `abortById` for exactly this, and compute-topology §2 already
-recommended adding it before any browser adapter exists. Breaking port change,
-so it rides with item 3's branch, not after.
+Changes required in `packages/core` for this detour: **none.** The
+browser-clean refactor from rev 1 of this plan (sha256 swap, injectable item
+metadata, entry-path split) is dissolved by D3/D4 — adaptation happens in the
+fork copy, where we are free to edit. The `AbortSignal` recommendation from
+compute-topology §2 applies to the *fork's* `SimRunner` port (browser tabs
+close mid-run; upstream exports `abortById`); adding it to this repo's port
+stays a good idea but is no longer on this detour's path.
 
 ---
 
@@ -247,9 +218,9 @@ Placement and mechanics, per
   in practice means "last content tab".
 - **Sub-tabs:** the Bootstrap `nav-tabs`/`tab-pane` strip, hand-rolled the way
   `DetailedResults` does it (no reusable sub-tab component exists upstream —
-  copy the idiom, not abstract it). Sub-tab 1: **Shopping List** — the ranked
-  shortlist via `applyView` (BiS tags, `source` labels, owned greyed, cutoff
-  behind an expand). Sub-tabs 2+: one per gear slot with that slot's
+  copy the idiom, don't abstract it). Sub-tab 1: **Shopping List** — the
+  ranked shortlist via `applyView` (BiS tags, `source` labels, owned greyed,
+  cutoff behind an expand). Sub-tabs 2+: one per gear slot with that slot's
   candidates and deltas.
 - **Idiom:** tsx-vanilla (`element`/`fragment` JSX factories to real DOM),
   class components, `TypedEvent` subscriptions. No React habits.
@@ -262,55 +233,80 @@ Placement and mechanics, per
   which emitter covers the rest of the settings is an implementation lookup.
 - **Numbers honesty:** the baseline row is labelled as the user's own current
   setup simmed with their own settings. The assumptions drawer carries seed,
-  iterations, `maxPhase`, engine version, and sim version, same as the CLI
-  report.
+  iterations, `maxPhase`, engine provenance (fork commit), and sim version.
 
 ---
 
 ## 5. What runs when the user clicks Run
 
-1. Adapter serializes current settings → skeleton; reads gear → `LoggedGear`.
-2. `rankUpgrades` runs exactly as on the CLI: pool filtered by `maxPhase`,
+1. Adapter serializes current settings → skeleton; reads gear from the page.
+2. The ported engine runs exactly as on the CLI: pool filtered by `maxPhase`,
    player-aware EP prefilter, gem/meta repair, baseline + candidates simmed
    through `WasmSimRunner` with a fixed seed, ranking + cutoff.
-3. Per-sim cache (`MemoryStore`) dedupes identical requests within and across
-   runs in the session.
-4. `applyView` renders the shopping list; slot sub-tabs are views over the same
-   `Ranking` — no re-sim on any view toggle (PLAN.md §2's "no view changes a
-   number" applies verbatim).
+3. Per-sim cache (`MemoryStore`, string keys) dedupes identical requests
+   within and across runs in the session.
+4. `applyView` renders the shopping list; slot sub-tabs are views over the
+   same `Ranking` — no re-sim on any view toggle (PLAN.md §2's "no view
+   changes a number" applies verbatim).
 
 Budget note (unmeasured, drives E-W2): a default run is baseline + ~80
 candidates after the prefilter. At 3,000 iterations on ≤4 WASM workers the
 wall-clock is unknown — could be fine, could force a tighter prefilter or a
 lower default candidate count. **Measure before tuning anything.**
 
+<!-- E-W2 results land here: wall-clock per candidate at 3,000 and 5,000
+     iterations, worker count, machine. -->
+
 ---
 
 ## 6. WCL gear-only import (separate slice, D6)
 
-Goal: a new entry in the site's Import menu — "Warcraft Logs (gear only)" —
-that takes a report URL + fight, fetches the player's logged gear, and applies
-**only** gear, leaving talents/rotation/buffs/consumes untouched.
+**What this is for, plainly.** The tab ranks upgrades against whatever gear
+is on the Gear tab. Today the user sets that gear by hand-picking items in
+the gear picker. The import slice adds a shortcut: *load the gear you
+actually wore in last night's raid, straight from your Warcraft Logs log* —
+so the ranking starts from your real character, not from a hand-built
+approximation. Everything else on the page (talents, rotation, buffs,
+consumes) stays exactly as the user set it; only the 17 equipment slots
+change.
 
-- **Apply path (proven upstream):** the category-filtered import API —
-  `player.fromProto(eventID, proto, [SimSettingCategories.Gear])` — or
-  `player.setGear(...)` directly
-  ([research-import-wcl.md](research/research-import-wcl.md) §2). No engine
-  code involved at all; this slice is pure fork-side UI + WCL fetch.
-- **Fetch path:** upstream's raid-sim WCL importer is the working reference —
-  browser-direct GraphQL to `classic.warcraftlogs.com/api/v2/client` — but its
-  spec classifier throws on Anniversary data
-  (`take-list.md` §1), so the gear-extraction query shapes are reusable and the
-  classification is not needed (gear-only import doesn't classify anything).
-- **Credentials:** local dev uses the personal WCL client id/secret via a
-  gitignored local config; they never enter source or bundle. This works
-  because WCL's classic API demonstrably accepts browser-origin
-  client-credential calls (upstream ships exactly that). What a *published*
-  build would use is a PR-time question (§9) — most likely upstream's own
-  existing credential, which is their decision to make.
-- **Shelve condition, stated up front:** if applying gear-only through the
-  category filter turns out to disturb other settings in practice (E-W4), this
-  slice is shelved per the original ask — not redesigned into a full importer.
+**The two possible input shapes, plainly:**
+
+- **Report URL** (chosen for v1): the user pastes a link to a specific log —
+  the thing your guild posts in Discord after raid, e.g.
+  `classic.warcraftlogs.com/reports/AbCd1234#fight=5` — picks their character
+  from that report's roster, and their gear *as worn in that fight* is
+  applied. Requires having a log link at hand. This is the input shape
+  upstream's own raid-sim WCL importer already uses, so the fetch code
+  (queries, auth flow) has a working in-repo reference.
+- **Character-first** (deferred): the user types region/realm/name and we
+  search WCL for their recent kills, pick the latest, and read gear from it.
+  No link needed — but it needs more WCL API vocabulary (character lookup,
+  recent-reports/rankings queries, "which fight counts" rules), which exists
+  as spec in PLAN.md §5.2 but is unbuilt anywhere. Deferring it costs the
+  user only "go find your log link".
+
+**How gear-only application works:** upstream's import machinery can apply a
+settings proto *filtered by category* —
+`player.fromProto(eventID, proto, [SimSettingCategories.Gear])` — which sets
+equipment and touches nothing else; `player.setGear(...)` is the even more
+direct single-purpose call
+([research-import-wcl.md](research/research-import-wcl.md) §2). No shipped
+importer exposes this today, but the mechanism is real, exercised code (the
+share-link importer uses the same category filter via its `?i=` parameter).
+Follow-up flagged by research: read `bulk_gear_json_importer.tsx` — its name
+suggests an existing gear-only application path worth copying.
+
+**Credentials:** local dev uses the personal WCL client id/secret via a
+gitignored local config; they never enter source or bundle. Browser-direct
+WCL calls demonstrably work (upstream ships exactly that, with their own
+embedded credential). What a *published* build would use is a PR-time
+question — most likely upstream's existing credential, which is their
+decision.
+
+**Shelve condition, stated up front:** if gear-only application in practice
+disturbs other settings (E-W4's proto diff says so), this slice is shelved
+per the original ask — not redesigned into a full importer.
 
 ---
 
@@ -320,18 +316,17 @@ that takes a report URL + fight, fetches the player's logged gear, and applies
   `bisTags` rows each — but wowsims has no ret p3 curated set (PLAN.md Stage 1
   notes), so those tags trace to p2-era membership and need a refresh against
   a current Wowhead/community **P3 ret BiS list** before the tab shows them at
-  `maxPhase: 3`. This is the "ret bis list for phase 3" item from the ask.
-  Deliverable: refreshed `bisTags` in `data/universes/ret-p3.json` +
-  provenance note, run through `sme-rank-review`.
+  `maxPhase: 3`. Deliverable: refreshed `bisTags` in
+  `data/universes/ret-p3.json` + provenance note, run through
+  `sme-rank-review`.
 - **Ret p3 EP weights.** Only p2 exists (`data/presets/ret/p2.ep-weights.json`,
   and it is missing `PseudoStatMainHandDps` — PLAN.md §16 item 3, fix while
   here). EP gates the prefilter and gem fill, so p3 rankings with p2 weights
-  are *usable but degraded*; a p3 set (from upstream presets or a stat-weights
-  run) is wanted before calling ret-at-p3 done.
+  are *usable but degraded*; produce a p3 set before calling ret-at-p3 done.
 - **Feral:** p2–p3 universes exist; nothing new needed for v1.
 - **Adding a spec later** = universe file + EP weights + `bisTags`. The site
-  supplies everything else (settings, APL, spec identity), which is a strictly
-  smaller per-spec cost than the standalone app's (no preset skeleton needed).
+  supplies everything else (settings, APL, spec identity) — a strictly
+  smaller per-spec cost than the standalone app's.
 
 ---
 
@@ -341,50 +336,54 @@ that takes a report URL + fight, fetches the player's logged gear, and applies
 |---|---|---|---|
 | E-W1 | Does WASM agree with native? | Build `lib.wasm` at the pin (`make wasm`), run `test/fixtures/slamaltman.raid-sim-request.json` seed 42 through it, diff against native `2042.3926…` (compute-topology §7 E1 — unchanged, still unrun) | Slice 3 results shown to anyone |
 | E-W2 | Wall-clock per candidate in-browser | Time baseline + 20 candidates at 3,000 and 5,000 iterations on this machine, ≤4 workers | D7's default; candidate-count budget |
-| E-W3 | Is the core entry path actually browser-clean? | Build check in this repo: bundle `packages/core`'s pure entry with a browser target and fail on any `node:` resolution | §3 slice merge |
-| E-W4 | Does gear-only import disturb settings? | Apply a category-filtered import on a configured page; diff full `IndividualSimSettings` proto before/after (gear fields excepted) | §6 slice ships vs shelves |
+| E-W3 | Did the port preserve behaviour? | Fork-side test: ported engine + ported `RecordedSimRunner` reproduces the committed slamaltman fixture ranking (same deltas) from the same recorded observations | Slice 2 merge; re-run on every fork engine edit |
+| E-W4 | Does gear-only import disturb settings? | Apply a category-filtered import on a configured page; diff the full settings proto before/after (gear fields excepted) | §6 slice ships vs shelves |
 
 ---
 
 ## 9. Delivery slices, in order
 
 Slices, not PLAN.md Stages — this detour does not renumber the main plan.
-Each slice is a normal feature branch (here) or fork branch (there); engine
-slices gate on `pnpm verify` as always.
+Fork slices are branches in the nested clone; anything touching this repo is
+a normal feature branch gated by `pnpm verify`.
 
-1. **Core browser-clean** (this repo): sha256 swap, injectable item metadata,
-   entry-path split, `AbortSignal` on the `SimRunner` port, E-W3 build check.
-   *Done when:* `pnpm verify` green, E-W3 build check green in CI, and the CLI
-   produces the same ranking as before the refactor on the slamaltman fixture.
-2. **Fork scaffold**: personal fork at the pin, `feat/upgrades-tab`, empty
-   Upgrades tab registered with sub-tab strip, `file:` dependency wired,
-   local build runs (`WATCH=1 make devmode`; full build needs Go ≥1.25 +
-   protoc + Node ≥22).
+1. **Fork scaffold**: personal fork created (user action: fork on GitHub),
+   nested clone at `vendor/tbc-new-fork/` checked out to the pin on branch
+   `feat/upgrades-tab`; `data/wowsims-fork.lock.json` committed here; empty
+   Upgrades tab registered with sub-tab strip; local build runs
+   (`WATCH=1 make devmode`; full build needs Go ≥1.25 + protoc + Node ≥22).
    *Done when:* the site builds and serves locally with the new tab visible
-   after Batch, and a module from `packages/core` is imported and executes in
-   the page.
+   after Batch, and the lockfile records the fork branch + commit.
+2. **Engine port**: copy the §2.1 port surface into
+   `upgrades/engine/`, adapt (Database-backed item metadata, string cache
+   keys, drop WCL-compensation), write `PROVENANCE.md`, port the recorded
+   runner + fixture, stand up E-W3 in the fork's test setup.
+   *Done when:* E-W3 passes fork-side — the ported engine reproduces the
+   slamaltman fixture ranking from recorded observations.
 3. **Adapters + first ranking**: `PlayerGearSource`, skeleton serialization,
-   `WasmSimRunner`, `Deps` assembly; ret ranking renders end-to-end. E-W1 and
-   E-W2 run here.
+   `WasmSimRunner`; ret ranking renders end-to-end in the tab. E-W1 and E-W2
+   run here.
    *Done when:* a ret ranking completes in the tab from the page's own gear
-   and settings, E-W1 is recorded with the deltas inside the 3.4 DPS cutoff,
-   and E-W2's timings are written into this document's §5 budget note.
+   and settings, E-W1 is recorded with deltas inside the 3.4 DPS cutoff, and
+   E-W2's timings are written into §5's budget note.
 4. **UI completion**: shopping-list polish (tags, sources, owned, cutoff),
    per-slot sub-tabs, staleness, progress, assumptions drawer.
-   *Done when:* every `ViewOptions` behaviour listed in §4 works without
-   triggering a sim, and a gear change marks results stale.
-5. **WCL gear-only importer** (independent of 3–4 once 2 exists; E-W4 decides
-   ship-or-shelve).
+   *Done when:* every view behaviour listed in §4 works without triggering a
+   sim, and a gear change marks results stale.
+5. **WCL gear-only importer** (independent of 3–4 once 1 exists; E-W4
+   decides ship-or-shelve).
    *Done when:* E-W4's proto diff is empty outside gear fields, or the slice
    is shelved with the diff recorded.
-6. **Data**: ret p3 `bisTags` refresh + p3 EP weights (+ the
+6. **Data** (this repo): ret p3 `bisTags` refresh + p3 EP weights (+ the
    `PseudoStatMainHandDps` fix); `sme-rank-review` on the refreshed ranking.
    *Done when:* refreshed p3 tags carry a provenance note, EP files exist for
    p3, and the `sme-rank-review` verdict is filed.
 7. **Later, explicitly out of scope now**: more specs; IndexedDB cache;
-   character-first WCL discovery; porting the tab into the downloadable local
-   sim (their HTTP-worker distribution shares the `WorkerInterface`, so the
-   tab *should* carry over unchanged — **hypothesis, untested**); and the
+   character-first WCL discovery (§6); the **reconciliation** — this repo
+   consuming the fork's engine for the standalone app's browser runner, and
+   retiring duplicated modules here; porting the tab into the downloadable
+   local sim (their HTTP-worker distribution shares the `WorkerInterface`, so
+   the tab *should* carry over unchanged — **hypothesis, untested**); and the
    **PR checklist** — rebase onto `master`, re-verify every pin-scoped fact,
    iteration caps to upstream's web limits, credential story, upstream code
    style + review.
@@ -396,26 +395,27 @@ slices gate on `pnpm verify` as always.
 | Risk | Impact | Mitigation |
 |---|---|---|
 | WASM ≠ native numerically | Every number on the tab inherits it | E-W1 before anything ships; it was already the gate on compute-topology's plan and has still never been run |
+| **Port drift** — fork engine and `packages/core` diverge silently | Two tools, two answers, no explanation | §3's ladder: E-W3 fixture parity fork-side, `PROVENANCE.md`, design changes routed here first, reconciliation as the end state |
 | Browser run too slow at default settings | Tab feels broken; users bail mid-run | E-W2 sizes the budget; prefilter and iteration control are the knobs; skeleton-first rendering keeps waits legible |
-| Upstream drift (112 commits and counting) | Fork bit-rots; rebase cost grows | Deliberate: stay at the pin while local (D2); rebase is a single named PR-checklist item, not continuous |
-| `items.ts` refactor ripples wider than expected | Slice 1 balloons | Measure the import graph first; the fallback is bundling a *subset* index (pool + wearable items) instead of injecting, at a bundle-size cost |
-| Two `db.json` vintages after a future rebase | Universe metadata subtly disagrees with the page's Database | Non-issue at the pin; named re-check on the PR checklist |
+| Upstream drift (112 commits and counting) | Fork bit-rots; rebase cost grows | Deliberate: stay at the pin while local (D2); rebase is a single named PR-checklist item |
+| Two `db.json` vintages after a future rebase | Universe metadata subtly disagrees with the page's `Database` | Non-issue at the pin; named re-check on the PR checklist |
 | Ret p3 tags/EP stale or missing | Shopping list at p3 shows 2022-era BiS pins and mis-gemmed candidates | Slice 6 before advertising p3; tags degrade to empty rather than block (PLAN.md §4.1 behaviour) |
 | Gear-only import quietly touches settings | Violates the ask's core constraint | E-W4 is the ship/shelve gate, decided by proto diff, not by eyeballing the UI |
 | tsx-vanilla unfamiliarity | React idioms leak in; upstream would reject | Copy `DetailedResults`/`BulkTab` patterns; keep tab code boring |
+| Nested-repo footguns (outer git seeing the inner tree) | Accidental adds, confusing status | `vendor/` is already gitignored; verify the ignore covers the clone before first commit inside it |
 
 ---
 
 ## 11. Relationship to the standing plan
 
-- PLAN.md Stages are untouched. Stage 3 (our own web shell) remains a separate
-  deliverable; this tab neither replaces it nor depends on it.
+- PLAN.md Stages are untouched. Stage 3 (our own web shell) remains a
+  separate deliverable; this tab neither replaces it nor depends on it.
 - Carry-forward ticket 72 (user-supplied wowsims setup): D5 implements its
-  central mechanism (externally supplied skeleton) on a surface where the APL
-  lift problem doesn't arise. The ticket itself stays open — its CLI/paste-box
-  scope is not delivered by this detour — but slice 3's serialization work is
-  direct prior art for it and should be noted on the ticket when it exists.
-- `docs/plans/compute-topology.md`: this plan executes its migration rows 2–4
-  (AbortSignal, runtime-agnostic hashing, a browser SimRunner) in the fork
-  context instead of the standalone-app context. Its E1 experiment is E-W1
-  here, unchanged.
+  central idea — the user's real settings as the skeleton — on a surface
+  where the APL lift problem doesn't arise. The ticket stays open for the
+  CLI/paste-box scope; slice 3's serialization work is direct prior art and
+  should be noted on the ticket when it exists.
+- `docs/plans/compute-topology.md`: this plan realizes its "browser
+  SimRunner" row inside the fork instead of the standalone app. Its E1
+  experiment is E-W1 here, unchanged. Its `simCacheKey`/`AbortSignal` items
+  stay open for `packages/core` but are off this detour's path (§3).
