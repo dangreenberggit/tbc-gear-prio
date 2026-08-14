@@ -54,22 +54,42 @@ Branch `feat/ret-p3-data`, worktree
   landed 26 minutes later in `5c7491899` ("missed jsons"). A pin bump aimed at
   the curated set must reach `5c7491899` or later. Committed as `90cd3d8`.
 
-## Slice 6b — p3 pin bump + regen: IN FLIGHT
+## Slice 6b — p3 pin bump + regen: DONE, orchestrator-verified
 
 Dispatched on explicit user approval ("fast-follow now, as its own slice").
-Same worktree and branch as slice 6. Commits so far:
+Same worktree and branch as slice 6.
 
 - `621b8af` Vendor ret P3 gear set without moving the main pin
 - `7aaff35` Wire ret P3 gear set into bisTags, regen p3-p5
+- `896c6d8` Score ret p3+ universes with p3 EP weights, not p2's
+- `d96c044` Guard curated-item membership by the item's own phase
+- `cd20471` Record slice 6b handoff
+- `9004654` Correct the feral arithmetic in the 6b handoff (orchestrator)
 
-**Watch item for whoever reviews this:** at last check the worker's working
-tree also showed `data/universes/feral-p2.json`, `feral-p2.report.json` and
-`scripts/assemble_universe.py` modified. Its brief said to do the EP wiring
-**only** if feral's output stays byte-identical, and to report rather than
-regress it. Feral universe files changing is exactly the condition that brief
-called out. **Do not accept the slice without checking whether that change is
-intentional and justified**; a feral regression is worse than a deferred
-improvement.
+**The earlier feral watch item is resolved.** The final diff does not touch any
+committed feral artifact; the worker reverted its exploratory regen. Verified
+by the orchestrator rather than accepted on the worker's word:
+
+| Check | Method | Result |
+| --- | --- | --- |
+| Tags actually moved | count `bisSets` per universe | ret-p3/p4/p5 now `["p3"]`×15; ret-p2 stays `["p2"]`×15 |
+| Tags match upstream | diff tagged ids against `5c7491899`'s set | 15/16 match, **0** spurious; the gap (`27484`) is absent from the pool at p2 *and* p3, so it is a pool-membership question, not a tagging bug |
+| Phase-guard fix is real | look up `32574` per universe | absent from ret-p2, present at ret-p3 (phase 3); phase-1 `33122` correctly still at p2 |
+| Artifact reproducible | regen ret-p3, compare to committed | **byte-identical** |
+| `pnpm verify` | run independently in the worktree | **exit 0** |
+| Pin discipline (D2) | read the lockfile diff | per-file `PER_FILE_PIN` override; main pin unmoved |
+| p3 vs p3Bulwark | upstream `presets.ts` build wiring | `P3_GEAR_PRESET` is in `P3_PRESET_BUILD_RET`; Bulwark has no `PresetBuild`. Settled by upstream, not inferred |
+
+**One correction made.** The worker's handoff implied the phase guard moves
+feral-p2 from 256 to 253 entries. It does not: the committed file already holds
+253, and regenerating at the **base** commit reproduces the same 256-vs-253 gap
+and the same five differing entries. That drift is pre-existing staleness in
+`curatedSets` values (not membership) and predates this branch. The deferral
+decision was right; only the arithmetic was wrong. Corrected in `9004654`.
+
+**Carried forward (needs a feral-owning session):** `feral-p2.json` is stale
+against its own generator — five entries differ, e.g. `29994` regen
+`['p2_6p','p3_6p']` vs committed `['p2_6p']`. Unrelated to this detour.
 
 ## Not started
 

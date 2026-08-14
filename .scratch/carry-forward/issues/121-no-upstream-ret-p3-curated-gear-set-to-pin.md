@@ -1,4 +1,4 @@
-Status: open
+Status: resolved via Option 1 — 2026-08-14 (pending review; see "Resolution")
 Type: data gap (design decision if pursued)
 Origin: ret catch-up round, 2026-08-11
 (`.scratch/set-bonus-value/ret-catchup/01-survey.md` §3; W2b cancelled in
@@ -57,10 +57,50 @@ subordinate to the claim it contradicts), and the observation that `bisStale`
 can only detect a curated set as *older*, never *absent*. Not a duplicate;
 not merging.
 
+## Resolution — Option 1 fired, 2026-08-14
+
+**Upstream shipped a ret P3 set.** This ticket's Option 1 ("wait for upstream…
+the mechanical pin+regen recipe applies") is what happened, ~2 days after the
+ticket was filed:
+
+- `ac0ed034b` (2026-08-13T18:15:10Z, "RetP3 Gear and Presets") — adds
+  `P3_EP_PRESET` to `ui/paladin/retribution/presets.ts`, **no gear JSONs**.
+- `5c7491899` (2026-08-13T18:41:45Z, "missed jsons") — adds
+  `gear_sets/p3.gear.json` and `p3Bulwark.gear.json`. **This is the commit that
+  matters for this ticket**; a bump aimed at `ac0ed034b` would fetch weights
+  and leave the tags where they were.
+
+Done on branch `feat/ret-p3-data` (commits `621b8af`, `7aaff35`, `896c6d8`,
+`d96c044`):
+
+- `ret_p3.gear.json` vendored via a new **per-file pin override** in
+  `sync_wowsims.py`, so the main `8aa378b3` pin stays put — plan decision D2
+  keeps it deliberate, and nothing else changed between the two commits.
+- Wired into `SPEC_PROFILES["ret"].gear_sets`; ret-p3/p4/p5 regenerated.
+- `p3.gear.json` chosen over `p3Bulwark.gear.json`: upstream's own
+  `P3_PRESET_BUILD_RET` wires `P3_GEAR_PRESET`, and Bulwark has no
+  `PresetBuild`. Settled by upstream's wiring, not by our inference.
+- Ret p3 EP weights now score p3+ universes (`p3.ep-weights.json`), replacing
+  the p2 weights all higher phases used.
+
+Verified by the orchestrator, not accepted on report: ret-p3/p4/p5 tagged rows
+now carry `bisSets: ["p3"]` (was `["p2"]`); the tagged ids match upstream's set
+15/16 with **zero** spurious tags; and a fresh regen of ret-p3 is byte-identical
+to the committed artifact.
+
+The one untagged member, `27484`, is **absent from the candidate pool** at p2
+and p3 alike, so it is a pool-membership question rather than a tagging bug —
+and it is not a regression, since it behaved the same way before.
+
+**The reference-gear caveat carried in from review round 3 (ADR-0024's +11.31
+Lightbringer 2pc) is NOT addressed** by this work and remains open.
+
 ## Acceptance criteria (whichever option lands)
 
-- [ ] Ret max-phase-3 BiS tags come from a genuinely-P3 list, or this ticket
-      is re-closed as wontfix with the degrade reaffirmed.
-- [ ] `CURATED_SET_PHASE` (both the Python source and the gate-checked TS
-      mirror) covers the new label if one is introduced.
-- [ ] `pnpm verify` green.
+- [x] Ret max-phase-3 BiS tags come from a genuinely-P3 list — upstream's own,
+      vendored at `5c7491899`.
+- [x] `CURATED_SET_PHASE` covers the label — `"p3": 3` already existed;
+      verified rather than assumed, and `curated-set-phase:check` passes.
+- [x] `pnpm verify` green — exit 0, run independently in the worktree.
+- [ ] ADR-0024 reference-gear caveat (carried in from round 3) — still open.
+- [ ] `sme-rank-review` on the refreshed ranking — plan §9.6's gate, not yet run.
