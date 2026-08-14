@@ -1572,17 +1572,24 @@ def assemble(
             it.get("phase") or 99
         ) <= max_phase
         list_only = iid in wowhead_list_only and iid in wowhead_list_ids
-        # No phase guard: these are persistent non-raid items whose own phase is
-        # not the interesting fact about them. Everbloom Idol is phase 1 and
-        # still what a cat wants at phase 2.
         # A curated item whose db source names a real zone (raid/heroic) keeps
         # whatever scope rules that source implies -- several point at
         # five-man dungeons outside PHASE_HEROIC_DUNGEONS, and admitting those
         # is ticket 17's question, not this one. `curated_unsourced` (no
         # source at all) and `curated_list_only` (a real but zone-less source)
         # are the two shapes where the curated claim itself is what grants
-        # membership.
-        curated = iid in curated_unsourced or iid in curated_list_only
+        # membership. Guarded the same way as in_heroic/in_rep_phase below --
+        # "no phase guard" originally meant "an earlier-phase persistent item
+        # (Everbloom Idol, phase 1) still belongs at a later phase," not "any
+        # phase, however high." That distinction was never exercised until
+        # ret_p3.gear.json (slice 6b) vendored a phase-3 crafted item
+        # (32574 Bindings of Lightning Reflexes) with no raid/heroic/rep
+        # source: without this guard it leaked into ret-p2.json even though
+        # cli.ts's loadUniversePool trusts a universe file's own membership as
+        # already phase-scoped and never re-applies filterPoolByPhase.
+        curated = (
+            iid in curated_unsourced or iid in curated_list_only
+        ) and int(it.get("phase") or 99) <= max_phase
         if (
             not in_phase
             and not in_heroic

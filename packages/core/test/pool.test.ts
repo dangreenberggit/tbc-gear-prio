@@ -438,7 +438,17 @@ describe("data/universes/ret-p2.json", () => {
     // `{kind: "crafted"}`, all wowsims-curated, none independently a member
     // because their own Wowhead row uses "Crafting:" prose the parser does
     // not read (ticket 45 leaves that prose unmodeled by design).
-    expect(entries.length).toBe(240);
+    // 240 -> 241: ret_p3.gear.json (slice 6b, 5c7491899) widens the curated
+    // union, admitting +33122 Cloak of Darkness (phase 1, so it clears the
+    // phase guard curated_unsourced/curated_list_only now enforce -- see
+    // assemble_universe.py's `curated` check). A second new member,
+    // 32574 Bindings of Lightning Reflexes, is phase 3 and correctly does
+    // NOT appear here: that same guard is what excludes it from a p2
+    // universe. Before the guard existed it leaked through regardless of its
+    // own phase (pool-file.test.ts caught it -- cli.ts's loadUniversePool
+    // trusts a universe file's own membership as already phase-scoped and
+    // never re-applies filterPoolByPhase).
+    expect(entries.length).toBe(241);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

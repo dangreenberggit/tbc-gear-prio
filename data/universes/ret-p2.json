@@ -4401,28 +4401,6 @@
       "curationHint": 80.03
     },
     {
-      "itemId": 32574,
-      "name": "Bindings of Lightning Reflexes",
-      "slot": "wrist",
-      "armorType": 3,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Leatherworking",
-          "recipeZone": "Black Temple",
-          "recipeBoss": "Patterns",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 70.3,
-      "curatedSets": [
-        "p3"
-      ]
-    },
-    {
       "itemId": 30026,
       "name": "Bands of the Celestial Archer",
       "slot": "wrist",

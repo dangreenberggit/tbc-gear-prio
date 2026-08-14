@@ -92,6 +92,7 @@ function wowsimsCuratedItemIds(): Set<number> {
     "ret_preraid.gear.json",
     "ret_p1.gear.json",
     "ret_p2.gear.json",
+    "ret_p3.gear.json",
   ]) {
     const gear = JSON.parse(
       readFileSync(join(root, "vendor/wowsims", file), "utf8")
@@ -103,18 +104,20 @@ function wowsimsCuratedItemIds(): Set<number> {
   return ids;
 }
 
-/** Measured present in ret-p3 at sub-phase 6 base (24/36 wowsims curated IDs). */
+/**
+ * Measured present in ret-p3 (40/44 wowsims curated IDs, re-measured after
+ * ret_p3.gear.json was vendored -- slice 6b, 5c7491899). The p3 set's own
+ * items resolve real sources the earlier p2-only union couldn't provide.
+ */
 const WOWSIMS_ADMITTED_IN_P3 = [
-  23537, 24259, 28430, 28608, 28745, 28757, 28779, 28795, 28830, 29071, 29073,
-  29075, 29383, 29947, 30022, 30055, 30061, 30098, 30104, 30106, 30129, 30644,
-  32087, 32461,
+  23522, 23537, 24259, 28176, 28429, 28430, 28608, 28745, 28757, 28779, 28795,
+  28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022, 30055, 30061,
+  30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905, 32087, 32235,
+  32332, 32366, 32461, 32526, 32574, 33122, 33173,
 ] as const;
 
 /** Still excluded at p3 — no resolvable source and/or below rare (see hardening handoff). */
-const WOWSIMS_NOT_YET_ADMITTED = [
-  23522, 27484, 27985, 28176, 28288, 28429, 29119, 29177, 30257, 30341, 30834,
-  33173,
-] as const;
+const WOWSIMS_NOT_YET_ADMITTED = [27484, 27985, 28288, 30341] as const;
 
 /**
  * Must stay OUT, each for a different enforced rule. The count assertion
@@ -221,7 +224,12 @@ describe("S6: bisTags do not affect pool membership", () => {
 
 describe("curated BiS tags name their source (carry-forward 47)", () => {
   const specSets: Record<string, string[]> = {
-    ret: ["ret_preraid.gear.json", "ret_p1.gear.json", "ret_p2.gear.json"],
+    ret: [
+      "ret_preraid.gear.json",
+      "ret_p1.gear.json",
+      "ret_p2.gear.json",
+      "ret_p3.gear.json",
+    ],
     feral: [
       "feral_preraid.gear.json",
       "feral_p2_6p.gear.json",
@@ -285,9 +293,11 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
     expect(justicarCrown?.curatedSets).toEqual(["p1"]);
     expect(justicarCrown?.bisTags).toBeUndefined();
 
+    // ret_p3.gear.json (slice 6b, 5c7491899) is the newest set vendored, so
+    // p5's degrade fallback names p3 now, not p2.
     for (const entry of p5) {
       if ((entry.bisTags ?? []).includes("BiS")) {
-        expect(entry.bisSets).toEqual(["p2"]);
+        expect(entry.bisSets).toEqual(["p3"]);
       }
     }
   });
@@ -315,17 +325,18 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
 
   it("keeps the ret and feral verdicts on the shared ring distinguishable", () => {
     // Shapeshifter's Signet is the item that opened the ticket. Upstream
-    // really does equip it in all three ret sets — it was never a cross-spec
-    // leak — so it keeps the tag, but now says which phase vouches for it.
-    // Feral curates it pre-raid only, so at p3 it carries no BiS claim there.
+    // really does equip it in all four ret sets (preraid/p1/p2/p3) — it was
+    // never a cross-spec leak — so it keeps the tag, but now says which phase
+    // vouches for it. Feral curates it pre-raid only, so at p3 it carries no
+    // BiS claim there.
     const ret = loadUniverse("data/universes/ret-p3.json").raw.entries.find(
       (e) => e.itemId === 30834
     );
     const feral = loadUniverse("data/universes/feral-p3.json").raw.entries.find(
       (e) => e.itemId === 30834
     );
-    expect(ret?.curatedSets).toEqual(["p1", "p2", "preraid"]);
-    expect(ret?.bisSets).toEqual(["p2"]);
+    expect(ret?.curatedSets).toEqual(["p1", "p2", "p3", "preraid"]);
+    expect(ret?.bisSets).toEqual(["p3"]);
     expect(feral?.curatedSets).toEqual(["preraid"]);
     expect(feral?.bisTags).toBeUndefined();
   });
@@ -631,45 +642,52 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it.skipIf(!hasWowsimsVendor)(
-    "loads wowsims curated gear sets from vendor (36 IDs)",
+    "loads wowsims curated gear sets from vendor (44 IDs)",
     () => {
       const wowsimsIds = wowsimsCuratedItemIds();
-      expect(wowsimsIds.size).toBe(36);
+      expect(wowsimsIds.size).toBe(44);
       for (const id of WOWSIMS_ADMITTED_IN_P3) {
         expect(wowsimsIds.has(id), `fixture id ${id}`).toBe(true);
       }
     }
   );
 
-  // Ticket 17's triage measured all 12 as phase 1, appearing on the Wowhead
-  // *pre-raid* list — BiS before you raid, which is why a P2+ universe
-  // omitting them is defensible. Deliberately not "they are dungeon/crafted
-  // so they are out of scope": content type is not the test, power at the
-  // tier is (see the ticket's 2026-08-02 correction).
+  // Ticket 17's triage measured the original 12 as phase 1, appearing on the
+  // Wowhead *pre-raid* list — BiS before you raid, which is why a P2+
+  // universe omitting them is defensible. Deliberately not "they are
+  // dungeon/crafted so they are out of scope": content type is not the test,
+  // power at the tier is (see the ticket's 2026-08-02 correction). Down to 4
+  // after ret_p3.gear.json was vendored (slice 6b) resolved sources for the
+  // other 8 -- the remaining 4 are still phase-1 heroic-dungeon drops or have
+  // no source db.json can resolve at all.
   it.todo(
-    "admits all 36 wowsims curated ret gear-set items — deferred: " +
+    "admits all 44 wowsims curated ret gear-set items — deferred: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
-      " are phase 1 pre-raid items (ticket 17 triage)"
+      " are phase 1 items with no resolvable phase-2+ source (ticket 17 triage)"
   );
 
   it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
-    // 30098 Razor-Scale Battlecloak: verified present in vendor/wowsims/ret_p2.gear.json
-    // and carrying bisTags in the regenerated data/universes/ret-p3.json.
-    const razorScale = raw.entries.find((e) => e.itemId === 30098);
-    expect(razorScale?.bisTags).toEqual(["BiS"]);
+    // 32235 Cursed Vision of Sargeras: verified present in
+    // vendor/wowsims/ret_p3.gear.json and carrying bisTags in the
+    // regenerated data/universes/ret-p3.json (slice 6b). Not the ticket's
+    // original example (30098 Razor-Scale Battlecloak): that item is only in
+    // ret_p2.gear.json, so it correctly lost the badge once a genuine p3 set
+    // existed to be the current curated phase instead of p2's degrade.
+    const cursedVision = raw.entries.find((e) => e.itemId === 32235);
+    expect(cursedVision?.bisTags).toEqual(["BiS"]);
 
     // Every curated member is still *admitted* — ticket 12's widening is about
     // membership and is unchanged, which `curatedSets` records. The `BiS`
     // claim itself is now phase-scoped (carry-forward 47): at p3 the current
-    // curated phase is p2, so a member curated only for pre-raid or p1 keeps
-    // its provenance and drops the badge.
+    // curated phase is p3 itself, so a member curated only for pre-raid, p1
+    // or p2 keeps its provenance and drops the badge.
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
       const entry = raw.entries.find((e) => e.itemId === id);
       expect(
         entry?.curatedSets?.length ?? 0,
         `${id} should be recorded as curated`
       ).toBeGreaterThan(0);
-      const expected = entry?.curatedSets?.includes("p2") ? ["BiS"] : undefined;
+      const expected = entry?.curatedSets?.includes("p3") ? ["BiS"] : undefined;
       expect(entry?.bisTags, `${id} BiS tag should follow its phase`).toEqual(
         expected
       );
