@@ -315,3 +315,337 @@ rode along.
   tags are not refreshed. `sme-rank-review` was never mine to run per the
   brief, and reviewing a ranking still built on p2-era tags would not be
   useful yet regardless.
+
+## Slice 6b handoff — pin+regen executed, EP wiring done, one latent bug found
+
+Branch: `feat/ret-p3-data`, worktree
+`C:\Users\dgree\Code\lulz\tbc-gear-prio-wt-ret-p3-data`. Ran ticket 121's
+Option 1 recipe against the ref slice 6's orchestrator correction named
+(`5c7491899`, not `ac0ed034b`), and wired the resulting EP weights into
+`assemble_universe.py`. Bottom line: **deliverable A is now done** —
+`data/universes/ret-p3.json`'s 15 previously-p2-tagged rows carry
+`bisSets: ["p3"]`, sourced from a real, verified, non-stub upstream set.
+p4/p5 degrade to p3 instead of p2. EP scoring for p3+ now uses p3's own
+weights. Along the way, regenerating `ret-p2.json` surfaced and fixed a
+real (if narrow) pre-existing bug in `assemble_universe.py`'s curated-item
+membership logic — detail below.
+
+### Commits (in order)
+
+- `90cd3d8` — **not mine**, made by the orchestrator before this slice
+  started (annotation on slice 6's finding, plus the `pin` string
+  correction in `p3.ep-weights.json`). Included here only so the SHA list
+  below reads as one continuous sequence.
+- `621b8af` — "Vendor ret P3 gear set without moving the main pin"
+- `7aaff35` — "Wire ret P3 gear set into bisTags, regen p3-p5"
+- `896c6d8` — "Score ret p3+ universes with p3 EP weights, not p2's"
+- `d96c044` — "Guard curated-item membership by the item's own phase"
+
+### Ref vendored and why that ref, that scope
+
+Vendored `ui/paladin/retribution/gear_sets/p3.gear.json` from
+`5c7491899b5d71adecdc8de28d4fb2f77f0571b8` (resolved via
+`gh api repos/wowsims/tbc-new/commits/5c7491899`, confirmed date
+2026-08-13T18:41:45Z and message "missed jsons" — matches the orchestrator's
+correction exactly). Did **not** bump `data/wowsims.lock.json`'s top-level
+`commit`/`tag` (still `8aa378b3671a0923fd11fb34b4b3753e53f20c9b` / `v0.0.101`,
+per plan decision D2).
+
+The existing `sync_wowsims.py` machinery (`--update --tag`, `--update --ref`,
+`--restore`) has no notion of "fetch this one file from a different ref than
+everything else" — `do_update` always resolves one `sha` and fetches every
+`TRACKED` entry at it. Bumping to `--ref 5c7491899` to pick up `p3.gear.json`
+would have force-moved `db.json`, both TS sources, every other gear set, and
+every feral file to that ref in the same lockfile write, none of which
+changed between the two commits and none of which D2 said to move. That is
+exactly the "wholesale bump... NOT obviously correct" case the brief warned
+about.
+
+Added a `PER_FILE_PIN` dict (`scripts/sync_wowsims.py`) mapping a `TRACKED`
+key to a commit that overrides the main pin for that file only. `do_update`
+fetches each file at `PER_FILE_PIN.get(local, sha)` and records the override
+as that entry's own `"commit"` field in the lockfile only when it differs
+from the top-level pin; `do_restore` reads the same field back
+(`meta.get("commit", sha)`). Verified: running `--update --tag v0.0.101`
+(the pin's own tag) produced a lockfile diff containing **only** the new
+`ret_p3.gear.json` entry — every other file's sha256 unchanged, top-level
+`commit`/`tag` untouched. Verified round-trip: deleted the vendored file,
+ran `--restore`, got the same bytes back with checksum verification passing.
+Both `check_sync_wowsims.py` and `check_lock_merge.py` still pass (6 and 7
+checks respectively) — neither exercises `PER_FILE_PIN` directly, but
+neither regressed either.
+
+This is a small, reviewable schema extension in the spirit of `watchedRefs`
+(tracking one thing outside the main pin) rather than a new mechanism; a
+file listed in `PER_FILE_PIN` should be removed from it once a future
+`--update` naturally reaches its commit or later, at which point the
+override becomes a no-op diff. **Untested**: whether a *second* `PER_FILE_PIN`
+entry (two files each needing their own override commit) round-trips
+cleanly — only one entry (`ret_p3.gear.json`) was exercised here.
+
+### p3 vs p3Bulwark: vendored p3 only, not Bulwark
+
+Read both files at `5c7491899` directly. They differ in exactly one slot
+(index 4, chest): `p3.gear.json` has item `30905` (Midnight Chestguard),
+`p3Bulwark.gear.json` has `28485` (Bulwark of the Ancient Kings) — everything
+else byte-identical, enchants and gems included.
+
+Read `presets.ts` at the same commit: `P3_GEAR_PRESET` (built from
+`p3.gear.json`) is wired into `P3_PRESET_BUILD_RET`, the group's default P3
+build (`makePresetBuild('P3', { group: 'Retribution', phase: Phase.Phase3,
+gear: P3_GEAR_PRESET, ... })`). `P3BULWARK_GEAR_PRESET` exists as a
+selectable named preset (`makePresetGear('Bulwark', ...)`) but has **no**
+`PresetBuild` of its own — nothing wires it into a default build. This
+settles the "which is mainline" question definitively rather than by
+inference: upstream's own build wiring says `p3.gear.json` is the set
+players get by default; Bulwark is an alternative gear preset a user can
+pick, not a second curated recommendation upstream endorses equally.
+Followed the brief's conservative-default instruction and vendored only
+`p3.gear.json`. No new `bisTags` vocabulary was needed or considered.
+
+### Before/after counts
+
+| universe | entries before | entries after | tagged rows | bisSets before | bisSets after |
+|---|---|---|---|---|---|
+| ret-p2.json | 240 | 241 | 0 (p2 tags apply at p2's own max_phase only... n/a, see note) | n/a | n/a |
+| ret-p3.json | 394 | 394 | 15 | `["p2"]` ×15 | `["p3"]` ×15 |
+| ret-p4.json | 441 | 441 | 15 | `["p2"]` ×15 | `["p3"]` ×15 |
+| ret-p5.json | 534 | 534 | 15 | `["p2"]` ×15 | `["p3"]` ×15 |
+
+ret-p2.json note: ret-p2 was never in scope for bisTags refresh (p2 tags
+against p2's own set were already correct), but its *membership* is affected
+too — `wowsims_curated_item_ids` unions `gear_sets` across every phase
+regardless of `max_phase`, so adding `ret_p3.gear.json` to the profile widens
+every ret universe's candidate pool, p2 included. Net after both the
+membership widening and the phase-guard fix (see below): **+1** row
+(`33122` Cloak of Darkness, phase 1) with no `bisTags` (p2's max_phase
+excludes a p3-only set from the current-phase claim). A second candidate,
+`32574` Bindings of Lightning Reflexes (phase 3), was briefly admitted by
+the same widening and then correctly excluded again by the phase-guard fix
+— see below.
+
+**The headline number**: ret-p3.json's 15 tagged rows moved from
+`bisSets: ["p2"]` to `bisSets: ["p3"]`, matching 15 of `p3.gear.json`'s 16
+populated slots. The 16th (`27484` Libram of Avengement) is not tagged
+because it is not in the universe **at all** — confirmed present-vs-absent
+against `HEAD~1` (pre-slice-6b) before touching anything: it was already
+absent. It is a phase-1 heroic-dungeon drop with no raid/zone/rep source
+this repo's membership rules currently admit through; **untested** why
+exactly (not investigated further — out of scope, a membership question
+for a different ticket, not a regression from this slice).
+
+Field-level account (all four universes, done programmatically by loading
+both the pre- and post-regen JSON and diffing every entry's keys): the
+**only** fields that ever changed were `bisTags`, `bisSets`, `curatedSets`,
+and (ret-p3/p4/p5 only, from the EP-weights slice below) `curationHint`.
+No entry's `itemId`, `slot`, `sources`, or any other field moved. Generator
+run twice for ret-p2 and ret-p3, diffed byte-identical (JSON-equal; the
+only literal byte differences across separate runs were platform line
+endings, not content).
+
+### The latent bug found and fixed: phase-unguarded curated membership
+
+While regenerating `ret-p2.json`, `packages/core/test/pool-file.test.ts`
+("loads ret-p2.json" / `pool.every(e => e.phase <= phase)`) failed for real
+reasons, not staleness: `32574` Bindings of Lightning Reflexes is `phase: 3`
+in `db.json` (a Leatherworking-crafted item, no raid/heroic/rep source) and
+is a member of `ret_p3.gear.json`'s curated set. `wowsims_curated_item_ids`
+in `assemble_universe.py` builds curated-item membership as a **union across
+all vendored gear sets regardless of `max_phase`**, and the
+`curated_unsourced`/`curated_list_only` admission path
+(`assemble_universe.py`, the `curated = ...` line) had **no phase guard at
+all** — unlike the parallel `in_heroic`/`in_rep_phase` checks a few lines
+above it, which both explicitly gate on `int(it.get("phase") or 99) <=
+max_phase`. So `32574` was silently admitted into `ret-p2.json` even though
+its own phase (3) exceeds that universe's max_phase (2).
+
+This is not cosmetic: `packages/core/src/cli.ts`'s `loadUniversePool` loads
+`data/universes/{spec}-p{maxPhase}.json` directly and **never calls
+`filterPoolByPhase`** on it — the universe file's own membership is trusted
+as already phase-scoped by construction. Grepped `cli.ts` for
+`filterPoolByPhase` to confirm this: zero call sites. So without the fix, a
+p2-max-phase player's ranking would have shown a phase-3-only crafted item
+with nothing downstream to catch it — a real, if narrow (one item, this
+phase, so far), user-facing leak.
+
+Root cause: the "no phase guard" comment at that call site was written for
+the *other* direction — an earlier-phase persistent item still relevant
+later (`Everbloom Idol`, phase 1, "still what a cat wants at phase 2" per
+the original comment) — and had never been exercised the other way, because
+no previously-vendored ret or feral curated-unsourced/list-only item
+happened to have a `phase` higher than the set it belonged to, until
+`ret_p3.gear.json` introduced one. Fixed by adding the same guard
+`in_heroic`/`in_rep_phase` already use:
+`curated = (iid in curated_unsourced or iid in curated_list_only) and
+int(it.get("phase") or 99) <= max_phase`.
+
+**Consequence for ret** (fixed, committed): `ret-p2.json` 242 → 241 entries
+(only `32574` removed; `33122`, phase 1, correctly stays admitted).
+ret-p3/p4/p5 unchanged — `32574` is phase 3, so it legitimately belongs at
+those tiers and the guard is a no-op there.
+
+**Consequence for feral (found, NOT fixed here — flagged for the
+orchestrator)**: the same guard changes `feral-p2.json`'s generated output,
+256 → 253 entries. Three phase-3 items leak the same way:
+`33881` Vindicator's Dragonhide Bracers, `33716` Vengeful Gladiator's Staff
+(both PvP), `29301` Band of the Eternal Champion (rep). Verified by
+generating `feral-p2.json` with and without the fix and diffing (isolated
+from the pre-existing staleness below by stashing/restoring cleanly).
+**Deliberately not regenerated**: this slice's brief is explicit that
+feral's *committed* output must be untouched, and — separately —
+`feral-p2.json` was already stale against `HEAD` before this slice touched
+anything at all (see next section), so folding an unrelated bugfix
+regeneration into that same file would conflate two different changes in
+one diff and make both harder to review. The fix in `assemble_universe.py`
+is spec-agnostic and already shipped (commit `d96c044`); only the feral
+*artifact* regeneration is deferred.
+
+### Pre-existing, unrelated finding: `feral-p2.json` was already stale
+
+Independent of anything in this slice: `data/universes/feral-p2.json` does
+not match what `assemble_universe.py` produces from the currently-vendored
+inputs, **even at `HEAD` before any of this slice's commits**. Confirmed by
+stashing all of this slice's changes, checking out to commit `7aaff35`
+(which touches only ret's `gear_sets` list and a docstring — nothing feral
+reads), regenerating `feral-p2.json`, and diffing against the committed
+file: it differs (new `curatedSets: p3_6p/p3_9p` labels appear on rows that
+don't have them committed, plus a new row, `29301`). `git log --follow -- 
+data/universes/feral-p2.json` shows it was last regenerated at `4d07e11`
+(2026-08-08), and nothing touched `scripts/assemble_universe.py` or the
+feral-relevant vendored inputs between then and this slice's start
+(`git log 5be6a81..aa74368 -- scripts/assemble_universe.py` returns no
+commits). So something changed the *effective* generator output (a vendored
+input drifting, most likely, since vendor/ is gitignored and per-worktree)
+without anyone regenerating the committed artifact. **Untested / unverified**:
+what specifically changed — not investigated further, since diagnosing it
+would mean touching feral's committed output, which is out of scope here.
+Flagging for the orchestrator to schedule as its own ticket; the fix is
+probably just "run `--restore` cleanly and regenerate," but that should be
+verified by whoever owns feral, not assumed.
+
+### EP-weights wiring: done, feral verified unchanged
+
+Added `SpecProfile.ep_weights_by_phase: dict[int, Path] | None = None`
+(defaults to `{}`) alongside the existing `ep_weights: Path`, plus
+`ep_weights_path_for(profile, max_phase)`: picks the highest phase key
+`<= max_phase` in `ep_weights_by_phase`, falling back to `profile.ep_weights`
+when the map is empty or has no entry at or below `max_phase`. ret's profile
+now sets `ep_weights_by_phase={3: .../p3.ep-weights.json}`; feral's profile
+sets nothing, so `ep_weights_path_for` always falls through to
+`profile.ep_weights` for feral — the exact same value it resolved to before
+this function existed.
+
+**Feral byte-identity, proven not asserted**: generated `feral-p2.json` and
+`feral-p3.json` from `HEAD` (before any EP-weights code existed, commit
+`7aaff35`) and again from the working tree with the EP-weights change
+applied (stashed/popped to isolate), and `cmp`'d the outputs.
+`feral-p3.json`: byte-identical both ways (also identical to the committed
+file — no pre-existing drift there, unlike p2). `feral-p2.json`: identical
+to *each other* (proving the EP-weights change itself has zero effect on
+feral), independently different from the committed file for the unrelated
+pre-existing reason above. So: EP-weights wiring is confirmed to not move
+feral's output by even one byte; feral-p2's staleness is a separate,
+pre-existing problem this slice did not cause and did not fix.
+
+**Which universes changed scoring**: `ret-p2.json` — unchanged, still scores
+against `p2.ep-weights.json` (`curationHint` untouched on every shared row,
+confirmed field-by-field). `ret-p3.json`, `ret-p4.json`, `ret-p5.json` — now
+score against `p3.ep-weights.json`. `curationHint` moved on 303/339/423 rows
+respectively; membership (`added`/`removed` itemId sets) empty on all three
+— only the score itself moved. Deltas are small and consistent with the
+P2→P3 weight deltas being a few hundredths per stat (mean |delta| ≈ 1.2,
+max ≈ 15, on scores in the 600–900 range). Both feral universes: unchanged
+(see above).
+
+### Tests updated (falsified assertions, not skill/logic changes)
+
+`packages/core/test/pool-hardening.test.ts`: `wowsimsCuratedItemIds()` and
+`specSets.ret` both hardcoded the file list `[preraid, p1, p2]` — added
+`ret_p3.gear.json`. That moved the "curated ID union" count from 36 to 44
+(re-measured, not guessed) and `WOWSIMS_ADMITTED_IN_P3`/
+`WOWSIMS_NOT_YET_ADMITTED` from 24/12 to 40/4 (re-measured against the
+regenerated `ret-p3.json`; the remaining 4 not-admitted are still phase-1
+items with no phase-2+-resolvable source — same shape as before, smaller
+set). Three assertions hardcoded "p2 is the current curated phase" as a
+literal `["p2"]`/`.includes("p2")` — updated to `["p3"]`/`.includes("p3")`,
+since p3 is now genuinely the newest vendored set. Swapped the "ticket 12"
+test's example item from `30098` (Razor-Scale Battlecloak, p2-only, now
+correctly un-tagged) to `32235` (Cursed Vision of Sargeras, in
+`ret_p3.gear.json`, correctly tagged) so the test demonstrates the rule it's
+named for rather than its former exception.
+
+`packages/core/test/pool.test.ts`: the running audit-trail comment
+(`240 -> ...`) for `ret-p2.json`'s entry count got one more line (`240 ->
+241`), explaining both the legitimate new member and the phase-guard fix in
+the same style as the six prior entries in that comment.
+
+All four affected test files (`pool-hardening.test.ts`, `pool.test.ts`,
+`pool-file.test.ts`, `view-gate.test.ts`) pass cleanly; nothing was skipped
+or loosened to make them pass — every changed assertion now encodes the
+*current* true state, re-measured, not a guess.
+
+### Acceptance criteria (ticket 121)
+
+- [x] "Ret max-phase-3 BiS tags come from a genuinely-P3 list" — met.
+      `ret-p3.json`'s 15 tagged rows are sourced from `ret_p3.gear.json`,
+      vendored from `5c7491899`, verified populated (not a stub) and
+      verified as upstream's own default P3 build via `presets.ts`.
+- [x] "`CURATED_SET_PHASE` (both the Python source and the gate-checked TS
+      mirror) covers the new label if one is introduced" — no new label was
+      introduced (`p3` already existed in the map before this slice, per
+      slice 6's own finding); `curated-set-phase:check` passes (4 phases in
+      step).
+- [x] "`pnpm verify` green" — met, see below.
+
+Ticket 153's parallel concerns: the `bisStale`-placement and
+absent-vs-stale-detection critiques (its points 1–2) are unaddressed — this
+slice was data/pipeline scope only, no `rank-report.ts` changes. Its point 3
+("box shows 3 items where p2's set has ~15 members" — unmeasured) is now
+moot for p3 specifically, since p3 has its own real set; whether the
+original p2-era "3 items" observation itself still needs investigating is
+unchanged by this slice.
+
+### `pnpm verify` — full tail, exit status
+
+```
+$ pnpm verify; echo "VERIFY_EXIT=$?"
+...
+ Test Files  38 passed | 1 skipped (39)
+      Tests  757 passed | 2 skipped | 2 todo (761)
+...
+rep-tables:check ok: 14 factions, 10 used by db.json, 4 standings in use, 95 rep rows shipped (95 id-checked)
+wowhead-prose:check ok: emitted 6 universes, 0 redundant wowhead locus rows
+curated-set-phase:check ok: 4 phases in step
+mirrors:check ok: skill mirrors match
+lock-merge:check ok: lockfile merge preserves foreign blocks (7 checks)
+sync-wowsims:unit:check ok: sync_wowsims.py guard rails ok (6 checks)
+feral-skeleton-apl:check ok: feral skeleton APL schema gate ok (3 checks)
+  [informational only, pre-existing, same note slice 6 already flagged: a
+   temp feral APL fixture uses a field ('timeToNextEnergyTick') unknown to
+   the pinned proto -- the check still reports ok because it's flagging
+   that condition by design, not failing on it]
+VERIFY_EXIT=0
+```
+
+`sync:atlasloot:verify-local` / `atlasloot:regen:check` skip cleanly
+(`vendor/atlasloot` absent, unrelated to this slice, never in scope).
+`git status` was clean before and after every commit.
+
+### Summary for the orchestrator
+
+- **Deliverable A (bisTags refresh) is now done.** `ret-p3.json` (and p4/p5's
+  degrade) carry genuine p3 provenance, sourced and verified against
+  upstream, not fabricated and not a community-list workaround. Plan §9.6's
+  done-when is now met for the tags/EP-file half; `sme-rank-review` still
+  has not been run (out of scope for this slice per its own brief — data
+  pipeline work, not the review lane).
+- **EP-weights wiring is done** and proven not to touch feral.
+- **Two things found mid-slice, handled differently on purpose**: the
+  phase-guard bug is fixed (small, correct, in scope — my own file,
+  `assemble_universe.py`, directly caused by the artifact I was
+  regenerating). The pre-existing `feral-p2.json` staleness is flagged, not
+  fixed (not caused by this slice, not in scope, needs its own owner to
+  verify what actually drifted before regenerating).
+- No blockers remain on ticket 121's acceptance criteria. Ticket 153's
+  display-side concerns (bisStale placement/absent-detection) are still
+  open and untouched.
