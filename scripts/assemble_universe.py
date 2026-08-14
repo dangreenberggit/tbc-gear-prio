@@ -163,9 +163,16 @@ class SpecProfile:
         ranged_type: int,
         allow_one_hand: bool,
         excluded_weapon_types: frozenset[int],
+        ep_weights_by_phase: dict[int, Path] | None = None,
     ):
         self.spec = spec
         self.ep_weights = ep_weights
+        # Optional, keyed by the phase a file's weights were transcribed for.
+        # ep_weights_for_phase() picks the highest key <= max_phase and falls
+        # back to `ep_weights` (the pre-existing single-file behaviour) when
+        # this is empty or has no entry at or below max_phase -- so a spec
+        # that never sets it, like feral, is byte-for-byte unaffected.
+        self.ep_weights_by_phase = ep_weights_by_phase or {}
         self.gear_sets = gear_sets
         self.wowhead_dir = wowhead_dir
         self.two_hop = two_hop
@@ -181,7 +188,14 @@ class SpecProfile:
 SPEC_PROFILES: dict[str, SpecProfile] = {
     "ret": SpecProfile(
         "ret",
+        # `ep_weights` is the pre-p3 fallback (p1 has no separate weights
+        # file; p2's are close enough and this default predates the phase map
+        # below). ep_weights_by_phase adds p3's real transcribed weights
+        # without touching what p1/p2 universes resolve to.
         ep_weights=ROOT / "data/presets/ret/p2.ep-weights.json",
+        ep_weights_by_phase={
+            3: ROOT / "data/presets/ret/p3.ep-weights.json",
+        },
         # Upstream tbc-new ships one curated set per phase for retribution --
         # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
         # Feral cat does have that split; see its own entry below.
@@ -335,6 +349,26 @@ SLOTS_WITH_EP_SIGNAL = frozenset({"feet", "waist", "hands", "wrist"})
 
 def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def ep_weights_path_for(profile: SpecProfile, max_phase: int) -> Path:
+    """The EP-weights file to score `max_phase` against.
+
+    Picks the highest key in `ep_weights_by_phase` that is <= max_phase --
+    same "newest available, never a later phase's claim" rule as
+    `bis_set_labels_for_max_phase` uses for gear-set tagging. Falls back to
+    `profile.ep_weights` when the map is empty (feral, always) or has no entry
+    at or below max_phase (ret p1/p2, before p3.ep-weights.json existed) --
+    so a spec that never populates the map resolves to exactly what it did
+    before this function existed.
+    """
+    candidates = [p for phase, p in profile.ep_weights_by_phase.items() if phase <= max_phase]
+    if not candidates:
+        return profile.ep_weights
+    best_phase = max(
+        phase for phase in profile.ep_weights_by_phase if phase <= max_phase
+    )
+    return profile.ep_weights_by_phase[best_phase]
 
 
 def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
@@ -1266,7 +1300,7 @@ def assemble(
             "zone": str(best["zone"]),
             "boss": best.get("boss"),
         }
-    weights_raw = load_json(profile.ep_weights)
+    weights_raw = load_json(ep_weights_path_for(profile, max_phase))
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
     assert isinstance(w, dict)
