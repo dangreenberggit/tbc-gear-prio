@@ -4,7 +4,7 @@ Live state of the detour so nothing is lost at a token wall. Per
 `orchestration.md`: the orchestrator never backgrounds workers and ends a turn
 without this file naming in-flight work and the exact next spawn.
 
-Last updated: 2026-08-14, by the orchestrator seat.
+Last updated: 2026-08-14, by the slice-2 worker seat (engine port complete).
 
 ## Phase 0 — done
 
@@ -118,33 +118,47 @@ plan §9.6:**
 Parked deliberately: the fork chain (slices 1→2→3→4) is the critical path and
 none of it depends on this review. The user chose this ordering explicitly.
 
-## Slice 2 — engine port: IN FLIGHT
+## Slice 2 — engine port: DONE (plan §9.2 done-when met)
 
-Dispatched 2026-08-14 to a Sonnet workhorse. Ports plan §2.1's surface into
-`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`,
-writes `PROVENANCE.md`, stands up E-W3, and adds the drift gate.
+Dispatched 2026-08-14 to a Sonnet workhorse. Full report:
+[`slice-2/HANDOFF.md`](slice-2/HANDOFF.md).
 
-**Plan change it is executing (user decision, 2026-08-14):** E-W3 runs **in
-this repo**, not the fork. The fork has no TypeScript test runner — no
-vitest/jest, zero `.test.ts` under `ui/`, only an Ajv locale check — and it is
-**staying dependency-free** so the eventual upstream PR carries no test-infra
-change. Plan §8 now records this and its cost.
+**E-W3 passes** — both this repo's `rankUpgrades` and the fork's ported copy
+(imported by file path from `packages/core/test/wowsims-fork-parity.test.ts`)
+produce identical deltas from the same slamaltman fixture and the same
+recorded observations. Actual output: `deltaDps: 50, rank: 1` on both sides,
+plus matching `se`/`seMethod`/`belowCutoff`.
 
-Because the parity check no longer travels with the fork, slice 2 also adds a
-`check_*` gate in `pnpm verify` that content-hashes each ported file against
-`PROVENANCE.md`. That catches *silent edits*, not behaviour changes — only the
-parity test does the latter. Both must skip cleanly when the gitignored fork is
-absent (fresh clone, CI).
+30 files ported into `vendor/tbc-new-fork/ui/core/components/
+individual_sim_ui/upgrades/engine/` (fork commit `e49dcf23c`, **not pushed**
+— plan §1 lock). `items.ts`/`gems.ts` read the fork's own `Database`
+instead of a JSON snapshot; `enchants.ts` and `meta.ts` reuse the fork's own
+upstream utilities rather than re-deriving them a second time — a deliberate
+call beyond what plan §2.1 specified, reducing drift surface rather than
+adding it. `rank.ts` drops the spec-mismatch check (`spec.ts` not ported:
+the page already knows its own spec) and uses D4's crypto-free cache key.
 
-**When reviewing it, check specifically:** that E-W3 genuinely fails on a
-behaviour change rather than being tuned until green; that the skip-when-absent
-path cannot silently pass as success; and that `packages/core/` is untouched
-(plan §3 says this detour needs no changes there).
+The drift gate (`scripts/check_engine_port_drift.py`, wired into
+`pnpm verify`) is live and was verified both ways: passes at 30/30 today,
+and was confirmed to fail loudly on a deliberately corrupted hash before
+being restored. Its limitation is stated in its own docstring and repeated
+in the handoff: a hash match proves nothing about behaviour, only that
+bytes have not changed — only E-W3 proves behaviour.
+
+`pnpm verify` is green in this repo (commit `d8e915b`); `npx tsc --noEmit`
+is exit 0 in the fork. `packages/core/` is untouched, confirmed by
+`git status` before every commit in this repo.
+
+**Known gap, not blocking:** `pool.ts`'s `ItemSlot`/`ITEM_SOURCE_KINDS` and
+`slots.ts`'s `SIM_ORDER` are hand-copied literals (the fork has no
+`pnpm codegen:json-types` equivalent), kept in sync with packages/core's
+generated files by inspection only — nothing catches the two drifting apart
+if a union grows in this repo. Recorded in the handoff's "Untested" section.
 
 ## Not started
 
-Slices 2 (engine port), 3 (adapters + first ranking, where E-W1/E-W2 run),
-4 (UI completion), 5 (WCL importer). Slice 7 is explicitly out of scope.
+Slice 3 (adapters + first ranking, where E-W1/E-W2 run), 4 (UI completion),
+5 (WCL importer). Slice 7 is explicitly out of scope.
 
 ## Standing constraints
 
@@ -157,12 +171,12 @@ Slices 2 (engine port), 3 (adapters + first ranking, where E-W1/E-W2 run),
 
 ## Exact next steps
 
-1. Read slice 6b's report; resolve the feral question above before anything else.
-2. Then either close slice 6 (`sme-rank-review` on the refreshed ranking, per
-   plan §9.6) or send 6b back.
-3. Slice 1's remaining gate: register the empty Upgrades tab at
-   `ui/core/individual_sim_ui.tsx:354` (immediately after `this.bt = this.addBulkTab();`)
-   and get the site serving. Then the orchestrator writes
-   `data/wowsims-fork.lock.json`.
-4. Slice 2 (engine port) is the head of the remaining fork chain and can start
-   once slice 1's tab registration lands.
+1. Slice 6 review is still parked per the section above — resolve when
+   convenient, independent of the fork chain.
+2. Slice 3 (adapters + first ranking) is next on the fork chain: build
+   `PlayerGearSource`, the page-settings skeleton serializer, and
+   `WasmSimRunner` against slice 2's ported `engine/`. E-W1 (WASM vs native)
+   and E-W2 (wall-clock budget) run here — both still unrun.
+3. Copy universe/EP-weight data into the fork (plan §2.5) — noted as not yet
+   done in slice 2's `PROVENANCE.md`, deferred there because slice 2's scope
+   was the `engine/` code surface, not the data the adapters will consume.
