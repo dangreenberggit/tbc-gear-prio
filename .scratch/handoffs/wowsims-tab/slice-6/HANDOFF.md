@@ -85,6 +85,17 @@ Top commit: `ac0ed034b`, 2026-08-13T18:15:10Z, "RetP3 Gear and Presets" — one
 day before this session, three weeks after this repo's `8aa378b3` pin
 (v0.0.101, tagged well before). Confirmed absent at the pin itself:
 
+> **Orchestrator correction (2026-08-14).** `ac0ed034b` carries the *presets*
+> (`P3_EP_PRESET`) but **not** the gear JSONs. Verified:
+> `gh api ".../gear_sets?ref=ac0ed034b"` returns only p1/p2/preraid, while the
+> same call at `ref=master` returns p1/p2/**p3**/**p3Bulwark**/preraid. The
+> gear sets landed 26 minutes later in `5c7491899` ("missed jsons",
+> 2026-08-13T18:41:45Z). Consequence: a pin bump aimed at the curated set must
+> reach **`5c7491899` or later** — bumping to `ac0ed034b` would get the EP
+> weights and still no gear set. Deliverable B's provenance is unaffected
+> (the EP values genuinely are at `ac0ed034b`); only the pin-bump target
+> changes.
+
 ```
 gh api "repos/wowsims/tbc-new/contents/ui/paladin/retribution/gear_sets?ref=8aa378b3671a0923fd11fb34b4b3753e53f20c9b" --jq '.[].name'
 ```
@@ -123,6 +134,16 @@ whether to fold this into the fork-pin-rebase work already planned (§9 slice
 and 153 should both get a comment linking this finding — I did not edit them;
 that felt like the orchestrator's or user's call given they're carry-forward
 tickets with their own acceptance criteria.
+
+**Orchestrator verification of set contents (2026-08-14).** The worker flagged
+that it had not checked whether the new set is real or a blanked stub — worth
+checking, since `85df9a63b` ("Blank out all gearsets") is in this file's own
+history. Read at `ref=master`: `p3.gear.json` is a populated 17-slot positional
+array with **16 slots filled** (one empty `{}`, the same shape p2 uses), with
+enchants and gems, e.g. `{"id": 32235, "enchant": 3003, "gems": [32409, 32193]}`.
+So it is a genuine curated set, not a stub. Item names were **not** resolved
+against `db.json`, so "these are Black Temple/Hyjal items" remains an inference
+from id ranges, not a verified mapping.
 
 **Untested / unverified**: whether `p3.gear.json` vs `p3Bulwark.gear.json` is
 the "main" set upstream intends players to see by default, or whether both
