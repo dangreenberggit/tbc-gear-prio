@@ -11,7 +11,7 @@ These rules apply to every reply, every document, and every code comment.
 For word choice, sentence length, voice, tone, and person, consult the sources — do not improvise:
 
 - ASD-STE100 / Simplified Technical English — <https://www.asd-ste100.org/> — Issue 9 PDF: <https://www.asd-ste100.org/assets/files/ASD-STE100_ISSUE9.pdf>
-- Google developer documentation style guide — <https://developers.google.com/style> — start with `/word-list`, `/voice`, `/tone`, `/person`, `/sentence-structure`
+- Google developer documentation style guide — <https://developers.google.com/style> — start with `/style/word-list`, `/style/voice`, `/style/tone`, `/style/person`, `/style/sentence-structure`
 
 ## Chat responses
 
