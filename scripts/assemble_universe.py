@@ -189,6 +189,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/ret_preraid.gear.json",
             ROOT / "vendor/wowsims/ret_p1.gear.json",
             ROOT / "vendor/wowsims/ret_p2.gear.json",
+            ROOT / "vendor/wowsims/ret_p3.gear.json",
         ],
         wowhead_dir=ROOT / "data/wowhead-lists/ret",
         two_hop=ROOT / "data/two-hop/ret-tokens.json",
@@ -378,10 +379,11 @@ def bis_set_labels_for_max_phase(
     Where no set is vendored for `max_phase`, the newest available phase is
     used rather than tagging nothing: the claim degrades to "the latest curated
     set we vendor", which `curatedSets` then names and the HTML report warns
-    about. Ret genuinely stops at `p2` upstream and still degrades this way;
-    feral cat runs to `p5` upstream, so a gap there means the phase is simply
-    not vendored yet (see `TRACKED` in scripts/sync_wowsims.py) and is fixed by
-    pinning it, not by widening this fallback.
+    about. Ret stops at `p3` upstream as of 5c7491899 (2026-08-13) and still
+    degrades this way for p4/p5; feral cat runs to `p5` upstream, so a gap
+    there means the phase is simply not vendored yet (see `TRACKED` in
+    scripts/sync_wowsims.py) and is fixed by pinning it, not by widening this
+    fallback.
     """
     known = {
         iid: [s for s in labels if curated_set_phase(s) is not None]

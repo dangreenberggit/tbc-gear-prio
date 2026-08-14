@@ -66,12 +66,14 @@ VENDOR = "vendor/wowsims"
 # is the whole process for taking on a new upstream input.
 #
 # Per-phase refresh runbook (manual — not automated in CI):
-# - Ret's gear sets stop at p2 upstream; feral cat's run to p5. Taking on a new
-#   phase's set is a hand edit to TRACKED followed by
-#   `--update --tag <the tag already in data/wowsims.lock.json>` — plain
-#   `--restore` iterates the lockfile, so it cannot fetch a file that has no
-#   entry yet, and a bare `--update` would chase latest and move every other
-#   pin in the same diff.
+# - Ret's gear sets stopped at p2 upstream until 5c7491899 (2026-08-13)
+#   shipped p3; feral cat's run to p5. Taking on a new phase's set is a hand
+#   edit to TRACKED followed by `--update --tag <the tag already in
+#   data/wowsims.lock.json>` — plain `--restore` iterates the lockfile, so it
+#   cannot fetch a file that has no entry yet, and a bare `--update` would
+#   chase latest and move every other pin in the same diff. If the new file
+#   only exists past the current pin (as p3.gear.json did), fetch it via
+#   PER_FILE_PIN instead of moving the pin -- see that dict's comment.
 # - Pool membership refreshes from AtlasLoot (data/atlasloot_sources.json),
 #   Wowhead ret lists (data/wowhead-lists/ret/), and the tier token map
 #   (data/two-hop/ret-tokens.json) — not from wowsims curated gear sets
@@ -80,15 +82,16 @@ VENDOR = "vendor/wowsims"
 #   extending data/two-hop/ret-tokens.json; groupings differ by tier (D9).
 #
 # Feral cat is not shaped like ret upstream. Retribution ships one curated set
-# per phase and genuinely stops at p2; feral cat ships sixteen, split
+# per phase (p1/p2/p3 as of 5c7491899); feral cat ships sixteen, split
 # BiS/Alt/Realistic and again by 6-piece against 9-piece tier bonus, and runs
 # to p5.
 #
-# The p2 *and p3* pairs are tracked, plus pre-raid: those are the phases this
-# repo assembles universes for, and a max-phase-3 run tagging its BiS rows from
-# p2's list silently presents a stale curated set as the current one. p4/p5
-# stay untracked until a universe is assembled for them — the point is to cover
-# the phases we rank, not to mirror upstream's whole catalogue.
+# ret_p1/p2/p3 and feral's p2/p3 pairs are tracked, plus pre-raid: those are
+# the phases this repo assembles universes for, and a max-phase-N run tagging
+# its BiS rows from an older set silently presents a stale curated set as the
+# current one. p4/p5 stay untracked until a universe is assembled for them —
+# the point is to cover the phases we rank, not to mirror upstream's whole
+# catalogue.
 #
 # The `_6p`/`_9p` suffix is a hit percentage, not a piece count (carry-forward
 # 88). Only the BiS pair per phase is tracked; upstream's Alt/Realistic
