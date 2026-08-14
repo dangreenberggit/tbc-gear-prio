@@ -500,6 +500,31 @@ one diff and make both harder to review. The fix in `assemble_universe.py`
 is spec-agnostic and already shipped (commit `d96c044`); only the feral
 *artifact* regeneration is deferred.
 
+> **Orchestrator verification (2026-08-14) — the 256 needs one clarification.**
+> Measured independently, and the deferral decision is right, but the numbers
+> read as if the guard alone moves feral-p2 from 256 to 253. It does not.
+>
+> - The **committed** `feral-p2.json` already holds **253** entries. So against
+>   what is on disk, the guard is a **no-op on entry count** — it does not
+>   remove three rows from the shipping artifact.
+> - Regenerating feral-p2 **at the base commit** (`3673b24`, none of slice 6b's
+>   changes present, run from the main checkout) also yields **256 vs 253** and
+>   the *same* five differing entries — `29994`, `8345`, `30627`, `29383`,
+>   `30106`. The 256 is therefore the **pre-existing staleness**, not this
+>   slice's guard.
+> - The five differences are `curatedSets` values, not membership. Example
+>   `29994`: regen `['p2_6p', 'p3_6p']` vs committed `['p2_6p']`. Item id sets
+>   are **identical** between regen and committed.
+>
+> Net: feral-p2 has been stale since before this branch, and the guard's effect
+> on it is not separately visible in the committed file's entry count. The
+> deferral stands and the fix stays spec-agnostic; only the arithmetic in the
+> paragraph above should not be quoted as "the guard drops three feral rows".
+>
+> Reproduce (from the main checkout, base commit):
+> `python scripts/assemble_universe.py --spec feral --max-phase 2 --out <tmp>`
+> then compare to `data/universes/feral-p2.json`.
+
 ### Pre-existing, unrelated finding: `feral-p2.json` was already stale
 
 Independent of anything in this slice: `data/universes/feral-p2.json` does
