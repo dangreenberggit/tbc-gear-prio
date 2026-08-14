@@ -254,6 +254,42 @@ npx tsc --noEmit
 - **E-W1** (WASM vs native numeric agreement) is unrelated to this slice and
   remains unrun, per slice 1's handoff.
 
+## Orchestrator verification, 2026-08-14 — mutation-tested, both gates
+
+The handoff's claims were checked by **breaking the fork's engine on purpose**
+and watching what fired. Accepting "E-W3 passes" without this would prove only
+that the test runs.
+
+| Perturbation (in the fork's `engine/`)            | E-W3            | Drift gate       |
+| -------------------------------------------------- | --------------- | ---------------- |
+| `cutoff.ts` — `meetsCutoff` thresholds ×1000       | **FAILS** ✓     | (not run)        |
+| `se.ts` — `pairedReplicateSe` returns `+ 0.001`    | **PASSES** ✗    | **FAILS** ✓      |
+
+**E-W3 genuinely detects behaviour changes** on the paths it exercises. The
+cutoff break produced a precise diff — `belowCutoff: true` vs `false` on item
+`29983` — so the test is not tuned-until-green.
+
+**And it is genuinely blind elsewhere, exactly as the section above says.** The
+`se.ts` break slipped through because the test runs with a **single seed**
+(`seeds: [RUN_OPTS.seed]`), and `pairedReplicateSe` requires ≥2 deltas, so that
+function never executes. That confirms the worker's own "does not exercise …
+paired replication" caveat as **measured, not merely suspected**.
+
+**The two gates compose the way the design intended.** The one break E-W3 missed
+is caught by `engine-port-drift:check`, which named `se.ts`, printed both
+hashes, and told the reader not to update a hash without re-running E-W3. That
+is precisely the silent-drift scenario the gate was added for, working.
+
+Restored afterwards: the fork's `git status` is clean, E-W3 passes, and the
+drift gate reports 30/30. Reproduce any row above by making the same one-line
+edit and re-running `npx vitest run packages/core/test/wowsims-fork-parity.test.ts`
+or `pnpm engine-port-drift:check`.
+
+**What this does not establish:** the hash gate cannot tell a behaviour-changing
+edit from a comment change — it only proves bytes moved. Widening E-W3 to a
+multi-seed, socketed, set-bonus-bearing case is the way to close the coverage
+gap; the drift gate is a tripwire, not a substitute.
+
 ## Blockers
 
 None. Slice 2's "done when" (plan §9.2: "E-W3 passes fork-side — the ported
