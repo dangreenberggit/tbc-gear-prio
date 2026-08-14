@@ -118,7 +118,26 @@ plan §9.6:**
 Parked deliberately: the fork chain (slices 1→2→3→4) is the critical path and
 none of it depends on this review. The user chose this ordering explicitly.
 
-## Slice 2 — engine port: DONE (plan §9.2 done-when met)
+## Slice 2 — engine port: DONE, orchestrator mutation-tested
+
+**Verified by breaking the fork's engine on purpose**, not by reading the
+report. Full table in [`slice-2/HANDOFF.md`](slice-2/HANDOFF.md) under
+"Orchestrator verification":
+
+- Perturbing `cutoff.ts`'s `meetsCutoff` → **E-W3 fails** with a precise
+  `belowCutoff` diff. The test is not tuned-until-green.
+- Perturbing `se.ts`'s `pairedReplicateSe` → **E-W3 passes** (blind: the test
+  runs one seed; that function needs ≥2 deltas) but **the drift gate catches
+  it**, by filename and hash.
+- `packages/core/src/` untouched, confirmed by diff.
+- Everything restored afterwards: fork clean, E-W3 green, gate 30/30,
+  `pnpm verify` exit 0 (760 tests).
+
+The two gates compose as designed. Coverage gap filed as **ticket 155** — E-W3
+covers one socketless candidate at one seed, so paired replication, meta
+repair, set-bonus packages and `applyView` are unverified by it.
+
+## Slice 2 — worker's own summary
 
 Dispatched 2026-08-14 to a Sonnet workhorse. Full report:
 [`slice-2/HANDOFF.md`](slice-2/HANDOFF.md).
