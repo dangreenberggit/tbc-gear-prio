@@ -1,0 +1,213 @@
+{
+  "apiVersion": 13,
+  "settings": {
+    "iterations": 5000,
+    "phase": 2,
+    "showDamageMetrics": true,
+    "showQuickSwap": true,
+    "language": "en",
+    "faction": "Alliance",
+    "filters": { "oneHandedWeapons": true, "twoHandedWeapons": true }
+  },
+  "raidBuffs": {
+    "arcaneBrilliance": true,
+    "powerWordFortitude": "TristateEffectImproved",
+    "shadowProtection": true,
+    "divineSpirit": "TristateEffectImproved",
+    "giftOfTheWild": "TristateEffectRegular",
+    "thorns": "TristateEffectImproved",
+    "bloodlust": true
+  },
+  "debuffs": {
+    "judgementOfWisdom": true,
+    "improvedSealOfTheCrusader": "TristateEffectImproved",
+    "jocRetribution2pt4": true,
+    "misery": true,
+    "curseOfElements": "TristateEffectImproved",
+    "bloodFrenzy": true,
+    "exposeArmor": "TristateEffectImproved",
+    "faerieFire": "TristateEffectImproved",
+    "sunderArmor": true,
+    "curseOfRecklessness": true,
+    "huntersMark": "TristateEffectImproved",
+    "exposeWeaknessUptime": 0.9,
+    "exposeWeaknessHunterAgility": 1150
+  },
+  "partyBuffs": {
+    "leaderOfThePack": "TristateEffectImproved",
+    "drums": "LesserDrumsOfBattle",
+    "manaSpringTotem": "TristateEffectRegular",
+    "graceOfAirTotem": "TristateEffectImproved",
+    "strengthOfEarthTotem": "TristateEffectImproved",
+    "windfuryTotem": "TristateEffectImproved",
+    "totemTwisting": true,
+    "battleShout": "TristateEffectImproved"
+  },
+  "player": {
+    "apiVersion": 13,
+    "name": "Player",
+    "race": "RaceBloodElf",
+    "class": "ClassPaladin",
+    "equipment": {
+      "items": [
+        { "id": 32087, "enchant": 3003, "gems": [24058, 32409] },
+        { "id": 29119 },
+        { "id": 33173, "enchant": 2986, "gems": [24058, 24058] },
+        { "id": 24259, "enchant": 368, "gems": [24027] },
+        { "id": 23522, "enchant": 2661 },
+        { "id": 23537, "enchant": 2647 },
+        { "id": 30341, "enchant": 684 },
+        { "id": 27985, "gems": [24027, 24054] },
+        { "id": 30257, "enchant": 3012 },
+        { "id": 28176, "enchant": 2657, "gems": [24027, 24054] },
+        { "id": 29177 },
+        { "id": 30834 },
+        { "id": 29383 },
+        { "id": 28288 },
+        { "id": 28429, "enchant": 2673 },
+        {},
+        { "id": 27484 }
+      ]
+    },
+    "consumables": {
+      "potId": 22838,
+      "flaskId": 22854,
+      "foodId": 27655,
+      "conjuredId": 12662,
+      "explosiveId": 30217,
+      "superSapper": true,
+      "goblinSapper": true,
+      "scrollAgi": true,
+      "scrollStr": true
+    },
+    "bonusStats": {
+      "apiVersion": 13,
+      "stats": [
+        0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ],
+      "pseudoStats": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0
+      ]
+    },
+    "enableItemSwap": true,
+    "itemSwap": {
+      "items": [
+        { "id": 32087, "enchant": 3003, "gems": [24058, 32409] },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+      ],
+      "prepullBonusStats": {
+        "apiVersion": 13,
+        "stats": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        ],
+        "pseudoStats": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0
+        ]
+      }
+    },
+    "buffs": {
+      "blessingOfKings": true,
+      "blessingOfWisdom": "TristateEffectImproved",
+      "blessingOfMight": "TristateEffectImproved",
+      "unleashedRage": true
+    },
+    "retributionPaladin": { "options": { "classOptions": {} } },
+    "talentsString": "5-153201-0523005120033125331051",
+    "profession1": "Engineering",
+    "profession2": "Blacksmithing",
+    "cooldowns": {},
+    "rotation": {
+      "type": "TypeSimple",
+      "simple": {
+        "specRotationJson": "{\"delayMajorCDs\":99,\"prepullSotC\":true,\"aura\":\"SanctityAura\"}"
+      }
+    },
+    "reactionTimeMs": 100,
+    "distanceFromTarget": 15,
+    "healingModel": {}
+  },
+  "encounter": {
+    "apiVersion": 13,
+    "duration": 150,
+    "durationVariation": 5,
+    "executeProportion20": 0.2,
+    "executeProportion25": 0.25,
+    "executeProportion35": 0.35,
+    "executeProportion45": 0.45,
+    "executeProportion90": 0.9,
+    "targets": [
+      {
+        "id": 31146,
+        "name": "Raid Target",
+        "level": 73,
+        "mobType": "MobTypeMechanical",
+        "stats": [
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 54, 0, 0, 0, 7685, 0, 6070400, 0, 0, 0, 0, 0, 0, 0, 0
+        ],
+        "minBaseDamage": 15113,
+        "damageSpread": 0.5,
+        "swingSpeed": 2,
+        "parryHaste": true,
+        "canCrush": true
+      }
+    ]
+  },
+  "epWeightsStats": {
+    "apiVersion": 13,
+    "stats": [
+      1, 0.75, 0, 0, 0, 0.14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.41, 0, 0, 2.19,
+      0.77, 1.3, 0.1, 2.18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+    "pseudoStats": [
+      5.88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0
+    ]
+  },
+  "epRatios": [1, 0, 0, 0, 0, 0],
+  "reforgeSettings": {
+    "statCaps": {
+      "apiVersion": 13,
+      "stats": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        102.50000800000001, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ],
+      "pseudoStats": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0
+      ]
+    },
+    "breakpointLimits": {
+      "apiVersion": 13,
+      "stats": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ],
+      "pseudoStats": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0
+      ]
+    },
+    "maxGemPhase": 2,
+    "maxGemQuality": "ItemQualityEpic"
+  }
+}
