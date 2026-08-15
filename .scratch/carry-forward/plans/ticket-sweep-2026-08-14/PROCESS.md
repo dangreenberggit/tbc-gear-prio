@@ -309,3 +309,56 @@ table. `pnpm verify` green in the worker's worktree before handoff.
 
   Next: branch B's three review axes are dispatched; then its review file and
   the final handoff.
+
+## Final state — sweep complete, 2026-08-14
+
+Both branches are reviewed, green, and merge-ready. **Neither is merged.** The
+merge ask is the user's.
+
+| | Branch A | Branch B |
+| --- | --- | --- |
+| Branch | `feat/sweep-tab-tickets` | `feat/sweep-ret-tickets` |
+| Tip | `730a5694` | `01bbf125` |
+| `pnpm verify` | exit 0 — 41 files, 760 passed | exit 0 — 40 files, 773 passed |
+| Review | `docs/reviews/feat-sweep-tab-tickets.md` | `docs/reviews/feat-sweep-ret-tickets.md` |
+| `merge-to-dev --check-only` | `merge-ready: ok` (17 rows) | `merge-ready: ok` (21 rows) |
+
+`dev` is unmoved at `5be6a814`. No worker worktrees remain.
+
+**Branch B supersedes `feat/ret-p3-data`** — `git merge-base --is-ancestor
+cffaee0 01bbf125` succeeds, so merging B carries that branch and it needs no
+separate merge.
+
+### What each branch is worth reading for
+
+Branch A's review found that E-W3 could not fail on the two ported files whose
+`PROVENANCE.md` hashes I had just re-blessed on the strength of it passing.
+Fixed at `5cb013c`; the general case is ticket 165.
+
+Branch B's review found the one blocker of the sweep: ticket 157's
+force-include had no spec gate, so a ret-only fix leaked into the feral
+universes two commits after ticket 154 fixed that exact class of drift, with
+every gate green throughout. Fixed at `b2da640`. The missing gate — nothing
+compares a committed universe against a regen — is ticket 172 and is the
+highest-value follow-up in the sweep.
+
+### New tickets filed
+
+165, 166, 167, 168 (branch A) · 169, 170, 171, 172, 173, 174 (branch B).
+
+Note the numbering collision caught at fan-in: worker B2 minted a 165 on branch
+B while branch A's review minted a different 165. B2's was renumbered to 169 at
+`952fdc6`. Any future parallel sweep across two unmerged branches needs a
+number range assigned per branch up front.
+
+### Left undone, deliberately
+
+- **Ticket 162 v2** — not built, per the plan. Ticket stays `open`.
+- **Ticket 156's 20-candidate table** — not measured. The production-build
+  question it turned on *was* answered; the rest stays `open`.
+- **Libram proc effects (163 layer 3)** — upstream sim work at this pin, out of
+  scope, and now ticket 171 for the reporting half.
+- **The SME §9.6 gate** — ticket 157 landing re-opens the "would a ret trust
+  this?" question. Not reopened here; no verdict file was edited. The domain
+  axis's read is that relic-slot *membership* is now met and *presentation* is
+  not.
