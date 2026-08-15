@@ -14,22 +14,40 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-Two background agents are running in parallel; neither has reported yet.
+One background agent is running: the **combined slices 3+4 review**
+(Opus review lane, orchestration.md §"Review points" item b). It reviews
+fork range `e49dcf23c..6cf6dc28a` against plan §2.2–§2.5, §4, §5 and
+decisions D4/D5/D7, and files
+`.scratch/handoffs/wowsims-tab/slice-3-4-review.md` on
+`feat/shopping-list-wowsims-tab`. When it reports: read the verdict, verify
+any load-bearing claim, and **stop before any merge or push ask** — both
+require the user's word.
 
-1. **Slice 4 (UI completion)** — Sonnet workhorse, working in the fork clone
-   `vendor/tbc-new-fork` on `feat/upgrades-tab`. Brief: plan §9.4 / §4, no
-   sims triggered by any view, staleness banner on gear change, fnm + serving
-   recipes included. Deliverable: fork commits plus
-   `slice-4/HANDOFF.md` committed on `feat/shopping-list-wowsims-tab`.
-2. ~~Slice 6 `sme-rank-review`~~ **DONE** — see the new section below.
+## Slice 4 — UI completion: DONE, orchestrator-verified
 
-When they report, verify per §"Slice 3 — original dispatch notes" habits:
-re-derive numbers, run the green-baseline commands, check
-`packages/core/src` untouched. After slice 4: the gate is one Opus-medium
-review over slices 3+4 combined (orchestration.md §"Review points") — do not
-skip to a merge ask. After the SME verdict: slice 6 still needs
-`pre-merge-review` on `feat/ret-p3-data`, then stop and wait for a separate
-merge ask.
+Worker report: [`slice-4/HANDOFF.md`](slice-4/HANDOFF.md), committed
+`5aa72c1` with the lockfile bumped to fork tip `6cf6dc28a`. Orchestrator
+re-derived rather than accepted:
+
+- Fork diff `f7146dd69..6cf6dc28a` touches only `upgrades_tab.tsx`,
+  a new `engine_provenance.ts`, and translation strings — the
+  `upgrades/engine/` diff is **empty**, so no E-W3/hash obligation arose.
+- `pnpm verify` exit 0 (drift gate 30/30 inside it) and E-W3 passed,
+  both run independently by the orchestrator.
+- `packages/core/src` clean.
+
+What the worker built: BiS/Alt tags, source labels, owned rows greyed,
+below-cutoff rows behind an expand toggle, per-slot sub-tabs
+(DetailedResults nav-tabs idiom), staleness banner, assumptions drawer,
+hand-maintained fork-commit provenance constant. Verified sim-free via a
+16-assertion harness over the fork's real `view.ts`/`slots.ts` plus a
+served-page render check.
+
+**Honestly flagged gaps:** live click-through of the sub-tab strip and the
+below-cutoff toggle were not exercised (no completed `Ranking` reachable
+without a sim — ticket 156). The 3+4 review was asked to judge those code
+paths statically. Untracked `.ew1-scratch/` sits in the fork tree
+(E-W1 harness leftovers, harmless, not committed).
 
 ## Phase 0 — done
 
