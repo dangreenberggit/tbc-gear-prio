@@ -224,3 +224,119 @@ stated on the page.
 - Nothing in this ranking contradicts the earlier verdict on tags and stat
   weights. Those still look right. The problems are all about what reached the
   page and what the page knows he is wearing.
+
+## Addendum (2026-08-14): re-check after the worn-unrankable fix
+
+**Ruling: the gate is closed. trust-with-caveats stands, and §9.6's
+"would a ret trust this?" is satisfied.** One presentation finding is
+recorded below as a caveat, not a blocker.
+
+### What I checked
+
+Worktree `C:\Users\dgree\Code\lulz\tbc-gear-prio-wt-ret-p3-data`, branch
+`feat/ret-p3-data`, tip `00af8d3` (`2e6b257` = the classifier, `00af8d3` =
+the regen). Read the regenerated
+`.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json` and
+`slamaltman-p3.html`, the updated `PROVENANCE.md`, and the
+`worn-unrankable` cause in `packages/core/src/dead-slots.ts`.
+
+### Against my stated pass condition
+
+My condition was: recognise the worn relic **and** either make libram
+deltas distinct **or** mark the slot unmeasured rather than shown as
+losses. The second branch is the one taken, and it is taken properly.
+
+The relic is now recognised. `ranking.plausibilityWarnings` carries one
+entry, `dead-slot` / `ranged` / cause `worn-unrankable`, with
+`wornItemName: "Libram of Avengement"`. The page names the item the
+character is wearing, which it previously could not do at all.
+
+The message is the right message. It says the slot is unmeasured, says
+every ranged row was scored against an empty slot rather than against
+Avengement, and says in plain words: do not read any of them as an
+upgrade or a loss. That is exactly the sentence the old page was missing.
+It also names the fix (the worn item must enter the pool), so a reader
+who wants to know why is not left guessing.
+
+The wrong cause is gone. The old warning fired `unidentified-worn-item`
+and blamed a stale saved report, which I flagged as inviting a reader to
+dismiss a live defect. `worn-unrankable` is a distinct cause whose
+docstring states the real situation — worn item known by id and name,
+never became a row, so the slot's deltas are real numbers against the
+wrong baseline. The classifier now tells the truth about itself.
+
+Baseline and deltas are unchanged, as claimed. Baseline is still
+2003.5145189610075 (± 118.93), and the four ranged rows are still
+−13.806909042320513 (Souls Redeemed, Absolute Truth, Tome of the
+Lightbringer) and −14.09673154870211 (Fervor). Nothing about the fifteen
+correct slots moved, so my judgment on them carries over intact.
+
+### Would a ret still unequip his libram?
+
+No. The claim that blocked the gate was that the page made a **false
+statement** about the reader's own gear — four librams in red, the worn
+relic absent, honest reading "take my libram off". That statement is now
+retracted on the page itself, in the reader's own language, before the
+rows. A ret who reads the report top to bottom cannot come away with the
+wrong action. The defect has changed from a wrong answer into a declared
+absence of an answer, and a declared absence is something a player can
+work with. That is the difference the gate was about.
+
+### New finding: the retraction does not travel to the slot (medium, caveat)
+
+The warning panel renders once, `open`, at the top of the page. The
+ranged section sits roughly 387,000 characters further down and is the
+**last** of the fourteen slot sections. That section carries nothing
+local: its header reads "ranged / 4 candidates / 0 BiS candidates", and
+the four rows still render with the ordinary loss styling — `delta down`,
+"−13.81 DPS", "−0.69%" — identical to how a genuine downgrade renders
+anywhere else on the page.
+
+The reading path that worries me is the realistic one. The slot nav is
+`position: sticky` and the plausibility panel is not; the panel sits
+above the nav and scrolls away. A reader who clicks the sticky "ranged"
+chip lands on four red rows with the retraction off-screen. The nav chip
+itself is marked only `no-bis`, which it shares with ordinary
+nothing-here slots and which says nothing about being unmeasured.
+
+I am not making this a blocker, for two reasons. The page does state the
+truth prominently and open-by-default, which is what I asked for; and the
+rows are numerically real, so a reader who reaches them via the panel is
+correctly informed. But it is the same class of problem as the original
+finding — the slot looks confidently measured when it is not — surviving
+at reduced strength, and it is worth a ticket. The cheap fixes are a
+per-slot note in the `ranged` section header carrying the same sentence,
+and marking those four rows so they do not wear plain loss styling. The
+renderer's own comment at `rank-report.ts:535` says the gates belong
+"above the rows"; on a fourteen-slot page that intent needs a per-slot
+echo to hold.
+
+### The remaining caveats, as disclosure items
+
+Both are things a reader can live with, per my original framing, and
+neither reopens the gate.
+
+The unmeasured relic slot is now disclosed on the page in the reader's
+own terms, which is precisely the treatment I said item 3 deserved. That
+27484 still has no ranked row (ticket 157's pool backfill) is a gap the
+page admits to rather than papers over. The three unimplemented libram
+procs are upstream's, correctly attributed as such, and the identical
+−13.81 values are no longer evidence of a hidden defect because the page
+now tells the reader those numbers are not measuring what they appear to.
+
+The trinket slot is the weaker of the two. Darkmoon Card: Crusade,
+Hourglass of the Unraveller and Abacus of Violent Odds are still absent,
+and the page still effectively declares the slot finished — every trinket
+other than the two worn is a loss. Unlike the relic slot, this one gets
+**no** disclosure: nothing on the page tells a reader that known
+contenders for the slot were never candidates. That asymmetry is the
+thing to fix next if §9.6 is revisited, and it belongs with ticket 157.
+It does not block, because a missing candidate is a gap rather than a
+false statement, but the relic slot has now shown what the honest
+treatment looks like and the trinket slot should get it too.
+
+### Verdict unchanged
+
+**trust-with-caveats.** The blocker I named is resolved by the branch its
+pass condition allowed. Fifteen slots I would hand to a ret unhesitatingly,
+and the sixteenth now says honestly that it does not know.
