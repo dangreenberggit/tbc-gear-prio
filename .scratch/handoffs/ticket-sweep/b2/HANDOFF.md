@@ -110,7 +110,7 @@ feat/sweep-ret-tickets
      for "the guide named a candidate this slot never got to try" — only
      for "a worn item is missing from its own slot's pool." Producing
      that signal is engine-side work outside this ticket's report-layer
-     scope. Filed as ticket 165 rather than silently dropping it.
+     scope. Filed as ticket 169 rather than silently dropping it.
    - Ticket bookkeeping: `Status: resolved` (for the scope it covers),
      comments state the trinket gap and the 165 pointer explicitly.
    - Commit `79aecf2`.
@@ -130,7 +130,7 @@ feat/sweep-ret-tickets
   (recovered + resolved)
 - `.scratch/carry-forward/issues/164-relic-retraction-does-not-travel-to-slot-section.md`
   (recovered + resolved)
-- `.scratch/carry-forward/issues/165-trinket-slot-has-no-known-missing-candidate-signal.md`
+- `.scratch/carry-forward/issues/169-trinket-slot-has-no-known-missing-candidate-signal.md`
   (new — follow-up filed per ticket 164's scope boundary)
 - `.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.html`,
   `slamaltman-p3.json`, `PROVENANCE.md` (re-run + addendum)
@@ -194,7 +194,7 @@ for the ranking re-run, never committed), `data/presets/ep-weights-by-phase.json
   (`ReferenceError: Cannot access 'deadSlotWarningsBySlot' before
   initialization`) before I'd looked at the diff. Fixed by moving the
   `warnings`/`deadSlotWarningsBySlot` declarations above `nav`.
-- Ticket 165 (new) is a real scope boundary, not deferred work I could have
+- Ticket 169 (new) is a real scope boundary, not deferred work I could have
   finished here: the report layer literally has no field to read for
   "candidate pool known incomplete" pre-157. Engine-side, out of this
   worker's `pathsAllowed`.
@@ -206,7 +206,7 @@ for the ranking re-run, never committed), `data/presets/ep-weights-by-phase.json
   win32-x64` before reproducing that step.
 
 ## Suggested follow-ups
-- Ticket 165 (filed this session): engine-side signal for a slot whose
+- Ticket 169 (filed this session): engine-side signal for a slot whose
   candidate pool was known-incomplete (not just a worn item missing from
   it), so ticket 164's report-layer mechanism can extend to the trinket
   slot and any future case like it.

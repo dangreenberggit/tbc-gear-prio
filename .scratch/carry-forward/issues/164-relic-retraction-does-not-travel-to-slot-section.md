@@ -79,7 +79,7 @@ etc. were never worn, so no `DeadSlotWarning` was ever going to name
 `trinket`). Producing that signal is engine-side work (a new
 `PlausibilityWarning` variant or equivalent, computed from
 `wowheadRecall.missedItems` against the ranked slot) and is out of this
-ticket's report-layer-only scope. Filed as ticket 165 rather than
+ticket's report-layer-only scope. Filed as ticket 169 rather than
 silently dropping it.
 
 Commit: (recorded in the branch's commit for this ticket, see `git log`).
