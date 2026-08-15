@@ -794,6 +794,20 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         })
       )
     );
+    // Standing assumptions: the disclosure surface is what tells a reader
+    // which weights and which omissions produced a shortlist, so a port that
+    // drops one is a silent honesty regression, not a cosmetic diff. Compared
+    // by id (not detail text) because rank.ts deliberately spells presetId
+    // differently on each side. Without this, gutting disclosure.ts entirely
+    // still passed E-W3 — found by the adversarial pre-merge review of
+    // feat/sweep-tab-tickets, 2026-08-14.
+    expect(
+      thisRepoRanking.assumptions.standing.map((a) => a.id).sort()
+    ).toEqual(
+      forkRanking.assumptions.standing.map((a: { id: string }) => a.id).sort()
+    );
+    expect(thisRepoRanking.assumptions.standing.length).toBeGreaterThan(0);
+
     // Broadening the pool and seed count (ticket 155) pushed real elapsed
     // time for both engines' dynamic-imported dependency graphs past
     // vitest's 5s default; this is wall-clock reality, not slow test logic.
