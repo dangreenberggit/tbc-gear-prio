@@ -494,3 +494,53 @@ a normal feature branch gated by `pnpm verify`.
   SimRunner" row inside the fork instead of the standalone app. Its E1
   experiment is E-W1 here, unchanged. Its `simCacheKey`/`AbortSignal` items
   stay open for `packages/core` but are off this detour's path (§3).
+
+---
+
+## 12. User-set EP weights — deferred interaction
+
+The page the tab lives in already has its own EP weights: `player.setEpWeights`
+/ `getEpWeights` plus `epWeightsChangeEmitter`
+(`ui/core/player.tsx:479-494`), a "calculate stat weights" modal that sims them
+(`ui/core/components/stat_weights_action.tsx:365-428`), and a saved-weights
+manager (`ui/core/components/saved_data_managers/ep_weights.ts:21-25`). The tab
+ignores all of it and uses our committed per-spec weights (§2.5). The question
+of whether it should is deferred, not dismissed.
+
+Settled facts:
+
+- **Role is prefilter and gem fill only** (§2.5, §5). Sims produce every
+  displayed number, so wrong weights degrade candidate *selection* and can
+  never make a displayed number wrong.
+- **They are never zero.** `individual_sim_ui.tsx:589` seeds
+  `player.setEpWeights` from `defaults.epWeights` at init, and
+  `individual_sim_ui.tsx:737-739` restores either saved weights or that same
+  default on load. The "defaults to zero/unset" worry that motivated this
+  section does not hold at the pin (`adb0d135`).
+- **"User modified them" is already detectable.** `player.tsx:531-533`
+  `hasCustomEPWeights()` returns true when the vector matches no spec preset.
+  `suggest_reforges_action.tsx:321,329,364-372` is upstream's own precedent
+  for exactly our problem: an opt-in `useCustomEPValues` toggle, a warning
+  when custom weights exist but are not enabled, and a fall back to defaults
+  otherwise. Copy that shape rather than inventing one.
+- **No pending state is observable.** The compute is awaited inside a click
+  handler with a closure-local `let isRunning` (`stat_weights_action.tsx:364`),
+  and `SimSignalManager.running` is private with no getter and no completion
+  event (`sim_signal_manager.ts:38`). "Await the in-flight computation" is
+  therefore **not implementable without a fork-side shim** — see the ticket.
+- **Stat mapping is total; pseudo-stats are the gap.** Both sides index the
+  same `proto.Stat` enum (`packages/core/src/stats.ts:5-10`), so
+  `Stats.toProto().stats` maps 1:1 onto our `Record<string, number>`. But
+  `UnitStats` also carries `pseudoStats` (`stats.ts:609-614`) and our CLI
+  loads only `.weights`, dropping the `pseudoWeights` its own preset file
+  records (`packages/core/src/cli.ts:284-288` vs
+  `data/presets/ret/p2.ep-weights.json`). Ret's main-hand-DPS pseudo-weight of
+  5.34 is currently discarded on the CLI path.
+
+**v1 decision: keep the committed weights and disclose it.** The tab uses our
+per-spec weights unconditionally, and the assumptions drawer states which
+weights file and pin scored the prefilter, so a user who has computed their own
+weights can see why the candidate set ignored them. Opt-in use of page weights
+is v2. Ticket
+`.scratch/carry-forward/issues/162-upgrades-tab-ignores-user-set-ep-weights.md`
+carries the design, the shim, the mapping gap, and the validity check.
