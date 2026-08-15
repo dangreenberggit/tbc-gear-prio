@@ -49,6 +49,19 @@ Blocked by: none
 The review’s Disposition table **links** tickets for `defer` rows; it does
 not replace them. List open ones anytime: `pnpm issues:open`.
 
+**Ticket files are copied, not shared, across unmerged branches.** Two
+branches that both file or update tickets end up with diverging copies of
+the same file: their `Status:` lines disagree, `pnpm issues:open` shows
+whichever branch you are standing on, and merging the second branch to
+`dev` conflicts on every ticket both branches touched (this happened on
+2026-08-15 — eight ticket files, see ticket 175). Two rules follow:
+
+- Read a ticket's `Status:` **on the branch you will base from**, not the
+  branch you happen to be on.
+- When two branches will run in parallel and both may file tickets, give
+  each a distinct number range up front (e.g. branch A files 165+, branch B
+  files 169+), or file only from one of them.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).
