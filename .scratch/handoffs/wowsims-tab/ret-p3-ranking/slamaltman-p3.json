@@ -5,11 +5,11 @@
     "region": "US",
     "spec": "ret",
     "maxPhase": 3,
-    "poolSize": 400,
-    "generatedAt": "2026-08-15T06:08:41.339Z"
+    "poolSize": 390,
+    "generatedAt": "2026-08-15T16:21:15.873Z"
   },
   "ranking": {
-    "contentHash": "f5c2639305c6bde9d38314b716ea10882203372bdfa1f7bdd89d60659bfbd19d",
+    "contentHash": "efc1d4ee71d86b69cf3a3859ab29cc7833a5248164be74805af9eeab8e5a66ef",
     "cutoff": {
       "absDps": 3.4,
       "pct": 0.15
@@ -80,7 +80,7 @@
     "substitutions": [
       {
         "field": "candidate 30892 (shoulder)",
-        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 79 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff6f9e8bec0?, 0xc000ef8720?})\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff6fa14fdd0?, 0xc000d02098})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff6fa14fdd0, 0xc000d02098}, 0xc002c45c30, 0xc002c45c60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc00302e000, {0x7ff6fa14fdd0, 0xc000d02098})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:349 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc00302e000, {0x7ff6fa14fdd0, 0xc000d02098}, 0xc00075fe00, 0xc00307c0b0, 0xc00075f6d0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:299 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc000d00420, 0xc000c70700)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc000d002c0, 0xc000c70700, 0xc000cab3b0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc000c70700, 0xc000cab3b0, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc0018dfb60, {{0xc000dfe4e0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc0018dfb60, 0xc001fb3570, 0x0, {{0xc000dff110?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 13\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
+        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 52 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff73aa6bec0?, 0xc001e8bda0?})\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff73ad2fdd0?, 0xc0007ca3a0})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff73ad2fdd0, 0xc0007ca3a0}, 0xc002487c30, 0xc002487c60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc003000000, {0x7ff73ad2fdd0, 0xc0007ca3a0})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:349 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc003000000, {0x7ff73ad2fdd0, 0xc0007ca3a0}, 0xc001e0b770, 0xc001ebe370, 0xc001e0b040)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:299 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc001fc6160, 0xc001de1f00)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc001fc6000, 0xc001de1f00, 0xc001deefc0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc001de1f00, 0xc001deefc0, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc000363b00, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc000363b00, 0xc001e2d1f0, 0x0, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 50\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
       }
     ],
     "items": [
@@ -4213,96 +4213,6 @@
       },
       {
         "rank": null,
-        "itemId": 28592,
-        "name": "Libram of Souls Redeemed",
-        "slot": "ranged",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        "deltaDps": -13.806909042320513,
-        "deltaPct": -0.6891344640457393,
-        "se": 2.1529127321730197,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "The Wizard of Oz",
-            "origin": "db"
-          },
-          {
-            "boss": "The Big Bad Wolf",
-            "kind": "raid",
-            "zone": "Karazhan",
-            "origin": "atlasloot"
-          },
-          {
-            "boss": "Romulo and Julianne",
-            "kind": "raid",
-            "zone": "Karazhan",
-            "origin": "atlasloot"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 30063,
-        "name": "Libram of Absolute Truth",
-        "slot": "ranged",
-        "source": {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below",
-          "origin": "db"
-        },
-        "deltaDps": -13.806909042320513,
-        "deltaPct": -0.6891344640457393,
-        "se": 2.1529127321730197,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Serpentshrine Cavern",
-            "boss": "The Lurker Below",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 32368,
-        "name": "Tome of the Lightbringer",
-        "slot": "ranged",
-        "source": {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Mother Shahraz",
-          "origin": "db"
-        },
-        "deltaDps": -13.806909042320513,
-        "deltaPct": -0.6891344640457393,
-        "se": 2.1529127321730197,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Black Temple",
-            "boss": "Mother Shahraz",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
         "itemId": 23203,
         "name": "Libram of Fervor",
         "slot": "ranged",
@@ -6739,35 +6649,6 @@
       },
       {
         "rank": null,
-        "itemId": 29297,
-        "name": "Band of the Eternal Defender",
-        "slot": "finger",
-        "source": {
-          "faction": "The Scale of the Sands",
-          "factionId": 990,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        },
-        "deltaDps": -30.730395480633206,
-        "deltaPct": -1.533824446481652,
-        "se": 2.1336554489264348,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "faction": "The Scale of the Sands",
-            "factionId": 990,
-            "kind": "rep",
-            "standing": "Exalted",
-            "origin": "atlasloot"
-          }
-        ],
-        "slotChoice": "finger1"
-      },
-      {
-        "rank": null,
         "itemId": 30028,
         "name": "Seventh Ring of the Tirisfalen",
         "slot": "finger",
@@ -7056,32 +6937,6 @@
             "kind": "raid",
             "zone": "Karazhan",
             "boss": "Nightbane",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 30008,
-        "name": "Pendant of the Lost Ages",
-        "slot": "neck",
-        "source": {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker",
-          "origin": "db"
-        },
-        "deltaDps": -37.65698136784658,
-        "deltaPct": -1.8795462179817357,
-        "se": 2.126226879008006,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Serpentshrine Cavern",
-            "boss": "Morogrim Tidewalker",
             "origin": "db"
           }
         ]
@@ -8969,45 +8824,6 @@
       },
       {
         "rank": null,
-        "itemId": 28590,
-        "name": "Ribbon of Sacrifice",
-        "slot": "trinket",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        "deltaDps": -52.70407573689181,
-        "deltaPct": -2.6305811731388578,
-        "se": 2.1102368356301064,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "The Wizard of Oz",
-            "origin": "db"
-          },
-          {
-            "boss": "The Big Bad Wolf",
-            "kind": "raid",
-            "zone": "Karazhan",
-            "origin": "atlasloot"
-          },
-          {
-            "boss": "Romulo and Julianne",
-            "kind": "raid",
-            "zone": "Karazhan",
-            "origin": "atlasloot"
-          }
-        ],
-        "slotChoice": "trinket2"
-      },
-      {
-        "rank": null,
         "itemId": 32512,
         "name": "Girdle of Lordaeron's Fallen",
         "slot": "waist",
@@ -9113,60 +8929,6 @@
             "origin": "atlasloot"
           }
         ]
-      },
-      {
-        "rank": null,
-        "itemId": 30619,
-        "name": "Fel Reaver's Piston",
-        "slot": "trinket",
-        "source": {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
-          "origin": "db"
-        },
-        "deltaDps": -53.74500763415199,
-        "deltaPct": -2.682536469065537,
-        "se": 2.1382454248419474,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Tempest Keep",
-            "boss": "Void Reaver",
-            "origin": "db"
-          }
-        ],
-        "slotChoice": "trinket2"
-      },
-      {
-        "rank": null,
-        "itemId": 28823,
-        "name": "Eye of Gruul",
-        "slot": "trinket",
-        "source": {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller",
-          "origin": "db"
-        },
-        "deltaDps": -54.14974773702443,
-        "deltaPct": -2.702737974921473,
-        "se": 2.10886316129455,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Gruul's Lair",
-            "boss": "Gruul the Dragonkiller",
-            "origin": "db"
-          }
-        ],
-        "slotChoice": "trinket2"
       },
       {
         "rank": null,
@@ -9562,35 +9324,6 @@
             "kind": "raid",
             "zone": "Serpentshrine Cavern",
             "boss": "Lady Vashj",
-            "origin": "db"
-          }
-        ],
-        "slotChoice": "trinket2"
-      },
-      {
-        "rank": null,
-        "itemId": 32489,
-        "name": "Ashtongue Talisman of Zeal",
-        "slot": "trinket",
-        "source": {
-          "kind": "rep",
-          "faction": "Ashtongue Deathsworn",
-          "standing": "Exalted",
-          "factionId": 1012,
-          "origin": "db"
-        },
-        "deltaDps": -56.3182557372229,
-        "deltaPct": -2.8109731775953737,
-        "se": 2.106807184563267,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "rep",
-            "faction": "Ashtongue Deathsworn",
-            "standing": "Exalted",
-            "factionId": 1012,
             "origin": "db"
           }
         ],
@@ -11654,32 +11387,6 @@
             "kind": "raid",
             "zone": "Serpentshrine Cavern",
             "boss": "Hydross the Unstable",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28774,
-        "name": "Glaive of the Pit",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "db"
-        },
-        "deltaDps": -109.0743987358428,
-        "deltaPct": -5.444153147061153,
-        "se": 2.0044345548043125,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Magtheridon's Lair",
-            "boss": "Magtheridon",
             "origin": "db"
           }
         ]

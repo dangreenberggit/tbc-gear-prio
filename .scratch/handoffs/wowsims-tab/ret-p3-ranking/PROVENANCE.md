@@ -1,5 +1,42 @@
 # Ret p3 ranking — provenance
 
+## 2026-08-15 re-run — ticket 171 landed, stub-only librams excluded by design
+
+Re-run on `feat/sweep-ret-tickets` after ticket 171 (user ruling, exclusion by
+design) drops every stub-only item -- one whose only sim effect is a
+commented `TODO: Manual implementation required` block in the pinned fork's
+Go source -- from `data/universes/ret-p3.json` entirely. Same command as
+below, same fixture, same seeds. Pool size dropped from 394 (391 scored) to
+**390** (the ranged slot lost the three unimplementable librams: 28592 Libram
+of Souls Redeemed, 30063 Libram of Absolute Truth, 32368 Tome of the
+Lightbringer). Everything else in the run's shape is unchanged: same dropped
+candidate (30892 Beast-tamer's Shoulders, unrelated hunter-tier-set panic),
+same baseline (2003.51 DPS), same top-3 upgrades, `plausibilityWarnings`
+still absent (the worn relic 27484 Libram of Avengement is still in the pool,
+still `deltaDps: 0`, `owned: true`).
+
+The ranged slot now reads, in full:
+
+```
+27484 Libram of Avengement       deltaDps=0                owned=true
+31033 Libram of Righteous Power  deltaDps=-5.381348573639116
+22401 Libram of Hope             deltaDps=-11.174918437880478
+23203 Libram of Fervor           deltaDps=-14.09673154870211
+```
+
+No stat-tied trio at -13.8069... any more -- ticket 171's finding (three
+librams scoring identically to 16 significant figures because their procs
+were never simulated) cannot recur, because those three ids no longer reach
+this ranking at all. Verify:
+
+```
+python -c "import json; d=json.load(open('.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json', encoding='utf-8')); print(d['ranking'].get('plausibilityWarnings')); print([(i['itemId'],i['name'],i['deltaDps'],i.get('owned')) for i in d['ranking']['items'] if i['slot']=='ranged'])"
+```
+
+This supersedes the "Relic slot caveat" section below where it discusses the
+libram rows: those three rows no longer exist in this artifact, so there is
+nothing left needing a caveat. The section is kept for history.
+
 Real run, native `wowsimcli` sim runner, no fabricated numbers. Produced on
 `feat/ret-p3-data` after tickets 158 and 159 landed (commits `dade219` and
 `23153d2` in this worktree), and re-run after the ticket 163 / ticket 124 fix

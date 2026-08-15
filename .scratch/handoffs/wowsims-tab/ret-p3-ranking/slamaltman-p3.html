@@ -104,6 +104,14 @@
     transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
   }
   .nav a:hover { color: var(--ink); border-color: var(--accent); }
+  /* Ticket 164: "unmeasured" and "no BiS pick" look identical without this --
+     both are otherwise a plain grey chip -- so a reader cannot tell "nothing
+     special here" from "do not trust what you find here" before clicking. */
+  .nav a.unmeasured {
+    border-color: var(--down);
+    border-style: dashed;
+    color: var(--down);
+  }
   .nav-hit {
     margin-left: 0.35rem;
     background: var(--accent);
@@ -246,6 +254,19 @@
     text-transform: capitalize;
   }
   .slot-head p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  /* Ticket 164: local echo of a top-of-page plausibility retraction, styled
+     like the panel it repeats (same border/background language as
+     .panel.plausibility) so the two read as one claim, not two different
+     warnings. */
+  .slot-retraction {
+    margin: 0 0 0.85rem;
+    padding: 0.6rem 0.85rem;
+    border-left: 3px solid var(--down);
+    background: var(--down-bg);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
   .rows { display: flex; flex-direction: column; gap: 0.45rem; }
   .row {
     display: grid;
@@ -264,6 +285,18 @@
   }
   .row.muted { opacity: 0.72; }
   .row:hover { border-color: var(--accent); opacity: 1; }
+  /* Ticket 164: an unmeasured-slot row was scored against an empty slot, not
+     the worn item, so it must not carry the same visual claim as a genuine
+     downgrade. Neutral border/background instead of the ordinary hit/muted
+     styling; the delta figure itself is desaturated below rather than left
+     red, since red on this page always means "confirmed loss" elsewhere. */
+  .row.unmeasured {
+    background: var(--panel);
+    border-color: var(--line);
+    border-style: dashed;
+  }
+  .row.unmeasured .delta.down,
+  .row.unmeasured .delta.up { color: var(--muted); }
   .rank {
     font-family: var(--font-display);
     font-weight: 700;
@@ -507,7 +540,7 @@
       <div class="stat"><div class="label">Baseline</div><div class="value"><em>2003.5</em> DPS</div></div>
       <div class="stat"><div class="label">Stdev</div><div class="value">± 118.9</div></div>
       <div class="stat"><div class="label">Above cutoff</div><div class="value">44</div></div>
-      <div class="stat"><div class="label">Simmed</div><div class="value">399 / 400</div></div>
+      <div class="stat"><div class="label">Simmed</div><div class="value">389 / 390</div></div>
     </div>
 
     <div class="shortlist">
@@ -573,18 +606,18 @@
     </div>
     <div class="set-weight-toggle source-filter">
       <p class="set-weight-title">Sources</p>
-      <div class="source-boxes"><label><input type="checkbox" class="source-box" value="zone:Karazhan" checked /> <span>Karazhan <span class="source-n">100</span></span></label>
-      <label><input type="checkbox" class="source-box" value="zone:Black Temple" checked /> <span>Black Temple <span class="source-n">82</span></span></label>
-      <label><input type="checkbox" class="source-box" value="zone:Serpentshrine Cavern" checked /> <span>Serpentshrine Cavern <span class="source-n">49</span></span></label>
+      <div class="source-boxes"><label><input type="checkbox" class="source-box" value="zone:Karazhan" checked /> <span>Karazhan <span class="source-n">98</span></span></label>
+      <label><input type="checkbox" class="source-box" value="zone:Black Temple" checked /> <span>Black Temple <span class="source-n">81</span></span></label>
+      <label><input type="checkbox" class="source-box" value="zone:Serpentshrine Cavern" checked /> <span>Serpentshrine Cavern <span class="source-n">47</span></span></label>
       <label><input type="checkbox" class="source-box" value="zone:Hyjal Summit" checked /> <span>Hyjal Summit <span class="source-n">36</span></span></label>
-      <label><input type="checkbox" class="source-box" value="zone:Tempest Keep" checked /> <span>Tempest Keep <span class="source-n">32</span></span></label>
-      <label><input type="checkbox" class="source-box" value="zone:Gruul's Lair" checked /> <span>Gruul's Lair <span class="source-n">16</span></span></label>
+      <label><input type="checkbox" class="source-box" value="zone:Tempest Keep" checked /> <span>Tempest Keep <span class="source-n">31</span></span></label>
+      <label><input type="checkbox" class="source-box" value="zone:Gruul's Lair" checked /> <span>Gruul's Lair <span class="source-n">15</span></span></label>
       <label><input type="checkbox" class="source-box" value="zone:World Bosses" checked /> <span>World Bosses <span class="source-n">13</span></span></label>
-      <label><input type="checkbox" class="source-box" value="zone:Magtheridon's Lair" checked /> <span>Magtheridon's Lair <span class="source-n">8</span></span></label>
+      <label><input type="checkbox" class="source-box" value="zone:Magtheridon's Lair" checked /> <span>Magtheridon's Lair <span class="source-n">7</span></span></label>
       <label><input type="checkbox" class="source-box" value="kind:badge" checked /> <span>Badge vendor <span class="source-n">3</span></span></label>
       <label><input type="checkbox" class="source-box" value="kind:crafted" checked /> <span>Crafted <span class="source-n">29</span></span></label>
       <label><input type="checkbox" class="source-box" value="kind:pvp" checked /> <span>PvP vendor <span class="source-n">5</span></span></label>
-      <label><input type="checkbox" class="source-box" value="kind:rep" checked /> <span>Reputation vendor <span class="source-n">20</span></span></label>
+      <label><input type="checkbox" class="source-box" value="kind:rep" checked /> <span>Reputation vendor <span class="source-n">18</span></span></label>
       <label><input type="checkbox" class="source-box" value="kind:unknown" checked /> <span>Source not recorded <span class="source-n">8</span></span></label>
       <label><input type="checkbox" class="source-box" value="kind:world" checked /> <span>World drop <span class="source-n">2</span></span></label></div>
       <p class="set-weight-note"><button type="button" id="source-all">All</button> <button type="button" id="source-none">None</button> — a row shows if <em>any</em> of its sources is checked, so a tier piece stays under its raid via the token that drops there.</p>
@@ -697,6 +730,7 @@
     <p class="slot-count-all">25 candidates · <strong>2 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="32235" data-sources="zone:Black Temple" data-delta="19.725758755433255" data-weighted="19.725758755433255" data-full="19.725758755433255" data-package="19.725758755433255">
   <div class="lead"><span class="rank soft-rank">#6</span></div>
   <div class="body">
@@ -1210,9 +1244,10 @@
 <section class="slot" id="slot-neck">
   <header class="slot-head">
     <h2>neck</h2>
-    <p class="slot-count-all">25 candidates</p>
+    <p class="slot-count-all">24 candidates</p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row muted" data-item-id="32260" data-sources="zone:Black Temple" data-delta="0.4283084631067595" data-weighted="0.4283084631067595" data-full="0.4283084631067595" data-package="0.4283084631067595">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -1493,26 +1528,6 @@
     <div class="pct">-1.86%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="30008" data-sources="zone:Serpentshrine Cavern" data-delta="-37.65698136784658" data-weighted="-37.65698136784658" data-full="-37.65698136784658" data-package="-37.65698136784658">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=30008" target="_blank" rel="noreferrer">Pendant of the Lost Ages</a>
-    <div class="meta">Serpentshrine Cavern · Morogrim Tidewalker </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-37.66 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-37.66 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-37.66 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-37.66 <span class="unit">DPS</span></div>
-    <div class="pct">-1.88%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="28822" data-sources="zone:Gruul's Lair" data-delta="-38.089511848621214" data-weighted="-38.089511848621214" data-full="-38.089511848621214" data-package="-38.089511848621214">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -1720,6 +1735,7 @@
     <p class="slot-count-all">26 candidates</p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row muted" data-item-id="32581" data-sources="kind:crafted" data-delta="1.7998625600314426" data-weighted="1.7998625600314426" data-full="1.7998625600314426" data-package="1.7998625600314426">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -2256,6 +2272,7 @@
     <p class="slot-count-all">29 candidates · <strong>7 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit" data-item-id="30098" data-sources="zone:Serpentshrine Cavern" data-delta="15.820943474626347" data-weighted="15.820943474626347" data-full="15.820943474626347" data-package="15.820943474626347">
   <div class="lead"><span class="rank soft-rank">#9</span></div>
   <div class="body">
@@ -2843,6 +2860,7 @@
     <p class="slot-count-all">29 candidates · <strong>2 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit" data-item-id="28485" data-sources="kind:crafted" data-delta="15.253691348621714" data-weighted="15.253691348621714" data-full="15.253691348621714" data-package="15.253691348621714">
   <div class="lead"><span class="rank soft-rank">#11</span></div>
   <div class="body">
@@ -3436,6 +3454,7 @@
     <p class="slot-count-all">36 candidates · <strong>2 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="32574" data-sources="kind:crafted" data-delta="9.024196505543614" data-weighted="9.024196505543614" data-full="9.024196505543614" data-package="9.024196505543614">
   <div class="lead"><span class="rank soft-rank">#23</span></div>
   <div class="body">
@@ -4163,6 +4182,7 @@
     <p class="slot-count-all">26 candidates · <strong>2 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit" data-item-id="32347" data-sources="zone:Black Temple" data-delta="5.279518026822643" data-weighted="5.279518026822643" data-full="5.279518026822643" data-package="5.279518026822643">
   <div class="lead"><span class="rank soft-rank">#36</span></div>
   <div class="body">
@@ -4690,6 +4710,7 @@
     <p class="slot-count-all">39 candidates · <strong>7 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="30106" data-sources="zone:Serpentshrine Cavern" data-delta="47.75264908183849" data-weighted="47.75264908183849" data-full="47.75264908183849" data-package="47.75264908183849">
   <div class="lead"><span class="rank soft-rank">#1</span></div>
   <div class="body">
@@ -5477,6 +5498,7 @@
     <p class="slot-count-all">25 candidates · <strong>4 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit" data-item-id="32341" data-sources="zone:Black Temple" data-delta="13.452251980151232" data-weighted="13.452251980151232" data-full="13.452251980151232" data-package="13.452251980151232">
   <div class="lead"><span class="rank soft-rank">#17</span></div>
   <div class="body">
@@ -5993,6 +6015,7 @@
     <p class="slot-count-all">40 candidates · <strong>3 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="32366" data-sources="zone:Black Temple" data-delta="13.917225963720512" data-weighted="13.917225963720512" data-full="13.917225963720512" data-package="13.917225963720512">
   <div class="lead"><span class="rank soft-rank">#15</span></div>
   <div class="body">
@@ -6797,9 +6820,10 @@
 <section class="slot" id="slot-finger">
   <header class="slot-head">
     <h2>finger</h2>
-    <p class="slot-count-all">50 candidates · <strong>12 above cutoff</strong></p>
+    <p class="slot-count-all">49 candidates · <strong>12 above cutoff</strong></p>
     <p class="slot-count-bis">2 BiS candidates</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="32526" data-sources="zone:Black Temple" data-delta="22.63318295263257" data-weighted="22.63318295263257" data-full="22.63318295263257" data-package="22.63318295263257">
   <div class="lead"><span class="rank soft-rank">#4</span><span class="choice">Into finger1</span></div>
   <div class="body">
@@ -7720,26 +7744,6 @@
     <div class="pct">-1.53%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="29297" data-sources="kind:rep" data-delta="-30.730395480633206" data-weighted="-30.730395480633206" data-full="-30.730395480633206" data-package="-30.730395480633206">
-  <div class="lead"><span class="rank dash">—</span><span class="choice">Into finger1</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=29297" target="_blank" rel="noreferrer">Band of the Eternal Defender</a>
-    <div class="meta">The Scale of the Sands · Exalted </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-30.73 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-30.73 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-30.73 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-30.73 <span class="unit">DPS</span></div>
-    <div class="pct">-1.53%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="30028" data-sources="zone:Tempest Keep" data-delta="-30.75244637940864" data-weighted="-30.75244637940864" data-full="-30.75244637940864" data-package="-30.75244637940864">
   <div class="lead"><span class="rank dash">—</span><span class="choice">Into finger1</span></div>
   <div class="body">
@@ -7804,9 +7808,10 @@
 <section class="slot" id="slot-trinket">
   <header class="slot-head">
     <h2>trinket</h2>
-    <p class="slot-count-all">24 candidates</p>
+    <p class="slot-count-all">20 candidates</p>
     <p class="slot-count-bis">2 BiS candidates</p>
   </header>
+  
   <div class="rows"><article class="row muted is-bis" data-item-id="29383" data-sources="kind:badge" data-delta="0" data-weighted="0" data-full="0" data-package="0">
   <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
   <div class="body">
@@ -8067,66 +8072,6 @@
     <div class="pct">-2.54%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="28590" data-sources="zone:Karazhan" data-delta="-52.70407573689181" data-weighted="-52.70407573689181" data-full="-52.70407573689181" data-package="-52.70407573689181">
-  <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=28590" target="_blank" rel="noreferrer">Ribbon of Sacrifice</a>
-    <div class="meta">Karazhan · The Wizard of Oz </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-52.70 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-52.70 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-52.70 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-52.70 <span class="unit">DPS</span></div>
-    <div class="pct">-2.63%</div>
-  </div>
-</article>
-<article class="row muted" data-item-id="30619" data-sources="zone:Tempest Keep" data-delta="-53.74500763415199" data-weighted="-53.74500763415199" data-full="-53.74500763415199" data-package="-53.74500763415199">
-  <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=30619" target="_blank" rel="noreferrer">Fel Reaver's Piston</a>
-    <div class="meta">Tempest Keep · Void Reaver </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-53.75 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-53.75 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-53.75 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-53.75 <span class="unit">DPS</span></div>
-    <div class="pct">-2.68%</div>
-  </div>
-</article>
-<article class="row muted" data-item-id="28823" data-sources="zone:Gruul's Lair" data-delta="-54.14974773702443" data-weighted="-54.14974773702443" data-full="-54.14974773702443" data-package="-54.14974773702443">
-  <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=28823" target="_blank" rel="noreferrer">Eye of Gruul</a>
-    <div class="meta">Gruul's Lair · Gruul the Dragonkiller </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-54.15 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-54.15 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-54.15 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-54.15 <span class="unit">DPS</span></div>
-    <div class="pct">-2.70%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="30620" data-sources="zone:Serpentshrine Cavern" data-delta="-56.1140011856894" data-weighted="-56.1140011856894" data-full="-56.1140011856894" data-package="-56.1140011856894">
   <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
   <div class="body">
@@ -8227,26 +8172,6 @@
     <div class="pct">-2.81%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="32489" data-sources="kind:rep" data-delta="-56.3182557372229" data-weighted="-56.3182557372229" data-full="-56.3182557372229" data-package="-56.3182557372229">
-  <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=32489" target="_blank" rel="noreferrer">Ashtongue Talisman of Zeal</a>
-    <div class="meta">Ashtongue Deathsworn · Exalted </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-56.32 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-56.32 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-56.32 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-56.32 <span class="unit">DPS</span></div>
-    <div class="pct">-2.81%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="28727" data-sources="zone:Karazhan" data-delta="-56.512637990511394" data-weighted="-56.512637990511394" data-full="-56.512637990511394" data-package="-56.512637990511394">
   <div class="lead"><span class="rank dash">—</span><span class="choice">Into trinket2</span></div>
   <div class="body">
@@ -8291,9 +8216,10 @@
 <section class="slot" id="slot-weapon">
   <header class="slot-head">
     <h2>weapon</h2>
-    <p class="slot-count-all">18 candidates · <strong>3 above cutoff</strong></p>
+    <p class="slot-count-all">17 candidates · <strong>3 above cutoff</strong></p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row hit is-bis" data-item-id="32332" data-sources="zone:Black Temple" data-delta="43.611926925645186" data-weighted="43.611926925645186" data-full="43.611926925645186" data-package="43.611926925645186">
   <div class="lead"><span class="rank soft-rank">#2</span></div>
   <div class="body">
@@ -8614,26 +8540,6 @@
     <div class="pct">-4.51%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="28774" data-sources="zone:Magtheridon's Lair" data-delta="-109.0743987358428" data-weighted="-109.0743987358428" data-full="-109.0743987358428" data-package="-109.0743987358428">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=28774" target="_blank" rel="noreferrer">Glaive of the Pit</a>
-    <div class="meta">Magtheridon's Lair · Magtheridon </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-109.07 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-109.07 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-109.07 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-109.07 <span class="unit">DPS</span></div>
-    <div class="pct">-5.44%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="28587" data-sources="zone:Karazhan" data-delta="-124.47779146872199" data-weighted="-124.47779146872199" data-full="-124.47779146872199" data-package="-124.47779146872199">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -8658,9 +8564,10 @@
 <section class="slot" id="slot-ranged">
   <header class="slot-head">
     <h2>ranged</h2>
-    <p class="slot-count-all">7 candidates</p>
+    <p class="slot-count-all">4 candidates</p>
     <p class="slot-count-bis">1 BiS candidate</p>
   </header>
+  
   <div class="rows"><article class="row muted is-bis" data-item-id="27484" data-sources="kind:unknown" data-delta="0" data-weighted="0" data-full="0" data-package="0">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -8721,66 +8628,6 @@
     <div class="pct">-0.56%</div>
   </div>
 </article>
-<article class="row muted" data-item-id="28592" data-sources="zone:Karazhan" data-delta="-13.806909042320513" data-weighted="-13.806909042320513" data-full="-13.806909042320513" data-package="-13.806909042320513">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=28592" target="_blank" rel="noreferrer">Libram of Souls Redeemed</a>
-    <div class="meta">Karazhan · The Wizard of Oz </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-13.81 <span class="unit">DPS</span></div>
-    <div class="pct">-0.69%</div>
-  </div>
-</article>
-<article class="row muted" data-item-id="30063" data-sources="zone:Serpentshrine Cavern" data-delta="-13.806909042320513" data-weighted="-13.806909042320513" data-full="-13.806909042320513" data-package="-13.806909042320513">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=30063" target="_blank" rel="noreferrer">Libram of Absolute Truth</a>
-    <div class="meta">Serpentshrine Cavern · The Lurker Below </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-13.81 <span class="unit">DPS</span></div>
-    <div class="pct">-0.69%</div>
-  </div>
-</article>
-<article class="row muted" data-item-id="32368" data-sources="zone:Black Temple" data-delta="-13.806909042320513" data-weighted="-13.806909042320513" data-full="-13.806909042320513" data-package="-13.806909042320513">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="https://www.wowhead.com/tbc/item=32368" target="_blank" rel="noreferrer">Tome of the Lightbringer</a>
-    <div class="meta">Black Temple · Mother Shahraz </div>
-    
-    
-    
-    
-    
-    
-  </div>
-  <div class="nums">
-    <div class="delta down delta-plain">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-weighted">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-full">-13.81 <span class="unit">DPS</span></div>
-    <div class="delta down delta-package">-13.81 <span class="unit">DPS</span></div>
-    <div class="pct">-0.69%</div>
-  </div>
-</article>
 <article class="row muted" data-item-id="23203" data-sources="kind:world" data-delta="-14.09673154870211" data-weighted="-14.09673154870211" data-full="-14.09673154870211" data-package="-14.09673154870211">
   <div class="lead"><span class="rank dash">—</span></div>
   <div class="body">
@@ -8804,7 +8651,7 @@
 </section>
 
     <footer>
-      Generated 2026-08-15T06:08:41.339Z · contentHash f5c2639305c6bde9d38314b716ea10882203372bdfa1f7bdd89d60659bfbd19d ·
+      Generated 2026-08-15T16:21:15.873Z · contentHash efc1d4ee71d86b69cf3a3859ab29cc7833a5248164be74805af9eeab8e5a66ef ·
       metaAdjusted=false
     </footer>
   </div>
