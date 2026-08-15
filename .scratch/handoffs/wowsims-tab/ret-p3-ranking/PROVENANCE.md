@@ -9,6 +9,25 @@ identical command, seeds and gear fixture and produced bit-identical
 `items`/`baseline` figures — the only change in the second run's JSON is the
 new `plausibilityWarnings` entry below.
 
+## 2026-08-14 re-run — ticket 157 landed, the relic caveat is gone
+
+Re-run on `feat/sweep-ret-tickets` (worker B2) after ticket 157 force-admits
+27484 into the ret-p3 pool. Same command as below, same fixture, same seeds.
+27484 Libram of Avengement now scores as an ordinary worn candidate:
+`owned: true`, `deltaDps: 0`, `slot: "ranged"`, `p3 BiS` tag — like the other
+15 worn items — and `plausibilityWarnings` is absent from the run's JSON (no
+`dead-slot` fires, because the worn item is no longer missing from its
+slot's pool). Verify:
+
+```
+python -c "import json; d=json.load(open('.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json')); print(d['ranking'].get('plausibilityWarnings')); print([(i['itemId'],i['name'],i['deltaDps'],i.get('owned')) for i in d['ranking']['items'] if i['slot']=='ranged'])"
+```
+
+The "Relic slot caveat" section below is the pre-157 state and is kept for
+history; it no longer describes the current artifact. Headline numbers below
+are also pre-157 and are superseded by this re-run — see the top-3 upgrades
+list in the current `slamaltman-p3.html`/`.json` for the live figures.
+
 ## Command
 
 ```

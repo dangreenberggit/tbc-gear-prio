@@ -5,11 +5,11 @@
     "region": "US",
     "spec": "ret",
     "maxPhase": 3,
-    "poolSize": 394,
-    "generatedAt": "2026-08-15T04:05:18.732Z"
+    "poolSize": 400,
+    "generatedAt": "2026-08-15T06:08:41.339Z"
   },
   "ranking": {
-    "contentHash": "1470d46a291f1f609efd249f96468d2a87e1749f4203270522dc1e5583cce597",
+    "contentHash": "f5c2639305c6bde9d38314b716ea10882203372bdfa1f7bdd89d60659bfbd19d",
     "cutoff": {
       "absDps": 3.4,
       "pct": 0.15
@@ -80,7 +80,7 @@
     "substitutions": [
       {
         "field": "candidate 30892 (shoulder)",
-        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 69 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff694f5bec0?, 0xc0020049c0?})\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff69521fdd0?, 0xc00088a090})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff69521fdd0, 0xc00088a090}, 0xc002e3fc30, 0xc002e3fc60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc002a82000, {0x7ff69521fdd0, 0xc00088a090})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:349 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc002a82000, {0x7ff69521fdd0, 0xc00088a090}, 0xc001e17360, 0xc000bb20b0, 0xc001e16c30)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:299 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc001fa8160, 0xc001ded580)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc001fa8000, 0xc001ded580, 0xc001dd78c0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc001ded580, 0xc001dd78c0, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc00040cc00, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc00040cc00, 0xc001e0b810, 0x0, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 56\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
+        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 79 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff6f9e8bec0?, 0xc000ef8720?})\\n\\t/opt/hostedtoolcache/go/1.25.12/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff6fa14fdd0?, 0xc000d02098})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff6fa14fdd0, 0xc000d02098}, 0xc002c45c30, 0xc002c45c60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc00302e000, {0x7ff6fa14fdd0, 0xc000d02098})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:349 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc00302e000, {0x7ff6fa14fdd0, 0xc000d02098}, 0xc00075fe00, 0xc00307c0b0, 0xc00075f6d0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:299 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc000d00420, 0xc000c70700)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc000d002c0, 0xc000c70700, 0xc000cab3b0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc000c70700, 0xc000cab3b0, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc0018dfb60, {{0xc000dfe4e0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc0018dfb60, 0xc001fb3570, 0x0, {{0xc000dff110?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 13\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
       }
     ],
     "items": [
@@ -2057,6 +2057,40 @@
       },
       {
         "rank": null,
+        "itemId": 27484,
+        "name": "Libram of Avengement",
+        "slot": "ranged",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": 0,
+        "deltaPct": 0,
+        "se": 2.171424243650045,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "curatedSets": [
+          "p1",
+          "p2",
+          "p3",
+          "preraid"
+        ],
+        "bisSets": [
+          "p3"
+        ],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ],
+        "owned": true
+      },
+      {
+        "rank": null,
         "itemId": 30055,
         "name": "Shoulderpads of the Stranger",
         "slot": "shoulder",
@@ -2977,6 +3011,28 @@
       },
       {
         "rank": null,
+        "itemId": 31033,
+        "name": "Libram of Righteous Power",
+        "slot": "ranged",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": -5.381348573639116,
+        "deltaPct": -0.26859543680421155,
+        "se": 2.1561499174491394,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ]
+      },
+      {
+        "rank": null,
         "itemId": 30132,
         "name": "Crystalforge Greaves",
         "slot": "legs",
@@ -3731,6 +3787,28 @@
       },
       {
         "rank": null,
+        "itemId": 22401,
+        "name": "Libram of Hope",
+        "slot": "ranged",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": -11.174918437880478,
+        "deltaPct": -0.5577657826845009,
+        "se": 2.133724085781945,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ]
+      },
+      {
+        "rank": null,
         "itemId": 32278,
         "name": "Grips of Silent Justice",
         "slot": "hands",
@@ -4453,6 +4531,29 @@
       },
       {
         "rank": null,
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": -16.124023570701183,
+        "deltaPct": -0.8047869590215327,
+        "se": 2.161490267588528,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ],
+        "slotChoice": "trinket2"
+      },
+      {
+        "rank": null,
         "itemId": 28746,
         "name": "Fiend Slayer Boots",
         "slot": "feet",
@@ -4532,6 +4633,29 @@
             "origin": "db"
           }
         ]
+      },
+      {
+        "rank": null,
+        "itemId": 31856,
+        "name": "Darkmoon Card: Crusade",
+        "slot": "trinket",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": -17.019116238893275,
+        "deltaPct": -0.849463084885411,
+        "se": 2.1512789030510717,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ],
+        "slotChoice": "trinket2"
       },
       {
         "rank": null,
@@ -5182,6 +5306,32 @@
             }
           ]
         }
+      },
+      {
+        "rank": null,
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "source": {
+          "kind": "unknown",
+          "origin": "curated"
+        },
+        "deltaDps": -23.15819420897469,
+        "deltaPct": -1.1558785319401719,
+        "se": 2.150417404046753,
+        "seMethod": "independent",
+        "bisTags": [],
+        "curatedSets": [
+          "preraid"
+        ],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "unknown",
+            "origin": "curated"
+          }
+        ],
+        "slotChoice": "trinket2"
       },
       {
         "rank": null,
@@ -11703,15 +11853,6 @@
         "packageDeltaDps": -80.55680926908235,
         "bonusDps": -3.8759685783284112,
         "se": 5.367011142028341
-      }
-    ],
-    "plausibilityWarnings": [
-      {
-        "kind": "dead-slot",
-        "slot": "ranged",
-        "cause": "worn-unrankable",
-        "wornItemName": "Libram of Avengement",
-        "message": "ranged is unmeasured: the worn Libram of Avengement is not in the candidate pool for this slot, so every row shown for ranged was scored against an empty slot, not against Libram of Avengement. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
       }
     ]
   }
