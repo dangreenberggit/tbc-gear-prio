@@ -54,7 +54,8 @@
       ],
       "curationHint": 56.28,
       "curatedSets": [
-        "p2_6p"
+        "p2_6p",
+        "p3_6p"
       ],
       "bisTags": [
         "BiS"
@@ -1923,6 +1924,8 @@
       "curatedSets": [
         "p2_6p",
         "p2_9p",
+        "p3_6p",
+        "p3_9p",
         "preraid"
       ],
       "bisTags": [
@@ -2969,7 +2972,9 @@
       "curationHint": 39.46,
       "curatedSets": [
         "p2_6p",
-        "p2_9p"
+        "p2_9p",
+        "p3_6p",
+        "p3_9p"
       ],
       "bisTags": [
         "BiS"
@@ -3016,6 +3021,8 @@
       "curatedSets": [
         "p2_6p",
         "p2_9p",
+        "p3_6p",
+        "p3_9p",
         "preraid"
       ],
       "bisTags": [
@@ -3315,7 +3322,9 @@
       "curationHint": 85.04,
       "curatedSets": [
         "p2_6p",
-        "p2_9p"
+        "p2_9p",
+        "p3_6p",
+        "p3_9p"
       ],
       "bisTags": [
         "BiS"
