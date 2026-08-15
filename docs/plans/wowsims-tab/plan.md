@@ -257,6 +257,28 @@ lower default candidate count. **Measure before tuning anything.**
 <!-- E-W2 results land here: wall-clock per candidate at 3,000 and 5,000
      iterations, worker count, machine. -->
 
+**E-W2: blocked by environment WASM throughput, not measured as planned
+(slice 3, 2026-08-14).** Attempted on this machine (Windows 11, 20 logical
+cores) via the Claude Code Browser pane (`vite serve`, `vendor/tbc-new-fork`
+at `f7146dd69`). Finding, not a measurement: **the browser pane's WASM-in-Worker
+execution is roughly 2-3 orders of magnitude slower than the same binary run
+directly under Node** — upstream's own built-in "Simulate" button (not this
+detour's code) took over 200 seconds to finish 100 iterations of the same
+fixture-scale gear, with no error and no crash, just extremely slow
+computation; by contrast E-W1's direct-Node harness (below) did 5,000
+iterations of a comparable request in ~30 seconds. `document.hidden` reports
+`true` for this pane even when "fronted," which points at the automation
+harness never giving the tab real OS-level paint/visibility — a plausible
+mechanism for Worker-thread timer/scheduling throttling that a real browser
+tab would not hit. **Not established as the cause, only as a correlated
+fact** — no lower-level profiling was done. `WasmSimRunner`'s own request
+composition was confirmed correct up to the point WASM execution starts (see
+slice 3 handoff's DOM evidence: "Simming 0/277…" with a well-formed
+`raidSimAsync` request logged, matching `PlayerGearSource`'s output field for
+field). **Re-run E-W2 in a real, foregrounded browser tab** before trusting
+any default-candidate-count or iteration-count decision on this data — this
+environment is not representative of what a user's own browser will do.
+
 ---
 
 ## 6. WCL gear-only import (separate slice, D6)
