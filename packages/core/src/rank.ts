@@ -89,6 +89,7 @@ import {
   plausibilityWarnings,
   type PlausibilityWarning,
 } from "./plausibility.js";
+import type { WornUnrankableItem } from "./dead-slots.js";
 import { getItem } from "./items.js";
 import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
@@ -930,6 +931,29 @@ export async function rankUpgrades(
       }
     }
 
+    // Worn items that never became a row at all: absent from `candidates` for
+    // their slot (ticket 163 — `assemble_universe.py`'s no-source rule can
+    // exclude a D7-eligible item entirely, so it survives gear-fetch and
+    // `data/items/index.json` but never reaches the pool). `equippedIds` was
+    // built from the same `equipment` array `ranked` is scored against, so an
+    // id present there but never seen in `ranked` did not skip ranking for
+    // some other reason (belowCutoff rows are still in `ranked`) — it was
+    // never a candidate to begin with. Resolved through `getItem`, the same
+    // item index the pool itself is built from, so the slot named here is the
+    // pool bucket the item would belong to if it were in the pool.
+    const rankedItemIds = new Set(ranked.map((i) => i.itemId));
+    const wornUnrankable: WornUnrankableItem[] = [];
+    for (const id of equippedIds) {
+      if (rankedItemIds.has(id)) continue;
+      const item = getItem(id);
+      // No index entry either: covered by `unknown-item`/`unidentified-worn-
+      // item` already, not this — `worn-unrankable` states a slot for the
+      // reader, and inventing one for an item this repo cannot identify at
+      // all would assert more than is known.
+      if (!item) continue;
+      wornUnrankable.push({ itemId: id, itemName: item.name, slot: item.slot });
+    }
+
     // Run over the finished rows and the final `setBonuses`, so a warning
     // describes what the report will actually show rather than an intermediate.
     const warnings = plausibilityWarnings({
@@ -943,6 +967,7 @@ export async function rankUpgrades(
         ...(i.owned === true ? { owned: true } : {}),
       })),
       wornSetCounts: setCounts(equipment),
+      ...(wornUnrankable.length > 0 ? { wornUnrankable } : {}),
     });
 
     const ranking: Ranking = {

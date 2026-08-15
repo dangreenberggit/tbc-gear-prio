@@ -59,6 +59,18 @@ export type DeadSlotCause =
    * exists so that absence is stated instead of dropping the slot in silence.
    */
   | "unidentified-worn-item"
+  /**
+   * The worn item is known by id and name (the caller read it off the
+   * character's equipment) but never became a row at all — it is absent from
+   * the candidate pool for its slot, so no candidate was ever compared
+   * against it and every row in the slot is scored against an empty slot
+   * instead. Distinct from `unidentified-worn-item`: there the classifier has
+   * rows but none says what is worn; here the worn item is known but has no
+   * row to anchor to. The slot's other rows (if any) are real deltas but
+   * against the wrong baseline, so they must not be read as upgrades or
+   * losses relative to what is actually equipped (ticket 163, ticket 124).
+   */
+  | "worn-unrankable"
   /** A real pool, no set, nothing better — not a defect. */
   | "benign-nothing-better";
 
@@ -112,6 +124,14 @@ export type DeadSlot = {
   poolSize: number;
 };
 
+/** An equipped item the caller could name but that never reached `rows` at all. */
+export type WornUnrankableItem = {
+  itemId: number;
+  itemName: string;
+  /** The pool slot bucket it belongs to, matching `DeadSlotRow.slot`. */
+  slot: string;
+};
+
 export type ClassifyDeadSlotsOptions = {
   /**
    * Pieces worn per set, as `setCounts(equipment)` returns. Needed because a
@@ -119,6 +139,17 @@ export type ClassifyDeadSlotsOptions = {
    * examined — a lone worn piece breaks nothing.
    */
   wornSetCounts: ReadonlyMap<number, number>;
+  /**
+   * Worn items the caller resolved from the character's equipment that never
+   * produced a row in `rows` for their slot — absent from the candidate pool
+   * entirely (ticket 163: 27484 excluded from `data/universes/ret-p3.json` by
+   * `assemble_universe.py`'s no-source rule). `rows` alone cannot distinguish
+   * this from an ordinary dead slot: both look like "no row is owned", but
+   * here the classifier has no row to anchor to at all, worn or not, so the
+   * cause is read from this list rather than inferred. Optional because most
+   * callers (and existing tests) have nothing to report here.
+   */
+  wornUnrankable?: readonly WornUnrankableItem[];
 };
 
 /**
@@ -193,7 +224,37 @@ export function classifyDeadSlots(
   }
 
   const dead: DeadSlot[] = [];
+
+  // Worn-unrankable slots first, and unconditionally — not gated on `best >
+  // 0`. Every row this slot does have was scored against an empty slot, not
+  // against the item actually worn, so a positive-looking row here is not a
+  // real upgrade either; the whole slot's numbers are compromised, which is
+  // why this bypasses the normal "only dead slots get classified" gate rather
+  // than waiting to be reached by it (ticket 163, ticket 124).
+  const unrankableSlots = new Set(
+    (options.wornUnrankable ?? []).map((w) => w.slot)
+  );
+  for (const worn of options.wornUnrankable ?? []) {
+    const slotRows = bySlot.get(worn.slot) ?? [];
+    dead.push({
+      slot: worn.slot,
+      cause: "worn-unrankable",
+      wornItemId: worn.itemId,
+      wornItemName: worn.itemName,
+      // Set membership is not evaluated here: with the worn item outside the
+      // candidate pool entirely, none of the pool-based causes below (set
+      // toll, thin pool, unique effect) could have been tested against it
+      // either, so nothing about its set is asserted.
+      wornSetId: null,
+      wornSetName: null,
+      runnerUpGapDps: null,
+      tiedCandidates: null,
+      poolSize: slotRows.length,
+    });
+  }
+
   for (const [slot, slotRows] of bySlot) {
+    if (unrankableSlots.has(slot)) continue;
     const best = Math.max(...slotRows.map((r) => r.deltaDps));
     if (best > 0) continue;
 

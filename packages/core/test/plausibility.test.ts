@@ -282,6 +282,34 @@ describe("deadSlotWarnings", () => {
     });
     expect(found.map((w) => w.slot).sort()).toEqual(["chest", "head"]);
   });
+
+  describe("worn-unrankable (ticket 163)", () => {
+    // The slamaltman-p3 shape: 27484 (Libram of Avengement) is worn but
+    // absent from the ret-p3 universe, so `ranged` shows four librams, none
+    // owned, three tied at the identical -13.81 that is the classifier's own
+    // clue nothing is being measured against the worn item.
+    const RANGED_NO_WORN_ROW: DeadSlotRow[] = [
+      cand(28592, "Libram of Souls Redeemed", "ranged", -13.81),
+      cand(30063, "Libram of Absolute Truth", "ranged", -13.81),
+      cand(32368, "Tome of the Lightbringer", "ranged", -13.81),
+      cand(23203, "Libram of Fervor", "ranged", -14.1),
+    ];
+
+    it("warns and names the worn item instead of presenting the rows as losses", () => {
+      const found = deadSlotWarnings(RANGED_NO_WORN_ROW, {
+        wornSetCounts: new Map(),
+        wornUnrankable: [
+          { itemId: 27484, itemName: "Libram of Avengement", slot: "ranged" },
+        ],
+      });
+      expect(found).toHaveLength(1);
+      expect(found[0]?.cause).toBe("worn-unrankable");
+      expect(found[0]?.wornItemName).toBe("Libram of Avengement");
+      // Must read as "unmeasured", not restate the rows as real upgrades/losses.
+      expect(found[0]?.message).toContain("unmeasured");
+      expect(found[0]?.message).not.toMatch(/no positive candidate/i);
+    });
+  });
 });
 
 describe("plausibilityWarnings", () => {
