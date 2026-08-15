@@ -14,7 +14,34 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-**Nothing in flight.** All slices and reviews of the detour are done.
+One agent running (2026-08-15): **ticket 171 by exclusion** on
+`feat/sweep-ret-tickets` (worktree `..\tbc-gear-prio-wt-sweep-ret`) —
+generator scans the fork's Go tree for implemented item effects vs TODO
+stubs, assembler drops stub-only items, universes + ret-p3 ranking
+regen. User ruling: unimplemented items are not pooled, not simmed, not
+shown. When it reports: confirm the three librams (28592/30063/32368)
+are gone and 27484/23203 remain; verify byte-compare claims.
+
+## Post-sweep fixes (2026-08-15, this seat, after the ticket-sweep session)
+
+Context: another session ran a sweep of tickets 154–164 producing two
+merge-ready branches — A `feat/sweep-tab-tickets` (this checkout) and B
+`feat/sweep-ret-tickets` (supersedes `feat/ret-p3-data`); its handoff is
+`.scratch/carry-forward/plans/ticket-sweep-2026-08-14/HANDOFF-to-planner.md`.
+Both `merge-to-dev --check-only` → ok, re-run by this seat.
+
+**Tickets 162 v2 + 168 — DONE, orchestrator-verified.** User decisions:
+use the page's own EP weights by default when customized
+(`hasCustomEPWeights()` guard, three validity rules), else the committed
+file resolved per spec+phase from the shared `ep-weights-by-phase.json`;
+drawer discloses which; weight changes mark stale, never sim; no
+await-computation shim. Fork commit `3000b2f6b` on `w/a2-162-v1`, outer
+`8229c97` (lockfile bumped, tickets resolved, slice note in
+`slice-4/SLICE-NOTE-162v2-168.md`). Engine files `disclosure.ts`/`rank.ts`
+were edited (retyped source union) — orchestrator independently confirmed
+E-W3 passes and drift gate 30/30 on the tip. **168's merge-order
+precondition is dissolved** — the tab no longer hardcodes a weights file.
+Untested: live click-through; `invalid.reason` not surfaced in drawer.
 
 ## Slice 6 — §9.6 GATE CLOSED (SME addendum, 2026-08-14)
 
