@@ -119,3 +119,39 @@ table. `pnpm verify` green in the worker's worktree before handoff.
 
   In flight: all five. Next transition: collect handoffs, then fan-in 1
   (A1/A2/A3 → `feat/sweep-tab-tickets`; B1/B3 → `feat/sweep-ret-tickets`).
+
+- 2026-08-14 — **Structural discovery: the wowsims fork is invisible to
+  isolated worktrees.** Workers A2 and A3 both returned blocked, independently
+  and for the same underlying reason.
+
+  The Upgrades tab and the fork engine are not in this repository. They live in
+  a **nested, separately-versioned clone** at
+  `C:/Users/dgree/Code/lulz/tbc-gear-prio/vendor/tbc-new-fork`, which is its
+  own git repo on branch `feat/upgrades-tab` at `adb0d1353`, and which the main
+  repo **gitignores**. `git worktree add` does not carry gitignored paths, so a
+  worktree-isolated worker cannot see it.
+
+  Verified:
+  - `git -C vendor/tbc-new-fork rev-parse HEAD` → `adb0d135336a26eab613215fa85b1265d7ce2e5d`, branch `feat/upgrades-tab`.
+  - `ui/core/components/individual_sim_ui/upgrades/data/data.ts:88` defines `epWeightsFor` — ticket 162 names this as `upgrades/data/data.ts`, a path relative to the fork, not to this repo.
+  - `git grep -l epWeightsFor feat/sweep-tab-tickets` matches only the ticket and a slice-3 handoff — no source file in this repo.
+
+  Consequence for path ownership: **fork-side commits land in
+  `vendor/tbc-new-fork`'s own history, not on `feat/sweep-tab-tickets`.** The
+  branch-A review must say so, or a reader will look for tab changes in this
+  repo's log and conclude nothing shipped.
+
+  Per-worker effect:
+  - **A2** (ticket 162) — blocked, committed `1b601d5`. Needs the fork. Respawned without isolation.
+  - **A3** (ticket 156) — blocked, committed `86de068`. Its worktree has no `vendor/` directory at all. Needs the fork (`vite.build-workers.mts`, `dist/tbc`). Respawned without isolation.
+  - **A1** (ticket 155) — **not** blocked. Its worktree does contain a `vendor/tbc-new-fork` directory carrying the engine sources, so it can read them. Note that directory is a plain copy, not the nested repo: `git -C .claude/worktrees/agent-abd559c4ed6de1152/vendor/tbc-new-fork rev-parse HEAD` returns the *main* repo's SHA. A1 may therefore read fork sources and run temporary mutations, but cannot commit fork-side changes — which its slice does not require, since the test it edits lives in `packages/core`.
+  - **B1, B3** — unaffected; their tickets are Python and docs in this repo. B3 has committed `71a35a7`.
+
+  **Respawn policy for A2 and A3.** Both run *without* worktree isolation,
+  sharing the main checkout. That breaks the isolation rule deliberately, so
+  strict path ownership is the compensating control and is non-negotiable:
+  A2 writes only `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/**`
+  plus ticket 162; A3 writes only `docs/plans/wowsims-tab/plan.md` plus ticket
+  156 (and may run, not commit, fork builds). Their main-repo file sets are
+  disjoint, and each commits only its own paths. This is tolerable only
+  because the main-repo edits are few and file-disjoint.
