@@ -52,6 +52,18 @@ outer commit `005b5b8` with `e-w4-result.md` + captured before/after JSON
   modal click-through, unresolved-item reporting path. First live use
   needs the user's WCL creds in that file.
 
+## Decision (user, 2026-08-14): WCL credentials for prod
+
+The personal `.env` WCL creds are **development-only**. A production /
+published build must use the **same accessing method as the rest of the
+wowsims app** — upstream's existing credential path, as
+`raid_wcl_importer.tsx` does — not the personal creds and not a new
+mechanism. This resolves plan §6's "PR-time question" in the direction it
+predicted. **Plan §6 still needs a one-sentence amendment recording
+this** — deferred only because a design agent is concurrently appending a
+section to `plan.md` (one-writer-per-file rule); apply it when that
+agent's commit lands.
+
 ## Open design question (user-raised, 2026-08-14): user-set EP weights
 
 Upstream's page lets users set their own EP weights
