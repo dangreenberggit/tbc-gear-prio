@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/generate_sim_implemented_effects.py",
   "forkRepo": "dangreenberggit/tbc-new",
-  "forkCommit": "655b3c36fccadc740332e53da527ba3cfcaec68d",
+  "forkCommit": "6071b858ecf47fb88ea79f72f06b6b4f233020b8",
   "_comment": "implementedEffectItemIds is informational -- assemble_universe.py does not consult it, because a stat-only item needs no registration at all. stubOnlyItemIds is the one that drives exclusion: an item id whose only appearance in the fork's Go tree is inside a commented `TODO: Manual implementation required` stub block, with no active core.NewItemEffect / shared.NewSimpleStatActive registration anywhere. Regenerate with `python scripts/generate_sim_implemented_effects.py` after re-pinning vendor/tbc-new-fork.",
   "implementedEffectItemIdsCount": 215,
   "implementedEffectItemIds": [
