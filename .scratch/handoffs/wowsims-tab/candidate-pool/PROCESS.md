@@ -41,7 +41,48 @@ orchestrator:
 | Slice | Content | Model | Branch | Status |
 | --- | --- | --- | --- | --- |
 | A | M0 doc fixes: `plan.md`, ticket 162, ADR-0018 | Sonnet | `slice-a-m0-docs` | **merged** `80508a9`; acceptance grep re-verified by orchestrator |
-| B | E-W5 §3.1 + §3.2 harnesses, numbers into §3.3 | Sonnet | `slice-b-ew5` | dispatched with measured timings and corrected counts |
+| B | E-W5 §3.1 + §3.2 harnesses, numbers into §3.3 | Sonnet | `slice-b-ew5` | §3.1 **committed** `7e1f620`; §3.2 sweep still running, worker ended its turn early (see below) |
+
+### Slice B §3.1 — landed and independently spot-checked
+
+`experiments/e-w5-overhead.{json,md}` + `scripts/ew5_overhead.mjs`, median of 5
+repeats, `iterationsDone` asserted per run:
+
+| iterations | median ms | median dps |
+| --- | --- | --- |
+| 100 | 377.0 | 2026.7 |
+| 300 | 391.0 | 2039.3 |
+| 1000 | 435.8 | 2040.9 |
+| 3000 | 575.5 | 2042.8 |
+| 5000 | 685.2 | 2042.4 |
+
+Fit: **`t_fixed` = 373.2 ms, `t_iter` = 0.0637 ms/iteration**. Peak RSS
+**183.8 MB** at 5,000 iterations — that is §5.1.2's `memoryCap` input.
+
+**F8 is resolved to a proven zero, not left ambiguous.** B's claim: `runPresims`
+loops only while `doOne || remainingAgents > 0`; the only `Presimmer` in the
+fork is `Character.GetPresimOptions`, which returns `nil` unless
+`HealingModel.Hps == 0 && HealingModel.CadenceSeconds != 0`.
+
+Orchestrator re-verified this independently:
+`vendor/tbc-new-fork/sim/core/health.go:272-277` returns `nil` when
+`healingModel == nil || Hps != 0 || CadenceSeconds == 0`; the fixture's
+`healingModel` is `{}` (so `CadenceSeconds == 0`), it has no
+`endFightAtHealth`, and the encounter is a fixed 180 s. So the presim loop body
+never executes for this fixture and `t_fixed` is pure setup. Confirmed.
+
+B also caught a real measurement artifact: a 50 ms RSS poller inflated
+wall-clock 2–40× through CPU/IO contention, so timing and RSS are now sampled
+in separate runs. That is the kind of thing that would have silently corrupted
+every downstream ratio.
+
+**Worker ended its turn with the §3.2 sweep still in flight** — the fan-in
+abandonment the model policy names. The orchestrator did not treat that as
+completion: a live `wowsimcli-windows.exe` and the absence of
+`experiments/e-w5-rank.json` both confirm §3.2 is unfinished. The orchestrator
+now owns waiting for it and will resume B (its context is intact) to do the
+write-up and the go/no-go once the sweep lands. **No go/no-go exists yet — do
+not record one.**
 | C | M1 in `packages/core` | Sonnet | `slice-c-m1-core` | **merged** `162097e`; 6 commits, spawned at `55b5a51` and self-corrected |
 
 ### Slice C — what the orchestrator verified rather than took on trust
