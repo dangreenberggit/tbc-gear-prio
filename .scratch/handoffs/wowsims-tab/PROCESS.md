@@ -60,18 +60,29 @@ wowsims app** — upstream's existing credential path, as
 `raid_wcl_importer.tsx` does — not the personal creds and not a new
 mechanism. This resolves plan §6's "PR-time question" in the direction it
 predicted. **Plan §6 still needs a one-sentence amendment recording
-this** — deferred only because a design agent is concurrently appending a
-section to `plan.md` (one-writer-per-file rule); apply it when that
-agent's commit lands.
+this** — ~~deferred~~ applied as `fc6a70a` once the plan.md writer landed.
 
-## Open design question (user-raised, 2026-08-14): user-set EP weights
+## User-set EP weights — RESOLVED as plan §12 + ticket 162 (2026-08-14)
 
-Upstream's page lets users set their own EP weights
-(`player.setEpWeights`, `stat_weights_action.tsx` calculator,
-`saved_data_managers/ep_weights.ts`); our tab prefilters/gem-fills with
-the committed `epWeightsFor(specId)` and ignores the page's. EP shapes
-candidate *selection* only — sims produce every number. Assessment given
-in chat; awaiting the user's direction before any change.
+Opus design investigation, commit `acd8dd5` (plan §12 appended; ticket
+`162-upgrades-tab-ignores-user-set-ep-weights.md`). Key results, both
+falsifying premises of the original framing:
+
+- Page weights are **never observably zero** — seeded from the spec
+  default at init (`individual_sim_ui.tsx:589`, `:737-739`); the real
+  hazard is stale/degenerate, not empty. `hasCustomEPWeights()`
+  (`player.tsx:531-533`) detects user modification.
+- The user's "await an in-flight computation" idea **cannot be built
+  from outside** — the stat-weights promise is closure-local with no
+  pending state or completion event; it needs a small fork patch
+  (`getPendingStatWeights()` shim, designed in the ticket, hypothesis).
+- v1 decision: committed weights + assumptions-drawer disclosure of the
+  weights file and pin. v2 (ticket 162): opt-in toggle following
+  upstream's own reforge-suggester precedent
+  (`suggest_reforges_action.tsx:321-372`).
+- The v1 disclosure line in the assumptions drawer is **not yet
+  implemented** in the fork — small tab edit, no engine files; fold into
+  the next fork-touching slice rather than a dedicated dispatch.
 
 ## Slice 6 `pre-merge-review` — DONE: gate green, two user decisions open
 
