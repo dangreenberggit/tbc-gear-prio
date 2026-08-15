@@ -97,5 +97,5 @@ generated — gitignored, absent by default per plan §1). Full gate:
 unrelated to this ticket: `vendor/wowsims` gear/APL fixtures needed a local
 sync in this worktree) / 2 todo, exit 0.
 
-Commit: see this branch's `w/a1-155-parity` history (this file, the test, and
-the handoff table land in one commit alongside this comment).
+Commit: `ea6f46b1dd31387cee99f88e748dee560c2034e3` on `w/a1-155-parity`
+("Broaden E-W3 to multi-seed, socketed, set-bonus case").
