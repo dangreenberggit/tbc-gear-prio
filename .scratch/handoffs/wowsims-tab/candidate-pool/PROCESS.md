@@ -295,7 +295,63 @@ Base for both: this repo `cc78ea68ebda6f6d9b2cfcf29a8ef3718ee12ff6`.
 | Slice | Content | Isolation | Base |
 | --- | --- | --- | --- |
 | B′ | M1.5 EP-ordering recall (`experiments/m1-5-*`) | this repo, own worktree | **merged** `667ba97`; worktree torn down |
-| D | M1 port to fork + adapter + Candidates/Stop controls | **fork clone's main working tree** per §9.1a — no worktree | fork `655b3c36f` on `feat/upgrades-tab` |
+| D | M1 port to fork + adapter + Candidates/Stop controls | **fork clone's main working tree** per §9.1a — no worktree | **done**; fork now at `6071b858e` on `feat/upgrades-tab` |
+
+### Slice D — verified, not taken on trust
+
+- Fork tree clean, work merged onto `feat/upgrades-tab` as instructed.
+- **E-W3 parity passes** (`packages/core/test/wowsims-fork-parity.test.ts`) —
+  the ported engine reproduces this repo's ranked deltas. Re-run again after
+  the CRLF renormalisation below; still green.
+- The **post-drain `signal.aborted` re-read is present** in the fork copy
+  (`engine/rank.ts:753`), so the Stop bug found in core is not reproduced
+  there.
+- `makeRaidSimRequest(debug, iterations?)` is one optional parameter with all
+  existing callers unchanged — §6.3's "no parallel builder" honoured.
+
+**Orchestrator correction:** D's comment on that parameter justified it by
+"racing", which E-W5 cancelled. Reworded — the parameter stays because it is
+the right shape for any per-request iteration control, but nothing overrides
+iterations today.
+
+### The CRLF gate is fixed at the cause, not papered over
+
+D confirmed the diagnosis and extended it: even **freshly created** files
+(`candidate-order.ts`, `promise-pool.ts`) flipped to CRLF after an ordinary
+commit/checkout/merge cycle. D correctly refused to force the hashes and
+reported the gate unpassable at clone-config level.
+
+Fixed there: set `core.autocrlf=false` on the fork clone and re-checked out.
+Files came back LF, 31 of 32 immediately matched, and only `rank.ts` still
+carried a hash recorded while CRLF was in effect. E-W3 passes both before and
+after, so updating that one row corrects a stale **byte** hash without hiding a
+behaviour change — which is exactly what `check_engine_port_drift.py`
+prescribes. `pnpm engine-port-drift:check` now reports **all 32 ported files
+matching**.
+
+### `pnpm verify` exits 0 on the tip
+
+Verified by capturing the exit code directly. **A trap worth recording:** the
+first attempt ran past its foreground timeout and was backgrounded, and the
+wrapper reported `[exited with code 0]` while the log's last lines read
+`ELIFECYCLE ... exit code 1`. The wrapper's status is not the command's status
+— AGENTS.md's "an exit code is not evidence" applies to the harness too. The
+real failure was `sim-implemented-effects.json` going stale *again*, because
+D's fork commits moved the SHA past the one regenerated earlier in the session.
+
+Lockfile and effects artifact are now both pinned at fork `6071b858e`; id sets
+unchanged (215/460) across every regeneration, so no universe was ever
+affected. `pushed` stays `false`.
+
+## Round 3
+
+F's substance is **already done and verified**: the M2 half was cancelled by
+the no-go, and 7.10 port parity (E-W3) is green at the tip with PROVENANCE
+matching. No separate F slice is needed; if a reviewer disagrees, the work to
+redo is a re-run of E-W3, not a port.
+
+Remaining: **G** — rewrite ticket 156's recipe around the Candidates cap and
+the Stop control, then the §10 execution review and REPORT.md.
 
 D is the only fork writer this round, so it uses the fork's main working tree
 and merges onto `feat/upgrades-tab` inside the fork. The orchestrator owns
