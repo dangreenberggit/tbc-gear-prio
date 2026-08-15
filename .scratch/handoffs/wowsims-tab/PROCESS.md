@@ -14,14 +14,40 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent is running: the **combined slices 3+4 review**
-(Opus review lane, orchestration.md §"Review points" item b). It reviews
-fork range `e49dcf23c..6cf6dc28a` against plan §2.2–§2.5, §4, §5 and
-decisions D4/D5/D7, and files
-`.scratch/handoffs/wowsims-tab/slice-3-4-review.md` on
-`feat/shopping-list-wowsims-tab`. When it reports: read the verdict, verify
-any load-bearing claim, and **stop before any merge or push ask** — both
-require the user's word.
+One background agent is running: a **Sonnet fix-up worker** applying the
+3+4 review's findings in the fork's `upgrades_tab.tsx` (F1 weapon-slot
+sub-tab bug, F2 sub-tab selection lost on re-render, F5 the D7 visible
+iteration control, F3 dead `hideOwned` field). Engine files are off-limits
+to it. It will bump the lockfile and append a "Fix-up after review"
+section to `slice-4/HANDOFF.md`. When it reports: re-derive the F1 bucket
+counts (ret-p2 12, ret-p3 18, feral-p2 57 weapon rows must land in the
+mainhand tab), re-run the green baseline, and **stop before any merge or
+push ask** — both require the user's word.
+
+## Combined slices 3+4 review — DONE: pass with findings
+
+Opus review lane, filed at
+[`slice-3-4-review.md`](slice-3-4-review.md), commit `547c5a7`. No finding
+blocks the fork-integration gate. Orchestrator verified F1's mechanism
+directly against `upgrades_tab.tsx`/`pool.ts`/`rank.ts` before dispatching
+the fix — it is real (`weapon` → single-element `["mainhand"]`, so
+`slotChoice` stays unset and the `SIM_ORDER` filter drops every weapon
+row; feral-p2's 57 weapon entries are its largest slot).
+
+- **F1 (medium):** weapon rows in no sub-tab — being fixed now.
+- **F2/F3/F5 (low):** sub-tab selection not restored; dead `hideOwned`;
+  D7's visible iteration control absent and unowned — all in the fix-up.
+- **F4 (low):** `ENGINE_FORK_COMMIT` names the parent commit — inherent to
+  a hand-maintained constant, disclosed, accepted.
+- Review re-ran drift gate (30/30) and E-W3 (passed, 2.5 s) itself; D5/[R6]
+  confirmed satisfied by construction via upstream's `makeRaidSimRequest`.
+
+**Watch item (hypothesis, untested — reviewer's caveat, no ticket yet):**
+`readGear` indexes `Gear.getEquippedItems()` positionally against
+`SIM_ORDER`, but that getter is `Object.values` over a partial record — an
+empty *middle* gear slot may shift every later index; the existing guard
+only covers a trailing gap. Needs a targeted check on a partially-geared
+character before slice 5/any real-user exposure.
 
 ## Slice 4 — UI completion: DONE, orchestrator-verified
 
