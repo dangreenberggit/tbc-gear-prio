@@ -633,10 +633,18 @@ describe("rank-report", () => {
     // +10 chars = 2 × ("\n" + 4-space indent), no CSS added (the note reuses
     // `.gem-subs`), and no row here carries `emptyMetaSocket` so no note
     // renders.
+    // Repinned for ticket 164's dead-slot retraction: every slot section now
+    // interpolates a `${localRetraction}` slot (empty on this fixture — no
+    // `plausibilityWarnings` here, so `deadSlotWarningsBySlot` is empty and
+    // no section matches), and the stylesheet gains three rules
+    // (`.slot-retraction`, `.row.unmeasured`, `.nav a.unmeasured`). The whole
+    // +1384-byte delta is those new CSS rules plus the two sections' empty
+    // interpolation whitespace — no visible markup moved on a fixture with
+    // no dead-slot warning.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "145ef7465b55a82c956beb63a2ca9148b384dcf28f319a8b7f66df2f9b5739c6",
-      length: 31005,
+        "e18751f06eb192d90ed93aa03fa45bc9697ccc176eeaa49464b6c0a704c17292",
+      length: 32389,
     });
   });
 });
