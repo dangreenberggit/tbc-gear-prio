@@ -452,7 +452,10 @@ describe("data/universes/ret-p2.json", () => {
     // three (27484, 22401, 31033) are phase 1, so they land in ret-p2 too.
     // The other three (31856, 28034, 28288) are also phase 1 and eligible
     // here — all six are ret-p2 members, matching ret-p3's +6.
-    expect(entries.length).toBe(247);
+    // 247 -> 240: ticket 171 (user ruling, exclusion by design) drops every
+    // stub-only item — 7 in ret-p2's phase-1/2 slice: 28590, 28592, 28774,
+    // 28823, 30008, 30063, 30619. See data/sim-implemented-effects.json.
+    expect(entries.length).toBe(240);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

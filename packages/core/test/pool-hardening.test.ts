@@ -402,10 +402,19 @@ describe("data/universes/ret-p3.json hardening", () => {
     // (27484, 31033, 22401, 31856, 28034, 28288) whose real db/Wowhead
     // sources all named a five-man zone outside phase_raids.json and
     // PHASE_HEROIC_DUNGEONS — see TICKET_157_FORCE_INCLUDE in
-    // assemble_universe.py. Re-run: `python scripts/assemble_universe.py
-    // --spec ret --max-phase 3 --out <scratch> --report <scratch>` and
+    // assemble_universe.py.
+    // 400 -> 390: ticket 171 (user ruling, exclusion by design) drops every
+    // item whose only sim effect is a commented `TODO: Manual implementation
+    // required` stub in the pinned fork's Go source — see
+    // data/sim-implemented-effects.json and stub_only_effect_ids() in
+    // assemble_universe.py. Ten p3 items are stub-only, including 28592/
+    // 30063/32368 (the three librams the ticket's own diagnosis named) and
+    // 28774 Glaive of the Pit / 32489 Ashtongue Talisman of Zeal (both
+    // asserted below by other tests, updated alongside this count).
+    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
+    // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(400);
+    expect(universeP3.length).toBe(390);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -496,26 +505,39 @@ describe("data/universes/ret-p3.json hardening", () => {
     const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
 
     // Ashtongue Deathsworn is Black Temple's faction, so its Exalted trinket
-    // is a phase-3 item. 32489 is the paladin one (classAllowlist [2]); the
-    // other eight talismans are other classes' and must not be admitted.
-    const zeal = byId.get(32489);
-    expect(zeal?.sources[0]).toMatchObject({
-      kind: "rep",
-      factionId: 1012,
-      standing: "Exalted",
-    });
+    // is structurally a phase-3 item, and 32489 is the paladin one
+    // (classAllowlist [2]) — the other eight talismans are other classes'
+    // and must not be admitted either way. But 32489's on-use proc is a
+    // stub-only sim effect (data/sim-implemented-effects.json), so ticket
+    // 171 (user ruling, exclusion by design) drops it from the shipped
+    // universe entirely, regardless of the rep→phase route having admitted
+    // it. Both facts are real and this asserts both: the route worked (it
+    // is not held out by phase or class), and the stub-only rule then
+    // removed it, so it is absent from `raw.entries` — never present with a
+    // caveat, per ticket 171.
+    expect(byId.has(32489), "32489 excluded as stub-only, not admitted").toBe(
+      false
+    );
 
     const talismans = [
       32485, 32486, 32487, 32488, 32489, 32490, 32491, 32492, 32493,
     ].filter((id) => byId.has(id));
-    expect(talismans).toEqual([32489]);
+    expect(talismans).toEqual([]);
 
     // Scale of the Sands (990) is Hyjal's faction. Its 16-ring ladder has
     // `sources: null` in db.json, so AtlasLoot's Factions module is the only
-    // witness — the whole point of parsing it (ticket 65 step 3).
+    // witness — the whole point of parsing it (ticket 65 step 3). 15 of the
+    // 16 rings are asserted here; the 16th, 29297 Band of the Eternal
+    // Defender, admits through the same rep→phase route but is then dropped
+    // by ticket 171 (user ruling, exclusion by design) as a stub-only sim
+    // effect — never present with a caveat.
+    expect(
+      byId.has(29297),
+      "29297 Band of the Eternal Defender excluded as stub-only"
+    ).toBe(false);
     const bands: number[] = [];
     for (let id = 29294; id <= 29309; id += 1) if (byId.has(id)) bands.push(id);
-    expect(bands.length).toBe(16);
+    expect(bands.length).toBe(15);
     for (const id of bands) {
       expect(byId.get(id)?.sources[0], `${id}`).toMatchObject({
         kind: "rep",
@@ -756,7 +778,10 @@ describe("data/universes/ret-p3.json hardening", () => {
   //
   // Note the ticket predicted the last four were "Shattered Sun
   // badge/craft/rep rewards". Three are actually Sunwell Plateau raid drops
-  // upgraded via a Sunmote at vendor Yrma; only 34679 is a rep reward.
+  // upgraded via a Sunmote at vendor Yrma; only 34679 is a rep reward. 34679
+  // itself is asserted separately below (ticket 171 excludes it as
+  // stub-only, so it cannot appear here even though its rep→phase route
+  // works exactly like the others').
   const P5_ADMITTED_BY = [
     {
       id: 34472,
@@ -782,17 +807,21 @@ describe("data/universes/ret-p3.json hardening", () => {
       kind: "token",
       why: "Sunmote upgrade of 34211, an M'uru drop",
     },
-    {
-      id: 34679,
-      name: "Shattered Sun Pendant of Might",
-      kind: "rep",
-      why: "Exalted with the Shattered Sun Offensive; the Wowhead parser had no rep branch at all",
-    },
   ] as const;
 
   it("admits the phase-5 BiS items that drop outside a raid zone", () => {
     const { pool: universeP5 } = loadUniverse("data/universes/ret-p5.json");
     const byItemId = new Map(universeP5.map((e) => [e.itemId, e] as const));
+
+    // 34679 Shattered Sun Pendant of Might: same rep→phase admission route as
+    // the four items above (Exalted with the Shattered Sun Offensive), but
+    // its on-use proc is a stub-only sim effect, so ticket 171 (user ruling,
+    // exclusion by design) drops it regardless — never present with a
+    // caveat.
+    expect(
+      byItemId.has(34679),
+      "34679 Shattered Sun Pendant of Might excluded as stub-only"
+    ).toBe(false);
 
     for (const { id, name, kind, why } of P5_ADMITTED_BY) {
       const entry = byItemId.get(id);
@@ -896,9 +925,17 @@ describe("data/universes/ret-p3.json hardening", () => {
 
   it("admits two-hand polearms but never staves", () => {
     // Paladins can wield polearms; staves they cannot. The D7 rule once
-    // rejected both in one condition, which hid Glaive of the Pit (a
-    // Magtheridon drop) from the universe.
-    expect(poolIds.has(28774), "Glaive of the Pit (polearm)").toBe(true);
+    // rejected both in one condition, which hid Glaive of the Pit and
+    // Halberd of Desolation (both Magtheridon drops) from the universe.
+    // Glaive of the Pit (28774) is D7-eligible and admitted by that route,
+    // but ticket 171 (user ruling, exclusion by design) then drops it as a
+    // stub-only sim effect — so its absence here proves the *later* rule,
+    // not a regression of this one. Halberd of Desolation has no such stub
+    // and is the polearm-admission witness instead.
+    expect(
+      poolIds.has(28774),
+      "Glaive of the Pit (polearm, excluded as stub-only)"
+    ).toBe(false);
     expect(poolIds.has(32248), "Halberd of Desolation (polearm)").toBe(true);
   });
 

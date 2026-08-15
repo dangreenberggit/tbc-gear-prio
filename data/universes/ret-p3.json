@@ -2800,25 +2800,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 29297,
-      "name": "Band of the Eternal Defender",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "faction": "The Scale of the Sands",
-          "factionId": 990,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 30028,
       "name": "Seventh Ring of the Tirisfalen",
       "slot": "finger",
@@ -4642,24 +4623,6 @@
       "curationHint": 7.36
     },
     {
-      "itemId": 30008,
-      "name": "Pendant of the Lost Ages",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 5.76
-    },
-    {
       "itemId": 28762,
       "name": "Adornment of Stolen Souls",
       "slot": "neck",
@@ -4916,54 +4879,6 @@
       ]
     },
     {
-      "itemId": 28592,
-      "name": "Libram of Souls Redeemed",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        {
-          "boss": "The Big Bad Wolf",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        },
-        {
-          "boss": "Romulo and Julianne",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30063,
-      "name": "Libram of Absolute Truth",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 31033,
       "name": "Libram of Righteous Power",
       "slot": "ranged",
@@ -4975,24 +4890,6 @@
         {
           "kind": "unknown",
           "origin": "curated"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 32368,
-      "name": "Tome of the Lightbringer",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Mother Shahraz",
-          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5721,54 +5618,6 @@
       "curationHint": 5.92
     },
     {
-      "itemId": 28590,
-      "name": "Ribbon of Sacrifice",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        {
-          "boss": "The Big Bad Wolf",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        },
-        {
-          "boss": "Romulo and Julianne",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 4.0
-    },
-    {
-      "itemId": 28823,
-      "name": "Eye of Gruul",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 2.4
-    },
-    {
       "itemId": 28528,
       "name": "Moroes' Lucky Pocket Watch",
       "slot": "trinket",
@@ -5835,24 +5684,6 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "Al'ar",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30619,
-      "name": "Fel Reaver's Piston",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
           "origin": "db"
         }
       ],
@@ -5947,25 +5778,6 @@
         {
           "kind": "unknown",
           "origin": "curated"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 32489,
-      "name": "Ashtongue Talisman of Zeal",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "kind": "rep",
-          "faction": "Ashtongue Deathsworn",
-          "standing": "Exalted",
-          "factionId": 1012,
-          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7053,24 +6865,6 @@
         }
       ],
       "curationHint": 671.02
-    },
-    {
-      "itemId": 28774,
-      "name": "Glaive of the Pit",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 650.132
     },
     {
       "itemId": 30057,

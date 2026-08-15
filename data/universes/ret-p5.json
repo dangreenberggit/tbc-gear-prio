@@ -3609,25 +3609,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 29297,
-      "name": "Band of the Eternal Defender",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "faction": "The Scale of the Sands",
-          "factionId": 990,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 30028,
       "name": "Seventh Ring of the Tirisfalen",
       "slot": "finger",
@@ -5856,25 +5837,6 @@
       "curationHint": 68.79
     },
     {
-      "itemId": 34680,
-      "name": "Shattered Sun Pendant of Resolve",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "faction": "Shattered Sun Offensive",
-          "factionId": 1077,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 66.65
-    },
-    {
       "itemId": 31275,
       "name": "Necklace of Trophies",
       "slot": "neck",
@@ -6109,25 +6071,6 @@
       "curationHint": 43.0
     },
     {
-      "itemId": 34679,
-      "name": "Shattered Sun Pendant of Might",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "faction": "Shattered Sun Offensive",
-          "factionId": 1077,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 40.02
-    },
-    {
       "itemId": 30099,
       "name": "Frayed Tether of the Drowned",
       "slot": "neck",
@@ -6198,43 +6141,6 @@
         }
       ],
       "curationHint": 6.24
-    },
-    {
-      "itemId": 34678,
-      "name": "Shattered Sun Pendant of Acumen",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "faction": "Shattered Sun Offensive",
-          "factionId": 1077,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 5.92
-    },
-    {
-      "itemId": 30008,
-      "name": "Pendant of the Lost Ages",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Morogrim Tidewalker",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 5.76
     },
     {
       "itemId": 35290,
@@ -6376,25 +6282,6 @@
           "zone": "Sunwell Plateau",
           "boss": "Felmyst",
           "origin": "db"
-        }
-      ],
-      "curationHint": 3.84
-    },
-    {
-      "itemId": 34677,
-      "name": "Shattered Sun Pendant of Restoration",
-      "slot": "neck",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "faction": "Shattered Sun Offensive",
-          "factionId": 1077,
-          "kind": "rep",
-          "standing": "Exalted",
-          "origin": "atlasloot"
         }
       ],
       "curationHint": 3.84
@@ -6602,54 +6489,6 @@
       ]
     },
     {
-      "itemId": 28592,
-      "name": "Libram of Souls Redeemed",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        {
-          "boss": "The Big Bad Wolf",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        },
-        {
-          "boss": "Romulo and Julianne",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30063,
-      "name": "Libram of Absolute Truth",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "The Lurker Below",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 31033,
       "name": "Libram of Righteous Power",
       "slot": "ranged",
@@ -6661,24 +6500,6 @@
         {
           "kind": "unknown",
           "origin": "curated"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 32368,
-      "name": "Tome of the Lightbringer",
-      "slot": "ranged",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "Mother Shahraz",
-          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -7605,26 +7426,6 @@
       "curationHint": 51.9
     },
     {
-      "itemId": 35751,
-      "name": "Assassin's Alchemist Stone",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Alchemy",
-          "recipeFaction": "Shattered Sun Offensive",
-          "recipeStanding": "Exalted",
-          "recipeFactionId": 1077,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 45.36
-    },
-    {
       "itemId": 33831,
       "name": "Berserker's Call",
       "slot": "trinket",
@@ -7776,26 +7577,6 @@
       ]
     },
     {
-      "itemId": 35749,
-      "name": "Sorcerer's Alchemist Stone",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Alchemy",
-          "recipeFaction": "Shattered Sun Offensive",
-          "recipeStanding": "Exalted",
-          "recipeFactionId": 1077,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 10.08
-    },
-    {
       "itemId": 32483,
       "name": "The Skull of Gul'dan",
       "slot": "trinket",
@@ -7850,61 +7631,6 @@
       "curationHint": 8.48
     },
     {
-      "itemId": 34470,
-      "name": "Timbal's Focusing Crystal",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "heroic",
-          "dungeon": "Magisters' Terrace",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 7.04
-    },
-    {
-      "itemId": 34430,
-      "name": "Glimmering Naaru Sliver",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Sunwell Plateau",
-          "boss": "M'uru",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 6.4
-    },
-    {
-      "itemId": 35750,
-      "name": "Redeemer's Alchemist Stone",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Alchemy",
-          "recipeFaction": "Shattered Sun Offensive",
-          "recipeStanding": "Exalted",
-          "recipeFactionId": 1077,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 6.4
-    },
-    {
       "itemId": 32496,
       "name": "Memento of Tyrande",
       "slot": "trinket",
@@ -7921,54 +7647,6 @@
         }
       ],
       "curationHint": 5.92
-    },
-    {
-      "itemId": 28590,
-      "name": "Ribbon of Sacrifice",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "The Wizard of Oz",
-          "origin": "db"
-        },
-        {
-          "boss": "The Big Bad Wolf",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        },
-        {
-          "boss": "Romulo and Julianne",
-          "kind": "raid",
-          "zone": "Karazhan",
-          "origin": "atlasloot"
-        }
-      ],
-      "curationHint": 4.0
-    },
-    {
-      "itemId": 28823,
-      "name": "Eye of Gruul",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Gruul's Lair",
-          "boss": "Gruul the Dragonkiller",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 2.4
     },
     {
       "itemId": 28528,
@@ -8037,24 +7715,6 @@
           "kind": "raid",
           "zone": "Tempest Keep",
           "boss": "Al'ar",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 30619,
-      "name": "Fel Reaver's Piston",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 2,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Void Reaver",
           "origin": "db"
         }
       ],
@@ -8154,25 +7814,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 32489,
-      "name": "Ashtongue Talisman of Zeal",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 3,
-      "sources": [
-        {
-          "kind": "rep",
-          "faction": "Ashtongue Deathsworn",
-          "standing": "Exalted",
-          "factionId": 1012,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 32501,
       "name": "Shadowmoon Insignia",
       "slot": "trinket",
@@ -8263,23 +7904,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 34471,
-      "name": "Vial of the Sunwell",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "heroic",
-          "dungeon": "Magisters' Terrace",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 34473,
       "name": "Commendation of Kael'thas",
       "slot": "trinket",
@@ -8330,46 +7954,6 @@
           "profession": "Jewelcrafting",
           "recipeFaction": "Shattered Sun Offensive",
           "recipeStanding": "Revered",
-          "recipeFactionId": 1077,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 35703,
-      "name": "Figurine - Seaspray Albatross",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Jewelcrafting",
-          "recipeFaction": "Shattered Sun Offensive",
-          "recipeStanding": "Revered",
-          "recipeFactionId": 1077,
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 35748,
-      "name": "Guardian's Alchemist Stone",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 5,
-      "sources": [
-        {
-          "kind": "crafted",
-          "profession": "Alchemy",
-          "recipeFaction": "Shattered Sun Offensive",
-          "recipeStanding": "Exalted",
           "recipeFactionId": 1077,
           "origin": "db"
         }
@@ -9618,24 +9202,6 @@
         }
       ],
       "curationHint": 671.02
-    },
-    {
-      "itemId": 28774,
-      "name": "Glaive of the Pit",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 4,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 650.132
     },
     {
       "itemId": 34673,
