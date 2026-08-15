@@ -14,16 +14,28 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent running: a **Sonnet fix worker** on
-`feat/ret-p3-data` implementing the SME blocker's "or" branch — a
-`worn-unrankable` classification for worn-but-unpooled items (ticket
-124's acceptance criteria) plus an honest unmeasured/caveat marking for
-the relic slot, then a ranking regen. Explicitly out of its scope: the
-assembler's no-source exclusion (ticket 157) and any sim/fork change.
-When it reports: verify the regenerated artifact's relic-slot rendering
-directly, update ticket 163's status, and consider a focused SME
-re-check of just that slot before presenting §9.6 as closed. **Merge
-remains a separate user ask.**
+**Nothing in flight.** All slices and reviews of the detour are done.
+
+## Slice 6 — §9.6 GATE CLOSED (SME addendum, 2026-08-14)
+
+The focused SME re-check ruled the gate **closed**, verdict
+trust-with-caveats (addendum `cffaee0` on the existing verdict file).
+The worn-unrankable fix (`2e6b257`/`00af8d3`) took the pass condition's
+"marked unmeasured" branch in substance: the page names the worn
+libram, retracts the false losses in the reader's language, and the
+old wrong cause is gone; baseline and deltas bit-identical.
+
+- New caveat (not a blocker) → **ticket 164**: the retraction renders
+  only at the top; the ranged section itself still shows plain red
+  rows, and the sticky slot nav lands past the warning.
+- The trinket slot is now the weaker disclosure (ticket 157's absent
+  contenders, undisclosed on the page) — same honest treatment owed
+  when 157 lands.
+
+**`feat/ret-p3-data` is now fully gated and awaiting the user's merge
+decision**: pre-merge review green (`merge-ready: ok`), SME gate
+closed, tickets 154/157–164 filed. `pnpm merge-to-dev` is the only
+door, on the user's explicit ask.
 
 ## Ticket 163 diagnosis — DONE (read-only, two agents)
 
