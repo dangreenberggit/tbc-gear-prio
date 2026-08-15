@@ -51,11 +51,51 @@ files) and are already byte-identical in content — no drift found there.
 
 ## Verdict
 
-**253 is correct** — item-id membership was never in question (both sides
-agree at 253; the earlier report of 256 in a different worktree/branch traces
-to different code, not this repo state, and this ticket does not investigate
-that number further). The `curatedSets` gap and the (nonexistent, here) entry-
-count gap do not share a cause — no entry-count gap was observed on this base.
+**Superseded 2026-08-14 — see the correction below. The original verdict read:**
+
+> **253 is correct** — item-id membership was never in question (both sides
+> agree at 253; the earlier report of 256 in a different worktree/branch traces
+> to different code, not this repo state, and this ticket does not investigate
+> that number further). The `curatedSets` gap and the (nonexistent, here)
+> entry-count gap do not share a cause — no entry-count gap was observed on
+> this base.
+
+### Correction — the entry-count gap was real, and 254 is the right number
+
+That verdict was measured honestly at `c37b8e7` and was already wrong by the
+branch tip. Two commits later `c718d38` (ticket 157) added
+`TICKET_157_FORCE_INCLUDE` **with no spec gate**, so three ret trinkets began
+entering the feral universes too. A feral regen at that tip produced **256**
+against the committed 253 — the very figure the original verdict dismissed as
+another branch's artifact. It was reproducible here in one command:
+
+```bash
+python scripts/assemble_universe.py --spec feral --max-phase 2 \
+  --out /tmp/f2.json --report /tmp/f2r.json
+```
+
+The disposal clause was also a causal claim with no command behind it and no
+**hypothesis** / **untested** marker — what AGENTS.md § Durable claims forbids.
+"I cannot reproduce 256" would have been fine; "256 traces to different code"
+was not.
+
+**Resolved at `b2da640`**, which gates the force-include to ret. With that in
+place all six universes reproduce byte-identically, and the correct feral-p2
+count is **254** — one more than the committed 253, not 256:
+
+| | committed at `c37b8e7` | force-include, ungated | after `b2da640` |
+| --- | --- | --- | --- |
+| `feral-p2` | 253 | 256 | **254** |
+| `feral-p3` | 407 | 410 | **408** |
+
+The one added entry in each is **28034 Hourglass of the Unraveller**, and it
+belongs there: it is a real member of upstream's feral pre-raid gear set
+(`vendor/wowsims/feral_preraid.gear.json`), which the same unparseable-source
+gap ticket 157 documents had been silently dropping. So the feral artifacts
+were stale for two independent reasons — the `curatedSets` drift this ticket
+was filed for, and this membership drop — and `c37b8e7` fixed only the first.
+
+Three numbers, three causes, none of them "another branch".
 
 ## Reproduce
 
