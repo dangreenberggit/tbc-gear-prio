@@ -2,7 +2,12 @@
 
 Real run, native `wowsimcli` sim runner, no fabricated numbers. Produced on
 `feat/ret-p3-data` after tickets 158 and 159 landed (commits `dade219` and
-`23153d2` in this worktree).
+`23153d2` in this worktree), and re-run after the ticket 163 / ticket 124 fix
+(commit `2e6b257`, this worktree) that gives worn-but-unpooled items a
+`worn-unrankable` classification instead of silence. Both runs used the
+identical command, seeds and gear fixture and produced bit-identical
+`items`/`baseline` figures — the only change in the second run's JSON is the
+new `plausibilityWarnings` entry below.
 
 ## Command
 
@@ -53,7 +58,9 @@ confidence 100%.
   (`simming 431/431` in the run log — includes the baseline character plus
   each candidate swap; 1 candidate substitution failed and was dropped, see
   below), 393 items scored, 44 above the ret cutoff (`{absDps: 3.4, pct: 0.15}`)
-- Wall clock: 6m27.752s on this machine (`real 6m27.752s` from the run log)
+- Wall clock: 6m27.752s on this machine (`real 6m27.752s` from the run log).
+  The ticket 163 re-run took `real 7m3.366s` — the classifier change adds no
+  sim work, so the difference is machine noise, not new cost.
 
 ## EP weights used
 
@@ -77,6 +84,37 @@ the ranking: the sim panicked on that swap with a hunter-class type
 assertion inside upstream's own item-set code (a hunter tier-set item
 effect triggering on a paladin equip check) — logged in the run's
 `substitutions` block, not a bug introduced by this branch's changes.
+
+## Relic slot caveat (ticket 163, ticket 124)
+
+The character's worn relic, Libram of Avengement (27484), is excluded from
+`data/universes/ret-p3.json` by `assemble_universe.py`'s no-resolved-source
+rule and so still does not appear as a row — that exclusion is ticket 157's
+separate scope and this run does not touch it. What changed is that the
+ranking now says so instead of staying silent. `plausibilityWarnings` in
+`slamaltman-p3.json` carries one entry:
+
+```json
+{
+  "kind": "dead-slot",
+  "slot": "ranged",
+  "cause": "worn-unrankable",
+  "wornItemName": "Libram of Avengement",
+  "message": "ranged is unmeasured: the worn Libram of Avengement is not in the candidate pool for this slot, so every row shown for ranged was scored against an empty slot, not against Libram of Avengement. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
+}
+```
+
+The four libram rows are still present in `items` (Souls Redeemed, Absolute
+Truth and Tome of the Lightbringer all at −13.81, Fervor at −14.10 — verify
+with
+`python -c "import json;[print(i['itemId'],i['name'],i['deltaDps']) for i in json.load(open('.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json'))['ranking']['items'] if i['slot']=='ranged']"`),
+but the warning panel renders open by default above them in the HTML report
+and tells a reader not to act on those numbers. This closes the SME review's
+blocker for plan §9.6 (`.scratch/handoffs/sme-rank-judgment-ret-p3-real-ranking.md`)
+via the "or" branch it named: honest unmeasured-slot marking, not distinct
+libram deltas — the three libram procs remain unimplemented in the pinned
+sim (`sim/common/tbc/stat_bonus_procs_auto_gen.go` TODO stubs), which is
+untouched, upstream-only work.
 
 ## Headline numbers
 
