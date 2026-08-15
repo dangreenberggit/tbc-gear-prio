@@ -294,12 +294,47 @@ Base for both: this repo `cc78ea68ebda6f6d9b2cfcf29a8ef3718ee12ff6`.
 
 | Slice | Content | Isolation | Base |
 | --- | --- | --- | --- |
-| B′ | M1.5 EP-ordering recall (`experiments/m1-5-*`) | this repo, own worktree | `cc78ea6` |
+| B′ | M1.5 EP-ordering recall (`experiments/m1-5-*`) | this repo, own worktree | **merged** `667ba97`; worktree torn down |
 | D | M1 port to fork + adapter + Candidates/Stop controls | **fork clone's main working tree** per §9.1a — no worktree | fork `655b3c36f` on `feat/upgrades-tab` |
 
 D is the only fork writer this round, so it uses the fork's main working tree
 and merges onto `feat/upgrades-tab` inside the fork. The orchestrator owns
 `data/wowsims-fork.lock.json` and bumps it from D's reported SHA.
+
+### B′ result — the cap must default to "all eligible"
+
+Worst above-cutoff ordering rank: **114 of 246** on ret, **96 of 246** on
+feral. §5.1.1 permits a sub-"all" default only when that number is small on
+*every* fixture, so it does not. Re-verified by the orchestrator from the
+committed JSON (both worst ranks, and `missingFromEw5` empty for both specs,
+so no candidate was silently absent from the E-W5 data B′ reused).
+
+**The code already satisfies this**: `rank.ts:651` reads
+`input.candidateCap ?? ordered.length`, i.e. all eligible when unset. No change
+needed. Slice D must ship the fork's Candidates control with the same default.
+
+EP ordering is excellent at *ranking* (Spearman 0.97+) and poor at *cap
+membership* — a question it had never been validated against. B′'s mechanism
+is F9's blind spots: EP scores raw stats pre-gem, blind to set bonuses, procs,
+on-use effects and weapon speed.
+
+### The per-slot disagreement resolved on evidence (`007c50a`)
+
+§8.1 carried an open disagreement (Dean for per-slot promotion, Fowler and
+Beck against) with an explicit trigger: any 7.2 or M1.5 result naming a starved
+slot. **M1.5 fired it**, and the orchestrator ran the grouping rather than
+leaving the trigger unexamined:
+
+- ret: `back` holds six of thirteen above-cutoff rows, at ranks 94, 98, 102,
+  109, 110, 114 — every one of ret's worst-ranked upgrades is a cloak.
+- feral: `waist` holds 93, 95, 96; `neck` holds 58, 71, 75.
+- Above-cutoff rows beyond the _j_-th of their own slot: _j_=3 → ret 5, feral
+  2; _j_=5 → ret 1, feral 0; **_j_=10 → both zero.**
+
+A per-slot top-10 recalls everything a ~114 global cap would need. Recorded in
+§8.1 as evidence for Dean, with two limits stated in the plan: measured for cap
+membership rather than M2 promotion, and _j_=10 is fit on the same two fixtures
+it is judged against — a supported hypothesis, not a validated default.
 
 ### Two verify gates run red, both diagnosed, one fixed
 
