@@ -14,12 +14,29 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-**Nothing in flight** except a re-run of branch B's
-`merge-to-dev --check-only` on its new tip `a6c617b`.
+**Nothing in flight. Both sweep branches are merged to `dev`**
+(user's explicit ask, 2026-08-15, order A then B):
 
-**Merge order decided (user, 2026-08-15): A (`feat/sweep-tab-tickets`)
-first, then B (`feat/sweep-ret-tickets`).** Both stay unmerged until the
-user's explicit merge ask; `pnpm merge-to-dev` is the only door.
+- A `feat/sweep-tab-tickets` → `dev` `ee36134` via `pnpm merge-to-dev`.
+- B `feat/sweep-ret-tickets` → `dev` `996766f`. The door script's gate
+  passed and it started the merge, which stopped on 8 bookkeeping
+  conflicts (additive `package.json` verify gates from both sides; the
+  append-only `map.md`; six ticket files created independently on both
+  branches — B's later, resolved copies taken). Resolved by hand,
+  `pnpm verify` exit 0 on the integrated tree (774 tests; both new
+  gates ran for real against the fork clone), then committed with the
+  script's documented escape hatch `TBC_ALLOW_DEV_MERGE=1 git commit
+  --no-edit` — the script refuses to run *from* `dev`, so it cannot
+  finish its own conflicted merge. `git branch --merged dev` now
+  contains all four detour branches (`ret-p3-data`,
+  `shopping-list-wowsims-tab`, both sweeps).
+
+Two things any fresh checkout of `dev` needs before `pnpm verify` is
+meaningful, both gitignored: `pnpm sync:wowsims:restore` (else
+`pool-hardening` fails on a missing `vendor/wowsims/ret_p3.gear.json`),
+and the fork clone at `vendor/tbc-new-fork` (else the sim-effects and
+drift gates skip rather than verify). The fork itself is still
+unpushed on `w/a2-162-v1` @ `3000b2f6b`, `pushed: false`.
 
 **Ticket 171 — DONE by exclusion, orchestrator-verified.** Commits
 `41f3941`..`a6c617b` on B. `data/sim-implemented-effects.json` scans the
