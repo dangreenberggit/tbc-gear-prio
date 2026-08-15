@@ -155,3 +155,105 @@ table. `pnpm verify` green in the worker's worktree before handoff.
   156 (and may run, not commit, fork builds). Their main-repo file sets are
   disjoint, and each commits only its own paths. This is tolerable only
   because the main-repo edits are few and file-disjoint.
+
+  Correction to the A1 bullet above, from A1's own handoff: A1's worktree did
+  **not** ship with `vendor/`. A1 copied `vendor/tbc-new-fork` and
+  `vendor/wowsims` in from the main checkout itself, and ran `pnpm install`,
+  so that E-W3 and the full suite would run instead of silently skipping.
+  Nothing was added to git (both paths are gitignored). Every worker spawned
+  this way hits the same gap; A1 worked around it, A2 and A3 could not.
+
+- 2026-08-14 — **Round 1 results.** All five workers returned.
+
+  **A1 — success.** `ea6f46b`, `59f5d70`, merged to branch A as `f443445`.
+  Ticket 155 `resolved`. Broadened E-W3 to two seeds (`[11, 22]`) and three
+  candidates, adding two socketed Lightbringer pieces that cross the 2pc
+  threshold, so gem-fill/meta-repair and set-bonus completion are exercised
+  together. **Fixture extended, not regenerated** — the ticket's open question,
+  measured rather than assumed. Mutation table re-run: `meetsCutoff` ×1000
+  fails, `pairedReplicateSe` `+0.001` **now fails** (it passed before this
+  ticket — the defect 155 was filed for), and `computeSynergy` `+0.001` fails.
+  A1 found and fixed a trap of its own: a single shared DPS offset cancels out
+  of `candidate − baseline`, which would have hidden the very mutation it was
+  adding. Honest residual: mutating `fillEmptyCandidateGems` to return `[]`
+  still does **not** fail E-W3, because observations are canned by request
+  hash — recorded in the handoff, not omitted.
+
+  **A2 — success, with a gap I closed at fan-in.** Fork commit `57a84f1e4`;
+  main-repo commit `b79fe16`. Ticket 162 stays `open` by design (v2 unbuilt).
+  A2 could not reach `upgrades_tab.tsx` (one directory above its scope), so
+  the disclosure existed in data and tests but rendered nowhere — ticket 162's
+  first criterion was not met end to end. **Fixed by the orchestrator**, fork
+  commit `179de35a4`: passes `epWeightsSourceFor(specId)` into the `Deps`
+  literal, renders the `ep-weights-source` standing assumption in the drawer,
+  adds the `ep_weights` i18n key. Verified `npx tsc --noEmit -p tsconfig.json`
+  exit 0 and A2's own 3 tests still pass.
+
+  **A3 — partial, honestly.** Worktree run `063f69a` established the fork is
+  unrecoverable from a fresh worktree: the pinned commit was never pushed
+  (`git ls-remote` finds neither the branch nor `adb0d13`; the lockfile's
+  `"pushed": false` agrees). The respawn then produced `25d341d` + `5c481f4`,
+  which **answers ticket 156's leading hypothesis**: served the production
+  build instead of the vite dev server and measured single-candidate baselines
+  of 5.3 s / 13.4 s / 12.1 s at 4 workers, against the dev server's "93 s, did
+  not finish". Two to three orders of magnitude. A3 flagged rather than
+  smoothed that those three runs are mutually inconsistent (3,000 iterations
+  slower than 5,000), labelled the polling-interference explanation
+  **hypothesis, untested**, and recorded that the Browser pane is
+  non-displayed so visibility throttling is not ruled out. The 20-candidate
+  table was not attempted. Ticket 156 correctly stays `open`.
+
+  **B1 — success, and it corrected the plan.** `c37b8e7`, `217d62f` on
+  `w/b1-ep-weights`. **Tickets 158 and 159 were already resolved on base
+  `cffaee0` before this sweep began** — verified independently:
+  `git show cffaee0:.scratch/carry-forward/issues/158-*.md` and `159-*.md` both
+  read `Status: resolved`, and `git show cffaee0:packages/core/src/ep-weights.ts`
+  exists. `plan.md` was written against a stale reading of `feat/ret-p3-data`.
+  Ticket 154's file **did not exist** on `cffaee0` — it was filed on the
+  branch-A side — so B1 filed it fresh on B. Root cause found: `curatedSets` is
+  deliberately unscoped full-provenance since `d1da985`, but `02f2f85` wrongly
+  predicted `feral-p2.json` would stay byte-identical, which holds only for the
+  phase-scoped `bisTags`/`bisSets`. Regenerated `feral-p2`; `feral-p3` and all
+  four `ret-p*` were already byte-identical. The plan's 256-vs-253 figure
+  **did not reproduce** (253 both sides; pure field drift) — carried over from
+  the branch-A filing, unreconciled.
+
+  **B3 — partial (content complete).** `c267b24`, `f15216d`, `71a35a7`,
+  `f6bab9c`. Tickets 160 and 161 both `resolved`. Four offline cases added to
+  `check_sync_wowsims.py`; the previously untested second-`PER_FILE_PIN`-entry
+  round-trip does round-trip cleanly. Its `pnpm verify` failed only for want of
+  `node_modules` in its worktree — an environment gap, not its diff, and gated
+  on the integrated tip instead.
+
+- 2026-08-14 — **Fan-in 1, branch A. Complete and green.**
+
+  Merged `w/a1-155-parity` as `f443445`. A2 and A3 had committed directly to
+  the branch (they ran unisolated), so no merge was needed for them.
+
+  **Integration failure found and fixed:** A2's fork commits changed two
+  *ported* engine files, so `check_engine_port_drift.py` failed — the
+  silent-drift case it exists to catch. Per that checker's own instruction, I
+  re-ran E-W3 **first** (`npx vitest run
+  packages/core/test/wowsims-fork-parity.test.ts --testTimeout=60000` → green,
+  so the port is still behaviour-equivalent), and only then updated the two
+  `PROVENANCE.md` hashes, recording *why* each file changed rather than just
+  bumping a number. Fork commit `3bd0cd997`. `pnpm engine-port-drift:check` →
+  30 files match.
+
+  Round-1 worktrees torn down **before** verifying, per SKILL.md step 6. Three
+  needed `rm -rf` after `git worktree remove` because they held copied
+  `vendor/` and `node_modules`.
+
+  `pnpm verify` on branch A tip → **exit 0**, 41 files, 760 passed, 1 skipped,
+  2 todo. (The single skip is a deliberate placeholder that reports *why* the
+  fork is unavailable when it is; the real E-W3 case ran and passed.)
+
+  Branch A tip after fan-in: see the next entry's recorded SHA.
+
+  **Fork-side commits do not appear in this repo's log.** Branch A's review
+  must state that ticket 162's implementation lives in
+  `vendor/tbc-new-fork` at `57a84f1e4`, `3bd0cd997`, `179de35a4` on fork branch
+  `w/a2-162-v1`.
+
+  Next: fan-in 1 for branch B (merge `w/b1-ep-weights`, `w/b3-sync-docs` into
+  `feat/sweep-ret-tickets`), then round 2 (B2).
