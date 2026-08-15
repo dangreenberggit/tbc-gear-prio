@@ -21,9 +21,7 @@ Two background agents are running in parallel; neither has reported yet.
    sims triggered by any view, staleness banner on gear change, fnm + serving
    recipes included. Deliverable: fork commits plus
    `slice-4/HANDOFF.md` committed on `feat/shopping-list-wowsims-tab`.
-2. **Slice 6 `sme-rank-review`** — Opus review lane, judging the refreshed
-   ret-p3 ranking in the worktree `..\tbc-gear-prio-wt-ret-p3-data`
-   (`feat/ret-p3-data` @ `9004654`). Verdict file lands in that worktree.
+2. ~~Slice 6 `sme-rank-review`~~ **DONE** — see the new section below.
 
 When they report, verify per §"Slice 3 — original dispatch notes" habits:
 re-derive numbers, run the green-baseline commands, check
@@ -130,6 +128,35 @@ decision was right; only the arithmetic was wrong. Corrected in `9004654`.
 **Carried forward (needs a feral-owning session):** `feral-p2.json` is stale
 against its own generator — five entries differ, e.g. `29994` regen
 `['p2_6p','p3_6p']` vs committed `['p2_6p']`. Unrelated to this detour.
+
+## Slice 6 — SME review DONE: trust-with-caveats (2026-08-14)
+
+Opus review lane, verdict filed at
+`.scratch/handoffs/sme-rank-judgment-ret-p3-refresh.md` in the ret-p3-data
+worktree, commit `859eab5` on `feat/ret-p3-data`. Orchestrator spot-checked
+the evidence against `data/universes/ret-p3.report.json` (18 missed items,
+17 `d7Eligible`, the named librams and trinkets all present) — it matches.
+
+- **Verdict: trust-with-caveats.** EP preset passes two independent
+  consistency checks; all 15 tags paladin-equippable; raid/arena separation
+  holds; phase guard confirmed in-game terms.
+- **Finding 1 (medium):** the relic slot is half-empty — 3 eligible librams
+  missing from the pool, including `27484` Libram of Avengement (upstream's
+  16th curated slot). The 15/16 gap **does matter**; one apparent cause for
+  all three. Predates this refresh (p2's relic slot is thinner still).
+- **Finding 2 (medium):** real TBC ret trinkets missing from the pool:
+  Darkmoon Card: Crusade (31856), Hourglass of the Unraveller (28034),
+  Abacus of Violent Odds (28288).
+- **Finding 3 (informational):** zero plate/tier tagged at p3 — judged
+  genuine TBC ret reality, not a bug; consequence is no curated tier anchor
+  for set-bonus valuation at p3.
+- **Scope limit:** the artifacts are a universe + tags + EP preset, not a
+  ranked list — the skill's ordering/delta checks could not run. Findings
+  1–2 block the "would a ret trust this?" gate, **not the branch**.
+
+Findings 1–2 are pool-membership work — likely a follow-on ticket, not a fix
+on this branch. Next gate for slice 6 remains `pre-merge-review` on
+`feat/ret-p3-data`, then stop for a separate merge ask.
 
 ## Slice 6 — PARKED at "data done, review pending" (user decision, 2026-08-14)
 
