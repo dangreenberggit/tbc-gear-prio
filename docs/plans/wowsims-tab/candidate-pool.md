@@ -192,6 +192,19 @@ which is a different mechanism than screening iterations down).
 design pass rather than proceeding past M2. `screenIterations` and
 `promoteTopK` are not set.
 
+**Consequence for M1 and M1.5.** Because screening does not pay for itself
+on the measured (Node/CLI) path, **M1's candidate cap and concurrency are
+the levers that actually reduce wall-clock**, not racing. That makes
+**M1.5's EP-ordering-recall measurement more decision-relevant, not less**:
+a pre-M2 candidate cap's safety now rests entirely on whether EP ordering
+reliably keeps above-cutoff rows inside the cap, since there is no
+screening pass available as a second, cheaper filter to fall back on.
+
+**Scope:** this no-go is measured on the Node/CLI path only (one process
+spawn per request). The browser/WASM path (F5, ticket 156) has a different
+fixed-cost structure and was not measured here — do not generalize this
+verdict to that path without a separate measurement.
+
 ## 4. M0 — documents match the engine
 
 - `plan.md` §5 step 2: replace "player-aware EP prefilter" with "no prefilter; every eligible candidate is simmed (F1)"; replace "~80 candidates after the prefilter" with F2's counts and §1.1's model; point here.
