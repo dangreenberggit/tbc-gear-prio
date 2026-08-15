@@ -4781,6 +4781,25 @@
       ]
     },
     {
+      "itemId": 28034,
+      "name": "Hourglass of the Unraveller",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 24.64,
+      "curatedSets": [
+        "preraid"
+      ]
+    },
+    {
       "itemId": 32654,
       "name": "Crystalforged Trinket",
       "slot": "trinket",

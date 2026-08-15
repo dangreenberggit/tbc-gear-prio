@@ -1594,11 +1594,18 @@ def assemble(
         elif all(is_list_only_source(s) for s, _ in pairs):
             curated_list_only.add(iid)
 
-    # Ticket 157: force-admit the six named items regardless of whatever the
-    # zone/heroic gate below decides -- see TICKET_157_FORCE_INCLUDE's
-    # comment for why this bypasses that gate instead of widening it.
+    # Ticket 157: force-admit the six named items past the zone/heroic source
+    # gate -- see TICKET_157_FORCE_INCLUDE's comment for why this bypasses
+    # that gate instead of widening it. `eligible_d7` and the phase cut still
+    # apply, so this only rescues items the *source* lookup lost.
+    #
+    # Ret-only, because the six were chosen by a ret SME review. Three of them
+    # (the trinkets) also pass `eligible_d7` for feral, so without this guard
+    # they leaked into the feral universes and put feral-p2/p3 out of step with
+    # their own generator -- the exact defect ticket 154 had just fixed. Caught
+    # by this branch's pre-merge review; see ticket 154's comment.
     ticket_157_included: set[int] = set()
-    for iid in TICKET_157_FORCE_INCLUDE:
+    for iid in TICKET_157_FORCE_INCLUDE if profile.spec == "ret" else ():
         it = db_by_id.get(iid)
         if it is None or not eligible_d7(it, profile):
             continue

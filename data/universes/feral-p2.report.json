@@ -15,8 +15,8 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3463,
-  "excludedNoSource": 1478,
-  "universeTotal": 253,
+  "excludedNoSource": 1479,
+  "universeTotal": 254,
   "listOnlyMembership": 24,
   "perSlot": {
     "back": 22,
@@ -29,22 +29,22 @@
     "neck": 20,
     "ranged": 3,
     "shoulder": 10,
-    "trinket": 17,
+    "trinket": 18,
     "waist": 16,
     "weapon": 57,
     "wrist": 13
   },
   "sourceRecordAdds": {
-    "atlasloot": 287,
-    "curated": 4,
-    "db": 1864,
+    "atlasloot": 285,
+    "curated": 5,
+    "db": 1862,
     "two-hop": 15,
     "wowhead": 14
   },
   "membershipByOrigin": {
-    "curated": 3,
+    "curated": 4,
     "itemHasOrigin:atlasloot": 40,
-    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 216,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 10,
@@ -55,29 +55,29 @@
     "db": 216,
     "wowhead-only": 10,
     "atlasloot-only": 15,
-    "other": 2,
+    "other": 3,
     "two-hop": 10
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 253,
+    "total": 254,
     "casterOnlyReject": 114,
     "epFloorReject": 0,
     "combinedReject": 114,
-    "combinedKeep": 139,
-    "casterRejectPct": 45.1,
-    "combinedRejectPct": 45.1,
+    "combinedKeep": 140,
+    "casterRejectPct": 44.9,
+    "combinedRejectPct": 44.9,
     "applied": false
   },
   "wowheadListIds": 79,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 79,
-    "recalled": 61,
-    "missed": 18,
-    "recallPct": 77.2,
+    "recalled": 62,
+    "missed": 17,
+    "recallPct": 78.5,
     "missedItems": [
       {
         "itemId": 19406,
@@ -119,12 +119,6 @@
         "itemId": 27878,
         "name": "Auchenai Death Shroud",
         "slot": "back",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28034,
-        "name": "Hourglass of the Unraveller",
-        "slot": "trinket",
         "d7Eligible": true
       },
       {
@@ -188,5 +182,6 @@
         "d7Eligible": true
       }
     ]
-  }
+  },
+  "ticket157ForceIncluded": []
 }
