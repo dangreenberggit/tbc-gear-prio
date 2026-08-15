@@ -9,7 +9,7 @@ Companion docs: [`plan.md`](plan.md), [`orchestration.md`](orchestration.md).
 
 | Branch | Base SHA | How created |
 | --- | --- | --- |
-| `feat/sweep-tab-tickets` (A) | `a48594a78c1c73b7bba261e4d70c2fa9cf234d78` | `git checkout -b feat/sweep-tab-tickets a48594a…` in the main checkout `C:/Users/dgree/Code/lulz/tbc-gear-prio` |
+| `feat/sweep-tab-tickets` (A) | `dcec568f1f790ee2224d33fec1a82ea4c0f33676` (this file's own commit, on top of `a48594a`) | `git checkout -b feat/sweep-tab-tickets a48594a…` in the main checkout `C:/Users/dgree/Code/lulz/tbc-gear-prio`, then the PROCESS.md commit |
 | `feat/sweep-ret-tickets` (B) | `cffaee096da40275e0026a1f52bc71db9ace8aed` | `git worktree add C:/Users/dgree/Code/lulz/tbc-gear-prio-wt-sweep-ret -b feat/sweep-ret-tickets cffaee0` |
 
 Note: `orchestration.md` names `e1f460c` as branch A's base. The actual tip of
@@ -103,3 +103,19 @@ table. `pnpm verify` green in the worker's worktree before handoff.
   `a48594a`; branch B worktree created at `cffaee0` with deps installed and
   `node_modules` confirmed. PROCESS.md written. Next: spawn round 1 (A1, A2,
   A3, B1, B3).
+- 2026-08-14 — **Round 1 spawned**, five workers, `model: sonnet`,
+  `isolation: worktree`. Post-spawn `git worktree list` confirmed every worker
+  at its named base, but only after the workers ran their own assertions:
+  every worktree was created on `origin/main` (`55b5a51`) by default, and each
+  worker checked out its correct base itself. B3 was still sitting at
+  `55b5a51` on the auto-named branch at the first check and had corrected to
+  `cffaee0` on `w/b3-sync-docs` by the second. This re-confirms the Claude
+  Code adapter's note: worktree basing ignores the delegator's branch, and the
+  prompt-level assertion is the only thing that makes the fan-out usable.
+
+  Confirmed bases: `w/a1-155-parity` `dcec568`, `w/a2-162-v1` `dcec568`,
+  `w/a3-156-ew2` `dcec568`, `w/b1-ep-weights` `cffaee0`, `w/b3-sync-docs`
+  `cffaee0`.
+
+  In flight: all five. Next transition: collect handoffs, then fan-in 1
+  (A1/A2/A3 → `feat/sweep-tab-tickets`; B1/B3 → `feat/sweep-ret-tickets`).
