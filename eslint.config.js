@@ -62,7 +62,11 @@ export default tseslint.config(
   {
     // scripts/ is build-time tooling, the opposite of packages/core's purity
     // rule below: reading files and printing to stdout is its whole job.
-    files: ["scripts/**/*.mjs"],
+    // The wowsims-tab experiment scripts are the same kind of one-shot Node
+    // tooling (e-w4-diff.mjs, copied verbatim from
+    // docs/plans/wowsims-tab/experiments/e-w4-method.md's reference script),
+    // so they share the override rather than getting their own.
+    files: ["scripts/**/*.mjs", "docs/plans/wowsims-tab/experiments/**/*.mjs"],
     languageOptions: {
       globals: { process: "readonly", console: "readonly" },
     },

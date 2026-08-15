@@ -1,10 +1,37 @@
-Status: open
+Status: open — root cause fixed 2026-08-14, display-side items still stand
 Type: task
 Origin: human review of .scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.html, 2026-08-12
 Blocks: none
 Blocked by: none
 
 # P3 report's curated list is pinned to the P2 BiS set
+
+> **Update 2026-08-14 — the upstream gap this ticket rests on has closed.**
+> Upstream shipped a real ret P3 curated set in `5c7491899` ("missed jsons",
+> 2026-08-13), two days after this ticket was filed. It is now vendored and
+> wired, on branch `feat/ret-p3-data` — ret-p3/p4/p5 tagged rows carry
+> `bisSets: ["p3"]` instead of `["p2"]`, verified against upstream's set
+> (15/16 ids match, zero spurious). See ticket 121's Resolution section.
+>
+> **This ticket does not close on that.** Everything below about *presentation*
+> survives the fix and is still worth doing, because the next phase advance
+> recreates the same condition:
+>
+> - **Point 1** (`bisStale` sits in the note *below* the checkbox, subordinate
+>   to the claim it corrects) — untouched.
+> - **Point 2** (`bisStale` can detect a set as *older* but never as *absent*)
+>   — untouched, and it is precisely the check that would have caught this
+>   ticket's original symptom without a human noticing.
+> - **Point 3** (unmeasured: why the curated box showed 3 items where the set
+>   has ~15 members) — **still unmeasured**. The tag fix does not answer it.
+> - The wider point — "upstream ships what its maintainers curated, not a full
+>   matrix; absence is a normal case to design for" — is *reinforced*, not
+>   retired, by upstream filling this particular gap on its own schedule.
+>
+> Also still true: the labelling rules in `rank-report.ts` carry a set's phase
+> but not its **origin**. That did not matter while wowsims was the only
+> source, and it still does not today — but it is the design debt that would
+> bite the moment a non-upstream list is ever admitted.
 
 On a P3 ret rank report, the "Curated ranked list" box at the top shows only
 3 items and stays checked to "BiS only — the 15 items on upstream's ret gear
