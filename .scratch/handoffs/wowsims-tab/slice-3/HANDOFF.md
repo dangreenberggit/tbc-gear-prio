@@ -199,6 +199,44 @@ committed artifact. Reproducing this later means re-writing them from this
 handoff's method description (or asking for them to be recreated), not
 assuming they still exist on disk.
 
+## Orchestrator independent reproduction of E-W1, 2026-08-14
+
+E-W1 gates every number the tab will ever show, so it was reproduced from
+**this handoff's method description** using a **separately written harness**,
+not the worker's script — the point being to check the method, not to re-run
+someone else's code.
+
+```
+WASM observed : 2042.3926145882178   ← bit-identical to the worker's figure
+native 20-thd : 2042.3926145882197   delta 1.819e-12 DPS
+native  4-thd : 2042.3926145882203   delta 2.501e-12 DPS
+cutoff gate   : 3.4 DPS              → 1.87e12 × under the gate
+```
+
+**The delta is smaller than native's disagreement with itself.** compute-topology
+§3.1 records native at `…197` on 20 threads and `…203` on 4 — a spread of
+`6.8e-13` DPS, the *same order of magnitude* as our WASM-vs-native delta. So
+this is float-summation ordering noise, not a numerical disagreement between
+the two engines. **E-W1 passes.**
+
+Two corrections to the method as written, for whoever reproduces it next:
+
+1. **`wasmready` must be defined before `go.run`.** `sim/wasm/main.go:40` calls
+   `js.Global().Call("wasmready")` after registering its functions; if the
+   global is absent the module panics with `property wasmready is not a
+   function` and every registered function is unreachable. The handoff's method
+   description omits this; a `setTimeout` wait does not substitute for it.
+2. The harness scripts **do** still exist in this session's scratchpad
+   (`ew1-run.js`, `wasm_exec.js`, `project-db.ts`), contrary to the note above
+   implying they must be rewritten. They are still session-scoped and will not
+   survive it — the `.ew1-scratch/sim-database.json` input inside the fork is
+   the durable part, and it is untracked.
+
+Wall clock for the record: 5,000 iterations in **14.7 s** under Node on this
+machine. That number is *not* E-W2 — it is single-threaded Node, not the
+browser's worker pool — but it does establish that the WASM build itself runs
+at a sane speed here, which is what makes the browser figure below anomalous.
+
 ## E-W2 — blocked, not measured. State this plainly, do not imply it passed
 
 **Attempted, not completed.** The plan asked for wall-clock timing of
@@ -244,6 +282,68 @@ until someone re-runs this in a real, visible browser tab and gets numbers.
 **Plan §5's budget note has been updated** with this finding (see the plan
 diff — search for "E-W2: blocked by environment WASM throughput"). It does
 **not** contain fabricated timings.
+
+### Orchestrator follow-up, 2026-08-14 — one real bug found and fixed, and the stated hypothesis refuted
+
+Two separate things were wrong. Neither is a defect in slice 3's adapters.
+
+**1. A real bug, now fixed: the worker bundles did not exist.**
+`dist/tbc/` contained only `assets/` and `lib.wasm` — **no JavaScript at all**.
+`vite.build-workers.mts` had never been run (slice 1's handoff lists it as
+untested). Consequences observed directly:
+
+- `GET /tbc/sim_worker.js` → **404**.
+- `GET /tbc/wasm_exec.js` → **200 but `content-type: text/html`** — vite's SPA
+  fallback returning `index.html`. A script tag for it fails to parse, which is
+  a far more confusing symptom than a 404.
+
+Fixed by running the missing build step. It additionally needs **`go` on
+`PATH`** (it copies `wasm_exec.js` out of `$(go env GOROOT)`), and fails with
+`'go' is not recognized` otherwise:
+
+```bash
+eval "$(fnm env --shell bash)"
+export PATH="/c/Program Files/Go/bin:$PATH"
+npx tsx vite.build-workers.mts
+```
+
+`dist/tbc/` now holds `sim_worker.js`, `local_worker.js`, `net_worker.js`,
+`reforge_worker.js`, `highs.wasm` and friends, and `sim_worker.js` serves as
+`text/javascript`. **This step belongs in the serving recipe** alongside the
+asset copy and the per-spec `index.html`.
+
+**2. The stated cause — Worker-thread throttling — is refuted by measurement.**
+The handoff proposed `document.hidden === true` throttling Worker threads. Timed
+an identical busy-loop on the main thread and inside a `Worker` in this pane:
+
+| Thread | 1 s busy-loop iterations |
+| ------ | ------------------------- |
+| Main   | 5,493,974                 |
+| Worker | 5,087,158                 |
+
+**Ratio 1.1× — Workers run at essentially full speed here.** That cannot explain
+a 100×+ slowdown. Also measured: `WebAssembly.compile` of the 20 MB `lib.wasm`
+takes **22 ms**, and `navigator.hardwareConcurrency` is **20**. So neither
+Worker scheduling, nor WASM compilation, nor core count is the bottleneck.
+`document.hidden` is indeed `true`, but it is a **correlation the measurement
+rules out as the mechanism**.
+
+**The slowness is real and still unexplained.** After fixing the bundles and
+reloading, upstream's own **Simulate** button still ran **93 s without
+completing** (stopped manually; no DPS produced). So the missing bundles were a
+genuine bug but **not** the cause of the slowness, and E-W2 remains **blocked
+and unmeasured** — the slice's own conclusion stands, only its stated mechanism
+does not.
+
+**Still not ruled out** (nobody has tested these): the vite **dev** server
+serving unbundled ES modules to the worker; a first-run WASM warm-up path; or
+something specific to this automation harness that the busy-loop test does not
+capture. **Untested.**
+
+**What is now established:** the WASM build runs at a sane speed *outside* the
+browser — the orchestrator's independent E-W1 run did 5,000 iterations in
+**14.7 s** under Node on this machine. Whatever is slow is in the browser
+delivery path, not in `lib.wasm` itself.
 
 ## `pnpm verify` — green
 

@@ -266,12 +266,31 @@ directly under Node** — upstream's own built-in "Simulate" button (not this
 detour's code) took over 200 seconds to finish 100 iterations of the same
 fixture-scale gear, with no error and no crash, just extremely slow
 computation; by contrast E-W1's direct-Node harness (below) did 5,000
-iterations of a comparable request in ~30 seconds. `document.hidden` reports
-`true` for this pane even when "fronted," which points at the automation
-harness never giving the tab real OS-level paint/visibility — a plausible
-mechanism for Worker-thread timer/scheduling throttling that a real browser
-tab would not hit. **Not established as the cause, only as a correlated
-fact** — no lower-level profiling was done. `WasmSimRunner`'s own request
+iterations of a comparable request in ~30 seconds.
+
+**Correction (orchestrator, same day): the Worker-throttling explanation is
+refuted, and one real bug was found and fixed.**
+
+*The bug:* `dist/tbc/` held no JavaScript at all — `vite.build-workers.mts`
+had never been run. `sim_worker.js` 404'd and `wasm_exec.js` returned vite's
+`index.html` fallback as `text/html`. Fixed by running that build (it needs
+`go` on `PATH`, since it copies `wasm_exec.js` out of `$(go env GOROOT)`).
+**That step belongs in the serving recipe** with the asset copy and the
+per-spec `index.html`.
+
+*The refutation:* an identical 1-second busy-loop timed on the main thread and
+inside a `Worker` in this pane gives 5,493,974 vs 5,087,158 iterations — a
+**1.1× ratio**. Workers are not throttled here, so throttling cannot explain a
+100×+ slowdown. `WebAssembly.compile` of the 20 MB module takes 22 ms and
+`hardwareConcurrency` is 20, ruling out compilation and core count too.
+`document.hidden` is `true`, but measurement rules it out as the mechanism.
+
+*What still stands:* after fixing the bundles, upstream's own Simulate button
+still ran **93 s without completing**. The slowness is real and **unexplained**;
+E-W2 remains blocked. Untested candidates: the vite **dev** server's unbundled
+ES-module delivery, a first-run warm-up path, or something in the automation
+harness the busy-loop does not capture. The WASM binary itself is not at fault —
+run directly under Node on this machine it completes 5,000 iterations in 14.7 s. `WasmSimRunner`'s own request
 composition was confirmed correct up to the point WASM execution starts (see
 slice 3 handoff's DOM evidence: "Simming 0/277…" with a well-formed
 `raidSimAsync` request logged, matching `PlayerGearSource`'s output field for
@@ -356,7 +375,7 @@ per the original ask — not redesigned into a full importer.
 
 | # | Question | Method | Gate on |
 |---|---|---|---|
-| E-W1 | Does WASM agree with native? | Build `lib.wasm` at the pin (`make wasm`), run `test/fixtures/slamaltman.raid-sim-request.json` seed 42 through it, diff against native `2042.3926…` (compute-topology §7 E1 — unchanged, still unrun) | Slice 3 results shown to anyone |
+| E-W1 | Does WASM agree with native? | ~~unrun~~ **RUN AND PASSED, 2026-08-14.** WASM `2042.3926145882178` vs native `2042.3926145882197` → delta **1.8e-12 DPS**, 1.87e12× under the 3.4 cutoff, and *smaller than native's own 20-thread/4-thread spread of 6.8e-13*. Float-ordering noise, not disagreement. Reproduced independently by the orchestrator with a separately-written harness. **Two gotchas:** the WASM build has no `with_db` embedding (unlike the CLI), so a `SimDatabase` must be injected per player; and `wasmready` must exist as a global *before* `go.run`, or `sim/wasm/main.go:40` panics | ~~Slice 3 results shown to anyone~~ **cleared** |
 | E-W2 | Wall-clock per candidate in-browser | Time baseline + 20 candidates at 3,000 and 5,000 iterations on this machine, ≤4 workers | D7's default; candidate-count budget |
 | E-W3 | Did the port preserve behaviour? | **This-repo** test (see note below): ported engine + ported `RecordedSimRunner` reproduces the committed slamaltman fixture ranking (same deltas) from the same recorded observations | Slice 2 merge; re-run on every fork engine edit |
 | E-W4 | Does gear-only import disturb settings? | Apply a category-filtered import on a configured page; diff the full settings proto before/after (gear fields excepted) | §6 slice ships vs shelves |
@@ -444,7 +463,7 @@ a normal feature branch gated by `pnpm verify`.
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| WASM ≠ native numerically | Every number on the tab inherits it | E-W1 before anything ships; it was already the gate on compute-topology's plan and has still never been run |
+| ~~WASM ≠ native numerically~~ **CLOSED 2026-08-14** | Every number on the tab inherited it | **E-W1 ran and passed.** Delta 1.8e-12 DPS — smaller than native's disagreement with itself across thread counts. Reproduced independently. This was the standing gate from compute-topology's plan, unrun since that document was written; it is now answered, and the answer is that the two engines agree |
 | **Port drift** — fork engine and `packages/core` diverge silently | Two tools, two answers, no explanation | §3's ladder: E-W3 fixture parity fork-side, `PROVENANCE.md`, design changes routed here first, reconciliation as the end state |
 | Browser run too slow at default settings | Tab feels broken; users bail mid-run | E-W2 sizes the budget; prefilter and iteration control are the knobs; skeleton-first rendering keeps waits legible |
 | Upstream drift (112 commits and counting) | Fork bit-rots; rebase cost grows | Deliberate: stay at the pin while local (D2); rebase is a single named PR-checklist item |
