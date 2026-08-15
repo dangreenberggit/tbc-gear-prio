@@ -244,6 +244,15 @@ Seam check: no new port. `promisePool` is a helper, not a seam. `concurrency` an
 
 For every roster fixture (§7.a): rank eligible rows by 5.1.3's ordering; report the ordering rank of every above-cutoff row and of the top 5. Output `experiments/m1-5-ep-recall.md`. This decides two things: whether a pre-M2 cap default below "all" is ever safe (it is not unless the worst above-cutoff rank is small on every fixture), and how much M2 is worth (if EP recall is already good, M2's justification is weak; if an above-cutoff item ranks 200th, M2 is justified with a number).
 
+**Result:** measured by slice B′, branch `slice-bprime-m1-5` at base
+`cc78ea68ebda6f6d9b2cfcf29a8ef3718ee12ff6` (`npx tsx scripts/m1_5_recall.mjs`,
+reading the already-committed §3.2 data rather than re-simming). Worst
+above-cutoff ordering rank was **114 of 246** on ret and **96 of 246** on
+feral — neither fixture keeps its worst above-cutoff row inside any
+plausible sub-"all" cap default. Full tables and interpretation:
+`experiments/m1-5-ep-recall.{md,json}`. **No sub-"all" cap default is safe
+pre-M2.**
+
 ## 6. M2 — racing
 
 ### 6.1 Rule (pure function, unit-tested)
