@@ -14,13 +14,28 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One agent running (2026-08-15): **ticket 171 by exclusion** on
-`feat/sweep-ret-tickets` (worktree `..\tbc-gear-prio-wt-sweep-ret`) —
-generator scans the fork's Go tree for implemented item effects vs TODO
-stubs, assembler drops stub-only items, universes + ret-p3 ranking
-regen. User ruling: unimplemented items are not pooled, not simmed, not
-shown. When it reports: confirm the three librams (28592/30063/32368)
-are gone and 27484/23203 remain; verify byte-compare claims.
+**Nothing in flight** except a re-run of branch B's
+`merge-to-dev --check-only` on its new tip `a6c617b`.
+
+**Merge order decided (user, 2026-08-15): A (`feat/sweep-tab-tickets`)
+first, then B (`feat/sweep-ret-tickets`).** Both stay unmerged until the
+user's explicit merge ask; `pnpm merge-to-dev` is the only door.
+
+**Ticket 171 — DONE by exclusion, orchestrator-verified.** Commits
+`41f3941`..`a6c617b` on B. `data/sim-implemented-effects.json` scans the
+fork Go tree (fork commit `3000b2f6b`): 215 implemented, 460 stub-only,
+zero overlap; the five known cases classify correctly (28592/30063/
+32368 stub; 27484/23203 implemented — the latter needed struct-literal
+`LibramMap` detection). Assembler drops stub-only items from all six
+universes; orchestrator confirmed ret-p3's diff is pure deletion (10
+removed, 0 added, 0 mutated, all stub-only). Ranged slot of the regen'd
+ranking is exactly `27484 (0, owned), 31033 -5.38, 22401 -11.17,
+23203 -14.10` — no warnings needed. Freshness gate wired into `pnpm
+verify`, skipping cleanly when the fork clone is absent (same contract as
+the engine drift check). Worker's `pnpm verify` exit 0.
+Untested: the fork-scanning generator is only re-runnable where the fork
+clone exists (not from a fresh checkout); struct-literal detection was
+verified by inspection of the 14 files carrying the pattern.
 
 ## Post-sweep fixes (2026-08-15, this seat, after the ticket-sweep session)
 
