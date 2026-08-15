@@ -257,3 +257,55 @@ table. `pnpm verify` green in the worker's worktree before handoff.
 
   Next: fan-in 1 for branch B (merge `w/b1-ep-weights`, `w/b3-sync-docs` into
   `feat/sweep-ret-tickets`), then round 2 (B2).
+
+- 2026-08-14 — **Branch A complete.** Tip `6796bd0`, `pnpm verify` exit 0 (41
+  files, 760 passed), review at `docs/reviews/feat-sweep-tab-tickets.md`,
+  `pnpm merge-to-dev --check-only` → `merge-ready: ok` (17 disposition rows).
+
+  Review found two adversarial blockers, both proven by mutation rather than
+  argued. The first indicts a judgment I made at fan-in: I re-blessed the
+  `PROVENANCE.md` hashes for `disclosure.ts` and `rank.ts` after seeing E-W3
+  pass, and the reviewer then showed E-W3 could not have failed on those files
+  — gutting every standing assumption still passed. Fixed at `5cb013c` with a
+  standing-assumption parity assertion, verified to fail that exact mutation
+  and pass unmutated. The general case (the fixture is self-keying, so request
+  composition is structurally invisible) is ticket 165.
+
+  Also fixed: the EP-weights disclosure understated that EP weights drive
+  within-slot ordering (fork `63494ce7b`, E-W3 re-run before re-hashing).
+  Filed 165, 166, 167, 168.
+
+  **Ticket 167 is worth carrying forward:** the drift gate hashes raw bytes
+  against LF-computed hashes, so an ordinary Windows `git checkout` of a ported
+  file fails it on line endings alone, indistinguishably from real drift. It
+  fired twice during fan-in. Normalizing back to LF restored the recorded hash
+  byte-exact, which is the proof the content never changed.
+
+- 2026-08-14 — **Round 2 (B2) complete and verified.** B2 ran unisolated in the
+  branch B worktree (the fork-invisibility problem does not apply to it, but a
+  worktree-of-a-worktree is not a thing this harness does well, and B2 was the
+  only writer). Commits `c718d38` (157), `ea9b33f` (163), `79aecf2` (164),
+  `9844b28` (handoff).
+
+  **Ticket-number collision caught at fan-in:** B2 minted a new ticket 165 on
+  branch B while branch A's review minted a different 165. Both branches are
+  unmerged, so the two would have collided. Renumbered B2's to 169 at `952fdc6`,
+  updating the references in ticket 164 and B2's handoff.
+
+  Orchestrator re-ran both claim checks it committed to:
+  - Ticket 163: item 27484 now appears in the regenerated ranking as
+    `owned: True, deltaDps: 0, slot: ranged` — the "owned row at 0.00" the
+    ticket asked for. The ranged slot went from 4 candidates to 7.
+  - Ticket 164: the ranged section now reads "7 candidates / 1 BiS candidate"
+    with Libram of Avengement shown as owned and p3 BiS, against the old
+    "4 candidates / 0 BiS candidates" with the worn relic absent entirely.
+
+  Note the three librams still tie at exactly -13.8069, as expected — those
+  three exist only as commented-out stubs in the pinned fork, and implementing
+  them was explicitly out of scope (163 layer 3).
+
+  Branch B `pnpm verify` → exit 0, 40 files, 773 passed. No worker worktrees
+  remain (`git worktree list | grep -c agent-` → 0).
+
+  Next: branch B's three review axes are dispatched; then its review file and
+  the final handoff.
