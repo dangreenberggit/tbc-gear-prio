@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run curated-set-phase:check && pnpm run mirrors:check && pnpm run lock-merge:check && pnpm run sync-wowsims:unit:check && pnpm run feral-skeleton-apl:check",
+    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run curated-set-phase:check && pnpm run mirrors:check && pnpm run lock-merge:check && pnpm run sync-wowsims:unit:check && pnpm run feral-skeleton-apl:check && pnpm run sim-implemented-effects-classifier:check && pnpm run sim-implemented-effects:check",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
@@ -45,7 +45,10 @@
     "mirrors:check": "python scripts/check_skill_mirrors.py",
     "lock-merge:check": "python scripts/check_lock_merge.py",
     "codegen:json-types": "python scripts/generate_json_literal_types.py",
-    "codegen:json-types:check": "python scripts/generate_json_literal_types.py --check"
+    "codegen:json-types:check": "python scripts/generate_json_literal_types.py --check",
+    "sim-implemented-effects:generate": "python scripts/generate_sim_implemented_effects.py",
+    "sim-implemented-effects:check": "python scripts/check_sim_implemented_effects.py",
+    "sim-implemented-effects-classifier:check": "python scripts/check_sim_implemented_effects_classifier.py"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.72.0",
