@@ -9,7 +9,29 @@ Live state of the detour so nothing is lost at a token wall. Per
 `orchestration.md`: the orchestrator never backgrounds workers and ends a turn
 without this file naming in-flight work and the exact next spawn.
 
-Last updated: 2026-08-14, by the slice-2 worker seat (engine port complete).
+Last updated: 2026-08-14, by the incoming orchestrator seat (slice 4 and the
+slice-6 SME review dispatched).
+
+## In flight right now (dispatched 2026-08-14 by this seat)
+
+Two background agents are running in parallel; neither has reported yet.
+
+1. **Slice 4 (UI completion)** — Sonnet workhorse, working in the fork clone
+   `vendor/tbc-new-fork` on `feat/upgrades-tab`. Brief: plan §9.4 / §4, no
+   sims triggered by any view, staleness banner on gear change, fnm + serving
+   recipes included. Deliverable: fork commits plus
+   `slice-4/HANDOFF.md` committed on `feat/shopping-list-wowsims-tab`.
+2. **Slice 6 `sme-rank-review`** — Opus review lane, judging the refreshed
+   ret-p3 ranking in the worktree `..\tbc-gear-prio-wt-ret-p3-data`
+   (`feat/ret-p3-data` @ `9004654`). Verdict file lands in that worktree.
+
+When they report, verify per §"Slice 3 — original dispatch notes" habits:
+re-derive numbers, run the green-baseline commands, check
+`packages/core/src` untouched. After slice 4: the gate is one Opus-medium
+review over slices 3+4 combined (orchestration.md §"Review points") — do not
+skip to a merge ask. After the SME verdict: slice 6 still needs
+`pre-merge-review` on `feat/ret-p3-data`, then stop and wait for a separate
+merge ask.
 
 ## Phase 0 — done
 
