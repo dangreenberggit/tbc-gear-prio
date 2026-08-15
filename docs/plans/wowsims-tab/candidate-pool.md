@@ -81,7 +81,116 @@ M2 **go** if some point has `cost(point)/cost(5000) < 0.25` on the tuning fixtur
 
 ### 3.3 Results
 
-<!-- E-W5 results land here: t_fixed, t_iter, presim status, RSS/worker, rank table, go/no-go with K*. -->
+Measured 2026-08-15 by slice B, branch `slice-b-ew5` at base
+`9ae92a324be891367398c8657b78b506903928ad`. Every number below has the
+command that produced it in `experiments/e-w5-overhead.{json,md}` and
+`experiments/e-w5-rank.{json,md}`, both committed alongside this file.
+
+#### §3.1 — per-request cost (`experiments/e-w5-overhead.{json,md}`)
+
+`node scripts/ew5_overhead.mjs` — five-repeat median sweep against the pinned
+CLI binary (`vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe`, tag
+v0.0.101), fixture `test/fixtures/slamaltman.raid-sim-request.json`, seed 42.
+
+| iterations | median wall-clock (ms) | median dps |
+| ---------- | ---------------------- | ---------- |
+| 100        | 377.0                  | 2026.7     |
+| 300        | 391.0                  | 2039.3     |
+| 1000       | 435.8                  | 2040.9     |
+| 3000       | 575.5                  | 2042.8     |
+| 5000       | 685.2                  | 2042.4     |
+
+Fit: `t_fixed` = **373.2 ms**, `t_iter` = **0.0637 ms/iteration**.
+
+**Presim status (F8):** no presim round executes for the ret fixture. Read
+from code, not inferred from timing: `runPresims`
+(`vendor/tbc-new-fork/sim/core/presim.go:34`) only loops its body when
+`remainingAgents > 0` or `EndFightAtHealth > 0`. `remainingAgents` comes from
+`Presimmer.GetPresimOptions`, implemented only by `Character`
+(`vendor/tbc-new-fork/sim/core/health.go:272`), which returns `nil` unless
+`HealingModel.Hps == 0 && HealingModel.CadenceSeconds != 0`. The fixture's
+player has `healingModel: {}` (both zero), so `GetPresimOptions` returns
+`nil`; the fixture's encounter has a fixed duration (no `EndFightAtHealth`
+field), so `doOne` is also `false`. The loop body never runs — this is a
+resolved zero, not an unseparated mix. **Not separable on the CLI
+`--outfile` path in general**: `RaidSimResult`
+(`vendor/tbc-new-fork/proto/api.proto:384-398`) carries no presim field —
+only the streaming `ProgressMetrics` channel does, which `--outfile` does
+not use — but that limitation does not bite here since the presim count is
+provably zero for this fixture. `t_fixed` above is therefore pure setup
+cost.
+
+**Per-worker memory:** peak RSS **183.8 MB**, one sim process, 5000
+iterations, sampled every 100ms via `Get-Process -Id <pid> |
+.WorkingSet64` in an isolated pass (not concurrent with the timing sweep —
+see below).
+
+**Deviation, recorded per the task's instructions:** a first version of the
+harness polled RSS every 50ms _during_ the timing sweep. That polling
+inflated wall-clock by 2-40x from CPU/IO contention between the poller and
+the sim process (100 iterations went from ~450ms to up to 1.5s; 300
+iterations up to 19s) — numbers that looked plausible but were pure
+measurement noise. Fixed by measuring RSS in a separate, single run with no
+concurrent timing claim; the sweep table above is from the corrected script.
+
+#### §3.2 — screening rank vs full rank (`experiments/e-w5-rank.{json,md}`)
+
+`node scripts/ew5_rank.mjs` — full eligible pool through the real
+`rankUpgrades` seam (`packages/core/src/rank.ts`) against the live CLI
+binary via `CliSimRunner`, `seeds: [42]` (disables paired replication),
+both roster fixtures, every §3.1 sweep point plus 5,000.
+
+**ret** (tuning fixture, eligible pool 246, `data/universes/ret-p5.json`
+filtered to `phase<=2`):
+
+| iterations | Spearman rho vs 5000 | K\* | above-cutoff rows | cost(point)/cost(5000) |
+| ---------- | -------------------- | --- | ----------------- | ---------------------- |
+| 100        | 0.9721               | 18  | 13                | 0.609                  |
+| 300        | 0.9882               | 15  | 13                | 0.650                  |
+| 1000       | 0.9946               | 15  | 13                | 0.695                  |
+| 3000       | 0.9995               | 13  | 13                | 0.847                  |
+| 5000       | 1.0000               | 13  | 13                | 1.000                  |
+
+**feral** (eligible pool 246, `data/universes/feral-p2.json` filtered to
+`phase<=2`):
+
+| iterations | Spearman rho vs 5000 | K\* | above-cutoff rows | cost(point)/cost(5000) |
+| ---------- | -------------------- | --- | ----------------- | ---------------------- |
+| 100        | 0.9699               | 25  | 16                | 0.462                  |
+| 300        | 0.9905               | 16  | 16                | 0.483                  |
+| 1000       | 0.9964               | 18  | 16                | 0.565                  |
+| 3000       | 0.9992               | 16  | 16                | 0.768                  |
+| 5000       | 1.0000               | 16  | 16                | 1.000                  |
+
+Cutoff used for K\*: `{absDps: 3.4, pct: 0.15}` (F10), fixed for both specs
+per this plan's go/no-go rule — feral's own `cutoffForSpec()` value is
+`{absDps: 3.6, pct: 0.15}` (`packages/core/src/cutoff.ts:27`), different
+from what was used here; noted for transparency, not applied.
+
+#### Go/no-go: **no-go**
+
+The go rule needs _both_: some point with `cost(point)/cost(5000) < 0.25`
+on ret, **and** `max K* over the roster ≤ 60`. The K\* condition holds easily
+(max K\* = 25, well under 60), but the cost condition fails outright: the
+_cheapest_ ret sweep point (100 iterations) still costs **0.609** of a
+5,000-iteration run, more than double the 0.25 threshold, and cost only
+rises from there as iterations increase. No sweep point on either fixture
+gets close to 0.25.
+
+The reason is visible in the §3.1 fit: `t_fixed` (373 ms) dominates
+wall-clock at every sweep point tried — even 100 iterations only adds
+`0.0637 × 100 ≈ 6 ms` of iteration-proportional cost, so wall-clock at 100
+iterations (377 ms) is barely different from wall-clock at 5,000 (685 ms).
+Screening buys almost nothing here because the _fixed_ per-request cost
+(process spawn, `NewEnvironment` setup) — not the iteration count — is what
+a low-iteration screen fails to avoid. Racing (M2) cannot pay for itself
+under this cost model without also amortizing or eliminating the per-request
+fixed cost (e.g. batching multiple candidates into fewer process spawns,
+which is a different mechanism than screening iterations down).
+
+**M2 is not shipped.** Per §2's gate, M3 (EP prefilter) goes to a fresh
+design pass rather than proceeding past M2. `screenIterations` and
+`promoteTopK` are not set.
 
 ## 4. M0 — documents match the engine
 
