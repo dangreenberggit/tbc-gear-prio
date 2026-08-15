@@ -287,6 +287,52 @@ fall back on, a candidate cap's safety rests entirely on ordering recall.
 C's ordering entry point for B′ is
 `orderCandidatesByEp(candidates, equipment, weights, statsLookup)`.
 
+## Round 2 — dispatched
+
+`D ∥ B′`. E is dropped by the M2 no-go, so this round is two slices, not three.
+Base for both: this repo `cc78ea68ebda6f6d9b2cfcf29a8ef3718ee12ff6`.
+
+| Slice | Content | Isolation | Base |
+| --- | --- | --- | --- |
+| B′ | M1.5 EP-ordering recall (`experiments/m1-5-*`) | this repo, own worktree | `cc78ea6` |
+| D | M1 port to fork + adapter + Candidates/Stop controls | **fork clone's main working tree** per §9.1a — no worktree | fork `655b3c36f` on `feat/upgrades-tab` |
+
+D is the only fork writer this round, so it uses the fork's main working tree
+and merges onto `feat/upgrades-tab` inside the fork. The orchestrator owns
+`data/wowsims-fork.lock.json` and bumps it from D's reported SHA.
+
+### Two verify gates run red, both diagnosed, one fixed
+
+**1. `sim-implemented-effects:check` — FIXED (`cc78ea6`).** The artifact
+recorded `forkCommit 3000b2f6b7`, reachable only from `w/a2-162-v1`; cleaning
+the fork for the port slices moved it to `feat/upgrades-tab`. Regenerated with
+the pinned toolchain. **Only `forkCommit` changed** — both id sets are
+byte-identical to the committed ones (215 implemented, 460 stub-only, compared
+against `HEAD`'s copy). Since `stubOnlyItemIds` is what drives pool exclusion
+and it did not move, no universe needed reassembling and no item's pool
+membership changed.
+
+**2. `engine-port-drift:check` — pre-existing, NOT real drift, not fixed.**
+The gate reports `rank.ts` and `set-value.ts` drifted against
+`engine/PROVENANCE.md`. Diagnosed rather than patched:
+
+- It fails with my changes stashed, so Round 1 did not cause it.
+- On-disk `rank.ts` hashes `9553c1bb92694…`; `feat/upgrades-tab` holds
+  `f684a25def1dff75`, which is **exactly what PROVENANCE expects**.
+- `git status` in the fork is clean, which contradicts a content change.
+- Cause: the fork clone has **`core.autocrlf=true`** while this repo has it
+  **`false`**, so fork checkouts write **CRLF** to disk while git stores LF.
+  The drift script hashes raw disk bytes, so it can never match.
+- Proof it is not real drift: `tr -d '\r' < file | sha256sum` reproduces the
+  branch blob hash **exactly** for both files (`f684a25def1dff75`,
+  `317f07056e02038a`).
+
+So the ported engine is byte-identical in content and the gate is reporting a
+line-ending artifact. Slice D owns PROVENANCE this round and was briefed with
+this diagnosis plus the instruction not to paper over a real change as "just
+CRLF". **Still open; must be dispositioned before any merge ask**, because
+`pnpm verify` is the merge gate.
+
 ## Next spawn after Round 1
 
 Round 2 is `D ∥ E(code) ∥ B′` — but only after: the D/F fork-isolation question
