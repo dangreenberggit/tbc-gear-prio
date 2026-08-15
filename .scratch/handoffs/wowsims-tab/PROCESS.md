@@ -22,11 +22,22 @@ Two background agents, disjoint trees:
    settings diff is empty outside `player.equipment`, shelve (not
    redesign) on failure. Deliverables: fork commits, `e-w4-result.md`,
    lockfile bump, `slice-5/HANDOFF.md`.
-2. ~~`pre-merge-review` on `feat/ret-p3-data`~~ **DONE** — see the new
-   section below.
+2. **Tickets 158+159 + real p3 ranking worker (Sonnet)** — in the
+   ret-p3-data worktree on `feat/ret-p3-data` (tip was `73e919a`).
+   User-approved scope (2026-08-14): stamp EP-weights provenance into
+   the generated artifacts with a byte-compare regen (158); make
+   `cli.ts` resolve ret weights by maxPhase from one shared mapping
+   source (159 — **the detour's first deliberate `packages/core/src`
+   edit**, confined to weight resolution, flagged to the user); then run
+   a real ret `--max-phase 3` ranking with native sims and commit the
+   artifact. **The user chose a real-ranking SME review before any
+   merge** — when the artifact exists, dispatch `sme-rank-review`
+   (Opus) on it; plan §9.6's done-when closes on that verdict, not the
+   earlier candidate-list one.
 
 When they report: re-derive load-bearing claims (for slice 5, read the
-captured E-W4 diff artifact, not the verdict), run the green baseline,
+captured E-W4 diff artifact, not the verdict; for the ranking, check the
+weights file recorded in its provenance is p3's), run the green baseline,
 and **stop before any merge or push ask** — both require the user's word.
 
 ## Slice 6 `pre-merge-review` — DONE: gate green, two user decisions open
