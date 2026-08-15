@@ -58,8 +58,17 @@ drop is that `rank.ts:722` only emits rows for pool candidates;
 independent path for worn-but-unpooled items. The assembler's own
 `wowheadRecall.missedItems` records 27484 as a known miss (it is on the
 Wowhead p3 list at `data/wowhead-lists/ret/p3.json:886`), but nothing
-consumes that signal. Root cause is therefore ticket 157's pool gap;
-the exact assembler rule that excludes it is **hypothesis, unread**.
+consumes that signal. The excluding rule is now **verified**:
+`scripts/assemble_universe.py:1416-1424` only admits items whose
+`map_db_source(...)` resolves a real drop/vendor/crafted source;
+D7-eligible items with no matched source are silently excluded
+(`excludedNoSource`, 1298 items). The silent downstream skip is also
+already ticketed: **ticket 124** (and ticket 94's 2026-08-11 addendum)
+cover `dead-slots.ts:140-166` skipping a worn item with no
+`deltaDps === 0` row instead of warning, with acceptance criteria for a
+`worn-unrankable` cause. Notably, 27484 itself **does** have a real
+implemented proc in the pinned sim (`sim/paladin/item_librams.go:9-33`)
+— the invisibility is entirely our pool/report layer, not the sim.
 
 **Libram sim coverage:** of the four pool librams, only Libram of
 Fervor (23203) has a real effect
