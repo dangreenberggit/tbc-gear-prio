@@ -194,18 +194,32 @@ node --experimental-strip-types --import "data:text/javascript,import{register}f
 
 Observed: `# pass 3`, `# fail 0` (run 2026-08-14).
 
-**Known gap, out of scope for this slice:** `Deps.epWeightsSource` is not
-yet populated by the tab itself. `upgrades_tab.tsx` (the file that
-constructs `Deps` and renders the assumptions drawer, at
-`ui/core/components/individual_sim_ui/upgrades_tab.tsx:274` and `:499-519`)
-sits one directory above `upgrades/`, outside this worker's write scope
-(`ui/core/components/individual_sim_ui/upgrades/**` only). Until a follow-up
-adds `epWeightsSource: epWeightsSourceFor(specId)` to the `Deps` literal at
-`upgrades_tab.tsx:274`, `Ranking.assumptions.standing` carries the new
-`"ep-weights-source"` entry but the drawer's `<dl>` (which currently
-enumerates fields by hand, not by iterating `standing`) does not render it.
-The data-and-test half described above is real and tested; the last-mile
-wiring into the visible drawer is the follow-up.
+**Wiring gap — closed at fan-in, 2026-08-14.** The slice worker could not
+reach `upgrades_tab.tsx` (it sits one directory above `upgrades/`, outside
+that worker's write scope), so the `ep-weights-source` assumption reached
+`Ranking.assumptions.standing` but the drawer never rendered it. The
+orchestrator closed that last mile in fork commit `179de35a4`: it adds
+`epWeightsSource: epWeightsSourceFor(specId)` to the `Deps` literal and
+renders the entry in the drawer's `<dl>`, filtering `standing` for it and
+printing `s.detail` rather than restating the string. Verified:
+
+```bash
+cd vendor/tbc-new-fork && npx tsc --noEmit -p tsconfig.json   # exit 0
+```
+
+So this ticket's **first acceptance criterion is now met end to end**, not
+just in data. The ticket stays `open` only because v2 is deliberately unbuilt.
+
+**Caveat on the second criterion, from the pre-merge review
+(`docs/reviews/feat-sweep-tab-tickets.md`, finding S8):** the v1 pinning test
+is weaker than the criterion asks. It builds a `pageWeights` local, asserts it
+differs from the committed vector, then calls `epWeightsFor("ret")` twice and
+asserts the two calls agree — `pageWeights` is never connected to a `Player`,
+`Deps`, or `rankUpgrades`. That pins a **type signature**, not behaviour, and
+the exact v2 change it exists to guard against (threading page weights into
+the prefilter) would add the parameter and leave this test passing. Compounding
+it, the test is not gated at all — see ticket 166. Strengthening it is part of
+v2's work, not a v1 regression.
 
 Not built (v2, deliberately): the `useCustomEPValues`-shaped toggle, the
 fork-side `getPendingStatWeights` shim on `Player`, extending `epScore` with
