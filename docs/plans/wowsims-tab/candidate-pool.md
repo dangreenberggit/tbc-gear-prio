@@ -350,6 +350,15 @@ Three Opus (review lane, effort high) reviewers, one persona each — Fowler, De
 
 **Open disagreement carried forward:** per-slot promotion (Dean vs Fowler/Beck). Rule as shipped: global top-K + best-in-slot floor. Trigger to revisit: any 7.2 or M1.5 result naming a starved slot.
 
+**Trigger fired — M1.5 named starved slots (2026-08-15).** The recall data (`experiments/m1-5-ep-recall.json`, ordering ranks of above-cutoff rows grouped by slot) is not spread evenly: the tail clusters hard in a few slots.
+
+- **ret**: `back` holds six of the thirteen above-cutoff rows, at ordering ranks 94, 98, 102, 109, 110, 114 — every one of ret's worst-ranked upgrades is a cloak. `finger` supplies 77, 96, 100.
+- **feral**: `waist` holds ranks 93, 95, 96 (plus 13, 25), and `neck` holds 58, 71, 75.
+
+Counting how many above-cutoff rows fall beyond the _j_-th of their **own slot**: at _j_=3, ret misses 5 and feral 2; at _j_=5, ret misses 1 and feral 0; **at _j_=10 both fixtures miss nothing.** So a per-slot top-_j_ rule (Dean Q1) would have recalled every above-cutoff row on both fixtures at _j_=10, where a global cap needs ~114 to do the same job. Command: `npx tsx scripts/m1_5_recall.mjs` for the ranks; the per-_j_ counts are a group-by over `results.<spec>.f10.aboveCutoff` in the committed JSON.
+
+This is evidence **for** Dean's position and against the deferral, on the axis the trigger named. Two honest limits before anyone treats it as settled: the mechanism was measured for **ordering/cap membership**, not for M2 promotion (M2 is not shipped — §3.3), and _j_=10 is fit on the same two fixtures it is evaluated against, so it is a hypothesis with supporting evidence, not a validated default. It belongs to whatever design pass takes up M3.
+
 ## 9. Orchestration
 
 Lanes per `docs/agents/model-policy.md`: workhorse = Sonnet, review = Opus, design = Fable (this file only). The **execution orchestrator is an Opus session started by the human with this plan** — the top-level agent of its own session (`AGENTS.md` § Parallel agents); it names the model on every spawn and never backgrounds workers without a disk handoff. Handoffs under `.scratch/handoffs/wowsims-tab/candidate-pool/<slice>/HANDOFF.md`; in-flight state in `.../PROCESS.md`. Use the `parallel-phase` skill for the fan-outs; its disjointness rule is verified by listing files, not eyeballing.
