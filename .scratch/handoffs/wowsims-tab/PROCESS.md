@@ -14,15 +14,9 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-Two background agents, disjoint trees:
+One background agent running:
 
-1. **Slice 5 worker (Sonnet)** — WCL gear-only importer in the fork clone
-   on `feat/upgrades-tab` (sole fork writer; tip was `e1fbf0e2d` at
-   dispatch). Bound by `e-w4-method.md`: `setGear` only, pass iff the
-   settings diff is empty outside `player.equipment`, shelve (not
-   redesign) on failure. Deliverables: fork commits, `e-w4-result.md`,
-   lockfile bump, `slice-5/HANDOFF.md`.
-2. **Tickets 158+159 + real p3 ranking worker (Sonnet)** — in the
+1. **Tickets 158+159 + real p3 ranking worker (Sonnet)** — in the
    ret-p3-data worktree on `feat/ret-p3-data` (tip was `73e919a`).
    User-approved scope (2026-08-14): stamp EP-weights provenance into
    the generated artifacts with a byte-compare regen (158); make
@@ -39,6 +33,33 @@ When they report: re-derive load-bearing claims (for slice 5, read the
 captured E-W4 diff artifact, not the verdict; for the ranking, check the
 weights file recorded in its provenance is p3's), run the green baseline,
 and **stop before any merge or push ask** — both require the user's word.
+
+## Slice 5 — DONE: E-W4 PASSED, importer built, orchestrator-verified
+
+Fork tip `adb0d1353` (two commits over `e1fbf0e2d`), lockfile bumped,
+outer commit `005b5b8` with `e-w4-result.md` + captured before/after JSON
++ the diff script, and [`slice-5/HANDOFF.md`](slice-5/HANDOFF.md).
+
+- **E-W4 verdict PASS, reproduced by the orchestrator** from the
+  committed artifacts: `node e-w4-diff.mjs e-w4-before.json
+  e-w4-after.json` → `PASS: empty diff outside player.equipment`,
+  exit 0. Application call is `player.setGear` only, per the method doc.
+- Importer: modal beside Run — report URL → fight list → roster →
+  `Database.loadLeftoversIfNecessary` + `lookupItemSpec` → `setGear`.
+  `upgrades/engine/` untouched; fork dependency-free.
+- **Untested, honestly flagged:** live WCL fetch (no creds in the worker
+  env; `local.wcl-credentials.ts` committed gitignored with blanks),
+  modal click-through, unresolved-item reporting path. First live use
+  needs the user's WCL creds in that file.
+
+## Open design question (user-raised, 2026-08-14): user-set EP weights
+
+Upstream's page lets users set their own EP weights
+(`player.setEpWeights`, `stat_weights_action.tsx` calculator,
+`saved_data_managers/ep_weights.ts`); our tab prefilters/gem-fills with
+the committed `epWeightsFor(specId)` and ignores the page's. EP shapes
+candidate *selection* only — sims produce every number. Assessment given
+in chat; awaiting the user's direction before any change.
 
 ## Slice 6 `pre-merge-review` — DONE: gate green, two user decisions open
 
