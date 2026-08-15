@@ -46,7 +46,7 @@ and the slice-6 handoff line is corrected to point at the filed verdict.
 
 ## Comments
 
-2026-08-14: Resolved at (this commit) on `w/b3-sync-docs`. PLAN.md:975-977
+2026-08-14: Resolved at `c267b24` on `w/b3-sync-docs`. PLAN.md:975-977
 now records the `2fdad02` fix and its verify command; the slice-6 handoff
 line at `.scratch/handoffs/wowsims-tab/slice-6/HANDOFF.md:664-665` now
 points at the filed verdict (`859eab5`,
