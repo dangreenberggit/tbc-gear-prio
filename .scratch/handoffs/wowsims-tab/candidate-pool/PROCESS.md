@@ -18,20 +18,57 @@ Re-run these before relying on them.
 | F3 — serial candidate loop | `grep -n "for (const entry of candidates)" packages/core/src/rank.ts` | Confirmed at `:723`, second loop at `:1151` |
 | Sim binary present | `./vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe version` | `v0.0.101`, runs in 0.2s |
 
-## Deviation from the plan found at dispatch
+## Fork isolation — resolved by the plan author
 
-§9.1 assumes slices D and F run in a **fork clone** ("fork clone, branch off its
-integration branch"). The fork in this repo is **vendored** at
-`vendor/tbc-new-fork`, not a sibling clone. Round 2/3 must resolve how D and F
-are isolated before dispatch — this is unresolved and must not be guessed.
+Raised at dispatch: §9.1 said slices D and F run in a "fork clone", but the fork
+is nested at `vendor/tbc-new-fork`. The plan author amended the plan in
+`bb61877`, adding **§9.1a Fork isolation**. That section is now authoritative;
+this file does not restate it. The three obligations it puts on the
+orchestrator:
+
+1. One fork writer per round (D in Round 2, F in Round 3), using the clone's
+   main working tree on `w/candidate-pool-<slice>` off `feat/upgrades-tab`.
+2. **Clean the fork tree before spawning D.** Confirmed still dirty at
+   `git -C vendor/tbc-new-fork status`: `tsconfig.json` modified and
+   `.ew1-scratch/` untracked, on branch `w/a2-162-v1`. Commit the tsconfig fix
+   citing ticket 156, clear the scratch dir, record the SHA as D's base.
+3. `data/wowsims-fork.lock.json` is this repo's file and the **orchestrator**
+   owns it — bump `commit` after D and F merge inside the fork, re-run 7.10,
+   leave `pushed: false`.
 
 ## Round 1 — A ∥ B ∥ C
 
 | Slice | Content | Model | Branch | Status |
 | --- | --- | --- | --- | --- |
-| A | M0 doc fixes: `plan.md`, ticket 162, ADR-0018 | Sonnet | `slice-a-m0-docs` | dispatched, base asserted `9ae92a3` |
-| B | E-W5 §3.1 + §3.2 harnesses, numbers into §3.3 | Sonnet | not yet dispatched — see below | **held** |
-| C | M1 in `packages/core` | Sonnet | `slice-c-m1-core` | dispatched; **spawned at `55b5a51` (origin/main) — self-correction being watched** |
+| A | M0 doc fixes: `plan.md`, ticket 162, ADR-0018 | Sonnet | `slice-a-m0-docs` | **merged** `80508a9`; acceptance grep re-verified by orchestrator |
+| B | E-W5 §3.1 + §3.2 harnesses, numbers into §3.3 | Sonnet | `slice-b-ew5` | dispatched with measured timings and corrected counts |
+| C | M1 in `packages/core` | Sonnet | `slice-c-m1-core` | **merged** `162097e`; 6 commits, spawned at `55b5a51` and self-corrected |
+
+### Slice C — what the orchestrator verified rather than took on trust
+
+- `promisePool` keys results by task index and rethrows the **first error by
+  index**, which is what makes 7.3's "same error at any pool size" assertion
+  meaningful rather than incidental.
+- `complete: true` is a **literal** on `Ranking`, and `PartialRanking` is
+  `Omit<Ranking,"complete"> & {complete:false}`. The ranking cache therefore
+  cannot accept a partial by construction, which is what §5.1.4 asked for
+  ("enforced by type, not by convention").
+- Ran `promise-pool`, `candidate-order`, `content-hash` tests directly in the
+  worktree: 38 passed.
+
+**Carried to review — slice C's own flag:** an aborted run skips paired
+replication *and* set-bonus packages. Both dispatch new sims for refinement
+rather than coverage, so this reads as faithful to §5.1.4's "finishes in-flight
+sims"; it is an interpretation the plan does not state outright, and the plan
+author should confirm it. Belongs in the `## Disposition` table.
+
+**Orchestrator slip, recorded:** an earlier `cd` into slice C's worktree
+persisted across Bash calls, so the first `git merge` ran from there and checked
+out `slice-c-m1-core` inside that worktree instead of merging. No commits were
+lost — `feat/candidate-pool` was untouched. Fixed by restoring the worktree to
+its own branch and re-running the merge with an explicit `git -C`. AGENTS.md
+already says to prefer `-C`/`--prefix` over `cd` in shells whose cwd persists;
+this is that rule earning its place.
 
 ### B sizing — measured by the orchestrator, 2026-08-15
 
