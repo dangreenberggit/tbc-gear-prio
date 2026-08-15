@@ -347,7 +347,10 @@ gitignored local config; they never enter source or bundle. Browser-direct
 WCL calls demonstrably work (upstream ships exactly that, with their own
 embedded credential). What a *published* build would use is a PR-time
 question — most likely upstream's existing credential, which is their
-decision.
+decision. **Decided (user, 2026-08-14): a published build uses the same
+credential-accessing method as the rest of the wowsims app** — upstream's
+existing path, as `raid_wcl_importer.tsx` does — never the personal dev
+creds and no new mechanism.
 
 **Shelve condition, stated up front:** if gear-only application in practice
 disturbs other settings (E-W4's proto diff says so), this slice is shelved
