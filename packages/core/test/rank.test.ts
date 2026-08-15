@@ -19,6 +19,7 @@ import {
   equipmentForCandidateSwap,
   RankError,
   rankUpgrades,
+  type Ranking,
 } from "../src/rank.js";
 import { pairedReplicateSe } from "../src/se.js";
 import { applyView } from "../src/view.js";
@@ -1170,7 +1171,9 @@ describe("rankUpgrades", () => {
       await rankUpgrades(input, deps);
 
       const stages: string[] = [];
-      await rankUpgrades(input, deps, (p) => stages.push(p.stage));
+      await rankUpgrades(input, deps, (p) => {
+        if ("stage" in p) stages.push(p.stage);
+      });
       expect(stages).not.toContain("simming");
       expect(stages.at(-1)).toBe("ranking");
     });
@@ -2233,9 +2236,12 @@ describe("rankUpgrades paired-replicate SE", () => {
     ];
   }
 
-  async function rankWithSeeds(seeds: number[], sim: SimRunner) {
+  async function rankWithSeeds(
+    seeds: number[],
+    sim: SimRunner
+  ): Promise<Ranking> {
     const logged = slamaltmanLoggedGear();
-    return rankUpgrades(
+    const ranking = await rankUpgrades(
       {
         character: CHAR,
         spec: "ret",
@@ -2257,6 +2263,14 @@ describe("rankUpgrades paired-replicate SE", () => {
         pool: neckPool(),
       }
     );
+    // No caller in this describe block passes Deps.signal, so a
+    // PartialRanking is not actually reachable here — asserted rather than
+    // cast, so a future signal-passing caller fails loudly instead of
+    // silently narrowing away a real partial result.
+    if (!ranking.complete) {
+      throw new Error("expected a complete Ranking; got a PartialRanking");
+    }
+    return ranking;
   }
 
   it("marks the top 8 paired-replicate and leaves the rest independent", async () => {

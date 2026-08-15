@@ -119,7 +119,10 @@ function equipmentWithNeck(neckId: number | undefined): SimItemSpec[] {
   // real index, so it is built from the real SIM_ORDER rather than an
   // assumed length.
   return Array.from({ length: 20 }, () => ({ gems: [] }) as SimItemSpec).map(
-    (spec, i) => (i === neckIndex() ? { ...spec, id: neckId } : spec)
+    (spec, i) =>
+      i === neckIndex()
+        ? { ...spec, ...(neckId !== undefined ? { id: neckId } : {}) }
+        : spec
   );
 }
 

@@ -36,6 +36,7 @@ function ranking(
       expertise: { rating: 0, capRating: null, gap: null },
     },
     items,
+    complete: true,
     // Mirrors `rankUpgrades`: the field is present only when non-empty.
     ...(warnings?.length ? { plausibilityWarnings: warnings } : {}),
   };
