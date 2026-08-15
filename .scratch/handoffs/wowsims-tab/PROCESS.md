@@ -174,7 +174,49 @@ is exit 0 in the fork. `packages/core/` is untouched, confirmed by
 generated files by inspection only — nothing catches the two drifting apart
 if a union grows in this repo. Recorded in the handoff's "Untested" section.
 
-## Slice 3 — adapters + first ranking: IN FLIGHT
+## Slice 3 — adapters + first ranking: DONE except E-W2
+
+Adapters built and wired; a ret run composes a correct request and reaches
+`Simming 0/277`. **`packages/core/src/` untouched; drift gate 30/30;
+`pnpm verify` exit 0.**
+
+### E-W1 — PASSED, and independently reproduced
+
+The gate that had never been run since compute-topology was written.
+
+```
+WASM   2042.3926145882178
+native 2042.3926145882197   → delta 1.8e-12 DPS, 1.87e12× under the 3.4 cutoff
+```
+
+Smaller than native's own 20-vs-4-thread spread (6.8e-13), so this is
+float-ordering noise, not disagreement. **The orchestrator reproduced it from
+the handoff's method with a separately written harness** and got a bit-identical
+number. Plan §8 and §10's risk row are updated; the risk is closed.
+
+Two gotchas now recorded, both absent from the original plan: the WASM build has
+no `with_db` embedding (a `SimDatabase` must be injected per player), and
+`wasmready` must exist as a global *before* `go.run` or `sim/wasm/main.go:40`
+panics.
+
+### E-W2 — still blocked; the slice's stated cause was wrong
+
+Filed as **ticket 156**. Two separate things:
+
+- **A real bug, fixed:** `dist/tbc/` held no JavaScript — `vite.build-workers.mts`
+  had never run, so `sim_worker.js` 404'd and `wasm_exec.js` returned vite's
+  HTML fallback. **It needs `go` on `PATH`.** This belongs in the serving recipe.
+- **The stated cause is refuted.** Worker throttling was proposed from
+  `document.hidden === true`; a busy-loop measured **5.49M (main) vs 5.09M
+  (Worker)** — ratio 1.1×. Compilation (22 ms) and core count (20) are out too.
+  After fixing the bundles, upstream's own Simulate still ran **93 s without
+  finishing**. The slowness is real and **unexplained**; untested candidates are
+  in ticket 156.
+
+The worker was right that E-W2 is blocked and right not to fabricate numbers.
+Only its mechanism was wrong.
+
+## Slice 3 — original dispatch notes
 
 Dispatched 2026-08-14 to a Sonnet workhorse. Builds `PlayerGearSource`,
 skeleton serialization (D5), and `WasmSimRunner`, then wires them into
