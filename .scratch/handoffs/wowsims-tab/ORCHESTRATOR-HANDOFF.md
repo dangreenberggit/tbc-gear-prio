@@ -102,6 +102,18 @@ looks like a routing bug, isn't one. Skip the workers build and `sim_worker.js`
 
 `.claude/launch.json` has a `wowsims-fork` entry for the dev server.
 
+### A hook will stop two Bash mistakes
+
+`.claude/hooks/bash-footguns.sh` (registered globally) blocks a `cd` inside a
+**backgrounded** Bash call, and a Git Bash `/c/Users/...` path passed to
+`node`/`python`. Both are commands that exit 0 while doing nothing useful — the
+first installs into the session cwd, the second raises an ENOENT that reads as
+a missing file. If you see one of its BLOCKED messages, it is naming the fix,
+not reporting a broken environment.
+
+The repo copy is source of truth; `~/.claude/hooks/` is what runs. After editing,
+run `bash .claude/hooks/tests/bash-footguns.sh` (26 cases) and copy it across.
+
 ---
 
 ## 4. Done: slices 1, 2, 3 (except E-W2), and 6 (except review)
@@ -143,10 +155,28 @@ not.
 2. `pre-merge-review` on `feat/ret-p3-data` → `docs/reviews/feat-ret-p3-data.md`.
 3. **Then stop.** Merge is a separate ask from the user.
 
-**Slice 5 — WCL gear-only importer.** Plan §6, gated by E-W4 (ship vs shelve on
-a proto diff). Needs only slice 1, so it can run alongside slice 4 — in **its own
-`git worktree` of the nested clone**, since one tree holds one writer
-(orchestration.md risk 1).
+**Slice 5 — WCL gear-only importer.** Plan §6, gated by E-W4. Needs only slice 1,
+so it can run alongside slice 4 — in **its own `git worktree` of the nested
+clone**, since one tree holds one writer (orchestration.md risk 1).
+
+E-W4's method is now fully specified in
+[`e-w4-method.md`](../../../docs/plans/wowsims-tab/experiments/e-w4-method.md)
+(plan §8 points at it). Three things from it bind the slice:
+
+- **Apply gear with `setGear`, not `fromProto(..., [Gear])`.** The Gear
+  *category* spans four fields — `equipment`, `bonusStats`, `enableItemSwap`,
+  `itemSwap` — and the latter three are the user's page settings, which a log
+  knows nothing about. The category filter would overwrite them. **If the slice
+  ships any other application call, E-W4 must be re-run through that call
+  before its verdict counts.**
+- **Pass is literally empty** outside `player.equipment`. No benign-difference
+  category exists, because both captures come from one serializer in one session.
+- **No WCL credentials and no sims are needed** — the gate tests application,
+  not fetching, so ticket 156's WASM slowness does not block it.
+
+`bulk_gear_json_importer.tsx` was checked and is **not** a gear-only path: it
+feeds the Batch tab's item list and never touches `Player` state. Plan §6's
+follow-up is resolved, negatively — the slice does not shrink.
 
 ### Open tickets filed this session
 
