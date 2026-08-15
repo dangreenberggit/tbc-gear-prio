@@ -1,4 +1,8 @@
 Status: open
+Progress: honest-marking branch DONE (2e6b257/00af8d3 on
+feat/ret-p3-data — worn-unrankable classification + unmeasured caveat,
+verified in the regenerated artifact); full resolution (the worn item
+actually ranked) rides on ticket 157's pool backfill
 Type: bug
 Origin: .scratch/handoffs/sme-rank-judgment-ret-p3-real-ranking.md (SME review of the real ret-p3 ranking, feat/ret-p3-data @ 2b3bf56)
 Blocks: none
