@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: test coverage
 Origin: orchestrator mutation-testing of slice 2, 2026-08-14
 (`.scratch/handoffs/wowsims-tab/slice-2/HANDOFF.md`, "Orchestrator verification")
@@ -54,8 +54,48 @@ socketed case would need.
 
 ## Acceptance criteria
 
-- [ ] Perturbing `pairedReplicateSe` in the fork's `engine/se.ts` fails E-W3.
-- [ ] At least one socketed candidate and one set-bonus completion are
+- [x] Perturbing `pairedReplicateSe` in the fork's `engine/se.ts` fails E-W3.
+- [x] At least one socketed candidate and one set-bonus completion are
       exercised.
-- [ ] The handoff's mutation-test table is re-run and updated.
-- [ ] `pnpm verify` green.
+- [x] The handoff's mutation-test table is re-run and updated.
+- [x] `pnpm verify` green.
+
+## Comments
+
+**2026-08-14 — worker A1, branch `w/a1-155-parity`.**
+
+Broadened `packages/core/test/wowsims-fork-parity.test.ts` to two seeds
+(`[11, 22]`) and three pool candidates: the original socketless Fel-Steel
+Warhelm (29983, head), plus two socketed Lightbringer Battlegear pieces
+(setId 680 — head 30989, shoulder 30997) that cross the 2pc threshold via
+`selectPackage`'s multi-candidate completion path.
+
+**Fixture decision (the ticket's flagged untested hypothesis): extended, did
+not regenerate.** No new recorded sim observations beyond hand-added
+`SimObservation` map entries and two more item ids added to the existing
+fork-DB-stub builder were needed — measured by running the broadened suite
+green with no fixture regeneration step.
+
+All three "done when" mutations were re-run against the broadened test (not
+assumed from the ticket's original narrower table):
+
+- `cutoff.ts` — `meetsCutoff` thresholds ×1000 → **FAILS** (unchanged from
+  before broadening).
+- `se.ts` — `pairedReplicateSe` returns `+ 0.001` → **FAILS** (was PASSES
+  before this ticket — the gap this ticket exists to close).
+- `set-value.ts` — `computeSynergy`'s `bonusDps` returns `+ 0.001` → **FAILS**
+  (new coverage, the set-bonus-completion path).
+
+Full detail and exact diffs in
+`.scratch/handoffs/wowsims-tab/slice-2/HANDOFF.md`'s "Ticket 155 re-run"
+section.
+
+Reproduce: `npx vitest run packages/core/test/wowsims-fork-parity.test.ts`
+from `packages/core/` (requires `vendor/tbc-new-fork` present with protos
+generated — gitignored, absent by default per plan §1). Full gate:
+`pnpm verify` from the repo root — green, 758 passed / 3 skipped (pre-existing,
+unrelated to this ticket: `vendor/wowsims` gear/APL fixtures needed a local
+sync in this worktree) / 2 todo, exit 0.
+
+Commit: `ea6f46b1dd31387cee99f88e748dee560c2034e3` on `w/a1-155-parity`
+("Broaden E-W3 to multi-seed, socketed, set-bonus case").
