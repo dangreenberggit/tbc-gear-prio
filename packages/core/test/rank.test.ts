@@ -3937,6 +3937,54 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
       }
     });
 
+    it("dispatches no replication sims when aborted after the last candidate", async () => {
+      // The boundary case §5.1.4 names: every candidate sim has already
+      // landed, so the only work left is replication and set packages. Both
+      // are *new* dispatches, so Stop skips them and the run is still
+      // `complete: false` — completeness means the whole flow ran, not that
+      // every candidate ran. Multi-seed input so replication would otherwise
+      // fire; a single seed would make the assertion vacuous.
+      const controller = new AbortController();
+      const pool = syntheticPool();
+      const candidateSimCount = pool.length + 1;
+      let runCount = 0;
+      const countingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          if (runCount === candidateSimCount) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: countingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      } as never);
+
+      const ranking = await rankUpgrades(
+        { ...m1Input, seeds: [42, 43, 44, 45, 46] },
+        deps
+      );
+
+      expect(ranking.complete).toBe(false);
+      expect(runCount).toBe(candidateSimCount);
+      for (const item of ranking.items) {
+        expect(item.seMethod).not.toBe("paired-replicate");
+        expect(item.setBonusNote).toBeUndefined();
+      }
+    });
+
     it("writes no ranking cache row for a partial run, but keeps per-sim rows", async () => {
       const controller = new AbortController();
       let runCount = 0;

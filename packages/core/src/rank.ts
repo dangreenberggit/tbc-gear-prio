@@ -1004,6 +1004,12 @@ export async function rankUpgrades(
         await promisePool(tasks, concurrency);
       }
     }
+    // Re-read after the pool drains: an abort raised while the *last* task
+    // was in flight skips nothing, so the loop above never sets the flag,
+    // yet the run must still stop before replication and set packages
+    // (§5.1.4 — completeness is "the whole flow ran", not "all candidates
+    // ran").
+    if (signal?.aborted) aborted = true;
     const unsimmedCandidates = aborted
       ? candidates.filter((c) => !individualDeltasByItemId.has(c.itemId))
       : [];
