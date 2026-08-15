@@ -91,7 +91,21 @@ python -c "import json; d=json.load(open('.scratch/handoffs/wowsims-tab/ret-p3-r
 **Layer 3 (distinct libram proc deltas) stays explicitly out of scope**,
 as directed — Souls Redeemed (28592), Absolute Truth (30063) and Tome of
 the Lightbringer (32368) remain `TODO: Manual implementation required`
-stubs in the pinned sim fork (`sim/paladin/item_librams.go`); their
-three-way tie at -13.81 is untouched, upstream-only work.
+stubs in the pinned sim fork
+(`sim/common/tbc/stat_bonus_procs_auto_gen.go`, not `item_librams.go` —
+that file holds the *implemented* librams, 27484/23203/31033/22401);
+their three-way tie at -13.81 is untouched, upstream-only work.
 
 Commit: (recorded in the branch's commit for this ticket, see `git log`).
+
+## Comment (2026-08-15, ticket 171)
+
+Layer 3 is now resolved, but not by implementing the procs — by
+excluding the three stub-only items from the candidate pool entirely
+(user ruling: an item whose effect is not implemented in the pinned sim
+must not be simmed or shown, no "unmeasured" styling). See ticket 171 for
+the design and the fixing commits. The three-way tie can no longer occur
+because 28592/30063/32368 no longer reach `data/universes/ret-p3.json`
+at all — verified by re-running the same command above:
+`ranked.items` for `slot: "ranged"` now lists exactly four rows (27484,
+31033, 22401, 23203), none of them a stub.
