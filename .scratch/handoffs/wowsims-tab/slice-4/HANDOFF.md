@@ -242,3 +242,89 @@ plainly rather than implied by the code-reading verification above.
   `ui/core/components/individual_sim_ui/upgrades/engine_provenance.ts`
   staged; `.ew1-scratch/` (slice 3's leftover untracked scratch dir) was
   left alone, not added.
+
+## Fix-up after review
+
+Fixes for the findings in
+[`slice-3-4-review.md`](../slice-3-4-review.md). Fork commit
+`e1fbf0e2d` (parent `6cf6dc28a`) on `feat/upgrades-tab`, **not pushed**.
+This repo: `data/wowsims-fork.lock.json` bumped to `e1fbf0e2d`, this section.
+
+- **F1 (medium, fixed)** — weapon-pool rows landed in no slot sub-tab.
+  `slotsInView` and `slotPaneContent`'s row filter both cast
+  `row.slotChoice ?? row.slot` to `SimOrderName`, which is unsound for
+  `weapon`: it is a pool `ItemSlot`, not a `SIM_ORDER` member, and never
+  gets a `slotChoice` because `rank.ts` only sets one for slots that map to
+  more than one sim slot (finger/trinket). Replaced the cast with a shared
+  `effectiveSlot()` helper that resolves through `pool.ts`'s exported
+  `simSlotsForPoolSlot` (`row.slotChoice` still wins when the engine set
+  one), used identically by `slotsInView` and `slotPaneContent`. Also
+  updated the results-table slot column to use the same helper, so weapon
+  rows show "Main Hand" instead of the literal string "weapon".
+
+  Verified with a small node harness
+  (`vendor/tbc-new-fork`, not committed — scratch) that re-implements
+  `simSlotsForPoolSlot`/`effectiveSlot` and buckets every entry in the
+  three committed universes by effective slot:
+  ```
+  ret-p2   mainhand bucket: 12  weapon bucket: 0
+  ret-p3   mainhand bucket: 18  weapon bucket: 0
+  feral-p2 mainhand bucket: 57  weapon bucket: 0
+  ```
+  These match the review's own weapon-row counts (12/18/57) exactly, and
+  the `weapon bucket: 0` confirms nothing is left stuck under the old,
+  un-tabbed key. This is a bucket-assignment check against the raw
+  universes, not a run through `applyView`/`rankUpgrades` — it does not
+  exercise `slotChoice` being set by a live ranking, only the fallback path
+  F1 was about.
+
+- **F2 (low, fixed)** — `activeSubTab` was written but never read, so any
+  staleness-driven re-render (`renderSubTabs` tearing down and rebuilding
+  the tab strip) silently bounced the user back to Shopping List.
+  `renderSubTabs` now tracks each rebuilt sub-tab's button by id and calls
+  `Tab.show()` on the remembered `activeSubTab` after rebuilding, falling
+  back to Shopping List when that slot no longer has any candidates. The
+  existing `shown.bs.tab` listener (attached once, in the constructor)
+  keeps `activeSubTab` in sync for both user clicks and this programmatic
+  `show()`. Verified by `npx tsc --noEmit` and by reading the resulting
+  control flow; **not** verified live in a browser (same E-W2/ticket-156
+  constraint as the rest of this slice — browser sims are out of scope for
+  this fix-up, and this fix's mechanism does not depend on a completed sim
+  to exercise the tab-switch/rebuild path, but no live click was recorded).
+
+- **F3 (low, fixed)** — removed the dead `hideOwned` field; its one call
+  site in `currentViewOptions()` now inlines `false` directly, with a
+  comment pointing at plan §4 (greying, not hiding, owned rows is the
+  spec'd behaviour). No visible change.
+
+- **F5 (low, fixed)** — added the D7-required visible iterations control:
+  a plain `<input type="number">` next to the Run button, defaulting to
+  3000 (mirrors `rank.ts`'s own un-exported `DEFAULT_ITERATIONS`, restated
+  as a local constant since that engine constant isn't public and engine/
+  is out of scope for this fix-up). `run()` reads it once, at click time,
+  via a new `readIterations()` helper, and passes it as `RankInput.iterations`
+  — an already-existing optional field on the engine's public input type,
+  so no engine change was needed. The input has no change listener, so
+  editing it cannot mark state stale or trigger a sim by itself; it only
+  changes what the *next* Run click sends. Verified by `npx tsc --noEmit`
+  and by reading `run()`'s call site; **not** verified live (same
+  ticket-156 constraint — no browser sim was run to confirm the control's
+  value actually reaches a completed ranking's `assumptions.iterations`).
+
+### Verification (fix-up)
+
+- Fork `npx tsc --noEmit`: **exit 0**, no errors, after fixing one
+  follow-on type error (`min`/`step` on `<input>` belong at the top level
+  in this fork's `tsx-vanilla`, not inside the `attributes` bag).
+- This repo `pnpm verify`: **exit 0**. `40 Test Files passed (40)`,
+  `760 Tests passed | 1 skipped | 2 todo (763)` — unchanged from slice 4's
+  own numbers, confirming no regression from the fix-up (expected: no
+  `engine/` or `packages/core/src` file was touched).
+- `pnpm engine-port-drift:check`: **30/30 ported files match
+  PROVENANCE.md** — unchanged.
+- F1's bucket-count numbers above, from a fresh run against the fix-up
+  commit's working tree.
+- Not run this pass: browser sims (ticket 156, same constraint as slice
+  3/4), and no live click-through of F2's tab-restore or F5's iterations
+  control — both are stated above as unverified rather than implied
+  tested.
