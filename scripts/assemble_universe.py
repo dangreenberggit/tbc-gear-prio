@@ -93,6 +93,30 @@ RANGED_IDOL = 6
 RANGED_LIBRAM = 7
 MIN_QUALITY = 3
 
+# Ticket 157: six D7-eligible ret items the SME review named as missing from
+# the pool despite being real, well-known TBC drops/quest rewards. Every one
+# fails the general admission gate the same way -- db.json's `sources[]`
+# names a five-man zone that is neither a phase_raids.json raid nor listed in
+# PHASE_HEROIC_DUNGEONS (Dire Maul, The Black Morass, The Mechanar are not
+# there; Blood Furnace is, but PHASE_HEROIC_DUNGEONS deliberately excludes it
+# per ticket 17), and the Wowhead prose parser also mis-reads their source
+# text (a " - Heroic" suffix the heroic-zone regex does not match, or a
+# "Quest:" line with no zone at all). Widening PHASE_HEROIC_DUNGEONS would
+# also admit ~280 other phase-1 items from those same dungeons -- exactly the
+# broader question ticket 17 flagged and deferred as its own project, not a
+# drive-by here. This set force-admits only the six named items, the same
+# way `curated_unsourced` force-admits a wowsims-equipped item with no
+# resolvable source: real source text exists (see each entry below), it just
+# isn't in a shape the automated zone/heroic gate currently reads.
+TICKET_157_FORCE_INCLUDE: dict[int, str] = {
+    27484: "Drop: The Maker (Blood Furnace, Heroic)",
+    31033: "Quest: News of Victory",
+    22401: "Drop: Isalien (Dire Maul East, normal)",
+    31856: "Quest: Darkmoon Blessings Deck (BoE trinket)",
+    28034: "Drop: Temporus (The Black Morass, normal)",
+    28288: "Drop: Pathaleon the Calculator (The Mechanar, normal)",
+}
+
 KAEL_TEMP_LEGENDARY_IDS = frozenset(
     {30318, 30313, 30316, 30317, 30312, 30311, 30314}
 )
@@ -1418,6 +1442,16 @@ def assemble(
         if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
+        # Ticket 157's six force-included items each have a db/Wowhead source
+        # that names a five-man zone the validation guard below correctly
+        # rejects (Dire Maul, The Black Morass, The Mechanar are not raids;
+        # Blood Furnace is a heroic PHASE_HEROIC_DUNGEONS deliberately
+        # excludes). Recording that unusable row here and admitting the item
+        # through TICKET_157_FORCE_INCLUDE below would ship a source the rest
+        # of the engine cannot resolve -- so these items skip the automated
+        # db source entirely and carry only the documented force-include one.
+        if iid in TICKET_157_FORCE_INCLUDE:
+            continue
         db_src = map_db_source(
             it.get("sources"), zones_by_id=zones_by_id, npcs_by_id=npcs_by_id
         )
@@ -1504,6 +1538,14 @@ def assemble(
             wowhead_list_ids.add(iid)
             if hold_out_wowhead:
                 continue
+            # Same reasoning as the db loop above: these six items' Wowhead
+            # prose also mis-parses into an unresolvable zone (a " - Heroic"
+            # suffix WOWHEAD_HEROIC_ZONE_RE does not match, or "Quest:" text
+            # with a parenthetical the parser mistakes for a zone). Force
+            # membership carries them; the raw parse would only add a source
+            # row the validation guard below has to reject.
+            if iid in TICKET_157_FORCE_INCLUDE:
+                continue
             machine_locus = iid in machine_locus_ids
             parsed = parse_wowhead_source(source_text_for_parsing(row))
             for src in parsed:
@@ -1551,6 +1593,24 @@ def assemble(
             curated_unsourced.add(iid)
         elif all(is_list_only_source(s) for s, _ in pairs):
             curated_list_only.add(iid)
+
+    # Ticket 157: force-admit the six named items regardless of whatever the
+    # zone/heroic gate below decides -- see TICKET_157_FORCE_INCLUDE's
+    # comment for why this bypasses that gate instead of widening it.
+    ticket_157_included: set[int] = set()
+    for iid in TICKET_157_FORCE_INCLUDE:
+        it = db_by_id.get(iid)
+        if it is None or not eligible_d7(it, profile):
+            continue
+        # `origin="curated"` (not a new value) -- pool.ts's ItemSourceOrigin
+        # union is a closed set consumers branch on, and this force-include is
+        # the same *shape* of claim as curated_unsourced above: a real,
+        # documented source the automated gate cannot parse, not a machine
+        # witness. See item-source-kinds.json's own note on why kinds and
+        # origins are shared, closed vocabularies.
+        add_source(iid, {"kind": "unknown"}, "curated")
+        curated_unsourced.add(iid)
+        ticket_157_included.add(iid)
 
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
@@ -1806,6 +1866,9 @@ def assemble(
         "junkFilter": junk,
         "wowheadListIds": len(wowhead_list_ids),
         "wowheadRecall": wowhead_recall,
+        "ticket157ForceIncluded": sorted(
+            ticket_157_included & universe_ids
+        ),
     }
 
     payload = {

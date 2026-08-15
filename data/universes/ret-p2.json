@@ -3021,6 +3021,22 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 22401,
+      "name": "Libram of Hope",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 23203,
       "name": "Libram of Fervor",
       "slot": "ranged",
@@ -3035,6 +3051,34 @@
         }
       ],
       "curationHint": 0.0
+    },
+    {
+      "itemId": 27484,
+      "name": "Libram of Avengement",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 0.0,
+      "curatedSets": [
+        "p1",
+        "p2",
+        "p3",
+        "preraid"
+      ],
+      "bisTags": [
+        "BiS"
+      ],
+      "bisSets": [
+        "p2"
+      ]
     },
     {
       "itemId": 28592,
@@ -3080,6 +3124,22 @@
           "zone": "Serpentshrine Cavern",
           "boss": "The Lurker Below",
           "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31033,
+      "name": "Libram of Righteous Power",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
         }
       ],
       "curationHint": 0.0
@@ -3472,6 +3532,41 @@
       ]
     },
     {
+      "itemId": 28288,
+      "name": "Abacus of Violent Odds",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 26.24,
+      "curatedSets": [
+        "preraid"
+      ]
+    },
+    {
+      "itemId": 28034,
+      "name": "Hourglass of the Unraveller",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 3,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 24.64
+    },
+    {
       "itemId": 28830,
       "name": "Dragonspine Trophy",
       "slot": "trinket",
@@ -3729,6 +3824,22 @@
           "zone": "Serpentshrine Cavern",
           "boss": "Hydross the Unstable",
           "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31856,
+      "name": "Darkmoon Card: Crusade",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
         }
       ],
       "curationHint": 0.0

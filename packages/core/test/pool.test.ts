@@ -448,7 +448,11 @@ describe("data/universes/ret-p2.json", () => {
     // own phase (pool-file.test.ts caught it -- cli.ts's loadUniversePool
     // trusts a universe file's own membership as already phase-scoped and
     // never re-applies filterPoolByPhase).
-    expect(entries.length).toBe(241);
+    // 241 -> 247: ticket 157 force-admits six SME-flagged D7-eligible items;
+    // three (27484, 22401, 31033) are phase 1, so they land in ret-p2 too.
+    // The other three (31856, 28034, 28288) are also phase 1 and eligible
+    // here — all six are ret-p2 members, matching ret-p3's +6.
+    expect(entries.length).toBe(247);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

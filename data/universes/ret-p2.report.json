@@ -15,8 +15,8 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1303,
-  "universeTotal": 241,
+  "excludedNoSource": 1302,
+  "universeTotal": 247,
   "listOnlyMembership": 15,
   "perSlot": {
     "back": 21,
@@ -27,25 +27,25 @@
     "head": 17,
     "legs": 14,
     "neck": 18,
-    "ranged": 3,
+    "ranged": 6,
     "shoulder": 16,
-    "trinket": 16,
+    "trinket": 19,
     "waist": 22,
     "weapon": 12,
     "wrist": 18
   },
   "sourceRecordAdds": {
-    "atlasloot": 255,
-    "curated": 2,
-    "db": 1733,
+    "atlasloot": 253,
+    "curated": 8,
+    "db": 1729,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 9
+    "wowhead": 8
   },
   "membershipByOrigin": {
-    "curated": 8,
+    "curated": 14,
     "itemHasOrigin:atlasloot": 43,
-    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:curated": 8,
     "itemHasOrigin:db": 207,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 7,
@@ -56,29 +56,29 @@
     "db": 207,
     "atlasloot-only": 15,
     "two-hop": 10,
-    "other": 2,
+    "other": 8,
     "wowhead-only": 7
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 241,
+    "total": 247,
     "casterOnlyReject": 74,
     "epFloorReject": 10,
     "combinedReject": 84,
-    "combinedKeep": 157,
-    "casterRejectPct": 30.7,
-    "combinedRejectPct": 34.9,
+    "combinedKeep": 163,
+    "casterRejectPct": 30.0,
+    "combinedRejectPct": 34.0,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 74,
-    "missed": 12,
-    "recallPct": 86.0,
+    "recalled": 80,
+    "missed": 6,
+    "recallPct": 93.0,
     "missedItems": [
       {
         "itemId": 19343,
@@ -87,32 +87,8 @@
         "d7Eligible": true
       },
       {
-        "itemId": 22401,
-        "name": "Libram of Hope",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 23206,
         "name": "Mark of the Champion",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 27484,
-        "name": "Libram of Avengement",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28034,
-        "name": "Hourglass of the Unraveller",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28288,
-        "name": "Abacus of Violent Odds",
         "slot": "trinket",
         "d7Eligible": true
       },
@@ -129,21 +105,9 @@
         "d7Eligible": false
       },
       {
-        "itemId": 31033,
-        "name": "Libram of Righteous Power",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 31544,
         "name": "Clefthoof Hide Leggings",
         "slot": "legs",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31856,
-        "name": "Darkmoon Card: Crusade",
-        "slot": "trinket",
         "d7Eligible": true
       },
       {
@@ -153,5 +117,13 @@
         "d7Eligible": true
       }
     ]
-  }
+  },
+  "ticket157ForceIncluded": [
+    22401,
+    27484,
+    28034,
+    28288,
+    31033,
+    31856
+  ]
 }

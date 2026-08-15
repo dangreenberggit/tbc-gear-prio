@@ -23,8 +23,8 @@
     1077
   ],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1295,
-  "universeTotal": 534,
+  "excludedNoSource": 1294,
+  "universeTotal": 540,
   "listOnlyMembership": 33,
   "perSlot": {
     "back": 36,
@@ -35,26 +35,26 @@
     "head": 38,
     "legs": 33,
     "neck": 41,
-    "ranged": 5,
+    "ranged": 8,
     "shoulder": 42,
-    "trinket": 43,
+    "trinket": 46,
     "waist": 43,
     "weapon": 24,
     "wrist": 38
   },
   "sourceRecordAdds": {
-    "atlasloot": 255,
-    "curated": 2,
-    "db": 1733,
+    "atlasloot": 253,
+    "curated": 8,
+    "db": 1729,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 18
+    "wowhead": 17
   },
   "membershipByOrigin": {
-    "curated": 6,
+    "curated": 12,
     "heroicMatch": 11,
     "itemHasOrigin:atlasloot": 92,
-    "itemHasOrigin:curated": 2,
+    "itemHasOrigin:curated": 8,
     "itemHasOrigin:db": 461,
     "itemHasOrigin:sunmote": 3,
     "itemHasOrigin:two-hop": 18,
@@ -66,7 +66,7 @@
   "exclusivePrimaryOrigin": {
     "db": 461,
     "atlasloot-only": 36,
-    "other": 5,
+    "other": 11,
     "two-hop": 18,
     "wowhead-only": 14
   },
@@ -74,22 +74,22 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 534,
+    "total": 540,
     "casterOnlyReject": 177,
     "epFloorReject": 18,
     "combinedReject": 195,
-    "combinedKeep": 339,
-    "casterRejectPct": 33.1,
-    "combinedRejectPct": 36.5,
+    "combinedKeep": 345,
+    "casterRejectPct": 32.8,
+    "combinedRejectPct": 36.1,
     "applied": false
   },
   "wowheadListIds": 160,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 160,
-    "recalled": 142,
-    "missed": 18,
-    "recallPct": 88.8,
+    "recalled": 148,
+    "missed": 12,
+    "recallPct": 92.5,
     "missedItems": [
       {
         "itemId": 18823,
@@ -107,12 +107,6 @@
         "itemId": 19406,
         "name": "Drake Fang Talisman",
         "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 22401,
-        "name": "Libram of Hope",
-        "slot": "ranged",
         "d7Eligible": true
       },
       {
@@ -134,27 +128,9 @@
         "d7Eligible": true
       },
       {
-        "itemId": 27484,
-        "name": "Libram of Avengement",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 27878,
         "name": "Auchenai Death Shroud",
         "slot": "back",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28034,
-        "name": "Hourglass of the Unraveller",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28288,
-        "name": "Abacus of Violent Odds",
-        "slot": "trinket",
         "d7Eligible": true
       },
       {
@@ -170,21 +146,9 @@
         "d7Eligible": false
       },
       {
-        "itemId": 31033,
-        "name": "Libram of Righteous Power",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 31544,
         "name": "Clefthoof Hide Leggings",
         "slot": "legs",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31856,
-        "name": "Darkmoon Card: Crusade",
-        "slot": "trinket",
         "d7Eligible": true
       },
       {
@@ -200,5 +164,13 @@
         "d7Eligible": true
       }
     ]
-  }
+  },
+  "ticket157ForceIncluded": [
+    22401,
+    27484,
+    28034,
+    28288,
+    31033,
+    31856
+  ]
 }

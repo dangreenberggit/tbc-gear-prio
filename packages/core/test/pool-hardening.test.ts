@@ -398,7 +398,14 @@ describe("data/universes/ret-p3.json hardening", () => {
     // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
     // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
     // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
-    expect(universeP3.length).toBe(394);
+    // 394 -> 400: ticket 157 force-admits six SME-flagged D7-eligible items
+    // (27484, 31033, 22401, 31856, 28034, 28288) whose real db/Wowhead
+    // sources all named a five-man zone outside phase_raids.json and
+    // PHASE_HEROIC_DUNGEONS — see TICKET_157_FORCE_INCLUDE in
+    // assemble_universe.py. Re-run: `python scripts/assemble_universe.py
+    // --spec ret --max-phase 3 --out <scratch> --report <scratch>` and
+    // `len(json.load(open('<scratch>'))['entries'])`.
+    expect(universeP3.length).toBe(400);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
