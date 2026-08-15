@@ -410,11 +410,21 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         pool,
       },
       (p) => {
-        if (p.stage === "simming") {
+        if ("stage" in p && p.stage === "simming") {
           console.log(`simming ${p.done}/${p.total}`);
         }
       }
     );
+    // The CLI never passes Deps.signal, so rankUpgrades cannot actually
+    // return a PartialRanking here — Stop is a UI-only control for now
+    // (candidate-pool.md §5.2, fork controls). Asserted rather than
+    // silently narrowed, so a future CLI `--stop` flag is forced to touch
+    // this line instead of inheriting an unchecked cast.
+    if (!ranking.complete) {
+      throw new Error(
+        "internal: rankUpgrades returned a partial ranking with no signal passed"
+      );
+    }
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer is built in Stage 2 rather than in the web shell.

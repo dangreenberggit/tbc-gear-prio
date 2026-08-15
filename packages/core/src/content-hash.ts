@@ -88,6 +88,13 @@ export type ContentHashInput = {
   seeds: readonly number[];
   simVersion: string;
   engineVersion: number;
+  /**
+   * Undefined means "no cap, sim every eligible candidate" — the same
+   * meaning as a cap equal to `candidates.length`, so the two must hash
+   * identically (plan §5.1.1) rather than treat "no cap" as a distinct
+   * value from "a cap wide enough to be a no-op".
+   */
+  candidateCap?: number;
 };
 
 export function contentHashOf(input: ContentHashInput): string {
@@ -100,6 +107,10 @@ export function contentHashOf(input: ContentHashInput): string {
  * that: a view toggle must never cost a re-sim.
  */
 function hashPayload(input: ContentHashInput): Record<string, unknown> {
+  // Normalized before candidates is even read below, so "no cap" and "a cap
+  // equal to the eligible count" collide unconditionally rather than by
+  // accident of key ordering.
+  const candidateCap = input.candidateCap ?? input.candidates.length;
   return {
     character: {
       region: input.character.region.toLowerCase(),
@@ -141,5 +152,6 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
     seeds: [...input.seeds],
     simVersion: input.simVersion,
     engineVersion: input.engineVersion,
+    candidateCap,
   };
 }

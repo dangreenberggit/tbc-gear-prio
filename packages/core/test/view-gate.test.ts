@@ -14,7 +14,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { PoolEntry } from "../src/pool.js";
-import { rankUpgrades } from "../src/rank.js";
+import { rankUpgrades, type Ranking } from "../src/rank.js";
 import {
   RecordedGearSource,
   type FightSummary,
@@ -208,9 +208,24 @@ function depsFor(sim: CountingSimRunner, gear = newGearSource()) {
   };
 }
 
+/**
+ * None of this file's `Deps` ever set `signal`, so `rankUpgrades` cannot
+ * actually return a `PartialRanking` here — asserted rather than cast, so a
+ * future edit that starts passing `signal` fails loudly here instead of
+ * silently narrowing away a real partial result.
+ */
+function assertComplete(
+  r: Ranking | { complete: false }
+): asserts r is Ranking {
+  if (!r.complete) {
+    throw new Error("expected a complete Ranking; got a PartialRanking");
+  }
+}
+
 async function rankOnce() {
   const sim = new CountingSimRunner();
   const ranking = await rankUpgrades(INPUT, depsFor(sim));
+  assertComplete(ranking);
   return { ranking, sim };
 }
 
@@ -277,6 +292,7 @@ describe("Stage 2 gate: ViewOptions never changes a number", () => {
 
     // The session: rank once, then answer fourteen view requests.
     const ranking = await rankUpgrades(INPUT, depsFor(sim, gear));
+    assertComplete(ranking);
     expect(sim.runs).toBeGreaterThan(0);
     expect(gear.entries).toBe(1);
 
