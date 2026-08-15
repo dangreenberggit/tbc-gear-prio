@@ -22,13 +22,39 @@ Two background agents, disjoint trees:
    settings diff is empty outside `player.equipment`, shelve (not
    redesign) on failure. Deliverables: fork commits, `e-w4-result.md`,
    lockfile bump, `slice-5/HANDOFF.md`.
-2. **`pre-merge-review` (Opus)** — on `feat/ret-p3-data` in its worktree
-   → `docs/reviews/feat-ret-p3-data.md` committed on that branch. Told
-   not to re-file tickets 154/157.
+2. ~~`pre-merge-review` on `feat/ret-p3-data`~~ **DONE** — see the new
+   section below.
 
 When they report: re-derive load-bearing claims (for slice 5, read the
 captured E-W4 diff artifact, not the verdict), run the green baseline,
 and **stop before any merge or push ask** — both require the user's word.
+
+## Slice 6 `pre-merge-review` — DONE: gate green, two user decisions open
+
+Review at `docs/reviews/feat-ret-p3-data.md` on the branch (commits
+`0998200` + `73e919a`; orchestrator confirmed both exist with the stated
+contents). `pnpm merge-to-dev --check-only` → `merge-ready: ok`. Tickets
+158–161 filed on the branch and mirrored to this branch as `fd87b8b`
+(`pnpm issues:open` sees them).
+
+**Two decisions the review explicitly leaves to the user — surface them
+in the next user-facing summary; do not resolve them yourself:**
+
+1. **A1 (high, disclosure):** p4/p5 universes were rescored with p3 EP
+   weights and no artifact records which weights produced which scores
+   (423 of 534 p5 scores changed, report files absent from the diff).
+   Filed as ticket 158 rather than fixed — the data regenerates
+   byte-exact as-is. Merge now and fix provenance later, or fix first?
+2. **SP1 (high, completion claim):** plan §9.6's done-when says the SME
+   review passes on a *ranking*; the filed verdict judged a candidate
+   universe + EP preset (no ranked list exists yet) and its quality gate
+   answered "not yet" (findings in ticket 157). The branch's code and
+   data are fine; the *claim* "slice 6 done per §9.6" is not available.
+
+Other findings: medium test-cover and provenance gaps (tickets 158–160),
+ticket 161 for the stale PLAN.md §16 item 3 + slice-6 handoff line. The
+review independently re-verified the vendored gear hash, tag membership
+(15/16, zero spurious), pin discipline, and byte-identical regeneration.
 
 ## 3+4 fix-up — DONE, orchestrator-verified
 
