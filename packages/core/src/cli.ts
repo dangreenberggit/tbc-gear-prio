@@ -9,6 +9,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { cutoffForSpec } from "./cutoff.js";
 import {
+  resolveEpWeightsPath,
+  type EpWeightsByPhaseFile,
+} from "./ep-weights.js";
+import {
   fightProvenanceLines,
   hitCapBanner,
   renderDisclosure,
@@ -281,10 +285,19 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   const skeleton = loadJson<RaidSimRequest>(
     `data/presets/${args.spec}/p2.raid-sim-skeleton.json`
   );
+  // Resolved by maxPhase (ticket 159), not hardcoded to p2 — the assembler
+  // scores universes with the same phase-resolved file via
+  // ep_weights_path_for(), and the two paths disagreeing was ticket 159's
+  // bug. Only `.weights` is read here, never `.pseudoWeights` — the ticket
+  // flags that as a pre-existing observation, not something to silently fix
+  // in this change.
+  const epWeightsPath = resolveEpWeightsPath(
+    loadJson<EpWeightsByPhaseFile>("data/presets/ep-weights-by-phase.json"),
+    args.spec,
+    args.maxPhase
+  );
   const epWeights = loadJson<{ weights: Record<string, number> }>(
-    args.spec === "feral"
-      ? "data/presets/feral/p1.ep-weights.json"
-      : "data/presets/ret/p2.ep-weights.json"
+    epWeightsPath
   ).weights;
   const pool = loadUniversePool(args.maxPhase, args.spec);
 

@@ -30,6 +30,14 @@ RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 COMMON_PROTO = ROOT / "data/proto/common.proto"
 UI_PROTO = ROOT / "data/proto/ui.proto"
+# Single source of truth for the spec -> phase -> EP-weights-file mapping,
+# shared with packages/core/src/ep-weights.ts (ticket 159 -- do not hand-copy
+# this map into either language again; see the file's own "_comment").
+EP_WEIGHTS_BY_PHASE = ROOT / "data/presets/ep-weights-by-phase.json"
+
+
+def load_json(path: Path) -> object:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -185,17 +193,35 @@ class SpecProfile:
         self.excluded_weapon_types = excluded_weapon_types
 
 
+def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
+    """Load `spec`'s (fallback, by_phase) pair from EP_WEIGHTS_BY_PHASE.
+
+    Reads the JSON that packages/core/src/ep-weights.ts also reads, so the
+    "which weights file for which phase" fact has exactly one source (ticket
+    159's fix for the hand-copied-map failure mode in ticket 102).
+    """
+    raw = load_json(EP_WEIGHTS_BY_PHASE)
+    assert isinstance(raw, dict)
+    entry = raw[spec]
+    fallback = ROOT / entry["fallback"]
+    by_phase = {int(k): ROOT / v for k, v in entry["byPhase"].items()}
+    return fallback, by_phase
+
+
+_RET_EP_FALLBACK, _RET_EP_BY_PHASE = _ep_weights_map("ret")
+_FERAL_EP_FALLBACK, _FERAL_EP_BY_PHASE = _ep_weights_map("feral")
+
+
 SPEC_PROFILES: dict[str, SpecProfile] = {
     "ret": SpecProfile(
         "ret",
         # `ep_weights` is the pre-p3 fallback (p1 has no separate weights
         # file; p2's are close enough and this default predates the phase map
         # below). ep_weights_by_phase adds p3's real transcribed weights
-        # without touching what p1/p2 universes resolve to.
-        ep_weights=ROOT / "data/presets/ret/p2.ep-weights.json",
-        ep_weights_by_phase={
-            3: ROOT / "data/presets/ret/p3.ep-weights.json",
-        },
+        # without touching what p1/p2 universes resolve to. Both come from
+        # data/presets/ep-weights-by-phase.json -- see _ep_weights_map.
+        ep_weights=_RET_EP_FALLBACK,
+        ep_weights_by_phase=_RET_EP_BY_PHASE,
         # Upstream tbc-new ships one curated set per phase for retribution --
         # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
         # Feral cat does have that split; see its own entry below.
@@ -224,7 +250,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     "feral": SpecProfile(
         "feral",
         # Stage 1, because upstream ships no P2 EP preset for feral cat.
-        ep_weights=ROOT / "data/presets/feral/p1.ep-weights.json",
+        # From data/presets/ep-weights-by-phase.json -- see _ep_weights_map.
+        ep_weights=_FERAL_EP_FALLBACK,
         # Upstream ships sixteen curated cat sets against ret's three, split
         # BiS/Alt/Realistic and again by 6-piece against 9-piece hit variant
         # (carry-forward 88 — the suffix is a hit percentage, not a piece
@@ -345,10 +372,6 @@ MELEE_STATS = frozenset({0, 1, 17, 20, 21, 22, 23, 24})
 # evict Glaive of the Pit and Despair at 114-120 weapon dps. Sockets are still
 # unscored, and Glaive has three. Re-measure before adding `weapon` back.
 SLOTS_WITH_EP_SIGNAL = frozenset({"feet", "waist", "hands", "wrist"})
-
-
-def load_json(path: Path) -> object:
-    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def ep_weights_path_for(profile: SpecProfile, max_phase: int) -> Path:
