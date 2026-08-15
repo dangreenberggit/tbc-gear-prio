@@ -50,9 +50,21 @@ When changing committed **generated** artifacts: regenerate from the committed s
 
 Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs.
 
+**An exit code is not evidence that work happened.** A stopped background task reports exit 0, and a command that ran in the wrong directory succeeds at nothing. Confirm the artifact — `ls node_modules`, read the file, check the row count — before reporting an install, build or regen as done.
+
 Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBuiltDependencies`. A permission denial is evidence about that call, not a capability model — if a fan-out or merge precondition cannot be established, stop and report the exact blocked command rather than silently dropping or rewriting the plan.
 
 **A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the model to the judgement, not the token count: a question that needs judgment (does this measurement support this conclusion?) still needs a review-lane model. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
+
+### CLI environment
+
+Two shells with different syntax — **Bash** (Git Bash, POSIX) and **PowerShell** — and each tool call picks one. They share no state.
+
+**Backgrounded Bash does not inherit `cd`.** A `cd X && cmd` that works in the foreground runs in the session cwd when backgrounded, so it succeeds while doing the work somewhere else entirely. Reach for the command's own directory flag: `npm --prefix`, `git -C`, `pnpm -C`.
+
+Windows-native binaries — `node`, `python` — read `C:/Users/...`, not Git Bash's `/c/Users/...`. Passing the Bash form yields paths like `C:\c\Users\...` and an ENOENT that looks like a missing file.
+
+Read a command's error text before forming a theory about it. Tool-manager errors in particular usually name their own fix, and pattern-matching past them costs more than reading them.
 
 ### Types from JSON
 
