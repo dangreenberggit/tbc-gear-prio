@@ -189,6 +189,104 @@ resolve creatively, and record which slice wrote outside its scope.
 4. Every actionable `Notes / concerns` bullet becomes a row in the review's
    `## Disposition` table.
 
+## Round 1 — CLOSED
+
+All three slices merged into `feat/candidate-pool`; worktrees torn down before
+verifying, per the skill's ordering.
+
+### The M2 verdict: **no-go**
+
+`max K*` = 25 against a threshold of 60, and Spearman rho is 0.97+ at every
+point — screening *ranks* candidates very well. But the cost half of the gate
+fails everywhere: ret's cheapest point (100 iterations) costs **0.609** of a
+5,000-iteration run against a **0.25** threshold.
+
+Orchestrator cross-checked this against B's own §3.1 fit rather than taking the
+table on trust. With `t_fixed` = 373.2 ms and `t_iter` = 0.0637 ms/iteration,
+the predicted ratios are 0.549 / 0.567 / 0.632 / 0.816 / 1.000, and the floor as
+iterations → 0 is **`t_fixed`/cost(5000) = 0.540**. So **no `screenIterations`
+value can ever pass this gate on this path** — the failure is structural, not a
+bad choice of sweep point. That strengthens the no-go rather than weakening it.
+
+Consequences, already written into §3.3 by B: M2 is not shipped, M3 goes to a
+fresh design pass, and M1's cap and concurrency are the levers that actually
+reduce wall-clock. **Scope limit worth preserving:** measured on the Node/CLI
+path only (one process spawn per request); the browser/WASM path has a
+different fixed-cost structure and was not measured.
+
+### Stop semantics — confirmed by the plan author, and it exposed a real bug
+
+The author confirmed §5.1.4 means "finish in-flight work, dispatch nothing
+new", and that a partial keeps `seMethod: 'independent'` and never carries a
+`setBonusNote`. Writing the boundary test the author asked for (abort after the
+last candidate, before replication, five seeds) turned it **red**: `complete`
+came back `true`.
+
+Cause: `aborted` was only set when the pool *skipped* a task. An abort raised
+while the final candidate was in flight skips nothing, so the flag stayed
+false, the run continued into replication, and it **issued new sims after Stop
+and returned `complete: true`**. Fixed by re-reading `signal.aborted` after the
+pool drains (`rank.ts`, commit `f63cb11`). All 75 rank tests pass.
+
+Slice C's original abort test aborted after the *baseline*, so it never reached
+the replication boundary — the gap was invisible until the author named the
+exact case.
+
+### Integrated verify
+
+Teardown preceded verify. `codegen`, `typecheck`, `lint`, `format` all pass and
+**795 tests pass** (43 files, 1 skipped, 2 todo).
+
+Two lint errors surfaced only on the integrated tip (slice B's harness used
+`setInterval`/`clearInterval`, which the `scripts/` eslint block did not
+declare). Fixed in `d5190e4`. This is exactly why per-worker green is not
+enough.
+
+**One pre-existing failure, not caused by this round:** `pnpm
+sim-implemented-effects:check` reports `data/sim-implemented-effects.json`
+stale on `forkCommit`. Investigated rather than assumed:
+
+- The recorded `forkCommit` is `3000b2f6b7`, which exists **only** on the fork
+  branch `w/a2-162-v1`.
+- The gate **also fails on `w/a2-162-v1`**, where the fork sat before this
+  session touched anything — checked by switching back and re-running.
+- `git diff --name-only 9ae92a3..HEAD` touches **none** of the files this gate
+  covers (`sim-implemented-effects`, universes, proto).
+
+So the artifact was generated from a fork branch and never refreshed; my
+tsconfig commit did not cause it. Fixing it means regenerating the effects
+artifact and re-assembling every committed universe — a `data-pipeline-work`
+job well outside this plan's scope. **It must be dispositioned before any merge
+ask**, since `pnpm verify` is the merge gate and it is currently red for this
+reason.
+
+## Round 2 readiness
+
+**Fork is clean and D's base is recorded.** Per §9.1a and the author's
+instruction:
+
+- `tsconfig.json`'s one-line `allowImportingTsExtensions` committed on
+  `feat/upgrades-tab` as `655b3c36f`. The commit body attributes the TS5097
+  rationale to the plan author and marks it **untested here** — the named test
+  file is not on that branch and no `.ts`-extension import exists on it, so the
+  mechanism could not be reproduced at that SHA.
+- `.ew1-scratch/` held `project-db.ts` (a self-described throwaway that launders
+  `db.json` through the fork's generated `SimDatabase` class), its bundled
+  `.cjs`, and a 2.5 MB `sim-database.json` derived from the tracked
+  `assets/database/db.json`. E-W1's result is already fully recorded at
+  `plan.md:473` (both gotchas included), so nothing there was unrecorded. The
+  `.ts` script was archived to the session scratchpad and the directory
+  deleted.
+- `git -C vendor/tbc-new-fork status --short` is **empty**.
+- **D's base SHA: `655b3c36fccadc740332e53da527ba3cfcaec68d`** on
+  `feat/upgrades-tab`. `w/a2-162-v1` still exists; do not spawn D from it.
+
+**Round 2 is now `D ∥ B′` only** — E is dropped by the no-go. B′ (M1.5 EP
+ordering recall) is *more* decision-relevant now: with no screening pass to
+fall back on, a candidate cap's safety rests entirely on ordering recall.
+C's ordering entry point for B′ is
+`orderCandidatesByEp(candidates, equipment, weights, statsLookup)`.
+
 ## Next spawn after Round 1
 
 Round 2 is `D ∥ E(code) ∥ B′` — but only after: the D/F fork-isolation question
