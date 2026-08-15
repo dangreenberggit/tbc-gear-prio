@@ -4,6 +4,10 @@
   "carryoverPolicy": "union",
   "generatedBy": "scripts/assemble_universe.py",
   "d7Note": "D7 eligibility implemented in assemble_universe.py.",
+  "epWeights": {
+    "path": "data/presets/feral/p1.ep-weights.json",
+    "pin": "8aa378b3"
+  },
   "entries": [
     {
       "itemId": 28672,

@@ -1300,12 +1300,21 @@ def assemble(
             "zone": str(best["zone"]),
             "boss": best.get("boss"),
         }
-    weights_raw = load_json(ep_weights_path_for(profile, max_phase))
+    # Stamped into the payload/report below (ticket 158): curationHint is
+    # derived from `w`/`pw`, and without recording which file resolved here
+    # a reweight (e.g. p4/p5 picking up p3's weights) is invisible to a
+    # reader diffing committed artifacts.
+    ep_weights_path = ep_weights_path_for(profile, max_phase)
+    weights_raw = load_json(ep_weights_path)
     assert isinstance(weights_raw, dict)
     w = weights_raw["weights"]
     assert isinstance(w, dict)
     pw = weights_raw.get("pseudoWeights") or {}
     assert isinstance(pw, dict)
+    ep_weights_provenance = {
+        "path": ep_weights_path.relative_to(ROOT).as_posix(),
+        "pin": weights_raw.get("pin"),
+    }
 
     zones_by_id = {
         int(z["id"]): str(z["name"])
@@ -1757,6 +1766,7 @@ def assemble(
     report = {
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
+        "epWeights": ep_weights_provenance,
         "phaseZones": sorted(phase_zones),
         "phaseRepFactions": sorted(phase_rep_factions),
         "d7EligibleTotal": eligible_count,
@@ -1781,6 +1791,7 @@ def assemble(
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
         "d7Note": "D7 eligibility implemented in assemble_universe.py.",
+        "epWeights": ep_weights_provenance,
         "entries": entries,
     }
     return payload, report

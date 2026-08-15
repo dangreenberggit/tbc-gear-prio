@@ -4,6 +4,10 @@
   "carryoverPolicy": "union",
   "generatedBy": "scripts/assemble_universe.py",
   "d7Note": "D7 eligibility implemented in assemble_universe.py.",
+  "epWeights": {
+    "path": "data/presets/ret/p3.ep-weights.json",
+    "pin": "ac0ed034b (master, 2026-08-13) -- not yet at this repo's 8aa378b3 pin; P3_EP_PRESET does not exist at 8aa378b3. Note the matching p3.gear.json is NOT in ac0ed034b; it landed 26 min later in 5c7491899 ('missed jsons'), so a curated-set pin bump must reach 5c7491899 or later."
+  },
   "entries": [
     {
       "itemId": 34241,

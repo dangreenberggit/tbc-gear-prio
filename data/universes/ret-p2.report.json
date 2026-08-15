@@ -1,6 +1,10 @@
 {
   "maxPhase": 2,
   "carryoverPolicy": "union",
+  "epWeights": {
+    "path": "data/presets/ret/p2.ep-weights.json",
+    "pin": "8aa378b3"
+  },
   "phaseZones": [
     "Gruul's Lair",
     "Karazhan",

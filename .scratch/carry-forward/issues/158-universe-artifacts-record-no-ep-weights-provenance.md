@@ -1,4 +1,6 @@
-Status: open
+Status: resolved (scripts/assemble_universe.py stamps `epWeights: {path, pin}`
+into both the universe payload and the report; all 6 committed universes
+regenerated and byte-compared -- see commit that closes this ticket)
 Type: bug
 Origin: docs/reviews/feat-ret-p3-data.md (adversarial + domain axes, independently)
 Blocks: none

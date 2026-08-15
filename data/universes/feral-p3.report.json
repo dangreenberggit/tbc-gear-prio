@@ -1,6 +1,10 @@
 {
   "maxPhase": 3,
   "carryoverPolicy": "union",
+  "epWeights": {
+    "path": "data/presets/feral/p1.ep-weights.json",
+    "pin": "8aa378b3"
+  },
   "phaseZones": [
     "Black Temple",
     "Gruul's Lair",
