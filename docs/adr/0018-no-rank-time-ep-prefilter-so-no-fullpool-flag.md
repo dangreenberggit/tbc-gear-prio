@@ -4,6 +4,7 @@
 **Date:** 2026-07-30
 **Amends:** PLAN.md §4 (`RankInput.fullPool`), §8.3.3, §4's cost model
 **Ticket:** `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md` item 1
+**See also:** [`docs/plans/wowsims-tab/candidate-pool.md`](../plans/wowsims-tab/candidate-pool.md) — bounds the in-browser run without adding the EP prefilter this ADR describes as deferred
 
 ## Context
 
