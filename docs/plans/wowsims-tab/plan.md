@@ -335,8 +335,12 @@ direct single-purpose call
 ([research-import-wcl.md](research/research-import-wcl.md) §2). No shipped
 importer exposes this today, but the mechanism is real, exercised code (the
 share-link importer uses the same category filter via its `?i=` parameter).
-Follow-up flagged by research: read `bulk_gear_json_importer.tsx` — its name
-suggests an existing gear-only application path worth copying.
+Follow-up resolved (2026-08-14): `bulk_gear_json_importer.tsx` feeds the
+Batch tab's item list (`bulkUI.addItems`) and never touches the player — not
+a gear-only application path. Its DB-validation idiom
+(`Database.loadLeftoversIfNecessary` + `lookupItemSpec`) is worth copying
+when building gear from WCL items ([method doc](experiments/e-w4-method.md)
+§"The application call under test").
 
 **Credentials:** local dev uses the personal WCL client id/secret via a
 gitignored local config; they never enter source or bundle. Browser-direct
@@ -378,7 +382,7 @@ per the original ask — not redesigned into a full importer.
 | E-W1 | Does WASM agree with native? | ~~unrun~~ **RUN AND PASSED, 2026-08-14.** WASM `2042.3926145882178` vs native `2042.3926145882197` → delta **1.8e-12 DPS**, 1.87e12× under the 3.4 cutoff, and *smaller than native's own 20-thread/4-thread spread of 6.8e-13*. Float-ordering noise, not disagreement. Reproduced independently by the orchestrator with a separately-written harness. **Two gotchas:** the WASM build has no `with_db` embedding (unlike the CLI), so a `SimDatabase` must be injected per player; and `wasmready` must exist as a global *before* `go.run`, or `sim/wasm/main.go:40` panics | ~~Slice 3 results shown to anyone~~ **cleared** |
 | E-W2 | Wall-clock per candidate in-browser | Time baseline + 20 candidates at 3,000 and 5,000 iterations on this machine, ≤4 workers | D7's default; candidate-count budget |
 | E-W3 | Did the port preserve behaviour? | **This-repo** test (see note below): ported engine + ported `RecordedSimRunner` reproduces the committed slamaltman fixture ranking (same deltas) from the same recorded observations | Slice 2 merge; re-run on every fork engine edit |
-| E-W4 | Does gear-only import disturb settings? | Apply a category-filtered import on a configured page; diff the full settings proto before/after (gear fields excepted) | §6 slice ships vs shelves |
+| E-W4 | Does gear-only import disturb settings? | [`experiments/e-w4-method.md`](experiments/e-w4-method.md): capture `IndividualSimSettings` before/after via the page's localStorage autosave, apply fixture gear through `player.setGear`, structural diff — PASS iff empty outside `player.equipment` (the sole gear field; derivation in the method doc) | §6 slice ships vs shelves |
 
 ### E-W3 runs here, not in the fork — decided 2026-08-14
 
@@ -441,8 +445,10 @@ a normal feature branch gated by `pnpm verify`.
    sim, and a gear change marks results stale.
 5. **WCL gear-only importer** (independent of 3–4 once 1 exists; E-W4
    decides ship-or-shelve).
-   *Done when:* E-W4's proto diff is empty outside gear fields, or the slice
-   is shelved with the diff recorded.
+   *Done when:* E-W4's proto diff is empty outside `player.equipment`
+   (method and pass rule: [`experiments/e-w4-method.md`](experiments/e-w4-method.md);
+   result recorded as `experiments/e-w4-result.md`), or the slice is shelved
+   with that recorded diff.
 6. **Data** (this repo): ret p3 `bisTags` refresh + p3 EP weights (+ the
    `PseudoStatMainHandDps` fix); `sme-rank-review` on the refreshed ranking.
    *Done when:* refreshed p3 tags carry a provenance note, EP files exist for
