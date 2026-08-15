@@ -285,6 +285,21 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     (s) => (bySlot.get(s) ?? []).length > 0
   );
 
+  const warnings = ranking.plausibilityWarnings ?? [];
+  // Ticket 164: the top-of-page panel (built below) retracts a slot's rows,
+  // but a reader who clicks straight to that slot via the sticky nav never
+  // scrolls past the panel and never sees the retraction. `dead-slot` is the
+  // only warning kind that names a `slot`, so it is the only kind that can be
+  // echoed locally; `implausible-set-bonus` warnings stay top-of-page only.
+  const deadSlotWarningsBySlot = new Map(
+    warnings
+      .filter(
+        (w): w is Extract<typeof w, { kind: "dead-slot" }> =>
+          w.kind === "dead-slot"
+      )
+      .map((w) => [w.slot, w])
+  );
+
   // Both counts ride on the nav link so the BiS filter can swap the badge
   // without recomputing anything client-side.
   const nav = slotsWithItems
@@ -294,7 +309,14 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       const bisN = list.filter(isCuratedBis).length;
       const badge = n > 0 ? `<span class="nav-hit">${n}</span>` : "";
       const bisCls = bisN > 0 ? "" : " no-bis";
-      return `<a href="#slot-${slot}" class="nav-slot${bisCls}" data-hits="${n}" data-bis-hits="${bisN}">${esc(slot)}${badge}</a>`;
+      // Ticket 164: an unmeasured slot is not "no BiS candidates found", it is
+      // "these rows cannot be trusted at all" — a reader deciding which chip
+      // to click needs that distinction before they land on the section, not
+      // after.
+      const unmeasuredCls = deadSlotWarningsBySlot.has(slot)
+        ? " unmeasured"
+        : "";
+      return `<a href="#slot-${slot}" class="nav-slot${bisCls}${unmeasuredCls}" data-hits="${n}" data-bis-hits="${bisN}">${esc(slot)}${badge}</a>`;
     })
     .join("\n");
 
@@ -302,6 +324,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     .map((slot) => {
       const list = bySlot.get(slot) ?? [];
       const hits = list.filter((i) => !i.belowCutoff).length;
+      const deadSlotWarning = deadSlotWarningsBySlot.get(slot);
       const rows = list
         .map((item) => {
           const reportItem = item as ReportItem;
@@ -309,7 +332,16 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           // than filtered here, because the filter is a client-side view and
           // the artifact must still hold every row (§10, hidden not deleted).
           const bisCls = isCuratedBis(item) ? " is-bis" : "";
-          const cls = (item.belowCutoff ? "row muted" : "row hit") + bisCls;
+          // Ticket 164: a row in an unmeasured slot was scored against an
+          // empty slot, not against the worn item, so `delta down` reading as
+          // an ordinary loss is the exact confusion the retraction exists to
+          // prevent. `unmeasured` overrides that styling without touching
+          // `belowCutoff`/`hit` — the cutoff math is unchanged, only the
+          // visual claim "this is a real loss" is withdrawn.
+          const cls =
+            (item.belowCutoff ? "row muted" : "row hit") +
+            bisCls +
+            (deadSlotWarning ? " unmeasured" : "");
           const softRank =
             !item.belowCutoff &&
             Math.abs(item.deltaDps) < ranking.baseline.stdev;
@@ -461,13 +493,24 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       // A slot with no BiS row is hidden wholesale under the filter, rather
       // than left as an empty heading.
       const bisCount = list.filter(isCuratedBis).length;
-      const sectionCls = bisCount > 0 ? "slot" : "slot no-bis";
+      const sectionCls =
+        (bisCount > 0 ? "slot" : "slot no-bis") +
+        (deadSlotWarning ? " unmeasured" : "");
+      // Ticket 164: the top-of-page plausibility panel retracts this slot,
+      // but a reader who lands here via the sticky nav has scrolled past
+      // that panel already. Echoing the same `message` locally (not a
+      // shortened rewrite) means the retraction travels with the rows it
+      // qualifies instead of depending on the reader's scroll position.
+      const localRetraction = deadSlotWarning
+        ? `<p class="slot-retraction">${esc(deadSlotWarning.message)}</p>`
+        : "";
       return `<section class="${sectionCls}" id="slot-${slot}">
   <header class="slot-head">
     <h2>${esc(slot)}</h2>
     <p class="slot-count-all">${list.length} candidates${hits ? ` · <strong>${hits} above cutoff</strong>` : ""}</p>
     <p class="slot-count-bis">${bisCount} BiS candidate${bisCount === 1 ? "" : "s"}</p>
   </header>
+  ${localRetraction}
   <div class="rows">${rows}</div>
 </section>`;
     })
@@ -536,7 +579,6 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // details drawer, because each one qualifies a figure the reader is about to
   // act on. Nothing is suppressed — the flagged bonus still renders in the Set
   // potential panel, and the dead slot still shows all its rows.
-  const warnings = ranking.plausibilityWarnings ?? [];
   const plausibilityPanel = warnings.length
     ? `<details class="panel plausibility" open>
   <summary>Plausibility warnings (${warnings.length})</summary>

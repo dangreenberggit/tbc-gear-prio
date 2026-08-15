@@ -1,4 +1,8 @@
-Status: open
+Status: resolved (packages/core/src/ep-weights.ts resolves by maxPhase from
+data/presets/ep-weights-by-phase.json, the same file
+scripts/assemble_universe.py now reads -- see commit that closes this ticket.
+The CLI still reads only `.weights`, never `.pseudoWeights`; that is left as
+recorded, not silently changed)
 Type: bug
 Origin: docs/reviews/feat-ret-p3-data.md (reviewer's own check, orchestrator lane)
 Blocks: none

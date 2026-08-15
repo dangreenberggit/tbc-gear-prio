@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: docs
 Origin: docs/reviews/feat-ret-p3-data.md (spec axis)
 Blocks: none
@@ -43,3 +43,20 @@ rather than here.
 
 PLAN.md §16 item 3 records that `2fdad02` fixed it (or the item is removed),
 and the slice-6 handoff line is corrected to point at the filed verdict.
+
+## Comments
+
+2026-08-14: Resolved at `c267b24` on `w/b3-sync-docs`. PLAN.md:975-977
+now records the `2fdad02` fix and its verify command; the slice-6 handoff
+line at `.scratch/handoffs/wowsims-tab/slice-6/HANDOFF.md:664-665` now
+points at the filed verdict (`859eab5`,
+`.scratch/handoffs/sme-rank-judgment-ret-p3-refresh.md`, trust-with-caveats).
+`docs/plans/wowsims-tab/plan.md:322`'s copy of the same stale claim was
+**not** touched — that file belongs to worker A3 this round, on a different
+branch; see this round's orchestrator notes. Re-run:
+
+```bash
+python -c "import json;print(json.load(open('data/presets/ret/p2.ep-weights.json'))['pseudoWeights'])"
+# {'0': 5.34}
+git log -1 --format=%H 859eab5
+```

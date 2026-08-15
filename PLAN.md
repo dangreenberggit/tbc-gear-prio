@@ -972,20 +972,16 @@ globals. Two consequences that are easy to get backwards:
    2–4, and it must be measured before it is set. This is the cheap near-term win
    and it is **not** a topology change — it does not block on plan 1.
 
-3. **`data/presets/ret/p2.ep-weights.json` is missing its largest term.**
-   Upstream's `P2_EP_PRESET` passes a *second* map to `Stats.fromMap` carrying
-   `PseudoStatMainHandDps: 5.34`; we transcribed only the nine `Stat` entries.
-   Verify with:
+3. **Fixed.** `data/presets/ret/p2.ep-weights.json` was missing its largest
+   term (`PseudoStatMainHandDps: 5.34`, upstream's `P2_EP_PRESET` second map to
+   `Stats.fromMap`). `2fdad02` ("Score weapon damage, the term ret cares about
+   most", 2026-08-02) restored it as a `pseudoWeights` sibling and regenerated
+   ret-p2/p3. Verify with:
 
    ```bash
-   gh api "repos/wowsims/tbc-new/contents/ui/paladin/retribution/presets.ts?ref=8aa378b3671a0923fd11fb34b4b3753e53f20c9b" --jq '.content' | base64 -d | sed -n '62,80p'
+   python -c "import json;print(json.load(open('data/presets/ret/p2.ep-weights.json'))['pseudoWeights'])"
+   # {'0': 5.34}
    ```
-
-   Blast radius is bounded and should not be overstated: EP does **not** enter the
-   headline deltas (those are simmed at `rank.ts:210`/`:258` and differenced at
-   `:272`). It enters gem fill, meta-repair cost, and `curationHint` pool
-   membership for four slots — so bad EP yields under-gemmed candidates that then
-   sim honestly-but-low, plus a biased baseline. Serious, not fabricated numbers.
 
 **Cross-cutting caveat.** Sim output is **not** bit-reproducible across core
 counts: shard seeds derive from a split on `runtime.NumCPU()`. Measured spread at

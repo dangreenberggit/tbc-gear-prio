@@ -1,6 +1,10 @@
 {
   "maxPhase": 2,
   "carryoverPolicy": "union",
+  "epWeights": {
+    "path": "data/presets/ret/p2.ep-weights.json",
+    "pin": "8aa378b3"
+  },
   "phaseZones": [
     "Gruul's Lair",
     "Karazhan",
@@ -11,48 +15,48 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3140,
-  "excludedNoSource": 1303,
+  "excludedNoSource": 1302,
   "universeTotal": 240,
   "listOnlyMembership": 15,
   "perSlot": {
-    "back": 20,
+    "back": 21,
     "chest": 17,
     "feet": 24,
     "finger": 25,
     "hands": 18,
     "head": 17,
     "legs": 14,
-    "neck": 18,
-    "ranged": 3,
+    "neck": 17,
+    "ranged": 4,
     "shoulder": 16,
     "trinket": 16,
     "waist": 22,
-    "weapon": 12,
+    "weapon": 11,
     "wrist": 18
   },
   "sourceRecordAdds": {
-    "atlasloot": 255,
-    "curated": 2,
-    "db": 1733,
+    "atlasloot": 253,
+    "curated": 8,
+    "db": 1729,
     "sunmote": 3,
     "two-hop": 18,
-    "wowhead": 9
+    "wowhead": 8
   },
   "membershipByOrigin": {
-    "curated": 7,
-    "itemHasOrigin:atlasloot": 43,
-    "itemHasOrigin:curated": 2,
-    "itemHasOrigin:db": 206,
+    "curated": 14,
+    "itemHasOrigin:atlasloot": 41,
+    "itemHasOrigin:curated": 8,
+    "itemHasOrigin:db": 200,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 7,
     "listOnly": 15,
-    "zoneMatch": 218
+    "zoneMatch": 211
   },
   "exclusivePrimaryOrigin": {
-    "db": 206,
+    "db": 200,
     "atlasloot-only": 15,
     "two-hop": 10,
-    "other": 2,
+    "other": 8,
     "wowhead-only": 7
   },
   "tierPiecesExpected": 10,
@@ -60,21 +64,21 @@
   "tierPiecesMissing": [],
   "junkFilter": {
     "total": 240,
-    "casterOnlyReject": 74,
+    "casterOnlyReject": 73,
     "epFloorReject": 10,
-    "combinedReject": 84,
-    "combinedKeep": 156,
-    "casterRejectPct": 30.8,
-    "combinedRejectPct": 35.0,
+    "combinedReject": 83,
+    "combinedKeep": 157,
+    "casterRejectPct": 30.4,
+    "combinedRejectPct": 34.6,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 74,
-    "missed": 12,
-    "recallPct": 86.0,
+    "recalled": 79,
+    "missed": 7,
+    "recallPct": 91.9,
     "missedItems": [
       {
         "itemId": 19343,
@@ -83,32 +87,8 @@
         "d7Eligible": true
       },
       {
-        "itemId": 22401,
-        "name": "Libram of Hope",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 23206,
         "name": "Mark of the Champion",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 27484,
-        "name": "Libram of Avengement",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28034,
-        "name": "Hourglass of the Unraveller",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 28288,
-        "name": "Abacus of Violent Odds",
         "slot": "trinket",
         "d7Eligible": true
       },
@@ -119,27 +99,21 @@
         "d7Eligible": true
       },
       {
+        "itemId": 28774,
+        "name": "Glaive of the Pit",
+        "slot": "weapon",
+        "d7Eligible": true
+      },
+      {
         "itemId": 30341,
         "name": "Flesh Handler's Gauntlets",
         "slot": "hands",
         "d7Eligible": false
       },
       {
-        "itemId": 31033,
-        "name": "Libram of Righteous Power",
-        "slot": "ranged",
-        "d7Eligible": true
-      },
-      {
         "itemId": 31544,
         "name": "Clefthoof Hide Leggings",
         "slot": "legs",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 31856,
-        "name": "Darkmoon Card: Crusade",
-        "slot": "trinket",
         "d7Eligible": true
       },
       {
@@ -149,5 +123,383 @@
         "d7Eligible": true
       }
     ]
-  }
+  },
+  "ticket157ForceIncluded": [
+    22401,
+    27484,
+    28034,
+    28288,
+    31033,
+    31856
+  ],
+  "excludedUnimplementedEffect": [
+    {
+      "itemId": 11810,
+      "name": "Force of Will"
+    },
+    {
+      "itemId": 12588,
+      "name": "Bonespike Shoulder"
+    },
+    {
+      "itemId": 12639,
+      "name": "Stronghold Gauntlets"
+    },
+    {
+      "itemId": 12641,
+      "name": "Invulnerable Mail"
+    },
+    {
+      "itemId": 13143,
+      "name": "Mark of the Dragon Lord"
+    },
+    {
+      "itemId": 13212,
+      "name": "Halycon's Spiked Collar"
+    },
+    {
+      "itemId": 13213,
+      "name": "Smolderweb's Eye"
+    },
+    {
+      "itemId": 13387,
+      "name": "Foresight Girdle"
+    },
+    {
+      "itemId": 13503,
+      "name": "Alchemist's Stone"
+    },
+    {
+      "itemId": 13505,
+      "name": "Runeblade of Baron Rivendare"
+    },
+    {
+      "itemId": 13515,
+      "name": "Ramstein's Lightning Bolts"
+    },
+    {
+      "itemId": 15138,
+      "name": "Onyxia Scale Cloak"
+    },
+    {
+      "itemId": 17082,
+      "name": "Shard of the Flame"
+    },
+    {
+      "itemId": 17104,
+      "name": "Spinal Reaper"
+    },
+    {
+      "itemId": 18382,
+      "name": "Fluctuating Cloak"
+    },
+    {
+      "itemId": 18639,
+      "name": "Ultra-Flash Shadow Reflector"
+    },
+    {
+      "itemId": 18722,
+      "name": "Death Grips"
+    },
+    {
+      "itemId": 18760,
+      "name": "Necromantic Band"
+    },
+    {
+      "itemId": 18815,
+      "name": "Essence of the Pure Flame"
+    },
+    {
+      "itemId": 19874,
+      "name": "Halberd of Smiting"
+    },
+    {
+      "itemId": 19930,
+      "name": "Mar'li's Eye"
+    },
+    {
+      "itemId": 19946,
+      "name": "Tigule's Harpoon"
+    },
+    {
+      "itemId": 19962,
+      "name": "Gri'lek's Carver"
+    },
+    {
+      "itemId": 19963,
+      "name": "Pitchfork of Madness"
+    },
+    {
+      "itemId": 21488,
+      "name": "Fetish of Chitinous Spikes"
+    },
+    {
+      "itemId": 21625,
+      "name": "Scarab Brooch"
+    },
+    {
+      "itemId": 21647,
+      "name": "Fetish of the Sand Reaver"
+    },
+    {
+      "itemId": 21685,
+      "name": "Petrified Scarab"
+    },
+    {
+      "itemId": 21687,
+      "name": "Ukko's Ring of Darkness"
+    },
+    {
+      "itemId": 21891,
+      "name": "Shard of the Fallen Star"
+    },
+    {
+      "itemId": 22191,
+      "name": "Obsidian Mail Tunic"
+    },
+    {
+      "itemId": 22194,
+      "name": "Black Grasp of the Destroyer"
+    },
+    {
+      "itemId": 22196,
+      "name": "Thick Obsidian Breastplate"
+    },
+    {
+      "itemId": 22321,
+      "name": "Heart of Wyrmthalak"
+    },
+    {
+      "itemId": 22402,
+      "name": "Libram of Grace"
+    },
+    {
+      "itemId": 22691,
+      "name": "Corrupted Ashbringer"
+    },
+    {
+      "itemId": 23001,
+      "name": "Eye of Diminution"
+    },
+    {
+      "itemId": 23006,
+      "name": "Libram of Light"
+    },
+    {
+      "itemId": 23027,
+      "name": "Warmth of Forgiveness"
+    },
+    {
+      "itemId": 23201,
+      "name": "Libram of Divinity"
+    },
+    {
+      "itemId": 23533,
+      "name": "Steelgrip Gauntlets"
+    },
+    {
+      "itemId": 23558,
+      "name": "The Burrower's Shell"
+    },
+    {
+      "itemId": 23564,
+      "name": "Twisting Nether Chain Shirt"
+    },
+    {
+      "itemId": 23565,
+      "name": "Embrace of the Twisting Nether"
+    },
+    {
+      "itemId": 23824,
+      "name": "Rocket Boots Xtreme"
+    },
+    {
+      "itemId": 23835,
+      "name": "Gnomish Poultryizer"
+    },
+    {
+      "itemId": 23836,
+      "name": "Goblin Rocket Launcher"
+    },
+    {
+      "itemId": 24106,
+      "name": "Thick Felsteel Necklace"
+    },
+    {
+      "itemId": 24110,
+      "name": "Living Ruby Pendant"
+    },
+    {
+      "itemId": 24117,
+      "name": "Embrace of the Dawn"
+    },
+    {
+      "itemId": 24127,
+      "name": "Figurine - Talasite Owl"
+    },
+    {
+      "itemId": 24376,
+      "name": "Runed Fungalcap"
+    },
+    {
+      "itemId": 24386,
+      "name": "Libram of Saints Departed"
+    },
+    {
+      "itemId": 24390,
+      "name": "Auslese's Light Channeler"
+    },
+    {
+      "itemId": 25827,
+      "name": "Muck-Covered Drape"
+    },
+    {
+      "itemId": 26055,
+      "name": "Oculus of the Hidden Eye"
+    },
+    {
+      "itemId": 27416,
+      "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27896,
+      "name": "Alembic of Infernal Power"
+    },
+    {
+      "itemId": 27900,
+      "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28296,
+      "name": "Libram of the Lightbringer"
+    },
+    {
+      "itemId": 28590,
+      "name": "Ribbon of Sacrifice"
+    },
+    {
+      "itemId": 28592,
+      "name": "Libram of Souls Redeemed"
+    },
+    {
+      "itemId": 28774,
+      "name": "Glaive of the Pit"
+    },
+    {
+      "itemId": 28823,
+      "name": "Eye of Gruul"
+    },
+    {
+      "itemId": 29181,
+      "name": "Timelapse Shard"
+    },
+    {
+      "itemId": 29297,
+      "name": "Band of the Eternal Defender"
+    },
+    {
+      "itemId": 29347,
+      "name": "Talisman of the Breaker"
+    },
+    {
+      "itemId": 29357,
+      "name": "Master Thief's Gloves"
+    },
+    {
+      "itemId": 29512,
+      "name": "Earthen Netherscale Boots"
+    },
+    {
+      "itemId": 30008,
+      "name": "Pendant of the Lost Ages"
+    },
+    {
+      "itemId": 30063,
+      "name": "Libram of Absolute Truth"
+    },
+    {
+      "itemId": 30619,
+      "name": "Fel Reaver's Piston"
+    },
+    {
+      "itemId": 30841,
+      "name": "Lower City Prayerbook"
+    },
+    {
+      "itemId": 32368,
+      "name": "Tome of the Lightbringer"
+    },
+    {
+      "itemId": 32489,
+      "name": "Ashtongue Talisman of Zeal"
+    },
+    {
+      "itemId": 32538,
+      "name": "Skywitch's Drape"
+    },
+    {
+      "itemId": 32539,
+      "name": "Skyguard's Drape"
+    },
+    {
+      "itemId": 34430,
+      "name": "Glimmering Naaru Sliver"
+    },
+    {
+      "itemId": 34470,
+      "name": "Timbal's Focusing Crystal"
+    },
+    {
+      "itemId": 34471,
+      "name": "Vial of the Sunwell"
+    },
+    {
+      "itemId": 34677,
+      "name": "Shattered Sun Pendant of Restoration"
+    },
+    {
+      "itemId": 34678,
+      "name": "Shattered Sun Pendant of Acumen"
+    },
+    {
+      "itemId": 34679,
+      "name": "Shattered Sun Pendant of Might"
+    },
+    {
+      "itemId": 34680,
+      "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 35403,
+      "name": "Crusader's Ornamented Gloves"
+    },
+    {
+      "itemId": 35413,
+      "name": "Crusader's Scaled Gauntlets"
+    },
+    {
+      "itemId": 35477,
+      "name": "Crusader's Scaled Gauntlets"
+    },
+    {
+      "itemId": 35703,
+      "name": "Figurine - Seaspray Albatross"
+    },
+    {
+      "itemId": 35748,
+      "name": "Guardian's Alchemist Stone"
+    },
+    {
+      "itemId": 35749,
+      "name": "Sorcerer's Alchemist Stone"
+    },
+    {
+      "itemId": 35750,
+      "name": "Redeemer's Alchemist Stone"
+    },
+    {
+      "itemId": 35751,
+      "name": "Assassin's Alchemist Stone"
+    }
+  ]
 }

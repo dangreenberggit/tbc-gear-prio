@@ -92,6 +92,7 @@ function wowsimsCuratedItemIds(): Set<number> {
     "ret_preraid.gear.json",
     "ret_p1.gear.json",
     "ret_p2.gear.json",
+    "ret_p3.gear.json",
   ]) {
     const gear = JSON.parse(
       readFileSync(join(root, "vendor/wowsims", file), "utf8")
@@ -103,18 +104,20 @@ function wowsimsCuratedItemIds(): Set<number> {
   return ids;
 }
 
-/** Measured present in ret-p3 at sub-phase 6 base (24/36 wowsims curated IDs). */
+/**
+ * Measured present in ret-p3 (40/44 wowsims curated IDs, re-measured after
+ * ret_p3.gear.json was vendored -- slice 6b, 5c7491899). The p3 set's own
+ * items resolve real sources the earlier p2-only union couldn't provide.
+ */
 const WOWSIMS_ADMITTED_IN_P3 = [
-  23537, 24259, 28430, 28608, 28745, 28757, 28779, 28795, 28830, 29071, 29073,
-  29075, 29383, 29947, 30022, 30055, 30061, 30098, 30104, 30106, 30129, 30644,
-  32087, 32461,
+  23522, 23537, 24259, 28176, 28429, 28430, 28608, 28745, 28757, 28779, 28795,
+  28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022, 30055, 30061,
+  30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905, 32087, 32235,
+  32332, 32366, 32461, 32526, 32574, 33122, 33173,
 ] as const;
 
 /** Still excluded at p3 — no resolvable source and/or below rare (see hardening handoff). */
-const WOWSIMS_NOT_YET_ADMITTED = [
-  23522, 27484, 27985, 28176, 28288, 28429, 29119, 29177, 30257, 30341, 30834,
-  33173,
-] as const;
+const WOWSIMS_NOT_YET_ADMITTED = [27484, 27985, 28288, 30341] as const;
 
 /**
  * Must stay OUT, each for a different enforced rule. The count assertion
@@ -221,7 +224,12 @@ describe("S6: bisTags do not affect pool membership", () => {
 
 describe("curated BiS tags name their source (carry-forward 47)", () => {
   const specSets: Record<string, string[]> = {
-    ret: ["ret_preraid.gear.json", "ret_p1.gear.json", "ret_p2.gear.json"],
+    ret: [
+      "ret_preraid.gear.json",
+      "ret_p1.gear.json",
+      "ret_p2.gear.json",
+      "ret_p3.gear.json",
+    ],
     feral: [
       "feral_preraid.gear.json",
       "feral_p2_6p.gear.json",
@@ -285,9 +293,11 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
     expect(justicarCrown?.curatedSets).toEqual(["p1"]);
     expect(justicarCrown?.bisTags).toBeUndefined();
 
+    // ret_p3.gear.json (slice 6b, 5c7491899) is the newest set vendored, so
+    // p5's degrade fallback names p3 now, not p2.
     for (const entry of p5) {
       if ((entry.bisTags ?? []).includes("BiS")) {
-        expect(entry.bisSets).toEqual(["p2"]);
+        expect(entry.bisSets).toEqual(["p3"]);
       }
     }
   });
@@ -315,17 +325,18 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
 
   it("keeps the ret and feral verdicts on the shared ring distinguishable", () => {
     // Shapeshifter's Signet is the item that opened the ticket. Upstream
-    // really does equip it in all three ret sets — it was never a cross-spec
-    // leak — so it keeps the tag, but now says which phase vouches for it.
-    // Feral curates it pre-raid only, so at p3 it carries no BiS claim there.
+    // really does equip it in all four ret sets (preraid/p1/p2/p3) — it was
+    // never a cross-spec leak — so it keeps the tag, but now says which phase
+    // vouches for it. Feral curates it pre-raid only, so at p3 it carries no
+    // BiS claim there.
     const ret = loadUniverse("data/universes/ret-p3.json").raw.entries.find(
       (e) => e.itemId === 30834
     );
     const feral = loadUniverse("data/universes/feral-p3.json").raw.entries.find(
       (e) => e.itemId === 30834
     );
-    expect(ret?.curatedSets).toEqual(["p1", "p2", "preraid"]);
-    expect(ret?.bisSets).toEqual(["p2"]);
+    expect(ret?.curatedSets).toEqual(["p1", "p2", "p3", "preraid"]);
+    expect(ret?.bisSets).toEqual(["p3"]);
     expect(feral?.curatedSets).toEqual(["preraid"]);
     expect(feral?.bisTags).toBeUndefined();
   });
@@ -387,7 +398,23 @@ describe("data/universes/ret-p3.json hardening", () => {
     // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
     // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
     // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
-    expect(universeP3.length).toBe(394);
+    // 394 -> 400: ticket 157 force-admits six SME-flagged D7-eligible items
+    // (27484, 31033, 22401, 31856, 28034, 28288) whose real db/Wowhead
+    // sources all named a five-man zone outside phase_raids.json and
+    // PHASE_HEROIC_DUNGEONS — see TICKET_157_FORCE_INCLUDE in
+    // assemble_universe.py.
+    // 400 -> 390: ticket 171 (user ruling, exclusion by design) drops every
+    // item whose only sim effect is a commented `TODO: Manual implementation
+    // required` stub in the pinned fork's Go source — see
+    // data/sim-implemented-effects.json and stub_only_effect_ids() in
+    // assemble_universe.py. Ten p3 items are stub-only, including 28592/
+    // 30063/32368 (the three librams the ticket's own diagnosis named) and
+    // 28774 Glaive of the Pit / 32489 Ashtongue Talisman of Zeal (both
+    // asserted below by other tests, updated alongside this count).
+    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
+    // --out <scratch> --report <scratch>` and
+    // `len(json.load(open('<scratch>'))['entries'])`.
+    expect(universeP3.length).toBe(390);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -478,26 +505,39 @@ describe("data/universes/ret-p3.json hardening", () => {
     const byId = new Map(raw.entries.map((e) => [e.itemId, e]));
 
     // Ashtongue Deathsworn is Black Temple's faction, so its Exalted trinket
-    // is a phase-3 item. 32489 is the paladin one (classAllowlist [2]); the
-    // other eight talismans are other classes' and must not be admitted.
-    const zeal = byId.get(32489);
-    expect(zeal?.sources[0]).toMatchObject({
-      kind: "rep",
-      factionId: 1012,
-      standing: "Exalted",
-    });
+    // is structurally a phase-3 item, and 32489 is the paladin one
+    // (classAllowlist [2]) — the other eight talismans are other classes'
+    // and must not be admitted either way. But 32489's on-use proc is a
+    // stub-only sim effect (data/sim-implemented-effects.json), so ticket
+    // 171 (user ruling, exclusion by design) drops it from the shipped
+    // universe entirely, regardless of the rep→phase route having admitted
+    // it. Both facts are real and this asserts both: the route worked (it
+    // is not held out by phase or class), and the stub-only rule then
+    // removed it, so it is absent from `raw.entries` — never present with a
+    // caveat, per ticket 171.
+    expect(byId.has(32489), "32489 excluded as stub-only, not admitted").toBe(
+      false
+    );
 
     const talismans = [
       32485, 32486, 32487, 32488, 32489, 32490, 32491, 32492, 32493,
     ].filter((id) => byId.has(id));
-    expect(talismans).toEqual([32489]);
+    expect(talismans).toEqual([]);
 
     // Scale of the Sands (990) is Hyjal's faction. Its 16-ring ladder has
     // `sources: null` in db.json, so AtlasLoot's Factions module is the only
-    // witness — the whole point of parsing it (ticket 65 step 3).
+    // witness — the whole point of parsing it (ticket 65 step 3). 15 of the
+    // 16 rings are asserted here; the 16th, 29297 Band of the Eternal
+    // Defender, admits through the same rep→phase route but is then dropped
+    // by ticket 171 (user ruling, exclusion by design) as a stub-only sim
+    // effect — never present with a caveat.
+    expect(
+      byId.has(29297),
+      "29297 Band of the Eternal Defender excluded as stub-only"
+    ).toBe(false);
     const bands: number[] = [];
     for (let id = 29294; id <= 29309; id += 1) if (byId.has(id)) bands.push(id);
-    expect(bands.length).toBe(16);
+    expect(bands.length).toBe(15);
     for (const id of bands) {
       expect(byId.get(id)?.sources[0], `${id}`).toMatchObject({
         kind: "rep",
@@ -631,45 +671,52 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it.skipIf(!hasWowsimsVendor)(
-    "loads wowsims curated gear sets from vendor (36 IDs)",
+    "loads wowsims curated gear sets from vendor (44 IDs)",
     () => {
       const wowsimsIds = wowsimsCuratedItemIds();
-      expect(wowsimsIds.size).toBe(36);
+      expect(wowsimsIds.size).toBe(44);
       for (const id of WOWSIMS_ADMITTED_IN_P3) {
         expect(wowsimsIds.has(id), `fixture id ${id}`).toBe(true);
       }
     }
   );
 
-  // Ticket 17's triage measured all 12 as phase 1, appearing on the Wowhead
-  // *pre-raid* list — BiS before you raid, which is why a P2+ universe
-  // omitting them is defensible. Deliberately not "they are dungeon/crafted
-  // so they are out of scope": content type is not the test, power at the
-  // tier is (see the ticket's 2026-08-02 correction).
+  // Ticket 17's triage measured the original 12 as phase 1, appearing on the
+  // Wowhead *pre-raid* list — BiS before you raid, which is why a P2+
+  // universe omitting them is defensible. Deliberately not "they are
+  // dungeon/crafted so they are out of scope": content type is not the test,
+  // power at the tier is (see the ticket's 2026-08-02 correction). Down to 4
+  // after ret_p3.gear.json was vendored (slice 6b) resolved sources for the
+  // other 8 -- the remaining 4 are still phase-1 heroic-dungeon drops or have
+  // no source db.json can resolve at all.
   it.todo(
-    "admits all 36 wowsims curated ret gear-set items — deferred: " +
+    "admits all 44 wowsims curated ret gear-set items — deferred: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
-      " are phase 1 pre-raid items (ticket 17 triage)"
+      " are phase 1 items with no resolvable phase-2+ source (ticket 17 triage)"
   );
 
   it("tags wowsims curated ret gear-set members with bisTags (ticket 12)", () => {
-    // 30098 Razor-Scale Battlecloak: verified present in vendor/wowsims/ret_p2.gear.json
-    // and carrying bisTags in the regenerated data/universes/ret-p3.json.
-    const razorScale = raw.entries.find((e) => e.itemId === 30098);
-    expect(razorScale?.bisTags).toEqual(["BiS"]);
+    // 32235 Cursed Vision of Sargeras: verified present in
+    // vendor/wowsims/ret_p3.gear.json and carrying bisTags in the
+    // regenerated data/universes/ret-p3.json (slice 6b). Not the ticket's
+    // original example (30098 Razor-Scale Battlecloak): that item is only in
+    // ret_p2.gear.json, so it correctly lost the badge once a genuine p3 set
+    // existed to be the current curated phase instead of p2's degrade.
+    const cursedVision = raw.entries.find((e) => e.itemId === 32235);
+    expect(cursedVision?.bisTags).toEqual(["BiS"]);
 
     // Every curated member is still *admitted* — ticket 12's widening is about
     // membership and is unchanged, which `curatedSets` records. The `BiS`
     // claim itself is now phase-scoped (carry-forward 47): at p3 the current
-    // curated phase is p2, so a member curated only for pre-raid or p1 keeps
-    // its provenance and drops the badge.
+    // curated phase is p3 itself, so a member curated only for pre-raid, p1
+    // or p2 keeps its provenance and drops the badge.
     for (const id of WOWSIMS_ADMITTED_IN_P3) {
       const entry = raw.entries.find((e) => e.itemId === id);
       expect(
         entry?.curatedSets?.length ?? 0,
         `${id} should be recorded as curated`
       ).toBeGreaterThan(0);
-      const expected = entry?.curatedSets?.includes("p2") ? ["BiS"] : undefined;
+      const expected = entry?.curatedSets?.includes("p3") ? ["BiS"] : undefined;
       expect(entry?.bisTags, `${id} BiS tag should follow its phase`).toEqual(
         expected
       );
@@ -731,7 +778,10 @@ describe("data/universes/ret-p3.json hardening", () => {
   //
   // Note the ticket predicted the last four were "Shattered Sun
   // badge/craft/rep rewards". Three are actually Sunwell Plateau raid drops
-  // upgraded via a Sunmote at vendor Yrma; only 34679 is a rep reward.
+  // upgraded via a Sunmote at vendor Yrma; only 34679 is a rep reward. 34679
+  // itself is asserted separately below (ticket 171 excludes it as
+  // stub-only, so it cannot appear here even though its rep→phase route
+  // works exactly like the others').
   const P5_ADMITTED_BY = [
     {
       id: 34472,
@@ -757,17 +807,21 @@ describe("data/universes/ret-p3.json hardening", () => {
       kind: "token",
       why: "Sunmote upgrade of 34211, an M'uru drop",
     },
-    {
-      id: 34679,
-      name: "Shattered Sun Pendant of Might",
-      kind: "rep",
-      why: "Exalted with the Shattered Sun Offensive; the Wowhead parser had no rep branch at all",
-    },
   ] as const;
 
   it("admits the phase-5 BiS items that drop outside a raid zone", () => {
     const { pool: universeP5 } = loadUniverse("data/universes/ret-p5.json");
     const byItemId = new Map(universeP5.map((e) => [e.itemId, e] as const));
+
+    // 34679 Shattered Sun Pendant of Might: same rep→phase admission route as
+    // the four items above (Exalted with the Shattered Sun Offensive), but
+    // its on-use proc is a stub-only sim effect, so ticket 171 (user ruling,
+    // exclusion by design) drops it regardless — never present with a
+    // caveat.
+    expect(
+      byItemId.has(34679),
+      "34679 Shattered Sun Pendant of Might excluded as stub-only"
+    ).toBe(false);
 
     for (const { id, name, kind, why } of P5_ADMITTED_BY) {
       const entry = byItemId.get(id);
@@ -871,9 +925,17 @@ describe("data/universes/ret-p3.json hardening", () => {
 
   it("admits two-hand polearms but never staves", () => {
     // Paladins can wield polearms; staves they cannot. The D7 rule once
-    // rejected both in one condition, which hid Glaive of the Pit (a
-    // Magtheridon drop) from the universe.
-    expect(poolIds.has(28774), "Glaive of the Pit (polearm)").toBe(true);
+    // rejected both in one condition, which hid Glaive of the Pit and
+    // Halberd of Desolation (both Magtheridon drops) from the universe.
+    // Glaive of the Pit (28774) is D7-eligible and admitted by that route,
+    // but ticket 171 (user ruling, exclusion by design) then drops it as a
+    // stub-only sim effect — so its absence here proves the *later* rule,
+    // not a regression of this one. Halberd of Desolation has no such stub
+    // and is the polearm-admission witness instead.
+    expect(
+      poolIds.has(28774),
+      "Glaive of the Pit (polearm, excluded as stub-only)"
+    ).toBe(false);
     expect(poolIds.has(32248), "Halberd of Desolation (polearm)").toBe(true);
   });
 
@@ -1056,8 +1118,16 @@ describe("an item's source does not depend on which tier is assembled", () => {
       };
       for (const row of doc.entries) listed.add(row.itemId);
     }
+    // Ticket 157's force-included ids are the one documented exception: their
+    // source text *is* recorded (TICKET_157_FORCE_INCLUDE's own values) but
+    // the closed ItemSource vocabulary has no kind that carries free prose, so
+    // they ship as `unknown` while being Wowhead-listed. That is a known
+    // dishonesty in the vocabulary, not a parser regression — ticket 174.
+    // Listed explicitly so a *new* item acquiring this shape still fails.
+    const ticket157 = new Set([27484, 31033, 22401, 31856, 28034, 28288]);
     for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
       if (!e.sources.some((s) => s.kind === "unknown")) continue;
+      if (ticket157.has(e.itemId)) continue;
       expect(
         listed.has(e.itemId),
         `${e.itemId} ${e.name} is on a Wowhead list but shipped as kind:unknown — the parser dropped its prose`

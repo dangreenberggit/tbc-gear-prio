@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
-import type { Ranking } from "../src/rank.js";
+import type { RankedItem, Ranking } from "../src/rank.js";
 import { renderRankHtml, type RankReportMeta } from "../src/rank-report.js";
 import {
   plausibilityWarnings,
@@ -13,7 +13,10 @@ import {
  * page. A gate nobody sees is not a gate.
  */
 
-function ranking(warnings?: PlausibilityWarning[]): Ranking {
+function ranking(
+  warnings?: PlausibilityWarning[],
+  items: RankedItem[] = []
+): Ranking {
   return {
     contentHash: "test",
     cutoff: CUTOFF,
@@ -32,7 +35,7 @@ function ranking(warnings?: PlausibilityWarning[]): Ranking {
       hit: { rating: 100, capRating: 142, gap: 42, capUncertainty: 0 },
       expertise: { rating: 0, capRating: null, gap: null },
     },
-    items: [],
+    items,
     // Mirrors `rankUpgrades`: the field is present only when non-empty.
     ...(warnings?.length ? { plausibilityWarnings: warnings } : {}),
   };
@@ -131,5 +134,101 @@ describe("plausibility warnings in the rank report", () => {
     expect(renderRankHtml(ranking(passes), meta())).not.toContain(
       "Plausibility warnings"
     );
+  });
+});
+
+/**
+ * Ticket 164: the top-of-page panel retracts a dead slot's rows, but a
+ * reader who clicks the sticky nav straight to that slot never scrolls past
+ * the panel. The retraction has to travel into the section itself, and the
+ * rows it qualifies must not read as ordinary losses.
+ */
+describe("ticket 164 — dead-slot retraction travels to its section", () => {
+  const RANGED_DEAD: PlausibilityWarning = {
+    kind: "dead-slot",
+    slot: "ranged",
+    cause: "worn-unrankable",
+    wornItemName: "Libram of Avengement",
+    message:
+      "ranged is unmeasured: the worn Libram of Avengement is not in the candidate pool for this slot, so every row shown for ranged was scored against an empty slot, not against Libram of Avengement.",
+  };
+
+  const rangedItem: RankedItem = {
+    rank: 3,
+    itemId: 23203,
+    name: "Libram of Fervor",
+    slot: "ranged",
+    source: { kind: "world" },
+    deltaDps: -14.1,
+    deltaPct: -0.7,
+    se: 0,
+    seMethod: "independent",
+    bisTags: [],
+    belowCutoff: true,
+  };
+
+  // A slot with no warning, to prove the new markup is opt-in per slot.
+  const chestItem: RankedItem = {
+    rank: 1,
+    itemId: 30001,
+    name: "Breastplate of Malorne",
+    slot: "chest",
+    source: { kind: "world" },
+    deltaDps: 12,
+    deltaPct: 0.6,
+    se: 0,
+    seMethod: "independent",
+    bisTags: [],
+    belowCutoff: false,
+  };
+
+  it("echoes the warning's own message inside the ranged section", () => {
+    const html = renderRankHtml(
+      ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      meta()
+    );
+    const sectionStart = html.indexOf('id="slot-ranged"');
+    const sectionEnd = html.indexOf("</section>", sectionStart);
+    const section = html.slice(sectionStart, sectionEnd);
+    expect(section).toContain("slot-retraction");
+    expect(section).toContain(
+      "the worn Libram of Avengement is not in the candidate pool"
+    );
+  });
+
+  it("does not add a retraction to a slot the warning does not name", () => {
+    const html = renderRankHtml(
+      ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      meta()
+    );
+    const sectionStart = html.indexOf('id="slot-chest"');
+    const sectionEnd = html.indexOf("</section>", sectionStart);
+    const section = html.slice(sectionStart, sectionEnd);
+    expect(section).not.toContain("slot-retraction");
+  });
+
+  it("marks the dead-slot row unmeasured instead of an ordinary loss", () => {
+    const html = renderRankHtml(
+      ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      meta()
+    );
+    const rowStart = html.indexOf('data-item-id="23203"');
+    const articleStart = html.lastIndexOf("<article", rowStart);
+    const articleEnd = html.indexOf("</article>", rowStart);
+    const row = html.slice(articleStart, articleEnd);
+    expect(row).toContain("row muted unmeasured");
+  });
+
+  it("distinguishes the unmeasured nav chip from an ordinary no-BiS chip", () => {
+    const html = renderRankHtml(
+      ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      meta()
+    );
+    expect(html).toMatch(
+      /<a href="#slot-ranged" class="nav-slot no-bis unmeasured"/
+    );
+    // chest has a BiS-less item too, but no warning names it -- its chip
+    // must stay plain "no-bis", not pick up "unmeasured" for free.
+    expect(html).toMatch(/<a href="#slot-chest" class="nav-slot no-bis"[^u]/);
   });
 });

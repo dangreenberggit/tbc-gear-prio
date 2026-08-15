@@ -438,6 +438,23 @@ describe("data/universes/ret-p2.json", () => {
     // `{kind: "crafted"}`, all wowsims-curated, none independently a member
     // because their own Wowhead row uses "Crafting:" prose the parser does
     // not read (ticket 45 leaves that prose unmodeled by design).
+    // 240 -> 241: ret_p3.gear.json (slice 6b, 5c7491899) widens the curated
+    // union, admitting +33122 Cloak of Darkness (phase 1, so it clears the
+    // phase guard curated_unsourced/curated_list_only now enforce -- see
+    // assemble_universe.py's `curated` check). A second new member,
+    // 32574 Bindings of Lightning Reflexes, is phase 3 and correctly does
+    // NOT appear here: that same guard is what excludes it from a p2
+    // universe. Before the guard existed it leaked through regardless of its
+    // own phase (pool-file.test.ts caught it -- cli.ts's loadUniversePool
+    // trusts a universe file's own membership as already phase-scoped and
+    // never re-applies filterPoolByPhase).
+    // 241 -> 247: ticket 157 force-admits six SME-flagged D7-eligible items;
+    // three (27484, 22401, 31033) are phase 1, so they land in ret-p2 too.
+    // The other three (31856, 28034, 28288) are also phase 1 and eligible
+    // here — all six are ret-p2 members, matching ret-p3's +6.
+    // 247 -> 240: ticket 171 (user ruling, exclusion by design) drops every
+    // stub-only item — 7 in ret-p2's phase-1/2 slice: 28590, 28592, 28774,
+    // 28823, 30008, 30063, 30619. See data/sim-implemented-effects.json.
     expect(entries.length).toBe(240);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();

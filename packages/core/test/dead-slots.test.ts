@@ -305,4 +305,78 @@ describe("classifyDeadSlots", () => {
       "set-break-toll"
     );
   });
+
+  describe("worn-unrankable (ticket 163, ticket 124)", () => {
+    // The slamaltman-p3 shape: worn Libram of Avengement (27484) is absent
+    // from the ret-p3 universe entirely, so `ranged` has four libram
+    // candidates and none of them is `owned` — every row scored against an
+    // empty relic slot, not against 27484.
+    const RANGED_NO_WORN_ROW: DeadSlotRow[] = [
+      cand(28592, "Libram of Souls Redeemed", "ranged", -13.81),
+      cand(30063, "Libram of Absolute Truth", "ranged", -13.81),
+      cand(32368, "Tome of the Lightbringer", "ranged", -13.81),
+      cand(23203, "Libram of Fervor", "ranged", -14.1),
+    ];
+
+    it("classifies the slot as worn-unrankable when the caller names the worn item", () => {
+      const found = classifyDeadSlots(RANGED_NO_WORN_ROW, {
+        wornSetCounts: new Map(),
+        wornUnrankable: [
+          { itemId: 27484, itemName: "Libram of Avengement", slot: "ranged" },
+        ],
+      });
+      const ranged = found.find((d) => d.slot === "ranged");
+      expect(ranged?.cause).toBe("worn-unrankable");
+      expect(ranged?.wornItemId).toBe(27484);
+      expect(ranged?.wornItemName).toBe("Libram of Avengement");
+      // Set membership was never tested against the pool, so it must not be
+      // asserted here — the join that would establish it never ran.
+      expect(ranged?.wornSetId).toBeNull();
+    });
+
+    it("still falls through to unidentified-worn-item without the caller's list", () => {
+      // Same rows, no `wornUnrankable` supplied: the classifier has no way to
+      // know 27484 is worn, so it must land where an unowned dead slot always
+      // has — not silently promoted to a cause it cannot support.
+      const found = classifyDeadSlots(RANGED_NO_WORN_ROW, {
+        wornSetCounts: new Map(),
+      });
+      expect(found.find((d) => d.slot === "ranged")?.cause).toBe(
+        "unidentified-worn-item"
+      );
+    });
+
+    it("bypasses the best>0 gate: a worn-unrankable slot classifies even with a positive-looking row", () => {
+      // A row that reads as an upgrade in this slot is still scored against an
+      // empty slot, not against what is worn, so it cannot be trusted as a
+      // real positive candidate either. The normal `best > 0` skip must not
+      // apply here.
+      const rows: DeadSlotRow[] = [
+        cand(28592, "Libram of Souls Redeemed", "ranged", 5),
+      ];
+      const found = classifyDeadSlots(rows, {
+        wornSetCounts: new Map(),
+        wornUnrankable: [
+          { itemId: 27484, itemName: "Libram of Avengement", slot: "ranged" },
+        ],
+      });
+      expect(found.find((d) => d.slot === "ranged")?.cause).toBe(
+        "worn-unrankable"
+      );
+    });
+
+    it("reports worn-unrankable even when the slot has zero rows at all", () => {
+      // The pool could be entirely empty for a slot and the worn item still
+      // needs to be named — `bySlot` would never see this slot otherwise.
+      const found = classifyDeadSlots([], {
+        wornSetCounts: new Map(),
+        wornUnrankable: [
+          { itemId: 27484, itemName: "Libram of Avengement", slot: "ranged" },
+        ],
+      });
+      expect(found).toHaveLength(1);
+      expect(found[0]?.cause).toBe("worn-unrankable");
+      expect(found[0]?.poolSize).toBe(0);
+    });
+  });
 });

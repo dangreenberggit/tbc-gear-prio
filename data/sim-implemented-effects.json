@@ -1,0 +1,2066 @@
+{
+  "generatedBy": "scripts/generate_sim_implemented_effects.py",
+  "forkRepo": "dangreenberggit/tbc-new",
+  "forkCommit": "3000b2f6b7178c2e98e994583f4e3300e0ceb269",
+  "_comment": "implementedEffectItemIds is informational -- assemble_universe.py does not consult it, because a stat-only item needs no registration at all. stubOnlyItemIds is the one that drives exclusion: an item id whose only appearance in the fork's Go tree is inside a commented `TODO: Manual implementation required` stub block, with no active core.NewItemEffect / shared.NewSimpleStatActive registration anywhere. Regenerate with `python scripts/generate_sim_implemented_effects.py` after re-pinning vendor/tbc-new-fork.",
+  "implementedEffectItemIdsCount": 215,
+  "implementedEffectItemIds": [
+    1168,
+    11815,
+    12798,
+    13164,
+    14554,
+    15867,
+    15873,
+    18168,
+    18820,
+    19019,
+    19337,
+    19339,
+    19343,
+    19344,
+    19345,
+    19947,
+    19952,
+    19955,
+    19957,
+    19958,
+    19959,
+    20636,
+    21128,
+    21180,
+    21190,
+    21473,
+    21670,
+    22268,
+    22401,
+    22678,
+    22954,
+    23040,
+    23041,
+    23042,
+    23046,
+    23047,
+    23197,
+    23198,
+    23199,
+    23203,
+    23206,
+    23207,
+    23570,
+    24114,
+    24116,
+    24121,
+    24122,
+    24123,
+    24125,
+    24128,
+    25619,
+    25620,
+    25628,
+    25633,
+    25634,
+    25667,
+    25787,
+    25893,
+    25897,
+    25899,
+    25901,
+    25936,
+    25937,
+    25994,
+    25995,
+    25996,
+    27484,
+    27518,
+    27529,
+    27683,
+    27744,
+    27770,
+    27815,
+    27828,
+    27891,
+    27917,
+    27947,
+    27949,
+    27983,
+    27984,
+    28034,
+    28040,
+    28041,
+    28042,
+    28064,
+    28065,
+    28066,
+    28121,
+    28190,
+    28223,
+    28248,
+    28288,
+    28370,
+    28372,
+    28418,
+    28429,
+    28430,
+    28437,
+    28438,
+    28439,
+    28484,
+    28485,
+    28528,
+    28573,
+    28578,
+    28579,
+    28602,
+    28727,
+    28785,
+    28789,
+    28830,
+    29132,
+    29179,
+    29301,
+    29305,
+    29309,
+    29348,
+    29370,
+    29376,
+    29383,
+    29387,
+    29388,
+    29390,
+    29776,
+    29962,
+    29996,
+    30090,
+    30293,
+    30300,
+    30312,
+    30340,
+    30446,
+    30447,
+    30449,
+    30450,
+    30620,
+    30621,
+    30626,
+    30627,
+    30629,
+    30664,
+    30665,
+    30720,
+    30892,
+    31025,
+    31033,
+    31323,
+    31331,
+    31332,
+    31334,
+    31336,
+    31615,
+    31617,
+    31856,
+    31857,
+    31858,
+    32257,
+    32262,
+    32330,
+    32375,
+    32387,
+    32409,
+    32410,
+    32483,
+    32485,
+    32486,
+    32488,
+    32490,
+    32493,
+    32496,
+    32501,
+    32505,
+    32534,
+    32654,
+    32658,
+    32770,
+    32771,
+    33503,
+    33504,
+    33506,
+    33509,
+    33828,
+    33829,
+    33830,
+    33831,
+    33832,
+    33936,
+    33937,
+    33938,
+    33948,
+    33949,
+    33950,
+    34049,
+    34050,
+    34162,
+    34163,
+    34220,
+    34427,
+    34428,
+    34429,
+    34472,
+    34473,
+    35039,
+    35041,
+    35326,
+    35327,
+    35501,
+    35503,
+    35693,
+    38287,
+    38288,
+    38289,
+    38290,
+    186071,
+    278953
+  ],
+  "stubOnlyItemIds": [
+    {
+      "itemId": 3475,
+      "name": "Cloak of Flames"
+    },
+    {
+      "itemId": 10696,
+      "name": "Enchanted Azsharite Felbane Sword"
+    },
+    {
+      "itemId": 10697,
+      "name": "Enchanted Azsharite Felbane Dagger"
+    },
+    {
+      "itemId": 10698,
+      "name": "Enchanted Azsharite Felbane Staff"
+    },
+    {
+      "itemId": 11810,
+      "name": "Force of Will"
+    },
+    {
+      "itemId": 12344,
+      "name": "Seal of Ascension"
+    },
+    {
+      "itemId": 12588,
+      "name": "Bonespike Shoulder"
+    },
+    {
+      "itemId": 12639,
+      "name": "Stronghold Gauntlets"
+    },
+    {
+      "itemId": 12641,
+      "name": "Invulnerable Mail"
+    },
+    {
+      "itemId": 12709,
+      "name": "Pip's Skinner"
+    },
+    {
+      "itemId": 13143,
+      "name": "Mark of the Dragon Lord"
+    },
+    {
+      "itemId": 13171,
+      "name": "Smokey's Lighter"
+    },
+    {
+      "itemId": 13209,
+      "name": "Seal of the Dawn"
+    },
+    {
+      "itemId": 13212,
+      "name": "Halycon's Spiked Collar"
+    },
+    {
+      "itemId": 13213,
+      "name": "Smolderweb's Eye"
+    },
+    {
+      "itemId": 13243,
+      "name": "Argent Defender"
+    },
+    {
+      "itemId": 13375,
+      "name": "Crest of Retribution"
+    },
+    {
+      "itemId": 13387,
+      "name": "Foresight Girdle"
+    },
+    {
+      "itemId": 13503,
+      "name": "Alchemist's Stone"
+    },
+    {
+      "itemId": 13505,
+      "name": "Runeblade of Baron Rivendare"
+    },
+    {
+      "itemId": 13515,
+      "name": "Ramstein's Lightning Bolts"
+    },
+    {
+      "itemId": 13937,
+      "name": "Headmaster's Charge"
+    },
+    {
+      "itemId": 14152,
+      "name": "Robe of the Archmage"
+    },
+    {
+      "itemId": 14153,
+      "name": "Robe of the Void"
+    },
+    {
+      "itemId": 14154,
+      "name": "Truefaith Vestments"
+    },
+    {
+      "itemId": 14557,
+      "name": "The Lion Horn of Stormwind"
+    },
+    {
+      "itemId": 15138,
+      "name": "Onyxia Scale Cloak"
+    },
+    {
+      "itemId": 15782,
+      "name": "Beaststalker Blade"
+    },
+    {
+      "itemId": 15783,
+      "name": "Beasthunter Dagger"
+    },
+    {
+      "itemId": 16391,
+      "name": "Knight-Lieutenant's Silk Gloves"
+    },
+    {
+      "itemId": 16392,
+      "name": "Knight-Lieutenant's Leather Boots"
+    },
+    {
+      "itemId": 16403,
+      "name": "Knight-Lieutenant's Chain Gauntlets"
+    },
+    {
+      "itemId": 16406,
+      "name": "Knight-Lieutenant's Plate Gauntlets"
+    },
+    {
+      "itemId": 16410,
+      "name": "Knight-Lieutenant's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 16440,
+      "name": "Marshal's Silk Gloves"
+    },
+    {
+      "itemId": 16446,
+      "name": "Marshal's Leather Footguards"
+    },
+    {
+      "itemId": 16471,
+      "name": "Marshal's Lamellar Gloves"
+    },
+    {
+      "itemId": 16484,
+      "name": "Marshal's Plate Gauntlets"
+    },
+    {
+      "itemId": 16487,
+      "name": "Blood Guard's Silk Gloves"
+    },
+    {
+      "itemId": 16498,
+      "name": "Blood Guard's Leather Treads"
+    },
+    {
+      "itemId": 16510,
+      "name": "Blood Guard's Plate Gloves"
+    },
+    {
+      "itemId": 16518,
+      "name": "Blood Guard's Mail Walkers"
+    },
+    {
+      "itemId": 16530,
+      "name": "Blood Guard's Chain Gauntlets"
+    },
+    {
+      "itemId": 16540,
+      "name": "General's Silk Handguards"
+    },
+    {
+      "itemId": 16548,
+      "name": "General's Plate Gauntlets"
+    },
+    {
+      "itemId": 16558,
+      "name": "General's Leather Treads"
+    },
+    {
+      "itemId": 16573,
+      "name": "General's Mail Boots"
+    },
+    {
+      "itemId": 16907,
+      "name": "Bloodfang Gloves"
+    },
+    {
+      "itemId": 16928,
+      "name": "Nemesis Gloves"
+    },
+    {
+      "itemId": 16929,
+      "name": "Nemesis Skullcap"
+    },
+    {
+      "itemId": 16932,
+      "name": "Nemesis Spaulders"
+    },
+    {
+      "itemId": 17066,
+      "name": "Drillborer Disk"
+    },
+    {
+      "itemId": 17082,
+      "name": "Shard of the Flame"
+    },
+    {
+      "itemId": 17104,
+      "name": "Spinal Reaper"
+    },
+    {
+      "itemId": 17111,
+      "name": "Blazefury Medallion"
+    },
+    {
+      "itemId": 17182,
+      "name": "Sulfuras, Hand of Ragnaros"
+    },
+    {
+      "itemId": 17564,
+      "name": "Knight-Lieutenant's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17577,
+      "name": "Blood Guard's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17584,
+      "name": "Marshal's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17588,
+      "name": "General's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17596,
+      "name": "Knight-Lieutenant's Satin Gloves"
+    },
+    {
+      "itemId": 17608,
+      "name": "Marshal's Satin Gloves"
+    },
+    {
+      "itemId": 17617,
+      "name": "Blood Guard's Satin Gloves"
+    },
+    {
+      "itemId": 17620,
+      "name": "General's Satin Gloves"
+    },
+    {
+      "itemId": 17759,
+      "name": "Mark of Resolution"
+    },
+    {
+      "itemId": 17900,
+      "name": "Stormpike Insignia Rank 2"
+    },
+    {
+      "itemId": 17901,
+      "name": "Stormpike Insignia Rank 3"
+    },
+    {
+      "itemId": 17902,
+      "name": "Stormpike Insignia Rank 4"
+    },
+    {
+      "itemId": 17903,
+      "name": "Stormpike Insignia Rank 5"
+    },
+    {
+      "itemId": 17904,
+      "name": "Stormpike Insignia Rank 6"
+    },
+    {
+      "itemId": 17905,
+      "name": "Frostwolf Insignia Rank 2"
+    },
+    {
+      "itemId": 17906,
+      "name": "Frostwolf Insignia Rank 3"
+    },
+    {
+      "itemId": 17907,
+      "name": "Frostwolf Insignia Rank 4"
+    },
+    {
+      "itemId": 17908,
+      "name": "Frostwolf Insignia Rank 5"
+    },
+    {
+      "itemId": 17909,
+      "name": "Frostwolf Insignia Rank 6"
+    },
+    {
+      "itemId": 18345,
+      "name": "Murmuring Ring"
+    },
+    {
+      "itemId": 18346,
+      "name": "Threadbare Trousers"
+    },
+    {
+      "itemId": 18354,
+      "name": "Pimgib's Collar"
+    },
+    {
+      "itemId": 18355,
+      "name": "Ferra's Collar"
+    },
+    {
+      "itemId": 18382,
+      "name": "Fluctuating Cloak"
+    },
+    {
+      "itemId": 18406,
+      "name": "Onyxia Blood Talisman"
+    },
+    {
+      "itemId": 18602,
+      "name": "Tome of Sacrifice"
+    },
+    {
+      "itemId": 18639,
+      "name": "Ultra-Flash Shadow Reflector"
+    },
+    {
+      "itemId": 18715,
+      "name": "Lok'delar, Stave of the Ancient Keepers"
+    },
+    {
+      "itemId": 18722,
+      "name": "Death Grips"
+    },
+    {
+      "itemId": 18758,
+      "name": "Specter's Blade"
+    },
+    {
+      "itemId": 18760,
+      "name": "Necromantic Band"
+    },
+    {
+      "itemId": 18809,
+      "name": "Sash of Whispered Secrets"
+    },
+    {
+      "itemId": 18815,
+      "name": "Essence of the Pure Flame"
+    },
+    {
+      "itemId": 18825,
+      "name": "Grand Marshal's Aegis"
+    },
+    {
+      "itemId": 18826,
+      "name": "High Warlord's Shield Wall"
+    },
+    {
+      "itemId": 19287,
+      "name": "Darkmoon Card: Heroism"
+    },
+    {
+      "itemId": 19288,
+      "name": "Darkmoon Card: Blue Dragon"
+    },
+    {
+      "itemId": 19289,
+      "name": "Darkmoon Card: Maelstrom"
+    },
+    {
+      "itemId": 19290,
+      "name": "Darkmoon Card: Twisting Nether"
+    },
+    {
+      "itemId": 19336,
+      "name": "Arcane Infused Gem"
+    },
+    {
+      "itemId": 19340,
+      "name": "Rune of Metamorphosis"
+    },
+    {
+      "itemId": 19341,
+      "name": "Lifegiving Gem"
+    },
+    {
+      "itemId": 19342,
+      "name": "Venomous Totem"
+    },
+    {
+      "itemId": 19577,
+      "name": "Rage of Mugamba"
+    },
+    {
+      "itemId": 19588,
+      "name": "Hero's Brand"
+    },
+    {
+      "itemId": 19594,
+      "name": "The All-Seeing Eye of Zuldazar"
+    },
+    {
+      "itemId": 19601,
+      "name": "Jewel of Kajaro"
+    },
+    {
+      "itemId": 19605,
+      "name": "Kezan's Unstoppable Taint"
+    },
+    {
+      "itemId": 19609,
+      "name": "Unmarred Vision of Voodress"
+    },
+    {
+      "itemId": 19617,
+      "name": "Zandalarian Shadow Mastery Talisman"
+    },
+    {
+      "itemId": 19621,
+      "name": "Maelstrom's Wrath"
+    },
+    {
+      "itemId": 19812,
+      "name": "Rune of the Dawn"
+    },
+    {
+      "itemId": 19874,
+      "name": "Halberd of Smiting"
+    },
+    {
+      "itemId": 19930,
+      "name": "Mar'li's Eye"
+    },
+    {
+      "itemId": 19946,
+      "name": "Tigule's Harpoon"
+    },
+    {
+      "itemId": 19948,
+      "name": "Zandalarian Hero Badge"
+    },
+    {
+      "itemId": 19949,
+      "name": "Zandalarian Hero Medallion"
+    },
+    {
+      "itemId": 19950,
+      "name": "Zandalarian Hero Charm"
+    },
+    {
+      "itemId": 19951,
+      "name": "Gri'lek's Charm of Might"
+    },
+    {
+      "itemId": 19953,
+      "name": "Renataki's Charm of Beasts"
+    },
+    {
+      "itemId": 19954,
+      "name": "Renataki's Charm of Trickery"
+    },
+    {
+      "itemId": 19956,
+      "name": "Wushoolay's Charm of Spirits"
+    },
+    {
+      "itemId": 19961,
+      "name": "Gri'lek's Grinder"
+    },
+    {
+      "itemId": 19962,
+      "name": "Gri'lek's Carver"
+    },
+    {
+      "itemId": 19963,
+      "name": "Pitchfork of Madness"
+    },
+    {
+      "itemId": 19968,
+      "name": "Fiery Retributer"
+    },
+    {
+      "itemId": 20048,
+      "name": "Highlander's Plate Greaves"
+    },
+    {
+      "itemId": 20049,
+      "name": "Highlander's Lamellar Greaves"
+    },
+    {
+      "itemId": 20050,
+      "name": "Highlander's Chain Greaves"
+    },
+    {
+      "itemId": 20051,
+      "name": "Highlander's Mail Greaves"
+    },
+    {
+      "itemId": 20052,
+      "name": "Highlander's Leather Boots"
+    },
+    {
+      "itemId": 20053,
+      "name": "Highlander's Lizardhide Boots"
+    },
+    {
+      "itemId": 20054,
+      "name": "Highlander's Cloth Boots"
+    },
+    {
+      "itemId": 20071,
+      "name": "Talisman of Arathor"
+    },
+    {
+      "itemId": 20072,
+      "name": "Defiler's Talisman"
+    },
+    {
+      "itemId": 20154,
+      "name": "Defiler's Chain Greaves"
+    },
+    {
+      "itemId": 20159,
+      "name": "Defiler's Cloth Boots"
+    },
+    {
+      "itemId": 20167,
+      "name": "Defiler's Lizardhide Boots"
+    },
+    {
+      "itemId": 20181,
+      "name": "Defiler's Lamellar Greaves"
+    },
+    {
+      "itemId": 20186,
+      "name": "Defiler's Leather Boots"
+    },
+    {
+      "itemId": 20199,
+      "name": "Defiler's Mail Greaves"
+    },
+    {
+      "itemId": 20208,
+      "name": "Defiler's Plate Greaves"
+    },
+    {
+      "itemId": 20487,
+      "name": "Lok'delar, Stave of the Ancient Keepers DEP"
+    },
+    {
+      "itemId": 20579,
+      "name": "Green Dragonskin Cloak"
+    },
+    {
+      "itemId": 21181,
+      "name": "Grace of Earth"
+    },
+    {
+      "itemId": 21488,
+      "name": "Fetish of Chitinous Spikes"
+    },
+    {
+      "itemId": 21517,
+      "name": "Gnomish Turban of Psychic Might"
+    },
+    {
+      "itemId": 21526,
+      "name": "Band of Icy Depths"
+    },
+    {
+      "itemId": 21625,
+      "name": "Scarab Brooch"
+    },
+    {
+      "itemId": 21647,
+      "name": "Fetish of the Sand Reaver"
+    },
+    {
+      "itemId": 21685,
+      "name": "Petrified Scarab"
+    },
+    {
+      "itemId": 21687,
+      "name": "Ukko's Ring of Darkness"
+    },
+    {
+      "itemId": 21780,
+      "name": "Blood Crown"
+    },
+    {
+      "itemId": 21891,
+      "name": "Shard of the Fallen Star"
+    },
+    {
+      "itemId": 22013,
+      "name": "Beastmaster's Cap"
+    },
+    {
+      "itemId": 22060,
+      "name": "Beastmaster's Tunic"
+    },
+    {
+      "itemId": 22061,
+      "name": "Beastmaster's Boots"
+    },
+    {
+      "itemId": 22191,
+      "name": "Obsidian Mail Tunic"
+    },
+    {
+      "itemId": 22194,
+      "name": "Black Grasp of the Destroyer"
+    },
+    {
+      "itemId": 22196,
+      "name": "Thick Obsidian Breastplate"
+    },
+    {
+      "itemId": 22198,
+      "name": "Jagged Obsidian Shield"
+    },
+    {
+      "itemId": 22321,
+      "name": "Heart of Wyrmthalak"
+    },
+    {
+      "itemId": 22345,
+      "name": "Totem of Rebirth"
+    },
+    {
+      "itemId": 22396,
+      "name": "Totem of Life"
+    },
+    {
+      "itemId": 22398,
+      "name": "Idol of Rejuvenation"
+    },
+    {
+      "itemId": 22399,
+      "name": "Idol of Health"
+    },
+    {
+      "itemId": 22402,
+      "name": "Libram of Grace"
+    },
+    {
+      "itemId": 22589,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22630,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22631,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22632,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22691,
+      "name": "Corrupted Ashbringer"
+    },
+    {
+      "itemId": 22856,
+      "name": "Blood Guard's Leather Walkers"
+    },
+    {
+      "itemId": 22857,
+      "name": "Blood Guard's Mail Greaves"
+    },
+    {
+      "itemId": 22865,
+      "name": "Blood Guard's Dreadweave Handwraps"
+    },
+    {
+      "itemId": 22868,
+      "name": "Blood Guard's Plate Gauntlets"
+    },
+    {
+      "itemId": 22869,
+      "name": "Blood Guard's Satin Handwraps"
+    },
+    {
+      "itemId": 22870,
+      "name": "Blood Guard's Silk Handwraps"
+    },
+    {
+      "itemId": 23001,
+      "name": "Eye of Diminution"
+    },
+    {
+      "itemId": 23004,
+      "name": "Idol of Longevity"
+    },
+    {
+      "itemId": 23005,
+      "name": "Totem of Flowing Water"
+    },
+    {
+      "itemId": 23006,
+      "name": "Libram of Light"
+    },
+    {
+      "itemId": 23027,
+      "name": "Warmth of Forgiveness"
+    },
+    {
+      "itemId": 23072,
+      "name": "Fists of the Unrelenting"
+    },
+    {
+      "itemId": 23078,
+      "name": "Gauntlets of Undead Slaying"
+    },
+    {
+      "itemId": 23081,
+      "name": "Handwraps of Undead Slaying"
+    },
+    {
+      "itemId": 23082,
+      "name": "Handguards of Undead Slaying"
+    },
+    {
+      "itemId": 23084,
+      "name": "Gloves of Undead Cleansing"
+    },
+    {
+      "itemId": 23085,
+      "name": "Robe of Undead Cleansing"
+    },
+    {
+      "itemId": 23087,
+      "name": "Breastplate of Undead Slaying"
+    },
+    {
+      "itemId": 23088,
+      "name": "Chestguard of Undead Slaying"
+    },
+    {
+      "itemId": 23089,
+      "name": "Tunic of Undead Slaying"
+    },
+    {
+      "itemId": 23090,
+      "name": "Bracers of Undead Slaying"
+    },
+    {
+      "itemId": 23091,
+      "name": "Bracers of Undead Cleansing"
+    },
+    {
+      "itemId": 23092,
+      "name": "Wristguards of Undead Slaying"
+    },
+    {
+      "itemId": 23093,
+      "name": "Wristwraps of Undead Slaying"
+    },
+    {
+      "itemId": 23200,
+      "name": "Totem of Sustaining"
+    },
+    {
+      "itemId": 23201,
+      "name": "Libram of Divinity"
+    },
+    {
+      "itemId": 23221,
+      "name": "Misplaced Servo Arm"
+    },
+    {
+      "itemId": 23274,
+      "name": "Knight-Lieutenant's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 23282,
+      "name": "Knight-Lieutenant's Dreadweave Handwraps"
+    },
+    {
+      "itemId": 23285,
+      "name": "Knight-Lieutenant's Leather Walkers"
+    },
+    {
+      "itemId": 23286,
+      "name": "Knight-Lieutenant's Plate Gauntlets"
+    },
+    {
+      "itemId": 23288,
+      "name": "Knight-Lieutenant's Satin Handwraps"
+    },
+    {
+      "itemId": 23290,
+      "name": "Knight-Lieutenant's Silk Handwraps"
+    },
+    {
+      "itemId": 23533,
+      "name": "Steelgrip Gauntlets"
+    },
+    {
+      "itemId": 23558,
+      "name": "The Burrower's Shell"
+    },
+    {
+      "itemId": 23564,
+      "name": "Twisting Nether Chain Shirt"
+    },
+    {
+      "itemId": 23565,
+      "name": "Embrace of the Twisting Nether"
+    },
+    {
+      "itemId": 23587,
+      "name": "Mirren's Drinking Hat"
+    },
+    {
+      "itemId": 23824,
+      "name": "Rocket Boots Xtreme"
+    },
+    {
+      "itemId": 23825,
+      "name": "Nigh Invulnerability Belt"
+    },
+    {
+      "itemId": 23835,
+      "name": "Gnomish Poultryizer"
+    },
+    {
+      "itemId": 23836,
+      "name": "Goblin Rocket Launcher"
+    },
+    {
+      "itemId": 24106,
+      "name": "Thick Felsteel Necklace"
+    },
+    {
+      "itemId": 24110,
+      "name": "Living Ruby Pendant"
+    },
+    {
+      "itemId": 24117,
+      "name": "Embrace of the Dawn"
+    },
+    {
+      "itemId": 24127,
+      "name": "Figurine - Talasite Owl"
+    },
+    {
+      "itemId": 24376,
+      "name": "Runed Fungalcap"
+    },
+    {
+      "itemId": 24386,
+      "name": "Libram of Saints Departed"
+    },
+    {
+      "itemId": 24390,
+      "name": "Auslese's Light Channeler"
+    },
+    {
+      "itemId": 24413,
+      "name": "Totem of the Thunderhead"
+    },
+    {
+      "itemId": 24551,
+      "name": "Talisman of the Horde"
+    },
+    {
+      "itemId": 24556,
+      "name": "Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 25643,
+      "name": "Harold's Rejuvenating Broach"
+    },
+    {
+      "itemId": 25644,
+      "name": "Blessed Book of Nagrand"
+    },
+    {
+      "itemId": 25645,
+      "name": "Totem of the Plains"
+    },
+    {
+      "itemId": 25786,
+      "name": "Hypnotist's Watch"
+    },
+    {
+      "itemId": 25827,
+      "name": "Muck-Covered Drape"
+    },
+    {
+      "itemId": 25828,
+      "name": "Petrified Lichen Guard"
+    },
+    {
+      "itemId": 25829,
+      "name": "Talisman of the Alliance"
+    },
+    {
+      "itemId": 25834,
+      "name": "Gladiator's Leather Gloves"
+    },
+    {
+      "itemId": 25835,
+      "name": "Explorer's Walking Stick"
+    },
+    {
+      "itemId": 25857,
+      "name": "Gladiator's Silk Handguards"
+    },
+    {
+      "itemId": 25940,
+      "name": "Idol of the Claw"
+    },
+    {
+      "itemId": 26000,
+      "name": "Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 26055,
+      "name": "Oculus of the Hidden Eye"
+    },
+    {
+      "itemId": 27416,
+      "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27470,
+      "name": "Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 27544,
+      "name": "Totem of Spontaneous Regrowth"
+    },
+    {
+      "itemId": 27703,
+      "name": "Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 27707,
+      "name": "Gladiator's Satin Gloves"
+    },
+    {
+      "itemId": 27880,
+      "name": "Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 27886,
+      "name": "Idol of the Emerald Queen"
+    },
+    {
+      "itemId": 27896,
+      "name": "Alembic of Infernal Power"
+    },
+    {
+      "itemId": 27900,
+      "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 27920,
+      "name": "Mark of Conquest"
+    },
+    {
+      "itemId": 27921,
+      "name": "Mark of Conquest"
+    },
+    {
+      "itemId": 27922,
+      "name": "Mark of Defiance"
+    },
+    {
+      "itemId": 27924,
+      "name": "Mark of Defiance"
+    },
+    {
+      "itemId": 27926,
+      "name": "Mark of Vindication"
+    },
+    {
+      "itemId": 27927,
+      "name": "Mark of Vindication"
+    },
+    {
+      "itemId": 27989,
+      "name": "Idol of Savagery"
+    },
+    {
+      "itemId": 27990,
+      "name": "Idol of Savagery"
+    },
+    {
+      "itemId": 28108,
+      "name": "Power Infused Mushroom"
+    },
+    {
+      "itemId": 28109,
+      "name": "Essence Infused Mushroom"
+    },
+    {
+      "itemId": 28126,
+      "name": "Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28136,
+      "name": "Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28296,
+      "name": "Libram of the Lightbringer"
+    },
+    {
+      "itemId": 28355,
+      "name": "Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 28356,
+      "name": "Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 28357,
+      "name": "Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 28523,
+      "name": "Totem of Healing Rains"
+    },
+    {
+      "itemId": 28568,
+      "name": "Idol of the Avian Heart"
+    },
+    {
+      "itemId": 28590,
+      "name": "Ribbon of Sacrifice"
+    },
+    {
+      "itemId": 28592,
+      "name": "Libram of Souls Redeemed"
+    },
+    {
+      "itemId": 28618,
+      "name": "Grand Marshal's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28624,
+      "name": "Grand Marshal's Dreadweave Gloves"
+    },
+    {
+      "itemId": 28680,
+      "name": "Grand Marshal's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 28684,
+      "name": "Grand Marshal's Leather Gloves"
+    },
+    {
+      "itemId": 28690,
+      "name": "Grand Marshal's Linked Gauntlets"
+    },
+    {
+      "itemId": 28695,
+      "name": "Grand Marshal's Mail Gauntlets"
+    },
+    {
+      "itemId": 28704,
+      "name": "Grand Marshal's Satin Gloves"
+    },
+    {
+      "itemId": 28710,
+      "name": "Grand Marshal's Scaled Gauntlets"
+    },
+    {
+      "itemId": 28716,
+      "name": "Grand Marshal's Silk Handguards"
+    },
+    {
+      "itemId": 28719,
+      "name": "Grand Marshal's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28767,
+      "name": "The Decapitator"
+    },
+    {
+      "itemId": 28774,
+      "name": "Glaive of the Pit"
+    },
+    {
+      "itemId": 28811,
+      "name": "High Warlord's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28817,
+      "name": "High Warlord's Dreadweave Gloves"
+    },
+    {
+      "itemId": 28823,
+      "name": "Eye of Gruul"
+    },
+    {
+      "itemId": 28832,
+      "name": "High Warlord's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 28836,
+      "name": "High Warlord's Leather Gloves"
+    },
+    {
+      "itemId": 28842,
+      "name": "High Warlord's Linked Gauntlets"
+    },
+    {
+      "itemId": 28847,
+      "name": "High Warlord's Mail Gauntlets"
+    },
+    {
+      "itemId": 28856,
+      "name": "High Warlord's Satin Gloves"
+    },
+    {
+      "itemId": 28862,
+      "name": "High Warlord's Scaled Gauntlets"
+    },
+    {
+      "itemId": 28868,
+      "name": "High Warlord's Silk Handguards"
+    },
+    {
+      "itemId": 28871,
+      "name": "High Warlord's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 29181,
+      "name": "Timelapse Shard"
+    },
+    {
+      "itemId": 29297,
+      "name": "Band of the Eternal Defender"
+    },
+    {
+      "itemId": 29347,
+      "name": "Talisman of the Breaker"
+    },
+    {
+      "itemId": 29357,
+      "name": "Master Thief's Gloves"
+    },
+    {
+      "itemId": 29389,
+      "name": "Totem of the Pulsing Earth"
+    },
+    {
+      "itemId": 29398,
+      "name": "Circle of Banishing"
+    },
+    {
+      "itemId": 29512,
+      "name": "Earthen Netherscale Boots"
+    },
+    {
+      "itemId": 29594,
+      "name": "Knight-Lieutenant's Mail Greaves"
+    },
+    {
+      "itemId": 29600,
+      "name": "Blood Guard's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 29606,
+      "name": "Marshal's Mail Boots"
+    },
+    {
+      "itemId": 29613,
+      "name": "General's Lamellar Gloves"
+    },
+    {
+      "itemId": 30008,
+      "name": "Pendant of the Lost Ages"
+    },
+    {
+      "itemId": 30023,
+      "name": "Totem of the Maelstrom"
+    },
+    {
+      "itemId": 30051,
+      "name": "Idol of the Crescent Goddess"
+    },
+    {
+      "itemId": 30063,
+      "name": "Libram of Absolute Truth"
+    },
+    {
+      "itemId": 30188,
+      "name": "Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 30317,
+      "name": "Cosmic Infuser"
+    },
+    {
+      "itemId": 30318,
+      "name": "Netherstrand Longbow"
+    },
+    {
+      "itemId": 30619,
+      "name": "Fel Reaver's Piston"
+    },
+    {
+      "itemId": 30663,
+      "name": "Fathom-Brooch of the Tidewalker"
+    },
+    {
+      "itemId": 30787,
+      "name": "Illidari-Bane Mageblade"
+    },
+    {
+      "itemId": 30788,
+      "name": "Illidari-Bane Broadsword"
+    },
+    {
+      "itemId": 30789,
+      "name": "Illidari-Bane Claymore"
+    },
+    {
+      "itemId": 30841,
+      "name": "Lower City Prayerbook"
+    },
+    {
+      "itemId": 30847,
+      "name": "X-52 Rocket Helmet"
+    },
+    {
+      "itemId": 31031,
+      "name": "Stormfury Totem"
+    },
+    {
+      "itemId": 31328,
+      "name": "Leggings of Beast Mastery"
+    },
+    {
+      "itemId": 31375,
+      "name": "Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 31397,
+      "name": "Gladiator's Ringmail Gauntlets"
+    },
+    {
+      "itemId": 31409,
+      "name": "Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 31584,
+      "name": "High Warlord's Kodohide Gloves"
+    },
+    {
+      "itemId": 31589,
+      "name": "Grand Marshal's Kodohide Gloves"
+    },
+    {
+      "itemId": 31614,
+      "name": "Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 31620,
+      "name": "Grand Marshal's Mooncloth Mitts"
+    },
+    {
+      "itemId": 31621,
+      "name": "High Warlord's Mooncloth Mitts"
+    },
+    {
+      "itemId": 31631,
+      "name": "Grand Marshal's Ornamented Gloves"
+    },
+    {
+      "itemId": 31636,
+      "name": "High Warlord's Ornamented Gloves"
+    },
+    {
+      "itemId": 31641,
+      "name": "Grand Marshal's Ringmail Gloves"
+    },
+    {
+      "itemId": 31647,
+      "name": "High Warlord's Ringmail Gloves"
+    },
+    {
+      "itemId": 31745,
+      "name": "Illidari-Bane Dagger"
+    },
+    {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31967,
+      "name": "Merciless Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 31973,
+      "name": "Merciless Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 31981,
+      "name": "Merciless Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 31987,
+      "name": "Merciless Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 31993,
+      "name": "Merciless Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 31998,
+      "name": "Merciless Gladiator's Leather Gloves"
+    },
+    {
+      "itemId": 32005,
+      "name": "Merciless Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 32010,
+      "name": "Merciless Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 32015,
+      "name": "Merciless Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 32021,
+      "name": "Merciless Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 32030,
+      "name": "Merciless Gladiator's Ringmail Gauntlets"
+    },
+    {
+      "itemId": 32034,
+      "name": "Merciless Gladiator's Satin Gloves"
+    },
+    {
+      "itemId": 32040,
+      "name": "Merciless Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 32049,
+      "name": "Merciless Gladiator's Silk Handguards"
+    },
+    {
+      "itemId": 32056,
+      "name": "Merciless Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 32093,
+      "name": "Chancellor's Dreadweave Gloves"
+    },
+    {
+      "itemId": 32100,
+      "name": "Chancellor's Mooncloth Mitts"
+    },
+    {
+      "itemId": 32103,
+      "name": "Chancellor's Satin Gloves"
+    },
+    {
+      "itemId": 32110,
+      "name": "Chancellor's Silk Handguards"
+    },
+    {
+      "itemId": 32113,
+      "name": "Chancellor's Dragonhide Gloves"
+    },
+    {
+      "itemId": 32118,
+      "name": "Chancellor's Kodohide Gloves"
+    },
+    {
+      "itemId": 32124,
+      "name": "Chancellor's Leather Gloves"
+    },
+    {
+      "itemId": 32128,
+      "name": "Chancellor's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 32134,
+      "name": "Chancellor's Chain Gauntlets"
+    },
+    {
+      "itemId": 32139,
+      "name": "Chancellor's Linked Gauntlets"
+    },
+    {
+      "itemId": 32144,
+      "name": "Chancellor's Mail Gauntlets"
+    },
+    {
+      "itemId": 32149,
+      "name": "Chancellor's Ringmail Gloves"
+    },
+    {
+      "itemId": 32154,
+      "name": "Chancellor's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 32159,
+      "name": "Chancellor's Ornamented Gloves"
+    },
+    {
+      "itemId": 32169,
+      "name": "Chancellor's Scaled Gauntlets"
+    },
+    {
+      "itemId": 32368,
+      "name": "Tome of the Lightbringer"
+    },
+    {
+      "itemId": 32481,
+      "name": "Charm of Swift Flight"
+    },
+    {
+      "itemId": 32489,
+      "name": "Ashtongue Talisman of Zeal"
+    },
+    {
+      "itemId": 32491,
+      "name": "Ashtongue Talisman of Vision"
+    },
+    {
+      "itemId": 32492,
+      "name": "Ashtongue Talisman of Lethality"
+    },
+    {
+      "itemId": 32500,
+      "name": "Crystal Spire of Karabor"
+    },
+    {
+      "itemId": 32538,
+      "name": "Skywitch's Drape"
+    },
+    {
+      "itemId": 32539,
+      "name": "Skyguard's Drape"
+    },
+    {
+      "itemId": 33076,
+      "name": "Merciless Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33077,
+      "name": "Merciless Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 33078,
+      "name": "Merciless Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 33502,
+      "name": "Libram of Mending"
+    },
+    {
+      "itemId": 33505,
+      "name": "Totem of Living Water"
+    },
+    {
+      "itemId": 33507,
+      "name": "Stonebreaker's Totem"
+    },
+    {
+      "itemId": 33508,
+      "name": "Idol of Budding Life"
+    },
+    {
+      "itemId": 33510,
+      "name": "Idol of the Unseen Moon"
+    },
+    {
+      "itemId": 33671,
+      "name": "Vengeful Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 33676,
+      "name": "Vengeful Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 33684,
+      "name": "Vengeful Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 33690,
+      "name": "Vengeful Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 33696,
+      "name": "Vengeful Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 33700,
+      "name": "Vengeful Gladiator's Leather Gloves"
+    },
+    {
+      "itemId": 33707,
+      "name": "Vengeful Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 33712,
+      "name": "Vengeful Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 33717,
+      "name": "Vengeful Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 33723,
+      "name": "Vengeful Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 33739,
+      "name": "Vengeful Gladiator's Ringmail Gauntlets"
+    },
+    {
+      "itemId": 33744,
+      "name": "Vengeful Gladiator's Satin Gloves"
+    },
+    {
+      "itemId": 33750,
+      "name": "Vengeful Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 33759,
+      "name": "Vengeful Gladiator's Silk Handguards"
+    },
+    {
+      "itemId": 33767,
+      "name": "Vengeful Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 33808,
+      "name": "The Horseman's Helm"
+    },
+    {
+      "itemId": 33820,
+      "name": "Weather-Beaten Fishing Hat"
+    },
+    {
+      "itemId": 33841,
+      "name": "Vengeful Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33842,
+      "name": "Vengeful Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 33843,
+      "name": "Vengeful Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 33939,
+      "name": "Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33940,
+      "name": "Merciless Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33941,
+      "name": "Vengeful Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33942,
+      "name": "Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33943,
+      "name": "Merciless Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33944,
+      "name": "Vengeful Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33945,
+      "name": "Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33946,
+      "name": "Merciless Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33947,
+      "name": "Vengeful Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33951,
+      "name": "Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33952,
+      "name": "Merciless Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33953,
+      "name": "Vengeful Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 34430,
+      "name": "Glimmering Naaru Sliver"
+    },
+    {
+      "itemId": 34470,
+      "name": "Timbal's Focusing Crystal"
+    },
+    {
+      "itemId": 34471,
+      "name": "Vial of the Sunwell"
+    },
+    {
+      "itemId": 34677,
+      "name": "Shattered Sun Pendant of Restoration"
+    },
+    {
+      "itemId": 34678,
+      "name": "Shattered Sun Pendant of Acumen"
+    },
+    {
+      "itemId": 34679,
+      "name": "Shattered Sun Pendant of Might"
+    },
+    {
+      "itemId": 34680,
+      "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 34998,
+      "name": "Brutal Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 35003,
+      "name": "Brutal Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 35011,
+      "name": "Brutal Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 35019,
+      "name": "Brutal Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 35020,
+      "name": "Brutal Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 35021,
+      "name": "Brutal Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 35022,
+      "name": "Brutal Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 35028,
+      "name": "Brutal Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 35032,
+      "name": "Brutal Gladiator's Leather Gloves"
+    },
+    {
+      "itemId": 35040,
+      "name": "Brutal Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 35043,
+      "name": "Brutal Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 35049,
+      "name": "Brutal Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 35053,
+      "name": "Brutal Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 35060,
+      "name": "Brutal Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 35078,
+      "name": "Brutal Gladiator's Ringmail Gauntlets"
+    },
+    {
+      "itemId": 35083,
+      "name": "Brutal Gladiator's Satin Gloves"
+    },
+    {
+      "itemId": 35089,
+      "name": "Brutal Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 35098,
+      "name": "Brutal Gladiator's Silk Handguards"
+    },
+    {
+      "itemId": 35104,
+      "name": "Brutal Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 35105,
+      "name": "Brutal Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 35106,
+      "name": "Brutal Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 35111,
+      "name": "Brutal Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 35275,
+      "name": "Orb of the Sin'dorei"
+    },
+    {
+      "itemId": 35328,
+      "name": "Dreadweave Gloves"
+    },
+    {
+      "itemId": 35335,
+      "name": "Mooncloth Mitts"
+    },
+    {
+      "itemId": 35338,
+      "name": "Satin Gloves"
+    },
+    {
+      "itemId": 35345,
+      "name": "Evoker's Silk Handguards"
+    },
+    {
+      "itemId": 35356,
+      "name": "Dragonhide Gloves"
+    },
+    {
+      "itemId": 35361,
+      "name": "Kodohide Gloves"
+    },
+    {
+      "itemId": 35366,
+      "name": "Opportunist's Leather Gloves"
+    },
+    {
+      "itemId": 35371,
+      "name": "Wyrmhide Gloves"
+    },
+    {
+      "itemId": 35382,
+      "name": "Seer's Linked Gauntlets"
+    },
+    {
+      "itemId": 35387,
+      "name": "Seer's Mail Gauntlets"
+    },
+    {
+      "itemId": 35392,
+      "name": "Seer's Ringmail Gloves"
+    },
+    {
+      "itemId": 35403,
+      "name": "Crusader's Ornamented Gloves"
+    },
+    {
+      "itemId": 35413,
+      "name": "Crusader's Scaled Gauntlets"
+    },
+    {
+      "itemId": 35468,
+      "name": "Opportunist's Leather Gloves"
+    },
+    {
+      "itemId": 35471,
+      "name": "Wyrmhide Gloves"
+    },
+    {
+      "itemId": 35473,
+      "name": "Seer's Ringmail Gloves"
+    },
+    {
+      "itemId": 35477,
+      "name": "Crusader's Scaled Gauntlets"
+    },
+    {
+      "itemId": 35581,
+      "name": "Rocket Boots Xtreme Lite"
+    },
+    {
+      "itemId": 35703,
+      "name": "Figurine - Seaspray Albatross"
+    },
+    {
+      "itemId": 35748,
+      "name": "Guardian's Alchemist Stone"
+    },
+    {
+      "itemId": 35749,
+      "name": "Sorcerer's Alchemist Stone"
+    },
+    {
+      "itemId": 35750,
+      "name": "Redeemer's Alchemist Stone"
+    },
+    {
+      "itemId": 35751,
+      "name": "Assassin's Alchemist Stone"
+    },
+    {
+      "itemId": 38175,
+      "name": "The Horseman's Blade"
+    },
+    {
+      "itemId": 38506,
+      "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 186073,
+      "name": "Communal Totem of the Storm"
+    }
+  ]
+}

@@ -111,6 +111,14 @@ export const REPORT_CSS = `
     transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
   }
   .nav a:hover { color: var(--ink); border-color: var(--accent); }
+  /* Ticket 164: "unmeasured" and "no BiS pick" look identical without this --
+     both are otherwise a plain grey chip -- so a reader cannot tell "nothing
+     special here" from "do not trust what you find here" before clicking. */
+  .nav a.unmeasured {
+    border-color: var(--down);
+    border-style: dashed;
+    color: var(--down);
+  }
   .nav-hit {
     margin-left: 0.35rem;
     background: var(--accent);
@@ -253,6 +261,19 @@ export const REPORT_CSS = `
     text-transform: capitalize;
   }
   .slot-head p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  /* Ticket 164: local echo of a top-of-page plausibility retraction, styled
+     like the panel it repeats (same border/background language as
+     .panel.plausibility) so the two read as one claim, not two different
+     warnings. */
+  .slot-retraction {
+    margin: 0 0 0.85rem;
+    padding: 0.6rem 0.85rem;
+    border-left: 3px solid var(--down);
+    background: var(--down-bg);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
   .rows { display: flex; flex-direction: column; gap: 0.45rem; }
   .row {
     display: grid;
@@ -271,6 +292,18 @@ export const REPORT_CSS = `
   }
   .row.muted { opacity: 0.72; }
   .row:hover { border-color: var(--accent); opacity: 1; }
+  /* Ticket 164: an unmeasured-slot row was scored against an empty slot, not
+     the worn item, so it must not carry the same visual claim as a genuine
+     downgrade. Neutral border/background instead of the ordinary hit/muted
+     styling; the delta figure itself is desaturated below rather than left
+     red, since red on this page always means "confirmed loss" elsewhere. */
+  .row.unmeasured {
+    background: var(--panel);
+    border-color: var(--line);
+    border-style: dashed;
+  }
+  .row.unmeasured .delta.down,
+  .row.unmeasured .delta.up { color: var(--muted); }
   .rank {
     font-family: var(--font-display);
     font-weight: 700;

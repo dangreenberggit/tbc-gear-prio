@@ -1,0 +1,13 @@
+{
+  "_comment": "Single source of truth for which EP-weights file scores a spec at a given max phase. ep_weights_path_for() (scripts/assemble_universe.py) and resolveEpWeightsPath() (packages/core/src/ep-weights.ts) both read this file and apply the same rule: highest key in byPhase that is <= maxPhase, falling back to `fallback` when byPhase is empty or has no entry at or below maxPhase. Ticket 159 -- do not hand-copy this mapping into either language again.",
+  "ret": {
+    "fallback": "data/presets/ret/p2.ep-weights.json",
+    "byPhase": {
+      "3": "data/presets/ret/p3.ep-weights.json"
+    }
+  },
+  "feral": {
+    "fallback": "data/presets/feral/p1.ep-weights.json",
+    "byPhase": {}
+  }
+}

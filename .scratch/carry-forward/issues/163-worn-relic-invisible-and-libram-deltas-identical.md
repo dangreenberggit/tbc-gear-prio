@@ -1,8 +1,4 @@
-Status: open
-Progress: honest-marking branch DONE (2e6b257/00af8d3 on
-feat/ret-p3-data — worn-unrankable classification + unmeasured caveat,
-verified in the regenerated artifact); full resolution (the worn item
-actually ranked) rides on ticket 157's pool backfill
+Status: resolved
 Type: bug
 Origin: .scratch/handoffs/sme-rank-judgment-ret-p3-real-ranking.md (SME review of the real ret-p3 ranking, feat/ret-p3-data @ 2b3bf56)
 Blocks: none
@@ -50,50 +46,66 @@ unmeasured instead of rendered as losses. A diagnosis of where 27484 is
 dropped and whether libram effects exist in the pinned sim is the first
 step; its findings should be appended here.
 
-## Diagnosis (2026-08-14, read-only agents; all claims file:line-verified unless marked)
+## Comments (2026-08-14)
 
-**Where 27484 is dropped:** it never enters
-`data/universes/ret-p3.json` — the 394-row `entries` array has no
-27484. The item survives the WCL 19→17 mapping (`slots.ts:26-49`,
-`WCL_ORDER[17] = "ranged"`), exists in `data/items/index.json` with
-`slot: "ranged"`, and the report renderer has a `ranged` section — the
-drop is that `rank.ts:722` only emits rows for pool candidates;
-`owned` (`rank.ts:723`) is a decoration on an existing pool row, not an
-independent path for worn-but-unpooled items. The assembler's own
-`wowheadRecall.missedItems` records 27484 as a known miss (it is on the
-Wowhead p3 list at `data/wowhead-lists/ret/p3.json:886`), but nothing
-consumes that signal. The excluding rule is now **verified**:
-`scripts/assemble_universe.py:1416-1424` only admits items whose
-`map_db_source(...)` resolves a real drop/vendor/crafted source;
-D7-eligible items with no matched source are silently excluded
-(`excludedNoSource`, 1298 items). The silent downstream skip is also
-already ticketed: **ticket 124** (and ticket 94's 2026-08-11 addendum)
-cover `dead-slots.ts:140-166` skipping a worn item with no
-`deltaDps === 0` row instead of warning, with acceptance criteria for a
-`worn-unrankable` cause. Notably, 27484 itself **does** have a real
-implemented proc in the pinned sim (`sim/paladin/item_librams.go:9-33`)
-— the invisibility is entirely our pool/report layer, not the sim.
+Two layers, arriving in this order:
 
-**Libram sim coverage:** of the four pool librams, only Libram of
-Fervor (23203) has a real effect
-(`vendor/tbc-new-fork/sim/paladin/item_librams.go:58-94`). Souls
-Redeemed (28592), Absolute Truth (30063), and Tome of the Lightbringer
-(32368) exist only as commented-out `TODO: Manual implementation
-required` stubs in `sim/common/tbc/stat_bonus_procs_auto_gen.go`
-(lines 3856/4432/5291) with no `NewItemEffect` registration anywhere in
-the fork's Go tree — the −13.81 tie is stat-only scoring, as suspected.
+**Layer 2 (worn-but-unpooled guard) was already on this branch's base**
+before this worker started, landed in commit `2e6b257` ("Mark
+worn-unrankable slots instead of showing false losses"), an ancestor of
+`dc3fba0`. `dead-slots.ts`/`plausibility.ts` classify a worn item absent
+from its slot's pool as `dead-slot`/`worn-unrankable` and the report
+renders the warning (verified: `git merge-base --is-ancestor 2e6b257
+HEAD` -> ancestor). No new engine work was needed for this layer;
+ticket 164 (this branch, same worker) adds the report-layer fix that
+makes that warning travel into its own slot section instead of staying
+top-of-page only.
 
-**Fix layers:**
+**Layer 1 (the pool gap itself) is ticket 157**, this branch's other
+slice. With 157 landed, 27484 is a real ret-p3 pool member, so the
+worn-unrankable guard now has nothing to warn about — it correctly
+stays silent. Re-ran the full offline ranking after both fixes:
 
-1. **Pool backfill (root cause, = ticket 157):** teach the assembler to
-   include the missed eligible librams/trinkets and regen. Data-pipeline
-   work; makes the worn libram recognized *and* restores candidates.
-2. **Worn-but-unpooled guard (defense in depth):** `rankUpgrades` (or
-   the report layer) should surface a worn item absent from the pool as
-   an explicit row/warning instead of silence. `packages/core` change;
-   test at the module interface per AGENTS.md.
-3. **Distinct libram deltas:** upstream sim work (implementing three
-   proc effects) — out of our hands at the pin. The honest local
-   alternative is a relic-slot caveat where candidate effects are
-   unimplemented; note detecting "unimplemented" mechanically from this
-   repo is itself nontrivial (the stubs live in fork Go source).
+```
+npx tsx packages/core/src/cli.ts --region US --realm dreamscythe \
+  --character slamaltman --offline --max-phase 3 \
+  --report .scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.html
+```
+
+Confirmed the one-liner:
+
+```
+python -c "print('27484' in open('test/fixtures/slamaltman.raw.json').read(), '27484' in open('.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json').read())"
+# True True
+```
+
+27484 now appears in `ranking.items` at `slot: "ranged"`, `owned: true`,
+`deltaDps: 0` — exactly like the other 15 worn items, the ticket's
+literal acceptance criterion. `plausibilityWarnings` is absent from the
+re-run's JSON (no dead-slot fires). Verify:
+
+```
+python -c "import json; d=json.load(open('.scratch/handoffs/wowsims-tab/ret-p3-ranking/slamaltman-p3.json')); print(d['ranking'].get('plausibilityWarnings')); print([(i['itemId'],i['name'],i['deltaDps'],i.get('owned')) for i in d['ranking']['items'] if i['slot']=='ranged'])"
+```
+
+**Layer 3 (distinct libram proc deltas) stays explicitly out of scope**,
+as directed — Souls Redeemed (28592), Absolute Truth (30063) and Tome of
+the Lightbringer (32368) remain `TODO: Manual implementation required`
+stubs in the pinned sim fork
+(`sim/common/tbc/stat_bonus_procs_auto_gen.go`, not `item_librams.go` —
+that file holds the *implemented* librams, 27484/23203/31033/22401);
+their three-way tie at -13.81 is untouched, upstream-only work.
+
+Commit: (recorded in the branch's commit for this ticket, see `git log`).
+
+## Comment (2026-08-15, ticket 171)
+
+Layer 3 is now resolved, but not by implementing the procs — by
+excluding the three stub-only items from the candidate pool entirely
+(user ruling: an item whose effect is not implemented in the pinned sim
+must not be simmed or shown, no "unmeasured" styling). See ticket 171 for
+the design and the fixing commits. The three-way tie can no longer occur
+because 28592/30063/32368 no longer reach `data/universes/ret-p3.json`
+at all — verified by re-running the same command above:
+`ranked.items` for `slot: "ranged"` now lists exactly four rows (27484,
+31033, 22401, 23203), none of them a stub.
