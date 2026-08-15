@@ -148,3 +148,66 @@ Do **not** add magnitude or ratio sanity checks; a user's weights being
   aborted computation leaves the run using the pre-existing vector.
 - The pseudo-weight decision (drop vs. extend `epScore`) is recorded, either
   here or as an ADR.
+
+## Comments
+
+### 2026-08-14 — v1 half landed
+
+The v1 half of this ticket — assumptions-drawer disclosure plus a pinning
+test — is done. v2 (the `useCustomEPValues`-shaped opt-in reading
+`player.getEpWeights()`) was **not built**: it was out of scope for this
+slice and the user has not asked for it. This ticket stays `Status: open`
+for v2.
+
+**This lands in `vendor/tbc-new-fork`'s own git history, not in this repo's
+log.** The fork is a separate, gitignored clone at
+`vendor/tbc-new-fork` on branch `w/a2-162-v1`, commit
+`57a84f1e4ecce1ef3e11da675bf623964caea907` (base
+`adb0d135336a26eab613215fa85b1265d7ce2e5d`).
+
+What landed, in the fork:
+
+- `data/data.ts` — added `epWeightsSourceFor(spec)`, exposing the `source`
+  file name and `pin` already present in each `*.ep-weights.json` (previously
+  discarded — `epWeightsFor` only read `.weights`).
+- `engine/disclosure.ts` — `buildStandingAssumptions` takes an optional
+  `EpWeightsSourceDisclosure` and, when given one, emits a new
+  `"ep-weights-source"` standing assumption naming the file and pin. Optional
+  so it stays a byte-for-byte port for any caller that doesn't pass it.
+- `engine/rank.ts` — added optional `Deps.epWeightsSource`, threaded into the
+  `buildStandingAssumptions` call that builds each `Ranking.assumptions`.
+- `engine/ep-weights-v1.test.ts` — three tests: `epWeightsFor` returns the
+  committed vector independent of a differing page-set vector; the drawer
+  line names both file and pin when a source is given; the line is omitted
+  (not synthesized wrong) when no source is given.
+- `engine/test-ts-loader.mjs` — a small Node ESM loader so the test above can
+  run under plain `node --test` (the fork has no test runner — adding one
+  means touching `package.json`/`package-lock.json`, both out of this
+  worker's scope). See its header comment for the exact invocation.
+
+Re-run the test:
+
+```
+cd vendor/tbc-new-fork
+node --experimental-strip-types --import "data:text/javascript,import{register}from'node:module';import{pathToFileURL}from'node:url';register(pathToFileURL('ui/core/components/individual_sim_ui/upgrades/engine/test-ts-loader.mjs'));" --test ui/core/components/individual_sim_ui/upgrades/engine/ep-weights-v1.test.ts
+```
+
+Observed: `# pass 3`, `# fail 0` (run 2026-08-14).
+
+**Known gap, out of scope for this slice:** `Deps.epWeightsSource` is not
+yet populated by the tab itself. `upgrades_tab.tsx` (the file that
+constructs `Deps` and renders the assumptions drawer, at
+`ui/core/components/individual_sim_ui/upgrades_tab.tsx:274` and `:499-519`)
+sits one directory above `upgrades/`, outside this worker's write scope
+(`ui/core/components/individual_sim_ui/upgrades/**` only). Until a follow-up
+adds `epWeightsSource: epWeightsSourceFor(specId)` to the `Deps` literal at
+`upgrades_tab.tsx:274`, `Ranking.assumptions.standing` carries the new
+`"ep-weights-source"` entry but the drawer's `<dl>` (which currently
+enumerates fields by hand, not by iterating `standing`) does not render it.
+The data-and-test half described above is real and tested; the last-mile
+wiring into the visible drawer is the follow-up.
+
+Not built (v2, deliberately): the `useCustomEPValues`-shaped toggle, the
+fork-side `getPendingStatWeights` shim on `Player`, extending `epScore` with
+a pseudo-stat channel. No shim was written; `player.tsx`, `stats.ts`,
+`sim/**` in the fork were not touched (read-only per the worker's scope).
