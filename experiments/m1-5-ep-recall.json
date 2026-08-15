@@ -1,0 +1,659 @@
+{
+  "command": "npx tsx scripts/m1_5_recall.mjs",
+  "results": {
+    "ret": {
+      "poolSize": 246,
+      "missingFromEw5": [],
+      "f10": {
+        "cutoff": {
+          "absDps": 3.4,
+          "pct": 0.15
+        },
+        "poolSize": 246,
+        "aboveCutoffCount": 13,
+        "aboveCutoffNonOwnedCount": 13,
+        "aboveCutoff": [
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 47.53656155838348,
+            "deltaPct": 2.3716119386953265,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 2
+          },
+          {
+            "itemId": 29997,
+            "name": "Band of the Ranger-General",
+            "slot": "finger",
+            "deltaDps": 7.505143869477251,
+            "deltaPct": 0.3744336615642162,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 12
+          },
+          {
+            "itemId": 30738,
+            "name": "Ring of Reciprocity",
+            "slot": "finger",
+            "deltaDps": 3.729617529301777,
+            "deltaPct": 0.18607162927415252,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 22
+          },
+          {
+            "itemId": 28485,
+            "name": "Bulwark of the Ancient Kings",
+            "slot": "chest",
+            "deltaDps": 15.34016449530236,
+            "deltaPct": 0.7653249639001952,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 30
+          },
+          {
+            "itemId": 30061,
+            "name": "Ancestral Ring of Conquest",
+            "slot": "finger",
+            "deltaDps": 10.342701050690494,
+            "deltaPct": 0.5160001583212616,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 77
+          },
+          {
+            "itemId": 30098,
+            "name": "Razor-Scale Battlecloak",
+            "slot": "back",
+            "deltaDps": 15.808346989419306,
+            "deltaPct": 0.7886827154105184,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 94
+          },
+          {
+            "itemId": 28730,
+            "name": "Mithril Band of the Unscarred",
+            "slot": "finger",
+            "deltaDps": 5.779354255661474,
+            "deltaPct": 0.28833355003690114,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 96
+          },
+          {
+            "itemId": 29994,
+            "name": "Thalassian Wildercloak",
+            "slot": "back",
+            "deltaDps": 14.312689171140619,
+            "deltaPct": 0.7140639415289401,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 98
+          },
+          {
+            "itemId": 29177,
+            "name": "A'dal's Command",
+            "slot": "finger",
+            "deltaDps": 4.0445653289966685,
+            "deltaPct": 0.2017844603527079,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 100
+          },
+          {
+            "itemId": 30729,
+            "name": "Black-Iron Battlecloak",
+            "slot": "back",
+            "deltaDps": 13.417202445696603,
+            "deltaPct": 0.6693878661170098,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 102
+          },
+          {
+            "itemId": 33122,
+            "name": "Cloak of Darkness",
+            "slot": "back",
+            "deltaDps": 14.42481775395845,
+            "deltaPct": 0.7196580669128966,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 109
+          },
+          {
+            "itemId": 28777,
+            "name": "Cloak of the Pit Stalker",
+            "slot": "back",
+            "deltaDps": 8.020403946180522,
+            "deltaPct": 0.40014012642793406,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 110
+          },
+          {
+            "itemId": 24259,
+            "name": "Vengeance Wrap",
+            "slot": "back",
+            "deltaDps": 13.058269615118888,
+            "deltaPct": 0.651480609927638,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 114
+          }
+        ],
+        "top5ByDelta": [
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 47.53656155838348,
+            "deltaPct": 2.3716119386953265,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 2
+          },
+          {
+            "itemId": 30098,
+            "name": "Razor-Scale Battlecloak",
+            "slot": "back",
+            "deltaDps": 15.808346989419306,
+            "deltaPct": 0.7886827154105184,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 94
+          },
+          {
+            "itemId": 28485,
+            "name": "Bulwark of the Ancient Kings",
+            "slot": "chest",
+            "deltaDps": 15.34016449530236,
+            "deltaPct": 0.7653249639001952,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 30
+          },
+          {
+            "itemId": 33122,
+            "name": "Cloak of Darkness",
+            "slot": "back",
+            "deltaDps": 14.42481775395845,
+            "deltaPct": 0.7196580669128966,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 109
+          },
+          {
+            "itemId": 29994,
+            "name": "Thalassian Wildercloak",
+            "slot": "back",
+            "deltaDps": 14.312689171140619,
+            "deltaPct": 0.7140639415289401,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 98
+          }
+        ],
+        "worstAboveCutoffRank": 114,
+        "worstAboveCutoffNonOwnedRank": 114
+      },
+      "ownCutoff": null
+    },
+    "feral": {
+      "poolSize": 246,
+      "missingFromEw5": [],
+      "f10": {
+        "cutoff": {
+          "absDps": 3.4,
+          "pct": 0.15
+        },
+        "poolSize": 246,
+        "aboveCutoffCount": 16,
+        "aboveCutoffNonOwnedCount": 16,
+        "aboveCutoff": [
+          {
+            "itemId": 32014,
+            "name": "Merciless Gladiator's Maul",
+            "slot": "weapon",
+            "deltaDps": 44.80086109894091,
+            "deltaPct": 2.0886285399495037,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 5
+          },
+          {
+            "itemId": 29995,
+            "name": "Leggings of Murderous Intent",
+            "slot": "legs",
+            "deltaDps": 23.27049653057793,
+            "deltaPct": 1.0848769867441221,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 8
+          },
+          {
+            "itemId": 30627,
+            "name": "Tsunami Talisman",
+            "slot": "trinket",
+            "deltaDps": 6.20415588306696,
+            "deltaPct": 0.2892394638364574,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 12
+          },
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 44.281089918534235,
+            "deltaPct": 2.0643966637084845,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 13
+          },
+          {
+            "itemId": 30229,
+            "name": "Nordrassil Feral-Kilt",
+            "slot": "legs",
+            "deltaDps": 17.812229762607785,
+            "deltaPct": 0.8304110798263222,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 18
+          },
+          {
+            "itemId": 29994,
+            "name": "Thalassian Wildercloak",
+            "slot": "back",
+            "deltaDps": 6.4876168578734905,
+            "deltaPct": 0.3024544929100129,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 22
+          },
+          {
+            "itemId": 30040,
+            "name": "Belt of Deep Shadow",
+            "slot": "waist",
+            "deltaDps": 24.374697452408327,
+            "deltaPct": 1.136355139230527,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 25
+          },
+          {
+            "itemId": 30061,
+            "name": "Ancestral Ring of Conquest",
+            "slot": "finger",
+            "deltaDps": 3.5457460813963735,
+            "deltaPct": 0.1653036633528826,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 50
+          },
+          {
+            "itemId": 30017,
+            "name": "Telonicus's Pendant of Mayhem",
+            "slot": "neck",
+            "deltaDps": 12.616495394685444,
+            "deltaPct": 0.5881845060363011,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 58
+          },
+          {
+            "itemId": 28830,
+            "name": "Dragonspine Trophy",
+            "slot": "trinket",
+            "deltaDps": 5.460228221501893,
+            "deltaPct": 0.2545573504241456,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 65
+          },
+          {
+            "itemId": 29119,
+            "name": "Haramad's Bargain",
+            "slot": "neck",
+            "deltaDps": 5.825101912059836,
+            "deltaPct": 0.2715678628313288,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 71
+          },
+          {
+            "itemId": 28745,
+            "name": "Mithril Chain of Heroism",
+            "slot": "neck",
+            "deltaDps": 4.351185438400535,
+            "deltaPct": 0.20285346902564091,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 75
+          },
+          {
+            "itemId": 29099,
+            "name": "Greaves of Malorne",
+            "slot": "legs",
+            "deltaDps": 8.992953310395478,
+            "deltaPct": 0.4192539715038958,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 76
+          },
+          {
+            "itemId": 30042,
+            "name": "Belt of Natural Power",
+            "slot": "waist",
+            "deltaDps": 22.788017879020572,
+            "deltaPct": 1.0623836985161672,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 93
+          },
+          {
+            "itemId": 28828,
+            "name": "Gronn-Stitched Girdle",
+            "slot": "waist",
+            "deltaDps": 11.069502609303527,
+            "deltaPct": 0.5160632743593271,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 95
+          },
+          {
+            "itemId": 28750,
+            "name": "Girdle of Treachery",
+            "slot": "waist",
+            "deltaDps": 10.133987932168111,
+            "deltaPct": 0.4724493212727676,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 96
+          }
+        ],
+        "top5ByDelta": [
+          {
+            "itemId": 32014,
+            "name": "Merciless Gladiator's Maul",
+            "slot": "weapon",
+            "deltaDps": 44.80086109894091,
+            "deltaPct": 2.0886285399495037,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 5
+          },
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 44.281089918534235,
+            "deltaPct": 2.0643966637084845,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 13
+          },
+          {
+            "itemId": 30040,
+            "name": "Belt of Deep Shadow",
+            "slot": "waist",
+            "deltaDps": 24.374697452408327,
+            "deltaPct": 1.136355139230527,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 25
+          },
+          {
+            "itemId": 29995,
+            "name": "Leggings of Murderous Intent",
+            "slot": "legs",
+            "deltaDps": 23.27049653057793,
+            "deltaPct": 1.0848769867441221,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 8
+          },
+          {
+            "itemId": 30042,
+            "name": "Belt of Natural Power",
+            "slot": "waist",
+            "deltaDps": 22.788017879020572,
+            "deltaPct": 1.0623836985161672,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 93
+          }
+        ],
+        "worstAboveCutoffRank": 96,
+        "worstAboveCutoffNonOwnedRank": 96
+      },
+      "ownCutoff": {
+        "cutoff": {
+          "absDps": 3.6,
+          "pct": 0.15
+        },
+        "poolSize": 246,
+        "aboveCutoffCount": 16,
+        "aboveCutoffNonOwnedCount": 16,
+        "aboveCutoff": [
+          {
+            "itemId": 32014,
+            "name": "Merciless Gladiator's Maul",
+            "slot": "weapon",
+            "deltaDps": 44.80086109894091,
+            "deltaPct": 2.0886285399495037,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 5
+          },
+          {
+            "itemId": 29995,
+            "name": "Leggings of Murderous Intent",
+            "slot": "legs",
+            "deltaDps": 23.27049653057793,
+            "deltaPct": 1.0848769867441221,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 8
+          },
+          {
+            "itemId": 30627,
+            "name": "Tsunami Talisman",
+            "slot": "trinket",
+            "deltaDps": 6.20415588306696,
+            "deltaPct": 0.2892394638364574,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 12
+          },
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 44.281089918534235,
+            "deltaPct": 2.0643966637084845,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 13
+          },
+          {
+            "itemId": 30229,
+            "name": "Nordrassil Feral-Kilt",
+            "slot": "legs",
+            "deltaDps": 17.812229762607785,
+            "deltaPct": 0.8304110798263222,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 18
+          },
+          {
+            "itemId": 29994,
+            "name": "Thalassian Wildercloak",
+            "slot": "back",
+            "deltaDps": 6.4876168578734905,
+            "deltaPct": 0.3024544929100129,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 22
+          },
+          {
+            "itemId": 30040,
+            "name": "Belt of Deep Shadow",
+            "slot": "waist",
+            "deltaDps": 24.374697452408327,
+            "deltaPct": 1.136355139230527,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 25
+          },
+          {
+            "itemId": 30061,
+            "name": "Ancestral Ring of Conquest",
+            "slot": "finger",
+            "deltaDps": 3.5457460813963735,
+            "deltaPct": 0.1653036633528826,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 50
+          },
+          {
+            "itemId": 30017,
+            "name": "Telonicus's Pendant of Mayhem",
+            "slot": "neck",
+            "deltaDps": 12.616495394685444,
+            "deltaPct": 0.5881845060363011,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 58
+          },
+          {
+            "itemId": 28830,
+            "name": "Dragonspine Trophy",
+            "slot": "trinket",
+            "deltaDps": 5.460228221501893,
+            "deltaPct": 0.2545573504241456,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 65
+          },
+          {
+            "itemId": 29119,
+            "name": "Haramad's Bargain",
+            "slot": "neck",
+            "deltaDps": 5.825101912059836,
+            "deltaPct": 0.2715678628313288,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 71
+          },
+          {
+            "itemId": 28745,
+            "name": "Mithril Chain of Heroism",
+            "slot": "neck",
+            "deltaDps": 4.351185438400535,
+            "deltaPct": 0.20285346902564091,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 75
+          },
+          {
+            "itemId": 29099,
+            "name": "Greaves of Malorne",
+            "slot": "legs",
+            "deltaDps": 8.992953310395478,
+            "deltaPct": 0.4192539715038958,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 76
+          },
+          {
+            "itemId": 30042,
+            "name": "Belt of Natural Power",
+            "slot": "waist",
+            "deltaDps": 22.788017879020572,
+            "deltaPct": 1.0623836985161672,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 93
+          },
+          {
+            "itemId": 28828,
+            "name": "Gronn-Stitched Girdle",
+            "slot": "waist",
+            "deltaDps": 11.069502609303527,
+            "deltaPct": 0.5160632743593271,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 95
+          },
+          {
+            "itemId": 28750,
+            "name": "Girdle of Treachery",
+            "slot": "waist",
+            "deltaDps": 10.133987932168111,
+            "deltaPct": 0.4724493212727676,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 96
+          }
+        ],
+        "top5ByDelta": [
+          {
+            "itemId": 32014,
+            "name": "Merciless Gladiator's Maul",
+            "slot": "weapon",
+            "deltaDps": 44.80086109894091,
+            "deltaPct": 2.0886285399495037,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 5
+          },
+          {
+            "itemId": 30106,
+            "name": "Belt of One-Hundred Deaths",
+            "slot": "waist",
+            "deltaDps": 44.281089918534235,
+            "deltaPct": 2.0643966637084845,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 13
+          },
+          {
+            "itemId": 30040,
+            "name": "Belt of Deep Shadow",
+            "slot": "waist",
+            "deltaDps": 24.374697452408327,
+            "deltaPct": 1.136355139230527,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 25
+          },
+          {
+            "itemId": 29995,
+            "name": "Leggings of Murderous Intent",
+            "slot": "legs",
+            "deltaDps": 23.27049653057793,
+            "deltaPct": 1.0848769867441221,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 8
+          },
+          {
+            "itemId": 30042,
+            "name": "Belt of Natural Power",
+            "slot": "waist",
+            "deltaDps": 22.788017879020572,
+            "deltaPct": 1.0623836985161672,
+            "owned": false,
+            "aboveCutoff": true,
+            "orderingRank": 93
+          }
+        ],
+        "worstAboveCutoffRank": 96,
+        "worstAboveCutoffNonOwnedRank": 96
+      }
+    }
+  }
+}
