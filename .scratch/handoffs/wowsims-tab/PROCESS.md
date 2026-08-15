@@ -14,25 +14,35 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent running:
+One background agent running: **`sme-rank-review` (Opus) on the REAL
+ret-p3 ranking** (`ret-p3-ranking/slamaltman-p3.*` in the worktree, tip
+`2b3bf56`). This is the review the user chose to close plan §9.6's
+done-when — the earlier candidate-list verdict does not. When it
+reports: verify its evidence, record the verdict, and **stop before any
+merge or push ask** — both require the user's word.
 
-1. **Tickets 158+159 + real p3 ranking worker (Sonnet)** — in the
-   ret-p3-data worktree on `feat/ret-p3-data` (tip was `73e919a`).
-   User-approved scope (2026-08-14): stamp EP-weights provenance into
-   the generated artifacts with a byte-compare regen (158); make
-   `cli.ts` resolve ret weights by maxPhase from one shared mapping
-   source (159 — **the detour's first deliberate `packages/core/src`
-   edit**, confined to weight resolution, flagged to the user); then run
-   a real ret `--max-phase 3` ranking with native sims and commit the
-   artifact. **The user chose a real-ranking SME review before any
-   merge** — when the artifact exists, dispatch `sme-rank-review`
-   (Opus) on it; plan §9.6's done-when closes on that verdict, not the
-   earlier candidate-list one.
+## Tickets 158+159 + real p3 ranking — DONE, orchestrator-verified
 
-When they report: re-derive load-bearing claims (for slice 5, read the
-captured E-W4 diff artifact, not the verdict; for the ranking, check the
-weights file recorded in its provenance is p3's), run the green baseline,
-and **stop before any merge or push ask** — both require the user's word.
+Worker commits on `feat/ret-p3-data`: `dade219` (158: `epWeights`
+{path, pin} stamped into universe + report artifacts, byte-compare regen,
+determinism double-run), `23153d2` (159: mapping extracted to
+`data/presets/ep-weights-by-phase.json` read as a *value* by both Python
+and new pure `packages/core/src/ep-weights.ts`, 5 unit tests — the
+detour's one deliberate core edit), `2b3bf56` (the ranking).
+Orchestrator re-derived: the p4 universe carries the stamp with the
+correct nuanced pin note; the ranking PROVENANCE records p3 weights,
+seeds `[11,22,33,44,55]`, 3000 iterations. Worker's `pnpm verify` exit 0
+(764 tests) accepted; worktree clean.
+
+**Ranking headline:** baseline 2003.51 DPS (slamaltman fixture, offline);
+top-3 Belt of One-Hundred Deaths +47.75, Torch of the Damned +43.61,
+Cataclysm's Edge +26.22; 393 scored, 44 above cutoff. One candidate
+dropped on an upstream sim panic (Beast-tamer's Shoulders,
+hunter/paladin type assertion — upstream bug, not this branch).
+
+**Note carried:** feral-p2 pre-existing drift (ticket 154) was NOT
+absorbed — the worker hand-patched only the new field into those two
+files and confirmed the drift reproduces with HEAD's unmodified script.
 
 ## Slice 5 — DONE: E-W4 PASSED, importer built, orchestrator-verified
 
