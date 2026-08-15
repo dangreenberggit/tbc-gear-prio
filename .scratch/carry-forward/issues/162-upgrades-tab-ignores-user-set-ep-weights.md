@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: design
 Origin: docs/plans/wowsims-tab/plan.md §12 (deferred from the tab's v1 scope)
 Blocks: none
@@ -225,3 +225,71 @@ Not built (v2, deliberately): the `useCustomEPValues`-shaped toggle, the
 fork-side `getPendingStatWeights` shim on `Player`, extending `epScore` with
 a pseudo-stat channel. No shim was written; `player.tsx`, `stats.ts`,
 `sim/**` in the fork were not touched (read-only per the worker's scope).
+
+### 2026-08-15 — v2 built, resolved
+
+Built per the user's 2026-08-15 decision (default-with-guard, not the
+opt-in-toggle shape this ticket originally sketched): the tab now uses
+`player.getEpWeights()` whenever `player.hasCustomEPWeights()` is true and
+the mapped vector passes the three validity rules from this ticket's
+"Validity check" section (non-zero, non-negative, has weight on the spec's
+reference stat); otherwise it falls back to the committed per-spec/phase
+file (ticket 168, built in the same slice). No opt-in control was added —
+the validity check is the guard the user chose in place of it. No await-the-
+computation shim was built, matching this ticket's own conclusion that it is
+not implementable without a `Player`-side patch and was not wanted.
+
+**Lands in `vendor/tbc-new-fork`'s own git history** (gitignored clone, own
+`.git`), branch `w/a2-162-v1`, commit `3000b2f6b7178c2e98e994583f4e3300e0ceb269`
+(base `63494ce7b`). Outer repo's `data/wowsims-fork.lock.json` bumped to this
+commit on `feat/sweep-tab-tickets`.
+
+What landed, in the fork:
+
+- `ui/core/components/individual_sim_ui/upgrades/adapters/page_ep_weights.ts`
+  (new) — `resolvePageEpWeights(simUI)`: not-custom / custom / invalid,
+  implementing the stat mapping (`Stats.toProto().stats`, dense array index
+  = `proto.Stat`, dropped when zero) and the three validity rules. Pseudo-
+  weights are dropped, per this ticket's own conclusion that the CLI path
+  already drops them today — stated in the file's doc comment, not silently
+  done.
+- `ui/core/components/individual_sim_ui/upgrades_tab.tsx` — `run()` now
+  calls `resolvePageEpWeights` first; on `'custom'` it uses the mapped
+  record and discloses `{kind:'custom'}`, otherwise it uses
+  `epWeightsFor`/`epWeightsSourceFor` (ticket 168's resolver) and discloses
+  `{kind:'committed', file, pin}`. `wireStalenessListeners` now also listens
+  on `player.epWeightsChangeEmitter`, marking a `'done'` result stale rather
+  than rerunning.
+- `ui/core/components/individual_sim_ui/upgrades/engine/disclosure.ts` —
+  `EpWeightsSourceDisclosure` is now a `{kind:"committed",file,pin} |
+  {kind:"custom"}` union; the assumptions-drawer line reads "your page
+  weights (custom)" or "committed EP weights from `<file>` (pin `<pin>`)"
+  accordingly. This is the change ticket 168's own "Done when" and this
+  ticket's item 3 both asked for.
+- `ui/core/components/individual_sim_ui/upgrades/engine/rank.ts` —
+  `Deps.epWeightsSource` retyped from the old inline `{file,pin}` shape to
+  `EpWeightsSourceDisclosure`. This is an `engine/` edit (constrained,
+  per the worker's brief): E-W3
+  (`packages/core/test/wowsims-fork-parity.test.ts`) was re-run in the outer
+  repo and passed before `engine/PROVENANCE.md`'s hashes for `rank.ts` and
+  `disclosure.ts` were updated; `pnpm engine-port-drift:check` then reported
+  30/30.
+
+Tests: `ui/core/components/individual_sim_ui/upgrades/adapters/page_ep_weights.test.ts`
+(new, 5 cases — not-custom, custom+valid mapping, and the three validity
+failures, each asserting the disclosed reason) and a rewritten
+`engine/ep-weights-v1.test.ts` (6 cases — ticket 168's per-phase resolution
+for ret/feral, plus disclosure wording for both the committed and custom
+cases). Both run under Node's built-in `--experimental-strip-types --test`
+with no bundler; `page_ep_weights.test.ts` needed no custom loader because
+its only two imports are `import type`, erased at strip time. Observed:
+`page_ep_weights.test.ts` 5/5 pass, `ep-weights-v1.test.ts` 6/6 pass
+(2026-08-15). `npx tsc --noEmit -p tsconfig.json` in the fork: exit 0.
+
+Not tested: wiring `resolvePageEpWeights`'s output into an actual `Run` click
+against a real `Player`/`IndividualSimUI` instance (a served-page render
+check) — the fork's dev server needs a full `make devmode` build, judged not
+cheap enough for this slice; state so plainly rather than imply it was
+checked. The unit tests above cover the mapping/validation logic and the
+resolver/disclosure logic each in isolation, but not their end-to-end
+connection through `upgrades_tab.tsx`'s `run()`.
