@@ -298,6 +298,82 @@ field). **Re-run E-W2 in a real, foregrounded browser tab** before trusting
 any default-candidate-count or iteration-count decision on this data — this
 environment is not representative of what a user's own browser will do.
 
+**Candidate 1 (production build) confirmed, 2026-08-14 — the dev server *is*
+part of the problem.** Built `vendor/tbc-new-fork` at
+`adb0d135336a26eab613215fa85b1265d7ce2e5d` with `npx tsx vite.build-workers.mts`
+then `npx vite build` (2m36s, 532 modules; `dist/tbc/bundle/` produced,
+confirmed non-empty). Served the static `dist/` output with `http-server` on
+`localhost:8123` (not the vite dev server) and opened
+`http://localhost:8123/tbc/paladin/retribution/` in the Claude Code Browser
+pane — same machine (Windows 11, 20 logical cores) as the earlier dev-server
+attempt. Upstream's own Simulate button, page's own "Use Multiple CPU Cores"
+setting **at its default of 4 workers**, single candidate (baseline gear, no
+batch), fixed-seed off. Method: polled `.results-sim`'s live text every
+20-50ms via `javascript_exec`, tracking the "`N / 5000iterations complete`"
+counter (a static label, not a completion flag — a naive
+`/iterations complete/` match fires immediately on click and undercounts by
+~5s; the counter's own numeral must reach the target) until it hit the
+iteration target, confirmed by DPS continuing to visibly drift (Monte-Carlo
+noise, e.g. 1908.14/1919.52/1901.33 across three back-to-back runs) up to that
+point and going flat after:
+
+| Iterations | Workers | Wall-clock | Candidates | Notes |
+| --- | --- | --- | --- | --- |
+| 5,000 | 4 | 5.3 s | 1 (baseline) | first run this session |
+| 3,000 | 4 | 13.4 s | 1 (baseline) | run 2, immediately after |
+| 5,000 | 4 | 12.1 s | 1 (baseline) | run 3, immediately after |
+
+This is **two-to-three orders of magnitude faster than the dev-server
+attempt** (93 s, did not finish 100 iterations) for the same page, same
+machine, same pane — the production build is not merely faster, it is the
+difference between "does not finish" and "finishes in seconds". But the three
+runs above are **not consistent with each other**: 3,000 iterations (run 2)
+took longer wall-clock than 5,000 iterations (runs 1 and 3), and 5,000
+iterations itself varied 5.3 s → 12.1 s between two back-to-back runs with no
+setting changed. That variance is unexplained and is itself now the open
+question — **hypothesis, untested:** rapid repeated `javascript_exec` polling
+against the same page (used to detect completion) may itself be consuming
+main-thread or scheduler time and slowing the very thing being measured, or
+the Claude Code Browser pane's non-displayed state (see below) degrades
+differently run to run. Do not read "5.3 s" as *the* production-build number;
+read "seconds, not tens of seconds, not the 93 s+ dev-server figure" as the
+finding, with the variance flagged as unresolved.
+
+**Harness limitation, not a repo finding:** `computer{action:"screenshot"}`
+against this pane failed with *"the Browser pane is not displayed, so the
+page is not compositing frames"* — this pane is backgrounded/non-displayed by
+default in this environment, not a genuinely foregrounded user tab. All
+numbers above come from `javascript_exec` polling (which still ran; the page
+was not merely idle) rather than from a screenshot-verified, human-visible
+tab, so they cannot rule out `document.hidden`/visibility-driven throttling as
+a contributor — only the direct 1.1× main-thread-vs-Worker busy-loop ratio
+already recorded above rules that out for *Worker* code; the main page thread
+driving the UI update was not separately re-tested for throttling under this
+harness. **The only 20-candidate, baseline+full-batch measurement the ticket's
+"Done when" asks for was not attempted** — time was spent establishing that
+the production build changes the picture at all (a "Done when" item in its
+own right) and characterizing the single-candidate variance above. E-W2
+therefore stays **not fully done**: production-vs-dev is now answered, but the
+20-candidate wall-clock table and an explanation for the run-to-run variance
+are not.
+
+**Serving recipe, corrected for the fork (2026-08-14):** build workers before
+serving *and* before a production build — `vite build` does not do this step
+for you:
+
+```bash
+cd vendor/tbc-new-fork
+eval "$(fnm env --shell bash)"
+export PATH="/c/Program Files/Go/bin:$PATH"
+npx tsx vite.build-workers.mts   # copies wasm_exec.js from $(go env GOROOT), builds sim/reforge/local/net workers
+npx vite build                    # production bundle only; skip for `make host`'s own dev-server recipe
+```
+
+Then serve `dist/` (not `dist/tbc/` — the site expects a `/tbc/` prefix, same
+as GitHub Pages) with any static file server, e.g.
+`npx http-server vendor/tbc-new-fork/dist -p 8123`, and open
+`http://localhost:<port>/tbc/<spec>/`.
+
 ---
 
 ## 6. WCL gear-only import (separate slice, D6)
