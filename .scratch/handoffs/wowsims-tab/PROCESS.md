@@ -14,12 +14,33 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent running: **`sme-rank-review` (Opus) on the REAL
-ret-p3 ranking** (`ret-p3-ranking/slamaltman-p3.*` in the worktree, tip
-`2b3bf56`). This is the review the user chose to close plan §9.6's
-done-when — the earlier candidate-list verdict does not. When it
-reports: verify its evidence, record the verdict, and **stop before any
-merge or push ask** — both require the user's word.
+One background agent running: a **read-only Sonnet diagnosis** of ticket
+163 — where item 27484 is dropped between the WCL fixture and the
+ranking, and whether libram effects exist in the pinned sim (would
+explain the identical -13.81 deltas). Its findings go to the user, who
+then decides fix-vs-defer; append them to ticket 163 either way.
+
+## Real-ranking SME review — DONE: trust-with-caveats, §9.6 still open
+
+Verdict filed as `a077195` on `feat/ret-p3-data`
+(`sme-rank-judgment-ret-p3-real-ranking.md`). Orchestrator verified the
+central claim: 27484 present in the fixture, absent from the ranking
+output entirely.
+
+- **The one gate blocker (high, ticket 163):** the worn relic is
+  invisible — the slot reads empty, all four candidate librams show as
+  losses (three at identical -13.81), and a ret would wrongly conclude
+  they should unequip their libram.
+- Medium: ticket 157's missing trinkets demonstrably distort this
+  ranking (19 of 19 alternatives negative while three real TBC trinkets
+  were never candidates). Low: the Beast-tamer's Shoulders upstream
+  panic drop.
+- **Everything else passed**: all 15 identified worn items at exactly
+  0.00, sane ordering and magnitudes, correct baseline for the gear,
+  honest set-bonus reporting, PvP separation, cutoff dropping only
+  noise.
+- §9.6 done-when: **not satisfied**, by that one finding — "the distance
+  from here is short and specific."
 
 ## Tickets 158+159 + real p3 ranking — DONE, orchestrator-verified
 
