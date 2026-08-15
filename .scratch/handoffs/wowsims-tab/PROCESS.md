@@ -14,15 +14,41 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent is running: a **Sonnet fix-up worker** applying the
-3+4 review's findings in the fork's `upgrades_tab.tsx` (F1 weapon-slot
-sub-tab bug, F2 sub-tab selection lost on re-render, F5 the D7 visible
-iteration control, F3 dead `hideOwned` field). Engine files are off-limits
-to it. It will bump the lockfile and append a "Fix-up after review"
-section to `slice-4/HANDOFF.md`. When it reports: re-derive the F1 bucket
-counts (ret-p2 12, ret-p3 18, feral-p2 57 weapon rows must land in the
-mainhand tab), re-run the green baseline, and **stop before any merge or
-push ask** — both require the user's word.
+Two background agents, disjoint trees:
+
+1. **Slice 5 worker (Sonnet)** — WCL gear-only importer in the fork clone
+   on `feat/upgrades-tab` (sole fork writer; tip was `e1fbf0e2d` at
+   dispatch). Bound by `e-w4-method.md`: `setGear` only, pass iff the
+   settings diff is empty outside `player.equipment`, shelve (not
+   redesign) on failure. Deliverables: fork commits, `e-w4-result.md`,
+   lockfile bump, `slice-5/HANDOFF.md`.
+2. **`pre-merge-review` (Opus)** — on `feat/ret-p3-data` in its worktree
+   → `docs/reviews/feat-ret-p3-data.md` committed on that branch. Told
+   not to re-file tickets 154/157.
+
+When they report: re-derive load-bearing claims (for slice 5, read the
+captured E-W4 diff artifact, not the verdict), run the green baseline,
+and **stop before any merge or push ask** — both require the user's word.
+
+## 3+4 fix-up — DONE, orchestrator-verified
+
+Fork tip `e1fbf0e2d` (parent `6cf6dc28a`), lockfile bumped in outer commit
+`4645495`, "Fix-up after review" appended to `slice-4/HANDOFF.md`. F1/F2/
+F3/F5 all fixed; F4 accepted as inherent. Orchestrator re-derivation:
+
+- Fork diff limited to `upgrades_tab.tsx` + one translation key; `engine/`
+  untouched; the `as SimOrderName` cast is gone and all three sites route
+  through `effectiveSlot()` (imports the engine's real
+  `simSlotsForPoolSlot`).
+- Independent bucket count using the fork's **real** `pool.ts` (the
+  worker's harness had reimplemented it): ret-p2 12, ret-p3 18, feral-p2
+  57 weapon rows all resolve to `mainhand`, zero left as `weapon`.
+- Worker-run `pnpm verify` exit 0 (760 tests) and drift 30/30 accepted —
+  same commands the orchestrator ran minutes earlier on the parent tip.
+
+Still unverified live (stated, not glossed): F2's tab-restore and F5's
+control feeding a completed ranking — blocked by ticket 156, judged by
+typecheck and reading only.
 
 ## Combined slices 3+4 review — DONE: pass with findings
 
