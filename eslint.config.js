@@ -68,7 +68,14 @@ export default tseslint.config(
     // so they share the override rather than getting their own.
     files: ["scripts/**/*.mjs", "docs/plans/wowsims-tab/experiments/**/*.mjs"],
     languageOptions: {
-      globals: { process: "readonly", console: "readonly" },
+      // Timers are here for the E-W5 harnesses, which sample a child
+      // process's RSS on an interval while a sim runs.
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+      },
     },
   },
   {
