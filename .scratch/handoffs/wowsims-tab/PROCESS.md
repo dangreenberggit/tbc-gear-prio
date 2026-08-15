@@ -1,5 +1,10 @@
 # Wowsims tab — orchestration process state
 
+> **New to this detour? Start with
+> [`ORCHESTRATOR-HANDOFF.md`](ORCHESTRATOR-HANDOFF.md)** — it carries the next
+> action, the two environment traps, and the standing constraints. This file is
+> the per-slice detail behind it.
+
 Live state of the detour so nothing is lost at a token wall. Per
 `orchestration.md`: the orchestrator never backgrounds workers and ends a turn
 without this file naming in-flight work and the exact next spawn.
