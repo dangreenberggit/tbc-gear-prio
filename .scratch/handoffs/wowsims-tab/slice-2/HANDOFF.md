@@ -290,6 +290,78 @@ edit from a comment change — it only proves bytes moved. Widening E-W3 to a
 multi-seed, socketed, set-bonus-bearing case is the way to close the coverage
 gap; the drift gate is a tripwire, not a substitute.
 
+## Ticket 155 re-run, 2026-08-14 — broadened E-W3, mutations re-run
+
+Worker A1 broadened `packages/core/test/wowsims-fork-parity.test.ts` to two
+seeds (`[11, 22]`, up from one) and three pool candidates: the original
+socketless Fel-Steel Warhelm (29983, head), and two socketed Lightbringer
+Battlegear pieces (setId 680 — War-Helm 30989 head sockets `[4,1]`,
+Shoulderbraces 30997 shoulder sockets `[4,4]`) that together cross the 2pc
+threshold via `selectPackage`'s multi-candidate completion path, since
+slamaltman wears zero Lightbringer pieces going in. Per-role, per-seed DPS
+offsets (`SEED_OFFSET_BY_ROLE`) give `pairedReplicateSe` a genuine,
+non-degenerate spread to compute — a first attempt sharing one offset between
+baseline and candidate cancelled out of `candidate − baseline` and produced an
+always-zero SE, which would have made the `se.ts` mutation below invisible in
+a different, quieter way (`se: 0.001` vs `0`, not the real `3.0009999999999994`
+vs `2.9999999999999996` recorded below).
+
+**Fixture decision, per the ticket's flagged untested hypothesis: extended, did
+not regenerate.** The existing `slamaltman.raw.json`/fork-DB-stub fixture
+needed no new recorded observations beyond hand-added `SimObservation` map
+entries (still hand-picked constants, same as the original single-candidate
+map — see the test's own doc comment) and two more item ids
+(`data/items/index.json`, `data/gems/palette.json`) added to the fork DB stub.
+Measured by running the extended suite green on the first attempt with no
+fixture regeneration step — `npx vitest run
+packages/core/test/wowsims-fork-parity.test.ts` from `packages/core/`,
+1 passed / 1 skipped.
+
+Every row below was re-run against the **broadened** test (both engines, two
+seeds, three candidates, set-bonus assertion included), not assumed from the
+narrower version above.
+
+| Perturbation (in the fork's `engine/`)                              | E-W3 (broadened) |
+| ---------------------------------------------------------------------| ---------------- |
+| `cutoff.ts` — `meetsCutoff` thresholds ×1000                        | **FAILS** ✓      |
+| `se.ts` — `pairedReplicateSe` returns `+ 0.001`                     | **FAILS** ✓      |
+| `set-value.ts` — `computeSynergy`'s `bonusDps` returns `+ 0.001`    | **FAILS** ✓      |
+
+**`se.ts`'s `pairedReplicateSe` mutation now fails**, closing the exact gap
+this ticket exists for. Diff on item 29983: `se: 3.0009999999999994` (mutant)
+vs `2.9999999999999996` (real); items 30989/30997 similarly `1.001`/`1` and
+`0.501`/`0.5` — never `0`/`0.001`, confirming the per-role seed offsets (not a
+shared one) are what makes the spread real.
+
+**`cutoff.ts`'s `meetsCutoff` mutation still fails**, as before — re-run to
+confirm the broadened pool and multi-seed run didn't accidentally weaken this
+existing detection.
+
+**`set-value.ts`'s `computeSynergy` mutation fails**, confirming the
+set-bonus-completion path (ticket 155's second named gap) is now genuinely
+exercised: `bonusDps: 20.001` (mutant) vs `20` (real) on the Lightbringer 2pc
+package.
+
+**Not re-run / out of scope for this ticket's acceptance criteria:**
+`fillEmptyCandidateGems` (candidate-gems.ts) was mutated to return `[]` on the
+socketed head candidate and the broadened test **still passed** — not a gap in
+new coverage, but a structural property of this whole test design: DPS
+observations are canned constants keyed by composed-request hash, not derived
+from real gem stats, so a mutation that changes *which gems* end up on an item
+without changing whether a recording exists for that composed request is
+invisible to E-W3 by construction (true of the original single-candidate test
+too, not something ticket 155 introduced or was asked to fix). `view.ts`
+(`applyView`) remains uncalled by E-W3, same as before broadening — the ticket
+flags it as an uncovered path but the "Done when" acceptance criteria do not
+require it, and `applyView` is separately unit-tested directly per
+`AGENTS.md`'s testing section (pure function, no seam).
+
+All three mutations above restored afterward — confirmed by `git status`
+reporting nothing for `vendor/` (gitignored, D1) before the final commit, and
+by re-running the suite green: `npx vitest run
+packages/core/test/wowsims-fork-parity.test.ts` from `packages/core/`,
+1 passed / 1 skipped.
+
 ## Blockers
 
 None. Slice 2's "done when" (plan §9.2: "E-W3 passes fork-side — the ported

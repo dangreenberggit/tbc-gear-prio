@@ -89,17 +89,35 @@ const skeleton = JSON.parse(
 ) as RaidSimRequest;
 
 /**
- * The candidate pool is deliberately one item, not the full ret universe:
- * this test's job is proving the port preserves *behaviour*, not measuring a
- * real ranking (that is E-W1/E-W2, slice 3). A single, socketless candidate
- * (Fel-Steel Warhelm, 29983 — data/universes/ret-p2.json) keeps the
- * gem-migration/meta-repair path trivial (no sockets to fill or repair) so
- * the recorded-observation map below is small enough to read and audit by
- * hand, while still exercising the real candidate-swap/compose/cache-key
- * path both engines share.
+ * The candidate pool covers three cases (ticket 155): a socketless swap
+ * (kept from the original test, below), a socketed swap that exercises
+ * gem-fill/meta-repair, and a two-item set-bonus completion package. Not the
+ * full ret universe — this test's job is proving the port preserves
+ * *behaviour*, not measuring a real ranking (that is E-W1/E-W2, slice 3).
  */
 const CANDIDATE_ITEM_ID = 29983;
 const CANDIDATE_NAME = "Fel-Steel Warhelm";
+
+/**
+ * Lightbringer Battlegear (setId 680 — packages/core/src/set-value.ts's
+ * IMPLEMENTED_IN_SIM has both 2pc and 4pc measurable). slamaltman wears zero
+ * Lightbringer pieces (test/fixtures/slamaltman.raw.json), so `selectPackage`
+ * needs two pool candidates — one per open slot — to reach the 2pc threshold;
+ * a single-item swap only reaches 0→1 and never crosses it
+ * ("unmeasurable-at-this-worn-count", set-value.ts). Both items carry real
+ * sockets (data/items/index.json: head [4,1], shoulder [4,4]), so this same
+ * pair also exercises gem-fill/meta-repair on a socketed candidate — ticket
+ * 155's other uncovered path — without a third item.
+ *
+ * Both items are `phase: 3` in data/items/index.json; the pool entry's own
+ * `phase: 2` field below is test metadata for `filterPoolByPhase`, matching
+ * how the existing Fel-Steel Warhelm entry already labels itself, not a claim
+ * about the item's real drop phase.
+ */
+const SET_CANDIDATE_HEAD_ID = 30989;
+const SET_CANDIDATE_HEAD_NAME = "Lightbringer War-Helm";
+const SET_CANDIDATE_SHOULDER_ID = 30997;
+const SET_CANDIDATE_SHOULDER_NAME = "Lightbringer Shoulderbraces";
 
 /**
  * The one enchant-applicability fact both engines' swap path needs: does
@@ -155,34 +173,100 @@ function slamaltmanLoggedGear(): LoggedGear {
  * cutoff/rank code path a genuine sim result would. (Whether the *wasm* sim
  * agrees with native at all is E-W1, run once real observations exist —
  * slice 3, still unrun per slice 1's handoff.)
+ *
+ * Per-seed, per-role offsets, not one flat value: `pairedReplicateSe` (se.ts)
+ * needs a real spread of *deltas* (candidate DPS minus baseline DPS) across
+ * seeds to distinguish it from a bug that returns 0 on <2 deltas but a wrong
+ * constant on ≥2. A single offset shared by baseline and candidate at each
+ * seed was tried first and rejected: it shifts both sides by the same
+ * amount, so it cancels out of `candidate − baseline` and every delta comes
+ * back identical across seeds — `sd(deltas) = 0` by construction, which
+ * would make `pairedReplicateSe`'s own `+ 0.001` mutation invisible (it adds
+ * to a `0` the test never learns is a coincidence rather than a checked
+ * value). `SEED_OFFSET_BY_ROLE` gives baseline and each candidate a
+ * *different* per-seed shift instead, so `candidate − baseline` itself
+ * varies by seed and the standard deviation `pairedReplicateSe` computes is
+ * genuinely nonzero — verified by adding `+ 0.001` to the fork's
+ * `pairedReplicateSe` (`vendor/tbc-new-fork/…/engine/se.ts`) and reading the
+ * failing diff: `se: 3.0009999999999994` (mutant) vs `2.9999999999999996`
+ * (real) on item 29983, and similarly `1.001`/`1` and `0.501`/`0.5` on the
+ * other two rows — never `0`/`0.001`, which is what a shared per-seed offset
+ * produced before this fix (`.scratch/handoffs/wowsims-tab/slice-2/
+ * HANDOFF.md`'s mutation table records both re-runs).
  */
 const BASELINE_DPS = 2000;
 const BASELINE_STDEV = 120;
 const CANDIDATE_DPS = 2050;
 const CANDIDATE_STDEV = 118;
+const SET_HEAD_DPS = 2040;
+const SET_HEAD_STDEV = 119;
+const SET_SHOULDER_DPS = 2015;
+const SET_SHOULDER_STDEV = 121;
+const SET_PACKAGE_DPS = 2075;
+const SET_PACKAGE_STDEV = 117;
 const SIM_VERSION = "v0.0.101";
-const RUN_OPTS = { seed: 11, iterations: 3000 };
+const ITERATIONS = 3000;
+/**
+ * Two distinct seeds — `usesPairedReplication` (se.ts) keys off
+ * `seeds.length > 1`. `assertUsableSeeds` (se.ts) rejects repeats, so these
+ * must differ; the values themselves are arbitrary the way the original
+ * single seed (11) was.
+ */
+const SEEDS = [11, 22];
 
-function baselineObservation(): SimObservation {
+/**
+ * `role` keys the five DPS series above (`"baseline"`, `"felSteel"`,
+ * `"setHead"`, `"setShoulder"`, `"setPackage"`) so each gets its own
+ * per-seed shift — see the block comment above for why a shift shared across
+ * roles would cancel out of every delta.
+ */
+const SEED_OFFSET_BY_ROLE: Record<string, Record<number, number>> = {
+  baseline: { 11: 0, 22: 3 },
+  felSteel: { 11: 0, 22: 9 },
+  setHead: { 11: 0, 22: 5 },
+  setShoulder: { 11: 0, 22: 2 },
+  setPackage: { 11: 0, 22: 11 },
+};
+
+function observationFor(
+  role: keyof typeof SEED_OFFSET_BY_ROLE,
+  seed: number,
+  dps: number,
+  stdev: number
+): SimObservation {
+  const offset = SEED_OFFSET_BY_ROLE[role]?.[seed] ?? 0;
   return {
-    dps: BASELINE_DPS,
-    stdev: BASELINE_STDEV,
-    iterationsDone: RUN_OPTS.iterations,
+    dps: dps + offset,
+    stdev: stdev + offset,
+    iterationsDone: ITERATIONS,
     simVersion: SIM_VERSION,
   };
 }
 
-function candidateObservation(): SimObservation {
-  return {
-    dps: CANDIDATE_DPS,
-    stdev: CANDIDATE_STDEV,
-    iterationsDone: RUN_OPTS.iterations,
-    simVersion: SIM_VERSION,
-  };
-}
-
-/** This repo's own engine, run exactly like rank.test.ts's existing suite. */
-async function rankWithThisRepo() {
+/**
+ * The engine-agnostic half of both `rankWithThisRepo` and the fork's mirror
+ * below: compose every request this test's pool needs (baseline, the
+ * socketless swap, each set-completion piece, and the assembled 2pc
+ * package) across both `SEEDS`, and record a distinct observation for each.
+ * A function of the engine's own module set rather than two independent
+ * ~80-line copies, so the two engines' recordings cannot silently drift
+ * apart from each other — the one property this whole test exists to check.
+ */
+function buildRecordingsAndRun<TRanking>(engine: {
+  compose: typeof compose;
+  equipmentForCandidateSwap: typeof equipmentForCandidateSwap;
+  gemContext: typeof gemContext;
+  gemsForPhase: typeof gemsForPhase;
+  SIM_ORDER: typeof SIM_ORDER;
+  rankUpgrades: (
+    input: Parameters<typeof rankUpgrades>[0],
+    deps: Parameters<typeof rankUpgrades>[1]
+  ) => Promise<TRanking>;
+  RecordedGearSource: typeof RecordedGearSource;
+  RecordedSimRunner: typeof RecordedSimRunner;
+  MemoryStore: typeof MemoryStore;
+  simCacheKey: typeof simCacheKey;
+}): Promise<TRanking> {
   const logged = slamaltmanLoggedGear();
   const equipment = mapWclGearToSim(
     (
@@ -199,43 +283,101 @@ async function rankWithThisRepo() {
       (ev) => ev.sourceID === logged.provenance.sourceID
     )!.gear
   );
-  const baselineRequest = compose(skeleton, {
-    name: CHAR.name,
-    race: "RaceBloodElf",
+
+  const gems = engine.gemContext(engine.gemsForPhase(2), epWeights);
+  const headIdx = engine.SIM_ORDER.indexOf("head");
+  const shoulderIdx = engine.SIM_ORDER.indexOf("shoulder");
+
+  const felSteelEquipment = engine.equipmentForCandidateSwap(
     equipment,
-  });
-  const candidateEquipment = equipmentForCandidateSwap(
-    equipment,
-    SIM_ORDER.indexOf("head"),
+    headIdx,
     CANDIDATE_ITEM_ID,
-    gemContext(gemsForPhase(2), epWeights)
+    gems
   );
-  const candidateRequest = compose(skeleton, {
-    name: CHAR.name,
-    race: "RaceBloodElf",
-    equipment: candidateEquipment,
-  });
+  const setHeadEquipment = engine.equipmentForCandidateSwap(
+    equipment,
+    headIdx,
+    SET_CANDIDATE_HEAD_ID,
+    gems
+  );
+  // The assembled 2pc package: both set slots swapped, same sequential
+  // apply-one-slot-at-a-time policy `set-value.ts`'s `buildSetBonuses`
+  // documents for the real (non-test) path — swap the shoulder first so the
+  // head swap below shares its gem-repair starting point with what
+  // `selectPackage`/`buildSetBonuses` actually assembles at runtime.
+  const setShoulderEquipment = engine.equipmentForCandidateSwap(
+    equipment,
+    shoulderIdx,
+    SET_CANDIDATE_SHOULDER_ID,
+    gems
+  );
+  const setPackageEquipment = engine.equipmentForCandidateSwap(
+    setShoulderEquipment,
+    headIdx,
+    SET_CANDIDATE_HEAD_ID,
+    gems
+  );
 
-  const recordings = new Map<string, SimObservation>([
-    [
-      simCacheKey(baselineRequest, SIM_VERSION, RUN_OPTS),
-      baselineObservation(),
-    ],
-    [
-      simCacheKey(candidateRequest, SIM_VERSION, RUN_OPTS),
-      candidateObservation(),
-    ],
-  ]);
+  const recordings = new Map<string, SimObservation>();
+  for (const seed of SEEDS) {
+    const runOpts = { seed, iterations: ITERATIONS };
+    const baselineRequest = engine.compose(skeleton, {
+      name: CHAR.name,
+      race: "RaceBloodElf",
+      equipment,
+    });
+    const felSteelRequest = engine.compose(skeleton, {
+      name: CHAR.name,
+      race: "RaceBloodElf",
+      equipment: felSteelEquipment,
+    });
+    const setHeadRequest = engine.compose(skeleton, {
+      name: CHAR.name,
+      race: "RaceBloodElf",
+      equipment: setHeadEquipment,
+    });
+    const setShoulderRequest = engine.compose(skeleton, {
+      name: CHAR.name,
+      race: "RaceBloodElf",
+      equipment: setShoulderEquipment,
+    });
+    const setPackageRequest = engine.compose(skeleton, {
+      name: CHAR.name,
+      race: "RaceBloodElf",
+      equipment: setPackageEquipment,
+    });
 
-  return rankUpgrades(
-    { character: CHAR, spec: "ret", maxPhase: 2, seeds: [RUN_OPTS.seed] },
+    recordings.set(
+      engine.simCacheKey(baselineRequest, SIM_VERSION, runOpts),
+      observationFor("baseline", seed, BASELINE_DPS, BASELINE_STDEV)
+    );
+    recordings.set(
+      engine.simCacheKey(felSteelRequest, SIM_VERSION, runOpts),
+      observationFor("felSteel", seed, CANDIDATE_DPS, CANDIDATE_STDEV)
+    );
+    recordings.set(
+      engine.simCacheKey(setHeadRequest, SIM_VERSION, runOpts),
+      observationFor("setHead", seed, SET_HEAD_DPS, SET_HEAD_STDEV)
+    );
+    recordings.set(
+      engine.simCacheKey(setShoulderRequest, SIM_VERSION, runOpts),
+      observationFor("setShoulder", seed, SET_SHOULDER_DPS, SET_SHOULDER_STDEV)
+    );
+    recordings.set(
+      engine.simCacheKey(setPackageRequest, SIM_VERSION, runOpts),
+      observationFor("setPackage", seed, SET_PACKAGE_DPS, SET_PACKAGE_STDEV)
+    );
+  }
+
+  return engine.rankUpgrades(
+    { character: CHAR, spec: "ret", maxPhase: 2, seeds: SEEDS },
     {
-      gear: new RecordedGearSource({
+      gear: new engine.RecordedGearSource({
         fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
         gear: new Map([["abc123|7", logged]]),
       }),
-      sim: new RecordedSimRunner(SIM_VERSION, recordings),
-      store: new MemoryStore(),
+      sim: new engine.RecordedSimRunner(SIM_VERSION, recordings),
+      store: new engine.MemoryStore(),
       clock: () => new Date("2026-07-26T12:00:00.000Z"),
       raidSimSkeleton: skeleton,
       epWeights,
@@ -247,9 +389,39 @@ async function rankWithThisRepo() {
           phase: 2,
           source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
         },
+        {
+          itemId: SET_CANDIDATE_HEAD_ID,
+          name: SET_CANDIDATE_HEAD_NAME,
+          slot: "head",
+          phase: 2,
+          source: { kind: "raid", zone: "Karazhan", boss: "Prince Malchezaar" },
+        },
+        {
+          itemId: SET_CANDIDATE_SHOULDER_ID,
+          name: SET_CANDIDATE_SHOULDER_NAME,
+          slot: "shoulder",
+          phase: 2,
+          source: { kind: "raid", zone: "Karazhan", boss: "Prince Malchezaar" },
+        },
       ],
     }
   );
+}
+
+/** This repo's own engine, run exactly like rank.test.ts's existing suite. */
+async function rankWithThisRepo() {
+  return buildRecordingsAndRun({
+    compose,
+    equipmentForCandidateSwap,
+    gemContext,
+    gemsForPhase,
+    SIM_ORDER,
+    rankUpgrades,
+    RecordedGearSource,
+    RecordedSimRunner,
+    MemoryStore,
+    simCacheKey,
+  });
 }
 
 /**
@@ -327,6 +499,8 @@ function buildForkDatabaseJson(): Record<string, unknown> {
     }
   });
   wornItemIds.add(CANDIDATE_ITEM_ID);
+  wornItemIds.add(SET_CANDIDATE_HEAD_ID);
+  wornItemIds.add(SET_CANDIDATE_SHOULDER_ID);
 
   const itemsJson = [...wornItemIds].map((id) => {
     const item = items[String(id)];
@@ -357,6 +531,15 @@ function buildForkDatabaseJson(): Record<string, unknown> {
     };
   });
 
+  // Worn gems union the full phase<=2 palette, not worn gems alone: the set
+  // candidates' sockets (data/items/index.json: head [4,1], shoulder [4,4])
+  // are empty on the fixture item and must be auto-filled by
+  // candidate-gems.ts's real fill logic, which chooses from
+  // `gemsForPhase(2)` — the original socketless candidate never exercised
+  // this path, so `wornGemIds` alone was enough before ticket 155.
+  for (const gem of gems) {
+    if (gem.phase <= 2) wornGemIds.add(gem.id);
+  }
   const gemsJson = [...wornGemIds].map((id) => {
     const gem = gems.find((g) => g.id === id);
     if (!gem)
@@ -535,69 +718,20 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
       pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
     );
 
-    const logged = slamaltmanLoggedGear();
-    const raw = JSON.parse(
-      readFileSync(join(root, "test/fixtures/slamaltman.raw.json"), "utf8")
-    ) as {
-      combatant_info_events: Array<{ sourceID: number; gear: WclGearEntry[] }>;
-    };
-    const equipment = mapWclGearToSim(
-      raw.combatant_info_events.find(
-        (ev) => ev.sourceID === logged.provenance.sourceID
-      )!.gear
-    );
-
-    const baselineRequest = forkCompose.compose(skeleton, {
-      name: CHAR.name,
-      race: "RaceBloodElf",
-      equipment,
+    const forkRanking = await buildRecordingsAndRun<
+      Awaited<ReturnType<typeof rankUpgrades>>
+    >({
+      compose: forkCompose.compose,
+      equipmentForCandidateSwap: forkRank.equipmentForCandidateSwap,
+      gemContext: forkCandidateGems.gemContext,
+      gemsForPhase: forkGems.gemsForPhase,
+      SIM_ORDER: forkSlots.SIM_ORDER,
+      rankUpgrades: forkRank.rankUpgrades,
+      RecordedGearSource: forkGearSource.RecordedGearSource,
+      RecordedSimRunner: forkSimRunner.RecordedSimRunner,
+      MemoryStore: forkStore.MemoryStore,
+      simCacheKey: forkSimRunner.simCacheKey,
     });
-    const candidateEquipment = forkRank.equipmentForCandidateSwap(
-      equipment,
-      forkSlots.SIM_ORDER.indexOf("head"),
-      CANDIDATE_ITEM_ID,
-      forkCandidateGems.gemContext(forkGems.gemsForPhase(2), epWeights)
-    );
-    const candidateRequest = forkCompose.compose(skeleton, {
-      name: CHAR.name,
-      race: "RaceBloodElf",
-      equipment: candidateEquipment,
-    });
-
-    const forkRecordings = new Map([
-      [
-        forkSimRunner.simCacheKey(baselineRequest, SIM_VERSION, RUN_OPTS),
-        baselineObservation(),
-      ],
-      [
-        forkSimRunner.simCacheKey(candidateRequest, SIM_VERSION, RUN_OPTS),
-        candidateObservation(),
-      ],
-    ]);
-
-    const forkRanking = await forkRank.rankUpgrades(
-      { character: CHAR, spec: "ret", maxPhase: 2, seeds: [RUN_OPTS.seed] },
-      {
-        gear: new forkGearSource.RecordedGearSource({
-          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
-          gear: new Map([["abc123|7", logged]]),
-        }),
-        sim: new forkSimRunner.RecordedSimRunner(SIM_VERSION, forkRecordings),
-        store: new forkStore.MemoryStore(),
-        clock: () => new Date("2026-07-26T12:00:00.000Z"),
-        raidSimSkeleton: skeleton,
-        epWeights,
-        pool: [
-          {
-            itemId: CANDIDATE_ITEM_ID,
-            name: CANDIDATE_NAME,
-            slot: "head",
-            phase: 2,
-            source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
-          },
-        ],
-      }
-    );
 
     // The assertion E-W3 exists for: same deltas, same SE, same rank — not
     // a deep-equal on the whole Ranking, since assumptions.presetId is
@@ -625,7 +759,45 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         belowCutoff: i.belowCutoff,
       }))
     );
-  });
+    // At least one row must actually take the paired-replicate path — a
+    // silent fallback to `independent` SE on both engines would still pass
+    // the equality checks above (they'd agree on the wrong method) and
+    // defeat the reason `SEEDS` has two entries at all.
+    expect(
+      thisRepoRanking.items.some((i) => i.seMethod === "paired-replicate")
+    ).toBe(true);
+
+    // setBonuses: same completion-package synergy on both engines — the
+    // uncovered path ticket 155 names (set-bonus.ts, set-value.ts). Proves
+    // the 2pc Lightbringer package is actually measured, not merely present.
+    expect(thisRepoRanking.setBonuses?.length).toBeGreaterThan(0);
+    expect(
+      thisRepoRanking.setBonuses?.map((b) => ({
+        setId: b.setId,
+        threshold: b.threshold,
+        packageItemIds: b.packageItemIds,
+        packageDeltaDps: b.packageDeltaDps,
+        bonusDps: b.bonusDps,
+        se: b.se,
+        unmeasured: b.unmeasured,
+      }))
+    ).toEqual(
+      forkRanking.setBonuses?.map(
+        (b: NonNullable<typeof forkRanking.setBonuses>[number]) => ({
+          setId: b.setId,
+          threshold: b.threshold,
+          packageItemIds: b.packageItemIds,
+          packageDeltaDps: b.packageDeltaDps,
+          bonusDps: b.bonusDps,
+          se: b.se,
+          unmeasured: b.unmeasured,
+        })
+      )
+    );
+    // Broadening the pool and seed count (ticket 155) pushed real elapsed
+    // time for both engines' dynamic-imported dependency graphs past
+    // vitest's 5s default; this is wall-clock reality, not slow test logic.
+  }, 30000);
 });
 
 describe.skipIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
