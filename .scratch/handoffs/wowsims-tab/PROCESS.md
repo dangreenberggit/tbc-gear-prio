@@ -14,11 +14,28 @@ slice-6 SME review dispatched).
 
 ## In flight right now (dispatched 2026-08-14 by this seat)
 
-One background agent running: a **read-only Sonnet diagnosis** of ticket
-163 — where item 27484 is dropped between the WCL fixture and the
-ranking, and whether libram effects exist in the pinned sim (would
-explain the identical -13.81 deltas). Its findings go to the user, who
-then decides fix-vs-defer; append them to ticket 163 either way.
+One background agent running: a **Sonnet fix worker** on
+`feat/ret-p3-data` implementing the SME blocker's "or" branch — a
+`worn-unrankable` classification for worn-but-unpooled items (ticket
+124's acceptance criteria) plus an honest unmeasured/caveat marking for
+the relic slot, then a ranking regen. Explicitly out of its scope: the
+assembler's no-source exclusion (ticket 157) and any sim/fork change.
+When it reports: verify the regenerated artifact's relic-slot rendering
+directly, update ticket 163's status, and consider a focused SME
+re-check of just that slot before presenting §9.6 as closed. **Merge
+remains a separate user ask.**
+
+## Ticket 163 diagnosis — DONE (read-only, two agents)
+
+Full findings appended to the main repo's ticket 163 (commits `df0b4f1`,
+`448a624`). Load-bearing results: the drop point is the assembler's
+no-source exclusion (`assemble_universe.py:1416-1424`, `excludedNoSource`
+= 1298 items), rank.ts has no worn-but-unpooled path (owned decorates
+pool rows only), dead-slots.ts silently skips (pre-scoped by tickets 124
+and 94), three of four candidate librams are TODO stubs in the pinned
+sim while 27484's own proc IS implemented. Recommended and dispatched:
+the small this-repo pair (worn-unrankable + slot caveat); sim-side proc
+implementation documented as upstream work, deliberately not done.
 
 ## Real-ranking SME review — DONE: trust-with-caveats, §9.6 still open
 
