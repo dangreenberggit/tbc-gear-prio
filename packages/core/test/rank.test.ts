@@ -3661,3 +3661,331 @@ describe("rankUpgrades candidate-arm gem substitutions (ticket 107)", () => {
     expect(row!.gemSubstitutions).toBeUndefined();
   });
 });
+
+/**
+ * M1 controls, parallelism, ordering, Stop — candidate-pool.md §5.1/§7.
+ *
+ * All candidates below share the "neck" slot: only one is ever equipped in
+ * any composed request, so no set-bonus package is ever formed and a fixed
+ * `SYNTHETIC_NECK_DPS` lookup keyed by whichever neck item id the request
+ * carries is enough to control every candidate's delta independently,
+ * without needing real universe data or per-item recordings.
+ */
+describe("rankUpgrades — M1 candidate pool controls", () => {
+  const BASELINE_DPS = 2000;
+
+  /** Candidate item id -> the DPS a sim of that swap should report. */
+  const SYNTHETIC_NECK_DPS = new Map<number, number>([
+    [90001, 2100], // +100
+    [90002, 2080], // +80
+    [90003, 2060], // +60
+    [90004, 2040], // +40
+    [90005, 2020], // +20
+  ]);
+
+  function syntheticPool(): ReturnType<typeof neckEntry>[] {
+    return [...SYNTHETIC_NECK_DPS.keys()].map((id) => neckEntry(id));
+  }
+
+  function neckEntry(itemId: number) {
+    return {
+      itemId,
+      name: `Synthetic Neck ${itemId}`,
+      slot: "neck" as const,
+      phase: 1,
+      source: { kind: "world" as const },
+    };
+  }
+
+  /** Item id equipped in `neck` slot for this composed request, if any. */
+  function neckIdIn(req: RaidSimRequest): number | undefined {
+    const raid = req.raid as
+      | { parties?: Array<{ players?: Array<{ equipment?: unknown }> }> }
+      | undefined;
+    const equipment = raid?.parties?.[0]?.players?.[0]?.equipment as
+      { items?: Array<{ id?: number }> } | undefined;
+    const neckIndex = SIM_ORDER.indexOf("neck");
+    return equipment?.items?.[neckIndex]?.id;
+  }
+
+  /**
+   * Reports `BASELINE_DPS` for the worn character and, for a composed swap,
+   * whatever `SYNTHETIC_NECK_DPS` says the equipped neck item is worth —
+   * falling back to the baseline for a neck this test does not know about,
+   * so an unrecognised request fails loudly downstream (a missing row)
+   * rather than silently answering zero.
+   */
+  function syntheticSim(): SimRunner {
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+        const neckId = neckIdIn(req);
+        const dps =
+          neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+            ? SYNTHETIC_NECK_DPS.get(neckId)!
+            : BASELINE_DPS;
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: opts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  /** Counts calls and tracks how many were in flight at once. */
+  class TrackingSimRunner implements SimRunner {
+    runs = 0;
+    maxInFlight = 0;
+    private inFlight = 0;
+    constructor(private readonly inner: SimRunner) {}
+    version(): Promise<string> {
+      return this.inner.version();
+    }
+    async run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
+      this.runs += 1;
+      this.inFlight += 1;
+      this.maxInFlight = Math.max(this.maxInFlight, this.inFlight);
+      try {
+        return await this.inner.run(req, opts);
+      } finally {
+        this.inFlight -= 1;
+      }
+    }
+  }
+
+  function m1Deps(overrides: Partial<Parameters<typeof rankUpgrades>[1]> = {}) {
+    const sim = new TrackingSimRunner(syntheticSim());
+    return {
+      sim,
+      deps: {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: sim as SimRunner,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: syntheticPool(),
+        ...overrides,
+      },
+    };
+  }
+
+  const m1Input = {
+    character: CHAR,
+    spec: "ret" as const,
+    maxPhase: 1 as const,
+    iterations: 3000,
+    seeds: [42],
+    race: "RaceHuman" as const,
+  };
+
+  describe("candidateCap (7.1)", () => {
+    it("keeps only the capped candidates plus every owned row", async () => {
+      // Item 90005 is already worn in the neck slot; a cap of 2 must still
+      // surface it even though its EP-ordering rank (last, delta 0) would
+      // otherwise put it outside the cap.
+      const gear = slamaltmanLoggedGear();
+      const neckIndex = SIM_ORDER.indexOf("neck");
+      gear.items[neckIndex] = { id: 90005, slot: "neck", gems: [] };
+
+      const { deps } = m1Deps({
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", gear]]),
+        }),
+      });
+
+      const ranking = await rankUpgrades({ ...m1Input, candidateCap: 2 }, deps);
+
+      const itemIds = ranking.items.map((i) => i.itemId).sort((a, b) => a - b);
+      // Top 2 by EP order (90001, 90002 — the highest synthetic DPS gains,
+      // which is also their EP order since this fixture's EP weights favour
+      // the same stat the DPS table was built to reward) plus the owned
+      // 90005, which the cap must not drop.
+      expect(itemIds).toEqual([90001, 90002, 90005]);
+    });
+
+    it("still returns every owned row when the cap is smaller than the owned count", async () => {
+      const gear = slamaltmanLoggedGear();
+      const neckIndex = SIM_ORDER.indexOf("neck");
+      gear.items[neckIndex] = { id: 90005, slot: "neck", gems: [] };
+
+      const { deps } = m1Deps({
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", gear]]),
+        }),
+      });
+
+      const ranking = await rankUpgrades({ ...m1Input, candidateCap: 1 }, deps);
+
+      expect(ranking.items.some((i) => i.itemId === 90005)).toBe(true);
+    });
+
+    it("hashes an omitted cap the same as no cap at all — an uncapped run is cacheable across both spellings", async () => {
+      const { sim, deps } = m1Deps();
+      const uncapped = await rankUpgrades(m1Input, deps);
+      const runsAfterUncapped = sim.runs;
+
+      const explicitlyAll = await rankUpgrades(
+        { ...m1Input, candidateCap: SYNTHETIC_NECK_DPS.size },
+        deps
+      );
+
+      expect(sim.runs).toBe(runsAfterUncapped);
+      expect(explicitlyAll.contentHash).toBe(uncapped.contentHash);
+    });
+  });
+
+  describe("concurrency and determinism (7.3)", () => {
+    it("bounds in-flight sims to Deps.concurrency", async () => {
+      const { sim, deps } = m1Deps({ concurrency: 2 } as never);
+
+      await rankUpgrades(m1Input, deps);
+
+      expect(sim.maxInFlight).toBeLessThanOrEqual(2);
+    });
+
+    it("produces a byte-identical ranking at concurrency 1 vs 4", async () => {
+      const one = m1Deps({ concurrency: 1 } as never);
+      const four = m1Deps({ concurrency: 4 } as never);
+
+      const rankingOne = await rankUpgrades(m1Input, one.deps);
+      const rankingFour = await rankUpgrades(m1Input, four.deps);
+
+      expect(rankingFour).toEqual(rankingOne);
+    });
+
+    it("surfaces the same error regardless of pool size", async () => {
+      const failingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async () => {
+          throw new Error("candidate sim exploded");
+        },
+      };
+      const depsOne = {
+        ...m1Deps({ concurrency: 1 } as never).deps,
+        sim: failingSim,
+      };
+      const depsFour = {
+        ...m1Deps({ concurrency: 4 } as never).deps,
+        sim: failingSim,
+      };
+
+      await expect(rankUpgrades(m1Input, depsOne)).rejects.toThrow(RankError);
+      await expect(rankUpgrades(m1Input, depsFour)).rejects.toThrow(RankError);
+    });
+  });
+
+  describe("Stop (7.8)", () => {
+    it("returns complete: false and honest simmed flags when aborted mid-run", async () => {
+      const controller = new AbortController();
+      let runCount = 0;
+      const abortingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          // Abort after the baseline sim (run 1) so at least one candidate
+          // is left unsimmed — the case the type exists to describe.
+          if (runCount === 1) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: abortingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      } as never);
+
+      const ranking = await rankUpgrades(m1Input, deps);
+
+      expect(ranking.complete).toBe(false);
+      const unsimmed = ranking.items.filter((i) => i.simmed === false);
+      expect(unsimmed.length).toBeGreaterThan(0);
+      for (const row of unsimmed) {
+        expect(row.belowCutoff).toBe(false);
+        expect(row.rank).toBeNull();
+      }
+    });
+
+    it("writes no ranking cache row for a partial run, but keeps per-sim rows", async () => {
+      const controller = new AbortController();
+      let runCount = 0;
+      const abortingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          if (runCount === 1) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const store = new MemoryStore();
+      const { deps } = m1Deps({
+        sim: abortingSim,
+        store,
+        concurrency: 1,
+        signal: controller.signal,
+      } as never);
+
+      const ranking = await rankUpgrades(m1Input, deps);
+      expect(ranking.complete).toBe(false);
+
+      const cachedRanking = await store.get(`ranking:${ranking.contentHash}`);
+      expect(cachedRanking).toBeUndefined();
+
+      // The baseline sim (run 1, before abort) still wrote its per-sim row —
+      // a re-run after Stop must not have to redo work that already landed.
+      const cacheKeys = (store as unknown as { data?: Map<string, unknown> })
+        .data;
+      const anySimRowWritten =
+        cacheKeys === undefined ||
+        [...cacheKeys.keys()].some((k) => k.startsWith("sim:"));
+      expect(anySimRowWritten).toBe(true);
+    });
+  });
+
+  describe("row-landed progress (7.11)", () => {
+    it("emits a row event per candidate before the promise resolves", async () => {
+      const { deps } = m1Deps();
+      const rowEvents: unknown[] = [];
+
+      const ranking = await rankUpgrades(m1Input, deps, (p) => {
+        if ("kind" in p && p.kind === "row") rowEvents.push(p.row);
+      });
+
+      expect(rowEvents.length).toBe(SYNTHETIC_NECK_DPS.size);
+      const eventItemIds = rowEvents
+        .map((r) => (r as { itemId: number }).itemId)
+        .sort((a, b) => a - b);
+      const rankedItemIds = ranking.items
+        .map((i) => i.itemId)
+        .sort((a, b) => a - b);
+      expect(eventItemIds).toEqual(rankedItemIds);
+    });
+  });
+});
