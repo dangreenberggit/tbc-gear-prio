@@ -661,9 +661,10 @@ VERIFY_EXIT=0
 - **Deliverable A (bisTags refresh) is now done.** `ret-p3.json` (and p4/p5's
   degrade) carry genuine p3 provenance, sourced and verified against
   upstream, not fabricated and not a community-list workaround. Plan §9.6's
-  done-when is now met for the tags/EP-file half; `sme-rank-review` still
-  has not been run (out of scope for this slice per its own brief — data
-  pipeline work, not the review lane).
+  done-when is now met for the tags/EP-file half; `sme-rank-review` has since
+  been run, verdict trust-with-caveats, filed at `859eab5` in
+  `.scratch/handoffs/sme-rank-judgment-ret-p3-refresh.md` (that verdict notes
+  no ranking was reviewed — see its own scope caveat).
 - **EP-weights wiring is done** and proven not to touch feral.
 - **Two things found mid-slice, handled differently on purpose**: the
   phase-guard bug is fixed (small, correct, in scope — my own file,
