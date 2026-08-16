@@ -141,3 +141,76 @@ rule the pane's display state in or out as a factor, (2) run the actual
 20-candidate batch at both iteration counts, (3) explain or reproduce the
 5.3s-to-12.1s variance seen here on production-build single-candidate runs
 before trusting any of these numbers for D7's default.
+
+### 2026-08-15 (candidate-pool orchestrator) — recipe rewritten around the Candidates cap
+
+The remaining work above ("run the actual 20-candidate batch") had no
+supported way to run it: the engine simmed **every** eligible candidate, with
+no cap and no way to stop a run once started (candidate-pool.md F1, F3). A
+20-candidate batch was not a setting anyone could choose. That is now fixed,
+so this recipe replaces the earlier one.
+
+**What changed in the product**
+
+- **Candidates control**, beside Iterations: caps how many candidates are
+  simmed, defaulting to all eligible. Owned items are exempt from the cap.
+- **Stop button**: aborts a run, returning a partial ranking rather than
+  discarding the work. Sims that already finished are kept and cached, so a
+  re-run resumes cheaply.
+- **Candidate-level concurrency**: several candidates now sim at once, where
+  before each request was split across workers and candidates ran one at a
+  time. This changes what the wall-clock per candidate even means — see the
+  caveat below.
+
+**The measurement to run**
+
+Production build only (the dev server is already confirmed to distort this —
+see the 2026-08-14 comment). Serve `dist/tbc/bundle/` statically, then for
+each cell: set **Candidates = 20**, set Iterations, run, record wall-clock.
+
+| Iterations | Candidates | Wall-clock | Workers | Notes |
+| ---------- | ---------- | ---------- | ------- | ----- |
+| 3000       | 20         |            |         |       |
+| 5000       | 20         |            |         |       |
+
+Record the page's worker count (`#simui-concurrent-workers-picker`) and the
+machine. Run each cell **three times** and report all three: the earlier
+attempt saw a 5.3 s → 12.1 s spread on identical settings, and that variance
+is itself unexplained (item 3 below).
+
+**Two traps the last attempt hit — do not re-hit them**
+
+1. The Claude Code Browser pane is **backgrounded by default** and cannot
+   composite frames, so it cannot rule out visibility throttling of the main
+   thread. The recorded 1.1× busy-loop ratio ruled that out for *Worker* code
+   only. **Use a real foregrounded browser tab**, or state plainly that the
+   numbers came from a non-displayed pane.
+2. Confirm the sim actually ran before trusting a number — vary the seed and
+   check the DPS changes, or watch the access log for real `lib.wasm` /
+   `sim_worker.js` fetches. A fast "result" that never recomputed is the
+   failure mode here.
+
+**Caveat that did not exist before**
+
+Per-candidate wall-clock is no longer a single number: with candidate-level
+concurrency, throughput depends on how many candidates run at once. Record
+the concurrency the adapter chose alongside each cell, or the table cannot be
+compared against the CLI figures in candidate-pool.md §3.3.
+
+**What this measurement is still for**
+
+D7's 3,000-iteration default remains unjustified in either direction until
+this table exists. Note that the CLI-side numbers are now known
+(candidate-pool.md §3.3: `t_fixed` 373.2 ms, `t_iter` 0.0637 ms/iteration,
+peak RSS 183.8 MB per process) and they are what killed M2 racing — but they
+are **CLI figures and do not transfer to the browser**, whose fixed-cost
+structure is different and unmeasured. That is precisely the gap this ticket
+still owns.
+
+**Acceptance, restated**
+
+- [ ] The table above, filled, three runs per cell, with worker count,
+      concurrency and machine.
+- [ ] Foregrounded-tab status stated explicitly either way.
+- [ ] The run-to-run variance explained, or recorded as unexplained with the
+      spread quoted.
