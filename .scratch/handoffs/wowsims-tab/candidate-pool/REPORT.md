@@ -5,9 +5,17 @@ Branch: `feat/candidate-pool`, tip `b52fd51` (+ this report).
 Fork: `vendor/tbc-new-fork` at `6a192eb2a` on `feat/upgrades-tab`, `pushed: false`.
 Review: [`docs/reviews/feat-candidate-pool.md`](../../../../docs/reviews/feat-candidate-pool.md).
 
-**Headline: the plan's central bet lost, and losing it was the most valuable
-thing this branch did.** M2 (racing) was cancelled by its own gate, on
-measurement, before any of it was built. M1 shipped in both engine copies.
+> **Superseded in part by §8.** This headline was written before the plan
+> author pointed out that the gate had been measured on the CLI, the wrong
+> runtime for the question it decides. Re-measuring on WASM (ticket 203)
+> **resumed M2**, and it now ships in both engine copies. §1–7 are left as
+> written because they record what was true and known at the time; read §8
+> for the current state.
+
+**Headline (superseded): the plan's central bet lost, and losing it was the
+most valuable thing this branch did.** M2 (racing) was cancelled by its own
+gate, on measurement, before any of it was built. M1 shipped in both engine
+copies.
 
 ## 1. What was executed per slice
 
@@ -202,3 +210,165 @@ inactive on the measured path (ticket 200), and a Stop that is genuinely
 honest and resumable. What was learned is larger: per-request fixed cost, not
 iteration count, is the thing to attack, and no amount of screening tuning
 changes that.
+
+---
+
+# 8. Fix round (2026-08-15)
+
+Ordered by the user after the plan author's §3.4 judgment: ticket 203 → 200 →
+204 (conditional) → re-review + this section.
+
+**Headline: the plan author was right and I was wrong.** REPORT §1–7 said "the
+central bet lost." That over-read a CLI-scoped result. M2 exists for the
+browser, where a resident WASM module pays no process spawn — and re-measuring
+on that runtime **resumed the milestone**.
+
+## 8.1 What was executed
+
+| item      | content                                       | result                              |
+| --------- | --------------------------------------------- | ----------------------------------- |
+| 203       | E-W5 §3.1 sweep on `lib.wasm` under Node      | done; **floor 0.0441** → M2 resumes |
+| 200       | CLI `--concurrency`, default 4                | done; **1.88×** measured            |
+| 204       | Synthetic fixture roster (§7.a)               | done; ret 38/240, feral 42/246      |
+| slice E   | M2 racing in `packages/core`                  | merged `1ad5568`                    |
+| slice F   | M2 ported to the fork                         | fork `138fa77f5`                    |
+| re-review | Linus / perf / Carmack over the new diff only | 2 NACKs, 4 blockers, all fixed      |
+
+`pnpm verify` exits **0** on the tip; `pnpm merge-ready` reports **ok**. Both
+exit codes captured directly, not read off a wrapper.
+
+## 8.2 Numbers and the go/no-go
+
+**WASM (ticket 203):** `t_fixed` = 748.4 ms, `t_iter` = 3.2446 ms/iteration,
+`cost(5000)` = 16,971.4 ms, **floor = 0.0441** — under the 0.25 gate by more
+than 5×. With §3.2's `max K* = 25 ≤ 60`, both legs pass and **M2 resumed**.
+
+The contrast is the whole finding: CLI floor 0.609 against WASM floor 0.0441, a
+~14× difference in the deciding ratio, because `t_fixed` roughly doubles while
+`t_iter` grows about 51×.
+
+**The perf axis stress-tested it and it held.** Every estimator (median, mean,
+min, leave-one-out, two-point) and a 20,000-draw bootstrap put the floor below
+0.053. The verdict is robust even though the number itself is not precise
+(§8.5).
+
+**Defaults, corrected during slice E:** `screenIterations` = 1000,
+`promoteTopK` = 150. My §3.4.1 proposal of 300/35 was structurally impossible —
+I derived K from a fixture with 16 above-cutoff rows, but the gating fixture
+has 42 at contiguous ranks 1–42, so no K below 42 could ever pass recall.
+
+**§6.4's ratio target is NOT met: 0.7042 against ≤0.4**, and it is unreachable
+at any K that passes recall — K=120, the measured zero-miss floor, still lands
+near 0.58.
+
+**The sum nobody had done** (`experiments/m2-net-win-arithmetic.md`): racing
+**saves ~15% on WASM and costs ~24% on the CLI**. Break-even is a promoted
+ratio of 0.765 (WASM) and 0.368 (CLI).
+
+## 8.3 Test table
+
+| #       | Test                       | Status                                      |
+| ------- | -------------------------- | ------------------------------------------- |
+| 7.0     | Racing does less work      | pass                                        |
+| 7.2     | Recall on held-out fixture | pass — 30 seeded draws, zero misses, feral  |
+| 7.5     | Promotion rule             | pass — 9 unit cases incl. 2 added in review |
+| 7.7 ext | Screened third state       | pass                                        |
+| 7.10    | Port parity at tip         | pass (E-W3, re-run after every fork edit)   |
+
+`pnpm verify` runs 817+ tests. Ticket 204's fixture test asserts both the ≥10
+above-cutoff floor and the (spec, preset phase, `maxPhase`) triple.
+
+## 8.4 Deviations from the plan
+
+1. **§3.4.1's defaults replaced** (300/35 → 1000/150). Mine could not pass
+   recall on the gating fixture. Slice E measured and corrected.
+2. **§6.3's premise was false.** It said the fork needs a per-request
+   iterations override for screening. Slice F verified `WasmSimRunner` never
+   calls `makeRaidSimRequest` — `SimRunOpts.iterations` already crossed the
+   seam — and corrected the section rather than implementing a no-op.
+3. **§6.4's ratio target missed**, recorded as measured rather than adjusted.
+4. **§7.a's WCL fixtures kept, not replaced.** Their tests cover ambiguity
+   resolution that exists only because WCL data is ambiguous; replacing them
+   would have deleted coverage. §7.a records the reason, per its own rule.
+5. **Ticket 204's preset source** is `sync_wowsims.py --restore` into
+   `vendor/wowsims/`, not the nested fork clone my brief claimed.
+
+## 8.5 Open disagreements and unresolved items
+
+**Verbatim, not summarised into agreement.**
+
+### The one that decides whether M2 should be enabled
+
+- **Carmack:** racing as shipped is a **net loss on the CLI (1.24×) and a 15%
+  win on WASM** — not the ~2.5× the ≤0.4 target implied. Break-even is 0.368
+  (CLI) and 0.765 (WASM); the shipped 0.7042 sits on the wrong side of one and
+  barely inside the other.
+- **Orchestrator:** agreed, verified, and fixed the CLI half — `cli.ts` now
+  passes `fullPool: true`. **I do not think the WASM half is settled.** 15% is
+  a real win but far from what the plan wanted, and nobody has timed racing end
+  to end on either runtime. **My position: M2 is correct and safe, but whether
+  it ships enabled on the browser path is a judgment call for the plan
+  author**, with per-slot top-_j_ as the alternative that would make it clearly
+  worth it.
+
+### Per-slot promotion — §8.1's carried disagreement, now with a price
+
+- **Dean:** per-slot top-_j_ ∪ global K; a one-per-slot floor is not enough.
+- **Fowler and Beck:** add _j_ only when a recall failure names a starved slot.
+- **What this round produced:** a **third** independent pointer. M1.5 showed
+  slot clustering; §6.4 showed a global K cannot reach the ratio target at any
+  recall-passing value; and the net-win table shows the savings live at small
+  promoted counts. Carmack costed it: `bestDeltaBySlot` is **already computed**
+  inside `promotionRule`, so per-slot top-_j_ is a sort per bucket —
+  microseconds — and at _j_=5 over 17 slots the ratio lands near 0.354, **under
+  the target and under the CLI break-even**, the only configuration in this
+  analysis where racing pays on both runtimes.
+- **Orchestrator:** the evidence is three-for-three and now quantified at
+  roughly the difference between 6% and 65% on WASM. It is still fit on two
+  fixtures and unmeasured in a browser. **Recommend taking it before enabling
+  M2 by default.** Not built here — outside every slice's scope this round.
+
+### Linus's Blocker 3, tested and refuted
+
+- **Linus:** §6.4's "unreachable" may be measuring an over-broad
+  `setPackageItemIds` (it promotes every item with a set id, not the packages
+  `selectPackage` sims) rather than a real constraint. Instrument before
+  accepting the tension.
+- **Orchestrator:** correct objection, so I measured it. Of 160 promoted rows,
+  **150 are top-K**; everything else adds 10, the set clause 6. Removing it
+  entirely moves 0.704 to about 0.68. **The conclusion survives.** The clause is
+  still over-broad and worth tightening on its own merits (ticket 205).
+
+### My own errors this round
+
+1. **§3.4.1's defaults were structurally impossible** — K=35 against a 42-row
+   contiguous band.
+2. **§3.4.1 said M2 resumes "on the browser path" without checking the code
+   could distinguish runtimes.** It could not; that is Carmack's blocker F1.
+3. **My first net-win sum used 240 screens; the real count is 277** (paired
+   slots screen twice). Carmack's figure is the accurate one, and mine
+   understated racing's cost.
+
+## 8.6 What the user must still do
+
+1. **Decide whether M2 ships enabled on the browser path** at a 15% win, or
+   whether per-slot top-_j_ comes first. This is the substantive call.
+2. **Read the updated review** — 4 fix-round blockers fixed, 12 deferred to
+   tickets 201 and 205–207, 2 wontfix.
+3. **Ticket 156** still needs a human with a real foregrounded browser tab;
+   every number here is Node-hosted.
+4. **The merge.** `pnpm merge-to-dev` has not run and will not without an
+   explicit ask. Nothing is pushed; the fork's `pushed` flag is still `false`.
+
+## 8.7 Judgement
+
+The plan's instrument worked twice — once to cancel M2 on evidence, once to
+resume it when the author noticed the evidence came from the wrong runtime.
+Both moves were right on the information available, and the second was possible
+only because the first was recorded honestly enough to be re-examined.
+
+What ships now is a measured, recall-safe racing implementation worth ~15% on
+the runtime it targets, correctly disabled on the one where it loses. What it
+is not is the ~60% the plan hoped for, and the reason is a global top-K
+fighting a per-slot problem — the disagreement §8.1 has carried since the plan
+review, now with three independent measurements and a price attached.
