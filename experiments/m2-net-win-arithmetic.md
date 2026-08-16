@@ -99,3 +99,41 @@ difference between 6% and 65% on the runtime M2 exists for.
 - Set-completion and replication sims are excluded from both sides. They are
   roughly common to both flows, so they dilute the percentages rather than
   reverse the sign.
+
+## Which criterion actually promotes? (orchestrator, fix-round review)
+
+The Linus review axis raised a reasonable objection to everything above:
+`setPackageItemIds` is built as `ordered.filter(e => getItem(e.itemId)?.setId != null)`
+— **every item with a set id**, not the packages `selectPackage` actually sims.
+If that clause were promoting most of the pool, then §6.4's "the ratio target
+is unreachable" would be measuring an over-broad `.filter()` rather than a law
+about recall.
+
+Measured, by temporarily instrumenting `promotionRule` and re-running
+`measure-racing-ratio.ts` on the ret tuning fixture (probe removed afterwards;
+`git checkout -- packages/core/src/promotion.ts`):
+
+| criterion                          | rows   |
+| ---------------------------------- | ------ |
+| promoted (total)                   | 160    |
+| in global top-K                    | 150    |
+| best-in-slot                       | 14     |
+| set-package member                 | 13     |
+| owned                              | 14     |
+| **promoted by anything but top-K** | **10** |
+| **promoted by set-package alone**  | **6**  |
+
+**The objection does not hold, and the conclusion survives.** Top-K promotes
+150 of 160; every other criterion combined adds 10 rows, and the over-broad
+set clause is solely responsible for 6. Removing that clause entirely would
+move the ratio from 0.704 to about 0.68 — nowhere near the 0.4 target.
+
+So §6.4's tension is real: it is the global-K rule against this fixture's
+above-cutoff density, exactly as recorded, and not an artifact of the set
+filter. The set clause is still over-broad and worth tightening on its own
+merits (it promotes set pieces no `selectPackage` would choose), but it is not
+what makes the target unreachable.
+
+(The 160 here versus §6.4's 169 full sims is the paired-slot effect: finger and
+trinket candidates each sim twice, so a promoted-row count and a sim count are
+not the same number.)
