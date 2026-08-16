@@ -806,3 +806,98 @@ Copies refreshed from `data/universes/` at `60e05571`; nothing yet prevents
 the drift recurring, which is all 211 still owns.
 
 Slice B is unchanged and still next.
+
+### 2026-08-16 (slice B) - the exception, and the cause: compose() never updates player.database
+
+**Slice B is answered.** The screening sims throw a Go panic, and the cause is
+in this project's own `compose()`, not in worker counts, `SharedArrayBuffer`,
+or anything environmental. None of plan v2 §B's four candidates was right.
+
+**The exception, verbatim** (read off the page from the per-row disclosure
+slice A added; item id varies per candidate, always the candidate's own id):
+
+```
+Ragesteel Breastplate was dropped from the ranking: the sim failed on this
+swap - sim error (0): No item with id: 23522 Stack Trace: goroutine 350
+[running]: ... github.com/wowsims/tbc/sim/core.NewItem(...)
+vendor/tbc-new-fork/sim/core/database.go:419 ...
+github.com/wowsims/tbc/sim/core.NewEquipmentSet(...) database.go:471
+github.com/wowsims/tbc/sim/core.ProtoToEquipment(...) database.go:479
+[through NewParty raid.go:34, NewRaid raid.go:178, Environment.construct
+environment.go:77, NewEnvironment environment.go:58, NewSim sim.go:191,
+runSim sim.go:146, RunSim]
+```
+
+**Every screen failed: 455 of 455 dropped**, status line mid-run read
+`Screening 119/390... (119 failed) (0 rows landed)`. Engine confirmed loaded:
+16 `GET /tbc/lib.wasm` in the server access log.
+
+**Root cause, traced through source rather than inferred.** The WASM build is
+compiled **without** the `with_db` tag, so `database_load.go`'s embedded
+`db.bin` never registers. `ItemsByID` is therefore populated *only* per
+request, from the `player.Database` proto the caller attaches
+(`sim/core/character.go:95` -> `addToDatabase`).
+
+Upstream's own Simulate button rebuilds that proto for every sim, next to the
+equipment it describes:
+
+```ts
+// ui/core/sim.ts:346-347
+player.database = gear.toDatabase(this.db);
+player.equipment = gear.asSpec();
+```
+
+Our `compose()` sets only the equipment:
+
+```ts
+// upgrades/engine/compose.ts (and packages/core/src/compose.ts, same shape)
+slot.equipment = { items: player.equipment.map(toProtoItem) };
+// slot.database is never touched
+```
+
+`currentPageSkeleton()` captures the skeleton **once**, from the character's
+*currently equipped* gear, so `slot.database` only ever carries `SimItem`
+entries for items already worn. Swap in any candidate that is not already on
+the character and the request references an id its own database lacks ->
+`NewItem` panics -> `screenCandidate` catches it (and, before slice A,
+swallowed it).
+
+`db.json` is **not** the problem: 23522, 29072, 29074 and 30129 are all
+present in `assets/database/db.json`, so the browser's `Database` singleton
+has them. The gap is purely that `compose()` never copies them into the
+request.
+
+**Why every screen failed rather than some.** Screening only ever sims
+*candidate* swaps, and a candidate is by definition an item the character is
+not wearing. So the failure rate is 100% by construction - which is exactly
+why the swallowed-exception bug looked like "no upgrades found".
+
+**Why the CLI never hit it.** `cli.ts` hardcodes `fullPool: true` so it never
+screens - but note the full-iteration path composes requests the *same* way.
+The CLI works because `wowsimcli` is a different binary built **with** the
+`with_db` tag, so its `ItemsByID` is compiled in and complete. The browser is
+the only surface where the per-request database is the sole source.
+
+**Fix, not yet made:** `compose()` must populate `slot.database` for the
+composed equipment, the way `sim.ts:346` does. That is a real code change with
+a test, and it belongs to slice B's "Done when", so it is the next step rather
+than something to fold into a measurement run.
+
+**Corrections to plan v2 §B's candidate table.** Candidate 1 (an id the fork's
+bundled DB lacks) is closest but wrong in mechanism - the id is in `db.json`;
+it is missing from the *request*. Candidates 2, 3 and 4 (`raidMetrics.dps`
+shape, concurrency vs `hardwareConcurrency`, an iteration minimum) are all
+ruled out: the panic happens during environment construction, before a single
+iteration runs.
+
+**Two observations that contradict this ticket's earlier notes.** Both from
+the Claude-in-Chrome/Brave surface this session:
+
+- `document.visibilityState` read **`hidden`** throughout, not `visible` as
+  the 2026-08-16 "compositing surface EXISTS" comment recorded. Screenshots
+  and JS still worked and the run completed. Whatever the earlier comment
+  measured, `visible` is not reliably reproducible, and slice C must state the
+  observed value rather than assuming this surface delivers a foregrounded tab.
+- The page header kept displaying "Phase 2 (2.1 - T5)" while the gear-modal
+  dropdown and `localStorage` both read Phase 3. The header is **not** a
+  reliable phase indicator; confirm through the modal or storage.
