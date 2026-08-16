@@ -874,11 +874,14 @@ export async function rankUpgrades(
      * disclosure bookkeeping (hit caps, gem substitution notes, set-bonus
      * context) a screened candidate never carries: only promoted candidates
      * get a `RankedItem`'s full shape. A candidate whose every slot attempt
-     * panics screens at `-Infinity` rather than being silently promoted —
-     * the same "never let a sim failure look like a win" rule the
-     * full-iteration loop encodes by skipping the attempt entirely, except
-     * here there is no disclosure row to skip it *into*, so the delta itself
-     * carries the refusal.
+     * panics screens at `-Infinity`, which is a refusal the *promotion rule*
+     * then honours by skipping non-finite screens (`promotion.ts`) — the
+     * same "never let a sim failure look like a win" rule the full-iteration
+     * loop encodes by skipping the attempt entirely, except here there is no
+     * disclosure row to skip it *into*, so the delta itself carries it. The
+     * sentinel never reaches a `RankedItem`: the screened-row builder clamps
+     * it to 0, because `JSON.stringify(-Infinity)` is `null` and a
+     * rehydrated `null` would poison the sort comparator.
      */
     async function screenCandidate(entry: PoolEntry): Promise<number> {
       const slotNames = simSlotsForPoolSlot(entry.slot);
@@ -1160,13 +1163,26 @@ export async function rankUpgrades(
         // promotion cap dropped it — either way it keeps its screening
         // delta and renders as the third view state (view.ts), never
         // interleaved with full-iteration rows.
+        //
+        // A candidate whose every slot attempt panicked screens at
+        // -Infinity, which `JSON.stringify` writes as `null`. A cached
+        // ranking rehydrated with `deltaDps: null` makes the sort comparator
+        // `b.deltaDps - a.deltaDps` return NaN, and `Array.sort` with a NaN
+        // comparator orders arbitrarily — so the byte-identical-output
+        // guarantee (7.3) would hold only until a screening sim failed.
+        // Clamped here rather than at the screen so the promotion rule still
+        // sees the refusal (promotion.ts skips non-finite screens).
+        const screenDelta = deltaByItemId.get(entry.itemId);
         screenedRows.push({
           rank: null,
           itemId: entry.itemId,
           name: entry.name,
           slot: entry.slot,
           source: entry.source,
-          deltaDps: deltaByItemId.get(entry.itemId) ?? 0,
+          deltaDps:
+            screenDelta !== undefined && Number.isFinite(screenDelta)
+              ? screenDelta
+              : 0,
           deltaPct: 0,
           se: 0,
           seMethod: "independent",

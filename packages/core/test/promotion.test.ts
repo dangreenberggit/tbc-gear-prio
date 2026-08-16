@@ -147,4 +147,41 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
     expect(result.find((r) => r.itemId === 2)?.promoted).toBe(true);
     expect(result.find((r) => r.itemId === 3)?.promoted).toBe(false);
   });
+
+  it("does not promote a slot whose every candidate failed to screen", () => {
+    // A candidate whose every slot attempt panicked screens at -Infinity.
+    // The best-in-slot floor exists so no slot goes unrepresented, but a slot
+    // where nothing produced a number has nothing to represent: promoting the
+    // argmax of two failures spends a full-iteration sim on a candidate that
+    // will panic again. -Infinity also serializes to JSON `null`, so letting
+    // one reach a RankedItem breaks the sort comparator on a rehydrated
+    // Ranking.
+    const candidates = [entry(1, "back"), entry(2, "back")];
+    const screen = [
+      screened(1, Number.NEGATIVE_INFINITY),
+      screened(2, Number.NEGATIVE_INFINITY),
+    ];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 0,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.every((r) => !r.promoted)).toBe(true);
+  });
+
+  it("still floors a slot on its one finite screen among failures", () => {
+    const candidates = [entry(1, "back"), entry(2, "back")];
+    const screen = [screened(1, Number.NEGATIVE_INFINITY), screened(2, -3)];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 0,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.find((r) => r.itemId === 2)?.promoted).toBe(true);
+    expect(result.find((r) => r.itemId === 1)?.promoted).toBe(false);
+  });
 });
