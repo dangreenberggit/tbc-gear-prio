@@ -148,6 +148,11 @@ describe.each(Object.entries(ROSTER))(
           iterations: recorded.iterations,
           seeds: [recorded.seed],
           ...(cfg.race ? { race: cfg.race } : {}),
+          // This test replays a recorded *full sweep* (every eligible
+          // candidate full-iteration simmed, no screening) — racing's
+          // default would send screening requests this fixture's
+          // full-iteration-only recording has no observations for.
+          fullPool: true,
         },
         {
           gear: new RecordedGearSource(gearData),
