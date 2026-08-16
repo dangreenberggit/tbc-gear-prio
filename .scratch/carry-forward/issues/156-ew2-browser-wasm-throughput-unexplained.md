@@ -343,3 +343,114 @@ observed directly.
 build (worker path/MIME, a `wasm_exec.js` gate, or an adapter selecting
 recordings over the live engine). Until it loads, the browser cannot produce
 throughput numbers regardless of tab visibility.
+
+#### Operational detail for the next attempt
+
+Everything below was executed this session. Reuse it rather than rediscovering
+it; the selectors and the two workarounds cost most of the attempt's budget.
+
+**Surface.** Claude in Chrome extension on **Brave** (not the Claude Code
+Browser pane, which never composites). `list_connected_browsers` returned
+empty on the first call and populated on a retry moments later - **an empty
+list is not proof the extension is absent, retry before concluding.**
+
+Machine seen from that surface: `hardwareConcurrency` **6**, UA
+`Chrome/15...` on `Windows NT 10.0; Win64; x64`. Page's own worker picker
+(`#simui-concurrent-workers-picker`) read **4**.
+
+**Serving.** `http-server` must be pointed at `dist`, and the app lives under
+`/tbc/`; the per-spec page is a directory URL:
+
+```
+http://localhost:8123/tbc/paladin/retribution/
+```
+
+Asset check before driving anything (all three returned 200; `lib.wasm` is
+20,293,865 bytes):
+
+```bash
+curl -s -o /dev/null -w "%{http_code} %{size_download}\n" http://localhost:8123/tbc/lib.wasm
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8123/tbc/sim_worker.js
+```
+
+**Serving 200s on `lib.wasm` did not mean it was loaded.** The page never
+requested it. Check the request side, not the server side - see the detector
+below.
+
+**Selectors (post-rebuild bundle).** The Upgrades tab nav item is a
+`<button class="nav-link">` inside `li.upgrades-tab.nav-item`, **not an
+`<a>`** - an `a`-only selector silently does nothing and the pane stays
+`offsetParent === null`:
+
+```js
+document.querySelector('.upgrades-tab.nav-item button.nav-link').click();
+```
+
+| Thing | Selector |
+| --- | --- |
+| Pane | `#upgrades-tab` |
+| Iterations | `.upgrades-iterations-input` (default `3000`) |
+| Candidates | `.upgrades-candidates-input` (default empty = all) |
+| Run | `.upgrades-run-button` |
+| Status line | `.upgrades-status` |
+| Results | `.upgrades-results` |
+
+**Setting the inputs.** They are framework-controlled; assigning `.value`
+directly does not register. Use the native setter plus both events:
+
+```js
+function setVal(el, v) {
+  Object.getOwnPropertyDescriptor(el.constructor.prototype, 'value').set.call(el, v);
+  el.dispatchEvent(new Event('input',  { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+```
+
+**Completion detector that works.** Ignore the DPS value and the
+"N iterations complete" label (both are traps recorded in the 2026-08-14
+comment). The Upgrades tab exposes a cleaner signal: `.upgrades-run-button`
+is `disabled` for exactly the duration of the run. Attach a `MutationObserver`
+to the pane **before** clicking Run, and timestamp each mutation:
+
+```js
+window.__m = { samples: [], t0: performance.now() };
+new MutationObserver(() => window.__m.samples.push({
+  t: Math.round(performance.now() - window.__m.t0),
+  s: document.querySelector('.upgrades-status').innerText.trim(),
+})).observe(document.querySelector('#upgrades-tab'), {subtree:true, childList:true, characterData:true});
+document.querySelector('.upgrades-run-button').click();
+```
+
+Then **leave the browser alone** (wait in the shell, not in the page) and read
+`window.__m` in one short call afterwards. Status strings look like
+`Starting...` -> `Reading your gear...` -> `Building the candidate pool...` ->
+`Simming n/N... (r rows landed)` -> `Ranking results...`.
+
+**Engine-loaded assertion - run this before trusting any number:**
+
+```js
+performance.getEntriesByType('resource').filter(r => /\.wasm$/.test(r.name)).length
+```
+
+This session it returned **0** while `sim_worker.js` appeared 8 times. A run
+with 0 wasm entries is running on recordings, not the engine, and its
+wall-clock is meaningless.
+
+**Observed timings from the failed run** (recorded adapter, NOT the engine -
+do not use these as sim figures): `Starting...` at 33 ms, pool built by 57 ms,
+sim 35/71 at 30.4 s, sim 38/71 at 84.2 s (during harness interference),
+failure at 102.2 s.
+
+**Cosmetic bug spotted in passing:** the Candidates input's placeholder renders
+the raw i18n template `{{count}} / {{count}}`. Unrelated to this ticket;
+worth its own issue.
+
+#### Acceptance checklist, restated for the next attempt
+
+- [ ] `lib.wasm` fetch count > 0 before any timing is recorded.
+- [ ] Rebuild first; grep `dist/tbc/bundle/` for `upgrades-candidates`.
+- [ ] Candidates=20 at 3000 and 5000 iterations, three runs each.
+- [ ] Record worker count, candidate concurrency, and
+      `hardwareConcurrency` (6 on this machine, 20 on the original).
+- [ ] No harness polling during a timed run.
+- [ ] State foregrounded status explicitly (this surface: `visible`).
