@@ -51,18 +51,19 @@ the page. Commit per green slice.
 
 ## B. Find why browser screening sims throw
 
-Rebuild + serve per handoff §3, open the ret page, then **one call** from the
-console — no full run:
+Rebuild + serve per handoff §3, open the ret page, run once at Phase 3 with
+Candidates empty, and read the exception text slice A now prints per
+screened row. That is the primary route — no console handle needed.
 
-```js
-// in the tab's module scope via the devtools console
-const r = document.querySelector('.upgrades-tab')?.__tab ?? window.__upgradesTab; // expose in A if absent
-await r.sim.run(<one candidate RaidSimRequest>, { seed: 42, iterations: 1000 })
-```
-
-If the tab has no console handle, A adds a dev-only
-`window.__upgrades = { sim, lastRequest }` (gated on `isDevMode()`, same
-gate as `WorkerPool.log`), because rediscovering a way in cost this session.
+**No `isDevMode()` gate for anything slice B relies on.** `isDevMode()` is
+`import.meta.env.DEV`, false in the production build that B must measure
+(the same gate hid `Ready, isWasm: true`; ticket 156 slice B comment). Only
+if the per-row text is not enough to discriminate the candidates below does
+A add a console handle, and then it is gated on a URL parameter
+(`?upgradesDebug=1`) and exposes what the tab actually holds:
+`window.__upgrades = { sim, skeleton, gearSource, lastInput }` — the tab
+does not hold candidate requests; the engine composes them inside
+`rankUpgrades`, so a probe composes one from the skeleton and gear source.
 
 Record the exact exception string in the ticket. Candidates, in the order
 to check, each with its discriminating check:
