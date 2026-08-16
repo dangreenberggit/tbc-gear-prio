@@ -408,6 +408,8 @@ baseline (full) → screen all eligible (pool) → rule → cap → full sims fo
 
 `packages/core` first (TDD, §7 order), then port. The fork needs a per-request iterations override — an **optional `iterations` parameter on `makeRaidSimRequest`** (F7), not a parallel builder, to keep the upstream diff minimal.
 
+**Correction (slice F, 2026-08-15): the screening pass does not use that parameter, because it never needed to.** `WasmSimRunner.run` does not call `makeRaidSimRequest` at all — it builds its request directly and reads iterations from `SimRunOpts.iterations`, which already crosses the `SimRunner` seam per request. So screening at a lower iteration count required **no** engine or request-builder change on the fork side. The optional parameter added in slice D is still present and still harmless (one optional trailing argument, every existing caller unchanged), but it has no consumer; its comment says so. Verified: `grep -n "makeRaidSimRequest" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/adapters/wasm_sim_runner.ts` returns nothing.
+
 ### 6.4 Done when
 
 - Recall (7.2) passes on the **held-out** fixture across K noise draws; top-5 never screened out.
