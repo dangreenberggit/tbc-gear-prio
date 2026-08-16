@@ -596,6 +596,9 @@ describe("rankUpgrades", () => {
         iterations: 3000,
         seeds: [42],
         race: "RaceHuman",
+        // About the deltaDps calculation, not racing — the recorded runner
+        // has no fixture for a screening-pass sim key.
+        fullPool: true,
       },
       {
         gear: new RecordedGearSource({
@@ -776,6 +779,9 @@ describe("rankUpgrades", () => {
           iterations: 3000,
           seeds: [42],
           race: "RaceHuman",
+          // About hitDriven flagging, not racing — the recorded runner has
+          // no fixture for a screening-pass sim key.
+          fullPool: true,
         },
         {
           gear: new RecordedGearSource({
@@ -861,6 +867,9 @@ describe("rankUpgrades", () => {
         iterations: 3000,
         seeds: [42],
         race: "RaceHuman",
+        // About hit-cap regression flagging, not racing — the recorded
+        // runner has no fixture for a screening-pass sim key.
+        fullPool: true,
       },
       {
         gear: new RecordedGearSource({
@@ -953,6 +962,9 @@ describe("rankUpgrades", () => {
       iterations: 3000,
       seeds: [42],
       race: "RaceHuman" as const,
+      // About determinism of the ranking output, not racing — the recorded
+      // runner has no fixture for a screening-pass sim key.
+      fullPool: true as const,
     };
 
     const a = await rankUpgrades(input, deps);
@@ -1027,6 +1039,9 @@ describe("rankUpgrades", () => {
         iterations: 3000,
         seeds: [42],
         race: "RaceHuman",
+        // About worn-ring duplication, not racing — the recorded runner
+        // has no fixture for a screening-pass sim key.
+        fullPool: true,
       },
       {
         gear: new RecordedGearSource({
@@ -1493,6 +1508,9 @@ describe("rankUpgrades", () => {
           iterations: 3000,
           seeds: [42],
           race: "RaceHuman",
+          // About the candidate set and gem palette, not racing — the
+          // recorded runner has no fixture for a screening-pass sim key.
+          fullPool: true,
         },
         {
           gear: new RecordedGearSource({
@@ -1632,6 +1650,9 @@ describe("rankUpgrades", () => {
           iterations: 3000,
           seeds: [42],
           race: "RaceHuman",
+          // About the gem palette staying rare-capped, not racing — the
+          // recorded runner has no fixture for a screening-pass sim key.
+          fullPool: true,
         },
         {
           gear: new RecordedGearSource({
@@ -1752,6 +1773,9 @@ describe("rankUpgrades", () => {
           iterations: 3000,
           seeds: [42],
           race: "RaceHuman",
+          // About phase-5 rares reaching the fill, not racing — the
+          // recorded runner has no fixture for a screening-pass sim key.
+          fullPool: true,
         },
         {
           gear: new RecordedGearSource({
@@ -3388,6 +3412,179 @@ describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)"
       "Beast-tamer's Shoulders was dropped from the ranking"
     );
     expect(sub!.detail).toContain(GO_PANIC);
+  });
+});
+
+/**
+ * Ticket 156 slice A. The screening path swallowed every sim failure with a
+ * bare `catch { continue }`, so a run whose every screening sim threw exited
+ * green as "No upgrades found above the cutoff" — 394 consecutive engine
+ * failures were indistinguishable from "nothing is an upgrade", which is what
+ * hid the real browser defect for five sessions.
+ *
+ * These drive `rankUpgrades` with racing on (`fullPool` unset) and a runner
+ * that throws only on candidate swaps, which is the shape the browser hit:
+ * the baseline sim succeeds, so the run gets far enough to look healthy.
+ */
+describe("rankUpgrades — screening sim failures are disclosed (ticket 156)", () => {
+  const SCREEN_PANIC = "wasm sim panicked: worker pool exhausted";
+
+  /** The item ids in `neckPool`-style synthetic blocks, for targeted throws. */
+  function neckIdIn(req: RaidSimRequest): number {
+    const items = (
+      req.raid as {
+        parties: Array<{
+          players: Array<{ equipment: { items: Array<{ id?: number }> } }>;
+        }>;
+      }
+    ).parties[0]?.players[0]?.equipment.items;
+    return items?.[SIM_ORDER.indexOf("neck")]?.id ?? 0;
+  }
+
+  const WORN_NECK_ID = 30022;
+
+  /**
+   * Throws on every non-baseline swap at screening iterations, succeeds at
+   * full iterations. `screenIterations` defaults to 1000 and the tab's
+   * iterations are 3000, so the two paths are distinguishable by `iterations`
+   * alone — which is exactly how the browser failure presented: the full path
+   * was never reached because nothing survived screening.
+   */
+  function screenFailingSim(opts: { failAll: boolean }): SimRunner {
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, runOpts: SimRunOpts) => {
+        const neckId = neckIdIn(req);
+        const isBaseline = neckId === WORN_NECK_ID;
+        const isScreen = runOpts.iterations === 1000;
+        if (!isBaseline && isScreen) {
+          // `failAll: false` spares one candidate so the run still produces a
+          // ranking — that is the "partial failure" case, where a skip row
+          // must appear without the whole run refusing.
+          if (opts.failAll || neckId !== 900001) {
+            throw new Error(SCREEN_PANIC);
+          }
+        }
+        return {
+          dps: 2000 + (isBaseline ? 0 : 25),
+          stdev: 90,
+          iterationsDone: runOpts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  function racingPool() {
+    return [900001, 900002, 900003].map((itemId, i) => ({
+      itemId,
+      name: `neck-${i}`,
+      slot: "neck" as const,
+      phase: 1,
+      source: { kind: "raid" as const, zone: "Karazhan", boss: "Nightbane" },
+    }));
+  }
+
+  function racingDeps(sim: SimRunner) {
+    return {
+      gear: new RecordedGearSource({
+        fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+        gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+      }),
+      sim,
+      store: new MemoryStore(),
+      clock: () => new Date("2026-07-26T12:00:00.000Z"),
+      raidSimSkeleton: skeleton,
+      epWeights,
+      pool: racingPool(),
+    };
+  }
+
+  const racingInput = {
+    character: CHAR,
+    spec: "ret" as const,
+    maxPhase: 2 as const,
+    iterations: 3000,
+    seeds: [42],
+    race: "RaceHuman" as const,
+  };
+
+  it("refuses the run when every screening sim throws", async () => {
+    // Zero real signal must never render as "no upgrades found". The run has
+    // no measurement at all, so it must refuse rather than report an empty
+    // shortlist that looks like a finished, healthy comparison.
+    await expect(
+      rankUpgrades(racingInput, racingDeps(screenFailingSim({ failAll: true })))
+    ).rejects.toMatchObject({
+      name: "RankError",
+      kind: "sim-failed",
+    } satisfies Partial<RankError>);
+  });
+
+  it("names the failure count and the first message when it refuses", async () => {
+    // The operator needs to know it was the sim that died and how widely,
+    // not just that the run failed — the browser symptom was a green run.
+    let err: unknown;
+    try {
+      await rankUpgrades(
+        racingInput,
+        racingDeps(screenFailingSim({ failAll: true }))
+      );
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err).toBeInstanceOf(RankError);
+    // Narrowed rather than cast: a resolved run would otherwise read its
+    // way past these assertions on a `Ranking` that has no `message`.
+    if (!(err instanceof RankError)) throw new Error("expected a RankError");
+    expect(err.message).toContain(SCREEN_PANIC);
+    expect(err.message).toMatch(/\b3\b/);
+  });
+
+  it("discloses a partial screening failure and still ranks the survivor", async () => {
+    const ranking = await rankUpgrades(
+      racingInput,
+      racingDeps(screenFailingSim({ failAll: false }))
+    );
+
+    // The surviving candidate still ranks — one failing screen must not take
+    // the run down, exactly as one failing full sim does not (ticket 122).
+    expect(ranking.items.some((i) => i.itemId === 900001)).toBe(true);
+
+    // The two that lost every screening attempt are dropped, not carried as
+    // `~0.0` rows: that is ticket 122's accepted drop-and-disclose, applied
+    // to the screening stage rather than a second rule beside it.
+    expect(ranking.items.some((i) => i.itemId === 900002)).toBe(false);
+    expect(ranking.items.some((i) => i.itemId === 900003)).toBe(false);
+
+    const subs = ranking.substitutions.filter((s) =>
+      s.detail.includes(SCREEN_PANIC)
+    );
+    expect(subs.length).toBe(2);
+    for (const sub of subs) {
+      expect(sub.detail).toContain("was dropped from the ranking");
+      expect(sub.detail).toContain("during screening");
+    }
+  });
+
+  it("reports screening progress with a running failure count", async () => {
+    // Screening fired no progress at all before this: `onProgress` first
+    // spoke after the whole screening pass finished, so a tab watching 394
+    // failing screens showed a frozen status line for the entire run.
+    const events: Array<{ stage: string; failed?: number }> = [];
+    await rankUpgrades(
+      racingInput,
+      racingDeps(screenFailingSim({ failAll: false })),
+      (p) => {
+        if ("stage" in p && p.stage === "screening") {
+          events.push({ stage: p.stage, failed: p.failed });
+        }
+      }
+    );
+
+    expect(events.length).toBeGreaterThan(0);
+    expect(events[events.length - 1]!.failed).toBe(2);
   });
 });
 

@@ -370,7 +370,18 @@ function buildRecordingsAndRun<TRanking>(engine: {
   }
 
   return engine.rankUpgrades(
-    { character: CHAR, spec: "ret", maxPhase: 2, seeds: SEEDS },
+    {
+      character: CHAR,
+      spec: "ret",
+      maxPhase: 2,
+      seeds: SEEDS,
+      // Parity of the ranked deltas, not of racing: the recordings above are
+      // pinned at ITERATIONS only, and a screening pass would ask this runner
+      // for keys at DEFAULT_SCREEN_ITERATIONS that it rejects. Both engines
+      // take the same path, so the comparison is unaffected — and the port's
+      // screening code is covered by its own tests either side.
+      fullPool: true,
+    },
     {
       gear: new engine.RecordedGearSource({
         fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),

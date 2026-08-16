@@ -275,6 +275,31 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
     expect(result.every((r) => !r.promoted)).toBe(true);
   });
 
+  /**
+   * Ticket 156. The two tests around this one pass `promoteTopK: 0`, so they
+   * pin the "never promote a failed screen" intent for the per-slot floor
+   * only. `topK` sorts the whole screened list and slices the first K without
+   * checking finiteness, so at the shipped K (150) a pool smaller than 150
+   * promotes *everything* — including candidates whose every slot attempt
+   * panicked. The full-iteration sim then re-runs a swap already known to
+   * crash, and the row is disclosed as "dropped from the ranking" on top of
+   * the screening failure already recorded against it.
+   */
+  it("does not promote a failed screen through topK", () => {
+    const candidates = [entry(1, "back"), entry(2, "neck")];
+    const screen = [screened(1, Number.NEGATIVE_INFINITY), screened(2, 40)];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 150,
+      promoteTopJ: 1,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.find((r) => r.itemId === 2)?.promoted).toBe(true);
+    expect(result.find((r) => r.itemId === 1)?.promoted).toBe(false);
+  });
+
   it("still floors a slot on its one finite screen among failures", () => {
     const candidates = [entry(1, "back"), entry(2, "back")];
     const screen = [screened(1, Number.NEGATIVE_INFINITY), screened(2, -3)];
