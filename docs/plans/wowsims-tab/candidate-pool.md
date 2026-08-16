@@ -2,7 +2,7 @@
 
 Ticket: `.scratch/carry-forward/issues/199-tab-candidate-pool-is-not-prefiltered.md`
 Parent plan: [`plan.md`](plan.md) §5, §2.5, §12 · Engine seam rules: `PLAN.md` §5 · Prior decision: [ADR-0018](../../adr/0018-no-rank-time-ep-prefilter-so-no-fullpool-flag.md)
-Date: 2026-08-15 · Status: **rev 2 — plan review done (§8), ready for the execution orchestrator (§9)** · Author seat: Fable (design lane)
+Date: 2026-08-15 · Status: **rev 3 — executed; M1 shipped, M2 no-go on the CLI path and undecided on the browser path (§3.4)** · Author seat: Fable (design lane)
 
 ## 0. Read this first
 
@@ -215,6 +215,23 @@ screening pass available as a second, cheaper filter to fall back on.
 spawn per request). The browser/WASM path (F5, ticket 156) has a different
 fixed-cost structure and was not measured here — do not generalize this
 verdict to that path without a separate measurement.
+
+### 3.4 Plan author's judgment on the execution (2026-08-15, rev 3)
+
+Read against `REPORT.md` and `docs/reviews/feat-candidate-pool.md`.
+
+**The gate was measured on the wrong runtime for the question it decides.** §3.1 said "under Node" and slice B read that as the native `wowsimcli` binary, one OS process per request. That was a defensible reading of my wording, and the numbers are good numbers — for the CLI. But M2 exists for the **browser** path, where there is no process spawn: the WASM module is resident in a worker, per-request cost is `NewEnvironment` alone, and per-iteration cost is far higher (E-W1: 5,000 iterations ≈ 14.7 s under Node-WASM ≈ 2.9 ms/iteration, ~46× the native `t_iter`). The 0.54 floor is dominated by process start-up (373 ms against 0.064 ms/iteration) and **does not transfer**. §3.3's own scope note says so; the report's headline ("the central bet lost") over-reads it.
+
+Verdict: **M2 is no-go on the CLI path and undecided on the browser path.** Not cancelled. What decides it is the same §3.1 sweep run on the WASM runtime, which is agent-runnable under Node — E-W1's harness pattern (`plan.md:473` records both gotchas: inject a `SimDatabase`, define `wasmready` before `go.run`). Ticket 203. If WASM `t_fixed / cost(5000) < 0.25` the §3.2 rank result (K\* ≤ 25 on both fixtures) already says racing is safe, and M2 resumes at slice E from this branch. If not, M2 is dead on both paths and M3 gets its design pass.
+
+**Rulings the report asked for:**
+
+- **Ticket 200 (CLI concurrency): accept.** §5.2's `CLI: 1` is amended to "CLI: 4 by default, `--concurrency` flag" — the same measurement that killed racing on the CLI (66% fixed cost per process) is the one that makes concurrent process spawn the CLI's real win. Needs the before/after ratio the review asked for.
+- **§7.a synthetic fixtures: keep the rule, ticket it (204).** It was not needed for what shipped (M2 cancelled ⇒ no held-out recall gate), but it is needed the moment M2 resumes, and it is what lets a new spec join the roster without WCL.
+- **Per-slot promotion (§8.1 carried disagreement):** the M1.5 evidence (cloaks 94–114 on ret, belts/necks on feral; _j_=10 misses none where a global cap needs ~114) supports Dean's shape for **cap membership**. Agree with the orchestrator that it is a supported hypothesis fit on two fixtures, not a default. It rides with M2's resumption or M3's design pass; the cap keeps defaulting to all until then.
+- **Deviations 1–4 and the R1 self-correction:** accepted as reported.
+
+**On the branch itself:** `pnpm verify` re-run by the plan author (exit captured, not backgrounded) — see the commit that adds this section for the result. Mergeable on my reading once the user has read the review; the merge is the user's ask, per `AGENTS.md`.
 
 ## 4. M0 — documents match the engine
 
