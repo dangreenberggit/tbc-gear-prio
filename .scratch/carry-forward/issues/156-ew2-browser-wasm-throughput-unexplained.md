@@ -243,3 +243,103 @@ hidden, so the criteria cannot be met from this harness.**
 Unchanged conclusion: this ticket needs a human running a real browser on a
 visible desktop, or a harness that can foreground and composite the pane. No
 amount of agent budget in this environment substitutes for that.
+
+### 2026-08-16 (later) - a compositing surface EXISTS: Claude in Chrome on Brave
+
+Correcting the comment above: it tested only the Claude Code Browser pane and
+concluded the environment had no usable surface. That was too narrow. The
+**Claude in Chrome extension, running on Brave**, is a second surface and it
+does not have the pane's limitation.
+
+| Probe | Browser pane | Claude in Chrome (Brave) |
+| --- | --- | --- |
+| `computer{action:"screenshot"}` | fails, not compositing | **succeeds** (1512x803 jpeg) |
+| `document.visibilityState` | `"hidden"`, cannot be changed | **`"visible"`** |
+| `document.hasFocus()` | n/a | `false` (visible but not focused) |
+| `navigator.hardwareConcurrency` | 20 | **6** |
+
+**This unblocks the ticket's foregrounded-tab criterion.** A real, compositing,
+`visible` tab is reachable from this harness after all.
+
+**Caveat that changes comparability:** `hardwareConcurrency` is **6** here
+against **20** on the machine behind every earlier number in this ticket
+(2026-08-14 comments). Wall-clock from this surface is NOT comparable to the
+5.3s/12.1s figures above, and the worker count the page picks will differ.
+Re-baseline on this machine before comparing anything.
+
+**A third cold-start trap, caught.** The first `requestAnimationFrame` probe
+after the tab became visible reported **1 frame in a loop that took 15.8
+seconds** - a ~16x throttle signature. It does not reproduce. Three immediate
+re-runs gave 34, 64, 62 frames/s completing in ~1.01s each, and a
+three-path comparison (rAF 241, `setTimeout(0)` 414, `MessageChannel` 62428
+callbacks in 2s) is normal for a visible, unfocused tab. The 15.8s reading was
+a **one-off warm-up artifact of the visibility transition**, not throttling.
+
+Note the pattern: this ticket has now produced three misleading numbers from
+cold starts (the "iterations complete" label, the live-converging DPS value,
+and now this). **Discard the first measurement after any state change and
+re-run before believing a number** - especially one that confirms the
+hypothesis you already hold. The 2026-08-14 busy-loop ratio of 1.1x was
+measured on the *unthrottled* path, so it never ruled anything in or out for
+frame-driven code; that gap is still open, but the probe above gives no
+evidence of a problem.
+
+**Still not done:** the 20-candidate table. This comment establishes the
+surface works and re-baselines the machine; the measurement itself is the
+next step, and now has no known blocker beyond needing the production build
+served. Status stays open.
+
+### 2026-08-16 (later still) - first real-browser run attempted; blocked on the WASM engine never loading
+
+With the compositing surface established above, the production build was
+rebuilt and served and a real run was attempted. **The 20-candidate table is
+still not obtained**, but the blocker is now a different and more specific one
+than "no foregrounded tab".
+
+**Setup that worked (all verified, re-runnable):**
+
+```bash
+export PATH="/c/Program Files/Go/bin:$PATH"
+cd vendor/tbc-new-fork && npx tsx vite.build-workers.mts && npx vite build
+npx http-server vendor/tbc-new-fork/dist -p 8123 -c-1
+```
+
+- The **Aug-15 bundle on disk was stale**: `candidateCap` was present in
+  `ui/.../upgrades_tab.tsx` but absent from `dist/tbc/bundle/`. Anyone
+  measuring against a pre-existing bundle is measuring the pre-cap UI. Rebuild
+  first and grep the bundle for `upgrades-candidates` to confirm.
+- After rebuild the tab exposes **Iterations, Candidates, Run, Stop** as
+  specified. Worker picker read **4**.
+
+**What happened:** with Candidates=20, Iterations=3000, the run progressed
+through real per-row events ("Simming 38/71... (15 rows landed)") and then
+failed at 102 s:
+
+```
+Ranking failed: no recorded request for ranked item 30102
+(Krakken-Heart Breastplate)
+```
+
+**`lib.wasm` was never fetched.** `performance.getEntriesByType('resource')`
+shows `sim_worker.js` fetched 8 times and **zero** `.wasm` entries; the
+`http-server` access log agrees. The workers spawned but never loaded the
+engine, so the Upgrades tab ran on its **recorded adapter** and died on the
+first candidate with no recording. **No timing from this run is a sim
+measurement** and none is quoted here.
+
+Note "Simming n/71" against a cap of 20 - consistent with racing (screening
+runs plus paired-slot retries), but unverified while the engine is absent.
+
+**Second confirmation that harness polling distorts this page.** While a
+`javascript_exec` call held the main thread in a poll loop, progress advanced
+3 sims in 54 s (30.4 s -> 84.2 s); the call itself died on a 45 s CDP timeout
+("the renderer may be frozen"). Before and after that loop, status updates
+arrived milliseconds apart. **Do not poll from the harness while timing this
+page** - start the run, wait outside the browser, then read state in one
+short call. This is the same effect the 2026-08-14 comment hypothesised, now
+observed directly.
+
+**Next step is narrow:** find why `lib.wasm` is not requested on this served
+build (worker path/MIME, a `wasm_exec.js` gate, or an adapter selecting
+recordings over the live engine). Until it loads, the browser cannot produce
+throughput numbers regardless of tab visibility.
