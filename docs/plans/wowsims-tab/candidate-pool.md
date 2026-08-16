@@ -456,6 +456,59 @@ the noise floor enough for a smaller `promoteTopK` to hold. Recorded here
 per this slice's obligation to report the number honestly rather than
 adjust the target after the fact.
 
+**Both options measured 2026-08-16 (candidate-pool session). Neither works,
+and the measurement found something larger.**
+
+Option (a), per-slot top-_j_, is built (`promoteTopJ`, defaulting to 1 =
+today's rule). It does not shrink the ratio: at the shipped `promoteTopK =
+150` it _raises_ it 0.7146 -> 0.7232, and no (K, j) reaches <= 0.4 at zero
+recall misses. Full table and the reason (42 above-cutoff rows over 14
+slots, unevenly spread, so the floor and a large K overlap rather than
+substitute) is on `RankInput.promoteTopJ` in `packages/core/src/rank.ts`.
+
+Option (b), a lower-noise screen, is worse. Screening noise does fall as
+`1/sqrt(iterations)`, so a bigger screen does buy a smaller recall-safe K --
+but it never pays for itself. Measured over 15 noise draws on the gating
+feral fixture, as total iteration-work against simming every eligible
+candidate once at full iterations:
+
+```
+screenIters    K   full sims   misses   cost vs no racing
+       1000  150       175.5        0        1.0862
+       1000  120       139.7        0        0.9404
+       2000  100       118.3        0        1.2263
+       5000   80        98.0        0        2.2615
+```
+
+**Racing at the shipped defaults costs more total iteration-work than not
+racing at all** (1.0862). Raising `screenIterations` to buy a smaller K makes
+it monotonically worse, because the screen is charged against all ~277
+screening runs while the saving is only on the difference in promoted count.
+
+**The larger finding: whether racing pays at all depends on the
+full-iteration count, and D7's browser default sits on the wrong side of
+it.** Under §3.3's WASM cost model (`t_fixed` 748.4 ms, `t_iter` 3.2446
+ms/iter), same fixture and promoted counts:
+
+| full iterations             | K=150 (shipped)         | K=120 (best zero-miss) |
+| --------------------------- | ----------------------- | ---------------------- |
+| 3000 (D7's browser default) | **1.142x — a 14% loss** | 0.997x — break-even    |
+| 5000                        | 0.978x                  | 0.833x — a 17% win     |
+
+The ~15% WASM win recorded in §3.4.1 and the handoff is reproducible **only
+at 5000 iterations**. At the 3000 the browser actually ships, racing at
+shipped defaults is a _loss_. Racing pays only when the promoted ratio falls
+below `1 - (screens/eligible) * cost(screenIters)/cost(fullIters)` -- 0.571
+at 3000 iterations, 0.735 at 5000 -- and the measured ratio is 0.7042.
+
+Neither the ratio target nor the racing win survives this fixture at 3000
+iterations. Options remaining, none built: raise the browser default to 5000
+(D7 is unjustified pending ticket 156 either way, and this makes 156 gating
+rather than merely open); reuse the screening sim's result instead of
+re-deriving the winner (ticket 205 -- worth ~13% of WASM wall-clock, and it
+lowers the screen's charge rather than the promoted count); or accept racing
+as off by default on the browser path as it already is on the CLI.
+
 ## 7. Test plan
 
 Rules: `AGENTS.md` § Testing — primary tests at `rankUpgrades` through recorded/derived adapters; pure functions unit-tested directly; nothing asserts on stage internals. Every test red before the code that greens it (`tdd`). **Order below is the order they go red.** Each row says what it forces.
