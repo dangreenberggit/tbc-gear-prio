@@ -2,7 +2,7 @@
   "repo": "dangreenberggit/tbc-new",
   "upstream": "wowsims/tbc-new",
   "branch": "feat/upgrades-tab",
-  "commit": "6a192eb2a378a3d3e0f21dca52d40de84420b72c",
+  "commit": "79cbe04b6b42a85c234904ba435c92ff2a57ae31",
   "branchedFrom": "8aa378b3671a0923fd11fb34b4b3753e53f20c9b",
   "clonePath": "vendor/tbc-new-fork",
   "pushed": false,
