@@ -1,0 +1,223 @@
+{
+  "command": "npx tsx scripts/ew5_overhead_wasm.mjs",
+  "runtime": "wasm",
+  "wasmPath": "vendor/tbc-new-fork/dist/tbc/lib.wasm",
+  "wasmBuildCommand": "cd vendor/tbc-new-fork && GOOS=js GOARCH=wasm go build -o dist/tbc/lib.wasm ./sim/wasm/",
+  "toolchain": {
+    "goVersion": "go version go1.25.4 windows/amd64",
+    "goroot": "C:\\Program Files\\Go",
+    "wasmExecPath": "C:\\Program Files\\Go\\lib\\wasm\\wasm_exec.js"
+  },
+  "fixture": "test/fixtures/slamaltman.raid-sim-request.json",
+  "seed": "42",
+  "sweep": [100, 300, 1000, 3000, 5000],
+  "repeats": 5,
+  "databaseNote": "database (proto field 50) is a Player field, not a RaidSimRequest field (sim/core/proto/api.pb.go:172 vs :2024-2033) — corrects the ticket's field list. Built via SimDatabase.fromJson/.toJson round-trip over the full assets/database/db.json (not trimmed to fixture-referenced items — a full-DB inject the ticket calls acceptable) and attached to exactly one player, not all 25 raid slots: addToDatabase (sim/core/database.go:26) is a global first-write-wins registry, so one copy suffices, and attaching it to all 25 slots (24 of which are empty {} filler in this fixture) inflated the request to 56.6MB and made every call take ~24s regardless of iteration count — measurement noise from request size, not sim cost, that would have corrupted t_iter. One copy cut the 100-iteration call to ~1.35s with identical DPS.",
+  "raw": {
+    "100": [
+      {
+        "wallMs": 1338.2536,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.718332472111,
+        "memBytes": 67108864
+      },
+      {
+        "wallMs": 1338.4899,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.718332472111,
+        "memBytes": 75497472
+      },
+      {
+        "wallMs": 1255.7207000000003,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.718332472111,
+        "memBytes": 75497472
+      },
+      {
+        "wallMs": 1194.464,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.718332472111,
+        "memBytes": 75497472
+      },
+      {
+        "wallMs": 1188.9372999999996,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.718332472111,
+        "memBytes": 67108864
+      }
+    ],
+    "300": [
+      {
+        "wallMs": 1942.9400999999998,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293554,
+        "memBytes": 88080384
+      },
+      {
+        "wallMs": 1855.2046999999984,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293554,
+        "memBytes": 92274688
+      },
+      {
+        "wallMs": 1742.2374999999993,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293554,
+        "memBytes": 79691776
+      },
+      {
+        "wallMs": 1807.9377000000004,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293554,
+        "memBytes": 79691776
+      },
+      {
+        "wallMs": 1902.5761999999995,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293554,
+        "memBytes": 92274688
+      }
+    ],
+    "1000": [
+      {
+        "wallMs": 4095.464899999999,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736392,
+        "memBytes": 138412032
+      },
+      {
+        "wallMs": 4064.240700000002,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736392,
+        "memBytes": 138412032
+      },
+      {
+        "wallMs": 4058.7968,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736392,
+        "memBytes": 138412032
+      },
+      {
+        "wallMs": 4104.921900000001,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736392,
+        "memBytes": 138412032
+      },
+      {
+        "wallMs": 3701.0359000000026,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736392,
+        "memBytes": 100728832
+      }
+    ],
+    "3000": [
+      {
+        "wallMs": 9619.117700000003,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.847592795001,
+        "memBytes": 272629760
+      },
+      {
+        "wallMs": 9562.895899999996,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.847592795001,
+        "memBytes": 272629760
+      },
+      {
+        "wallMs": 9577.926800000001,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.847592795001,
+        "memBytes": 272629760
+      },
+      {
+        "wallMs": 9603.467900000003,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.847592795001,
+        "memBytes": 272629760
+      },
+      {
+        "wallMs": 9527.49470000001,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.847592795001,
+        "memBytes": 272629760
+      }
+    ],
+    "5000": [
+      {
+        "wallMs": 18458.34969999999,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882178,
+        "memBytes": 402653184
+      },
+      {
+        "wallMs": 17173.754499999995,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882178,
+        "memBytes": 390791168
+      },
+      {
+        "wallMs": 17504.608600000007,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882178,
+        "memBytes": 402653184
+      },
+      {
+        "wallMs": 17488.015799999994,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882178,
+        "memBytes": 402653184
+      },
+      {
+        "wallMs": 17388.156500000012,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882178,
+        "memBytes": 390791168
+      }
+    ]
+  },
+  "points": [
+    {
+      "iterations": 100,
+      "medianMs": 1255.7207000000003,
+      "medianDps": 2026.718332472111
+    },
+    {
+      "iterations": 300,
+      "medianMs": 1855.2046999999984,
+      "medianDps": 2039.2784578293554
+    },
+    {
+      "iterations": 1000,
+      "medianMs": 4064.240700000002,
+      "medianDps": 2040.8974872736392
+    },
+    {
+      "iterations": 3000,
+      "medianMs": 9577.926800000001,
+      "medianDps": 2042.847592795001
+    },
+    {
+      "iterations": 5000,
+      "medianMs": 17488.015799999994,
+      "medianDps": 2042.3926145882178
+    }
+  ],
+  "fit": {
+    "t_fixed_ms": 748.3672219187538,
+    "t_iter_ms": 3.2446034670644925
+  },
+  "cost5000_ms": 16971.384557241217,
+  "floor_t_fixed_over_cost5000": 0.04409582608859371,
+  "floorBelow025": true,
+  "memoryMeasurement": {
+    "iterations": 5000,
+    "wallMs": 17130.13399999999,
+    "memBytes": 402653184,
+    "note": "WebAssembly.Memory linear buffer size (instance.exports.mem.buffer.byteLength) for one fresh WASM instance after a 5000-iteration call — measured in a separate pass from the timing sweep (same discipline as the CLI harness: no concurrent instrumentation during a wall-clock measurement)."
+  },
+  "dpsSanityCheck": {
+    "median5000Dps": 2042.3926145882178,
+    "cliReference": 2042.4,
+    "note": "E-W1 showed WASM and native agree to 1.8e-12 DPS; this run's median 5000-iteration DPS is checked against the CLI's ~2042 before any timing is accepted."
+  }
+}

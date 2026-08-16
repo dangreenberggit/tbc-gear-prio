@@ -216,6 +216,87 @@ spawn per request). The browser/WASM path (F5, ticket 156) has a different
 fixed-cost structure and was not measured here — do not generalize this
 verdict to that path without a separate measurement.
 
+#### §3.1 — per-request cost, WASM runtime (ticket 203, `experiments/e-w5-overhead-wasm.{json,md}`)
+
+Measured 2026-08-15, branch `feat/candidate-pool` at
+`c5e29183b4e915dbe44ac14fb50a08de41875c4f`. Re-runs the same sweep as the
+CLI table above against `vendor/tbc-new-fork/dist/tbc/lib.wasm` under Node
+instead of the native binary — §3.4's own judgment is that the CLI verdict
+does not transfer to the browser path, where the WASM module is resident
+in a worker (no process spawn) and per-iteration cost is far higher.
+
+`npx tsx scripts/ew5_overhead_wasm.mjs` — five-repeat median sweep,
+fixture `test/fixtures/slamaltman.raid-sim-request.json`, seed 42. Each
+repeat boots a **fresh** `WebAssembly.Instance` (matches a resident
+worker's first request against a cold module; a warm worker serving a
+second candidate would skip instance boot, which this harness's `t_fixed`
+therefore includes as an upper bound, not a lower one).
+
+`lib.wasm` is a 20MB build artifact under a **gitignored** vendor path
+(`vendor/tbc-new-fork/dist` is not committed). Rebuild it with:
+
+```
+cd vendor/tbc-new-fork && GOOS=js GOARCH=wasm go build -o dist/tbc/lib.wasm ./sim/wasm/
+```
+
+(`vendor/tbc-new-fork/makefile:118-127`, target `wasm`). Toolchain used for
+this measurement: `go version go1.25.4 windows/amd64`, GOROOT
+`C:\Program Files\Go` (`go env GOROOT`). The Go WASM runtime shim
+(`wasm_exec.js`) is **not vendored in the fork** — read directly from
+`$(go env GOROOT)/lib/wasm/wasm_exec.js` at run time, so a different Go
+version on PATH runs a different shim than the one recorded here.
+
+| iterations | median wall-clock (ms) | median dps |
+| ---------- | ---------------------- | ---------- |
+| 100        | 1255.7                 | 2026.7     |
+| 300        | 1855.2                 | 2039.3     |
+| 1000       | 4064.2                 | 2040.9     |
+| 3000       | 9577.9                 | 2042.8     |
+| 5000       | 17488.0                | 2042.4     |
+
+Fit: `t_fixed` = **748.4 ms**, `t_iter` = **3.2446 ms/iteration** (~51× the
+CLI's `t_iter`, in the same range as E-W1's ~46×).
+
+**DPS sanity check:** median 5000-iteration DPS **2042.3926145882178** —
+matches the CLI's ~2042.4 and is bit-for-bit E-W1's recorded WASM figure.
+The script asserts this before writing any output, refusing to publish
+timings for a request it cannot confirm is correct.
+
+**Screening-cost floor:** `cost(5000)` = t_fixed + t_iter × 5000 =
+**16,971.4 ms**. `floor` = t_fixed / cost(5000) = **0.0441** — below the
+0.25 threshold by more than 5×.
+
+**Per-worker memory:** WASM linear memory after a 5000-iteration call,
+one fresh instance, sampled in a separate pass from the timing sweep:
+**402.7 MB** (`instance.exports.mem.buffer.byteLength`). This is a
+measured browser-runtime number, not the CLI's native-process RSS
+(183.8 MB) carried over as a proxy — it replaces
+`MEASURED_MB_PER_SIM_PROCESS` in
+`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/adapters/wasm_sim_runner.ts`
+as the input to ticket 201's `memoryCap`. Note it is more than double the
+CLI figure: WASM linear memory only grows (no native `free`), so this
+number is shaped by the allocator, not just the sim's working set — a
+consideration for `memoryCap` sizing, not a discrepancy to explain away.
+
+**Database field correction:** the ticket's field list said to inject
+`SimDatabase` at `RaidSimRequest.database` (field 50). Reading
+`sim/core/proto/api.pb.go:172` against `:2024-2033` shows `database` is
+actually a field on `Player`, not on `RaidSimRequest` — the WASM Go side
+rejected the request-root placement with `protojson`'s "unknown field
+\"database\"". Corrected by attaching to the fixture's one real player
+(the other 24 raid slots are empty `{}` filler). A first attempt attached
+the 2.26MB database payload to all 25 slots; `addToDatabase`
+(`sim/core/database.go:26`) is a global first-write-wins registry, so the
+duplication was pure overhead — it inflated the request to 56.6MB and
+made every call take ~24s regardless of iteration count, which would have
+been measurement noise dominating `t_iter` had it gone uncaught. One copy
+reproduced the identical DPS at the expected wall-clock.
+
+**WASM floor vs CLI floor:** 0.0441 vs 0.609 (cheapest CLI sweep point).
+Per §3.4's decision rule, floor `< 0.25` on the tuning fixture, combined
+with §3.2's already-measured `max K* = 25 ≤ 60`, is a **go** on both legs
+of the M2 gate.
+
 ### 3.4 Plan author's judgment on the execution (2026-08-15, rev 3)
 
 Read against `REPORT.md` and `docs/reviews/feat-candidate-pool.md`.
@@ -247,18 +328,18 @@ Done when: `grep -n "prefilter" docs/plans/wowsims-tab/plan.md` returns only lin
 ### 5.1 Behaviour
 
 1. **Candidates control** beside Iterations: integer, default _all eligible_ (shows "246 / 246"), `min=1`. `RankInput.candidateCap?: number`, hashed; `undefined` and `= eligible.length` must hash identically (test 7.4). Before M2 the cap keeps the first N of the EP ordering **plus every owned row regardless of N**, and the assumptions drawer says "top N by EP order — a preselection, not a ranking". After M2 the cap is applied **after screening**, to the promoted set, so the sim — not EP — picks what the cap keeps.
-2. **Concurrency across candidates.** The candidate loop in `rank.ts` (F3, both copies) becomes a bounded pool over candidate tasks, using a small pure `promisePool(tasks, n)` module in `packages/core` (unit-tested here; the fork adapter is a call site — F11). Pool size is a plain scalar `Deps.concurrency` (CLI: 1; fork: `min(workers, memoryCap)` from §3.1). The `SimRunner` port keeps its single-request shape — no batch method. Progress `done` is a monotonic completion counter; results are keyed by request, never by arrival order. When `candidates < concurrency` the fork adapter may fall back to upstream iteration-splitting for the remainder (records the crossover in HANDOFF); otherwise each request is single-split. Per-sim cache write happens before the next dispatch, so a crash loses at most the in-flight batch.
+2. **Concurrency across candidates.** The candidate loop in `rank.ts` (F3, both copies) becomes a bounded pool over candidate tasks, using a small pure `promisePool(tasks, n)` module in `packages/core` (unit-tested here; the fork adapter is a call site — F11). Pool size is a plain scalar `Deps.concurrency` (CLI: 4 by default with a `--concurrency` flag, per §3.4's ruling on ticket 200; fork: `min(workers, memoryCap)` from §3.1). The `SimRunner` port keeps its single-request shape — no batch method. Progress `done` is a monotonic completion counter; results are keyed by request, never by arrival order. When `candidates < concurrency` the fork adapter may fall back to upstream iteration-splitting for the remainder (records the crossover in HANDOFF); otherwise each request is single-split. Per-sim cache write happens before the next dispatch, so a crash loses at most the in-flight batch.
 3. **EP ordering.** Eligible candidates sort by committed-EP delta vs the owned item in that slot, computed **pre-gem** (raw item stats × `epWeights`, no repair) so it exists before any sim and never fails; ties by item id. Owned items sort at 0 but are exempt from the cap (5.1.1). Ordering changes _when_ a row fills and what a pre-M2 cap keeps; it changes no displayed number.
 4. **Stop.** `Deps.signal?: AbortSignal`. On abort the run finishes in-flight sims and returns `Ranking & {complete: false}` (a `PartialRanking` type); rows not simmed carry `simmed: false` and are excluded from cutoff classification and tie groups. The ranking cache write accepts only `complete: true` — enforced by type, not by convention. Per-sim rows are written as usual, so re-running resumes cheaply (F6). **"Finish in-flight work, dispatch nothing new":** paired replication and set-completion packages are new dispatches, so an aborted run skips both, and the result is `complete: false` even when every candidate sim had already landed — completeness means _the whole flow ran_, not _all candidates ran_. Consequently rows that did finish keep `seMethod: 'independent'`; a partial ranking never carries paired-replicate SE or a `setBonusNote`, and the disclosure must say replication was skipped rather than leave the SE column looking normal. 7.8 asserts exactly this case: abort after the last candidate sim but before replication → `complete: false`, no `ranking:` row, and no replication sims issued (`CountingSimRunner`).
 5. **Row-landed progress.** `Progress` gains a `{kind: 'row', row}` event so the UI fills a skeleton as each sim lands; tested at the interface (7.11).
 
 ### 5.2 Where it lives
 
-| Piece                                                 | `packages/core`                                               | fork                                                                          |
-| ----------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| cap, ordering, `signal`, `complete`, row events, hash | `rank.ts` loop restructure, types, hash; `promisePool` module | ported `engine/` copy, PROVENANCE bump                                        |
-| `Deps.concurrency` value, memoryCap                   | CLI: 1                                                        | adapter: `min(workers, memoryCap)`; optional split fallback                   |
-| Controls                                              | —                                                             | `upgrades/` UI: Candidates, Stop; progress text `Screening a/n · Simming b/k` |
+| Piece                                                 | `packages/core`                                                                                 | fork                                                                          |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| cap, ordering, `signal`, `complete`, row events, hash | `rank.ts` loop restructure, types, hash; `promisePool` module                                   | ported `engine/` copy, PROVENANCE bump                                        |
+| `Deps.concurrency` value, memoryCap                   | CLI: **4 by default, `--concurrency` flag** (§3.4 ruling, ticket 200; measured 1.88× on ret p2) | adapter: `min(workers, memoryCap)`; optional split fallback                   |
+| Controls                                              | —                                                                                               | `upgrades/` UI: Candidates, Stop; progress text `Screening a/n · Simming b/k` |
 
 Seam check: no new port. `promisePool` is a helper, not a seam. `concurrency` and `signal` are `Deps` scalars.
 
