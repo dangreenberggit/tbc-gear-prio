@@ -47,3 +47,27 @@ Ticket 156's browser measurement is the natural place to get the real number.
       and the comment says why.
 - [ ] No committed claim implies a measured browser figure that does not
       exist.
+
+## 2026-08-15 — the missing measurement now exists
+
+Ticket 203 measured WASM linear memory directly:
+**402.7 MB** for one fresh instance after a 5,000-iteration call
+(`instance.exports.mem.buffer.byteLength`, sampled in a pass separate from the
+timing sweep). Command and provenance in `experiments/e-w5-overhead-wasm.md`.
+
+That is the browser-runtime number this ticket said was missing — it replaces
+the 183.8 MB native-CLI RSS proxy currently hardcoded as
+`MEASURED_MB_PER_SIM_PROCESS` in `wasm_sim_runner.ts`. Note it is **more than
+double** the CLI figure, so the current constant under-estimates per-worker
+memory by ~2.2×: WASM linear memory only grows (no native `free`), so the
+number is shaped by the allocator rather than the sim's working set.
+
+This does not by itself close the ticket. The objection was that the function
+is a constant wearing a calculation — with 402.7 MB and a `navigator.deviceMemory`
+that is spec-capped at 8 and power-of-two rounded, `4096/402.7 = 10` still
+clamps to `min(numWorkers = 4, 10) = 4` on every realistic machine, so the cap
+still never binds. Whoever takes this should decide between the two options
+above with the real number in hand, and should fold in M2's screening pass
+(§3.4.1), which changes how many concurrent sims are in flight.
+
+Status: **open** (input measured; the design decision remains).

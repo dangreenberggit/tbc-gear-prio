@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: measurement (decides M2)
 Origin: plan author's judgment on `feat/candidate-pool` execution, 2026-08-15 (`docs/plans/wowsims-tab/candidate-pool.md` §3.4)
 Blocks: candidate-pool M2 (racing) resumption or M3 design pass
@@ -32,3 +32,43 @@ ticket 201's `memoryCap` has a real number.
 - Decision recorded in §3.4: floor `< 0.25` → M2 resumes at slice E on
   `feat/candidate-pool` (the §3.2 rank result already holds: K* ≤ 25 on both
   fixtures); otherwise M2 is dead on both paths and M3 gets a design pass.
+
+## 2026-08-15 — done
+
+Harness `scripts/ew5_overhead_wasm.mjs`, outputs
+`experiments/e-w5-overhead-wasm.{json,md}`, WASM table in candidate-pool §3.3,
+decision in **§3.4.1**.
+
+| quantity                | value                |
+| ----------------------- | -------------------- |
+| `t_fixed`               | 748.4 ms             |
+| `t_iter`                | 3.2446 ms/iteration  |
+| `cost(5000)`            | 16,971.4 ms          |
+| **floor**               | **0.0441**           |
+| per-worker WASM memory  | 402.7 MB             |
+
+**Floor is below 0.25 by more than 5×**, so with §3.2's `max K* = 25 ≤ 60`
+both legs of the gate pass and **M2 resumes at slice E**.
+
+Verified by the orchestrator rather than accepted from the handoff: the
+least-squares fit reproduces exactly from the committed medians (748.3672 /
+3.244603), and the 5,000-iteration median DPS is **2042.3926145882178**,
+matching E-W1's recorded WASM figure digit for digit, so the sim genuinely
+ran rather than erroring into a plausible-looking number.
+
+Two corrections the harness surfaced, both worth keeping:
+
+1. `SimDatabase` attaches to **`Player`**, not `RaidSimRequest` — this
+   ticket's own field list said field 50 on the request root, and the Go side
+   rejected it with `protojson`'s unknown-field error.
+2. Attaching the database to all 25 raid slots (24 of them empty filler)
+   inflated the request to 56.6 MB and added ~24 s of parse overhead **per
+   call regardless of iteration count** — which would have silently corrupted
+   `t_iter`. Caught by noticing near-identical wall-clock across very
+   different iteration counts. `addToDatabase` is a first-write-wins global
+   registry, so one copy on the real player is correct and sufficient.
+
+Also supersedes ticket 201's input: `memoryCap` now has a measured browser
+number (402.7 MB) instead of the 183.8 MB native-CLI proxy.
+
+Status: **closed**.
