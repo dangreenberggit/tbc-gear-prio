@@ -297,6 +297,16 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     },
     spec: args.spec,
     maxPhase: args.maxPhase,
+    // Racing loses on this runtime, so the CLI opts out (candidate-pool.md
+    // §3.2's no-go was CLI-scoped; §3.4.1 resumed M2 for the browser only).
+    // A native process pays 373.2 ms of spawn against 0.0637 ms/iteration, so
+    // a 1000-iteration screen still costs 63% of a full 5000-iteration sim:
+    // 277 screens + 169 full sims measures 1.24x the 277 full sims it
+    // replaces. Racing needs the promoted ratio under 0.368 here to break
+    // even, and it measures 0.704 (§6.4). WASM inverts this — 748.4 ms
+    // against 3.2446 ms/iteration — which is why the flag is per-runtime and
+    // not a global default. `experiments/m2-net-win-arithmetic.md` has the sum.
+    fullPool: true,
   };
 
   // Feral's EP preset is named p1 because upstream ships no p2 one for it;
