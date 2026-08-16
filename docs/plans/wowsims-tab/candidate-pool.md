@@ -314,6 +314,32 @@ Verdict: **M2 is no-go on the CLI path and undecided on the browser path.** Not 
 
 **On the branch itself:** `pnpm verify` re-run by the plan author (exit captured, not backgrounded) — see the commit that adds this section for the result. Mergeable on my reading once the user has read the review; the merge is the user's ask, per `AGENTS.md`.
 
+### 3.4.1 M2 decision on the browser path (orchestrator, 2026-08-15)
+
+**M2 resumes.** Ticket 203 ran §3.1's sweep on `lib.wasm` under Node. Both legs of §3.2's gate are now satisfied on the runtime M2 is actually for:
+
+| leg                             | requirement | measured                       |
+| ------------------------------- | ----------- | ------------------------------ |
+| `t_fixed / cost(5000)` on WASM  | `< 0.25`    | **0.0441** — passes by over 5× |
+| `max K*` over the roster (§3.2) | `≤ 60`      | **25** — already measured      |
+
+Numbers: WASM `t_fixed` = **748.4 ms**, `t_iter` = **3.2446 ms/iteration**, `cost(5000)` = 16,971.4 ms. Command in §3.3.
+
+Verified by the orchestrator rather than accepted from the handoff: the least-squares fit reproduces exactly from the committed medians (748.3672 / 3.244603); the 5,000-iteration median DPS is **2042.3926145882178**, matching E-W1's recorded WASM figure digit for digit, so the sim genuinely ran; and 16.2 s of iteration time at 5,000 sits beside E-W1's independently recorded ≈14.7 s.
+
+**The contrast is the whole point, and it is a ~14× difference in the deciding ratio:** the CLI floor is 0.609 because 373 ms of process spawn dominates 0.064 ms/iteration. On WASM the module is resident, so a proportionally smaller `t_fixed` (748 ms) sits against a per-iteration cost ~51× larger (3.24 ms), and screening at fewer iterations finally buys what racing needs. Three sweep points clear the gate outright: 100 → 0.063, 300 → 0.102, 1000 → 0.235.
+
+**Consequences.**
+
+- **Slice E (M2 in `packages/core`) resumes on this branch**, with tests 7.0, 7.5, 7.2 and the 7.7 extension, per §7's order.
+- **`screenIterations` and `promoteTopK` are still unset.** §3.2's rule sets them from the _chosen_ point's `K*`, and §3.2's cost ratios were measured on the CLI. The rank correlations and `K*` values are runtime-independent (they are properties of the sim's output at a given iteration count, not of how the sim is hosted), so **`promoteTopK = max K* + 10 = 35`** stands. `screenIterations` should be chosen from the WASM ratios above; **300 is the defensible default** — 0.102 of a full run, `K*` = 15 (ret) / 16 (feral) at that point, and Spearman 0.9882 (ret) / 0.9905 (feral). That choice is a slice-E decision to record with its own justification, not a fact this section can settle.
+- **Ticket 204 (synthetic fixtures) is now in scope**, because it gates 7.2's held-out recall.
+- **ADR-0018** gets its "Superseded-in-part" line when M2 actually ships, not now.
+
+**Scope, stated as plainly as the CLI verdict was:** this is Node-hosted WASM, not a browser tab. It removes process spawn, which is the thing that killed the CLI floor, and it uses the same module a worker would load — but it does not measure worker `postMessage` overhead, tab throttling, or contention between four workers. Ticket 156 still owns the real in-browser number. **What is settled is that the CLI's 0.54 floor was an artifact of process spawn and does not condemn racing.** What is not settled is the wall-clock a user sees.
+
+**Author's headline correction accepted.** REPORT.md's "the central bet lost" over-read a CLI-scoped result, and §3.3's own scope note said so at the time. Corrected in REPORT.md §8.
+
 ## 4. M0 — documents match the engine
 
 - `plan.md` §5 step 2: replace "player-aware EP prefilter" with "no prefilter; every eligible candidate is simmed (F1)"; replace "~80 candidates after the prefilter" with F2's counts and §1.1's model; point here.

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: performance (shipped mechanism inactive on the measured path)
 Origin: pre-merge review of `feat/candidate-pool`, Carmack axis R9, 2026-08-15
 Blocks: none
@@ -45,3 +45,43 @@ byte-identical output at concurrency 1 vs 4, which is what it got.
 - [ ] A measured before/after wall-clock ratio in §3.3, with the command,
       machine and run count.
 - [ ] Byte-identical ranking versus the serial run, shown not asserted.
+
+## 2026-08-15 — done
+
+`--concurrency N` added (`packages/core/src/cli.ts`), default **4**, validated
+as a positive integer, passed through to `Deps.concurrency`. §5.2's table is
+amended to match the plan author's ruling in §3.4.
+
+**Measured before/after**, ret `maxPhase 2`, 246 eligible candidates, offline
+gear, real `wowsimcli` v0.0.101, this machine (Windows 11, 20 logical cores),
+one run each:
+
+| concurrency | wall-clock  |
+| ----------- | ----------- |
+| 1           | 240,106 ms  |
+| 4           | 127,853 ms  |
+
+**Ratio: 1.88×** (240.1 s → 127.9 s).
+
+Command:
+
+```
+npx tsx packages/core/src/cli.ts --region US --realm dreamscythe \
+  --character slamaltman --offline --spec ret --max-phase 2 --concurrency N
+```
+
+**Output is byte-identical between the two runs** — `diff` of the two logs is
+empty once Node's `ExperimentalWarning` line (which carries the PID) is
+excluded. That is the property `rank.test.ts`'s concurrency 1-vs-4 test
+asserts in core, confirmed here end to end against the real binary.
+
+**Why 1.88× and not 4×:** `wowsimcli` already splits one request's iterations
+across the machine's threads, so four concurrent processes contend for cores
+that a single process was already using. The win is overlapping the fixed
+per-process cost (E-W5: 373.2 ms of every ~564 ms sim at 3,000 iterations),
+not multiplying raw throughput. A larger `--concurrency` was not swept; 4 is
+the default because per-process peak RSS is ~184 MB (§3.3) and the marginal
+return is already falling at 4. **Untested hypothesis:** higher values may
+help on machines with more cores than this one.
+
+Status: **closed**.
