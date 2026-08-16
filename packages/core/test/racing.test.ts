@@ -144,6 +144,30 @@ describe("M2 racing — 7.0: racing does less full-iteration work", () => {
   });
 });
 
+describe("M2 racing — §6.4: fullPool reproduces the pre-M2 flow", () => {
+  it("full-iteration sims every eligible candidate and carries no screened rows", async () => {
+    const eligibleCount = pool.length;
+    const sim = new CountingSimRunner(buildSim(1));
+
+    const ranking = await rankUpgrades(
+      { ...baseInput(), fullPool: true },
+      { ...baseDeps(sim as never), sim: sim as never }
+    );
+
+    // Byte-level property that distinguishes fullPool from racing: not one
+    // row anywhere carries the `screened` field racing introduces —
+    // `fullPool: true` is the escape hatch to the pre-M2 shape, not merely
+    // to the pre-M2 candidate count.
+    expect(ranking.items.every((i) => i.screened === undefined)).toBe(true);
+
+    // Every eligible candidate got a full-iteration sim (baseline + one per
+    // eligible candidate, at minimum — paired-slot items add a second try).
+    const fullIterationRuns =
+      sim.runsByIterations.get(recorded.iterations) ?? 0;
+    expect(fullIterationRuns).toBeGreaterThanOrEqual(eligibleCount);
+  });
+});
+
 describe("M2 racing — 7.2: recall on the held-out fixture", () => {
   // §7.a: feral is the HELD-OUT fixture and gates 7.2; ret is the tuning
   // fixture and never gates (candidate-pool.md, top-level module comment and

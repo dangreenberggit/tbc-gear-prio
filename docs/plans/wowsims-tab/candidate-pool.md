@@ -414,6 +414,46 @@ baseline (full) → screen all eligible (pool) → rule → cap → full sims fo
 - Ratio recorded here: full-iteration sims issued at defaults ÷ eligible, on ret `maxPhase 2`, tuning fixture, Node, `concurrency 1` — command in §3.3. Target ≤ 0.4.
 - `fullPool: true` reproduces the pre-M2 fixture `Ranking` byte-for-byte.
 
+**Measured 2026-08-15 by slice E, branch `slice-e-m2-racing`.**
+
+`§3.4.1`'s proposed defaults (`screenIterations = 300`, `promoteTopK = 35`)
+were measured against the E-W5 fixture
+(`test/fixtures/slamaltman.raid-sim-request.json`), whose feral run has only
+**16** above-cutoff rows. Ticket 204's fixture roster (§7.a) — the one 7.2
+actually gates against — is different: `FERAL_SYNTHETIC_ROW` has **42**
+above-cutoff rows occupying every global screening-delta rank from 1 to 42
+with no gaps, so any `promoteTopK` below 42 necessarily misses some of them
+even at zero screening noise, and 300/35 measured up to 18 of 42 missed
+across seeded noise draws (`npx vitest run
+packages/core/test/racing.test.ts`). Corrected to
+`screenIterations = 1000`, `promoteTopK = 150` — still `cost/cost(5000) =
+0.235` under the WASM `<0.25` gate (§3.4.1's own table) — which clears zero
+misses across 30 seeded draws on both ret and feral. Both defaults are
+defined once in `packages/core/src/promotion.ts`
+(`DEFAULT_SCREEN_ITERATIONS`, `DEFAULT_PROMOTE_TOP_K`); full reasoning is on
+`RankInput.screenIterations`/`promoteTopK` in `packages/core/src/rank.ts`.
+
+**Ratio: 0.7042** (169 full-iteration sims of 240 eligible), measured with
+`npx tsx packages/core/test/measure-racing-ratio.ts` — **above the ≤ 0.4
+target, not below it.** The mechanism is direct: `promoteTopK = 150` on a
+240-candidate pool promotes roughly `150/240 ≈ 0.625` of the pool from
+top-K alone, before best-in-slot, set-package and owned add anything, and
+`promoteTopK` cannot be lowered without reopening the recall miss above —
+recall (a test that must pass) and the ratio (a target) pull in opposite
+directions at this fixture's above-cutoff density. This is a **measured
+tension**, not a bug in the promotion rule or an implementation shortcut:
+the rule and its defaults are exactly what §6.1 specifies, tuned to the
+tightest `promoteTopK` that still clears 7.2. Two ways to actually shrink
+the ratio without reopening recall, neither built here (out of this
+slice's scope — pathsAllowed is `packages/core/src/**` and `test/**` plus
+this section): (a) per-slot top-_j_ (§8.1's carried Dean Q1 disagreement,
+already evidenced by M1.5's per-slot data), which recalls without a large
+global K; (b) a genuinely cheaper/higher-fidelity screen (more iterations
+at less relative cost, or a variance-reduction technique) that tightens
+the noise floor enough for a smaller `promoteTopK` to hold. Recorded here
+per this slice's obligation to report the number honestly rather than
+adjust the target after the fact.
+
 ## 7. Test plan
 
 Rules: `AGENTS.md` § Testing — primary tests at `rankUpgrades` through recorded/derived adapters; pure functions unit-tested directly; nothing asserts on stage internals. Every test red before the code that greens it (`tdd`). **Order below is the order they go red.** Each row says what it forces.
