@@ -6,6 +6,10 @@
  */
 
 import { createHash } from "node:crypto";
+import {
+  DEFAULT_PROMOTE_TOP_K,
+  DEFAULT_SCREEN_ITERATIONS,
+} from "./promotion.js";
 
 /**
  * Deterministic JSON: sorted keys, `undefined` treated as absent, non-finite
@@ -95,6 +99,15 @@ export type ContentHashInput = {
    * value from "a cap wide enough to be a no-op".
    */
   candidateCap?: number;
+  /**
+   * Racing knobs (candidate-pool.md §6.1): each one moves which candidates
+   * get a full-iteration sim, so each moves a number and must invalidate a
+   * cached ranking when changed. Per-sim rows still survive a knob change
+   * (F6) — only the assembled `Ranking` is keyed on these.
+   */
+  screenIterations?: number;
+  promoteTopK?: number;
+  fullPool?: boolean;
 };
 
 export function contentHashOf(input: ContentHashInput): string {
@@ -111,6 +124,16 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
   // equal to the eligible count" collide unconditionally rather than by
   // accident of key ordering.
   const candidateCap = input.candidateCap ?? input.candidates.length;
+  // Racing knobs normalized the same way: an omitted value and its default
+  // must hash identically, or a cache miss would silently reappear the
+  // moment a caller starts passing the default explicitly.
+  const fullPool = input.fullPool ?? false;
+  const screenIterations = fullPool
+    ? null
+    : (input.screenIterations ?? DEFAULT_SCREEN_ITERATIONS);
+  const promoteTopK = fullPool
+    ? null
+    : (input.promoteTopK ?? DEFAULT_PROMOTE_TOP_K);
   return {
     character: {
       region: input.character.region.toLowerCase(),
@@ -153,5 +176,8 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
     simVersion: input.simVersion,
     engineVersion: input.engineVersion,
     candidateCap,
+    fullPool,
+    screenIterations,
+    promoteTopK,
   };
 }

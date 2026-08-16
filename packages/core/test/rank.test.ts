@@ -1146,6 +1146,10 @@ describe("rankUpgrades", () => {
       iterations: 3000,
       seeds: [42],
       race: "RaceHuman" as const,
+      // This block is about the sim-result cache, not racing — screening
+      // sims a recording-based runner does not have a fixture for would
+      // otherwise throw (`RecordedSimRunner`/similar reject unknown keys).
+      fullPool: true as const,
     };
 
     it("serves the second identical call from the store without simming", async () => {
@@ -1874,6 +1878,9 @@ describe("rankUpgrades", () => {
         iterations: 3000,
         seeds: [42],
         race: "RaceHuman",
+        // Gem-migration behaviour, not racing — a CapturingSimRunner has no
+        // recording for a screening request and would throw on one.
+        fullPool: true,
       },
       {
         gear: new RecordedGearSource({
@@ -1945,6 +1952,9 @@ describe("rankUpgrades", () => {
         iterations: 3000,
         seeds: [42],
         race: "RaceHuman",
+        // Gem-preservation behaviour, not racing — a CapturingSimRunner has
+        // no recording for a screening request and would throw on one.
+        fullPool: true,
       },
       {
         gear: new RecordedGearSource({
@@ -3814,7 +3824,13 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         }),
       });
 
-      const ranking = await rankUpgrades({ ...m1Input, candidateCap: 2 }, deps);
+      // Pre-M2 cap semantics specifically (§5.1.1): the cap keeps the first
+      // N of the *EP order*, not the first N of a promoted set — racing's
+      // own cap-after-promotion semantics belong to the M2 tests instead.
+      const ranking = await rankUpgrades(
+        { ...m1Input, candidateCap: 2, fullPool: true },
+        deps
+      );
 
       const itemIds = ranking.items.map((i) => i.itemId).sort((a, b) => a - b);
       // Top 2 by EP order (90001, 90002 — the highest synthetic DPS gains,
