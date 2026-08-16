@@ -3858,7 +3858,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
 
   describe("concurrency and determinism (7.3)", () => {
     it("bounds in-flight sims to Deps.concurrency", async () => {
-      const { sim, deps } = m1Deps({ concurrency: 2 } as never);
+      const { sim, deps } = m1Deps({ concurrency: 2 });
 
       await rankUpgrades(m1Input, deps);
 
@@ -3866,8 +3866,8 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
     });
 
     it("produces a byte-identical ranking at concurrency 1 vs 4", async () => {
-      const one = m1Deps({ concurrency: 1 } as never);
-      const four = m1Deps({ concurrency: 4 } as never);
+      const one = m1Deps({ concurrency: 1 });
+      const four = m1Deps({ concurrency: 4 });
 
       const rankingOne = await rankUpgrades(m1Input, one.deps);
       const rankingFour = await rankUpgrades(m1Input, four.deps);
@@ -3883,11 +3883,11 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         },
       };
       const depsOne = {
-        ...m1Deps({ concurrency: 1 } as never).deps,
+        ...m1Deps({ concurrency: 1 }).deps,
         sim: failingSim,
       };
       const depsFour = {
-        ...m1Deps({ concurrency: 4 } as never).deps,
+        ...m1Deps({ concurrency: 4 }).deps,
         sim: failingSim,
       };
 
@@ -3924,7 +3924,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         sim: abortingSim,
         concurrency: 1,
         signal: controller.signal,
-      } as never);
+      });
 
       const ranking = await rankUpgrades(m1Input, deps);
 
@@ -3970,7 +3970,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         sim: countingSim,
         concurrency: 1,
         signal: controller.signal,
-      } as never);
+      });
 
       const ranking = await rankUpgrades(
         { ...m1Input, seeds: [42, 43, 44, 45, 46] },
@@ -3983,6 +3983,53 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         expect(item.seMethod).not.toBe("paired-replicate");
         expect(item.setBonusNote).toBeUndefined();
       }
+    });
+
+    it("does not re-add a sim-crashed candidate as an unsimmed row", async () => {
+      // A candidate whose every slot attempt panicked is dropped from the
+      // ranking and disclosed in `substitutions` (ticket 122). It is also
+      // absent from the measured-delta map, so an aborted run must not
+      // mistake it for "Stop never reached this" and re-add it as a
+      // `simmed: false` placeholder — that would have the same ranking say
+      // the item was dropped for a sim failure *and* show it as unsimmed.
+      const controller = new AbortController();
+      let runCount = 0;
+      const crashingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          const neckId = neckIdIn(req);
+          if (neckId === 90001) throw new Error("go panic: class-locked");
+          // Abort once a couple of candidates have landed, so the run is
+          // genuinely partial and the unsimmed path is exercised.
+          if (runCount === 3) controller.abort();
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: crashingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      });
+
+      const ranking = await rankUpgrades(m1Input, deps);
+
+      expect(ranking.complete).toBe(false);
+      const dropped = ranking.substitutions.some((s) =>
+        `${s.field} ${s.detail}`.includes("90001")
+      );
+      const asRow = ranking.items.find((i) => i.itemId === 90001);
+      // Disclosed as dropped, or present as a row — never both.
+      expect(dropped && asRow !== undefined).toBe(false);
     });
 
     it("writes no ranking cache row for a partial run, but keeps per-sim rows", async () => {
@@ -4012,7 +4059,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
         store,
         concurrency: 1,
         signal: controller.signal,
-      } as never);
+      });
 
       const ranking = await rankUpgrades(m1Input, deps);
       expect(ranking.complete).toBe(false);

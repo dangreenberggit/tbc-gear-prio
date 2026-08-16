@@ -1,5 +1,52 @@
 import { describe, expect, it } from "vitest";
 
+describe("promisePool error and size edge cases", () => {
+  it("rejects with the lowest-index error, not the first to reject", async () => {
+    // Two tasks fail in one drain. A time-ordered winner would surface
+    // index 2 here, making the error depend on pool size and task latency.
+    const tasks = [
+      async () => {
+        await new Promise((r) => setTimeout(r, 30));
+        throw new Error("index-0");
+      },
+      async () => "ok",
+      async () => {
+        throw new Error("index-2");
+      },
+    ];
+    await expect(promisePool(tasks, 3)).rejects.toThrow("index-0");
+  });
+
+  it("surfaces the same error at every pool size", async () => {
+    const build = () => [
+      async () => {
+        await new Promise((r) => setTimeout(r, 20));
+        throw new Error("index-0");
+      },
+      async () => {
+        throw new Error("index-1");
+      },
+      async () => "ok",
+    ];
+    const at1 = await promisePool(build(), 1).catch((e: Error) => e.message);
+    const at4 = await promisePool(build(), 4).catch((e: Error) => e.message);
+    expect(at1).toBe("index-0");
+    expect(at4).toBe(at1);
+  });
+
+  it("runs every task when given a non-finite pool size", async () => {
+    // NaN once produced zero workers and a silent success.
+    const ran: number[] = [];
+    const tasks = [0, 1, 2].map((i) => async () => {
+      ran.push(i);
+      return i;
+    });
+    const out = await promisePool(tasks, Number.NaN);
+    expect(out).toEqual([0, 1, 2]);
+    expect(ran.sort()).toEqual([0, 1, 2]);
+  });
+});
+
 import { promisePool } from "../src/promise-pool.js";
 
 describe("promisePool", () => {
