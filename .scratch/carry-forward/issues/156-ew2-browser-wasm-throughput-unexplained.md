@@ -471,3 +471,49 @@ The failure is `replicateTopItems` finding a ranked row with no
 `winningRequests` entry (`packages/core/src/rank.ts:1574`). **Hypothesis,
 untested:** a screened, unpromoted row reaches paired replication when fewer
 than 8 promoted rows meet the cutoff. Plan slice A tests it first.
+
+### 2026-08-16 (slice A) - hypothesis confirmed and fixed
+
+The hypothesis above is no longer a hypothesis. The red test reproduced the
+production error verbatim before any fix:
+
+```
+RankError: no recorded request for ranked item 900003 (neck-2);
+paired replication cannot re-sim it
+  at replicateTopItems packages/core/src/rank.ts:1580
+```
+
+Re-runnable: `npx vitest run packages/core/test/rank.test.ts -t "does not
+spend replication on screened-out rows"` at commit `aec062b^` fails, and at
+`aec062b` passes.
+
+**Mechanism, now read off the source rather than guessed.** Screened rows are
+pushed into `ranked` at `rank.ts:1389` carrying an explicit `belowCutoff:
+false` (`rank.ts:1248`), and they have no `winningRequests` entry because they
+were never simmed at full iterations. `replicateTopItems` selected its top N
+on `!item.belowCutoff` alone, so as soon as the promoted set held fewer than
+`PAIRED_REPLICATE_TOP_N` (8) rows, `slice(0, 8)` reached past the promoted
+rows into the screened ones and threw. Unsimmed rows (`simmed === false`, from
+an aborted run) sit in `ranked` the same way and are excluded by the same fix.
+
+- Red/green test: `does not spend replication on screened-out rows`,
+  `packages/core/test/rank.test.ts`.
+- Fix: `aec062b` (this repo), `151f5905d` (fork,
+  branch `feat/upgrades-tab`). The throw is kept — a *promoted* row without a
+  request is still a real bug.
+- E-W3 (`packages/core/test/wowsims-fork-parity.test.ts`) was re-run against
+  the edited fork engine and passed before `engine/PROVENANCE.md`'s hash for
+  `rank.ts` was updated to `c42a1751...`.
+- `pnpm verify` exits 0 in this repo; `npm run type-check` exits 0 in the
+  fork (its engine directory is eslint-ignored, so typecheck is the gate).
+
+**What this does and does not settle.** It removes the crash that ended the
+last four measurement attempts after ~38 sims. It says nothing about the
+throughput question the ticket is actually open for — no timing was taken.
+Slices B and C still have to run.
+
+**Retire acceptance box "`lib.wasm` fetch count > 0"** (line 450 above). That
+probe is page-side and the fetch is worker-side, so it can only ever read 0.
+Replaced by the two signals in plan §2 slice B: an `http-server` access-log
+`GET /tbc/lib.wasm`, and the pool's `Ready, isWasm: true` console line
+(`ui/core/worker_pool.ts:237`).
