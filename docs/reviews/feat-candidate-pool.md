@@ -133,8 +133,26 @@ Two things this review caught that the orchestrator had asserted:
   `check_engine_port_drift.py`'s own instruction.
 - `pnpm engine-port-drift:check` → 32 ported files match.
 
-## Disposition summary
+## Disposition
 
-12 fixed, 4 deferred to tickets 200–202 plus 3 wontfix with reasons. No
-blocker remains open. The two Linus blockers are resolved in both engine
-copies.
+| ID  | Finding                                                                | Disposition | Note                                                                                 |
+| --- | ---------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| R1  | `complete` cache claim false — `Store.put<T>` is generic               | fixed       | `b52fd51`, both engine copies                                                        |
+| R2  | Aborted run duplicated sim-crashed candidates as unsimmed rows         | fixed       | `b52fd51`, test red first                                                            |
+| R3  | `promisePool` first error by time, not index                           | fixed       | `b52fd51`                                                                            |
+| R4  | Test 7.3 could not detect R3                                           | fixed       | `b52fd51`, distinguishable errors                                                    |
+| R5  | Nine `as never` casts voided checking on the new `Deps` fields         | fixed       | `b52fd51`, typo now TS2561                                                           |
+| R6  | `promisePool` non-finite `n` ran nothing and returned success          | fixed       | `b52fd51` + test                                                                     |
+| R7  | Published `node scripts/ew5_rank.mjs` does not run                     | fixed       | `16ef233`, five places                                                               |
+| R8  | `ew5_rank.mjs` names a gitignored binary with no fetch pointer         | fixed       | `16ef233`                                                                            |
+| R9  | CLI sets no `concurrency`; zero throughput change on the measured path | defer       | `.scratch/carry-forward/issues/200-cli-runs-candidates-serially.md`                  |
+| R10 | `memoryCapFromDeviceMemory` is a constant wearing a calculation        | defer       | `.scratch/carry-forward/issues/201-memorycap-is-a-constant-wearing-a-calculation.md` |
+| R11 | CLI RSS reused for browser sizing without the caveat                   | fixed       | `16ef233`                                                                            |
+| R12 | M1.5's single-seed provenance undisclosed                              | fixed       | `16ef233`                                                                            |
+| R13 | A `PartialRanking` carries no disclosure in its own data               | defer       | `.scratch/carry-forward/issues/202-partial-ranking-carries-no-disclosure.md`         |
+| R14 | `orderCandidatesByEp` recomputes keys in the comparator                | wontfix     | Microseconds against a 141 s run; revisit only if ordering becomes hot               |
+| R15 | `makeRaidSimRequest`'s `iterations` param is dead                      | wontfix     | One optional param; the shape any future per-request control needs                   |
+| R16 | `contentHash` collides capped and uncapped equivalents                 | wontfix     | Correct: same candidate list, same sims, same result                                 |
+
+12 fixed, 3 deferred to tickets 200–202, 3 wontfix with reasons. No blocker
+remains open; both Linus blockers are resolved in both engine copies.
