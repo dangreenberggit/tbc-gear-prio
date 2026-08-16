@@ -214,3 +214,32 @@ still owns.
 - [ ] Foregrounded-tab status stated explicitly either way.
 - [ ] The run-to-run variance explained, or recorded as unexplained with the
       spread quoted.
+
+### 2026-08-16 (candidate-pool session) - blocker re-confirmed, table not attempted
+
+Re-checked whether this environment can satisfy the ticket's own acceptance
+criterion of a foregrounded, compositing tab. It cannot; the 2026-08-14
+finding reproduces exactly.
+
+Commands run in the Claude Code Browser pane (fresh pane, `https://example.com`,
+no repo assets involved - this probes the harness, not the app):
+
+| Probe | Result |
+| --- | --- |
+| `computer{action:"screenshot"}` | fails: "the Browser pane is not displayed, so the page is not compositing frames" |
+| `document.hidden` | `true` |
+| `document.visibilityState` | `"hidden"` |
+| `navigator.hardwareConcurrency` | 20 (same machine as prior comments) |
+
+**The 20-candidate table was deliberately not attempted.** This ticket already
+records that a non-displayed pane cannot rule out visibility throttling of the
+*main* thread, and that the leading untested explanation for the unexplained
+5.3s -> 12.1s variance is harness scheduling. Producing the table from this
+pane would yield numbers requiring the same caveat that left the previous
+attempt's numbers untrusted, while appearing to close a "Done when" box. The
+acceptance criteria ask for foregrounded status stated explicitly: **it is
+hidden, so the criteria cannot be met from this harness.**
+
+Unchanged conclusion: this ticket needs a human running a real browser on a
+visible desktop, or a harness that can foreground and composite the pane. No
+amount of agent budget in this environment substitutes for that.
