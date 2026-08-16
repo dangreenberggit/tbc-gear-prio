@@ -1557,8 +1557,19 @@ export async function rankUpgrades(
   ): Promise<void> {
     if (!usesPairedReplication(seeds)) return;
 
+    // Screened and unsimmed rows are excluded before the slice, not caught by
+    // the throw below: neither was ever simmed at full iterations, so neither
+    // has a `winningRequests` entry to re-sim, and both sit in `ranked` with
+    // `belowCutoff` false (ticket 156). Selecting on `!belowCutoff` alone let
+    // the slice run past a short promoted set into them and throw on a row
+    // that was never a replication candidate in the first place.
     const top = ranked
-      .filter((item) => !item.belowCutoff)
+      .filter(
+        (item) =>
+          !item.belowCutoff &&
+          item.screened === undefined &&
+          item.simmed !== false
+      )
       .slice(0, PAIRED_REPLICATE_TOP_N);
     if (top.length === 0) return;
     // Baseline once per seed, shared by every replicated candidate under that

@@ -21,7 +21,7 @@ import {
   rankUpgrades,
   type Ranking,
 } from "../src/rank.js";
-import { pairedReplicateSe } from "../src/se.js";
+import { PAIRED_REPLICATE_TOP_N, pairedReplicateSe } from "../src/se.js";
 import { applyView } from "../src/view.js";
 import { realPoolEntry } from "./real-source.js";
 import {
@@ -2439,6 +2439,62 @@ describe("rankUpgrades paired-replicate SE", () => {
     const ranking = await rankWithSeeds(SEEDS, new FlatRunner());
     expect(ranking.items.every((i) => i.belowCutoff)).toBe(true);
     expect(ranking.items.every((i) => i.seMethod === "independent")).toBe(true);
+  });
+
+  /**
+   * Ticket 156. Screened-out rows join `ranked` (rank.ts) with
+   * `belowCutoff: false` and no entry in `winningRequests` — they were never
+   * simmed at full iterations, so there is no request to re-sim. Replication
+   * selected on `!belowCutoff` alone, so as soon as fewer than
+   * `PAIRED_REPLICATE_TOP_N` promoted rows existed, the `slice(0, 8)` reached
+   * past the promoted rows into the screened ones and threw
+   * `no recorded request for ranked item`.
+   *
+   * This is the failure that killed four browser measurement runs: racing is
+   * on by default (`fullPool !== true`) and `DEFAULT_SEEDS` has five seeds, so
+   * the tab hits this path whenever the promoted set is small.
+   *
+   * `candidateCap: 3` is what makes the promoted set smaller than 8 while
+   * leaving six screened rows behind it — without the cap every pool row is
+   * promoted and the slice never runs off the end.
+   */
+  it("does not spend replication on screened-out rows", async () => {
+    const sim = new SeedAwareSimRunner();
+    const logged = slamaltmanLoggedGear();
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: SEEDS,
+        race: "RaceHuman",
+        candidateCap: 3,
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: neckPool(),
+      }
+    );
+
+    const screened = ranking.items.filter((i) => i.screened !== undefined);
+    const promoted = ranking.items.filter((i) => i.screened === undefined);
+    // The fixture only tests what it claims if screening actually left rows
+    // behind and promoted fewer than the top-8 slice would take.
+    expect(screened.length).toBeGreaterThan(0);
+    expect(promoted.length).toBeLessThan(PAIRED_REPLICATE_TOP_N);
+
+    for (const row of screened) {
+      expect(row.seMethod).toBe("independent");
+    }
   });
 
   it("rejects five identical seeds as internal rather than reporting SE 0", async () => {
