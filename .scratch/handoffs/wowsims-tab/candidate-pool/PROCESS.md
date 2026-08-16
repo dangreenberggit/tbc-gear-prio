@@ -433,3 +433,64 @@ dropped, §6 is marked not shipped, M3 goes to a design pass, and F's M2 half is
 skipped.
 
 Never merge to `dev`: the user must ask separately, after `pre-merge-review`.
+
+## Fix round (2026-08-15, after the plan author's §3.4 judgment)
+
+Ordered by the user: 203 → 200 → 204 (conditional) → re-review + REPORT §8.
+
+**The author's correction, accepted.** The M2 gate was measured on the CLI —
+one OS process per request — but M2 exists for the browser, where the module
+is resident and there is no spawn to pay for. The 0.54 floor was an artifact
+of process start-up. REPORT.md's "the central bet lost" over-read a
+CLI-scoped result; §3.3's own scope note had said so at the time.
+
+### Ticket 203 — done, and it reverses the M2 verdict
+
+WASM `t_fixed` = **748.4 ms**, `t_iter` = **3.2446 ms/iteration**, floor
+**0.0441** against a 0.25 gate. With §3.2's `max K* = 25 ≤ 60`, both legs pass:
+**M2 resumes.** Recorded in §3.4.1.
+
+Orchestrator verification, not accepted from the handoff: the least-squares fit
+reproduces exactly from the committed medians; the 5,000-iteration DPS is
+`2042.3926145882178`, matching E-W1's recorded WASM figure digit for digit; and
+16.2 s of iteration time at 5,000 sits beside E-W1's independent ≈14.7 s.
+
+Three sweep points clear the gate: 100 → 0.063, 300 → 0.102, 1000 → 0.235.
+
+**Scope held firm:** Node-hosted WASM is not a browser tab. It removes process
+spawn — the thing that killed the CLI floor — but measures no `postMessage`
+overhead, no throttling, no four-worker contention. Ticket 156 still owns the
+real in-browser number.
+
+### Ticket 200 — done with a measured ratio
+
+`--concurrency N`, default 4, §5.2 and §5.1.2 amended. Ret p2, real binary:
+**240,106 ms → 127,853 ms = 1.88×**, output byte-identical once Node's
+PID-carrying warning line is excluded. It is 1.88× not 4× because `wowsimcli`
+already splits one request across threads — the win is overlapping fixed
+per-process cost, not multiplying throughput.
+
+### Ticket 204 — dispatched (gates 7.2)
+
+In scope because M2 resumed. Base `2b438fd`, branch
+`slice-204-synthetic-fixtures`.
+
+### Ticket 201 — input measured, design decision still open
+
+Per-worker WASM memory is **402.7 MB**, over double the 183.8 MB native proxy
+it replaces. The objection survives: the cap still never binds on realistic
+hardware.
+
+### Still to do
+
+1. 204 lands → **slice E (M2 in `packages/core`)**, tests 7.0, 7.5, 7.2, 7.7 ext.
+   `promoteTopK = 35` (max K\* + 10) stands — K\* is runtime-independent.
+   `screenIterations` is a slice-E decision; 300 is the defensible default
+   (0.102 of a full run, K\* 15/16, Spearman 0.9882/0.9905).
+2. Port M2 to the fork; re-run E-W3; update PROVENANCE **after** parity passes.
+3. Three-axis review **over the new diff only**; update
+   `docs/reviews/feat-candidate-pool.md`.
+4. REPORT.md **§8 "Fix round"**, same six headings, deviations and open
+   disagreements verbatim.
+
+**Not to do:** no merge to `dev`, no fork push. Both need an explicit ask.
