@@ -691,3 +691,76 @@ would put a meaningless number in §5.
   this repo's `data/universes/ret-p3.json` (390 entries). Unexplained 4-entry
   gap; probably benign for this defect but it means the browser pool indicator
   is not evidence about this repo's data.
+
+### 2026-08-16 (plan v2 slice A) - screening failures are now disclosed; still no timing
+
+The blocker in the comment above is fixed in both repos. **No measurement was
+taken and none should be read into this comment** - slice A makes failure
+*visible*, slice B is what makes it *stop*.
+
+- Core: `e6a77a4` (this repo). Fork: `b603534c5` + `4c7386914`
+  (`feat/upgrades-tab`).
+- Four red tests drove it, at the `rankUpgrades` interface with racing on
+  (`packages/core/test/rank.test.ts`, describe "screening sim failures are
+  disclosed (ticket 156)"). The first failed with `promise resolved
+  "{ ...(10) }" instead of rejecting` - the production symptom reproduced:
+  every screening sim throws and the run still returns a `Ranking`.
+
+**What changed.** A failed screening slot attempt records a skip row and
+surfaces through the **same** `candidate <id> (<slot>)` field and "dropped
+from the ranking" wording the full-iteration path already used - one rule, so
+a reader never has to reason about which iteration count the engine panicked
+at. A run where nothing screened at all now throws
+`RankError('sim-failed')` naming the count and first message. A new
+`screening` progress event carries a running `failed` count, so the tab's
+status line moves during the pass instead of after it.
+
+**Two further defects found while building it, both fixed in the same
+commits** (each is inside slice A's subject: without them the disclosure is
+wrong):
+
+1. `promotionRule` filtered non-finite screens out of the per-slot floor but
+   **not out of `topK`**. `slice(0, K)` at the shipped K=150 takes every row
+   of any pool under 150, so a candidate whose every screen panicked was
+   promoted anyway and spent a full-iteration sim re-running a swap already
+   known to crash. Both pre-existing tests for this intent passed
+   `promoteTopK: 0`, which sidestepped the gap - re-runnable as the new
+   `does not promote a failed screen through topK` in `promotion.test.ts`.
+2. `screenCandidate` skipped an infeasible meta repair silently, so such a
+   candidate vanished from the racing path with no substitution row.
+
+**The fork's assumptions drawer never rendered `substitutions` at all.** The
+engine has always recorded dropped candidates there; the page showed only the
+run's settings. That is now rendered - without it, slice A's disclosure would
+exist in the data and still be invisible on the surface slice B has to read.
+
+**Nine tests broke and none was fixture noise.** Eight rank tests plus the
+E-W3 parity harness pinned recordings at their full iteration count only and
+passed **solely because screening failures were invisible** - this repo's own
+suite was exhibiting the bug. They are about ranking behaviour, not racing,
+so they now pass `fullPool: true`, as the sim-result-cache block already did.
+
+**Gate status, stated plainly.** All 832 tests pass; `pnpm verify` does *not*
+reach the end - it stops at `sim-implemented-effects:check`, which fails
+**identically at `HEAD` without these changes** (fork checkout is at
+`151f5905d`, `data/sim-implemented-effects.json` records `138fa77f5`). That
+is a pre-existing data-pipeline bookkeeping gap, untouched here. Fork
+`npm run type-check` exits 0; E-W3 was re-run green against the edited fork
+engine *before* `PROVENANCE.md`'s hashes were updated, and
+`scripts/check_engine_port_drift.py` now reports ok on 33 files.
+
+**Correction to the last comment's item 4.** The fork/core universe gap is
+**not** "4 extra entries, probably benign". It is a 16-item symmetric
+difference - 10 fork-only, 6 core-only - concentrated in trinkets and
+librams. `Darkmoon Card: Crusade`, `Hourglass of the Unraveller` and
+`Abacus of Violent Odds` are absent from the browser pool entirely;
+`Ashtongue Talisman of Zeal` is absent from this repo's. The two surfaces
+rank from different candidate sets, and neither is a superset. Ticket 211.
+
+Slice E is done: tickets **208** (`candidateCap` order), **209** (drawer says
+racing was not shipped), **210** (placeholder), **211** (universe divergence).
+
+**Next is slice B, unchanged in shape:** rebuild, serve, one Phase 3 run with
+Candidates empty, and read the exception text off the page - the per-row
+disclosure above is now the primary route, no console handle and no dev-mode
+rebuild (plan v2 §B as amended by `12878ec`). Status stays **open**.

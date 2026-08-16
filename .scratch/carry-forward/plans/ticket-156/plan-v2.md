@@ -107,15 +107,21 @@ Unchanged from `plan.md` slice D: apply §6.4's break-even (promoted ratio <
 `docs/plans/wowsims-tab/plan.md` at D7, one of: racing off at 3000 / default
 5000 / accept the loss.
 
-## E. File, do not fix here (handoff §8)
+## E. File, do not fix here (handoff §8) — **done**
 
-One carry-forward ticket each, opened before C so they are not lost:
+Filed 2026-08-16, before C as intended:
 
-1. `candidateCap` slices in EP order while its comment says screening order
-   (`rank.ts:1206-1213`).
-2. Assumptions drawer says racing was not shipped (`upgrades_tab.tsx:738-741`).
-3. `{{count}} / {{count}}` placeholder on load.
-4. Fork bundle has 394 P3 entries vs 390 in `data/universes/ret-p3.json`.
+1. `candidateCap` slices in EP order while the code around it says the sim
+   picks — ticket 208.
+2. Assumptions drawer says racing was not shipped — ticket 209.
+3. `{{count}} / {{count}}` placeholder on load — ticket 210. Also records
+   the lagging-indicator half, which is the part that costs measurement time.
+4. Fork bundle vs `data/universes/ret-p3.json` — ticket 211. **The "394 vs
+   390, probably benign" reading was wrong**: it is a 16-item symmetric
+   difference (10 fork-only, 6 core-only) concentrated in trinkets and
+   librams, including Darkmoon Card: Crusade and Hourglass of the Unraveller
+   missing from the browser pool entirely. The two surfaces rank from
+   different candidate sets.
 
 ## Lanes and budget
 
