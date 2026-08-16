@@ -454,3 +454,20 @@ worth its own issue.
       `hardwareConcurrency` (6 on this machine, 20 on the original).
 - [ ] No harness polling during a timed run.
 - [ ] State foregrounded status explicitly (this surface: `visible`).
+
+### 2026-08-16 (planning) - plan written; last comment's diagnosis retracted
+
+Plan: `.scratch/carry-forward/plans/ticket-156/plan.md`. Two corrections to
+the comment above, both re-checkable:
+
+- The tab has no recorded adapter (`upgrades_tab.tsx:97` constructs
+  `WasmSimRunner` unconditionally). "Ran on its recorded adapter" is wrong.
+- `lib.wasm` is fetched **by the worker** (`ui/worker/sim_worker.ts:45`), so
+  the page's `performance.getEntriesByType('resource')` cannot see it. That
+  probe is blind; the plan replaces it with the server access log and the
+  pool's `Ready, isWasm: true` console line.
+
+The failure is `replicateTopItems` finding a ranked row with no
+`winningRequests` entry (`packages/core/src/rank.ts:1574`). **Hypothesis,
+untested:** a screened, unpromoted row reaches paired replication when fewer
+than 8 promoted rows meet the cutoff. Plan slice A tests it first.
