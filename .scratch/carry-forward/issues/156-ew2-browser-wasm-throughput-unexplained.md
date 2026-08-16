@@ -517,3 +517,177 @@ probe is page-side and the fetch is worker-side, so it can only ever read 0.
 Replaced by the two signals in plan §2 slice B: an `http-server` access-log
 `GET /tbc/lib.wasm`, and the pool's `Ready, isWasm: true` console line
 (`ui/core/worker_pool.ts:237`).
+
+### 2026-08-16 (slice B) - the engine loads; the old diagnosis is dead
+
+**The engine was loading all along.** With `http-server` logging every
+request, opening the tab produced **five** `GET /tbc/lib.wasm` fetches from
+Chrome (20,293,865 bytes each) and six `GET /tbc/sim_worker.js`. The
+"0 wasm entries -> running on recordings" conclusion from the earlier comment
+was an artifact of a page-side probe that cannot observe worker fetches,
+exactly as the planning comment predicted. **No recorded adapter was ever
+involved.**
+
+Re-runnable, from `vendor/tbc-new-fork`:
+
+```bash
+npx http-server dist -p 8123 -c-1 > /tmp/http.log 2>&1 &
+# open http://127.0.0.1:8123/tbc/paladin/retribution/index.html, then:
+grep lib.wasm /tmp/http.log
+```
+
+**The plan's second signal does not exist on this surface.** `Ready, isWasm:
+true` goes through `WorkerPool.log()` (`ui/core/worker_pool.ts:349`), which is
+gated on `isDevMode()` -> `import.meta.env.DEV`. That is false in a production
+build, so the line is never emitted no matter how healthy the pool is. Do not
+treat its absence as a failed load, and do not rebuild in dev mode to obtain
+it -- that changes the delivery path under measurement. The server-side fetch
+log is the better signal anyway: it observes the bytes being served rather
+than the app's opinion about them.
+
+**Build recipe used** (no `make` on this machine; these are the three commands
+the Makefile's `bundle/.dirstamp` target runs):
+
+```bash
+export PATH="/c/Program Files/Go/bin:$PATH"
+npx tsc --noEmit && npx tsx vite.build-workers.mts && npx vite build
+```
+
+`lib.wasm` was not rebuilt -- the slice A fix is TypeScript-only and the
+committed binary already exists.
+
+**The slice A fix is in the served bundle**, verified in the minified output
+rather than inferred from a successful build:
+
+```
+s=e.filter(e=>!e.belowCutoff&&void 0===e.screened&&!1!==e.simmed).slice(0,8)
+```
+
+in `dist/tbc/bundle/ui/paladin/retribution/index.html-CNx0kpnM.entry.js`,
+which is the entry the served `index.html` actually references. Note `vite
+build` warns `outDir ... will not be emptied`: stale entry chunks from earlier
+builds remain in `dist/` and are unreferenced. Grep the served `index.html`
+for the current entry name rather than globbing `bundle/`.
+
+**Machine for this session differs from the original.**
+`navigator.hardwareConcurrency` is **3** here, against 20 on the machine that
+produced the 14.7 s Node figure. Timings below are a valid measurement of this
+machine and are **not** comparable to the historical Node/CLI numbers.
+
+**New lead, untested:** `self.crossOriginIsolated` is **false** on this
+surface, so `SharedArrayBuffer` is unavailable. That is a plausible
+contributor to the browser-vs-Node gap and is cheap to test by serving with
+COOP/COEP headers. Not pursued in this session.
+
+### 2026-08-16 (slice C attempt) - E-W2 still unmeasured: screening silently fails in-browser
+
+**No timing was recorded, and none should be until the defect below is fixed.**
+Every browser run this session completed "successfully" while doing almost no
+work. This is the real reason E-W2 has never been obtained, and it is not the
+crash fixed in slice A.
+
+**Runs attempted** (Candidates empty = no cap, `visibilityState: 'visible'`
+throughout, `hardwareConcurrency: 3`):
+
+| Pool | Iterations | Wall-clock | Result |
+| --- | --- | --- | --- |
+| Phase 2 (240) | 3000 | 5.21 s | "No upgrades found above the cutoff" |
+| Phase 3 (394) | 3000 | 14.31 s | 509 rows, 220 Black Temple/Hyjal, **all `~0.0 (screened)`** |
+
+**Why these are not measurements.** From this repo's own WASM cost model
+(`experiments/e-w5-overhead-wasm.md:36`: `t_fixed` 748.4 ms, `t_iter` 3.2446
+ms/iter), one 1000-iteration screening sim costs ~3,993 ms. 394 screens at
+concurrency 4 predicts **~393 s**. Observed: 14.31 s — about 14 sims' worth.
+The sims did not happen.
+
+**Root cause, confirmed by reading code.** `screenCandidate` swallows every
+sim failure:
+
+```ts
+// packages/core/src/rank.ts:973-977 (fork engine/rank.ts:686-690, identical)
+try {
+  candObs = await deps.sim.run(candReq, screenOpts);
+} catch {
+  continue;
+}
+```
+
+A bare `catch { continue }` per slot attempt. When every attempt throws, the
+loop returns `Number.NEGATIVE_INFINITY` (`rank.ts:983`), and the run then
+looks healthy all the way out:
+
+1. Every `ScreeningResult.deltaDps` is `-Infinity`.
+2. `promotionRule` skips non-finite screens for the per-slot floor
+   (`promotion.ts:111`), so no row is promoted on merit.
+3. The screened-row builder clamps the sentinel to exactly `0`
+   (`rank.ts:1235-1238`) — this is the `~0.0` on all 509 rows.
+4. Nothing clears the 3.4 DPS cutoff, so the UI says "No upgrades found above
+   the cutoff" and exits green.
+
+**The asymmetry that hid it for four sessions.** The full-iteration path
+*does* disclose sim failures — `runCandidate` records a `candidateSkips` row
+(`rank.ts:1045`, `:1072`) that surfaces in the substitutions drawer. The
+screening path has no equivalent: no skip row, no counter, no progress event
+(`onProgress` fires only after screening completes, `rank.ts:1269`). **394
+consecutive engine failures are indistinguishable from "nothing is an
+upgrade".**
+
+**The engine and the P3 data are fine — this is browser-only.** Re-runnable:
+
+```bash
+npx tsx packages/core/src/cli.ts --region US --realm dreamscythe \
+  --character slamaltman --offline --spec ret --max-phase 3
+```
+
+Exit 0, 427 sims, baseline 2003.51, real deltas: `#1 Belt of One-Hundred
+Deaths Δ47.75 (2.38%)`, `#2 Torch of the Damned Δ43.61`, and `#16 Shadowmoon
+Destroyer's Drape Δ13.67` — item 32323, a `phase: 3` Black Temple drop. So
+phase-3 items compose, gem-fill, sim and rank correctly outside the browser.
+
+Note the CLI **cannot** reach this path: `cli.ts:309` hardcodes `fullPool:
+true`, so `pnpm rank` never calls `screenCandidate`. Racing is browser-only,
+which is why no CLI run has ever caught this.
+
+**Why the underlying screening sims throw — hypothesis, untested.** Two
+candidates, both cheap to check:
+
+- Worker-pool exhaustion under `WasmSimRunner`: `hardwareConcurrency` is 3 on
+  this machine but `DEFAULT_WORKER_COUNT` is 4
+  (`wasm_sim_runner.ts:43`), and `run()` throws on `result.error` or a missing
+  `raidMetrics.dps` (`:136-141`) — either lands in the swallowed catch.
+- `self.crossOriginIsolated === false` (recorded in the slice B comment above),
+  so no `SharedArrayBuffer`.
+
+**Cheapest next experiment:** in the browser console, call `WasmSimRunner.run()`
+once directly with a 1000-iteration screening request and let the exception
+surface instead of letting `screenCandidate` eat it. That turns the hypothesis
+into the actual error string in one call.
+
+**Blocking E-W2.** Fix the disclosure defect first (a screening run that loses
+N/394 candidates must say so, not report a green run), then find why the sims
+throw, then measure. Timing a run that dispatches ~14 sims instead of ~400
+would put a meaningless number in §5.
+
+**Corrections to earlier comments in this ticket.**
+
+- The `{{count}} / {{count}}` placeholder bug (line ~445) is real but
+  mis-described: the field renders the raw template on a **fresh page load**
+  and only interpolates **after a run completes** — and then it shows the pool
+  size of the run that just finished. It is a lagging indicator, so it must not
+  be used to confirm which pool a run is *about* to use.
+- The phase picker is **not** limited to Phase 1-2. It offers Phase 1-5
+  (`Phase 3 (2.2 - T6)` etc.), is built from the whole `Phase` enum
+  (`ui/core/utils.ts:416-419` via `other_inputs.ts:81`), and is mounted inside
+  the gear-slot item modal — not the Settings tab, which is why an earlier
+  comment concluded it was absent. It has nothing to do with which gear sets a
+  spec ships.
+- Phase is persisted in `localStorage`
+  (`__tbc_new_retribution_paladin__currentSettings__`, `settings.phase`), so a
+  Phase 3 selection survives a reload. Clicking Run, however, was observed to
+  revert an unsaved phase change to `CURRENT_PHASE` (2) via `sim.ts:777` —
+  set the phase through the modal selector and confirm it stuck before timing.
+- The fork bundles its own universe copy
+  (`.../upgrades/data/ret-p3.universe.json`, 394 entries) which differs from
+  this repo's `data/universes/ret-p3.json` (390 entries). Unexplained 4-entry
+  gap; probably benign for this defect but it means the browser pool indicator
+  is not evidence about this repo's data.
