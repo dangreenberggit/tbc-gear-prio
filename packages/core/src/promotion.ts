@@ -9,13 +9,15 @@
 import type { PoolEntry } from "./pool.js";
 
 /**
- * Defaults per candidate-pool.md §3.4.1 — see `RankInput.screenIterations`
- * and `RankInput.promoteTopK` in rank.ts for the measured justification.
- * Defined once so `rank.ts` and `content-hash.ts` (which must normalize an
- * omitted knob the same way the runtime applies it) cannot drift apart.
+ * Defaults — see `RankInput.screenIterations` and `RankInput.promoteTopK`
+ * in rank.ts for the measured justification (candidate-pool.md §3.4.1's
+ * defaults, corrected against the fixture that actually gates 7.2 — see
+ * that doc comment for the full story). Defined once so `rank.ts` and
+ * `content-hash.ts` (which must normalize an omitted knob the same way the
+ * runtime applies it) cannot drift apart.
  */
-export const DEFAULT_SCREEN_ITERATIONS = 300;
-export const DEFAULT_PROMOTE_TOP_K = 35;
+export const DEFAULT_SCREEN_ITERATIONS = 1000;
+export const DEFAULT_PROMOTE_TOP_K = 150;
 
 /** One candidate's screening observation, keyed by item id. */
 export type ScreeningResult = {

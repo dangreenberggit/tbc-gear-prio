@@ -129,25 +129,37 @@ export type RankInput = {
   candidateCap?: number;
   /**
    * Iterations per candidate in the screening pass (candidate-pool.md §6).
-   * Defaults to 300 — the WASM-measured point at `cost/cost(5000) = 0.102`,
-   * `K* = 15` (ret, tuning) / `16` (feral, held-out gate), Spearman 0.9882 /
-   * 0.9905 (§3.4.1). Chosen over the cheaper 100-iteration point (K*=18/25,
-   * still under the K*<=60 gate but a visibly worse rank correlation at
-   * ~0.97) because racing's whole value proposition is a promotion decision
-   * cheap sims can be trusted to make — a modest amount more iteration
-   * budget for a meaningfully tighter correlation is worth it when the
-   * floor (0.102) still clears the <0.25 gate by more than 2x. Ignored
-   * when `fullPool: true`.
+   * §3.4.1 proposed 300 (the WASM point at `cost/cost(5000) = 0.102`) with
+   * `promoteTopK = 35`, both measured against the E-W5 fixture
+   * (`test/fixtures/slamaltman.raid-sim-request.json`), whose feral run had
+   * only 16 above-cutoff rows. Ticket 204's held-out gating fixture
+   * (`FERAL_SYNTHETIC_ROW`, §7.a) has **42** above-cutoff rows occupying
+   * *every* global delta rank from 1 to 42 with no gaps — so any `K* < 42`
+   * necessarily misses some of them even at zero noise, and 7.2's own
+   * measurement (`npx vitest run packages/core/test/racing.test.ts -t 7.2`)
+   * found 300/35 missed up to 18 of 42 rows across seeded noise draws.
+   * Raised to 1000 (still `cost/cost(5000) = 0.235`, under the <0.25 gate —
+   * §3.4.1's own table) because 1000 iterations' tighter per-candidate SE
+   * is what let a much smaller `promoteTopK` recall reliably; 300 iterations
+   * needed `promoteTopK` around 150 to reach the same zero-miss point,
+   * which would have spent nearly as much on the promoted-cap full sims as
+   * racing was meant to save. Ignored when `fullPool: true`.
    */
   screenIterations?: number;
   /**
    * How many top-screened candidates promote to a full-iteration sim
-   * (candidate-pool.md §6.1). Defaults to 35 = max(K*) + 10, where K* = 25
-   * is §3.2's measured "smallest global top-K that contains every
-   * 5,000-iteration above-cutoff row", taken over the ret/feral roster.
-   * Runtime-independent (a property of rank correlation, not of CLI vs
-   * WASM cost), so this default carries over from the CLI-path measurement
-   * unchanged. Ignored when `fullPool: true`.
+   * (candidate-pool.md §6.1). §3.4.1 proposed 35 = max(K*) + 10 from the
+   * E-W5 fixture's measured K* (16 feral / 15 ret) — a fixture with only 16
+   * above-cutoff feral rows. Ticket 204's held-out gating fixture needs
+   * `promoteTopK = 120` at `screenIterations = 1000` for zero misses across
+   * 30 seeded noise draws (re-run: `npx vitest run
+   * packages/core/test/racing.test.ts -t 7.2`); 150 is that measured floor
+   * plus the same +10-ish margin §3.4.1's own formula used, rounded up for
+   * legibility. Runtime-independent in the same sense §3.4.1 argued (a
+   * property of rank correlation and cutoff density, not of CLI vs WASM
+   * cost) — but tied to *this* fixture's cutoff density, which is a fact
+   * about the gear pool, not about the runtime. Ignored when `fullPool:
+   * true`.
    */
   promoteTopK?: number;
   /**
