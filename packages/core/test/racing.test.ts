@@ -171,51 +171,58 @@ describe("M2 racing — 7.2: recall on the held-out fixture", () => {
   // set to clear, not an arbitrarily larger one.
   const NOISE_DRAWS = 30;
 
-  it("promotes every above-cutoff row and never screens out a top-5 row, across seeded noise draws", async () => {
-    const truth = await fullSweepTruth();
-    const aboveCutoffIds = new Set(
-      truth.items.filter((i) => !i.belowCutoff).map((i) => i.itemId)
-    );
-    const top5Ids = new Set(
-      truth.items
-        .filter((i) => i.rank !== null)
-        .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
-        .slice(0, 5)
-        .map((i) => i.itemId)
-    );
-    // A recall gate needs something to recall — a fixture with no
-    // above-cutoff rows would make every assertion below vacuously true.
-    expect(aboveCutoffIds.size).toBeGreaterThan(0);
-    expect(top5Ids.size).toBe(5);
+  // 30 draws over a ~250-candidate pool at 1000 screening iterations each is
+  // real work, so this test takes an explicit timeout well above the
+  // default 5s — generous enough that ordinary CI variance cannot turn a
+  // passing recall gate into a flaky timeout.
+  const RECALL_TEST_TIMEOUT_MS = 60_000;
 
-    const misses: Array<{ draw: number; itemId: number }> = [];
-    const top5Misses: Array<{ draw: number; itemId: number }> = [];
-
-    for (let draw = 0; draw < NOISE_DRAWS; draw++) {
-      const sim = buildSim(draw);
-      // Default screenIterations/promoteTopK (omitted) — the recall gate
-      // is on what a real caller gets, not on hand-tuned knobs this test
-      // supplies itself.
-      const ranking = await rankUpgrades(baseInput(), baseDeps(sim));
-      const screenedOutIds = new Set(
-        ranking.items
-          .filter((i) => i.screened?.promoted === false)
+  it(
+    "promotes every above-cutoff row and never screens out a top-5 row, across seeded noise draws",
+    async () => {
+      const truth = await fullSweepTruth();
+      const aboveCutoffIds = new Set(
+        truth.items.filter((i) => !i.belowCutoff).map((i) => i.itemId)
+      );
+      const top5Ids = new Set(
+        truth.items
+          .filter((i) => i.rank !== null)
+          .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+          .slice(0, 5)
           .map((i) => i.itemId)
       );
-      for (const itemId of aboveCutoffIds) {
-        if (screenedOutIds.has(itemId)) misses.push({ draw, itemId });
-      }
-      for (const itemId of top5Ids) {
-        if (screenedOutIds.has(itemId)) top5Misses.push({ draw, itemId });
-      }
-    }
+      // A recall gate needs something to recall — a fixture with no
+      // above-cutoff rows would make every assertion below vacuously true.
+      expect(aboveCutoffIds.size).toBeGreaterThan(0);
+      expect(top5Ids.size).toBe(5);
 
-    // A miss fails the build; the fix is the rule or the defaults, never
-    // the test (candidate-pool.md §7, 7.2's own row).
-    expect(misses).toEqual([]);
-    expect(top5Misses).toEqual([]);
-  }, // 30 draws over a ~250-candidate pool at 1000 screening iterations each
-  // is real work — generous over the default 5s so CI variance does not
-  // turn a passing recall gate into a flaky timeout.
-  60_000);
+      const misses: Array<{ draw: number; itemId: number }> = [];
+      const top5Misses: Array<{ draw: number; itemId: number }> = [];
+
+      for (let draw = 0; draw < NOISE_DRAWS; draw++) {
+        const sim = buildSim(draw);
+        // Default screenIterations/promoteTopK (omitted) — the recall gate
+        // is on what a real caller gets, not on hand-tuned knobs this test
+        // supplies itself.
+        const ranking = await rankUpgrades(baseInput(), baseDeps(sim));
+        const screenedOutIds = new Set(
+          ranking.items
+            .filter((i) => i.screened?.promoted === false)
+            .map((i) => i.itemId)
+        );
+        for (const itemId of aboveCutoffIds) {
+          if (screenedOutIds.has(itemId)) misses.push({ draw, itemId });
+        }
+        for (const itemId of top5Ids) {
+          if (screenedOutIds.has(itemId)) top5Misses.push({ draw, itemId });
+        }
+      }
+
+      // A miss fails the build; the fix is the rule or the defaults, never
+      // the test (candidate-pool.md §7, 7.2's own row).
+      expect(misses).toEqual([]);
+      expect(top5Misses).toEqual([]);
+    },
+    RECALL_TEST_TIMEOUT_MS
+  );
 });
