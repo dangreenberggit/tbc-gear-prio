@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: correctness (user-facing text states the opposite of what runs)
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 3)
@@ -39,17 +39,31 @@ A reader who takes this note at face value will believe the cap picked items by
 EP alone with no sim involved, and will not think to ask why an item that
 screened well is missing. It is disclosure that actively misleads.
 
-Note the cap **does** currently slice the EP order (ticket 208), so the note's
-second clause is accidentally half-right about the ordering while being wrong
-about the mechanism. Fixing this text and fixing 208 are independent: whichever
-lands first must not assert the other's outcome.
+The cap **does** slice the EP order within the promoted set, which ticket 208
+establishes is deliberate (Beck Q2, "ordering stays committed EP") rather than
+the defect it was first filed as. So the note's error is the mechanism, not
+the ordering: it denied that any screening pass happens at all.
+
+## Resolution (2026-08-16)
+
+Both halves fixed in the fork.
+
+- `candidate_cap_note` now reads "top {{cap}} of the candidates that survived
+  screening — every eligible item is screened first, then the best are simmed
+  in full", replacing "top {{cap}} by EP order — a preselection, not a
+  ranking". This is the half users actually see.
+- The source comment above it now states that racing is always on here (the
+  tab never sets `fullPool`), that the CLI is the surface that never races,
+  and that the EP ordering within the promoted set is ticket 208's subject
+  rather than an endorsement.
 
 ## Acceptance criteria
 
-- [ ] The comment and the `candidate_cap_note` string both describe what runs:
+- [x] The comment and the `candidate_cap_note` string both describe what runs:
       racing is on, the pool is screened at 1000 iterations, promotion happens,
       and the cap applies to the promoted set.
-- [ ] The note states which order the cap slices, consistent with whatever
-      ticket 208 settles.
+- [x] The note states which order the cap slices, consistent with ticket 208.
 - [ ] Checked on a served build that the rendered text changed — this string is
       i18n, so editing the source comment alone changes nothing a user sees.
+      **Left for the slice B run**, which rebuilds and serves anyway; the string
+      change is verified in source and by `type-check` only.

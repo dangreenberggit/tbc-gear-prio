@@ -107,21 +107,37 @@ Unchanged from `plan.md` slice D: apply §6.4's break-even (promoted ratio <
 `docs/plans/wowsims-tab/plan.md` at D7, one of: racing off at 3000 / default
 5000 / accept the loss.
 
-## E. File, do not fix here (handoff §8) — **done**
+## E. File, do not fix here (handoff §8) — **done, and three were fixed**
 
-Filed 2026-08-16, before C as intended:
+Tickets 208-211 filed 2026-08-16, before C as intended. Investigating each
+one to write it up honestly turned out to cost about as much as fixing it, so
+three are already closed. Only 211's missing sync check is deferred.
 
-1. `candidateCap` slices in EP order while the code around it says the sim
-   picks — ticket 208.
-2. Assumptions drawer says racing was not shipped — ticket 209.
-3. `{{count}} / {{count}}` placeholder on load — ticket 210. Also records
-   the lagging-indicator half, which is the part that costs measurement time.
-4. Fork bundle vs `data/universes/ret-p3.json` — ticket 211. **The "394 vs
-   390, probably benign" reading was wrong**: it is a 16-item symmetric
-   difference (10 fork-only, 6 core-only) concentrated in trinkets and
-   librams, including Darkmoon Card: Crusade and Hourglass of the Unraveller
-   missing from the browser pool entirely. The two surfaces rank from
-   different candidate sets.
+1. **208 — not a defect.** `candidateCap` slicing EP order is deliberate:
+   candidate-pool.md §11 records Dean Q2 ("cap must apply after screening")
+   and Beck Q2 ("ordering stays committed EP") as separately accepted, with
+   the note that the two questions are distinct. Screening decides
+   membership, EP decides rank among the survivors. Ticket kept as the
+   record so this is not re-filed a third time.
+2. **209 — fixed** (fork `fc8980a1a`). The drawer told users racing "was not
+   shipped"; it is always on in the browser. Both the rendered string and the
+   comment now describe what runs.
+3. **210 — fixed** (same commit). The placeholder rendered a raw `{{count}}`
+   until a run finished and then lagged a run behind. `eligibleCount` is a
+   pure synchronous filter, so the old comment's premise ("not known until
+   Run is clicked") was false; it now refreshes at construction and on every
+   settings change.
+4. **211 — data fixed** (fork `5e26fa0d8`), mechanism still open. The "394 vs
+   390, probably benign" reading was wrong three ways: **all six** universes
+   had drifted, ret-p3 had 300 of 384 shared entries differing in content,
+   and the differences were deliberate core decisions the stale copy was
+   reverting — six SME-flagged ret trinkets/librams missing from the browser
+   pool (`c718d38`), and stub-only-effect items still present that ticket
+   171's ruling excludes (`1fcfcaf`). Copies refreshed; **no check yet stops
+   it recurring**, which is what 211 now owns.
+
+Both 209 and 210 are i18n strings, so neither is verified against a served
+build. Slice B rebuilds and serves anyway — confirm both there.
 
 ## Lanes and budget
 

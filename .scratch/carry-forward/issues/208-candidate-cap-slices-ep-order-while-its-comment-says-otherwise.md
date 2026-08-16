@@ -1,68 +1,67 @@
-Status: open
-Type: correctness (wrong items shown, not wrong numbers)
+Status: resolved (not a defect — decision found and recorded)
+Type: documentation (comment did not cite the decision behind it)
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 1)
 Blocks: none
 Blocked by: none
 
-# `candidateCap` slices the EP order, while the code around it says screening order
+# `candidateCap` slices the EP order — deliberate, per two accepted review points
 
-`rank.ts`'s racing path caps the promoted set with a positional slice:
+Filed on the handoff's reading that the cap "slices in EP order while its
+comment says screening order", implying the sim's own ranking was being
+discarded at the step it exists to inform. **That reading is wrong**, and this
+ticket is kept as the record so the next reader does not re-file it.
+
+## What the code does
 
 ```ts
 // packages/core/src/rank.ts (M2 racing branch)
 const promotedOrdered = ordered.filter((e) => promotedIds.has(e.itemId));
-// Cap applies to the promoted set (Dean Q2): the first N of the EP
-// order *within the promoted set*, plus every owned row regardless of
-// N — same shape as the pre-M2 cap, just over a narrower input.
 const promotedCap = input.candidateCap ?? promotedOrdered.length;
 simCandidates = promotedOrdered.filter(
   (e, i) => i < promotedCap || equippedIds.has(e.itemId)
 );
 ```
 
-`ordered` is the **EP order**, so `promotedOrdered` preserves EP order and the
-slice keeps the first N by EP — not the N that screened best. The comment is
-honest about this ("the first N of the EP order"), but it sits directly under
-M2's stated purpose, which is that *the sim, not EP, picks what a cap keeps
-once racing is active* (candidate-pool.md §5.1.1 Dean Q2). Racing screens every
-candidate and then discards the screening ranking at exactly the step the
-screening ranking exists to inform.
+`ordered` is the committed-EP order, so the cap keeps the first N by EP from
+**within the promoted set**, plus every owned row.
 
-## Why this is worth its own ticket rather than a fix inside 156
+## Why that is correct
 
-**It does not change how many sims run,** so it does not invalidate a timing
-measurement: the cap is a positional slice and `totalSims` depends only on
-`simCandidates.length`. Ticket 156 is a throughput ticket, and this is a
-correctness-of-selection question — different subject, different acceptance.
+`docs/plans/wowsims-tab/candidate-pool.md` §11's review table carries two
+separately accepted points that together describe exactly this:
 
-**It does change which items a user sees.** At Candidates = 20 with a promoted
-set larger than 20, the user gets the 20 highest-EP promoted candidates rather
-than the 20 that screened highest. An item that screens well but prices low on
-EP is exactly the case racing was built to catch, and the cap drops it.
+| Reviewer | Point | Disposition |
+| --- | --- | --- |
+| Dean · Q2 | "After M2, cap must apply after screening or it is M3 by another name" | **Accept** — "Cap applies to the promoted set post-M2" |
+| Beck · Q1/Q2/Q3 | "keep committed EP ordering" | **Accept** — "Q2 note: ordering stays committed EP; Dean's cap-after-screening point is separate and accepted" |
 
-Second-order: a different item set can change which set-bonus completion
-packages are reachable, so the set-bonus sim count can move even though the
-per-candidate count does not.
+Dean's requirement is about **which population** the cap draws from — the
+promoted set, not the raw pool — and the code satisfies it. Beck's is about
+**the order within that population**, and it says EP, explicitly noting the two
+questions are separate. So screening decides *membership* (via promotion) and
+EP decides *rank within the survivors*. Both accepted, both implemented.
 
-## Not yet established
+§5.1.1 states the same division: "Ordering changes _when_ a row fills and what
+a pre-M2 cap keeps; it changes no displayed number."
 
-- Whether ordering by screening delta is the intended behaviour or whether
-  Dean Q2 deliberately chose EP order for the cap. The comment asserts Q2
-  settled it, but reads as describing the pre-M2 shape being preserved rather
-  than a decision to keep EP under racing. **Read the Q2 decision before
-  changing anything** — if EP order is deliberate, the fix is to say why in
-  the comment, not to change the sort.
-- How often the two orders actually differ on a real pool. Unmeasured; a run
-  that reported both orders side by side would size the problem.
+## What was actually wrong, and is now fixed
 
-## Acceptance criteria
+Only the disclosure. The tab's assumptions drawer told users M2/racing "was
+not shipped" and that a cap is "an EP-order preselection, not a second,
+cheaper ranking pass" — false on both counts, since racing is always on in the
+browser. Fixed under ticket 209, whose note now says the pool is screened
+first and the cap applies to the survivors.
 
-- [ ] The Dean Q2 decision is read and quoted here, settling whether EP order
-      under a cap is intended.
-- [ ] Either the cap slices the screening order, or the comment states plainly
-      why EP order is correct under racing despite §5.1.1.
-- [ ] If behaviour changes: a test at the `rankUpgrades` interface with racing
-      on, pinning which candidates survive a cap when the two orders disagree.
-- [ ] The same decision is applied to the fork port (`engine/rank.ts`), with
-      E-W3 re-run and `PROVENANCE.md` updated in that order.
+The engine-side comment was accurate but did not cite Dean Q2 / Beck Q2, which
+is what let this be re-read as a defect twice. Left as-is beyond that; the
+citation now lives here.
+
+## Open question this does *not* settle
+
+Whether committed EP is the *best* order is a live design question, not a bug:
+§5a's M1.5 recall data found above-cutoff rows as deep as **rank 114 of 246**
+on ret under EP ordering, and a per-slot top-_j_ rule would have recalled
+every one at _j_=10. That evidence is recorded as belonging to "whatever
+design pass takes up M3", with the caveat that _j_=10 was fit on the same two
+fixtures it was evaluated against. Not this ticket.

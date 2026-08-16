@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: cosmetic + misleading indicator
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 4, §4)
@@ -46,12 +46,29 @@ confirm "am I about to run against the Phase 3 pool?" — and it cannot answer
 that question. Ticket 156's handoff records it as a trap that cost time. Verify
 the pool from the run's own result rows instead.
 
+## Resolution (2026-08-16)
+
+Both halves fixed in the fork. `eligibleCount` is a pure synchronous filter
+over the bundled pool, so the premise behind the old code's comment — that the
+count "is not known until Run is clicked" — was simply false; the count is
+knowable as soon as a spec and a phase are.
+
+- New `refreshCandidatesPlaceholder()` writes the count, called once at
+  construction and again from the existing staleness listeners, which
+  `sim.changeEmitter` already fires on a phase change (the phase picker lives
+  in the gear-slot item modal and routes through that emitter).
+- The run-time write inside `run()` is removed: a value set there could only
+  ever describe the run just started.
+- The template `"{{count}} / {{count}}"` — which also repeated the same number
+  on both sides of a slash — becomes `"all {{count}} eligible"`, with
+  `"all eligible"` for a spec that has no pool rather than a misleading `0`.
+
 ## Acceptance criteria
 
-- [ ] A fresh page load shows a real number (or a placeholder needing no
+- [x] A fresh page load shows a real number (or a placeholder needing no
       interpolation), never `{{count}}`.
-- [ ] The displayed count reflects the *current* spec/phase selection rather
-      than the last completed run — or, if that is impractical, the field is
-      reworded so it cannot be mistaken for a forward-looking pool size.
+- [x] The displayed count reflects the *current* spec/phase selection rather
+      than the last completed run.
 - [ ] Verified on a served production build, not just in source: this is an
       i18n string, so a source-only change proves nothing about what renders.
+      **Left for the slice B run**, which rebuilds and serves anyway.

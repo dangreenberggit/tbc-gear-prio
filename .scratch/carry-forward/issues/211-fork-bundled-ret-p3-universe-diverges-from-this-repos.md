@@ -1,94 +1,101 @@
-Status: open
-Type: data divergence (two sources of truth for the same pool)
+Status: open (data fixed; the missing sync check is what remains)
+Type: data divergence (no mechanism keeps two copies in step)
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 4, §9)
 Blocks: none
 Blocked by: none
 
-Note for any in-browser measurement: the tab's pool count is evidence about
-the fork's bundled copy, not about this repo's `data/universes/`.
+Note for any in-browser measurement: the tab's pool comes from the fork's
+bundled copy. It matches `data/universes/` as of 2026-08-16, and nothing
+enforces that it still will.
 
-# The fork's bundled ret p3 universe is not this repo's ret p3 universe
+# The fork's bundled universes drifted from this repo's, with nothing to catch it
 
-Earlier notes recorded this as "the fork has 394 entries against this repo's
-390" and guessed it was "probably benign". The counts are right and the reading
-is wrong: **the difference is not four extra items, it is sixteen items that
-differ in both directions.**
+Filed as "the fork has 394 ret-p3 entries against this repo's 390, probably
+benign". Both halves of that were wrong: the divergence was **not** four extra
+items, it was not confined to ret-p3, and it was **not** benign.
+
+## What was actually wrong
+
+All six bundled universes had drifted. Fork-only / core-only entry counts at
+the time of investigation:
+
+| Universe | fork-only | core-only |
+| --- | --- | --- |
+| ret-p2 | 7 | 7 |
+| ret-p3 | 10 | 6 |
+| ret-p4 | 10 | 6 |
+| ret-p5 | 22 | 6 |
+| feral-p2 | 8 | 1 |
+| feral-p3 | 10 | 1 |
+
+Content had drifted too: on ret-p3, **300 of 384 shared entries differed**,
+because `curationHint` values were rescored upstream. The copies also predated
+`epWeights` provenance being stamped into the artifacts, so that key was
+absent from all six.
+
+Two upstream commits explain the membership half, and both are **deliberate
+decisions the stale copies were silently reverting**:
+
+- **`c718d38`** force-admits six SME-flagged ret librams and trinkets. So
+  `Darkmoon Card: Crusade`, `Hourglass of the Unraveller` and `Abacus of
+  Violent Odds` — three well-known ret trinkets — were **absent from the
+  browser pool entirely** and could not be ranked at any phase.
+- **`1fcfcaf`** drops stub-only sim effects per ticket 171's user ruling: an
+  item whose only sim effect is a `TODO: Manual implementation required` stub
+  must not appear in any candidate pool. The stale copies still carried those
+  items, so the tab **offered candidates that ruling excludes by design**.
+
+Root cause: `upgrades/data/*.universe.json` are hand-copied. The fork's copy
+was written once (`f7146dd69`, "Wire adapters into the Upgrades tab") and
+never updated, while `data/universes/` moved on through five commits. Nothing
+generates them, and nothing compares them.
+
+## Fixed (2026-08-16)
+
+Data only. Refreshed by straight copy from `data/universes/*.json` at
+`60e05571`; all six now compare `==` under `json.load`. Fork commit
+`5e26fa0d8`, with the detail recorded in the fork's
+`upgrades/data/PROVENANCE.md`. The two ep-weights files were checked at the
+same time and had not drifted. `data.ts` reads only `entries`, so the added
+`epWeights` key is inert; fork `type-check` and this repo's 832 tests
+(E-W3 included) pass after the refresh.
 
 Re-runnable:
 
 ```bash
 python -c "
 import json
-a=json.load(open('data/universes/ret-p3.json'))
-b=json.load(open('vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/data/ret-p3.universe.json'))
-ea={e['itemId']:e for e in a['entries']}; eb={e['itemId']:e for e in b['entries']}
-print('fork only:', sorted(set(eb)-set(ea)))
-print('core only:', sorted(set(ea)-set(eb)))
+for f in ['ret-p2','ret-p3','ret-p4','ret-p5','feral-p2','feral-p3']:
+    a=json.load(open(f'data/universes/{f}.json',encoding='utf-8'))
+    b=json.load(open(f'vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/data/{f}.universe.json',encoding='utf-8'))
+    print(f, a==b)
 "
 ```
 
-**In the fork, absent from this repo (10):**
+## What this ticket still owns
 
-| id | name | slot | phase |
-| --- | --- | --- | --- |
-| 28590 | Ribbon of Sacrifice | trinket | 1 |
-| 28592 | Libram of Souls Redeemed | ranged | 1 |
-| 28774 | Glaive of the Pit | weapon | 1 |
-| 28823 | Eye of Gruul | trinket | 1 |
-| 29297 | Band of the Eternal Defender | finger | 3 |
-| 30008 | Pendant of the Lost Ages | neck | 2 |
-| 30063 | Libram of Absolute Truth | ranged | 2 |
-| 30619 | Fel Reaver's Piston | trinket | 2 |
-| 32368 | Tome of the Lightbringer | ranged | 3 |
-| 32489 | Ashtongue Talisman of Zeal | trinket | 3 |
+**The mechanism.** The same drift recurs the moment a universe is regenerated,
+and it will again be invisible: the copies are gitignored-adjacent vendor data
+with no gate over them. `check_engine_port_drift.py` covers the ported
+*engine* files and deliberately does not look at data.
 
-**In this repo, absent from the fork (6):**
+Options, none chosen:
 
-| id | name | slot | phase |
-| --- | --- | --- | --- |
-| 22401 | Libram of Hope | ranged | 1 |
-| 27484 | Libram of Avengement | ranged | 1 |
-| 28034 | Hourglass of the Unraveller | trinket | 1 |
-| 28288 | Abacus of Violent Odds | trinket | 1 |
-| 31033 | Libram of Righteous Power | ranged | 1 |
-| 31856 | Darkmoon Card: Crusade | trinket | 1 |
-
-## Why "probably benign" does not survive the list
-
-The divergence is concentrated in **trinkets and librams** — the two slots where
-ret item choice is most contested. `Darkmoon Card: Crusade`, `Hourglass of the
-Unraveller` and `Abacus of Violent Odds` are all well-known ret trinkets that
-the browser build cannot rank at all, because they are not in its pool.
-`Ashtongue Talisman of Zeal` is the reverse: the browser can rank it and the
-CLI cannot.
-
-So the two surfaces answer "what should I equip?" from different candidate
-sets, and neither is a superset of the other. A user comparing a CLI report
-against the tab will find items missing from each, with nothing on either
-surface explaining why.
-
-## What is not yet known
-
-- **Which side is right.** Unestablished. It could be that the fork's copy was
-  generated from a different phase filter, a different `classAllowlist` pass, or
-  simply an older run of `assemble_universe.py`. Nobody has diffed the
-  generation inputs.
-- **Whether p2/p4/p5 diverge the same way.** Only ret p3 was compared.
-- **Whether the fork's copy is generated at all**, or was hand-copied once and
-  has drifted since. This decides whether the fix is a regeneration step or a
-  build-time import.
-
-Deliberately not guessed here — the earlier "probably benign, 4 extra entries"
-note is what this ticket exists to correct, and replacing one guess with
-another would repeat the mistake.
+1. A `pnpm verify` check that compares the six pairs and fails on difference —
+   cheapest, and matches how `engine-port-drift:check` already guards the code
+   half. Needs a defined skip when `vendor/tbc-new-fork` is absent, which is
+   the ordinary state on a fresh clone.
+2. Make the fork import from a generated location so there is one copy.
+3. Accept drift and document that the tab's pool is a pinned snapshot, with
+   the pin recorded — the current situation, minus the surprise.
 
 ## Acceptance criteria
 
-- [ ] Establish how `upgrades/data/ret-p3.universe.json` is produced and
-      whether anything regenerates it from this repo's `data/universes/`.
-- [ ] Decide which side is authoritative and say why.
-- [ ] Either the fork consumes this repo's universes (single source of truth),
-      or the divergence is documented with the reason each item differs.
-- [ ] Extend the comparison to p2, p4 and p5 before closing.
-- [ ] A check that fails when the two diverge again, if they are meant to match.
+- [x] Establish how the copies are produced. **They are not** — hand-copied
+      once, never regenerated.
+- [x] Decide which side is authoritative: `data/universes/` is, and the
+      divergences were core changes the copy predated.
+- [x] Bring the copies back into line, extended to p2/p4/p5 and feral rather
+      than ret-p3 alone.
+- [ ] A check that fails when the two diverge again.

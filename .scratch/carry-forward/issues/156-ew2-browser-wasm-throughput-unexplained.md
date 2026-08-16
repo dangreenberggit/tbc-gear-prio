@@ -764,3 +764,45 @@ racing was not shipped), **210** (placeholder), **211** (universe divergence).
 Candidates empty, and read the exception text off the page - the per-row
 disclosure above is now the primary route, no console handle and no dev-mode
 rebuild (plan v2 §B as amended by `12878ec`). Status stays **open**.
+
+### 2026-08-16 (slice E follow-up) - three of the four filed defects are fixed
+
+Amends the comment above, which said slice E was "file and move on". Writing
+each ticket up honestly meant verifying it, and verifying cost about what
+fixing cost, so three are closed. Two of them change what slice B will see.
+
+- **208 is not a defect.** `candidateCap` slicing committed EP order within
+  the promoted set is deliberate: `docs/plans/wowsims-tab/candidate-pool.md`
+  §11 accepts Dean Q2 ("cap must apply after screening") and Beck Q2
+  ("ordering stays committed EP") as *separate* points. Screening decides
+  membership, EP decides rank among survivors. The ticket is kept as the
+  citation so this is not re-filed a third time.
+- **209 fixed** (fork `fc8980a1a`): the assumptions drawer no longer tells
+  users racing "was not shipped".
+- **210 fixed** (same commit): the Candidates placeholder no longer renders a
+  raw `{{count}}` on load, and no longer lags a run behind the selection. It
+  is now safe to read as "the pool the next run will use" - the trap recorded
+  in §4 of the handoff is gone.
+- **211 data fixed** (fork `5e26fa0d8`), mechanism still open.
+
+**211 matters for the measurement and was badly mis-scoped when filed.** It
+was recorded as a benign 4-entry gap on ret-p3. In fact **all six** bundled
+universes had drifted, ret-p3 had 300 of 384 shared entries differing in
+content (`curationHint` rescored upstream), and the membership differences
+were deliberate decisions the stale copy was reverting:
+
+- six SME-flagged ret librams and trinkets (`c718d38`) - including Darkmoon
+  Card: Crusade, Hourglass of the Unraveller and Abacus of Violent Odds -
+  were **absent from the browser pool entirely**;
+- stub-only-effect items that ticket 171's user ruling excludes by design
+  (`1fcfcaf`) were **still present** in it.
+
+So every earlier browser run screened a different candidate set from the CLI,
+in both directions. That does not explain the throughput question this ticket
+owns, but it does mean **no pre-2026-08-16 browser pool count is comparable
+to a CLI figure**, and the ret-p3 pool is now 390 rather than 394.
+
+Copies refreshed from `data/universes/` at `60e05571`; nothing yet prevents
+the drift recurring, which is all 211 still owns.
+
+Slice B is unchanged and still next.
