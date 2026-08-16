@@ -194,18 +194,24 @@ function tieWindow(a: ViewRow, b: ViewRow): number {
  *    SE measures 2.149 DPS while adjacent deltas differ by far less; §10
  *    records 1.678 DPS at 5,000 iterations, and SE grows as iterations fall.
  */
-function assignTieGroups(
+/**
+ * `groupId` starts from a shared counter passed in rather than always at 0,
+ * so calling this once per screened/non-screened partition (§6.1: screened
+ * rows are ranked only among themselves) cannot mint `tie-1` twice and
+ * collide two unrelated groups under one id.
+ */
+function assignTieGroupsWithinPartition(
   rows: ViewRow[],
-  sortKey: (r: ViewRow) => number
+  sortKey: (r: ViewRow) => number,
+  groupIdRef: { next: number }
 ): void {
   const byDelta = [...rows].sort((a, b) => sortKey(b) - sortKey(a));
   let groupStart = 0;
-  let groupId = 0;
 
   const flush = (end: number) => {
     if (end - groupStart > 1) {
-      groupId += 1;
-      const id = `tie-${groupId}`;
+      const id = `tie-${groupIdRef.next}`;
+      groupIdRef.next += 1;
       for (let i = groupStart; i < end; i += 1) byDelta[i]!.tieGroupId = id;
     }
   };
@@ -221,6 +227,24 @@ function assignTieGroups(
       groupStart = i;
     }
   }
+}
+
+/**
+ * Screened rows carry a screening-iteration delta, not a full-iteration one
+ * (§6.1) — grouping them into the same tie-window math as full-iteration
+ * rows would compare two quantities that were never measured the same way.
+ * Partitioning first keeps `assignTieGroupsWithinPartition`'s SE-window
+ * logic meaningful within each group and absent across the boundary.
+ */
+function assignTieGroups(
+  rows: ViewRow[],
+  sortKey: (r: ViewRow) => number
+): void {
+  const groupIdRef = { next: 1 };
+  const fullIteration = rows.filter((r) => r.screened === undefined);
+  const screened = rows.filter((r) => r.screened !== undefined);
+  assignTieGroupsWithinPartition(fullIteration, sortKey, groupIdRef);
+  assignTieGroupsWithinPartition(screened, sortKey, groupIdRef);
 }
 
 /**
@@ -261,6 +285,12 @@ function belowCutoffUnderView(
   baselineDps: number,
   cutoff: Cutoff
 ): boolean {
+  // Screened out (candidate-pool.md §6.1): never measured at full
+  // precision, so there is no cutoff verdict to give it — the same
+  // "excluded from the shortlist, present in rows" treatment a Stop-
+  // unsimmed row gets, and for the same reason (view.ts has no ranking-
+  // level `simmed` field to check, but `screened` carries the same idea).
+  if (item.screened !== undefined) return true;
   if (!withSetPotential) return item.belowCutoff;
   const prospective = rankableSetPotential(item);
   if (prospective === 0) return item.belowCutoff;
@@ -295,6 +325,14 @@ function compareRows(
   pinBis: boolean,
   sortKey: (r: ViewRow) => number
 ): number {
+  // Screened rows sort after every full-iteration row, before anything else
+  // is considered (candidate-pool.md §6.1: ranked only among themselves,
+  // never interleaved with full-iteration deltas) — a screening delta and a
+  // full-iteration delta are not the same quantity, so pinBis and the sort
+  // key both apply only *within* whichever group a row belongs to.
+  const aScreened = a.screened !== undefined;
+  const bScreened = b.screened !== undefined;
+  if (aScreened !== bScreened) return aScreened ? 1 : -1;
   if (pinBis) {
     const ap = a.bisTags.includes("BiS") ? 0 : 1;
     const bp = b.bisTags.includes("BiS") ? 0 : 1;

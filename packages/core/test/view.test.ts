@@ -884,4 +884,85 @@ describe("applyView", () => {
     expect(r.items[0]).not.toHaveProperty("tieGroupId");
     expect(r.items[0]).not.toHaveProperty("belowCutoffInView");
   });
+
+  describe("screened rows (candidate-pool.md §6.1, 7.7 ext)", () => {
+    function screenedItem(
+      over: Partial<RankedItem> & Pick<RankedItem, "itemId">
+    ) {
+      return item({
+        screened: { iterations: 1000, promoted: false },
+        ...over,
+      });
+    }
+
+    it("appears in rows, but never in the shortlist — a third state, not below-cutoff", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
+        item({ itemId: 2, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
+        screenedItem({ itemId: 3, deltaDps: 50, deltaPct: 2.5 }),
+      ]);
+      const view = applyView(r);
+      expect(view.rows.map((x) => x.itemId).sort()).toEqual([1, 2, 3]);
+      expect(view.shortlist.map((x) => x.itemId)).toEqual([1]);
+      // Below-cutoff for the same reason a Stop-unsimmed row would be: there
+      // is no measured verdict to give it, and belowCutoffInView existing
+      // as `true` is what keeps it out of the shortlist without inventing
+      // a distinct third boolean the rest of the view layer would need to
+      // learn about.
+      const screenedRow = view.rows.find((x) => x.itemId === 3);
+      expect(screenedRow?.belowCutoffInView).toBe(true);
+    });
+
+    it("is ranked only among other screened rows, never interleaved with full-iteration deltas", () => {
+      const r = ranking([
+        // A screened row with a *larger* deltaDps than every full-iteration
+        // row — if screened rows interleaved by raw delta, this one would
+        // sort first.
+        screenedItem({ itemId: 9, deltaDps: 999, deltaPct: 50 }),
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
+        item({ itemId: 2, deltaDps: 20, deltaPct: 1 }),
+        screenedItem({ itemId: 8, deltaDps: 5, deltaPct: 0.3 }),
+      ]);
+      const { rows } = applyView(r);
+      // Every full-iteration row (screened or not) precedes every screened
+      // row, and within each group the ordering is by that group's own
+      // delta — the screened group's 999 does not jump the full-iteration
+      // rows despite outscoring them numerically.
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2, 9, 8]);
+    });
+
+    it("survives every filter — hideOwned, raid, boss — the same as any other row", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5, owned: true }),
+        screenedItem({
+          itemId: 2,
+          deltaDps: 10,
+          deltaPct: 0.5,
+          source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
+        }),
+      ]);
+      const filtered = applyView(r, { raid: "Tempest Keep" });
+      expect(filtered.rows.map((x) => x.itemId)).toEqual([2]);
+      expect(filtered.shortlist).toEqual([]);
+    });
+
+    it("does not affect the ranked (non-screened) rows' own tie groups", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 30.0, deltaPct: 1.5, se: 0.001 }),
+        item({ itemId: 2, deltaDps: 30.001, deltaPct: 1.5, se: 0.001 }),
+        screenedItem({ itemId: 3, deltaDps: 30.0005, deltaPct: 1.5 }),
+      ]);
+      const { rows } = applyView(r);
+      const tied = rows.filter((x) => x.itemId === 1 || x.itemId === 2);
+      expect(tied.every((x) => x.tieGroupId === tied[0]?.tieGroupId)).toBe(
+        true
+      );
+      const screenedRow = rows.find((x) => x.itemId === 3);
+      // A lone screened row forms no group of its own (assignTieGroups
+      // never groups a singleton), and it must not have been folded into
+      // the full-iteration pair's group just because its raw delta sits
+      // between theirs.
+      expect(screenedRow?.tieGroupId).toBeUndefined();
+    });
+  });
 });
