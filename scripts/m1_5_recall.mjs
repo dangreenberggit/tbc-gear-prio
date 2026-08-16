@@ -177,11 +177,19 @@ Calls the already-merged \`orderCandidatesByEp\`
 (\`packages/core/src/candidate-order.ts:52\`) over each roster fixture's
 eligible pool, and reads the measured 5,000-iteration \`deltaDps\` per
 candidate from \`experiments/e-w5-rank.json\` (committed by slice B, produced
-by \`node scripts/ew5_rank.mjs\`) rather than re-simming. Cutoff \`{absDps:
+by \`npx tsx scripts/ew5_rank.mjs\`) rather than re-simming. Cutoff \`{absDps:
 3.4, pct: 0.15}\` (F10) is used for both specs, matching §3.2; feral's own
 \`cutoffForSpec()\` value (\`{absDps: 3.6, pct: 0.15}\`,
 \`packages/core/src/cutoff.ts:27\`) is reported separately per fixture to
 show whether it changes the conclusion.
+
+**Seed provenance (inherited from section 3.2):** those deltas come from runs with
+\`seeds: [42]\` — a single seed, which disables paired replication, so each row
+carries independent SE (~1.68 DPS at 5,000 iterations, F10) rather than a
+paired-replicate SE. Above-cutoff *membership* is therefore noise-sensitive
+for rows sitting within ~1 SE of the 3.4 DPS cutoff. This does not move the
+conclusion below: the worst-ranked misses are 13-15 DPS cloaks and belts, far
+outside that band.
 
 This script writes only the data tables below. The "Interpretation"
 section at the end of the committed \`experiments/m1-5-ep-recall.md\` is

@@ -13,7 +13,13 @@
  * per eligible candidate + a handful of set-completion sims — matching §1.1's
  * "n_screened / n_full" term, not the full production run's replication cost.
  *
- * Run: node scripts/ew5_rank.mjs
+ * Run: npx tsx scripts/ew5_rank.mjs — NOT bare `node`, which fails with
+ *   ERR_MODULE_NOT_FOUND: the NodeNext `.js` specifiers below resolve to
+ *   `.ts` sources that need tsx's loader.
+ * Requires: vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe
+ *   (gitignored, so absent in a fresh clone — fetch with:
+ *   python scripts/fetch_wowsimcli.py --platform win32-x64).
+ *   The path below is win32-x64 only; another OS needs it edited.
  * Cost: ~20 minutes total sim time across both fixtures and all 6 points
  *   (5 sweep points + 5000), estimated from the §3.1 fit before running.
  */
@@ -284,7 +290,7 @@ async function main() {
   }
 
   const outJson = {
-    command: "node scripts/ew5_rank.mjs",
+    command: "npx tsx scripts/ew5_rank.mjs",
     cutoffUsedForGoNoGo: CUTOFF,
     note:
       "feral's own cutoffForSpec() value is {absDps:3.6, pct:0.15} " +

@@ -1,6 +1,6 @@
 # E-W5 §3.2 — screening rank vs full rank
 
-Command: `node scripts/ew5_rank.mjs`
+Command: `npx tsx scripts/ew5_rank.mjs`
 Seed: 42. Cutoff used for the go/no-go: `{"absDps":3.4,"pct":0.15}` (F10).
 feral's own cutoffForSpec() value is {absDps:3.6, pct:0.15} (packages/core/src/cutoff.ts:27), different from the fixed {3.4,0.15} used here for both specs per the task instructions (F10) — reported for transparency, not applied
 

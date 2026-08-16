@@ -1,15 +1,15 @@
 {
-  "command": "node scripts/ew5_rank.mjs",
+  "command": "npx tsx scripts/ew5_rank.mjs",
   "cutoffUsedForGoNoGo": {
     "absDps": 3.4,
     "pct": 0.15
   },
-  "note": "feral's own cutoffForSpec() value is {absDps:3.6, pct:0.15} (packages/core/src/cutoff.ts:27), different from the fixed {3.4,0.15} used here for both specs per the task instructions (F10) — reported for transparency, not applied",
+  "note": "feral's own cutoffForSpec() value is {absDps:3.6, pct:0.15} (packages/core/src/cutoff.ts:27), different from the fixed {3.4,0.15} used here for both specs per the task instructions (F10) \u2014 reported for transparency, not applied",
   "seed": 42,
   "sweep": [100, 300, 1000, 3000, 5000],
   "fixtures": {
-    "ret": "ret-p2.json has 240 entries; ret-p5.json filtered to phase<=2 has 246 (this script uses ret-p5.json, per the task's corrected counts) — 6-row gap, unreconciled",
-    "feral": "feral-p2.json filtered to phase<=2 has 246 entries, feral-p3.json filtered to phase<=2 has 251 — this script uses feral-p2.json (matches its own maxPhase 2 pin)"
+    "ret": "ret-p2.json has 240 entries; ret-p5.json filtered to phase<=2 has 246 (this script uses ret-p5.json, per the task's corrected counts) \u2014 6-row gap, unreconciled",
+    "feral": "feral-p2.json filtered to phase<=2 has 246 entries, feral-p3.json filtered to phase<=2 has 251 \u2014 this script uses feral-p2.json (matches its own maxPhase 2 pin)"
   },
   "raw": {
     "ret": {

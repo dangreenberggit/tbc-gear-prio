@@ -125,6 +125,17 @@ iterations, sampled every 100ms via `Get-Process -Id <pid> |
 .WorkingSet64` in an isolated pass (not concurrent with the timing sweep —
 see below).
 
+**Scope, and it matters because this number is reused:** 183.8 MB is a
+**native `wowsimcli` OS process** on the CLI path. §5.1.2's `memoryCap` sizes
+**browser WASM workers**, and the fork adapter
+(`upgrades/adapters/wasm_sim_runner.ts`) uses this figure as its
+`MEASURED_MB_PER_SIM_PROCESS`. A WASM linear memory that only grows, inside a
+tab, is not the same allocator as a Go process whose RSS includes the runtime
+and binary image. Treat the browser cap derived from it as a **hypothesis**,
+not a measured browser number, until a WASM-side sample replaces it — the fork
+source says so at its definition, and it is repeated here so a reader who only
+reads §3.3 does not take it as a settled per-worker budget.
+
 **Deviation, recorded per the task's instructions:** a first version of the
 harness polled RSS every 50ms _during_ the timing sweep. That polling
 inflated wall-clock by 2-40x from CPU/IO contention between the poller and
@@ -135,7 +146,7 @@ concurrent timing claim; the sweep table above is from the corrected script.
 
 #### §3.2 — screening rank vs full rank (`experiments/e-w5-rank.{json,md}`)
 
-`node scripts/ew5_rank.mjs` — full eligible pool through the real
+`npx tsx scripts/ew5_rank.mjs` — full eligible pool through the real
 `rankUpgrades` seam (`packages/core/src/rank.ts`) against the live CLI
 binary via `CliSimRunner`, `seeds: [42]` (disables paired replication),
 both roster fixtures, every §3.1 sweep point plus 5,000.
