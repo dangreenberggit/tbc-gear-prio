@@ -3,7 +3,7 @@ Type: measurement blocked (unexplained performance)
 Origin: slice 3 + orchestrator follow-up, 2026-08-14
 (`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
-Blocked by: none
+Blocked by: ticket 212 (compose() omits the SimDatabase)
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
 
@@ -901,3 +901,10 @@ the Claude-in-Chrome/Brave surface this session:
 - The page header kept displaying "Phase 2 (2.1 - T5)" while the gear-modal
   dropdown and `localStorage` both read Phase 3. The header is **not** a
   reliable phase indicator; confirm through the modal or storage.
+
+**Fix split out to ticket 212.** The cause is understood but the fix needs a
+design decision (`compose()` is pure and has no item-stat data; three options
+with different costs, one on the hot screening path). Ticket 212 carries the
+diagnosis, the options and the acceptance criteria. **156 is blocked on 212**
+- until candidate sims stop panicking there is nothing to time, and every
+previous browser run must be treated as never having simmed a candidate.

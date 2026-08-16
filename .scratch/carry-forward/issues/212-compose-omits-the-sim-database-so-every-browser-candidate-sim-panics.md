@@ -1,0 +1,120 @@
+Status: open
+Type: defect (browser-only, blocks all in-browser ranking) + design decision required
+Origin: ticket 156 slice B, 2026-08-16
+Blocks: ticket 156 (E-W2 throughput measurement cannot start until this is fixed)
+Blocked by: none
+
+# `compose()` never sends a SimDatabase, so every browser candidate sim panics
+
+The diagnosis is complete and re-checkable; **the fix needs a design decision
+before anyone writes it**, which is why this is a ticket and not a patch.
+
+## Symptom
+
+Every screening sim in the browser throws this Go panic (item id is always the
+candidate's own):
+
+```
+sim error (0): No item with id: 23522
+  github.com/wowsims/tbc/sim/core.NewItem      sim/core/database.go:419
+  github.com/wowsims/tbc/sim/core.NewEquipmentSet   database.go:471
+  github.com/wowsims/tbc/sim/core.ProtoToEquipment  database.go:479
+  ... NewParty raid.go:34 -> NewRaid raid.go:178
+  ... Environment.construct environment.go:77 -> NewEnvironment environment.go:58
+  ... NewSim sim.go:191 -> runSim sim.go:146 -> RunSim
+```
+
+Observed 2026-08-16 on a served production build, Phase 3, Candidates empty:
+**455 of 455 candidates dropped**, engine confirmed loaded (16
+`GET /tbc/lib.wasm` in the access log). The panic happens during environment
+construction, before any iteration runs.
+
+## Mechanism (read from source, not inferred)
+
+1. The WASM target is built **without** `--tags=with_db`
+   (`vendor/tbc-new-fork/Makefile:123`, which also filters out
+   `sim/core/items/all_items.go`). So `database_load.go`'s embedded `db.bin`
+   never registers, and `ItemsByID` is empty at startup.
+2. The only runtime filler is per request:
+   `sim/core/character.go:95` — `if player.Database != nil { addToDatabase(player.Database) }`.
+3. Upstream's own Simulate button rebuilds that proto next to the equipment it
+   describes, on every sim — `ui/core/sim.ts:346-347`:
+   ```ts
+   player.database  = gear.toDatabase(this.db);
+   player.equipment = gear.asSpec();
+   ```
+4. **Our `compose()` sets only the equipment** and never touches
+   `slot.database` (`packages/core/src/compose.ts`, and the fork's ported copy
+   `upgrades/engine/compose.ts`, same shape):
+   ```ts
+   slot.equipment = { items: player.equipment.map(toProtoItem) };
+   ```
+5. `currentPageSkeleton()` (`upgrades/adapters/skeleton.ts:30`) captures the
+   skeleton **once**, from the character's *currently equipped* gear. So
+   `slot.database` only ever describes worn items.
+
+A candidate is by definition an item the character is not wearing, so the
+100% failure rate is by construction — and screening sims nothing *but*
+candidates. This is exactly why the (now-fixed) swallowed exception read as
+"No upgrades found above the cutoff".
+
+**`db.json` is not at fault.** 23522, 29072, 29074 and 30129 are all present
+in `assets/database/db.json`, so the browser's `Database` singleton holds
+them. Only the *request* is missing them.
+
+**Why no CLI run ever caught it.** `wowsimcli` IS built `--tags=with_db`
+(`Makefile:189`, `:197`, `:199`), so its `ItemsByID` is compiled in and
+complete. The CLI composes requests the same incomplete way and gets away with
+it. The browser is the only surface where the per-request database is the sole
+source — so this is browser-only in effect, but the *bug* is in shared code.
+
+## The decision to make
+
+`compose()` is a pure function over a skeleton (one of the three architectural
+seams' neighbours) and has no access to item stat data. Upstream's
+`gear.toDatabase()` (`ui/core/proto_utils/gear.ts:145-163`) builds a
+`SimDatabase` of `items`/`gems`/`enchants`/`randomSuffixes`/
+`itemEffectRandPropPoints` from the browser `Database` singleton — data
+`compose()` cannot reach and arguably should not.
+
+Options, none chosen:
+
+1. **Extend the skeleton to carry a full DB.** Have the skeleton builders
+   include `SimDatabase` rows for every *pool* item up front, not just worn
+   gear; `compose()` stays pure and keeps patching what it was handed. One
+   build, no per-candidate lookup. **Cost:** a much larger skeleton
+   (hundreds of items) `structuredClone`d per request, on the hot screening
+   path — needs measuring before it is chosen.
+2. **Give `compose()` an item-data lookup.** Pass a resolver
+   (`itemId -> SimItem`) as a parameter and build the per-request database
+   from the composed equipment, mirroring upstream. Smallest payload, closest
+   to how upstream does it. **Cost:** changes `compose()`'s signature at every
+   call site in both repos and adds a data dependency to a pure function.
+3. **Patch the database in the adapter.** Leave `compose()` alone; have
+   `WasmSimRunner` enrich the request just before handing it to the worker,
+   since it has `Database` access. Confines the change to the browser.
+   **Cost:** core's `compose()` stays subtly wrong and only works because
+   `wowsimcli` is built `with_db` — the asymmetry survives as a trap for the
+   next person.
+
+Whichever is chosen must land in **both** `packages/core/src/compose.ts` and
+the fork's ported `upgrades/engine/compose.ts`, in the §9.1a order (fork
+commit -> E-W3 rerun -> `PROVENANCE.md` hash -> `check_engine_port_drift.py`).
+
+Note `compose.ts`'s own PROVENANCE line records it as "PORTED from
+packages/core/src/compose.ts, unchanged" — the gap was inherited from core,
+not introduced in the port, and nothing in the repo currently documents it.
+
+## Acceptance criteria
+
+- [ ] An option above is chosen, with the reason recorded (including the
+      clone-cost measurement if option 1).
+- [ ] A test at the `rankUpgrades` interface with racing on, driving a
+      candidate the character does not wear, asserting the composed request
+      carries database rows for that candidate's item.
+- [ ] The same fix ported to the fork, E-W3 re-run green *before* the
+      `PROVENANCE.md` hash is updated.
+- [ ] A served-build run screens candidates without panicking — the count of
+      dropped candidates for `No item with id` reaches zero.
+- [ ] Ticket 156's measurement can then start; note it must be re-baselined,
+      as no previous browser run ever actually simmed a candidate.

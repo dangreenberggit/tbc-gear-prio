@@ -49,7 +49,34 @@ Done when: `pnpm verify` green in both repos; a served build run with a
 deliberately broken screen (e.g. Iterations 0) shows the failure text on
 the page. Commit per green slice.
 
-## B. Find why browser screening sims throw
+## B. Find why browser screening sims throw — **answered 2026-08-16**
+
+**The exception is known and the diagnosis is complete; the fix is now
+ticket 212, and C is blocked on it.** Everything below is kept as the record
+of how it was found.
+
+The panic is `sim error (0): No item with id: <candidate id>`, raised in
+Go's `NewItem` (`sim/core/database.go:419`) during environment construction,
+before any iteration runs. 455 of 455 candidates failed. Cause: the WASM
+target is built without `--tags=with_db`, so `ItemsByID` is filled only from
+the per-request `player.Database` — and `compose()` sets `slot.equipment`
+without ever setting `slot.database`, while the skeleton is captured once
+from the *worn* gear. Every candidate is by definition unworn, so every
+candidate sim panics. `wowsimcli` is built `--tags=with_db`, which is why no
+CLI run could reproduce it.
+
+**None of the four candidates in the table below was right.** Candidate 1 is
+closest but wrong in mechanism: the ids are present in `db.json`; they are
+missing from the *request*. Candidates 2-4 are ruled out — the panic precedes
+iteration entirely.
+
+The route worked exactly as planned: one run, read the per-row text slice A
+discloses, no console handle. Note the surface reported
+`visibilityState: 'hidden'` despite being Claude-in-Chrome on Brave, and the
+page header showed Phase 2 while `localStorage` and the gear modal both read
+Phase 3 — the header is not a phase indicator.
+
+### Original instructions, kept for the record
 
 Rebuild + serve per handoff §3, open the ret page, run once at Phase 3 with
 Candidates empty, and read the exception text slice A now prints per
@@ -84,6 +111,11 @@ one. If the cause is environment-only (candidate 3), the fix is in
 `wasm_sim_runner.ts` and the ticket says which machine class it affects.
 
 ## C. Measure (unchanged from plan.md slice C, plus the screening counts)
+
+**Blocked on ticket 212.** Until candidate sims stop panicking there is
+nothing to time. When it unblocks, re-baseline from scratch: no browser run
+in this ticket's history ever actually simmed a candidate, so every number
+recorded before 2026-08-16 describes a run that did almost no work.
 
 Precondition: after A and B, a Phase 3, Candidates-empty run at 3000 shows
 non-zero screening deltas and ≥ 1 promoted row (`screened.promoted` absent
