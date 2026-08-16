@@ -7,6 +7,7 @@
 
 import { createHash } from "node:crypto";
 import {
+  DEFAULT_PROMOTE_TOP_J,
   DEFAULT_PROMOTE_TOP_K,
   DEFAULT_SCREEN_ITERATIONS,
 } from "./promotion.js";
@@ -107,6 +108,7 @@ export type ContentHashInput = {
    */
   screenIterations?: number;
   promoteTopK?: number;
+  promoteTopJ?: number;
   fullPool?: boolean;
 };
 
@@ -134,6 +136,9 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
   const promoteTopK = fullPool
     ? null
     : (input.promoteTopK ?? DEFAULT_PROMOTE_TOP_K);
+  const promoteTopJ = fullPool
+    ? null
+    : (input.promoteTopJ ?? DEFAULT_PROMOTE_TOP_J);
   return {
     character: {
       region: input.character.region.toLowerCase(),
@@ -179,5 +184,6 @@ function hashPayload(input: ContentHashInput): Record<string, unknown> {
     fullPool,
     screenIterations,
     promoteTopK,
+    promoteTopJ,
   };
 }

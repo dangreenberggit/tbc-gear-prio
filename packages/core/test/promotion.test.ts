@@ -37,6 +37,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 2,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -63,10 +64,13 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened(3, 80),
       screened(5, 10),
     ];
+    // j = 1 is the pre-§6.4 best-in-slot floor: the generalization to top-j
+    // must reproduce it exactly at j = 1.
     const result = promotionRule({
       screened: screen,
       candidates,
       promoteTopK: 2,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -81,6 +85,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 1,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set([9]),
     });
@@ -94,6 +99,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 1,
+      promoteTopJ: 1,
       ownedItemIds: new Set([7]),
       setPackageItemIds: new Set(),
     });
@@ -107,6 +113,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 1,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -123,6 +130,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 35,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -136,6 +144,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 2,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -146,6 +155,100 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
     expect(result.find((r) => r.itemId === 1)?.promoted).toBe(true);
     expect(result.find((r) => r.itemId === 2)?.promoted).toBe(true);
     expect(result.find((r) => r.itemId === 3)?.promoted).toBe(false);
+  });
+
+  it("promotes the top-j within each slot, independently of global rank", () => {
+    // The rule this is here for: 'back' deltas are an order of magnitude
+    // smaller than 'neck' deltas, so a global cutoff drops every cloak at
+    // once — which is exactly the clustered miss M1.5 measured on ret. With
+    // promoteTopJ = 2 the two best cloaks promote on their own slot's
+    // ranking, no matter how small cloak upgrades are in absolute terms.
+    const candidates = [
+      entry(1, "neck"),
+      entry(2, "neck"),
+      entry(3, "neck"),
+      entry(10, "back"),
+      entry(11, "back"),
+      entry(12, "back"),
+    ];
+    const screen = [
+      screened(1, 100),
+      screened(2, 90),
+      screened(3, 80),
+      screened(10, 9),
+      screened(11, 8),
+      screened(12, 7),
+    ];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 0,
+      promoteTopJ: 2,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    const promoted = new Set(
+      result.filter((r) => r.promoted).map((r) => r.itemId)
+    );
+    expect([...promoted].sort((a, b) => a - b)).toEqual([1, 2, 10, 11]);
+  });
+
+  it("takes the whole slot when it holds fewer than j candidates", () => {
+    const candidates = [entry(1, "neck"), entry(10, "back")];
+    const screen = [screened(1, 100), screened(10, 9)];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 0,
+      promoteTopJ: 5,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.every((r) => r.promoted)).toBe(true);
+  });
+
+  it("breaks per-slot ties by item id, deterministically", () => {
+    const candidates = [entry(3, "back"), entry(1, "back"), entry(2, "back")];
+    const screen = [screened(3, 50), screened(1, 50), screened(2, 50)];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 0,
+      promoteTopJ: 2,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.find((r) => r.itemId === 1)?.promoted).toBe(true);
+    expect(result.find((r) => r.itemId === 2)?.promoted).toBe(true);
+    expect(result.find((r) => r.itemId === 3)?.promoted).toBe(false);
+  });
+
+  it("still promotes a dense slot's global-top rows beyond j", () => {
+    // Per-slot top-j is a floor, not a cap: a slot holding many genuinely
+    // strong candidates keeps them via global top-K. Removing top-K would
+    // cap every slot at j and reopen the recall miss on the dense-cutoff
+    // fixture that gates 7.2.
+    const candidates = [
+      entry(1, "neck"),
+      entry(2, "neck"),
+      entry(3, "neck"),
+      entry(4, "neck"),
+    ];
+    const screen = [
+      screened(1, 100),
+      screened(2, 99),
+      screened(3, 98),
+      screened(4, 97),
+    ];
+    const result = promotionRule({
+      screened: screen,
+      candidates,
+      promoteTopK: 4,
+      promoteTopJ: 1,
+      ownedItemIds: new Set(),
+      setPackageItemIds: new Set(),
+    });
+    expect(result.every((r) => r.promoted)).toBe(true);
   });
 
   it("does not promote a slot whose every candidate failed to screen", () => {
@@ -165,6 +268,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 0,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });
@@ -178,6 +282,7 @@ describe("promotionRule (candidate-pool.md §6.1)", () => {
       screened: screen,
       candidates,
       promoteTopK: 0,
+      promoteTopJ: 1,
       ownedItemIds: new Set(),
       setPackageItemIds: new Set(),
     });

@@ -15,6 +15,7 @@ import { orderCandidatesByEp } from "./candidate-order.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
 import { promisePool } from "./promise-pool.js";
 import {
+  DEFAULT_PROMOTE_TOP_J,
   DEFAULT_PROMOTE_TOP_K,
   DEFAULT_SCREEN_ITERATIONS,
   promotionRule,
@@ -162,6 +163,57 @@ export type RankInput = {
    * true`.
    */
   promoteTopK?: number;
+  /**
+   * How many candidates promote from **each slot's own** screening ranking
+   * (candidate-pool.md §6.4 option (a)). Generalizes the best-in-slot floor
+   * from top-1 to top-`j`; `1` reproduces the pre-§6.4 rule exactly.
+   *
+   * Why a per-slot floor and not just a bigger `promoteTopK`: upgrade deltas
+   * scale with how outdated the worn piece is, so one global ranking is not a
+   * fair comparison across slots. A slot whose upgrades are all small (a
+   * near-BiS cloak) falls below any global cutoff *as a block*, losing the
+   * precision needed to order that slot at all — which is the clustered miss
+   * M1.5 measured (ret: all six worst-ranked rows were cloaks; feral: belts
+   * and necks). §6.4 recorded that no `promoteTopK` clearing the 7.2 recall
+   * gate also reaches the ≤0.4 ratio target: recall and ratio pulled against
+   * each other because a global K buys coverage only by buying volume. A
+   * per-slot floor buys coverage directly, so `promoteTopK` no longer has to
+   * carry it.
+   *
+   * **Defaults to 1 (the pre-§6.4 floor) because raising it does not pay
+   * here.** §6.4 predicted j=5 would land the ratio ~0.354, under the ≤0.4
+   * target. Measured on the gating feral fixture over 30 noise draws
+   * (246 eligible, 42 above-cutoff, 14 slots), it does not:
+   *
+   * ```
+   *   K    j   ratio   misses      K    j   ratio   misses
+   * 150    1  0.7146     0        60    5  0.3768    53
+   * 150    5  0.7232     0        40    5  0.3252   147
+   * 120    5  0.5822     0         0    5  0.3084   218
+   * 100    5  0.5123     1         0   10  0.5959    21
+   *  80    5  0.4416     6
+   * ```
+   *
+   * Three things that table settles. j=5 at the shipped K *raises* the ratio
+   * (0.7146 → 0.7232) — the floor and a large K overlap rather than
+   * substitute. No (K, j) reaches ≤0.4 at zero misses; the best zero-miss
+   * point is K=120/j=5 at 0.5822. And a larger j cannot rescue a small K: at
+   * K=0, j=10 still misses 21 rows at a *worse* ratio than K=120/j=5.
+   *
+   * Why the prediction missed: 42 above-cutoff rows over 14 slots averages 3
+   * per slot but is not spread evenly, so a floor deep enough for the dense
+   * slots promotes redundantly in the sparse ones — while the dense slots
+   * still need K to reach past j. The clustered-miss mechanism M1.5 measured
+   * is real; it just is not what binds the ratio on this fixture.
+   *
+   * Kept as a knob rather than reverted: the mechanism is fixture-dependent,
+   * and a pool with more slots or a flatter cutoff would change the table.
+   * Re-measure before changing the default — recall gate is `npx vitest run
+   * packages/core/test/racing.test.ts -t 7.2`, ratio is `npx tsx
+   * packages/core/test/measure-racing-ratio.ts`. Ignored when `fullPool:
+   * true`.
+   */
+  promoteTopJ?: number;
   /**
    * Skips screening entirely and full-iteration sims every eligible
    * candidate — ADR-0018's escape flag, now paired with the racing it
@@ -722,6 +774,7 @@ export async function rankUpgrades(
   const racing = input.fullPool !== true;
   const screenIterations = input.screenIterations ?? DEFAULT_SCREEN_ITERATIONS;
   const promoteTopK = input.promoteTopK ?? DEFAULT_PROMOTE_TOP_K;
+  const promoteTopJ = input.promoteTopJ ?? DEFAULT_PROMOTE_TOP_J;
 
   // Read once and shared with the sim cache below, so the version a result is
   // filed under is always the version it was hashed with.
@@ -760,6 +813,7 @@ export async function rankUpgrades(
       ? {
           screenIterations,
           promoteTopK,
+          promoteTopJ,
         }
       : {}),
   });
@@ -1139,6 +1193,7 @@ export async function rankUpgrades(
         screened: screenResults,
         candidates: ordered,
         promoteTopK,
+        promoteTopJ,
         ownedItemIds: equippedIds,
         setPackageItemIds,
       });

@@ -18,6 +18,18 @@ import type { PoolEntry } from "./pool.js";
  */
 export const DEFAULT_SCREEN_ITERATIONS = 1000;
 export const DEFAULT_PROMOTE_TOP_K = 150;
+/**
+ * Per-slot promotion depth (candidate-pool.md §6.4's option (a)). Generalizes
+ * the best-in-slot floor from top-1 to top-`j`.
+ *
+ * Defaults to 1 — the pre-§6.4 best-in-slot floor, byte-for-byte — because
+ * raising it does not pay on the gating fixture. Measured, 30 noise draws on
+ * feral (see `RankInput.promoteTopJ` in rank.ts for the table): j=5 at the
+ * shipped K=150 *raises* the ratio 0.7146 → 0.7232, and no (K, j) reaches the
+ * §6.4 ≤0.4 target at zero misses. The knob is kept because the mechanism is
+ * real and fixture-dependent, not because this default exercises it.
+ */
+export const DEFAULT_PROMOTE_TOP_J = 1;
 
 /** One candidate's screening observation, keyed by item id. */
 export type ScreeningResult = {
@@ -29,6 +41,11 @@ export type PromotionInputs = {
   screened: readonly ScreeningResult[];
   candidates: readonly PoolEntry[];
   promoteTopK: number;
+  /**
+   * How many candidates promote from *each* slot's own screening ranking.
+   * `1` reproduces the pre-§6.4 best-in-slot floor exactly.
+   */
+  promoteTopJ: number;
   /** Item ids already worn (candidate-pool.md's "owned" — never dropped). */
   ownedItemIds: ReadonlySet<number>;
   /**
@@ -46,16 +63,31 @@ export type PromotionResult = {
 
 /**
  * Promote candidate *c* if any of: *c* is in the global top-`promoteTopK` by
- * screening delta; *c* is best-in-slot at screening (a floor — no empty
- * slot); *c* is in a set-completion package; *c* is owned.
+ * screening delta; *c* is in its own slot's top-`promoteTopJ` (a floor — no
+ * slot goes under-sampled); *c* is in a set-completion package; *c* is owned.
  *
- * Ties in the top-K cutoff break toward the lower item id, mirroring
- * `orderCandidatesByEp`'s total order (candidate-order.ts) — so the boundary
- * of the promoted set never depends on input order.
+ * The per-slot floor is what a global cutoff cannot do. Upgrade deltas scale
+ * with how outdated the worn piece is, so slots are not comparable on one
+ * axis: a slot whose upgrades are all small loses *every* candidate to a
+ * global K at once, taking with it the precision needed to order that slot at
+ * all. M1.5 measured exactly that clustering (on ret, all six worst-ranked
+ * rows were cloaks; on feral, belts and necks). Since only one item is ever
+ * equipped per slot, the comparison that matters is within a slot — so the
+ * screening budget is spread across slots rather than pooled (§6.4 (a)).
+ *
+ * Ties break toward the lower item id in both the global and per-slot
+ * cutoffs, mirroring `orderCandidatesByEp`'s total order (candidate-order.ts)
+ * — so the boundary of the promoted set never depends on input order.
  */
 export function promotionRule(input: PromotionInputs): PromotionResult[] {
-  const { screened, candidates, promoteTopK, ownedItemIds, setPackageItemIds } =
-    input;
+  const {
+    screened,
+    candidates,
+    promoteTopK,
+    promoteTopJ,
+    ownedItemIds,
+    setPackageItemIds,
+  } = input;
   const slotByItemId = new Map(candidates.map((c) => [c.itemId, c.slot]));
 
   const ordered = [...screened].sort((a, b) => {
@@ -66,37 +98,40 @@ export function promotionRule(input: PromotionInputs): PromotionResult[] {
     ordered.slice(0, Math.max(0, promoteTopK)).map((s) => s.itemId)
   );
 
-  const bestInSlot = new Set<number>();
-  const bestDeltaBySlot = new Map<
-    string,
-    { itemId: number; deltaDps: number }
-  >();
+  const bySlot = new Map<string, ScreeningResult[]>();
   for (const s of screened) {
     const slot = slotByItemId.get(s.itemId);
     if (slot === undefined) continue;
     // A candidate whose every slot attempt panicked screens at -Infinity.
-    // The floor exists so no slot goes unrepresented, but a slot where
+    // The floor exists so no slot goes under-sampled, but a slot where
     // nothing produced a number has nothing to represent: promoting the
     // argmax of two failures spends a full-iteration sim on a candidate that
     // panics again, and -Infinity serializes to JSON `null`, so a promoted
     // one would break the sort comparator on any rehydrated `Ranking`.
     if (!Number.isFinite(s.deltaDps)) continue;
-    const current = bestDeltaBySlot.get(slot);
-    if (
-      !current ||
-      s.deltaDps > current.deltaDps ||
-      (s.deltaDps === current.deltaDps && s.itemId < current.itemId)
-    ) {
-      bestDeltaBySlot.set(slot, { itemId: s.itemId, deltaDps: s.deltaDps });
-    }
+    const bucket = bySlot.get(slot);
+    if (bucket) bucket.push(s);
+    else bySlot.set(slot, [s]);
   }
-  for (const { itemId } of bestDeltaBySlot.values()) bestInSlot.add(itemId);
+
+  const topInSlot = new Set<number>();
+  // A non-finite j would make `slice(0, j)` take nothing and silently delete
+  // the floor — the one criterion that guarantees every slot is represented.
+  // Failing closed to the pre-§6.4 top-1 keeps a miscall degraded, not silent.
+  const j = Number.isFinite(promoteTopJ) ? Math.max(0, promoteTopJ) : 1;
+  for (const bucket of bySlot.values()) {
+    bucket.sort((a, b) => {
+      if (a.deltaDps !== b.deltaDps) return b.deltaDps - a.deltaDps;
+      return a.itemId - b.itemId;
+    });
+    for (const s of bucket.slice(0, j)) topInSlot.add(s.itemId);
+  }
 
   return screened.map((s) => ({
     itemId: s.itemId,
     promoted:
       topK.has(s.itemId) ||
-      bestInSlot.has(s.itemId) ||
+      topInSlot.has(s.itemId) ||
       setPackageItemIds.has(s.itemId) ||
       ownedItemIds.has(s.itemId),
   }));
