@@ -181,3 +181,59 @@ decision about whether the pin bump belongs here or to ticket 156.
 
 This intersects plan slices 3 and 5, which port into that clone and bump the
 pin respectively.
+
+**Slice 3 landed 2026-08-17 — the fork engine now carries the change, and
+E-W3 can fail on it.** Two fork commits on `feat/upgrades-tab` (working
+clone, `pushed: false`): `cd2e4106` ports the change and `eaf6acf9` re-hashes
+PROVENANCE, merged by `36991167`. This repo: `2698396` extends E-W3.
+
+The shape ported is core's **post-`ea8f916`** one, not `1d2f724`'s. `ea8f916`
+exists because a review proved two of core's four compose sites accepted a
+full revert of ticket 212 with every test green, so `buildSetBonuses` takes
+`composeFor` as a parameter instead of resolving a second database of its
+own, and the spread guard is `database !== undefined` rather than truthiness.
+That commit's own acceptance check re-run against the fork:
+`grep -c "compose(deps.raidSimSkeleton" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts`
+→ `1`, and `grep -n simDatabaseFor` on the same file → exactly two hits, the
+`Deps` member and the closure body.
+
+**Mutation evidence.** Command throughout:
+`npx vitest run test/wowsims-fork-parity.test.ts --root packages/core`. Each
+mutation was applied alone to the committed fork tree, run, then reverted
+with `git -C vendor/tbc-new-fork checkout -- <the two engine files>` and
+`git -C vendor/tbc-new-fork status --porcelain` confirmed empty before the
+next one.
+
+1. Unmutated → green.
+2. Delete `if (player.database) slot.database = player.database;` from the
+   fork's `compose.ts` → red:
+   `forkRequests[0]: composed request carries no sim database (ticket 212 slice 3)`.
+3. Replace `deps.simDatabaseFor?.(forEquipment)` with `undefined` inside the
+   fork's `composeFor` → red: `RankError: no recording for sim key {...}`,
+   the dumped key showing a player slot with `equipment` and no `database`
+   while the harness keys carry one.
+4. Revert **only** the package compose site to a direct database-less
+   `compose(deps.raidSimSkeleton, {...})` call, leaving `composeFor` and the
+   other three sites intact → red: the `setBonuses` comparison, fork
+   reporting `unmeasured: "sim-failed"`, `bonusDps: undefined` where this
+   repo measured `bonusDps: 20, packageDeltaDps: 75`.
+5. Restored → green.
+
+`PROVENANCE.md` was re-hashed only after run 5, never before — re-hashing
+ahead of a green gate launders drift into the baseline, which is how ticket
+165's blind spot survived. `python scripts/check_engine_port_drift.py` exits
+0, and `pnpm verify` exits 0 on `2698396`.
+
+**Coverage hole, disclosed rather than implied closed: E-W3 gates compose
+sites 1, 3 and 4 only.** Site 2 (fork `rank.ts`, the screening path) is
+wired through the same `composeFor` closure — proven statically by the
+single-compose-call grep above, and behaviourally only insofar as mutation 3
+reddens that shared closure body — but E-W3 never executes it, because the
+suite runs `fullPool: true` (`packages/core/test/wowsims-fork-parity.test.ts`,
+the `rankUpgrades` input in `buildRecordingsAndRun`), which skips screening on
+both engines by design. Core covers the analogous site with
+`packages/core/test/rank.test.ts:4495`; the fork has no equivalent. Filed as
+ticket 217, which also records why a naive `fullPool: false` parity case may
+red on legitimate divergence.
+
+The lockfile pin is untouched here — slice 5 owns `data/wowsims-fork.lock.json`.
