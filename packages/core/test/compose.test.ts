@@ -97,6 +97,69 @@ describe("compose", () => {
   });
 });
 
+// Ticket 212: the WASM sim is built without with_db, so its item registry is
+// filled per request from player.database. compose never wrote that field, so
+// every candidate — never worn, never in the skeleton's database — panicked
+// before iterating. compose stays pure: it writes rows it is handed.
+describe("compose — player.database (ticket 212)", () => {
+  const DB = {
+    items: [{ id: 30129, name: "Marker" }],
+  } as const;
+
+  function playerSlot(req: RaidSimRequest): Record<string, unknown> {
+    return (
+      req as unknown as {
+        raid: { parties: Array<{ players: Array<Record<string, unknown>> }> };
+      }
+    ).raid.parties[0]!.players[0]!;
+  }
+
+  function bareSkeleton(withDatabase: boolean): RaidSimRequest {
+    const player: Record<string, unknown> = {
+      name: "seed",
+      race: "RaceHuman",
+      equipment: { items: [{ id: 28430 }] },
+    };
+    if (withDatabase) player.database = { items: [{ id: 1, name: "Worn" }] };
+    return {
+      raid: { parties: [{ players: [player] }] },
+    } as unknown as RaidSimRequest;
+  }
+
+  it("writes the database it is handed onto the player slot", () => {
+    const got = compose(bareSkeleton(false), {
+      name: "probe",
+      race: "RaceHuman",
+      equipment: [{ id: 30129, gems: [] }],
+      database: DB,
+    });
+
+    expect(playerSlot(got).database).toEqual(DB);
+  });
+
+  it("leaves the skeleton's database untouched when handed none", () => {
+    const got = compose(bareSkeleton(true), {
+      name: "probe",
+      race: "RaceHuman",
+      equipment: [{ id: 28430, gems: [] }],
+    });
+
+    expect(playerSlot(got).database).toEqual({
+      items: [{ id: 1, name: "Worn" }],
+    });
+  });
+
+  it("adds no database field when neither skeleton nor player has one", () => {
+    const got = compose(bareSkeleton(false), {
+      name: "probe",
+      race: "RaceHuman",
+      equipment: [{ id: 28430, gems: [] }],
+    });
+
+    expect(playerSlot(got)).not.toHaveProperty("database");
+  });
+});
+
 describe("ret P2 preset ↔ skeleton mappings", () => {
   // Four fields are byte-identical between IndividualSimSettings and the
   // golden RaidSimRequest skeleton. player is deliberately unchecked — the

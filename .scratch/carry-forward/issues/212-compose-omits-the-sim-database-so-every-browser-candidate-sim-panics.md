@@ -118,3 +118,66 @@ not introduced in the port, and nothing in the repo currently documents it.
       dropped candidates for `No item with id` reaches zero.
 - [ ] Ticket 156's measurement can then start; note it must be re-baselined,
       as no previous browser run ever actually simmed a candidate.
+
+## Comments
+
+Option chosen 2026-08-16 (acceptance criterion 1). Plan:
+`.scratch/plans/ticket-212-plan.md`.
+
+**Chosen: option 2, in a form that keeps `compose()` pure.** The per-request
+database is data handed *in*, not a lookup `compose()` performs.
+`ComposePlayer` gains an optional opaque `database`; `Deps` gains
+`simDatabaseFor(equipment)`; `rank.ts` consults the resolver at all four
+compose sites so baseline, screening, full and package requests each describe
+their own equipment — upstream's invariant at `ui/core/sim.ts:346-347`. The
+browser adapter implements the resolver through upstream's own path
+(`lookupEquipmentSpec` -> `gear.toDatabase(db)`). CLI callers pass no
+resolver, so composed requests stay byte-identical and no fixture, sim-cache
+row, or ENGINE_VERSION moves.
+
+The ticket's stated cost for option 2 — "changes `compose()`'s signature at
+every call site" — does not materialise in this form: the new field is
+optional, so the CLI call sites are untouched. Evidence: the pre-existing
+"matches the Stage 0 slamaltman RaidSimRequest minus simOptions" test in
+`packages/core/test/compose.test.ts` passes unmodified against the change
+(`npx vitest run test/compose.test.ts --root packages/core`).
+
+**Why not option 1**: hundreds of item rows land on the `structuredClone` +
+`simCacheKey` hot path per candidate, and `currentPageSkeleton()` runs in the
+adapter, which never sees the pool (`pool` is a rankUpgrades dep). **Why not
+option 3**: it sits below the SimRunner seam, so this ticket's own acceptance
+test — assert at the `rankUpgrades` interface — cannot observe it, and core's
+compose would stay wrong-by-luck on the CLI, the trap this ticket names.
+
+**Seam classification.** `simDatabaseFor` is a data dep, not a fourth
+architectural seam, so AGENTS.md's "agree a fourth port first" rule does not
+apply. `PLAN.md:145-147` defines the seams as exactly `gear`/`sim`/`store`,
+each a port with a live+recorded adapter pair; `PLAN.md:149-150` annotates
+neighbouring `Deps` entries as "Data, not ports — see ADR-0019". The resolver
+is synchronous, does no I/O, and has nothing to record.
+
+**Preflight (plan slice 0), run 2026-08-16.** The fork's
+`assets/database/db.json` covers every pool item today: 0 missing across all
+six universes (2,229 entries) and 0 missing of 207 palette gems. Command in
+the plan's slice 0. This retires the risk that criterion 4 fails late on data
+rather than code.
+
+**Slice 1 landed 2026-08-16; `pnpm verify` blocked by a pre-existing gate
+failure, not by this change.** `pnpm run sim-implemented-effects:check` fails
+on `data/sim-implemented-effects.json` being stale in one field,
+`forkCommit`. Verified pre-existing: the same failure reproduces on a stashed
+working tree at `f4b9b4a` with none of this ticket's edits present
+(`git stash && pnpm run sim-implemented-effects:check`).
+
+Diagnosis (not yet acted on): the committed artifact's `forkCommit`
+`138fa77` matches `data/wowsims-fork.lock.json`'s pin `138fa77` — artifact and
+pin agree. What has moved is the fork *working clone*, at `5e26fa0`, five
+commits ahead of the pin on `feat/upgrades-tab` with a clean tree (the
+ticket-156 screening-disclosure work). So the gate is comparing the artifact
+against an unpinned checkout. Regenerating as the script suggests would
+re-baseline the artifact onto an unpinned commit — deliberately not done as a
+side effect of this ticket; it needs the `data-pipeline-work` path and a
+decision about whether the pin bump belongs here or to ticket 156.
+
+This intersects plan slices 3 and 5, which port into that clone and bump the
+pin respectively.
