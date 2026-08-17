@@ -1,4 +1,4 @@
-Status: open
+Status: resolved (fixed end to end; served-build run clean)
 Type: defect (browser-only, blocks all in-browser ranking) + design decision required
 Origin: ticket 156 slice B, 2026-08-16
 Blocks: ticket 156 (E-W2 throughput measurement cannot start until this is fixed)
@@ -107,16 +107,16 @@ not introduced in the port, and nothing in the repo currently documents it.
 
 ## Acceptance criteria
 
-- [ ] An option above is chosen, with the reason recorded (including the
+- [x] An option above is chosen, with the reason recorded (including the
       clone-cost measurement if option 1).
-- [ ] A test at the `rankUpgrades` interface with racing on, driving a
+- [x] A test at the `rankUpgrades` interface with racing on, driving a
       candidate the character does not wear, asserting the composed request
       carries database rows for that candidate's item.
-- [ ] The same fix ported to the fork, E-W3 re-run green *before* the
+- [x] The same fix ported to the fork, E-W3 re-run green *before* the
       `PROVENANCE.md` hash is updated.
-- [ ] A served-build run screens candidates without panicking — the count of
+- [x] A served-build run screens candidates without panicking — the count of
       dropped candidates for `No item with id` reaches zero.
-- [ ] Ticket 156's measurement can then start; note it must be re-baselined,
+- [x] Ticket 156's measurement can then start; note it must be re-baselined,
       as no previous browser run ever actually simmed a candidate.
 
 ## Comments
