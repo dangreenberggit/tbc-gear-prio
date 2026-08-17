@@ -1,4 +1,4 @@
-Status: open
+Status: resolved (vitest excludes **/vendor/**)
 Type: gate gap
 Origin: standards axis, pre-merge review of `feat/sweep-tab-tickets`, 2026-08-14
 (`docs/reviews/feat-sweep-tab-tickets.md`, finding S1)
@@ -56,3 +56,27 @@ green — is the worst of the three.
 
 Ticket 162 is the slice whose test this is. Ticket 165 covers a different and
 independent gap in E-W3's coverage.
+
+## Resolution, 2026-08-17
+
+`vitest.config.ts` now excludes `**/vendor/**`. The ticket's named file
+(`ep-weights-v1.test.ts`) is no longer in the working tree, so the condition
+was reconstructed to prove the fix rather than assume it.
+
+Probe: a `node:test` file in the fork's engine directory with a deliberately
+failing assertion (`assert.equal("DELIBERATELY-BROKEN", "never-equal")`).
+
+Without the exclusion — the ticket's symptom, exactly:
+
+```
+✓ vendor/.../zz-ticket166-probe.test.ts (0 test)
+Test Files  47 passed (47)
+```
+
+A failing assertion reported as a passing file. With the exclusion: 46 files
+collected, the probe absent. Probe deleted; fork clone clean afterwards.
+
+Note the green tick appeared *because* vitest found no vitest-registered
+tests in the file — `passWithNoTests: true` then counts the file as passing.
+Excluding the directory is the fix rather than turning that flag off, since
+the flag is wanted for genuinely empty suites elsewhere.
