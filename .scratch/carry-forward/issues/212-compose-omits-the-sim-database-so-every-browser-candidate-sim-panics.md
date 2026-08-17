@@ -237,3 +237,61 @@ ticket 217, which also records why a naive `fullPool: false` parity case may
 red on legitimate divergence.
 
 The lockfile pin is untouched here — slice 5 owns `data/wowsims-fork.lock.json`.
+
+### Slice 4 — browser wiring, 2026-08-17
+
+Fork commits (clone `vendor/tbc-new-fork`, branch `feat/upgrades-tab`,
+`pushed: false`):
+
+- `d5b8d1f2a` — Supply the browser's per-request sim database
+- `1dddd77c9` — merge of `w/candidate-pool-slice4`
+
+New adapter `upgrades/adapters/sim_database.ts` implements the engine's
+`Deps.simDatabaseFor` through upstream's own path — `Database.getSync()` →
+`lookupEquipmentSpec` → `Gear.toDatabase(db)` → `SimDatabase.toJson` — so
+gems, enchants, random suffixes and `itemEffectRandPropPoints` carry exactly
+as a normal page sim carries them. `upgrades_tab.tsx` passes it into deps
+beside `pool` (two added lines: the import and the dep).
+
+No fallback when an item fails to resolve: it produces no row and the sim
+panics on that id, which the per-row disclosure surfaces. Swallowing it would
+turn a data gap into a wrong number.
+
+Evidence, re-runnable:
+
+```bash
+# from inside the clone (PowerShell; fnm intercepts node in Git Bash)
+npx tsc --noEmit          # exit 0
+```
+
+`pnpm verify` at the repo root is green on the tip, including
+`engine-port-drift:check` (33 ported files match) — slice 4 touches adapters,
+not ported engine files, so no PROVENANCE row moves.
+
+Two corrections made during the slice, both caught by the fork typecheck:
+`SimDatabase` is exported from `proto/db`, not `proto/common`; and
+`Database.getSync()` throws rather than returning null, so an early
+`if (!db) return undefined` guard was dead code that would also have handed
+the sim a database-less request — the exact bug this ticket fixes. Removed.
+
+Note on `git show --stat` for `upgrades_tab.tsx`: it reports ~1858 changed
+lines. That is git's diff heuristic failing to anchor on a tab-indented file,
+not a rewrite. The file went 928 → 930 lines, the committed blob is
+byte-identical to the working file (`cmp`), and
+`git diff HEAD~1 HEAD -U0` shows exactly the two added lines.
+
+### Criterion 4 — scope decision, 2026-08-17
+
+Criterion 4 asks for a served-build run where the count of candidates dropped
+for `No item with id` reaches zero. A full pass over the pool is ~455
+candidates and its duration has never been measured — measuring it *is*
+ticket 156, which this ticket blocks.
+
+Decision (user, 2026-08-17): **cap the acceptance run at 30 minutes.** Record
+how many candidates it covered and treat zero drops across that sample as
+satisfying criterion 4, because the pre-fix failure rate was 100% of
+candidates — every candidate panicked — so a fix that works cannot produce a
+zero-drop sample of any size, and a fix that does not work fails on the first
+candidate. A full-pass run is filed as a follow-up in case a longer run
+surfaces something a partial one cannot (for example a failure specific to
+late-pool items or to a phase the sample never reaches).
