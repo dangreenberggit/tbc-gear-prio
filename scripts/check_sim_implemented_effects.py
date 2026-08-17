@@ -6,6 +6,12 @@ the payload in memory with generate_sim_implemented_effects.py's own
 functions and compare it to the committed file, byte for byte, rather than
 writing to disk and running `git diff`.
 
+forkCommit is compared against the pin in data/wowsims-fork.lock.json, not
+the clone's checked-out HEAD: clone-ahead-of-pin is the expected mid-slice
+state (docs/plans/wowsims-tab/candidate-pool.md section 9.1a), and the real
+signal -- the Go tree on disk moving under the artifact -- is carried by the
+rebuilt id sets below. Ticket 213.
+
 Skips cleanly (exit 0, explaining why) when vendor/tbc-new-fork is absent --
 same "absence is ordinary, not a failure" contract check_engine_port_drift.py
 uses, since vendor/ is gitignored and most checkouts (including CI, unless a
@@ -29,7 +35,7 @@ from generate_sim_implemented_effects import (  # noqa: E402
     FORK_ROOT,
     SIM_DIR,
     active_item_ids,
-    fork_commit,
+    lockfile_pin,
     stub_only_candidates,
 )
 from generate_sim_implemented_effects import AUTO_GEN_GLOB  # noqa: E402
@@ -80,8 +86,15 @@ def main() -> int:
         if committed.get(key) != fresh[key]:
             diffs.append(key)
 
-    commit = fork_commit(FORK_ROOT)
-    if committed.get("forkCommit") != commit:
+    pin = lockfile_pin()
+    if pin is None:
+        print(
+            "sim-implemented-effects check: could not read the pin from "
+            "data/wowsims-fork.lock.json.",
+            file=sys.stderr,
+        )
+        return 2
+    if committed.get("forkCommit") != pin:
         diffs.append("forkCommit")
 
     if not diffs:
