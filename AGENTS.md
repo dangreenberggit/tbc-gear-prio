@@ -96,6 +96,17 @@ When you will have **two writers running at once** (independent slices — diffe
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
 
+### Stage-gate features
+
+When a wrong plan would be expensive, run the `stage-gate` skill: the
+session orchestrates Planner (Fable, effort low) → adversarial
+Plan-Reviewer (Opus, effort medium) → fresh-context Executor
+(Sonnet-class), with judged gates between stages and a bounded loop-back.
+The plan is reviewed before any code exists; `pre-merge-review` still runs
+after, unchanged. Seats are agent definitions under `.claude/agents/` —
+files added there register at session start only, so a new or edited seat
+needs a fresh session.
+
 ### Parking WIP
 
 When you stash WIP, say what you parked and what tip is missing because of it. Name the important pieces (files or jobs), not a vibe. If tip still needs any of that to be correct or complete, write that down before you start the next work. “Restore later if needed” is not enough.

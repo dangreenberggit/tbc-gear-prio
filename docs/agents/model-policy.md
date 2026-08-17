@@ -193,6 +193,21 @@ review is not the kind of work Fable is reserved for.
 Prefer this harness when a review-lane reviewer from a different vendor than the
 authoring session is wanted, and sequential axes on a rate limit.
 
+#### Stage-gate seats
+
+The `stage-gate` skill fills its seats from these lanes: Planner = design
+(Fable, frontmatter `effort: low` — the capability is what is bought, not
+the tokens), Reviewer = review (Opus at effort `medium`; its optional
+single judgment-claim refuter is the one narrow adversarial axis this
+policy reserves `high`+ for, when used at all), Executor = workhorse
+(Sonnet-class). The orchestrator is the interactive session; Opus at
+effort `medium` is the recommended seat, and a Fable session may
+orchestrate with the stated reason that between-stage adjudication is
+planning-adjacent — a deliberate one-job extension of the design lane.
+Agent-definition frontmatter cannot name Fable, so the skill names every
+seat's model at the call site and each seat self-checks
+(`WRONG_MODEL: <name>` → respawn with the model named, never continue).
+
 ### Codex
 
 | Lane          | Fill it with                              |
