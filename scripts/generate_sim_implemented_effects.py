@@ -34,10 +34,16 @@ Run manually (regenerate after re-pinning vendor/tbc-new-fork):
 
     python scripts/generate_sim_implemented_effects.py
 
+Refuses to run (exit 2) when the clone's HEAD differs from the pin in
+data/wowsims-fork.lock.json: forkCommit must name the commit the artifact
+describes, and check_sim_implemented_effects.py compares it against the pin
+(ticket 213). Regenerating is therefore a pin-bump-time act, which was
+already the documented workflow -- this makes it enforced instead of assumed.
+
 Writes data/sim-implemented-effects.json. Exits 2 if vendor/tbc-new-fork is
-absent -- same "absence is ordinary, not a failure" contract as
-check_engine_port_drift.py, since vendor/ is gitignored and a fresh clone
-will not have the fork checked out.
+absent or its HEAD is off the pin -- same "absence is ordinary, not a failure"
+contract as check_engine_port_drift.py, since vendor/ is gitignored and a
+fresh clone will not have the fork checked out.
 """
 
 from __future__ import annotations
@@ -52,6 +58,16 @@ ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 SIM_DIR = FORK_ROOT / "sim"
 OUT_PATH = ROOT / "data/sim-implemented-effects.json"
+LOCK_PATH = ROOT / "data/wowsims-fork.lock.json"
+
+
+def lockfile_pin() -> str | None:
+    """The fork commit this repo is pinned to, or None if unreadable."""
+    try:
+        return json.loads(LOCK_PATH.read_text(encoding="utf-8")).get("commit")
+    except (OSError, json.JSONDecodeError):
+        return None
+
 
 # The one auto-gen file the ticket's diagnosis names, plus any sibling that
 # shares its generator header (a second phase's auto-gen file would carry
@@ -148,6 +164,19 @@ def main() -> int:
         )
         return 2
 
+    pin = lockfile_pin()
+    commit = fork_commit(FORK_ROOT)
+    if commit is None or commit != pin:
+        print(
+            f"generate_sim_implemented_effects: clone HEAD is {commit or 'unknown'} "
+            f"but data/wowsims-fork.lock.json pins {pin or 'unknown'}. forkCommit "
+            "must name the commit the artifact describes, so regeneration is "
+            "valid only at pin-bump time: update the lockfile (or reset the "
+            "clone to the pin), then re-run.",
+            file=sys.stderr,
+        )
+        return 2
+
     go_files = sorted(SIM_DIR.rglob("*.go"))
     auto_gen_files = sorted(FORK_ROOT.glob(AUTO_GEN_GLOB))
     if not auto_gen_files:
@@ -167,7 +196,6 @@ def main() -> int:
         iid: name for iid, name in stub_candidates.items() if iid not in implemented
     }
 
-    commit = fork_commit(FORK_ROOT)
     payload = {
         "generatedBy": "scripts/generate_sim_implemented_effects.py",
         "forkRepo": "dangreenberggit/tbc-new",
