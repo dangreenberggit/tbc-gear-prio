@@ -111,3 +111,63 @@ Fork restored to `HEAD` immediately after; `check_engine_port_drift.py` green
 This is what makes the ticket's first "Done when" — assert the two engines'
 recording keys/composed requests agree — the load-bearing fix rather than a
 nice-to-have.
+
+## Resolved 2026-08-17 — composed requests are now asserted
+
+`buildRecordingsAndRun` collects every request it composes (baseline, the
+socketless candidate, both set candidates, and the set package, across both
+seeds) and returns them alongside the ranking. The fork test asserts the two
+engines' request lists are equal, before the ranking comparisons.
+
+### It bites
+
+The probe recorded above — truncating the fork compose's equipment to five of
+seventeen slots — previously passed green. With the assertion in place:
+
+```bash
+npx vitest run test/wowsims-fork-parity.test.ts --root packages/core
+# unmutated: 1 passed
+# mutated:   1 failed, at the composed-request toEqual
+```
+
+Fork clone restored after the probe; `check_engine_port_drift.py` green.
+
+### It found a real fixture bug immediately
+
+The first unmutated run **failed**, and the cause was not the new assertion
+being wrong. `ENCHANT_APPLIES` — the fixture standing in for the fork's mocked
+`enchantAppliesToItem` — only mapped enchant 3003 to items 32461 and 29983.
+The two set-bonus candidates from ticket 155 were never added, and shoulder
+enchant 2986 was absent entirely.
+
+So this repo's real `enchantAppliesToItem` carried enchants onto the set
+candidates while the fork's mock said they did not apply, and the two engines
+composed **different equipment**. Verified against `data/items/index.json`:
+30989 is itemType 1 (head), matching 32461 and 29983, so head enchant 3003
+genuinely applies; 30997 is itemType 3 (shoulder) and worn shoulder 30022
+carries permanentEnchant 2986.
+
+The rankings still matched, because each engine keyed its recordings from its
+own composed request. That is the blindness this ticket describes, caught in
+its own fix within minutes of the assertion existing.
+
+Fixture corrected; both entries added with the item-type evidence in a
+comment.
+
+### Header claim corrected
+
+The file's header claimed "a behaviour-changing edit to either copy fails this
+test". That was false for the composition modules. It now states what is
+gated (ranking arithmetic, composed requests), what is deliberately not
+(text-only edits), and what remains outside (anything below the mocked
+`Database` / `proto_utils` boundary).
+
+### Not done here
+
+- `epWeightsSource` is still not passed to either engine, so the
+  `ep-weights-source` standing assumption remains absent on both sides rather
+  than compared. Left open.
+- The slice-2 mutation table has not been re-run wholesale; the truncation
+  probe above is the one request-composition mutation recorded.
+
+Those two are why this ticket stays open rather than resolved.

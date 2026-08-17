@@ -7,10 +7,27 @@
  * This test drives BOTH copies — this repo's `rankUpgrades` and the fork's
  * ported one, loaded from its actual file path — with the same slamaltman
  * fixture gear and the same recorded sim observations, and asserts they
- * produce the same ranked deltas. A behaviour-changing edit to either copy
- * fails this test; a text-only edit (renamed variable, reordered import)
- * does not, which is deliberate — PROVENANCE.md's hash gate is what catches
- * changes that never reach behaviour.
+ * produce the same ranked deltas — and, since ticket 165, the same composed
+ * sim requests.
+ *
+ * What this test does and does not gate (the header used to claim "a
+ * behaviour-changing edit to either copy fails this test", which was false
+ * for roughly half the ported modules — ticket 165):
+ *
+ * - Ranked deltas, SE, rank, cutoff and set-bonus synergy are compared, so a
+ *   mutation in the arithmetic downstream of a sim observation fails here.
+ * - Composed requests are compared, so a mutation confined to request
+ *   *composition* also fails here. That covers `compose` itself, gem fill,
+ *   meta repair, enchant carry-over and stat computation. Before ticket 165
+ *   these were invisible: the harness keys every recording by the engine's
+ *   own composed request, so a broken compose moved the key and the lookup
+ *   together and the ranking came out identical.
+ * - A text-only edit (renamed variable, reordered import) does not fail this
+ *   test, which is deliberate — PROVENANCE.md's hash gate catches changes
+ *   that never reach behaviour.
+ * - Still NOT gated: anything below the mocked boundary. `Database` and
+ *   `proto_utils/utils` are mocked (see the mock's own comment), so the
+ *   fork's real adapters and the Vite build are outside this test.
  *
  * Per plan §8's "E-W3 runs here, not in the fork" decision: the fork ships
  * no TypeScript test runner and stays that way, so this is the only place
@@ -130,7 +147,20 @@ const SET_CANDIDATE_SHOULDER_NAME = "Lightbringer Shoulderbraces";
  * import upstream's real implementation. See that mock's comment for why.
  */
 const ENCHANT_APPLIES = new Map<number, Set<number>>([
-  [3003, new Set([32461, CANDIDATE_ITEM_ID])],
+  // Head enchant onto head items. 30989 (Lightbringer War-Helm) is itemType 1
+  // in data/items/index.json, exactly like 32461 and 29983, so the real
+  // `enchantAppliesToItem` carries 3003 onto it too.
+  [3003, new Set([32461, CANDIDATE_ITEM_ID, SET_CANDIDATE_HEAD_ID])],
+  // Shoulder enchant onto the shoulder candidate: worn shoulder 30022 carries
+  // permanentEnchant 2986, and 30997 is itemType 3 (shoulder).
+  //
+  // Both set-candidate entries were missing until ticket 165 added the
+  // composed-request assertion, which caught it immediately: the fork's
+  // mocked lookup said "does not apply" while this repo's real one said it
+  // does, so the two engines composed different equipment. The rankings still
+  // matched — the harness keys each recording by its own engine's request —
+  // which is precisely the blindness ticket 165 exists to close.
+  [2986, new Set([30022, SET_CANDIDATE_SHOULDER_ID])],
 ]);
 
 function slamaltmanLoggedGear(): LoggedGear {
@@ -252,7 +282,7 @@ function observationFor(
  * ~80-line copies, so the two engines' recordings cannot silently drift
  * apart from each other — the one property this whole test exists to check.
  */
-function buildRecordingsAndRun<TRanking>(engine: {
+async function buildRecordingsAndRun<TRanking>(engine: {
   compose: typeof compose;
   equipmentForCandidateSwap: typeof equipmentForCandidateSwap;
   gemContext: typeof gemContext;
@@ -266,7 +296,7 @@ function buildRecordingsAndRun<TRanking>(engine: {
   RecordedSimRunner: typeof RecordedSimRunner;
   MemoryStore: typeof MemoryStore;
   simCacheKey: typeof simCacheKey;
-}): Promise<TRanking> {
+}): Promise<{ ranking: TRanking; composedRequests: unknown[] }> {
   const logged = slamaltmanLoggedGear();
   const equipment = mapWclGearToSim(
     (
@@ -319,6 +349,7 @@ function buildRecordingsAndRun<TRanking>(engine: {
   );
 
   const recordings = new Map<string, SimObservation>();
+  const composedRequests: unknown[] = [];
   for (const seed of SEEDS) {
     const runOpts = { seed, iterations: ITERATIONS };
     const baselineRequest = engine.compose(skeleton, {
@@ -347,6 +378,19 @@ function buildRecordingsAndRun<TRanking>(engine: {
       equipment: setPackageEquipment,
     });
 
+    // Ticket 165: every recording below is keyed by the engine's OWN
+    // composed request, so a mutation inside compose moves the key and the
+    // lookup together and cancels out. Capturing the requests here is what
+    // lets the caller compare them across engines instead of only comparing
+    // rankings that a broken compose can still produce identically.
+    composedRequests.push(
+      baselineRequest,
+      felSteelRequest,
+      setHeadRequest,
+      setShoulderRequest,
+      setPackageRequest
+    );
+
     recordings.set(
       engine.simCacheKey(baselineRequest, SIM_VERSION, runOpts),
       observationFor("baseline", seed, BASELINE_DPS, BASELINE_STDEV)
@@ -369,7 +413,7 @@ function buildRecordingsAndRun<TRanking>(engine: {
     );
   }
 
-  return engine.rankUpgrades(
+  const ranking = await engine.rankUpgrades(
     {
       character: CHAR,
       spec: "ret",
@@ -417,6 +461,8 @@ function buildRecordingsAndRun<TRanking>(engine: {
       ],
     }
   );
+
+  return { ranking, composedRequests };
 }
 
 /** This repo's own engine, run exactly like rank.test.ts's existing suite. */
@@ -592,7 +638,8 @@ const canRunForkSide = forkPresent && forkProtosGenerated;
 
 describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
   it("the ported fork engine reproduces this repo's ranked deltas", async () => {
-    const thisRepoRanking = await rankWithThisRepo();
+    const { ranking: thisRepoRanking, composedRequests: thisRepoRequests } =
+      await rankWithThisRepo();
 
     // The ported engine's items.ts/gems.ts adapters call
     // `Database.getSync().{getItemById,lookupGem,getGems}` — the only three
@@ -729,20 +776,35 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
       pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
     );
 
-    const forkRanking = await buildRecordingsAndRun<
-      Awaited<ReturnType<typeof rankUpgrades>>
-    >({
-      compose: forkCompose.compose,
-      equipmentForCandidateSwap: forkRank.equipmentForCandidateSwap,
-      gemContext: forkCandidateGems.gemContext,
-      gemsForPhase: forkGems.gemsForPhase,
-      SIM_ORDER: forkSlots.SIM_ORDER,
-      rankUpgrades: forkRank.rankUpgrades,
-      RecordedGearSource: forkGearSource.RecordedGearSource,
-      RecordedSimRunner: forkSimRunner.RecordedSimRunner,
-      MemoryStore: forkStore.MemoryStore,
-      simCacheKey: forkSimRunner.simCacheKey,
-    });
+    const { ranking: forkRanking, composedRequests: forkRequests } =
+      await buildRecordingsAndRun<Awaited<ReturnType<typeof rankUpgrades>>>({
+        compose: forkCompose.compose,
+        equipmentForCandidateSwap: forkRank.equipmentForCandidateSwap,
+        gemContext: forkCandidateGems.gemContext,
+        gemsForPhase: forkGems.gemsForPhase,
+        SIM_ORDER: forkSlots.SIM_ORDER,
+        rankUpgrades: forkRank.rankUpgrades,
+        RecordedGearSource: forkGearSource.RecordedGearSource,
+        RecordedSimRunner: forkSimRunner.RecordedSimRunner,
+        MemoryStore: forkStore.MemoryStore,
+        simCacheKey: forkSimRunner.simCacheKey,
+      });
+
+    // Ticket 165: assert the composed requests themselves, BEFORE comparing
+    // rankings. Every recording in the harness is keyed by the engine's own
+    // composed request, so a mutation confined to composition moves the key
+    // and the lookup together and leaves the ranking identical — gem fill,
+    // meta repair, enchant carry-over, stat computation and `compose` itself
+    // were all invisible here. Comparing the requests is what closes that:
+    // it is the only assertion in this file that reads composition directly
+    // rather than through an observation the harness chose by role.
+    //
+    // Verified to bite: truncating the fork compose's equipment to five of
+    // seventeen slots passes every other assertion in this file and fails
+    // only this one.
+    expect(forkRequests.length).toBe(thisRepoRequests.length);
+    expect(forkRequests.length).toBeGreaterThan(0);
+    expect(forkRequests).toEqual(thisRepoRequests);
 
     // The assertion E-W3 exists for: same deltas, same SE, same rank — not
     // a deep-equal on the whole Ranking, since assumptions.presetId is
