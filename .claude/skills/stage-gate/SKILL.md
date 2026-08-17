@@ -20,7 +20,14 @@ that one reviews the diff after.
 | --- | --- | --- | --- | --- |
 | Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `medium` | review |
-| Executor | `gate-executor` | `sonnet` | `medium` | workhorse |
+| Executor | `gate-executor` | `opus` | `medium` | review |
+
+The Executor is on the review lane, not the workhorse lane, because
+plans are underspecified and it decides adapt-vs-flag-vs-stop on every
+step where reality disagrees with the plan — the failure mode is a silent
+paper-over, which is a judgment failure, not a throughput one. Its
+`parallel-phase` workers are a separate call: pick each worker's model
+from the difficulty of its slice.
 
 Name the model on every spawn — frontmatter cannot name Fable, and an
 unnamed seat inherits the session's model at the session's price. Every
@@ -74,7 +81,7 @@ at startup only; restart the session.
 
 5. **Execute.** Resolve the base SHA fresh (`git rev-parse HEAD` — paste
    command output, never hand-typed). Spawn `gate-executor`
-   (`model: "sonnet"`) with the paths of `plan.md` and `plan-review.md`,
+   (`model: "opus"`) with the paths of `plan.md` and `plan-review.md`,
    the base SHA, the current branch name, and its checkout mode: shared
    checkout (default — you write nothing while it runs) or
    `isolation: worktree` when the tree must stay free (the seat's

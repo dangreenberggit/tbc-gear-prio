@@ -100,8 +100,10 @@ When you will have **two writers running at once** (independent slices — diffe
 
 When a wrong plan would be expensive, run the `stage-gate` skill: the
 session orchestrates Planner (Fable, effort low) → adversarial
-Plan-Reviewer (Opus, effort medium) → fresh-context Executor
-(Sonnet-class), with judged gates between stages and a bounded loop-back.
+Plan-Reviewer (Opus, effort medium) → fresh-context Executor (Opus,
+effort medium — it holds the adapt-vs-flag-vs-stop call on every
+underspecified step), with judged gates between stages and a bounded
+loop-back.
 The plan is reviewed before any code exists; `pre-merge-review` still runs
 after, unchanged. Seats are agent definitions under `.claude/agents/` —
 files added there register at session start only, so a new or edited seat
