@@ -277,6 +277,57 @@ function observationFor(
 }
 
 /**
+ * Ticket 212 slice 3's stub sim-database resolver, handed to both engines.
+ * A pure function of the equipment ids, so the same equipment always yields
+ * the same rows no matter which engine asks or when — which is what lets the
+ * harness precompute recording keys that an engine's own internal `compose`
+ * has to reproduce byte-for-byte.
+ */
+const stubSimDatabaseFor = (equipment: readonly { id?: number }[]) => ({
+  items: equipment
+    .filter((s) => s.id)
+    .map((s) => ({ id: s.id, marker: `db-${s.id}` })),
+});
+
+/**
+ * Ticket 212 slice 3's gate: every composed request must carry a database
+ * describing its OWN equipment. Run over both engines' captured requests —
+ * over this repo's so the assertion cannot be vacuous (core really does
+ * produce databases), and over the fork's so a symmetric removal on the fork
+ * side cannot slip past the cross-engine `toEqual` below.
+ */
+function expectRequestsCarryOwnDatabase(
+  requests: readonly unknown[],
+  label: string
+): void {
+  requests.forEach((request, index) => {
+    const player = (
+      request as {
+        raid: { parties: { players: Record<string, unknown>[] }[] };
+      }
+    ).raid.parties[0]?.players[0];
+    const where = `${label}[${index}]`;
+    const database = player?.["database"] as
+      { items?: { id?: number }[] } | undefined;
+    if (database === undefined) {
+      throw new Error(
+        `${where}: composed request carries no sim database (ticket 212 slice 3)`
+      );
+    }
+    const equipmentIds = (
+      player?.["equipment"] as { items?: { id?: number }[] } | undefined
+    )?.items
+      ?.map((item) => item.id)
+      .filter((id) => id);
+    const databaseIds = database.items?.map((item) => item.id);
+    expect(
+      databaseIds,
+      `${where}: sim database rows do not match this request's own equipment (ticket 212 slice 3)`
+    ).toEqual(equipmentIds);
+  });
+}
+
+/**
  * The engine-agnostic half of both `rankWithThisRepo` and the fork's mirror
  * below: compose every request this test's pool needs (baseline, the
  * socketless swap, each set-completion piece, and the assembled 2pc
@@ -359,26 +410,31 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       name: CHAR.name,
       race: "RaceBloodElf",
       equipment,
+      database: stubSimDatabaseFor(equipment),
     });
     const felSteelRequest = engine.compose(skeleton, {
       name: CHAR.name,
       race: "RaceBloodElf",
       equipment: felSteelEquipment,
+      database: stubSimDatabaseFor(felSteelEquipment),
     });
     const setHeadRequest = engine.compose(skeleton, {
       name: CHAR.name,
       race: "RaceBloodElf",
       equipment: setHeadEquipment,
+      database: stubSimDatabaseFor(setHeadEquipment),
     });
     const setShoulderRequest = engine.compose(skeleton, {
       name: CHAR.name,
       race: "RaceBloodElf",
       equipment: setShoulderEquipment,
+      database: stubSimDatabaseFor(setShoulderEquipment),
     });
     const setPackageRequest = engine.compose(skeleton, {
       name: CHAR.name,
       race: "RaceBloodElf",
       equipment: setPackageEquipment,
+      database: stubSimDatabaseFor(setPackageEquipment),
     });
 
     // Ticket 165: every recording below is keyed by the engine's OWN
@@ -439,6 +495,11 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       clock: () => new Date("2026-07-26T12:00:00.000Z"),
       raidSimSkeleton: skeleton,
       epWeights,
+      // Ticket 212 slice 3: both engines' `rankUpgrades` must resolve a
+      // database for every request they compose internally, matching the
+      // harness keys above. An engine that ignores this resolver misses
+      // every recording.
+      simDatabaseFor: stubSimDatabaseFor,
       pool: [
         {
           itemId: CANDIDATE_ITEM_ID,
@@ -807,6 +868,13 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     // only this one.
     expect(forkRequests.length).toBe(thisRepoRequests.length);
     expect(forkRequests.length).toBeGreaterThan(0);
+
+    // Ticket 212 slice 3's gate, before the cross-engine comparison: a
+    // `toEqual` alone passes when BOTH engines drop the database, so each
+    // engine's requests are checked against their own equipment first.
+    expectRequestsCarryOwnDatabase(thisRepoRequests, "thisRepoRequests");
+    expectRequestsCarryOwnDatabase(forkRequests, "forkRequests");
+
     expect(forkRequests).toEqual(thisRepoRequests);
 
     // The assertion E-W3 exists for: same deltas, same SE, same rank — not
