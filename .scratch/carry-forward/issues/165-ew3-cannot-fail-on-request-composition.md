@@ -71,7 +71,7 @@ That assertion does **not** close this ticket. Two known limits:
 
 ## Why it matters beyond the test
 
-`PROVENANCE.md` content-hashes the 30 ported files, and the checker's own text
+`PROVENANCE.md` content-hashes the 33 ported files, and the checker's own text
 says "a hash match proves nothing about behaviour by itself — only E-W3 does."
 The re-hash workflow is: change a ported file, re-run E-W3, and update the hash
 once it is green. For any file in the blind region that workflow re-blesses a

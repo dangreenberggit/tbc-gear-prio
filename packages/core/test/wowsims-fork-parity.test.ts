@@ -137,22 +137,25 @@ const SET_CANDIDATE_SHOULDER_ID = 30997;
 const SET_CANDIDATE_SHOULDER_NAME = "Lightbringer Shoulderbraces";
 
 /**
- * The one enchant-applicability fact both engines' swap path needs: does
- * slamaltman's worn head enchant (`permanentEnchant: 3003`, "Glyph of
- * Ferocity" — data/enchants/index.json) carry onto the candidate head item?
- * Both are `itemType: 1` (head) in data/items/index.json, so the real
- * `enchantAppliesToItem` (this repo's src/enchants.ts, and upstream's own
- * `ui/core/proto_utils/utils.ts` the port bridges to) answers yes — pinned
- * here as data, not re-derived, since the fork-side mock (below) cannot
- * import upstream's real implementation. See that mock's comment for why.
+ * The enchant-applicability facts both engines' swap path needs: does a worn
+ * enchant carry onto the candidate that replaces its item? Pinned here as
+ * data, not re-derived, because the fork-side mock (below) cannot import
+ * upstream's real `enchantAppliesToItem`. See that mock's comment for why.
+ *
+ * Each entry maps an enchant id to the items it applies to, and each is
+ * checked against `data/items/index.json` item types and the worn gear in
+ * `test/fixtures/slamaltman.raw.json` — see the per-entry comments.
  */
 const ENCHANT_APPLIES = new Map<number, Set<number>>([
   // Head enchant onto head items. 30989 (Lightbringer War-Helm) is itemType 1
   // in data/items/index.json, exactly like 32461 and 29983, so the real
   // `enchantAppliesToItem` carries 3003 onto it too.
   [3003, new Set([32461, CANDIDATE_ITEM_ID, SET_CANDIDATE_HEAD_ID])],
-  // Shoulder enchant onto the shoulder candidate: worn shoulder 30022 carries
-  // permanentEnchant 2986, and 30997 is itemType 3 (shoulder).
+  // Shoulder enchant onto the shoulder candidate: worn shoulder 30055
+  // (Shoulderpads of the Stranger) carries permanentEnchant 2986 in
+  // test/fixtures/slamaltman.raw.json, and candidate 30997 is itemType 3
+  // (shoulder) in data/items/index.json, so the real `enchantAppliesToItem`
+  // carries it across.
   //
   // Both set-candidate entries were missing until ticket 165 added the
   // composed-request assertion, which caught it immediately: the fork's
@@ -160,7 +163,7 @@ const ENCHANT_APPLIES = new Map<number, Set<number>>([
   // does, so the two engines composed different equipment. The rankings still
   // matched — the harness keys each recording by its own engine's request —
   // which is precisely the blindness ticket 165 exists to close.
-  [2986, new Set([30022, SET_CANDIDATE_SHOULDER_ID])],
+  [2986, new Set([30055, SET_CANDIDATE_SHOULDER_ID])],
 ]);
 
 function slamaltmanLoggedGear(): LoggedGear {

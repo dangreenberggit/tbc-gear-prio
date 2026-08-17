@@ -4488,6 +4488,110 @@ describe("rankUpgrades — simDatabaseFor (ticket 212)", () => {
     expect(baselineReqDb).toBeDefined();
   });
 
+  // The screening pass is the browser's default path (racing on), and it was
+  // the site a review proved could be fully reverted with the whole suite
+  // green: the acceptance test above passes `fullPool: true`, which skips
+  // screening entirely. This drives it for real.
+  it("gives screening requests their own database too", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const CANDIDATE = 29381;
+    const upgraded = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: CANDIDATE, gems: [] as number[] } : spec
+    );
+
+    const keyAt = (
+      eq: readonly { id?: number; gems: number[] }[],
+      iterations: number
+    ) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: eq,
+          database: markerDatabase(eq),
+        }),
+        "v0.0.101",
+        { seed: 42, iterations }
+      );
+
+    const sample = (dps: number, iterationsDone: number) => ({
+      dps,
+      stdev: 90,
+      iterationsDone,
+      simVersion: "v0.0.101",
+    });
+
+    const SCREEN = 1000;
+    const sent: unknown[] = [];
+    const recorded = new RecordedSimRunner(
+      "v0.0.101",
+      new Map([
+        // Screening pass: both baseline and candidate at SCREEN iterations.
+        [keyAt(equipment, SCREEN), sample(2000, SCREEN)],
+        [keyAt(upgraded, SCREEN), sample(2100, SCREEN)],
+        // Promotion to the full pass.
+        [keyAt(equipment, 3000), sample(2000, 3000)],
+        [keyAt(upgraded, 3000), sample(2100, 3000)],
+      ])
+    );
+    type RunFn = (...args: never[]) => unknown;
+    const capturing = {
+      version: () => recorded.version(),
+      run: (...args: never[]) => {
+        sent.push(args[0]);
+        return (recorded.run as RunFn)(...args);
+      },
+    } as unknown as typeof recorded;
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+        screenIterations: SCREEN,
+        // No fullPool: screening actually runs.
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: capturing,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(CANDIDATE)],
+        simDatabaseFor: markerDatabase,
+      }
+    );
+
+    // Reaching the ranking at all proves the screening request carried a
+    // database: its recording is keyed on a database-bearing request, and a
+    // screened candidate that misses its key is dropped, not ranked.
+    const row = ranking.items.find((i) => i.itemId === CANDIDATE);
+    expect(row).toBeDefined();
+
+    // Assert it directly as well, so the reason is legible on failure.
+    const screeningDbs = sent.map((req) => {
+      const slot = (
+        req as {
+          raid: { parties: Array<{ players: Array<Record<string, unknown>> }> };
+        }
+      ).raid.parties[0]!.players[0]!;
+      return slot.database as { items: Array<{ id: number }> } | undefined;
+    });
+    expect(screeningDbs.length).toBeGreaterThan(0);
+    for (const db of screeningDbs) expect(db).toBeDefined();
+    expect(
+      screeningDbs.some((db) => db!.items.some((it) => it.id === CANDIDATE))
+    ).toBe(true);
+  });
+
   it("composes byte-identical requests when no resolver is given", () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);

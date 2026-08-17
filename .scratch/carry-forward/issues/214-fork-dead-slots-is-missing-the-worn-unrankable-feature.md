@@ -71,17 +71,20 @@ Same reproduce recipe, substituting `plausibility.ts` (14 code-diff lines).
 
 ## Audit of the other ported files
 
-Every ported engine file with a `packages/core/src/` counterpart (28 of the 33
-hashed entries; the rest have no core source) was diffed, comment- and
-blank-line-stripped. Divergence over 10 lines:
+Every row of the PROVENANCE table was diffed against its
+`packages/core/src/` source, comment- and blank-line-stripped. **All rows have
+a core source that exists on disk** — there are no fork-only entries.
+
+Divergence over 10 lines, complete:
 
 | file | code-diff lines | PROVENANCE label |
 |---|---|---|
+| `seams/store.ts` | 137 | adapted (documented) |
 | `rank.ts` | 140 | adapted (documented) |
 | `meta.ts` | 116 | adapted (documented) |
-| `enchants.ts` | 94 | adapted (documented) |
+| `enchants.ts` | 98 | adapted (documented) |
 | `content-hash.ts` | 94 | adapted (documented) |
-| `slots.ts` | 62 | adapted (documented) |
+| `fixtures/report-events-offline.ts` | 73 | adapted (documented) |
 | `pool.ts` | 49 | adapted (documented) |
 | `items.ts` | 48 | adapted (documented) |
 | `promotion.ts` | 41 | adapted (documented) |
@@ -95,13 +98,49 @@ fork's own helpers, hand-written literals, and so on), so those divergences
 are intended. The two bolded rows are the only files claiming to be pure
 copies while differing in code, and both differ by exactly this one feature.
 
-Full breakdown of the 17 files labelled "none (import paths only)": 12 are
-byte-identical in code, 3 differ only by import lines, 2 differ by one or two
-incidental lines (`compose.ts` — the unported ticket-212 field — and `se.ts`,
-a type-export line), and these 2 are stale.
+Of the **19** rows whose label begins "none", **12 are byte-identical** in
+code, 5 differ by a handful of import or type-export lines, and these 2 are
+stale.
 
 That is the good news in this ticket: the port is not broadly rotten. One
 feature was missed, in the two files it touched.
+
+Recompute (run from the repo root; parses the PROVENANCE table, so it stays
+correct as rows are added):
+
+```bash
+python - <<'EOF'
+import re, os, difflib
+P = 'vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/PROVENANCE.md'
+E = os.path.dirname(P)
+rows = []
+for line in open(P, encoding='utf-8'):
+    m = re.match(r'^\|\s*`([^`]+)`\s*\|\s*`?([^`|]+?)`?\s*\|\s*(.*?)\s*\|\s*`?([0-9a-f]{64})`?\s*\|', line)
+    if m:
+        rows.append((m.group(1), m.group(2).strip(), m.group(3).strip()))
+def strip(p):
+    out = []
+    for l in open(p, encoding='utf-8', errors='replace'):
+        s = l.strip()
+        if not s or s.startswith(('//', '/*', '*')):
+            continue
+        out.append(re.sub(r'\s*//.*$', '', l.rstrip()))
+    return out
+for fork_rel, core_rel, label in rows:
+    f, c = os.path.join(E, fork_rel), os.path.join('packages/core/src', core_rel)
+    if not (os.path.isfile(f) and os.path.isfile(c)):
+        print('NO CORE SOURCE:', fork_rel); continue
+    d = [x for x in difflib.unified_diff(strip(c), strip(f), lineterm='', n=0)
+         if x[:1] in '+-' and not x.startswith(('---', '+++'))]
+    if len(d) > 10:
+        print(f'{fork_rel:<36}{len(d):>5}  {label[:44]}')
+EOF
+```
+
+The earlier version of this table was wrong on three counts: it claimed 28 of
+33 rows had core sources (all do), said 17 where the census gives 19, and
+omitted `seams/store.ts` and `fixtures/report-events-offline.ts` from a table
+presented as complete. Corrected 2026-08-17 after review.
 
 ## Impact
 
@@ -135,4 +174,5 @@ point at from different directions.
       `packages/core/src/` sources shows no code divergence.
 - [ ] E-W3 re-run green *before* the PROVENANCE hashes are updated (§9.1a).
 - [x] Every other ported file audited the same way — done 2026-08-16, table
-      above. Only these two files diverge without an "adapted" label.
+      above; recomputed and corrected 2026-08-17 after review found the
+      counts wrong. Only these two files diverge without an "adapted" label.

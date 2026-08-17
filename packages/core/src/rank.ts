@@ -778,7 +778,11 @@ export async function rankUpgrades(
       // Spread rather than `database: undefined` — exactOptionalPropertyTypes
       // distinguishes an absent key from an explicit undefined, and compose
       // must see no key at all when there is no resolver.
-      ...(database ? { database } : {}),
+      //
+      // `!== undefined`, not truthiness: an empty database is a meaningful
+      // answer ("this request needs no extra rows") and must be written
+      // through, where `undefined` means no resolver at all — the CLI path.
+      ...(database !== undefined ? { database } : {}),
     });
   };
 
@@ -1526,6 +1530,7 @@ export async function rankUpgrades(
           gems,
           race,
           input,
+          composeFor,
           individualDeltasByItemId,
           { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
           simVersion,
@@ -1832,6 +1837,13 @@ async function buildSetBonuses(
   gems: GemContext,
   race: Race,
   input: RankInput,
+  /**
+   * `rankUpgrades`'s own compose helper, passed in rather than rebuilt here:
+   * a second copy drifts silently, since no test covers both call sites
+   * (ticket 212 review). Every composed request must carry the database its
+   * own equipment needs.
+   */
+  composeFor: (equipment: readonly SimItemSpec[]) => RaidSimRequest,
   individualDeltasByItemId: ReadonlyMap<number, IndividualDelta>,
   baseline: DpsSample,
   simVersion: string,
@@ -1985,13 +1997,7 @@ async function buildSetBonuses(
         });
         continue;
       }
-      const packageDatabase = deps.simDatabaseFor?.(packageEquipment);
-      const packageRequest = compose(deps.raidSimSkeleton, {
-        name: input.character.name.toLowerCase(),
-        race,
-        equipment: packageEquipment,
-        ...(packageDatabase ? { database: packageDatabase } : {}),
-      });
+      const packageRequest = composeFor(packageEquipment);
 
       let packageObs = await readCachedSim(
         deps,
