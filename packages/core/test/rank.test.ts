@@ -4367,3 +4367,140 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
     });
   });
 });
+
+// Ticket 212: the browser's WASM sim is built without `with_db`, so its item
+// registry is filled per request from `player.database`. rank must therefore
+// hand every composed request a database describing that request's own
+// equipment — upstream's invariant (ui/core/sim.ts:346-347). This is the
+// ticket's named acceptance test: drive a candidate the character does not
+// wear and prove the composed request carries rows for that candidate's item.
+describe("rankUpgrades — simDatabaseFor (ticket 212)", () => {
+  // Marker rows keyed off the equipment handed in, so a request composed with
+  // the wrong equipment produces a different key and misses its recording.
+  const markerDatabase = (equipment: readonly { id?: number }[]) => ({
+    items: equipment
+      .filter((s) => s.id)
+      .map((s) => ({ id: s.id, marker: `db-${s.id}` })),
+  });
+
+  it("gives baseline and candidate requests each their own database", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+
+    const CANDIDATE = 29381; // neck; not worn by the fixture character
+    const wornNeck = equipment[SIM_ORDER.indexOf("neck")]?.id;
+    // Vacuity guard: a candidate the character already wears would make the
+    // "describes its own equipment" claim trivially true.
+    expect(wornNeck).not.toBe(CANDIDATE);
+
+    const upgraded = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: CANDIDATE, gems: [] as number[] } : spec
+    );
+
+    const keyFor = (eq: readonly { id?: number; gems: number[] }[]) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: eq,
+          database: markerDatabase(eq),
+        }),
+        "v0.0.101",
+        opts
+      );
+
+    const sample = (dps: number) => ({
+      dps,
+      stdev: 90,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+
+    const sent: unknown[] = [];
+    const recorded = new RecordedSimRunner(
+      "v0.0.101",
+      new Map([
+        [keyFor(equipment), sample(2000)],
+        [keyFor(upgraded), sample(2100)],
+      ])
+    );
+    type RunFn = (...args: never[]) => unknown;
+    const capturing = {
+      version: () => recorded.version(),
+      run: (...args: never[]) => {
+        sent.push(args[0]);
+        return (recorded.run as RunFn)(...args);
+      },
+    } as unknown as typeof recorded;
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+        fullPool: true,
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: capturing,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(CANDIDATE)],
+        simDatabaseFor: markerDatabase,
+      }
+    );
+
+    // The candidate ranked at all only because its request carried a database
+    // naming its own item: the recording is keyed on exactly that request.
+    const row = ranking.items.find((i) => i.itemId === CANDIDATE);
+    expect(row).toBeDefined();
+    expect(row!.deltaDps).toBeCloseTo(100, 5);
+
+    // Every request describes its own equipment, not the worn set.
+    const databases = sent.map((req) => {
+      const slot = (
+        req as {
+          raid: { parties: Array<{ players: Array<Record<string, unknown>> }> };
+        }
+      ).raid.parties[0]!.players[0]!;
+      return slot.database as { items: Array<{ id: number }> };
+    });
+    expect(databases.length).toBeGreaterThanOrEqual(2);
+    for (const db of databases) expect(db).toBeDefined();
+
+    const candidateReqDb = databases.find((db) =>
+      db.items.some((it) => it.id === CANDIDATE)
+    );
+    expect(candidateReqDb).toBeDefined();
+    // ...and the baseline's database does NOT name the candidate.
+    const baselineReqDb = databases.find(
+      (db) => !db.items.some((it) => it.id === CANDIDATE)
+    );
+    expect(baselineReqDb).toBeDefined();
+  });
+
+  it("composes byte-identical requests when no resolver is given", () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const withoutResolver = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    // The CLI path: wowsimcli is built with_db, so it passes no resolver and
+    // its requests -- and therefore every cache key and fixture -- must not
+    // move. Guards the claim made in ticket 212's decision record.
+    expect(withoutResolver).not.toHaveProperty(
+      "raid.parties.0.players.0.database"
+    );
+  });
+});
