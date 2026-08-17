@@ -78,7 +78,8 @@ the generator is left alone deliberately. Decide and record which.
 - [x] With the clone ahead of the pin and no `.go` change, the check passes.
 - [x] The generator/check source-of-truth disagreement noted above is
       resolved or explicitly documented in the script docstring.
-- [ ] Lands before ticket 212 slice 3 starts.
+- [x] Lands before ticket 212 slice 3 starts. Merged to `feat/candidate-pool`
+      as `f3e6e74` on 2026-08-16, before slice 3 began.
 
 ## Resolution
 
