@@ -295,3 +295,62 @@ zero-drop sample of any size, and a fix that does not work fails on the first
 candidate. A full-pass run is filed as a follow-up in case a longer run
 surfaces something a partial one cannot (for example a failure specific to
 late-pool items or to a phase the sample never reaches).
+
+### Slice 5 — served-build acceptance run, 2026-08-17
+
+**Criterion 4 met: zero candidates dropped for `No item with id`.** The run
+completed the whole pool inside the 30-minute cap, so the partial-evidence
+question the cap was meant to cover did not arise.
+
+Build and serve (fork clone at `1dddd77c9`, `feat/upgrades-tab`):
+
+```bash
+# in vendor/tbc-new-fork, PowerShell (fnm intercepts node in Git Bash)
+npx tsx vite.build-workers.mts     # exit 0
+npx vite build                     # exit 0, built in 42.97s
+# staleness guard -- the bundle must contain slice 4's code:
+grep -ro "simDatabaseFor" dist/tbc/bundle/ | wc -l        # 2
+# serve the production build, NOT the dev server (dev server distorts results)
+npx http-server "C:/Users/dgree/Code/lulz/tbc-gear-prio/vendor/tbc-new-fork/dist" -p 8899
+curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8899/tbc/lib.wasm   # 200, 20293865 bytes
+```
+
+Run: `/tbc/paladin/retribution/`, Upgrades tab, Run, 3000 iterations,
+screening on, pool "all 240 eligible". Duration ~16 minutes wall clock
+(16:28 start, complete by 16:46).
+
+Observed progression, each read from the DOM without polling the page during
+the sim (harness polling froze the page in an earlier session):
+
+| Elapsed | Progress | `No item with id` |
+| --- | --- | --- |
+| ~2 min | screening 135/240 | 0 |
+| ~4 min | full sims 5/187 | 0 |
+| ~9 min | full sims 121/187 | 0 |
+| ~15 min | full sims 174/187 | 0 |
+| ~16 min | complete (Run re-enabled, Stop disabled) | 0 |
+
+Final state, all counts read from the Upgrades tab pane:
+
+```js
+// noItem, simFailed, panic, unmeasured, skipped, dropped, error
+// -> all 0
+```
+
+The ranking is populated, which is what makes the zero meaningful — an empty
+table would trivially have no failures. Baseline **1775.6 DPS**, 19 ranked
+upgrade rows, top row `Lionheart Executioner ★ BiS, Main Hand, +37.5,
+Crafted`, last row `Abacus of Violent Odds, Trinket 1, +3.4`. Every delta
+required a candidate sim that ran to completion — the operation that failed
+455/455 times before this fix.
+
+**Deviation from the plan: the run was Phase 2, not Phase 3.** This build's
+UI exposes only Phase 1 and Phase 2 gear presets and no phase selector;
+`currentSettings` reads `phase: 2`. Rather than patch storage underneath the
+app, the run used the phase the app was actually in. Criterion 4 asks whether
+candidates panic, and the P2 pool (240 eligible, 187 promoted to full sims)
+exercises exactly that. A P3 run remains worth doing under ticket 219, which
+already lists "a phase the sample never reaches" as an untested hypothesis.
+
+Not done here: the lockfile pin bump. The clone is at `1dddd77c9`, ahead of
+`data/wowsims-fork.lock.json`'s `5e26fa0`. Deliberate — see below.
