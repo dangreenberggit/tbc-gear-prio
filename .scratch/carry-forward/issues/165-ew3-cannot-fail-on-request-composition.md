@@ -78,3 +78,36 @@ once it is green. For any file in the blind region that workflow re-blesses a
 hash on the strength of a test that could not have failed. This happened during
 this very sweep — `disclosure.ts` and `rank.ts` were re-hashed at `3bd0cd997`
 after a green E-W3 run that, as the review then proved, did not cover them.
+
+## Reproduced directly, 2026-08-16
+
+Independently confirmed while deciding whether ticket 212 slice 3 could safely
+port a `compose()` change. The blindness is not subtle — E-W3 survives gross
+corruption, not just edge cases.
+
+Mutation: in the fork's `upgrades/engine/compose.ts`, truncate the composed
+equipment to the first five slots.
+
+```bash
+# slot.equipment = { items: player.equipment.map(toProtoItem) };
+# becomes
+# slot.equipment = { items: player.equipment.map(toProtoItem).slice(0, 5) };
+npx vitest run test/wowsims-fork-parity.test.ts --root packages/core
+```
+
+Result: **passed** — "the ported fork engine reproduces this repo's ranked
+deltas", 1 passed. Twelve of seventeen equipment slots silently discarded in
+the fork's copy and the parity test still went green.
+
+The mechanism is the self-keying described above: the fork engine composes the
+request, derives the recording key from that same composed request, and looks
+up an observation that is a constant chosen by role rather than anything
+computed from the equipment. Key and lookup move together, so the corruption
+cancels out.
+
+Fork restored to `HEAD` immediately after; `check_engine_port_drift.py` green
+(33 files match).
+
+This is what makes the ticket's first "Done when" — assert the two engines'
+recording keys/composed requests agree — the load-bearing fix rather than a
+nice-to-have.
