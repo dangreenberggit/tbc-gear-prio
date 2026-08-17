@@ -61,11 +61,26 @@ EOF
 
 Low but real. A botched merge or a truncated write that leaves the lockfile as
 `null` or a list turns `pnpm verify` into a Python traceback rather than the
-intended message. Both callers already have a correct `pin is None` path —
-`check_sim_implemented_effects.py` exits 2 with "could not read the pin from
-data/wowsims-fork.lock.json", and the generator prints its HEAD-vs-pin
-message — so the fix restores an error path that already exists rather than
-inventing one.
+intended message.
+
+**Only one of the two callers has a real `pin is None` path.**
+`check_sim_implemented_effects.py:89-96` does exit 2 with "could not read the
+pin from data/wowsims-fork.lock.json". The generator has **no such branch**:
+its condition is `if commit is None or commit != pin`
+(`generate_sim_implemented_effects.py:169`), so an unreadable lockfile falls
+into the generic mismatch message and prints
+
+> clone HEAD is `<sha>` but data/wowsims-fork.lock.json pins **unknown**.
+> ... update the lockfile (or reset the clone to the pin), then re-run.
+
+That misreports an unreadable lockfile as a pin mismatch, and advises
+resetting the clone to a pin it could not read. So fixing `lockfile_pin()`
+restores the intended path on the check side, and leaves a second, separate
+defect on the generator side.
+
+(An earlier version of this ticket claimed both callers already handled
+`pin is None` correctly. That was asserted without reading the generator's
+branch and is wrong.)
 
 `json.JSONDecodeError` is a subclass of `ValueError`, so widening the except
 to `ValueError` does not fix this; the failure is an `AttributeError` at
@@ -90,3 +105,6 @@ future field read.
       still returns `None`.
 - [ ] `pnpm verify` on a lockfile containing `null` prints the intended
       could-not-read-the-pin message and exits non-zero, with no traceback.
+- [ ] The generator distinguishes an unreadable pin from a HEAD/pin mismatch,
+      rather than printing "pins unknown" and advising a reset to a pin it
+      could not read.

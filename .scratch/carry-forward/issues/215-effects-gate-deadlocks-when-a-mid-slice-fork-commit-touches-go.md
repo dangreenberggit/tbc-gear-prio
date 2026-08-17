@@ -1,7 +1,8 @@
 Status: open
 Type: defect (latent; the gate's instructions become unfollowable)
 Origin: adversarial review of ticket 213's fix, 2026-08-17
-Blocks: none today — dormant while fork slices stay TypeScript-only
+Blocks: none today — no current slice commits Go, but see the trigger note:
+an untracked .go file in the clone is enough
 Blocked by: none
 
 # The effects gate deadlocks if a mid-slice fork commit touches `sim/**/*.go`
@@ -40,7 +41,7 @@ only exits are to bump the pin early (which §9.1a assigns to the end of the
 slice, after the fork work merges) or to reset the clone (throwing away
 in-progress fork work).
 
-## Why it is dormant, not fixed
+## Why no current slice hits it
 
 Ticket 212 slices 3 and 4 are TypeScript-only — verified: `git -C
 vendor/tbc-new-fork diff --name-only 138fa77..5e26fa0 -- '*.go'` is empty for
@@ -49,16 +50,43 @@ the last five fork commits, and the engine port touches
 `sim/common/**/*_auto_gen.go` exclusively, so a TypeScript-only fork slice
 cannot move the id sets.
 
-Untested hypothesis: any future fork slice that touches Go — a sim fix, an
-upstream merge that brings Go changes, a new item effect — reaches this state
-on its first `pnpm verify`.
+Any future fork slice that touches Go — a sim fix, an upstream merge that
+brings Go changes, a new item effect — reaches this state on its first
+`pnpm verify`. So does a TypeScript-only slice with a stray untracked `.go`
+file in the clone, per the trigger note above.
 
-## Reproduce
+## Reproduced 2026-08-17 — observed, not derived
 
-Not reproduced. Constructing it means committing a Go change into the shared
-fork clone, which was out of scope for the review that found it. The
-mechanism is read off the two scripts, cited above. Treat the failure mode as
-**derived, not observed**.
+Reproduced in an isolated sandbox: copies of both scripts against a synthetic
+fork repo in a temp directory. The shared clone at `vendor/tbc-new-fork` was
+never touched, so this needs no access to it and can be re-run safely.
+
+Method: build a synthetic fork with a `sim/` tree, take a green baseline with
+HEAD equal to the pin, then commit a Go change so the clone sits one commit
+ahead.
+
+1. `pnpm sim-implemented-effects:check` → **exit 1**: "sim-implemented-effects.json
+   is stale against the fork's Go tree (fields differ:
+   `['implementedEffectItemIdsCount', 'implementedEffectItemIds']`). Re-run
+   `python scripts/generate_sim_implemented_effects.py` ..."
+2. Following that instruction → **exit 2**: "clone HEAD is `<ahead>` but
+   data/wowsims-fork.lock.json pins `<base>` ... update the lockfile (or reset
+   the clone to the pin), then re-run."
+
+No legal move was found. Neither script has a bypass flag; the check's message
+names only the generator and `assemble_universe.py`, which consumes the
+artifact rather than producing it; and the sibling
+`sim-implemented-effects-classifier:check` runs on synthetic in-line Go
+strings, so it is unaffected. The two exits named under "The stuck state"
+above are the only ones.
+
+## The trigger is wider than a Go *commit*
+
+The scan is of the **working tree**, not of git: `SIM_DIR.rglob("*.go")`. So an
+uncommitted or untracked `.go` file under `sim/` moves the id sets too. A fork
+slice that is TypeScript-only *in its commits* still reaches this state if a
+stray Go file is left in the clone — a scratch file, a half-finished
+experiment, an editor backup.
 
 ## Options (not decided)
 
@@ -81,6 +109,6 @@ mechanism is read off the two scripts, cited above. Treat the failure mode as
       either passes for a defensible reason or fails with a remedy the
       operator can actually carry out.
 - [ ] The chosen option is recorded here with its reasoning.
-- [ ] Reproduced first: construct the state deliberately (a throwaway Go file
-      in the clone plus an empty probe commit), record the observed output,
-      then fix. Restore the clone afterwards — it is shared.
+- [x] Reproduced first — done 2026-08-17 in an isolated sandbox (synthetic
+      fork repo in a temp directory; the shared clone was never touched).
+      Observed output recorded above.
