@@ -71,8 +71,9 @@ Same reproduce recipe, substituting `plausibility.ts` (14 code-diff lines).
 
 ## Audit of the other ported files
 
-All 33 engine files were diffed (comment- and blank-line-stripped) against
-their `packages/core/src/` sources. Divergence over 10 lines:
+Every ported engine file with a `packages/core/src/` counterpart (28 of the 33
+hashed entries; the rest have no core source) was diffed, comment- and
+blank-line-stripped. Divergence over 10 lines:
 
 | file | code-diff lines | PROVENANCE label |
 |---|---|---|
@@ -93,6 +94,11 @@ specific documented reason (Database-backed instead of JSON-backed, reuses the
 fork's own helpers, hand-written literals, and so on), so those divergences
 are intended. The two bolded rows are the only files claiming to be pure
 copies while differing in code, and both differ by exactly this one feature.
+
+Full breakdown of the 17 files labelled "none (import paths only)": 12 are
+byte-identical in code, 3 differ only by import lines, 2 differ by one or two
+incidental lines (`compose.ts` — the unported ticket-212 field — and `se.ts`,
+a type-export line), and these 2 are stale.
 
 That is the good news in this ticket: the port is not broadly rotten. One
 feature was missed, in the two files it touched.
