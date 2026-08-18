@@ -934,21 +934,26 @@ section; fork clone at `1dddd77c9`.
 Nothing in this run resembles "sims that finish in seconds outside the browser
 do not finish in minutes inside it" — that claim is not reproducing.
 
-**Do not read the 0.44x as "the browser is faster than the CLI."** The CLI is
-expected to be the faster path, so a ratio below 1.0 is a signal the
-comparison is wrong, not a win. The likeliest reason is the scaling: the Node
-reference is one 14.7 s run at 5,000 iterations, and dividing it by 5/3
-assumes per-sim fixed overhead is zero. Any real startup cost (process spawn,
-WASM instantiate, DB marshalling) inflates the scaled 3,000-iteration figure,
-so 8.8 s is an upper bound rather than a like-for-like number. The browser
-also amortises its WASM instantiation across the whole pool, where a
-per-candidate CLI invocation would not.
+**Do not read the 0.44x as a browser-vs-CLI result in either direction.**
+It is not a matched comparison and cannot settle which path is faster.
 
-What the ratio does support is the negative claim: browser throughput is in
-the same order of magnitude as native, not the order-of-magnitude-worse this
-ticket was opened for. Establishing the true browser-vs-CLI ratio needs a
-matched comparison — same iteration count, same item, per-sim timings on both
-sides — which this run did not do.
+Two things are in tension and neither is established here:
+
+- There is a general expectation that the native CLI should be the faster
+  path. Recorded as an expectation, not a measurement — nobody has produced
+  a matched number for it in this repo, and the reason it would hold has not
+  been articulated.
+- This run's arithmetic points the other way, but its baseline is weak: the
+  Node reference is a *single* 14.7 s run at 5,000 iterations, scaled to
+  3,000 by dividing by 5/3. That assumes per-sim fixed overhead is zero. Any
+  real startup cost (process spawn, WASM instantiate, DB marshalling) makes
+  8.8 s an overestimate, and the browser amortises WASM instantiation across
+  the whole pool where per-candidate CLI invocations would not.
+
+So the ratio is unresolved and should not be quoted. What this run *does*
+support is the narrower negative claim this ticket actually needs: browser
+throughput is in the same order of magnitude as native, not the
+order-of-magnitude-worse the ticket was opened for.
 
 **What this does and does not establish.**
 
@@ -985,9 +990,9 @@ candidate ranking could not work at all.
 - A 5,000-iteration run, the second half of plan §8's ask.
 - A **matched** browser-vs-CLI comparison if the ratio itself matters: same
   item, same iteration count, per-sim timings on both sides, so the CLI
-  reference is not a linearly-scaled single run. The CLI is expected to be
-  the faster path; the 0.44x above almost certainly reflects the scaling
-  assumption rather than a real browser advantage.
+  reference is not a linearly-scaled single run. Worth doing precisely
+  because the expectation (CLI faster) and this run's arithmetic (browser
+  faster) disagree, and neither is currently established.
 - If the *cause* matters rather than just the budget: one dev-server run for
   comparison, to isolate which of the three changes (production build, worker
   bundles, ticket 212's fix) was responsible.
