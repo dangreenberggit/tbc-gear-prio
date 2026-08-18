@@ -47,7 +47,7 @@ On the P2 pool, racing now performs **98% of the work a full sweep would**.
 The screening shortcut has very nearly stopped being a shortcut there. §6.4's
 stated target was <= 0.4.
 
-## The measured reason, which is sharper than "the budget is too big"
+## What the fixture shows
 
 The user pressed the point that matters: if we re-check 150 candidates and a
 genuine upgrade **still** misses the list, the ranking that produced those 150
@@ -72,15 +72,19 @@ DPS**. So at any rank in this region, **~80 items are statistically tied**, and
 the entire span from the last real upgrade (86) to the shipped budget (210) is
 **under three noise-widths**.
 
-**The screening ranking near the cutoff is close to meaningless.** Raising K
-from 150 to 210 does not make it more accurate; it widens the net over a region
-the measurement cannot order. That is why the fix worked empirically and why it
-should not be trusted as a principle — the same noise that pushed an item past
-150 can push one past 210, and only luck over 30 draws says otherwise.
+Raising K from 150 to 210 did not make the ranking more accurate; it widened
+the net over a region the measurement cannot order. The fix works empirically —
+zero misses over 30 draws — but the sweep cannot say whether 210 has margin or
+is one unlucky draw from failing.
+
+**What is NOT established here:** whether any of this matters to output quality.
+If the items packed near the cutoff are genuinely interchangeable — as ticket
+222 found the trinkets to be — then a screen that cannot order them is behaving
+correctly, and the only real defect is presenting them as if it had. Nobody has
+looked at what those items actually are. That check is cheap and should come
+before any redesign.
 
 ## The cutoff is smaller than the noise that decides it
-
-Worse, and this is the root:
 
 ```
 feral cutoff (cutoff.ts:27 CUTOFF_FERAL.absDps):  3.6 DPS
@@ -96,9 +100,10 @@ clearly above cutoff (delta > cut + 1 SE):   45
 within +/-1 SE of the cutoff (undecidable):  77
 ```
 
-So "86 upgrades" is really **~45 solid upgrades and a large undecidable band**.
-Screening cannot classify the band, at any budget, because the question is finer
-than the instrument. Every figure in the two blocks above is reproduced by:
+So "86 upgrades" is **~45 solid upgrades plus 77 rows inside one error bar of
+the line**. Screening cannot classify that band at any budget, because the
+question is finer than the instrument. Whether the band deserves classifying is
+the open question above. Every figure in the two blocks above is reproduced by:
 
 ```
 node .scratch/carry-forward/probes/225-cutoff-density.mjs
@@ -165,6 +170,12 @@ problem with extra steps.
 
 ## Acceptance criteria
 
+- [ ] **First, the cheap check:** look at what the 77 items inside the cutoff's
+      error bar actually are. If they are interchangeable in the way ticket
+      222's trinkets were, this ticket may reduce to a presentation problem
+      (ticket 224) and no budget redesign is warranted. Do this before anything
+      below — it is one query against the fixture plus a look at the item list,
+      and it decides whether the rest of this ticket is worth doing.
 - [ ] **A stated recall target**: what fraction of above-cutoff items must
       survive screening, at what probability. This is the criterion everything
       else depends on, and it does not currently exist anywhere in the repo.
