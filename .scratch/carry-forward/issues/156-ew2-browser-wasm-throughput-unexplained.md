@@ -3,7 +3,8 @@ Type: measurement blocked (unexplained performance)
 Origin: slice 3 + orchestrator follow-up, 2026-08-14
 (`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
-Blocked by: ticket 212 (compose() omits the SimDatabase)
+Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3); see the
+production-build measurement below. Remaining: a 5,000-iteration run.
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
 
@@ -908,3 +909,85 @@ with different costs, one on the hot screening path). Ticket 212 carries the
 diagnosis, the options and the acceptance criteria. **156 is blocked on 212**
 - until candidate sims stop panicking there is nothing to time, and every
 previous browser run must be treated as never having simmed a candidate.
+
+## The slowness did not reproduce on a production build, 2026-08-17
+
+Ticket 212's slice-5 acceptance run incidentally tested this ticket's **first
+untested candidate** — "the vite dev server serving unbundled ES modules to
+the worker; a production build may behave differently". It behaves
+differently.
+
+The run was a served production build (`npx tsx vite.build-workers.mts` then
+`npx vite build`, served from `dist/` by `http-server`, **not** the dev
+server), retribution paladin, Upgrades tab, 3,000 iterations, screening on,
+pool "all 240 eligible". Full record and commands in ticket 212's slice-5
+section; fork clone at `1dddd77c9`.
+
+| Measure | Value |
+| --- | --- |
+| Whole run: 240 screened + 187 full sims | **~16 min** wall clock |
+| Full sims observed 5/187 -> 174/187 | 169 sims in ~11 min |
+| **Per candidate @3,000 iterations** | **~3.9 s** |
+| Node harness reference, 14.7 s @5,000, scaled to 3,000 | 8.8 s |
+| Browser / Node ratio | **~0.44x** — the browser was *faster* |
+
+Nothing in this run resembles "sims that finish in seconds outside the browser
+do not finish in minutes inside it" — that claim is not reproducing.
+
+**Do not read the 0.44x as "the browser is faster than the CLI."** The CLI is
+expected to be the faster path, so a ratio below 1.0 is a signal the
+comparison is wrong, not a win. The likeliest reason is the scaling: the Node
+reference is one 14.7 s run at 5,000 iterations, and dividing it by 5/3
+assumes per-sim fixed overhead is zero. Any real startup cost (process spawn,
+WASM instantiate, DB marshalling) inflates the scaled 3,000-iteration figure,
+so 8.8 s is an upper bound rather than a like-for-like number. The browser
+also amortises its WASM instantiation across the whole pool, where a
+per-candidate CLI invocation would not.
+
+What the ratio does support is the negative claim: browser throughput is in
+the same order of magnitude as native, not the order-of-magnitude-worse this
+ticket was opened for. Establishing the true browser-vs-CLI ratio needs a
+matched comparison — same iteration count, same item, per-sim timings on both
+sides — which this run did not do.
+
+**What this does and does not establish.**
+
+Established: on a production build, with the worker bundles present, browser
+throughput at 3,000 iterations is ~3.9 s per candidate on this machine, and a
+240-candidate pool ranks end to end in about a quarter of an hour.
+
+Not established, and deliberately not claimed:
+
+- **Which change fixed it.** Three things differ from the original
+  observation: the production build vs the dev server, the worker bundles now
+  being built (this ticket records that fix), and ticket 212's fix, without
+  which every candidate panicked before doing any real work. The dev server
+  was not re-run for comparison, so the production-build hypothesis is
+  *consistent with* this result but not isolated by it. Untested.
+- **The 5,000-iteration figure** plan §8's E-W2 also asks for. This run was
+  3,000 only.
+- **Upstream's own Simulate button**, the original 93-second observation, was
+  not re-run on the production build.
+
+**Timing caveat.** These numbers come from DOM progress reads taken between
+long waits outside the browser, not from instrumentation. The per-candidate
+figure is derived from two progress samples (5/187 at ~4 min, 174/187 at ~15
+min), so treat it as ~±10%, good enough to refute a claimed order-of-magnitude
+slowdown but not as a precise budget.
+
+**Re-baseline note.** Every measurement in this ticket taken before 2026-08-17
+predates ticket 212's fix, so no earlier browser run ever completed a
+candidate sim. The table at the top of this ticket describes a build where
+candidate ranking could not work at all.
+
+**What remains for E-W2 to close:**
+
+- A 5,000-iteration run, the second half of plan §8's ask.
+- A **matched** browser-vs-CLI comparison if the ratio itself matters: same
+  item, same iteration count, per-sim timings on both sides, so the CLI
+  reference is not a linearly-scaled single run. The CLI is expected to be
+  the faster path; the 0.44x above almost certainly reflects the scaling
+  assumption rather than a real browser advantage.
+- If the *cause* matters rather than just the budget: one dev-server run for
+  comparison, to isolate which of the three changes (production build, worker
+  bundles, ticket 212's fix) was responsible.
