@@ -52,6 +52,7 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -111,15 +112,18 @@ STUB_ITEM_LINE_RE = re.compile(
 )
 
 
-def active_item_ids(go_files: list[Path]) -> set[int]:
+def active_item_ids_from_texts(texts: Iterable[str]) -> set[int]:
     ids: set[int] = set()
-    for path in go_files:
-        text = path.read_text(encoding="utf-8")
+    for text in texts:
         for m in ACTIVE_CALL_RE.finditer(text):
             ids.add(int(m.group(1)))
         for m in ACTIVE_STRUCT_LITERAL_RE.finditer(text):
             ids.add(int(m.group(1)))
     return ids
+
+
+def active_item_ids(go_files: list[Path]) -> set[int]:
+    return active_item_ids_from_texts(p.read_text(encoding="utf-8") for p in go_files)
 
 
 def stub_only_candidates(auto_gen_files: list[Path]) -> dict[int, str]:
@@ -132,9 +136,14 @@ def stub_only_candidates(auto_gen_files: list[Path]) -> dict[int, str]:
     `// TODO: Manual implementation required` and runs until the next
     occurrence of that same marker or end of file.
     """
+    return stub_only_candidates_from_texts(
+        p.read_text(encoding="utf-8") for p in auto_gen_files
+    )
+
+
+def stub_only_candidates_from_texts(texts: Iterable[str]) -> dict[int, str]:
     out: dict[int, str] = {}
-    for path in auto_gen_files:
-        text = path.read_text(encoding="utf-8")
+    for text in texts:
         if STUB_MARKER not in text:
             continue
         blocks = text.split(STUB_MARKER)[1:]  # first split chunk precedes any stub
