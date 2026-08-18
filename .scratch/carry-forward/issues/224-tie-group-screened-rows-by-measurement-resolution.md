@@ -1,5 +1,6 @@
 Status: open
 Type: task (presentation; no ranking-logic defect)
+Supersedes-framing: user challenge 2026-08-18 — see "The user's framing" below
 Origin: `sme-rank-review` verdict during ticket 222, 2026-08-18 — verdict
   `trust-with-caveats`, handoff at
   `.scratch/handoffs/sme-rank-judgment-ticket-222-within-slot-ordering.md`
@@ -58,25 +59,56 @@ The stated risk is spillover: a user who sees an overconfident trinket list and
 later learns those items were indistinguishable discounts the whole tool,
 including the weapon slot where the ordering is genuinely excellent.
 
+## The user's framing, which supersedes the SME's suggested fix
+
+The SME proposed grouping tied rows instead of ordering them. The user, on
+seeing that, made the sharper point (2026-08-18):
+
+> if there's some option to show those at all, you're right that there's no
+> point ordering them and they can just be shown in a little list. but probably
+> not even then if they weren't important enough to make even the top 150+ of
+> upgrade options
+
+That reframes the ticket. These rows did not merely tie with each other — they
+**failed to make the promotion budget at all**, out of a 398-candidate pool
+where only 86 clear the upgrade cutoff. The question is not "how do we order
+rows nobody should act on" but **"why are we showing them at all"**.
+
+This is the cheaper fix and the more honest one: a row that is both
+un-promoted and below cutoff is not decision-relevant, and an ordered list of
+such rows manufactures a distinction the data cannot support.
+
 ## The proposed change
 
-Group ties by the **measurement's own resolution** rather than by exact
-equality, and mark such slots as tied sets rather than ordered lists.
+Preferred: **do not present un-promoted, below-cutoff rows as a ranked list at
+all.** Options in descending order of preference —
 
-Per the SME, this needs **no reordering, no extra iterations, and no row
-removal** — the per-candidate screening SE is already known (mean 5.128 DPS at
-1,000 iterations; pairwise scale √2·SE = 7.25 DPS, measured in ticket 222).
+1. Omit them from the default view entirely, behind a disclosure ("show the
+   items that were ruled out") if they are wanted for debugging.
+2. If shown, render them as an **unordered** set with no positions and no
+   implied precedence.
+3. Only if 1 and 2 are rejected: the SME's original suggestion — group ties by
+   the measurement's own resolution and mark such slots as tied sets.
+
+Any of these needs **no reordering, no extra iterations, and no re-simulation**
+— the per-candidate screening SE is already known (mean 5.128 DPS at 1,000
+iterations; pairwise scale √2·SE = 7.25 DPS, measured in ticket 222).
+
+**Keep the development value.** The ordering has been useful for engineering
+(it is how ticket 222 measured anything at all), so whatever the user-facing
+view does, the underlying data should stay available to the measurement scripts
+and to any debug view.
 
 ## Acceptance criteria
 
-- [ ] Tie grouping for screened rows keys off the measurement's resolution
-      (per-candidate SE) rather than exact delta equality, in both `rank.ts` and
-      the view layer, which currently mirror each other.
-- [ ] A slot whose screened rows are all within the noise band renders as a
-      tied set rather than a numbered order, so it cannot be read as a ranking.
-- [ ] The feral Phase 3 trinket slot (0 of 66 resolvable pairs) is verified to
-      render as a tied set, and the weapon slot (2,751 resolvable pairs, 0.4%
-      inversion) is verified to keep its ordering.
+- [ ] Un-promoted, below-cutoff rows are no longer presented to the user as an
+      ordered list — omitted, disclosed, or unordered per the options above.
+      A decision among the three is recorded with its reason.
+- [ ] The underlying ordering remains available to measurement scripts and any
+      debug view, so engineering does not lose what ticket 222 relied on.
+- [ ] The feral Phase 3 trinket slot (0 of 66 resolvable pairs) no longer
+      reads as a ranking, and the weapon slot (2,751 resolvable pairs, 0.4%
+      inversion) keeps its ordering — promoted rows are unaffected throughout.
 - [ ] `sme-rank-review` judges the revised presentation, and its verdict is
       recorded here.
 - [ ] `pnpm verify` green.
@@ -89,5 +121,6 @@ removal** — the per-candidate screening SE is already known (mean 5.128 DPS at
   for a defaults change.
 - Re-measuring the ordering. Ticket 222 did that; this ticket consumes its
   numbers.
-- Dropping screened rows from the output. They are informative; the issue is
-  the ordering they are presented in, not their presence.
+- Changing which rows the *engine* produces. This ticket is about what the
+  user-facing view presents; the rows stay in the data for measurement and
+  debug use either way.

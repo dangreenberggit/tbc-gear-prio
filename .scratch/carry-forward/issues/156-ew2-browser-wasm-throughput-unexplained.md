@@ -215,11 +215,13 @@ still owns.
 
 **Acceptance, restated**
 
-- [ ] The table above, filled, three runs per cell, with worker count,
-      concurrency and machine.
-- [ ] Foregrounded-tab status stated explicitly either way.
-- [ ] The run-to-run variance explained, or recorded as unexplained with the
-      spread quoted.
+- [x] The table above, filled, three runs per cell, with worker count,
+      concurrency and machine. **Done 2026-08-18 — see Resolution below.**
+- [x] Foregrounded-tab status stated explicitly either way. **`visible` and
+      focused on every run, with zero visibility changes recorded per run.**
+- [x] The run-to-run variance explained, or recorded as unexplained with the
+      spread quoted. **3.6% at 3,000 and 1.3% at 5,000; the old large spread
+      was an artefact of the non-compositing surface — see Resolution.**
 
 ### 2026-08-16 (candidate-pool session) - blocker re-confirmed, table not attempted
 
@@ -1259,3 +1261,78 @@ Checking AC2 does not close this ticket. Still unchecked:
   above supersedes in substance but which is not itself checked off.
 
 Status stays **open** for those.
+
+
+## Resolution — 2026-08-18, E-W2 table measured
+
+Surface: **Brave, tab manually fronted by the user**, driven through the Claude
+in Chrome extension. Production build served from `vendor/tbc-new-fork/dist`
+(not the dev server — AC3 recorded prod vs dev as a real difference). Druid
+feral cat, Candidates=20, four runs per cell with the first discarded.
+
+Full run log, traps, and the working server recipe:
+`.scratch/stage-gate/ticket-156-ew2-table/` (`run-log.md`, `prep-notes.md`,
+`protocol.md`, `harness.js`).
+
+### The table
+
+| Iterations | Runs (s) | Mean (s) | Spread | Screening (s) | Full sims (s) |
+| --- | --- | --- | --- | --- | --- |
+| 3,000 | 330.4 / 338.9 / 342.5 | **337.3** | 12.1 s = 3.6% | 207.2 | 130.1 |
+| 5,000 | 460.3 / 461.9 / 456.1 | **459.4** | 5.8 s = 1.3% | 243.9 | 215.5 |
+
+`hardwareConcurrency` = **20** on every run, recorded per run because this
+machine has reported 3, 6 and 20 across sessions and figures are not comparable
+without it. Every run: `visibilityState: visible`, focused, zero visibility
+changes, completed on its own (`button re-enabled`), 34 rows landed.
+
+### Variance: the old spread was a measurement artefact
+
+The 2026-08-14 figures swung 5.3 s -> 12.1 s per candidate. Those were taken on
+the Claude Code Browser pane, which cannot composite and reports
+`visibilityState: hidden`. On a genuinely foregrounded tab the spread is 3.6%
+and 1.3%. **The variance was a property of the measuring surface, not of the
+browser WASM engine.** No further explanation is owed.
+
+### Full-sim cost is linear in iterations
+
+130.1 s -> 215.5 s is **1.657x** for a 1.667x iteration increase — linear to
+within 0.6%. No throughput cliff at 5,000 and no fixed per-run penalty.
+
+### Warning for D7: do not use the totals
+
+End-to-end time rises only **1.362x** (337.3 -> 459.4 s) because the fixed
+screening pass dilutes the change. The part that actually scales rises 1.657x.
+A D7 decision taken from the totals would understate the cost of raising
+iterations by roughly half, and the totals are specific to this pool's
+screening/full-sim mix — they shift with pool size and promotion budget.
+
+### Open, minor: screening costs ~37 s more in the 5,000 cell
+
+Screening runs at a fixed 1,000 iterations regardless of the cell's setting
+(`packages/core/src/rank.ts:867`), so it should cost the same in both. Measured:
+207.2 s vs 243.9 s, consistent across all three runs in each cell. **Cause
+untested** — plausibly worker-pool sizing or per-candidate setup scaling with
+the configured count, but nothing was investigated. Recorded as an observation,
+not an explanation.
+
+### Traps found in this ticket's own recipe (all now documented)
+
+1. The prescribed engine-loaded check —
+   `performance.getEntriesByType('resource').filter(r => /\.wasm$/...)` — reads
+   **0 on a real engine run**, because the sim workers fetch `lib.wasm` and
+   main-thread Resource Timing does not see worker fetches. Confirmed against
+   the http-server access log, which showed nine `GET /tbc/lib.wasm` from Chrome
+   during a run the check called engine-less. **Use the server log.**
+2. `Candidates=N` caps **full sims**, not screening (`rank.ts:1395-1398`), and
+   the cap admits equipped items regardless (`|| equippedIds.has(...)`). A cell
+   is one screening pass over all 246 eligible plus ~N+equipped full sims;
+   `Screening 1/246` alongside `Candidates=20` is correct behaviour.
+3. Setting the inputs in the same tick as the tab click loses the write to the
+   tab's own re-render. Open the tab, wait, then set values in a separate call
+   and read them back before starting.
+4. A completion detector that treats "run button not disabled" as finished fires
+   on the pre-run state (observed: a 43 ms "run"). Latch on the button going
+   disabled first.
+5. A finished run replaces the controls with a results view, so runs need a page
+   reload between them.
