@@ -22,6 +22,22 @@ high confidence.
 What it does not discriminate is a failure that only a longer run would
 reach.
 
+## Where this work happens
+
+Two repos are involved; be explicit about which is which.
+
+- **The build and the run** happen in the **fork clone**,
+  `vendor/tbc-new-fork` (a separate git repo, gitignored by the parent, its
+  own remote `github.com/dangreenberggit/tbc-new`), on `feat/upgrades-tab`.
+  Nothing here needs a fork commit: building `dist/` and serving it changes
+  no tracked file. If a fix *is* needed, that is a fork change and follows
+  §9.1a (fork commit -> E-W3 green -> PROVENANCE re-hash -> drift check),
+  with the lockfile pin bumped from the parent repo afterwards.
+- **The evidence** is recorded in **this repo**,
+  `C:/Users/dgree/Code/lulz/tbc-gear-prio`, on the feature branch in play
+  (`feat/candidate-pool` at the time of writing), by editing this ticket and
+  ticket 156.
+
 ## What a full pass could still surface
 
 Hypotheses, untested — each is a reason a partial run could read clean while

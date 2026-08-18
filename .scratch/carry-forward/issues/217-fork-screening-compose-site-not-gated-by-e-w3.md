@@ -12,6 +12,22 @@ composed request carries a sim database describing its own equipment. It
 cannot check that for the fork's **screening** compose site, because it never
 runs screening at all.
 
+
+## Where this work happens
+
+**Primarily this repo** (`C:/Users/dgree/Code/lulz/tbc-gear-prio`), on the
+feature branch in play (`feat/candidate-pool` at the time of writing): the
+gate is `packages/core/test/wowsims-fork-parity.test.ts`, a parent-repo test.
+Extending it needs no fork commit and §9.1a does not apply.
+
+The fork clone (`vendor/tbc-new-fork`, `feat/upgrades-tab`) is involved only
+as the thing under test — E-W3 imports its engine sources at runtime. If the
+investigation concludes the fork's adapted `promotion.ts` must change so the
+two engines can be compared under `fullPool: false`, *that* is a fork change
+and follows §9.1a (fork commit -> E-W3 green -> PROVENANCE re-hash -> drift
+check), with the lockfile pin bumped from this repo afterwards. Deciding
+whether to touch it at all is the design question this ticket names.
+
 ## The fact
 
 The fork's `rank.ts` has four compose sites, all now routed through one

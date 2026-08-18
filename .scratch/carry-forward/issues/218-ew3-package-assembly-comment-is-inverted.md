@@ -52,6 +52,15 @@ internally (stage-gate finding F5), and the answer was "not here, not yet".
 Deliberately left unfixed by ticket 212 slice 3: that slice froze the harness
 so a fixture change could not be confused with the port it was gating.
 
+## Where this work happens
+
+**This repo only** (`C:/Users/dgree/Code/lulz/tbc-gear-prio`), on the feature
+branch in play (`feat/candidate-pool` at the time of writing). The file is
+`packages/core/test/wowsims-fork-parity.test.ts` — a parent-repo test, not a
+ported engine file, so no fork commit, no PROVENANCE re-hash, and §9.1a does
+not apply. E-W3 imports the fork's sources at runtime but nothing in the fork
+clone changes.
+
 ## Options
 
 1. Reverse the fixture to head-then-shoulder and correct the comment. Lowest
