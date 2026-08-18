@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: defect (ported engine is stale; browser output differs from core)
 Origin: ticket 212 slice 3 pre-flight investigation, 2026-08-16
 Blocks: none
@@ -166,13 +166,105 @@ point at from different directions.
 
 ## Acceptance criteria
 
-- [ ] The fork's `dead-slots.ts` carries the `worn-unrankable` cause, type,
+- [x] The fork's `dead-slots.ts` carries the `worn-unrankable` cause, type,
       option, emit loop and suppression guard.
-- [ ] The fork's `plausibility.ts` carries the cause entry, the warning
+- [x] The fork's `plausibility.ts` carries the cause entry, the warning
       branch and the `wornUnrankable` pass-through.
-- [ ] A comment-stripped diff of both files against their
+- [x] A comment-stripped diff of both files against their
       `packages/core/src/` sources shows no code divergence.
-- [ ] E-W3 re-run green *before* the PROVENANCE hashes are updated (§9.1a).
+- [x] E-W3 re-run green *before* the PROVENANCE hashes are updated (§9.1a).
 - [x] Every other ported file audited the same way — done 2026-08-16, table
       above; recomputed and corrected 2026-08-17 after review found the
       counts wrong. Only these two files diverge without an "adapted" label.
+
+## Comments
+
+### 2026-08-17 — ported; fork commit `4018f9b`, pin bumped in the main repo
+
+Two-repo change. Fork commit `4018f9bf8ea1afa885f9fe3c3735db3286c670e7` on
+`feat/upgrades-tab` in `vendor/tbc-new-fork`; the main-repo commit on
+`feat/candidate-pool` carries the lockfile pin bump, the regenerated effects
+artifact and this ticket edit. **Neither repo was pushed** and `pushed` stays
+`false` in `data/wowsims-fork.lock.json`.
+
+Ported into `dead-slots.ts`: the `"worn-unrankable"` cause-union member, the
+`WornUnrankableItem` type, the `wornUnrankable?` option field, the emit loop,
+and the `if (unrankableSlots.has(slot)) continue;` guard. Into
+`plausibility.ts`: the cause entry in `WARNED_DEAD_SLOT_CAUSES`, the warning
+branch, and the `wornUnrankable` pass-through into `deadSlotWarnings`. Core's
+explanatory comments were **not** carried across — the fork's copies
+deliberately strip them (its header says "PORTED ... unchanged except for the
+import path"), so adding them would have been a new divergence.
+
+Divergence, by the ticket's own strip/diff recipe, before and after:
+
+```
+$ strip() { grep -vE '^\s*(//|/\*|\*|$)' "$1" | sed 's#\s*//.*##'; }
+$ diff <(strip packages/core/src/$f.ts) <(strip $E/$f.ts) | grep -cE '^[<>]'
+
+              before   after
+dead-slots.ts     25       0
+plausibility.ts   14       0
+```
+
+Note the reproduce block in the ticket body says "30 diff lines" for
+`dead-slots.ts` inline while the summary table says 25. Measured: **25**. The
+table was right; the inline number was stale.
+
+**Work order followed** (§9.1a, as derived from the ticket bodies): port →
+E-W3 green → PROVENANCE hashes → drift check → fork commit → pin bump from the
+main repo last.
+
+E-W3 green **before** the PROVENANCE hashes were touched, and again after:
+
+```
+$ npx vitest run packages/core/test/wowsims-fork-parity.test.ts
+ Tests  2 passed | 1 skipped (3)
+```
+
+Fork typecheck shows 45 `error TS` lines both with and without this change
+(`npx tsc --noEmit -p vendor/tbc-new-fork/tsconfig.json`, measured by stashing
+the change and re-running) — pre-existing JSX-factory noise in unrelated
+`.tsx` files, none of it in either ported file.
+
+PROVENANCE: the two rows got new sha256 hashes (raw on-disk bytes — this clone
+is `core.autocrlf=true`, so the hash is over CRLF bytes) plus a note that they
+trace to core `2e6b257`, not the table's header commit. The drift check
+re-derives them:
+
+```
+$ python scripts/check_engine_port_drift.py
+engine port drift check ok: 33 ported files match PROVENANCE.md
+```
+
+**The table's header commit is stale for every row, not just these two.** Not
+fixed here: re-baselining would assert a fresh comparison for 31 rows nobody
+re-verified this round. Recorded as a note in `PROVENANCE.md` and left as an
+open observation, per the ticket's "decide whether to re-baseline" question —
+the answer taken was "record per-file source commits".
+
+**The pin bump needs the artifact regenerated in the same commit.** Bumping
+`commit` alone leaves `data/sim-implemented-effects.json` stale on its
+`forkCommit` field, which the check compares against the pin:
+
+```
+$ python scripts/check_sim_implemented_effects.py      # pin bumped, artifact not yet regenerated
+data\sim-implemented-effects.json is stale against the fork's Go tree
+(fields differ: ['forkCommit'])                        # EXIT=1
+
+$ python scripts/generate_sim_implemented_effects.py
+wrote data\sim-implemented-effects.json -- 215 implemented, 460 stub-only
+(fork commit 4018f9bf8ea1afa885f9fe3c3735db3286c670e7)
+
+$ git diff data/sim-implemented-effects.json           # only the one field moved
+-  "forkCommit": "1dddd77c91698c19a06a5683f0b41ca9f7a4be28",
++  "forkCommit": "4018f9bf8ea1afa885f9fe3c3735db3286c670e7",
+```
+
+Only `forkCommit` changed, so the id sets did not move — expected for a
+TypeScript-only fork commit — and `scripts/assemble_universe.py` did **not**
+need re-running. `pnpm verify` green at this commit: 46 test files, 836 passed.
+
+The Impact section's hypothesis above is still **untested**: nothing here
+confirms the browser's rendering of a worn-unrankable slot. That needs a
+served-build run against this specific behaviour, which this round did not do.
