@@ -129,7 +129,15 @@ const eligibleCount = pool.length;
 const fullIterationRuns = sim.runsByIterations.get(recorded.iterations) ?? 0;
 const screeningRuns = sim.runsByIterations.get(DEFAULT_SCREEN_ITERATIONS) ?? 0;
 const ratio = fullIterationRuns / eligibleCount;
-const aboveCutoff = ranking.items.filter((i) => !i.belowCutoff).length;
+// `belowCutoff` is false on screened rows by design (rank.ts's `screened`
+// doc: a screened row is a third view state, "never measured at full
+// precision", not "measured and small"), so `!belowCutoff` alone counts all
+// 30 screened losses as upgrades. view.ts's `belowCutoffUnderView` answers
+// the game-facing question by treating any screened row as below cutoff;
+// this mirrors that rule rather than the raw field.
+const aboveCutoff = ranking.items.filter(
+  (i) => !i.belowCutoff && i.screened === undefined
+).length;
 const screenedOut = ranking.items.filter(
   (i) => i.screened !== undefined
 ).length;
@@ -145,8 +153,10 @@ console.log(`ratio: ${ratio.toFixed(4)}`);
 
 // A printed ratio is only evidence if the counts behind it are sane: one
 // baseline sim plus at least one full sim per promoted candidate is the
-// floor (paired-slot items can add more), and a racing pass that issued as
-// many full sims as there are eligible candidates did no racing at all.
+// floor (paired-slot items can add more). The upper check is weak on
+// purpose — it catches only "no racing happened at all", not "racing
+// achieved anything worthwhile"; a ratio just under 1.0 passes it and is
+// still a near-total sweep, which is exactly what 0.9708 reports.
 if (fullIterationRuns < promoted + 1) {
   throw new Error(
     `full-iteration sims (${fullIterationRuns}) below the baseline-plus-promoted floor (${promoted + 1})`

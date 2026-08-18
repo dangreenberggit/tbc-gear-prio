@@ -435,11 +435,14 @@ defined once in `packages/core/src/promotion.ts`
 (`DEFAULT_SCREEN_ITERATIONS`, `DEFAULT_PROMOTE_TOP_K`); full reasoning is on
 `RankInput.screenIterations`/`promoteTopK` in `packages/core/src/rank.ts`.
 
-**Ratio: 0.7042** (169 full-iteration sims of 240 eligible), measured with
-`npx tsx packages/core/test/measure-racing-ratio.ts` at `promoteTopK = 150`
-— **above the ≤ 0.4 target, not below it.** At the shipped `K = 210` the
-same command reports 0.9708 (233 of 240; ticket 223), further above the
-target: raising K promotes more of the pool, so the ratio can only rise. The mechanism is direct: `promoteTopK = 150` on a
+**Ratio: 0.7042** (169 full-iteration sims of 240 eligible) — **above the
+≤ 0.4 target, not below it.** This is a historical figure measured at
+`promoteTopK = 150`, and `npx tsx packages/core/test/measure-racing-ratio.ts`
+as shipped does not reproduce it: the script ranks at the current default
+`K = 210` and takes no K override, so re-running it reports 0.9708 (233 of
+240; ticket 223) rather than 0.7042. Reproducing the older figure needs an
+edit to the script or a `promoteTopK: 150` override threaded into its
+`rankUpgrades` call. The mechanism is direct: `promoteTopK = 150` on a
 240-candidate pool promotes roughly `150/240 ≈ 0.625` of the pool from
 top-K alone, before best-in-slot, set-package and owned add anything, and
 `promoteTopK` cannot be lowered without reopening the recall miss above —
@@ -502,9 +505,10 @@ at 5000 iterations**. At the 3000 the browser actually ships, racing at
 shipped defaults is a _loss_. Racing pays only when the promoted ratio falls
 below `1 - (screens/eligible) * cost(screenIters)/cost(fullIters)` -- 0.571
 at 3000 iterations, 0.735 at 5000 -- and the measured ratio is 0.7042 at
-`promoteTopK = 150`, or 0.9708 at the shipped `K = 210` (ticket 223). Both
-sit above the 0.571 break-even, and the K=210 figure sits further above it,
-so the conclusion below strengthens rather than softens at shipped defaults.
+`promoteTopK = 150` (a historical figure; see the note above on why the
+shipped command does not reproduce it), or 0.9708 at the shipped `K = 210`
+(ticket 223). Both sit above the 0.571 break-even, and the K=210 figure sits
+further above it, so the conclusion below holds at shipped defaults.
 
 Neither the ratio target nor the racing win survives this fixture at 3000
 iterations. Options remaining, none built: raise the browser default to 5000

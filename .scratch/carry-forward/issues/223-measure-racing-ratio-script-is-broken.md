@@ -71,7 +71,7 @@ full-iteration sims issued: 233
 screening sims issued: 264
 promoted rows: 210
 screened-out rows: 30
-above-cutoff rows: 78
+above-cutoff rows: 48
 ratio: 0.9708
 ```
 
@@ -79,13 +79,60 @@ Checks: 233 / 240 = 0.970833..., which is the printed 0.9708 to 4 dp; the
 script did not throw, so 233 >= 210 + 1 and 233 < 240 both hold; two runs
 redirected to files diff empty.
 
+`above-cutoff rows` counts 48, not the 78 first recorded here. See "The
+above-cutoff count was wrong" below; the ratio is unaffected.
+
 This is the **ret** P2 tuning pool at the shipped `DEFAULT_PROMOTE_TOP_K = 210`.
 It corroborates rather than contradicts the feral figures the `promoteTopJ`
 comment records: feral P2 is 0.9837 at the same K, and 0.9708 sits 1.3 points
-from it. Two independent P2 pools now say the same thing — at K=210 racing
-barely beats a full sweep, because K admits nearly every eligible candidate.
+from it. Both are **P2 pre-raid** pools, and the agreement is scoped to that
+tier: a pre-raid pool is shallow and flat, the character owns few good items,
+so K=210 admits nearly every eligible candidate. The one P3 figure on record
+(feral P3, 0.6457) is materially lower, where racing does real work. Do not
+read "racing barely beats a full sweep" as a claim about P3.
+
 The earlier 0.7042 in candidate-pool.md was measured at K=150 and is not
-comparable to either.
+comparable to either; the script as shipped takes no K override, so it cannot
+reproduce that figure without an edit.
+
+### SME notes carried forward
+
+From `.scratch/handoffs/sme-rank-judgment-ticket-223-ret-p2.md`
+(verdict: trust-with-caveats; the 30 screened-out rows are all genuine deep
+losses, -44.9 to -81.3 DPS, wrong armour class or healer/caster plate):
+
+- **Furious Gizmatic Goggles at rank 7 (+23.3)** assumes the fixture ret has
+  engineering. Goggles are profession-locked; if the fixture character is not
+  an engineer the row is unwearable and should not rank. **Unverified** — nobody
+  has checked the fixture's professions.
+- **`ranged`: 4 eligible, 0 above cutoff.** A ret's ranged slot is a libram and
+  a libram's value is its effect, not its stat line. Plausible if the character
+  already holds a good libram, but it is the one slot where zero could instead
+  mean the effect is not being valued at all. Flagged **unsure**, not as a
+  defect.
+
+Neither is in scope for this ticket; both are recorded so they are not lost.
+
+### The above-cutoff count was wrong
+
+First recorded here as 78. The SME dumped the rows: 48 genuine upgrades plus
+all 30 screened-out rows, which the script was counting as above cutoff.
+
+The cause is the **script**, not shipped ranking behaviour. `rank.ts` sets
+`belowCutoff: false` on screened rows deliberately — the `screened` field's
+doc comment calls a screened row "a third view state, distinct from
+`belowCutoff` ('measured and small') because a screened row was never measured
+at full precision at all". The game-facing rule lives in `view.ts`
+`belowCutoffUnderView`, whose first line is `if (item.screened !== undefined)
+return true;`. The presentation layer has always been right; the script read
+the raw field and skipped the rule. `rank.ts` was not touched, and no new
+ticket was needed.
+
+Fixed by filtering on `!i.belowCutoff && i.screened === undefined`, with a
+comment at the call site pointing at the reason. The corrected count is 48,
+matching the SME's independent dump. `eligible`, `full-iteration sims`,
+`promoted`, `screened-out` and the ratio 0.9708 are all unchanged — the bug
+was in reporting only.
 
 ## Smoke gate recommendation
 

@@ -258,8 +258,12 @@ export type RankInput = {
    * That script ranks the **ret** tuning fixture, while the table above and
    * the 0.6457/0.9837 figures were measured on the **feral** fixture through
    * the 7.0 gate's `CountingSimRunner` (ticket 221 harness); the ret P2
-   * number corroborates the feral P2 one — two pools, same conclusion that
-   * at K=210 racing barely beats a full sweep (ticket 223).
+   * number corroborates the feral P2 one — on both **P2 pre-raid** pools,
+   * at K=210 racing barely beats a full sweep (ticket 223). Do not carry
+   * that across tiers: the one P3 figure on record is 0.6457, where racing
+   * does real work, because a P3 character already wears near-optimal gear
+   * and most of the pool is an obvious loss. The shallow, flat pre-raid
+   * pool is what makes K=210 admit nearly everything.
    *
    * ## The floor is inert on the shipped feral P3 pool (ticket 222)
    *
