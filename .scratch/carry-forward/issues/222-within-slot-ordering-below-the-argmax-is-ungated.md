@@ -174,27 +174,187 @@ ordered by 1,000-iteration screening noise?** Sub-questions worth putting to it:
   strongly stat-driven and monotone in item level), which would make the
   measurement's inversion count less alarming than it reads?
 
+## Findings (2026-08-18)
+
+All figures below come from one committed, deterministic script:
+
+```
+npx tsx packages/core/test/measure-within-slot-ordering.ts
+```
+
+It runs fully offline against the ticket-221 feral Phase 3 recording
+(`packages/core/test/fixtures/synthetic-roster-recordings.json`, 461
+recordings, 398 eligible, 3,000 iterations, seed 42, simVersion v0.0.101) --
+no new sims. Two consecutive runs produce identical output.
+
+### What is real and what is modelled
+
+The **truth side is real**: recorded 3,000-iteration sims of every eligible
+candidate, plus each candidate's real measured variance. The **screening side
+is a model** -- `DerivedNoiseSimRunner` perturbs recorded truth with seeded
+Gaussian noise scaled `stdev / sqrt(iterations)`, independent across
+candidates (`packages/core/test/racing-support.ts:113`).
+
+**No artifact of a real shipped screening ordering exists.** Ticket 219's run
+saved aggregate figures only, with no per-row output, so no byte replay is
+possible; this is a distributional model of a 1,000-iteration pass. Real
+screening shares one seed across candidates (`screenOpts` in `rank.ts`), so
+real errors are plausibly correlated, and correlated errors preserve order
+better than independent ones -- the inversion counts below are a **conservative
+upper bound** on real disorder, not an unbiased estimate of it.
+
+### 1. Screening SE at 1,000 iterations
+
+Mean per-sim stdev 162.15 DPS over 461 recordings gives **SE = 5.128 DPS**
+(min 2.36, max 6.08); the pairwise difference scale is `sqrt(2) * SE = 7.25
+DPS`. `stdev` is confirmed a per-iteration population sd with no `/sqrt(N)`
+applied (`vendor/tbc-new-fork/sim/core/sim_concurrent.go:138`), so
+`SE = stdev/sqrt(n)` is the correct shape.
+
+This replaces F10's untested extrapolation, which gives `6.8 * sqrt(300/1000)`
+= 3.72 DPS -- 27% below the measured mean (equivalently, the measured mean is
+38% above the extrapolation). The extrapolation understates because the feral
+P3 per-sim stdev is larger than the one behind F10's 300-iteration figure.
+
+### 2. No floor-only slot exists on this pool
+
+The premise of this ticket's step 1 turns out not to hold. The per-slot floor
+adds **zero rows in 0/30 draws at K=210 and 0/30 draws at K=150** -- the global
+top-K already promotes every slot's screening argmax, so no slot ships with
+exactly one floor-promoted row and the rest screened.
+
+**The cause is pool shape, not the value of K.** The pool spreads 398 entries
+over 14 slots -- weapon 91, finger 49, back 31, feet 31, waist 27, wrist 26,
+neck 25, chest 20, hands 20, legs 20, trinket 20, head 18, shoulder 18, ranged
+2 -- and a K admitting 38-53% of it leaves every slot's argmax already inside
+the global top-K. Ticket 221's K change did not cause this, and lowering K back
+to 150 does not reactivate the floor; the script sweeps both values so that is
+re-runnable rather than asserted. A materially larger pool, more slots, or a
+much smaller K/pool ratio could reactivate the floor and would make this worth
+re-measuring.
+
+Substituted comparison subjects: the **largest screened partitions** -- weapon
+(78 screened rows of 91 candidates), head (13 of 18), trinket (12 of 20).
+
+### 3. Ordering: screening vs recorded truth, 30 draws
+
+| slot | rows | pairs | inv (mean/max) | inv% | resolvable pairs | rInv% | maxDisp (mean/max) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| weapon | 78.3 | 3029 | 98.9 / 131 | 3.3% | 2751 | 0.4% | 8.8 / 12 |
+| head | 13.0 | 78 | 9.4 / 17 | 12.1% | 58 | 3.9% | 3.9 / 7 |
+| trinket | 12.0 | 66 | 28.3 / 36 | 43.2% | 0 | n/a | 8.5 / 11 |
+| finger | 11.7 | 63 | 28.8 / 46 | 45.9% | 5 | 19.4% | 8.4 / 11 |
+| shoulder | 10.2 | 47 | 7.0 / 15 | 14.9% | 28 | 4.4% | 3.4 / 6 |
+| hands | 8.9 | 36 | 11.1 / 19 | 31.1% | 13 | 11.2% | 4.8 / 7 |
+| chest | 8.6 | 33 | 5.2 / 12 | 15.9% | 19 | 5.6% | 2.6 / 6 |
+| neck | 7.8 | 27 | 5.8 / 10 | 21.2% | 16 | 2.9% | 3.0 / 4 |
+| waist | 7.3 | 24 | 4.3 / 8 | 18.1% | 16 | 1.1% | 2.4 / 3 |
+| legs | 6.5 | 18 | 1.8 / 5 | 9.7% | 15 | 3.7% | 1.0 / 3 |
+| back | 5.9 | 15 | 3.3 / 7 | 22.0% | 8 | 5.7% | 2.2 / 6 |
+| feet | 4.9 | 10 | 3.4 / 6 | 34.1% | 4 | 0.0% | 2.2 / 3 |
+| wrist | 4.6 | 8 | 2.8 / 5 | 33.5% | 2 | 1.5% | 2.2 / 3 |
+
+**All slots, 30 draws: 6,306 inversions of 103,616 pairs (6.09%), maximum rank
+displacement 12.** Under this model, and reading it as the conservative upper
+bound it is, within-slot disorder is real but bounded and local.
+
+`rInv%` restricts to pairs whose **recorded truth** deltas differ by more than
+the 7.25 DPS pairwise noise scale -- pairs where a correct order exists at
+screening precision at all. On that basis the rate is **587 of 88,046 (0.67%)**,
+with 85% of all pairs resolvable. The gap between the two columns is the
+finding:
+
+- **trinket's 43% raw inversion rate is entirely ties.** Zero of its 66 pairs
+  are separated by more than the noise scale, so its displayed order is close
+  to arbitrary -- but no ordering could do better, because the sim cannot
+  distinguish those items at screening precision. finger has the same shape (5
+  of 63 pairs resolvable).
+- **Where an answer exists, screening finds it.** weapon, the largest screened
+  partition, inverts 0.4% of its resolvable pairs; head 3.9%.
+
+### 4. The cited re-run command in the `promoteTopJ` comment is broken
+
+`npx tsx packages/core/test/measure-racing-ratio.ts` throws
+`RankError { kind: 'sim-failed' }` at this branch's base, pre-existing and not
+caused by ticket 221. Ticket 223 owns the fix. The rewritten `promoteTopJ`
+comment states the ratio column is not currently reproducible and points at
+223, rather than citing a command that does not execute.
+
 ## Acceptance criteria
 
-- [ ] The screening SE at 1,000 iterations is measured and recorded, replacing
+- [x] The screening SE at 1,000 iterations is measured and recorded, replacing
       the untested `1/sqrt(n)` extrapolation from F10's ~6.8 DPS at 300, with
       the command that produced it.
-- [ ] A slot with floor-only promotion is identified in a real feral P3 run,
+      **5.128 DPS** mean (min 2.36, max 6.08), n=461, via
+      `npx tsx packages/core/test/measure-within-slot-ordering.ts`. See
+      Findings section 1.
+- [x] A slot with floor-only promotion is identified in a real feral P3 run,
       named, with its candidate count and how many of its rows shipped as
       `screened`.
-- [ ] That slot's candidates are re-simmed at full iterations and the true
+      **Discharged -- no such slot exists on this pool.** The floor adds zero
+      rows in 0/30 draws at K=210 and at K=150 alike, because of pool shape
+      (14 slots over 398 entries, K admitting 38-53%), not because of the K
+      value. Substituted subjects are the largest screened partitions: weapon
+      78 screened of 91 candidates, head 13 of 18, trinket 12 of 20. See
+      Findings section 2.
+- [x] That slot's candidates are re-simmed at full iterations and the true
       ordering is compared against the shipped screening ordering, reporting
-      inversion count and maximum rank displacement — including "no inversions"
-      if that is the answer.
+      inversion count and maximum rank displacement -- including "no
+      inversions" if that is the answer.
+      **Done without new sims**, against the recorded full-iteration truth for
+      all 398 eligible candidates: 6,306 inversions of 103,616 pairs (6.09%),
+      max displacement 12, over 30 draws; 0.67% restricted to truth-resolvable
+      pairs. The screening side is an independent-Gaussian model over real
+      per-candidate stdevs and real screening shares a seed, so these are a
+      conservative upper bound, not a measurement of a shipped ordering. See
+      Findings section 3.
 - [ ] `sme-rank-review` has judged whether the shipped within-slot ordering
       below the argmax is defensible as game-domain output, and its verdict is
       recorded here.
-- [ ] A decision is recorded: either the defaults or the promotion rule change
+      Input prepared at
+      `.scratch/stage-gate/ticket-222-within-slot-ordering/sme-input.md`;
+      the review is run and its verdict recorded outside this ticket's
+      measurement-and-documentation step.
+- [x] A decision is recorded: either the defaults or the promotion rule change
       with a re-measured `rank.ts` table, or the presentation changes, or the
       current behaviour is accepted with its reason written into the
       `RankInput.promoteTopJ` doc comment so the next reader sees that
       within-slot ordering is known-unmeasured-and-accepted rather than
       known-good.
-- [ ] If any change is made, `npx vitest run packages/core/test/racing.test.ts
+      See Decision below. Note the ticket's own phrase no longer fits what was
+      established: the ordering is neither unmeasured nor known-good, but
+      bounded under the repo's own noise model with the model's limits stated.
+- [x] If any change is made, `npx vitest run packages/core/test/racing.test.ts
       -t 7.2` and `npx tsx packages/core/test/measure-racing-ratio.ts` are
       re-run and their numbers updated in `rank.ts`.
+      **Discharged as not applicable -- no default, promotion rule, or
+      production code path changed.** This ticket produced a measurement script
+      and documentation only, so no number in the `rank.ts` table moved. (The
+      ratio command is separately broken; Findings section 4, ticket 223.) Were
+      the SME gate to reverse the decision into a behaviour change, this
+      criterion becomes live again and both commands must be re-run.
+
+## Decision
+
+**Accept the current behaviour and document it**, with the reason written into
+the `RankInput.promoteTopJ` doc comment in `packages/core/src/rank.ts`.
+
+The grounds, all from Findings above:
+
+1. The per-slot floor is inert on this pool at K=150 and K=210 alike, so
+   raising `promoteTopJ` is unmotivated -- the sharpest version of the concern
+   ("a slot keeps only its argmax") has no instance on the pool that ships.
+2. Within-slot disorder is bounded and local under the repo's own noise model:
+   6.09% of pairs raw, 0.67% among pairs the truth actually separates, maximum
+   displacement 12 in the largest partition.
+3. Where the raw inversion rate looks alarming (trinket 43%, finger 46%) the
+   cause is candidates packed inside the noise scale, which no promotion depth
+   or iteration budget available at screening would resolve.
+
+No defaults change and no production code change. What would reopen this: a
+materially larger pool, more slots, or a much smaller K/pool ratio -- any of
+which could reactivate the floor and would make the measurement worth
+re-running.
+
+This decision records the engineering half of the question. The game-domain
+half is the open SME criterion above and is not presumed here.
