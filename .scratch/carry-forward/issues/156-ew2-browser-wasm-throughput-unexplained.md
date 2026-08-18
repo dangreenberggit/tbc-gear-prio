@@ -1080,3 +1080,53 @@ the question stays exactly where the 2026-08-17 entry left it.
 opening the served page in an ordinary browser window would settle it in
 minutes), or an explanation of the original slowness. Both are unchanged by this
 entry; only the missing 5,000-iteration number is now filled in.
+
+## 2026-08-18 — AC2 probed again on a feral cat run; still open
+
+**AC2 is not met and this ticket stays open for it.** AC1 and AC3 are untouched
+by this entry. No CLI-vs-browser winner is claimed and no ratio is quoted as
+settled — the standing instruction (`ee953e0`) still holds.
+
+**What was probed.** The served production build was exercised on a new page
+this round (druid feral cat, `http://127.0.0.1:8899/tbc/druid/feralcat/`) for
+ticket 219's full-pool run. Before relying on the surface for AC2, visibility
+was probed directly, and again after requesting focus:
+
+```js
+document.visibilityState   // -> "hidden"   (before)
+window.focus();
+document.visibilityState   // -> "hidden"   (after)
+document.hidden            // -> true
+document.hasFocus()        // -> false
+```
+
+`hidden` held for the entire 45.4-minute run and was re-read after it finished.
+So the run cannot serve as "shown absent in a real foregrounded browser",
+whatever its numbers look like.
+
+**One thing did change from previous rounds, and it is not enough.**
+`computer{action:"screenshot"}` **succeeded** on this surface and returned a
+correctly rendered page — earlier entries in this ticket record it failing with
+"the Browser pane is not displayed". So this surface renders and can be
+captured. It still reports `visibilityState: "hidden"`, which is the property
+AC2 turns on. Screenshot capability is **not** evidence of a foregrounded,
+compositing tab, and it is not treated as such here.
+
+**Blocker, unchanged in substance:** AC2 requires a compositing foregrounded
+tab; the harness surfaces read `hidden` this session; a human opening the served
+page in an ordinary browser window would settle it in minutes.
+
+**The optional dev-vs-prod A/B was deliberately not run.** It tests build mode,
+which is **AC3's** question and AC3 was already checked on 2026-08-17. It cannot
+check AC2, so running it would have added a number without moving the box. Not
+run, rather than run-and-discounted.
+
+**Machine caveat for anyone comparing this session's numbers to earlier ones.**
+This browser reported `navigator.hardwareConcurrency` = **3** and
+`__tbc_new_wasmconcurrency` = **"1"**, against **20** and **"4"** in the
+2026-08-17 run, on a host with 20 logical CPUs (`nproc` -> 20). Throughput
+figures from this session are therefore not comparable with earlier ones and no
+per-candidate figure is carried forward from it. The 2026-08-18 feral run's raw
+record (398 screened, 199 fully simmed, 2724 s wall clock) is in ticket 219; it
+is logged there as a completion record, **not** as an E-W2 throughput
+measurement.

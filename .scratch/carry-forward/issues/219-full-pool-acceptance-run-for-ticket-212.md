@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: verification gap (acceptance evidence is a time-boxed sample)
 Origin: ticket 212 criterion 4, scope decision 2026-08-17
 Blocks: none
@@ -60,9 +60,9 @@ a full one does not:
 
 ## Done when
 
-- [ ] A served production build runs the full candidate pool to completion,
+- [x] A served production build runs the full candidate pool to completion,
       Phase 3, screening on.
-- [ ] The dropped-for-`No item with id` count is zero across the whole pool,
+- [x] The dropped-for-`No item with id` count is zero across the whole pool,
       read from the per-row disclosure, with the candidate count recorded.
 - [x] The run's wall-clock duration is recorded — this is also the
       measurement ticket 156 needs, so the two can be satisfied together.
@@ -176,3 +176,145 @@ fix works" from "it does not" with high confidence, exactly as this ticket's
 decision paragraph argued: before the fix every candidate panicked, so a broken
 fix cannot produce a 240-candidate zero-drop pass. It does not establish
 anything about candidates outside the UI's 240, or about Phase 3.
+
+### 2026-08-18 — full pool, Phase 3, run to completion; all four boxes now checked
+
+**Outcome: the run completed on its own at Phase 3 over the whole eligible
+pool, with zero drops.** Boxes 1 and 2 are checked on their existing wording,
+not on reworded criteria. The spec is **druid feral cat**, not retribution —
+feral is the spec with Phase 3 data, which is why it was used.
+
+**The previous entry's "Phase 3 is not reachable in this build" was wrong.**
+That blocker was a misread of the *preset* picker, whose buttons come from the
+phases a spec's presets cover (`preset_group_picker.tsx`). The control that
+sets `sim.getPhase()` — the value the Upgrades tab reads for `maxPhase`
+(`upgrades_tab.tsx:311`) — is the phase selector inside the **gear-slot item
+modal**, built by `makePhaseSelector` (`other_inputs.ts:77-88`) from
+`phasesEnumToNumber()`, which returns the whole `Phase` enum. Read live from
+the served page, that selector offers all five phases verbatim:
+
+```
+1:Phase 1 (2.0 - T4)  2:Phase 2 (2.1 - T5)  3:Phase 3 (2.2 - T6)
+4:Phase 4 (2.3 - ZA)  5:Phase 5 (2.4 - SWP)
+```
+
+**No code change was needed to reach Phase 3**, and `CURRENT_PHASE`
+(`ui/core/constants/other.ts:13`) was *not* edited — it is only the default and
+the `fromProto` fallback (`sim.ts:777`, `proto.phase || CURRENT_PHASE`, which
+fires only on a falsy stored phase). Selecting Phase 3 in the modal moved the
+stored setting and the eligible count, and it survived a reload:
+
+```
+localStorage['__tbc_new_feral_cat_druid__currentSettings__'].settings.phase  -> 3   (after reload)
+Candidates placeholder: "all 246 eligible" (Phase 2) -> "all 398 eligible" (Phase 3)
+```
+
+**398 is the whole feral-P3 pool, and the run was uncapped.** The Candidates
+input was left **empty**, so the placeholder count is what ran; the assumptions
+drawer shows **no `Candidate cap` line at all**, which the tab only renders when
+a cap is set (`upgrades_tab.tsx:772-786`). 398 matches this repo's own universe
+file exactly:
+
+```
+python -c "import json;a=json.load(open('data/universes/feral-p3.json'));b=json.load(open('vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/data/feral-p3.universe.json'));print(a==b,len(a['entries']),sum(1 for e in a['entries'] if e.get('phase',0)>3))"
+# -> True 398 0
+```
+
+**This run does not reconcile the ~455 figure, and does not try to.** 398 is
+not ~455. The ~455 premise in this ticket's opening paragraph is a **ret-era**
+number from the slice-B record; this is a *feral* pool, a different spec with a
+different universe, so the two denominators are not comparable and the ret-side
+question is untouched by this run. It stays exactly where the previous stage's
+escalation left it. What boxes 1-2 assert is narrower and is what was measured:
+the full pool **the engine defines for this spec** ran to completion with no cap
+applied.
+
+**Run record.**
+
+| | |
+|---|---|
+| Spec / page | druid feral cat, `http://127.0.0.1:8899/tbc/druid/feralcat/` |
+| Pool setting | Candidates left **empty** = full pool; placeholder `all 398 eligible` |
+| Candidates | **398 eligible, all screened**; **199 promoted to full sims**; 199 fully simmed |
+| Iterations | 3000 (the default, unchanged) |
+| Screening | on (progress went `Screening n/398` then `Simming n/199`) |
+| Phase | **3** — drawer `Max phase 3` |
+| Seeds | 11, 22, 33, 44, 55 |
+| Start → end (UTC) | 2026-08-18T02:41:45.579Z → 2026-08-18T03:27:09.871Z |
+| **Wall clock** | **2724 s = 45.4 min** — run finished **on its own**, inside the 60-minute cap |
+| Page visibility | `hidden` throughout (`document.visibilityState`) |
+| Machine | `navigator.hardwareConcurrency` = **3**; `__tbc_new_wasmconcurrency` = **"1"**; `navigator.deviceMemory` = 8 |
+| Sim version | api-v13 |
+| Engine (fork commit) | `4018f9bf8` (see ticket 220 for the convention this reads under) |
+
+**Timings here are NOT comparable to the 2026-08-17 ret run.** That run reported
+`hardwareConcurrency` = 20 and `__tbc_new_wasmconcurrency` = "4"; this one
+reports **3** and **"1"**. The host machine has 20 logical CPUs (`nproc` -> 20),
+so the browser surface — not the hardware — is what differs, and the cause of
+that difference was not investigated here. Do not read 45.4 min against 17.4 min
+as a spec or pool comparison: the worker budget differs by 4x and the candidate
+mix differs too. No ratio is claimed and no per-candidate figure is extrapolated
+from this run.
+
+**Drop count: zero.** `No item with id` appears **0 times** in the fully
+expanded result surface — every `<details>` opened and all 17 "Show N item(s)"
+toggles clicked before scanning, with none left unexpanded (verified by
+re-querying for remaining toggles: 0). 802 result rows were in the DOM at scan
+time.
+
+A scan for `panic|dropped|skipped|could not|failed|error|no item with id`
+returned 2 hits, both false positives, quoted with context so a reader can
+check them:
+
+- `Cord of Screaming Terrors` — the substring "Terror" in an item name.
+- The drawer's own heading `Dropped candidates and substitutions (1)`.
+
+**That "(1)" is a substitution note, not a dropped candidate.** Its full text:
+
+```
+gems.meta-preference
+no meta preference recorded for feral — meta sockets on candidate items were
+left empty, so those items are priced without any meta gem's stats or effect
+```
+
+Worth carrying forward as a **feral-specific pricing caveat** (candidate items
+with meta sockets are priced with those sockets empty), but it is a disclosure
+about how items were valued, not a candidate that failed to sim.
+
+**Box 4 diagnosis.** No drop appeared, so box 4 is again vacuous — but unlike
+the Phase 2 / 240 run, this pass *does* reach two of the four hypotheses this
+ticket lists. It ran **Phase 3**, so "a phase the sample never reaches" is
+exercised for phases up to 3 (the feral-p3 universe contains zero entries above
+phase 3, per the command above, so phases 4-5 remain unexercised by
+construction). And it covered the **entire** eligible pool rather than a prefix,
+so "late-pool items whose rows the Database cannot resolve" and "accumulating
+state" are exercised across all 398 screens and 199 full sims. The meta-gem
+hypothesis is **not** disconfirmed: the substitution note above shows feral
+candidates were simmed with meta sockets empty, so a meta-repair failure mode
+would not have been triggered in the first place.
+
+**Commands.** Repo B (`vendor/tbc-new-fork`), Bash, with Go on PATH. Note the
+per-spec `index.html` is **generated and gitignored** — the druid one did not
+exist and had to be created before the build would emit the page:
+
+```bash
+cat ui/index_template.html | sed -e 's/@@CLASS@@/druid/g' -e 's/@@SPEC@@/feralcat/g' > ui/druid/feralcat/index.html
+export PATH="/c/Program Files/Go/bin:$PATH"
+npx tsx vite.build-workers.mts && npx vite build
+./node_modules/.bin/http-server dist -p 8899 -c-1
+```
+
+Then `http://127.0.0.1:8899/tbc/druid/feralcat/`, open any gear slot, set the
+modal's phase selector to Phase 3, close it, Upgrades tab, Candidates empty, Run.
+
+**`lib.wasm` was not rebuilt and is not claimed to be** — same position as the
+previous entry. It is the pre-existing binary (20,293,865 bytes, mtime
+2026-08-14 13:13), valid to serve because the fork's Go tree is unchanged:
+`git -C vendor/tbc-new-fork diff --name-only 1dddd77c..HEAD -- '*.go'` returns
+empty. The engine did load on this page — the server access log shows the
+worker and wasm fetches, which a page-side resource probe cannot see:
+
+```
+GET /tbc/sim_worker.js      (x4)
+GET /tbc/lib.wasm           (x5)
+```
