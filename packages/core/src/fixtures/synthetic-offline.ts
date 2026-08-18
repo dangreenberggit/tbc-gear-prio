@@ -157,6 +157,24 @@ export const FERAL_SYNTHETIC_ROW: RosterRow = {
   maxPhase: 2,
 };
 
+/**
+ * The same feral character ranked against its **phase 3** pool — 398 eligible
+ * candidates where `FERAL_SYNTHETIC_ROW` has 246.
+ *
+ * A separate row rather than a `maxPhase` argument because both are live at
+ * once: the 7.2 recall gate measures screening at 246 and the 7.3 gate at 398,
+ * and the fixture file holds a recorded full-sweep truth per row. Sharing
+ * `ref` with the P2 row is safe — recordings live under per-row keys — and is
+ * what makes the two measurements comparable: same character, same worn gear,
+ * only the pool differs (ticket 221).
+ */
+export const FERAL_P3_SYNTHETIC_ROW: RosterRow = {
+  spec: "feral",
+  ref: FERAL_SYNTHETIC_REF,
+  presetPhase: 1,
+  maxPhase: 3,
+};
+
 export const RET_SYNTHETIC_FIGHT = {
   reportCode: "synthetic-ret-preraid",
   fightId: 1,

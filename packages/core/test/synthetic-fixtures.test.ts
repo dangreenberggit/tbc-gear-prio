@@ -20,6 +20,7 @@ import {
   FERAL_SYNTHETIC_FIGHT,
   RET_SYNTHETIC_ROW,
   FERAL_SYNTHETIC_ROW,
+  FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
 
@@ -79,6 +80,16 @@ const ROSTER = {
     epWeightsPath: "data/presets/feral/p1.ep-weights.json",
     skeletonPath: "data/presets/feral/p2.raid-sim-skeleton.json",
     universePath: "data/universes/feral-p2.json",
+    race: "RaceTauren" as const,
+  },
+  "feral-p3": {
+    row: FERAL_P3_SYNTHETIC_ROW,
+    ref: FERAL_SYNTHETIC_REF,
+    fight: FERAL_SYNTHETIC_FIGHT,
+    presetGearPath: "vendor/wowsims/feral_preraid.gear.json",
+    epWeightsPath: "data/presets/feral/p1.ep-weights.json",
+    skeletonPath: "data/presets/feral/p2.raid-sim-skeleton.json",
+    universePath: "data/universes/feral-p3.json",
     race: "RaceTauren" as const,
   },
 } as const;

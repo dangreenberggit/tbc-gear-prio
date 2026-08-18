@@ -17,7 +17,7 @@ import type { PoolEntry } from "./pool.js";
  * runtime applies it) cannot drift apart.
  */
 export const DEFAULT_SCREEN_ITERATIONS = 1000;
-export const DEFAULT_PROMOTE_TOP_K = 150;
+export const DEFAULT_PROMOTE_TOP_K = 210;
 /**
  * Per-slot promotion depth (candidate-pool.md §6.4's option (a)). Generalizes
  * the best-in-slot floor from top-1 to top-`j`.

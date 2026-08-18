@@ -151,16 +151,59 @@ export type RankInput = {
    * How many top-screened candidates promote to a full-iteration sim
    * (candidate-pool.md §6.1). §3.4.1 proposed 35 = max(K*) + 10 from the
    * E-W5 fixture's measured K* (16 feral / 15 ret) — a fixture with only 16
-   * above-cutoff feral rows. Ticket 204's held-out gating fixture needs
+   * above-cutoff feral rows. Ticket 204's held-out gating fixture then needed
    * `promoteTopK = 120` at `screenIterations = 1000` for zero misses across
-   * 30 seeded noise draws (re-run: `npx vitest run
-   * packages/core/test/racing.test.ts -t 7.2`); 150 is that measured floor
-   * plus the same +10-ish margin §3.4.1's own formula used, rounded up for
-   * legibility. Runtime-independent in the same sense §3.4.1 argued (a
-   * property of rank correlation and cutoff density, not of CLI vs WASM
-   * cost) — but tied to *this* fixture's cutoff density, which is a fact
-   * about the gear pool, not about the runtime. Ignored when `fullPool:
-   * true`.
+   * 30 seeded noise draws, and 150 was that floor plus §3.4.1's +10-ish
+   * margin.
+   *
+   * **150 was measured on a pool half the size of the one that ships.** K is
+   * a fixed absolute budget, so the fraction of the pool it admits shrinks as
+   * the pool grows: 150/246 ≈ 61% on the phase 2 fixture the number was tuned
+   * on, but 150/398 ≈ 38% on the phase 3 pool every real feral run screens.
+   * Ticket 221 measured that gap and it is real — at K=150 the phase 3 pool
+   * loses **7 above-cutoff rows across 30 draws** (6 distinct items). Top-5
+   * recall held throughout; the losses are mid-table above-cutoff rows, which
+   * is exactly the "a slot's second-best row runs out of global budget"
+   * mechanism the per-slot floor does not catch at j=1.
+   *
+   * Verified at zero misses across 30 seeded noise draws on **both** pools,
+   * each with its own re-run command:
+   *
+   * - 246 eligible / 42 above cutoff (feral phase 2) —
+   *   `npx vitest run packages/core/test/racing.test.ts -t 7.2`
+   * - 398 eligible / 86 above cutoff (feral phase 3) —
+   *   `npx vitest run packages/core/test/racing.test.ts -t 7.3`
+   *
+   * Re-measured K sweep on the phase 3 pool, 30 draws each
+   * (`npx tsx packages/core/test/measure-feral-p3-recall.ts`); the phase 2
+   * pool is at zero misses for every row in this table:
+   *
+   * ```
+   *   K    misses  distinct
+   *   150       7         6
+   *   175       3         3
+   *   190       1         1
+   *   195       0         0   <- measured floor
+   *   200       0         0
+   *   210       0         0   <- shipped
+   * ```
+   *
+   * 210 is the 195 floor plus the same +10-ish margin, rounded up for
+   * legibility — the formula §3.4.1 used and ticket 204 reused.
+   *
+   * **What this costs.** Raising K buys recall with full-iteration sims, and
+   * on a small pool it buys almost nothing else: full sims ÷ eligible is
+   * 0.6457 on the phase 3 pool but 0.9837 on the phase 2 one, where K=210
+   * admits nearly all 246 candidates and racing barely beats a full sweep.
+   * That is the honest trade — the default is set by the pool the tool
+   * actually ships against, and the phase 2 fixture is now the pool where
+   * racing looks worst, not the pool the number is tuned to.
+   *
+   * Runtime-independent in the same sense §3.4.1 argued (a property of rank
+   * correlation and cutoff density, not of CLI vs WASM cost) — but tied to
+   * these fixtures' cutoff density, which is a fact about the gear pool, not
+   * about the runtime. A materially larger pool than 398 is unmeasured
+   * territory again. Ignored when `fullPool: true`.
    */
   promoteTopK?: number;
   /**

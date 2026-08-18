@@ -1,5 +1,5 @@
 /**
- * M2 racing — interface-level tests (candidate-pool.md §7: 7.0, 7.2).
+ * M2 racing — interface-level tests (candidate-pool.md §7: 7.0, 7.2, 7.3).
  *
  * Tune on ret, gate on feral (§7.a) — this file therefore ranks the
  * **feral** synthetic fixture (`FERAL_SYNTHETIC_ROW`) throughout, per the
@@ -24,6 +24,7 @@ import {
   FERAL_SYNTHETIC_REF,
   FERAL_SYNTHETIC_FIGHT,
   FERAL_SYNTHETIC_ROW,
+  FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
 import { CountingSimRunner, DerivedNoiseSimRunner } from "./racing-support.js";
@@ -116,6 +117,72 @@ function buildSim(noiseSeed: number) {
     recorded.seed,
     noiseSeed
   );
+}
+
+/**
+ * Phase 3 bindings for the 7.3 gate (ticket 221).
+ *
+ * Same character, same worn gear, same presets — only the candidate pool
+ * differs (398 eligible against the P2 row's 246). Feral ships no P3-specific
+ * ep-weights or skeleton, so reusing the P2 row's is both necessary and what
+ * makes the two miss counts comparable: the pool size is the only variable.
+ */
+const recordedP3 = recordingsFile.rows["feral-p3"]!;
+
+const poolP3 = filterPoolByPhase(
+  poolFromUniverse(
+    loadJson<Parameters<typeof poolFromUniverse>[0]>(
+      "data/universes/feral-p3.json"
+    )
+  ),
+  FERAL_P3_SYNTHETIC_ROW.maxPhase
+);
+
+function baseInputP3() {
+  return {
+    character: FERAL_SYNTHETIC_REF,
+    spec: FERAL_P3_SYNTHETIC_ROW.spec,
+    maxPhase: FERAL_P3_SYNTHETIC_ROW.maxPhase,
+    iterations: recordedP3.iterations,
+    seeds: [recordedP3.seed],
+    race: "RaceTauren" as const,
+  };
+}
+
+function baseDepsP3(sim: ReturnType<typeof buildSimP3>) {
+  return {
+    gear: new RecordedGearSource(gearData),
+    sim,
+    store: new MemoryStore(),
+    clock: () => new Date("2026-08-15T12:00:00.000Z"),
+    raidSimSkeleton: skeleton,
+    epWeights,
+    pool: poolP3,
+  };
+}
+
+function buildSimP3(noiseSeed: number) {
+  const recordings = new Map(Object.entries(recordedP3.recordings));
+  return new DerivedNoiseSimRunner(
+    recordedP3.simVersion,
+    recordings,
+    recordedP3.seed,
+    noiseSeed
+  );
+}
+
+/**
+ * Hands the event loop back between noise draws.
+ *
+ * Every await inside a draw resolves from an in-memory recordings map, so the
+ * whole 30-draw loop is one unbroken chain of microtasks: the worker never
+ * reaches the macrotask queue, and vitest's reporter RPC starves until it
+ * times out with `Timeout calling "onTaskUpdate"` — an unhandled error that
+ * fails the run even though every assertion passed. `setImmediate` is a
+ * macrotask, so awaiting one per draw lets the worker answer.
+ */
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
 }
 
 describe("M2 racing — 7.0: racing does less full-iteration work", () => {
@@ -224,11 +291,91 @@ describe("M2 racing — 7.2: recall on the held-out fixture", () => {
       const top5Misses: Array<{ draw: number; itemId: number }> = [];
 
       for (let draw = 0; draw < NOISE_DRAWS; draw++) {
+        await yieldToEventLoop();
         const sim = buildSim(draw);
         // Default screenIterations/promoteTopK (omitted) — the recall gate
         // is on what a real caller gets, not on hand-tuned knobs this test
         // supplies itself.
         const ranking = await rankUpgrades(baseInput(), baseDeps(sim));
+        const screenedOutIds = new Set(
+          ranking.items
+            .filter((i) => i.screened?.promoted === false)
+            .map((i) => i.itemId)
+        );
+        for (const itemId of aboveCutoffIds) {
+          if (screenedOutIds.has(itemId)) misses.push({ draw, itemId });
+        }
+        for (const itemId of top5Ids) {
+          if (screenedOutIds.has(itemId)) top5Misses.push({ draw, itemId });
+        }
+      }
+
+      // A miss fails the build; the fix is the rule or the defaults, never
+      // the test (candidate-pool.md §7, 7.2's own row).
+      expect(misses).toEqual([]);
+      expect(top5Misses).toEqual([]);
+    },
+    RECALL_TEST_TIMEOUT_MS
+  );
+});
+
+describe("M2 racing — 7.3: recall on the maxPhase 3 pool", () => {
+  // Ticket 221: 7.2 above measures recall at 246 eligible candidates, but
+  // every real feral run screens the phase 3 pool at 398. `promoteTopK` is a
+  // fixed absolute budget, so the fraction it admits falls from ~61% to ~38%
+  // as the pool grows — this gate measures whether recall survives that.
+  //
+  // Deliberately named "7.3" and not "7.2-P3": vitest's `-t` is an unanchored
+  // regex, so a name containing "7.2" as a substring would silently widen
+  // every committed `-t 7.2` invocation to run both gates.
+
+  /** The recorded P3 full-sweep truth — same shape as 7.2's, on the P3 row. */
+  async function fullSweepTruthP3() {
+    const recordings = new Map(Object.entries(recordedP3.recordings));
+    const sim = new RecordedSimRunner(recordedP3.simVersion, recordings);
+    return rankUpgrades(
+      { ...baseInputP3(), fullPool: true },
+      { ...baseDepsP3(sim as never), sim: sim as never }
+    );
+  }
+
+  // Same 30 draws as 7.2, so the two miss counts are directly comparable and
+  // the pool size is the only thing that differs between the measurements.
+  const NOISE_DRAWS = 30;
+
+  // 7.2 runs 30 draws over 246 candidates within 60s; this pool is ~1.6x
+  // larger, so the budget is doubled rather than scaled tight. A timeout here
+  // should mean something changed, not that the machine was busy.
+  const RECALL_TEST_TIMEOUT_MS = 120_000;
+
+  it(
+    "promotes every above-cutoff row and never screens out a top-5 row, across seeded noise draws",
+    async () => {
+      const truth = await fullSweepTruthP3();
+      const aboveCutoffIds = new Set(
+        truth.items.filter((i) => !i.belowCutoff).map((i) => i.itemId)
+      );
+      const top5Ids = new Set(
+        truth.items
+          .filter((i) => i.rank !== null)
+          .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+          .slice(0, 5)
+          .map((i) => i.itemId)
+      );
+      // A recall gate needs something to recall — a fixture with no
+      // above-cutoff rows would make every assertion below vacuously true.
+      expect(aboveCutoffIds.size).toBeGreaterThan(0);
+      expect(top5Ids.size).toBe(5);
+
+      const misses: Array<{ draw: number; itemId: number }> = [];
+      const top5Misses: Array<{ draw: number; itemId: number }> = [];
+
+      for (let draw = 0; draw < NOISE_DRAWS; draw++) {
+        await yieldToEventLoop();
+        const sim = buildSimP3(draw);
+        // Defaults omitted, exactly as 7.2 does — the measurement is on what
+        // a real caller gets, not on knobs the test supplies itself.
+        const ranking = await rankUpgrades(baseInputP3(), baseDepsP3(sim));
         const screenedOutIds = new Set(
           ranking.items
             .filter((i) => i.screened?.promoted === false)
