@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: defect (error handling; wrong failure mode on malformed input)
 Origin: adversarial review of ticket 213's fix, 2026-08-17
 Blocks: none
@@ -100,11 +100,60 @@ future field read.
 
 ## Acceptance criteria
 
-- [ ] All four payloads above return `None` rather than raising.
-- [ ] `{"commit": "x"}` still returns `"x"`, and a missing or malformed file
+- [x] All four payloads above return `None` rather than raising.
+- [x] `{"commit": "x"}` still returns `"x"`, and a missing or malformed file
       still returns `None`.
-- [ ] `pnpm verify` on a lockfile containing `null` prints the intended
+- [x] `pnpm verify` on a lockfile containing `null` prints the intended
       could-not-read-the-pin message and exits non-zero, with no traceback.
-- [ ] The generator distinguishes an unreadable pin from a HEAD/pin mismatch,
+- [x] The generator distinguishes an unreadable pin from a HEAD/pin mismatch,
       rather than printing "pins unknown" and advising a reset to a pin it
       could not read.
+
+## Comments
+
+### 2026-08-17 — fixed, all four boxes verified
+
+Applied the suggested fix in `scripts/generate_sim_implemented_effects.py`:
+`lockfile_pin()` now decodes first and returns `data.get("commit")` only when
+`isinstance(data, dict)`, so a non-object payload returns `None` instead of
+raising past the callers' `pin is None` guards. `check_sim_implemented_effects.py`
+needed no edit — it imports `lockfile_pin` rather than duplicating it, so the
+one fix reaches both callers.
+
+Separately, the generator gained a distinct unreadable-pin branch ahead of the
+`commit is None or commit != pin` mismatch branch. It no longer reports an
+unreadable lockfile as a pin mismatch, and no longer advises resetting the
+clone to a pin it could not read.
+
+AC1/AC2 — the ticket's own probe heredoc, re-run verbatim after the fix:
+
+```
+'null'               -> None
+'[]'                 -> None
+'"abc"'              -> None
+'123'                -> None
+'not json at all'    -> None
+'{"commit": "x"}'    -> 'x'
+```
+
+Before the fix the same command returned `RAISES AttributeError` for the first
+four rows, matching the Observed table above.
+
+AC3/AC4 — with `data/wowsims-fork.lock.json` temporarily replaced by `null`
+(backed up and restored in the same shell; tree left clean):
+
+```
+$ python scripts/generate_sim_implemented_effects.py   # EXIT=2
+generate_sim_implemented_effects: could not read the pin from
+data/wowsims-fork.lock.json -- the file is missing, is not valid JSON, is not
+a JSON object, or has no 'commit' field. Repair the lockfile, then re-run.
+(Not a HEAD/pin mismatch: the pin is unreadable, so resetting the clone to it
+is not possible.)
+
+$ python scripts/check_sim_implemented_effects.py      # EXIT=2
+sim-implemented-effects check: could not read the pin from data/wowsims-fork.lock.json.
+```
+
+Both exit non-zero with no traceback. On the restored real lockfile,
+`pnpm sim-implemented-effects:check` exits 0 with
+`215 implemented, 460 stub-only, matches committed file`.

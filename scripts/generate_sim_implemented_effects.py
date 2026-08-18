@@ -64,9 +64,12 @@ LOCK_PATH = ROOT / "data/wowsims-fork.lock.json"
 def lockfile_pin() -> str | None:
     """The fork commit this repo is pinned to, or None if unreadable."""
     try:
-        return json.loads(LOCK_PATH.read_text(encoding="utf-8")).get("commit")
+        data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+    # Valid JSON that is not an object has no .get; returning None here keeps
+    # the callers' `pin is None` guards reachable instead of raising past them.
+    return data.get("commit") if isinstance(data, dict) else None
 
 
 # The one auto-gen file the ticket's diagnosis names, plus any sibling that
@@ -166,6 +169,16 @@ def main() -> int:
 
     pin = lockfile_pin()
     commit = fork_commit(FORK_ROOT)
+    if pin is None:
+        print(
+            "generate_sim_implemented_effects: could not read the pin from "
+            "data/wowsims-fork.lock.json -- the file is missing, is not valid "
+            "JSON, is not a JSON object, or has no 'commit' field. Repair the "
+            "lockfile, then re-run. (Not a HEAD/pin mismatch: the pin is "
+            "unreadable, so resetting the clone to it is not possible.)",
+            file=sys.stderr,
+        )
+        return 2
     if commit is None or commit != pin:
         print(
             f"generate_sim_implemented_effects: clone HEAD is {commit or 'unknown'} "
