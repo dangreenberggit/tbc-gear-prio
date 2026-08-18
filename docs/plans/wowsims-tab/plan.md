@@ -268,6 +268,42 @@ feed and the plan for bounding the run.
 <!-- E-W2 results land here: wall-clock per candidate at 3,000 and 5,000
      iterations, worker count, machine. -->
 
+**E-W2 numbers, 2026-08-17** (ticket 156). Served production build of
+`vendor/tbc-new-fork` at fork commit `4018f9bf8ea1afa885f9fe3c3735db3286c670e7`,
+retribution paladin, Upgrades tab, screening on, max phase 2.
+
+| Iterations | Workers | Machine | Per candidate | Whole run |
+| --- | --- | --- | --- | --- |
+| 3,000 | 4 of 20 | Windows 11, 20 logical cores | **~3.9 s** | ~16 min (240 screened + 187 full) |
+| 5,000 | 4 of 20 | Windows 11, 20 logical cores | **~14.8 s** | 15.4 min (240 screened + 73 full) |
+
+The 3,000 row is the ticket 212 slice-5 record, cited not re-run. The 5,000 row
+was measured for this entry: 11 full sims between two timestamped DOM progress
+samples (43/73 at 01:49:06.979Z, 54/73 at 01:51:49.975Z) = 163.0 s, so 14.8 s
+per candidate. Same ~±10% caveat as the 3,000 figure — these are progress-counter
+reads between long waits, not instrumentation.
+
+Reproduce: in `vendor/tbc-new-fork` (PowerShell, `go` on PATH)
+`npx tsx vite.build-workers.mts`, `npx vite build`,
+`./node_modules/.bin/http-server <abs>/dist -p 8899 --silent`, then
+`http://127.0.0.1:8899/tbc/paladin/retribution/`, Upgrades tab, Candidates=20,
+Iterations=5000, Run. **`lib.wasm` is not built by those commands** (separate Go
+target, `makefile:117-126`) — the served binary is pre-existing (20,293,865
+bytes, mtime 2026-08-14), which is sound here because the fork's Go tree is
+unchanged across this pin bump (`git -C vendor/tbc-new-fork diff --name-only
+1dddd77c..HEAD -- '*.go'` is empty).
+
+Per candidate, 5,000 iterations cost **3.8x** the 3,000 figure where the
+iteration count alone predicts 1.67x. Do not read that as a superlinear
+iteration cost: **the two runs are not matched.** The 5,000 run also screened
+all 240 candidates at 5,000 iterations (the 3,000 run screened at 3,000), so
+screening load differs between them, and both per-candidate figures are derived
+from progress samples at ~±10%. Recorded as an open observation; isolating it
+needs a matched run.
+
+Page visibility was `hidden` for both (Claude Code Browser pane, not a
+foregrounded tab) — see ticket 156 for why that caveat still stands.
+
 **E-W2: blocked by environment WASM throughput, not measured as planned
 (slice 3, 2026-08-14).** Attempted on this machine (Windows 11, 20 logical
 cores) via the Claude Code Browser pane (`vite serve`, `vendor/tbc-new-fork`

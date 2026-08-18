@@ -3,8 +3,9 @@ Type: measurement blocked (unexplained performance)
 Origin: slice 3 + orchestrator follow-up, 2026-08-14
 (`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
-Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3); see the
-production-build measurement below. Remaining: a 5,000-iteration run.
+Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3). The
+5,000-iteration run is done (2026-08-17). Remaining: AC2 only — a
+foregrounded-tab run, or an explanation of the original slowness.
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
 
@@ -71,8 +72,10 @@ in either direction, and plan §5's candidate-count budget is guesswork.
 
 ## Acceptance criteria
 
-- [ ] Wall-clock for baseline + 20 candidates at 3,000 and 5,000 iterations,
-      with worker count and machine, written into plan §5.
+- [x] Wall-clock for baseline + 20 candidates at 3,000 and 5,000 iterations,
+      with worker count and machine, written into plan §5. (Done 2026-08-17,
+      see "The 5,000-iteration run" below; 3,000 row cited from ticket 212's
+      slice-5 record, 5,000 row measured.)
 - [ ] Either the slowness is explained, or it is shown absent in a real
       foregrounded browser (in which case say so, with the numbers).
 - [x] If a production build behaves differently from the dev server, record
@@ -996,3 +999,84 @@ candidate ranking could not work at all.
 - If the *cause* matters rather than just the budget: one dev-server run for
   comparison, to isolate which of the three changes (production build, worker
   bundles, ticket 212's fix) was responsible.
+
+## The 5,000-iteration run, 2026-08-17 — AC1 met, AC2 still open
+
+The second half of plan §8's ask. Numbers written into
+`docs/plans/wowsims-tab/plan.md` §5 alongside the 3,000 figure.
+
+**Setup.** Served production build (not the dev server) of `vendor/tbc-new-fork`
+at fork commit `4018f9bf8ea1afa885f9fe3c3735db3286c670e7`, which includes this
+round's ticket 214 port. Retribution paladin, Upgrades tab, screening on, max
+phase 2, Candidates=20, Iterations=5000.
+
+```
+# in vendor/tbc-new-fork (PowerShell; `go` must be on PATH for the worker build)
+npx tsx vite.build-workers.mts
+npx vite build
+./node_modules/.bin/http-server <abs>/vendor/tbc-new-fork/dist -p 8899 --silent
+# then http://127.0.0.1:8899/tbc/paladin/retribution/ -> Upgrades -> Run
+```
+
+**`lib.wasm` was not built by those commands.** It is a separate Go target
+(`makefile:117-126`, `GOOS=js GOARCH=wasm go build`) and `vite build` does not
+empty `dist/`, so the engine binary served here is pre-existing: 20,293,865
+bytes, mtime 2026-08-14, served at HTTP 200 with that exact length. Acceptable
+for this measurement because the fork's Go tree is unchanged between the old pin
+and the new HEAD — `git -C vendor/tbc-new-fork diff --name-only 1dddd77c..HEAD
+-- '*.go'` returns empty. The JS bundle *was* freshly built, verified by mtime
+change across the build (16:26 -> 18:17), not by grepping for a string.
+
+**Measurement.**
+
+| | |
+|---|---|
+| Iterations | 5,000 |
+| Workers | 4 (`__tbc_new_wasmconcurrency`), of `navigator.hardwareConcurrency` = 20 |
+| Machine | Windows 11, 20 logical cores |
+| Pool | 240 screened at 5,000, then 73 fully simmed |
+| **Per candidate** | **~14.8 s** — 11 sims between two timestamped samples (43/73 at 01:49:06.979Z, 54/73 at 01:51:49.975Z) = 163.0 s |
+| Whole run | 925 s = 15.4 min (01:41:20.505Z -> 01:56:45.473Z) |
+| Page visibility | `hidden` throughout |
+| Drops | zero (`No item with id` appears 0 times in the result surface) |
+
+Same ~±10% caveat as the 3,000 figure: these are progress-counter reads taken
+between long waits, not instrumentation. No harness polling ran during the
+timed interval.
+
+**An unexplained scaling observation, recorded not resolved.** Per candidate,
+5,000 iterations cost 3.8x the 3,000 figure (14.8 s vs ~3.9 s) where the
+iteration count alone predicts 1.67x. **This is not evidence of superlinear
+iteration cost** — the two runs are not matched: the 5,000 run screened all 240
+candidates at 5,000 iterations while the 3,000 run screened at 3,000, so
+screening load differs, and both per-candidate numbers carry ~±10%. Isolating
+it needs a matched run holding screening constant. Untested.
+
+**Acceptance criteria status.**
+
+- **AC1 — met.** Wall-clock for 3,000 and 5,000 iterations with worker count and
+  machine is now in plan §5. The 3,000 row is cited from the ticket 212 slice-5
+  record rather than re-run; the 5,000 row was measured here. Note the run was
+  capped at Candidates=20 as the criterion asks, which the UI expanded to 73
+  full sims (a 20-candidate cap is not 20 slot-rows); the per-candidate figure
+  is per full sim.
+- **AC2 — NOT met, and this ticket stays open for it.** The criterion wants the
+  slowness either *explained* or *shown absent in a real foregrounded browser*.
+  This run shows it absent, but **not in a foregrounded browser**:
+  `document.visibilityState` was `hidden` for the entire run, the same Claude
+  Code Browser pane limitation recorded throughout this ticket
+  (`computer{action:"screenshot"}` still fails with "the Browser pane is not
+  displayed"). And the cause is still not explained — which of the production
+  build, the worker bundles, or ticket 212's fix was responsible remains
+  unisolated, since the dev server was never re-run for comparison.
+- **AC3 — already checked before this round; untouched.** The production-vs-dev
+  difference was recorded on 2026-08-17.
+
+**No CLI-vs-browser winner is claimed here, and no ratio is quoted as settled.**
+The matched comparison this ticket names as outstanding was not attempted, so
+the question stays exactly where the 2026-08-17 entry left it.
+
+**What still remains for E-W2 to close:** AC2 — a foregrounded-tab run (a human
+opening the served page in an ordinary browser window would settle it in
+minutes), or an explanation of the original slowness. Both are unchanged by this
+entry; only the missing 5,000-iteration number is now filled in.
