@@ -386,9 +386,12 @@ async function buildRecordingsAndRun<TRanking>(engine: {
   );
   // The assembled 2pc package: both set slots swapped, same sequential
   // apply-one-slot-at-a-time policy `set-value.ts`'s `buildSetBonuses`
-  // documents for the real (non-test) path — swap the shoulder first so the
-  // head swap below shares its gem-repair starting point with what
-  // `selectPackage`/`buildSetBonuses` actually assembles at runtime.
+  // documents for the real (non-test) path. Head is swapped first because
+  // `selectPackage` sorts the added pieces by ascending `slotIndex`
+  // (`set-value.ts:222`) and `SIM_ORDER` puts head at 0 and shoulder at 2, so
+  // head-then-shoulder is the order runtime actually assembles — the head swap
+  // gives the shoulder swap below its gem-repair starting point. Extending this
+  // fixture with a pair whose gem repair is order-sensitive relies on that.
   const setShoulderEquipment = engine.equipmentForCandidateSwap(
     equipment,
     shoulderIdx,
@@ -396,9 +399,9 @@ async function buildRecordingsAndRun<TRanking>(engine: {
     gems
   );
   const setPackageEquipment = engine.equipmentForCandidateSwap(
-    setShoulderEquipment,
-    headIdx,
-    SET_CANDIDATE_HEAD_ID,
+    setHeadEquipment,
+    shoulderIdx,
+    SET_CANDIDATE_SHOULDER_ID,
     gems
   );
 

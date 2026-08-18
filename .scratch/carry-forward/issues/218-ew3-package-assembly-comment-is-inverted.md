@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: defect (misleading comment; the code is currently correct by luck)
 Origin: stage-gate plan review of ticket 212 slice 3 (finding F5), 2026-08-17
 Blocks: none
@@ -76,8 +76,57 @@ extending the fixture will rely on.
 
 ## Acceptance criteria
 
-- [ ] The fixture's assembly order and its comment agree with
+- [x] The fixture's assembly order and its comment agree with
       `set-value.ts`'s ascending-`slotIndex` behaviour.
-- [ ] E-W3 green after the change, with the run recorded.
+- [x] E-W3 green after the change, with the run recorded.
 - [ ] If the order is deliberately left reversed (option 2), the comment says
       why and names the condition under which it would break.
+
+## Comments
+
+### 2026-08-17 — resolved with option 1 (reverse the fixture, make the comment true)
+
+Option 1 as the ticket preferred: the fixture now assembles head first, then
+shoulder, and the comment says so and cites why. `setPackageEquipment` is built
+from the already-computed `setHeadEquipment` with the shoulder swap applied on
+top. `setShoulderEquipment` stays as its own single-swap fixture — it feeds
+`setShoulderRequest`, so it is a candidate in its own right, not an
+intermediate of the package.
+
+The third acceptance box does not apply: it is conditional on taking option 2,
+and option 1 was taken. Left unchecked deliberately rather than ticked as
+vacuous.
+
+Reproduce, confirming the runtime order the fixture now mirrors:
+
+```
+$ grep -n "sort((a, b) => a.slotIndex - b.slotIndex)" packages/core/src/set-value.ts
+222:    .sort((a, b) => a.slotIndex - b.slotIndex);
+
+$ node -e "const s=require('fs').readFileSync('packages/core/src/slots-sim-order.generated.ts','utf8');const m=s.match(/SIM_ORDER\s*=\s*\[([\s\S]*?)\]/);const arr=m[1].split(',').map(x=>x.trim().replace(/[\"']/g,'')).filter(Boolean);console.log('head',arr.indexOf('head'),'shoulder',arr.indexOf('shoulder'));"
+head 0 shoulder 2
+```
+
+Note the second reproduce command in the ticket body above does not run as
+written: it reads `SIM_ORDER` from `packages/core/dist/slots.js`, but `slots.ts`
+re-exports the constant from `slots-sim-order.generated.ts`, and no `dist/`
+build is required to read it. The command above is the working equivalent and
+returns the same indices the ticket asserts.
+
+**E-W3 run, recorded.** The confirmed standalone invocation — root vitest, so
+the root `vitest.config.ts` and its `**/vendor/**` exclusion apply. Do not use
+`--root packages/core`, which bypasses that config:
+
+```
+$ npx vitest run packages/core/test/wowsims-fork-parity.test.ts
+ ✓ packages/core/test/wowsims-fork-parity.test.ts (2 tests | 1 skipped) 2893ms
+   ✓ wowsims-fork-parity (E-W3) > the ported fork engine reproduces this repo's ranked deltas
+ Test Files  1 passed (1)
+      Tests  1 passed | 1 skipped (2)
+```
+
+The one skipped test is the deliberate fork-absent placeholder
+(`describe.skipIf(canRunForkSide)`), not a suppressed failure. Green both
+before and after the change, so the two orders are byte-identical on this pair
+as the ticket predicted — the fixture's correctness was never at stake, only
+the truth of its comment.
