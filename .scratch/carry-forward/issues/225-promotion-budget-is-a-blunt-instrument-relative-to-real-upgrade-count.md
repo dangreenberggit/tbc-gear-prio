@@ -109,38 +109,80 @@ which reads only the committed fixture
 
 ## The question this ticket exists to answer
 
-Not "what should K be" but **"should a rank budget be the mechanism at all"**,
-given that the ranking it slices is unreliable exactly where it is sliced.
+**Nobody has ever stated what recall this system is buying, or at what
+confidence.** `promoteTopK` was set by sweeping until the observed miss count
+hit zero on 30 draws. That is a stopping rule, not a specification. It cannot
+tell you whether 210 is generous or barely adequate, and it cannot survive a
+change to the pool without another sweep.
 
-## Candidate directions (none chosen; that is the ticket's job)
+The concrete question: **what fraction of genuinely above-cutoff items must
+survive screening, with what probability, and what is the cheapest rule that
+achieves it?** Until that target exists, every K is equally arbitrary.
 
-1. **Promote by noise band rather than by rank budget.** Promote everything
-   whose screening delta is within k * SE of the cutoff, plus everything clearly
-   above it. Ties the budget to measured precision instead of a swept constant,
-   and shrinks automatically when screening gets more precise.
-2. **Two-stage screening.** Re-screen the marginal band at higher iterations
-   before deciding, rather than promoting it all to full sims.
-3. **Keep the rank budget but derive it** from the measured displacement bound
-   and the count above cutoff, so it is a computed consequence rather than a
-   swept constant.
-4. **Accept and document** that the shortcut is only worthwhile on large pools,
-   and skip screening entirely below some pool size — the P2 ratio of 0.98 says
-   racing is close to pointless there already.
+## A caution: "use a noise band instead" is not automatically an improvement
+
+The obvious alternative is to promote by measured noise rather than by rank
+position. Tested against this fixture, it lands in the same place:
+
+```
+node .scratch/carry-forward/probes/225-cutoff-density.mjs   # density
+```
+
+promote if (delta >= cutoff + k*SE) or (|delta - cutoff| < k*SE):
+
+```
+  k=1  ->  122 of 398 promoted (30.7%)
+  k=2  ->  166 of 398 (41.7%)
+  k=3  ->  211 of 398 (53.0%)     <- K=210 promotes 210 (52.8%)
+```
+
+At k=3 the band rule is **the same rule with different notation**. Its value is
+not that it promotes fewer items by magic; it is that `k` has a meaning
+("how many error-widths of protection") where `210` has none, so the number
+becomes arguable from a stated recall target instead of a sweep. Whether it is
+also *cheaper* depends entirely on what k the target justifies — and k=1 at 122
+items would be a genuine saving if 1 SE of protection is enough.
+
+**Do not adopt the band rule on the grounds that it is more principled while
+setting k by sweeping until misses hit zero.** That reproduces the original
+problem with extra steps.
+
+## Directions worth testing (none chosen; that is the ticket's job)
+
+1. **State the recall target first**, then derive the rule. Without this, the
+   rest is guessing.
+2. **Two-stage screening.** Re-screen only the undecidable band at higher
+   iterations, rather than promoting all of it to full sims. This is the one
+   direction that attacks the root cause — the cutoff (3.6 DPS) being finer
+   than the screening SE (5.128 DPS) — instead of budgeting around it. More
+   iterations on 77 items is much cheaper than full sims on 124 extra ones.
+3. **Skip screening entirely on small pools.** The P2 ratio of 0.9837 says
+   racing is already close to pointless there; a pool-size threshold may beat
+   any budget rule.
+4. **Accept that items inside the cutoff's error bar are unclassifiable** and
+   handle them as a declared band in the output rather than pretending the
+   screen decided them. Relates to ticket 224.
 
 ## Acceptance criteria
 
-- [ ] A stated relationship between the promotion budget, the measured
-      screening SE, and the observed rank displacement — so the budget's size
-      has a reason, not just a sweep result.
-- [ ] Either a rule that adapts to pool shape, or a recorded decision that the
-      swept constant is the right tool with the re-measurement trigger written
-      down.
+- [ ] **A stated recall target**: what fraction of above-cutoff items must
+      survive screening, at what probability. This is the criterion everything
+      else depends on, and it does not currently exist anywhere in the repo.
+- [ ] The chosen rule's promoted-set size is a *consequence* of that target,
+      derivable without sweeping. If a sweep is still used to set the final
+      constant, say so plainly rather than presenting the result as principled.
+- [ ] The band-rule equivalence above is addressed head on: any proposal must
+      say why it is not K=210 in different notation (`k=3` promotes 211).
 - [ ] The recall gate (`racing.test.ts` 7.2 and 7.3) still passes at zero
       misses on both fixtures. **Never weaken the gate to make a cheaper rule
       look good** (candidate-pool.md §7).
 - [ ] The full-sims/eligible ratio is reported for both fixtures under whatever
       rule is chosen, and the P2 ratio of 0.9837 is explicitly addressed —
       either improved or accepted with its reason.
+- [ ] Reproduce both probes and confirm their numbers still hold on whatever
+      fixture is current:
+      `node .scratch/carry-forward/probes/225-cutoff-density.mjs` and
+      `node .scratch/carry-forward/probes/225-band-rule-comparison.mjs`.
 
 ## Out of scope
 
