@@ -252,9 +252,66 @@ export type RankInput = {
    * Kept as a knob rather than reverted: the mechanism is fixture-dependent,
    * and a pool with more slots or a flatter cutoff would change the table.
    * Re-measure before changing the default — recall gate is `npx vitest run
-   * packages/core/test/racing.test.ts -t 7.2`, ratio is `npx tsx
-   * packages/core/test/measure-racing-ratio.ts`. Ignored when `fullPool:
-   * true`.
+   * packages/core/test/racing.test.ts -t 7.2`. The ratio column is **not
+   * currently reproducible**: `packages/core/test/measure-racing-ratio.ts`
+   * throws `RankError { kind: 'sim-failed' }` (pre-existing, ticket 223), so
+   * the ratio figures above stand as recorded numbers with no working re-run
+   * command until 223 lands.
+   *
+   * ## The floor is inert on the shipped feral P3 pool (ticket 222)
+   *
+   * Measured over 30 noise draws: the floor promotes **zero additional rows
+   * at K=210 and zero at K=150 alike**. The global top-K already takes every
+   * slot's screening argmax, so `promotionRule`'s per-slot `slice(0, j)`
+   * finds nothing left to add at either value.
+   *
+   * The cause is **cutoff density and slot count on this pool, not the value
+   * of K**: 398 entries spread over 14 slots (largest weapon 91, smallest
+   * ranged 2), with K admitting 38–53% of the pool. At that density every
+   * slot's argmax clears the global cutoff on its own. Lowering K back to 150
+   * would not reactivate the floor — the sweep runs both values so this is
+   * re-runnable rather than asserted.
+   *
+   * What *would* change it, and should re-trigger this measurement: a
+   * materially larger pool, more slots, or a much smaller K/pool ratio. Any
+   * of those can put a slot's argmax outside the global top-K and give the
+   * floor real work, at which point the depth question below reopens.
+   *
+   * ## Screening SE at 1,000 iterations, measured
+   *
+   * **5.128 DPS** mean (min 2.36, max 6.08) over the 461 recorded feral P3
+   * candidates; the pairwise difference scale is `sqrt(2) * SE ≈ 7.25 DPS`.
+   * This replaces the `1/sqrt(n)` extrapolation off F10's ~6.8 DPS at 300
+   * iterations, which gives 3.72 DPS and sits 27% below the measured mean.
+   * `stdev` is a per-iteration population sd with no `/sqrt(N)` applied
+   * (`vendor/tbc-new-fork/sim/core/sim_concurrent.go:138`), so `SE =
+   * stdev/sqrt(n)` is the correct shape rather than an inherited assumption.
+   *
+   * ## Ordering below the argmax
+   *
+   * Screened rows are not deleted: `rank.ts` orders them against each other
+   * by screening delta. Within-slot ordering noise below the argmax is
+   * bounded under the repo's own **independent-Gaussian noise model using
+   * real per-candidate stdevs** — 6,306 inversions of 103,616 pairs (6.09%)
+   * over 30 draws, maximum rank displacement 12; restricted to pairs whose
+   * recorded truth separates them by more than the 7.25 DPS noise scale, 587
+   * of 88,046 (0.67%). Slots with a high raw rate are packed inside the noise
+   * rather than misordered: trinket inverts 43% of pairs raw, but **none** of
+   * its 66 pairs are separated by more than the noise scale, so no achievable
+   * ordering would do better.
+   *
+   * **No artifact of a real shipped ordering exists** — ticket 219 saved
+   * aggregates only — so this is a distributional model, not a byte replay.
+   * Real screening shares a seed across candidates, so real errors are
+   * plausibly correlated, and correlated errors preserve order better than
+   * independent ones: these counts are a **conservative upper bound** on
+   * shipped disorder, not an unbiased estimate of it. On that basis the
+   * ordering is accepted and documented.
+   *
+   * Every figure in these three sections: `npx tsx
+   * packages/core/test/measure-within-slot-ordering.ts`.
+   *
+   * Ignored when `fullPool: true`.
    */
   promoteTopJ?: number;
   /**
