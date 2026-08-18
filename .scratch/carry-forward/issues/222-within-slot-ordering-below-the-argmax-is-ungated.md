@@ -308,7 +308,7 @@ comment states the ratio column is not currently reproducible and points at
       per-candidate stdevs and real screening shares a seed, so these are a
       conservative upper bound, not a measurement of a shipped ordering. See
       Findings section 3.
-- [ ] `sme-rank-review` has judged whether the shipped within-slot ordering
+- [x] `sme-rank-review` has judged whether the shipped within-slot ordering
       below the argmax is defensible as game-domain output, and its verdict is
       recorded here.
       Input prepared at
@@ -358,3 +358,49 @@ re-running.
 
 This decision records the engineering half of the question. The game-domain
 half is the open SME criterion above and is not presumed here.
+
+## SME verdict (2026-08-18) — `trust-with-caveats`
+
+Run by the orchestrator against
+`.scratch/stage-gate/ticket-222-within-slot-ordering/sme-input.md`; handoff at
+`.scratch/handoffs/sme-rank-judgment-ticket-222-within-slot-ordering.md`.
+
+**The sort order is upheld.** 0.67% inversion among truth-resolvable pairs and
+0.4% in the weapon slot — the 78-row list users actually read. The SME supplied
+the game-domain reason the measurement could not: feral cat item value within a
+slot keys off a small stat set (agility, AP, crit, and on weapons the weapon
+damage and feral AP) that scales with item level inside a tier, so true deltas
+spread out rather than cluster.
+
+**Trinket and finger are confirmed as a game fact, not a precision failure.**
+TBC itemises trinkets as an effect rather than a stat line, and the Phase 3
+feral trinkets converge on a budgeted tie from two directions (static agi/AP
+versus proc/on-use); rings below the top one or two are famously flat. This is
+independent agreement with the measurement's zero-resolvable-pairs result. More
+iterations cannot fix it — there is no difference there to find, and engineering
+should not chase it as a bug.
+
+**Head's 12.1% raw rate is harmless churn.** Rows 4-13 are caster and healer
+pieces (Crown of the Sun, Headdress of the High Potentate, Uni-Mind Headdress,
+Collar of Cho'gall) that a feral would never equip, correctly priced at 230-264
+DPS losses. The top three — Cursed Vision of Sargeras, Cowl of Defiance, Malefic
+Mask of the Shadows — are real leather melee helms in a sensible order at zero
+displacement.
+
+**The caveat, and what it changes.** The SME judged "accept and document"
+sufficient for the sort order but **not** for the trinket and finger
+*presentation*: the structural signals this ticket leans on (`rank: null`,
+sorting below simmed rows, separate tie groups) do not do the work, because a
+list in an order reads as a ranking. A feral scanning 12 numbered trinkets
+chases the first, when all 12 are indistinguishable and the real decision is
+drop source, cooldown alignment with Tiger's Fury and Berserk, and fight length.
+
+**Orchestrator disposition.** The Decision above **stands** for the sort order —
+it is measured, bounded, and now independently judged defensible. The
+presentation concern is real but is a behaviour change, which this ticket's own
+Out of scope excludes, so it does not ride in silently here. Filed as
+`.scratch/carry-forward/issues/224-tie-group-screened-rows-by-measurement-resolution.md`:
+group ties by the measurement's own resolution and mark such slots as tied sets
+rather than ordered lists — no reordering, no extra iterations, no row removal.
+
+With this recorded, the SME acceptance criterion is met.

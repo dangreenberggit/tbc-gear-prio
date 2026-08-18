@@ -308,6 +308,17 @@ export type RankInput = {
    * shipped disorder, not an unbiased estimate of it. On that basis the
    * ordering is accepted and documented.
    *
+   * `sme-rank-review` judged this output **trust-with-caveats** (ticket 222,
+   * 2026-08-18). It upheld the sort order and supplied the game reason the
+   * measurement could not: feral item value within a slot keys off a small
+   * stat set that scales with item level inside a tier, so true deltas spread
+   * rather than cluster. It also confirmed the trinket/finger result is a game
+   * fact rather than a precision failure — TBC itemises trinkets as an effect,
+   * not a stat line, so more iterations cannot resolve them. Its one caveat is
+   * about **presentation**, not ordering: a list in an order reads as a
+   * ranking even with `rank: null` and separate tie groups. That is ticket 224
+   * (tie-group by the measurement's own resolution), not a change here.
+   *
    * Every figure in these three sections: `npx tsx
    * packages/core/test/measure-within-slot-ordering.ts`.
    *
