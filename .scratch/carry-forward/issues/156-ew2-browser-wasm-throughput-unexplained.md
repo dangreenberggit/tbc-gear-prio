@@ -4,8 +4,9 @@ Origin: slice 3 + orchestrator follow-up, 2026-08-14
 (`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
 Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3). The
-5,000-iteration run is done (2026-08-17). Remaining: AC2 only — a
-foregrounded-tab run, or an explanation of the original slowness.
+5,000-iteration run is done (2026-08-17). AC2 met 2026-08-18 by a
+foregrounded Brave run. Remaining: the restated 20-candidate table
+(three runs per cell) and the unexplained run-to-run variance.
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
 
@@ -76,8 +77,9 @@ in either direction, and plan §5's candidate-count budget is guesswork.
       with worker count and machine, written into plan §5. (Done 2026-08-17,
       see "The 5,000-iteration run" below; 3,000 row cited from ticket 212's
       slice-5 record, 5,000 row measured.)
-- [ ] Either the slowness is explained, or it is shown absent in a real
+- [x] Either the slowness is explained, or it is shown absent in a real
       foregrounded browser (in which case say so, with the numbers).
+      (Second arm, done 2026-08-18 — see the 641 s foregrounded run below.)
 - [x] If a production build behaves differently from the dev server, record
       that — it changes how every future in-browser measurement is taken.
 
@@ -1130,3 +1132,130 @@ per-candidate figure is carried forward from it. The 2026-08-18 feral run's raw
 record (398 screened, 199 fully simmed, 2724 s wall clock) is in ticket 219; it
 is logged there as a completion record, **not** as an E-W2 throughput
 measurement.
+
+## 2026-08-18 (later) — AC2 met: a genuinely foregrounded run, 641 s, zero hidden samples
+
+**AC2 is now checked.** AC1 and AC3 are untouched by this entry. Status stays
+**open**: other acceptance boxes in this ticket are still unchecked — see
+"What remains" at the end. No CLI-vs-browser winner is claimed and no ratio is
+quoted as settled; the standing instruction (`ee953e0`) holds.
+
+**The surface is what changed.** Claude in Chrome extension driving **Brave**,
+with the tab fronted **manually by the user**. That is the difference from
+every earlier attempt: runs in the Claude Code Browser pane, and an earlier
+Brave attempt where the tab was not fronted, all read `hidden`. The user
+fronting the correct tab is what made this measurement possible at all.
+
+**Setup.** Served production build of `vendor/tbc-new-fork/dist`, druid feral
+cat, Phase 3.
+
+```
+"C:/Users/dgree/Code/lulz/tbc-gear-prio/vendor/tbc-new-fork/node_modules/.bin/http-server" \
+  "C:/Users/dgree/Code/lulz/tbc-gear-prio/vendor/tbc-new-fork/dist" -p 8899 -c-1 --silent
+# then http://127.0.0.1:8899/tbc/druid/feralcat/ -> Upgrades -> Run
+```
+
+Settings: Iterations **3000**, Candidate cap **20** (drawer confirmed:
+"Candidate cap: top 20 of the candidates that survived screening"), screening
+on. Drawer also read `Max phase 3`; engine fork commit `4018f9bf8`.
+
+**Measurement.**
+
+| | |
+|---|---|
+| Iterations | 3,000 |
+| Candidate cap | 20 |
+| Pool | all 398 eligible screened, then capped to 20 |
+| Full sims | 71 candidates (read at the 507 s mark as "67/71") |
+| **Wall clock** | **641 s** (10.7 min), completed on its own — not stopped |
+| **Visibility** | **325 of 325 samples `visible` AND `hasFocus: true`; zero hidden** |
+| Drops | **0** occurrences of "No item with id" |
+| Result rows | 808 |
+| Workers | **1** (`__tbc_new_wasmconcurrency` = `"1"`) |
+| `navigator.hardwareConcurrency` | **3** |
+| `navigator.deviceMemory` | 8 |
+| Host machine | 20 logical CPUs (`nproc` -> 20) |
+
+**How visibility was established, and why it is the load-bearing fact.** A
+`setInterval` recorder was armed immediately **before** the Run click and
+cleared after completion, sampling `document.visibilityState` and
+`document.hasFocus()` every 2 seconds. All 325 samples read `visible` with
+`hasFocus: true`. The tab was continuously foregrounded for the **entire**
+run, not merely spot-checked before and after — which is what every previous
+entry in this ticket could not establish.
+
+Drops were counted after opening all `<details>` elements and clicking every
+"Show N item(s)" toggle, so the count covers the collapsed rows too.
+
+**This is a SINGLE-WORKER number.** The browser derived one worker, so 641 s
+is not a multi-worker throughput figure and must not be read as one.
+
+### Why `__tbc_new_wasmconcurrency` = "1" is correct, not a stale preference
+
+Earlier entries treated the `"1"` reading as a suspicious stored value. It is
+the correct derived default. The worker count comes from
+`vendor/tbc-new-fork/ui/core/sim.ts:137-145`, verified by reading the file
+this session:
+
+```ts
+let wasmConcurrencySetting = parseInt(window.localStorage.getItem(WASM_CONCURRENCY_STORAGE_KEY) ?? 'NaN');
+if (isNaN(wasmConcurrencySetting)) {
+    wasmConcurrencySetting = 0;
+    if (navigator.hardwareConcurrency > 1) {
+        wasmConcurrencySetting = Math.min(4, Math.floor(navigator.hardwareConcurrency / 2));
+    }
+}
+```
+
+With `hardwareConcurrency = 3`, `Math.min(4, Math.floor(3 / 2))` is exactly
+**1**. Both the Claude Code Browser pane and Brave report 3 on this 20-CPU
+host; the earlier run that reported 20 cores and 4 workers is the outlier, not
+this one. Re-check with:
+
+```bash
+sed -n '137,145p' vendor/tbc-new-fork/ui/core/sim.ts
+```
+
+**Do not compare 641 s to the other wall clocks in this ticket.** Not to the
+2026-08-17 feral run's 2724 s, and not to the ret run's 1041 s. Candidate
+caps, worker counts and pools all differ across those runs; they are not
+matched and no ratio between them means anything.
+
+### The AC2 judgment
+
+AC2 asks that the slowness be explained **or** "shown absent in a real
+foregrounded browser (in which case say so, with the numbers)". The second arm
+is satisfied:
+
+- **"Real foregrounded browser"** — Brave, a normal browser, tab fronted by a
+  human, `visible` and focused on 325 of 325 samples spanning the whole run.
+  This is the property every earlier attempt failed on and the reason AC2 sat
+  open through five sessions.
+- **"Shown absent"** — the symptom the ticket was opened for is "sims that
+  finish in seconds outside the browser do not finish in minutes inside it".
+  This run completed 398 screens plus 71 full sims at 3,000 iterations in
+  10.7 minutes on **one** worker, with no stall, no drop, and 808 result rows.
+  Nothing pathological occurred; the run finished by itself.
+- **"With the numbers"** — the table above.
+
+So AC2's second arm is met and the box is checked. What is explicitly **not**
+claimed: the *cause* of the original slowness. AC2's first arm remains
+unanswered — which of the production build, the worker bundles, or ticket
+212's fix mattered is still unisolated, because the dev server was never
+re-run for comparison. AC2 is disjunctive, and the arm satisfied here is the
+second one.
+
+### What remains
+
+Checking AC2 does not close this ticket. Still unchecked:
+
+- The restated 20-candidate table (line ~216): three runs per cell at 3,000
+  **and** 5,000 iterations, with worker count, candidate concurrency and
+  machine. This run is one cell, one run, at 3,000 only.
+- Foregrounded status stated explicitly for that table (line ~218) — stated
+  here for this run, but the table itself does not exist.
+- The run-to-run variance (line ~219), explained or recorded with its spread.
+- The 2026-08-16 restated checklist (lines ~454-460), which the tracked table
+  above supersedes in substance but which is not itself checked off.
+
+Status stays **open** for those.
