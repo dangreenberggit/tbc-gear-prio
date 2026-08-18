@@ -695,6 +695,161 @@ function buildForkDatabaseJson(): Record<string, unknown> {
 }
 
 /**
+ * Stand the fork engine up under this repo's test runner: the `window`
+ * stub and the two `vi.doMock` calls its import graph needs, then the
+ * engine modules themselves. Extracted so the two cases below share one
+ * copy — the mocks are the fiddly part, and two drifting copies of them
+ * would be a worse hazard than the extraction.
+ */
+async function loadForkEngine() {
+  // The ported engine's items.ts/gems.ts adapters call
+  // `Database.getSync().{getItemById,lookupGem,getGems}` — the only three
+  // methods either module reads. Rather than import the fork's *real*
+  // `Database` class (proto_utils/database.ts), this mocks that module
+  // outright: the real class's import graph reaches
+  // `ui/core/launched_sims.tsx` → `constants/other.ts` (module-scope
+  // `window.location` read) and `ui/i18n/config.ts` (a Vite-only
+  // `virtual:i18next-loader` specifier that only resolves inside the
+  // fork's own `vite.config` — not under plain vitest transform).
+  // Neither is a defect in the port; they are facts about how deep the
+  // rest of the fork's UI bootstrap sits behind one import, confirmed by
+  // running this suite without the mock and reading each successive
+  // ReferenceError/resolution-error. A fake `Database` sidesteps both
+  // without needing the fork's Vite pipeline in this repo's test runner.
+  //
+  // `enchants.ts` (this port's own bridge to the fork's upstream
+  // `enchantAppliesToItem`, see its doc comment) imports
+  // `proto_utils/utils.ts` directly — a second, independent path to the
+  // same `constants/other.ts` module-scope `window.location` read, not
+  // reachable through `database.ts` at all. A one-field stub is the
+  // cheapest fix and is not a fake: this is exactly the `window` a real
+  // page supplies, just not fetched through a browser here.
+  // `player_specs/druid.ts` (reached transitively through
+  // `proto_utils/utils.ts`'s module-scope `getSpecSiteUrl` static
+  // initializers) additionally needs `protocol`/`host` to build a `new
+  // URL(...)` — same reasoning as above, filled in as the errors named
+  // them rather than guessed at up front.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (globalThis as any).window ??= {
+    location: {
+      pathname: "/tbc/",
+      protocol: "https:",
+      host: "localhost",
+    },
+  };
+  const dbJson = buildForkDatabaseJson();
+  const { UIDatabase } = await import(
+    pathToFileURL(join(forkProtoDir, "ui.ts")).href
+  );
+  const uiDb = UIDatabase.fromJson(dbJson) as {
+    items: Array<{
+      id: number;
+      setId: number;
+      setName: string;
+      gemSockets: number[];
+      stats: number[];
+      socketBonus: number[];
+      unique: boolean;
+      type: number;
+      handType: number;
+      weaponType: number;
+      rangedWeaponType: number;
+      name: string;
+    }>;
+    gems: Array<{
+      id: number;
+      color: number;
+      stats: number[];
+      phase: number;
+      quality: number;
+      unique: boolean;
+    }>;
+  };
+  const itemsById = new Map(uiDb.items.map((i) => [i.id, i]));
+  const gemsById = new Map(uiDb.gems.map((g) => [g.id, g]));
+  const fakeDatabase = {
+    getItemById: (id: number) => itemsById.get(id),
+    lookupGem: (id: number) => gemsById.get(id) ?? null,
+    getGems: () => [...gemsById.values()],
+    // enchants.ts's bridge scans every slot's enchant list looking for a
+    // matching effectId, then hands the record to the (also mocked, see
+    // below) upstream `enchantAppliesToItem`. Since that mock decides
+    // applicability from `effectId` alone via `ENCHANT_APPLIES`, one
+    // synthetic record per known effectId — returned for every slot — is
+    // enough to reach it; the fake never needs slot-shaped data of its own.
+    getEnchants: () =>
+      [...ENCHANT_APPLIES.keys()].map((effectId) => ({ effectId })),
+  };
+
+  vi.doMock(
+    pathToFileURL(join(forkRoot, "ui/core/proto_utils/database.ts")).href,
+    () => ({ Database: { getSync: () => fakeDatabase } })
+  );
+
+  // enchants.ts's bridge to the fork's real `proto_utils/utils.ts`
+  // (its own doc comment explains why it delegates rather than
+  // re-deriving) turns out to be unimportable outside the fork's own Vite
+  // build: `utils.ts` reaches `ui/player_specs/*` → `ui/i18n/config.ts`,
+  // which imports a Vite-generated `virtual:i18next-loader` specifier that
+  // only resolves inside the fork's own `vite.config.mts` plugin chain —
+  // confirmed by exhausting every `window`-stub fix first and hitting this
+  // wall regardless. Mocked here to a small table covering exactly the
+  // enchant effect ids the slamaltman fixture and this test's swap path
+  // touch (see `ENCHANT_APPLIES` below) — this test's job is proving
+  // rank.ts's ported *ranking arithmetic* matches, not exercising
+  // upstream's enchant-slot eligibility machinery, which this port does
+  // not modify and which stays covered by the fork's own eventual UI
+  // testing (or lack of it — plan §8's "the fork has no TS test runner").
+  vi.doMock(
+    pathToFileURL(join(forkRoot, "ui/core/proto_utils/utils.ts")).href,
+    () => ({
+      enchantAppliesToItem: (
+        enchant: { effectId: number },
+        item: { id: number }
+      ) => ENCHANT_APPLIES.get(enchant.effectId)?.has(item.id) ?? false,
+      getEligibleItemSlots: () => [],
+      getEligibleEnchantSlots: () => [],
+    })
+  );
+
+  const forkRank = await import(
+    pathToFileURL(join(forkEngineDir, "rank.ts")).href
+  );
+  const forkCompose = await import(
+    pathToFileURL(join(forkEngineDir, "compose.ts")).href
+  );
+  const forkCandidateGems = await import(
+    pathToFileURL(join(forkEngineDir, "candidate-gems.ts")).href
+  );
+  const forkGems = await import(
+    pathToFileURL(join(forkEngineDir, "gems.ts")).href
+  );
+  const forkSlots = await import(
+    pathToFileURL(join(forkEngineDir, "slots.ts")).href
+  );
+  const forkGearSource = await import(
+    pathToFileURL(join(forkEngineDir, "seams/gear-source.ts")).href
+  );
+  const forkSimRunner = await import(
+    pathToFileURL(join(forkEngineDir, "seams/sim-runner.ts")).href
+  );
+  const forkStore = await import(
+    pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
+  );
+
+  return {
+    forkRank,
+    forkCompose,
+    forkCandidateGems,
+    forkGems,
+    forkSlots,
+    forkGearSource,
+    forkSimRunner,
+    forkStore,
+  };
+}
+
+/**
  * Whether to run this suite at all. Two independent absence conditions
  * (fork clone absent; fork present but protos not generated) collapse to
  * one skip path, since both mean "cannot import the fork's engine" and
@@ -708,140 +863,16 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     const { ranking: thisRepoRanking, composedRequests: thisRepoRequests } =
       await rankWithThisRepo();
 
-    // The ported engine's items.ts/gems.ts adapters call
-    // `Database.getSync().{getItemById,lookupGem,getGems}` — the only three
-    // methods either module reads. Rather than import the fork's *real*
-    // `Database` class (proto_utils/database.ts), this mocks that module
-    // outright: the real class's import graph reaches
-    // `ui/core/launched_sims.tsx` → `constants/other.ts` (module-scope
-    // `window.location` read) and `ui/i18n/config.ts` (a Vite-only
-    // `virtual:i18next-loader` specifier that only resolves inside the
-    // fork's own `vite.config` — not under plain vitest transform).
-    // Neither is a defect in the port; they are facts about how deep the
-    // rest of the fork's UI bootstrap sits behind one import, confirmed by
-    // running this suite without the mock and reading each successive
-    // ReferenceError/resolution-error. A fake `Database` sidesteps both
-    // without needing the fork's Vite pipeline in this repo's test runner.
-    //
-    // `enchants.ts` (this port's own bridge to the fork's upstream
-    // `enchantAppliesToItem`, see its doc comment) imports
-    // `proto_utils/utils.ts` directly — a second, independent path to the
-    // same `constants/other.ts` module-scope `window.location` read, not
-    // reachable through `database.ts` at all. A one-field stub is the
-    // cheapest fix and is not a fake: this is exactly the `window` a real
-    // page supplies, just not fetched through a browser here.
-    // `player_specs/druid.ts` (reached transitively through
-    // `proto_utils/utils.ts`'s module-scope `getSpecSiteUrl` static
-    // initializers) additionally needs `protocol`/`host` to build a `new
-    // URL(...)` — same reasoning as above, filled in as the errors named
-    // them rather than guessed at up front.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).window ??= {
-      location: {
-        pathname: "/tbc/",
-        protocol: "https:",
-        host: "localhost",
-      },
-    };
-    const dbJson = buildForkDatabaseJson();
-    const { UIDatabase } = await import(
-      pathToFileURL(join(forkProtoDir, "ui.ts")).href
-    );
-    const uiDb = UIDatabase.fromJson(dbJson) as {
-      items: Array<{
-        id: number;
-        setId: number;
-        setName: string;
-        gemSockets: number[];
-        stats: number[];
-        socketBonus: number[];
-        unique: boolean;
-        type: number;
-        handType: number;
-        weaponType: number;
-        rangedWeaponType: number;
-        name: string;
-      }>;
-      gems: Array<{
-        id: number;
-        color: number;
-        stats: number[];
-        phase: number;
-        quality: number;
-        unique: boolean;
-      }>;
-    };
-    const itemsById = new Map(uiDb.items.map((i) => [i.id, i]));
-    const gemsById = new Map(uiDb.gems.map((g) => [g.id, g]));
-    const fakeDatabase = {
-      getItemById: (id: number) => itemsById.get(id),
-      lookupGem: (id: number) => gemsById.get(id) ?? null,
-      getGems: () => [...gemsById.values()],
-      // enchants.ts's bridge scans every slot's enchant list looking for a
-      // matching effectId, then hands the record to the (also mocked, see
-      // below) upstream `enchantAppliesToItem`. Since that mock decides
-      // applicability from `effectId` alone via `ENCHANT_APPLIES`, one
-      // synthetic record per known effectId — returned for every slot — is
-      // enough to reach it; the fake never needs slot-shaped data of its own.
-      getEnchants: () =>
-        [...ENCHANT_APPLIES.keys()].map((effectId) => ({ effectId })),
-    };
-
-    vi.doMock(
-      pathToFileURL(join(forkRoot, "ui/core/proto_utils/database.ts")).href,
-      () => ({ Database: { getSync: () => fakeDatabase } })
-    );
-
-    // enchants.ts's bridge to the fork's real `proto_utils/utils.ts`
-    // (its own doc comment explains why it delegates rather than
-    // re-deriving) turns out to be unimportable outside the fork's own Vite
-    // build: `utils.ts` reaches `ui/player_specs/*` → `ui/i18n/config.ts`,
-    // which imports a Vite-generated `virtual:i18next-loader` specifier that
-    // only resolves inside the fork's own `vite.config.mts` plugin chain —
-    // confirmed by exhausting every `window`-stub fix first and hitting this
-    // wall regardless. Mocked here to a small table covering exactly the
-    // enchant effect ids the slamaltman fixture and this test's swap path
-    // touch (see `ENCHANT_APPLIES` below) — this test's job is proving
-    // rank.ts's ported *ranking arithmetic* matches, not exercising
-    // upstream's enchant-slot eligibility machinery, which this port does
-    // not modify and which stays covered by the fork's own eventual UI
-    // testing (or lack of it — plan §8's "the fork has no TS test runner").
-    vi.doMock(
-      pathToFileURL(join(forkRoot, "ui/core/proto_utils/utils.ts")).href,
-      () => ({
-        enchantAppliesToItem: (
-          enchant: { effectId: number },
-          item: { id: number }
-        ) => ENCHANT_APPLIES.get(enchant.effectId)?.has(item.id) ?? false,
-        getEligibleItemSlots: () => [],
-        getEligibleEnchantSlots: () => [],
-      })
-    );
-
-    const forkRank = await import(
-      pathToFileURL(join(forkEngineDir, "rank.ts")).href
-    );
-    const forkCompose = await import(
-      pathToFileURL(join(forkEngineDir, "compose.ts")).href
-    );
-    const forkCandidateGems = await import(
-      pathToFileURL(join(forkEngineDir, "candidate-gems.ts")).href
-    );
-    const forkGems = await import(
-      pathToFileURL(join(forkEngineDir, "gems.ts")).href
-    );
-    const forkSlots = await import(
-      pathToFileURL(join(forkEngineDir, "slots.ts")).href
-    );
-    const forkGearSource = await import(
-      pathToFileURL(join(forkEngineDir, "seams/gear-source.ts")).href
-    );
-    const forkSimRunner = await import(
-      pathToFileURL(join(forkEngineDir, "seams/sim-runner.ts")).href
-    );
-    const forkStore = await import(
-      pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
-    );
+    const {
+      forkRank,
+      forkCompose,
+      forkCandidateGems,
+      forkGems,
+      forkSlots,
+      forkGearSource,
+      forkSimRunner,
+      forkStore,
+    } = await loadForkEngine();
 
     const { ranking: forkRanking, composedRequests: forkRequests } =
       await buildRecordingsAndRun<Awaited<ReturnType<typeof rankUpgrades>>>({
@@ -958,6 +989,124 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     // Broadening the pool and seed count (ticket 155) pushed real elapsed
     // time for both engines' dynamic-imported dependency graphs past
     // vitest's 5s default; this is wall-clock reality, not slow test logic.
+  }, 30000);
+
+  /**
+   * Ticket 217: the fork's SCREENING compose site, which the case above
+   * cannot reach. That one passes `fullPool: true`, which skips screening on
+   * both engines by design — its recordings are pinned at one iteration count
+   * and a screening pass would ask the recorded runner for keys at
+   * `DEFAULT_SCREEN_ITERATIONS` that it rejects. So a port that threads the
+   * other three compose sites correctly and botches the screening one passed
+   * every E-W3 run before this case existed.
+   *
+   * This is the ticket's SECOND closing route: a fork-only check that needs no
+   * cross-engine parity at all. "The screening request carries a database
+   * describing its own equipment" is a property of ONE engine, so it can be
+   * asserted directly on the fork's captured requests — no recordings at
+   * screening iterations, and no answer required to the design question the
+   * first route would have forced.
+   *
+   * Cross-engine request equality is deliberately NOT asserted here. The
+   * fork's `promotion.ts` is a documented adapted port (its PROVENANCE row:
+   * no `promoteTopJ`, keeps the pre-§6.4 best-in-slot floor), so under
+   * `fullPool: false` the two engines may legitimately promote different
+   * candidate sets. What request-level parity should mean under divergent
+   * promotion is an open design question recorded on ticket 217; this case
+   * does not prejudge it.
+   *
+   * Nor does it assert WHICH candidates promote. The stub runner returns one
+   * constant observation, so every `deltaDps` is 0 and promotion falls back to
+   * `itemId` ordering — an artefact of the stub, not engine behaviour worth
+   * pinning. The assertions range over the captured screening requests only.
+   *
+   * The mirror of core's own gate for this site, `rank.test.ts:4495`
+   * ("gives screening requests their own database too").
+   */
+  it("gives the fork's screening requests their own database", async () => {
+    const { forkRank, forkGearSource, forkStore } = await loadForkEngine();
+
+    const screeningRequests: unknown[] = [];
+    // A stub rather than `RecordedSimRunner`: recordings are keyed by request
+    // content at a fixed iteration count, which is exactly what makes the
+    // screening pass unreachable in the case above. This runner answers any
+    // request at any iteration count, and captures what it was asked. The
+    // constant result is why nothing below asserts on promotion order.
+    const capturingSim = {
+      version: async () => SIM_VERSION,
+      run: async (req: unknown, opts: { seed: number; iterations: number }) => {
+        // Screening runs at its own (lower) iteration count; the
+        // full-iteration calls for whatever gets promoted are not this
+        // case's subject.
+        if (opts.iterations !== ITERATIONS) screeningRequests.push(req);
+        return {
+          dps: 1000,
+          stdev: 10,
+          iterationsDone: opts.iterations,
+          simVersion: SIM_VERSION,
+        };
+      },
+    };
+
+    await forkRank.rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        seeds: [SEEDS[0]!],
+        // The point of this case: screening runs only when fullPool is false.
+        fullPool: false,
+      },
+      {
+        gear: new forkGearSource.RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: capturingSim,
+        store: new forkStore.MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        simDatabaseFor: stubSimDatabaseFor,
+        pool: [
+          {
+            itemId: CANDIDATE_ITEM_ID,
+            name: CANDIDATE_NAME,
+            slot: "head",
+            phase: 2,
+            source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
+          },
+          {
+            itemId: SET_CANDIDATE_HEAD_ID,
+            name: SET_CANDIDATE_HEAD_NAME,
+            slot: "head",
+            phase: 2,
+            source: {
+              kind: "raid",
+              zone: "Karazhan",
+              boss: "Prince Malchezaar",
+            },
+          },
+          {
+            itemId: SET_CANDIDATE_SHOULDER_ID,
+            name: SET_CANDIDATE_SHOULDER_NAME,
+            slot: "shoulder",
+            phase: 2,
+            source: {
+              kind: "raid",
+              zone: "Karazhan",
+              boss: "Prince Malchezaar",
+            },
+          },
+        ],
+      }
+    );
+
+    // Guards the assertion below against vacuity: if screening ever stops
+    // running here, the forEach would pass over an empty list and this case
+    // would silently stop gating anything.
+    expect(screeningRequests.length).toBeGreaterThan(0);
+    expectRequestsCarryOwnDatabase(screeningRequests, "forkScreeningRequests");
   }, 30000);
 });
 
