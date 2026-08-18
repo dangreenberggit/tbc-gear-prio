@@ -252,11 +252,14 @@ export type RankInput = {
    * Kept as a knob rather than reverted: the mechanism is fixture-dependent,
    * and a pool with more slots or a flatter cutoff would change the table.
    * Re-measure before changing the default — recall gate is `npx vitest run
-   * packages/core/test/racing.test.ts -t 7.2`. The ratio column is **not
-   * currently reproducible**: `packages/core/test/measure-racing-ratio.ts`
-   * throws `RankError { kind: 'sim-failed' }` (pre-existing, ticket 223), so
-   * the ratio figures above stand as recorded numbers with no working re-run
-   * command until 223 lands.
+   * packages/core/test/racing.test.ts -t 7.2`, and the ratio re-run command
+   * is `npx tsx packages/core/test/measure-racing-ratio.ts`, which reports
+   * 0.9708 (233 full-iteration sims of 240 eligible) at the shipped K=210.
+   * That script ranks the **ret** tuning fixture, while the table above and
+   * the 0.6457/0.9837 figures were measured on the **feral** fixture through
+   * the 7.0 gate's `CountingSimRunner` (ticket 221 harness); the ret P2
+   * number corroborates the feral P2 one — two pools, same conclusion that
+   * at K=210 racing barely beats a full sweep (ticket 223).
    *
    * ## The floor is inert on the shipped feral P3 pool (ticket 222)
    *

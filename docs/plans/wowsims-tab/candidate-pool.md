@@ -436,8 +436,10 @@ defined once in `packages/core/src/promotion.ts`
 `RankInput.screenIterations`/`promoteTopK` in `packages/core/src/rank.ts`.
 
 **Ratio: 0.7042** (169 full-iteration sims of 240 eligible), measured with
-`npx tsx packages/core/test/measure-racing-ratio.ts` — **above the ≤ 0.4
-target, not below it.** The mechanism is direct: `promoteTopK = 150` on a
+`npx tsx packages/core/test/measure-racing-ratio.ts` at `promoteTopK = 150`
+— **above the ≤ 0.4 target, not below it.** At the shipped `K = 210` the
+same command reports 0.9708 (233 of 240; ticket 223), further above the
+target: raising K promotes more of the pool, so the ratio can only rise. The mechanism is direct: `promoteTopK = 150` on a
 240-candidate pool promotes roughly `150/240 ≈ 0.625` of the pool from
 top-K alone, before best-in-slot, set-package and owned add anything, and
 `promoteTopK` cannot be lowered without reopening the recall miss above —
@@ -499,7 +501,10 @@ The ~15% WASM win recorded in §3.4.1 and the handoff is reproducible **only
 at 5000 iterations**. At the 3000 the browser actually ships, racing at
 shipped defaults is a _loss_. Racing pays only when the promoted ratio falls
 below `1 - (screens/eligible) * cost(screenIters)/cost(fullIters)` -- 0.571
-at 3000 iterations, 0.735 at 5000 -- and the measured ratio is 0.7042.
+at 3000 iterations, 0.735 at 5000 -- and the measured ratio is 0.7042 at
+`promoteTopK = 150`, or 0.9708 at the shipped `K = 210` (ticket 223). Both
+sit above the 0.571 break-even, and the K=210 figure sits further above it,
+so the conclusion below strengthens rather than softens at shipped defaults.
 
 Neither the ratio target nor the racing win survives this fixture at 3000
 iterations. Options remaining, none built: raise the browser default to 5000
