@@ -7,7 +7,7 @@ Origin: user challenge during the 2026-08-18 review of ticket 221 — "am I
 Blocks: none
 Blocked by: none
 
-# `promoteTopK` costs 53% of the pool to find the 22% that are upgrades
+# The screening ranking is unreliable exactly where `promoteTopK` cuts it
 
 ## The challenge, and why it is well aimed
 
@@ -47,28 +47,70 @@ On the P2 pool, racing now performs **98% of the work a full sweep would**.
 The screening shortcut has very nearly stopped being a shortcut there. §6.4's
 stated target was <= 0.4.
 
+## The measured reason, which is sharper than "the budget is too big"
+
+The user pressed the point that matters: if we re-check 150 candidates and a
+genuine upgrade **still** misses the list, the ranking that produced those 150
+is the problem, not its length. The fixture says exactly that.
+
+Density around the cutoff, computed from the committed `feral-p3` recordings
+(461 rows, 3,000-iteration truth):
+
+```
+rank  86:  1958.33 DPS   77 items within +/-1 screening SE
+rank 150:  1950.44 DPS   86 items within +/-1 screening SE
+rank 195:  1945.24 DPS   77 items within +/-1 screening SE
+rank 210:  1943.18 DPS   75 items within +/-1 screening SE
+
+gap rank 86 -> rank 150:  7.89 DPS = 1.54 x SE
+gap rank 86 -> rank 210: 15.15 DPS = 2.95 x SE
+```
+
+Screening SE is **5.128 DPS** at 1,000 iterations (ticket 222, verified against
+the fork source). Consecutive items near the cutoff differ by roughly **0.1
+DPS**. So at any rank in this region, **~80 items are statistically tied**, and
+the entire span from the last real upgrade (86) to the shipped budget (210) is
+**under three noise-widths**.
+
+**The screening ranking near the cutoff is close to meaningless.** Raising K
+from 150 to 210 does not make it more accurate; it widens the net over a region
+the measurement cannot order. That is why the fix worked empirically and why it
+should not be trusted as a principle — the same noise that pushed an item past
+150 can push one past 210, and only luck over 30 draws says otherwise.
+
+## The cutoff is smaller than the noise that decides it
+
+Worse, and this is the root:
+
+```
+feral cutoff (cutoff.ts:27 CUTOFF_FERAL.absDps):  3.6 DPS
+screening SE at 1,000 iterations:                 5.128 DPS
+```
+
+The threshold for "is this an upgrade at all" is **smaller than the error bar of
+the measurement used to screen against it**. Splitting the 86 above-cutoff rows
+by that error bar:
+
+```
+clearly above cutoff (delta > cut + 1 SE):   45
+within +/-1 SE of the cutoff (undecidable):  77
+```
+
+So "86 upgrades" is really **~45 solid upgrades and a large undecidable band**.
+Screening cannot classify the band, at any budget, because the question is finer
+than the instrument. Every figure in the two blocks above is reproduced by:
+
+```
+node .scratch/carry-forward/probes/225-cutoff-density.mjs
+```
+
+which reads only the committed fixture
+(`packages/core/test/fixtures/synthetic-roster-recordings.json`).
+
 ## The question this ticket exists to answer
 
-Ticket 221 established empirically that K=210 gives zero misses over 30 seeded
-noise draws, and that the zero-miss floor is 195. What it did **not** establish
-is *why* 210 is enough, and that gap is the concern:
-
-If screening noise (measured at ~5.13 DPS at 1,000 iterations, ticket 222) can
-push a genuine upgrade from its true position past 150, what bounds the
-displacement at 210? "It held across 30 draws" is evidence, not a mechanism. A
-principled answer would relate the budget to the noise scale and the density of
-candidates near the cutoff, rather than to a swept constant that must be
-re-measured every time the pool changes shape.
-
-Note the two known facts that make this tractable now, both from ticket 222:
-
-- The screening SE at 1,000 iterations is **measured**, not extrapolated:
-  5.128 DPS mean (min 2.36, max 6.08), and `SE = stdev/sqrt(n)` is verified
-  against the fork source (`vendor/tbc-new-fork/sim/core/sim_concurrent.go:138`).
-- Maximum observed rank displacement anywhere was **12** positions.
-
-A displacement bound of ~12 does not obviously require a 60-row margin over the
-86 real upgrades.
+Not "what should K be" but **"should a rank budget be the mechanism at all"**,
+given that the ranking it slices is unreliable exactly where it is sliced.
 
 ## Candidate directions (none chosen; that is the ticket's job)
 
