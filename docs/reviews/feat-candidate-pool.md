@@ -263,3 +263,104 @@ regression was fixed properly rather than patched.
 
 12 fixed, 3 deferred to tickets 200–202, 3 wontfix with reasons. No blocker
 remains open; both Linus blockers are resolved in both engine copies.
+
+## Round 3 — tickets 156–225 (2026-08-18)
+
+Reviewed range: `8867f5c5108377a88c7ddd6e0c49d7ce608d97d8..8cb5e68767c68625a80db3bacf1dbf818404ea10`
+
+Covers everything after the fix-round review commit: tickets 156, 212–214,
+218, 219, 221–225 (223–225 ran through the stage-gate pipeline, each with a
+code review and an SME review reconciled by the orchestrator; stage artifacts
+under `.scratch/stage-gate/ticket-22{3,4,5}-*/`). Dispatch: `codex` not on
+`PATH`; adversarial + domain + standards + spec as four fresh-context Opus
+subagents in one batch. The adversarial axis initially left the
+scripts/measurement lane unexamined and was sent back to finish it; that lane
+executed three of the four `measure-*.ts` scripts and reproduced every figure
+`rank.ts` quotes from them. Fixes landed at `dc49801..1d56e5f` (tip
+`1d56e5f4e70e65760a326e87e0975578f03351ed`); this table's `fixed` rows point
+there.
+
+### Adversarial
+
+No correctness bug in `packages/core/src` survived. Cleared: `SLOT_ORDER`
+exhaustive over `ItemSlot`; new `sim-failed` throw handled by the generic
+`RankError` arm; owned candidates whose screen panics still get a
+`candidateSkips` row; no purity violations. `DerivedNoiseSimRunner` verified:
+`se = stdev/sqrt(iterations)` matches the fork's population-sd `stdev`, noise is
+seeded per request so a candidate gets identical noise across the K sweep.
+Findings: A1 stale "shipped K=150" in `promotion.ts`; A2 the feral ratios
+0.6457/0.9837 had no re-run command; A3 tautological sum test; A4 `"1
+candidates"` matches `"11 candidates"`; A5 digest-repin comment overstates
+what the test proves; A6 structurally-guaranteed guard in the parity test.
+
+### Domain
+
+No contradiction of `docs/stage0-findings.md` / `docs/verification-log.md` in
+src, tests, data or the plan doc. D1: ticket 228's druid proficiency list was
+wrong and its "no source in this repo" claim false — authority is
+`vendor/tbc-new-fork/ui/core/player_classes/druid.ts` (Dagger, Fist, Mace,
+OffHand, Staff): polearm is not druid-equippable, off-hand is. D2: 228's "nothing
+reads `weaponType` for eligibility" is false — `scripts/assemble_universe.py`
+does, and the feral profile's `excluded_weapon_types` is an empty set while its
+own comment names the druid list. Tickets 226/227 correctly label recalled
+knowledge and hypotheses.
+
+### Standards + Spec
+
+Standards: no hard violation (types-from-JSON, seams, durable claims, comment
+policy all checked and clean). Judgement calls: the four `measure-*.ts` scripts
+share a copied prologue and `RosterRecordingsFile` type (S1); `SCREEN_SE =
+5.128` hard-coded in `measure-cutoff-band.ts` (S2); ruled-out sort key
+duplicated in `rank-report.ts` with the reason commented (S3, accepted).
+
+Spec: the recall gate is not weakened (7.2 assertions byte-identical, 7.3 is a
+new P3 gate). Findings: P1 ticket 156 has ticked ACs while open; P2 ticket 219
+resolved over unretracted blockers; P3 §10 REPORT.md never written; P4 ticket
+225 closed with 5/7 ACs unticked (recorded honestly); P5 `promoteTopJ` is a
+shipped knob nothing uses; P6 failed-screen filter in `promotionRule`
+attributed to 156; P7 §6.1 says the count line is behind the flag; P8 test
+name "7.3" collides with §7's Determinism row; P9 duplicated sort key.
+
+### Summary
+
+Nothing on any axis blocks merge after the fix batch. The most valuable
+findings were domain's D1/D2 (ticket 228 would have sent an engineer to build
+the wrong filter in the wrong place) and adversarial's A2 (two load-bearing
+ratio figures with no reproduction path — now `npx tsx
+packages/core/test/measure-racing-ratio.ts feral|feral-p3`, and both reproduce
+exactly). Three items are the user's call and are ticketed rather than decided
+here: 219's closure, §10 REPORT.md, and whether ticket 228 (a druid-illegal
+axe and sword in the ranked list) must land before this branch merges.
+
+`pnpm verify` exit 0 on `1d56e5f`; `pnpm merge-to-dev --check-only` result is
+recorded in the commit that adds this section.
+
+## Disposition (round 3)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                          |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `dc49801` — measurement was at K=150, K is now 210                                                                                     |
+| A2  | Adversarial | fixed       | `dc49801` — `measure-racing-ratio.ts` takes `ret`/`feral`/`feral-p3`; 0.9708 / 0.9837 / 0.6457 all reproduce                           |
+| A3  | Adversarial | fixed       | `1d56e5f` — hand-derived literals                                                                                                      |
+| A4  | Adversarial | fixed       | `1d56e5f` — anchored to the slot-count markup, verified red by mutation                                                                |
+| A5  | Adversarial | wontfix     | comment describes a diff the reviewer independently verified (+6 bytes); the digest is the gate                                        |
+| A6  | Adversarial | wontfix     | the following `toEqual` is the real parity gate; the length guard is a readability pre-check                                           |
+| D1  | Domain      | fixed       | `bd93a43` — ticket 228 and both SME handoffs corrected against `druid.ts` (29 of 78, not 40)                                           |
+| D2  | Domain      | fixed       | `bd93a43` — ticket 228 retargeted at `assemble_universe.py`'s empty feral `excluded_weapon_types`                                      |
+| S1  | Standards   | defer       | `.scratch/carry-forward/issues/229-measurement-scripts-share-a-copied-prologue.md`                                                     |
+| S2  | Standards   | defer       | `.scratch/carry-forward/issues/229-measurement-scripts-share-a-copied-prologue.md`                                                     |
+| S3  | Standards   | wontfix     | renderer takes a `Ranking`, not a `ViewResult`; the duplication is named at the site                                                   |
+| P1  | Spec        | defer       | `.scratch/carry-forward/issues/231-candidate-pool-closure-housekeeping.md`                                                             |
+| P2  | Spec        | defer       | `.scratch/carry-forward/issues/231-candidate-pool-closure-housekeeping.md` (user decision)                                             |
+| P3  | Spec        | defer       | `.scratch/carry-forward/issues/231-candidate-pool-closure-housekeeping.md`                                                             |
+| P4  | Spec        | wontfix     | 225's closure text states which ACs are N/A and why; exit A was reviewed by two SMEs and reconciled                                    |
+| P5  | Spec        | wontfix     | `promoteTopJ` defaults to 1 (today's rule) and its no-op is measured and documented; removing a hash-affecting field is its own change |
+| P6  | Spec        | wontfix     | the filter is fix-round F2 (`452cc35`, "refuse to promote a slot whose every screen failed"), not creep                                |
+| P7  | Spec        | fixed       | `41303fc` — §6.1 now matches the reviewed CLI behaviour                                                                                |
+| P8  | Spec        | defer       | `.scratch/carry-forward/issues/230-racing-test-73-name-collides-with-the-spec-table.md`                                                |
+| P9  | Spec        | wontfix     | same as S3                                                                                                                             |
+
+Also open from this round's SME reviews, filed during the stage-gate stages:
+226 (feral-p3 head/idol/trinket scoring cliffs), 227 (healer-role items above
+the feral cutoff; truth-SE ≈ cutoff hypothesis), 228 (pool admits
+druid-illegal weapons; Cataclysm's Edge #16, Soul Cleaver ranked).
