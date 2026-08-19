@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task (process record; needs a user decision)
 Origin: pre-merge review of feat/candidate-pool round 3, 2026-08-18 — spec axis
 Blocks: none
@@ -27,3 +27,14 @@ Two spec-axis findings that are the user's call, not an executor's:
       reworded, or reopen), and 156's ticked-but-open ACs are either unticked
       or the ticket is closed with the concession recorded.
 - [ ] §10's REPORT.md exists, or §10 is amended to point at HANDOFF-NEXT.md.
+
+## Resolution (2026-08-18)
+
+Both halves were already settled; the spec reviewer's finding was stale:
+
+1. `.scratch/handoffs/wowsims-tab/candidate-pool/REPORT.md` exists (beside
+   `HANDOFF-NEXT.md`, a separate start-here note); candidate-pool.md §8
+   records the plan author reading and correcting it. Verify:
+   `ls .scratch/handoffs/wowsims-tab/candidate-pool/`.
+2. The user confirmed ticket 219's closure in chat on 2026-08-18. Ticket 156
+   stays open by its own record ("Status stays open for those").
