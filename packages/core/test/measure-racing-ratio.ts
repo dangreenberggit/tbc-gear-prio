@@ -1,23 +1,32 @@
 /**
  * §6.4's ratio, on demand: full-iteration sims issued at defaults ÷
- * eligible, on ret `maxPhase 2` (the tuning fixture), Node, `concurrency 1`.
+ * eligible, Node, `concurrency 1`.
+ *
+ * Takes an optional fixture selector as argv[2]:
+ *
+ *   npx tsx packages/core/test/measure-racing-ratio.ts          # ret (default)
+ *   npx tsx packages/core/test/measure-racing-ratio.ts feral    # feral P2
+ *   npx tsx packages/core/test/measure-racing-ratio.ts feral-p3 # feral P3
+ *
+ * `ret` ranks the **tuning** fixture at `maxPhase 2`; the two feral
+ * selectors rank the **gating** fixture (`racing.test.ts` 7.0/7.2), whose
+ * numbers rank.ts quotes. The ret output is unchanged from before the
+ * selector existed.
  *
  * Screening asks for sims at `DEFAULT_SCREEN_ITERATIONS`, which the recorded
  * fixture (3000-iteration keys only) cannot answer, so lookups go through
- * `DerivedNoiseSimRunner` — the same derivation the racing tests use. This
- * ranks the **ret tuning fixture**; `racing.test.ts` 7.0 gates on the
- * **feral** fixture, so the number printed here is not 7.0's number. Noise
+ * `DerivedNoiseSimRunner` — the same derivation the racing tests use. Noise
  * seed 1 is a convention borrowed from those tests, not a correspondence.
  *
  * Not a vitest test — a measurement script, per §7.12 ("E-W5 / M1.5
  * harnesses ... not tests — record numbers"). Named without a `.test.ts`
  * suffix so vitest does not pick it up as a suite. Not a gate: nothing in
- * `pnpm verify` runs it (ticket 223 AC4). Run with:
+ * `pnpm verify` runs it (ticket 223 AC4).
  *
- *   npx tsx packages/core/test/measure-racing-ratio.ts
- *
- * Requires: vendor/wowsims/ret_preraid.gear.json (gitignored — a fresh
- * checkout must sync vendor/ before this script can run).
+ * Requires: vendor/wowsims/ret_preraid.gear.json (for `ret`) or
+ * vendor/wowsims/feral_preraid.gear.json (for the feral selectors) — both
+ * gitignored, so a fresh checkout must sync vendor/ before this script can
+ * run.
  *
  * Lives under `packages/core/test/` rather than the repo's top-level
  * `scripts/` because this slice's `pathsAllowed` is `packages/core/src/**`,
@@ -41,6 +50,10 @@ import {
   RET_SYNTHETIC_REF,
   RET_SYNTHETIC_FIGHT,
   RET_SYNTHETIC_ROW,
+  FERAL_SYNTHETIC_REF,
+  FERAL_SYNTHETIC_FIGHT,
+  FERAL_SYNTHETIC_ROW,
+  FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
 import { CountingSimRunner, DerivedNoiseSimRunner } from "./racing-support.js";
@@ -68,32 +81,92 @@ type RosterRecordingsFile = {
   >;
 };
 
+type FixtureCase = {
+  rowKey: string;
+  ref: typeof RET_SYNTHETIC_REF;
+  spec: SpecId;
+  maxPhase: ContentPhase;
+  fight: typeof RET_SYNTHETIC_FIGHT;
+  epWeightsPath: string;
+  skeletonPath: string;
+  presetGearPath: string;
+  universePath: string;
+  /**
+   * `racing.test.ts` passes an explicit race on the feral runs; ret's
+   * fixture carries its own. Kept per-case so each selector reproduces the
+   * wiring of the harness whose numbers it is meant to reproduce.
+   */
+  race?: "RaceTauren";
+};
+
+const CASES: Record<string, FixtureCase> = {
+  ret: {
+    rowKey: "ret",
+    ref: RET_SYNTHETIC_REF,
+    spec: RET_SYNTHETIC_ROW.spec,
+    maxPhase: RET_SYNTHETIC_ROW.maxPhase,
+    fight: RET_SYNTHETIC_FIGHT,
+    epWeightsPath: "data/presets/ret/p2.ep-weights.json",
+    skeletonPath: "data/presets/ret/p2.raid-sim-skeleton.json",
+    presetGearPath: "vendor/wowsims/ret_preraid.gear.json",
+    universePath: "data/universes/ret-p2.json",
+  },
+  feral: {
+    rowKey: "feral",
+    ref: FERAL_SYNTHETIC_REF,
+    spec: FERAL_SYNTHETIC_ROW.spec,
+    maxPhase: FERAL_SYNTHETIC_ROW.maxPhase,
+    fight: FERAL_SYNTHETIC_FIGHT,
+    epWeightsPath: "data/presets/feral/p1.ep-weights.json",
+    skeletonPath: "data/presets/feral/p2.raid-sim-skeleton.json",
+    presetGearPath: "vendor/wowsims/feral_preraid.gear.json",
+    universePath: "data/universes/feral-p2.json",
+    race: "RaceTauren",
+  },
+  "feral-p3": {
+    rowKey: "feral-p3",
+    ref: FERAL_SYNTHETIC_REF,
+    spec: FERAL_P3_SYNTHETIC_ROW.spec,
+    maxPhase: FERAL_P3_SYNTHETIC_ROW.maxPhase,
+    fight: FERAL_SYNTHETIC_FIGHT,
+    epWeightsPath: "data/presets/feral/p1.ep-weights.json",
+    skeletonPath: "data/presets/feral/p2.raid-sim-skeleton.json",
+    presetGearPath: "vendor/wowsims/feral_preraid.gear.json",
+    universePath: "data/universes/feral-p3.json",
+    race: "RaceTauren",
+  },
+};
+
+const selector = process.argv[2] ?? "ret";
+const chosen = CASES[selector];
+if (chosen === undefined) {
+  console.error(
+    `unknown fixture selector ${JSON.stringify(selector)}; ` +
+      `expected one of ${Object.keys(CASES).join(", ")}`
+  );
+  process.exit(1);
+}
+
 const recordingsFile = loadJson<RosterRecordingsFile>(
   "packages/core/test/fixtures/synthetic-roster-recordings.json"
 );
-const recorded = recordingsFile.rows.ret!;
+const recorded = recordingsFile.rows[chosen.rowKey]!;
 const epWeights = loadJson<{ weights: Record<string, number> }>(
-  "data/presets/ret/p2.ep-weights.json"
+  chosen.epWeightsPath
 ).weights;
-const skeleton = loadJson<RaidSimRequest>(
-  "data/presets/ret/p2.raid-sim-skeleton.json"
-);
-const presetGear = loadJson<PresetGearFile>(
-  "vendor/wowsims/ret_preraid.gear.json"
-);
+const skeleton = loadJson<RaidSimRequest>(chosen.skeletonPath);
+const presetGear = loadJson<PresetGearFile>(chosen.presetGearPath);
 const pool = filterPoolByPhase(
   poolFromUniverse(
-    loadJson<Parameters<typeof poolFromUniverse>[0]>(
-      "data/universes/ret-p2.json"
-    )
+    loadJson<Parameters<typeof poolFromUniverse>[0]>(chosen.universePath)
   ),
-  RET_SYNTHETIC_ROW.maxPhase
+  chosen.maxPhase
 );
 const gearData = syntheticOfflineRecordings({
-  ref: RET_SYNTHETIC_REF,
-  spec: RET_SYNTHETIC_ROW.spec,
+  ref: chosen.ref,
+  spec: chosen.spec,
   presetGear,
-  fight: RET_SYNTHETIC_FIGHT,
+  fight: chosen.fight,
 });
 
 const recordings = new Map(Object.entries(recorded.recordings));
@@ -107,11 +180,12 @@ const sim = new CountingSimRunner(inner);
 
 const ranking = await rankUpgrades(
   {
-    character: RET_SYNTHETIC_REF,
-    spec: RET_SYNTHETIC_ROW.spec,
-    maxPhase: RET_SYNTHETIC_ROW.maxPhase,
+    character: chosen.ref,
+    spec: chosen.spec,
+    maxPhase: chosen.maxPhase,
     iterations: recorded.iterations,
     seeds: [recorded.seed],
+    ...(chosen.race === undefined ? {} : { race: chosen.race }),
   },
   {
     gear: new RecordedGearSource(gearData),
@@ -143,6 +217,7 @@ const screenedOut = ranking.items.filter(
 ).length;
 const promoted = ranking.items.length - screenedOut;
 
+console.log(`fixture: ${selector}`);
 console.log(`eligible: ${eligibleCount}`);
 console.log(`full-iteration sims issued: ${fullIterationRuns}`);
 console.log(`screening sims issued: ${screeningRuns}`);

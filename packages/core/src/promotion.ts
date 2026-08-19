@@ -24,9 +24,11 @@ export const DEFAULT_PROMOTE_TOP_K = 210;
  *
  * Defaults to 1 — the pre-§6.4 best-in-slot floor, byte-for-byte — because
  * raising it does not pay on the gating fixture. Measured, 30 noise draws on
- * feral (see `RankInput.promoteTopJ` in rank.ts for the table): j=5 at the
- * shipped K=150 *raises* the ratio 0.7146 → 0.7232, and no (K, j) reaches the
- * §6.4 ≤0.4 target at zero misses. The knob is kept because the mechanism is
+ * feral (see `RankInput.promoteTopJ` in rank.ts for the table): j=5 at K=150,
+ * the shipped default when that sweep was taken, *raises* the ratio
+ * 0.7146 → 0.7232, and no (K, j) reaches the §6.4 ≤0.4 target at zero
+ * misses. `DEFAULT_PROMOTE_TOP_K` is 210 now (ticket 221 raised it); the
+ * table was not re-measured at 210. The knob is kept because the mechanism is
  * real and fixture-dependent, not because this default exercises it.
  */
 export const DEFAULT_PROMOTE_TOP_J = 1;

@@ -85,7 +85,11 @@ above-cutoff count was wrong" below; the ratio is unaffected.
 This is the **ret** P2 tuning pool at the shipped `DEFAULT_PROMOTE_TOP_K = 210`.
 It corroborates rather than contradicts the feral figures the `promoteTopJ`
 comment records: feral P2 is 0.9837 at the same K, and 0.9708 sits 1.3 points
-from it. Both are **P2 pre-raid** pools, and the agreement is scoped to that
+from it. The script now takes a fixture selector, so both feral figures are
+re-runnable from it rather than quoted from a session record — `npx tsx
+packages/core/test/measure-racing-ratio.ts feral` prints 0.9837 (242 full
+sims of 246 eligible) and `... feral-p3` prints 0.6457 (257 of 398), both
+re-measured 2026-08-18. Both are **P2 pre-raid** pools, and the agreement is scoped to that
 tier: a pre-raid pool is shallow and flat, the character owns few good items,
 so K=210 admits nearly every eligible candidate. The one P3 figure on record
 (feral P3, 0.6457) is materially lower, where racing does real work. Do not

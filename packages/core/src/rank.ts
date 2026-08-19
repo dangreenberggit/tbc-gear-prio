@@ -193,8 +193,10 @@ export type RankInput = {
    *
    * **What this costs.** Raising K buys recall with full-iteration sims, and
    * on a small pool it buys almost nothing else: full sims ÷ eligible is
-   * 0.6457 on the phase 3 pool but 0.9837 on the phase 2 one, where K=210
-   * admits nearly all 246 candidates and racing barely beats a full sweep.
+   * 0.6457 on the phase 3 pool (`npx tsx
+   * packages/core/test/measure-racing-ratio.ts feral-p3`) but 0.9837 on the
+   * phase 2 one (`... feral`), where K=210 admits nearly all 246 candidates
+   * and racing barely beats a full sweep.
    * That is the honest trade — the default is set by the pool the tool
    * actually ships against, and the phase 2 fixture is now the pool where
    * racing looks worst, not the pool the number is tuned to.
@@ -255,11 +257,14 @@ export type RankInput = {
    * packages/core/test/racing.test.ts -t 7.2`, and the ratio re-run command
    * is `npx tsx packages/core/test/measure-racing-ratio.ts`, which reports
    * 0.9708 (233 full-iteration sims of 240 eligible) at the shipped K=210.
-   * That script ranks the **ret** tuning fixture, while the table above and
-   * the 0.6457/0.9837 figures were measured on the **feral** fixture through
-   * the 7.0 gate's `CountingSimRunner` (ticket 221 harness); the ret P2
-   * number corroborates the feral P2 one — on both **P2 pre-raid** pools,
-   * at K=210 racing barely beats a full sweep (ticket 223). Do not carry
+   * That script defaults to the **ret** tuning fixture; the same script
+   * takes a fixture selector, and `npx tsx
+   * packages/core/test/measure-racing-ratio.ts feral` /
+   * `... feral-p3` reproduce the feral figures 0.9837 and 0.6457. (The j
+   * table above is still a ticket 221 session record, not re-runnable from
+   * this script.) The ret P2 number corroborates the feral P2 one — on both
+   * **P2 pre-raid** pools, at K=210 racing barely beats a full sweep
+   * (ticket 223). Do not carry
    * that across tiers: the one P3 figure on record is 0.6457, where racing
    * does real work, because a P3 character already wears near-optimal gear
    * and most of the pool is an obvious loss. The shallow, flat pre-raid
