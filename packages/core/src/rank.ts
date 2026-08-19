@@ -172,7 +172,7 @@ export type RankInput = {
    * - 246 eligible / 42 above cutoff (feral phase 2) —
    *   `npx vitest run packages/core/test/racing.test.ts -t 7.2`
    * - 398 eligible / 86 above cutoff (feral phase 3) —
-   *   `npx vitest run packages/core/test/racing.test.ts -t 7.3`
+   *   `npx vitest run packages/core/test/racing.test.ts -t P3-recall`
    *
    * Re-measured K sweep on the phase 3 pool, 30 draws each
    * (`npx tsx packages/core/test/measure-feral-p3-recall.ts`); the phase 2

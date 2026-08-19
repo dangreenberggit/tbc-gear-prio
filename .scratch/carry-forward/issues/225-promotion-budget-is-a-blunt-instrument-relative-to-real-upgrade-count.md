@@ -184,7 +184,7 @@ problem with extra steps.
       constant, say so plainly rather than presenting the result as principled.
 - [ ] The band-rule equivalence above is addressed head on: any proposal must
       say why it is not K=210 in different notation (`k=3` promotes 211).
-- [ ] The recall gate (`racing.test.ts` 7.2 and 7.3) still passes at zero
+- [ ] The recall gate (`racing.test.ts` 7.2 and P3-recall) still passes at zero
       misses on both fixtures. **Never weaken the gate to make a cheaper rule
       look good** (candidate-pool.md §7).
 - [ ] The full-sims/eligible ratio is reported for both fixtures under whatever
@@ -384,7 +384,7 @@ an ordering one, and it is ticket 227's, not this ticket's.
   noise-band rule promotes 211 against K=210's 210 (probe output above); it
   is K=210 in different notation, and no measurement here justifies picking
   a smaller k.
-- **Recall gate still green** — 7.2 and 7.3 untouched and passing; no rule or
+- **Recall gate still green** — 7.2 and P3-recall untouched and passing; no rule or
   default was changed, so the gate had nothing to survive.
 - **Ratios reported, 0.9837 addressed** — `ret` **0.9708** (240 eligible,
   233 full sims) from `npx tsx packages/core/test/measure-racing-ratio.ts`;

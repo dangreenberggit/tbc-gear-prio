@@ -313,13 +313,14 @@ share a copied prologue and `RosterRecordingsFile` type (S1); `SCREEN_SE =
 5.128` hard-coded in `measure-cutoff-band.ts` (S2); ruled-out sort key
 duplicated in `rank-report.ts` with the reason commented (S3, accepted).
 
-Spec: the recall gate is not weakened (7.2 assertions byte-identical, 7.3 is a
-new P3 gate). Findings: P1 ticket 156 has ticked ACs while open; P2 ticket 219
+Spec: the recall gate is not weakened (7.2 assertions byte-identical, the P3
+recall gate is new). Findings: P1 ticket 156 has ticked ACs while open; P2 ticket 219
 resolved over unretracted blockers; P3 §10 REPORT.md never written; P4 ticket
 225 closed with 5/7 ACs unticked (recorded honestly); P5 `promoteTopJ` is a
 shipped knob nothing uses; P6 failed-screen filter in `promotionRule`
 attributed to 156; P7 §6.1 says the count line is behind the flag; P8 test
-name "7.3" collides with §7's Determinism row; P9 duplicated sort key.
+name "7.3" collides with §7's Determinism row (fixed by ticket 230: the gate
+is now named `P3-recall`); P9 duplicated sort key.
 
 ### Summary
 

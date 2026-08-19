@@ -164,7 +164,7 @@ larger floor is not free.
       recorded in the rank.ts comment and reproducible from a committed script.
 - [x] If the P3 pool is instead judged not worth gating on, that decision is
       recorded here with its reason. **Not taken** — the P3 pool is gated on,
-      by the new 7.3 recall gate.
+      by the new P3-recall gate.
 
 ## Resolution (2026-08-18)
 
@@ -253,12 +253,12 @@ refuses.
    the 7.0 gate uses. Filed separately rather than fixed here.
 
 3. **Both recall gates now yield to the event loop once per draw.** Adding
-   the 7.3 gate pushed `racing.test.ts` to ~66 s in one worker, and every
+   the P3-recall gate pushed `racing.test.ts` to ~66 s in one worker, and every
    await inside a draw resolves from an in-memory map — so 30 draws ran as
    one unbroken microtask chain that starved vitest's reporter RPC until it
    failed the run with `Timeout calling "onTaskUpdate"`. Every assertion
    passed and `pnpm verify` still exited 1. The fix is one `setImmediate`
-   await per draw in 7.2 and 7.3. No assertion changed.
+   await per draw in 7.2 and P3-recall. No assertion changed.
 
 ### Re-run commands
 
@@ -266,12 +266,17 @@ refuses.
 npx tsx scripts/record_synthetic_fixtures.mjs --dry-run feral-p3   # cost, no spend
 npx tsx scripts/record_synthetic_fixtures.mjs feral-p3             # re-record
 npx vitest run packages/core/test/racing.test.ts -t 7.2            # P2 recall gate
-npx vitest run packages/core/test/racing.test.ts -t 7.3            # P3 recall gate
+npx vitest run packages/core/test/racing.test.ts -t P3-recall      # P3 recall gate
 npx tsx packages/core/test/measure-feral-p3-recall.ts              # the K sweep
 ```
 
 The two `-t` selectors are disjoint: vitest's `-t` is an unanchored regex, so
-the new gate is named `7.3` rather than `7.2-P3` to keep every committed
-`-t 7.2` site selecting only the P2 gate. Confirmed by observed counts —
-`-t 7.2` selects 1 test and skips 3, the same 1 test it selected before 7.3
-existed.
+the gate was originally named `7.3` rather than `7.2-P3` to keep every
+committed `-t 7.2` site selecting only the P2 gate.
+
+**Superseded by ticket 230.** Naming it `7.3` collided with §7's Determinism
+row, and the unanchored regex's `.` matches any character, so `-t 7.0`
+selected three blocks (7.0, 7.2 and 7.3), not one. The gate is now named with
+the non-numeric token `P3-recall`; `-t 7.0`, `-t 7.2` and `-t P3-recall` each
+select exactly one block. Verified by
+`npx vitest list packages/core/test/racing.test.ts -t <pattern>`.

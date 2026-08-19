@@ -208,7 +208,7 @@ is a full-sweep truth over the **old** 398-row pool.
    two sides now come from different pools, so the comparison is meaningless
    rather than failing on its merits.
 
-**The recall gates both passed** — 7.2 (p2) and 7.3 (maxPhase 3) are green
+**The recall gates both passed** — 7.2 (p2) and P3-recall (maxPhase 3) are green
 against the shrunken pool. That is the load-bearing result: `promoteTopK = 210`
 still recalls every above-cutoff row and every top-5 row. A smaller pool only
 makes that budget more generous (210/365 against 210/398), so the ticket-221

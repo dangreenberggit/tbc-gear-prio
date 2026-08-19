@@ -1,5 +1,5 @@
 /**
- * M2 racing — interface-level tests (candidate-pool.md §7: 7.0, 7.2, 7.3).
+ * M2 racing — interface-level tests (candidate-pool.md §7: 7.0, 7.2, P3-recall).
  *
  * Tune on ret, gate on feral (§7.a) — this file therefore ranks the
  * **feral** synthetic fixture (`FERAL_SYNTHETIC_ROW`) throughout, per the
@@ -120,7 +120,7 @@ function buildSim(noiseSeed: number) {
 }
 
 /**
- * Phase 3 bindings for the 7.3 gate (ticket 221).
+ * Phase 3 bindings for the P3-recall gate (ticket 221).
  *
  * Same character, same worn gear, same presets — only the candidate pool
  * differs (398 eligible against the P2 row's 246). Feral ships no P3-specific
@@ -319,15 +319,19 @@ describe("M2 racing — 7.2: recall on the held-out fixture", () => {
   );
 });
 
-describe("M2 racing — 7.3: recall on the maxPhase 3 pool", () => {
+describe("M2 racing — P3-recall: recall on the maxPhase 3 pool", () => {
   // Ticket 221: 7.2 above measures recall at 246 eligible candidates, but
   // every real feral run screens the phase 3 pool at 398. `promoteTopK` is a
   // fixed absolute budget, so the fraction it admits falls from ~61% to ~38%
   // as the pool grows — this gate measures whether recall survives that.
   //
-  // Deliberately named "7.3" and not "7.2-P3": vitest's `-t` is an unanchored
-  // regex, so a name containing "7.2" as a substring would silently widen
-  // every committed `-t 7.2` invocation to run both gates.
+  // Named with the non-numeric token "P3-recall" (ticket 230), not a §7
+  // number: vitest's `-t` is an unanchored regex, so any "7.N" name collides
+  // with the §7 row patterns. "7.2-P3" would widen every committed `-t 7.2`
+  // to run both gates, and "7.13" is matched by `-t 7.1` (§7's Cap row).
+  // The dot is any-char too, so while this block was named "7.3",
+  // `-t 7.0` selected three blocks — 7.0, 7.2 and 7.3 — not one.
+  // A token no `-t 7.N` pattern can match keeps each selector to one block.
 
   /** The recorded P3 full-sweep truth — same shape as 7.2's, on the P3 row. */
   async function fullSweepTruthP3() {

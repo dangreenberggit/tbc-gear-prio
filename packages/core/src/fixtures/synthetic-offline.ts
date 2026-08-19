@@ -162,7 +162,7 @@ export const FERAL_SYNTHETIC_ROW: RosterRow = {
  * candidates where `FERAL_SYNTHETIC_ROW` has 246.
  *
  * A separate row rather than a `maxPhase` argument because both are live at
- * once: the 7.2 recall gate measures screening at 246 and the 7.3 gate at 398,
+ * once: the 7.2 recall gate measures screening at 246 and the P3-recall gate at 398,
  * and the fixture file holds a recorded full-sweep truth per row. Sharing
  * `ref` with the P2 row is safe — recordings live under per-row keys — and is
  * what makes the two measurements comparable: same character, same worn gear,
