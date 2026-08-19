@@ -155,7 +155,14 @@ describe("rank-report ruled-out block", () => {
 
   it("counts only the ranked candidates in the slot header", () => {
     const html = renderRankHtml(SCREENED_SLOT, meta());
-    expect(html).toContain("1 candidates");
+    // Anchored to the header element: a bare `toContain("1 candidates")` is
+    // also satisfied by "11 candidates" or "31 candidates", so it would pass
+    // if the screened rows were counted in.
+    expect(html).toContain('<p class="slot-count-all">1 candidates');
+    // SCREENED_SLOT is one slot, so exactly one header exists and it is that
+    // one -- otherwise the assertion above could pass on a second slot while
+    // this slot's own count was wrong.
+    expect(html.match(/<p class="slot-count-all">/g)).toHaveLength(1);
   });
 });
 

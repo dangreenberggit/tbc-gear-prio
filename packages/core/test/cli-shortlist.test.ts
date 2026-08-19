@@ -199,18 +199,30 @@ describe("CLI ruled-out disclosure", () => {
    * The counting identity `cli-shortlist.test.ts` has asserted since ticket 04,
    * extended to the third group. The three counts are disjoint and jointly
    * exhaustive over the rows the filters left, so nothing is silently dropped.
+   *
+   * Every number below is a literal read off `SCREENED_MIX` by hand, not
+   * derived from the view: `applyView` computes `belowCutoffCount` from the
+   * same partition the identity is meant to check, so summing its own outputs
+   * back to `items.length` holds however the partition is written and proves
+   * nothing about it.
    */
   it("reconciles shortlist, below-cutoff and ruled-out against the filtered total", () => {
     const view = applyView(SCREENED_MIX);
+    // item 1, the only unscreened row above cutoff.
     expect(view.shortlist.length).toBe(1);
+    // item 2, unscreened and `belowCutoff: true`.
     expect(view.belowCutoffCount).toBe(1);
+    // items 31 and 30, both carrying `screened.promoted === false`.
     expect(view.ruledOut.length).toBe(2);
+    // 1 + 1 + 2 against the four rows SCREENED_MIX declares.
+    expect(SCREENED_MIX.items.length).toBe(4);
     expect(
       view.shortlist.length + view.belowCutoffCount + view.ruledOut.length
-    ).toBe(SCREENED_MIX.items.length);
-    expect(view.rows.length + view.ruledOut.length).toBe(
-      SCREENED_MIX.items.length
-    );
+    ).toBe(4);
+    // `rows` is the ranked view: shortlist plus below-cutoff, ruled-out split
+    // out. 1 + 1 = 2.
+    expect(view.rows.length).toBe(2);
+    expect(view.rows.length + view.ruledOut.length).toBe(4);
   });
 
   /**
