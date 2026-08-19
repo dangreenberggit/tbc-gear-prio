@@ -47,6 +47,24 @@
  * Screening SE is 5.128 DPS at 1,000 iterations — a settled input from
  * ticket 222 section 1, not re-measured here.
  *
+ * **What this script does not tell you.** It measures where rows sit
+ * relative to the cutoff; it does not ask whether a row belongs in the
+ * comparison. Ten of the 28 band-above rows on this fixture are healer
+ * gear — intellect/healing/spellpower/spirit/mp5 with zero agility,
+ * strength, attack power, crit, hit, expertise or armour penetration —
+ * scoring +4.61 to +7.80 DPS for a feral druid. See ticket 227. Read the
+ * zone counts as "where the measurement put each row", not as "these are
+ * the candidates a player is choosing between".
+ *
+ * Two further limits worth knowing. The worn-row exclusion in P1 matches on
+ * **item id only** and does not check that the row's slot is the one the
+ * item is worn in; on this fixture no item is pooled for a slot other than
+ * the one it occupies, so the two are equivalent here, but a fixture where
+ * that stopped holding would need a slot check. And the committed output
+ * under `.scratch/handoffs/` is captured stdout, not a machine-readable
+ * artifact — nothing gates it against a re-run, so treat it as a snapshot
+ * and re-run the command when the numbers matter.
+ *
  * Not a vitest test — a measurement script, same convention as
  * `measure-within-slot-ordering.ts` (§7.12: "record numbers"). Named
  * without a `.test.ts` suffix so vitest's default include glob does not
@@ -137,11 +155,18 @@ const pool = filterPoolByPhase(
   maxPhase
 );
 
-/** Ticket 222 §1, measured from the recorded per-candidate stdevs. */
+/**
+ * Ticket 222 §1, measured from the recorded per-candidate stdevs at 1,000
+ * screening iterations. A hand-copied constant: if the fixture is ever
+ * re-recorded this does not follow it, and `measure-within-slot-ordering.ts`
+ * section 1 is what re-derives it.
+ */
 const SCREEN_SE = 5.128;
 
-const EXPECTED_POOL_SIZE = 398;
-const EXPECTED_ABOVE_CUTOFF = 86;
+// Read from the fixture rather than hand-written, so a re-record moves the
+// assertion with the data instead of failing a stale literal.
+const EXPECTED_POOL_SIZE = recorded.poolSize;
+const EXPECTED_ABOVE_CUTOFF = recorded.aboveCutoffCount;
 
 /** Rebuilds the recorded full-sweep truth exactly as `racing.test.ts` does. */
 async function fullSweepTruthP3() {

@@ -179,10 +179,35 @@ not a narrative.
       any conclusion about the pinned fork's behaviour cites a run
       against the pin rather than a reading of the Go source alone.
 
+## Sibling: ticket 227
+
+A second `sme-rank-review` opinion on ticket 225's closure found the
+**opposite sign** of this defect on the same fixture: ten healer-statted
+items — no agility, strength, attack power, crit, hit or expertise —
+scoring **+4.61 to +7.80 DPS** for a feral and clearing the cutoff.
+Filed separately as
+`.scratch/carry-forward/issues/227-healer-role-items-score-above-the-feral-cutoff.md`,
+because this ticket's signature is a *cliff* concentrated in three slots
+(value withheld from candidates or credited to the incumbent), while
+227's is *positive* deltas spread across six slots on items whose stat
+lines alone should score near zero.
+
+They may share a root cause. **If one diagnosis explains both, close
+whichever ticket it does not belong to with a pointer** rather than
+carrying two.
+
+One finding from 227 bears directly on this ticket's trinket criterion:
+all eleven trinkets sharing -31.33 DPS carry **zero melee-relevant
+stats, and three have empty stat maps entirely**. That is consistent
+with their effects not being credited — a stats-plus-effects question,
+and the reason this ticket asks whether -31.33 is exactly the value of
+losing the worn trinket's contribution.
+
 ## Out of scope
 
 - Ticket 225's promotion budget and the recall target. That ticket is
   closed on its own evidence and this finding does not reopen it.
+- Ticket 227's healer-item scoring — the sibling above.
 - Ticket 224's presentation of tied rows.
 - Re-recording the `feral-p3` fixture. Establish the cause against the
   committed recordings and the pinned binary first; a re-record is a

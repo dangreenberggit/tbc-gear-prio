@@ -353,13 +353,23 @@ promotion rule or default changes.
 **On the one non-zero property.** The gate this ticket's plan set was
 "interchangeable and P1 = 0 and P2 = 0". P1 = 1, so the gate does not close
 on its literal reading, and that is recorded here rather than rounded away.
-It is judged to close anyway, because P1 is a mechanical proxy for a
-judgment and the judgment went the other way on the same row: P1 exists to
-find a slot whose best upgrade the screen could lose, and the neck cluster
-offers no wrong answer to give — 1.44 DPS of spread against a 7.25 DPS
-pairwise noise scale, with P2 = 0 confirming the slot cannot be emptied.
-A reader who disagrees with that reading has every number above to
-re-decide it on.
+It is judged to close anyway, because P1 is a mechanical proxy for an
+ordering question, and on ordering the neck slot has nothing to resolve:
+its three above-cutoff rows span 1.44 DPS against a 7.25 DPS pairwise noise
+scale, and P2 = 0 confirms no slot can be emptied by losing a band row.
+
+**That statement needed re-wording after a second review, and the re-worded
+version is narrower.** The neck slot's argmax — 28822 Teeth of Gruul, the
+P1 row — is a **healer** item: `{int 21, healing 46, spellpower 16, spirit
+19, mp5 8}` in both `data/items/index.json` and `vendor/wowsims/db.json`,
+with no agility, strength, attack power, crit, hit or expertise. The two
+genuine feral necks sit just below it at 5.73 (30017 Telonicus's Pendant of
+Mayhem) and 4.37 (32591 Choker of Serrated Blades) — still within 7.25 DPS
+of each other, so **"no resolvable order" holds**. But the earlier claim
+that there was "no wrong answer a screen could give" does not: there is a
+wrong answer available, and it is a healer neck ranked first. That is a
+**scoring** question — does this row belong above the cutoff at all — not
+an ordering one, and it is ticket 227's, not this ticket's.
 
 ### Remaining criteria
 
@@ -422,6 +432,52 @@ Ticket 226 carries the annotated dump
 (`.scratch/handoffs/ticket-226-slot-truth-dump.txt`) and phrases its
 acceptance criteria as the questions that remain open.
 
-It does not change the decision above. The band-above rows the verdict
-turns on carry ordinary stat-driven deltas; the broken slots sit at 0.00 or
-far below the cutoff and contribute no above-cutoff rows.
+It does not change the decision above, for the reason that the head, idol
+and trinket slots contribute no above-cutoff rows at all (histogram: head 0,
+ranged 0, trinket 3) and so cannot move the band arithmetic.
+
+**One sentence in an earlier version of this section was wrong and is
+withdrawn**: that "the band-above rows the verdict turns on carry ordinary
+stat-driven deltas". They do not. **Ten of the 28 band-above rows are
+healer-statted items** — intellect, healing power, spellpower, spirit, mp5,
+with zero melee-relevant stats — scoring **+4.61 to +7.80 DPS** for a feral
+druid. Verified against `data/items/index.json` and cross-checked against
+`vendor/wowsims/db.json`; evidence at
+`.scratch/handoffs/ticket-227-healer-stat-lines.txt`. That is **ticket
+227**:
+`.scratch/carry-forward/issues/227-healer-role-items-score-above-the-feral-cutoff.md`.
+
+## Two SME seats disagreed on this closure
+
+Recorded because the disagreement is substantive and a reader should not
+have to reconstruct it.
+
+- **First opinion** (`.scratch/handoffs/sme-rank-judgment-ticket-225-cutoff-band.md`)
+  — the band is **interchangeable**. All 28 band-above rows are same-slot
+  alternates inside the pairwise noise scale, so a screen that cannot order
+  them is behaving correctly, and 225 reduces to ticket 224.
+- **Second opinion** (`.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`)
+  — **do-not-trust the closure.** Ten of those 28 rows are healer gear. A
+  tie presumes the tied items are candidates in the first place, and these
+  are not; calling the band "ties" papers over the question of why healer
+  items clear a feral's cutoff at all.
+
+**How this was reconciled.** Exit A stands, on narrower ground than the
+first opinion claimed. What the measurement establishes is that **screening
+cannot order or classify this band** — the screening SE of 5.128 DPS is
+wider than the effective cutoff of 2.9288 DPS, so no promotion budget can
+separate these rows, and no budget redesign follows. That conclusion does
+not depend on the band's rows being sensible items; it is a statement about
+resolution.
+
+What the second opinion is right about, and what this ticket therefore does
+**not** claim: whether an individual band row belongs above the cutoff at
+all is a **separate, open question**, now tracked as ticket 227. The two
+findings are compatible — screening cannot resolve the band *and* some rows
+in it may not deserve to be there — and they have different owners.
+
+One correction to the second opinion itself: it recalled 28822 Teeth of
+Gruul as a melee neck. It is not; both data sources agree it is a healer
+neck, so this is not a repo item-identity defect. That correction does not
+weaken its finding — a healer neck as the slot argmax is precisely its
+point.
