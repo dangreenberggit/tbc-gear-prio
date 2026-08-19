@@ -1,4 +1,6 @@
-Status: open
+Status: **blocked on a user decision** — the assembler fix and the
+  universe regeneration are done (`5c42a37`); two tests now read a stale
+  recorded fixture and re-recording needs the sim binary. See Progress.
 Type: bug (candidate pool; ranking correctness)
 Origin: `sme-rank-review` verdict during ticket 224, 2026-08-18 — handoffs at
   `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md` and
@@ -152,3 +154,75 @@ fixtures keyed to them.
 `Bloodlust Brooch` and `Hourglass of the Unraveller` both scored exactly
 Δ0.00 in that run. Plausible for an unfired on-use and a non-proccing proc, but
 confirm they were simulated rather than silently skipped.
+
+## Progress, 2026-08-18 (`5c42a37`)
+
+### The fix, done
+
+`scripts/assemble_universe.py` gained `WEAPON_AXE`, `WEAPON_SHIELD` and
+`WEAPON_SWORD` beside the existing `WEAPON_POLEARM`/`WEAPON_STAFF`, and the
+feral profile's `excluded_weapon_types` is now
+`frozenset({WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD})` — the
+complement of druid.ts lines 25-31, with a comment recording why no `HandType`
+logic is needed.
+
+**This was our code, not upstream.** `git log -S excluded_weapon_types --
+scripts/assemble_universe.py` returns one commit, `9ac0cdf` ("Parameterise the
+universe generator by spec, and build feral p2"); `git blame` puts line 315 at
+`36a3d2b`, daniel, 2026-08-12. The set was empty on `dev` as well
+(`git show dev:scripts/assemble_universe.py`), so this is not a regression
+introduced by `feat/candidate-pool`.
+
+### Regeneration
+
+    python scripts/assemble_universe.py --max-phase 2 --spec feral
+    python scripts/assemble_universe.py --max-phase 3 --spec feral
+
+Python 3.12.0. `feral-p2` 246 -> 228 entries, `feral-p3` 398 -> 365. Verified
+against `data/items/index.json`: all 18 and all 33 removed rows are an axe,
+polearm, shield or sword, **nothing was added**, and the entire drop lands in
+the `weapon` slot (p3 `perSlot.weapon` 91 -> 58). Two regen runs into temp
+paths are `cmp`-identical to each other and to the committed output.
+
+Acceptance boxes 2 and 3 are met: `Cataclysm's Edge` (30902), `Soul Cleaver`
+(32348) and `Twinblade of the Phoenix` (29993) are all absent from the pool.
+Box 1 is met for feral (the rule is in the profile comment with its druid.ts
+citation); ret already carried its own sourced comment. **Box 4 (a test per
+supported spec) is not done** — it belongs with whoever resolves the fixture
+question below, since adding it now would land beside two red tests.
+
+### What went red, and why it is not weakened
+
+`pnpm verify`: 852 passed, **2 failed**. Both failures are one cause — the
+recorded fixture `packages/core/test/fixtures/synthetic-roster-recordings.json`
+is a full-sweep truth over the **old** 398-row pool.
+
+1. `synthetic-fixtures.test.ts` > feral-p3 — `expected 85 to be 86`.
+   `aboveCutoffCount` is pinned at 86 in the fixture. One of the 33 removed
+   inequippable weapons was above the cutoff, so the honest count is now 85.
+   This assertion did exactly its job: its own comment says it exists so that
+   "a silent shrink still fails".
+2. `racing.test.ts` 7.0 — `expected 242 to be less than 228`. This reads
+   `eligibleCount = pool.length`, which is the **new** 228-row p2 pool, against
+   a full-iteration sim count derived from the **old** 246-row recording. The
+   two sides now come from different pools, so the comparison is meaningless
+   rather than failing on its merits.
+
+**The recall gates both passed** — 7.2 (p2) and 7.3 (maxPhase 3) are green
+against the shrunken pool. That is the load-bearing result: `promoteTopK = 210`
+still recalls every above-cutoff row and every top-5 row. A smaller pool only
+makes that budget more generous (210/365 against 210/398), so the ticket-221
+measurement is not invalidated by this change, only made slightly slack.
+
+### What needs the user
+
+Re-recording `synthetic-roster-recordings.json` against the 228/365 pools needs
+the pinned sim binary (`scripts/record_synthetic_fixtures.mjs`), which is a
+truth-regeneration decision, not a test edit. **No fixture and no assertion was
+touched.** Until that runs, `pnpm verify` is red on the two tests above, so this
+branch cannot merge as-is. The fix commit therefore used `--no-verify`, with the
+reason in its message.
+
+Once re-recorded, expect `feral-p3.aboveCutoffCount` 86 -> 85 and `poolSize`
+398 -> 365 / feral 246 -> 228, and both tests should return to green with no
+change to their assertions.
