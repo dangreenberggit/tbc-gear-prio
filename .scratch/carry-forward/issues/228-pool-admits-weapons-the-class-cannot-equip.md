@@ -226,3 +226,10 @@ reason in its message.
 Once re-recorded, expect `feral-p3.aboveCutoffCount` 86 -> 85 and `poolSize`
 398 -> 365 / feral 246 -> 228, and both tests should return to green with no
 change to their assertions.
+
+### 2026-08-19 — 7.0 follow-up parked
+
+The 7.0 failure this fix exposed is a racing-defaults question, handed to
+ticket 225 (reopened). This ticket's own work (filter + regenerated
+universes + re-recorded fixture) is complete; box 4 (per-spec cannot-equip
+test) is still open. Status stays open for box 4 and until 225 greens 7.0.

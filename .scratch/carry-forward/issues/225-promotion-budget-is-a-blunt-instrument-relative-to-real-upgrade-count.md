@@ -517,3 +517,18 @@ Questions to actually investigate (design lane, not another K sweep):
 Acceptance: each question answered with a measurement or a reasoned "not
 worth pursuing", commands recorded; a recommendation that is not "keep the
 same approach with different constants".
+
+### First concrete fact for the reopened scope (2026-08-19)
+
+After ticket 228 shrank the feral pools, `racing.test.ts` 7.0 fails honestly:
+on feral P2 (228 eligible) at `DEFAULT_PROMOTE_TOP_K = 210`, racing issues
+242 full-iteration sims — more than a full sweep. Ratios:
+`npx tsx packages/core/test/measure-racing-ratio.ts feral` → 1.0614;
+`... feral-p3` → 0.7041; `... ret` → 0.9708. A "skip screening when
+K ≥ 0.8·eligible" fix was planned and reviewed
+(`.scratch/stage-gate/ticket-228-skip-screening-small-pools/`) and parked
+by the user: its review found it would remove recall gating from the §7
+roster fixture and disqualify any fixture under 263 eligible from gating
+recall. The gate stays red until this ticket decides the rule or defaults;
+the branch cannot merge before then. Question 5 above is therefore live
+now, not later.
