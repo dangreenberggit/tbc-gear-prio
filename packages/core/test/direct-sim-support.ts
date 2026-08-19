@@ -51,6 +51,9 @@ import {
   FERAL_SYNTHETIC_REF,
   FERAL_SYNTHETIC_FIGHT,
   FERAL_P3_SYNTHETIC_ROW,
+  RET_SYNTHETIC_REF,
+  RET_SYNTHETIC_FIGHT,
+  RET_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
 import { loadJson, type RosterRecordingsFile } from "./racing-support.js";
@@ -133,7 +136,7 @@ export async function simDirect(
   return { ...obs, wallMs: Date.now() - started };
 }
 
-export type FeralP3Capture = {
+export type RowCapture = {
   ranking: Ranking | PartialRanking;
   recorded: RosterRecordingsFile["rows"][string];
   /** Every request the ranker issued, keyed by `simCacheKey`. */
@@ -146,34 +149,83 @@ export type FeralP3Capture = {
 };
 
 /**
- * Replays the feral P3 full sweep offline and keeps every request built.
+ * How one recorded row is wired — the same bindings `measure-racing-ratio.ts`
+ * carries, kept here so a capture reproduces the harness whose numbers it is
+ * meant to explain rather than approximating it.
+ */
+type RowBinding = {
+  ref: typeof FERAL_SYNTHETIC_REF;
+  spec: "feral" | "ret";
+  maxPhase: (typeof FERAL_P3_SYNTHETIC_ROW)["maxPhase"];
+  fight: typeof FERAL_SYNTHETIC_FIGHT;
+  epWeightsPath: string;
+  skeletonPath: string;
+  presetGearPath: string;
+  universePath: string;
+  race?: "RaceTauren";
+};
+
+/**
+ * The rows with a committed recorded truth.
+ *
+ * There is deliberately no `ret-p3`: `data/universes/ret-p3.json` exists as a
+ * universe, but no recorded row was ever made for it, and tickets 226/227
+ * forbid re-recording. Ret comparisons therefore run on the P2 row.
+ */
+export const ROW_BINDINGS: Record<string, RowBinding> = {
+  "feral-p3": {
+    ref: FERAL_SYNTHETIC_REF,
+    spec: "feral",
+    maxPhase: FERAL_P3_SYNTHETIC_ROW.maxPhase,
+    fight: FERAL_SYNTHETIC_FIGHT,
+    epWeightsPath: "data/presets/feral/p1.ep-weights.json",
+    skeletonPath: "data/presets/feral/p2.raid-sim-skeleton.json",
+    presetGearPath: "vendor/wowsims/feral_preraid.gear.json",
+    universePath: "data/universes/feral-p3.json",
+    race: "RaceTauren",
+  },
+  ret: {
+    ref: RET_SYNTHETIC_REF,
+    spec: "ret",
+    maxPhase: RET_SYNTHETIC_ROW.maxPhase,
+    fight: RET_SYNTHETIC_FIGHT,
+    epWeightsPath: "data/presets/ret/p2.ep-weights.json",
+    skeletonPath: "data/presets/ret/p2.raid-sim-skeleton.json",
+    presetGearPath: "vendor/wowsims/ret_preraid.gear.json",
+    universePath: "data/universes/ret-p2.json",
+  },
+};
+
+/**
+ * Replays one row's full sweep offline and keeps every request built.
  *
  * `fullPool: true` so every eligible candidate is simmed and therefore
  * captured; racing would only build requests for the promoted subset.
  */
-export async function captureFeralP3(): Promise<FeralP3Capture> {
+export async function captureRow(rowKey: string): Promise<RowCapture> {
+  const binding = ROW_BINDINGS[rowKey];
+  if (!binding) {
+    throw new Error(
+      `no binding for row ${rowKey}; have ${Object.keys(ROW_BINDINGS).join(", ")}`
+    );
+  }
+
   const recordingsFile = loadJson<RosterRecordingsFile>(
     "packages/core/test/fixtures/synthetic-roster-recordings.json"
   );
-  const recorded = recordingsFile.rows["feral-p3"]!;
+  const recorded = recordingsFile.rows[rowKey];
+  if (!recorded) throw new Error(`no recorded row ${rowKey}`);
 
   const epWeights = loadJson<{ weights: Record<string, number> }>(
-    "data/presets/feral/p1.ep-weights.json"
+    binding.epWeightsPath
   ).weights;
-  const skeleton = loadJson<RaidSimRequest>(
-    "data/presets/feral/p2.raid-sim-skeleton.json"
-  );
-  const presetGear = loadJson<PresetGearFile>(
-    "vendor/wowsims/feral_preraid.gear.json"
-  );
-  const maxPhase = FERAL_P3_SYNTHETIC_ROW.maxPhase;
+  const skeleton = loadJson<RaidSimRequest>(binding.skeletonPath);
+  const presetGear = loadJson<PresetGearFile>(binding.presetGearPath);
   const pool = filterPoolByPhase(
     poolFromUniverse(
-      loadJson<Parameters<typeof poolFromUniverse>[0]>(
-        "data/universes/feral-p3.json"
-      )
+      loadJson<Parameters<typeof poolFromUniverse>[0]>(binding.universePath)
     ),
-    maxPhase
+    binding.maxPhase
   );
 
   const inner = new RecordedSimRunner(
@@ -184,21 +236,21 @@ export async function captureFeralP3(): Promise<FeralP3Capture> {
 
   const ranking = await rankUpgrades(
     {
-      character: FERAL_SYNTHETIC_REF,
-      spec: "feral" as const,
-      maxPhase,
+      character: binding.ref,
+      spec: binding.spec,
+      maxPhase: binding.maxPhase,
       iterations: recorded.iterations,
       seeds: [recorded.seed],
-      race: "RaceTauren" as const,
+      ...(binding.race ? { race: binding.race } : {}),
       fullPool: true,
     },
     {
       gear: new RecordedGearSource(
         syntheticOfflineRecordings({
-          ref: FERAL_SYNTHETIC_REF,
-          spec: "feral",
+          ref: binding.ref,
+          spec: binding.spec,
           presetGear,
-          fight: FERAL_SYNTHETIC_FIGHT,
+          fight: binding.fight,
         })
       ),
       sim: sim as never,
@@ -218,6 +270,11 @@ export async function captureFeralP3(): Promise<FeralP3Capture> {
     baselineReq: findBaselineRequest(sim.calls),
     requestByItemId: indexByCandidateItem(sim.calls),
   };
+}
+
+/** The feral P3 row — what tickets 226 and 227 are both about. */
+export function captureFeralP3(): Promise<RowCapture> {
+  return captureRow("feral-p3");
 }
 
 /**
