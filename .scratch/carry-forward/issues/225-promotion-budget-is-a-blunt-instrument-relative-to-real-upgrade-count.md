@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (design question raised by measurement; no known defect)
 Origin: user challenge during the 2026-08-18 review of ticket 221 — "am I
   supposed to believe that 150 items provided a DPS increase... but that
@@ -532,3 +532,288 @@ roster fixture and disqualify any fixture under 263 eligible from gating
 recall. The gate stays red until this ticket decides the rule or defaults;
 the branch cannot merge before then. Question 5 above is therefore live
 now, not later.
+
+## Reopened scope — answers (2026-08-19)
+
+Every measurement below was re-run on 2026-08-19 from the ticket-225 branch
+with `vendor/` present. The TS scripts need `vendor/wowsims/*.gear.json`; the
+Python probes need `vendor/wowsimcli-v0.0.101-win32-x64/` and exit 2 with a
+`pnpm fetch:wowsimcli` hint when it is missing. All four are tracked, so a
+fresh clone reproduces every number here once vendor is synced.
+
+### The criterion, stated before the alternatives were measured (C1)
+
+> A screening mechanism earns its place only if, at zero recall misses over 30
+> noise draws on every committed gating fixture, it costs at least 20 % less
+> WASM wall-clock than a full sweep under candidate-pool.md §3.4.1's model
+> `cost(it) = 748.4 + 3.2446·it` ms, with its decision rule and parameters
+> fixed in advance — not tuned per fixture on the truth.
+
+This was written against the pre-existing ratios in this ticket (1.06 feral,
+0.70 feral-p3, 0.97 ret) before any alternative was run. The "fixed in
+advance" clause is what stops the exercise from being another K sweep: a rule
+tuned per fixture on the answer is not a rule anyone can ship.
+
+Six candidate mechanisms were measured. One cleared the bar. Racing did not.
+
+### Q1 — Is the cutoff meaningful, and should it be stated in SE units?
+
+Two candidates, each with its win condition fixed first.
+
+**Candidate: restate the cutoff in SE units (z · paired-SE at 3,000).**
+Win condition: keeps ≥ 80 % of today's above-cutoff rows while putting the bar
+at ≥ 2 SE.
+
+```
+npx tsx packages/core/test/measure-screening-alternatives.ts
+```
+
+Paired SE (stdev/√3000·√2, mean over above-cutoff rows) is
+2.835 / 4.319 / 4.330 DPS on ret / feral / feral-p3, against a boundary of
+2.752 / 2.929 / 2.929 DPS. So boundary ÷ paired-SE = **0.97 / 0.68 / 0.68** —
+today's bar sits at roughly *one* paired SE, not two. A z=2 SE-unit cutoff
+would keep 29/38, 18/42 and 52/85 rows. Feral loses well over half.
+
+Verdict: **does not win.** The bar is a judgement bar, not a statistical one,
+and ADR-0020 already says the cutoff is absolute and a filter never moves it.
+Keep the absolute cutoff. What changes is disclosure: the ratio 0.97/0.68/0.68
+is now a stated fact rather than an unexamined one.
+
+For scale, making today's bar equal 2·SE_pair on feral would need roughly
+`3000 · (4.33/1.46)² ≈ 26,000` iterations per candidate. That is the honest
+answer to "what cutoff does the instrument support": the instrument at 3,000
+iterations supports a ~1-SE bar, and buying a 2-SE bar costs ~9× the sim time.
+Whether to spend it is a product call, and it is **not made here**.
+
+**Candidate: common-random-numbers pairing** (baseline and candidate share a
+seed, so shared variance cancels). Win condition: paired sd ≤ 0.7 × unpaired sd.
+
+```
+python scripts/crn_pairing_probe.py <outdir> 3000 29379 11
+python scripts/crn_pairing_probe.py <outdir> 3000 28034 13
+```
+
+Ring swap: paired sd **2.627** vs unpaired **2.930** (√2·SE = 3.034).
+Trinket swap: paired sd **3.372** vs unpaired **3.069**. No reduction; on the
+trinket the paired sd is *worse*. The RNG stream desyncs as soon as stats
+change, so the two runs stop sharing the randomness pairing depends on.
+
+Verdict: **does not win.** Note the comparator is a rotation of the same runs
+(candidate seed *i* vs baseline seed *i+1*), which is the conservative
+direction for this claim, and n=8 is low power. It would take a much stronger
+prior than "pairing usually helps" to spend more on this.
+
+### Q2 — What is the output actually for? Per-slot top-N instead of set-recall
+
+**Candidate: per-slot top-3 as the output contract.** Win condition: under the
+EP-gap stop at B=p95, at least 20 % fewer sims than set-recall at zero top-3
+misses.
+
+```
+npx tsx packages/core/test/measure-screening-alternatives.ts     # section [D]
+```
+
+Per-slot top-3 costs **0.752 / 0.859 / 0.860** of N, against set-recall's
+**0.841 / 0.859 / 0.863**. Ret saves 9 points; both feral pools save
+essentially nothing (0.000 and 0.003).
+
+Verdict: **does not win.** The saving exists only on the pool that was already
+cheapest, and vanishes on the pools that motivated this ticket. Worth stating
+plainly: once there is no screening pass at all, the output contract stops
+affecting cost entirely — every eligible candidate is simmed either way, and
+"top 3 per slot" becomes a *view* over a full sweep rather than a cheaper
+computation. The output stays set-recall plus the per-slot view.
+
+### Q3 — Can the EP pre-order do the work?
+
+**Candidate: EP-gap stop with a stated overturn bound B** — walk candidates in
+EP order and stop a slot once `slope·EP + B < boundary`, where B is a quantile
+of the residual of truth against `slope·EP`. Win condition: zero set-recall
+misses and ≤ 0.8·N sims, with B fixed in advance.
+
+```
+npx tsx packages/core/test/measure-ep-preorder-stop.ts
+npx tsx packages/core/test/measure-screening-alternatives.ts     # section [D]
+```
+
+Least-squares slope through the origin is 0.709 / 0.863 / 0.854 DPS per EP.
+The residuals are the problem: |resid| p95 is **34.4 / 231.6 / 227.4** DPS and
+max is 75 / 302 / 301. EP predicts ret tolerably and feral barely at all —
+Spearman(EP, truth) is 0.79 / 0.50 / 0.52.
+
+At B = p95 the stop costs **0.841 / 0.859 / 0.863** of N at zero misses. At
+B = p90 it is cheaper but misses a top-3 row on feral-p3, so the zero-miss
+condition fails at the only setting that saves anything.
+
+Simple variants fail worse. A consecutive-below-cutoff stop finds no zero-miss
+`m` up to 8 (at m=8 it still misses 15 of 85 on feral-p3). An absolute EP
+floor has to admit 315 of 365 candidates to lose nothing.
+
+Verdict: **fails on all three fixtures.** And note B is fitted on the truth —
+this is an oracle bound, so the real thing would be worse. EP ordering is
+useful for *ordering* work; it is not a basis for skipping it.
+
+### Q4 — Is a separate screening pass the wrong shape?
+
+Yes. Two candidates, both sequential-per-candidate rather than a batch screen.
+
+```
+npx tsx packages/core/test/measure-screening-alternatives.ts     # section [B/C]
+```
+
+**Candidate: sequential screening with a separate full sim on promote**, z
+fixed at 3. Win condition: wall ratio ≤ 0.8 at zero misses.
+Result **0.874 / 1.196 / 1.227**. **Fails** — paying twice for promoted rows
+eats the saving and then some.
+
+**Candidate: adaptive per-candidate sims until the CI clears the cutoff
+decision, keeping the pooled estimate, no separate full sim**, z fixed at 3.
+Win condition: wall ratio ≤ 0.8 at zero misses over 30 draws, **and** every row
+shown in the shortlist/top-N reaches ≥ 3,000 iterations or is replicated
+there, with mean |pooled − truth| over promoted rows reported.
+
+Result: wall **0.591 / 0.764 / 0.760**, iteration ratio 0.517 / 0.668 / 0.665,
+zero recall misses. **Clears the cost term.** The precision term is *not* met
+as measured: 14.8 / 5.8 / 19.4 promoted rows (mean over draws) end below 3,000
+iterations, carrying a pooled estimate whose mean error against truth is
+1.84 / 2.52 / 2.62 DPS — comparable to the cutoff boundary itself
+(2.752/2.929/2.929).
+
+So: **the cost term is cleared, the precision term is unscored-and-suspect, and
+the evidence is a noise-model simulation rather than a real-binary run.** That
+is enough to call it the open direction and not enough to ship it. Filed as
+ticket 233 with its validation plan.
+
+*Oracle aside, labelled as such and not a criterion result:* choosing the
+smallest zero-miss z per fixture (2/2/3) gives 0.536/0.672/0.760 for the
+adaptive variant and 0.783/1.018/1.227 for the separate-sim variant. z=1
+misses up to 2/4/4 rows. Per-fixture z is not a shippable rule; the z=3 row
+above is the one that counts.
+
+### Q5 — Should racing simply be removed?
+
+**Yes. Removed in ADR-0026.**
+
+Win condition for keeping racing: the same C1 bar every other candidate was
+held to — ≤ 0.8 wall ratio at zero recall misses, parameters fixed in advance.
+
+```
+npx tsx packages/core/test/measure-screening-alternatives.ts     # section [A]
+```
+
+Racing fails that criterion three ways, and none of them is a tuning
+problem.
+
+*It loses at shipped defaults.* Wall ratios against a full sweep are
+**1.407 / 1.476 / 1.098** at 3,000 iterations and 1.262 / 1.331 / 0.952 at
+5,000. Break-even needs promoted/eligible ≤ 0.619 at 3,000; the real pools do
+not get near that.
+
+*It loses even with K tuned on the answer.* Screening all candidates at 1,000
+iterations and promoting the smallest per-pool K that loses no above-cutoff
+row in any of 30 draws gives K/N = 0.270 / 0.518 / 0.487 and wall ratios
+**0.651 / 0.899 / 0.868**. Feral pools miss the 20 % bar under an oracle. Since
+this is top-K only, it is a *lower bound* on the real K+J rule's cost — the
+shipped rule can only do worse.
+
+*Its own gate is red.* `racing.test.ts` 7.0 fails on feral at shipped defaults.
+
+And nothing depended on it: `cli.ts` always passed `fullPool: true`, and every
+racing-active call site was under `packages/core/test/`.
+
+Also rejected: ticket 228's skip-small-pools heuristic, because its own review
+found it would remove recall gating from the §7 roster fixture and disqualify
+any fixture under 263 eligible from gating recall — a fix that works by
+switching the gate off.
+
+**Recommendation: remove racing; full sweep now; adaptive-CI screening is the
+measured open direction.**
+
+#### What happened to the recall gate
+
+After removal there is one sim path, so screening-recall ceases to be a
+property — there is no second computation to lose rows against. What remains
+gated is that the full sweep reproduces the generator-recorded above-cutoff
+set (`packages/core/test/full-sweep-recall.test.ts`).
+
+That gate's truth is external on two counts. The above-cutoff **item ids** (not
+just the count) were written into the fixture by
+`scripts/record_synthetic_fixtures.mjs` running against the real pinned binary,
+so the test cannot recompute its own expected answer. And `RecordedSimRunner`
+throws on any (seed, iterations) pair the fixture does not hold, while the
+fixture holds full-iteration rows only — so a reintroduced screening pass
+would fail loudly rather than quietly under-sim.
+
+Confirmed on 2026-08-19: regenerating the fixture with the *post-removal*
+engine against the real binary reproduces the committed file exactly —
+38/42/85 above cutoff, 267/260/428 requests captured.
+
+#### Reconciling 38/42/85 against the 48/39/86 that appears above
+
+The **38/42/85** figures are the full-sweep truth: recorded by
+`scripts/record_synthetic_fixtures.mjs` against the real binary and pinned
+green by `synthetic-fixtures.test.ts`. The **48/39/86** figures elsewhere in
+this ticket were one noisy draw — `measure-racing-ratio.ts` wrapped
+`DerivedNoiseSimRunner`, which adds `gaussian · stdev/√it` at *every* iteration
+count including 3,000, and counted `!belowCutoff && screened === undefined` on
+the racing path. Two different quantities; the truth is the recorded one.
+
+### The seed-overlap finding (filed as ticket 232)
+
+Turned up while checking whether the reported SE is real noise. It is not, for
+the seeds this repo ships.
+
+```
+python scripts/seed_overlap_probe.py <outdir> 3000 11 22 33 44 55
+  sampleSd=0.1880  meanReportedSE=2.1726  ratio 0.087
+python scripts/seed_overlap_probe.py <outdir> 3000 11 3011 6011 9011 12011
+  sampleSd=1.1140  meanReportedSE=2.1410  ratio 0.520
+```
+
+`DEFAULT_SEEDS = [11, 22, 33, 44, 55]` at 3,000 iterations are near-duplicate
+runs: their spread is 11× smaller than the sim's own reported SE, while seeds
+spaced a full iteration count apart spread 6× wider. The shipped
+paired-replicate SE is computed from those five seeds.
+
+Mechanism — **hypothesis, untested in source**: iteration *i* seeds from
+`randomSeed + i`, so seeds closer together than `iterations` share most of
+their streams.
+
+This has a consequence beyond the SE: `docs/verification-log.md` "Stage 1,
+first sitting" read the 0.099 spread across these seeds as evidence that
+"seeds barely move the mean". That reading is an artifact of seed overlap, not
+a fact about sim stability. Filed as ticket **232**, which blocks 233 — a rule
+whose whole decision is "has this CI cleared the boundary yet" cannot be
+validated on replicates that do not vary.
+
+### Open directions and how to test them
+
+**Adaptive-CI screening (ticket 233).** Cleared the cost term at fixed z=3
+(0.591/0.764/0.760 wall, zero misses); precision term unscored; evidence is a
+noise model. Validation plan in the ticket: land 232 first, then drive the
+real binary on feral-p3 and score both terms. Two anchor facts measured
+2026-08-19 with the pinned binary: replaying a captured request at the
+recorded seed and iteration count reproduces the recorded DPS *exactly*
+(baseline 1952.5249585538932, Δ 0.0000), so comparisons can be exact rather
+than read against SE; and one geared sim costs 654 ms at 3,000 iterations,
+2,877 ms at 30,000.
+
+**Cutoff in SE units.** Needs 232 fixed first — the paired-SE evidence the
+whole question rests on is computed from the overlapping seeds.
+
+### Scripts
+
+Tracked by this ticket's work, all reproducing the numbers above:
+
+- `packages/core/test/measure-screening-alternatives.ts` — Q1 SE figures, Q2, Q4, racing at oracle K
+- `packages/core/test/measure-ep-preorder-stop.ts` — Q3
+- `scripts/seed_overlap_probe.py` — the seed finding
+- `scripts/crn_pairing_probe.py` — Q1 pairing
+
+Deleted with racing: `measure-racing-ratio.ts`, `measure-feral-p3-recall.ts`,
+`measure-within-slot-ordering.ts`, `racing.test.ts`, `promotion.test.ts`
+(`racing-support.ts` survives as `measure-support.ts`, keeping
+`DerivedNoiseSimRunner` and `CountingSimRunner`).
+
+Tickets 223, 224 and 230 are moot or moved by this removal; they are **not**
+edited here.
