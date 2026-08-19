@@ -1622,7 +1622,7 @@
       "spec": "feral",
       "presetPhase": 1,
       "maxPhase": 2,
-      "poolSize": 246,
+      "poolSize": 228,
       "aboveCutoffCount": 42,
       "baselineDps": 1952.5249585538932,
       "iterations": 3000,
@@ -2985,63 +2985,15 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "6f1c35b8424fa652d9820cb3fef2de77829ca0f9385c8c3303b2506373e728ff:v0.0.101:42:3000": {
-          "dps": 1899.0685835466793,
-          "stdev": 164.36546853544573,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "dbb708a3bccb0c096349eab716170b6a147177beda9d1a68afaa29cdcc41e3c3:v0.0.101:42:3000": {
-          "dps": 1880.3297663828212,
-          "stdev": 159.34382387683945,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "40048eff2bc661ecb88046dee4a52f9e807b0d2721f06a9ff6f343cc56b51625:v0.0.101:42:3000": {
-          "dps": 1936.4050094769084,
-          "stdev": 167.6256303828049,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "3206ed288a5ed447c5268eb016e139fe84fb483ca806d9b00353340cee1c412c:v0.0.101:42:3000": {
-          "dps": 1895.3685742572882,
-          "stdev": 163.26609751000808,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "81090eb410d5692d04d454002493871898ece45d05812869e862da7690783729:v0.0.101:42:3000": {
-          "dps": 1745.2524189853723,
-          "stdev": 157.93880404416842,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "a4a123ae131d4c31c1501a5737df327957f0a0c5bc9ad9651ccee56f02f0b353:v0.0.101:42:3000": {
           "dps": 1746.449888350311,
           "stdev": 156.72075337492612,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "a059db1c0a963fa29b74c652164fbd57b81aafac7967763a5a61db730dd03d83:v0.0.101:42:3000": {
-          "dps": 1869.4054605028864,
-          "stdev": 155.22054281415822,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "2e2e4b1bf5f330c42cbbf32e0dca3efc144b7984a8bdf882356e6ed2dcf8682d:v0.0.101:42:3000": {
-          "dps": 1751.4698718374298,
-          "stdev": 158.15034047634117,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "b8cacc3098756f20cef1955d6678928c8d8893763b01fcec62d8e8c39e454ad8:v0.0.101:42:3000": {
           "dps": 1752.4223389656777,
           "stdev": 159.4396145367307,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "e7d1ae9248b6c94fb950fb2855ff7fc596d7f0957b5bbc0b4ad6ba863c35f668:v0.0.101:42:3000": {
-          "dps": 1880.5773080979177,
-          "stdev": 153.73531960608344,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -3081,21 +3033,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "d88bffbf3f6c20f1eb3d8928c8a0b316d4a52cbf1e2b3770c9d6ee7fe8ba6f9c:v0.0.101:42:3000": {
-          "dps": 1720.4364555257796,
-          "stdev": 156.26421429554387,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "713619230087aef34dd24e7e568c5da9b0f5adfe73a7bf1544c445372fb09e9c:v0.0.101:42:3000": {
           "dps": 1720.25066593515,
           "stdev": 157.28252099867993,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "49977cb8fa0d96d32dd2563f04da9db7b00f4a81e698edfbb8d45fb484f5b5b0:v0.0.101:42:3000": {
-          "dps": 1721.8008587719862,
-          "stdev": 154.72786998699848,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -3108,18 +3048,6 @@
         "501763eeb52e8236ded0ba9167badb95e568a73524306bb48b078cb18089009f:v0.0.101:42:3000": {
           "dps": 1760.513832781275,
           "stdev": 155.37803546492867,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "cab2230107cb2255146f8a22aff2beca7f8ba34c7d160a153dbccf5992b6175d:v0.0.101:42:3000": {
-          "dps": 1693.0301395566453,
-          "stdev": 147.60837212405121,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "f10e6f4b0a601c4a553b460d1db1ab90ac56c1f8c45276616311604b6ffefc4d:v0.0.101:42:3000": {
-          "dps": 1455.5290249789734,
-          "stdev": 139.98761697027882,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -3159,18 +3087,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "56198667e283797447570fd7e943917815b3eb0b96c06c021d7b94502fcaf3e6:v0.0.101:42:3000": {
-          "dps": 1449.7236449888403,
-          "stdev": 138.32922332626643,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "73a0fe27af3e8becd4e4984eab0ba2fcdf408ee6f2ac538ffdb1f8231ed79c39:v0.0.101:42:3000": {
-          "dps": 1472.820926910725,
-          "stdev": 132.06892119751507,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "e5cc63c7d078e98b2319b3146f5c48ebe9cc0403940d85af177b35a6bed834c3:v0.0.101:42:3000": {
           "dps": 1732.541370862578,
           "stdev": 108.34575474179347,
@@ -3186,12 +3102,6 @@
         "4da52bc145d15befbdf934a2228d85473698216a0e56b69ee945629ecc170a5e:v0.0.101:42:3000": {
           "dps": 1460.2520302465289,
           "stdev": 135.59625397220873,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "5353eb0be26ebea0612e6e8a961b17dffa2dd56a14057482aa2754011d44bea0:v0.0.101:42:3000": {
-          "dps": 1474.4227306065309,
-          "stdev": 130.1876747344364,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -3219,18 +3129,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "fcf006ee37588ca4ad5d9bfb9776188daf0be88d157366000f4eea35fa728723:v0.0.101:42:3000": {
-          "dps": 1594.4043114063343,
-          "stdev": 134.94317694993666,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "e38675ad3d8ffc9bf0712b46c031116889390b44300401bbe645511a47a3820c:v0.0.101:42:3000": {
-          "dps": 1479.7524076176428,
-          "stdev": 126.33117346284814,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "53fc9445bab5affc4fb73edf9cd7ace83dfe74dc8079d030709b86c7c659cbdf:v0.0.101:42:3000": {
           "dps": 1473.1810146026378,
           "stdev": 130.96672738300222,
@@ -3252,12 +3150,6 @@
         "b73f43795c79e6d9b11b3e8f344bde648b8b0e9673e80ceeeb7944db4f369f26:v0.0.101:42:3000": {
           "dps": 1459.7947518982326,
           "stdev": 136.06121093904133,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "cadb027a005cda0145709323089c4e2f4f2fe75533885f8026f67e558edd5b95:v0.0.101:42:3000": {
-          "dps": 1581.8196316617502,
-          "stdev": 132.8246772933501,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -3303,8 +3195,8 @@
       "spec": "feral",
       "presetPhase": 1,
       "maxPhase": 3,
-      "poolSize": 398,
-      "aboveCutoffCount": 86,
+      "poolSize": 365,
+      "aboveCutoffCount": 85,
       "baselineDps": 1952.5249585538932,
       "iterations": 3000,
       "seed": 42,
@@ -5548,51 +5440,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "4c2df0e472be69a9eea5127e1dd6740331ba86a6bf97d1e2a6c254e4a26ea1a3:v0.0.101:42:3000": {
-          "dps": 1934.3190734802934,
-          "stdev": 165.56516399024662,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "ab9e094bf492eefde5e468504d0a05bcf59d21c66ab2a8525c30fe061e45847b:v0.0.101:42:3000": {
-          "dps": 1973.7580685840928,
-          "stdev": 166.56549397462808,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "ff44939c3737b33e09bbe8d3682308ac6cc761346fc5f8efb3d02a880b55a3ab:v0.0.101:42:3000": {
-          "dps": 1944.2389550000216,
-          "stdev": 162.62650421632594,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "112e937ab6c41ef65c3e17f2a706b0cea90495aeb8a89286bce760af84455f9d:v0.0.101:42:3000": {
           "dps": 1939.6700137622688,
           "stdev": 169.3923487762014,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "6f1c35b8424fa652d9820cb3fef2de77829ca0f9385c8c3303b2506373e728ff:v0.0.101:42:3000": {
-          "dps": 1899.0685835466793,
-          "stdev": 164.36546853544573,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "dbb708a3bccb0c096349eab716170b6a147177beda9d1a68afaa29cdcc41e3c3:v0.0.101:42:3000": {
-          "dps": 1880.3297663828212,
-          "stdev": 159.34382387683945,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "40048eff2bc661ecb88046dee4a52f9e807b0d2721f06a9ff6f343cc56b51625:v0.0.101:42:3000": {
-          "dps": 1936.4050094769084,
-          "stdev": 167.6256303828049,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "3206ed288a5ed447c5268eb016e139fe84fb483ca806d9b00353340cee1c412c:v0.0.101:42:3000": {
-          "dps": 1895.3685742572882,
-          "stdev": 163.26609751000808,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5602,21 +5452,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "690b0599de06ddc2b3c575cb57a7cfe2feae453c0ed93ad673a6b1b4fe7487f2:v0.0.101:42:3000": {
-          "dps": 1768.3461185719877,
-          "stdev": 160.01512596552905,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "9412e2b8874ff284f95e4f6f751eec14f29693adab857cb4873ae4a394c39f24:v0.0.101:42:3000": {
           "dps": 1761.323663205688,
           "stdev": 156.32190960978014,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "81090eb410d5692d04d454002493871898ece45d05812869e862da7690783729:v0.0.101:42:3000": {
-          "dps": 1745.2524189853723,
-          "stdev": 157.93880404416842,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5626,27 +5464,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "5ca32b7e59c8bcbf75d668890e400da833e0e5d0cafba0a99e32bda93079d3eb:v0.0.101:42:3000": {
-          "dps": 1747.1390316847446,
-          "stdev": 159.35847791950602,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "9b2cec40bb83e362b6cde551f145e08ae424e823f17de68701dd51657586e03e:v0.0.101:42:3000": {
           "dps": 1749.0994734926442,
           "stdev": 158.04511439567116,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "a059db1c0a963fa29b74c652164fbd57b81aafac7967763a5a61db730dd03d83:v0.0.101:42:3000": {
-          "dps": 1869.4054605028864,
-          "stdev": 155.22054281415822,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "2e2e4b1bf5f330c42cbbf32e0dca3efc144b7984a8bdf882356e6ed2dcf8682d:v0.0.101:42:3000": {
-          "dps": 1751.4698718374298,
-          "stdev": 158.15034047634117,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5662,12 +5482,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "e7d1ae9248b6c94fb950fb2855ff7fc596d7f0957b5bbc0b4ad6ba863c35f668:v0.0.101:42:3000": {
-          "dps": 1880.5773080979177,
-          "stdev": 153.73531960608344,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "1aadd2b20cd03ddfbaceb28f8b2d9f74cf01c135eec158909db2eae8fe517540:v0.0.101:42:3000": {
           "dps": 1885.414349803392,
           "stdev": 167.10151683590814,
@@ -5677,12 +5491,6 @@
         "ca69bf407fafa5655c609086ba38d2acb9ce5474fc3cbd4c0ab61d67a7192a34:v0.0.101:42:3000": {
           "dps": 1474.4111670238276,
           "stdev": 142.23666720772886,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "32edeb4fb16c37bf9578436005649532d6731e59970561757e1e8040ca0dcb5d:v0.0.101:42:3000": {
-          "dps": 1743.6620237247253,
-          "stdev": 155.9681028957904,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5722,21 +5530,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "d88bffbf3f6c20f1eb3d8928c8a0b316d4a52cbf1e2b3770c9d6ee7fe8ba6f9c:v0.0.101:42:3000": {
-          "dps": 1720.4364555257796,
-          "stdev": 156.26421429554387,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "713619230087aef34dd24e7e568c5da9b0f5adfe73a7bf1544c445372fb09e9c:v0.0.101:42:3000": {
           "dps": 1720.25066593515,
           "stdev": 157.28252099867993,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "49977cb8fa0d96d32dd2563f04da9db7b00f4a81e698edfbb8d45fb484f5b5b0:v0.0.101:42:3000": {
-          "dps": 1721.8008587719862,
-          "stdev": 154.72786998699848,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5752,18 +5548,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "2abeefbe46b75590a2c5f57f9a60cd1afca4b7f7d3423c3d39f74f5f27c60597:v0.0.101:42:3000": {
-          "dps": 1455.5290249789734,
-          "stdev": 139.98761697027882,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "218251c62b7be40af8955b52ab9115af8ce7e40db0cda354ace7d6151161c554:v0.0.101:42:3000": {
-          "dps": 1733.251567517903,
-          "stdev": 158.893393842318,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "501763eeb52e8236ded0ba9167badb95e568a73524306bb48b078cb18089009f:v0.0.101:42:3000": {
           "dps": 1760.513832781275,
           "stdev": 155.37803546492867,
@@ -5773,18 +5557,6 @@
         "e4f34ee6cde2e34435e721e840f20db94042aac2466b16737f5210ba412e8fe9:v0.0.101:42:3000": {
           "dps": 1754.1766804191445,
           "stdev": 154.40301694525425,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "cab2230107cb2255146f8a22aff2beca7f8ba34c7d160a153dbccf5992b6175d:v0.0.101:42:3000": {
-          "dps": 1693.0301395566453,
-          "stdev": 147.60837212405121,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "f10e6f4b0a601c4a553b460d1db1ab90ac56c1f8c45276616311604b6ffefc4d:v0.0.101:42:3000": {
-          "dps": 1455.5290249789734,
-          "stdev": 139.98761697027882,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5824,18 +5596,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "56198667e283797447570fd7e943917815b3eb0b96c06c021d7b94502fcaf3e6:v0.0.101:42:3000": {
-          "dps": 1449.7236449888403,
-          "stdev": 138.32922332626643,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "73a0fe27af3e8becd4e4984eab0ba2fcdf408ee6f2ac538ffdb1f8231ed79c39:v0.0.101:42:3000": {
-          "dps": 1472.820926910725,
-          "stdev": 132.06892119751507,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "e5cc63c7d078e98b2319b3146f5c48ebe9cc0403940d85af177b35a6bed834c3:v0.0.101:42:3000": {
           "dps": 1732.541370862578,
           "stdev": 108.34575474179347,
@@ -5851,12 +5611,6 @@
         "4da52bc145d15befbdf934a2228d85473698216a0e56b69ee945629ecc170a5e:v0.0.101:42:3000": {
           "dps": 1460.2520302465289,
           "stdev": 135.59625397220873,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "5353eb0be26ebea0612e6e8a961b17dffa2dd56a14057482aa2754011d44bea0:v0.0.101:42:3000": {
-          "dps": 1474.4227306065309,
-          "stdev": 130.1876747344364,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5884,18 +5638,6 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "fcf006ee37588ca4ad5d9bfb9776188daf0be88d157366000f4eea35fa728723:v0.0.101:42:3000": {
-          "dps": 1594.4043114063343,
-          "stdev": 134.94317694993666,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "e38675ad3d8ffc9bf0712b46c031116889390b44300401bbe645511a47a3820c:v0.0.101:42:3000": {
-          "dps": 1479.7524076176428,
-          "stdev": 126.33117346284814,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "53fc9445bab5affc4fb73edf9cd7ace83dfe74dc8079d030709b86c7c659cbdf:v0.0.101:42:3000": {
           "dps": 1473.1810146026378,
           "stdev": 130.96672738300222,
@@ -5917,12 +5659,6 @@
         "b73f43795c79e6d9b11b3e8f344bde648b8b0e9673e80ceeeb7944db4f369f26:v0.0.101:42:3000": {
           "dps": 1459.7947518982326,
           "stdev": 136.06121093904133,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "cadb027a005cda0145709323089c4e2f4f2fe75533885f8026f67e558edd5b95:v0.0.101:42:3000": {
-          "dps": 1581.8196316617502,
-          "stdev": 132.8246772933501,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5950,33 +5686,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "9fdd487b6a537a54cb229b2307fdb0d8322c9b2491135149d1068346d0be26ff:v0.0.101:42:3000": {
-          "dps": 1728.9902710673161,
-          "stdev": 149.77876283634222,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "658eb5ee821e3760d9264bd52d2ab580d21238cd0c88e71e10731da3be6d4cbe:v0.0.101:42:3000": {
-          "dps": 1477.467727187574,
-          "stdev": 133.47724528916203,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "36753887e7fde88165daba4a65f7e8527d1d203587b1ce030465f1b4e1630b2a:v0.0.101:42:3000": {
           "dps": 1778.436771120402,
           "stdev": 85.64940385243747,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "73ef8fb5a0ea85bf3ccf73c62f0e27e9c4c7426ba4b696fab300b85550b539d1:v0.0.101:42:3000": {
-          "dps": 1471.298169133991,
-          "stdev": 126.70153757162323,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "9010a3f6a1f0d5a37ebb261fb58ee20a5db01262a18ff2334b46a99d1fcfba14:v0.0.101:42:3000": {
-          "dps": 1583.6142292989205,
-          "stdev": 133.24269993040488,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -5995,12 +5707,6 @@
         "c42fb82dc2fad9ed5ec7db9ee8d08602c525fbeaca4278e0cb812371bf8a0349:v0.0.101:42:3000": {
           "dps": 1583.2398138331232,
           "stdev": 132.07889407841034,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "ee5d62f1f68a6f580e08986ae4d45a31e706fe36fe8da2d1b17cadab4b171d8b:v0.0.101:42:3000": {
-          "dps": 1470.0140391437615,
-          "stdev": 127.91293696333072,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
@@ -6028,21 +5734,9 @@
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
-        "6b318f5767af392631e3aa4096f50ea5b85422863e7a3f4e9eed9e8cd7352ae0:v0.0.101:42:3000": {
-          "dps": 1449.7236449888403,
-          "stdev": 138.32922332626643,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
         "e3d840cf64c70d528c6b8834373b26eaa780e88f56fb97ac63907b8a8feff541:v0.0.101:42:3000": {
           "dps": 1583.6034513052414,
           "stdev": 133.24779196229989,
-          "iterationsDone": 3000,
-          "simVersion": "v0.0.101"
-        },
-        "895bcb62d8a46b1a4b86fc6fc564e87deb163e49b1347ba878a1485daf3f6617:v0.0.101:42:3000": {
-          "dps": 1471.0697400531267,
-          "stdev": 133.08854018992812,
           "iterationsDone": 3000,
           "simVersion": "v0.0.101"
         },
