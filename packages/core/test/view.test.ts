@@ -895,42 +895,63 @@ describe("applyView", () => {
       });
     }
 
-    it("appears in rows, but never in the shortlist — a third state, not below-cutoff", () => {
+    // Rewritten for ticket 224: screened rows are a disclosed set, not an
+    // ordered tail. The intent of the original — a screened row is a third
+    // state, neither shortlisted nor a ranked below-cutoff row — is kept; what
+    // changed is which projection carries it.
+    it("comes back in ruledOut, never in rows or the shortlist — a third state, not below-cutoff", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
         item({ itemId: 2, deltaDps: 1, deltaPct: 0.05, belowCutoff: true }),
         screenedItem({ itemId: 3, deltaDps: 50, deltaPct: 2.5 }),
       ]);
       const view = applyView(r);
-      expect(view.rows.map((x) => x.itemId).sort()).toEqual([1, 2, 3]);
+      expect(view.rows.map((x) => x.itemId)).toEqual([1, 2]);
+      expect(view.ruledOut.map((x) => x.itemId)).toEqual([3]);
       expect(view.shortlist.map((x) => x.itemId)).toEqual([1]);
+      // The ruled-out set carries no position claim at all.
+      expect(view.ruledOut[0]?.tieGroupId).toBeUndefined();
+      expect(view.ruledOut[0]?.rank).toBeNull();
+      // belowCutoffCount now counts full-iteration rows only.
+      expect(view.belowCutoffCount).toBe(1);
       // Below-cutoff for the same reason a Stop-unsimmed row would be: there
       // is no measured verdict to give it, and belowCutoffInView existing
       // as `true` is what keeps it out of the shortlist without inventing
       // a distinct third boolean the rest of the view layer would need to
       // learn about.
-      const screenedRow = view.rows.find((x) => x.itemId === 3);
+      const screenedRow = view.ruledOut.find((x) => x.itemId === 3);
       expect(screenedRow?.belowCutoffInView).toBe(true);
     });
 
-    it("is ranked only among other screened rows, never interleaved with full-iteration deltas", () => {
+    // Rewritten for ticket 224: screened rows are a disclosed set, not an
+    // ordered tail. The original asserted the screened rows formed a delta-
+    // ordered tail of `rows` ([1, 2, 9, 8]); the surviving intent is that a
+    // large screening delta never buys a position among the ranked rows.
+    it("is a set ordered by slot and name, never interleaved with full-iteration deltas", () => {
       const r = ranking([
         // A screened row with a *larger* deltaDps than every full-iteration
-        // row — if screened rows interleaved by raw delta, this one would
-        // sort first.
-        screenedItem({ itemId: 9, deltaDps: 999, deltaPct: 50 }),
+        // row — if screened rows were ranked at all, this one would sort
+        // first among them; under slot/name order its delta buys it nothing.
+        screenedItem({
+          itemId: 9,
+          name: "zulian",
+          deltaDps: 999,
+          deltaPct: 50,
+        }),
         item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
         item({ itemId: 2, deltaDps: 20, deltaPct: 1 }),
-        screenedItem({ itemId: 8, deltaDps: 5, deltaPct: 0.3 }),
+        screenedItem({ itemId: 8, name: "amani", deltaDps: 5, deltaPct: 0.3 }),
       ]);
-      const { rows } = applyView(r);
-      // Every full-iteration row (screened or not) precedes every screened
-      // row, and within each group the ordering is by that group's own
-      // delta — the screened group's 999 does not jump the full-iteration
-      // rows despite outscoring them numerically.
-      expect(rows.map((x) => x.itemId)).toEqual([1, 2, 9, 8]);
+      const { rows, ruledOut } = applyView(r);
+      expect(rows.map((x) => x.itemId)).toEqual([1, 2]);
+      // Same slot, so name order decides: "amani" before "zulian", which is
+      // the opposite of the screening-delta order the old tail carried.
+      expect(ruledOut.map((x) => x.itemId)).toEqual([8, 9]);
     });
 
+    // Rewritten for ticket 224: the row survives the filter into `ruledOut`
+    // rather than into `rows`. The intent — filters select ruled-out rows the
+    // same way they select ranked ones — is unchanged.
     it("survives every filter — hideOwned, raid, boss — the same as any other row", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 30, deltaPct: 1.5, owned: true }),
@@ -942,27 +963,202 @@ describe("applyView", () => {
         }),
       ]);
       const filtered = applyView(r, { raid: "Tempest Keep" });
-      expect(filtered.rows.map((x) => x.itemId)).toEqual([2]);
+      expect(filtered.rows).toEqual([]);
+      expect(filtered.ruledOut.map((x) => x.itemId)).toEqual([2]);
       expect(filtered.shortlist).toEqual([]);
     });
 
+    it("applies hideOwned to the ruled-out set as to the ranked rows", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
+        screenedItem({ itemId: 2, name: "kept", deltaDps: 10, deltaPct: 0.5 }),
+        screenedItem({
+          itemId: 3,
+          name: "dropped",
+          deltaDps: 9,
+          deltaPct: 0.4,
+          owned: true,
+        }),
+      ]);
+      const view = applyView(r, { hideOwned: true });
+      expect(view.ruledOut.map((x) => x.itemId)).toEqual([2]);
+    });
+
+    it("applies the boss filter to the ruled-out set", () => {
+      const r = ranking([
+        screenedItem({
+          itemId: 2,
+          deltaDps: 10,
+          deltaPct: 0.5,
+          source: { kind: "raid", zone: "Karazhan", boss: "Nightbane" },
+        }),
+        screenedItem({
+          itemId: 3,
+          deltaDps: 9,
+          deltaPct: 0.4,
+          source: { kind: "raid", zone: "Karazhan", boss: "Prince Malchezaar" },
+        }),
+      ]);
+      const view = applyView(r, { raid: "Karazhan", boss: "Nightbane" });
+      expect(view.ruledOut.map((x) => x.itemId)).toEqual([2]);
+    });
+
+    // Rewritten for ticket 224: the screened row is looked up in `ruledOut`
+    // instead of `rows`. The intent — a screened row whose raw delta sits
+    // between two tied full-iteration rows is not folded into their group —
+    // is unchanged, and is now structural rather than incidental.
     it("does not affect the ranked (non-screened) rows' own tie groups", () => {
       const r = ranking([
         item({ itemId: 1, deltaDps: 30.0, deltaPct: 1.5, se: 0.001 }),
         item({ itemId: 2, deltaDps: 30.001, deltaPct: 1.5, se: 0.001 }),
         screenedItem({ itemId: 3, deltaDps: 30.0005, deltaPct: 1.5 }),
       ]);
-      const { rows } = applyView(r);
+      const { rows, ruledOut } = applyView(r);
       const tied = rows.filter((x) => x.itemId === 1 || x.itemId === 2);
       expect(tied.every((x) => x.tieGroupId === tied[0]?.tieGroupId)).toBe(
         true
       );
-      const screenedRow = rows.find((x) => x.itemId === 3);
-      // A lone screened row forms no group of its own (assignTieGroups
-      // never groups a singleton), and it must not have been folded into
-      // the full-iteration pair's group just because its raw delta sits
-      // between theirs.
+      const screenedRow = ruledOut.find((x) => x.itemId === 3);
+      expect(screenedRow).toBeDefined();
       expect(screenedRow?.tieGroupId).toBeUndefined();
+    });
+
+    // The trinket pole from ticket 224: a dozen screened trinkets inside one
+    // 7.25 DPS band. This is the case that made the old delta-ordered tail
+    // read as a ranking, so the test that matters is that the *order does not
+    // depend on the deltas at all*.
+    it("returns the trinket pole as an unordered set with no positions", () => {
+      const screenedTrinkets = Array.from({ length: 12 }, (_, i) =>
+        screenedItem({
+          itemId: 200 + i,
+          name: `trinket-${String(i).padStart(2, "0")}`,
+          slot: "trinket",
+          deltaDps: 40 - i * 0.6,
+          deltaPct: 2,
+        })
+      );
+      const r = ranking([
+        item({ itemId: 1, slot: "trinket", deltaDps: 60, deltaPct: 3 }),
+        ...screenedTrinkets,
+      ]);
+      const view = applyView(r, { groupBy: "slot" });
+
+      expect(view.ruledOut).toHaveLength(12);
+      expect(view.rows.map((x) => x.itemId)).toEqual([1]);
+      expect(view.shortlist.map((x) => x.itemId)).toEqual([1]);
+      for (const row of view.ruledOut) {
+        expect(row.tieGroupId).toBeUndefined();
+        expect(row.rank).toBeNull();
+      }
+      const grouped = view.groups?.flatMap((g) => g.rows.map((x) => x.itemId));
+      expect(grouped).toEqual([1]);
+
+      // Shuffling the screening deltas leaves the ruled-out sequence
+      // identical — the disclosure carries no information about which
+      // screened candidate measured higher.
+      const shuffledDeltas = [7, 3, 11, 0, 5, 9, 1, 8, 4, 10, 2, 6];
+      const reshuffled = ranking([
+        item({ itemId: 1, slot: "trinket", deltaDps: 60, deltaPct: 3 }),
+        ...screenedTrinkets.map((t, i) => ({
+          ...t,
+          deltaDps: 40 - shuffledDeltas[i]! * 0.6,
+        })),
+      ]);
+      expect(applyView(reshuffled).ruledOut.map((x) => x.itemId)).toEqual(
+        view.ruledOut.map((x) => x.itemId)
+      );
+    });
+
+    // The weapon pole: the promoted rows there are a real ranking and must
+    // keep reading as one.
+    it("keeps promoted weapon rows in delta order while their screened peers leave", () => {
+      const r = ranking([
+        screenedItem({
+          itemId: 90,
+          name: "screened-axe",
+          slot: "weapon",
+          deltaDps: 12,
+          deltaPct: 0.6,
+        }),
+        item({ itemId: 2, slot: "weapon", deltaDps: 40, deltaPct: 2, rank: 2 }),
+        item({
+          itemId: 1,
+          slot: "weapon",
+          deltaDps: 55,
+          deltaPct: 2.7,
+          rank: 1,
+        }),
+        screenedItem({
+          itemId: 91,
+          name: "screened-mace",
+          slot: "weapon",
+          deltaDps: 11,
+          deltaPct: 0.5,
+        }),
+        item({
+          itemId: 3,
+          slot: "weapon",
+          deltaDps: 25,
+          deltaPct: 1.2,
+          rank: 3,
+        }),
+      ]);
+      const view = applyView(r);
+      expect(view.rows.map((x) => x.itemId)).toEqual([1, 2, 3]);
+      expect(view.rows.map((x) => x.rank)).toEqual([1, 2, 3]);
+      expect(view.ruledOut.map((x) => x.itemId)).toEqual([90, 91]);
+    });
+
+    // C13: removing the screened tail must be invisible to everything above
+    // it. Compared against the same ranking with the screened items simply
+    // absent — an independent source of truth for what the promoted rows
+    // should look like.
+    it("leaves promoted rows byte-identical to a ranking with no screened items", () => {
+      const promoted = [
+        item({ itemId: 1, deltaDps: 30.0, deltaPct: 1.5, se: 0.001 }),
+        item({ itemId: 2, deltaDps: 30.0005, deltaPct: 1.5, se: 0.001 }),
+        item({ itemId: 3, deltaDps: 12, deltaPct: 0.6 }),
+        item({ itemId: 4, deltaDps: 0.4, deltaPct: 0.02, belowCutoff: true }),
+      ];
+      const withScreened = applyView(
+        ranking([
+          ...promoted,
+          screenedItem({ itemId: 80, deltaDps: 999, deltaPct: 50 }),
+          screenedItem({ itemId: 81, deltaDps: 30.0002, deltaPct: 1.5 }),
+        ]),
+        { groupBy: "slot" }
+      );
+      const withoutScreened = applyView(ranking(promoted), {
+        groupBy: "slot",
+      });
+
+      expect(withScreened.rows).toEqual(withoutScreened.rows);
+      expect(withScreened.shortlist).toEqual(withoutScreened.shortlist);
+      expect(withScreened.groups).toEqual(withoutScreened.groups);
+      expect(withScreened.belowCutoffCount).toBe(
+        withoutScreened.belowCutoffCount
+      );
+      expect(withScreened.rows.map((x) => x.tieGroupId)).toEqual([
+        "tie-1",
+        "tie-1",
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it("never mutates a ranking that contains screened rows", () => {
+      const r = ranking([
+        item({ itemId: 1, deltaDps: 30, deltaPct: 1.5 }),
+        screenedItem({ itemId: 2, deltaDps: 999, deltaPct: 50 }),
+      ]);
+      const before = structuredClone(r.items);
+      const order = r.items.map((x) => x.itemId);
+      applyView(r, { groupBy: "slot", hideOwned: true });
+      expect(r.items).toEqual(before);
+      // The delta ordering the engine produced stays reachable on the
+      // Ranking — that is where the measurement scripts read it from.
+      expect(r.items.map((x) => x.itemId)).toEqual(order);
+      expect(r.items[1]).not.toHaveProperty("belowCutoffInView");
     });
   });
 });
