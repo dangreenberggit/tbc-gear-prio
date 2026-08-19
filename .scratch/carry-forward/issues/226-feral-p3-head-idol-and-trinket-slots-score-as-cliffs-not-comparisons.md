@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug (suspected scoring / unimplemented-effect gap on the feral-p3 fixture)
 Origin: `sme-rank-review` verdict during ticket 225, 2026-08-18 — verdict
   `do-not-trust` for the head, ranged and trinket slots; handoff at
@@ -141,7 +141,7 @@ wrongly, and carries a diagnostic loop method.
 Each is a question this ticket must answer with a re-runnable command,
 not a narrative.
 
-- [ ] **Is the incumbent's value inflated, or are the candidates'
+- [x] **Is the incumbent's value inflated, or are the candidates'
       undervalued?** For the head slot: sim Wolfshead Helm and
       Thunderheart Cover directly on this character with the pinned
       `wowsimcli`, holding gems and enchants equal across both arms, and
@@ -149,7 +149,7 @@ not a narrative.
       a direct sim, our inputs are not the cause and the fork's helm
       handling is. If it does not reproduce, the defect is on our side
       of the wall — in what we feed the sim or how we read it back.
-- [ ] **If the incumbent is inflated, what inflates it?** Name which of
+- [x] **If the incumbent is inflated, what inflates it?** Name which of
       these it is and show the measurement: the meta gem failing to
       activate in the candidate arm but not the worn arm; a set bonus
       broken by the swap and credited to the baseline; or Wolfshead's
@@ -157,7 +157,7 @@ not a narrative.
       removed when the helm is swapped out. A near-constant loss applied
       to every non-incumbent item in a slot is the shape all three
       produce, so the answer must distinguish them, not assert one.
-- [ ] **Are the eleven trinkets sharing -31.33 because their procs score
+- [x] **Are the eleven trinkets sharing -31.33 because their procs score
       as zero?** They are all marked `impl`, so ticket 171's mechanism
       is not the answer as written. Establish whether -31.33 is exactly
       the value of losing the worn trinket's contribution — i.e. whether
@@ -165,17 +165,17 @@ not a narrative.
       incumbent's loss showing through. Romulo's Poison Vial (-25.44)
       and Sextant of Unstable Currents (-32.06) sit just outside the
       shared value, so it is not a hard floor being clamped to.
-- [ ] **Does the idol gap survive a direct sim?** Same treatment as the
+- [x] **Does the idol gap survive a direct sim?** Same treatment as the
       helms for Everbloom Idol against Idol of the White Stag. An idol
       carries an empty stat line by nature, so a 21 DPS gap between two
       idols cannot be explained by stats and must come from how their
       effects are simulated or from the rotation not using one of them.
-- [ ] **Is this feral-only, or does ret show it too?** Ticket 171 found
+- [x] **Is this feral-only, or does ret show it too?** Ticket 171 found
       the ret librams; this ticket found feral head, idol and trinket.
       Check whether the ret-p3 fixture's head and trinket slots show the
       same shapes, so the fix is scoped to a mechanism rather than to a
       spec.
-- [ ] Whatever is found is recorded with the commands that show it, and
+- [x] Whatever is found is recorded with the commands that show it, and
       any conclusion about the pinned fork's behaviour cites a run
       against the pin rather than a reading of the Go source alone.
 
@@ -212,3 +212,63 @@ losing the worn trinket's contribution.
 - Re-recording the `feral-p3` fixture. Establish the cause against the
   committed recordings and the pinned binary first; a re-record is a
   consequence of a diagnosis, not a substitute for one.
+
+## Resolution (2026-08-19)
+
+Full findings, with the command above every block:
+`.scratch/handoffs/ticket-226-direct-sims.md`.
+
+Method: the ranker's own requests were captured through a `CapturingSimRunner`
+and replayed against the pinned `wowsimcli` v0.0.101 at 3,000 and 30,000
+iterations, with slot-emptied controls. A replay at the recorded seed and
+iteration count reproduces the recorded DPS **exactly**
+(`npx tsx packages/core/test/measure-direct-sim-sanity.ts`), so these are
+absolute comparisons, not same-shape ones.
+
+**None of the three shapes is a defect on our side of the wall.**
+
+- **Head — correct behaviour.** The gap reproduces at both iteration counts
+  (-188.56 and -177.79 at 30,000, SE(Δ) <= 1.48). Wolfshead Helm's own
+  contribution, measured by emptying the slot, is **284.06 DPS** — larger than
+  any candidate's loss, which is what must be true if candidates are getting
+  proper credit for their stats while losing a large effect. The swap is
+  clean: exactly one slot differs, so no meta gem or set bonus rides along.
+  Wolfshead's energy-on-shift is genuinely simulated
+  (`vendor/tbc-new-fork/sim/druid/forms.go:92,147`), confirmed by the 284 DPS
+  measurement and not by reading Go alone.
+- **Trinkets — real, and exactly as this ticket suspected.** Three of the tied
+  group each return **1920.64 DPS, byte-identical to emptying the trinket slot
+  entirely**. They contribute literally nothing, so -31.33 is the incumbent
+  Hourglass of the Unraveller's value showing through. The tie is not a clamp:
+  Romulo's sits outside it at -27.70 because it carries melee hit. On the tip
+  fixture the group is **10 items, not eleven**, after `57ec814`.
+- **Idol — not a cliff.** An empty ranged slot costs -48.36 while Idol of the
+  White Stag costs only -21.31, so White Stag contributes about 27 DPS of real
+  value. Both idols are simulated; Everbloom is simply worth more. Whether it
+  *should* be worth twice as much is a fork balance question, not a pipeline
+  defect.
+- **Not feral-only.** The ret P2 row shows the same trinket mechanism — 28528,
+  28785 and 30621 all at exactly -47.73. Ret's head slot shows no cliff, which
+  is the control: the head shape is specific to Wolfshead Helm, not to feral.
+  There is no recorded `ret-p3` row (the universe file exists, the recorded
+  truth does not), and re-recording is out of scope, so the comparison used
+  the P2 row. The result was not inconclusive, so live ret-p3 sims were not
+  needed.
+
+**What is left is not a bug in this repo.** The sim scores inert items as
+inert and the pipeline reports that faithfully. Whether items contributing
+exactly nothing belong in a candidate pool is the same product question ticket
+227 asks from the opposite direction, and it is carried in ticket 234 rather
+than duplicated here.
+
+**New ticket filed** (this ticket required a sim to confirm before filing):
+`233-effects-classifier-mislabels-in-both-directions.md` — Wolfshead is in
+neither classifier list despite its effect firing, and all ten tied trinkets
+are labelled `impl` despite contributing nothing.
+
+**Sibling relationship.** This ticket asked that if one diagnosis explains
+both 226 and 227, the other be closed with a pointer. It does not. 226's
+trinkets contribute a deterministic, reproducible *nothing*; 227's healer rows
+carry *real positive* deltas driven by mana. Different mechanisms, so both
+tickets keep their own disposition.
+

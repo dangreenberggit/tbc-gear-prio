@@ -120,14 +120,14 @@ about the fixture, not about healer items.
 
 ## Acceptance criteria
 
-- [ ] **Do the healer rows survive more iterations?** Re-sim these ten
+- [x] **Do the healer rows survive more iterations?** Re-sim these ten
       item ids against the pinned `wowsimcli` at materially more than
       3,000 iterations and report each delta with its own SE. The
       hypothesis predicts they collapse toward zero and drop below the
       cutoff. If instead they hold at +5 to +8 DPS, the noise explanation
       is refuted and something is genuinely crediting healing stats to
       feral DPS.
-- [ ] **Is any healer stat reaching the DPS calculation?** Check whether
+- [x] **Is any healer stat reaching the DPS calculation?** Check whether
       intellect, healing power, spellpower, spirit or mp5 carries a
       non-zero EP weight or otherwise enters the delta for feral —
       `data/presets/feral/p1.ep-weights.json` and the sim request built
@@ -135,16 +135,17 @@ about the fixture, not about healer items.
       delta itself comes from the sim, so a non-zero weight would explain
       *pool membership* but not a positive DPS delta. Say which of the
       two is in play.
-- [ ] **Per-item variance, not just the fixture mean.** The σ figures
+- [x] **Per-item variance, not just the fixture mean.** The σ figures
       above use one fixture-wide mean stdev. Report each of the ten rows'
       own `stdev` and `iterationsDone` from the recordings, so the σ
       claim rests on that item's variance rather than the pool average.
-- [ ] **How many non-healer rows are also noise-positives?** If the
+- [x] **How many non-healer rows are also noise-positives?** If the
       hypothesis holds it does not stop at healer gear. Estimate how many
       of the 86 above-cutoff rows are within 2σ of the boundary, and say
       what that implies for the tests that assert `aboveCutoffCount` and
       for ticket 225's closed conclusion.
-- [ ] **Should role-inappropriate items be pooled at all?** Decide and
+- [ ] **Should role-inappropriate items be pooled at all?** NEEDS OWNER
+      RULING — carried in ticket 234; see Resolution below. Decide and
       record whether items with no class-usable stat should be excluded
       from a spec's candidate pool, or kept and disclosed. This is a
       product question, not only a scoring one; if the answer is "kept",
@@ -156,3 +157,66 @@ about the fixture, not about healer items.
   slots; see "Why this is a sibling" above.
 - Ticket 224's presentation of tied rows.
 - Re-recording the `feral-p3` fixture before the cause is known.
+
+## Resolution (2026-08-19) — hypothesis refuted; one criterion left open
+
+Full findings, with commands: `.scratch/handoffs/ticket-227-healer-noise.md`.
+Run with `npx tsx packages/core/test/measure-ticket-227-direct.ts`.
+
+**This ticket's noise hypothesis is refuted.** It was marked untested and it
+does not survive testing. At 30,000 iterations **nine of the ten still clear
+the cutoff**, and the two largest rows grew rather than shrank (+7.80 ->
++8.17). Only 28661 Mender's Heart-Ring collapsed below the line (+4.61 ->
++1.60) — the single case the hypothesis predicted for all ten. Across five
+independent seeds the delta for 29308 has a standard deviation of **0.212
+DPS**; noise does not reproduce that tightly across independent streams.
+
+**Healer stats really do reach the DPS calculation, through mana.** Isolating
+each stat of Band of Eternity via `bonusStats` with gear untouched, at 30,000
+iterations:
+
+| added stat | delta DPS |
+| --- | --- |
+| intellect 25 | **+29.92** |
+| mp5 10 | **+13.17** |
+| healing power 64 | 0.0000 |
+| spellpower 22 | 0.0000 |
+| stamina 28 | 0.0000 |
+
+Healing power and spellpower are worth exactly nothing, as the SME expected.
+Intellect and mp5 are not. Both saturate at the same ceiling (int +2500 ->
++157.13, mp5 +1000 -> +156.76), which is the signature of a **hard mana
+constraint** rather than a stat weight: this feral runs out of mana, and
+anything that extends it buys casts.
+
+The cause is the fixture's raid setup, not the items:
+`data/presets/feral/p2.raid-sim-skeleton.json` runs a 180-second encounter
+with **no Blessing of Wisdom, no mana spring totem and no Innervate**.
+
+EP is not involved either way: no healer stat index carries a feral EP weight,
+and EP only orders the pool — the delta comes from the sim.
+
+**On the 86 / aboveCutoffCount worry.** 34 of the 85 above-cutoff rows sit
+within 2x their own SE of the boundary and 16 within 1x, so that count is
+imprecise and the `synthetic-fixtures.test.ts` assertion on it is a change
+detector rather than a correctness gate (out of scope to change here). But the
+worry is *smaller* than it first looked: proximity to the boundary did not
+make the healer rows wrong, and it does not make the others wrong either.
+
+**Status stays `open`** on one criterion — the product ruling in 5e, which an
+agent cannot make. It is carried with options, precedent, measurements and a
+recommendation in
+`.scratch/carry-forward/issues/234-owner-ruling-mana-driven-upgrades-and-the-feral-skeleton.md`.
+The recommendation is to fix the skeleton's missing mana buff and caveat the
+report, rather than to exclude the items: they are correctly simulated and
+genuinely do produce DPS here, so excluding them would suppress a true
+measurement instead of addressing the modelling choice that causes it.
+
+**Sibling relationship to ticket 226.** No single diagnosis explains both, so
+neither is closed with a pointer to the other. 226's trinkets contribute a
+deterministic, reproducible *nothing* and land on the incumbent's value; this
+ticket's rows carry *real positive* deltas from mana. Opposite sign, different
+mechanism. The one thing they share is a consequence: the `impl` / `stub`
+labels in `data/sim-implemented-effects.json` misled both investigations,
+filed as ticket 233.
+
