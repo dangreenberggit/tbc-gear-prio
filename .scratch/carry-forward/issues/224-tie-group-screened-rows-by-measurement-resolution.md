@@ -124,3 +124,54 @@ and to any debug view.
 - Changing which rows the *engine* produces. This ticket is about what the
   user-facing view presents; the rows stay in the data for measurement and
   debug use either way.
+
+## Finding from ticket 225 (2026-08-18)
+
+Ticket 225 asked whether the items packed inside the cutoff's screening
+error bar are interchangeable or decision-relevant, and closed on the
+answer **interchangeable** — which hands the band to this ticket. Nothing
+below changes this ticket's design; it widens the evidence for it.
+
+Reproduce with:
+
+```
+npx tsx packages/core/test/measure-cutoff-band.ts
+```
+
+On the committed `feral-p3` fixture, the effective cutoff boundary is
+**2.9288 DPS** — the `deltaPct >= 0.15` arm of `meetsCutoff`, which binds
+below the 3.6 absDps arm on this baseline — and screening SE at 1,000
+iterations is **5.128 DPS** (ticket 222). A band of +/-1 SE around that
+boundary holds **70 of 398 rows**: 28 above the cutoff and 42 below it.
+The `sme-rank-review` verdict on that list
+(`.scratch/handoffs/sme-rank-judgment-ticket-225-cutoff-band.md`) is that
+all 28 band-above rows are same-slot alternates separated by less than the
+pairwise noise scale of sqrt(2) x 5.128 = 7.25 DPS — this ticket's trinket
+story, in more slots.
+
+**The neck slot is a second worked example alongside trinket and finger.**
+Its three above-cutoff candidates span 5.81 -> 4.37 DPS, a range of **1.44
+DPS** against that 7.25 DPS noise scale, so no pair is truth-resolvable:
+
+```
+   5.81  Teeth of Gruul
+   5.73  Telonicus's Pendant of Mayhem
+   4.37  Choker of Serrated Blades
+   0.00  Haramad's Bargain            (currently worn)
+```
+
+Unlike trinket and finger, these are full-iteration rows above the cutoff,
+so they are presented as an ordered part of the shortlist rather than in
+the screened partition this ticket's existing examples live in. The three
+necks read as first, second and third choice; they are one choice.
+
+**A presentation detail worth carrying into the fix.** Eight of the
+character's sixteen worn items land inside that band at exactly 0.00 DPS,
+because a worn item ranks as a swap of itself. Any "these rows are
+indistinguishable" treatment applied by measured distance from a boundary
+will sweep those worn rows in, and a worn row's 0.00 is a definitional
+zero, not a measurement that happens to be small. Ticket 225's own P1
+property counted them by mistake and had to be corrected to exclude them.
+Whatever this ticket builds should distinguish the two cases, or it will
+tell a reader that their currently-equipped gear is statistically tied with
+a candidate when what it means is that the row is not a comparison at all.

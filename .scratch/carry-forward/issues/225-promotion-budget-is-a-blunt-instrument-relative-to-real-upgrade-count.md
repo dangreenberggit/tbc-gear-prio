@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (design question raised by measurement; no known defect)
 Origin: user challenge during the 2026-08-18 review of ticket 221 — "am I
   supposed to believe that 150 items provided a DPS increase... but that
@@ -170,7 +170,7 @@ problem with extra steps.
 
 ## Acceptance criteria
 
-- [ ] **First, the cheap check:** look at what the 77 items inside the cutoff's
+- [x] **First, the cheap check:** look at what the 77 items inside the cutoff's
       error bar actually are. If they are interchangeable in the way ticket
       222's trinkets were, this ticket may reduce to a presentation problem
       (ticket 224) and no budget redesign is warranted. Do this before anything
@@ -190,7 +190,7 @@ problem with extra steps.
 - [ ] The full-sims/eligible ratio is reported for both fixtures under whatever
       rule is chosen, and the P2 ratio of 0.9837 is explicitly addressed —
       either improved or accepted with its reason.
-- [ ] Reproduce both probes and confirm their numbers still hold on whatever
+- [x] Reproduce both probes and confirm their numbers still hold on whatever
       fixture is current:
       `node .scratch/carry-forward/probes/225-cutoff-density.mjs` and
       `node .scratch/carry-forward/probes/225-band-rule-comparison.mjs`.
@@ -200,3 +200,216 @@ problem with extra steps.
 - Reverting ticket 221's K=210. The misses it fixed were real; this ticket asks
   for a better rule, not a return to a worse one.
 - The presentation of screened rows — that is ticket 224.
+
+## Cheap check (2026-08-18)
+
+The check this ticket asked for first has been done. **The band is ties.**
+Ticket 225 reduces to the presentation problem (ticket 224) and no budget
+redesign is warranted on the band's evidence.
+
+### What was measured
+
+```
+npx tsx packages/core/test/measure-cutoff-band.ts
+```
+
+The script rebuilds the recorded `feral-p3` full-sweep truth exactly as
+`racing.test.ts` `fullSweepTruthP3()` does — `rankUpgrades` with
+`RecordedSimRunner` and `fullPool: true` — and asserts on the way through
+that no row carries `screened` and that the sweep has 398 rows and 86
+above-cutoff rows. Deterministic; two consecutive runs produce identical
+text. Full output committed at
+`.scratch/handoffs/measure-cutoff-band-output.txt`.
+
+**The band is centred on 2.9288 DPS, not 3.6.** `meetsCutoff` fires on
+`deltaDps >= 3.6 || deltaPct >= 0.15` and `deltaPct` is a percentage, so on
+this fixture's baseline of 1952.5249585538932 DPS the pct arm binds at
+`0.15 * 1952.5249... / 100` = 2.9288 DPS. That arm, not the 3.6 absDps arm,
+is what decides `belowCutoff` for every row on this fixture.
+
+```
+  eligible rows            398
+  above cutoff             86
+  effective boundary       2.9288 DPS   (the binding pct arm)
+  screening SE @1000 it    5.128 DPS    (ticket 222)
+  band span                -2.199 .. 8.057 DPS
+
+    clear-above            58
+    band-above             28
+    band-below             42
+    clear-below            270
+    band total             70
+```
+
+Per-slot histogram:
+
+```
+  slot            band-above  band-below  slot rows  slot above-cut
+  back                     3           4         31               6
+  chest                    1           1         20               4
+  feet                     3           5         31              14
+  finger                   9          13         49              16
+  hands                    1           1         20               3
+  head                     0           1         18               0
+  legs                     2           1         20               7
+  neck                     3           3         25               3
+  ranged                   0           1          2               0
+  trinket                  0           3         20               3
+  waist                    2           5         27               9
+  wrist                    4           4         26              10
+```
+
+**P1 = 1**, **P2 = 0**.
+
+- **P1** — slots whose best _candidate_ by truth lies inside the band: one,
+  `neck` (Teeth of Gruul, 5.81 DPS, band-above).
+- **P2** — band-above rows that are their slot's only above-cutoff row:
+  zero. No band row can empty a slot if the screen loses it.
+
+### A correction to P1, and why it matters
+
+P1 first counted 3 — `head`, `neck`, `ranged`. Two of those were an
+artifact. A worn item ranks as a swap of itself and scores exactly 0.00 DPS
+by construction; that is not a measurement, but 0.00 falls inside a band
+spanning -2.199 DPS, so **eight of this fixture's sixteen worn items land in
+the band**, and in `head` and `ranged` the worn item is the slot's argmax.
+Both slots have **zero above-cutoff candidates** (histogram above). P1 was
+written to detect "the screen may lose this slot's best upgrade"; counting
+those slots reported that for slots with no upgrade to lose. P1 now counts
+candidates only, and the excluded slots print separately with their
+above-cutoff counts so the exclusion is auditable:
+
+```
+Worn rows inside the band (0.00 DPS by construction, not measurements): 8
+P1 — slots whose best candidate by truth is inside the band: 1
+  neck               5.81 DPS  band-above  Teeth of Gruul
+  excluded — slots whose argmax is the worn item (no upgrade to lose): 2
+  head               0.00 DPS  Wolfshead Helm      slot above-cutoff rows: 0
+  ranged             0.00 DPS  Everbloom Idol      slot above-cutoff rows: 0
+```
+
+### Drift against this ticket's own numbers
+
+Both probes still reproduce every figure this ticket quotes, unchanged:
+
+```
+node .scratch/carry-forward/probes/225-cutoff-density.mjs
+#   rank 86/150/195/210 -> 77 / 86 / 77 / 75 within +/-1 SE
+#   inferred baseline ~ 1954.7
+#   clearly above cutoff 45; within +/-1 SE of the cutoff 77
+
+node .scratch/carry-forward/probes/225-band-rule-comparison.mjs
+#   k=1 -> 122 of 398 (30.7%); k=2 -> 166 (41.7%); k=3 -> 211 (53.0%)
+#   K=210 promotes 210 (52.8%)
+```
+
+The script's counts differ from the probes' — 70 band rows and 58
+clear-above against the probes' 77 and 45 — and the difference is entirely
+framing, not drift in the fixture. Two reasons, both named in the script's
+header, which prints the probes' framing alongside its own so the gap stays
+visible:
+
+1. **The arm swap.** The probes band around absDps 3.6; the script bands
+   around the pct arm at 2.9288, which is what actually decides
+   `belowCutoff`. This dominates.
+2. **The inferred baseline.** The probes infer the baseline as
+   `dps[85] - 3.6` = ~1954.7 rather than reading the fixture's recorded
+   1952.5249585538932.
+
+Recomputed the probes' way against the recorded baseline, the script prints
+65 within +/-1 SE of 3.6 and 55 clearly above 3.6 + SE — so the residual gap
+to 77/45 is the inferred baseline.
+
+### SME verdict
+
+Full handoff: `.scratch/handoffs/sme-rank-judgment-ticket-225-cutoff-band.md`
+(`sme-rank-review`, audience engineering).
+
+Verdict `do-not-trust`, for the head, ranged and trinket slots — but on
+**this ticket's question** the judgment is that the band is **ties**:
+
+> The **band-above rows are interchangeable.** All 28 of them are same-slot
+> alternates separated by less than the pairwise noise scale, exactly like
+> ticket 222's trinkets. Nothing there is a decision a player would make by
+> more than noise.
+
+On the one P1 row:
+
+> The top three necks span **5.81 -> 4.37 DPS**, a range of **1.44 DPS**.
+> Ticket 222's pairwise noise scale is **sqrt(2) x 5.128 = 7.25 DPS**. Not
+> one of those three pairs is truth-resolvable. There is no ordering here to
+> recover, and no wrong answer a screen could give [...] This is ticket 222's
+> trinket story repeated exactly: **a real cluster of genuinely equivalent
+> alternatives, presented as an ordered list it has no right to be.** That is
+> ticket 224's problem, not ticket 225's.
+
+## Decision: reduces to ticket 224; no budget change
+
+The band is a set of ties, not a set of decisions. A screen that cannot
+order it is behaving correctly; the defect is presenting it as ordered,
+which is ticket 224's subject. No recall target is derived here and no
+promotion rule or default changes.
+
+**On the one non-zero property.** The gate this ticket's plan set was
+"interchangeable and P1 = 0 and P2 = 0". P1 = 1, so the gate does not close
+on its literal reading, and that is recorded here rather than rounded away.
+It is judged to close anyway, because P1 is a mechanical proxy for a
+judgment and the judgment went the other way on the same row: P1 exists to
+find a slot whose best upgrade the screen could lose, and the neck cluster
+offers no wrong answer to give — 1.44 DPS of spread against a 7.25 DPS
+pairwise noise scale, with P2 = 0 confirming the slot cannot be emptied.
+A reader who disagrees with that reading has every number above to
+re-decide it on.
+
+### Remaining criteria
+
+- **A stated recall target** — N/A. The target was to be derived only if the
+  band proved decision-relevant; it did not, so nothing here justifies one,
+  and inventing a target with no decision riding on it would be the
+  arbitrariness this ticket objected to, one level up.
+- **Promoted-set size as a consequence of the target** — N/A, no target
+  derived and no rule changed. K=210 stands as ticket 221 set it: a sweep,
+  and this ticket does not claim otherwise.
+- **Band-rule equivalence addressed** — addressed and not adopted. At k=3 the
+  noise-band rule promotes 211 against K=210's 210 (probe output above); it
+  is K=210 in different notation, and no measurement here justifies picking
+  a smaller k.
+- **Recall gate still green** — 7.2 and 7.3 untouched and passing; no rule or
+  default was changed, so the gate had nothing to survive.
+- **Ratios reported, 0.9837 addressed** — `ret` **0.9708** (240 eligible,
+  233 full sims) from `npx tsx packages/core/test/measure-racing-ratio.ts`;
+  `feral-p3` **0.6457** and `feral` (P2) **0.9837** as ticket 221 measured
+  them. The `feral` 0.9837 is **accepted, not improved**: it is a 246-item
+  pool with 42 above-cutoff rows spread over 14 slots, so the per-slot floor
+  and a K sized for recall together reach nearly every candidate. Nothing in
+  this ticket's finding argues for a cheaper rule there, and this check
+  found no rule that would be cheaper at equal recall.
+
+## Flagged, not handled here
+
+Reading the band surfaced a scoring problem this ticket did not ask about
+and did not investigate. Three shapes, all from the SME handoff:
+
+- **head** — all 18 helms score -173.97 to -253.60 DPS against a level-42
+  crafted incumbent (Wolfshead Helm), including Thunderheart Cover, the
+  tier 6 feral helm, at -186.69. Every helm is leather, so no equip rule is
+  involved. A near-constant ~200 DPS gap across eighteen helms of three
+  tiers is a cliff, not a stat comparison.
+- **ranged** — Idol of the White Stag at -21.29 against the worn Everbloom
+  Idol. Both legal feral idols; that gap is indefensible in either
+  direction.
+- **trinket** — eleven unrelated trinkets share exactly -31.33 DPS, tying
+  Ashtongue Talisman of Equilibrium (the feral tier 6 rep trinket) with
+  Memento of Tyrande (caster).
+
+That last shape is the signature ticket 171 diagnosed on the ret librams:
+an item whose effect the pinned fork does not implement scores on stats
+alone, so unrelated items land on one identical delta. Ticket 171 is marked
+resolved and was scoped to ret's ranged slot; this is the same mechanism
+recurring on feral head/idol/trinket and needs its own ticket. **Not filed
+by this ticket** — it is outside the scope this work was authorised for, and
+it wants its own diagnosis rather than a paragraph here.
+
+It does not change the decision above. The band-above rows the verdict
+turns on carry ordinary stat-driven deltas; the broken slots sit at 0.00 or
+far below the cutoff and contribute no above-cutoff rows.
