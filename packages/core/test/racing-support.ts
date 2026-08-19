@@ -9,6 +9,9 @@
  * So `screenIterations` can change freely without re-recording, and 7.2's
  * recall test can run over many draws by varying only the noise seed.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   simCacheKey,
   type RaidSimRequest,
@@ -16,6 +19,7 @@ import {
   type SimRunner,
   type SimRunOpts,
 } from "../src/seams/sim-runner.js";
+import type { ContentPhase, SpecId } from "../src/types.js";
 
 /** Counts runs so "racing does less work" (7.0) is asserted, not assumed. */
 export class CountingSimRunner implements SimRunner {
@@ -154,4 +158,65 @@ function hashToUint32(text: string): number {
     hash = Math.imul(hash, 0x01000193);
   }
   return hash >>> 0;
+}
+
+// --- shared fixture prologue (ticket 229) --------------------------------
+//
+// `loadJson` and `RosterRecordingsFile` were copied near-verbatim into each
+// of the four `measure-*.ts` scripts. The type is the sharp case: it
+// describes one committed fixture file, so independent copies can drift from
+// it and from each other. `racing.test.ts` and `synthetic-fixtures.test.ts`
+// keep their own copies by design — they are vitest-collected and the
+// duplication there is out of ticket 229's scope.
+
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+
+/** Reads a repo-relative JSON file. Paths are from the repo root, not cwd. */
+export function loadJson<T>(rel: string): T {
+  return JSON.parse(readFileSync(join(repoRoot, rel), "utf8")) as T;
+}
+
+export type RosterRecordingsFile = {
+  simVersion: string;
+  seed: number;
+  iterations: number;
+  rows: Record<
+    string,
+    {
+      spec: SpecId;
+      presetPhase: ContentPhase;
+      maxPhase: ContentPhase;
+      poolSize: number;
+      aboveCutoffCount: number;
+      baselineDps: number;
+      iterations: number;
+      seed: number;
+      simVersion: string;
+      recordings: Record<string, SimObservation>;
+    }
+  >;
+};
+
+/** The iteration count screening runs at, and the one SE is quoted against. */
+export const SCREEN_ITERATIONS = 1000;
+
+/**
+ * Mean per-candidate screening SE, derived from the recordings.
+ *
+ * Derived rather than a constant on purpose (ticket 229). `5.128` was
+ * hard-coded in `measure-cutoff-band.ts` and went stale the moment the feral
+ * P3 fixture was re-recorded in `57ec814`: the tip figure is 5.162194. A
+ * constant makes a re-record silently wrong; deriving it makes drift loud.
+ *
+ * wowsims reports a per-iteration population sd with no /sqrt(N) applied
+ * (vendor/tbc-new-fork/sim/core/sim_concurrent.go:138), so SE of the mean is
+ * stdev/sqrt(iterations) — the same shape rank.ts reports.
+ */
+export function derivedScreeningSe(
+  recordings: Record<string, SimObservation>
+): number {
+  const ses = Object.values(recordings).map(
+    (o) => o.stdev / Math.sqrt(SCREEN_ITERATIONS)
+  );
+  return ses.reduce((a, b) => a + b, 0) / ses.length;
 }

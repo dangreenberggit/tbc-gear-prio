@@ -291,10 +291,18 @@ export type RankInput = {
    *
    * ## Screening SE at 1,000 iterations, measured
    *
-   * **5.128 DPS** mean (min 2.36, max 6.08) over the 461 recorded feral P3
-   * candidates; the pairwise difference scale is `sqrt(2) * SE ≈ 7.25 DPS`.
+   * **5.162 DPS** mean (min 2.36, max 6.08) over the 428 recorded feral P3
+   * candidates; the pairwise difference scale is `sqrt(2) * SE ≈ 7.30 DPS`.
    * This replaces the `1/sqrt(n)` extrapolation off F10's ~6.8 DPS at 300
-   * iterations, which gives 3.72 DPS and sits 27% below the measured mean.
+   * iterations, which gives 3.72 DPS and sits 28% below the measured mean.
+   *
+   * Was "5.128 over 461 candidates", from the pre-`57ec814` fixture. The
+   * figures above are re-derived on the tip fixture and are no longer copied
+   * by hand anywhere: `derivedScreeningSe` in `test/racing-support.ts` is the
+   * one source, so a re-record moves them (ticket 229). Re-run with
+   * `npx tsx packages/core/test/measure-within-slot-ordering.ts`, section 1;
+   * min/max re-derived on the tip fixture (n=428, min 2.3641, max 6.0842) by
+   * the one-liner in ticket 229's Resolution.
    * `stdev` is a per-iteration population sd with no `/sqrt(N)` applied
    * (`vendor/tbc-new-fork/sim/core/sim_concurrent.go:138`), so `SE =
    * stdev/sqrt(n)` is the correct shape rather than an inherited assumption.

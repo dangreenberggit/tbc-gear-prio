@@ -44,8 +44,11 @@
  * only on the rows genuinely above the cutoff. `band-above` and
  * `band-below` are therefore counted and printed separately.
  *
- * Screening SE is 5.128 DPS at 1,000 iterations — a settled input from
- * ticket 222 section 1, not re-measured here.
+ * Screening SE is derived from the recordings at 1,000 iterations
+ * (`derivedScreeningSe`, ticket 229) — 5.162 DPS on the tip fixture. It was
+ * the hard-coded 5.128 from ticket 222 section 1 until the fixture was
+ * re-recorded in `57ec814` and the constant stayed behind; the band figures
+ * quoted in this header were computed against the old value.
  *
  * **What this script does not tell you.** It measures where rows sit
  * relative to the cutoff; it does not ask whether a row belongs in the
@@ -76,19 +79,20 @@
  * network. One full-sweep rank, a few seconds. Output is deterministic:
  * two consecutive runs produce identical text.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { filterPoolByPhase, poolFromUniverse } from "../src/pool.js";
 import { rankUpgrades, type RankedItem } from "../src/rank.js";
 import { RecordedGearSource } from "../src/seams/gear-source.js";
 import {
   RecordedSimRunner,
   type RaidSimRequest,
-  type SimObservation,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import type { ContentPhase, SpecId } from "../src/types.js";
+import {
+  loadJson,
+  derivedScreeningSe,
+  SCREEN_ITERATIONS,
+  type RosterRecordingsFile,
+} from "./racing-support.js";
 import {
   syntheticOfflineRecordings,
   FERAL_SYNTHETIC_REF,
@@ -97,32 +101,6 @@ import {
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
 import { CUTOFF_FERAL } from "../src/cutoff.js";
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
-function loadJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
-}
-
-type RosterRecordingsFile = {
-  simVersion: string;
-  seed: number;
-  iterations: number;
-  rows: Record<
-    string,
-    {
-      spec: SpecId;
-      presetPhase: ContentPhase;
-      maxPhase: ContentPhase;
-      poolSize: number;
-      aboveCutoffCount: number;
-      baselineDps: number;
-      iterations: number;
-      seed: number;
-      simVersion: string;
-      recordings: Record<string, SimObservation>;
-    }
-  >;
-};
 
 const recordingsFile = loadJson<RosterRecordingsFile>(
   "packages/core/test/fixtures/synthetic-roster-recordings.json"
@@ -156,12 +134,16 @@ const pool = filterPoolByPhase(
 );
 
 /**
- * Ticket 222 §1, measured from the recorded per-candidate stdevs at 1,000
- * screening iterations. A hand-copied constant: if the fixture is ever
- * re-recorded this does not follow it, and `measure-within-slot-ordering.ts`
- * section 1 is what re-derives it.
+ * Ticket 222 §1, derived from the recorded per-candidate stdevs at 1,000
+ * screening iterations.
+ *
+ * This was the hand-copied constant `5.128`, and the risk its own comment
+ * warned about came true: the feral P3 fixture was re-recorded in `57ec814`
+ * and the constant did not follow it, so every band below was computed from
+ * a figure 0.034 DPS stale. Deriving it (ticket 229) makes the next
+ * re-record move the arithmetic with the data.
  */
-const SCREEN_SE = 5.128;
+const SCREEN_SE = derivedScreeningSe(recorded.recordings);
 
 // Read from the fixture rather than hand-written, so a re-record moves the
 // assertion with the data instead of failing a stale literal.
@@ -285,7 +267,8 @@ async function main(): Promise<void> {
     `  effective boundary       ${fmt(boundary, 4)} DPS   (the binding arm)`
   );
   console.log(
-    `  screening SE @1000 it    ${fmt(SCREEN_SE, 3)} DPS (ticket 222)`
+    `  screening SE @${SCREEN_ITERATIONS} it    ${fmt(SCREEN_SE, 3)} DPS ` +
+      `(ticket 222; derived from ${Object.keys(recorded.recordings).length} recordings)`
   );
   console.log(
     `  band span                ${fmt(boundary - SCREEN_SE, 3)} .. ${fmt(

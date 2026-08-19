@@ -48,19 +48,14 @@
  * plus the ordering sweep, so expect a few minutes. Output is deterministic:
  * two consecutive runs produce identical text.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { filterPoolByPhase, poolFromUniverse } from "../src/pool.js";
 import { rankUpgrades, type RankedItem } from "../src/rank.js";
 import { RecordedGearSource } from "../src/seams/gear-source.js";
 import {
   RecordedSimRunner,
   type RaidSimRequest,
-  type SimObservation,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import type { ContentPhase, SpecId } from "../src/types.js";
 import {
   syntheticOfflineRecordings,
   FERAL_SYNTHETIC_REF,
@@ -68,33 +63,13 @@ import {
   FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
-import { DerivedNoiseSimRunner } from "./racing-support.js";
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
-function loadJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
-}
-
-type RosterRecordingsFile = {
-  simVersion: string;
-  seed: number;
-  iterations: number;
-  rows: Record<
-    string,
-    {
-      spec: SpecId;
-      presetPhase: ContentPhase;
-      maxPhase: ContentPhase;
-      poolSize: number;
-      aboveCutoffCount: number;
-      baselineDps: number;
-      iterations: number;
-      seed: number;
-      simVersion: string;
-      recordings: Record<string, SimObservation>;
-    }
-  >;
-};
+import {
+  DerivedNoiseSimRunner,
+  loadJson,
+  derivedScreeningSe,
+  SCREEN_ITERATIONS,
+  type RosterRecordingsFile,
+} from "./racing-support.js";
 
 const recordingsFile = loadJson<RosterRecordingsFile>(
   "packages/core/test/fixtures/synthetic-roster-recordings.json"
@@ -128,7 +103,6 @@ const pool = filterPoolByPhase(
 );
 
 const NOISE_DRAWS = 30;
-const SCREEN_ITERATIONS = 1000;
 /** Shipped default and the pre-ticket-221 value, to show K-independence. */
 const K_VALUES: readonly number[] = [210, 150];
 /** Named in the report body; the rest roll up into the all-slots summary. */
@@ -178,7 +152,8 @@ function fmt(n: number, digits = 2) {
 function reportScreeningSe() {
   const stdevs = Object.values(recorded.recordings).map((o) => o.stdev);
   const ses = stdevs.map((s) => s / Math.sqrt(SCREEN_ITERATIONS));
-  const mean = ses.reduce((a, b) => a + b, 0) / ses.length;
+  // Shared with measure-cutoff-band.ts (ticket 229) so both read one figure.
+  const mean = derivedScreeningSe(recorded.recordings);
   const meanStdev = stdevs.reduce((a, b) => a + b, 0) / stdevs.length;
 
   console.log(

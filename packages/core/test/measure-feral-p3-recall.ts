@@ -23,19 +23,15 @@
  * ratio. This one ranks feral (the gating fixture) and reports recall. The
  * shapes rhyme; the subjects do not.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { filterPoolByPhase, poolFromUniverse } from "../src/pool.js";
 import { rankUpgrades } from "../src/rank.js";
 import { RecordedGearSource } from "../src/seams/gear-source.js";
 import {
   RecordedSimRunner,
   type RaidSimRequest,
-  type SimObservation,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import type { ContentPhase, SpecId } from "../src/types.js";
+import type { ContentPhase } from "../src/types.js";
 import {
   syntheticOfflineRecordings,
   FERAL_SYNTHETIC_REF,
@@ -44,33 +40,11 @@ import {
   FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
-import { DerivedNoiseSimRunner } from "./racing-support.js";
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
-function loadJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
-}
-
-type RosterRecordingsFile = {
-  simVersion: string;
-  seed: number;
-  iterations: number;
-  rows: Record<
-    string,
-    {
-      spec: SpecId;
-      presetPhase: ContentPhase;
-      maxPhase: ContentPhase;
-      poolSize: number;
-      aboveCutoffCount: number;
-      baselineDps: number;
-      iterations: number;
-      seed: number;
-      simVersion: string;
-      recordings: Record<string, SimObservation>;
-    }
-  >;
-};
+import {
+  DerivedNoiseSimRunner,
+  loadJson,
+  type RosterRecordingsFile,
+} from "./racing-support.js";
 
 const recordingsFile = loadJson<RosterRecordingsFile>(
   "packages/core/test/fixtures/synthetic-roster-recordings.json"
