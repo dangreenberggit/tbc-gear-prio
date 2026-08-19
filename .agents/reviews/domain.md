@@ -59,4 +59,7 @@ consequence (wrong number, wrong slot, invented data). If a new WCL
 assumption shows up that isn't covered by existing findings, flag it as
 **unverified** separately from actual contradictions.
 
+Every finding names the command you ran or the file you read to find it.
+List each lane you did not examine as **unexamined**, with the reason.
+
 Under 400 words.

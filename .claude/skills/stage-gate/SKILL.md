@@ -21,6 +21,7 @@ that one reviews the diff after.
 | Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `medium` | review |
 | Executor | `gate-executor` | `opus` | `medium` | review |
+| SME | `gate-sme` | `opus` | `medium` | review |
 
 The Executor is on the review lane, not the workhorse lane, because
 plans are underspecified and it decides adapt-vs-flag-vs-stop on every
@@ -70,9 +71,10 @@ at startup only; restart the session.
    reviewer's.
    - A `blocking` finding, or a refuted load-bearing claim → loop back:
      respawn `gate-planner` with brief + plan + review for a revision,
-     then `gate-reviewer` on the changed claims only. **Two revision
-     rounds maximum**; a third disagreement goes to the user with the
-     contradiction stated, not resolved.
+     then `gate-reviewer` on the changed claims only. **One revision
+     round is the norm.** Loop back again only while a `blocking` finding
+     still stands after the revision; a third disagreement goes to the
+     user with the contradiction stated, not resolved.
    - Proceed when: no blocking finding stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
      `minor` findings ride along to the executor as advisories.
@@ -87,6 +89,11 @@ at startup only; restart the session.
    `isolation: worktree` when the tree must stay free (the seat's
    base-SHA assertion is what makes worktree mode safe on a feature
    branch). Write its final message to `execution-report.md`.
+
+   When the plan has an SME step, the executor spawns `gate-sme` once and
+   commits its handoff. That handoff is the ticket's SME verdict: Gate C
+   dispositions it like a ledger row, and a second SME runs only when the
+   executor's ledger marks the verdict `contested`.
 
 6. **Gate C.** Disposition every Deviation-ledger row in
    `decision-log.md`: `accepted`, `rework` (`SendMessage` the same

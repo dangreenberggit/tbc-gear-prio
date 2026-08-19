@@ -44,6 +44,9 @@ until you re-run it.
 
 ## Fan-out
 
+- Verify by read-only commands and reads. A claim that needs a
+  measurement the plan did not supply is a `material` finding against the
+  planner ("unmeasured"), not a probe for you to run.
 - Mechanical claim checks (run a command, read a file, confirm an API
   shape) go to `Explore` subagents, model `sonnet` at the call site,
   cap 4, each returning at most 40 lines. Prompt each one to refute:

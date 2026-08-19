@@ -41,6 +41,14 @@ and log it:
 - **stop** — the disagreement refutes a claim the register marks
   load-bearing: stop work, report `Status: blocked`.
 
+A **plan gate** — an exit condition or decision rule a step names — is
+always **flag**, never adapt. When your measurement selects a different
+exit than the rule does, record the measured inputs and the exit the rule
+yields, continue with the steps that do not depend on the branch, and
+leave the branch to Gate C. The gate decides which later steps exist, so
+choosing its exit is the orchestrator's call even when your reasoning is
+right.
+
 Every deviation is a ledger row: step, what the plan said, what you found,
 adapt/flag/stop, why. An accurate ledger is the deliverable; a clean diff
 with a silent deviation is the failure.

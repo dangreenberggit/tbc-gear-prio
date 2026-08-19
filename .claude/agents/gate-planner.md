@@ -37,7 +37,10 @@ other document over ~30 kB, get a heading map first
   re-runnable `Verified by` command or the label `hypothesis, untested`.
   Verify to the depth of the claim you are about to make: a load-bearing
   claim deserves a researcher; a step-local one may stay a labeled
-  hypothesis.
+  hypothesis. Every number a step depends on is measured before the plan
+  ships — by a subagent if the run is long — and cited in `Verified by`
+  with its command. A number the plan cannot measure is labelled
+  `hypothesis, untested`.
 - The executor will not see this conversation. Write for a reader with
   fresh context: full file paths, acceptance criteria as commands or
   observables, and anything you were tempted to leave implicit goes into
