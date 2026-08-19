@@ -93,8 +93,11 @@ ARMOR_CLOTH = 1
 ARMOR_LEATHER = 2
 ARMOR_MAIL = 3
 ARMOR_PLATE = 4
+WEAPON_AXE = 1
 WEAPON_POLEARM = 6
+WEAPON_SHIELD = 7
 WEAPON_STAFF = 8
+WEAPON_SWORD = 9
 HAND_TYPE_TWO_HAND = 4
 RANGED_IDOL = 6
 RANGED_LIBRAM = 7
@@ -311,8 +314,15 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         ranged_type=RANGED_IDOL,
         # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
         # one-handers are eligible and staves are the signature weapon.
+        # The exclusions are the complement of that list, per wowsims
+        # ui/core/player_classes/druid.ts lines 25-31. WeaponType has no
+        # two-hand members (data/proto/common.proto lines 338-349): a
+        # two-handed sword carries WeaponTypeSword and is told apart by
+        # HandType, so excluding the type covers both hand types at once.
         allow_one_hand=True,
-        excluded_weapon_types=frozenset(),
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        ),
     ),
 }
 
