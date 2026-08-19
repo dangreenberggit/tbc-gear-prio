@@ -9,12 +9,23 @@
  * SME can answer that, and measures two properties that decide it
  * mechanically:
  *
- *   P1 — slots whose truth argmax lies inside the band.
+ *   P1 — slots whose best *candidate* by truth lies inside the band.
  *   P2 — band rows above the cutoff that are the only above-cutoff row of
  *        their slot.
  *
  * Either being non-zero means a slot's best or only upgrade is undecidable
  * at screening precision, which is a decision, not a tie.
+ *
+ * **Why P1 counts candidates and not every row.** A worn item ranks as a
+ * swap of itself and scores exactly 0.00 DPS by construction, so it is not
+ * a measurement at all — but it lands inside a band that spans −2.199 DPS,
+ * and it can be its slot's argmax when the slot holds no upgrade. Counting
+ * those would report "the screen may lose this slot's best upgrade" for
+ * slots that have no upgrade to lose. Eight of this fixture's sixteen worn
+ * items fall in the band on exactly this arithmetic; head and ranged are
+ * argmax that way, and both have zero above-cutoff candidates. P1 excludes
+ * them and the excluded slots are printed separately, with their
+ * above-cutoff count, so the exclusion is auditable rather than silent.
  *
  * **Why the band is centred on 2.9288 DPS and not 3.6.** `meetsCutoff`
  * (cutoff.ts) fires on `deltaDps >= 3.6 || deltaPct >= 0.15`, and
@@ -330,19 +341,34 @@ async function main(): Promise<void> {
   }
   console.log("");
 
-  // P1 — a slot whose best row by truth is itself undecidable at screening
-  // precision. Computed over every slot present in the pool, not only the
-  // slots that have band rows.
+  // A worn item ranks as a swap of itself and therefore scores exactly 0.00
+  // DPS by construction. That is not a measurement, so a worn row landing in
+  // the band says nothing about screening precision — but it can still be a
+  // slot's argmax when the slot holds no upgrade at all, which would make a
+  // naive P1 count slots that have nothing to lose. Excluded from P1 below,
+  // and reported separately so the exclusion is visible rather than silent.
+  const wornIds = new Set(
+    presetGear.items.filter((i) => i.id !== undefined).map((i) => i.id!)
+  );
+  const wornInBand = band.filter((i) => wornIds.has(i.itemId));
+
+  // P1 — a slot whose best *candidate* by truth is itself undecidable at
+  // screening precision, which would mean the screen can lose that slot's
+  // best upgrade. Computed over every slot present in the pool, not only
+  // the slots that have band rows, and over candidates only: a slot whose
+  // argmax is the worn item has no upgrade for the screen to lose.
   const poolSlots = [...new Set(items.map((i) => String(i.slot)))].sort();
   const p1: { slot: string; item: RankedItem }[] = [];
+  const p1WornArgmax: { slot: string; item: RankedItem }[] = [];
   for (const slot of poolSlots) {
     const slotRows = items.filter((i) => String(i.slot) === slot);
     const argmax = slotRows.reduce((best, r) =>
       r.deltaDps > best.deltaDps ? r : best
     );
     const z = zones.get(argmax.itemId)!;
-    if (z === "band-above" || z === "band-below")
-      p1.push({ slot, item: argmax });
+    if (z !== "band-above" && z !== "band-below") continue;
+    if (wornIds.has(argmax.itemId)) p1WornArgmax.push({ slot, item: argmax });
+    else p1.push({ slot, item: argmax });
   }
 
   // P2 — a band row that is the only above-cutoff row of its slot. If the
@@ -355,13 +381,39 @@ async function main(): Promise<void> {
     if (slotAbove.length === 1 && slotAbove[0]!.itemId === r.itemId) p2.push(r);
   }
 
-  console.log(`P1 — slots whose truth argmax is inside the band: ${p1.length}`);
+  console.log(
+    `Worn rows inside the band (0.00 DPS by construction, not measurements): ${wornInBand.length}`
+  );
+  for (const r of wornInBand) {
+    console.log(
+      `  ${pad(String(r.slot), 14)}${padLeft(fmt(r.deltaDps), 9)} DPS  ${r.name}`
+    );
+  }
+  console.log("");
+  console.log(
+    `P1 — slots whose best candidate by truth is inside the band: ${p1.length}`
+  );
   for (const { slot, item } of p1) {
     console.log(
       `  ${pad(slot, 14)}${padLeft(fmt(item.deltaDps), 9)} DPS  ${pad(
         zones.get(item.itemId)!,
         12
       )}${item.name}`
+    );
+  }
+  console.log("");
+  console.log(
+    `  excluded — slots whose argmax is the worn item (no upgrade to lose): ${p1WornArgmax.length}`
+  );
+  for (const { slot, item } of p1WornArgmax) {
+    const slotAbove = items.filter(
+      (i) => String(i.slot) === slot && !i.belowCutoff
+    ).length;
+    console.log(
+      `  ${pad(slot, 14)}${padLeft(fmt(item.deltaDps), 9)} DPS  ${pad(
+        item.name,
+        28
+      )}slot above-cutoff rows: ${slotAbove}`
     );
   }
   console.log("");
