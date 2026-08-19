@@ -404,11 +404,23 @@ and did not investigate. Three shapes, all from the SME handoff:
 
 That last shape is the signature ticket 171 diagnosed on the ret librams:
 an item whose effect the pinned fork does not implement scores on stats
-alone, so unrelated items land on one identical delta. Ticket 171 is marked
-resolved and was scoped to ret's ranged slot; this is the same mechanism
-recurring on feral head/idol/trinket and needs its own ticket. **Not filed
-by this ticket** — it is outside the scope this work was authorised for, and
-it wants its own diagnosis rather than a paragraph here.
+alone, so unrelated items land on one identical delta. **Filed as ticket
+226** —
+`.scratch/carry-forward/issues/226-feral-p3-head-idol-and-trinket-slots-score-as-cliffs-not-comparisons.md`
+— rather than handled here, because it is outside the scope this work was
+authorised for and wants its own diagnosis.
+
+One correction belongs with the hand-off, because ticket 171's mechanism
+does **not** carry over as written. Annotating each row with whether its
+item id appears in `data/sim-implemented-effects.json` shows all eleven
+-31.33 trinkets marked implemented, not stub-only, while every helm in the
+head slot is stub-only **including the worn Wolfshead Helm**. That artifact
+is informational and a stat-only item needs no registration at all, so
+neither label settles anything on its own — but it does rule out the
+one-line reading that the candidates' effects are simply unimplemented.
+Ticket 226 carries the annotated dump
+(`.scratch/handoffs/ticket-226-slot-truth-dump.txt`) and phrases its
+acceptance criteria as the questions that remain open.
 
 It does not change the decision above. The band-above rows the verdict
 turns on carry ordinary stat-driven deltas; the broken slots sit at 0.00 or

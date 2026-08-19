@@ -1,0 +1,46 @@
+
+=== head (18 rows) ===
+     0.00  8345    WORN,stub  Wolfshead Helm
+  -173.97  32235   stub       Cursed Vision of Sargeras
+  -181.39  33672   stub       Vengeful Gladiator's Dragonhide Helm
+  -186.69  31039   stub       Thunderheart Cover
+  -193.03  30228   stub       Nordrassil Headdress
+  -201.18  29098   stub       Stag-Helm of Malorne
+  -211.88  28732   stub       Cowl of Defiance
+  -221.62  28796   stub       Malefic Mask of the Shadows
+  -231.57  29986   stub       Cowl of the Grand Engineer
+  -232.17  32329   stub       Cowl of Benevolence
+  -234.98  32240   stub       Guise of the Tidal Lurker
+  -237.04  28803   stub       Cowl of Nature's Breath
+  -237.28  29990   stub       Crown of the Sun
+  -239.77  28756   stub       Headdress of the High Potentate
+  -244.51  32525   stub       Cowl of the Illidari High Lord
+  -245.98  28744   stub       Uni-Mind Headdress
+  -248.21  28586   stub       Wicked Witch's Hat
+  -253.60  28804   stub       Collar of Cho'gall
+
+=== ranged (2 rows) ===
+     0.00  29390   WORN,impl  Everbloom Idol
+   -21.29  32257   impl       Idol of the White Stag
+
+=== trinket (20 rows) ===
+    16.14  28727   impl       Pendant of the Violet Eye
+    16.00  28830   impl       Dragonspine Trophy
+     8.82  30627   impl       Tsunami Talisman
+     0.00  29383   WORN,impl  Bloodlust Brooch
+     0.00  28034   WORN,impl  Hourglass of the Unraveller
+    -1.25  32505   impl       Madness of the Betrayer
+    -4.18  32654   impl       Crystalforged Trinket
+    -4.67  30664   impl       Living Root of the Wildheart
+   -25.44  28579   impl       Romulo's Poison Vial
+   -31.33  28528   impl       Moroes' Lucky Pocket Watch
+   -31.33  28785   impl       The Lightning Capacitor
+   -31.33  28789   impl       Eye of Magtheridon
+   -31.33  30620   impl       Spyglass of the Hidden Fleet
+   -31.33  30621   impl       Prism of Inner Calm
+   -31.33  30629   impl       Scarab of Displacement
+   -31.33  32483   impl       The Skull of Gul'dan
+   -31.33  32486   impl       Ashtongue Talisman of Equilibrium
+   -31.33  32496   impl       Memento of Tyrande
+   -31.33  32501   impl       Shadowmoon Insignia
+   -32.06  30626   impl       Sextant of Unstable Currents
