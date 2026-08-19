@@ -69,6 +69,51 @@ export type RankReportMeta = {
 };
 
 /**
+ * A candidate the screening pass ruled out and never promoted to a
+ * full-iteration measurement (candidate-pool.md §6.1). Its delta was measured
+ * at screening precision, so it is not the same quantity as a ranked row's
+ * delta and must never be placed against one (ticket 224).
+ */
+export function isScreened(item: Pick<RankedItem, "screened">): boolean {
+  return item.screened !== undefined;
+}
+
+/**
+ * The one-line disclosure the CLI prints when ruled-out candidates exist and
+ * `--show-ruled-out` is off. `null` when there is nothing to disclose.
+ *
+ * Separate from `--show-below-cutoff` on purpose: that flag expands ranked
+ * rows the cutoff hides, and these were never ranked at all. Folding them into
+ * one flag would put the two groups in one list, which is the placement this
+ * ticket removes.
+ */
+export function ruledOutDisclosureLine(ruledOut: RankedItem[]): string | null {
+  if (ruledOut.length === 0) return null;
+  return `${ruledOut.length} candidate(s) ruled out at screening (not ranked); --show-ruled-out to list them`;
+}
+
+/**
+ * The `--show-ruled-out` listing: a per-slot heading over a name-ordered set.
+ *
+ * No `#` position, and the delta is labelled "screen" and prefixed `~` so the
+ * reader can see it is a screening estimate rather than a ranked figure. The
+ * input order is `applyView`'s `ruledOut` order (slot, then name), so this
+ * walks it rather than re-sorting — one place decides the order.
+ */
+export function ruledOutLines(ruledOut: RankedItem[]): string[] {
+  const lines: string[] = [];
+  for (const slot of SLOT_ORDER) {
+    const rows = ruledOut.filter((r) => r.slot === slot);
+    if (rows.length === 0) continue;
+    lines.push(`${slot}: ruled out at screening (${rows.length}) — not ranked`);
+    for (const row of rows) {
+      lines.push(`  ${row.name} screen ~Δ${row.deltaDps.toFixed(2)}`);
+    }
+  }
+  return lines;
+}
+
+/**
  * Split the above-cutoff items into the two shortlists.
  *
  * PvP is separated because it is not lootable tonight, and

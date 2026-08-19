@@ -21,6 +21,8 @@ import {
   formatSetBonusLine,
   GEM_POLICY_QUALIFIER,
   formatSetPotentialLine,
+  ruledOutDisclosureLine,
+  ruledOutLines,
 } from "../src/rank-report-rules.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import { applyView } from "../src/view.js";
@@ -146,6 +148,92 @@ describe("CLI shortlist default", () => {
     expect((view.groups ?? []).map((g) => g.key).sort()).toEqual([
       "hands",
       "neck",
+    ]);
+  });
+});
+
+/**
+ * Ticket 224. Screened candidates are disclosed as a set, never printed in a
+ * positional list. `--show-ruled-out` is independent of `--show-below-cutoff`:
+ * the two flags expand two disjoint groups of hidden rows.
+ */
+describe("CLI ruled-out disclosure", () => {
+  const SCREENED_MIX = ranking([
+    item({ itemId: 1, slot: "trinket", deltaDps: 30, deltaPct: 1.5 }),
+    item({
+      itemId: 2,
+      slot: "trinket",
+      deltaDps: 1,
+      deltaPct: 0.05,
+      belowCutoff: true,
+    }),
+    item({
+      itemId: 30,
+      name: "screened-b",
+      slot: "trinket",
+      deltaDps: 12,
+      deltaPct: 0.6,
+      screened: { iterations: 1000, promoted: false },
+    }),
+    item({
+      itemId: 31,
+      name: "screened-a",
+      slot: "neck",
+      deltaDps: 40,
+      deltaPct: 2,
+      screened: { iterations: 1000, promoted: false },
+    }),
+  ]);
+
+  it("excludes screened rows from the printed selection under either flag", () => {
+    expect(rowsPrinted(SCREENED_MIX, false).map((r) => r.itemId)).toEqual([1]);
+    expect(rowsPrinted(SCREENED_MIX, true).map((r) => r.itemId)).toEqual([
+      1, 2,
+    ]);
+    expect(applyView(SCREENED_MIX).ruledOut.map((r) => r.itemId)).toEqual([
+      31, 30,
+    ]);
+  });
+
+  /**
+   * The counting identity `cli-shortlist.test.ts` has asserted since ticket 04,
+   * extended to the third group. The three counts are disjoint and jointly
+   * exhaustive over the rows the filters left, so nothing is silently dropped.
+   */
+  it("reconciles shortlist, below-cutoff and ruled-out against the filtered total", () => {
+    const view = applyView(SCREENED_MIX);
+    expect(view.shortlist.length).toBe(1);
+    expect(view.belowCutoffCount).toBe(1);
+    expect(view.ruledOut.length).toBe(2);
+    expect(
+      view.shortlist.length + view.belowCutoffCount + view.ruledOut.length
+    ).toBe(SCREENED_MIX.items.length);
+    expect(view.rows.length + view.ruledOut.length).toBe(
+      SCREENED_MIX.items.length
+    );
+  });
+
+  it("discloses the count on one line when the flag is off", () => {
+    expect(ruledOutDisclosureLine(applyView(SCREENED_MIX).ruledOut)).toBe(
+      "2 candidate(s) ruled out at screening (not ranked); --show-ruled-out to list them"
+    );
+  });
+
+  it("prints nothing when there are no ruled-out rows", () => {
+    expect(ruledOutDisclosureLine(applyView(MIXED).ruledOut)).toBeNull();
+  });
+
+  /**
+   * The listing carries no `#` position and no delta ordering — a per-slot
+   * heading over a name-ordered set, which is what stops it reading as a
+   * second, weaker ranking.
+   */
+  it("lists ruled-out rows per slot with no positions", () => {
+    expect(ruledOutLines(applyView(SCREENED_MIX).ruledOut)).toEqual([
+      "neck: ruled out at screening (1) — not ranked",
+      "  screened-a screen ~Δ40.00",
+      "trinket: ruled out at screening (1) — not ranked",
+      "  screened-b screen ~Δ12.00",
     ]);
   });
 });
