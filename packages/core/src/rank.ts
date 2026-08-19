@@ -480,10 +480,11 @@ export type RankedItem = {
    * full-iteration sim. `deltaDps`/`se` above are the *screening*
    * observation, not a full sim — a third view state, distinct from
    * `belowCutoff` ("measured and small") because a screened row was never
-   * measured at full precision at all. Ranked only among other screened
-   * rows (view.ts), never interleaved with full-iteration deltas, and
-   * never deleted — a screened row keeps its screening delta rather than
-   * being dropped from `items`.
+   * measured at full precision at all. `applyView` returns these as its
+   * `ruledOut` set, ordered by slot and name rather than by delta, so the
+   * disclosure carries no priority claim (ticket 224); the screening
+   * ordering stays here, on `items`. Never deleted — a screened row keeps
+   * its screening delta rather than being dropped from `items`.
    *
    * `promoted: true` never appears here: a promoted candidate goes on to a
    * full sim and this field is absent from its finished row, exactly like
@@ -1660,7 +1661,8 @@ export async function rankUpgrades(
     // package — a package member is promoted by construction) and after
     // replication's winning-request bookkeeping is built, since they were
     // never simmed at full iterations and have no winning request to
-    // register (§6.1: ranked only among themselves, never interleaved).
+    // register (§6.1; `applyView` returns them as its `ruledOut` set rather
+    // than placing them among the ranked rows — ticket 224).
     ranked.push(...screenedRows);
 
     onProgress?.({ stage: "ranking" });
