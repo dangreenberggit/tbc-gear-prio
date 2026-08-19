@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: task (design question raised by measurement; no known defect)
 Origin: user challenge during the 2026-08-18 review of ticket 221 — "am I
   supposed to believe that 150 items provided a DPS increase... but that
@@ -481,3 +481,39 @@ Gruul as a melee neck. It is not; both data sources agree it is a healer
 neck, so this is not a repo item-identity defect. That correction does not
 weaken its finding — a healer neck as the slot argmax is precisely its
 point.
+
+## Reopened (2026-08-19) — the questions this ticket was supposed to ask
+
+User verdict on the 2026-08-18 closure: the ticket was about investigating
+and finding a better approach; instead it confirmed the mechanism and tested
+two re-parameterisations of the same approach. Reopened with the scope below.
+The 2026-08-18 record above stands as evidence, not as the answer. Racing as
+shipped is an extra filtering layer that is a net loss or near-loss on every
+measured pool (ratios 1.06 feral P2, 0.70 feral P3, 0.97 ret P2 — commands in
+the "Measured" sections); the burden is on screening to justify existing.
+
+Questions to actually investigate (design lane, not another K sweep):
+
+1. **Is the cutoff meaningful?** 3.6 DPS / 0.15 % is finer than the screening
+   SE (5.1), finer than the 3000-iteration truth's own SE (~3.0, ticket 227),
+   and finer than the pairwise resolution a player could notice. If no
+   affordable sim resolves it, "above cutoff" is partly noise and every recall
+   target built on it is chasing noise. What cutoff does the instrument
+   support, and should the cutoff be stated in SE units?
+2. **What is the output actually for?** If the user needs "the best few per
+   slot" (what a player acts on) rather than "every item above a cutoff",
+   screening's job changes from set-recall to per-slot top-N — a different,
+   probably much cheaper problem.
+3. **Can the EP pre-order do the work?** Candidates are already EP-ordered
+   before any sim (candidate-order.ts). Per slot, once the EP gap to the
+   incumbent exceeds what any sim could overturn, stop — no screen at all.
+   Measure how many full sims that needs on the three fixtures vs today.
+4. **Is a separate screening pass the wrong shape?** Alternatives: sequential /
+   adaptive iterations per candidate (sim until the CI clears the decision),
+   or no screening at all plus the EP stop above. Compare cost and recall.
+5. **Should racing simply be removed** if none of the above beats "full sweep
+   + EP stop" on these pools? State the criterion before measuring.
+
+Acceptance: each question answered with a measurement or a reasoned "not
+worth pursuing", commands recorded; a recommendation that is not "keep the
+same approach with different constants".
