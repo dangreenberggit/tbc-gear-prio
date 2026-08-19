@@ -101,17 +101,103 @@ and to any debug view.
 
 ## Acceptance criteria
 
-- [ ] Un-promoted, below-cutoff rows are no longer presented to the user as an
+- [x] Un-promoted, below-cutoff rows are no longer presented to the user as an
       ordered list — omitted, disclosed, or unordered per the options above.
       A decision among the three is recorded with its reason.
-- [ ] The underlying ordering remains available to measurement scripts and any
+      **Option 1, plus option 2's rendering when disclosed** — see "What was
+      built" below. `pnpm exec vitest run packages/core/test/view.test.ts`
+- [x] The underlying ordering remains available to measurement scripts and any
       debug view, so engineering does not lose what ticket 222 relied on.
-- [ ] The feral Phase 3 trinket slot (0 of 66 resolvable pairs) no longer
+      `applyView` never mutates `Ranking.items`, and neither measurement script
+      imports the view at all:
+      `grep -ln "view.js\|applyView" packages/core/test/measure-*.ts` prints
+      nothing.
+- [x] The feral Phase 3 trinket slot (0 of 66 resolvable pairs) no longer
       reads as a ranking, and the weapon slot (2,751 resolvable pairs, 0.4%
       inversion) keeps its ordering — promoted rows are unaffected throughout.
-- [ ] `sme-rank-review` judges the revised presentation, and its verdict is
-      recorded here.
-- [ ] `pnpm verify` green.
+      Both judged on real rows by the SME (below). The promoted-rows guarantee
+      also has a test: `view.test.ts` compares the whole view against the same
+      ranking with the screened items simply absent.
+- [x] `sme-rank-review` judges the revised presentation, and its verdict is
+      recorded here. Verdict **trust-with-caveats**; handoff at
+      `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md`
+- [x] `pnpm verify` green.
+
+## What was built
+
+**Decision: option 1, and when disclosed, option 2's rendering.** Screened rows
+leave `rows` for a new `ViewResult.ruledOut` projection, ordered by slot, then
+item name, then item id — never by delta, and never given a `tieGroupId` or a
+position. The reason for slot/name rather than delta: a delta-ordered list under
+a caption still reads as a ranking, which is the exact complaint this ticket
+opened with. Name order does not move when the screening deltas move, so there
+is no priority claim left to read.
+
+The CLI omits them by default behind a one-line disclosure and a new
+`--show-ruled-out` flag, which is **independent of `--show-below-cutoff`**: that
+flag expands ranked rows the cutoff hides, and these were never ranked at all.
+
+`belowCutoffCount` now counts full-iteration rows only. It and `ruledOut.length`
+are disjoint and jointly exhaustive over the rows the default display hides, so
+`shortlist.length + belowCutoffCount + ruledOut.length` equals the filtered row
+total. Measured on the real pool: **70 + 149 + 179 = 398**.
+
+**A live report defect fixed on the way.** The HTML report rendered from
+`ranking.items` with no `screened` handling, and screened rows carry
+`belowCutoff: false` because the engine never gave them a cutoff verdict — so a
+screened row could render in the report's **above-cutoff strip with a dash
+rank**. The first new report test reproduced it: `partitionShortlist` returned
+both screened rings in the raid shortlist. They are now excluded from both
+shortlists and render in a per-slot collapsed "Ruled out at screening (N) — not
+ranked" block.
+
+## The neck case is a non-goal here
+
+The three neck rows from ticket 225's finding are **promoted, above-cutoff,
+full-iteration rows**. The `screened` partition does not reach them, so nothing
+in this ticket changes how they are presented. The brief's addendum reclassifies
+that as a scoring question and **ticket 227 owns it**.
+
+Whether the existing SE-overlap rule already joins those three into one tie
+group is **untested** — the group leader is a global anchor and need not be a
+neck row, so the ~5.9 DPS window against their 1.44 DPS span does not settle it
+by itself.
+
+## SME verdict (2026-08-18)
+
+Verdict **trust-with-caveats** on the revised presentation. Handoff:
+`.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md`
+
+The screening ordering the SME judged is **modelled**, not shipped:
+`DerivedNoiseSimRunner` perturbs recorded 3,000-iteration truth with seeded
+Gaussian noise, independent across candidates, one fixed **draw 0**. No artifact
+of a real shipped screening ordering exists. Real screening shares one seed, so
+real errors are plausibly correlated and would preserve order better than
+independent ones. The promoted-row truth side is real.
+
+- **Trinket — name order works.** The 12 ruled-out trinkets read A-to-Z as a
+  set. The old ordering opened Spyglass / Eye of Magtheridon / Romulo's, which
+  reads as "closest calls" — a priority claim the modelled screening does not
+  support. Residual: the `screen ~Δ` figures let a determined reader re-sort 12
+  rows by eye.
+- **Weapon — promoted rows survive.** Ranks, tie groups and the delta-ordered
+  below-cutoff tail are all intact, and the top four are correct feral
+  two-handers.
+- **Honesty — yes, with a wording caveat.** Showing the screening delta is the
+  right call; omitting it would leave no way to tell a near-miss from a
+  non-starter. But "ruled out at screening" reads as a verdict on the *item*
+  when it is a verdict on a *measurement*, and the screen figures are not
+  comparable to ranked deltas. The SME suggests wording closer to "not promoted
+  past screening" plus a non-comparability note. **Not applied here** — it is a
+  copy change on a shipped string and deserves its own decision.
+
+## Domain defect found by the SME, filed separately
+
+The SME found that **40 of the 78 ruled-out feral weapons are items a druid
+cannot equip**, and that one of them — `Cataclysm's Edge` (30902), a sword —
+prints as a **ranked upgrade at #16**, above the fold. That is a candidate-pool
+bug, not a presentation one, and it predates this ticket. Filed as
+`.scratch/carry-forward/issues/228-pool-admits-weapons-the-class-cannot-equip.md`.
 
 ## Out of scope
 
