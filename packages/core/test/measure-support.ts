@@ -1,13 +1,17 @@
 /**
- * Shared test runners for M2 racing (candidate-pool.md §7 preamble).
+ * Shared sim runners for the tests and measurement scripts.
  *
- * `DerivedNoiseSimRunner` avoids a second recorded fixture per
- * `screenIterations` value: it looks up the *full-iteration* recorded truth
- * for a request (ignoring the caller's `opts.iterations`/`opts.seed`) and
- * adds deterministic seeded noise scaled by `1/sqrt(iterations)` — the same
- * shape independent SE takes in rank.ts (`stdev / Math.sqrt(iterations)`).
- * So `screenIterations` can change freely without re-recording, and 7.2's
- * recall test can run over many draws by varying only the noise seed.
+ * `CountingSimRunner` records how many runs landed at each iteration count,
+ * which is what `full-sweep-recall.test.ts` asserts the engine's work
+ * against.
+ *
+ * `DerivedNoiseSimRunner` answers *any* iteration count from a fixture
+ * recorded at one: it looks up the full-iteration truth for a request
+ * (ignoring the caller's `opts.iterations`/`opts.seed`) and adds
+ * deterministic seeded noise scaled by `1/sqrt(iterations)` — the same shape
+ * independent SE takes in rank.ts (`stdev / Math.sqrt(iterations)`). That is
+ * what lets a measurement script sweep iteration counts and noise draws
+ * without re-recording anything against the real binary.
  */
 import {
   simCacheKey,
@@ -17,7 +21,7 @@ import {
   type SimRunOpts,
 } from "../src/seams/sim-runner.js";
 
-/** Counts runs so "racing does less work" (7.0) is asserted, not assumed. */
+/** Counts runs per iteration count, so work done is asserted, not assumed. */
 export class CountingSimRunner implements SimRunner {
   runs = 0;
   runsByIterations = new Map<number, number>();
@@ -37,8 +41,8 @@ export class CountingSimRunner implements SimRunner {
 
 /**
  * A splitmix32-style PRNG: small, dependency-free, and — unlike
- * `Math.random` — reproducible from an integer seed, which is what lets
- * 7.2 draw K independent noise samples deterministically.
+ * `Math.random` — reproducible from an integer seed, which is what lets a
+ * measurement draw many independent noise samples deterministically.
  */
 function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -62,15 +66,15 @@ function gaussian(rand: () => number): number {
  * Wraps a recorded full-iteration `SimRunner` (`recordedIterations`,
  * `recordedSeed` — the truth every draw perturbs) and answers *any*
  * `opts.iterations` by adding noise scaled `stdev / sqrt(iterations)` to the
- * recorded dps — the same independent-SE shape rank.ts reports, so a
- * screening pass at 300 iterations looks statistically like what a real
- * 300-iteration sim would report relative to the 3000-iteration truth.
+ * recorded dps — the same independent-SE shape rank.ts reports, so a run at
+ * 300 iterations looks statistically like what a real 300-iteration sim
+ * would report relative to the 3000-iteration truth.
  *
  * `noiseSeed` selects the draw: two runners built with different seeds
- * perturb the same truth differently, which is what 7.2's "K seeded noise
- * draws" needs. The seed is mixed with the request's own cache key so two
- * different candidates in the same draw get independent noise rather than
- * identical offsets.
+ * perturb the same truth differently, which is what a multi-draw
+ * measurement needs. The seed is mixed with the request's own cache key so
+ * two different candidates in the same draw get independent noise rather
+ * than identical offsets.
  */
 export class DerivedNoiseSimRunner implements SimRunner {
   constructor(

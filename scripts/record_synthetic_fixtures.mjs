@@ -12,11 +12,11 @@
  * deterministically.
  *
  * Rows: `ret` and `feral` at maxPhase 2, `feral-p3` at maxPhase 3. Every row
- * is recorded with `fullPool: true` — the committed fixture is a *full sweep*
- * truth (one full-iteration sim per eligible candidate, no screening), which
- * is what the 7.2/7.3 recall gates in racing.test.ts compare racing's
- * promotions against. A raced recording would carry screening observations
- * and miss most candidates' full-iteration rows.
+ * is a *full sweep* — one full-iteration sim per eligible candidate. That
+ * used to need `fullPool: true` to switch racing off; since ADR-0026 removed
+ * racing there is only one path and the flag is gone, but the property the
+ * fixture depends on is unchanged and `full-sweep-recall.test.ts` is what
+ * gates it.
  *
  * Usage: pass row names to record a subset; with no names, all rows are
  * recorded. The fixture file is *merged*, not overwritten, so recording one
@@ -238,12 +238,6 @@ async function recordRow(name, cfg, seedRecordings) {
       iterations: ITERATIONS,
       seeds: [SEED],
       ...(cfg.race ? { race: cfg.race } : {}),
-      // The committed fixture is a full-sweep truth. Without this the run
-      // races: it screens at 1000 iterations and full-sims only the promoted
-      // rows, so most eligible candidates would have no full-iteration
-      // observation and the recall gates replaying this file would have
-      // nothing to check racing against.
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(gearData),

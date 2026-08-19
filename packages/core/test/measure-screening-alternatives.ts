@@ -219,10 +219,6 @@ async function truthFor(key: RowKey) {
       iterations: rec.iterations,
       seeds: [rec.seed],
       ...(isFeral ? { race: "RaceTauren" as const } : {}),
-      // Removed with racing in Step 4 of the ticket-225 plan; until then the
-      // default path screens at 1000 iterations and RecordedSimRunner throws,
-      // because the committed fixture holds full-iteration rows only (C23).
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(gearData),

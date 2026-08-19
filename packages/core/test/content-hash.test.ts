@@ -102,6 +102,21 @@ describe("contentHashOf", () => {
     expect(contentHashOf(BASE)).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it("still produces the key a pre-removal `fullPool: true` run produced", () => {
+    // 7.4a. Racing is gone (ADR-0026) but `contentHashOf` keeps
+    // `fullPool: true, screenIterations: null, promoteTopK: null,
+    // promoteTopJ: null` frozen in the payload, because every cache key
+    // already on disk was written with them. The CLI was the only caller and
+    // always passed `fullPool: true`, so this digest — taken from the
+    // pre-removal implementation against this same BASE — is the whole
+    // evidence that no stored ranking silently re-sims. If a change to the
+    // payload shape is deliberate, bump ENGINE_VERSION rather than editing
+    // this constant.
+    expect(contentHashOf(BASE)).toBe(
+      "02f21d1f3020ba80eaadecd6c276745d315b6dad7ecb43373f055bfbf7d56ef0"
+    );
+  });
+
   it("normalizes the character ref, which is a lookup key and not a number", () => {
     // Same character, different capitalisation, must not re-sim.
     expect(

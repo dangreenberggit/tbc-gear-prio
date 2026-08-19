@@ -226,10 +226,6 @@ async function runFixture(key: string): Promise<void> {
       iterations: recorded.iterations,
       seeds: [recorded.seed],
       ...(c.race === undefined ? {} : { race: c.race }),
-      // Removed with racing in Step 4 of the ticket-225 plan; until then the
-      // default path screens at 1000 iterations and RecordedSimRunner throws,
-      // because the committed fixture holds full-iteration rows only (C23).
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(gearData),

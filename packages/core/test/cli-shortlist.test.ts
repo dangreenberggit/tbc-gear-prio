@@ -21,8 +21,6 @@ import {
   formatSetBonusLine,
   GEM_POLICY_QUALIFIER,
   formatSetPotentialLine,
-  ruledOutDisclosureLine,
-  ruledOutLines,
 } from "../src/rank-report-rules.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import { applyView } from "../src/view.js";
@@ -149,124 +147,6 @@ describe("CLI shortlist default", () => {
       "hands",
       "neck",
     ]);
-  });
-});
-
-/**
- * Ticket 224. Screened candidates are disclosed as a set, never printed in a
- * positional list. `--show-ruled-out` is independent of `--show-below-cutoff`:
- * the two flags expand two disjoint groups of hidden rows.
- */
-describe("CLI ruled-out disclosure", () => {
-  const SCREENED_MIX = ranking([
-    item({ itemId: 1, slot: "trinket", deltaDps: 30, deltaPct: 1.5 }),
-    item({
-      itemId: 2,
-      slot: "trinket",
-      deltaDps: 1,
-      deltaPct: 0.05,
-      belowCutoff: true,
-    }),
-    item({
-      itemId: 30,
-      name: "screened-b",
-      slot: "trinket",
-      deltaDps: 12,
-      deltaPct: 0.6,
-      screened: { iterations: 1000, promoted: false },
-    }),
-    item({
-      itemId: 31,
-      name: "screened-a",
-      slot: "neck",
-      deltaDps: 40,
-      deltaPct: 2,
-      screened: { iterations: 1000, promoted: false },
-    }),
-  ]);
-
-  it("excludes screened rows from the printed selection under either flag", () => {
-    expect(rowsPrinted(SCREENED_MIX, false).map((r) => r.itemId)).toEqual([1]);
-    expect(rowsPrinted(SCREENED_MIX, true).map((r) => r.itemId)).toEqual([
-      1, 2,
-    ]);
-    expect(applyView(SCREENED_MIX).ruledOut.map((r) => r.itemId)).toEqual([
-      31, 30,
-    ]);
-  });
-
-  /**
-   * The counting identity `cli-shortlist.test.ts` has asserted since ticket 04,
-   * extended to the third group. The three counts are disjoint and jointly
-   * exhaustive over the rows the filters left, so nothing is silently dropped.
-   *
-   * Every number below is a literal read off `SCREENED_MIX` by hand, not
-   * derived from the view: `applyView` computes `belowCutoffCount` from the
-   * same partition the identity is meant to check, so summing its own outputs
-   * back to `items.length` holds however the partition is written and proves
-   * nothing about it.
-   */
-  it("reconciles shortlist, below-cutoff and ruled-out against the filtered total", () => {
-    const view = applyView(SCREENED_MIX);
-    // item 1, the only unscreened row above cutoff.
-    expect(view.shortlist.length).toBe(1);
-    // item 2, unscreened and `belowCutoff: true`.
-    expect(view.belowCutoffCount).toBe(1);
-    // items 31 and 30, both carrying `screened.promoted === false`.
-    expect(view.ruledOut.length).toBe(2);
-    // 1 + 1 + 2 against the four rows SCREENED_MIX declares.
-    expect(SCREENED_MIX.items.length).toBe(4);
-    expect(
-      view.shortlist.length + view.belowCutoffCount + view.ruledOut.length
-    ).toBe(4);
-    // `rows` is the ranked view: shortlist plus below-cutoff, ruled-out split
-    // out. 1 + 1 = 2.
-    expect(view.rows.length).toBe(2);
-    expect(view.rows.length + view.ruledOut.length).toBe(4);
-  });
-
-  /**
-   * The copy avoids "ruled out": both SMEs read that as a verdict on the item
-   * when it is a verdict on the measurement. `ruledOut` survives as the
-   * identifier only.
-   */
-  it("discloses the count on one line", () => {
-    expect(ruledOutDisclosureLine(applyView(SCREENED_MIX).ruledOut)).toBe(
-      "2 candidate(s) screened only (measured roughly, not re-checked; not ranked); --show-ruled-out to list them"
-    );
-  });
-
-  it("prints nothing when there are no ruled-out rows", () => {
-    expect(ruledOutDisclosureLine(applyView(MIXED).ruledOut)).toBeNull();
-  });
-
-  /**
-   * The listing carries no `#` position and no delta ordering — a per-slot
-   * heading over a name-ordered set, which is what stops it reading as a
-   * second, weaker ranking.
-   */
-  it("lists ruled-out rows per slot with no positions", () => {
-    expect(ruledOutLines(applyView(SCREENED_MIX).ruledOut)).toEqual([
-      "neck: screened only — measured roughly, not re-checked (1)",
-      "  screening deltas are not comparable to the ranked deltas above",
-      "  screened-a screen ~Δ40.00",
-      "trinket: screened only — measured roughly, not re-checked (1)",
-      "  screening deltas are not comparable to the ranked deltas above",
-      "  screened-b screen ~Δ12.00",
-    ]);
-  });
-
-  /**
-   * The non-comparability note is the part the second SME insisted on: on real
-   * rows the screened spread and the ranked spread are different scales, so a
-   * reader assuming one scale misreads the block. Every slot carries it.
-   */
-  it("repeats the non-comparability note under every slot heading", () => {
-    const lines = ruledOutLines(applyView(SCREENED_MIX).ruledOut);
-    const headings = lines.filter((l) => l.includes("screened only"));
-    const notes = lines.filter((l) => l.includes("not comparable"));
-    expect(headings).toHaveLength(2);
-    expect(notes).toHaveLength(2);
   });
 });
 

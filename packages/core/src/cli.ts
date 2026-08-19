@@ -37,8 +37,6 @@ import { renderRankHtml } from "./rank-report.js";
 import {
   formatSetBonusLine,
   formatSetPotentialLine,
-  ruledOutDisclosureLine,
-  ruledOutLines,
 } from "./rank-report-rules.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
@@ -82,10 +80,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--spec ret|feral] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--show-ruled-out] [--with-set-potential] [--report-events] [--assumptions] [--concurrency N] [--report [<path.html>]]"
-  );
-  console.error(
-    "note: ruled-out (screened) candidates are never part of --show-below-cutoff; --show-ruled-out lists them separately"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--spec ret|feral] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--with-set-potential] [--report-events] [--assumptions] [--concurrency N] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -100,7 +95,6 @@ function parseArgs(argv: string[]): {
   maxPhase: ContentPhase;
   assumptions: boolean;
   showBelowCutoff: boolean;
-  showRuledOut: boolean;
   reportEvents: boolean;
   concurrency: number;
   raid?: string;
@@ -116,7 +110,6 @@ function parseArgs(argv: string[]): {
     maxPhase: ContentPhase;
     assumptions: boolean;
     showBelowCutoff: boolean;
-    showRuledOut: boolean;
     reportEvents: boolean;
     concurrency: number;
     raid?: string;
@@ -127,7 +120,6 @@ function parseArgs(argv: string[]): {
     spec: "ret",
     assumptions: false,
     showBelowCutoff: false,
-    showRuledOut: false,
     reportEvents: false,
     // Ticket 200: E-W5 measured 66% of every CLI sim as fixed per-process
     // cost (t_fixed 373.2 ms vs t_iter 0.0637 ms/iteration), so overlapping
@@ -159,10 +151,6 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--show-below-cutoff") {
       out.showBelowCutoff = true;
-      continue;
-    }
-    if (arg === "--show-ruled-out") {
-      out.showRuledOut = true;
       continue;
     }
     if (arg === "--with-set-potential") {
@@ -252,7 +240,6 @@ function parseArgs(argv: string[]): {
     maxPhase: out.maxPhase,
     assumptions: out.assumptions,
     showBelowCutoff: out.showBelowCutoff,
-    showRuledOut: out.showRuledOut,
     reportEvents: out.reportEvents,
     concurrency: out.concurrency,
     view: out.view,
@@ -310,16 +297,6 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     },
     spec: args.spec,
     maxPhase: args.maxPhase,
-    // Racing loses on this runtime, so the CLI opts out (candidate-pool.md
-    // §3.2's no-go was CLI-scoped; §3.4.1 resumed M2 for the browser only).
-    // A native process pays 373.2 ms of spawn against 0.0637 ms/iteration, so
-    // a 1000-iteration screen still costs 63% of a full 5000-iteration sim:
-    // 277 screens + 169 full sims measures 1.24x the 277 full sims it
-    // replaces. Racing needs the promoted ratio under 0.368 here to break
-    // even, and it measures 0.704 (§6.4). WASM inverts this — 748.4 ms
-    // against 3.2446 ms/iteration — which is why the flag is per-runtime and
-    // not a global default. `experiments/m2-net-win-arithmetic.md` has the sum.
-    fullPool: true,
   };
 
   // Feral's EP preset is named p1 because upstream ships no p2 one for it;
@@ -582,20 +559,6 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       );
     }
 
-    // Independent of `--show-below-cutoff` (ticket 224): that flag expands
-    // ranked rows the cutoff hides, these were never ranked at all, and the
-    // two counts are disjoint. Printed as a per-slot set with no positions so
-    // the listing cannot be read as a second, weaker ranking.
-    //
-    // The count line prints either way: with the flag on it is the total the
-    // per-slot headings below sum to, so a reader who scrolled into one slot
-    // still knows how much was set aside overall.
-    const ruledOutDisclosure = ruledOutDisclosureLine(view.ruledOut);
-    if (ruledOutDisclosure !== null) console.log(ruledOutDisclosure);
-    if (args.showRuledOut) {
-      for (const line of ruledOutLines(view.ruledOut)) console.log(line);
-    }
-
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
@@ -610,19 +573,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       // the shortlist would delete from the artifact rows the renderer expects
       // to hold — the opposite of §10's "hidden, never deleted".
       const viewed = Object.keys(args.view).length > 0;
-      // `ruledOut` is spliced back in: it left `view.rows` for presentation,
-      // but §10 is "hidden, never deleted" and the report is the artifact that
-      // has to hold every row the filters left. The renderer decides where a
-      // screened row goes (its own collapsed per-slot block), which it can
-      // only do if the row reaches it.
-      // The unviewed branch needs no splice: `ranking.items` already holds the
-      // screened rows, because `rank.ts` pushes them onto `ranked` before the
-      // `Ranking` is built (see the "Screened-out rows join after set-context"
-      // comment there). Only the viewed branch has to rebuild the list, since
-      // `applyView` is what separated them.
-      const reportRanking = viewed
-        ? { ...ranking, items: [...view.rows, ...view.ruledOut] }
-        : ranking;
+      const reportRanking = viewed ? { ...ranking, items: view.rows } : ranking;
       mkdirSync(dirname(reportPath), { recursive: true });
       const meta = {
         character: args.character,

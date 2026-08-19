@@ -24,8 +24,6 @@ import {
   formatCuratedPackagePointer,
   GEM_POLICY_QUALIFIER,
   isCuratedBis,
-  isScreened,
-  SCREENED_NOT_COMPARABLE_NOTE,
   formatPackageMembershipLine,
   packageSetPotentialDps,
   packageOnlyShortlist,
@@ -324,22 +322,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
 
   const sections = slotsWithItems
     .map((slot) => {
-      const slotAll = bySlot.get(slot) ?? [];
-      // Ticket 224: screened candidates were measured only at screening
-      // precision, so they are not comparable with the rows below and get their
-      // own collapsed block instead of a position among them. They stay in the
-      // document — §10 is "hidden, never deleted".
-      const list = slotAll.filter((i) => !isScreened(i));
-      // Re-sorted here rather than read off `applyView`'s `ruledOut`, because
-      // `renderRankHtml` takes a `Ranking` and not a `ViewResult` — the report
-      // is reachable without any view at all. The key is duplicated from
-      // `compareRuledOutRows`; the slot arm is unnecessary here since this
-      // block is already per-slot.
-      const ruledOutRows = slotAll
-        .filter(isScreened)
-        .sort(
-          (a, b) => a.name.localeCompare(b.name, "en") || a.itemId - b.itemId
-        );
+      const list = bySlot.get(slot) ?? [];
       const hits = list.filter((i) => !i.belowCutoff).length;
       const deadSlotWarning = deadSlotWarningsBySlot.get(slot);
       const rows = list
@@ -521,40 +504,6 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       const localRetraction = deadSlotWarning
         ? `<p class="slot-retraction">${esc(deadSlotWarning.message)}</p>`
         : "";
-      // Collapsed by default: the reader can reach every candidate, but nothing
-      // about the block invites reading it as a continuation of the list above.
-      // Name-ordered rather than delta-ordered, and the delta is labelled
-      // "screen", so the ordering carries no priority claim (ticket 224).
-      //
-      // The title says "screened only — measured roughly, not re-checked"
-      // rather than "ruled out": both SMEs read "ruled out" as a verdict on the
-      // item when it is a verdict on the measurement. The note under it is the
-      // part the second SME insisted on — the screened spread and the ranked
-      // spread are different scales, and a reader assuming one scale misreads
-      // the block.
-      const ruledOut =
-        ruledOutRows.length === 0
-          ? ""
-          : `<details class="ruled-out">
-    <summary>Screened only — measured roughly, not re-checked (${ruledOutRows.length})</summary>
-    <p class="ruled-out-note">${esc(SCREENED_NOT_COMPARABLE_NOTE)}</p>
-    <div class="rows">${ruledOutRows
-      .map(
-        (
-          i
-        ) => `<article class="row muted ruled-out-row" data-item-id="${i.itemId}">
-  <div class="lead"><span class="rank dash">—</span></div>
-  <div class="body">
-    <a class="name" href="${wowheadUrl(i.itemId)}" target="_blank" rel="noreferrer">${esc(i.name)}</a>
-    <div class="meta">${esc(formatItemSource(i.source))}</div>
-  </div>
-  <div class="nums">
-    <div class="delta flat">screen ~${fmtDelta(i.deltaDps)} <span class="unit">DPS</span></div>
-  </div>
-</article>`
-      )
-      .join("\n")}</div>
-  </details>`;
       return `<section class="${sectionCls}" id="slot-${slot}">
   <header class="slot-head">
     <h2>${esc(slot)}</h2>
@@ -563,7 +512,6 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   </header>
   ${localRetraction}
   <div class="rows">${rows}</div>
-  ${ruledOut}
 </section>`;
     })
     .join("\n");
