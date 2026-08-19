@@ -133,12 +133,19 @@ describe("rank-report ruled-out block", () => {
 
   it("renders them in a collapsed per-slot block, name-ordered", () => {
     const html = renderRankHtml(SCREENED_SLOT, meta());
-    expect(html).toContain("Ruled out at screening (2) — not ranked");
+    expect(html).toContain(
+      "Screened only — measured roughly, not re-checked (2)"
+    );
+    // The note matters more than the heading: the screened spread and the
+    // ranked spread are different scales.
+    expect(html).toContain(
+      "screening deltas are not comparable to the ranked deltas above"
+    );
     // Name order, which is the opposite of the screening-delta order.
     expect(html.indexOf("alpha-ring")).toBeLessThan(html.indexOf("zeta-ring"));
     // The screened names appear only inside the ruled-out block, never in
     // the slot's main rows.
-    const blockStart = html.indexOf("Ruled out at screening");
+    const blockStart = html.indexOf("Screened only");
     expect(html.indexOf("zeta-ring")).toBeGreaterThan(blockStart);
     expect(html.indexOf("alpha-ring")).toBeGreaterThan(blockStart);
     const mainRows = html.slice(0, blockStart);

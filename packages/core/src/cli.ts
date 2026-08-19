@@ -585,12 +585,15 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     // Independent of `--show-below-cutoff` (ticket 224): that flag expands
     // ranked rows the cutoff hides, these were never ranked at all, and the
     // two counts are disjoint. Printed as a per-slot set with no positions so
-    // the disclosure cannot be read as a second, weaker ranking.
+    // the listing cannot be read as a second, weaker ranking.
+    //
+    // The count line prints either way: with the flag on it is the total the
+    // per-slot headings below sum to, so a reader who scrolled into one slot
+    // still knows how much was set aside overall.
+    const ruledOutDisclosure = ruledOutDisclosureLine(view.ruledOut);
+    if (ruledOutDisclosure !== null) console.log(ruledOutDisclosure);
     if (args.showRuledOut) {
       for (const line of ruledOutLines(view.ruledOut)) console.log(line);
-    } else {
-      const disclosure = ruledOutDisclosureLine(view.ruledOut);
-      if (disclosure !== null) console.log(disclosure);
     }
 
     if (args.report !== undefined) {
@@ -612,6 +615,11 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       // has to hold every row the filters left. The renderer decides where a
       // screened row goes (its own collapsed per-slot block), which it can
       // only do if the row reaches it.
+      // The unviewed branch needs no splice: `ranking.items` already holds the
+      // screened rows, because `rank.ts` pushes them onto `ranked` before the
+      // `Ranking` is built (see the "Screened-out rows join after set-context"
+      // comment there). Only the viewed branch has to rebuild the list, since
+      // `applyView` is what separated them.
       const reportRanking = viewed
         ? { ...ranking, items: [...view.rows, ...view.ruledOut] }
         : ranking;

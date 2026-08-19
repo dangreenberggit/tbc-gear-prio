@@ -213,9 +213,14 @@ describe("CLI ruled-out disclosure", () => {
     );
   });
 
-  it("discloses the count on one line when the flag is off", () => {
+  /**
+   * The copy avoids "ruled out": both SMEs read that as a verdict on the item
+   * when it is a verdict on the measurement. `ruledOut` survives as the
+   * identifier only.
+   */
+  it("discloses the count on one line", () => {
     expect(ruledOutDisclosureLine(applyView(SCREENED_MIX).ruledOut)).toBe(
-      "2 candidate(s) ruled out at screening (not ranked); --show-ruled-out to list them"
+      "2 candidate(s) screened only (measured roughly, not re-checked; not ranked); --show-ruled-out to list them"
     );
   });
 
@@ -230,11 +235,26 @@ describe("CLI ruled-out disclosure", () => {
    */
   it("lists ruled-out rows per slot with no positions", () => {
     expect(ruledOutLines(applyView(SCREENED_MIX).ruledOut)).toEqual([
-      "neck: ruled out at screening (1) — not ranked",
+      "neck: screened only — measured roughly, not re-checked (1)",
+      "  screening deltas are not comparable to the ranked deltas above",
       "  screened-a screen ~Δ40.00",
-      "trinket: ruled out at screening (1) — not ranked",
+      "trinket: screened only — measured roughly, not re-checked (1)",
+      "  screening deltas are not comparable to the ranked deltas above",
       "  screened-b screen ~Δ12.00",
     ]);
+  });
+
+  /**
+   * The non-comparability note is the part the second SME insisted on: on real
+   * rows the screened spread and the ranked spread are different scales, so a
+   * reader assuming one scale misreads the block. Every slot carries it.
+   */
+  it("repeats the non-comparability note under every slot heading", () => {
+    const lines = ruledOutLines(applyView(SCREENED_MIX).ruledOut);
+    const headings = lines.filter((l) => l.includes("screened only"));
+    const notes = lines.filter((l) => l.includes("not comparable"));
+    expect(headings).toHaveLength(2);
+    expect(notes).toHaveLength(2);
   });
 });
 

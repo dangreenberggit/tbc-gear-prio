@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task (presentation; no ranking-logic defect)
 Supersedes-framing: user challenge 2026-08-18 — see "The user's framing" below
 Origin: `sme-rank-review` verdict during ticket 222, 2026-08-18 — verdict
@@ -121,6 +121,12 @@ and to any debug view.
 - [x] `sme-rank-review` judges the revised presentation, and its verdict is
       recorded here. Verdict **trust-with-caveats**; handoff at
       `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md`
+- [x] A second, independent `sme-rank-review` judges the same output, and its
+      verdict is recorded here. Verdict **trust-with-caveats**; handoff at
+      `.scratch/handoffs/sme-rank-judgment-ticket-224-second-opinion.md`
+- [x] The user-facing copy carries no verdict-on-the-item wording, and every
+      listing states that screening deltas are not comparable to ranked ones.
+      `pnpm exec vitest run packages/core/test/cli-shortlist.test.ts packages/core/test/rank-report.test.ts`
 - [x] `pnpm verify` green.
 
 ## What was built
@@ -187,16 +193,81 @@ independent ones. The promoted-row truth side is real.
   right call; omitting it would leave no way to tell a near-miss from a
   non-starter. But "ruled out at screening" reads as a verdict on the *item*
   when it is a verdict on a *measurement*, and the screen figures are not
-  comparable to ranked deltas. The SME suggests wording closer to "not promoted
-  past screening" plus a non-comparability note. **Not applied here** — it is a
-  copy change on a shipped string and deserves its own decision.
+  comparable to ranked deltas. **This was applied** — see "Wording, reconciled"
+  below.
 
-## Domain defect found by the SME, filed separately
+## Second SME verdict (2026-08-18)
 
-The SME found that **40 of the 78 ruled-out feral weapons are items a druid
-cannot equip**, and that one of them — `Cataclysm's Edge` (30902), a sword —
-prints as a **ranked upgrade at #16**, above the fold. That is a candidate-pool
-bug, not a presentation one, and it predates this ticket. Filed as
+An independent second SME reached the same label, **trust-with-caveats**.
+Handoff: `.scratch/handoffs/sme-rank-judgment-ticket-224-second-opinion.md`
+
+It confirms the first on the three presentation questions, and sharpens the
+reasoning on two: the property that matters in the ruled-out ordering is not
+that it is alphabetical but that it is **invariant to the measurement** — a
+delta-ordered list re-sorts every run and so re-encodes the priority claim,
+whatever the caption says. And hiding by default is right because of *what
+these rows are*, not because there are many of them.
+
+It also parts company with the first SME on two points, both resolved below:
+the count of druid-illegal ranked rows (**three**, not two), and the wording.
+
+### Wording, reconciled
+
+Both SMEs objected to "ruled out" in player-facing text. The first proposed
+"not promoted past screening"; the second rejected that as pipeline jargon —
+"promotion" is our word, not the game's — and proposed plainer copy. The
+orchestrator took the second SME's register:
+
+- CLI disclosure: `N candidate(s) screened only (measured roughly, not
+  re-checked; not ranked); --show-ruled-out to list them`
+- CLI per-slot heading and HTML block title: `screened only — measured roughly,
+  not re-checked (N)`
+- A note under every listing and block: `screening deltas are not comparable to
+  the ranked deltas above`
+
+The identifiers `ruledOut` and `--show-ruled-out` are **unchanged** — they are
+code names, not player copy.
+
+The second SME insisted on the note more than the heading, and the trinket slot
+is why: the screened spread runs about -24 to -40 while the ranked trinkets sit
+between +14 and -13, so a reader assuming one scale concludes those trinkets are
+far worse than they are. The heading is a nuance; a missing non-comparability
+note is an active misreading.
+
+### The ruled-out rows are two populations, not one
+
+The ticket's own framing — "un-promoted, below-cutoff rows" — treats them as one
+kind of thing. In game-facing terms they are two, and the feral weapon block
+shows both:
+
+1. **Near-bar misses**, genuinely measured close to the cutoff (`Torch of the
+   Damned` ~Δ-21, `Hammer of the Naaru` ~Δ-26).
+2. **Slot-mismatch artifacts** at roughly **−470 to −513 DPS** — the shields,
+   held-in-off-hand items and the off-hand fist weapon. That figure means the
+   character ended up with **no weapon equipped**, not that the item is bad.
+
+Both are correctly hidden, so this changes nothing about what was built. But
+**nothing may be tuned on the second group**, and it must never be described to
+a user as "how close each item came". Do not read the bottom of the ruled-out
+list as information about item quality.
+
+## Domain defect found by the SMEs, filed separately
+
+**40 of the 78 screened-only feral weapons are items a druid cannot equip** —
+11 shields, 11 held-in-off-hand, 11 swords, 7 axes — verified independently by
+both SMEs against `data/items/index.json` using the `WeaponType`/`HandType`
+enums. Three of them reach the **ranked** side: `Cataclysm's Edge` (30902,
+sword) at **#16 above the cutoff**, `Twinblade of the Phoenix` (sword) and
+`Soul Cleaver` (axe) below it. The first SME named two; the second found the
+third.
+
+**Ticket 224 changed the ranked side by exactly zero.** `Cataclysm's Edge` sat
+at #16 before this ticket and sits at #16 after. This ticket neither raised nor
+lowered the visibility of that bug in any way that bears on its urgency, and
+228 must not be treated as less pressing because a hidden block became hidden —
+the urgency lives at #16, which 224 did not touch.
+
+Filed as
 `.scratch/carry-forward/issues/228-pool-admits-weapons-the-class-cannot-equip.md`.
 
 ## Out of scope

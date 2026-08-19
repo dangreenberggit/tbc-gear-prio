@@ -69,18 +69,22 @@ export type RankReportMeta = {
 };
 
 /**
- * A candidate the screening pass ruled out and never promoted to a
- * full-iteration measurement (candidate-pool.md §6.1). Its delta was measured
- * at screening precision, so it is not the same quantity as a ranked row's
- * delta and must never be placed against one (ticket 224).
+ * A candidate measured only at screening precision, never re-checked at full
+ * iterations (candidate-pool.md §6.1). Its delta is not the same quantity as a
+ * ranked row's delta and must never be placed against one (ticket 224).
+ *
+ * `ruledOut` is the identifier; the user-facing copy says "screened only —
+ * measured roughly, not re-checked". Both SMEs objected to "ruled out" in
+ * player-facing text: it reads as a verdict on the *item* when it is a verdict
+ * on the *measurement*.
  */
 export function isScreened(item: Pick<RankedItem, "screened">): boolean {
   return item.screened !== undefined;
 }
 
 /**
- * The one-line disclosure the CLI prints when ruled-out candidates exist and
- * `--show-ruled-out` is off. `null` when there is nothing to disclose.
+ * The one-line disclosure the CLI prints whenever screened-only candidates
+ * exist. `null` when there is nothing to disclose.
  *
  * Separate from `--show-below-cutoff` on purpose: that flag expands ranked
  * rows the cutoff hides, and these were never ranked at all. Folding them into
@@ -89,14 +93,27 @@ export function isScreened(item: Pick<RankedItem, "screened">): boolean {
  */
 export function ruledOutDisclosureLine(ruledOut: RankedItem[]): string | null {
   if (ruledOut.length === 0) return null;
-  return `${ruledOut.length} candidate(s) ruled out at screening (not ranked); --show-ruled-out to list them`;
+  return `${ruledOut.length} candidate(s) screened only (measured roughly, not re-checked; not ranked); --show-ruled-out to list them`;
 }
 
 /**
- * The `--show-ruled-out` listing: a per-slot heading over a name-ordered set.
+ * The non-comparability note that rides under every screened-only listing.
+ *
+ * The second SME insisted on this above the heading wording: on the feral-p3
+ * trinket slot the screened spread runs about -24 to -40 while the ranked
+ * trinkets sit between +14 and -13, so a reader who assumes one scale concludes
+ * those trinkets are far worse than they are. The heading is a nuance; a
+ * missing non-comparability note is an active misreading.
+ */
+export const SCREENED_NOT_COMPARABLE_NOTE =
+  "screening deltas are not comparable to the ranked deltas above";
+
+/**
+ * The `--show-ruled-out` listing: a per-slot heading over a name-ordered set,
+ * each slot followed by the non-comparability note.
  *
  * No `#` position, and the delta is labelled "screen" and prefixed `~` so the
- * reader can see it is a screening estimate rather than a ranked figure. The
+ * reader can see it is a rough estimate rather than a ranked figure. The
  * input order is `applyView`'s `ruledOut` order (slot, then name), so this
  * walks it rather than re-sorting — one place decides the order.
  */
@@ -105,7 +122,10 @@ export function ruledOutLines(ruledOut: RankedItem[]): string[] {
   for (const slot of SLOT_ORDER) {
     const rows = ruledOut.filter((r) => r.slot === slot);
     if (rows.length === 0) continue;
-    lines.push(`${slot}: ruled out at screening (${rows.length}) — not ranked`);
+    lines.push(
+      `${slot}: screened only — measured roughly, not re-checked (${rows.length})`
+    );
+    lines.push(`  ${SCREENED_NOT_COMPARABLE_NOTE}`);
     for (const row of rows) {
       lines.push(`  ${row.name} screen ~Δ${row.deltaDps.toFixed(2)}`);
     }
