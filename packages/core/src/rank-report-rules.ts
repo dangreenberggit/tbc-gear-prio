@@ -125,8 +125,13 @@ export function partitionShortlist(items: RankedItem[]): {
   pvp: RankedItem[];
 } {
   const reportItems = items as ReportItem[];
+  // Screened rows are excluded for the same reason `magnitudeWarning` rows
+  // are: a figure that cannot bear the weight should not head a list captioned
+  // "act on tonight". They carry `belowCutoff: false` — the engine never gave
+  // them a cutoff verdict — so without this they rendered in the above-cutoff
+  // strip with a dash rank (ticket 224).
   const above = reportItems.filter(
-    (i) => !i.belowCutoff && !i.magnitudeWarning
+    (i) => !i.belowCutoff && !i.magnitudeWarning && !isScreened(i)
   );
   return {
     raid: above.filter((i) => i.source.kind !== "pvp"),
