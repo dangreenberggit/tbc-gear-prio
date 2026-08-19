@@ -179,6 +179,13 @@ type on an illegal hand. Feral uses no off-hand; cat and bear occupy both hands
 with the main-hand weapon. Its Δ-479.66 is a comparison against nothing.
 Confirmed.
 
+> **Correction (pre-merge review, 2026-08-18):** the repo does hold a source —
+> `vendor/tbc-new-fork/ui/core/player_classes/druid.ts` lines 25-31 list Dagger,
+> Fist, Mace, OffHand, Staff. So **polearm is not druid-equippable** and
+> **held-in-off-hand is**, both opposite to the recalled list above. Whether a
+> feral build uses an off-hand is a separate question from whether a druid can
+> equip one. See ticket 228.
+
 *Source note:* the druid proficiency list — **staff, mace, dagger, fist weapon,
 polearm; not sword, not axe, not shield, not held-in-off-hand** — is **recalled
 game knowledge**. The repo holds no class-proficiency table, which is itself
