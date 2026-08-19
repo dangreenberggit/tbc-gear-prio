@@ -263,10 +263,20 @@ async function recordRow(name, cfg, seedRecordings) {
     recordings[simCacheKey(req, version, opts)] = obs;
   }
 
-  const aboveCutoffCount = ranking.items.filter((i) => !i.belowCutoff).length;
+  const aboveCutoff = ranking.items.filter((i) => !i.belowCutoff);
+  const aboveCutoffCount = aboveCutoff.length;
+  // Sorted so the array is a set, not a ranking: the gate that reads it
+  // asserts *which* items clear the cutoff, and item order within the
+  // shortlist is a separate property with its own tests. Recorded here
+  // rather than derived by a replay test because a value computed from the
+  // same run it checks proves nothing — this one comes from the real binary.
+  const aboveCutoffItemIds = aboveCutoff
+    .map((i) => i.itemId)
+    .sort((a, b) => a - b);
   console.error(
     `[${name}] wallMs=${wallMs} items=${ranking.items.length} ` +
-      `aboveCutoff=${aboveCutoffCount} baseline=${ranking.baseline.dps.toFixed(1)} ` +
+      `aboveCutoff=${aboveCutoffCount} ids=${aboveCutoffItemIds.length} ` +
+      `baseline=${ranking.baseline.dps.toFixed(1)} ` +
       `simVersion=${version} requestsCaptured=${recordedRequests.length} ` +
       `cacheHits=${hits} cacheMisses=${misses}`
   );
@@ -278,6 +288,7 @@ async function recordRow(name, cfg, seedRecordings) {
       maxPhase: cfg.maxPhase,
       poolSize: pool.length,
       aboveCutoffCount,
+      aboveCutoffItemIds,
       baselineDps: ranking.baseline.dps,
       iterations: ITERATIONS,
       seed: SEED,
