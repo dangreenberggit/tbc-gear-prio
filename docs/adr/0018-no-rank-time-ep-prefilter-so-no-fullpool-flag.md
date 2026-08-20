@@ -1,6 +1,6 @@
 # ADR-0018 — There is no rank-time EP prefilter, so `fullPool` is not implemented
 
-**Status:** accepted
+**Status:** accepted; amended by [ADR-0026](0026-racing-is-removed-the-engine-full-sweeps-every-eligible-candidate.md) (2026-08-19) — this ADR's conclusion stands, but the `fullPool` flag it discusses is gone. M2's racing later gave the flag a meaning (skip screening) and ADR-0026 removed racing, so what the flag selected is now simply what the engine does.
 **Date:** 2026-07-30
 **Amends:** PLAN.md §4 (`RankInput.fullPool`), §8.3.3, §4's cost model
 **Ticket:** `.scratch/carry-forward/issues/23-spec-drift-fullpool-deps-pools-setnote.md` item 1

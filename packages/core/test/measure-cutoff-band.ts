@@ -92,7 +92,7 @@ import {
   derivedScreeningSe,
   SCREEN_ITERATIONS,
   type RosterRecordingsFile,
-} from "./racing-support.js";
+} from "./measure-support.js";
 import {
   syntheticOfflineRecordings,
   FERAL_SYNTHETIC_REF,
@@ -162,7 +162,6 @@ async function fullSweepTruthP3() {
       iterations: recorded.iterations,
       seeds: [recorded.seed],
       race: "RaceTauren" as const,
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(gearData),
@@ -201,14 +200,6 @@ async function main(): Promise<void> {
   const truth = await fullSweepTruthP3();
   const items = truth.items;
 
-  // With `fullPool: true` racing never runs, so no row can be a screened
-  // row wearing `belowCutoff: false` by construction. Every verdict below
-  // is a full-iteration verdict. Assert it rather than trust it.
-  if (!items.every((i) => i.screened === undefined)) {
-    throw new Error(
-      "expected no screened rows under fullPool: true — the truth sweep is not a full sweep"
-    );
-  }
   if (items.length !== EXPECTED_POOL_SIZE) {
     throw new Error(
       `expected ${EXPECTED_POOL_SIZE} truth rows, got ${items.length}`

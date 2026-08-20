@@ -32,7 +32,7 @@ import {
   type RowCapture,
 } from "./direct-sim-support.js";
 import { CUTOFF_FERAL, meetsCutoff } from "../src/cutoff.js";
-import { loadJson } from "./racing-support.js";
+import { loadJson } from "./measure-support.js";
 import type { RankedItem } from "../src/rank.js";
 
 /** The ten ids ticket 227 lists, in the order the ticket's table gives them. */

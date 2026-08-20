@@ -14,13 +14,6 @@ import {
 import { orderCandidatesByEp } from "./candidate-order.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
 import { promisePool } from "./promise-pool.js";
-import {
-  DEFAULT_PROMOTE_TOP_J,
-  DEFAULT_PROMOTE_TOP_K,
-  DEFAULT_SCREEN_ITERATIONS,
-  promotionRule,
-  type ScreeningResult,
-} from "./promotion.js";
 import { compose } from "./compose.js";
 import {
   contentHashOf,
@@ -120,238 +113,12 @@ export type RankInput = {
   iterations?: number;
   seeds?: number[];
   /**
-   * Pre-M2 (or `fullPool: true`): keeps the first N candidates of the EP
-   * ordering, plus every owned row regardless of N (§5.1.1). Once racing is
-   * active, the cap instead applies to the *promoted* set (§5.1.1 Dean Q2)
-   * — the sim, not EP, picks what the cap keeps. `undefined` means "no cap"
-   * — hashed identically to a cap equal to the relevant set's size
+   * Keeps the first N candidates of the EP ordering, plus every owned row
+   * regardless of N (§5.1.1). `undefined` means "no cap" — hashed
+   * identically to a cap equal to the eligible set's size
    * (content-hash.ts).
    */
   candidateCap?: number;
-  /**
-   * Iterations per candidate in the screening pass (candidate-pool.md §6).
-   * §3.4.1 proposed 300 (the WASM point at `cost/cost(5000) = 0.102`) with
-   * `promoteTopK = 35`, both measured against the E-W5 fixture
-   * (`test/fixtures/slamaltman.raid-sim-request.json`), whose feral run had
-   * only 16 above-cutoff rows. Ticket 204's held-out gating fixture
-   * (`FERAL_SYNTHETIC_ROW`, §7.a) has **42** above-cutoff rows occupying
-   * *every* global delta rank from 1 to 42 with no gaps — so any `K* < 42`
-   * necessarily misses some of them even at zero noise, and 7.2's own
-   * measurement (`npx vitest run packages/core/test/racing.test.ts -t 7.2`)
-   * found 300/35 missed up to 18 of 42 rows across seeded noise draws.
-   * Raised to 1000 (still `cost/cost(5000) = 0.235`, under the <0.25 gate —
-   * §3.4.1's own table) because 1000 iterations' tighter per-candidate SE
-   * is what let a much smaller `promoteTopK` recall reliably; 300 iterations
-   * needed `promoteTopK` around 150 to reach the same zero-miss point,
-   * which would have spent nearly as much on the promoted-cap full sims as
-   * racing was meant to save. Ignored when `fullPool: true`.
-   */
-  screenIterations?: number;
-  /**
-   * How many top-screened candidates promote to a full-iteration sim
-   * (candidate-pool.md §6.1). §3.4.1 proposed 35 = max(K*) + 10 from the
-   * E-W5 fixture's measured K* (16 feral / 15 ret) — a fixture with only 16
-   * above-cutoff feral rows. Ticket 204's held-out gating fixture then needed
-   * `promoteTopK = 120` at `screenIterations = 1000` for zero misses across
-   * 30 seeded noise draws, and 150 was that floor plus §3.4.1's +10-ish
-   * margin.
-   *
-   * **150 was measured on a pool half the size of the one that ships.** K is
-   * a fixed absolute budget, so the fraction of the pool it admits shrinks as
-   * the pool grows: 150/246 ≈ 61% on the phase 2 fixture the number was tuned
-   * on, but 150/398 ≈ 38% on the phase 3 pool every real feral run screens.
-   * Ticket 221 measured that gap and it is real — at K=150 the phase 3 pool
-   * loses **7 above-cutoff rows across 30 draws** (6 distinct items). Top-5
-   * recall held throughout; the losses are mid-table above-cutoff rows, which
-   * is exactly the "a slot's second-best row runs out of global budget"
-   * mechanism the per-slot floor does not catch at j=1.
-   *
-   * Verified at zero misses across 30 seeded noise draws on **both** pools,
-   * each with its own re-run command:
-   *
-   * - 246 eligible / 42 above cutoff (feral phase 2) —
-   *   `npx vitest run packages/core/test/racing.test.ts -t 7.2`
-   * - 398 eligible / 86 above cutoff (feral phase 3) —
-   *   `npx vitest run packages/core/test/racing.test.ts -t P3-recall`
-   *
-   * Re-measured K sweep on the phase 3 pool, 30 draws each
-   * (`npx tsx packages/core/test/measure-feral-p3-recall.ts`); the phase 2
-   * pool is at zero misses for every row in this table:
-   *
-   * ```
-   *   K    misses  distinct
-   *   150       7         6
-   *   175       3         3
-   *   190       1         1
-   *   195       0         0   <- measured floor
-   *   200       0         0
-   *   210       0         0   <- shipped
-   * ```
-   *
-   * 210 is the 195 floor plus the same +10-ish margin, rounded up for
-   * legibility — the formula §3.4.1 used and ticket 204 reused.
-   *
-   * **What this costs.** Raising K buys recall with full-iteration sims, and
-   * on a small pool it buys almost nothing else: full sims ÷ eligible is
-   * 0.6457 on the phase 3 pool (`npx tsx
-   * packages/core/test/measure-racing-ratio.ts feral-p3`) but 0.9837 on the
-   * phase 2 one (`... feral`), where K=210 admits nearly all 246 candidates
-   * and racing barely beats a full sweep.
-   * That is the honest trade — the default is set by the pool the tool
-   * actually ships against, and the phase 2 fixture is now the pool where
-   * racing looks worst, not the pool the number is tuned to.
-   *
-   * Runtime-independent in the same sense §3.4.1 argued (a property of rank
-   * correlation and cutoff density, not of CLI vs WASM cost) — but tied to
-   * these fixtures' cutoff density, which is a fact about the gear pool, not
-   * about the runtime. A materially larger pool than 398 is unmeasured
-   * territory again. Ignored when `fullPool: true`.
-   */
-  promoteTopK?: number;
-  /**
-   * How many candidates promote from **each slot's own** screening ranking
-   * (candidate-pool.md §6.4 option (a)). Generalizes the best-in-slot floor
-   * from top-1 to top-`j`; `1` reproduces the pre-§6.4 rule exactly.
-   *
-   * Why a per-slot floor and not just a bigger `promoteTopK`: upgrade deltas
-   * scale with how outdated the worn piece is, so one global ranking is not a
-   * fair comparison across slots. A slot whose upgrades are all small (a
-   * near-BiS cloak) falls below any global cutoff *as a block*, losing the
-   * precision needed to order that slot at all — which is the clustered miss
-   * M1.5 measured (ret: all six worst-ranked rows were cloaks; feral: belts
-   * and necks). §6.4 recorded that no `promoteTopK` clearing the 7.2 recall
-   * gate also reaches the ≤0.4 ratio target: recall and ratio pulled against
-   * each other because a global K buys coverage only by buying volume. A
-   * per-slot floor buys coverage directly, so `promoteTopK` no longer has to
-   * carry it.
-   *
-   * **Defaults to 1 (the pre-§6.4 floor) because raising it does not pay
-   * here.** §6.4 predicted j=5 would land the ratio ~0.354, under the ≤0.4
-   * target. Measured on the gating feral fixture over 30 noise draws
-   * (246 eligible, 42 above-cutoff, 14 slots), it does not:
-   *
-   * ```
-   *   K    j   ratio   misses      K    j   ratio   misses
-   * 150    1  0.7146     0        60    5  0.3768    53
-   * 150    5  0.7232     0        40    5  0.3252   147
-   * 120    5  0.5822     0         0    5  0.3084   218
-   * 100    5  0.5123     1         0   10  0.5959    21
-   *  80    5  0.4416     6
-   * ```
-   *
-   * Three things that table settles. j=5 at the shipped K *raises* the ratio
-   * (0.7146 → 0.7232) — the floor and a large K overlap rather than
-   * substitute. No (K, j) reaches ≤0.4 at zero misses; the best zero-miss
-   * point is K=120/j=5 at 0.5822. And a larger j cannot rescue a small K: at
-   * K=0, j=10 still misses 21 rows at a *worse* ratio than K=120/j=5.
-   *
-   * Why the prediction missed: 42 above-cutoff rows over 14 slots averages 3
-   * per slot but is not spread evenly, so a floor deep enough for the dense
-   * slots promotes redundantly in the sparse ones — while the dense slots
-   * still need K to reach past j. The clustered-miss mechanism M1.5 measured
-   * is real; it just is not what binds the ratio on this fixture.
-   *
-   * Kept as a knob rather than reverted: the mechanism is fixture-dependent,
-   * and a pool with more slots or a flatter cutoff would change the table.
-   * Re-measure before changing the default — recall gate is `npx vitest run
-   * packages/core/test/racing.test.ts -t 7.2`, and the ratio re-run command
-   * is `npx tsx packages/core/test/measure-racing-ratio.ts`, which reports
-   * 0.9708 (233 full-iteration sims of 240 eligible) at the shipped K=210.
-   * That script defaults to the **ret** tuning fixture; the same script
-   * takes a fixture selector, and `npx tsx
-   * packages/core/test/measure-racing-ratio.ts feral` /
-   * `... feral-p3` reproduce the feral figures 0.9837 and 0.6457. (The j
-   * table above is still a ticket 221 session record, not re-runnable from
-   * this script.) The ret P2 number corroborates the feral P2 one — on both
-   * **P2 pre-raid** pools, at K=210 racing barely beats a full sweep
-   * (ticket 223). Do not carry
-   * that across tiers: the one P3 figure on record is 0.6457, where racing
-   * does real work, because a P3 character already wears near-optimal gear
-   * and most of the pool is an obvious loss. The shallow, flat pre-raid
-   * pool is what makes K=210 admit nearly everything.
-   *
-   * ## The floor is inert on the shipped feral P3 pool (ticket 222)
-   *
-   * Measured over 30 noise draws: the floor promotes **zero additional rows
-   * at K=210 and zero at K=150 alike**. The global top-K already takes every
-   * slot's screening argmax, so `promotionRule`'s per-slot `slice(0, j)`
-   * finds nothing left to add at either value.
-   *
-   * The cause is **cutoff density and slot count on this pool, not the value
-   * of K**: 398 entries spread over 14 slots (largest weapon 91, smallest
-   * ranged 2), with K admitting 38–53% of the pool. At that density every
-   * slot's argmax clears the global cutoff on its own. Lowering K back to 150
-   * would not reactivate the floor — the sweep runs both values so this is
-   * re-runnable rather than asserted.
-   *
-   * What *would* change it, and should re-trigger this measurement: a
-   * materially larger pool, more slots, or a much smaller K/pool ratio. Any
-   * of those can put a slot's argmax outside the global top-K and give the
-   * floor real work, at which point the depth question below reopens.
-   *
-   * ## Screening SE at 1,000 iterations, measured
-   *
-   * **5.162 DPS** mean (min 2.36, max 6.08) over the 428 recorded feral P3
-   * candidates; the pairwise difference scale is `sqrt(2) * SE ≈ 7.30 DPS`.
-   * This replaces the `1/sqrt(n)` extrapolation off F10's ~6.8 DPS at 300
-   * iterations, which gives 3.72 DPS and sits 28% below the measured mean.
-   *
-   * Was "5.128 over 461 candidates", from the pre-`57ec814` fixture. The
-   * figures above are re-derived on the tip fixture and are no longer copied
-   * by hand anywhere: `derivedScreeningSe` in `test/racing-support.ts` is the
-   * one source, so a re-record moves them (ticket 229). Re-run with
-   * `npx tsx packages/core/test/measure-within-slot-ordering.ts`, section 1;
-   * min/max re-derived on the tip fixture (n=428, min 2.3641, max 6.0842) by
-   * the one-liner in ticket 229's Resolution.
-   * `stdev` is a per-iteration population sd with no `/sqrt(N)` applied
-   * (`vendor/tbc-new-fork/sim/core/sim_concurrent.go:138`), so `SE =
-   * stdev/sqrt(n)` is the correct shape rather than an inherited assumption.
-   *
-   * ## Ordering below the argmax
-   *
-   * Screened rows are not deleted: `rank.ts` orders them against each other
-   * by screening delta. Within-slot ordering noise below the argmax is
-   * bounded under the repo's own **independent-Gaussian noise model using
-   * real per-candidate stdevs** — 6,306 inversions of 103,616 pairs (6.09%)
-   * over 30 draws, maximum rank displacement 12; restricted to pairs whose
-   * recorded truth separates them by more than the 7.25 DPS noise scale, 587
-   * of 88,046 (0.67%). Slots with a high raw rate are packed inside the noise
-   * rather than misordered: trinket inverts 43% of pairs raw, but **none** of
-   * its 66 pairs are separated by more than the noise scale, so no achievable
-   * ordering would do better.
-   *
-   * **No artifact of a real shipped ordering exists** — ticket 219 saved
-   * aggregates only — so this is a distributional model, not a byte replay.
-   * Real screening shares a seed across candidates, so real errors are
-   * plausibly correlated, and correlated errors preserve order better than
-   * independent ones: these counts are a **conservative upper bound** on
-   * shipped disorder, not an unbiased estimate of it. On that basis the
-   * ordering is accepted and documented.
-   *
-   * `sme-rank-review` judged this output **trust-with-caveats** (ticket 222,
-   * 2026-08-18). It upheld the sort order and supplied the game reason the
-   * measurement could not: feral item value within a slot keys off a small
-   * stat set that scales with item level inside a tier, so true deltas spread
-   * rather than cluster. It also confirmed the trinket/finger result is a game
-   * fact rather than a precision failure — TBC itemises trinkets as an effect,
-   * not a stat line, so more iterations cannot resolve them. Its one caveat is
-   * about **presentation**, not ordering: a list in an order reads as a
-   * ranking even with `rank: null` and separate tie groups. That is ticket 224
-   * (tie-group by the measurement's own resolution), not a change here.
-   *
-   * Every figure in these three sections: `npx tsx
-   * packages/core/test/measure-within-slot-ordering.ts`.
-   *
-   * Ignored when `fullPool: true`.
-   */
-  promoteTopJ?: number;
-  /**
-   * Skips screening entirely and full-iteration sims every eligible
-   * candidate — ADR-0018's escape flag, now paired with the racing it
-   * escapes (candidate-pool.md §6.1). `true` reproduces the pre-M2 flow
-   * byte-for-byte (§6.4).
-   */
-  fullPool?: boolean;
 };
 
 export type Deps = {
@@ -401,20 +168,6 @@ export type Progress =
   | { stage: "reading-gear" }
   | { stage: "composing" }
   | { stage: "building-pool" }
-  /**
-   * M2 racing's screening pass (candidate-pool.md §6.2), which dispatches one
-   * sim per eligible candidate before any full-iteration work begins. Distinct
-   * from "simming" because the two count different budgets: screening runs at
-   * `screenIterations` over the whole pool, "simming" at the caller's
-   * `iterations` over the promoted set only.
-   *
-   * `failed` is the running count of candidates whose every slot attempt threw.
-   * It exists because a screening pass that loses every candidate used to be
-   * indistinguishable from one that found no upgrade (ticket 156) — a status
-   * line with no failure channel showed a healthy run for 394 consecutive
-   * engine failures.
-   */
-  | { stage: "screening"; done: number; total: number; failed: number }
   | { stage: "simming"; done: number; total: number }
   /**
    * A single candidate's row finished — fired as each sim lands, ahead of
@@ -487,27 +240,6 @@ export type RankedItem = {
    * cutoff classification and tie groups.
    */
   simmed?: false;
-  /**
-   * Present only when this run raced (candidate-pool.md §6): the row was
-   * screened at `iterations` and the promotion rule did not promote it to a
-   * full-iteration sim. `deltaDps`/`se` above are the *screening*
-   * observation, not a full sim — a third view state, distinct from
-   * `belowCutoff` ("measured and small") because a screened row was never
-   * measured at full precision at all. `applyView` returns these as its
-   * `ruledOut` set, ordered by slot and name rather than by delta, so the
-   * disclosure carries no priority claim (ticket 224); the screening
-   * ordering stays here, on `items`. Never deleted — a screened row keeps
-   * its screening delta rather than being dropped from `items`.
-   *
-   * `promoted: true` never appears here: a promoted candidate goes on to a
-   * full sim and this field is absent from its finished row, exactly like
-   * `simmed` never carries `true` for a normally-simmed row.
-   *
-   * Every screened row carries a real screening measurement: a candidate
-   * whose every slot attempt threw is dropped and disclosed instead (ticket
-   * 156), so `deltaDps` here is never a sentinel standing in for one.
-   */
-  screened?: { iterations: number; promoted: false };
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
   /** Every pinned upstream gear set equipping this item, any phase. */
   curatedSets?: string[];
@@ -943,33 +675,27 @@ export async function rankUpgrades(
     (e) => !isKaelTempLegendary(e.itemId)
   );
   // Ordering runs before any sim, from raw stats only, so it cannot fail on
-  // a candidate the sim itself would later reject. Pre-M2 (or `fullPool`)
-  // this order also decides which N the cap keeps (§5.1.1); once racing is
-  // active it is a tie-break only — the sim decides the cap via screening.
+  // a candidate the sim itself would later reject. This order also decides
+  // which N the cap keeps (§5.1.1).
   const ordered = orderCandidatesByEp(
     eligible,
     equipment,
     deps.epWeights,
     (itemId) => getItem(itemId)?.stats ?? []
   );
-  const racing = input.fullPool !== true;
-  const screenIterations = input.screenIterations ?? DEFAULT_SCREEN_ITERATIONS;
-  const promoteTopK = input.promoteTopK ?? DEFAULT_PROMOTE_TOP_K;
-  const promoteTopJ = input.promoteTopJ ?? DEFAULT_PROMOTE_TOP_J;
 
   // Read once and shared with the sim cache below, so the version a result is
   // filed under is always the version it was hashed with.
   const simVersion = await deps.sim.version();
 
-  // Hashed on every *eligible* candidate, not the post-cap/post-promotion
-  // set: which candidates are eligible is known before any sim runs, so this
-  // is stable enough to gate the cache lookup before screening or full sims
-  // start. `candidateCap` and the racing knobs are separate hashed fields
-  // (below) that narrow the eligible set down to what actually gets a full
-  // sim — hashing here rather than at entry because the logged gear is the
-  // largest input to every delta, and it is not known until readGear
-  // resolves. The check still lands before the sim loop, which is the
-  // expensive part.
+  // Hashed on every *eligible* candidate, not the post-cap set: which
+  // candidates are eligible is known before any sim runs, so this is stable
+  // enough to gate the cache lookup before the sim loop starts.
+  // `candidateCap` is a separate hashed field (below) that narrows the
+  // eligible set down to what actually gets simmed — hashing here rather
+  // than at entry because the logged gear is the largest input to every
+  // delta, and it is not known until readGear resolves. The check still
+  // lands before the sim loop, which is the expensive part.
   const contentHash = contentHashOf({
     character: input.character,
     spec: input.spec,
@@ -988,14 +714,6 @@ export async function rankUpgrades(
     engineVersion: ENGINE_VERSION,
     ...(input.candidateCap !== undefined
       ? { candidateCap: input.candidateCap }
-      : {}),
-    ...(input.fullPool !== undefined ? { fullPool: input.fullPool } : {}),
-    ...(racing
-      ? {
-          screenIterations,
-          promoteTopK,
-          promoteTopJ,
-        }
       : {}),
   });
 
@@ -1086,21 +804,6 @@ export async function rankUpgrades(
       reason: string;
     }[] = [];
     /**
-     * Screening-stage sim failures (ticket 156), kept apart from
-     * `candidateSkips` rather than folded into it with a `stage` field: these
-     * rows describe a candidate that never reached the full-iteration pass at
-     * all, so "dropped from the ranking" — what `candidateSkips` renders — is
-     * the wrong sentence. A screened-out candidate still appears, carrying a
-     * screening delta the failure means it does not have.
-     */
-    const screeningSkips: {
-      kind: "sim" | "repair";
-      itemId: number;
-      name: string;
-      slot: string;
-      reason: string;
-    }[] = [];
-    /**
      * Every candidate's winning single-swap delta, by item id — the input
      * `selectPackage` (set-value.ts §2.2 step 1) needs to rank same-set
      * candidates by their own measured `deltaDps`. Populated alongside `best`
@@ -1116,90 +819,6 @@ export async function rankUpgrades(
       spec: input.spec,
       ...(talentsString !== undefined ? { talentsString } : {}),
     });
-
-    /**
-     * One candidate's best screening delta (candidate-pool.md §6.1/§6.2) —
-     * every slot attempt at `screenIterations`, cheapest-delta-wins exactly
-     * like `runCandidate`'s full-iteration loop, but with none of the
-     * disclosure bookkeeping (hit caps, gem substitution notes, set-bonus
-     * context) a screened candidate never carries: only promoted candidates
-     * get a `RankedItem`'s full shape. A candidate whose every slot attempt
-     * panics screens at `-Infinity`, which is a refusal the *promotion rule*
-     * then honours by skipping non-finite screens (`promotion.ts`). The
-     * sentinel never reaches a `RankedItem`: the screened-row builder clamps
-     * it to 0, because `JSON.stringify(-Infinity)` is `null` and a
-     * rehydrated `null` would poison the sort comparator.
-     *
-     * A failing slot attempt also records a `screeningSkips` row (ticket 156).
-     * The sentinel alone was not disclosure: it stops a failure counting as a
-     * *win*, but it renders as `~0.0` and reads as "measured, and no better",
-     * so a run that lost every candidate to engine panics exited green as "no
-     * upgrades found above the cutoff". The full-iteration loop has always
-     * pushed a `candidateSkips` row for the same event; this is that rule
-     * applied to the path racing actually takes in the browser.
-     */
-    async function screenCandidate(entry: PoolEntry): Promise<number> {
-      const slotNames = simSlotsForPoolSlot(entry.slot);
-      let best: number | undefined;
-      const screenOpts = { seed, iterations: screenIterations };
-      for (const slotName of slotNames) {
-        const slotIndex = SIM_ORDER.indexOf(slotName);
-        if (slotIndex < 0) continue;
-        const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
-        if (wornAt >= 0 && wornAt !== slotIndex) continue;
-        let swapped: SimItemSpec[];
-        try {
-          swapped = candidateSwapWithRepairs(
-            equipment,
-            slotIndex,
-            entry.itemId,
-            gems
-          ).equipment;
-        } catch (err) {
-          // Recorded for the same reason the sim failure below is: a repair
-          // that cannot activate the meta drops the candidate, and the
-          // screening stage must disclose that as loudly as the
-          // full-iteration stage does (rank.ts's `candidateSkips` repair row).
-          if (!(err instanceof MetaRepairError)) throw err;
-          screeningSkips.push({
-            kind: "repair",
-            itemId: entry.itemId,
-            name: entry.name,
-            slot: slotName,
-            reason: err.message,
-          });
-          continue;
-        }
-        const candReq = composeFor(swapped);
-        let candObs = await readCachedSim(
-          deps,
-          candReq,
-          simVersion,
-          screenOpts
-        );
-        if (!candObs) {
-          try {
-            candObs = await deps.sim.run(candReq, screenOpts);
-          } catch (err) {
-            // Recorded, not swallowed — see this function's doc comment. Only
-            // the *sim* call sits inside this catch: a failing store read
-            // above would otherwise be disclosed as an engine panic.
-            screeningSkips.push({
-              kind: "sim",
-              itemId: entry.itemId,
-              name: entry.name,
-              slot: slotName,
-              reason: err instanceof Error ? err.message : String(err),
-            });
-            continue;
-          }
-          await cacheSimResult(deps, candReq, simVersion, screenOpts, candObs);
-        }
-        const deltaDps = candObs.dps - baselineDps;
-        if (best === undefined || deltaDps > best) best = deltaDps;
-      }
-      return best ?? Number.NEGATIVE_INFINITY;
-    }
 
     /**
      * One candidate's full slot-attempt loop, unchanged from the old serial
@@ -1374,174 +993,14 @@ export async function rankUpgrades(
       onProgress?.({ kind: "row", row: item });
     }
 
-    // M2 racing (candidate-pool.md §6.2): screen all eligible, apply the
-    // promotion rule, then cap the *promoted* set — the sim, not EP, picks
-    // what a cap keeps once racing is active (§5.1.1 Dean Q2). Pre-M2 or
-    // `fullPool: true` keeps today's flow: cap the EP order directly, no
-    // screening pass, no screened rows.
-    let simCandidates: PoolEntry[];
-    const screenedRows: RankedItem[] = [];
-    if (racing) {
-      const screenSignal = deps.signal;
-      // Screening's own progress channel (ticket 156). Counted here rather
-      // than from `screeningSkips.length` because that collection counts slot
-      // *attempts* — a ring or trinket contributes two — while this counts
-      // candidates that ended with no finite screen at all, which is what a
-      // status line means by "failed".
-      let screensDone = 0;
-      let screensFailed = 0;
-      /**
-       * Candidates that ran a screen and came back with nothing usable — as
-       * opposed to ones a Stop meant never ran at all. Both return the
-       * `-Infinity` sentinel, so the delta cannot tell them apart, and the
-       * difference decides whether a row is dropped as failed (ticket 122's
-       * rule) or kept as unsimmed (Stop's contract, §5.1.4).
-       */
-      const screenFailedIds = new Set<number>();
-      const screenTasks = ordered.map((entry) => async () => {
-        if (screenSignal?.aborted)
-          return { itemId: entry.itemId, deltaDps: Number.NEGATIVE_INFINITY };
-        const deltaDps = await screenCandidate(entry);
-        screensDone += 1;
-        if (!Number.isFinite(deltaDps)) {
-          screensFailed += 1;
-          screenFailedIds.add(entry.itemId);
-        }
-        onProgress?.({
-          stage: "screening",
-          done: screensDone,
-          total: ordered.length,
-          failed: screensFailed,
-        });
-        return { itemId: entry.itemId, deltaDps };
-      });
-      const screenResults: ScreeningResult[] = await promisePool(
-        screenTasks,
-        deps.concurrency ?? 1
-      );
-      // Zero real signal must never render as "nothing is an upgrade" (ticket
-      // 156). Every screen non-finite means either every sim threw or the
-      // pool was empty; the first is a broken engine and the second has
-      // nothing to say, and both are refusals rather than empty shortlists.
-      // Gated on an abort because a Stop that lands before the first screen
-      // completes is a user decision, not an engine failure.
-      const screenedAnything = screenResults.some((r) =>
-        Number.isFinite(r.deltaDps)
-      );
-      if (!screenedAnything && !screenSignal?.aborted && ordered.length > 0) {
-        const first = screeningSkips[0]?.reason ?? "no slot attempt succeeded";
-        throw new RankError(
-          "sim-failed",
-          `every screening sim failed: ${screensFailed} of ${ordered.length} ` +
-            `candidates lost every slot attempt at ${screenIterations} ` +
-            `iterations. First failure: ${first}`
-        );
-      }
-      // Set-package membership at screening time is judged the same way the
-      // full-iteration pass judges it (buildSetBonuses below): any set with
-      // a candidate present in the *eligible* pool is a set the promotion
-      // rule must not starve of pieces, since selectPackage picks its best
-      // pieces from whichever candidates got a full sim.
-      const setPackageItemIds = new Set(
-        ordered
-          .filter((e) => getItem(e.itemId)?.setId != null)
-          .map((e) => e.itemId)
-      );
-      const promotion = promotionRule({
-        screened: screenResults,
-        candidates: ordered,
-        promoteTopK,
-        promoteTopJ,
-        ownedItemIds: equippedIds,
-        setPackageItemIds,
-      });
-      // A Stop during screening leaves every unscreened candidate on the
-      // `-Infinity` sentinel, which the promotion rule correctly refuses to
-      // promote — it cannot tell a refusal from a measurement it never got.
-      // But Stop's contract (§5.1.4) is that unreached candidates come back
-      // as honest `simmed: false` rows, and only a *promoted* candidate ever
-      // becomes one. So an aborted screening pass keeps the pre-screening
-      // order and lets the full-iteration stage's own abort filter below
-      // decide what actually runs, which is none of it.
-      // Candidates that *did* screen and failed stay excluded either way:
-      // they are drop-and-disclose rows (ticket 122), and re-admitting one
-      // here would have the ranking both disclose it as dropped and show it
-      // as unsimmed — the contradiction Stop's own test pins.
-      const promotedIds = screenSignal?.aborted
-        ? new Set(
-            ordered
-              .map((e) => e.itemId)
-              .filter((itemId) => !screenFailedIds.has(itemId))
-          )
-        : new Set(promotion.filter((p) => p.promoted).map((p) => p.itemId));
-      const deltaByItemId = new Map(
-        screenResults.map((r) => [r.itemId, r.deltaDps])
-      );
-      const promotedOrdered = ordered.filter((e) => promotedIds.has(e.itemId));
-      // Cap applies to the promoted set (Dean Q2): the first N of the EP
-      // order *within the promoted set*, plus every owned row regardless of
-      // N — same shape as the pre-M2 cap, just over a narrower input.
-      const promotedCap = input.candidateCap ?? promotedOrdered.length;
-      simCandidates = promotedOrdered.filter(
-        (e, i) => i < promotedCap || equippedIds.has(e.itemId)
-      );
-      const simCandidateIds = new Set(simCandidates.map((e) => e.itemId));
-      for (const entry of ordered) {
-        if (simCandidateIds.has(entry.itemId)) continue;
-        // A candidate whose every screening attempt threw is dropped from the
-        // ranking and disclosed in `substitutions`, exactly as one that
-        // crashes at full iterations is (ticket 122's accepted drop-and-
-        // disclose). One rule, not two: which iteration count the engine
-        // happened to panic at is not a distinction a reader should have to
-        // reason about, and a row with no measurement has nothing to show —
-        // its `deltaDps` would be the clamped sentinel, rendering as a
-        // measured non-gain.
-        if (screenFailedIds.has(entry.itemId)) continue;
-        // Screened out: either the rule never promoted it, or the post-
-        // promotion cap dropped it — either way it keeps its screening
-        // delta and renders as the third view state (view.ts), never
-        // interleaved with full-iteration rows.
-        //
-        // Still clamped, for the rows Stop skipped rather than screened: they
-        // carry the same `-Infinity` sentinel, which `JSON.stringify` writes
-        // as `null`. A cached ranking rehydrated with `deltaDps: null` makes
-        // the sort comparator `b.deltaDps - a.deltaDps` return NaN, and
-        // `Array.sort` with a NaN comparator orders arbitrarily — so the
-        // byte-identical-output guarantee (7.3) would hold only until a run
-        // was stopped.
-        const screenDelta = deltaByItemId.get(entry.itemId);
-        screenedRows.push({
-          rank: null,
-          itemId: entry.itemId,
-          name: entry.name,
-          slot: entry.slot,
-          source: entry.source,
-          deltaDps:
-            screenDelta !== undefined && Number.isFinite(screenDelta)
-              ? screenDelta
-              : 0,
-          deltaPct: 0,
-          se: 0,
-          seMethod: "independent",
-          screened: { iterations: screenIterations, promoted: false },
-          bisTags: entry.bisTags ?? [],
-          ...(entry.curatedSets ? { curatedSets: entry.curatedSets } : {}),
-          ...(entry.bisSets ? { bisSets: entry.bisSets } : {}),
-          belowCutoff: false,
-          ...(entry.sources ? { sources: entry.sources } : {}),
-        });
-      }
-    } else {
-      const cap = input.candidateCap ?? ordered.length;
-      simCandidates = ordered.filter(
-        (e, i) => i < cap || equippedIds.has(e.itemId)
-      );
-    }
+    // Every eligible candidate gets a full-iteration sim; the cap keeps the
+    // first N of the EP order plus every owned row regardless of N (§5.1.1).
+    const cap = input.candidateCap ?? ordered.length;
+    const simCandidates = ordered.filter(
+      (e, i) => i < cap || equippedIds.has(e.itemId)
+    );
 
-    // Counted here, after screening/promotion decide the full-iteration set
-    // — screening's own sims are accounted separately (screenCandidate does
-    // not touch simsDone/totalSims, which describe the full-iteration
-    // budget a progress bar promises).
+    // Counted here, after the cap decides the full-iteration set.
     const replicaSims = usesPairedReplication(seeds)
       ? (seeds.length - 1) *
         (1 + Math.min(PAIRED_REPLICATE_TOP_N, simCandidates.length))
@@ -1627,12 +1086,6 @@ export async function rankUpgrades(
     // Deterministic regardless of completion order, so `substitutions`
     // below reads the same on every run at every `concurrency` (7.3).
     candidateSkips.sort((a, b) => a.itemId - b.itemId);
-    // Same guarantee for the screening rows, which the racing path fills from
-    // a `promisePool` whose completion order is not the pool order. Tie-broken
-    // on slot so a paired-slot candidate's two attempts keep a fixed order.
-    screeningSkips.sort(
-      (a, b) => a.itemId - b.itemId || a.slot.localeCompare(b.slot)
-    );
 
     /**
      * Package-level sim failures (Finding 5): a whole completion package has
@@ -1670,13 +1123,6 @@ export async function rankUpgrades(
           packageSimSkips
         );
     if (setBonuses.length > 0) applySetContext(ranked, setBonuses, equipment);
-    // Screened-out rows join after set-context (they belong to no set
-    // package — a package member is promoted by construction) and after
-    // replication's winning-request bookkeeping is built, since they were
-    // never simmed at full iterations and have no winning request to
-    // register (§6.1; `applyView` returns them as its `ruledOut` set rather
-    // than placing them among the ranked rows — ticket 224).
-    ranked.push(...screenedRows);
 
     onProgress?.({ stage: "ranking" });
     // Sorted first so replication can pick the contested top of the list, then
@@ -1684,15 +1130,8 @@ export async function rankUpgrades(
     // is built from, so ranking before it would freeze the ordering the
     // refinement exists to correct. Unsimmed rows sort last regardless of
     // their placeholder deltaDps (0), so an aborted run's honest-but-unsimmed
-    // rows never crowd out real deltas at the top of the list. Screened rows
-    // sort after every full-iteration row (simmed or not) and are ordered
-    // only against each other — a screening delta and a full-iteration delta
-    // are not the same quantity (§6.1), so they must never interleave.
+    // rows never crowd out real deltas at the top of the list.
     const bySimmedThenDelta = (a: RankedItem, b: RankedItem): number => {
-      const aScreened = a.screened !== undefined;
-      const bScreened = b.screened !== undefined;
-      if (aScreened !== bScreened) return aScreened ? 1 : -1;
-      if (aScreened && bScreened) return b.deltaDps - a.deltaDps;
       if (a.simmed === false && b.simmed !== false) return 1;
       if (b.simmed === false && a.simmed !== false) return -1;
       return b.deltaDps - a.deltaDps;
@@ -1703,13 +1142,6 @@ export async function rankUpgrades(
 
     let rank = 1;
     for (const item of ranked) {
-      // Screened out: never measured at full precision, so there is no
-      // cutoff verdict to give it and no rank to assign (§6.1) — the same
-      // treatment Stop's unsimmed rows get, for the same reason.
-      if (item.screened !== undefined) {
-        item.rank = null;
-        continue;
-      }
       // Stop left this row unsimmed — excluded from cutoff classification
       // and tie groups (candidate-pool.md §5.1.4): there is no measured
       // delta to classify or group.
@@ -1793,22 +1225,6 @@ export async function rankUpgrades(
               ? `the sim failed on this swap — ${s.reason}`
               : `gem repair could not activate its meta — ${s.reason}`),
         })),
-        // Same `candidate <id> (<slot>)` field and same "dropped from the
-        // ranking" sentence as the full-iteration skips above: a reader
-        // should not have to know which iteration count the engine panicked
-        // at to understand that the item is gone and why (ticket 156). The
-        // screening stage is named in the detail because it is the one thing
-        // that differs, and because it tells an operator the failure is on
-        // the path only the browser takes.
-        ...screeningSkips.map((s) => ({
-          field: `candidate ${s.itemId} (${s.slot})`,
-          detail:
-            `${s.name} was dropped from the ranking: ` +
-            (s.kind === "sim"
-              ? `the sim failed on this swap during screening at ` +
-                `${screenIterations} iterations — ${s.reason}`
-              : `gem repair could not activate its meta — ${s.reason}`),
-        })),
         ...packageSimSkips.map((s) => ({
           field: `${s.setName} ${s.threshold}pc completion package`,
           detail:
@@ -1870,12 +1286,7 @@ export async function rankUpgrades(
     // the slice run past a short promoted set into them and throw on a row
     // that was never a replication candidate in the first place.
     const top = ranked
-      .filter(
-        (item) =>
-          !item.belowCutoff &&
-          item.screened === undefined &&
-          item.simmed !== false
-      )
+      .filter((item) => !item.belowCutoff && item.simmed !== false)
       .slice(0, PAIRED_REPLICATE_TOP_N);
     if (top.length === 0) return;
     // Baseline once per seed, shared by every replicated candidate under that

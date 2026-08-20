@@ -56,7 +56,7 @@ import {
   RET_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
-import { loadJson, type RosterRecordingsFile } from "./racing-support.js";
+import { loadJson, type RosterRecordingsFile } from "./measure-support.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -242,7 +242,6 @@ export async function captureRow(rowKey: string): Promise<RowCapture> {
       iterations: recorded.iterations,
       seeds: [recorded.seed],
       ...(binding.race ? { race: binding.race } : {}),
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(

@@ -12,11 +12,11 @@
  * deterministically.
  *
  * Rows: `ret` and `feral` at maxPhase 2, `feral-p3` at maxPhase 3. Every row
- * is recorded with `fullPool: true` — the committed fixture is a *full sweep*
- * truth (one full-iteration sim per eligible candidate, no screening), which
- * is what the 7.2/7.3 recall gates in racing.test.ts compare racing's
- * promotions against. A raced recording would carry screening observations
- * and miss most candidates' full-iteration rows.
+ * is a *full sweep* — one full-iteration sim per eligible candidate. That
+ * used to need `fullPool: true` to switch racing off; since ADR-0026 removed
+ * racing there is only one path and the flag is gone, but the property the
+ * fixture depends on is unchanged and `full-sweep-recall.test.ts` is what
+ * gates it.
  *
  * Usage: pass row names to record a subset; with no names, all rows are
  * recorded. The fixture file is *merged*, not overwritten, so recording one
@@ -238,12 +238,6 @@ async function recordRow(name, cfg, seedRecordings) {
       iterations: ITERATIONS,
       seeds: [SEED],
       ...(cfg.race ? { race: cfg.race } : {}),
-      // The committed fixture is a full-sweep truth. Without this the run
-      // races: it screens at 1000 iterations and full-sims only the promoted
-      // rows, so most eligible candidates would have no full-iteration
-      // observation and the recall gates replaying this file would have
-      // nothing to check racing against.
-      fullPool: true,
     },
     {
       gear: new RecordedGearSource(gearData),
@@ -263,10 +257,20 @@ async function recordRow(name, cfg, seedRecordings) {
     recordings[simCacheKey(req, version, opts)] = obs;
   }
 
-  const aboveCutoffCount = ranking.items.filter((i) => !i.belowCutoff).length;
+  const aboveCutoff = ranking.items.filter((i) => !i.belowCutoff);
+  const aboveCutoffCount = aboveCutoff.length;
+  // Sorted so the array is a set, not a ranking: the gate that reads it
+  // asserts *which* items clear the cutoff, and item order within the
+  // shortlist is a separate property with its own tests. Recorded here
+  // rather than derived by a replay test because a value computed from the
+  // same run it checks proves nothing — this one comes from the real binary.
+  const aboveCutoffItemIds = aboveCutoff
+    .map((i) => i.itemId)
+    .sort((a, b) => a - b);
   console.error(
     `[${name}] wallMs=${wallMs} items=${ranking.items.length} ` +
-      `aboveCutoff=${aboveCutoffCount} baseline=${ranking.baseline.dps.toFixed(1)} ` +
+      `aboveCutoff=${aboveCutoffCount} ids=${aboveCutoffItemIds.length} ` +
+      `baseline=${ranking.baseline.dps.toFixed(1)} ` +
       `simVersion=${version} requestsCaptured=${recordedRequests.length} ` +
       `cacheHits=${hits} cacheMisses=${misses}`
   );
@@ -278,6 +282,7 @@ async function recordRow(name, cfg, seedRecordings) {
       maxPhase: cfg.maxPhase,
       poolSize: pool.length,
       aboveCutoffCount,
+      aboveCutoffItemIds,
       baselineDps: ranking.baseline.dps,
       iterations: ITERATIONS,
       seed: SEED,

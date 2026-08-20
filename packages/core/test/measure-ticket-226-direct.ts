@@ -44,7 +44,7 @@ import {
   type RowCapture,
 } from "./direct-sim-support.js";
 import { SIM_ORDER } from "../src/slots.js";
-import { loadJson, type RosterRecordingsFile } from "./racing-support.js";
+import { loadJson, type RosterRecordingsFile } from "./measure-support.js";
 import type { RankedItem } from "../src/rank.js";
 
 const HEAD = SIM_ORDER.indexOf("head");

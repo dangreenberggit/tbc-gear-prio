@@ -85,87 +85,6 @@ function ranking(items: RankedItem[]): Ranking {
   };
 }
 
-/**
- * Ticket 224. Screened candidates were measured at screening precision and
- * never promoted, so the report must not place them beside ranked rows.
- *
- * Before this ticket the renderer had no `screened` handling at all and these
- * rows carry `belowCutoff: false`, so a screened row rendered in the
- * above-cutoff strip with a dash rank — a live presentation defect, not a
- * hypothetical one.
- */
-describe("rank-report ruled-out block", () => {
-  const SCREENED_SLOT = ranking([
-    item({
-      itemId: 1,
-      name: "promoted-ring",
-      slot: "finger",
-      deltaDps: 30,
-      deltaPct: 1.5,
-      rank: 1,
-      belowCutoff: false,
-    }),
-    item({
-      itemId: 2,
-      name: "zeta-ring",
-      slot: "finger",
-      deltaDps: 12,
-      deltaPct: 0.6,
-      belowCutoff: false,
-      screened: { iterations: 1000, promoted: false },
-    }),
-    item({
-      itemId: 3,
-      name: "alpha-ring",
-      slot: "finger",
-      deltaDps: 11,
-      deltaPct: 0.5,
-      belowCutoff: false,
-      screened: { iterations: 1000, promoted: false },
-    }),
-  ]);
-
-  it("keeps screened rows out of both shortlists", () => {
-    const { raid, pvp } = partitionShortlist(SCREENED_SLOT.items);
-    expect(raid.map((i) => i.name)).toEqual(["promoted-ring"]);
-    expect(pvp).toEqual([]);
-  });
-
-  it("renders them in a collapsed per-slot block, name-ordered", () => {
-    const html = renderRankHtml(SCREENED_SLOT, meta());
-    expect(html).toContain(
-      "Screened only — measured roughly, not re-checked (2)"
-    );
-    // The note matters more than the heading: the screened spread and the
-    // ranked spread are different scales.
-    expect(html).toContain(
-      "screening deltas are not comparable to the ranked deltas above"
-    );
-    // Name order, which is the opposite of the screening-delta order.
-    expect(html.indexOf("alpha-ring")).toBeLessThan(html.indexOf("zeta-ring"));
-    // The screened names appear only inside the ruled-out block, never in
-    // the slot's main rows.
-    const blockStart = html.indexOf("Screened only");
-    expect(html.indexOf("zeta-ring")).toBeGreaterThan(blockStart);
-    expect(html.indexOf("alpha-ring")).toBeGreaterThan(blockStart);
-    const mainRows = html.slice(0, blockStart);
-    expect(mainRows).toContain("promoted-ring");
-    expect(mainRows).not.toContain("alpha-ring");
-  });
-
-  it("counts only the ranked candidates in the slot header", () => {
-    const html = renderRankHtml(SCREENED_SLOT, meta());
-    // Anchored to the header element: a bare `toContain("1 candidates")` is
-    // also satisfied by "11 candidates" or "31 candidates", so it would pass
-    // if the screened rows were counted in.
-    expect(html).toContain('<p class="slot-count-all">1 candidates');
-    // SCREENED_SLOT is one slot, so exactly one header exists and it is that
-    // one -- otherwise the assertion above could pass on a second slot while
-    // this slot's own count was wrong.
-    expect(html.match(/<p class="slot-count-all">/g)).toHaveLength(1);
-  });
-});
-
 describe("rank-report", () => {
   it("groups and sorts by delta within each slot", () => {
     const bySlot = groupBySlot([
@@ -723,16 +642,10 @@ describe("rank-report", () => {
     // +1384-byte delta is those new CSS rules plus the two sections' empty
     // interpolation whitespace — no visible markup moved on a fixture with
     // no dead-slot warning.
-    // Repinned for ticket 224: every slot section now interpolates a
-    // `${ruledOut}` slot, empty on this fixture because no row here is
-    // screened. Diffed before/after: the whole +6-byte delta is two lines of
-    // `"  "` — one per rendered slot — and nothing else. No visible markup
-    // moved, and `partitionShortlist`'s new screened exclusion changes nothing
-    // on a fixture with no screened rows.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "0e1bb66209bfea55b14ccd19ff34a61f7046976c43f493e863481dca2eb38557",
-      length: 32395,
+        "e18751f06eb192d90ed93aa03fa45bc9697ccc176eeaa49464b6c0a704c17292",
+      length: 32389,
     });
   });
 });

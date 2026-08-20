@@ -6,7 +6,7 @@
  */
 import { meetsCutoff, type Cutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
-import { setPotentialIsConfounded, SLOT_ORDER } from "./rank-report-rules.js";
+import { setPotentialIsConfounded } from "./rank-report-rules.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export type ViewOptions = {
@@ -82,36 +82,9 @@ export type ViewResult = {
   shortlist: ViewRow[];
   /**
    * How many rows the shortlist hides, so a caller can label the expand.
-   *
-   * Full-iteration rows only — screened rows left `rows` for `ruledOut`
-   * (ticket 224), so they are not counted here. The two counts are disjoint
-   * (a row is screened xor full-iteration) and jointly exhaustive over the
-   * rows the default display hides:
-   * `shortlist.length + belowCutoffCount + ruledOut.length` equals the
-   * filtered row total.
+   * `shortlist.length + belowCutoffCount` equals the filtered row total.
    */
   belowCutoffCount: number;
-  /**
-   * Candidates the screening pass ruled out (`RankedItem.screened !==
-   * undefined`) and never promoted to a full-iteration measurement — a
-   * disclosed **set**, not a ranking (ticket 224, option 1).
-   *
-   * Kept out of `rows`, `shortlist` and `groups` so no consumer can print a
-   * screened row in a positional list. Ordered by `SLOT_ORDER`, then item
-   * name, then `itemId`: an order that carries no priority claim and does not
-   * move when the screening deltas move, which is what makes the disclosure a
-   * set rather than a second, weaker ranking. `tieGroupId` is never assigned —
-   * a screening delta and a full-iteration delta are not the same quantity,
-   * so there is no SE window to group them by.
-   *
-   * The delta ordering is not lost: it stays on `Ranking.items`, which
-   * `applyView` never mutates and which the measurement scripts read directly.
-   *
-   * "Hidden, never deleted" (§10) still holds — this is a projection of the
-   * same filtered payload, so a caller that wants every row renders
-   * `[...rows, ...ruledOut]`.
-   */
-  ruledOut: ViewRow[];
   /**
    * Whether a `pinBis` toggle has anything to act on. The Stage 3 gate box
    * "the pin control is hidden, not inert, where no curated set exists" needs
@@ -224,17 +197,11 @@ function tieWindow(a: ViewRow, b: ViewRow): number {
  *    SE measures 2.149 DPS while adjacent deltas differ by far less; §10
  *    records 1.678 DPS at 5,000 iterations, and SE grows as iterations fall.
  */
-/**
- * `groupId` starts from a shared counter passed in rather than always at 0,
- * so calling this once per screened/non-screened partition (§6.1: screened
- * rows are ranked only among themselves) cannot mint `tie-1` twice and
- * collide two unrelated groups under one id.
- */
-function assignTieGroupsWithinPartition(
+function assignTieGroups(
   rows: ViewRow[],
-  sortKey: (r: ViewRow) => number,
-  groupIdRef: { next: number }
+  sortKey: (r: ViewRow) => number
 ): void {
+  const groupIdRef = { next: 1 };
   const byDelta = [...rows].sort((a, b) => sortKey(b) - sortKey(a));
   let groupStart = 0;
 
@@ -257,20 +224,6 @@ function assignTieGroupsWithinPartition(
       groupStart = i;
     }
   }
-}
-
-/**
- * Only full-iteration rows reach here: screened rows leave for `ruledOut`
- * before tie grouping (ticket 224). That is what the old two-partition split
- * was protecting against — a screening delta and a full-iteration delta are
- * not the same quantity, so the SE-window math must never span the boundary —
- * and removing the screened rows from `rows` enforces it upstream instead.
- */
-function assignTieGroups(
-  rows: ViewRow[],
-  sortKey: (r: ViewRow) => number
-): void {
-  assignTieGroupsWithinPartition(rows, sortKey, { next: 1 });
 }
 
 /**
@@ -311,12 +264,6 @@ function belowCutoffUnderView(
   baselineDps: number,
   cutoff: Cutoff
 ): boolean {
-  // Screened out (candidate-pool.md §6.1): never measured at full
-  // precision, so there is no cutoff verdict to give it — the same
-  // "excluded from the shortlist, present in rows" treatment a Stop-
-  // unsimmed row gets, and for the same reason (view.ts has no ranking-
-  // level `simmed` field to check, but `screened` carries the same idea).
-  if (item.screened !== undefined) return true;
   if (!withSetPotential) return item.belowCutoff;
   const prospective = rankableSetPotential(item);
   if (prospective === 0) return item.belowCutoff;
@@ -364,20 +311,6 @@ function compareRows(
   return a.itemId - b.itemId;
 }
 
-/**
- * The ruled-out set's presentation order (ticket 224). Deliberately *not* the
- * screening delta: slot then name is stable under any change in the screening
- * measurement, so a reader cannot mistake the sequence for a priority claim.
- * `itemId` is the final tiebreak only so the order is total.
- */
-function compareRuledOutRows(a: ViewRow, b: ViewRow): number {
-  const slotDiff = SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot);
-  if (slotDiff !== 0) return slotDiff;
-  const nameDiff = a.name.localeCompare(b.name, "en");
-  if (nameDiff !== 0) return nameDiff;
-  return a.itemId - b.itemId;
-}
-
 export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const pinBis = v.pinBis ?? false;
   const zone = v.raid === undefined || v.raid === "all" ? undefined : v.raid;
@@ -401,11 +334,9 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
       ),
     }));
 
-  const rows = filtered.filter((row) => row.screened === undefined);
-  const ruledOut = filtered.filter((row) => row.screened !== undefined);
+  const rows = filtered;
 
   rows.sort((a, b) => compareRows(a, b, pinBis, sortKey));
-  ruledOut.sort(compareRuledOutRows);
 
   assignTieGroups(rows, sortKey);
 
@@ -415,7 +346,6 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
     rows,
     shortlist,
     belowCutoffCount: rows.length - shortlist.length,
-    ruledOut,
     pinBisAvailable,
   };
 
