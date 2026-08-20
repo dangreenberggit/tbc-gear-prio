@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug (candidate pool; ranking correctness)
 Origin: `sme-rank-review` verdict during ticket 224, 2026-08-18 — handoffs at
   `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md` and
@@ -149,9 +149,9 @@ fixtures keyed to them.
       absent from the feral candidate pool — the axe case is the one a
       sword-only filter would miss. Met at `5c42a37`, and now held down by a
       test rather than a one-off check.
-- [ ] A test covers at least one inequippable type per supported spec.
-      Box 4 below claimed this on 2026-08-20; that closure was rejected the
-      same day — see "Closure rejected, 2026-08-20".
+- [x] A test covers at least one inequippable type per supported spec.
+      First claimed 2026-08-20 and rejected the same day (see "Closure
+      rejected"); met for real by the replacement below.
 
 ## Box 4, 2026-08-20 — one inequippable type per supported spec, both covered
 
@@ -227,6 +227,55 @@ needed, and it was available the whole time. The reasoning conflated
 The owner's requirement is stronger than the box as written: the coverage must
 hold for every supported spec, including a spec that does not exist yet, rather
 than for the two that happen to exist today.
+
+## Box 4 replacement, 2026-08-20 — covered for every spec, from committed data
+
+Supersedes both the original Box 4 above and its rejection. The box is met by
+`packages/core/test/weapon-type-exclusion.test.ts`, which reads only committed
+files and carries no `skipIf` and no `vendor/` path
+(`grep -n "skipIf\|vendor" packages/core/test/weapon-type-exclusion.test.ts`
+matches the header comment only, never a call).
+
+**How the coverage is obtained.** `scripts/assemble_universe.py` now emits
+`data/weapon-type-exclusions.json`, mapping each spec to the weapon type codes
+its profile excludes — `{"feral": [1, 6, 7, 9], "ret": [8]}`. The test globs the
+committed universes, reads each payload's own `spec`, and joins every row's
+`itemId` to `data/items/index.json`, which is committed and carries
+`weaponType`. Any row whose weapon type its spec excludes fails the test, naming
+the offending item id.
+
+**Why this covers a spec that does not exist yet.** The manifest is emitted from
+`SPEC_PROFILES` as a whole, never from the generator's `--spec` argument, so any
+single invocation regenerates every spec's entry. The test takes its spec list
+from that manifest and asserts one entry per spec that ships a universe — it
+contains no hardcoded count and no literal list of specs. A third spec is
+therefore covered the moment its universe artifact is committed, with no edit to
+the test. The earlier "confirm both entries" framing would have stopped covering
+at exactly that point, which is why it is not what was built.
+
+Verified rather than asserted, 2026-08-20, Python 3.12.0:
+
+    python scripts/assemble_universe.py --max-phase 3 --spec feral
+    cp data/weapon-type-exclusions.json /tmp/excl-feral.json
+    python scripts/assemble_universe.py --max-phase 3 --spec ret
+    cmp /tmp/excl-feral.json data/weapon-type-exclusions.json   # exit 0
+
+Both single-spec runs emit both keys, byte-identical — the manifest does not
+depend on `--spec` or on invocation order.
+
+**It fails rather than skips.** Deleting the manifest and running
+`npx vitest run packages/core/test/weapon-type-exclusion.test.ts` gives ENOENT
+and exit 1, with `Tests: no tests` and the file reported failed. Deleting only
+the `feral` key fails 4 of 20 tests, including the coverage guard. Neither edit
+was committed. Green state is 20 passed, zero skipped.
+
+**The vendor-gated staff test is no longer load-bearing.**
+`it.skipIf(!hasWowsimsVendor)("no staff ever enters the universe")` at
+`packages/core/test/pool-hardening.test.ts:984` (not :942 — that line number was
+stale in the original box) is left exactly as it is. Ret's staff exclusion is
+now asserted here from committed data instead, so the vendor-gated test is an
+extra check rather than the evidence for this box. The eleven skip sites are
+ticketed as 240 and deliberately not touched here.
 
 ## Also worth a look
 
