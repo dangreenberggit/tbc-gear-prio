@@ -95,6 +95,52 @@ still hits CI, which has no bypass. Never use `--no-verify` / `merge-to-dev --no
 `dev` with a raw `git merge` when `pnpm merge-to-dev` exists — that bypasses the
 ticket check (the pre-commit hook blocks it unless the escape env is set).
 
+## Why lint-staged runs with `--no-stash --no-hide-partially-staged`
+
+`.githooks/pre-commit` runs `npx lint-staged --no-stash
+--no-hide-partially-staged`. Both flags exist to make one failure mode
+impossible: **a lock race must never destroy working-tree content.**
+
+By default lint-staged backs the tree up in a git stash, and its recovery
+path (`lib/gitWorkflow.js`, `restoreOriginalState`) runs `git reset --hard
+HEAD` and _then_ `git stash apply --index`. If another git process holds
+`.git/index.lock` in between, the reset has already wiped the tree and the
+apply fails. Parallel agents share this checkout, so that race is routine
+here, not exotic. Ticket 235 records a real occurrence in which several
+hundred lines of unstaged work were lost.
+
+Measured on lint-staged 16.4.0 with a harness that holds `.git/index.lock`
+across the recovery window (`.scratch/repro-235/repro.sh`, run as
+`bash .scratch/repro-235/repro.sh <mode> "$PWD/node_modules/.bin/lint-staged" <lab-dir>`):
+
+| Config                                  | Unstaged WIP after a lock race         |
+| --------------------------------------- | -------------------------------------- |
+| default (stash on)                      | removed from the tree, left in a stash |
+| `--no-stash` alone                      | removed from the tree, **no stash**    |
+| `--no-stash --no-hide-partially-staged` | **intact**                             |
+
+`--no-stash` alone is not enough: hiding partially staged changes writes a
+patch that also has to be re-applied, and the same lock blocks that — with
+the backup stash now disabled, nothing holds the content. Only disabling
+both movements leaves the tree genuinely untouched.
+
+**The trade-off, measured** (`.scratch/repro-235/happy-path.sh`): with these
+flags the unstaged half of a _partially staged_ file is formatted and
+committed along with the staged half. That is an accepted cost here, because
+this repo already commits with a deliberately dirty tree — `.lintstagedrc`
+matches `*`, so everything dirty rides along regardless. Losing work is
+unrecoverable; committing slightly more than intended is fixable with
+`git reset` and a second commit.
+
+The version is pinned to `~16.4.0`. lint-staged 15 is **not** an acceptable
+fallback: there `--no-stash` implies `--no-hide-partially-staged` and cannot
+be separated (upstream fixed the implication in 16.1.1), and lint-staged 17
+requires Node `>=22.22.1`. Upstream has no `index.lock` retry — the race
+itself is unfixed (lint-staged issue
+[#842](https://github.com/lint-staged/lint-staged/issues/842)), which is why
+the mitigation is to remove the destructive recovery path rather than wait
+for a fix.
+
 ## Why no coverage threshold
 
 A global percentage gate contradicts the `tdd` skill's own rule — "test

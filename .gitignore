@@ -48,6 +48,14 @@ vendor/
 !.scratch/ticket-18/
 !.scratch/ticket-20/
 
+# Ticket 235 lock-race reproduction. docs/workflow.md cites these two scripts as
+# the evidence for the lint-staged flags, so they are tracked; the throwaway git
+# repos they build (lab-*) are not.
+!.scratch/repro-235/
+.scratch/repro-235/*
+!.scratch/repro-235/repro.sh
+!.scratch/repro-235/happy-path.sh
+
 # The phase-2 verification UI: a dev harness for eyeballing real rank output for
 # three characters across raid zones. The shell and its generator are tracked;
 # everything they produce is not. reports/ is ~3MB of HTML+JSON regenerated on
