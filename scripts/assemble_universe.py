@@ -8,6 +8,10 @@ D7 eligibility is implemented here (leather/mail/librams allowed; not plate-only
     python scripts/assemble_universe.py --max-phase 2
     python scripts/assemble_universe.py --max-phase 3 --out data/universes/ret-p3.json
 
+Every run also rewrites data/universes/exclusions.json from SPEC_PROFILES as a
+whole, so any single invocation regenerates the whole manifest and the output
+does not depend on --spec or on invocation order.
+
 Exit 0 ok, 2 missing inputs.
 """
 
@@ -325,6 +329,30 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         ),
     ),
 }
+
+EXCLUSIONS_MANIFEST = DEFAULT_OUT_DIR / "exclusions.json"
+
+
+def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, list[int]]:
+    """Emit every spec's excluded weapon types, not just the one being built.
+
+    Deliberately derived from SPEC_PROFILES as a whole and never from the
+    --spec profile: this script runs once per spec/phase, so a manifest built
+    from the selected profile would hold one spec and the last invocation
+    would silently win. packages/core/test/weapon-type-exclusion.test.ts reads
+    this file to decide which specs it must cover, so that silent gap would be
+    the very coverage hole the manifest exists to close.
+    """
+    manifest = {
+        name: sorted(profile.excluded_weapon_types)
+        for name, profile in sorted(SPEC_PROFILES.items())
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
+
 
 # Wowhead list files included when assembling up to maxPhase N.
 WOWHEAD_STAGE_FOR_MAX_PHASE: dict[int, list[str]] = {
@@ -2011,7 +2039,13 @@ def main() -> int:
         except ValueError:
             return p
 
+    manifest = write_exclusions_manifest()
+
     print(f"wrote {display(out_path)} — {len(payload['entries'])} entries")
+    print(
+        f"wrote {display(EXCLUSIONS_MANIFEST)} — "
+        f"{len(manifest)} specs: {', '.join(sorted(manifest))}"
+    )
     print(f"wrote {display(report_path)}")
     print(json.dumps(report, indent=2))
     return 0
