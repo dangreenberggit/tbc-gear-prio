@@ -19,6 +19,13 @@ become:
 .scratch/carry-forward/issues/<NN>-<slug>.md
 ```
 
+**Allocating `<NN>`:** read `.scratch/carry-forward/issues/NEXT`, use that
+number, and write the incremented value back to `NEXT` in the same commit
+as the new ticket. Never allocate by listing the directory — two branches
+doing that pick the same number and merge cleanly under different
+filenames (it happened: two 232s and two 233s on 2026-08-19). Editing
+`NEXT` forces the collision into a git conflict instead.
+
 Each file starts with these lines (machine-readable; `pnpm merge-to-dev` / `merge-ready` parse them):
 
 ```

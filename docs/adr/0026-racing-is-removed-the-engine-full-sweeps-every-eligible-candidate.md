@@ -103,4 +103,4 @@ promotion path, so the E-W3 parity harness passes `fullPool: true` on the
 fork's side to hold both engines on the same full-sweep path. Porting the
 removal is separate work.
 
-**Open direction:** adaptive-CI screening, `.scratch/carry-forward/issues/233-adaptive-ci-screening-design.md`, gated on the replication-seed fix in `232`.
+**Open direction:** adaptive-CI screening, `.scratch/carry-forward/issues/237-adaptive-ci-screening-design.md`, gated on the replication-seed fix in `236`.

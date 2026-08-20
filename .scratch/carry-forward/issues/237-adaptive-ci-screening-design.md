@@ -66,7 +66,7 @@ zero recall misses.
    acceptable. For scale, the cutoff boundary itself is 2.752/2.929/2.929 DPS
    — the error on a coarse row is comparable to the bar it was measured
    against.
-3. **It rests on seed independence, which is currently false.** Ticket 232
+3. **It rests on seed independence, which is currently false.** Ticket 236
    shows `DEFAULT_SEEDS` are near-duplicate runs at 3,000 iterations. A
    mechanism whose entire decision rule is "has this CI cleared the boundary
    yet" cannot be validated on replicates that do not vary. **232 is a
@@ -85,7 +85,7 @@ Win condition, both terms required:
 
 Procedure:
 
-1. **Land ticket 232 first.** Re-derive far-apart seeds.
+1. **Land ticket 236 first.** Re-derive far-apart seeds.
 2. **Pick one fixture** — `feral-p3` is the right one: largest pool (365
    eligible, 85 above cutoff), weakest EP correlation, and the most coarse
    rows (19.4).

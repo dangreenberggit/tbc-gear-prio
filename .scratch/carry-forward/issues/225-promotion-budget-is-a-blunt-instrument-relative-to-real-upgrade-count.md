@@ -682,7 +682,7 @@ iterations, carrying a pooled estimate whose mean error against truth is
 So: **the cost term is cleared, the precision term is unscored-and-suspect, and
 the evidence is a noise-model simulation rather than a real-binary run.** That
 is enough to call it the open direction and not enough to ship it. Filed as
-ticket 233 with its validation plan.
+ticket 237 with its validation plan.
 
 *Oracle aside, labelled as such and not a criterion result:* choosing the
 smallest zero-miss z per fixture (2/2/3) gives 0.536/0.672/0.760 for the
@@ -758,7 +758,7 @@ this ticket were one noisy draw — `measure-racing-ratio.ts` wrapped
 count including 3,000, and counted `!belowCutoff && screened === undefined` on
 the racing path. Two different quantities; the truth is the recorded one.
 
-### The seed-overlap finding (filed as ticket 232)
+### The seed-overlap finding (filed as ticket 236)
 
 Turned up while checking whether the reported SE is real noise. It is not, for
 the seeds this repo ships.
@@ -788,7 +788,7 @@ validated on replicates that do not vary.
 
 ### Open directions and how to test them
 
-**Adaptive-CI screening (ticket 233).** Cleared the cost term at fixed z=3
+**Adaptive-CI screening (ticket 237).** Cleared the cost term at fixed z=3
 (0.591/0.764/0.760 wall, zero misses); precision term unscored; evidence is a
 noise model. Validation plan in the ticket: land 232 first, then drive the
 real binary on feral-p3 and score both terms. Two anchor facts measured
