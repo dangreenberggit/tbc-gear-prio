@@ -8,8 +8,8 @@ D7 eligibility is implemented here (leather/mail/librams allowed; not plate-only
     python scripts/assemble_universe.py --max-phase 2
     python scripts/assemble_universe.py --max-phase 3 --out data/universes/ret-p3.json
 
-Every run also rewrites data/universes/exclusions.json from SPEC_PROFILES as a
-whole, so any single invocation regenerates the whole manifest and the output
+Every run also rewrites data/weapon-type-exclusions.json from SPEC_PROFILES as
+a whole, so any single invocation regenerates the whole manifest and the output
 does not depend on --spec or on invocation order.
 
 Exit 0 ok, 2 missing inputs.
@@ -330,7 +330,12 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     ),
 }
 
-EXCLUSIONS_MANIFEST = DEFAULT_OUT_DIR / "exclusions.json"
+# Deliberately beside the other flat data/ config files rather than inside
+# data/universes/, which carries an implicit contract that every non-report
+# .json in it is a universe payload: pool-hardening.test.ts globs the directory
+# and parses each hit, and check_rep_tables.py globs "*.json" there too. A
+# manifest dropped in that directory breaks both.
+EXCLUSIONS_MANIFEST = ROOT / "data/weapon-type-exclusions.json"
 
 
 def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, list[int]]:
