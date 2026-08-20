@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task (measurement gap + SME judgment; no known defect)
 Origin: user question during the 2026-08-18 feral Phase 3 review — "if it ends
   up screening out, for example, basically all the upgrades in a certain slot,
@@ -404,3 +404,15 @@ group ties by the measurement's own resolution and mark such slots as tied sets
 rather than ordered lists — no reordering, no extra iterations, no row removal.
 
 With this recorded, the SME acceptance criterion is met.
+
+## Closed, 2026-08-20
+
+`Status: resolved`. All six acceptance boxes are checked, the Decision section
+records the chosen outcome ("accept the current behaviour and document it"), and
+`sme-rank-review` returned `trust-with-caveats` on 2026-08-18 — both already in
+this file above. Nothing remains for an agent or for the owner.
+
+Ticket 234 (the owner ruling on role-appropriate pooling) is deliberately *not*
+treated as holding this open: 234 does not appear in this ticket's `Blocks:` or
+`Blocked by:` fields, and 222's Decision stands on its own measurements. If the
+234 ruling later contradicts it, that is a new ticket rather than a reopened one.

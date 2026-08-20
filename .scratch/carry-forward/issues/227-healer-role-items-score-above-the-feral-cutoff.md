@@ -1,10 +1,10 @@
-Status: open
+Status: blocked
 Type: bug (suspected scoring / role-relevance gap on the feral-p3 fixture)
 Origin: second `sme-rank-review` opinion on ticket 225's closure, 2026-08-18 —
   verdict `do-not-trust` on the closure; handoff at
   `.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`
 Blocks: none
-Blocked by: none
+Blocked by: 234
 
 # Ten healer-statted items score above the feral cutoff
 
@@ -220,3 +220,16 @@ mechanism. The one thing they share is a consequence: the `impl` / `stub`
 labels in `data/sim-implemented-effects.json` misled both investigations,
 filed as ticket 237.
 
+## Status, 2026-08-20 — `blocked`, on ticket 234
+
+Four of the five acceptance boxes are checked and the Resolution section above
+records the measured outcome. The one open box — "Should role-inappropriate
+items be pooled at all?" — is marked NEEDS OWNER and is exactly ticket 234's
+question, so this ticket is `blocked` rather than `open`: no agent can make
+progress on it, only the owner can. 234 already carries `Blocks: 227`; the
+reverse edge (`Blocked by: 234`) is added here so the dependency reads in both
+directions.
+
+`blocked` is a sub-state of open, so this ticket still appears in
+`pnpm issues:open` — it is visible, just not actionable by an agent. The ruling
+itself is not made here.
