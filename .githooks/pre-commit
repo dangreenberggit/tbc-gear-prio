@@ -20,4 +20,12 @@ if [ "$branch" = "dev" ] && [ -n "$merge_head" ] && [ -f "$merge_head" ]; then
   fi
 fi
 
-npx lint-staged
+# --no-stash + --no-hide-partially-staged: never let lint-staged move working-tree
+# content it might fail to put back. Its recovery path is `git reset --hard HEAD`
+# then `git stash apply` (lint-staged 16.4.0 lib/gitWorkflow.js restoreOriginalState);
+# a concurrent process holding .git/index.lock between those two steps leaves the
+# tree wiped and the stash unapplied. Parallel agents share this checkout, so that
+# race is routine. With both flags the worst case on a lock race is a failed commit
+# with the working tree untouched. See ticket 235 and docs/workflow.md.
+# Trade-off: the unstaged half of a partially staged file is formatted and committed.
+npx lint-staged --no-stash --no-hide-partially-staged
