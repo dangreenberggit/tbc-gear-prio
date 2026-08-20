@@ -66,6 +66,7 @@ import type { Store } from "./seams/store.js";
 import {
   assertUsableSeeds,
   DegenerateSeedsError,
+  replicateSeeds,
   pairedReplicateSe,
   PAIRED_REPLICATE_TOP_N,
   usesPairedReplication,
@@ -507,11 +508,26 @@ const DEFAULT_ITERATIONS = 3000;
  * every real run and the shortlist shipped the Stage 1 `independent` SE that
  * §10:705 records as overstating a shared-seed delta's variance.
  *
- * These are the five seed values `docs/five-seed-spread.json` measured
- * spread at — that file ran at 5000 iterations, not this module's 3000, so
- * only the seed values transfer, not the SE evidence at this configuration.
+ * Spaced by the iteration count rather than pinned, because upstream seeds
+ * iteration `i` from `RandomSeed + i` (`sim/core/sim.go:248-251`), so a run of
+ * `N` iterations from seed `S` consumes the streams `S..S+N-1`. The previous
+ * values 11/22/33/44/55 sat inside one run's span: at 3,000 iterations seeds
+ * 11 and 22 shared 2,989 of 3,000 streams, so the five "replicates" were
+ * near-copies and the SE derived from their spread was far too small —
+ * `sampleSd/SE` 0.087 where independence gives ~0.9 (ticket 232,
+ * `.scratch/handoffs/ticket-232-seed-spacing-measurements.md`).
+ *
+ * Deriving from `DEFAULT_ITERATIONS` keeps the two from drifting apart again;
+ * the old constants were correct only relative to an iteration count that
+ * nothing tied them to.
  */
-const DEFAULT_SEEDS = [11, 22, 33, 44, 55];
+const DEFAULT_SEED_BASE = 11;
+const DEFAULT_SEED_COUNT = 5;
+const DEFAULT_SEEDS = replicateSeeds(
+  DEFAULT_SEED_BASE,
+  DEFAULT_SEED_COUNT,
+  DEFAULT_ITERATIONS
+);
 /**
  * Hashed and disclosed from one place, so the two cannot drift apart. Now
  * per-spec, which keeps that property: both call sites read this one function,
@@ -657,7 +673,7 @@ export async function rankUpgrades(
   // Before the job row and before any sim: a caller's bad seeds are not worth
   // a stranded `running` row or a wasted baseline run.
   try {
-    assertUsableSeeds(seeds);
+    assertUsableSeeds(seeds, iterations);
   } catch (err) {
     if (err instanceof DegenerateSeedsError) {
       throw new RankError("internal", err.message);

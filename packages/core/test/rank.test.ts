@@ -2123,7 +2123,14 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
  * under *that same seed*, and that only the top 8 pay the 5× cost.
  */
 describe("rankUpgrades paired-replicate SE", () => {
-  const SEEDS = [11, 22, 33, 44, 55];
+  /**
+   * Spaced by the 3000 iterations these tests run at, because `rankUpgrades`
+   * now rejects seeds closer than that as overlapping replicates (ticket 232).
+   * Only the seed *values* changed here; the synthetic per-seed gains below
+   * keep their magnitudes, so every SE this suite asserts is arithmetically
+   * unchanged and still tests the pairing rather than a new number.
+   */
+  const SEEDS = [11, 3011, 6011, 9011, 12011];
 
   /**
    * DPS as a function of (which item sits in `neck`, seed). Deterministic and
@@ -2166,10 +2173,10 @@ describe("rankUpgrades paired-replicate SE", () => {
    */
   const NECK_GAIN_BY_SEED: Record<number, number> = {
     11: 40,
-    22: 44,
-    33: 26,
-    44: 50,
-    55: 20,
+    3011: 44,
+    6011: 26,
+    9011: 50,
+    12011: 20,
   };
 
   class SeedAwareSimRunner implements SimRunner {
@@ -3973,7 +3980,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
       });
 
       const ranking = await rankUpgrades(
-        { ...m1Input, seeds: [42, 43, 44, 45, 46] },
+        { ...m1Input, seeds: [42, 3042, 6042, 9042, 12042] },
         deps
       );
 
