@@ -46,9 +46,10 @@ at startup only; restart the session.
    `git status --porcelain` is empty and record `git rev-parse HEAD` in
    the log.
 
-   When the ticket asks whether something is worth keeping or what else
-   could work, list each **open question** in the brief and require, per
-   question: a candidate approach that is not the same approach with
+   When the deliverable is a decision — the ticket ends in a
+   recommendation, a chosen design, or a keep/change/remove verdict
+   rather than a change it already specifies — list each **open
+   question** in the brief and require, per question: a candidate approach that is not the same approach with
    different constants; the result that would make that candidate win,
    written down before anything is measured; and a measurement of it, or
    the reason the committed fixtures cannot measure it. A candidate the
