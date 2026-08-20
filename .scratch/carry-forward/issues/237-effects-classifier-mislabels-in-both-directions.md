@@ -108,3 +108,10 @@ for it exactly as ticket 226 did.
   be excluded is ticket 227's product question, not this one.
 - Re-pinning `vendor/tbc-new-fork`.
 - Ticket 226's three shapes, which are diagnosed and closed.
+
+## Renumbered from 233 (2026-08-19)
+
+Filed as `233`, colliding with the adaptive-CI screening ticket that ticket
+225 had already given that number. Renumbered to `237`; the citations in
+tickets 226, 227 and 234 and in
+`.scratch/handoffs/ticket-226-direct-sims.md` were updated to match.

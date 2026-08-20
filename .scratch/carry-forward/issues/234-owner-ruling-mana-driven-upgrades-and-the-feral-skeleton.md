@@ -85,4 +85,4 @@ better addressed directly.
 
 - Re-recording any fixture before the ruling.
 - Ticket 226's trinket and head findings, which are diagnosed and separate.
-- The effects-classifier labels (ticket 233).
+- The effects-classifier labels (ticket 237).

@@ -519,7 +519,7 @@ direction, and it is filed there rather than duplicated here.
 
 **New ticket filed** — the effects classifier's blind spot, which this ticket
 required a sim to confirm before filing:
-`.scratch/carry-forward/issues/233-effects-classifier-mislabels-both-directions.md`.
+`.scratch/carry-forward/issues/237-effects-classifier-mislabels-in-both-directions.md`.
 
 **Relationship to ticket 227.** Ticket 226 asked that if one diagnosis
 explains both tickets, the one it does not belong to be closed with a
