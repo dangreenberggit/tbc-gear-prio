@@ -2123,7 +2123,14 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
  * under *that same seed*, and that only the top 8 pay the 5× cost.
  */
 describe("rankUpgrades paired-replicate SE", () => {
-  const SEEDS = [11, 22, 33, 44, 55];
+  /**
+   * Spaced by the 3000 iterations these tests run at, because `rankUpgrades`
+   * now rejects seeds closer than that as overlapping replicates (ticket 232).
+   * Only the seed *values* changed here; the synthetic per-seed gains below
+   * keep their magnitudes, so every SE this suite asserts is arithmetically
+   * unchanged and still tests the pairing rather than a new number.
+   */
+  const SEEDS = [11, 3011, 6011, 9011, 12011];
 
   /**
    * DPS as a function of (which item sits in `neck`, seed). Deterministic and
@@ -2147,10 +2154,10 @@ describe("rankUpgrades paired-replicate SE", () => {
   /** Baseline DPS wobbles per seed; each candidate adds its own fixed gain. */
   const BASELINE_BY_SEED: Record<number, number> = {
     11: 2000,
-    22: 2010,
-    33: 1990,
-    44: 2020,
-    55: 1980,
+    3011: 2010,
+    6011: 1990,
+    9011: 2020,
+    12011: 1980,
   };
 
   /** Slamaltman's worn neck in the fixture — the baseline's own item. */
@@ -2166,10 +2173,10 @@ describe("rankUpgrades paired-replicate SE", () => {
    */
   const NECK_GAIN_BY_SEED: Record<number, number> = {
     11: 40,
-    22: 44,
-    33: 26,
-    44: 50,
-    55: 20,
+    3011: 44,
+    6011: 26,
+    9011: 50,
+    12011: 20,
   };
 
   class SeedAwareSimRunner implements SimRunner {
@@ -3798,6 +3805,26 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
     race: "RaceHuman" as const,
   };
 
+  /**
+   * Ticket 232 regression. The default seeds are spaced by the iteration
+   * count, and the guard rejects seeds closer together than that. Freezing the
+   * defaults against `DEFAULT_ITERATIONS` rather than the run's *resolved*
+   * iterations would hand a caller who raises `iterations` a set of
+   * under-spaced defaults, and fail its own guard on a request that has
+   * nothing wrong with it.
+   */
+  describe("default seeds track the iteration count (ticket 232)", () => {
+    it("accepts its own defaults at a non-default iteration count", async () => {
+      const { deps } = m1Deps();
+      const { seeds: _omitted, ...withoutSeeds } = m1Input;
+      const ranking = await rankUpgrades(
+        { ...withoutSeeds, iterations: 5000 },
+        deps
+      );
+      expect(ranking.items.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("candidateCap (7.1)", () => {
     it("keeps only the capped candidates plus every owned row", async () => {
       // Item 90005 is already worn in the neck slot; a cap of 2 must still
@@ -3973,7 +4000,7 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
       });
 
       const ranking = await rankUpgrades(
-        { ...m1Input, seeds: [42, 43, 44, 45, 46] },
+        { ...m1Input, seeds: [42, 3042, 6042, 9042, 12042] },
         deps
       );
 

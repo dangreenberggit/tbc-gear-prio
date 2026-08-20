@@ -218,5 +218,5 @@ deterministic, reproducible *nothing* and land on the incumbent's value; this
 ticket's rows carry *real positive* deltas from mana. Opposite sign, different
 mechanism. The one thing they share is a consequence: the `impl` / `stub`
 labels in `data/sim-implemented-effects.json` misled both investigations,
-filed as ticket 233.
+filed as ticket 237.
 

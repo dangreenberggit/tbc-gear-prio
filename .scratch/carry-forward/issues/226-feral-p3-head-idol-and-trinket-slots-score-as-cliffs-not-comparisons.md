@@ -262,7 +262,7 @@ exactly nothing belong in a candidate pool is the same product question ticket
 than duplicated here.
 
 **New ticket filed** (this ticket required a sim to confirm before filing):
-`233-effects-classifier-mislabels-in-both-directions.md` — Wolfshead is in
+`237-effects-classifier-mislabels-in-both-directions.md` — Wolfshead is in
 neither classifier list despite its effect firing, and all ten tied trinkets
 are labelled `impl` despite contributing nothing.
 

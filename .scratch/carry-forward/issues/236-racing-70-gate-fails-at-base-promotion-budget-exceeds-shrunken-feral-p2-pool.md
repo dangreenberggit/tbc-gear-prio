@@ -1,7 +1,7 @@
-Status: open
+Status: closed (obsolete)
 Type: bug (test red on the branch tip)
 Origin: executor of stage-gate tickets-226-230, 2026-08-19 — found running `pnpm verify` at base `017c0c6`
-Blocks: feat/candidate-pool
+Blocks: none
 Blocked by: none
 
 # `racing.test.ts` 7.0 fails on the branch tip: 242 full-iteration sims against a 228-item pool
@@ -75,3 +75,26 @@ test.
       pool sizes, or restate 7.0's property (coordinate with ticket 225).
 - [ ] `npx vitest run packages/core/test/racing.test.ts` green, and
       `pnpm verify` green on the branch tip.
+
+## Resolution (2026-08-19) — obsolete, closed without a fix
+
+Racing was removed wholesale by
+[ADR-0026](../../../docs/adr/0026-racing-is-removed-the-engine-full-sweeps-every-eligible-candidate.md)
+later the same day this ticket was filed. The failing gate, the mechanism it
+guarded and the constant this ticket proposed re-tuning are all deleted:
+
+```
+ls packages/core/test/racing.test.ts   # No such file or directory
+ls packages/core/src/promotion.ts      # No such file or directory
+```
+
+There is no red test left to fix and no promotion budget left to re-tune, so
+none of the acceptance criteria above can be met or are worth meeting. The
+question this ticket raised — an absolute promotion budget scaling badly
+against a shrinking pool — was answered by ticket 225 the way ADR-0026
+records: the screening mechanism did not clear its cost bar and was removed
+rather than re-tuned.
+
+This ticket was originally filed as `232`, colliding with the seed-overlap
+ticket that ticket 225 §"The seed-overlap finding" had already claimed that
+number for. Renumbered to `236` when the collision was found.

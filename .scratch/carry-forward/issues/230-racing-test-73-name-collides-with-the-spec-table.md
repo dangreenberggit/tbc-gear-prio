@@ -22,12 +22,12 @@ but every `-t 7.3` citation in tickets and doc comments must move with it.
       `grep -rn "7\.3" packages/core docs .scratch/carry-forward/issues`.
 - [x] Assertions in the renamed block are byte-identical
       (`git diff --numstat` deletions column 0 inside the block).
-- [ ] `pnpm verify` green. **Blocked by ticket 232, not by this work.**
+- [ ] `pnpm verify` green. **Blocked by ticket 236, not by this work.**
 
 ## Resolution (2026-08-19)
 
 **`pnpm verify` is red at the branch tip for an unrelated reason** — see
-ticket 232. `racing.test.ts` 7.0 fails with `expected 242 to be less than 228`
+ticket 236. `racing.test.ts` 7.0 fails with `expected 242 to be less than 228`
 at base `017c0c6` with this work stashed, and identically at `57ec814^`, so it
 predates both the re-record and this rename. Everything else is green: 853
 tests pass, one fails. This ticket's own gate is

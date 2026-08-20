@@ -140,7 +140,13 @@ design pass, not a patch to the removed racing code.
 
 ## Acceptance
 
-- [ ] 232 landed; far-apart seeds in use.
+- [~] 232 landed; far-apart seeds in use. **Partial:** the seeds are spaced and
+      the mechanism is confirmed, but 232 did *not* re-derive the
+      paired-replicate SE evidence — ADR-0021's paired figures are annotated as
+      understated by an unknown factor, not recomputed. This ticket needs those
+      numbers, so re-deriving them is now work *here* rather than a
+      precondition met elsewhere. See `docs/reviews/feat-seed-overlap.md` (S2)
+      and 232's "Downstream, flagged not fixed".
 - [ ] Adaptive rule measured against the real binary on feral-p3, cost and precision terms both reported.
 - [ ] Explicit written judgement on whether the pooled-estimate error is acceptable at display time.
 - [ ] Verdict recorded: adopt (with a design pass to follow), adopt-with-replication, or reject.

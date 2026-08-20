@@ -11,6 +11,7 @@ export {
   PAIRED_REPLICATE_TOP_N,
   assertUsableSeeds,
   pairedReplicateSe,
+  replicateSeeds,
   usesPairedReplication,
 } from "./se.js";
 export {

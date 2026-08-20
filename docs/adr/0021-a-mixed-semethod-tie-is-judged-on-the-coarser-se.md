@@ -40,6 +40,17 @@ them.
 | `independent`      | 232  | 2.149 DPS  | 4.30                |
 | `paired-replicate` | 8    | 0.0155 DPS | 0.031               |
 
+> **Flagged (2026-08-19, ticket 232).** The `paired-replicate` SEs in this
+> table were computed across `DEFAULT_SEEDS` = 11, 22, 33, 44, 55, which share
+> almost all their per-iteration RNG streams at the iteration count they ran at.
+> Their spread therefore measures seed overlap rather than simulation noise, so
+> the paired figures here — and the ~139× ratio built from them — are
+> **understated by an unknown factor**. The seeds are fixed
+> (`replicateSeeds`, `packages/core/src/se.ts`); re-deriving this table needs
+> fresh sim runs and has not been done. **This ADR's decision does not turn on
+> the magnitude:** it rests on paired SE being materially finer than
+> independent, which spacing the seeds widens rather than reverses.
+
 **~139×**, close to the ticket's estimated ~127× and in the same direction. Two
 corrections to the ticket's arithmetic, both now measured rather than derived:
 the paired SEs are _not_ uniform — rank 1 is 0.0994 while the other seven run
