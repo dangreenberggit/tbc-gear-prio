@@ -265,12 +265,49 @@ mapped). Binary: `wowsimcli` v0.0.101 from `data/wowsims.lock.json`. Full number
 
 | Arm | Seeds / repeats | max−min of avgs | mean reported SE (`stdev/√n`) |
 |---|---|---|---|
-| Independent | 11, 22, 33, 44, 55 | **0.099 DPS** | **1.678 DPS** |
+| ~~Independent~~ *(see correction)* | 11, 22, 33, 44, 55 | **0.099 DPS** | **1.678 DPS** |
 | Shared | 42 × 5 | **0.000 DPS** | 1.678 DPS |
 
 Shared-seed repeats are bit-identical — the sim is deterministic given a seed.
-Independent seeds barely move the *mean* (0.1 DPS); what forms tie groups is the
-**reported** independent SE on the ~1.7 DPS scale.
+What forms tie groups is the **reported** SE on the ~1.7 DPS scale.
+
+> **Correction (2026-08-19, ticket 232).** The first arm is **not independent**,
+> and the sentence this entry originally drew from it — "independent seeds barely
+> move the *mean* (0.1 DPS)" — was wrong. It read a property of the seeds as a
+> property of the sim.
+>
+> Upstream seeds iteration `i` from `RandomSeed + i`
+> (`vendor/tbc-new-fork/sim/core/sim.go:248-251`, called per iteration at
+> `:347-348`), so a run of `N` iterations from seed `S` consumes the streams
+> `S..S+N-1`. At the 5,000 iterations this sitting used, seeds 11 and 55 are 44
+> apart and so share 4,956 of 5,000 streams. The five runs were near-copies of
+> one run, which is why their means barely moved. The sim was never shown to be
+> insensitive to seed; these seeds were shown to be nearly the same seed.
+>
+> Re-measured at 3,000 iterations with `scripts/seed_overlap_probe.py` against
+> the same pinned binary, as `sampleSd/SE` — a spread that matches the reported
+> SE gives ~1.0:
+>
+> | seeds | sampleSd/SE |
+> |---|---|
+> | 11, 22, 33, 44, 55 | **0.087** |
+> | `11 + k*3000`, 20 seeds | **0.895** |
+> | 20 scattered seeds | **1.074** |
+>
+> Properly spaced seeds move the mean about ten times as much as this entry
+> reported. Full table and method in
+> [`.scratch/handoffs/ticket-232-seed-spacing-measurements.md`](../.scratch/handoffs/ticket-232-seed-spacing-measurements.md).
+>
+> **What survives.** The **reported SE** column (1.678 DPS) and everything
+> derived from it are unaffected: the sim reports that per run from its own
+> iteration variance, not from any spread across seeds, and the cutoff constant
+> below is built from reported SE for exactly the reason the next section gives.
+> The bit-identical shared arm is also unaffected. What does not survive is any
+> claim about sim stability inferred from the 0.099 spread.
+>
+> `DEFAULT_SEEDS` is now derived as `base + k*iterations` rather than pinned
+> (`packages/core/src/se.ts`, `replicateSeeds`), and `assertUsableSeeds` rejects
+> under-spaced seeds.
 
 ### Against R5's cited 1.58 / 0.06
 

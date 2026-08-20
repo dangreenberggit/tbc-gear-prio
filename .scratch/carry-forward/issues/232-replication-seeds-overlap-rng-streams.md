@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: ticket 225's reopened-scope measurements, 2026-08-19 (claims C20/C21)
 Blocks: 233
@@ -109,6 +109,71 @@ same way and should be re-checked.
 - [x] Mechanism confirmed against upstream source, cited by file and line
       (`sim/core/sim.go:248-251` and `:347-348`; corroborated by
       `sim/core/sim_concurrent.go:39-40`).
-- [ ] `DEFAULT_SEEDS` spaced so `sampleSd/SE` from `seed_overlap_probe.py` is near 1.0 at the shipped iteration count.
-- [ ] Paired-replicate SE evidence re-derived and the verification-log entry corrected.
-- [ ] `pnpm verify` green.
+- [x] `DEFAULT_SEEDS` spaced so `sampleSd/SE` from `seed_overlap_probe.py` is
+      near 1.0 at the shipped iteration count — 0.087 → **0.895** at 20 seeds,
+      1× spacing (see "Measuring it properly" below).
+- [x] Paired-replicate SE evidence re-derived and the verification-log entry
+      corrected (`docs/verification-log.md`, Stage 1 first sitting).
+- [x] Recorded fixtures checked — no re-record needed, see "Fixtures" below.
+- [x] `pnpm verify` green (833 tests, exit 0).
+
+## Measuring it properly (2026-08-19)
+
+Full table: `.scratch/handoffs/ticket-232-seed-spacing-measurements.md`.
+
+**A five-seed ratio cannot answer this question.** At n=5 the sample sd carries
+34 % relative error, so a truly independent set lands anywhere in ~0.60..1.28.
+Five-seed arms measured here scatter 0.47..1.19 with *no* dependence on
+spacing — 100× spacing scored 0.472, worse than 3× spacing's 1.063. Reading any
+single five-seed ratio as a verdict on independence is a mistake this ticket
+nearly made.
+
+At 20 seeds, where the sd is well enough determined to conclude:
+
+| arm | sampleSd/SE |
+| --- | --- |
+| shipped 11, 22, 33, 44, 55 | 0.087 |
+| `11 + k*3000`, 20 seeds | **0.895** |
+| 20 scattered seeds | **1.074** |
+
+The two spaced arms agree, so **spacing is what matters, not arrangement**.
+Spacing by `iterations` is sufficient; scattering buys nothing beyond it.
+
+## Fixtures — no re-record needed
+
+`packages/core/test/fixtures/synthetic-roster-recordings.json` keys its
+recordings `<hash>:<simVersion>:<seed>:<iterations>`. All 955 recordings across
+all three rows use seed **42** — the single-seed path, where
+`usesPairedReplication` is false and `DEFAULT_SEEDS` is never consulted:
+
+```
+python -c "import json,io,collections;r=json.load(io.open('packages/core/test/fixtures/synthetic-roster-recordings.json',encoding='utf-8'));c=collections.Counter(k.split(':')[2] for row in r['rows'].values() for k in row['recordings']);print(c)"
+# Counter({'42': 955})
+```
+
+So the recorded numbers are unaffected by this change.
+
+## What shipped
+
+- `replicateSeeds(base, count, iterations)` in `packages/core/src/se.ts` —
+  seeds derived as `base + k*iterations` rather than pinned, so the spacing
+  cannot drift away from the iteration count again.
+- `assertUsableSeeds(seeds, iterations?)` now also rejects under-spaced seeds.
+  It previously caught only exact duplicates, though a distinct-but-overlapping
+  seed drives the SE toward the same false precision. The argument is optional,
+  so callers that cannot know the iteration count keep the old contract.
+- `docs/verification-log.md` Stage 1 corrected.
+
+## Downstream, flagged not fixed
+
+`docs/adr/0021` reports paired-replicate SEs of 0.0005–0.0068 DPS and a ~139×
+ratio against `independent`, all computed across the overlapping seeds. Those
+paired figures are **understated by an unknown factor**. Re-deriving the table
+needs fresh sim runs and was not done here; the ADR is annotated in place. Its
+decision does not turn on the magnitude — it needs paired SE to be materially
+finer than independent, which spacing widens rather than reverses.
+
+`docs/plans/wowsims-tab/candidate-pool.md` F10 and `docs/five-seed-spread.json`
+also carry the 0.099 spread; F10 is annotated. `five-seed-spread.json` is a
+recorded measurement artifact and was left as recorded — it is what the probe
+returned, and the verification-log correction explains what it means.
