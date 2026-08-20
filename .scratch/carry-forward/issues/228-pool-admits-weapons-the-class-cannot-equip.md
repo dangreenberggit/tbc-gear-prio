@@ -1,4 +1,4 @@
-Status: blocked
+Status: resolved
 Type: bug (candidate pool; ranking correctness)
 Origin: `sme-rank-review` verdict during ticket 224, 2026-08-18 — handoffs at
   `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md` and
@@ -140,12 +140,57 @@ fixtures keyed to them.
 
 ## Acceptance
 
-- [ ] The proficiency rule for each supported spec is written down with a source.
-- [ ] The pool no longer admits weapon types the spec cannot equip.
-- [ ] `Cataclysm's Edge` (30902, sword) and `Soul Cleaver` (axe) are both
+- [x] The proficiency rule for each supported spec is written down with a source.
+      Met at `5c42a37` — feral in the profile comment citing druid.ts lines
+      25-31; ret already carried its own sourced comment. See Progress.
+- [x] The pool no longer admits weapon types the spec cannot equip.
+      Met at `5c42a37`. See Regeneration.
+- [x] `Cataclysm's Edge` (30902, sword) and `Soul Cleaver` (axe) are both
       absent from the feral candidate pool — the axe case is the one a
-      sword-only filter would miss.
-- [ ] A test covers at least one inequippable type per supported spec.
+      sword-only filter would miss. Met at `5c42a37`, and now held down by a
+      test rather than a one-off check.
+- [x] A test covers at least one inequippable type per supported spec.
+      **Done 2026-08-20** — see Box 4 below.
+
+## Box 4, 2026-08-20 — one inequippable type per supported spec, both covered
+
+Supported specs are exactly `ret` and `feral` (`SPEC_PROFILES` in
+`scripts/assemble_universe.py`). Each now has a covering test.
+
+**Feral (sword and axe) — new, and runs everywhere.**
+`packages/core/test/pool-hardening.test.ts`, "excludes druid-inequippable
+weapon types from the feral pool only". Cataclysm's Edge (30902, sword) and
+Soul Cleaver (32348, axe) are asserted absent from `data/universes/feral-p3.json`
+**and present in both `ret-p3.json` and `ret-p5.json`**. The paired assertion is
+the point: a pure-absence test would still pass if the item had vanished from
+every universe for an unrelated reason, so the ret presence is what proves the
+exclusion is spec-specific. All three fixtures are committed, so this test has
+no vendor dependency.
+
+Asserted by item id rather than by weapon type on purpose. The committed
+universe rows carry `armorType`, `handType`, `slot` and **no `weaponType`
+field**, and every ret weapon row has `handType` 4, so a weaponType sweep over
+committed data cannot be written at all. Verified 2026-08-20 by reading the row
+keys of `data/universes/feral-p3.json`.
+
+**Ret (staff) — the existing vendor-gated test, and it did run.**
+`it.skipIf(!hasWowsimsVendor)("no staff ever enters the universe")` at
+`packages/core/test/pool-hardening.test.ts:942`. This is the staff-exclusion
+test; the neighbouring test at :926 asserts polearm *admission* and is not it.
+
+That test is guarded on `vendor/wowsims/db.json`, which is untracked and
+gitignored, so on a fresh checkout or in CI without a vendor sync it silently
+skips and proves nothing. **This box is discharged only because it actually
+executed here.** Observed 2026-08-20:
+`npx vitest run packages/core/test/pool-hardening.test.ts --reporter=verbose`
+→ `✓ data/universes/ret-p3.json hardening > no staff ever enters the universe
+(9ms)`, with 82 passed and the only two skips being unrelated ticket-17 `todo`
+deferrals. Re-run the same command to confirm the tick, not the plain reporter —
+a skipped run reports as a pass at file level.
+
+There is no committed-fixture substitute for the ret half: without `weaponType`
+a staff cannot be told from a polearm, and `handType` is 4 for both. Anyone
+re-verifying this box needs the vendor sync.
 
 ## Also worth a look
 
@@ -223,6 +268,15 @@ measurement is not invalidated by this change, only made slightly slack.
 
 ### What needs the user
 
+**Discharged as of 2026-08-20 — nothing here still needs the user.** The
+re-recording described below happened, and the 7.0 follow-up was resolved
+elsewhere. Observed 2026-08-20:
+`npx vitest run packages/core/test/synthetic-fixtures.test.ts` passes (6 tests,
+including `synthetic roster fixture: feral-p3`), and
+`ls packages/core/test/racing.test.ts` reports no such file — ADR-0026 removed
+racing, so the 7.0 comparison no longer exists to be red. `pnpm verify` is green
+on this branch. The two paragraphs below are kept for the history they record.
+
 Re-recording `synthetic-roster-recordings.json` against the 228/365 pools needs
 the pinned sim binary (`scripts/record_synthetic_fixtures.mjs`), which is a
 truth-regeneration decision, not a test edit. **No fixture and no assertion was
@@ -240,3 +294,7 @@ The 7.0 failure this fix exposed is a racing-defaults question, handed to
 ticket 225 (reopened). This ticket's own work (filter + regenerated
 universes + re-recorded fixture) is complete; box 4 (per-spec cannot-equip
 test) is still open. Status stays open for box 4 and until 225 greens 7.0.
+
+**Superseded 2026-08-20:** box 4 is now done (see Box 4 above) and the 7.0
+comparison was removed with racing.test.ts by ADR-0026, so neither condition
+holds this ticket open any more. `Status: resolved`.
