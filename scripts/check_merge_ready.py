@@ -54,7 +54,12 @@ DISPOSITION_RE = re.compile(
 # `pnpm issues:open` (ticket 147). A ticket the tooling cannot see cannot block
 # a merge -- silent under-reporting, the same shape as open ticket 85.
 STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
-KNOWN_STATUSES = ("open", "claimed", "closed", "resolved", "wontfix")
+# `blocked` is a sub-state of open -- work waiting on a named human, not a
+# merge veto. Every scan that lists or gates on open/claimed includes it:
+# hiding a ticket from the tooling is how 85, 88/89 and 147 rotted, and
+# merge-veto power lives in `Blocks:`, not in the status word.
+OPEN_STATUSES = ("open", "claimed", "blocked")
+KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
 BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
@@ -223,7 +228,7 @@ def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
         blocks_m = BLOCKS_RE.search(text)
         if not status_m or not blocks_m:
             continue
-        if status_m.group(1).lower() not in ("open", "claimed"):
+        if status_m.group(1).lower().strip("*_`") not in OPEN_STATUSES:
             continue
         blocks = [b.strip().lower() for b in blocks_m.group(1).split(",")]
         if phase_l not in blocks:
@@ -382,7 +387,7 @@ def relevant_open_tickets(
     for path in iter_issue_files():
         text = path.read_text(encoding="utf-8", errors="replace")
         status = read_status(path_text=text)
-        if status not in ("open", "claimed"):
+        if status not in OPEN_STATUSES:
             continue
         matched = relevant_paths(changed_files, extract_ticket_paths(text))
         if not matched:
@@ -401,7 +406,7 @@ def list_open_carry_forward() -> list[tuple[Path, str, str, str]]:
         return out
     for path in sorted(CARRY.glob("*.md")):
         status = read_status(path) or "?"
-        if status not in ("open", "claimed"):
+        if status not in OPEN_STATUSES:
             continue
         text = path.read_text(encoding="utf-8")
         blocks_m = BLOCKS_RE.search(text)
@@ -458,7 +463,7 @@ def check(
                     errors.append(f"{row['id']}: defer ticket missing: {rel}")
                     continue
                 status = read_status(tpath)
-                if status not in ("open", "claimed"):
+                if status not in OPEN_STATUSES:
                     errors.append(
                         f"{row['id']}: {rel} has Status: {status!r} "
                         f"(defer tickets must be open|claimed)"
@@ -744,6 +749,39 @@ def check_status_reads_from_text() -> list[str]:
     return []
 
 
+
+def check_blocked_is_a_known_open_status() -> list[str]:
+    """`blocked` must parse and must scan as open; unknown words must not.
+
+    A ticket the gates cannot see cannot block anything (85, 88/89, 147), so
+    `blocked` joins the open scans rather than hiding from them -- while the
+    strictness that makes an unreadable status an error stays put.
+    """
+    if read_status(path_text="Status: blocked\n\n# t") != "blocked":
+        return ["read_status must parse `Status: blocked`"]
+    if "blocked" not in KNOWN_STATUSES:
+        return ["`blocked` must be a known status"]
+    if "blocked" not in OPEN_STATUSES:
+        return ["`blocked` must scan as open -- it is a sub-state of open"]
+    if "reopened?" in KNOWN_STATUSES:
+        return ["unknown words must stay unknown"]
+    return []
+
+
+def check_bold_status_value_strips_to_a_known_word() -> list[str]:
+    """A bold *value* (`Status: **blocked**`) must reach the membership tests
+    stripped. `open_blockers_for_phase` read the raw group and would have
+    silently dropped such a ticket from the phase gate (review F9)."""
+    text = "Status: **blocked**\n\n# t"
+    if read_status(path_text=text) != "blocked":
+        return ["read_status must strip a bold status value"]
+    raw = STATUS_RE.search(text)
+    if raw is None:
+        return ["STATUS_RE must match a bold status value"]
+    if raw.group(1).lower().strip("*_`") not in OPEN_STATUSES:
+        return ["a bold status value must survive the phase-gate test"]
+    return []
+
 CHECKS = (
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
@@ -762,6 +800,8 @@ CHECKS = (
     check_relevance_reports_every_case_variant,
     check_relevance_empty_sides_are_safe,
     check_status_reads_from_text,
+    check_blocked_is_a_known_open_status,
+    check_bold_status_value_strips_to_a_known_word,
 )
 
 

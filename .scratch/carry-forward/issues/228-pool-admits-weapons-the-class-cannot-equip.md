@@ -1,6 +1,4 @@
-Status: **blocked on a user decision** — the assembler fix and the
-  universe regeneration are done (`5c42a37`); two tests now read a stale
-  recorded fixture and re-recording needs the sim binary. See Progress.
+Status: blocked
 Type: bug (candidate pool; ranking correctness)
 Origin: `sme-rank-review` verdict during ticket 224, 2026-08-18 — handoffs at
   `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md` and
@@ -192,6 +190,15 @@ supported spec) is not done** — it belongs with whoever resolves the fixture
 question below, since adding it now would land beside two red tests.
 
 ### What went red, and why it is not weakened
+
+**Stale as of 2026-08-20 — both failures are gone.** The status line used to
+carry this as prose ("two tests now read a stale recorded fixture and
+re-recording needs the sim binary"); it is now `Status: blocked`, and the prose
+is corrected here rather than kept. Re-run to confirm:
+`npx vitest run packages/core/test/synthetic-fixtures.test.ts` passes (6 tests,
+observed 2026-08-20) and `ls packages/core/test/racing.test.ts` reports no such
+file — ADR-0026 removed racing. Neither failure below needs the sim binary any
+more. The section is left in place for the history it records.
 
 `pnpm verify`: 852 passed, **2 failed**. Both failures are one cause — the
 recorded fixture `packages/core/test/fixtures/synthetic-roster-recordings.json`

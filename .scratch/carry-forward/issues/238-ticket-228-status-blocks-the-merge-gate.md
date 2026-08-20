@@ -64,9 +64,41 @@ work that hit it.
 ## Acceptance criteria
 
 - [ ] `pnpm merge-to-dev --check-only` exits 0 on a branch with a review file
-      and no other blockers.
-- [ ] Whichever fix is chosen, `docs/agents/issue-tracker.md` states the
+      and no other blockers. **Not yet run** — deferred to this branch's final
+      verification, where the tree is clean. `python scripts/check_merge_ready.py`
+      exits 0 as of this commit; that is the gate `--check-only` calls, but it is
+      not the box, so the box stays unchecked until the real command is observed.
+- [x] Whichever fix is chosen, `docs/agents/issue-tracker.md` states the
       allowed `Status:` vocabulary, so the next prose status is a review
-      finding rather than a merge-time surprise.
-- [ ] If `blocked` is added: `scripts/check_merge_ready.py` treats it as
+      finding rather than a merge-time surprise. Done: the doc now lists all
+      six words and says an unreadable status is an error.
+- [x] If `blocked` is added: `scripts/check_merge_ready.py` treats it as
       blocking or non-blocking **deliberately**, with the choice written down.
+      Done — see Decision.
+
+## Decision, 2026-08-20 — fix 2, and `blocked` is *not* a merge veto
+
+Fix 2 was chosen: `blocked` joins `KNOWN_STATUSES`, and 228's line becomes a
+plain `Status: blocked` with its prose moved into 228's body. Fix 1 would have
+flattened a real distinction — 228 waits on the user, not on an engineer.
+
+`blocked` is a **sub-state of open**, treated identically to `open` in every
+scan. The script now has `OPEN_STATUSES = ("open", "claimed", "blocked")` and all
+four filter sites use it, so a blocked ticket still appears in `pnpm issues:open`,
+still gates phase merges through its `Blocks:` line, and can still be a review
+`defer` target.
+
+Why not make `blocked` mean "cannot merge": merge-veto power already lives in the
+`Blocks:` field. Encoding it in the status word too would double-encode one fact
+in two fields that can disagree. And why not hide `blocked` from the open list:
+invisibility is this tracker's documented failure mode (85, 88/89, 147) — 228's
+and 227's blockage is an owner decision inside this repo, which the owner finds
+by reading the open list.
+
+Unparseable statuses stay an error, as `1f03344` made them deliberately. Re-run:
+`python -c "import sys; sys.path.insert(0,'scripts'); import check_merge_ready as m; print(m.unparseable_status_tickets())"`
+→ `[]` (observed 2026-08-20). `python scripts/check_merge_ready.py --self-test`
+→ `ok (19 checks)`, two of them new: `blocked` parses and scans as open, and a
+bold status *value* (`Status: **blocked**`) survives the phase-gate membership
+test — that site read the raw regex group without the strip `read_status`
+applies, so it would have silently dropped such a ticket (plan review F9).
