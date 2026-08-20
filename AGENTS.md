@@ -48,7 +48,7 @@ In **committed or dispatched** artifacts (commit messages, tickets, ADRs, tracke
 
 When changing committed **generated** artifacts: regenerate from the committed sources with the pinned toolchain; the working tree must match `HEAD` (or you must document which side is wrong) before commit. For CI byte-compare gates, read a real CI run — do not predict from a local story about another OS.
 
-Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs.
+Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs — but to test whether one thing exists, name it (`ls <path>`, `grep -c <pattern>`); a truncated listing cannot show absence.
 
 **An exit code is not evidence that work happened.** A stopped background task reports exit 0, and a command that ran in the wrong directory succeeds at nothing. Confirm the artifact — `ls node_modules`, read the file, check the row count — before reporting an install, build or regen as done.
 
