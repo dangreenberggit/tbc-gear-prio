@@ -40,12 +40,48 @@ The same pattern at 5,000 iterations (recorded in ticket 225's C20): seeds
 11/12/13 give sd 0.024, seeds 11/100011/2000011/3000011 give sd 1.489 against
 a mean reported SE of 1.673.
 
-**Mechanism — hypothesis, untested in source.** Iteration `i` appears to seed
-from `randomSeed + i`, so two seeds closer together than `iterations` share
-most of their per-iteration streams. The measurements above are consistent
-with that and are the evidence; nobody has read the upstream RNG code to
-confirm it. Confirming it (`vendor/tbc-new-fork/sim/core/`) is cheap and
-should be step one.
+**Mechanism — CONFIRMED in source, 2026-08-19.** Iteration `i` seeds from
+`RandomSeed + i`, exactly as hypothesised:
+
+```go
+// vendor/tbc-new-fork/sim/core/sim.go:248-251
+func (sim *Simulation) reseedRands(i int64) {
+	rseed := sim.Options.RandomSeed + i
+	sim.currentSeed = rseed
+	sim.rand.Seed(rseed)
+```
+
+and that is called once per iteration inside the run loop:
+
+```go
+// vendor/tbc-new-fork/sim/core/sim.go:347-348
+		// Before each iteration, reset state to seed+iterations
+		sim.reseedRands(int64(i))
+```
+
+So a run of `N` iterations from seed `S` consumes the per-iteration streams
+`S .. S+N-1`. Two seeds `a < b` overlap on `N - (b - a)` of them. For the
+shipped `DEFAULT_SEEDS` at 3,000 iterations, seeds 11 and 22 share 2,989 of
+3,000 streams — **99.6 % overlap** — which is why their spread measures almost
+nothing.
+
+**Upstream independently applies the fix this ticket proposes.** Its concurrent
+split path spaces sub-run seeds by exactly the iteration count, for exactly
+this reason:
+
+```go
+// vendor/tbc-new-fork/sim/core/sim_concurrent.go:39-40
+	// Sims increment their seed each iteration. Offset starting seed of each split to emulate that.
+	nextStartSeed := split[0].SimOptions.RandomSeed + int64(split[0].SimOptions.Iterations)
+```
+
+That is upstream treating "spaced by `iterations`" as the condition for two
+runs to behave like independent continuations. The proposed fix below is the
+same rule applied to replicate seeds.
+
+Note `vendor/` is gitignored and absent from a fresh worktree; the citations
+above were read from a checkout where `pnpm sync:wowsims` had already
+populated `vendor/tbc-new-fork/`.
 
 ## Why it matters beyond the SE number
 
@@ -70,7 +106,9 @@ same way and should be re-checked.
 
 ## Acceptance
 
-- [ ] Mechanism confirmed or refuted against upstream source, cited by file and line.
+- [x] Mechanism confirmed against upstream source, cited by file and line
+      (`sim/core/sim.go:248-251` and `:347-348`; corroborated by
+      `sim/core/sim_concurrent.go:39-40`).
 - [ ] `DEFAULT_SEEDS` spaced so `sampleSd/SE` from `seed_overlap_probe.py` is near 1.0 at the shipped iteration count.
 - [ ] Paired-replicate SE evidence re-derived and the verification-log entry corrected.
 - [ ] `pnpm verify` green.
