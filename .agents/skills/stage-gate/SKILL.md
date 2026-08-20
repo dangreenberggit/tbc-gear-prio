@@ -46,8 +46,17 @@ at startup only; restart the session.
    `git status --porcelain` is empty and record `git rev-parse HEAD` in
    the log.
 
-   Done when: `brief.md` answers "what exists when this is done", the tree
-   is clean, and the SHA is logged.
+   When the ticket asks whether something is worth keeping or what else
+   could work, list each **open question** in the brief and require, per
+   question: a candidate approach that is not the same approach with
+   different constants; the result that would make that candidate win,
+   written down before anything is measured; and a measurement of it, or
+   the reason the committed fixtures cannot measure it. A candidate the
+   plan drops carries a stated reason.
+
+   Done when: `brief.md` answers "what exists when this is done", every
+   open question carries those three items, the tree is clean, and the SHA
+   is logged.
 
 2. **Plan.** Spawn `gate-planner` (`model: "fable"`) with the absolute
    paths of `brief.md` and
@@ -55,7 +64,8 @@ at startup only; restart the session.
    to `plan.md` verbatim.
 
    **Gate A (mechanical):** every template section present; Claims
-   register nonempty; Paths manifest present; `git status --porcelain`
+   register nonempty; Paths manifest present; every open question in the
+   brief answered with its three items; `git status --porcelain`
    still empty. A dirty tree means the seat edited files: run
    `git checkout -- .`, discard the output, respawn once with the
    violation named. One respawn per gap; a second failure goes to the
