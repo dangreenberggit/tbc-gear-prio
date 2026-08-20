@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug (merge gate refuses every branch)
 Origin: `feat/seed-overlap` pre-merge review, 2026-08-19 — hit running
   `pnpm merge-to-dev --check-only`
@@ -63,11 +63,12 @@ work that hit it.
 
 ## Acceptance criteria
 
-- [ ] `pnpm merge-to-dev --check-only` exits 0 on a branch with a review file
-      and no other blockers. **Not yet run** — deferred to this branch's final
-      verification, where the tree is clean. `python scripts/check_merge_ready.py`
-      exits 0 as of this commit; that is the gate `--check-only` calls, but it is
-      not the box, so the box stays unchecked until the real command is observed.
+- [x] `pnpm merge-to-dev --check-only` exits 0 on a branch with a review file
+      and no other blockers. **Discharged by running it**, not by substituting
+      the gate it wraps. Observed 2026-08-20 on `feat/candidate-pool` with a
+      clean tree: the command printed `merge-ready: ok` then
+      `check-only: ok (not merging)` and exited 0. The 25-open-ticket relevance
+      WARN it also prints is advisory and does not block. Re-run to confirm.
 - [x] Whichever fix is chosen, `docs/agents/issue-tracker.md` states the
       allowed `Status:` vocabulary, so the next prose status is a review
       finding rather than a merge-time surprise. Done: the doc now lists all
