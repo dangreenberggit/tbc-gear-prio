@@ -7,7 +7,7 @@ commits: `git cherry dev HEAD` lists ~165 commits absent from `dev`, essentially
 the whole candidate-pool epic, ending with this ticket's four. A `dev...HEAD`
 diff would therefore have sent reviewers ~36,000 lines of other sessions' work
 that this session neither wrote nor can speak for. The review was scoped to the
-four commits of ticket 232 (`3d64d1f..HEAD`, 16 files, +436/−48). **The
+four commits of ticket 236 (`3d64d1f..HEAD`, 16 files, +436/−48). **The
 candidate-pool commits between `dev` and `3d64d1f` are not gated by this file**
 — `docs/reviews/feat-candidate-pool.md` covers part of that range; whether the
 remainder is reviewed is a separate question and a blocker for any merge of this
@@ -129,7 +129,7 @@ satisfied. Demoted to `[~]` and restated.
 original step 3 said "Re-derive the paired-replicate SE evidence"; only the
 verification-log _narrative_ was corrected, and ADR-0021's table was annotated as
 "understated by an unknown factor" rather than recomputed. Demoted to `[~]` with
-the gap named and carried on ticket 233.
+the gap named and carried on ticket 237.
 
 **S3 — `DEFAULT_SEEDS` frozen at module load (fixed; the one blocking defect).**
 `rankUpgrades` resolves `iterations` from the input but the defaults were built
@@ -138,7 +138,7 @@ seeds 3,000 apart — under-spaced — and **threw `RankError("internal")` on a
 previously-working call**. This re-created the very drift the ticket names.
 Seeds now derive from the resolved iteration count, with a regression test that
 fails against the frozen version with the predicted error and passes against the
-fix. This also bit ticket 233 directly, whose mechanism runs 1,000-iteration
+fix. This also bit ticket 237 directly, whose mechanism runs 1,000-iteration
 increments.
 
 **S4 — stale reference missed in the renumbering (fixed).**

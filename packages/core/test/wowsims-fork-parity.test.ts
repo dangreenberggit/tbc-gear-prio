@@ -242,7 +242,7 @@ const ITERATIONS = 3000;
 /**
  * Two distinct seeds — `usesPairedReplication` (se.ts) keys off
  * `seeds.length > 1`. `assertUsableSeeds` (se.ts) rejects repeats, and also
- * rejects seeds spaced closer than the iteration count (ticket 232), so these
+ * rejects seeds spaced closer than the iteration count (ticket 236), so these
  * are `ITERATIONS` apart. The base is arbitrary the way the original single
  * seed (11) was; the spacing is not.
  */

@@ -1,7 +1,7 @@
 Status: open (fix landed; two acceptance boxes partial — see below)
 Type: defect
 Origin: ticket 225's reopened-scope measurements, 2026-08-19 (claims C20/C21)
-Blocks: 233
+Blocks: 237
 Blocked by: none
 
 # Replication seeds overlap RNG streams — DEFAULT_SEEDS 11..55 are near-duplicate runs at 3000 iterations
@@ -122,13 +122,13 @@ same way and should be re-checked.
       re-derived** — the original step 3 asked for that, and it needs fresh sim
       runs. ADR-0021's paired figures are annotated as understated by an
       unknown factor rather than recomputed. See "Downstream, flagged not
-      fixed"; carried on ticket 233, which needs the same numbers.
+      fixed"; carried on ticket 237, which needs the same numbers.
 - [x] Recorded fixtures checked — no re-record needed, see "Fixtures" below.
 - [x] `pnpm verify` green (833 tests, exit 0).
 
 ## Measuring it properly (2026-08-19)
 
-Full table: `.scratch/handoffs/ticket-232-seed-spacing-measurements.md`.
+Full table: `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`.
 
 **A five-seed ratio cannot answer this question.** At n=5 the sample sd carries
 34 % relative error, so a truly independent set lands anywhere in ~0.60..1.28.

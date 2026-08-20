@@ -74,14 +74,14 @@ export function assertUsableSeeds(
         `A run of N iterations from seed S consumes the per-iteration streams ` +
         `S..S+N-1, so these two share ${iterations - gap} of ${iterations} streams ` +
         `and their spread measures overlap rather than simulation noise ` +
-        `(ticket 232; upstream vendor/tbc-new-fork/sim/core/sim.go:248-251).`
+        `(ticket 236; upstream vendor/tbc-new-fork/sim/core/sim.go:248-251).`
     );
   }
 }
 
 /**
  * `count` seeds from `base`, spaced by `iterations` so no two runs share a
- * per-iteration RNG stream (ticket 232).
+ * per-iteration RNG stream (ticket 236).
  *
  * Derived rather than pinned as constants, because the defect this replaced
  * was constants that stayed still while the iteration count they were only
@@ -94,7 +94,7 @@ export function assertUsableSeeds(
  * against 0.087 for the seeds this fixed. Do not read a single five-seed ratio
  * as a measurement of independence: at n=5 the sample sd carries 34 % relative
  * error, so it cannot separate 0.5 from 1.0. See
- * `.scratch/handoffs/ticket-232-seed-spacing-measurements.md`.
+ * `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`.
  */
 export function replicateSeeds(
   base: number,

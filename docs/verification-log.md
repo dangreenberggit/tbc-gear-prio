@@ -271,7 +271,7 @@ mapped). Binary: `wowsimcli` v0.0.101 from `data/wowsims.lock.json`. Full number
 Shared-seed repeats are bit-identical — the sim is deterministic given a seed.
 What forms tie groups is the **reported** SE on the ~1.7 DPS scale.
 
-> **Correction (2026-08-19, ticket 232).** The first arm is **not independent**,
+> **Correction (2026-08-19, ticket 236).** The first arm is **not independent**,
 > and the sentence this entry originally drew from it — "independent seeds barely
 > move the *mean* (0.1 DPS)" — was wrong. It read a property of the seeds as a
 > property of the sim.
@@ -296,7 +296,7 @@ What forms tie groups is the **reported** SE on the ~1.7 DPS scale.
 >
 > Properly spaced seeds move the mean about ten times as much as this entry
 > reported. Full table and method in
-> [`.scratch/handoffs/ticket-232-seed-spacing-measurements.md`](../.scratch/handoffs/ticket-232-seed-spacing-measurements.md).
+> [`.scratch/handoffs/ticket-236-seed-spacing-measurements.md`](../.scratch/handoffs/ticket-236-seed-spacing-measurements.md).
 >
 > **What survives.** The **reported SE** column (1.678 DPS) and everything
 > derived from it are unaffected: the sim reports that per run from its own

@@ -73,13 +73,13 @@ describe("PAIRED_REPLICATE_TOP_N", () => {
 });
 
 /**
- * Ticket 232. Upstream seeds iteration `i` from `RandomSeed + i`
+ * Ticket 236. Upstream seeds iteration `i` from `RandomSeed + i`
  * (`vendor/tbc-new-fork/sim/core/sim.go:248-251`, called per iteration at
  * `:347-348`), so a run of `N` iterations from seed `S` consumes the streams
  * `S .. S+N-1`. Two seeds closer together than `N` therefore share streams and
  * are not independent replicates.
  */
-describe("seed spacing (ticket 232)", () => {
+describe("seed spacing (ticket 236)", () => {
   it("rejects seeds spaced closer than the iteration count", () => {
     // The seeds this project shipped, at the iteration count it shipped them
     // at: 11 and 22 share 2,989 of 3,000 streams.
@@ -123,7 +123,7 @@ describe("seed spacing (ticket 232)", () => {
   });
 });
 
-describe("replicateSeeds (ticket 232)", () => {
+describe("replicateSeeds (ticket 236)", () => {
   it("spaces seeds by the iteration count, so they never share streams", () => {
     expect(replicateSeeds(11, 5, 3000)).toEqual([11, 3011, 6011, 9011, 12011]);
   });

@@ -40,7 +40,7 @@ them.
 | `independent`      | 232  | 2.149 DPS  | 4.30                |
 | `paired-replicate` | 8    | 0.0155 DPS | 0.031               |
 
-> **Flagged (2026-08-19, ticket 232).** The `paired-replicate` SEs in this
+> **Flagged (2026-08-19, ticket 236).** The `paired-replicate` SEs in this
 > table were computed across `DEFAULT_SEEDS` = 11, 22, 33, 44, 55, which share
 > almost all their per-iteration RNG streams at the iteration count they ran at.
 > Their spread therefore measures seed overlap rather than simulation noise, so

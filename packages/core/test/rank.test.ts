@@ -2125,7 +2125,7 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
 describe("rankUpgrades paired-replicate SE", () => {
   /**
    * Spaced by the 3000 iterations these tests run at, because `rankUpgrades`
-   * now rejects seeds closer than that as overlapping replicates (ticket 232).
+   * now rejects seeds closer than that as overlapping replicates (ticket 236).
    * Only the seed *values* changed here; the synthetic per-seed gains below
    * keep their magnitudes, so every SE this suite asserts is arithmetically
    * unchanged and still tests the pairing rather than a new number.
@@ -3806,14 +3806,14 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
   };
 
   /**
-   * Ticket 232 regression. The default seeds are spaced by the iteration
+   * Ticket 236 regression. The default seeds are spaced by the iteration
    * count, and the guard rejects seeds closer together than that. Freezing the
    * defaults against `DEFAULT_ITERATIONS` rather than the run's *resolved*
    * iterations would hand a caller who raises `iterations` a set of
    * under-spaced defaults, and fail its own guard on a request that has
    * nothing wrong with it.
    */
-  describe("default seeds track the iteration count (ticket 232)", () => {
+  describe("default seeds track the iteration count (ticket 236)", () => {
     it("accepts its own defaults at a non-default iteration count", async () => {
       const { deps } = m1Deps();
       const { seeds: _omitted, ...withoutSeeds } = m1Input;

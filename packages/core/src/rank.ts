@@ -515,8 +515,8 @@ const DEFAULT_ITERATIONS = 3000;
  * values 11/22/33/44/55 sat inside one run's span: at 3,000 iterations seeds
  * 11 and 22 shared 2,989 of 3,000 streams, so the five "replicates" were
  * near-copies and the SE derived from their spread was far too small —
- * `sampleSd/SE` 0.087 where independence gives ~0.9 (ticket 232,
- * `.scratch/handoffs/ticket-232-seed-spacing-measurements.md`).
+ * `sampleSd/SE` 0.087 where independence gives ~0.9 (ticket 236,
+ * `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`).
  *
  * Deriving from `DEFAULT_ITERATIONS` keeps the two from drifting apart again;
  * the old constants were correct only relative to an iteration count that

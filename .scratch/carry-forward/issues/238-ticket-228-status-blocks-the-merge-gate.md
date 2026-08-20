@@ -2,8 +2,12 @@ Status: open
 Type: bug (merge gate refuses every branch)
 Origin: `feat/seed-overlap` pre-merge review, 2026-08-19 — hit running
   `pnpm merge-to-dev --check-only`
-Blocks: any merge to `dev`
+Blocks: none
 Blocked by: none
+
+**Blocks in practice:** any merge through `pnpm merge-to-dev`, which is
+advisory-free prose rather than a `Blocks:` value because the field is
+parsed.
 
 # Ticket 228's prose `Status:` line makes `merge-to-dev` fail for every branch
 
