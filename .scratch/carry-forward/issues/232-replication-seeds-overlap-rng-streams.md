@@ -1,4 +1,4 @@
-Status: closed
+Status: open (fix landed; two acceptance boxes partial — see below)
 Type: defect
 Origin: ticket 225's reopened-scope measurements, 2026-08-19 (claims C20/C21)
 Blocks: 233
@@ -109,11 +109,20 @@ same way and should be re-checked.
 - [x] Mechanism confirmed against upstream source, cited by file and line
       (`sim/core/sim.go:248-251` and `:347-348`; corroborated by
       `sim/core/sim_concurrent.go:39-40`).
-- [x] `DEFAULT_SEEDS` spaced so `sampleSd/SE` from `seed_overlap_probe.py` is
-      near 1.0 at the shipped iteration count — 0.087 → **0.895** at 20 seeds,
-      1× spacing (see "Measuring it properly" below).
-- [x] Paired-replicate SE evidence re-derived and the verification-log entry
-      corrected (`docs/verification-log.md`, Stage 1 first sitting).
+- [~] `DEFAULT_SEEDS` spaced so `sampleSd/SE` is near 1.0 at the shipped
+      iteration count — **the seeds are spaced; the box as written cannot be
+      satisfied at the shipped n=5.** The shipped configuration is five seeds,
+      and at n=5 the sample sd carries 34 % relative error, so its ratio
+      scatters 0.47..1.19 regardless of spacing. Independence is demonstrated
+      at n=20 instead (0.087 → **0.895** spaced, **1.074** scattered). Read the
+      n=5 ratio as uninformative, not as a pass or a fail — see "Measuring it
+      properly" below.
+- [~] Verification-log entry corrected (`docs/verification-log.md`, Stage 1
+      first sitting), **but the paired-replicate SE evidence is not
+      re-derived** — the original step 3 asked for that, and it needs fresh sim
+      runs. ADR-0021's paired figures are annotated as understated by an
+      unknown factor rather than recomputed. See "Downstream, flagged not
+      fixed"; carried on ticket 233, which needs the same numbers.
 - [x] Recorded fixtures checked — no re-record needed, see "Fixtures" below.
 - [x] `pnpm verify` green (833 tests, exit 0).
 
@@ -152,6 +161,16 @@ python -c "import json,io,collections;r=json.load(io.open('packages/core/test/fi
 ```
 
 So the recorded numbers are unaffected by this change.
+
+## Honest status of the acceptance boxes
+
+Two boxes above are `[~]`, not `[x]`. Both were reworded by this change from
+the original wording, and a reviewer was right to push back on that: an author
+editing their own acceptance criteria and then declaring them met is how a
+weaker result gets recorded as a pass. What actually shipped is the spacing fix
+and the narrative correction. What did not ship is a re-derived paired SE
+table, and the "near 1.0" target is unmeasurable at the shipped seed count
+rather than met.
 
 ## What shipped
 

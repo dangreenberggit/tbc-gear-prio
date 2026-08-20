@@ -241,11 +241,12 @@ const SIM_VERSION = "v0.0.101";
 const ITERATIONS = 3000;
 /**
  * Two distinct seeds — `usesPairedReplication` (se.ts) keys off
- * `seeds.length > 1`. `assertUsableSeeds` (se.ts) rejects repeats, so these
- * must differ; the values themselves are arbitrary the way the original
- * single seed (11) was.
+ * `seeds.length > 1`. `assertUsableSeeds` (se.ts) rejects repeats, and also
+ * rejects seeds spaced closer than the iteration count (ticket 232), so these
+ * are `ITERATIONS` apart. The base is arbitrary the way the original single
+ * seed (11) was; the spacing is not.
  */
-const SEEDS = [11, 22];
+const SEEDS = [11, 11 + ITERATIONS];
 
 /**
  * `role` keys the five DPS series above (`"baseline"`, `"felSteel"`,

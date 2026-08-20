@@ -74,7 +74,7 @@ export function assertUsableSeeds(
         `A run of N iterations from seed S consumes the per-iteration streams ` +
         `S..S+N-1, so these two share ${iterations - gap} of ${iterations} streams ` +
         `and their spread measures overlap rather than simulation noise ` +
-        `(ticket 232; upstream sim/core/sim.go:248-251).`
+        `(ticket 232; upstream vendor/tbc-new-fork/sim/core/sim.go:248-251).`
     );
   }
 }

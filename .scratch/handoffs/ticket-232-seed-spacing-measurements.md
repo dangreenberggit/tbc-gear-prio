@@ -4,6 +4,10 @@ All runs: `python scripts/seed_overlap_probe.py .scratch/seed-probe 3000 <seeds>
 pinned `vendor/wowsimcli-v0.0.101-win32-x64/`, fixture
 `test/fixtures/slamaltman.raid-sim-request.json`, 3000 iterations.
 
+`vendor/` is gitignored and **absent from a fresh worktree**. Before re-running
+any row below: `pnpm fetch:wowsimcli` (the probe exits 2 with that hint if the
+binary is missing) and, for the Go citations, `pnpm sync:wowsims:restore`.
+
 `sampleSd/SE` compares the spread across seeds to the sim's own reported SE.
 
 ## Baseline — reproduces the ticket exactly

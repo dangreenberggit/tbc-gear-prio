@@ -113,5 +113,6 @@ for it exactly as ticket 226 did.
 
 Filed as `233`, colliding with the adaptive-CI screening ticket that ticket
 225 had already given that number. Renumbered to `237`; the citations in
-tickets 226, 227 and 234 and in
-`.scratch/handoffs/ticket-226-direct-sims.md` were updated to match.
+tickets 226, 227 and 234 and in `.scratch/handoffs/ticket-226-direct-sims.md`
+and `.scratch/handoffs/ticket-227-healer-noise.md` were updated to match.
+Re-check with `grep -rn "ticket 233" .scratch docs`.

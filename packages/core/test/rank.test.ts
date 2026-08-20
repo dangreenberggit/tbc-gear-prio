@@ -2154,10 +2154,10 @@ describe("rankUpgrades paired-replicate SE", () => {
   /** Baseline DPS wobbles per seed; each candidate adds its own fixed gain. */
   const BASELINE_BY_SEED: Record<number, number> = {
     11: 2000,
-    22: 2010,
-    33: 1990,
-    44: 2020,
-    55: 1980,
+    3011: 2010,
+    6011: 1990,
+    9011: 2020,
+    12011: 1980,
   };
 
   /** Slamaltman's worn neck in the fixture — the baseline's own item. */
@@ -3804,6 +3804,26 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
     seeds: [42],
     race: "RaceHuman" as const,
   };
+
+  /**
+   * Ticket 232 regression. The default seeds are spaced by the iteration
+   * count, and the guard rejects seeds closer together than that. Freezing the
+   * defaults against `DEFAULT_ITERATIONS` rather than the run's *resolved*
+   * iterations would hand a caller who raises `iterations` a set of
+   * under-spaced defaults, and fail its own guard on a request that has
+   * nothing wrong with it.
+   */
+  describe("default seeds track the iteration count (ticket 232)", () => {
+    it("accepts its own defaults at a non-default iteration count", async () => {
+      const { deps } = m1Deps();
+      const { seeds: _omitted, ...withoutSeeds } = m1Input;
+      const ranking = await rankUpgrades(
+        { ...withoutSeeds, iterations: 5000 },
+        deps
+      );
+      expect(ranking.items.length).toBeGreaterThan(0);
+    });
+  });
 
   describe("candidateCap (7.1)", () => {
     it("keeps only the capped candidates plus every owned row", async () => {

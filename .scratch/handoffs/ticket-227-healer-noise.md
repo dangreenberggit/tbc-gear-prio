@@ -372,4 +372,4 @@ to the other; see `.scratch/handoffs/ticket-226-direct-sims.md`.
 
 The one thing they share is a consequence rather than a cause: in both cases
 the `impl` / `stub` labels in `data/sim-implemented-effects.json` were
-misleading, which is filed separately as ticket 233.
+misleading, which is filed separately as ticket 237.
