@@ -1,4 +1,4 @@
-Status: resolved
+Status: open
 Type: bug (candidate pool; ranking correctness)
 Origin: `sme-rank-review` verdict during ticket 224, 2026-08-18 — handoffs at
   `.scratch/handoffs/sme-rank-judgment-ticket-224-screened-presentation.md` and
@@ -149,8 +149,9 @@ fixtures keyed to them.
       absent from the feral candidate pool — the axe case is the one a
       sword-only filter would miss. Met at `5c42a37`, and now held down by a
       test rather than a one-off check.
-- [x] A test covers at least one inequippable type per supported spec.
-      **Done 2026-08-20** — see Box 4 below.
+- [ ] A test covers at least one inequippable type per supported spec.
+      Box 4 below claimed this on 2026-08-20; that closure was rejected the
+      same day — see "Closure rejected, 2026-08-20".
 
 ## Box 4, 2026-08-20 — one inequippable type per supported spec, both covered
 
@@ -191,6 +192,41 @@ a skipped run reports as a pass at file level.
 There is no committed-fixture substitute for the ret half: without `weaponType`
 a staff cannot be told from a polearm, and `handType` is 4 for both. Anyone
 re-verifying this box needs the vendor sync.
+
+## Closure rejected, 2026-08-20
+
+The `Status: resolved` set by the Box 4 section above is withdrawn; this ticket
+goes back to `open` until box 4 is met by a test that runs from committed data.
+Two things were wrong with that closure.
+
+**The ret half rested on a test that silently skips.** Box 4 discharges ret
+against `it.skipIf(!hasWowsimsVendor)("no staff ever enters the universe")` in
+`packages/core/test/pool-hardening.test.ts`. `hasWowsimsVendor` is
+`existsSync(vendor/wowsims/db.json)` (same file, line 60), and that path is
+gitignored and untracked, so on a fresh clone and in CI the test does not fail —
+it is skipped, and vitest reports the file as passing. Box 4 acknowledged this
+and discharged the box anyway on the grounds that the test executed on one
+machine on one day. A check that proves nothing on any other machine does not
+discharge an acceptance box. Re-runnable evidence of the mechanism:
+`grep -n "hasWowsimsVendor" packages/core/test/pool-hardening.test.ts` shows the
+`existsSync` at :60 and eleven `skipIf` sites (699, 715, 768, 800, 886, 908,
+984, 1032, 1069, 1075, 1087). The staff test is at :984, not :942 as Box 4
+states — that line number was stale.
+
+**The "no committed-fixture substitute exists" claim was wrong.** Box 4 argues a
+weaponType sweep over committed data "cannot be written at all", because the
+universe rows carry no `weaponType`. The rows do not, but they do not need to:
+`data/items/index.json` is committed (`git ls-files data/items/index.json`) and
+its rows carry `weaponType`, keyed by the item id every universe row already
+carries. Re-runnable:
+`node -e "const i=require('./data/items/index.json'); console.log(i['30902'].weaponType, i['32348'].weaponType)"`
+prints `9 1` — sword and axe. The join over two committed files is what the box
+needed, and it was available the whole time. The reasoning conflated
+`data/universes/*.json` with `data/items/index.json`.
+
+The owner's requirement is stronger than the box as written: the coverage must
+hold for every supported spec, including a spec that does not exist yet, rather
+than for the two that happen to exist today.
 
 ## Also worth a look
 
