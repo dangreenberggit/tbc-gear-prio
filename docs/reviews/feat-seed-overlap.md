@@ -166,6 +166,14 @@ session had run `pnpm verify` green over three of the four.
 
 `pnpm verify` green at 834 tests after the fixes.
 
+**`pnpm merge-to-dev --check-only` is NOT green**, for a reason outside this
+branch: ticket 228 carries a prose `Status:` line that
+`scripts/check_merge_ready.py` cannot parse, so the gate refuses every branch,
+not just this one. Filed as
+[`238`](../../.scratch/carry-forward/issues/238-ticket-228-status-blocks-the-merge-gate.md).
+The gate did find this review file and did run `pnpm verify` green before
+failing on 228.
+
 ## Disposition
 
 | ID    | Axis               | Disposition | Ticket / note                                                                                                  |
