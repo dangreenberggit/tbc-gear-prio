@@ -74,7 +74,7 @@ def build_payload(pin: str) -> dict:
     A side effect worth naming: sim/core/proto/*.pb.go is generated protobuf,
     untracked by design, so it drops out of the scan. Those files contribute no
     item ids, and a reconstruction at the pin reproduces the committed artifact
-    exactly (215 implemented, 460 stub-only).
+    exactly (216 implemented, 460 stub-only).
     """
     names = git_out("ls-tree", "-r", "--name-only", pin).splitlines()
     go_names = [n for n in names if n.startswith("sim/") and n.endswith(".go")]

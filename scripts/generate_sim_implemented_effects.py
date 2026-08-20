@@ -104,6 +104,29 @@ ACTIVE_STRUCT_LITERAL_RE = re.compile(
     re.MULTILINE,
 )
 
+# A third registration shape: the effect is not registered through a call at
+# all, it is read off the equipped set at runtime -- `HasItemEquipped(8345,
+# ...)` gates Wolfshead Helm's feral energy behaviour in
+# sim/druid/feralcat/rotation.go and sim/druid/forms.go. The item is as
+# implemented as any NewItemEffect one, but neither call regex saw it, so it
+# reported stub-only (ticket 233).
+#
+# Unlike the two above, this one is NOT anchored at the start of a line: these
+# calls sit mid-expression, inside an `if` or a struct field, never first on
+# the line. The leading negative lookahead does the comment exclusion that the
+# anchor does for the others -- it rejects the whole line when a `//` appears
+# anywhere before the match. That also rejects a real call sharing a line with
+# a trailing comment, which is the safe direction: it under-counts rather than
+# counting a commented-out registration as live.
+#
+# Limit, deliberate: this is a literal scan, so a caller passing a named
+# constant -- HasItemEquipped(WolfsheadHelm, ...) -- is out of its reach,
+# exactly as for the other two regexes. Nothing in the pinned tree does that.
+ACTIVE_HAS_ITEM_EQUIPPED_RE = re.compile(
+    r"^(?![^\n]*//)[^\n]*?HasItemEquipped\(\s*(\d+)",
+    re.MULTILINE,
+)
+
 # The auto-generator's own stub-list line format, always commented:
 # `//	{ItemID: 28592, ItemName: "Libram of Souls Redeemed"},`
 STUB_ITEM_LINE_RE = re.compile(
@@ -118,6 +141,8 @@ def active_item_ids_from_texts(texts: Iterable[str]) -> set[int]:
         for m in ACTIVE_CALL_RE.finditer(text):
             ids.add(int(m.group(1)))
         for m in ACTIVE_STRUCT_LITERAL_RE.finditer(text):
+            ids.add(int(m.group(1)))
+        for m in ACTIVE_HAS_ITEM_EQUIPPED_RE.finditer(text):
             ids.add(int(m.group(1)))
     return ids
 
@@ -231,7 +256,18 @@ def main() -> int:
             "required` stub block, with no active core.NewItemEffect / "
             "shared.NewSimpleStatActive registration anywhere. Regenerate "
             "with `python scripts/generate_sim_implemented_effects.py` after "
-            "re-pinning vendor/tbc-new-fork."
+            "re-pinning vendor/tbc-new-fork. "
+            "Membership in implementedEffectItemIds means the item is actively "
+            "registered or referenced in the fork's Go tree -- through a "
+            "core.NewItemEffect / shared.NewSimpleStatActive call, a LibramMap "
+            "{ItemID: ...} struct literal, or a runtime HasItemEquipped(<id>, "
+            "...) gate. It does NOT mean the item's proc contributes DPS for "
+            "your spec: ticket 226's direct sims measured a member of this "
+            "list contributing nothing for the spec under test "
+            "(.scratch/handoffs/ticket-226-direct-sims.md). Implemented and "
+            "contributes are different questions and this key answers only the "
+            "first. All three scans are literal-id scans, so a registration "
+            "whose id is a named constant is out of their reach."
         ),
         "implementedEffectItemIdsCount": len(implemented),
         "implementedEffectItemIds": sorted(implemented),

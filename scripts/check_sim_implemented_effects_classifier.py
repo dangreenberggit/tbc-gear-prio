@@ -173,11 +173,87 @@ def check_stub_candidates_ignore_non_stub_files() -> list[str]:
     return problems
 
 
+# A trimmed stand-in for sim/druid/feralcat/rotation.go and sim/druid/forms.go:
+# Wolfshead Helm (8345) is never registered through a call, it is read off the
+# equipped set at runtime. Both real call shapes appear -- a struct field and
+# an `if` condition -- plus the two that must NOT count: a commented-out call,
+# and a caller passing a named constant instead of a literal id (ticket 233).
+HAS_ITEM_EQUIPPED_SNIPPET = """package feralcat
+
+func (cat *FeralDruid) setupRotation() {
+	cat.Rotation = &FeralDruidRotation{
+		Wolfshead: cat.HasItemEquipped(8345, []proto.ItemSlot{proto.ItemSlot_ItemSlotHead}),
+	}
+	if cat.HasItemEquipped(32387, []proto.ItemSlot{proto.ItemSlot_ItemSlotRanged}) {
+		cat.applyIdol()
+	}
+	// legacy: cat.HasItemEquipped(29390, []proto.ItemSlot{proto.ItemSlot_ItemSlotHead})
+	if cat.HasItemEquipped(WolfsheadHelmID, []proto.ItemSlot{proto.ItemSlot_ItemSlotHead}) {
+		cat.applyNamedConstantPath()
+	}
+}
+"""
+
+
+def check_has_item_equipped_counts_as_implemented() -> list[str]:
+    """A runtime `HasItemEquipped(<literal>, ...)` gate is a registration.
+
+    Wolfshead Helm (8345) is wired only this way, so before this path existed
+    the generator reported it stub-only while the fork implements it -- one of
+    the two directions ticket 233 names. Unlike the other two regexes this one
+    is not line-anchored, so its comment exclusion is a lookahead rather than
+    the anchor, and both need holding down.
+    """
+    problems: list[str] = []
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        rotation = _write(tmp, "rotation.go", HAS_ITEM_EQUIPPED_SNIPPET)
+        implemented = active_item_ids([rotation])
+        for iid in (8345, 32387):
+            if iid not in implemented:
+                problems.append(
+                    f"HasItemEquipped({iid}, ...) must count as implemented -- "
+                    "it is how the fork wires an equipped-item effect with no "
+                    "NewItemEffect call"
+                )
+        if 29390 in implemented:
+            problems.append(
+                "a commented-out `// ... HasItemEquipped(29390, ...)` must not "
+                "count -- this regex is not line-anchored, so the comment "
+                "exclusion is a lookahead and is the part that can regress"
+            )
+    return problems
+
+
+def check_has_item_equipped_ignores_named_constants() -> list[str]:
+    """The scan is literal-only, and that limit is deliberate.
+
+    `HasItemEquipped(WolfsheadHelmID, ...)` is out of reach of a literal scan,
+    exactly as for the other two regexes. Nothing in the pinned tree does this
+    today; this check exists so a future widening is a decision rather than an
+    accident, and so the regex cannot silently start matching identifiers.
+    """
+    problems: list[str] = []
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        rotation = _write(tmp, "rotation.go", HAS_ITEM_EQUIPPED_SNIPPET)
+        implemented = active_item_ids([rotation])
+        if implemented != {8345, 32387}:
+            problems.append(
+                "the HasItemEquipped scan must find exactly the two literal "
+                f"ids and nothing else, got {sorted(implemented)} -- a named "
+                "constant caller must not resolve to some id"
+            )
+    return problems
+
+
 CHECKS = (
     check_known_cases,
     check_libram_map_struct_literal_counts,
     check_commented_call_not_active,
     check_stub_candidates_ignore_non_stub_files,
+    check_has_item_equipped_counts_as_implemented,
+    check_has_item_equipped_ignores_named_constants,
 )
 
 
