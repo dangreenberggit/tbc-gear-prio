@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect (committed artifact contradicts a durable claim)
 Origin: review of feat/engine-pin-backend-reforge, 2026-08-21
 Blocks: none
@@ -47,9 +47,48 @@ Update `data/wowsims-fork.lock.json`:
 Leave `pushed: false` alone. Nothing has left the machine, and flipping that
 flag is a deliberate act per plan section 1.
 
+## Resolution, 2026-08-21
+
+Fixed rather than carried. `data/wowsims-fork.lock.json` now records the
+post-rebase state, both values re-read from the clone rather than copied out of
+this ticket:
+
+- `commit` -> `f359239572c38af9acb24c1ee178088bfe44692c`
+- `branchedFrom` -> `cbf6b75a889e52c4106351976db66efd914ea349`
+
+Confirmed the tip really sits on the new base:
+
+```
+git -C vendor/tbc-new-fork merge-base --is-ancestor cbf6b75a889e52c4106351976db66efd914ea349 feat/upgrades-tab
+```
+
+`pushed: false` left alone — nothing has left the machine.
+
+Also fixed something this ticket missed: the file's own `_comment` asserted
+"branchedFrom is the v0.0.101 pin from wowsims.lock.json", which the pin move
+had already made false. Reworded to state the rule (branchedFrom is whatever
+`wowsims.lock.json` currently pins) rather than naming a version that goes stale
+on every move.
+
+## Why this should not have been a ticket
+
+Filing it was the wrong call and is worth recording as the useful part.
+
+`AGENTS.md:128` says *deferred* findings become tickets. It says what to do with
+a finding already decided to be deferred; it does not say to defer. The defer
+decision never actually got made here — the finding arrived from a reviewer at
+merge time, it did not block the merge, and it went into the write-it-down pile
+without anyone asking whether filing cost more than fixing. It did: two fields
+against a whole ticket file.
+
+The test applied was "does this block the merge". The right test is "is writing
+the ticket more work than the fix". A `fixed` disposition already existed and
+was used for four other findings on that branch; nothing in the vocabulary was
+missing.
+
 ## Acceptance
 
-- [ ] `data/wowsims-fork.lock.json` records the post-rebase tip and the new
+- [x] `data/wowsims-fork.lock.json` records the post-rebase tip and the new
       `branchedFrom`, both re-read from the clone rather than copied from here.
-- [ ] The `_comment` still describes what the file means accurately.
-- [ ] `pnpm verify` green.
+- [x] The `_comment` still describes what the file means accurately.
+- [x] `pnpm verify` green.
