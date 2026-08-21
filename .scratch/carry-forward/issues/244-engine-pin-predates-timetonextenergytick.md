@@ -168,84 +168,118 @@ Measured, not assumed:
 
 ## Options
 
-**Three of the original four are dead. Recorded so nobody re-opens them.**
+**Two of the original four are dead. Recorded so nobody re-opens them.**
 
-- ~~**Bump to v0.0.105.**~~ Dead. Minimum version carrying the field, 14 tags
-  behind the branch we already track. Buys the field and another bump shortly
-  after.
+- ~~**Bump to v0.0.105.**~~ Dead. It carries the field, but it is the minimum
+  version that does — a stepping stone that buys the field and another bump
+  shortly after. Both live options contain it.
 - ~~**Hold / keep the 12-action skeleton.**~~ Dead. The owner has asked for the
   real APL; holding is a decision not to do the thing this ticket exists for.
-- ~~**Bump to v0.0.119.**~~ Dead once the ancestry was checked — see below.
 
-### The decision, which the ancestry makes for us
+**Still live: `feature/backend-reforge` and `v0.0.119`.** A previous revision
+marked v0.0.119 dead "once the ancestry was checked". That reasoning is
+retracted immediately below and v0.0.119 is back on the table.
 
-**Our pin is an ancestor of `feature/backend-reforge`.** Measured:
+### The ancestry argument, retracted 2026-08-20
 
-```
-curl -s "https://api.github.com/repos/wowsims/tbc-new/compare/8aa378b3671a0923fd11fb34b4b3753e53f20c9b...cbf6b75a889e52c4106351976db66efd914ea349"
-```
+An earlier revision of this ticket decided the matter on ancestry: our pin is an
+ancestor of `feature/backend-reforge` (`ahead_by: 154, behind_by: 0`), therefore
+moving to it is a fast-forward along the line we are already on, while v0.0.119
+is a "sideways move onto a different line."
 
-→ `status: ahead, ahead_by: 154, behind_by: 0`
-
-So `feature/backend-reforge` **contains our pinned commit exactly**, plus 154
-commits. Moving to it is a fast-forward along the line this repo is already on.
-
-`v0.0.119`, by contrast, is a tag on `master`, and backend-reforge *diverges*
-from `v0.0.116` onward (behind 10, 12, 14, and 20 at v0.0.119). Taking v0.0.119
-is a **sideways move onto a different line** — one that does not contain the
-reforge work, and that our pin's own descendants do not sit on.
-
-That reframes the choice. It was written up as "continue on our line vs. take a
-newer tag, do we want reforging?" That was wrong: continuing forward along the
-line we already pinned to and already watch is the default, and jumping to a
-divergent tag is the move that needs justifying. There is no version argument
-for v0.0.119 — it is newer in tag number only, on a line we are not on.
-
-**Decision: track `feature/backend-reforge`** (v0.0.115 base + 54 reforge
-commits, contains our pin).
+**The measurement is correct and the inference from it is wrong.** Re-measured
+2026-08-20, same endpoint, all three candidates against the pin
+`8aa378b3671a0923fd11fb34b4b3753e53f20c9b`:
 
 ```
-python scripts/sync_wowsims.py --update --ref feature/backend-reforge
+curl -s "https://api.github.com/repos/wowsims/tbc-new/compare/8aa378b...<ref>"
 ```
 
-Supported and documented in `sync_wowsims.py`'s own usage examples — this is
-what `--ref` was built for.
+| ref | status | ahead_by | behind_by |
+| --- | --- | --- | --- |
+| `feature/backend-reforge` (`cbf6b75`) | ahead | 154 | 0 |
+| `v0.0.119` | ahead | 122 | 0 |
+| `v0.0.105` | ahead | 30 | 0 |
 
-**The one real cost, unchanged:** no GitHub release exists for a branch (404
-verified above), so the wowsimcli binary must be **built from source**. Go
-`1.25.4` is installed and matches the fork's `toolchain` directive exactly. The
-consequence to accept deliberately: committed sim numbers then trace to a
-locally-built binary rather than a downloaded release artifact, so
-`fetch_wowsimcli.py`'s provenance story needs an answer — pin the built
-binary's sha256 in the lockfile, or record the build command and commit as the
-provenance. Decide that as part of doing the work, not before it.
+Our pin is an ancestor of **every** candidate. It is a commit on `master`, so
+each later `master` tag contains it by construction. `behind_by: 0` therefore
+does not distinguish the options — it is true of all of them, and cannot decide
+between them. v0.0.119 is not "a different line"; it is further along the same
+`master` line the pin sits on. What diverges from `master` is
+`backend-reforge`'s own 54 reforge commits.
 
-Note also `watchedRefs` still records `33970a8` (2026-08-12) while the branch
-HEAD is `cbf6b75` — re-resolve at execution time rather than trusting the
-recorded sha.
+Do not re-derive a decision from `behind_by: 0` against a single ref. Measure
+every candidate or the number means nothing.
+
+## The decision, still open
+
+Retracting the ancestry argument does not resurrect the dead options above:
+v0.0.105 is still a stepping stone, and holding still refuses the thing this
+ticket exists for. It reopens exactly one question, the one the original
+write-up posed:
+
+**`feature/backend-reforge` vs `v0.0.119` — do we want the reforge work enough
+to accept a from-source binary?**
+
+- **`feature/backend-reforge`**: v0.0.115 base + 54 reforge commits. No GitHub
+  release exists for a branch (404 verified above), so the binary must be built
+  from source and committed sim numbers trace to a local build.
+- **`v0.0.119`**: current `master` tag, 4 tags ahead of backend-reforge's base,
+  prebuilt binary with a downloadable release artifact. No reforge work.
+
+Both contain the field. Both are the same mechanical bump. The trade is reforge
+work against binary provenance — a judgement for the owner, not something a
+compare endpoint settles.
+
+**Decision: UNMADE — owner to choose.** A previous revision recorded
+`feature/backend-reforge` as chosen; that record rested on the retracted
+ancestry argument above and is withdrawn.
+
+Whichever ref is chosen, these mechanics were verified and still apply:
+
+- `sync_wowsims.py --update --ref <ref>` is the supported door and is in the
+  script's own usage examples. On a `--ref` pin, `lock["tag"]` becomes the
+  literal ref you passed — a branch name, not a release tag
+  (`sync_wowsims.py:36`).
+- That matters because `fetch_wowsimcli.py:45-48` builds
+  `releases/download/{tag}/...` straight from `lock["tag"]`. On a branch ref it
+  404s. On a tag ref it works unchanged — so this cost lands only on the
+  branch route.
+- On the branch route the binary must be **built from source**. Go `1.25.4` is
+  installed and matches the fork's `toolchain` directive exactly, so the build
+  is not the risk; provenance is. Committed sim numbers would trace to a local
+  build, and `fetch_wowsimcli.py`'s provenance story needs an answer — pin the
+  built binary's sha256 in the lockfile, or record the build command and commit
+  as the provenance.
+- `watchedRefs` still records `33970a8` (2026-08-12) while the branch HEAD was
+  `cbf6b75` (re-confirmed 2026-08-20) — re-resolve at execution time rather
+  than trusting the recorded sha.
 
 ## Acceptance
 
-- [x] Option chosen: **track `feature/backend-reforge`**, because our pin is an
-      ancestor of it (ahead 154, behind 0) — a fast-forward on the line we are
-      already on, where v0.0.119 is a divergent tag on `master`.
-- [ ] The from-source binary's provenance settled and recorded: how a future
-      reader reproduces or verifies the binary the committed sim numbers came
-      from.
-- [ ] **`data/wowsims.lock.json` moved to `feature/backend-reforge`**, re-resolving
-      the branch HEAD at execution time rather than trusting the stale
-      `watchedRefs` sha (`33970a8`, 2026-08-12; HEAD was `cbf6b75` on
+- [ ] Option chosen and recorded here with its reason — `feature/backend-reforge`
+      or `v0.0.119`. **Not decidable from `behind_by: 0`**: the pin is an
+      ancestor of both. The live question is reforge work vs. a prebuilt,
+      hash-pinnable binary.
+- [ ] **If the branch route is chosen:** the from-source binary's provenance
+      settled and recorded — how a future reader reproduces or verifies the
+      binary the committed sim numbers came from. (Not applicable on a tag
+      route, which has a downloadable release artifact.)
+- [ ] **`data/wowsims.lock.json` moved to the chosen ref.** On the branch
+      route, re-resolve the branch HEAD at execution time rather than trusting
+      the stale `watchedRefs` sha (`33970a8`, 2026-08-12; HEAD was `cbf6b75` on
       2026-08-20):
 
       ```
-      python scripts/sync_wowsims.py --update --ref feature/backend-reforge
+      python scripts/sync_wowsims.py --update --ref <chosen-ref>
       ```
 
-      Note `lock["tag"]` becomes the literal ref — a branch name, not a release
-      tag. `sync_wowsims.py:36` warns to read it back and check before assuming
-      it names a tag; anything keying off `tag` needs re-reading, including
-      `fetch_wowsimcli.py`, which builds a release URL from it and will 404.
-- [ ] **The watch is reconciled with the pin.** Once we build from
+      On a `--ref` pin, `lock["tag"]` becomes the literal ref — a branch name,
+      not a release tag. `sync_wowsims.py:36` warns to read it back and check
+      before assuming it names a tag; anything keying off `tag` needs
+      re-reading, including `fetch_wowsimcli.py:45-48`, which builds a release
+      URL from it and will 404 on a branch.
+- [ ] **The watch is reconciled with the pin.** If we end up building from
       `feature/backend-reforge`, keeping it in `watchedRefs` means watching the
       thing we build from, which is not what a watch is for
       (`sync_wowsims.py:41` — "a branch we build from the tag but want to know
