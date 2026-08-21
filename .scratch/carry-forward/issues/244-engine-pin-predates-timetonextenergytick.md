@@ -101,8 +101,22 @@ Verified 2026-08-20 by fetching each ref and reading `proto/apl.proto`:
 
 `feature/backend-reforge` is the branch already recorded in
 `data/wowsims.lock.json` under `watchedRefs` (watched at `33970a8`, 2026-08-12;
-branch HEAD is now `cbf6b75` — it has moved and we have not re-fetched). It
-carries a **working implementation**, not just a schema entry:
+branch HEAD is now `cbf6b75` — it has moved and we have not re-fetched).
+
+**It is at v0.0.115 plus 54 commits of its own reforge work.** Measured by
+`gh`-less compare against each tag:
+
+```
+curl -s "https://api.github.com/repos/wowsims/tbc-new/compare/<tag>...cbf6b75a889e52c4106351976db66efd914ea349"
+```
+
+`behind_by: 0` against every tag through **v0.0.115** (it fully contains them);
+it diverges from v0.0.116 onward (behind 10, then 12, 14, and 20 at v0.0.119).
+Its HEAD is a `Merge branch 'master'` dated 2026-08-13.
+
+So the branch we already track is **14 tags ahead of our pin** and only 4 tags
+behind current upstream — not an exotic side branch. It carries a **working
+implementation**, not just a schema entry:
 
 - `sim/core/apl_value.go:139` — dispatch case
 - `sim/core/apl_values_resources.go:304-325` — the value type
@@ -161,14 +175,26 @@ Measured, not assumed:
    drift, prebuilt binary exists, leaves us current.
 3. **Track `feature/backend-reforge`.** `sync_wowsims.py` explicitly supports
    `--update --ref feature/backend-reforge` (its own usage examples), and this
-   is the branch we already watch. Cost: **no prebuilt binary**, so a
-   from-source build and the provenance problem above. Only worth it if
-   something else on that branch is wanted.
+   is the branch we already watch — we are 14 tags behind it. Gets the field
+   **and** v0.0.115 **and** the reforge work in one move, versus option 1's
+   14-tag-older stepping stone. Cost: **no prebuilt binary**, so a from-source
+   build and the provenance problem above — that is the only thing making this
+   more expensive than option 1, and it is a provenance judgement, not a
+   mechanical blocker.
 4. **Hold.** Keep the 12-action skeleton until an engine bump is wanted for its
    own reasons. Costs nothing now; the owner's APL stays unlandable.
 
-Option 1 is the cheapest route that actually works. Option 3 is the one to reach
-for only if `backend-reforge` is wanted for reforging, not for this field.
+**Correction, 2026-08-20.** This section originally called option 3 marginal —
+"only worth it if `backend-reforge` is wanted for reforging". That was written
+without checking what version the branch was on, which is the number the whole
+decision turns on. At v0.0.115 it is not a side quest: it is the branch this
+repo already committed to tracking, 14 tags ahead of the pin, and it moots the
+stepping-stone problem option 1 creates.
+
+Option 1 is the cheapest route with a **prebuilt, pinnable** binary. Option 3
+gets more in one move and is the better answer if a from-source build is
+acceptable — the trade is provenance (a locally-built binary no one else can
+reproduce byte-for-byte) against not doing this again in a few weeks.
 
 ## Acceptance
 
