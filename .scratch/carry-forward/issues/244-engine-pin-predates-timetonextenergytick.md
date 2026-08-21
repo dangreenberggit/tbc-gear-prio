@@ -382,6 +382,155 @@ re-runs the command above at `cbf6b75` and compares sha256. Record the command,
 the commit, the `main.Version` value, and the resulting sha256 together —
 omitting any one of them breaks reproduction.
 
+## STOP — the chosen branch does not actually unblock the APL (2026-08-21)
+
+The pin was moved to `feature/backend-reforge` and the binary was built. The
+blocking field is fixed. **The APL still does not round-trip clean, because it
+uses two more fields the branch also predates.**
+
+Running the repo's own gate (`scripts/apl_schema.py`) over the owner's rotation:
+
+| schema | unknown fields in the owner's APL |
+| --- | --- |
+| `feature/backend-reforge` (pinned now) | `selectedConjured`, `selectedPotion`, `potionId` |
+| **`v0.0.119`** | **NONE** |
+
+`timeToNextEnergyTick` is known under both. The new blockers are
+`selected_potion = 131` and `selected_conjured = 132`, added upstream in
+`3267f8dfa` ("Add selected potion/conjured APL check", **2026-08-19**).
+`backend-reforge`'s last merge from master is dated 2026-08-13, six days
+earlier, so the branch predates them exactly as it predated the first field.
+
+Confirmed against the built binary, same probe the ticket used:
+
+```
+selected_conjured 0
+selected_potion   0
+potion_id         0
+```
+
+**This is the identical failure mode, not a new one.** These fields sit inside
+`condition` boolean trees (`/groups[3]/actions[2..4]/.../condition/and/vals[]`),
+so `DiscardUnknown: true` drops the leaves and the guards silently evaluate
+something else. A believable DPS number from a mutilated rotation — the exact
+trap this ticket exists to prevent.
+
+### What this does to the decision
+
+`3267f8dfa` **is** v0.0.119 (`status: identical`). So the fix is the tip of
+master, and the trade is now concrete rather than a preference:
+
+| | `feature/backend-reforge` | `v0.0.119` |
+| --- | --- | --- |
+| `timeToNextEnergyTick` | yes | yes |
+| `selectedPotion` / `selectedConjured` | **no** | **yes** |
+| owner's APL round-trips clean | **no** | **yes** |
+| reforge work (`getReforgeCacheGearKey`, `getGearIdentityKey`) | **yes (3 hits)** | **no (0 hits)** |
+| prebuilt binary | no, build from source | yes |
+
+The earlier framing had these as "reforge work vs. binary provenance", with the
+APL landing either way. **That was wrong** — only v0.0.119 actually lands the
+APL. The reforge work and the owner's APL are not currently available from the
+same ref.
+
+### Options, and none is free
+
+1. **Re-pin to v0.0.119.** The APL lands, prebuilt binary, provenance problem
+   disappears. **Loses the reforge work**, which was the whole reason the branch
+   was chosen.
+2. **Stay on `backend-reforge` and wait** for it to merge master past
+   `3267f8dfa`. Keeps reforge; the APL stays unlandable until upstream moves,
+   which is not in our control.
+3. **Rebase/merge `3267f8dfa` into a local branch off `backend-reforge`.** Gets
+   both. Means maintaining our own engine fork of the sim, and every sim number
+   traces to a ref that exists nowhere upstream — a strictly worse provenance
+   story than the one already accepted.
+
+**Not decided. Owner's call**, because the reforge work was the stated reason
+for the branch and this is the first evidence the two goals conflict.
+
+## Where this stands, 2026-08-21 (left open deliberately)
+
+Work parked on `feat/engine-pin-backend-reforge`, unmerged, tree clean. The pin
+moved, the binary was built, the fork was rebased. **The APL is not landed and
+is not being pursued** — the owner's position is that it waits until an engine
+supports it. Everything below is about matching wowsims.com, which is a separate
+goal from the APL.
+
+### Our pin does not match the wowsims site
+
+Recorded as the standing fact this ticket now carries.
+
+The TBC site is built from **master**, verified rather than assumed:
+`.github/workflows/deploy.yml` triggers on `push: branches: [master]`, builds
+`dist/tbc`, and publishes to `wowsims/pages-deploy` under `target-folder: tbc`.
+`wowsims/tbc-new` declares `https://wowsims.com/tbc/` as its homepage.
+
+At time of writing master's tip is `3267f8dfa` and **`v0.0.119` is `status:
+identical` to master**. So v0.0.119 *is* the site.
+
+Our pin is `feature/backend-reforge` (`cbf6b75`), which is **20 ahead / 52
+behind** master and diverged from it.
+
+### The DPS gap, measured
+
+Committed 12-action skeleton, 20k iterations, identical input file to every
+binary. v0.0.101 is the old pin; v0.0.119 is the official release artifact
+(`sha256 4b60235dcbb0088c…`), not a local build.
+
+| seed | v0.0.101 | backend-reforge | v0.0.119 | delta vs old |
+| --- | --- | --- | --- | --- |
+| 1 | 723.51 | 740.74 | 740.74 | +17.23 |
+| 42 | 723.55 | 740.67 | 740.67 | +17.12 |
+| 1234 | 723.57 | 740.78 | 740.78 | +17.21 |
+
+Two findings, and the second was not expected:
+
+1. **Our committed numbers are ~2.4% low against the current engine.** The gap
+   is systematic, not noise — under 0.15 DPS spread across seeds.
+2. **`backend-reforge` and v0.0.119 agree to the cent on all three seeds.** For
+   this workload the reforge branch is DPS-equivalent to the site. The 54 reforge
+   commits do not move feral cat numbers.
+
+Finding 2 narrows the pin question considerably. On *this* measurement the two
+refs are interchangeable for output, so the choice rests on the non-DPS
+differences: v0.0.119 is the site, is a fixed tag, has a prebuilt binary, and
+runs the owner's APL; `backend-reforge` has the reforge work, needs a
+from-source build, cannot run the APL, and sits behind an open PR.
+
+**Caveat, untested:** this is one feral cat skeleton. It does not establish
+DPS-equivalence for ret, for other gear, or for anything touching the 19 changed
+`db.json` proc/stacking items. Do not generalise it into "the branch and the tag
+are the same".
+
+### Upstream PR #385 is open, unmerged and conflicted
+
+`feature/backend-reforge` → `master`, opened 2026-06-06, last updated
+2026-08-13. GitHub reports **`mergeable: false`, `mergeable_state: dirty`** —
+52 commits, 161 files, conflicting against master today.
+
+The reforge functions (`getReforgeCacheGearKey`, `getGearIdentityKey`) are
+**absent from master**. Reforging has never shipped to the site.
+
+Consequence worth stating plainly: if that PR ever lands it will likely land
+*rewritten* after conflict resolution, so `cbf6b75` may not be an ancestor of
+whatever merges. A pin to it can become a pin to a dead commit.
+
+The watch was re-pointed at `cbf6b75` (2026-08-21) so any movement is reported.
+
+### Still open
+
+- **The pin.** Left on `backend-reforge`. Not defended as correct — the owner
+  has been told it does not match the site.
+- **Re-baselining.** Every committed sim number is ~2.4% stale. Not started,
+  because doing it before the pin settles means doing it twice.
+- **Ticket 239** still carries the false claim that `pnpm fetch:protos` advances
+  the pin.
+- **`pnpm verify`** has not run since the pin moved.
+- **The rebased fork has never been compiled on its new base** (154 upstream
+  commits). Keep `backup/pre-reforge-rebase` in `vendor/tbc-new-fork` until a
+  build passes.
+
 ## Acceptance
 
 - [x] Option chosen: **track `feature/backend-reforge`** (v0.0.115 + 54 reforge

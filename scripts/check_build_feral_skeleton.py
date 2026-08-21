@@ -41,24 +41,33 @@ def check_known_schema_accepts_the_real_ret_apl() -> list[str]:
     return []
 
 
-def check_rejects_time_to_next_energy_tick() -> list[str]:
-    """The motivating case named in issue #1 step 8: upstream's newer feral
-    APL uses timeToNextEnergyTick, a field data/proto/apl.proto does not
-    declare (the pinned APLValue oneof has energyTimeToTarget, not this).
-    unknown_field_keys must catch it directly."""
+def check_rejects_unknown_apl_field() -> list[str]:
+    """The motivating case named in issue #1 step 8, re-aimed by ticket 244.
+
+    It originally used timeToNextEnergyTick. That field is now DECLARED by the
+    pinned proto, so asserting it is unknown asserted the opposite of the truth
+    and made this check fail for being right. selectedPotion replaces it: the
+    owner's APL uses it, upstream added it in 3267f8dfa (2026-08-19), and the
+    pin predates that commit -- so it is a real, current gap rather than a
+    synthetic one, and this check keeps documenting the live blocker.
+
+    When the pin next moves past 3267f8dfa this check will fail the same way.
+    That failure is the signal to re-aim it again at whatever is then absent,
+    not to weaken it."""
     apl_value_with_bad_field = {
         "cmp": {
             "op": "OpLe",
-            "lhs": {"timeToNextEnergyTick": {}},
+            "lhs": {"selectedPotion": {"potionId": {"itemId": 22832}}},
             "rhs": {"const": {"val": "1s"}},
         }
     }
     unknown = unknown_field_keys(apl_value_with_bad_field, known_fields())
-    if "timeToNextEnergyTick" not in unknown:
+    if "selectedPotion" not in unknown:
         return [
-            "unknown_field_keys() did not flag timeToNextEnergyTick -- either the "
+            "unknown_field_keys() did not flag selectedPotion -- either the "
             "field has been added to data/proto/apl.proto (re-pin applied, this "
-            "check is stale) or the walk/extraction regressed"
+            "check is stale and should be re-aimed at a field the new pin still "
+            "lacks) or the walk/extraction regressed"
         ]
     return []
 
@@ -82,7 +91,11 @@ def check_build_feral_skeleton_refuses_unknown_apl_field() -> list[str]:
                                 "condition": {
                                     "cmp": {
                                         "op": "OpLe",
-                                        "lhs": {"timeToNextEnergyTick": {}},
+                                        "lhs": {
+                                            "selectedPotion": {
+                                                "potionId": {"itemId": 22832}
+                                            }
+                                        },
                                         "rhs": {"const": {"val": "1s"}},
                                     }
                                 },
@@ -116,7 +129,7 @@ def check_build_feral_skeleton_refuses_unknown_apl_field() -> list[str]:
 
 CHECKS = (
     check_known_schema_accepts_the_real_ret_apl,
-    check_rejects_time_to_next_energy_tick,
+    check_rejects_unknown_apl_field,
     check_build_feral_skeleton_refuses_unknown_apl_field,
 )
 
