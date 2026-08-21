@@ -7,6 +7,22 @@ Blocked by: none
 
 # The proto pin has no `timeToNextEnergyTick`, so a feral APL re-sync is blocked until it is re-pinned
 
+## Superseded by ticket 244, 2026-08-20
+
+**This ticket's acceptance criteria are wrong.** Criterion 1 assumes
+`pnpm fetch:protos` can advance the proto pin. It cannot:
+`scripts/fetch_protos.py:86` reads `sha = lock["commit"]` and re-fetches at the
+commit already pinned.
+
+It also mis-locates the blocker. Re-pinning `data/proto/` alone would satisfy
+the name-based gate in `scripts/apl_schema.py` while the **compiled binary**
+kept discarding the field — turning a loud armed gate into a silent wrong
+answer. The binary at v0.0.101 contains zero occurrences of
+`time_to_next_energy_tick`; see ticket 244 for the probe.
+
+The gate described below is still real and still armed. Ticket 244 carries the
+actual fix, the measured blast radius, and the owner's options.
+
 ## What this is, and what it is not
 
 Upstream's newer feral APL uses an APL value field called
