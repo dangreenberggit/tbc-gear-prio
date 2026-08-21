@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: decision (product ruling required; needs the owner, not an agent)
 Origin: ticket 227 acceptance criterion 5e, 2026-08-19 — the executor of the
   tickets-226-230 stage-gate cannot rule on it; handoff at
@@ -7,6 +7,30 @@ Blocks: 227
 Blocked by: none
 
 # Owner ruling: what to do about mana-driven upgrades on the feral fixture
+
+## PARKED 2026-08-20 — do not investigate
+
+**Owner ruling: punted.** `wontfix` here means parked indefinitely, not
+judged wrong — it is the merge gate's vocabulary word for a ticket nobody is
+working (`KNOWN_STATUSES`, `scripts/check_merge_ready.py:62`). Reopen it to
+`open` if the owner ever wants the ruling made. No agent should
+spend measurement time on it.
+
+Why it is parked rather than answered: the question is shaped like an empirical
+one and is not. Every agent that has picked it up has tried to *earn* the ruling
+with sims, and the cost has been hours per attempt for no decision. The
+measurements it would need already exist — `.scratch/handoffs/ticket-227-healer-noise.md`
+and the ticket-226 direct sims. What is missing is a product judgement, and more
+sim time does not produce one.
+
+**If you are an agent reading this: stop here.** Do not run sims, do not
+re-measure, do not open the handoffs to "check". Only the owner may move this
+ticket. If some other work appears to be blocked on it, say so in chat and let
+the owner decide — do not attempt to unblock it by ruling on their behalf.
+
+This does not block the Stage 2 gate. The open Stage 2 box is the
+"≥3 real characters produce believable shortlists" SME check
+(`PLAN.md` §14), which is independent of this ruling.
 
 Ticket 227 asked whether role-inappropriate items should be pooled at all,
 and flagged it as a product question. The diagnostics answered the empirical

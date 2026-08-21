@@ -1,12 +1,28 @@
-Status: blocked
+Status: open
 Type: bug (suspected scoring / role-relevance gap on the feral-p3 fixture)
 Origin: second `sme-rank-review` opinion on ticket 225's closure, 2026-08-18 —
   verdict `do-not-trust` on the closure; handoff at
   `.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`
 Blocks: none
-Blocked by: 234
+Blocked by: none — 234 was parked `wontfix` on 2026-08-20 (owner punt), so the
+  ruling this waited on is not coming. See the note below.
 
 # Ten healer-statted items score above the feral cutoff
+
+## Unblocked-but-unruled, 2026-08-20
+
+Ticket 234 — the owner ruling this was waiting on — was parked `wontfix`. The
+product question (should role-inappropriate, mana-driven items be pooled at
+all?) has no answer and is not being pursued.
+
+That leaves this ticket open on its *diagnostic* half only: the measurements in
+`.scratch/handoffs/ticket-227-healer-noise.md` stand, and the mana mechanism was
+confirmed rather than refuted. What cannot proceed is any fix that presumes a
+ruling on role-relevance.
+
+**Do not re-run the diagnostics to try to settle 234.** If this ticket is picked
+up, the actionable scope is disclosure — surfacing *why* a mana-driven item
+scores where it does — not deciding whether it belongs in the pool.
 
 On the committed `feral-p3` truth sweep, **10 of the 28 rows in the
 band above the cutoff are healer gear** — intellect, healing power,
