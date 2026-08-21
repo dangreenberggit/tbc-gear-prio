@@ -8,7 +8,7 @@ import type { RaidSimRequest } from "../src/seams/sim-runner.js";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const lock = JSON.parse(
   readFileSync(join(root, "data/wowsims.lock.json"), "utf8")
-) as { tag: string };
+) as { tag: string; commit: string };
 
 const platform = process.platform.startsWith("win") ? "win32-x64" : "linux-x64";
 const binaryName =
@@ -24,9 +24,14 @@ const binaryPath = join(
 // fetches nothing, so this must skip there rather than fail — the recorded
 // SimRunner adapter is what keeps the seam covered offline (PLAN.md §5).
 describe.skipIf(!existsSync(binaryPath))("CliSimRunner", () => {
-  it("reports the pinned wowsimcli version", async () => {
+  // Asserted against the lockfile rather than a version literal. The string
+  // the binary reports is whatever it was built or released as: a release tag
+  // on a --tag pin, but the build's `main.Version` on a --ref pin, which this
+  // repo sets to the pinned commit (ticket 244). Either way it must identify
+  // the pin, or the vendored binary is not the one the lockfile claims.
+  it("reports a version identifying the pinned engine", async () => {
     const sim = new CliSimRunner(binaryPath);
-    expect(await sim.version()).toBe("v0.0.101");
+    expect([lock.tag, lock.commit]).toContain(await sim.version());
   });
 
   it("sims the slamaltman request and returns a DPS observation", async () => {
@@ -39,7 +44,7 @@ describe.skipIf(!existsSync(binaryPath))("CliSimRunner", () => {
     const sim = new CliSimRunner(binaryPath);
     const obs = await sim.run(req, { seed: 42, iterations: 500 });
     expect(obs.iterationsDone).toBe(500);
-    expect(obs.simVersion).toMatch(/0\.0\.101/);
+    expect([lock.tag, lock.commit]).toContain(obs.simVersion);
     expect(obs.dps).toBeGreaterThan(1500);
     expect(obs.dps).toBeLessThan(2500);
     expect(obs.stdev).toBeGreaterThan(0);
