@@ -22,7 +22,9 @@ but every `-t 7.3` citation in tickets and doc comments must move with it.
       `grep -rn "7\.3" packages/core docs .scratch/carry-forward/issues`.
 - [x] Assertions in the renamed block are byte-identical
       (`git diff --numstat` deletions column 0 inside the block).
-- [ ] `pnpm verify` green. **Blocked by ticket 236, not by this work.**
+- [x] `pnpm verify` green. Was blocked by ticket 236 via a `racing.test.ts` 7.0
+      failure; that file was deleted with racing at `28b00f9` and ticket 236's
+      fix landed. Re-checked 2026-08-20 at `88c1c1e`: `pnpm verify` exits 0.
 
 ## Resolution (2026-08-19)
 

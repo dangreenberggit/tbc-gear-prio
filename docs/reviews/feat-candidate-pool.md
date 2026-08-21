@@ -365,3 +365,144 @@ Also open from this round's SME reviews, filed during the stage-gate stages:
 226 (feral-p3 head/idol/trinket scoring cliffs), 227 (healer-role items above
 the feral cutoff; truth-SE ≈ cutoff hypothesis), 228 (pool admits
 druid-illegal weapons; Cataclysm's Edge #16, Soul Cleaver ranked).
+
+---
+
+# Round 4 — 2026-08-20
+
+Reviewed range: `8cb5e68767c68625a80db3bacf1dbf818404ea10..88c1c1ebb0bc7a43bb600738c93fd44037ceeb8f`
+
+57 commits, ~766 KB of diff, chained from round 3's recorded `<through-sha>` so
+no commit falls between rounds. Three fresh-context Opus subagents at effort
+medium, one parallel batch; `codex` is not on `PATH`, so this ran on Claude
+Code's review lane (a ceiling, not a wall).
+
+The diff does not fit one reviewer, so it was split by axis:
+
+| Slice                                                                                                         | Bytes  | Axis             |
+| ------------------------------------------------------------------------------------------------------------- | ------ | ---------------- |
+| `packages/core/{src,test}`, `vitest.config.ts`, `eslint.config.js`                                            | 370 KB | Adversarial      |
+| `scripts/`, `data/`, `docs/`                                                                                  | 141 KB | Domain           |
+| all three, plus hooks, `.gitignore`, `package.json`, `AGENTS.md`, `PLAN.md`, `.claude/`, `.agents/`, lockfile | 44 KB  | Standards + Spec |
+
+`pnpm verify` exits 0 on `88c1c1e`, confirmed by capturing the exit code
+directly. Its feral-skeleton gate prints a non-fatal warning about the unpinned
+`timeToNextEnergyTick` proto field — that is ticket 239, filed in this window.
+
+## What this window did
+
+Racing was **removed**, not fixed: `rank.ts` lost ~658 lines and `promotion.ts`,
+`promotion.test.ts` and `racing.test.ts` were deleted. Every eligible candidate
+is now full-swept. The gate racing was built against measured wall ratios of
+1.407/1.476/1.098 where it needed to win, so it lost on its own terms and went.
+ADR-0026 records the removal. Alongside that: a weapon-type exclusion path
+(ticket 228's reopen-and-redo), seed spacing (ticket 236, merged from
+`feat/seed-overlap`), an effects classifier fix, and tickets 238-241.
+
+## Adversarial
+
+**No blockers.** One latent finding, filed as ticket 243 — `assertUsableSeeds`
+gates ticket 236's spacing check behind an optional parameter, so the guard
+against a false-precision SE defaults to off on a barrel-exported function. The
+one production caller passes it, so today's behaviour is correct.
+
+What it cleared, with method:
+
+- **The frozen cache-key constant is genuinely golden, not a tautology.** It
+  checked out `8cb5e68` in a scratch worktree, ran the pre-removal
+  `contentHashOf` against the same base, and got a hash byte-identical to the
+  constant in `content-hash.test.ts:113`. No stored ranking silently re-sims.
+- **`full-sweep-recall.test.ts` is not test theatre** — its truth came from the
+  real pinned binary via `record_synthetic_fixtures.mjs`, re-recorded in this
+  window at `57ec814`/`7c2620f`. Its `runsByIterations` key-set assertion
+  structurally prevents a reintroduced screening pass.
+- **The racing removal is complete in `src`** — no residual `screened`,
+  `ruledOut` or `isScreened`. The deleted tests covered only deleted code.
+- **`RankError`** is handled generically at `cli.ts:600`, so no discriminated
+  case can be silently missed.
+
+Declared unexamined: the `measure-*.ts` scripts (~4,000 lines — vitest never
+collects them and their numbers need the gitignored vendor binary), and the
+`data/` regeneration lane.
+
+## Domain
+
+**No contradictions of any established finding.** The diff does not touch WCL
+parsing, slot mapping, enchant namespaces, meta activation, race inference, or
+spec classification.
+
+One **unverified incompleteness**, filed as ticket 242: the ret exclusion set
+covers staff only, where upstream `paladin.ts:26-33` omits dagger and fist from
+paladin's eligible types exactly as it omits staff. Latent —
+`allow_one_hand=False` removes both first.
+
+Claims it tried to break and could not:
+
+- **The universe shrink is justified, not an over-broad filter.** Diffing old
+  against new membership by item: p2 246 → 228, p3 398 → 365. **Every removed
+  row is a weapon of an excluded type; zero items added; zero non-weapon rows
+  touched.**
+- **The polearm exclusion is correct**, against general TBC knowledge. Druids
+  did not gain polearms here: `druid.ts` lists Dagger, Fist, Mace, OffHand,
+  Staff only. Ticket 228 caught this exact SME recall error.
+- **The mana spring totem correction moves toward the evidence.** It
+  strengthens ticket 227's finding (starving _despite_ the totem) rather than
+  weakening it — the reverse of motivated reasoning.
+- **`HasItemEquipped` and item 8345** (Wolfshead Helm) trace to real call sites
+  in the pinned fork.
+
+## Standards + Spec
+
+**Pass on both.** The repo's three hard rules are honoured: no type is derived
+from a JSON import (the old wrong comment in `pool.ts` was actively corrected);
+durable claims carry re-runnable commands, pins, and gitignored-input warnings;
+added `src` comments explain why.
+
+Standards findings are cosmetic: seven name-restating JSDoc one-liners on
+trivial helpers in the two new test-support modules, two mechanics-narrating
+section dividers, and stale `racing-support.ts` paths in tickets 222/223/229
+(renamed to `measure-support.ts` at `28b00f9`; ticket 225:815 records the
+rename, so these read as dated text rather than live promises). Left as-is —
+the restating comments are worth deleting when those files are next touched.
+
+Spec: the shipped code matches the plan, and **the racing removal is reflected
+consistently everywhere** — the item most likely to leave docs promising a
+feature that no longer exists. `candidate-pool.md` §6 opens with a bold
+"Superseded by ADR-0026" block that records what was built, what it measured,
+and — the part most removals get wrong — where the recall obligation moved. The
+one surviving "screening on" passage (`plan.md:273-300`) is a dated 2026-08-17
+measurement of the fork, which still races by design.
+
+**Ticket 228's resolution genuinely delivers.** It withdraws its own prior
+`resolved`, names both errors, and replaces a `skipIf`-gated test that proved
+nothing on a fresh clone with one driven from committed data — 20 tests, no
+`skipIf`, covering any future spec from the generated manifest.
+
+Both spec findings were ticket hygiene, and both are fixed in this round.
+
+## Disposition
+
+| ID  | Axis        | Sev     | Finding                                                                                                                                        | Disposition                                                                                       |
+| --- | ----------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | low-mod | `assertUsableSeeds` gates ticket 236's spacing check behind an optional param; the unsafe one-arg form is barrel-exported and unused           | **defer** → `.scratch/carry-forward/issues/243-usable-seeds-spacing-check-is-opt-in.md`           |
+| D1  | Domain      | low     | Ret exclusion set is `[8]` where `paladin.ts` supports `[2, 3, 8]`; masked by `allow_one_hand=False`                                           | **defer** → `.scratch/carry-forward/issues/242-ret-weapon-exclusion-set-omits-dagger-and-fist.md` |
+| S1  | Spec        | minor   | Ticket 230 marked `resolved` with an unchecked `pnpm verify` box whose blocker cited the since-deleted `racing.test.ts`                        | **fixed** — box checked against a re-run at `88c1c1e`                                             |
+| S2  | Spec        | minor   | Ticket 236's prose `Status:` line survived the gate only because `STATUS_RE` captures one token — the shape ticket 238 was filed to eliminate  | **fixed** — qualifier moved to a `Note:` line                                                     |
+| S3  | Standards   | minor   | Seven restating JSDoc one-liners in the new test-support modules; `withDuration:267` states _that_ variation is pinned to 0 without saying why | **wontfix** — cosmetic, on self-describing test helpers; delete when next touched                 |
+| S4  | Standards   | minor   | Stale `racing-support.ts` paths in tickets 222/223/229                                                                                         | **wontfix** — dated text; the rename is recorded at ticket 225:815                                |
+
+## Summary
+
+No blockers on any axis. Two latent defects deferred to tickets 242 and 243 —
+both are correct today and become live only under a future change. Two ticket
+hygiene defects fixed in this round.
+
+The strongest evidence in this window is negative: three reviewers tried to
+break the racing removal, the universe shrink, and the frozen cache key, and
+each one independently reproduced the artifact it was checking rather than
+taking the commit message's word for it.
+
+**Open decision for the owner — ticket 234**, which blocks 227: whether
+role-inappropriate, mana-driven items should be pooled at all on the feral
+fixture. It is marked `Type: decision (product ruling required; needs the
+owner, not an agent)`. No agent can close it, and this review does not.

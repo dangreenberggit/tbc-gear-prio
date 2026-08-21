@@ -1,4 +1,5 @@
-Status: open (fix landed; two acceptance boxes partial — see below)
+Status: open
+Note: the fix landed; two acceptance boxes remain partial — see below.
 Type: defect
 Origin: ticket 225's reopened-scope measurements, 2026-08-19 (claims C20/C21)
 Blocks: 237
