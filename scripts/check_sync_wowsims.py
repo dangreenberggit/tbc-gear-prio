@@ -14,7 +14,9 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
+import inspect
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -22,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import sync_wowsims  # noqa: E402
+import warn_upstream_drift  # noqa: E402
 
 
 def check_vendor_is_empty_missing_dir() -> list[str]:
@@ -303,6 +306,178 @@ def check_promoting_file_out_of_per_file_pin_is_noop_diff() -> list[str]:
     return problems
 
 
+def _run_warner(returncode: int, stdout: str = "", stderr: str = "") -> str:
+    """Drive warn_upstream_drift.main() against a canned --check result.
+
+    Stubs the subprocess call rather than shelling out, so these checks stay
+    offline and independent of whatever vendor/ and gh auth this machine has.
+    """
+    import io
+    from contextlib import redirect_stdout
+
+    class _Completed:
+        pass
+
+    fake = _Completed()
+    fake.returncode = returncode
+    fake.stdout = stdout
+    fake.stderr = stderr
+
+    orig = warn_upstream_drift.subprocess.run
+    orig_note = warn_upstream_drift.warn_pin_behind_watched_refs
+    warn_upstream_drift.subprocess.run = lambda *a, **k: fake
+    # The containment NOTE shells out to `gh`; it is not part of this contract.
+    warn_upstream_drift.warn_pin_behind_watched_refs = lambda: None
+    buf = io.StringIO()
+    try:
+        with redirect_stdout(buf):
+            rc = warn_upstream_drift.main()
+    finally:
+        warn_upstream_drift.subprocess.run = orig
+        warn_upstream_drift.warn_pin_behind_watched_refs = orig_note
+    if rc != 0:
+        return f"__NONZERO_EXIT_{rc}__\n" + buf.getvalue()
+    return buf.getvalue()
+
+
+def check_drift_token_still_matches_what_check_emits() -> list[str]:
+    """The warner finds drift by matching the literal "DRIFT:" in --check's
+    output. Nothing else couples the two scripts, so if do_check() ever renames
+    that token the warner silently reports "in sync" forever -- ticket 245's
+    third-instance failure, and the reason this check exists.
+
+    Asserted against do_check()'s source rather than by running it, because
+    running it needs network, gh auth and a populated vendor/.
+    """
+    problems = []
+    src = inspect.getsource(sync_wowsims.do_check)
+    token = warn_upstream_drift.DRIFT_TOKEN
+
+    if token not in src:
+        problems.append(
+            f"warn_upstream_drift matches {token!r} but sync_wowsims.do_check() no "
+            "longer emits it -- the warner is now a no-op that always reports "
+            '"in sync". Update both together.'
+        )
+
+    # The token must be in do_check's *print* of each drift item, not merely
+    # mentioned in a comment somewhere in the function.
+    if not re.search(r'print\(f?"[^"]*' + re.escape(token), src):
+        problems.append(
+            f"do_check() mentions {token!r} but no longer prints it in a print() "
+            "call -- the warner greps stdout, so a token that only survives in a "
+            "comment makes the warner a no-op."
+        )
+    return problems
+
+
+def check_check_exit_codes_match_the_warner_branches() -> list[str]:
+    """The warner branches on --check's exit codes: 2 means vendor/ absent
+    (skip), 0 means ran-and-clean, anything else means it did not run. Pin the
+    two that do_check() returns explicitly, so a renumbering shows up here
+    rather than as a wrong warning.
+    """
+    problems = []
+    src = inspect.getsource(sync_wowsims.do_check)
+
+    if "return 2" not in src:
+        problems.append(
+            "do_check() no longer returns 2 -- the warner reads 2 as 'vendor/ "
+            "absent, skip'. If that code moved, warn_upstream_drift must move with it."
+        )
+    if "return 1" not in src:
+        problems.append(
+            "do_check() no longer returns 1 on drift -- the warner treats a "
+            "nonzero exit with no DRIFT: lines as 'check did not run'."
+        )
+    return problems
+
+
+def check_warner_never_claims_in_sync_when_check_failed() -> list[str]:
+    """The defect ticket 245 measured: with `gh` absent, --check dies on a
+    traceback and exits 1, and the warner used to print "in sync with the pin".
+    A tripwire that reports all-clear when it never ran is worse than none --
+    it is the same "we do not have this feature" reassurance that cost two
+    tickets. Exit must stay 0 (warn-only), but the text must not claim sync.
+    """
+    problems = []
+    out = _run_warner(1, stderr="Traceback (most recent call last):\nFileNotFoundError: gh\n")
+
+    if out.startswith("__NONZERO_EXIT_"):
+        problems.append(
+            "the warner must always exit 0 -- it is wired into pnpm verify as a "
+            f"warning, not a gate. Got: {out.splitlines()[0]}"
+        )
+    if "in sync" in out:
+        problems.append(
+            "warner reported 'in sync' when --check exited 1 without reporting "
+            f"drift (i.e. it never ran). Output was: {out.strip()!r}"
+        )
+    if "UNKNOWN" not in out:
+        problems.append(
+            "a --check that did not run must be reported as unknown drift, not "
+            f"silence. Output was: {out.strip()!r}"
+        )
+    return problems
+
+
+def check_warner_reports_drift_and_stays_green() -> list[str]:
+    """The normal drift case: --check exits 1 and names the drift. The warner
+    must surface every DRIFT: line and still exit 0.
+    """
+    problems = []
+    body = (
+        "  pinned:   somepin (abcdef123456)\n"
+        "  DRIFT: new release available: somepin -> sometag\n"
+        "  DRIFT: watched ref someref moved: aaaaaaaaaaaa -> bbbbbbbbbbbb\n"
+    )
+    out = _run_warner(1, stdout=body)
+
+    if out.startswith("__NONZERO_EXIT_"):
+        problems.append(f"warner must exit 0 on drift, got {out.splitlines()[0]}")
+    for want in ("new release available", "watched ref someref moved"):
+        if want not in out:
+            problems.append(f"warner dropped a DRIFT line containing {want!r}: {out.strip()!r}")
+    if "UNKNOWN" in out:
+        problems.append(
+            "real drift must not be reported as 'check did not run': " f"{out.strip()!r}"
+        )
+    return problems
+
+
+def check_warner_skips_on_absent_vendor() -> list[str]:
+    """Exit 2 is the fresh-clone / pre-restore state, not a defect. It must
+    read as a skip, and must not be mistaken for the did-not-run case.
+    """
+    problems = []
+    out = _run_warner(2, stderr="vendor/wowsims/ is empty or missing")
+
+    if out.startswith("__NONZERO_EXIT_"):
+        problems.append(f"warner must exit 0 when vendor/ is absent, got {out.splitlines()[0]}")
+    if "vendor" not in out:
+        problems.append(f"exit 2 must be reported as a vendor/ skip: {out.strip()!r}")
+    if "in sync" in out:
+        problems.append(
+            f"an absent vendor/ proves nothing about sync; do not claim it: {out.strip()!r}"
+        )
+    return problems
+
+
+def check_warner_reports_clean_only_on_exit_zero() -> list[str]:
+    """The one case that may say "in sync": --check ran to completion and
+    found nothing."""
+    problems = []
+    out = _run_warner(0, stdout="  pinned: somepin\n\n  in sync.\n")
+
+    if out.startswith("__NONZERO_EXIT_"):
+        problems.append(f"warner must exit 0, got {out.splitlines()[0]}")
+    if "in sync" not in out:
+        problems.append(f"a clean exit-0 --check should report in sync: {out.strip()!r}")
+    if "UNKNOWN" in out:
+        problems.append(f"a clean exit-0 --check is not unknown drift: {out.strip()!r}")
+    return problems
+
+
 CHECKS = (
     check_vendor_is_empty_missing_dir,
     check_vendor_is_empty_empty_dir,
@@ -314,6 +489,13 @@ CHECKS = (
     check_restore_fetches_override_not_main_pin,
     check_second_override_entry_round_trips,
     check_promoting_file_out_of_per_file_pin_is_noop_diff,
+    # The --check / warn_upstream_drift output contract (ticket 245).
+    check_drift_token_still_matches_what_check_emits,
+    check_check_exit_codes_match_the_warner_branches,
+    check_warner_never_claims_in_sync_when_check_failed,
+    check_warner_reports_drift_and_stays_green,
+    check_warner_skips_on_absent_vendor,
+    check_warner_reports_clean_only_on_exit_zero,
 )
 
 

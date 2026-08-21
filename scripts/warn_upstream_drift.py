@@ -46,6 +46,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CHECK = ROOT / "scripts" / "sync_wowsims.py"
 
+# The entire coupling between this warner and sync_wowsims.py is that do_check()
+# prints this literal on each drift item. Named here so check_sync_wowsims.py can
+# assert both sides still agree -- if the token is renamed on one side only, the
+# warner matches nothing and reports "in sync" forever (ticket 245).
+DRIFT_TOKEN = "DRIFT:"
+
 
 def main() -> int:
     try:
@@ -64,10 +70,25 @@ def main() -> int:
         return 0
 
     body = (out.stdout or "") + (out.stderr or "")
-    drift_lines = [ln for ln in body.splitlines() if "DRIFT:" in ln]
+    drift_lines = [ln for ln in body.splitlines() if DRIFT_TOKEN in ln]
 
     if out.returncode == 2:
         print("upstream drift: vendor/ absent -- skipped (run pnpm sync:wowsims:restore)")
+        return 0
+
+    # Only exit 0 means "ran to completion and found nothing". Exit 1 means
+    # drift, and --check always prints a DRIFT: line for each one; exit 1 with
+    # none is --check dying before it got there (no `gh` on PATH, no auth, an
+    # import error after a refactor). Reporting that as "in sync" is the
+    # failure this whole warner exists to prevent -- ticket 245 measured it:
+    # with `gh` absent, --check exits 1 on a traceback and the old code printed
+    # "in sync with the pin". A tripwire that lies is worse than none.
+    if out.returncode != 0 and not drift_lines:
+        print("upstream drift: CHECK DID NOT RUN -- drift is UNKNOWN, not absent.")
+        print(f"  sync_wowsims.py --check exited {out.returncode} without reporting drift.")
+        for ln in body.strip().splitlines()[-3:]:
+            print(f"  | {ln.strip()}")
+        print("  usually no `gh` on PATH or no auth; run pnpm sync:wowsims:check to see it.")
         return 0
 
     if not drift_lines:
