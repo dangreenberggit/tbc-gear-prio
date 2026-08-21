@@ -37,7 +37,15 @@ jobs:
       # be compared against its source. Ticket 69.
       - run: pnpm run sync:atlasloot:restore
 
+      # GH_TOKEN is for the upstream-drift:warn step at the tail of verify: it
+      # shells out to `gh api`, which in Actions has no credentials unless one
+      # is passed explicitly. Without it the drift check never ran here at all
+      # -- run 32504123312 reported "CHECK DID NOT RUN", and before that fix it
+      # reported "in sync with the pin" while checking nothing. Read-only; the
+      # step is warn-only and cannot fail the build either way. Ticket 245.
       - run: pnpm run verify
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       # PLAN.md §8.1: regenerating packages/core/src/proto/ from the pinned
       # data/proto/*.proto must reproduce the committed output exactly. A diff
