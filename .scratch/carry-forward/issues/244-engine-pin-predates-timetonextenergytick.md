@@ -232,9 +232,29 @@ recorded sha.
 - [ ] The from-source binary's provenance settled and recorded: how a future
       reader reproduces or verifies the binary the committed sim numbers came
       from.
-- [ ] If a pin moves: `data/wowsims.lock.json`, `data/proto/`, the wowsimcli
-      binary and `data/wowsims-fork.lock.json` all move **together**, and the
-      working tree matches `HEAD` after regenerating every committed artifact.
+- [ ] **`data/wowsims.lock.json` moved to `feature/backend-reforge`**, re-resolving
+      the branch HEAD at execution time rather than trusting the stale
+      `watchedRefs` sha (`33970a8`, 2026-08-12; HEAD was `cbf6b75` on
+      2026-08-20):
+
+      ```
+      python scripts/sync_wowsims.py --update --ref feature/backend-reforge
+      ```
+
+      Note `lock["tag"]` becomes the literal ref — a branch name, not a release
+      tag. `sync_wowsims.py:36` warns to read it back and check before assuming
+      it names a tag; anything keying off `tag` needs re-reading, including
+      `fetch_wowsimcli.py`, which builds a release URL from it and will 404.
+- [ ] **The watch is reconciled with the pin.** Once we build from
+      `feature/backend-reforge`, keeping it in `watchedRefs` means watching the
+      thing we build from, which is not what a watch is for
+      (`sync_wowsims.py:41` — "a branch we build from the tag but want to know
+      about if it moves"). Either drop the `watchedRefs` entry, or repoint the
+      watch at whatever we are now *not* building from (`master`, so a future
+      divergence is visible). Record which and why.
+- [ ] `data/proto/`, the wowsimcli binary and `data/wowsims-fork.lock.json` all
+      move **with** the main pin, and the working tree matches `HEAD` after
+      regenerating every committed artifact.
 - [ ] `grep -rn timeToNextEnergyTick data/proto/` returns a hit, **and** the
       binary probe above returns a non-zero count. Both, not either.
 - [ ] The owner's APL round-trips through the pinned binary with **no dropped
