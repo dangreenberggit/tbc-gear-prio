@@ -168,37 +168,44 @@ Measured, not assumed:
 
 ## Options
 
-1. **Bump the pin to v0.0.105.** Minimum version with the field; smallest
-   upstream drift; prebuilt binary exists. Leaves us on a stepping stone 14 tags
-   behind.
-2. **Bump to v0.0.119** (current upstream tag). Same mechanical work, larger
-   drift, prebuilt binary exists, leaves us current.
-3. **Track `feature/backend-reforge`.** `sync_wowsims.py` explicitly supports
-   `--update --ref feature/backend-reforge` (its own usage examples), and this
-   is the branch we already watch — we are 14 tags behind it. Gets the field
-   **and** v0.0.115 **and** the reforge work in one move, versus option 1's
-   14-tag-older stepping stone. Cost: **no prebuilt binary**, so a from-source
-   build and the provenance problem above — that is the only thing making this
-   more expensive than option 1, and it is a provenance judgement, not a
-   mechanical blocker.
-4. **Hold.** Keep the 12-action skeleton until an engine bump is wanted for its
-   own reasons. Costs nothing now; the owner's APL stays unlandable.
+**Two of the four are dead on arrival. Recorded here so nobody re-opens them.**
 
-**Correction, 2026-08-20.** This section originally called option 3 marginal —
-"only worth it if `backend-reforge` is wanted for reforging". That was written
-without checking what version the branch was on, which is the number the whole
-decision turns on. At v0.0.115 it is not a side quest: it is the branch this
-repo already committed to tracking, 14 tags ahead of the pin, and it moots the
-stepping-stone problem option 1 creates.
+- ~~**Bump to v0.0.105.**~~ Dead. It is the *minimum* version carrying the
+  field, and it is 14 tags behind `feature/backend-reforge`, which this repo
+  already tracks. It buys the field and nothing else, and buys another engine
+  bump shortly after. It only looked cheapest before anyone checked what
+  version the watched branch was on.
+- ~~**Hold / keep the 12-action skeleton.**~~ Dead. The owner has asked for the
+  real APL; holding is a decision not to do the thing the ticket exists for.
 
-Option 1 is the cheapest route with a **prebuilt, pinnable** binary. Option 3
-gets more in one move and is the better answer if a from-source build is
-acceptable — the trade is provenance (a locally-built binary no one else can
-reproduce byte-for-byte) against not doing this again in a few weeks.
+### The actual choice
+
+1. **Bump the pin to v0.0.119** (current upstream tag). Prebuilt binary exists
+   (`releases/download/v0.0.119/wowsimcli-windows.exe.zip` → 200), so the pin
+   stays a real pin and committed sim numbers keep byte-reproducible
+   provenance. **Newer than `backend-reforge`'s v0.0.115 base**, so it is not a
+   compromise on version — only on the reforge work.
+2. **Track `feature/backend-reforge`** (v0.0.115 + 54 reforge commits).
+   `sync_wowsims.py --update --ref feature/backend-reforge` is supported and
+   documented in its own usage examples. Gets the reforge work. Costs: **no
+   release binary**, so a from-source build, and every committed sim number
+   then traces to a local build nobody else can reproduce byte-for-byte.
+
+**Recommendation: option 1**, unless the reforge work is specifically wanted.
+It is on a newer base than option 2, keeps a pinnable binary, and needs no
+from-source build. Option 2's only advantage is the reforge commits — so the
+question to answer is simply *do we want reforging now?* If no, option 1. If
+yes, option 2 and accept the provenance cost.
+
+Either way the mechanical work is the same: move `data/wowsims.lock.json`,
+`data/proto/`, the wowsimcli binary and `data/wowsims-fork.lock.json` together,
+regenerate committed artifacts, re-baseline sim numbers, rebase the fork.
 
 ## Acceptance
 
-- [ ] An option above chosen and recorded here with its reason.
+- [ ] One of the two live options chosen and recorded here with its reason. The
+      only real question is whether the reforge work is wanted now; if not, it
+      is option 1.
 - [ ] If a pin moves: `data/wowsims.lock.json`, `data/proto/`, the wowsimcli
       binary and `data/wowsims-fork.lock.json` all move **together**, and the
       working tree matches `HEAD` after regenerating every committed artifact.
