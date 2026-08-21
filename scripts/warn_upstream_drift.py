@@ -22,6 +22,15 @@ records the first instance of this exact failure -- "the optimizer that
 (sync_wowsims.py:443). This is the second. A tripwire wired to nothing is not
 a tripwire.
 
+It also reports the **relationship** between the pin and each watched ref, not
+just whether the ref moved. `tag` and `watchedRefs` are separate lockfile keys
+with no stated connection, so both failures read them as two independent facts
+-- "we build from v0.0.101" and "we watch some branch" -- and never asked
+whether one contained the other. It does: the pin is an ancestor of
+`feature/backend-reforge` (ahead 154, behind 0), so every feature on that
+branch is reachable by fast-forward, not absent. A fresh value in a stale
+schema would not have prevented either mistake; naming the containment does.
+
     python scripts/warn_upstream_drift.py
 
 Always exits 0. Run `pnpm sync:wowsims:check` for the real exit code.
@@ -29,6 +38,7 @@ Always exits 0. Run `pnpm sync:wowsims:check` for the real exit code.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -69,7 +79,53 @@ def main() -> int:
         print(f"  {ln.strip()}")
     print("  a watched ref that moved may have gained a feature we treat as absent;")
     print("  see .scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md")
+    warn_pin_behind_watched_refs()
     return 0
+
+
+def warn_pin_behind_watched_refs() -> None:
+    """Report how the build pin sits relative to each watched ref.
+
+    Movement alone was never the missed signal -- containment was. When the pin
+    is an ancestor of a watched ref, that ref's features are reachable by
+    fast-forward and must not be described as unavailable. Prints nothing it
+    cannot establish; never raises.
+    """
+    try:
+        lock = json.loads((ROOT / "data/wowsims.lock.json").read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return
+    watched = lock.get("watchedRefs") or {}
+    pin = lock.get("commit")
+    repo = lock.get("repo")
+    if not (watched and pin and repo):
+        return
+
+    for name in watched:
+        try:
+            raw = subprocess.run(
+                ["gh", "api", f"repos/{repo}/compare/{pin}...{name}",
+                 "--jq", ".status + \" \" + (.ahead_by|tostring) + \" \" + (.behind_by|tostring)"],
+                capture_output=True, text=True, timeout=30,
+            )
+            if raw.returncode != 0:
+                continue
+            status, ahead, behind = raw.stdout.strip().split()
+        except Exception:  # noqa: BLE001
+            continue
+
+        if behind == "0" and ahead != "0":
+            print(
+                f"  NOTE: the pin is an ANCESTOR of watched ref {name} "
+                f"({ahead} commits ahead, 0 behind)."
+            )
+            print(
+                "        Features on that branch are reachable by fast-forward -- "
+                "do not call them absent."
+            )
+        elif status == "diverged":
+            print(f"  NOTE: the pin has DIVERGED from watched ref {name} "
+                  f"(ahead {ahead}, behind {behind}) -- not a fast-forward.")
 
 
 if __name__ == "__main__":
