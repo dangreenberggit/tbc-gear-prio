@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: defect (latent; masked by `allow_one_hand=False`)
 Origin: pre-merge review round 4 of `feat/candidate-pool`, 2026-08-20 (domain axis)
 Blocks: none
@@ -72,12 +72,39 @@ Two ways this becomes live:
 
 ## Acceptance
 
-- [ ] `WEAPON_DAGGER = 2` and `WEAPON_FIST = 3` defined beside `WEAPON_STAFF`
+- [x] `WEAPON_DAGGER = 2` and `WEAPON_FIST = 3` defined beside `WEAPON_STAFF`
       (`assemble_universe.py:103`), and the ret profile excludes all three.
-- [ ] The profile comment quotes all three omissions against `paladin.ts:26-33`,
+- [x] The profile comment quotes all three omissions against `paladin.ts:26-33`,
       not just staff.
-- [ ] `data/weapon-type-exclusions.json` regenerates to `"ret": [2, 3, 8]`.
-- [ ] The universe histogram above is byte-unchanged — this fix must move no
+- [x] `data/weapon-type-exclusions.json` regenerates to `"ret": [2, 3, 8]`.
+- [x] The universe histogram above is byte-unchanged — this fix must move no
       universe membership, because the hand gate already removed these items.
       A membership change means the hand-gate reasoning above is wrong.
-- [ ] `pnpm verify` green.
+- [x] `pnpm verify` green.
+
+## Resolution (2026-08-20)
+
+Added `WEAPON_DAGGER = 2` and `WEAPON_FIST = 3` beside `WEAPON_STAFF` in
+`scripts/assemble_universe.py`, and changed the ret profile's
+`excluded_weapon_types` to `frozenset({WEAPON_DAGGER, WEAPON_FIST,
+WEAPON_STAFF})`. Rewrote the comment to cite all three omissions against
+`paladin.ts`'s `static weaponTypes` list, not just staff.
+
+Regenerated every committed universe by running
+`python scripts/assemble_universe.py --max-phase {2,3,4,5} --spec ret` and
+`--max-phase {2,3} --spec feral`, which also rewrites
+`data/weapon-type-exclusions.json` as a side effect (`write_exclusions_manifest`,
+called from `main()`). Confirmed `data/weapon-type-exclusions.json` now reads
+`"ret": [2, 3, 8]`.
+
+Re-ran the histogram command from this ticket after regeneration; output was
+identical to the row recorded above at `88c1c1e`, and `git diff` against every
+regenerated `data/universes/*.json` / `*.report.json` produced zero diff lines
+(git only warned about CRLF-vs-LF normalization on the pre-existing working-tree
+files, not a content change — those files were checked back out unmodified so
+the commit carries no unrelated line-ending noise). This confirms the ticket's
+hand-gate reasoning: `allow_one_hand=False` already removes every TBC dagger
+and fist before the weapon-type check runs, so widening the exclusion set moved
+no membership.
+
+Ran `pnpm verify` from the repo root: exit code 0.

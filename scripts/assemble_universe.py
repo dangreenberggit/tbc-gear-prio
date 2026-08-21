@@ -98,6 +98,8 @@ ARMOR_LEATHER = 2
 ARMOR_MAIL = 3
 ARMOR_PLATE = 4
 WEAPON_AXE = 1
+WEAPON_DAGGER = 2
+WEAPON_FIST = 3
 WEAPON_POLEARM = 6
 WEAPON_SHIELD = 7
 WEAPON_STAFF = 8
@@ -280,10 +282,11 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
         ranged_type=RANGED_LIBRAM,
         allow_one_hand=False,
-        # Paladins wield polearms but not staves. wowsims
-        # ui/core/player_classes/paladin.ts lists Polearm with
-        # canUseTwoHand: true and omits Staff entirely.
-        excluded_weapon_types=frozenset({WEAPON_STAFF}),
+        # wowsims ui/core/player_classes/paladin.ts static weaponTypes lists
+        # only Axe, Mace, OffHand, Polearm, Shield, Sword as eligible --
+        # Dagger, Fist and Staff are all absent from that list, so all three
+        # are excluded here.
+        excluded_weapon_types=frozenset({WEAPON_DAGGER, WEAPON_FIST, WEAPON_STAFF}),
     ),
     "feral": SpecProfile(
         "feral",
