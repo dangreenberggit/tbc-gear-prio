@@ -21,13 +21,13 @@
   ],
   "d7EligibleTotal": 3066,
   "excludedNoSource": 1316,
-  "universeTotal": 365,
+  "universeTotal": 366,
   "listOnlyMembership": 35,
   "perSlot": {
     "back": 31,
     "chest": 20,
     "feet": 31,
-    "finger": 49,
+    "finger": 50,
     "hands": 20,
     "head": 18,
     "legs": 20,
@@ -48,19 +48,19 @@
   },
   "membershipByOrigin": {
     "curated": 4,
-    "itemHasOrigin:atlasloot": 64,
+    "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:curated": 3,
     "itemHasOrigin:db": 300,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 19,
     "listOnly": 35,
-    "repFactionMatch": 25,
+    "repFactionMatch": 26,
     "zoneMatch": 301
   },
   "exclusivePrimaryOrigin": {
     "db": 300,
     "wowhead-only": 19,
-    "atlasloot-only": 28,
+    "atlasloot-only": 29,
     "other": 3,
     "two-hop": 15
   },
@@ -68,13 +68,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 365,
+    "total": 366,
     "casterOnlyReject": 173,
     "epFloorReject": 0,
     "combinedReject": 173,
-    "combinedKeep": 192,
-    "casterRejectPct": 47.4,
-    "combinedRejectPct": 47.4,
+    "combinedKeep": 193,
+    "casterRejectPct": 47.3,
+    "combinedRejectPct": 47.3,
     "applied": false
   },
   "wowheadListIds": 115,
@@ -422,10 +422,6 @@
       "name": "Timelapse Shard"
     },
     {
-      "itemId": 29297,
-      "name": "Band of the Eternal Defender"
-    },
-    {
       "itemId": 29347,
       "name": "Talisman of the Breaker"
     },
@@ -462,12 +458,16 @@
       "name": "Skyguard's Drape"
     },
     {
-      "itemId": 34430,
-      "name": "Glimmering Naaru Sliver"
+      "itemId": 32770,
+      "name": "Skyguard Silver Cross"
     },
     {
-      "itemId": 34470,
-      "name": "Timbal's Focusing Crystal"
+      "itemId": 32771,
+      "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 34430,
+      "name": "Glimmering Naaru Sliver"
     },
     {
       "itemId": 34471,

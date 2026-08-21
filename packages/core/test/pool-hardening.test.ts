@@ -453,10 +453,16 @@ describe("data/universes/ret-p3.json hardening", () => {
     // 30063/32368 (the three librams the ticket's own diagnosis named) and
     // 28774 Glaive of the Pit / 32489 Ashtongue Talisman of Zeal (both
     // asserted below by other tests, updated alongside this count).
+    // 390 -> 391: the engine pin move to feature/backend-reforge implemented
+    // 29297 Band of the Eternal Defender, so it is no longer stub-only and
+    // ticket 171's exclusion no longer reaches it. Nine p3 items remain
+    // stub-only. The ruling is unchanged -- what changed is that the fork now
+    // implements this effect (stat_bonus_procs_auto_gen.go, and every spec's
+    // TestAllItems results carry it).
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(390);
+    expect(universeP3.length).toBe(391);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -568,18 +574,23 @@ describe("data/universes/ret-p3.json hardening", () => {
 
     // Scale of the Sands (990) is Hyjal's faction. Its 16-ring ladder has
     // `sources: null` in db.json, so AtlasLoot's Factions module is the only
-    // witness — the whole point of parsing it (ticket 65 step 3). 15 of the
-    // 16 rings are asserted here; the 16th, 29297 Band of the Eternal
-    // Defender, admits through the same rep→phase route but is then dropped
-    // by ticket 171 (user ruling, exclusion by design) as a stub-only sim
-    // effect — never present with a caveat.
+    // witness — the whole point of parsing it (ticket 65 step 3).
+    //
+    // All 16 rings are asserted now. 29297 Band of the Eternal Defender used
+    // to be the exception: it admits through the same rep→phase route but was
+    // dropped by ticket 171 (user ruling) as a stub-only sim effect, never
+    // present with a caveat. The engine pin move to feature/backend-reforge
+    // implemented it — `stat_bonus_procs_auto_gen.go` registers it and every
+    // spec's TestAllItems results carry it — so the ruling's premise no longer
+    // holds and it ships like the other 15. The ruling itself is unchanged:
+    // stub-only effects still do not ship.
     expect(
       byId.has(29297),
-      "29297 Band of the Eternal Defender excluded as stub-only"
-    ).toBe(false);
+      "29297 Band of the Eternal Defender now implemented, no longer stub-only"
+    ).toBe(true);
     const bands: number[] = [];
     for (let id = 29294; id <= 29309; id += 1) if (byId.has(id)) bands.push(id);
-    expect(bands.length).toBe(15);
+    expect(bands.length).toBe(16);
     for (const id of bands) {
       expect(byId.get(id)?.sources[0], `${id}`).toMatchObject({
         kind: "rep",
