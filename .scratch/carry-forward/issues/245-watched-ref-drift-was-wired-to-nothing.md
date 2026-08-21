@@ -1,6 +1,5 @@
-Status: open — all mechanical work done on `feat/drift-warner-proven`; open
-  solely on the last acceptance box, an owner decision on the proposed
-  `AGENTS.md` wording (see "Decision, 2026-08-21" below)
+Status: resolved on `feat/drift-warner-proven` — all acceptance boxes closed
+  2026-08-21. Close on merge to `dev`.
 Type: defect (process gap; a tripwire nothing ran)
 Origin: ticket 244 investigation, 2026-08-20 — found while establishing why the
   `timeToNextEnergyTick` gap went unnoticed for weeks
@@ -223,7 +222,7 @@ adding a second, unproven intervention on top of an unvalidated one is how the
 first tripwire ended up wired to nothing. Close the boxes above first, then
 decide whether this is still needed.
 
-### Decision, 2026-08-21: adopt, but generalised — proposed, awaiting approval
+### Decision, 2026-08-21: adopted, in a generalised form
 
 **Still needed.** Closing the boxes did not reach the failure. The CI finding
 sharpened the case rather than weakening it: the mechanical tripwire was
@@ -266,8 +265,10 @@ Proposed wording, for approval before any edit:
 > tracked precisely because a feature was twice called missing while live on a
 > branch this repo already watched.
 
-Status: **proposed in chat, not yet written to `AGENTS.md`.** This ticket stays
-open until the owner approves or rejects the wording.
+Status: **approved by the owner 2026-08-21 and written to `AGENTS.md`**
+§ Durable claims, directly below "An exit code is not evidence that work
+happened" — the same shape of error, where a signal that looks like proof is
+not one.
 
 ## Acceptance
 
@@ -284,5 +285,7 @@ open until the owner approves or rejects the wording.
       if `vendor/` was populated from a branch with a different pin, or
       `feral-preset.test.ts` fails on a `timeToNextEnergyTick` mismatch that has
       nothing to do with this ticket.
-- [ ] A decision recorded on the follow-up option above — adopted (with the
-      wording proposed in chat first) or dropped, with the reason.
+- [x] A decision recorded on the follow-up option above — **adopted**, in the
+      generalised form. Proposed in chat 2026-08-21 and approved by the owner
+      the same day; written to `AGENTS.md` § Durable claims, directly below
+      "An exit code is not evidence that work happened".
