@@ -168,44 +168,70 @@ Measured, not assumed:
 
 ## Options
 
-**Two of the four are dead on arrival. Recorded here so nobody re-opens them.**
+**Three of the original four are dead. Recorded so nobody re-opens them.**
 
-- ~~**Bump to v0.0.105.**~~ Dead. It is the *minimum* version carrying the
-  field, and it is 14 tags behind `feature/backend-reforge`, which this repo
-  already tracks. It buys the field and nothing else, and buys another engine
-  bump shortly after. It only looked cheapest before anyone checked what
-  version the watched branch was on.
+- ~~**Bump to v0.0.105.**~~ Dead. Minimum version carrying the field, 14 tags
+  behind the branch we already track. Buys the field and another bump shortly
+  after.
 - ~~**Hold / keep the 12-action skeleton.**~~ Dead. The owner has asked for the
-  real APL; holding is a decision not to do the thing the ticket exists for.
+  real APL; holding is a decision not to do the thing this ticket exists for.
+- ~~**Bump to v0.0.119.**~~ Dead once the ancestry was checked — see below.
 
-### The actual choice
+### The decision, which the ancestry makes for us
 
-1. **Bump the pin to v0.0.119** (current upstream tag). Prebuilt binary exists
-   (`releases/download/v0.0.119/wowsimcli-windows.exe.zip` → 200), so the pin
-   stays a real pin and committed sim numbers keep byte-reproducible
-   provenance. **Newer than `backend-reforge`'s v0.0.115 base**, so it is not a
-   compromise on version — only on the reforge work.
-2. **Track `feature/backend-reforge`** (v0.0.115 + 54 reforge commits).
-   `sync_wowsims.py --update --ref feature/backend-reforge` is supported and
-   documented in its own usage examples. Gets the reforge work. Costs: **no
-   release binary**, so a from-source build, and every committed sim number
-   then traces to a local build nobody else can reproduce byte-for-byte.
+**Our pin is an ancestor of `feature/backend-reforge`.** Measured:
 
-**Recommendation: option 1**, unless the reforge work is specifically wanted.
-It is on a newer base than option 2, keeps a pinnable binary, and needs no
-from-source build. Option 2's only advantage is the reforge commits — so the
-question to answer is simply *do we want reforging now?* If no, option 1. If
-yes, option 2 and accept the provenance cost.
+```
+curl -s "https://api.github.com/repos/wowsims/tbc-new/compare/8aa378b3671a0923fd11fb34b4b3753e53f20c9b...cbf6b75a889e52c4106351976db66efd914ea349"
+```
 
-Either way the mechanical work is the same: move `data/wowsims.lock.json`,
-`data/proto/`, the wowsimcli binary and `data/wowsims-fork.lock.json` together,
-regenerate committed artifacts, re-baseline sim numbers, rebase the fork.
+→ `status: ahead, ahead_by: 154, behind_by: 0`
+
+So `feature/backend-reforge` **contains our pinned commit exactly**, plus 154
+commits. Moving to it is a fast-forward along the line this repo is already on.
+
+`v0.0.119`, by contrast, is a tag on `master`, and backend-reforge *diverges*
+from `v0.0.116` onward (behind 10, 12, 14, and 20 at v0.0.119). Taking v0.0.119
+is a **sideways move onto a different line** — one that does not contain the
+reforge work, and that our pin's own descendants do not sit on.
+
+That reframes the choice. It was written up as "continue on our line vs. take a
+newer tag, do we want reforging?" That was wrong: continuing forward along the
+line we already pinned to and already watch is the default, and jumping to a
+divergent tag is the move that needs justifying. There is no version argument
+for v0.0.119 — it is newer in tag number only, on a line we are not on.
+
+**Decision: track `feature/backend-reforge`** (v0.0.115 base + 54 reforge
+commits, contains our pin).
+
+```
+python scripts/sync_wowsims.py --update --ref feature/backend-reforge
+```
+
+Supported and documented in `sync_wowsims.py`'s own usage examples — this is
+what `--ref` was built for.
+
+**The one real cost, unchanged:** no GitHub release exists for a branch (404
+verified above), so the wowsimcli binary must be **built from source**. Go
+`1.25.4` is installed and matches the fork's `toolchain` directive exactly. The
+consequence to accept deliberately: committed sim numbers then trace to a
+locally-built binary rather than a downloaded release artifact, so
+`fetch_wowsimcli.py`'s provenance story needs an answer — pin the built
+binary's sha256 in the lockfile, or record the build command and commit as the
+provenance. Decide that as part of doing the work, not before it.
+
+Note also `watchedRefs` still records `33970a8` (2026-08-12) while the branch
+HEAD is `cbf6b75` — re-resolve at execution time rather than trusting the
+recorded sha.
 
 ## Acceptance
 
-- [ ] One of the two live options chosen and recorded here with its reason. The
-      only real question is whether the reforge work is wanted now; if not, it
-      is option 1.
+- [x] Option chosen: **track `feature/backend-reforge`**, because our pin is an
+      ancestor of it (ahead 154, behind 0) — a fast-forward on the line we are
+      already on, where v0.0.119 is a divergent tag on `master`.
+- [ ] The from-source binary's provenance settled and recorded: how a future
+      reader reproduces or verifies the binary the committed sim numbers came
+      from.
 - [ ] If a pin moves: `data/wowsims.lock.json`, `data/proto/`, the wowsimcli
       binary and `data/wowsims-fork.lock.json` all move **together**, and the
       working tree matches `HEAD` after regenerating every committed artifact.
