@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DegenerateSeedsError,
   PAIRED_REPLICATE_TOP_N,
+  assertDistinctSeeds,
   assertUsableSeeds,
   pairedReplicateSe,
   replicateSeeds,
@@ -24,13 +25,13 @@ describe("pairedReplicateSe", () => {
   });
 });
 
-describe("assertUsableSeeds", () => {
+describe("assertDistinctSeeds", () => {
   it("accepts distinct seeds", () => {
-    expect(() => assertUsableSeeds([11, 22, 33, 44, 55])).not.toThrow();
+    expect(() => assertDistinctSeeds([11, 22, 33, 44, 55])).not.toThrow();
   });
 
   it("accepts a single seed — that is the independent-SE path, not replication", () => {
-    expect(() => assertUsableSeeds([42])).not.toThrow();
+    expect(() => assertDistinctSeeds([42])).not.toThrow();
   });
 
   /**
@@ -39,14 +40,14 @@ describe("assertUsableSeeds", () => {
    * zero that looks like a precise measurement and is an artifact (§10).
    */
   it("rejects repeated seeds, naming the degenerate value", () => {
-    expect(() => assertUsableSeeds([42, 42, 42, 42, 42])).toThrow(
+    expect(() => assertDistinctSeeds([42, 42, 42, 42, 42])).toThrow(
       DegenerateSeedsError
     );
-    expect(() => assertUsableSeeds([42, 42, 42, 42, 42])).toThrow(/42/);
+    expect(() => assertDistinctSeeds([42, 42, 42, 42, 42])).toThrow(/42/);
   });
 
   it("rejects a partial repeat too — one duplicate already flattens the spread", () => {
-    expect(() => assertUsableSeeds([11, 22, 22, 44, 55])).toThrow(
+    expect(() => assertDistinctSeeds([11, 22, 22, 44, 55])).toThrow(
       DegenerateSeedsError
     );
   });
@@ -113,9 +114,14 @@ describe("seed spacing (ticket 236)", () => {
     );
   });
 
-  it("skips the spacing check when no iteration count is given", () => {
-    // Callers that cannot know the iteration count keep the old contract.
-    expect(() => assertUsableSeeds([11, 22, 33, 44, 55])).not.toThrow();
+  it("has no spacing-unchecked form to fall back to (ticket 243)", () => {
+    // The condemned seed set is rejected by the only entry point that admits a
+    // multi-seed replication. Weakening to distinctness alone now costs a
+    // caller a different function name, not a dropped argument.
+    expect(() => assertUsableSeeds([11, 22, 33, 44, 55], 3000)).toThrow(
+      DegenerateSeedsError
+    );
+    expect(() => assertDistinctSeeds([11, 22, 33, 44, 55])).not.toThrow();
   });
 
   it("does not constrain a single seed — there is no pair to overlap", () => {

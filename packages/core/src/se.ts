@@ -41,10 +41,7 @@ export function usesPairedReplication(seeds: readonly number[]): boolean {
  * entirely an artifact, and worse than no number at all because it reads as
  * precision. Fail loudly instead of reporting it.
  */
-export function assertUsableSeeds(
-  seeds: readonly number[],
-  iterations?: number
-): void {
+export function assertDistinctSeeds(seeds: readonly number[]): void {
   if (!usesPairedReplication(seeds)) return;
   const seen = new Set<number>();
   const repeated = new Set<number>();
@@ -60,8 +57,26 @@ export function assertUsableSeeds(
         `variance and drives the paired-replicate SE toward a false zero (PLAN.md §10).`
     );
   }
+}
 
-  if (iterations === undefined) return;
+/**
+ * The full guard on a multi-seed replication: distinct **and** spaced far
+ * enough apart to be independent (ticket 236).
+ *
+ * `iterations` is required rather than optional, and the spacing check is not
+ * separately reachable, because an optional argument made ticket 236's whole
+ * fix opt-in: omitting it silently downgraded to distinctness alone and
+ * re-admitted the false-precision SE that PLAN.md names as the project's worst
+ * case. A caller that genuinely only wants distinctness now asks for
+ * `assertDistinctSeeds` by name, so the weaker check is a visible choice
+ * instead of a missing argument (ticket 243).
+ */
+export function assertUsableSeeds(
+  seeds: readonly number[],
+  iterations: number
+): void {
+  assertDistinctSeeds(seeds);
+  if (!usesPairedReplication(seeds)) return;
   const ordered = [...seeds].sort((a, b) => a - b);
   for (let i = 1; i < ordered.length; i += 1) {
     const lo = ordered[i - 1]!;
