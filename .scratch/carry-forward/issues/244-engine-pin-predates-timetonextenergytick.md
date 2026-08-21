@@ -260,18 +260,142 @@ Mechanics verified for the chosen route:
   `cbf6b75` (re-confirmed 2026-08-20) — re-resolve at execution time rather
   than trusting the recorded sha.
 
+## Blast radius, measured 2026-08-20
+
+Ticket previously listed these as "untested, flagged rather than guessed".
+Measured now, against `cbf6b75`. Read-only; nothing in the tree was moved.
+
+### `check_engine_port_drift.py` does not watch this at all
+
+**The earlier framing of this as a risk was wrong.** The script re-hashes ~31
+files under
+`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`
+against sha256 values in that directory's own `PROVENANCE.md`. Those files were
+ported from **this repo's** `packages/core/src/` — our ranking engine — not from
+`wowsims/tbc-new`. `vendor/tbc-new-fork`'s remote is the personal UI fork.
+
+So moving the `wowsims/tbc-new` pin cannot make that check drift, and **a green
+result from it is not evidence the bump is safe**. The real signals are
+`sync_wowsims.py --check` and `scripts/warn_upstream_drift.py`
+(`upstream-drift:warn` in `pnpm verify`). Neither was run for this measurement.
+
+### `ret_p3.gear.json` is absent on the branch — already handled
+
+`ui/paladin/retribution/gear_sets/p3.gear.json` returns **404 at `cbf6b75`**.
+Directory listing there holds only `p1`, `p2`, `preraid`. It is present at
+v0.0.119 (with a new `p3Bulwark.gear.json` beside it).
+
+Not a deletion. Upstream shipped it in `5c7491899` ("missed jsons",
+2026-08-13), and **`backend-reforge` is behind that commit by 2** — the branch
+forked before the file was restored.
+
+**No action needed.** `PER_FILE_PIN` (`sync_wowsims.py:139`) already pins this
+file to `5c7491899` precisely because it postdates the main pin, and
+`do_update()` fetches at `PER_FILE_PIN.get(local, sha)` — it never asks the
+branch. Verify after the bump rather than assuming: confirm the lock entry for
+`ret_p3.gear.json` still carries its own `commit`.
+
+### Synced-file churn
+
+11 of 15 tracked files byte-identical. Four move:
+
+| file | old | new | note |
+| --- | --- | --- | --- |
+| `db.json` | 3,105,094 | 3,087,592 | −0.6%, no items added/removed |
+| `feral_default.apl.json` | 7,058 | 17,207 | upstream's own APL rewrite, 12→22 actions |
+| `proto_utils.ts` | 55,814 | 58,800 | additive: `getGearIdentityKey`, `getReforgeCacheGearKey` |
+| `feral_sim.ts` | 8,405 | 8,406 | one import moves `proto/ui` → `proto/api` |
+
+`constants_other.ts` is **byte-identical**, which re-confirms the content tier
+does not move.
+
+`db.json` detail: array counts identical at every top-level key (`items` 8257
+both sides). 658 items differ, but 639 are a no-op `scalingOptions` cleanup.
+**19 items carry real proc/stacking model changes** — new `maxCumulativeStacks`,
+`stackingAura`/`stackProc`, `ppm` ↔ `procChance` representation shifts, new
+`proc.icdMs`. Named examples: Darkmoon Card: Maelstrom, Zandalarian Hero Badge,
+Badge of the Swarmguard, Blackened Naaru Sliver, Vial of the Sunwell. **These
+can move simmed values for items already in our pools** — it is the main reason
+re-baselining is not optional.
+
+Two items change `phase` 5→3 (Medallion of Karabor, Blessed Medallion of
+Karabor). Outside our phase-2 range today, but it shows upstream phase data
+moved.
+
+`feral_sim.ts` matters more than one byte suggests: it is parsed by the TS
+compiler API in `scripts/extract_sim_defaults.mjs`, so an import move is worth
+re-running that extractor over.
+
+### Not established
+
+The whole-repo compare returns **exactly 300 changed files, GitHub's hard cap**
+on that endpoint's `files` array, with no pagination for it. So the true count
+is **300 or more, unknown**. Do not quote 300 as the file-change total.
+
+## Binary provenance: reproducible, so record the recipe not just the hash
+
+Measured 2026-08-20, in throwaway clones. Nothing in the tree was touched.
+
+The open question was whether a from-source build is byte-reproducible, or
+whether we must settle for "here is the sha256 of the one binary that existed".
+**It is reproducible, with `-trimpath`.**
+
+Two clones of `cbf6b75` at deliberately different absolute path lengths:
+
+| build | sha256 | size |
+| --- | --- | --- |
+| no `-trimpath`, dir A | `d73cd848af90b181...` | 22,364,160 |
+| no `-trimpath`, dir B | `188230f0dfa1a260...` | 22,380,544 |
+| **`-trimpath`, dir A** | **`71c240d2bb0cd887...`** | 22,340,608 |
+| **`-trimpath`, dir B** | **`71c240d2bb0cd887...`** | 22,340,608 |
+
+Cause confirmed rather than assumed: `grep -a` on the non-trimpath binaries
+finds absolute source paths baked in (`.../repro-test/a/cmd/wowsimcli/cmd/
+root.go`), which differ per clone directory. `-trimpath` rewrites them
+module-relative.
+
+**The upstream makefile does not pass `-trimpath`** for the
+`wowsimtbc-windows.exe` target (`makefile:192`). Ours must.
+
+Recipe, from `cmd/wowsimcli`:
+
+```
+GOOS=windows GOARCH=amd64 GOAMD64=v2 go build -trimpath   -o wowsimcli-windows.exe --tags=with_db   -ldflags="-X 'main.Version=<version>' -s -w"
+```
+
+Two prerequisites, both real build steps:
+
+- `protoc -I=./proto --go_opt=Mgoogle/protobuf/descriptor.proto=google.golang.org/protobuf/types/descriptorpb --go_out=./sim/core ./proto/*.proto`
+  generates the gitignored `sim/core/proto/*.pb.go` (`makefile:224`).
+- `--tags=with_db` needs `assets/database/db.bin` and `leftover_db.bin`, both
+  committed upstream, so no `make db` step.
+
+Every one of `GOOS`, `GOARCH`, `GOAMD64`, `--tags`, `-ldflags` and `-trimpath`
+must be held fixed or the hash moves. **`main.Version` is part of the hash** —
+the probe used the literal `test` on both sides. Pick the value we will actually
+ship and record it, because changing it later changes the binary.
+
+Build cost is small: seconds to ~23s per build, plus clone time.
+
+**So provenance is a recorded recipe, not just a trusted hash.** A future reader
+re-runs the command above at `cbf6b75` and compares sha256. Record the command,
+the commit, the `main.Version` value, and the resulting sha256 together —
+omitting any one of them breaks reproduction.
+
 ## Acceptance
 
 - [x] Option chosen: **track `feature/backend-reforge`** (v0.0.115 + 54 reforge
       commits), 2026-08-20, because the reforge work is wanted and a from-source
       binary is an accepted cost. Not chosen on ancestry — the pin is an
       ancestor of both candidates and `behind_by: 0` distinguishes nothing.
-- [ ] The from-source binary's provenance settled and recorded — how a future
-      reader reproduces or verifies the binary the committed sim numbers came
-      from. **Now in scope**, since the branch route was chosen: pin the built
-      binary's sha256 in the lockfile, or record the build commit and exact
-      command. `fetch_wowsimcli.py` cannot fetch it (404 on a branch), so
-      whatever replaces that path needs writing down.
+- [ ] Binary provenance recorded as a **reproducible recipe**, now that the
+      build is proven byte-identical under `-trimpath` (see above): the exact
+      command including `-trimpath` and every pinned flag, the source commit,
+      the `main.Version` string used, and the resulting sha256 — all four, since
+      dropping any one breaks reproduction. `fetch_wowsimcli.py` 404s on a
+      branch ref, so it needs a build path or a documented manual step.
+- [ ] A second independent build reproduces the recorded sha256 before any sim
+      number is committed against that binary.
 - [ ] **`data/wowsims.lock.json` moved to the chosen ref.** On the branch
       route, re-resolve the branch HEAD at execution time rather than trusting
       the stale `watchedRefs` sha (`33970a8`, 2026-08-12; HEAD was `cbf6b75` on
