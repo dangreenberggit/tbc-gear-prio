@@ -14,11 +14,11 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
-import inspect
+import json
 import os
-import re
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -306,22 +306,20 @@ def check_promoting_file_out_of_per_file_pin_is_noop_diff() -> list[str]:
     return problems
 
 
-def _run_warner(returncode: int, stdout: str = "", stderr: str = "") -> str:
+def _run_warner(returncode: int, stdout: str = "", stderr: str = "") -> tuple[list[str], str]:
     """Drive warn_upstream_drift.main() against a canned --check result.
 
     Stubs the subprocess call rather than shelling out, so these checks stay
     offline and independent of whatever vendor/ and gh auth this machine has.
+
+    Returns (problems, output). The warner is wired into `pnpm verify` as a
+    warning and must exit 0 in every branch, so that one assertion is made here
+    once rather than repeated in each caller.
     """
     import io
     from contextlib import redirect_stdout
 
-    class _Completed:
-        pass
-
-    fake = _Completed()
-    fake.returncode = returncode
-    fake.stdout = stdout
-    fake.stderr = stderr
+    fake = types.SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
 
     orig = warn_upstream_drift.subprocess.run
     orig_note = warn_upstream_drift.warn_pin_behind_watched_refs
@@ -335,9 +333,83 @@ def _run_warner(returncode: int, stdout: str = "", stderr: str = "") -> str:
     finally:
         warn_upstream_drift.subprocess.run = orig
         warn_upstream_drift.warn_pin_behind_watched_refs = orig_note
+
+    problems = []
     if rc != 0:
-        return f"__NONZERO_EXIT_{rc}__\n" + buf.getvalue()
-    return buf.getvalue()
+        problems.append(
+            f"the warner must always exit 0 -- it is wired into pnpm verify as a "
+            f"warning, not a gate. Got {rc} for a --check that exited {returncode}."
+        )
+    return problems, buf.getvalue()
+
+
+class _DoCheckHarness:
+    """Run the real do_check() offline against a lock whose pin is stale.
+
+    do_check() needs network, `gh` auth and a populated vendor/, so this stubs
+    the three functions that reach outside -- latest_tag, ref_sha, fetch -- and
+    points VENDOR and LOCKFILE at a temp dir. Everything else, including the
+    drift wording and the exit codes, is the real thing.
+
+    The alternative -- asserting against inspect.getsource(do_check) -- was
+    tried and rejected: a source grep for "DRIFT:" passes on a do_check that
+    prints "CHANGED:" and carries a commented-out `# print("DRIFT: legacy")`,
+    and a grep for "return 2" passes when 1 and 2 have been swapped. Both leave
+    the warner broken and the check green, which is the exact rot this ticket
+    exists to prevent.
+    """
+
+    PIN_SHA = "a" * 40
+    UPSTREAM_SHA = "b" * 40
+
+    def __enter__(self):
+        self._td = tempfile.TemporaryDirectory()
+        td = self._td.name
+        self._orig = {
+            k: getattr(sync_wowsims, k)
+            for k in ("VENDOR", "LOCKFILE", "TRACKED", "PER_FILE_PIN",
+                      "fetch", "tag_sha", "latest_tag", "ref_sha")
+        }
+        sync_wowsims.VENDOR = os.path.join(td, "vendor")
+        sync_wowsims.LOCKFILE = os.path.join(td, "wowsims.lock.json")
+        sync_wowsims.TRACKED = {"constants_other.ts": "ui/core/constants/other.ts"}
+        sync_wowsims.PER_FILE_PIN = {}
+        sync_wowsims.tag_sha = lambda tag: self.PIN_SHA
+        sync_wowsims.latest_tag = lambda: ("v9.9.9", self.UPSTREAM_SHA)
+        sync_wowsims.ref_sha = lambda ref: self.UPSTREAM_SHA
+        sync_wowsims.fetch = lambda sha, path: (
+            b"export const CURRENT_PHASE: Phase = Phase.Phase2;"
+        )
+        sync_wowsims.do_update("v0.0.101")
+        return self
+
+    def __exit__(self, *exc):
+        for k, v in self._orig.items():
+            setattr(sync_wowsims, k, v)
+        self._td.cleanup()
+
+    def run(self):
+        """Return (returncode, combined output) from the real do_check()."""
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            rc = sync_wowsims.do_check()
+        return rc, out.getvalue() + err.getvalue()
+
+    def write_lock(self, lock):
+        with open(sync_wowsims.LOCKFILE, "w", encoding="utf-8", newline="") as fh:
+            json.dump(lock, fh, indent=2)
+
+    def add_watched_ref(self, name="some/watched-ref", commit="c" * 40):
+        lock = sync_wowsims.load_lock()
+        lock["watchedRefs"] = {name: {"commit": commit, "fetchedAt": "2026-01-01"}}
+        self.write_lock(lock)
+
+    def empty_the_vendor_dir(self):
+        for entry in os.listdir(sync_wowsims.VENDOR):
+            os.remove(os.path.join(sync_wowsims.VENDOR, entry))
 
 
 def check_drift_token_still_matches_what_check_emits() -> list[str]:
@@ -346,49 +418,85 @@ def check_drift_token_still_matches_what_check_emits() -> list[str]:
     that token the warner silently reports "in sync" forever -- ticket 245's
     third-instance failure, and the reason this check exists.
 
-    Asserted against do_check()'s source rather than by running it, because
-    running it needs network, gh auth and a populated vendor/.
+    Runs the real do_check() and greps its real output the same way the warner
+    does, so the assertion holds regardless of how the token is spelled in the
+    source or which call emits it.
     """
     problems = []
-    src = inspect.getsource(sync_wowsims.do_check)
     token = warn_upstream_drift.DRIFT_TOKEN
 
-    if token not in src:
-        problems.append(
-            f"warn_upstream_drift matches {token!r} but sync_wowsims.do_check() no "
-            "longer emits it -- the warner is now a no-op that always reports "
-            '"in sync". Update both together.'
-        )
+    with _DoCheckHarness() as h:
+        h.add_watched_ref()
+        rc, body = h.run()
 
-    # The token must be in do_check's *print* of each drift item, not merely
-    # mentioned in a comment somewhere in the function.
-    if not re.search(r'print\(f?"[^"]*' + re.escape(token), src):
+    matched = [ln for ln in body.splitlines() if token in ln]
+    if not matched:
         problems.append(
-            f"do_check() mentions {token!r} but no longer prints it in a print() "
-            "call -- the warner greps stdout, so a token that only survives in a "
-            "comment makes the warner a no-op."
+            f"do_check() reported drift but printed no line containing {token!r}, "
+            "so warn_upstream_drift matches nothing and reports \"in sync\" "
+            f"forever. Its output was: {body.strip()!r}"
+        )
+    # A stale pin and a moved watched ref are two distinct drift items; both
+    # must reach the warner, not just whichever one is emitted first.
+    if len(matched) < 2:
+        problems.append(
+            "do_check() should emit one DRIFT line per drift item (stale pin AND "
+            f"moved watched ref); the warner echoes each. Got {len(matched)}: {matched!r}"
         )
     return problems
 
 
 def check_check_exit_codes_match_the_warner_branches() -> list[str]:
     """The warner branches on --check's exit codes: 2 means vendor/ absent
-    (skip), 0 means ran-and-clean, anything else means it did not run. Pin the
-    two that do_check() returns explicitly, so a renumbering shows up here
-    rather than as a wrong warning.
+    (skip), 0 means ran-and-clean, anything else means it did not run.
+
+    Runs the real do_check() in each of those three states and asserts the code
+    it returns, so swapping two codes fails here instead of silently turning
+    real drift into a vendor skip.
     """
     problems = []
-    src = inspect.getsource(sync_wowsims.do_check)
 
-    if "return 2" not in src:
+    with _DoCheckHarness() as h:
+        rc, body = h.run()
+        if rc != 1:
+            problems.append(
+                f"do_check() must return 1 when it finds drift, got {rc}. The warner "
+                "reads a nonzero exit with no DRIFT: lines as 'check did not run', "
+                f"and 2 as 'vendor/ absent'. Output was: {body.strip()!r}"
+            )
+
+        h.empty_the_vendor_dir()
+        rc, body = h.run()
+        if rc != 2:
+            problems.append(
+                f"do_check() must return 2 when vendor/ is empty, got {rc} -- the "
+                "warner reads 2 as 'vendor/ absent, skip'. If that code moved, "
+                f"warn_upstream_drift must move with it. Output was: {body.strip()!r}"
+            )
+    return problems
+
+
+def check_check_returns_zero_when_actually_in_sync() -> list[str]:
+    """The only state in which the warner may say "in sync" is do_check()
+    returning 0. Pin that it still does when nothing has drifted -- otherwise
+    the warner's one honest all-clear becomes unreachable.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        # Move the pin up to what upstream reports, so there is nothing to report.
+        lock = sync_wowsims.load_lock()
+        lock["commit"] = h.UPSTREAM_SHA
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc != 0:
         problems.append(
-            "do_check() no longer returns 2 -- the warner reads 2 as 'vendor/ "
-            "absent, skip'. If that code moved, warn_upstream_drift must move with it."
+            f"do_check() must return 0 when the pin matches upstream, got {rc}. "
+            f"Output was: {body.strip()!r}"
         )
-    if "return 1" not in src:
+    if warn_upstream_drift.DRIFT_TOKEN in body:
         problems.append(
-            "do_check() no longer returns 1 on drift -- the warner treats a "
-            "nonzero exit with no DRIFT: lines as 'check did not run'."
+            f"do_check() printed a drift line with nothing drifted: {body.strip()!r}"
         )
     return problems
 
@@ -400,14 +508,10 @@ def check_warner_never_claims_in_sync_when_check_failed() -> list[str]:
     it is the same "we do not have this feature" reassurance that cost two
     tickets. Exit must stay 0 (warn-only), but the text must not claim sync.
     """
-    problems = []
-    out = _run_warner(1, stderr="Traceback (most recent call last):\nFileNotFoundError: gh\n")
+    problems, out = _run_warner(
+        1, stderr="Traceback (most recent call last):\nFileNotFoundError: gh\n"
+    )
 
-    if out.startswith("__NONZERO_EXIT_"):
-        problems.append(
-            "the warner must always exit 0 -- it is wired into pnpm verify as a "
-            f"warning, not a gate. Got: {out.splitlines()[0]}"
-        )
     if "in sync" in out:
         problems.append(
             "warner reported 'in sync' when --check exited 1 without reporting "
@@ -425,16 +529,13 @@ def check_warner_reports_drift_and_stays_green() -> list[str]:
     """The normal drift case: --check exits 1 and names the drift. The warner
     must surface every DRIFT: line and still exit 0.
     """
-    problems = []
     body = (
         "  pinned:   somepin (abcdef123456)\n"
         "  DRIFT: new release available: somepin -> sometag\n"
         "  DRIFT: watched ref someref moved: aaaaaaaaaaaa -> bbbbbbbbbbbb\n"
     )
-    out = _run_warner(1, stdout=body)
+    problems, out = _run_warner(1, stdout=body)
 
-    if out.startswith("__NONZERO_EXIT_"):
-        problems.append(f"warner must exit 0 on drift, got {out.splitlines()[0]}")
     for want in ("new release available", "watched ref someref moved"):
         if want not in out:
             problems.append(f"warner dropped a DRIFT line containing {want!r}: {out.strip()!r}")
@@ -449,28 +550,31 @@ def check_warner_skips_on_absent_vendor() -> list[str]:
     """Exit 2 is the fresh-clone / pre-restore state, not a defect. It must
     read as a skip, and must not be mistaken for the did-not-run case.
     """
-    problems = []
-    out = _run_warner(2, stderr="vendor/wowsims/ is empty or missing")
+    problems, out = _run_warner(2, stderr="vendor/wowsims/ is empty or missing")
 
-    if out.startswith("__NONZERO_EXIT_"):
-        problems.append(f"warner must exit 0 when vendor/ is absent, got {out.splitlines()[0]}")
-    if "vendor" not in out:
-        problems.append(f"exit 2 must be reported as a vendor/ skip: {out.strip()!r}")
+    # Asserted as "reported as a skip, and distinguishable from the other two
+    # branches" rather than by grepping the skip line's wording, which this
+    # check does not own -- pinning a literal it cannot see change is the rot
+    # shape ticket 245 is about.
     if "in sync" in out:
         problems.append(
             f"an absent vendor/ proves nothing about sync; do not claim it: {out.strip()!r}"
         )
+    if "UNKNOWN" in out:
+        problems.append(
+            "an absent vendor/ is the expected fresh-clone state, not a check that "
+            f"failed to run; do not report it as unknown drift: {out.strip()!r}"
+        )
+    if not out.strip():
+        problems.append("exit 2 must say something -- silence reads as a clean run")
     return problems
 
 
 def check_warner_reports_clean_only_on_exit_zero() -> list[str]:
-    """The one case that may say "in sync": --check ran to completion and
-    found nothing."""
-    problems = []
-    out = _run_warner(0, stdout="  pinned: somepin\n\n  in sync.\n")
+    """Guards the all-clear from the opposite direction to the other checks:
+    they stop it being said wrongly, this stops it becoming unreachable."""
+    problems, out = _run_warner(0, stdout="  pinned: somepin\n\n  in sync.\n")
 
-    if out.startswith("__NONZERO_EXIT_"):
-        problems.append(f"warner must exit 0, got {out.splitlines()[0]}")
     if "in sync" not in out:
         problems.append(f"a clean exit-0 --check should report in sync: {out.strip()!r}")
     if "UNKNOWN" in out:
@@ -492,6 +596,7 @@ CHECKS = (
     # The --check / warn_upstream_drift output contract (ticket 245).
     check_drift_token_still_matches_what_check_emits,
     check_check_exit_codes_match_the_warner_branches,
+    check_check_returns_zero_when_actually_in_sync,
     check_warner_never_claims_in_sync_when_check_failed,
     check_warner_reports_drift_and_stays_green,
     check_warner_skips_on_absent_vendor,

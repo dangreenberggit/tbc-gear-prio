@@ -133,18 +133,26 @@ a way it could silently become useless:
 
       Both runs read with `gh run view <id> --log`, not predicted from local
       output.
-- [x] **It stays visible.** Kept as-is, deliberately. Measured: on a green run
-      the warner's output is the **last thing `pnpm verify` prints** — 249 lines
-      total, nothing after it to scroll past — and it is the final step of the
-      chain, so a failure anywhere earlier aborts before reaching it. A repeat
-      banner would have nothing to sit below. A separate `pnpm drift` was
-      considered and rejected: `pnpm sync:wowsims:check` already is that command
-      and returns a real exit code, so a third alias adds a name without adding
-      a capability. What was missing was not volume but *content* — the old line
-      said drift existed without saying what to conclude. The `NOTE:` line now
-      states the conclusion in words: *the pin is an ANCESTOR of watched ref X,
-      features on that branch are reachable by fast-forward, do not call them
-      absent.*
+- [x] **It stays visible.** Kept as-is, deliberately — this box is closed as a
+      **decision not to change anything**, so unlike the other four it rests on
+      a measurement plus an argument rather than a fix.
+
+      Measured with `pnpm verify 2>&1 | wc -l` (249) and
+      `pnpm verify 2>&1 | tail -8`: on a green run the warner's output is the
+      **last thing `pnpm verify` prints**, with nothing after it to scroll past,
+      and it is the final step of the chain, so a failure anywhere earlier
+      aborts before reaching it. A repeat banner would have nothing to sit
+      below. A separate `pnpm drift` was considered and rejected:
+      `pnpm sync:wowsims:check` already is that command and returns a real exit
+      code, so a third alias adds a name without adding a capability.
+
+      **Correction.** An earlier draft of this box credited the `NOTE:` line to
+      this ticket's work. It does not belong to it —
+      `git show 57fea48:scripts/warn_upstream_drift.py | grep -c "NOTE: the pin"`
+      returns 2, so the line predates this branch. What this branch adds to the
+      *content* argument is one line: the `Reachable is not the same as usable`
+      caveat, from the domain review. The visibility box is closed on the
+      measurement and the argument, not on a change made for it.
 - [x] **The wrapper cannot rot silently.** Six checks added to
       `scripts/check_sync_wowsims.py` (already in `pnpm verify` as
       `sync-wowsims:unit:check`), 16 checks total. They pin the `DRIFT:` token,
@@ -155,23 +163,43 @@ a way it could silently become useless:
 ## Mutation evidence
 
 A check that has never failed is the same unproven thing this ticket is about,
-so each was run against a deliberately broken copy in a temp tree. All six fail
-when they should:
+so each was run against a deliberately broken copy in a temp tree.
 
 | Mutation | Caught by |
 |---|---|
-| `do_check()` prints `CHANGED:` instead of `DRIFT:` | token check (2 failures) |
-| `do_check()`'s `return 2` renumbered to `3` | exit-code check |
-| `do_check()`'s `return 1` renumbered to `9` | exit-code check |
+| `do_check()` prints `CHANGED:` **and keeps a commented-out `# print("DRIFT: legacy")`** | token check (2 failures) |
+| `do_check()`'s `return 1` and `return 2` **swapped** | exit-code check (2 failures) |
 | the did-not-run branch deleted (i.e. ae1a590 reverted) | never-claims-in-sync check (2 failures) |
 | warner returns 1 on drift instead of 0 | stays-green check (3 failures) |
-| warner prints "in sync" on exit 2 | vendor-skip check (2 failures) |
+| warner prints "in sync" on exit 2 | vendor-skip check |
 | warner stops echoing the `DRIFT:` lines | reports-drift check (2 failures) |
+| warner's "in sync" wording removed, making the all-clear unreachable | returns-zero check |
 
 One mutation deliberately **does not** fail, and that is correct: renaming the
 token to `UPSTREAM-DRIFT:` keeps `DRIFT:` as a substring, so the warner still
 matches it and nothing is broken. Verified directly rather than assumed —
 `[l for l in body.splitlines() if w.DRIFT_TOKEN in l]` still returns the line.
+
+### The first two rows are stronger than they were, because review broke them
+
+The first draft of the token and exit-code checks asserted against
+`inspect.getsource(do_check)` — substring and regex matching on source text.
+The adversarial review defeated both, and both defeats were reproduced before
+being accepted:
+
+- A `do_check` printing `CHANGED:` with a leftover `# print(f"  DRIFT: legacy")`
+  comment passed the token check, while the warner matched nothing. The check's
+  own docstring had promised to catch exactly that.
+- Swapping `return 1` and `return 2` passed the exit-code check, because both
+  substrings were still present. The warner would then have read real drift as
+  a vendor skip.
+
+Both now run the real `do_check()` offline through `_DoCheckHarness` — stubbing
+only `latest_tag`, `ref_sha` and `fetch`, the three functions that reach the
+network — and assert on what it actually prints and returns. Source-text
+assertions were removed entirely: a grep for a literal that the checked code can
+rename out from under it is the same rot shape this ticket is about, one level
+up.
 
 ## The warning is necessary, not sufficient
 
