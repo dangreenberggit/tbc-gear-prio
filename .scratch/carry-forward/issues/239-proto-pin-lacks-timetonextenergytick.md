@@ -88,14 +88,20 @@ tightening if it ever bites.
 
 ## Acceptance criteria
 
-- [ ] `pnpm fetch:protos` re-pins `data/proto/*.proto` to a version declaring
-      `timeToNextEnergyTick`, and `pnpm fetch:protos:check` passes at the new
-      pin.
-- [ ] `python scripts/check_build_feral_skeleton.py` still passes. Note its
-      `check_rejects_time_to_next_energy_tick` self-test asserts the field is
-      **unknown**, so re-pinning makes that check stale by design — its own
-      failure message says so. Replace it with a still-unknown field rather
-      than deleting the coverage.
+- [x] `data/proto/*.proto` re-pinned to a version declaring
+      `timeToNextEnergyTick` — done 2026-08-21 on
+      `feat/engine-pin-backend-reforge`. **Not by `pnpm fetch:protos`**, which
+      cannot advance anything on its own (see the correction at the top of this
+      ticket): the main pin moved first with
+      `sync_wowsims.py --update --ref feature/backend-reforge`, and
+      `fetch_protos.py` then read the new `lock["commit"]`. Verified:
+      `data/proto/apl.proto:149` declares `time_to_next_energy_tick = 89`.
+- [x] `python scripts/check_build_feral_skeleton.py` still passes — done in
+      `fc1b13f`. This ticket predicted the staleness exactly and prescribed the
+      fix that was applied: `check_rejects_time_to_next_energy_tick` was
+      re-aimed (and renamed `check_rejects_unknown_apl_field`) at
+      `selectedPotion`, a field the new pin still lacks, rather than deleted.
+      Ticket 244 records why that field is the right replacement.
 - [ ] The feral skeleton regenerates from the re-pinned protos and the byte
       compare over the regenerated artifact passes.
 - [ ] Whether the re-pin changes any committed sim numbers is stated either way,

@@ -151,11 +151,11 @@ could not be verified.
 
 ## Disposition
 
-| #   | Finding                                | Disposition                                                                                   |
-| --- | -------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 1   | Pin does not unblock the APL           | Recorded in ticket 244; owner deferred the APL until an engine supports it                    |
-| 2   | `fetch:wowsimcli` 404s on a branch pin | Accepted by owner (local-only repo); gap remains open in ticket 244                           |
-| 3   | Two stale gates                        | Fixed, `fc1b13f`                                                                              |
-| 4   | `wowsims-fork.lock.json` not updated   | Deferred — `.scratch/carry-forward/issues/248-fork-lockfile-not-updated-after-rebase.md`      |
-| 5   | Lockfile `_comment` guidance lost      | Deferred — `.scratch/carry-forward/issues/249-lockfile-comment-lost-watched-refs-guidance.md` |
-| 6   | Claims spot-checked                    | No action; all confirmed                                                                      |
+| ID  | Axis        | Disposition | Note                                                                                                                                                                          |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | correctness | defer       | Pin does not unblock the APL; owner deferred the APL until an engine supports it. Recorded in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md` |
+| 2   | correctness | defer       | `fetch:wowsimcli` 404s on a branch pin; owner accepted for a local-only repo, gap tracked in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md`  |
+| 3   | correctness | fixed       | Two stale gates re-aimed at `selectedPotion` in `fc1b13f`                                                                                                                     |
+| 4   | standards   | defer       | Fork lockfile not updated after the rebase — `.scratch/carry-forward/issues/248-fork-lockfile-not-updated-after-rebase.md`                                                    |
+| 5   | standards   | defer       | Lockfile `_comment` lost watched-refs guidance — `.scratch/carry-forward/issues/249-lockfile-comment-lost-watched-refs-guidance.md`                                           |
+| 6   | spec        | fixed       | Load-bearing claims independently re-verified; all correct, no action needed                                                                                                  |
