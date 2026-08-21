@@ -1,4 +1,6 @@
-Status: open
+Status: open — all mechanical work done on `feat/drift-warner-proven`; open
+  solely on the last acceptance box, an owner decision on the proposed
+  `AGENTS.md` wording (see "Decision, 2026-08-21" below)
 Type: defect (process gap; a tripwire nothing ran)
 Origin: ticket 244 investigation, 2026-08-20 — found while establishing why the
   `timeToNextEnergyTick` gap went unnoticed for weeks
@@ -21,6 +23,15 @@ DRIFT: new release available: v0.0.101 -> v0.0.119
 DRIFT: watched ref feature/backend-reforge moved: 33970a8f3c65 -> cbf6b75a889e
   (informational -- not a build pin; re-review before treating its features as still absent)
 ```
+
+> **These exact lines depend on the branch's lock pin, so do not treat them as
+> a fixture.** They are what `dev` produces (pin `v0.0.101`). On
+> `feat/engine-pin-backend-reforge` the pin is the watched branch itself, so the
+> watched-ref line disappears and the release line reads
+> `feature/backend-reforge -> v0.0.119`. The contract checks added for this
+> ticket assert the *shape* — the token, the exit codes, the branches — and
+> hardcode no ref name or pin, because the pin decision from ticket 244 is still
+> open and may move again.
 
 **Nothing ran it.** `sync:wowsims:check` existed in `package.json` but was not
 in `pnpm verify`'s 20-check chain, so it fired only if a human typed it. It also
@@ -64,27 +75,104 @@ wrapper swallows all three.
 Verified 2026-08-20 — `python scripts/warn_upstream_drift.py` prints both drift
 lines and exits 0.
 
+> **That verification covered only the happy path.** It was run on a machine
+> with `gh` authenticated and `vendor/` populated, which is the one condition
+> the wrapper did not need to survive. Two of the five boxes below turned out to
+> be broken, and one of them — CI — was broken on every commit. "It works here"
+> is what the boxes exist to distrust.
+
 ## What is left — the reason this ticket is open
 
 The warner is unproven in the conditions it exists to survive. Each of these is
 a way it could silently become useless:
 
-- [ ] **No network / no `gh` auth** — confirm it prints a skip line and exits 0
-      rather than hanging or failing. The 60s timeout is untested.
-- [ ] **Empty `vendor/`** — confirm the returncode-2 path prints the skip line.
-      Untested; `vendor/` was populated on the authoring machine.
-- [ ] **CI** — confirm the warning is actually *visible* in a real CI run's
-      output, not buried or stripped. A warning nobody reads is the same defect
-      this ticket is about. Read a real run; do not predict from local output.
-- [ ] **It stays visible.** A warn-only line at the end of a 21-step verify is
-      easy to scroll past. Consider whether it needs to be louder — e.g.
-      repeated at the end of the run, or a separate `pnpm drift` a human is
-      told to run at phase boundaries.
-- [ ] **The wrapper cannot rot silently.** If `sync_wowsims.py --check` changes
-      its output format, the `"DRIFT:" in ln` match breaks and the warner
-      reports "in sync" forever — a third instance of this same failure. Add a
-      unit check pinning the contract, alongside the existing
-      `scripts/check_sync_wowsims.py` checks.
+- [x] **No network / no `gh` auth** — **it failed.** It did not print a skip
+      line: it printed `upstream drift check ok: in sync with the pin` and
+      exited 0. `--check` dies on an uncaught `SystemExit` from `gh()` and exits
+      1, and the warner read "no `DRIFT:` lines" as proof of sync. Measured by
+      copying `scripts/` and `data/` to a temp tree and repointing the `gh()`
+      wrapper at a binary that does not exist:
+      `subprocess.run(["gh-does-not-exist", "api", *args]`, then
+      `python scripts/warn_upstream_drift.py`. Fixed in ae1a590; the same
+      command now prints `CHECK DID NOT RUN -- drift is UNKNOWN, not absent`.
+      The 60s timeout is separately confirmed working — patched `--check` to
+      `time.sleep(30)` against a 2s timeout, got
+      `upstream drift: check timed out (network?) -- skipped, not a failure`,
+      exit 0.
+- [x] **Empty `vendor/`** — correct as built. In a temp tree with no `vendor/`,
+      `--check` exits 2 and the warner prints
+      `upstream drift: vendor/ absent -- skipped (run pnpm sync:wowsims:restore)`
+      and exits 0. Note the first attempt at this test was invalid: the temp
+      tree was missing `scripts/pinned_fetch.py`, so `--check` died on an import
+      and exited 1, not 2. That accident is what surfaced the box-1 defect.
+- [x] **CI** — **it failed, and worse than locally.** Run
+      [32504123312](https://github.com/dangreenberggit/tbc-gear-prio/actions/runs/32504123312)
+      printed:
+
+      upstream drift: CHECK DID NOT RUN -- drift is UNKNOWN, not absent.
+        sync_wowsims.py --check exited 1 without reporting drift.
+        | gh api failed: gh: To use GitHub CLI in a GitHub Actions workflow,
+        | set the GH_TOKEN environment variable.
+
+      `gh` in Actions has no credentials unless the workflow passes one, and
+      `verify.yml` passed none. **The drift check has never run in CI, on any
+      commit, since it was added.** Before ae1a590 those same conditions printed
+      `in sync with the pin` — a green build asserting there was no upstream
+      drift, on the one machine whose output nobody reads by hand. Fixed in
+      91f3803 by giving the `verify` step
+      `GH_TOKEN: ${{ github.token }}`.
+
+      Confirmed fixed by run
+      [32504851836](https://github.com/dangreenberggit/tbc-gear-prio/actions/runs/32504851836)
+      — green, and the drift check ran for real in CI for the first time:
+
+      upstream drift (warning only -- does not fail the build):
+        DRIFT: new release available: v0.0.101 -> v0.0.119
+        DRIFT: watched ref feature/backend-reforge moved: 33970a8f3c65 -> cbf6b75a889e
+        NOTE: the pin is an ANCESTOR of watched ref feature/backend-reforge (154 commits ahead, 0 behind).
+              Features on that branch are reachable by fast-forward -- do not call them absent.
+
+      Both runs read with `gh run view <id> --log`, not predicted from local
+      output.
+- [x] **It stays visible.** Kept as-is, deliberately. Measured: on a green run
+      the warner's output is the **last thing `pnpm verify` prints** — 249 lines
+      total, nothing after it to scroll past — and it is the final step of the
+      chain, so a failure anywhere earlier aborts before reaching it. A repeat
+      banner would have nothing to sit below. A separate `pnpm drift` was
+      considered and rejected: `pnpm sync:wowsims:check` already is that command
+      and returns a real exit code, so a third alias adds a name without adding
+      a capability. What was missing was not volume but *content* — the old line
+      said drift existed without saying what to conclude. The `NOTE:` line now
+      states the conclusion in words: *the pin is an ANCESTOR of watched ref X,
+      features on that branch are reachable by fast-forward, do not call them
+      absent.*
+- [x] **The wrapper cannot rot silently.** Six checks added to
+      `scripts/check_sync_wowsims.py` (already in `pnpm verify` as
+      `sync-wowsims:unit:check`), 16 checks total. They pin the `DRIFT:` token,
+      the exit codes `do_check()` returns, and all four warner branches. Each
+      was verified to **fail** against a mutation of the code it guards — see
+      "Mutation evidence" below.
+
+## Mutation evidence
+
+A check that has never failed is the same unproven thing this ticket is about,
+so each was run against a deliberately broken copy in a temp tree. All six fail
+when they should:
+
+| Mutation | Caught by |
+|---|---|
+| `do_check()` prints `CHANGED:` instead of `DRIFT:` | token check (2 failures) |
+| `do_check()`'s `return 2` renumbered to `3` | exit-code check |
+| `do_check()`'s `return 1` renumbered to `9` | exit-code check |
+| the did-not-run branch deleted (i.e. ae1a590 reverted) | never-claims-in-sync check (2 failures) |
+| warner returns 1 on drift instead of 0 | stays-green check (3 failures) |
+| warner prints "in sync" on exit 2 | vendor-skip check (2 failures) |
+| warner stops echoing the `DRIFT:` lines | reports-drift check (2 failures) |
+
+One mutation deliberately **does not** fail, and that is correct: renaming the
+token to `UPSTREAM-DRIFT:` keeps `DRIFT:` as a substring, so the warner still
+matches it and nothing is broken. Verified directly rather than assumed —
+`[l for l in body.splitlines() if w.DRIFT_TOKEN in l]` still returns the line.
 
 ## The warning is necessary, not sufficient
 
@@ -110,9 +198,16 @@ concrete ways it still fails:
 2. **Nobody reads the tail of a passing build.** That is the standing weakness
    of every warn-only check, and it is why the visibility box above is open
    rather than assumed closed.
+   — *Still true, and unfixable by volume. Closed as "kept as-is": the line is
+   already last, and the fix applied was to the line's **content** (the `NOTE:`
+   now states the conclusion, not just the fact) rather than its loudness.*
 3. **It can rot into a reassuring lie.** If `--check`'s output format changes,
    the `"DRIFT:"` match stops matching and the warner reports "in sync"
    permanently — worse than no warner, and a third instance of the same shape.
+   — *This was not hypothetical. It was already true in CI on every commit, via
+   a different route than the one predicted: not a format change but a missing
+   `GH_TOKEN`. Fixed in ae1a590 (honest reporting) and 91f3803 (CI token), and
+   guarded by the six contract checks.*
 
 **Follow-up option, deliberately not implemented yet.** The intervention that
 would reach the real failure belongs at the point of reasoning, not the point of
@@ -128,12 +223,66 @@ adding a second, unproven intervention on top of an unvalidated one is how the
 first tripwire ended up wired to nothing. Close the boxes above first, then
 decide whether this is still needed.
 
+### Decision, 2026-08-21: adopt, but generalised — proposed, awaiting approval
+
+**Still needed.** Closing the boxes did not reach the failure. The CI finding
+sharpened the case rather than weakening it: the mechanical tripwire was
+*itself* silently broken on every commit, so an agent forming an absence claim
+would have found the build agreeing with it. A rule at the point of reasoning
+does not share that failure mode, because it does not depend on a script
+running.
+
+**Not the watchedRefs-specific wording, though.** The ticket proposed *"before
+asserting an upstream feature is absent, resolve every ref in `watchedRefs`"*.
+That covers two of the four known instances. There are now four, and the shape
+they share is broader — in each, a property was measured against **one** ref or
+option and then treated as decisive without measuring the alternatives:
+
+1. An optimizer declared absent while live on `feature/backend-reforge`.
+2. Tickets 239 and 244 written on the premise `timeToNextEnergyTick` was
+   unavailable, without resolving what the watched branch was on.
+3. Ticket 244's decision closed on *"our pin is an ancestor of
+   backend-reforge, so it is a fast-forward, therefore choose it"* — true but
+   non-discriminating: the pin is an ancestor of **every** candidate
+   (v0.0.119 ahead 122 behind 0; v0.0.105 ahead 30 behind 0). One ref was
+   measured; the alternatives never were. Retracted in 294d229.
+4. *"The site almost certainly runs master"* — stated as near-fact before
+   checking. It happens to be true (`deploy.yml` triggers on push to master).
+
+A `watchedRefs` rule catches 1 and 2 and misses 3 and 4. The generalisation
+catches all four, and it belongs in `AGENTS.md` § Durable claims, next to
+**"An exit code is not evidence that work happened"** — the same shape of
+error, where a signal that looks like proof is not one.
+
+Proposed wording, for approval before any edit:
+
+> **A property measured against one option is not a comparison.** Before
+> ruling an option in or out — a version, a branch, a library, an approach —
+> name the alternatives and say what the same measurement gives for each. "Our
+> pin is an ancestor of that branch" and "we do not have that feature" are both
+> claims about one ref; neither is evidence until the other candidates are
+> measured the same way. When the claim is that something is *absent*, resolve
+> the refs that could contain it — `watchedRefs` in `data/wowsims.lock.json` is
+> tracked precisely because a feature was twice called missing while live on a
+> branch this repo already watched.
+
+Status: **proposed in chat, not yet written to `AGENTS.md`.** This ticket stays
+open until the owner approves or rejects the wording.
+
 ## Acceptance
 
-- [ ] All five boxes above closed, each naming the command run.
-- [ ] The output-format contract between `--check` and the warner is asserted by
+- [x] All five boxes above closed, each naming the command run. Two of the five
+      failed and were fixed rather than merely confirmed.
+- [x] The output-format contract between `--check` and the warner is asserted by
       a check in `pnpm verify`, so a format change fails loudly instead of
-      turning the warner into a no-op.
-- [ ] `pnpm verify` green.
+      turning the warner into a no-op. Six checks in
+      `scripts/check_sync_wowsims.py`, run by `pnpm sync-wowsims:unit:check`
+      (16 checks total), each proven to fail against a mutation.
+- [x] `pnpm verify` green — locally (exit 0) and in CI run
+      [32504851836](https://github.com/dangreenberggit/tbc-gear-prio/actions/runs/32504851836).
+      One caveat on the local run: `pnpm sync:wowsims:restore` must be run first
+      if `vendor/` was populated from a branch with a different pin, or
+      `feral-preset.test.ts` fails on a `timeToNextEnergyTick` mismatch that has
+      nothing to do with this ticket.
 - [ ] A decision recorded on the follow-up option above — adopted (with the
       wording proposed in chat first) or dropped, with the reason.
