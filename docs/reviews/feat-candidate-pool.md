@@ -482,20 +482,20 @@ Both spec findings were ticket hygiene, and both are fixed in this round.
 
 ## Disposition
 
-| ID  | Axis        | Sev     | Finding                                                                                                                                        | Disposition                                                                                       |
-| --- | ----------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | low-mod | `assertUsableSeeds` gates ticket 236's spacing check behind an optional param; the unsafe one-arg form is barrel-exported and unused           | **defer** → `.scratch/carry-forward/issues/243-usable-seeds-spacing-check-is-opt-in.md`           |
-| D1  | Domain      | low     | Ret exclusion set is `[8]` where `paladin.ts` supports `[2, 3, 8]`; masked by `allow_one_hand=False`                                           | **defer** → `.scratch/carry-forward/issues/242-ret-weapon-exclusion-set-omits-dagger-and-fist.md` |
-| S1  | Spec        | minor   | Ticket 230 marked `resolved` with an unchecked `pnpm verify` box whose blocker cited the since-deleted `racing.test.ts`                        | **fixed** — box checked against a re-run at `88c1c1e`                                             |
-| S2  | Spec        | minor   | Ticket 236's prose `Status:` line survived the gate only because `STATUS_RE` captures one token — the shape ticket 238 was filed to eliminate  | **fixed** — qualifier moved to a `Note:` line                                                     |
-| S3  | Standards   | minor   | Seven restating JSDoc one-liners in the new test-support modules; `withDuration:267` states _that_ variation is pinned to 0 without saying why | **wontfix** — cosmetic, on self-describing test helpers; delete when next touched                 |
-| S4  | Standards   | minor   | Stale `racing-support.ts` paths in tickets 222/223/229                                                                                         | **wontfix** — dated text; the rename is recorded at ticket 225:815                                |
+| ID  | Axis        | Sev     | Finding                                                                                                                                        | Disposition                                                                       |
+| --- | ----------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| A1  | Adversarial | low-mod | `assertUsableSeeds` gates ticket 236's spacing check behind an optional param; the unsafe one-arg form is barrel-exported and unused           | **fixed** `1112cc7` — ticket 243; API split, `iterations` now required            |
+| D1  | Domain      | low     | Ret exclusion set is `[8]` where `paladin.ts` supports `[2, 3, 8]`; masked by `allow_one_hand=False`                                           | **fixed** `fa9ec7b` — ticket 242; universe membership unchanged                   |
+| S1  | Spec        | minor   | Ticket 230 marked `resolved` with an unchecked `pnpm verify` box whose blocker cited the since-deleted `racing.test.ts`                        | **fixed** — box checked against a re-run at `88c1c1e`                             |
+| S2  | Spec        | minor   | Ticket 236's prose `Status:` line survived the gate only because `STATUS_RE` captures one token — the shape ticket 238 was filed to eliminate  | **fixed** — qualifier moved to a `Note:` line                                     |
+| S3  | Standards   | minor   | Seven restating JSDoc one-liners in the new test-support modules; `withDuration:267` states _that_ variation is pinned to 0 without saying why | **wontfix** — cosmetic, on self-describing test helpers; delete when next touched |
+| S4  | Standards   | minor   | Stale `racing-support.ts` paths in tickets 222/223/229                                                                                         | **wontfix** — dated text; the rename is recorded at ticket 225:815                |
 
 ## Summary
 
-No blockers on any axis. Two latent defects deferred to tickets 242 and 243 —
-both are correct today and become live only under a future change. Two ticket
-hygiene defects fixed in this round.
+No blockers on any axis. Two latent defects were filed as tickets 242 and 243
+and **both were then fixed on this branch** at `fa9ec7b` and `1112cc7` — see
+the disposition table. Two ticket hygiene defects fixed in this round.
 
 The strongest evidence in this window is negative: three reviewers tried to
 break the racing removal, the universe shrink, and the frozen cache key, and
