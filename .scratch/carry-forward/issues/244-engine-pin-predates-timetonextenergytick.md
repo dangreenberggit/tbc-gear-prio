@@ -449,6 +449,88 @@ same ref.
 **Not decided. Owner's call**, because the reforge work was the stated reason
 for the branch and this is the first evidence the two goals conflict.
 
+## Where this stands, 2026-08-21 (left open deliberately)
+
+Work parked on `feat/engine-pin-backend-reforge`, unmerged, tree clean. The pin
+moved, the binary was built, the fork was rebased. **The APL is not landed and
+is not being pursued** — the owner's position is that it waits until an engine
+supports it. Everything below is about matching wowsims.com, which is a separate
+goal from the APL.
+
+### Our pin does not match the wowsims site
+
+Recorded as the standing fact this ticket now carries.
+
+The TBC site is built from **master**, verified rather than assumed:
+`.github/workflows/deploy.yml` triggers on `push: branches: [master]`, builds
+`dist/tbc`, and publishes to `wowsims/pages-deploy` under `target-folder: tbc`.
+`wowsims/tbc-new` declares `https://wowsims.com/tbc/` as its homepage.
+
+At time of writing master's tip is `3267f8dfa` and **`v0.0.119` is `status:
+identical` to master**. So v0.0.119 *is* the site.
+
+Our pin is `feature/backend-reforge` (`cbf6b75`), which is **20 ahead / 52
+behind** master and diverged from it.
+
+### The DPS gap, measured
+
+Committed 12-action skeleton, 20k iterations, identical input file to every
+binary. v0.0.101 is the old pin; v0.0.119 is the official release artifact
+(`sha256 4b60235dcbb0088c…`), not a local build.
+
+| seed | v0.0.101 | backend-reforge | v0.0.119 | delta vs old |
+| --- | --- | --- | --- | --- |
+| 1 | 723.51 | 740.74 | 740.74 | +17.23 |
+| 42 | 723.55 | 740.67 | 740.67 | +17.12 |
+| 1234 | 723.57 | 740.78 | 740.78 | +17.21 |
+
+Two findings, and the second was not expected:
+
+1. **Our committed numbers are ~2.4% low against the current engine.** The gap
+   is systematic, not noise — under 0.15 DPS spread across seeds.
+2. **`backend-reforge` and v0.0.119 agree to the cent on all three seeds.** For
+   this workload the reforge branch is DPS-equivalent to the site. The 54 reforge
+   commits do not move feral cat numbers.
+
+Finding 2 narrows the pin question considerably. On *this* measurement the two
+refs are interchangeable for output, so the choice rests on the non-DPS
+differences: v0.0.119 is the site, is a fixed tag, has a prebuilt binary, and
+runs the owner's APL; `backend-reforge` has the reforge work, needs a
+from-source build, cannot run the APL, and sits behind an open PR.
+
+**Caveat, untested:** this is one feral cat skeleton. It does not establish
+DPS-equivalence for ret, for other gear, or for anything touching the 19 changed
+`db.json` proc/stacking items. Do not generalise it into "the branch and the tag
+are the same".
+
+### Upstream PR #385 is open, unmerged and conflicted
+
+`feature/backend-reforge` → `master`, opened 2026-06-06, last updated
+2026-08-13. GitHub reports **`mergeable: false`, `mergeable_state: dirty`** —
+52 commits, 161 files, conflicting against master today.
+
+The reforge functions (`getReforgeCacheGearKey`, `getGearIdentityKey`) are
+**absent from master**. Reforging has never shipped to the site.
+
+Consequence worth stating plainly: if that PR ever lands it will likely land
+*rewritten* after conflict resolution, so `cbf6b75` may not be an ancestor of
+whatever merges. A pin to it can become a pin to a dead commit.
+
+The watch was re-pointed at `cbf6b75` (2026-08-21) so any movement is reported.
+
+### Still open
+
+- **The pin.** Left on `backend-reforge`. Not defended as correct — the owner
+  has been told it does not match the site.
+- **Re-baselining.** Every committed sim number is ~2.4% stale. Not started,
+  because doing it before the pin settles means doing it twice.
+- **Ticket 239** still carries the false claim that `pnpm fetch:protos` advances
+  the pin.
+- **`pnpm verify`** has not run since the pin moved.
+- **The rebased fork has never been compiled on its new base** (154 upstream
+  commits). Keep `backup/pre-reforge-rebase` in `vendor/tbc-new-fork` until a
+  build passes.
+
 ## Acceptance
 
 - [x] Option chosen: **track `feature/backend-reforge`** (v0.0.115 + 54 reforge
