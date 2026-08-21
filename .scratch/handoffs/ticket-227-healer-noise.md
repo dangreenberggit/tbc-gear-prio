@@ -70,10 +70,18 @@ npx tsx packages/core/test/measure-ticket-227-direct.ts
 5. **Why this character is mana-starved.** The skeleton
    (`data/presets/feral/p2.raid-sim-skeleton.json`) runs a **180-second**
    encounter with raid buffs that include Arcane Brilliance and Divine Spirit
-   but **no Blessing of Wisdom, no mana spring totem and no Innervate**. Over
-   three minutes of shifting and ability use that is a genuinely
-   mana-constrained configuration. The sim is right; the fixture's raid setup
-   is what makes mana scarce.
+   but **no Blessing of Wisdom and no Innervate**. Over three minutes of
+   shifting and ability use that is a genuinely mana-constrained
+   configuration. The sim is right; the fixture's raid setup is what makes
+   mana scarce.
+
+   **Correction (ticket 241, 2026-08-20):** this paragraph originally also
+   denied the presence of a mana spring totem. That was false. The
+   skeleton does carry `manaSpringTotem` and `judgementOfWisdom` --
+   `grep -n "manaSpringTotem\|judgementOfWisdom"
+   data/presets/feral/p2.raid-sim-skeleton.json` returns lines 1134 and 1196.
+   The character is mana-starved *despite* both. The Blessing of Wisdom and
+   Innervate halves of the claim stand: grep finds neither.
 
 **So: the ten rows are correctly simulated, and they are also misleading as
 loot advice.** They are real DPS gains for *this* character in *this* raid
@@ -349,9 +357,11 @@ them. Two things follow, both for the owner to rule on:
 
 1. Whether the report should caveat mana-driven upgrades.
 2. Whether `data/presets/feral/p2.raid-sim-skeleton.json` should carry a
-   mana-restoring buff, since a 180-second fight with no Blessing of Wisdom,
-   no mana spring and no Innervate is arguably not the configuration this
-   tool should be advising against. **That is the higher-leverage question**,
+   *further* mana-restoring buff, since a 180-second fight with no Blessing
+   of Wisdom and no Innervate is arguably not the configuration this
+   tool should be advising against. (Corrected per ticket 241: this line
+   originally denied the presence of a mana spring totem. The skeleton does
+   carry `manaSpringTotem`, line 1134, and `judgementOfWisdom`, line 1196.) **That is the higher-leverage question**,
    because it would move every mana-sensitive row at once rather than
    annotating them.
 

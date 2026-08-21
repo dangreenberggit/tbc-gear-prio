@@ -38,8 +38,16 @@ signature of a hard mana constraint rather than a stat weight.
 
 The cause is the fixture's raid setup:
 `data/presets/feral/p2.raid-sim-skeleton.json` runs a **180-second** encounter
-with Arcane Brilliance and Divine Spirit but **no Blessing of Wisdom, no mana
-spring totem and no Innervate**.
+with Arcane Brilliance and Divine Spirit but **no Blessing of Wisdom and no
+Innervate**.
+
+**Correction (ticket 241, 2026-08-20):** this sentence originally also denied
+the presence of a mana spring totem. That was false. The skeleton carries
+both `manaSpringTotem` (line 1134) and `judgementOfWisdom` (line 1196) --
+`grep -n "manaSpringTotem\|judgementOfWisdom"
+data/presets/feral/p2.raid-sim-skeleton.json`. The character is mana-starved
+*despite* both, which makes the starvation finding stronger, not weaker: the
+obvious mana buff is already there and is not enough.
 
 Reproduce: `npx tsx packages/core/test/measure-ticket-227-direct.ts`, plus the
 `bonusStats` probe described in the handoff.
