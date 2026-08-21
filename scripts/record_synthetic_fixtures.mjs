@@ -37,7 +37,7 @@
  *
  * Run: npx tsx scripts/record_synthetic_fixtures.mjs — NOT bare `node`,
  *   same NodeNext/.ts-via-tsx-loader reason as ew5_rank.mjs.
- * Requires: vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe
+ * Requires the pinned wowsimcli named by data/wowsims.lock.json
  *   (gitignored — fetch with `python scripts/fetch_wowsimcli.py --platform win32-x64`)
  *   and vendor/wowsims/*.gear.json (gitignored — fetch with
  *   `python scripts/sync_wowsims.py --restore`). The binary path below is
@@ -71,9 +71,19 @@ import {
 } from "../packages/core/src/fixtures/synthetic-offline.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
+// Resolved from the lockfile, never hardcoded. This path was pinned to
+// v0.0.101 while the lockfile moved on, so re-recording silently produced
+// fixtures from the OLD binary and reported the old simVersion -- a recording
+// that looks fresh and is not (ticket 244).
+const LOCK = JSON.parse(
+  readFileSync(join(ROOT, "data/wowsims.lock.json"), "utf8")
+);
+const PLATFORM = process.platform.startsWith("win") ? "win32-x64" : "linux-x64";
 const BIN = join(
   ROOT,
-  "vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe"
+  "vendor",
+  `wowsimcli-${LOCK.tag}-${PLATFORM}`,
+  PLATFORM === "win32-x64" ? "wowsimcli-windows.exe" : "wowsimcli"
 );
 const ITERATIONS = 3000;
 const SEED = 42;
@@ -385,12 +395,21 @@ async function main() {
   // Merge into the existing file rather than rebuilding it, so recording one
   // row leaves every other row byte-identical — the whole point of being able
   // to name rows on the command line.
-  const out = existing ?? {
-    simVersion: null,
-    seed: SEED,
-    iterations: ITERATIONS,
-    rows: {},
-  };
+  //
+  // Recording EVERY row is the exception: carrying the old header forward
+  // would keep a stale simVersion and trip the mismatch guard below against a
+  // binary no row is being recorded on any more. A full re-record is a fresh
+  // file, which is exactly what an engine pin move needs (ticket 244).
+  const recordingEveryRow = selected.length === Object.keys(ROWS).length;
+  const out =
+    existing && !recordingEveryRow
+      ? existing
+      : {
+          simVersion: null,
+          seed: SEED,
+          iterations: ITERATIONS,
+          rows: {},
+        };
   for (const name of selected) {
     const cfg = ROWS[name];
     const seedRow = existing?.rows?.[cfg.seedFrom];
