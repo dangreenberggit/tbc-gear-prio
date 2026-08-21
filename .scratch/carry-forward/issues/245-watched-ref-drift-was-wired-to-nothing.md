@@ -1,5 +1,5 @@
-Status: resolved on `feat/drift-warner-proven` — all acceptance boxes closed
-  2026-08-21. Close on merge to `dev`.
+Status: closed — merged to `dev` as `4cf7089` on 2026-08-21. Review:
+  `docs/reviews/feat-drift-warner-proven.md`. Follow-ups: 246, 247.
 Type: defect (process gap; a tripwire nothing ran)
 Origin: ticket 244 investigation, 2026-08-20 — found while establishing why the
   `timeToNextEnergyTick` gap went unnoticed for weeks
