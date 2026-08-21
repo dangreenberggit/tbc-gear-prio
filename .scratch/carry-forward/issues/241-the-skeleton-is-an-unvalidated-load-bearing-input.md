@@ -174,3 +174,71 @@ So treat the following as the work, and do not assume a fix is known:
   asserts the fixture has "no mana spring totem"; that is **false**
   (`p2.raid-sim-skeleton.json` carries `manaSpringTotem` and
   `judgementOfWisdom`). Correct it if this ticket touches that file.
+
+---
+
+## 2026-08-20 session — failure record
+
+**Status: ticket NOT advanced. Read this before trusting anything attributed
+to that session, including any subagent report or plan review from it.**
+
+A stage-gate session (plan / adversarial review / execute) ran against this
+ticket and produced results that were then discarded by the owner. The reason
+is recorded here because the failure pattern is the reusable part.
+
+### What was committed, and why only this
+
+1. The `manaSpringTotem` correction (commit `903c714`) — the one claim
+   verified directly against the artifact it describes.
+2. Three probe scripts, each carrying a provenance disclaimer (`b82719c`) —
+   kept for two output-parsing traps and an ablation harness, explicitly not
+   for their numbers.
+
+Everything else was reset. No findings document, no ticket answers, no
+`secondsOomAvg` change.
+
+### The false claims, and how each entered
+
+All five were stated as fact by the orchestrating agent. Three came from
+relaying a subagent report without checking it; two from reading part of an
+artifact and asserting a conclusion about the rest.
+
+| Claim stated | Truth | How it entered |
+| --- | --- | --- |
+| `secondsOomAvg` is at `raidMetrics.dps.secondsOomAvg` | It is on `UnitMetrics` (`api_pb.ts:912`, field `:960`); `RaidMetrics.dps` is `DistributionMetrics` (`:853-897`), which has no such field. **This ticket's original path was correct.** | Subagent report, relayed unchecked into the brief and the plan; a plan step would have written the falsehood into two committed artifacts as a "correction" |
+| The rotation's last priority entry is an **unguarded** Cat Form cast | Entry 11 is guarded by `currentEnergy <= 30` | Partial read — saw the cast, did not read the adjacent condition. Became a whole hypothesis |
+| Item 12662 is a Major Mana Potion | It is `conjuredId`, a Demonic Rune (mana at the cost of health). The potion is `potId` 22838, a Haste Potion, on a different entry | Partial read of the consumables block |
+| Cat Form casts are 0 per iteration | The top-level `casts` field is empty; counts live in `targets[].casts`. See the probe scripts | Own script summed the wrong field and returned a confident zero |
+| Intellect buys +0.76 shifts at 120s rising to +3.04 at 600s | Not reproduced by the orchestrator. Relayed from an executor report as though first-hand | Relayed unverified |
+
+Two of the five were caught by the adversarial reviewer, two by a later run,
+one by the owner.
+
+### Consequence for the artifacts of that session
+
+The plan reviews were **fed the false claims as premises**. A review can only
+attack what it is given, so its clean verdicts on those points prove nothing.
+Any plan, review, or executor report from 2026-08-20 should be treated as
+unverified regardless of how carefully it reads.
+
+### What is still open, and what is not
+
+**Not open — verified independently by the owner and re-checked:** the skeleton
+carries `manaSpringTotem` and `judgementOfWisdom`.
+
+**Open, and untouched by this session:** the six questions in this ticket.
+Q1's displacement answer was produced during the corrupted session and was
+reset with the rest; it is not established.
+
+**Open, and worth its own ticket (hypothesis, untested):** melee hit rating
+measured 0.00 DPS per 30 rating in both mana conditions during the discarded
+session. If a hit-capped baseline is real, hit-bearing candidates would rank
+falsely weak. Unconfirmed — the measurement came from the corrupted session.
+
+### Process note
+
+The session churned: the brief was rewritten three times mid-review, a running
+reviewer was messaged twice with new instructions, and the scope was re-opened
+after a plan had already been reviewed. Injecting unverified facts between
+rounds is what made the reviews worthless — each round re-vetted a moving
+target whose premises were wrong.
