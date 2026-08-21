@@ -122,13 +122,23 @@ could not be verified.
   triggers on `push: branches: [master]` and publishes `dist/tbc` to
   `wowsims/pages-deploy`. `v0.0.119` is `status: identical` to master, so
   v0.0.119 _is_ the site.
-- **This pin is therefore not the site.** Measured on the committed feral
-  skeleton, 20k iterations, identical input to each binary: `v0.0.101` gives
-  ~723.5, and both `backend-reforge` and `v0.0.119` give ~740.7. Committed
-  numbers are ~2.4% low against the current engine.
-- **`backend-reforge` and `v0.0.119` agreed to the cent on all three seeds.**
-  On this workload the reforge commits do not move feral DPS. Untested for ret,
-  other gear, or the 19 changed `db.json` proc items — do not generalise it.
+- **This pin is therefore not the site.** It is 20 ahead / 52 behind master.
+- **The engine change alone is nearly a no-op.** Ret's rotation is
+  byte-identical across both pins, so ret isolates the engine: 1909.74 ->
+  1909.09 at seed 42, **-0.03%**. Three seeds agree.
+- **Feral's shift was the rotation, not the engine.** `feature/backend-reforge`
+  ships a rewritten feral rotation (22 actions vs v0.0.101's 12). An earlier
+  draft of this file called ~2.4% an engine-wide move; that was wrong, and ret
+  is the measurement that shows it.
+- **Upstream's new feral rotation is worse on this gear.** Old 12-action
+  skeleton on the new engine: 740.67. New 22-action skeleton: 722.55, seed 42,
+  20k iterations — about **-18 DPS**. Adopted anyway on the owner's rule that a
+  changed upstream rotation is the one we take. **This deserves a domain look:**
+  nobody with feral judgment has said whether a rotation regression of that size
+  is expected from their rewrite or a sign something is mismatched.
+- **Ranking moved further than DPS.** Feral's above-cutoff set went 15 -> 27
+  rows, feral-p3's 36 -> 55. Which items read as upgrades changed, not just by
+  how much.
 - **Upstream PR #385 is open, unmerged and conflicted** (52 commits, 161 files,
   last updated 2026-08-13). If it lands rewritten, `cbf6b75` may have no
   descendant and this pin would reference a commit reachable from nothing.
@@ -136,11 +146,14 @@ could not be verified.
 ## Limits of this review
 
 - **Not the three-axis `pre-merge-review`.** No SME/domain axis was run. Nobody
-  with game-domain judgment has looked at the ~2.4% DPS shift to say whether it
-  is plausible for the engine changes involved.
-- **Re-baselining has not started.** Every committed sim number is stale against
-  this pin, and `v0.0.101` is baked into recorded fixtures and cache keys
-  (`synthetic-roster-recordings.json`), not just assertions.
+  with game-domain judgment has looked at the -18 DPS feral rotation change to
+  say whether it is plausible or a sign of a mismatch.
+- **Re-baselining is done for the recorded fixtures** (`d41c46c`): all three
+  rows re-recorded on the pinned binary, `simVersion` now the pinned commit.
+  Other committed sim numbers in docs and experiment write-ups were **not**
+  swept and still quote v0.0.101 figures.
+- **No SME has reviewed the -18 DPS rotation regression.** That is the single
+  most valuable follow-up on this branch.
 - **The rebased fork has never been compiled on its new base** (154 upstream
   commits). Keep `backup/pre-reforge-rebase` in `vendor/tbc-new-fork` until a
   build passes there.
@@ -151,11 +164,14 @@ could not be verified.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Note                                                                                                                                                                          |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | correctness | defer       | Pin does not unblock the APL; owner deferred the APL until an engine supports it. Recorded in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md` |
-| 2   | correctness | defer       | `fetch:wowsimcli` 404s on a branch pin; owner accepted for a local-only repo, gap tracked in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md`  |
-| 3   | correctness | fixed       | Two stale gates re-aimed at `selectedPotion` in `fc1b13f`                                                                                                                     |
-| 4   | standards   | defer       | Fork lockfile not updated after the rebase — `.scratch/carry-forward/issues/248-fork-lockfile-not-updated-after-rebase.md`                                                    |
-| 5   | standards   | defer       | Lockfile `_comment` lost watched-refs guidance — `.scratch/carry-forward/issues/249-lockfile-comment-lost-watched-refs-guidance.md`                                           |
-| 6   | spec        | fixed       | Load-bearing claims independently re-verified; all correct, no action needed                                                                                                  |
+| ID  | Axis        | Disposition | Note                                                                                                                                                                                                               |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | correctness | defer       | Pin does not unblock the APL; owner deferred the APL until an engine supports it. Recorded in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md`                                      |
+| 2   | correctness | defer       | `fetch:wowsimcli` 404s on a branch pin; owner accepted for a local-only repo, gap tracked in `.scratch/carry-forward/issues/244-engine-pin-predates-timetonextenergytick.md`                                       |
+| 3   | correctness | fixed       | Two stale gates re-aimed at `selectedPotion` in `fc1b13f`                                                                                                                                                          |
+| 7   | correctness | fixed       | `record_synthetic_fixtures.mjs` hardcoded the v0.0.101 binary and recorded fixtures on the wrong engine while reporting the old `simVersion`; now reads the lockfile (`d41c46c`)                                   |
+| 8   | correctness | fixed       | Full re-record carried the stale file header and tripped the recorder's own `simVersion` guard; a full re-record now starts a fresh file (`d41c46c`)                                                               |
+| 9   | domain      | defer       | Upstream's new feral rotation costs ~18 DPS and moves the above-cutoff set 15 to 27; adopted per owner rule but unreviewed by an SME - `.scratch/carry-forward/issues/250-feral-rotation-regression-unreviewed.md` |
+| 4   | standards   | defer       | Fork lockfile not updated after the rebase — `.scratch/carry-forward/issues/248-fork-lockfile-not-updated-after-rebase.md`                                                                                         |
+| 5   | standards   | defer       | Lockfile `_comment` lost watched-refs guidance — `.scratch/carry-forward/issues/249-lockfile-comment-lost-watched-refs-guidance.md`                                                                                |
+| 6   | spec        | fixed       | Load-bearing claims independently re-verified; all correct, no action needed                                                                                                                                       |
