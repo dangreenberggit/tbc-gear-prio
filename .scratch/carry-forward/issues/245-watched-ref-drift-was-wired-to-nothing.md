@@ -86,6 +86,48 @@ a way it could silently become useless:
       unit check pinning the contract, alongside the existing
       `scripts/check_sync_wowsims.py` checks.
 
+## The warning is necessary, not sufficient
+
+Recorded 2026-08-20 after the owner asked whether the warn would catch this.
+Partly. It closes the gap it was built for — the drift is now in front of a
+human on every verify instead of behind a command nobody typed. But it does not
+reach the failure that actually happened, and this ticket should not be closed
+believing it does.
+
+**Both instances were an agent reasoning from "we do not have this feature",**
+not a human missing a notification. In the first, an optimizer was declared
+absent while live on this branch. In the second, tickets 239 and 244 were both
+written on the premise that `timeToNextEnergyTick` was unavailable, and 244
+went further — it listed `feature/backend-reforge` as an option and called it
+marginal without ever resolving what version the branch was on.
+
+A line at the tail of a 21-step green build does not intercept that. Three
+concrete ways it still fails:
+
+1. **It warns; it does not stop.** The agent writing 239 could have read the
+   drift line and continued, because the line does not contradict the specific
+   claim being made.
+2. **Nobody reads the tail of a passing build.** That is the standing weakness
+   of every warn-only check, and it is why the visibility box above is open
+   rather than assumed closed.
+3. **It can rot into a reassuring lie.** If `--check`'s output format changes,
+   the `"DRIFT:"` match stops matching and the warner reports "in sync"
+   permanently — worse than no warner, and a third instance of the same shape.
+
+**Follow-up option, deliberately not implemented yet.** The intervention that
+would reach the real failure belongs at the point of reasoning, not the point of
+build: a rule stating that *before asserting an upstream feature is absent,
+resolve every ref in `watchedRefs` and say what you found* — placed where an
+agent reads it while forming the claim (`AGENTS.md`, or a `_comment` on
+`data/wowsims.lock.json` beside `watchedRefs` itself).
+
+Not written yet on purpose. Per `AGENTS.md`, changes to `AGENTS.md` and skill
+files are proposed in chat and wait for approval, because they steer every
+future session. And the cheap mechanical fix is already in place and working —
+adding a second, unproven intervention on top of an unvalidated one is how the
+first tripwire ended up wired to nothing. Close the boxes above first, then
+decide whether this is still needed.
+
 ## Acceptance
 
 - [ ] All five boxes above closed, each naming the command run.
@@ -93,3 +135,5 @@ a way it could silently become useless:
       a check in `pnpm verify`, so a format change fails loudly instead of
       turning the warner into a no-op.
 - [ ] `pnpm verify` green.
+- [ ] A decision recorded on the follow-up option above — adopted (with the
+      wording proposed in chat first) or dropped, with the reason.
