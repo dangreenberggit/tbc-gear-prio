@@ -1,11 +1,12 @@
 {
   "generatedBy": "scripts/generate_sim_implemented_effects.py",
   "forkRepo": "dangreenberggit/tbc-new",
-  "forkCommit": "3000b2f6b7178c2e98e994583f4e3300e0ceb269",
-  "_comment": "implementedEffectItemIds is informational -- assemble_universe.py does not consult it, because a stat-only item needs no registration at all. stubOnlyItemIds is the one that drives exclusion: an item id whose only appearance in the fork's Go tree is inside a commented `TODO: Manual implementation required` stub block, with no active core.NewItemEffect / shared.NewSimpleStatActive registration anywhere. Regenerate with `python scripts/generate_sim_implemented_effects.py` after re-pinning vendor/tbc-new-fork.",
-  "implementedEffectItemIdsCount": 215,
+  "forkCommit": "7de45ea080d294d04399878b3b3f0a4cbd0039b5",
+  "_comment": "implementedEffectItemIds is informational -- assemble_universe.py does not consult it, because a stat-only item needs no registration at all. stubOnlyItemIds is the one that drives exclusion: an item id whose only appearance in the fork's Go tree is inside a commented `TODO: Manual implementation required` stub block, with no active core.NewItemEffect / shared.NewSimpleStatActive registration anywhere. Regenerate with `python scripts/generate_sim_implemented_effects.py` after re-pinning vendor/tbc-new-fork. Membership in implementedEffectItemIds means the item is actively registered or referenced in the fork's Go tree -- through a core.NewItemEffect / shared.NewSimpleStatActive call, a LibramMap {ItemID: ...} struct literal, or a runtime HasItemEquipped(<id>, ...) gate. It does NOT mean the item's proc contributes DPS for your spec: ticket 226's direct sims measured a member of this list contributing nothing for the spec under test (.scratch/handoffs/ticket-226-direct-sims.md). Implemented and contributes are different questions and this key answers only the first. All three scans are literal-id scans, so a registration whose id is a named constant is out of their reach.",
+  "implementedEffectItemIdsCount": 216,
   "implementedEffectItemIds": [
     1168,
+    8345,
     11815,
     12798,
     13164,

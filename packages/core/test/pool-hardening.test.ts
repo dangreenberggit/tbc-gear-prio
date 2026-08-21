@@ -340,6 +340,48 @@ describe("curated BiS tags name their source (carry-forward 47)", () => {
     expect(feral?.curatedSets).toEqual(["preraid"]);
     expect(feral?.bisTags).toBeUndefined();
   });
+
+  it("excludes druid-inequippable weapon types from the feral pool only", () => {
+    // Ticket 228 box 4: at least one inequippable weapon type per spec, and
+    // the exclusion must be provably *spec-specific*. A pure absence check
+    // would still pass if the item had vanished from every universe for an
+    // unrelated reason, so each feral absence is paired with the matching ret
+    // presence in the same assertion.
+    //
+    // Deliberately by item id, not by weapon type: the committed universe
+    // rows carry armorType / handType / slot and NO weaponType field, so a
+    // weaponType sweep cannot be expressed against committed data at all.
+    // That is why the staff case below loads the vendor db instead.
+    const feral = new Set(
+      loadUniverse("data/universes/feral-p3.json").raw.entries.map(
+        (e) => e.itemId
+      )
+    );
+    const retP3 = new Set(
+      loadUniverse("data/universes/ret-p3.json").raw.entries.map(
+        (e) => e.itemId
+      )
+    );
+    const retP5 = new Set(
+      loadUniverse("data/universes/ret-p5.json").raw.entries.map(
+        (e) => e.itemId
+      )
+    );
+
+    // Cataclysm's Edge (sword) and Soul Cleaver (axe) — both weapon types a
+    // druid cannot equip, both types in assemble_universe.py's feral
+    // excluded_weapon_types.
+    for (const [id, name] of [
+      [30902, "Cataclysm's Edge (sword)"],
+      [32348, "Soul Cleaver (axe)"],
+    ] as const) {
+      expect(feral.has(id), `${name} must not enter the feral pool`).toBe(
+        false
+      );
+      expect(retP3.has(id), `${name} must still enter ret p3`).toBe(true);
+      expect(retP5.has(id), `${name} must still enter ret p5`).toBe(true);
+    }
+  });
 });
 
 describe("data/universes/ret-p3.json hardening", () => {

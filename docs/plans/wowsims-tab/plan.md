@@ -161,8 +161,10 @@ dependency.
   lives for the page session; per-sim dedupe within and across runs is where
   the savings are. IndexedDB is a later nicety, not scoped.
 - **EP weights:** our committed per-spec weights, copied into the fork's
-  `data/` (they feed the prefilter and gem fill only — sims produce the
-  numbers). Ret has weights **only at p2** today; §7 picks that up.
+  `data/` (they feed gem fill only, never candidate selection — there is no
+  prefilter, so sims produce every displayed number; see §5, §12 and
+  [`candidate-pool.md`](candidate-pool.md)). Ret has weights **only at p2**
+  today; §7 picks that up.
 - **Universe/pool data:** the committed `data/universes/<spec>-p<N>.json`
   files (99–534 KB) copy into the fork and bundle as static JSON. They carry
   `bisTags` and `source` per row — tags and raid filter come for free.
@@ -240,22 +242,67 @@ Placement and mechanics, per
 ## 5. What runs when the user clicks Run
 
 1. Adapter serializes current settings → skeleton; reads gear from the page.
-2. The ported engine runs exactly as on the CLI: pool filtered by `maxPhase`,
-   player-aware EP prefilter, gem/meta repair, baseline + candidates simmed
-   through `WasmSimRunner` with a fixed seed, ranking + cutoff.
+2. The ported engine runs exactly as on the CLI: pool filtered by `maxPhase`
+   and the Kael temp-legendary exclusion — **no EP prefilter; every eligible
+   candidate is simmed** (`packages/core/src/rank.ts:576-582`, confirmed with
+   `grep -n "epWeights" packages/core/src/rank.ts`, which shows only gem
+   context, repair, hash and disclosure uses) — gem/meta repair, baseline +
+   candidates simmed through `WasmSimRunner` with a fixed seed, ranking +
+   cutoff.
 3. Per-sim cache (`MemoryStore`, string keys) dedupes identical requests
    within and across runs in the session.
 4. `applyView` renders the shopping list; slot sub-tabs are views over the
    same `Ranking` — no re-sim on any view toggle (PLAN.md §2's "no view
    changes a number" applies verbatim).
 
-Budget note (unmeasured, drives E-W2): a default run is baseline + ~80
-candidates after the prefilter. At 3,000 iterations on ≤4 WASM workers the
-wall-clock is unknown — could be fine, could force a tighter prefilter or a
-lower default candidate count. **Measure before tuning anything.**
+Budget note (unmeasured, drives E-W2): a default run is baseline + every
+eligible candidate — there is no prefilter to shrink that set (see above).
+Ret eligible counts by `maxPhase`, from `data/universes/ret-p5.json`: p1
+**155**, p2 **246**, p3 **390**, p4 **437**, p5 **518**. At 3,000 iterations
+on ≤4 WASM workers the wall-clock is unknown — could be fine, could force a
+candidate cap or a lower default iteration count. **Measure before tuning
+anything.** See
+[`candidate-pool.md`](candidate-pool.md) §1.1 for the cost model these counts
+feed and the plan for bounding the run.
 
 <!-- E-W2 results land here: wall-clock per candidate at 3,000 and 5,000
      iterations, worker count, machine. -->
+
+**E-W2 numbers, 2026-08-17** (ticket 156). Served production build of
+`vendor/tbc-new-fork` at fork commit `4018f9bf8ea1afa885f9fe3c3735db3286c670e7`,
+retribution paladin, Upgrades tab, screening on, max phase 2.
+
+| Iterations | Workers | Machine | Per candidate | Whole run |
+| --- | --- | --- | --- | --- |
+| 3,000 | 4 of 20 | Windows 11, 20 logical cores | **~3.9 s** | ~16 min (240 screened + 187 full) |
+| 5,000 | 4 of 20 | Windows 11, 20 logical cores | **~14.8 s** | 15.4 min (240 screened + 73 full) |
+
+The 3,000 row is the ticket 212 slice-5 record, cited not re-run. The 5,000 row
+was measured for this entry: 11 full sims between two timestamped DOM progress
+samples (43/73 at 01:49:06.979Z, 54/73 at 01:51:49.975Z) = 163.0 s, so 14.8 s
+per candidate. Same ~±10% caveat as the 3,000 figure — these are progress-counter
+reads between long waits, not instrumentation.
+
+Reproduce: in `vendor/tbc-new-fork` (PowerShell, `go` on PATH)
+`npx tsx vite.build-workers.mts`, `npx vite build`,
+`./node_modules/.bin/http-server <abs>/dist -p 8899 --silent`, then
+`http://127.0.0.1:8899/tbc/paladin/retribution/`, Upgrades tab, Candidates=20,
+Iterations=5000, Run. **`lib.wasm` is not built by those commands** (separate Go
+target, `makefile:117-126`) — the served binary is pre-existing (20,293,865
+bytes, mtime 2026-08-14), which is sound here because the fork's Go tree is
+unchanged across this pin bump (`git -C vendor/tbc-new-fork diff --name-only
+1dddd77c..HEAD -- '*.go'` is empty).
+
+Per candidate, 5,000 iterations cost **3.8x** the 3,000 figure where the
+iteration count alone predicts 1.67x. Do not read that as a superlinear
+iteration cost: **the two runs are not matched.** The 5,000 run also screened
+all 240 candidates at 5,000 iterations (the 3,000 run screened at 3,000), so
+screening load differs between them, and both per-candidate figures are derived
+from progress samples at ~±10%. Recorded as an open observation; isolating it
+needs a matched run.
+
+Page visibility was `hidden` for both (Claude Code Browser pane, not a
+foregrounded tab) — see ticket 156 for why that caveat still stands.
 
 **E-W2: blocked by environment WASM throughput, not measured as planned
 (slice 3, 2026-08-14).** Attempted on this machine (Windows 11, 20 logical
@@ -445,8 +492,9 @@ per the original ask — not redesigned into a full importer.
   `sme-rank-review`.
 - **Ret p3 EP weights.** Only p2 exists (`data/presets/ret/p2.ep-weights.json`,
   and it is missing `PseudoStatMainHandDps` — PLAN.md §16 item 3, fix while
-  here). EP gates the prefilter and gem fill, so p3 rankings with p2 weights
-  are *usable but degraded*; produce a p3 set before calling ret-at-p3 done.
+  here). EP gates gem fill (there is no prefilter — see §5, §12), so p3
+  rankings with p2 weights are *usable but degraded*; produce a p3 set before
+  calling ret-at-p3 done.
 - **Feral:** p2–p3 universes exist; nothing new needed for v1.
 - **Adding a spec later** = universe file + EP weights + `bisTags`. The site
   supplies everything else (settings, APL, spec identity) — a strictly
@@ -550,7 +598,7 @@ a normal feature branch gated by `pnpm verify`.
 |---|---|---|
 | ~~WASM ≠ native numerically~~ **CLOSED 2026-08-14** | Every number on the tab inherited it | **E-W1 ran and passed.** Delta 1.8e-12 DPS — smaller than native's disagreement with itself across thread counts. Reproduced independently. This was the standing gate from compute-topology's plan, unrun since that document was written; it is now answered, and the answer is that the two engines agree |
 | **Port drift** — fork engine and `packages/core` diverge silently | Two tools, two answers, no explanation | §3's ladder: E-W3 fixture parity fork-side, `PROVENANCE.md`, design changes routed here first, reconciliation as the end state |
-| Browser run too slow at default settings | Tab feels broken; users bail mid-run | E-W2 sizes the budget; prefilter and iteration control are the knobs; skeleton-first rendering keeps waits legible |
+| Browser run too slow at default settings | Tab feels broken; users bail mid-run | E-W2 sizes the budget; there is no EP prefilter (§5, §12), so the knobs are iteration count and, if [`candidate-pool.md`](candidate-pool.md)'s M1 lands, a candidate cap; skeleton-first rendering keeps waits legible |
 | Upstream drift (112 commits and counting) | Fork bit-rots; rebase cost grows | Deliberate: stay at the pin while local (D2); rebase is a single named PR-checklist item |
 | Two `db.json` vintages after a future rebase | Universe metadata subtly disagrees with the page's `Database` | Non-issue at the pin; named re-check on the PR checklist |
 | Ret p3 tags/EP stale or missing | Shopping list at p3 shows 2022-era BiS pins and mis-gemmed candidates | Slice 6 before advertising p3; tags degrade to empty rather than block (PLAN.md §4.1 behaviour) |
@@ -588,9 +636,14 @@ of whether it should is deferred, not dismissed.
 
 Settled facts:
 
-- **Role is prefilter and gem fill only** (§2.5, §5). Sims produce every
-  displayed number, so wrong weights degrade candidate *selection* and can
-  never make a displayed number wrong.
+- **Role is gem fill only, and never candidate selection.** There is no EP
+  prefilter (§2.5, §5): `filterPoolByPhase(...).filter(e =>
+  !isKaelTempLegendary(e.itemId))` is the entire candidate filter
+  (`packages/core/src/rank.ts:576-582`), and every eligible candidate is
+  simmed. Sims produce every displayed number, so wrong weights can degrade
+  gem choice (and, if [`candidate-pool.md`](candidate-pool.md)'s M1 lands,
+  the order rows fill in) but can never make a displayed number wrong and
+  can never drop a candidate.
 - **They are never zero.** `individual_sim_ui.tsx:589` seeds
   `player.setEpWeights` from `defaults.epWeights` at init, and
   `individual_sim_ui.tsx:737-739` restores either saved weights or that same
@@ -618,8 +671,8 @@ Settled facts:
 
 **v1 decision: keep the committed weights and disclose it.** The tab uses our
 per-spec weights unconditionally, and the assumptions drawer states which
-weights file and pin scored the prefilter, so a user who has computed their own
-weights can see why the candidate set ignored them. Opt-in use of page weights
+weights file and pin scored gem fill, so a user who has computed their own
+weights can see why gem choice ignored them. Opt-in use of page weights
 is v2. Ticket
 `.scratch/carry-forward/issues/162-upgrades-tab-ignores-user-set-ep-weights.md`
 carries the design, the shim, the mapping gap, and the validity check.

@@ -8,6 +8,10 @@ D7 eligibility is implemented here (leather/mail/librams allowed; not plate-only
     python scripts/assemble_universe.py --max-phase 2
     python scripts/assemble_universe.py --max-phase 3 --out data/universes/ret-p3.json
 
+Every run also rewrites data/weapon-type-exclusions.json from SPEC_PROFILES as
+a whole, so any single invocation regenerates the whole manifest and the output
+does not depend on --spec or on invocation order.
+
 Exit 0 ok, 2 missing inputs.
 """
 
@@ -93,8 +97,13 @@ ARMOR_CLOTH = 1
 ARMOR_LEATHER = 2
 ARMOR_MAIL = 3
 ARMOR_PLATE = 4
+WEAPON_AXE = 1
+WEAPON_DAGGER = 2
+WEAPON_FIST = 3
 WEAPON_POLEARM = 6
+WEAPON_SHIELD = 7
 WEAPON_STAFF = 8
+WEAPON_SWORD = 9
 HAND_TYPE_TWO_HAND = 4
 RANGED_IDOL = 6
 RANGED_LIBRAM = 7
@@ -273,10 +282,11 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
         ranged_type=RANGED_LIBRAM,
         allow_one_hand=False,
-        # Paladins wield polearms but not staves. wowsims
-        # ui/core/player_classes/paladin.ts lists Polearm with
-        # canUseTwoHand: true and omits Staff entirely.
-        excluded_weapon_types=frozenset({WEAPON_STAFF}),
+        # wowsims ui/core/player_classes/paladin.ts static weaponTypes lists
+        # only Axe, Mace, OffHand, Polearm, Shield, Sword as eligible --
+        # Dagger, Fist and Staff are all absent from that list, so all three
+        # are excluded here.
+        excluded_weapon_types=frozenset({WEAPON_DAGGER, WEAPON_FIST, WEAPON_STAFF}),
     ),
     "feral": SpecProfile(
         "feral",
@@ -311,10 +321,46 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         ranged_type=RANGED_IDOL,
         # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
         # one-handers are eligible and staves are the signature weapon.
+        # The exclusions are the complement of that list, per wowsims
+        # ui/core/player_classes/druid.ts lines 25-31. WeaponType has no
+        # two-hand members (data/proto/common.proto lines 338-349): a
+        # two-handed sword carries WeaponTypeSword and is told apart by
+        # HandType, so excluding the type covers both hand types at once.
         allow_one_hand=True,
-        excluded_weapon_types=frozenset(),
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        ),
     ),
 }
+
+# Deliberately beside the other flat data/ config files rather than inside
+# data/universes/, which carries an implicit contract that every non-report
+# .json in it is a universe payload: pool-hardening.test.ts globs the directory
+# and parses each hit, and check_rep_tables.py globs "*.json" there too. A
+# manifest dropped in that directory breaks both.
+EXCLUSIONS_MANIFEST = ROOT / "data/weapon-type-exclusions.json"
+
+
+def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, list[int]]:
+    """Emit every spec's excluded weapon types, not just the one being built.
+
+    Deliberately derived from SPEC_PROFILES as a whole and never from the
+    --spec profile: this script runs once per spec/phase, so a manifest built
+    from the selected profile would hold one spec and the last invocation
+    would silently win. packages/core/test/weapon-type-exclusion.test.ts reads
+    this file to decide which specs it must cover, so that silent gap would be
+    the very coverage hole the manifest exists to close.
+    """
+    manifest = {
+        name: sorted(profile.excluded_weapon_types)
+        for name, profile in sorted(SPEC_PROFILES.items())
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
+
 
 # Wowhead list files included when assembling up to maxPhase N.
 WOWHEAD_STAGE_FOR_MAX_PHASE: dict[int, list[str]] = {
@@ -2001,7 +2047,13 @@ def main() -> int:
         except ValueError:
             return p
 
+    manifest = write_exclusions_manifest()
+
     print(f"wrote {display(out_path)} — {len(payload['entries'])} entries")
+    print(
+        f"wrote {display(EXCLUSIONS_MANIFEST)} — "
+        f"{len(manifest)} specs: {', '.join(sorted(manifest))}"
+    )
     print(f"wrote {display(report_path)}")
     print(json.dumps(report, indent=2))
     return 0

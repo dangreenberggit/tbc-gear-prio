@@ -293,3 +293,13 @@ cheap enough for this slice; state so plainly rather than imply it was
 checked. The unit tests above cover the mapping/validation logic and the
 resolver/disclosure logic each in isolation, but not their end-to-end
 connection through `upgrades_tab.tsx`'s `run()`.
+
+### 2026-08-15 — correction
+
+Line 9 and line 13 above say "prefilters" and "candidate *selection*". There
+is no EP prefilter in the engine: candidate selection is `filterPoolByPhase`
+plus the Kael temp-legendary exclusion only, and every eligible candidate is
+simmed (`packages/core/src/rank.ts:576-582`). EP's role, here and throughout
+this ticket, is gem fill only. See
+[`docs/plans/wowsims-tab/candidate-pool.md`](../../../docs/plans/wowsims-tab/candidate-pool.md)
+§4.

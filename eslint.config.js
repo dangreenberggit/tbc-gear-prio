@@ -68,7 +68,24 @@ export default tseslint.config(
     // so they share the override rather than getting their own.
     files: ["scripts/**/*.mjs", "docs/plans/wowsims-tab/experiments/**/*.mjs"],
     languageOptions: {
-      globals: { process: "readonly", console: "readonly" },
+      // Timers are here for the E-W5 harnesses, which sample a child
+      // process's RSS on an interval while a sim runs. The WASM-runtime
+      // sweep (ticket 203) additionally runs the Go wasm_exec.js shim and
+      // the compiled sim module directly under Node, so it needs the Web
+      // platform globals that shim expects.
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        performance: "readonly",
+        WebAssembly: "readonly",
+        TextDecoder: "readonly",
+        TextEncoder: "readonly",
+        globalThis: "readonly",
+        fetch: "readonly",
+        crypto: "readonly",
+      },
     },
   },
   {

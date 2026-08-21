@@ -19,6 +19,13 @@ become:
 .scratch/carry-forward/issues/<NN>-<slug>.md
 ```
 
+**Allocating `<NN>`:** read `.scratch/carry-forward/issues/NEXT`, use that
+number, and write the incremented value back to `NEXT` in the same commit
+as the new ticket. Never allocate by listing the directory — two branches
+doing that pick the same number and merge cleanly under different
+filenames (it happened: two 232s and two 233s on 2026-08-19). Editing
+`NEXT` forces the collision into a git conflict instead.
+
 Each file starts with these lines (machine-readable; `pnpm merge-to-dev` / `merge-ready` parse them):
 
 ```
@@ -29,7 +36,17 @@ Blocks: phase-1
 Blocked by: none
 ```
 
-- **`Status:`** — `open` / `claimed` / `resolved` (same vocabulary as wayfinding).
+- **`Status:`** — one of exactly six words, and nothing else:
+  `open` / `claimed` / `blocked` / `closed` / `resolved` / `wontfix`
+  (`scripts/check_merge_ready.py`, `KNOWN_STATUSES`). Anything the gate cannot
+  read is an error that fails the merge, not a shrug — a ticket the tooling
+  cannot see cannot block anything (tickets 85, 88/89, 147). Put commentary in
+  the body, never on the `Status:` line.
+- **`blocked`** — open work that only a _named human_ can move, such as an
+  owner ruling. It behaves exactly like `open` in every gate scan: it shows in
+  `pnpm issues:open`, its `Blocks: phase-N` line still gates phase merges, and a
+  review `defer` may target it. It is not a merge veto on its own — veto power
+  lives in `Blocks:`, not in the status word.
 - **`Origin:`** — the review that created it.
 - **`Blocks:`** — which phase must deal with this (e.g. `phase-1`). On
   `phase-N/*`, `pnpm merge-to-dev` refuses while matching tickets are still open,

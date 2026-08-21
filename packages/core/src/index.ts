@@ -9,8 +9,10 @@ export {
 export {
   DegenerateSeedsError,
   PAIRED_REPLICATE_TOP_N,
+  assertDistinctSeeds,
   assertUsableSeeds,
   pairedReplicateSe,
+  replicateSeeds,
   usesPairedReplication,
 } from "./se.js";
 export {

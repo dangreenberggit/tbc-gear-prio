@@ -1,0 +1,32 @@
+itemId  slot    name                                  melee-relevant  stat line (index.json)
+32609   feet    Boots of the Divine Light             none  {'sta': 47, 'int': 24, 'healing': 73, 'spellpower': 25, 'spirit': 24, 'armor': 162}  vendor-agrees=True
+32516   wrist   Wraps of Purification                 none  {'sta': 24, 'int': 25, 'healing': 53, 'spellpower': 18, 'armor': 94, 'mp5': 7}  vendor-agrees=True
+29984   waist   Girdle of Zaetar                      none  {'sta': 22, 'int': 23, 'healing': 73, 'spellpower': 25, 'spirit': 24, 'armor': 227}  vendor-agrees=True
+29989   back    Sunshower Light Cloak                 none  {'sta': 18, 'int': 24, 'healing': 77, 'spellpower': 26, 'spirit': 20, 'armor': 116}  vendor-agrees=True
+29308   finger  Band of Eternity                      none  {'sta': 28, 'int': 25, 'healing': 64, 'spellpower': 22, 'mp5': 10}  vendor-agrees=True
+29307   finger  Band of Eternity                      none  {'sta': 24, 'int': 22, 'healing': 55, 'spellpower': 19, 'mp5': 8}  vendor-agrees=True
+29309   finger  Band of the Eternal Restorer          none  {'sta': 28, 'int': 25, 'healing': 64, 'spellpower': 22, 'mp5': 10}  vendor-agrees=True
+28661   finger  Mender's Heart-Ring                   none  {'sta': 18, 'int': 21, 'healing': 44, 'spellpower': 15, 'spirit': 19}  vendor-agrees=True
+29920   finger  Phoenix-Ring of Rebirth               none  {'int': 24, 'healing': 55, 'spellpower': 19, 'mp5': 10}  vendor-agrees=True
+28822   neck    Teeth of Gruul                        none  {'int': 21, 'healing': 46, 'spellpower': 16, 'spirit': 19, 'mp5': 8}  vendor-agrees=True
+
+VERIFIED healer-only (zero melee-relevant stats): [32609, 32516, 29984, 29989, 29308, 29307, 29309, 28661, 29920, 28822]
+count: 10 of 10 claimed
+
+=== truth-fixture noise scale (hypothesis input) ===
+recordings: 461   iterations: 3000   iterationsDone: [3000]
+mean per-item stdev: 162.1527
+SE at 3000 iterations = 2.9605 DPS
+effective cutoff boundary = 2.9288 DPS
+
+healer rows expressed in sigma of the truth's own SE:
+  29308    7.80 DPS = 2.63 sigma
+  29309    7.80 DPS = 2.63 sigma
+  32609    7.62 DPS = 2.57 sigma
+  32516    7.53 DPS = 2.54 sigma
+  29920    6.37 DPS = 2.15 sigma
+  29984    6.10 DPS = 2.06 sigma
+  29989    5.95 DPS = 2.01 sigma
+  28822    5.81 DPS = 1.96 sigma
+  29307    5.16 DPS = 1.74 sigma
+  28661    4.61 DPS = 1.56 sigma

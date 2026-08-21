@@ -80,7 +80,7 @@ function defaultMaxPhaseFromLock(): ContentPhase {
 
 function usage(): never {
   console.error(
-    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--spec ret|feral] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--with-set-potential] [--report-events] [--assumptions] [--report [<path.html>]]"
+    "usage: pnpm rank --region US --realm <realm> --character <name> [--offline] [--spec ret|feral] [--max-phase N] [--raid <zone>] [--boss <name>] [--group-by rank|slot|raid] [--pin-bis] [--hide-owned] [--show-below-cutoff] [--with-set-potential] [--report-events] [--assumptions] [--concurrency N] [--report [<path.html>]]"
   );
   process.exit(2);
   throw new Error("unreachable");
@@ -96,6 +96,7 @@ function parseArgs(argv: string[]): {
   assumptions: boolean;
   showBelowCutoff: boolean;
   reportEvents: boolean;
+  concurrency: number;
   raid?: string;
   report?: string;
   view: ViewOptions;
@@ -110,6 +111,7 @@ function parseArgs(argv: string[]): {
     assumptions: boolean;
     showBelowCutoff: boolean;
     reportEvents: boolean;
+    concurrency: number;
     raid?: string;
     report?: string;
     view: ViewOptions;
@@ -119,6 +121,12 @@ function parseArgs(argv: string[]): {
     assumptions: false,
     showBelowCutoff: false,
     reportEvents: false,
+    // Ticket 200: E-W5 measured 66% of every CLI sim as fixed per-process
+    // cost (t_fixed 373.2 ms vs t_iter 0.0637 ms/iteration), so overlapping
+    // process spawns is the CLI's real throughput win. 4 rather than the
+    // core count because each wowsimcli process peaks near 184 MB (§3.3)
+    // and already splits its own iterations across threads.
+    concurrency: 4,
     maxPhase: defaultMaxPhaseFromLock(),
     view: {},
   };
@@ -166,6 +174,16 @@ function parseArgs(argv: string[]): {
     }
     if (arg === "--character" && next) {
       out.character = next;
+      i++;
+      continue;
+    }
+    if (arg === "--concurrency" && next) {
+      const n = Number(next);
+      if (!Number.isInteger(n) || n < 1) {
+        console.error(`--concurrency must be a positive integer, got: ${next}`);
+        process.exit(2);
+      }
+      out.concurrency = n;
       i++;
       continue;
     }
@@ -223,6 +241,7 @@ function parseArgs(argv: string[]): {
     assumptions: out.assumptions,
     showBelowCutoff: out.showBelowCutoff,
     reportEvents: out.reportEvents,
+    concurrency: out.concurrency,
     view: out.view,
     ...(out.raid !== undefined ? { raid: out.raid } : {}),
     ...(out.report !== undefined ? { report: out.report } : {}),
@@ -408,13 +427,24 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         raidSimSkeleton: skeleton,
         epWeights,
         pool,
+        concurrency: args.concurrency,
       },
       (p) => {
-        if (p.stage === "simming") {
+        if ("stage" in p && p.stage === "simming") {
           console.log(`simming ${p.done}/${p.total}`);
         }
       }
     );
+    // The CLI never passes Deps.signal, so rankUpgrades cannot actually
+    // return a PartialRanking here — Stop is a UI-only control for now
+    // (candidate-pool.md §5.2, fork controls). Asserted rather than
+    // silently narrowed, so a future CLI `--stop` flag is forced to touch
+    // this line instead of inheriting an unchecked cast.
+    if (!ranking.complete) {
+      throw new Error(
+        "internal: rankUpgrades returned a partial ranking with no signal passed"
+      );
+    }
     // Through applyView (§4.1) rather than a second filter implementation —
     // the CLI exercising every ViewOptions field is the stated reason the view
     // layer is built in Stage 2 rather than in the web shell.

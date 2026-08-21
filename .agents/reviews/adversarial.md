@@ -43,4 +43,7 @@ concrete input/state that triggers it (not just "this could be wrong" —
 show the failure). Rank most-severe first. If nothing survives scrutiny,
 say so plainly rather than inventing minor nits to fill space.
 
+Every finding names the command you ran or the file you read to find it.
+List each lane you did not examine as **unexamined**, with the reason.
+
 Under 400 words.

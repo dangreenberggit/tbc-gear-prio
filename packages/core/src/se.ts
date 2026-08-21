@@ -41,7 +41,7 @@ export function usesPairedReplication(seeds: readonly number[]): boolean {
  * entirely an artifact, and worse than no number at all because it reads as
  * precision. Fail loudly instead of reporting it.
  */
-export function assertUsableSeeds(seeds: readonly number[]): void {
+export function assertDistinctSeeds(seeds: readonly number[]): void {
   if (!usesPairedReplication(seeds)) return;
   const seen = new Set<number>();
   const repeated = new Set<number>();
@@ -57,6 +57,66 @@ export function assertUsableSeeds(seeds: readonly number[]): void {
         `variance and drives the paired-replicate SE toward a false zero (PLAN.md §10).`
     );
   }
+}
+
+/**
+ * The full guard on a multi-seed replication: distinct **and** spaced far
+ * enough apart to be independent (ticket 236).
+ *
+ * `iterations` is required rather than optional, and the spacing check is not
+ * separately reachable, because an optional argument made ticket 236's whole
+ * fix opt-in: omitting it silently downgraded to distinctness alone and
+ * re-admitted the false-precision SE that PLAN.md names as the project's worst
+ * case. A caller that genuinely only wants distinctness now asks for
+ * `assertDistinctSeeds` by name, so the weaker check is a visible choice
+ * instead of a missing argument (ticket 243).
+ */
+export function assertUsableSeeds(
+  seeds: readonly number[],
+  iterations: number
+): void {
+  assertDistinctSeeds(seeds);
+  if (!usesPairedReplication(seeds)) return;
+  const ordered = [...seeds].sort((a, b) => a - b);
+  for (let i = 1; i < ordered.length; i += 1) {
+    const lo = ordered[i - 1]!;
+    const hi = ordered[i]!;
+    const gap = hi - lo;
+    if (gap >= iterations) continue;
+    throw new DegenerateSeedsError(
+      `seeds must be at least ${iterations} apart to be independent replicates: ` +
+        `${lo} and ${hi} are ${gap} apart in [${seeds.join(", ")}]. ` +
+        `A run of N iterations from seed S consumes the per-iteration streams ` +
+        `S..S+N-1, so these two share ${iterations - gap} of ${iterations} streams ` +
+        `and their spread measures overlap rather than simulation noise ` +
+        `(ticket 236; upstream vendor/tbc-new-fork/sim/core/sim.go:248-251).`
+    );
+  }
+}
+
+/**
+ * `count` seeds from `base`, spaced by `iterations` so no two runs share a
+ * per-iteration RNG stream (ticket 236).
+ *
+ * Derived rather than pinned as constants, because the defect this replaced
+ * was constants that stayed still while the iteration count they were only
+ * correct relative to moved. Upstream applies the same rule to keep concurrent
+ * splits independent (`sim/core/sim_concurrent.go:39-40`).
+ *
+ * Spacing is what matters, not the arrangement: at 20 seeds and 3,000
+ * iterations, seeds spaced by exactly `iterations` measure `sampleSd/SE` 0.895
+ * and 20 scattered seeds measure 1.074 — both consistent with independence,
+ * against 0.087 for the seeds this fixed. Do not read a single five-seed ratio
+ * as a measurement of independence: at n=5 the sample sd carries 34 % relative
+ * error, so it cannot separate 0.5 from 1.0. See
+ * `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`.
+ */
+export function replicateSeeds(
+  base: number,
+  count: number,
+  iterations: number
+): number[] {
+  return Array.from({ length: count }, (_, k) => base + k * iterations);
 }
 
 /**

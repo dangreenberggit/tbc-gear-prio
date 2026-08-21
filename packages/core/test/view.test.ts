@@ -45,6 +45,7 @@ function ranking(items: RankedItem[]): Ranking {
       expertise: { rating: 0, capRating: null, gap: null },
     },
     items,
+    complete: true,
   };
 }
 

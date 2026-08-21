@@ -80,7 +80,10 @@ export type ViewResult = {
    * shortlist stays a view concern rather than the `Ranking`'s.
    */
   shortlist: ViewRow[];
-  /** How many rows the shortlist hides, so a caller can label the expand. */
+  /**
+   * How many rows the shortlist hides, so a caller can label the expand.
+   * `shortlist.length + belowCutoffCount` equals the filtered row total.
+   */
   belowCutoffCount: number;
   /**
    * Whether a `pinBis` toggle has anything to act on. The Stage 3 gate box
@@ -198,14 +201,14 @@ function assignTieGroups(
   rows: ViewRow[],
   sortKey: (r: ViewRow) => number
 ): void {
+  const groupIdRef = { next: 1 };
   const byDelta = [...rows].sort((a, b) => sortKey(b) - sortKey(a));
   let groupStart = 0;
-  let groupId = 0;
 
   const flush = (end: number) => {
     if (end - groupStart > 1) {
-      groupId += 1;
-      const id = `tie-${groupId}`;
+      const id = `tie-${groupIdRef.next}`;
+      groupIdRef.next += 1;
       for (let i = groupStart; i < end; i += 1) byDelta[i]!.tieGroupId = id;
     }
   };
@@ -314,7 +317,7 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const boss = v.boss === undefined || v.boss === "all" ? undefined : v.boss;
   const sortKey = sortKeyFor(v.withSetPotential ?? false);
 
-  const rows: ViewRow[] = r.items
+  const filtered: ViewRow[] = r.items
     .filter((item) => {
       if (v.hideOwned === true && item.owned === true) return false;
       if (zone !== undefined && !matchesZone(item, zone)) return false;
@@ -330,6 +333,8 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
         r.cutoff
       ),
     }));
+
+  const rows = filtered;
 
   rows.sort((a, b) => compareRows(a, b, pinBis, sortKey));
 

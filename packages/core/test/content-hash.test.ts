@@ -70,6 +70,7 @@ const BASE = {
   seeds: [42],
   simVersion: "v0.0.101",
   engineVersion: 1,
+  candidateCap: 2,
 };
 
 describe("contentHashOf", () => {
@@ -101,6 +102,21 @@ describe("contentHashOf", () => {
     expect(contentHashOf(BASE)).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it("still produces the key a pre-removal `fullPool: true` run produced", () => {
+    // 7.4a. Racing is gone (ADR-0026) but `contentHashOf` keeps
+    // `fullPool: true, screenIterations: null, promoteTopK: null,
+    // promoteTopJ: null` frozen in the payload, because every cache key
+    // already on disk was written with them. The CLI was the only caller and
+    // always passed `fullPool: true`, so this digest — taken from the
+    // pre-removal implementation against this same BASE — is the whole
+    // evidence that no stored ranking silently re-sims. If a change to the
+    // payload shape is deliberate, bump ENGINE_VERSION rather than editing
+    // this constant.
+    expect(contentHashOf(BASE)).toBe(
+      "02f21d1f3020ba80eaadecd6c276745d315b6dad7ecb43373f055bfbf7d56ef0"
+    );
+  });
+
   it("normalizes the character ref, which is a lookup key and not a number", () => {
     // Same character, different capitalisation, must not re-sim.
     expect(
@@ -124,12 +140,39 @@ describe("contentHashOf", () => {
     ["epWeights", { epWeights: { sp: 1, crit: 0.8 } }],
     ["candidates", { candidates: [{ itemId: 30101, slot: "chest" }] }],
     ["gemPaletteIds", { gemPaletteIds: [24028] }],
+    ["candidateCap", { candidateCap: 1 }],
     [
       "gear",
       { gear: { items: [{ id: 30101, slot: "head", gems: [24028, 24033] }] } },
     ],
   ])("changes when %s changes", (_field, patch) => {
     expect(contentHashOf({ ...BASE, ...patch })).not.toBe(contentHashOf(BASE));
+  });
+
+  it("hashes an omitted candidateCap the same as one equal to eligible.length", () => {
+    // plan §5.1.1: the Candidates control defaults to "all eligible", and
+    // that default must not re-sim a ranking cached before the cap existed
+    // — the two spellings of "no cap" have to collide.
+    const noCapField = { ...BASE } as Partial<typeof BASE>;
+    delete noCapField.candidateCap;
+    const capAtEligibleCount = {
+      ...BASE,
+      candidateCap: BASE.candidates.length,
+    };
+    expect(contentHashOf(noCapField as typeof BASE)).toBe(
+      contentHashOf(capAtEligibleCount)
+    );
+  });
+
+  it("does not change when a Deps-only concurrency value is added", () => {
+    // plan §5.1.2: concurrency is a Deps scalar, not a ranking input — it
+    // changes how fast the run goes, never what it returns, so it must
+    // never be part of the cache key. Not a real ContentHashInput field,
+    // so this pins that passing it through anyway (a caller spreading Deps
+    // into the hash payload by mistake) is still inert, the same way the
+    // ViewOptions-shaped-field test above pins for view toggles.
+    const withConcurrency = { ...BASE, concurrency: 4 };
+    expect(contentHashOf(withConcurrency)).toBe(contentHashOf(BASE));
   });
 
   it.each([

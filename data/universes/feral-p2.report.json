@@ -14,9 +14,9 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3463,
-  "excludedNoSource": 1479,
-  "universeTotal": 246,
+  "d7EligibleTotal": 3066,
+  "excludedNoSource": 1324,
+  "universeTotal": 228,
   "listOnlyMembership": 24,
   "perSlot": {
     "back": 22,
@@ -31,30 +31,30 @@
     "shoulder": 10,
     "trinket": 15,
     "waist": 16,
-    "weapon": 55,
+    "weapon": 37,
     "wrist": 13
   },
   "sourceRecordAdds": {
-    "atlasloot": 285,
+    "atlasloot": 254,
     "curated": 5,
-    "db": 1862,
+    "db": 1632,
     "two-hop": 15,
     "wowhead": 14
   },
   "membershipByOrigin": {
     "curated": 4,
-    "itemHasOrigin:atlasloot": 39,
+    "itemHasOrigin:atlasloot": 35,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 208,
+    "itemHasOrigin:db": 192,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 10,
     "listOnly": 24,
-    "zoneMatch": 218
+    "zoneMatch": 200
   },
   "exclusivePrimaryOrigin": {
-    "db": 208,
+    "db": 192,
     "wowhead-only": 10,
-    "atlasloot-only": 15,
+    "atlasloot-only": 13,
     "other": 3,
     "two-hop": 10
   },
@@ -62,13 +62,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 246,
-    "casterOnlyReject": 113,
+    "total": 228,
+    "casterOnlyReject": 108,
     "epFloorReject": 0,
-    "combinedReject": 113,
-    "combinedKeep": 133,
-    "casterRejectPct": 45.9,
-    "combinedRejectPct": 45.9,
+    "combinedReject": 108,
+    "combinedKeep": 120,
+    "casterRejectPct": 47.4,
+    "combinedRejectPct": 47.4,
     "applied": false
   },
   "wowheadListIds": 79,
@@ -206,16 +206,8 @@
       "name": "Smolderweb's Eye"
     },
     {
-      "itemId": 13375,
-      "name": "Crest of Retribution"
-    },
-    {
       "itemId": 13503,
       "name": "Alchemist's Stone"
-    },
-    {
-      "itemId": 13505,
-      "name": "Runeblade of Baron Rivendare"
     },
     {
       "itemId": 13515,
@@ -230,16 +222,8 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 17066,
-      "name": "Drillborer Disk"
-    },
-    {
       "itemId": 17082,
       "name": "Shard of the Flame"
-    },
-    {
-      "itemId": 17104,
-      "name": "Spinal Reaper"
     },
     {
       "itemId": 18382,
@@ -270,32 +254,12 @@
       "name": "Rune of Metamorphosis"
     },
     {
-      "itemId": 19874,
-      "name": "Halberd of Smiting"
-    },
-    {
       "itemId": 19930,
       "name": "Mar'li's Eye"
     },
     {
-      "itemId": 19946,
-      "name": "Tigule's Harpoon"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
-    },
-    {
-      "itemId": 19962,
-      "name": "Gri'lek's Carver"
-    },
-    {
-      "itemId": 19963,
-      "name": "Pitchfork of Madness"
-    },
-    {
-      "itemId": 19968,
-      "name": "Fiery Retributer"
     },
     {
       "itemId": 21488,
@@ -326,10 +290,6 @@
       "name": "Shard of the Fallen Star"
     },
     {
-      "itemId": 22198,
-      "name": "Jagged Obsidian Shield"
-    },
-    {
       "itemId": 22321,
       "name": "Heart of Wyrmthalak"
     },
@@ -340,10 +300,6 @@
     {
       "itemId": 22399,
       "name": "Idol of Health"
-    },
-    {
-      "itemId": 22691,
-      "name": "Corrupted Ashbringer"
     },
     {
       "itemId": 23001,
@@ -410,10 +366,6 @@
       "name": "Muck-Covered Drape"
     },
     {
-      "itemId": 25828,
-      "name": "Petrified Lichen Guard"
-    },
-    {
       "itemId": 25835,
       "name": "Explorer's Walking Stick"
     },
@@ -448,14 +400,6 @@
     {
       "itemId": 28590,
       "name": "Ribbon of Sacrifice"
-    },
-    {
-      "itemId": 28767,
-      "name": "The Decapitator"
-    },
-    {
-      "itemId": 28774,
-      "name": "Glaive of the Pit"
     },
     {
       "itemId": 28823,

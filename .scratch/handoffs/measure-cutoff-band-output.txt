@@ -1,0 +1,131 @@
+measure-cutoff-band — ticket 225, fixture feral-p3
+
+  eligible rows            398
+  above cutoff             86
+  baseline DPS             1952.5249585538932
+  cutoff absDps arm        3.60 DPS   (CUTOFF_FERAL.absDps)
+  cutoff pct arm           2.9288 DPS   (0.15% of baseline)
+  effective boundary       2.9288 DPS   (the binding arm)
+  screening SE @1000 it    5.128 DPS (ticket 222)
+  band span                -2.199 .. 8.057 DPS
+
+  zone counts (centred on the effective boundary)
+    clear-above            58
+    band-above             28
+    band-below             42
+    clear-below            270
+    band total             70
+
+  for comparison, centred on absDps 3.6 as the probes were
+    within +/-1 SE of 3.6  65
+    clearly above 3.6+SE   55
+
+Band contents, by truth delta descending
+
+  rank  itemId  slot          deltaDps  deltaPct  zone        cutoff  name
+  59    30098   back              8.04    0.4119  band-above  above   Razor-Scale Battlecloak
+  60    29299   finger            7.88    0.4037  band-above  above   Band of Eternity
+  61    29308   finger            7.80    0.3997  band-above  above   Band of Eternity
+  62    29309   finger            7.80    0.3997  band-above  above   Band of the Eternal Restorer
+  63    32609   feet              7.62    0.3901  band-above  above   Boots of the Divine Light
+  64    32516   wrist             7.53    0.3857  band-above  above   Wraps of Purification
+  65    29096   chest             7.24    0.3706  band-above  above   Breastplate of Malorne
+  66    30223   hands             6.61    0.3383  band-above  above   Nordrassil Handgrips
+  67    29920   finger            6.37    0.3265  band-above  above   Phoenix-Ring of Rebirth
+  68    29984   waist             6.10    0.3123  band-above  above   Girdle of Zaetar
+  69    29989   back              5.95    0.3048  band-above  above   Sunshower Light Cloak
+  70    28822   neck              5.81    0.2975  band-above  above   Teeth of Gruul
+  71    30017   neck              5.73    0.2935  band-above  above   Telonicus's Pendant of Mayhem
+  72    30100   feet              5.63    0.2881  band-above  above   Soul-Strider Boots
+  73    29298   finger            5.58    0.2857  band-above  above   Band of Eternity
+  74    32266   finger            5.57    0.2853  band-above  above   Ring of Deceitful Intent
+  75    29099   legs              5.41    0.2769  band-above  above   Greaves of Malorne
+  76    29966   wrist             5.19    0.2657  band-above  above   Vambraces of Ending
+  77    29307   finger            5.16    0.2643  band-above  above   Band of Eternity
+  78    28655   waist             4.75    0.2434  band-above  above   Cord of Nature's Sustenance
+  79    30052   finger            4.63    0.2372  band-above  above   Ring of Lethality
+  80    28661   finger            4.61    0.2361  band-above  above   Mender's Heart-Ring
+  81    30674   feet              4.48    0.2294  band-above  above   Zierhut's Lost Treads
+  82    32591   neck              4.37    0.2237  band-above  above   Choker of Serrated Blades
+  83    30863   wrist             4.21    0.2155  band-above  above   Deadly Cuffs
+  84    28765   back              4.00    0.2051  band-above  above   Stainless Cloak of the Pure Hearted
+  85    32647   wrist             3.26    0.1669  band-above  above   Shard-bound Bracers
+  86    29995   legs              3.13    0.1604  band-above  above   Leggings of Murderous Intent
+  87    32513   wrist             2.87    0.1471  band-below  below   Wristbands of Divine Influence
+  88    32347   hands             2.60    0.1333  band-below  below   Grips of Damnation
+  89    30737   feet              2.59    0.1328  band-below  below   Gold-Leaf Wildboots
+  90    32271   legs              2.51    0.1284  band-below  below   Kilt of Immortal Nature
+  91    28750   waist             2.34    0.1200  band-below  below   Girdle of Treachery
+  92    28582   back              2.34    0.1199  band-below  below   Red Riding Hood's Cloak
+  93    29997   finger            2.04    0.1043  band-below  below   Band of the Ranger-General
+  94    32528   finger            1.99    0.1021  band-below  below   Blessed Band of Karabor
+  95    30870   wrist             1.96    0.1003  band-below  below   Cuffs of Devastation
+  96    32814   wrist             1.81    0.0926  band-below  below   Veteran's Leather Bracers
+  97    28828   waist             1.50    0.0771  band-below  below   Gronn-Stitched Girdle
+  98    32238   finger            1.50    0.0768  band-below  below   Ring of Calming Waves
+  99    32323   back              1.22    0.0627  band-below  below   Shadowmoon Destroyer's Drape
+  100   32239   feet              0.98    0.0504  band-below  below   Slippers of the Seacaller
+  101   28670   feet              0.60    0.0306  band-below  below   Boots of the Infernal Coven
+  102   32252   chest             0.43    0.0220  band-below  below   Nether Shadow Tunic
+  103   32351   wrist             0.36    0.0184  band-below  below   Elunite Empowered Bracers
+  104   32352   feet              0.10    0.0049  band-below  below   Naturewarden's Treads
+  105   30110   finger            0.04    0.0021  band-below  below   Coral Band of the Revived
+  106   30834   finger            0.00    0.0000  band-below  below   Shapeshifter's Signet
+  107   29383   trinket           0.00    0.0000  band-below  below   Bloodlust Brooch
+  108   8345    head              0.00    0.0000  band-below  below   Wolfshead Helm
+  109   28034   trinket           0.00    0.0000  band-below  below   Hourglass of the Unraveller
+  110   29119   neck              0.00    0.0000  band-below  below   Haramad's Bargain
+  111   29382   back              0.00    0.0000  band-below  below   Blood Knight War Cloak
+  112   29390   ranged            0.00    0.0000  band-below  below   Everbloom Idol
+  113   30365   finger            0.00    0.0000  band-below  below   Overseer's Signet
+  114   28649   finger           -0.17   -0.0089  band-below  below   Garona's Signet Ring
+  115   28565   waist            -0.38   -0.0193  band-below  below   Nethershard Girdle
+  116   28745   neck             -0.64   -0.0327  band-below  below   Mithril Chain of Heroism
+  117   28730   finger           -0.95   -0.0487  band-below  below   Mithril Band of the Unscarred
+  118   33122   back             -1.23   -0.0631  band-below  below   Cloak of Darkness
+  119   32505   trinket          -1.25   -0.0641  band-below  below   Madness of the Betrayer
+  120   30738   finger           -1.35   -0.0694  band-below  below   Ring of Reciprocity
+  121   28510   finger           -1.63   -0.0835  band-below  below   Spectral Band of Innervation
+  122   30894   feet             -1.68   -0.0859  band-below  below   Blue Suede Shoes
+  123   32527   finger           -1.81   -0.0928  band-below  below   Ring of Ancient Knowledge
+  124   29304   finger           -1.83   -0.0939  band-below  below   Band of Eternity
+  125   29305   finger           -1.83   -0.0939  band-below  below   Band of the Eternal Sage
+  126   32260   neck             -1.85   -0.0949  band-below  below   Choker of Endless Nightmares
+  127   28652   waist            -2.08   -0.1066  band-below  below   Cincture of Will
+  128   28799   waist            -2.19   -0.1119  band-below  below   Belt of Divine Inspiration
+
+Per-slot band histogram
+
+  slot            band-above  band-below  slot rows  slot above-cut
+  back                     3           4         31               6
+  chest                    1           1         20               4
+  feet                     3           5         31              14
+  finger                   9          13         49              16
+  hands                    1           1         20               3
+  head                     0           1         18               0
+  legs                     2           1         20               7
+  neck                     3           3         25               3
+  ranged                   0           1          2               0
+  trinket                  0           3         20               3
+  waist                    2           5         27               9
+  wrist                    4           4         26              10
+
+Worn rows inside the band (0.00 DPS by construction, not measurements): 8
+  finger             0.00 DPS  Shapeshifter's Signet
+  trinket            0.00 DPS  Bloodlust Brooch
+  head               0.00 DPS  Wolfshead Helm
+  trinket            0.00 DPS  Hourglass of the Unraveller
+  neck               0.00 DPS  Haramad's Bargain
+  back               0.00 DPS  Blood Knight War Cloak
+  ranged             0.00 DPS  Everbloom Idol
+  finger             0.00 DPS  Overseer's Signet
+
+P1 — slots whose best candidate by truth is inside the band: 1
+  neck               5.81 DPS  band-above  Teeth of Gruul
+
+  excluded — slots whose argmax is the worn item (no upgrade to lose): 2
+  head               0.00 DPS  Wolfshead Helm              slot above-cutoff rows: 0
+  ranged             0.00 DPS  Everbloom Idol              slot above-cutoff rows: 0
+
+P2 — band-above rows that are their slot's only above-cutoff row: 0
+

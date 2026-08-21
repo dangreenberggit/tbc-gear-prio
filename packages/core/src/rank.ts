@@ -11,7 +11,9 @@ import {
   type FillEmptyOpts,
   type GemContext,
 } from "./candidate-gems.js";
+import { orderCandidatesByEp } from "./candidate-order.js";
 import { migrateGemsToItem } from "./migrate-gems.js";
+import { promisePool } from "./promise-pool.js";
 import { compose } from "./compose.js";
 import {
   contentHashOf,
@@ -64,6 +66,7 @@ import type { Store } from "./seams/store.js";
 import {
   assertUsableSeeds,
   DegenerateSeedsError,
+  replicateSeeds,
   pairedReplicateSe,
   PAIRED_REPLICATE_TOP_N,
   usesPairedReplication,
@@ -110,6 +113,13 @@ export type RankInput = {
   race?: Race;
   iterations?: number;
   seeds?: number[];
+  /**
+   * Keeps the first N candidates of the EP ordering, plus every owned row
+   * regardless of N (§5.1.1). `undefined` means "no cap" — hashed
+   * identically to a cap equal to the eligible set's size
+   * (content-hash.ts).
+   */
+  candidateCap?: number;
 };
 
 export type Deps = {
@@ -125,6 +135,33 @@ export type Deps = {
   gemPalette?: readonly GemEntry[];
   /** Curated (or test) candidate pool — filtered by maxPhase inside. */
   pool?: readonly PoolEntry[];
+  /**
+   * Per-request item rows for the sim's database (ticket 212). Data, not a
+   * port: synchronous, no I/O, nothing to record — same family as `pool` and
+   * `epWeights` (PLAN.md §5 names the three seams; these are not among them).
+   *
+   * The browser needs it because its WASM sim is built without `with_db`, so
+   * the registry is filled per request; a candidate is never worn, so the
+   * skeleton's own database never describes it. CLI callers omit it —
+   * `wowsimcli` is built `with_db` — and composed requests then stay
+   * byte-identical to today's.
+   */
+  simDatabaseFor?: (
+    equipment: readonly SimItemSpec[]
+  ) => Readonly<Record<string, unknown>> | undefined;
+  /**
+   * How many candidate sims may be in flight at once (candidate-pool.md
+   * §5.1.2). A plain scalar, not a ranking input — it changes how fast a
+   * run goes, never what it returns, so it stays out of the content hash.
+   * Defaults to 1 (today's serial behaviour) when omitted.
+   */
+  concurrency?: number;
+  /**
+   * Stop signal (candidate-pool.md §5.1.4). On abort, in-flight sims finish
+   * and the run returns a `PartialRanking` (`complete: false`); no further
+   * candidates are dispatched.
+   */
+  signal?: AbortSignal;
 };
 
 export type Progress =
@@ -133,6 +170,14 @@ export type Progress =
   | { stage: "composing" }
   | { stage: "building-pool" }
   | { stage: "simming"; done: number; total: number }
+  /**
+   * A single candidate's row finished — fired as each sim lands, ahead of
+   * the "ranking" stage, so a caller can fill a skeleton row incrementally
+   * rather than waiting for the whole run (candidate-pool.md §5.1.5). No
+   * `stage` field: this is a side channel alongside the stage sequence
+   * above, not a replacement for the "simming" done/total updates.
+   */
+  | { kind: "row"; row: RankedItem }
   | { stage: "ranking" };
 
 export type RankErrorKind =
@@ -187,6 +232,15 @@ export type RankedItem = {
   deltaPct: number;
   se: number;
   seMethod: "independent" | "paired-replicate";
+  /**
+   * `false` only on a row Stop left unsimmed (candidate-pool.md §5.1.4) —
+   * absent otherwise, never `true`, so an ordinary complete run never
+   * carries the field at all and a reader can tell "simmed" from "this
+   * `Ranking` predates Stop" apart from "this row was skipped by Stop".
+   * Such a row's `deltaDps`/`se`/etc. are placeholders, excluded from
+   * cutoff classification and tie groups.
+   */
+  simmed?: false;
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
   /** Every pinned upstream gear set equipping this item, any phase. */
   curatedSets?: string[];
@@ -392,7 +446,31 @@ export type Ranking = {
    * `Ranking` does not carry. Present only when non-empty.
    */
   plausibilityWarnings?: PlausibilityWarning[];
+  /**
+   * `true` unless Stop cut this run short (candidate-pool.md §5.1.4).
+   *
+   * The literal type does real work at every consumer that names `Ranking`
+   * in its signature — `applyView` (view.ts) will not accept a
+   * `PartialRanking`, and `cli.ts` must assert rather than narrow. It does
+   * **not** guard the ranking cache: `Store.put<T>` (seams/store.ts:39) is
+   * generic, so `store.put(rankingCacheKey(hash), partial)` type-checks
+   * fine. The only thing keeping a partial out of the cache is the
+   * `if (aborted) return partial` branch below, which returns before the
+   * write — a runtime check, so treat it as one and do not remove it on the
+   * theory that the type covers you.
+   */
+  complete: true;
 };
+
+/**
+ * What `rankUpgrades` returns when `Deps.signal` aborts mid-run
+ * (candidate-pool.md §5.1.4). Rows Stop never reached carry
+ * `simmed: false` and are excluded from `rank`/cutoff classification and
+ * tie groups; per-sim cache rows for whatever did complete are still
+ * written, so a re-run resumes cheaply. Never written to the ranking
+ * cache — only a `complete: true` `Ranking` is.
+ */
+export type PartialRanking = Omit<Ranking, "complete"> & { complete: false };
 
 /** The best of a candidate's slot attempts, before it becomes a `RankedItem`. */
 type BestSwap = {
@@ -430,11 +508,34 @@ const DEFAULT_ITERATIONS = 3000;
  * every real run and the shortlist shipped the Stage 1 `independent` SE that
  * §10:705 records as overstating a shared-seed delta's variance.
  *
- * These are the five seed values `docs/five-seed-spread.json` measured
- * spread at — that file ran at 5000 iterations, not this module's 3000, so
- * only the seed values transfer, not the SE evidence at this configuration.
+ * Spaced by the iteration count rather than pinned, because upstream seeds
+ * iteration `i` from `RandomSeed + i`
+ * (`vendor/tbc-new-fork/sim/core/sim.go:248-251`, gitignored — `pnpm sync:wowsims:restore`), so a run of
+ * `N` iterations from seed `S` consumes the streams `S..S+N-1`. The previous
+ * values 11/22/33/44/55 sat inside one run's span: at 3,000 iterations seeds
+ * 11 and 22 shared 2,989 of 3,000 streams, so the five "replicates" were
+ * near-copies and the SE derived from their spread was far too small —
+ * `sampleSd/SE` 0.087 where independence gives ~0.9 (ticket 236,
+ * `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`).
+ *
+ * Deriving from `DEFAULT_ITERATIONS` keeps the two from drifting apart again;
+ * the old constants were correct only relative to an iteration count that
+ * nothing tied them to.
  */
-const DEFAULT_SEEDS = [11, 22, 33, 44, 55];
+const DEFAULT_SEED_BASE = 11;
+/** §10 Stage 2 replicates across five seeds; `PAIRED_REPLICATE_TOP_N` sets who. */
+const DEFAULT_SEED_COUNT = 5;
+
+/**
+ * Derived from the run's *resolved* iteration count, not from
+ * `DEFAULT_ITERATIONS`. Freezing the defaults against the default iteration
+ * count would rebuild the very drift this replaced: a caller passing
+ * `iterations: 5000` would get seeds 3,000 apart — under-spaced, and rejected
+ * by the guard on a call that used to work.
+ */
+function defaultSeedsFor(iterations: number): number[] {
+  return replicateSeeds(DEFAULT_SEED_BASE, DEFAULT_SEED_COUNT, iterations);
+}
 /**
  * Hashed and disclosed from one place, so the two cannot drift apart. Now
  * per-spec, which keeps that property: both call sites read this one function,
@@ -454,7 +555,7 @@ export async function rankUpgrades(
   input: RankInput,
   deps: Deps,
   onProgress?: (p: Progress) => void
-): Promise<Ranking> {
+): Promise<Ranking | PartialRanking> {
   onProgress?.({ stage: "resolving" });
   const cutoff = cutoffForSpec(input.spec);
   const fights = await deps.gear.findFights(input.character, input.spec);
@@ -552,42 +653,73 @@ export async function rankUpgrades(
     equipmentFromLoggedGear(logged),
     socketed
   );
-  const request = compose(deps.raidSimSkeleton, {
-    name: input.character.name.toLowerCase(),
-    race,
-    equipment,
-  });
+
+  // Every request describes its own equipment in its own database, which is
+  // upstream's invariant (ui/core/sim.ts:346-347). Without a resolver this is
+  // exactly today's compose call, so CLI requests stay byte-identical.
+  const composeFor = (forEquipment: readonly SimItemSpec[]) => {
+    const database = deps.simDatabaseFor?.(forEquipment);
+    return compose(deps.raidSimSkeleton, {
+      name: input.character.name.toLowerCase(),
+      race,
+      equipment: forEquipment,
+      // Spread rather than `database: undefined` — exactOptionalPropertyTypes
+      // distinguishes an absent key from an explicit undefined, and compose
+      // must see no key at all when there is no resolver.
+      //
+      // `!== undefined`, not truthiness: an empty database is a meaningful
+      // answer ("this request needs no extra rows") and must be written
+      // through, where `undefined` means no resolver at all — the CLI path.
+      ...(database !== undefined ? { database } : {}),
+    });
+  };
+
+  const request = composeFor(equipment);
 
   const iterations = input.iterations ?? DEFAULT_ITERATIONS;
-  const seeds = input.seeds ?? DEFAULT_SEEDS;
+  const seeds = input.seeds ?? defaultSeedsFor(iterations);
   // Before the job row and before any sim: a caller's bad seeds are not worth
   // a stranded `running` row or a wasted baseline run.
   try {
-    assertUsableSeeds(seeds);
+    assertUsableSeeds(seeds, iterations);
   } catch (err) {
     if (err instanceof DegenerateSeedsError) {
       throw new RankError("internal", err.message);
     }
     throw err;
   }
-  const seed = seeds[0] ?? DEFAULT_SEEDS[0]!;
+  const seed = seeds[0] ?? DEFAULT_SEED_BASE;
   const runOpts = { seed, iterations };
 
   onProgress?.({ stage: "building-pool" });
   const equippedIds = new Set(
     equipment.map((s) => s.id).filter((id): id is number => !!id)
   );
-  const candidates = filterPoolByPhase(deps.pool ?? [], input.maxPhase).filter(
+  const eligible = filterPoolByPhase(deps.pool ?? [], input.maxPhase).filter(
     (e) => !isKaelTempLegendary(e.itemId)
+  );
+  // Ordering runs before any sim, from raw stats only, so it cannot fail on
+  // a candidate the sim itself would later reject. This order also decides
+  // which N the cap keeps (§5.1.1).
+  const ordered = orderCandidatesByEp(
+    eligible,
+    equipment,
+    deps.epWeights,
+    (itemId) => getItem(itemId)?.stats ?? []
   );
 
   // Read once and shared with the sim cache below, so the version a result is
   // filed under is always the version it was hashed with.
   const simVersion = await deps.sim.version();
 
-  // Hashed here rather than at entry because the logged gear is the largest
-  // input to every delta, and it is not known until readGear resolves. The
-  // check still lands before the sim loop, which is the expensive part.
+  // Hashed on every *eligible* candidate, not the post-cap set: which
+  // candidates are eligible is known before any sim runs, so this is stable
+  // enough to gate the cache lookup before the sim loop starts.
+  // `candidateCap` is a separate hashed field (below) that narrows the
+  // eligible set down to what actually gets simmed — hashing here rather
+  // than at entry because the logged gear is the largest input to every
+  // delta, and it is not known until readGear resolves. The check still
+  // lands before the sim loop, which is the expensive part.
   const contentHash = contentHashOf({
     character: input.character,
     spec: input.spec,
@@ -595,7 +727,7 @@ export async function rankUpgrades(
     race,
     fight,
     gear: { items: logged.items as readonly HashedGearItem[] },
-    candidates: candidates.map((e) => ({ itemId: e.itemId, slot: e.slot })),
+    candidates: ordered.map((e) => ({ itemId: e.itemId, slot: e.slot })),
     gemPaletteIds: gems.palette.map((g) => g.id),
     epWeights: deps.epWeights,
     presetId: presetIdFor(input.spec),
@@ -604,6 +736,9 @@ export async function rankUpgrades(
     seeds,
     simVersion,
     engineVersion: ENGINE_VERSION,
+    ...(input.candidateCap !== undefined
+      ? { candidateCap: input.candidateCap }
+      : {}),
   });
 
   const cached = await deps.store.get<Ranking>(rankingCacheKey(contentHash));
@@ -650,17 +785,7 @@ export async function rankUpgrades(
     throw err;
   }
 
-  async function rankAfterJobCreated(): Promise<Ranking> {
-    // Counted here rather than left to run past a progress bar that already
-    // said "done". The extra seeds re-sim the top N *and* the baseline; the
-    // first seed's runs are cache hits, which is why it is `seeds.length - 1`.
-    const replicaSims = usesPairedReplication(seeds)
-      ? (seeds.length - 1) *
-        (1 + Math.min(PAIRED_REPLICATE_TOP_N, candidates.length))
-      : 0;
-    const totalSims = 1 + candidates.length + replicaSims;
-    totalSimsForProgress = totalSims;
-    onProgress?.({ stage: "simming", done: 0, total: totalSims });
+  async function rankAfterJobCreated(): Promise<Ranking | PartialRanking> {
     // Only `deps.sim.run` belongs inside this catch. A store read or write
     // that fails is an `internal` fault, and labelling it `sim-failed` sends
     // an operator to the wrong subsystem.
@@ -677,7 +802,6 @@ export async function rankUpgrades(
       await cacheSimResult(deps, request, simVersion, runOpts, observation);
     }
     simsDone = 1;
-    onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
     const baselineDps = observation.dps;
     const ranked: RankedItem[] = [];
@@ -720,7 +844,20 @@ export async function rankUpgrades(
       ...(talentsString !== undefined ? { talentsString } : {}),
     });
 
-    for (const entry of candidates) {
+    /**
+     * One candidate's full slot-attempt loop, unchanged from the old serial
+     * body except that it is now a `promisePool` task rather than one turn
+     * of a `for` loop (candidate-pool.md §5.1.2) — every mutation below
+     * still lands on the shared `ranked`/`candidateSkips`/
+     * `individualDeltasByItemId`/`winningRequests` collections, which is
+     * safe because JS interleaves at `await` points only, never inside a
+     * synchronous stretch of code. Ordering downstream never depends on
+     * which task finishes first: `ranked` is sorted by `deltaDps` right
+     * after the pool drains, and `candidateSkips` is sorted by item id
+     * before it feeds `substitutions` below — both so two runs at
+     * different `concurrency` values produce byte-identical output (7.3).
+     */
+    async function runCandidate(entry: PoolEntry): Promise<void> {
       const owned = equippedIds.has(entry.itemId);
       const slotNames = simSlotsForPoolSlot(entry.slot);
       let best: BestSwap | null = null;
@@ -775,11 +912,7 @@ export async function rankUpgrades(
           });
           continue;
         }
-        const candReq = compose(deps.raidSimSkeleton, {
-          name: input.character.name.toLowerCase(),
-          race,
-          equipment: swapped,
-        });
+        const candReq = composeFor(swapped);
         // Outside the catch below: only a failing *sim* may skip a candidate.
         // A failing store read routed in there would push a `sim`-kind skip
         // blaming the sim, drop the item, and return a ranking one place
@@ -829,7 +962,7 @@ export async function rankUpgrades(
       simsDone += 1;
       onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
 
-      if (!best) continue;
+      if (!best) return;
 
       // Recorded before the cutoff/rank logic below: package selection needs
       // every candidate's own measured delta, including below-cutoff rows —
@@ -881,7 +1014,102 @@ export async function rankUpgrades(
       }
       ranked.push(item);
       winningRequests.set(entry.itemId, best.request);
+      onProgress?.({ kind: "row", row: item });
     }
+
+    // Every eligible candidate gets a full-iteration sim; the cap keeps the
+    // first N of the EP order plus every owned row regardless of N (§5.1.1).
+    const cap = input.candidateCap ?? ordered.length;
+    const simCandidates = ordered.filter(
+      (e, i) => i < cap || equippedIds.has(e.itemId)
+    );
+
+    // Counted here, after the cap decides the full-iteration set.
+    const replicaSims = usesPairedReplication(seeds)
+      ? (seeds.length - 1) *
+        (1 + Math.min(PAIRED_REPLICATE_TOP_N, simCandidates.length))
+      : 0;
+    const totalSims = 1 + simCandidates.length + replicaSims;
+    totalSimsForProgress = totalSims;
+    onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
+
+    // Stop (candidate-pool.md §5.1.4): candidates not yet dispatched when
+    // `signal` aborts are simply never started — `promisePool` stops
+    // pulling new tasks once it observes the abort, so this is a plain
+    // pre-dispatch filter rather than cooperative cancellation of tasks
+    // already in flight. Read once so an abort mid-dispatch is a clean cut
+    // rather than a race between this check and the pool's own loop.
+    const signal = deps.signal;
+    const dispatchedCandidates = signal?.aborted ? [] : simCandidates;
+    const tasks = dispatchedCandidates.map(
+      (entry) => () => runCandidate(entry)
+    );
+    const concurrency = deps.concurrency ?? 1;
+    let aborted = signal?.aborted ?? false;
+    if (tasks.length > 0) {
+      if (signal !== undefined) {
+        // A cooperative check between dispatches, not preemption of a task
+        // already running — promisePool's own dispatch loop calls this
+        // between tasks, so nothing in flight is torn down mid-sim.
+        await promisePool(
+          tasks.map((task) => async () => {
+            if (signal.aborted) {
+              aborted = true;
+              return;
+            }
+            await task();
+          }),
+          concurrency
+        );
+      } else {
+        await promisePool(tasks, concurrency);
+      }
+    }
+    // Re-read after the pool drains: an abort raised while the *last* task
+    // was in flight skips nothing, so the loop above never sets the flag,
+    // yet the run must still stop before replication and set packages
+    // (§5.1.4 — completeness is "the whole flow ran", not "all candidates
+    // ran").
+    if (signal?.aborted) aborted = true;
+    // A candidate the sim panicked on is already dropped and disclosed in
+    // `substitutions` (ticket 122), and it never reaches
+    // `individualDeltasByItemId` either — so filtering on that map alone
+    // would re-add it here as a Stop placeholder, and the ranking would
+    // both say it was dropped for a sim failure and show it as unsimmed.
+    const skippedIds = new Set(candidateSkips.map((s) => s.itemId));
+    const unsimmedCandidates = aborted
+      ? simCandidates.filter(
+          (c) =>
+            !individualDeltasByItemId.has(c.itemId) && !skippedIds.has(c.itemId)
+        )
+      : [];
+    for (const entry of unsimmedCandidates) {
+      // A row Stop never reached — placeholder numbers so the shape stays a
+      // RankedItem, but `simmed: false` pulls it out of cutoff
+      // classification and tie groups below rather than letting a zeroed
+      // deltaDps masquerade as a measured one.
+      ranked.push({
+        rank: null,
+        itemId: entry.itemId,
+        name: entry.name,
+        slot: entry.slot,
+        source: entry.source,
+        deltaDps: 0,
+        deltaPct: 0,
+        se: 0,
+        seMethod: "independent",
+        simmed: false,
+        bisTags: entry.bisTags ?? [],
+        ...(entry.curatedSets ? { curatedSets: entry.curatedSets } : {}),
+        ...(entry.bisSets ? { bisSets: entry.bisSets } : {}),
+        belowCutoff: false,
+        ...(entry.sources ? { sources: entry.sources } : {}),
+        ...(equippedIds.has(entry.itemId) ? { owned: true } : {}),
+      });
+    }
+    // Deterministic regardless of completion order, so `substitutions`
+    // below reads the same on every run at every `concurrency` (7.3).
+    candidateSkips.sort((a, b) => a.itemId - b.itemId);
 
     /**
      * Package-level sim failures (Finding 5): a whole completion package has
@@ -897,32 +1125,54 @@ export async function rankUpgrades(
       reason: string;
     }[] = [];
 
-    const setBonuses = await buildSetBonuses(
-      deps,
-      candidates,
-      equipment,
-      gems,
-      race,
-      input,
-      individualDeltasByItemId,
-      { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
-      simVersion,
-      runOpts,
-      packageSimSkips
-    );
+    // Set-bonus packages and paired replication both dispatch further sims
+    // for refinement, not for coverage — Stop's contract is "finish
+    // in-flight and stop", so once aborted, neither runs; what already
+    // simmed stands, and the unsimmed rows stay honestly unsimmed rather
+    // than pulling more work in behind the caller's back.
+    const setBonuses = aborted
+      ? []
+      : await buildSetBonuses(
+          deps,
+          simCandidates,
+          equipment,
+          gems,
+          race,
+          input,
+          composeFor,
+          individualDeltasByItemId,
+          { dps: baselineDps, se: observation.stdev / Math.sqrt(iterations) },
+          simVersion,
+          runOpts,
+          packageSimSkips
+        );
     if (setBonuses.length > 0) applySetContext(ranked, setBonuses, equipment);
 
     onProgress?.({ stage: "ranking" });
     // Sorted first so replication can pick the contested top of the list, then
     // sorted again below — replication rewrites the very `deltaDps` this order
     // is built from, so ranking before it would freeze the ordering the
-    // refinement exists to correct.
-    ranked.sort((a, b) => b.deltaDps - a.deltaDps);
-    await replicateTopItems(ranked, winningRequests, baselineDps);
-    ranked.sort((a, b) => b.deltaDps - a.deltaDps);
+    // refinement exists to correct. Unsimmed rows sort last regardless of
+    // their placeholder deltaDps (0), so an aborted run's honest-but-unsimmed
+    // rows never crowd out real deltas at the top of the list.
+    const bySimmedThenDelta = (a: RankedItem, b: RankedItem): number => {
+      if (a.simmed === false && b.simmed !== false) return 1;
+      if (b.simmed === false && a.simmed !== false) return -1;
+      return b.deltaDps - a.deltaDps;
+    };
+    ranked.sort(bySimmedThenDelta);
+    if (!aborted) await replicateTopItems(ranked, winningRequests, baselineDps);
+    ranked.sort(bySimmedThenDelta);
 
     let rank = 1;
     for (const item of ranked) {
+      // Stop left this row unsimmed — excluded from cutoff classification
+      // and tie groups (candidate-pool.md §5.1.4): there is no measured
+      // delta to classify or group.
+      if (item.simmed === false) {
+        item.rank = null;
+        continue;
+      }
       if (item.belowCutoff) {
         item.rank = null;
       } else {
@@ -970,7 +1220,7 @@ export async function rankUpgrades(
       ...(wornUnrankable.length > 0 ? { wornUnrankable } : {}),
     });
 
-    const ranking: Ranking = {
+    const rankingBase = {
       contentHash,
       cutoff,
       fight: resolved,
@@ -1011,6 +1261,21 @@ export async function rankUpgrades(
       ...(warnings.length > 0 ? { plausibilityWarnings: warnings } : {}),
     };
 
+    if (aborted) {
+      // No ranking-cache row for a partial run (candidate-pool.md §5.1.4) —
+      // the type only permits `complete: true` there, so this branch is the
+      // enforcement, not a convention a future edit could quietly drop.
+      // Per-sim rows already landed via `cacheSimResult` inside
+      // `runCandidate`, so a re-run still resumes cheaply.
+      const partial: PartialRanking = { ...rankingBase, complete: false };
+      await deps.store.job.update(job.id, {
+        status: "done",
+        result: partial,
+      });
+      return partial;
+    }
+
+    const ranking: Ranking = { ...rankingBase, complete: true };
     await deps.store.put(rankingCacheKey(contentHash), ranking);
     await deps.store.job.update(job.id, {
       status: "done",
@@ -1038,8 +1303,14 @@ export async function rankUpgrades(
   ): Promise<void> {
     if (!usesPairedReplication(seeds)) return;
 
+    // Screened and unsimmed rows are excluded before the slice, not caught by
+    // the throw below: neither was ever simmed at full iterations, so neither
+    // has a `winningRequests` entry to re-sim, and both sit in `ranked` with
+    // `belowCutoff` false (ticket 156). Selecting on `!belowCutoff` alone let
+    // the slice run past a short promoted set into them and throw on a row
+    // that was never a replication candidate in the first place.
     const top = ranked
-      .filter((item) => !item.belowCutoff)
+      .filter((item) => !item.belowCutoff && item.simmed !== false)
       .slice(0, PAIRED_REPLICATE_TOP_N);
     if (top.length === 0) return;
     // Baseline once per seed, shared by every replicated candidate under that
@@ -1134,6 +1405,13 @@ async function buildSetBonuses(
   gems: GemContext,
   race: Race,
   input: RankInput,
+  /**
+   * `rankUpgrades`'s own compose helper, passed in rather than rebuilt here:
+   * a second copy drifts silently, since no test covers both call sites
+   * (ticket 212 review). Every composed request must carry the database its
+   * own equipment needs.
+   */
+  composeFor: (equipment: readonly SimItemSpec[]) => RaidSimRequest,
   individualDeltasByItemId: ReadonlyMap<number, IndividualDelta>,
   baseline: DpsSample,
   simVersion: string,
@@ -1287,11 +1565,7 @@ async function buildSetBonuses(
         });
         continue;
       }
-      const packageRequest = compose(deps.raidSimSkeleton, {
-        name: input.character.name.toLowerCase(),
-        race,
-        equipment: packageEquipment,
-      });
+      const packageRequest = composeFor(packageEquipment);
 
       let packageObs = await readCachedSim(
         deps,

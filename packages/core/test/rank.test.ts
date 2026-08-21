@@ -19,6 +19,7 @@ import {
   equipmentForCandidateSwap,
   RankError,
   rankUpgrades,
+  type Ranking,
 } from "../src/rank.js";
 import { pairedReplicateSe } from "../src/se.js";
 import { applyView } from "../src/view.js";
@@ -1170,7 +1171,9 @@ describe("rankUpgrades", () => {
       await rankUpgrades(input, deps);
 
       const stages: string[] = [];
-      await rankUpgrades(input, deps, (p) => stages.push(p.stage));
+      await rankUpgrades(input, deps, (p) => {
+        if ("stage" in p) stages.push(p.stage);
+      });
       expect(stages).not.toContain("simming");
       expect(stages.at(-1)).toBe("ranking");
     });
@@ -2120,7 +2123,14 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
  * under *that same seed*, and that only the top 8 pay the 5× cost.
  */
 describe("rankUpgrades paired-replicate SE", () => {
-  const SEEDS = [11, 22, 33, 44, 55];
+  /**
+   * Spaced by the 3000 iterations these tests run at, because `rankUpgrades`
+   * now rejects seeds closer than that as overlapping replicates (ticket 236).
+   * Only the seed *values* changed here; the synthetic per-seed gains below
+   * keep their magnitudes, so every SE this suite asserts is arithmetically
+   * unchanged and still tests the pairing rather than a new number.
+   */
+  const SEEDS = [11, 3011, 6011, 9011, 12011];
 
   /**
    * DPS as a function of (which item sits in `neck`, seed). Deterministic and
@@ -2144,10 +2154,10 @@ describe("rankUpgrades paired-replicate SE", () => {
   /** Baseline DPS wobbles per seed; each candidate adds its own fixed gain. */
   const BASELINE_BY_SEED: Record<number, number> = {
     11: 2000,
-    22: 2010,
-    33: 1990,
-    44: 2020,
-    55: 1980,
+    3011: 2010,
+    6011: 1990,
+    9011: 2020,
+    12011: 1980,
   };
 
   /** Slamaltman's worn neck in the fixture — the baseline's own item. */
@@ -2163,10 +2173,10 @@ describe("rankUpgrades paired-replicate SE", () => {
    */
   const NECK_GAIN_BY_SEED: Record<number, number> = {
     11: 40,
-    22: 44,
-    33: 26,
-    44: 50,
-    55: 20,
+    3011: 44,
+    6011: 26,
+    9011: 50,
+    12011: 20,
   };
 
   class SeedAwareSimRunner implements SimRunner {
@@ -2233,9 +2243,12 @@ describe("rankUpgrades paired-replicate SE", () => {
     ];
   }
 
-  async function rankWithSeeds(seeds: number[], sim: SimRunner) {
+  async function rankWithSeeds(
+    seeds: number[],
+    sim: SimRunner
+  ): Promise<Ranking> {
     const logged = slamaltmanLoggedGear();
-    return rankUpgrades(
+    const ranking = await rankUpgrades(
       {
         character: CHAR,
         spec: "ret",
@@ -2257,6 +2270,14 @@ describe("rankUpgrades paired-replicate SE", () => {
         pool: neckPool(),
       }
     );
+    // No caller in this describe block passes Deps.signal, so a
+    // PartialRanking is not actually reachable here — asserted rather than
+    // cast, so a future signal-passing caller fails loudly instead of
+    // silently narrowing away a real partial result.
+    if (!ranking.complete) {
+      throw new Error("expected a complete Ranking; got a PartialRanking");
+    }
+    return ranking;
   }
 
   it("marks the top 8 paired-replicate and leaves the rest independent", async () => {
@@ -3659,5 +3680,584 @@ describe("rankUpgrades candidate-arm gem substitutions (ticket 107)", () => {
     const row = ranking.items.find((i) => i.itemId === 29381);
     expect(row).toBeDefined();
     expect(row!.gemSubstitutions).toBeUndefined();
+  });
+});
+
+/**
+ * M1 controls, parallelism, ordering, Stop — candidate-pool.md §5.1/§7.
+ *
+ * All candidates below share the "neck" slot: only one is ever equipped in
+ * any composed request, so no set-bonus package is ever formed and a fixed
+ * `SYNTHETIC_NECK_DPS` lookup keyed by whichever neck item id the request
+ * carries is enough to control every candidate's delta independently,
+ * without needing real universe data or per-item recordings.
+ */
+describe("rankUpgrades — M1 candidate pool controls", () => {
+  const BASELINE_DPS = 2000;
+
+  /** Candidate item id -> the DPS a sim of that swap should report. */
+  const SYNTHETIC_NECK_DPS = new Map<number, number>([
+    [90001, 2100], // +100
+    [90002, 2080], // +80
+    [90003, 2060], // +60
+    [90004, 2040], // +40
+    [90005, 2020], // +20
+  ]);
+
+  function syntheticPool(): ReturnType<typeof neckEntry>[] {
+    return [...SYNTHETIC_NECK_DPS.keys()].map((id) => neckEntry(id));
+  }
+
+  function neckEntry(itemId: number) {
+    return {
+      itemId,
+      name: `Synthetic Neck ${itemId}`,
+      slot: "neck" as const,
+      phase: 1,
+      source: { kind: "world" as const },
+    };
+  }
+
+  /** Item id equipped in `neck` slot for this composed request, if any. */
+  function neckIdIn(req: RaidSimRequest): number | undefined {
+    const raid = req.raid as
+      | { parties?: Array<{ players?: Array<{ equipment?: unknown }> }> }
+      | undefined;
+    const equipment = raid?.parties?.[0]?.players?.[0]?.equipment as
+      { items?: Array<{ id?: number }> } | undefined;
+    const neckIndex = SIM_ORDER.indexOf("neck");
+    return equipment?.items?.[neckIndex]?.id;
+  }
+
+  /**
+   * Reports `BASELINE_DPS` for the worn character and, for a composed swap,
+   * whatever `SYNTHETIC_NECK_DPS` says the equipped neck item is worth —
+   * falling back to the baseline for a neck this test does not know about,
+   * so an unrecognised request fails loudly downstream (a missing row)
+   * rather than silently answering zero.
+   */
+  function syntheticSim(): SimRunner {
+    return {
+      version: async () => "v0.0.101",
+      run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+        const neckId = neckIdIn(req);
+        const dps =
+          neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+            ? SYNTHETIC_NECK_DPS.get(neckId)!
+            : BASELINE_DPS;
+        return {
+          dps,
+          stdev: 90,
+          iterationsDone: opts.iterations,
+          simVersion: "v0.0.101",
+        };
+      },
+    };
+  }
+
+  /** Counts calls and tracks how many were in flight at once. */
+  class TrackingSimRunner implements SimRunner {
+    runs = 0;
+    maxInFlight = 0;
+    private inFlight = 0;
+    constructor(private readonly inner: SimRunner) {}
+    version(): Promise<string> {
+      return this.inner.version();
+    }
+    async run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
+      this.runs += 1;
+      this.inFlight += 1;
+      this.maxInFlight = Math.max(this.maxInFlight, this.inFlight);
+      try {
+        return await this.inner.run(req, opts);
+      } finally {
+        this.inFlight -= 1;
+      }
+    }
+  }
+
+  function m1Deps(overrides: Partial<Parameters<typeof rankUpgrades>[1]> = {}) {
+    const sim = new TrackingSimRunner(syntheticSim());
+    return {
+      sim,
+      deps: {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: sim as SimRunner,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: syntheticPool(),
+        ...overrides,
+      },
+    };
+  }
+
+  const m1Input = {
+    character: CHAR,
+    spec: "ret" as const,
+    maxPhase: 1 as const,
+    iterations: 3000,
+    seeds: [42],
+    race: "RaceHuman" as const,
+  };
+
+  /**
+   * Ticket 236 regression. The default seeds are spaced by the iteration
+   * count, and the guard rejects seeds closer together than that. Freezing the
+   * defaults against `DEFAULT_ITERATIONS` rather than the run's *resolved*
+   * iterations would hand a caller who raises `iterations` a set of
+   * under-spaced defaults, and fail its own guard on a request that has
+   * nothing wrong with it.
+   */
+  describe("default seeds track the iteration count (ticket 236)", () => {
+    it("accepts its own defaults at a non-default iteration count", async () => {
+      const { deps } = m1Deps();
+      const { seeds: _omitted, ...withoutSeeds } = m1Input;
+      const ranking = await rankUpgrades(
+        { ...withoutSeeds, iterations: 5000 },
+        deps
+      );
+      expect(ranking.items.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("candidateCap (7.1)", () => {
+    it("keeps only the capped candidates plus every owned row", async () => {
+      // Item 90005 is already worn in the neck slot; a cap of 2 must still
+      // surface it even though its EP-ordering rank (last, delta 0) would
+      // otherwise put it outside the cap.
+      const gear = slamaltmanLoggedGear();
+      const neckIndex = SIM_ORDER.indexOf("neck");
+      gear.items[neckIndex] = { id: 90005, slot: "neck", gems: [] };
+
+      const { deps } = m1Deps({
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", gear]]),
+        }),
+      });
+
+      const ranking = await rankUpgrades({ ...m1Input, candidateCap: 2 }, deps);
+
+      const itemIds = ranking.items.map((i) => i.itemId).sort((a, b) => a - b);
+      // Top 2 by EP order (90001, 90002 — the highest synthetic DPS gains,
+      // which is also their EP order since this fixture's EP weights favour
+      // the same stat the DPS table was built to reward) plus the owned
+      // 90005, which the cap must not drop.
+      expect(itemIds).toEqual([90001, 90002, 90005]);
+    });
+
+    it("still returns every owned row when the cap is smaller than the owned count", async () => {
+      const gear = slamaltmanLoggedGear();
+      const neckIndex = SIM_ORDER.indexOf("neck");
+      gear.items[neckIndex] = { id: 90005, slot: "neck", gems: [] };
+
+      const { deps } = m1Deps({
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", gear]]),
+        }),
+      });
+
+      const ranking = await rankUpgrades({ ...m1Input, candidateCap: 1 }, deps);
+
+      expect(ranking.items.some((i) => i.itemId === 90005)).toBe(true);
+    });
+
+    it("hashes an omitted cap the same as no cap at all — an uncapped run is cacheable across both spellings", async () => {
+      const { sim, deps } = m1Deps();
+      const uncapped = await rankUpgrades(m1Input, deps);
+      const runsAfterUncapped = sim.runs;
+
+      const explicitlyAll = await rankUpgrades(
+        { ...m1Input, candidateCap: SYNTHETIC_NECK_DPS.size },
+        deps
+      );
+
+      expect(sim.runs).toBe(runsAfterUncapped);
+      expect(explicitlyAll.contentHash).toBe(uncapped.contentHash);
+    });
+  });
+
+  describe("concurrency and determinism (7.3)", () => {
+    it("bounds in-flight sims to Deps.concurrency", async () => {
+      const { sim, deps } = m1Deps({ concurrency: 2 });
+
+      await rankUpgrades(m1Input, deps);
+
+      expect(sim.maxInFlight).toBeLessThanOrEqual(2);
+    });
+
+    it("produces a byte-identical ranking at concurrency 1 vs 4", async () => {
+      const one = m1Deps({ concurrency: 1 });
+      const four = m1Deps({ concurrency: 4 });
+
+      const rankingOne = await rankUpgrades(m1Input, one.deps);
+      const rankingFour = await rankUpgrades(m1Input, four.deps);
+
+      expect(rankingFour).toEqual(rankingOne);
+    });
+
+    it("surfaces the same error regardless of pool size", async () => {
+      const failingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async () => {
+          throw new Error("candidate sim exploded");
+        },
+      };
+      const depsOne = {
+        ...m1Deps({ concurrency: 1 }).deps,
+        sim: failingSim,
+      };
+      const depsFour = {
+        ...m1Deps({ concurrency: 4 }).deps,
+        sim: failingSim,
+      };
+
+      await expect(rankUpgrades(m1Input, depsOne)).rejects.toThrow(RankError);
+      await expect(rankUpgrades(m1Input, depsFour)).rejects.toThrow(RankError);
+    });
+  });
+
+  describe("Stop (7.8)", () => {
+    it("returns complete: false and honest simmed flags when aborted mid-run", async () => {
+      const controller = new AbortController();
+      let runCount = 0;
+      const abortingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          // Abort after the baseline sim (run 1) so at least one candidate
+          // is left unsimmed — the case the type exists to describe.
+          if (runCount === 1) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: abortingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      });
+
+      const ranking = await rankUpgrades(m1Input, deps);
+
+      expect(ranking.complete).toBe(false);
+      const unsimmed = ranking.items.filter((i) => i.simmed === false);
+      expect(unsimmed.length).toBeGreaterThan(0);
+      for (const row of unsimmed) {
+        expect(row.belowCutoff).toBe(false);
+        expect(row.rank).toBeNull();
+      }
+    });
+
+    it("dispatches no replication sims when aborted after the last candidate", async () => {
+      // The boundary case §5.1.4 names: every candidate sim has already
+      // landed, so the only work left is replication and set packages. Both
+      // are *new* dispatches, so Stop skips them and the run is still
+      // `complete: false` — completeness means the whole flow ran, not that
+      // every candidate ran. Multi-seed input so replication would otherwise
+      // fire; a single seed would make the assertion vacuous.
+      const controller = new AbortController();
+      const pool = syntheticPool();
+      const candidateSimCount = pool.length + 1;
+      let runCount = 0;
+      const countingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          if (runCount === candidateSimCount) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: countingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      });
+
+      const ranking = await rankUpgrades(
+        { ...m1Input, seeds: [42, 3042, 6042, 9042, 12042] },
+        deps
+      );
+
+      expect(ranking.complete).toBe(false);
+      expect(runCount).toBe(candidateSimCount);
+      for (const item of ranking.items) {
+        expect(item.seMethod).not.toBe("paired-replicate");
+        expect(item.setBonusNote).toBeUndefined();
+      }
+    });
+
+    it("does not re-add a sim-crashed candidate as an unsimmed row", async () => {
+      // A candidate whose every slot attempt panicked is dropped from the
+      // ranking and disclosed in `substitutions` (ticket 122). It is also
+      // absent from the measured-delta map, so an aborted run must not
+      // mistake it for "Stop never reached this" and re-add it as a
+      // `simmed: false` placeholder — that would have the same ranking say
+      // the item was dropped for a sim failure *and* show it as unsimmed.
+      const controller = new AbortController();
+      let runCount = 0;
+      const crashingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          const neckId = neckIdIn(req);
+          if (neckId === 90001) throw new Error("go panic: class-locked");
+          // Abort once a couple of candidates have landed, so the run is
+          // genuinely partial and the unsimmed path is exercised.
+          if (runCount === 3) controller.abort();
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const { deps } = m1Deps({
+        sim: crashingSim,
+        concurrency: 1,
+        signal: controller.signal,
+      });
+
+      const ranking = await rankUpgrades(m1Input, deps);
+
+      expect(ranking.complete).toBe(false);
+      const dropped = ranking.substitutions.some((s) =>
+        `${s.field} ${s.detail}`.includes("90001")
+      );
+      const asRow = ranking.items.find((i) => i.itemId === 90001);
+      // Disclosed as dropped, or present as a row — never both.
+      expect(dropped && asRow !== undefined).toBe(false);
+    });
+
+    it("writes no ranking cache row for a partial run, but keeps per-sim rows", async () => {
+      const controller = new AbortController();
+      let runCount = 0;
+      const abortingSim: SimRunner = {
+        version: async () => "v0.0.101",
+        run: async (req: RaidSimRequest, opts: SimRunOpts) => {
+          runCount += 1;
+          if (runCount === 1) controller.abort();
+          const neckId = neckIdIn(req);
+          const dps =
+            neckId !== undefined && SYNTHETIC_NECK_DPS.has(neckId)
+              ? SYNTHETIC_NECK_DPS.get(neckId)!
+              : BASELINE_DPS;
+          return {
+            dps,
+            stdev: 90,
+            iterationsDone: opts.iterations,
+            simVersion: "v0.0.101",
+          };
+        },
+      };
+      const store = new MemoryStore();
+      const { deps } = m1Deps({
+        sim: abortingSim,
+        store,
+        concurrency: 1,
+        signal: controller.signal,
+      });
+
+      const ranking = await rankUpgrades(m1Input, deps);
+      expect(ranking.complete).toBe(false);
+
+      const cachedRanking = await store.get(`ranking:${ranking.contentHash}`);
+      expect(cachedRanking).toBeUndefined();
+
+      // The baseline sim (run 1, before abort) still wrote its per-sim row —
+      // a re-run after Stop must not have to redo work that already landed.
+      const cacheKeys = (store as unknown as { data?: Map<string, unknown> })
+        .data;
+      const anySimRowWritten =
+        cacheKeys === undefined ||
+        [...cacheKeys.keys()].some((k) => k.startsWith("sim:"));
+      expect(anySimRowWritten).toBe(true);
+    });
+  });
+
+  describe("row-landed progress (7.11)", () => {
+    it("emits a row event per candidate before the promise resolves", async () => {
+      const { deps } = m1Deps();
+      const rowEvents: unknown[] = [];
+
+      const ranking = await rankUpgrades(m1Input, deps, (p) => {
+        if ("kind" in p && p.kind === "row") rowEvents.push(p.row);
+      });
+
+      expect(rowEvents.length).toBe(SYNTHETIC_NECK_DPS.size);
+      const eventItemIds = rowEvents
+        .map((r) => (r as { itemId: number }).itemId)
+        .sort((a, b) => a - b);
+      const rankedItemIds = ranking.items
+        .map((i) => i.itemId)
+        .sort((a, b) => a - b);
+      expect(eventItemIds).toEqual(rankedItemIds);
+    });
+  });
+});
+
+// Ticket 212: the browser's WASM sim is built without `with_db`, so its item
+// registry is filled per request from `player.database`. rank must therefore
+// hand every composed request a database describing that request's own
+// equipment — upstream's invariant (ui/core/sim.ts:346-347). This is the
+// ticket's named acceptance test: drive a candidate the character does not
+// wear and prove the composed request carries rows for that candidate's item.
+describe("rankUpgrades — simDatabaseFor (ticket 212)", () => {
+  // Marker rows keyed off the equipment handed in, so a request composed with
+  // the wrong equipment produces a different key and misses its recording.
+  const markerDatabase = (equipment: readonly { id?: number }[]) => ({
+    items: equipment
+      .filter((s) => s.id)
+      .map((s) => ({ id: s.id, marker: `db-${s.id}` })),
+  });
+
+  it("gives baseline and candidate requests each their own database", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+
+    const CANDIDATE = 29381; // neck; not worn by the fixture character
+    const wornNeck = equipment[SIM_ORDER.indexOf("neck")]?.id;
+    // Vacuity guard: a candidate the character already wears would make the
+    // "describes its own equipment" claim trivially true.
+    expect(wornNeck).not.toBe(CANDIDATE);
+
+    const upgraded = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: CANDIDATE, gems: [] as number[] } : spec
+    );
+
+    const keyFor = (eq: readonly { id?: number; gems: number[] }[]) =>
+      simCacheKey(
+        compose(skeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: eq,
+          database: markerDatabase(eq),
+        }),
+        "v0.0.101",
+        opts
+      );
+
+    const sample = (dps: number) => ({
+      dps,
+      stdev: 90,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+
+    const sent: unknown[] = [];
+    const recorded = new RecordedSimRunner(
+      "v0.0.101",
+      new Map([
+        [keyFor(equipment), sample(2000)],
+        [keyFor(upgraded), sample(2100)],
+      ])
+    );
+    type RunFn = (...args: never[]) => unknown;
+    const capturing = {
+      version: () => recorded.version(),
+      run: (...args: never[]) => {
+        sent.push(args[0]);
+        return (recorded.run as RunFn)(...args);
+      },
+    } as unknown as typeof recorded;
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: capturing,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(CANDIDATE)],
+        simDatabaseFor: markerDatabase,
+      }
+    );
+
+    // The candidate ranked at all only because its request carried a database
+    // naming its own item: the recording is keyed on exactly that request.
+    const row = ranking.items.find((i) => i.itemId === CANDIDATE);
+    expect(row).toBeDefined();
+    expect(row!.deltaDps).toBeCloseTo(100, 5);
+
+    // Every request describes its own equipment, not the worn set.
+    const databases = sent.map((req) => {
+      const slot = (
+        req as {
+          raid: { parties: Array<{ players: Array<Record<string, unknown>> }> };
+        }
+      ).raid.parties[0]!.players[0]!;
+      return slot.database as { items: Array<{ id: number }> };
+    });
+    expect(databases.length).toBeGreaterThanOrEqual(2);
+    for (const db of databases) expect(db).toBeDefined();
+
+    const candidateReqDb = databases.find((db) =>
+      db.items.some((it) => it.id === CANDIDATE)
+    );
+    expect(candidateReqDb).toBeDefined();
+    // ...and the baseline's database does NOT name the candidate.
+    const baselineReqDb = databases.find(
+      (db) => !db.items.some((it) => it.id === CANDIDATE)
+    );
+    expect(baselineReqDb).toBeDefined();
+  });
+
+  it("composes byte-identical requests when no resolver is given", () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const withoutResolver = compose(skeleton, {
+      name: "slamaltman",
+      race: "RaceHuman",
+      equipment,
+    });
+    // The CLI path: wowsimcli is built with_db, so it passes no resolver and
+    // its requests -- and therefore every cache key and fixture -- must not
+    // move. Guards the claim made in ticket 212's decision record.
+    expect(withoutResolver).not.toHaveProperty(
+      "raid.parties.0.players.0.database"
+    );
   });
 });

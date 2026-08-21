@@ -1,0 +1,218 @@
+{
+  "command": "node scripts/ew5_overhead.mjs (spawns vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe sim --infile ... --outfile ... against test/fixtures/slamaltman.raid-sim-request.json, seed 42, 5 repeats per sweep point; RSS measured in a separate single run at 5000 iterations to avoid polling overhead corrupting the timing sweep)",
+  "binary": "vendor/wowsimcli-v0.0.101-win32-x64/wowsimcli-windows.exe",
+  "fixture": "test/fixtures/slamaltman.raid-sim-request.json",
+  "seed": "42",
+  "sweep": [100, 300, 1000, 3000, 5000],
+  "repeats": 5,
+  "raw": {
+    "100": [
+      {
+        "wallMs": 405.2983,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.7183324721107,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 376.9799,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.7183324721107,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 376.4551,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.7183324721107,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 376.5612,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.7183324721107,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 381.2065,
+        "iterationsDone": 100,
+        "dpsAvg": 2026.7183324721107,
+        "peakRssBytes": 0
+      }
+    ],
+    "300": [
+      {
+        "wallMs": 391.002,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293567,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 391.5243,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293567,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 386.1585,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293567,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 385.7163,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293567,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 411.804,
+        "iterationsDone": 300,
+        "dpsAvg": 2039.2784578293567,
+        "peakRssBytes": 0
+      }
+    ],
+    "1000": [
+      {
+        "wallMs": 441.3794,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736385,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 439.8487,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736385,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 430.3066,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736385,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 428.844,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736385,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 435.8413,
+        "iterationsDone": 1000,
+        "dpsAvg": 2040.8974872736385,
+        "peakRssBytes": 0
+      }
+    ],
+    "3000": [
+      {
+        "wallMs": 581.5418,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.8475927950003,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 563.1005,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.8475927950003,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 575.4947,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.8475927950003,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 574.7394,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.8475927950003,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 593.0759,
+        "iterationsDone": 3000,
+        "dpsAvg": 2042.8475927950003,
+        "peakRssBytes": 0
+      }
+    ],
+    "5000": [
+      {
+        "wallMs": 713.6737,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882197,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 685.2043,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882197,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 682.8621,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882197,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 701.5083,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882197,
+        "peakRssBytes": 0
+      },
+      {
+        "wallMs": 680.6272,
+        "iterationsDone": 5000,
+        "dpsAvg": 2042.3926145882197,
+        "peakRssBytes": 0
+      }
+    ]
+  },
+  "points": [
+    {
+      "iterations": 100,
+      "medianMs": 376.9799,
+      "medianDps": 2026.7183324721107
+    },
+    {
+      "iterations": 300,
+      "medianMs": 391.002,
+      "medianDps": 2039.2784578293567
+    },
+    {
+      "iterations": 1000,
+      "medianMs": 435.8413,
+      "medianDps": 2040.8974872736385
+    },
+    {
+      "iterations": 3000,
+      "medianMs": 575.4947,
+      "medianDps": 2042.8475927950003
+    },
+    {
+      "iterations": 5000,
+      "medianMs": 685.2043,
+      "medianDps": 2042.3926145882197
+    }
+  ],
+  "fit": {
+    "t_fixed_ms": 373.16136807436294,
+    "t_iter_ms": 0.06369312336470052
+  },
+  "rssMeasurement": {
+    "iterations": 5000,
+    "wallMs": 826.5763,
+    "peakRssBytes": 183836672,
+    "pollIntervalMs": 100,
+    "note": "measured in isolation, not concurrently with the timing sweep above — the 50ms-interval poll used in a first attempt of this script inflated wall-clock times by 2-40x (100 iters went from ~450ms to up to 1.5s; 300 iters up to 19s) from CPU/IO contention between the poller and the sim process, so timing and RSS are never sampled in the same run here"
+  },
+  "presim": {
+    "claim": "no presim round executes for this fixture: runPresims (sim/core/presim.go:34) only loops when remainingAgents>0 or EndFightAtHealth>0; remainingAgents comes from Presimmer.GetPresimOptions, implemented only by Character (health.go:272), which returns nil unless HealingModel.Hps==0 && HealingModel.CadenceSeconds!=0. The fixture's player has healingModel:{} (Hps=0, CadenceSeconds=0), so GetPresimOptions returns nil; the fixture's encounter has a fixed duration (no EndFightAtHealth field), so doOne is also false. runPresims's for-loop body never executes and it returns immediately.",
+    "verifiedBy": [
+      "read vendor/tbc-new-fork/sim/core/sim.go:114-188 (runSim always calls sim.runPresims(rsr) on the CLI path — sim/lib/library.go:40 calls core.RunSim(input, nil, signals), which sets skipPresim=false)",
+      "read vendor/tbc-new-fork/sim/core/presim.go:34-122 (loop guard: `for doOne || remainingAgents > 0`)",
+      "read vendor/tbc-new-fork/sim/core/health.go:272-291 (the only Presimmer implementation in the fork; condition quoted above)",
+      "python -c \"import json; d=json.load(open('test/fixtures/slamaltman.raid-sim-request.json')); print(d['raid']['parties'][0]['players'][0].get('healingModel')); print('endFightAtHealth' in d['encounter'])\" -> {} and False"
+    ],
+    "separable": "Not separable on the CLI --outfile path: RaidSimResult (proto/api.proto:384-398) carries no PresimRunning or presim-duration field, only the streaming ProgressMetrics channel does (which --outfile does not use). Reported as one t_fixed number for that reason (F8), but since the presim loop body provably never executes for this fixture (see claim above), t_fixed here is pure setup cost with zero presim rounds mixed in — not an unresolved mix, a resolved zero."
+  }
+}

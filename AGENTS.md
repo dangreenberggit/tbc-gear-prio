@@ -48,7 +48,7 @@ In **committed or dispatched** artifacts (commit messages, tickets, ADRs, tracke
 
 When changing committed **generated** artifacts: regenerate from the committed sources with the pinned toolchain; the working tree must match `HEAD` (or you must document which side is wrong) before commit. For CI byte-compare gates, read a real CI run — do not predict from a local story about another OS.
 
-Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs.
+Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs — but to test whether one thing exists, name it (`ls <path>`, `grep -c <pattern>`); a truncated listing cannot show absence.
 
 **An exit code is not evidence that work happened.** A stopped background task reports exit 0, and a command that ran in the wrong directory succeeds at nothing. Confirm the artifact — `ls node_modules`, read the file, check the row count — before reporting an install, build or regen as done.
 
@@ -96,6 +96,19 @@ When you will have **two writers running at once** (independent slices — diffe
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
 
+### Stage-gate features
+
+When a wrong plan would be expensive, run the `stage-gate` skill: the
+session orchestrates Planner (Fable, effort low) → adversarial
+Plan-Reviewer (Opus, effort medium) → fresh-context Executor (Opus,
+effort medium — it holds the adapt-vs-flag-vs-stop call on every
+underspecified step), with judged gates between stages and a bounded
+loop-back.
+The plan is reviewed before any code exists; `pre-merge-review` still runs
+after, unchanged. Seats are agent definitions under `.claude/agents/` —
+files added there register at session start only, so a new or edited seat
+needs a fresh session.
+
 ### Parking WIP
 
 When you stash WIP, say what you parked and what tip is missing because of it. Name the important pieces (files or jobs), not a vibe. If tip still needs any of that to be correct or complete, write that down before you start the next work. “Restore later if needed” is not enough.
@@ -108,7 +121,7 @@ Three lanes, every harness, sorted by **kind of work, not model height**: **work
 
 1. Branch off `dev`: `feat/<slug>` (or `phase-N/<slug>` for a PLAN.md phase).
 2. Red → green, one slice at a time. **Commit regularly as you accomplish work — a commit per green slice, not one commit at the end, and not only when asked.** Merging to `dev` is the gated step, not this one.
-   - **`git add <paths>` does not scope the commit** — pre-commit runs `lint-staged` against `*`, so any dirty file rides along. Before each commit `git status` must be clean of work you did not do (commit it separately or ask), and after `git reset`, re-read `git log -1` before recommitting — another session may have merged in between.
+   - **`git add <paths>` does not scope the commit** — pre-commit runs `lint-staged` against `*` with `--no-stash --no-hide-partially-staged`, so every dirty file rides along, and staging part of a file commits the rest of it too. Before each commit `git status` must be clean of work you did not do (commit it separately or ask), and after `git reset`, re-read `git log -1` before recommitting — another session may have merged in between.
 3. `pnpm verify` before every push — typecheck, lint, format, test (also on pre-push).
 4. When the branch looks done: run the `pre-merge-review` skill → `docs/reviews/<branch>.md` (commit it on the feature branch). Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime. **Do not skip this** — `pnpm merge-to-dev` only checks that the review file exists; it does not run the review.
 5. **Ask before merging to `dev`.** Never `pnpm merge-to-dev`, never `git merge` into `dev`, and never set `TBC_ALLOW_DEV_MERGE=1`, unless the user has explicitly asked to merge **after** the review file is written and they have had a chance to see the summary (a combined “review and merge” request is **not** enough — finish the review, stop, wait for a separate merge ask). When they ask: `pnpm merge-to-dev` is the only supported door — verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first).
