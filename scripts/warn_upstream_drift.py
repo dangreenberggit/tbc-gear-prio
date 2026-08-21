@@ -46,6 +46,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CHECK = ROOT / "scripts" / "sync_wowsims.py"
 
+# The entire coupling between this warner and sync_wowsims.py is that do_check()
+# prints this literal on each drift item. Named here so check_sync_wowsims.py can
+# assert both sides still agree -- if the token is renamed on one side only, the
+# warner matches nothing and reports "in sync" forever (ticket 245).
+DRIFT_TOKEN = "DRIFT:"
+
 
 def main() -> int:
     try:
@@ -64,10 +70,29 @@ def main() -> int:
         return 0
 
     body = (out.stdout or "") + (out.stderr or "")
-    drift_lines = [ln for ln in body.splitlines() if "DRIFT:" in ln]
+    drift_lines = [ln for ln in body.splitlines() if DRIFT_TOKEN in ln]
 
     if out.returncode == 2:
         print("upstream drift: vendor/ absent -- skipped (run pnpm sync:wowsims:restore)")
+        return 0
+
+    # Only exit 0 means "ran to completion and found nothing". A nonzero exit
+    # with no DRIFT: line is --check not reaching its verdict -- no `gh` on
+    # PATH, no auth, no lockfile, an import error after a refactor. Reporting
+    # any of those as "in sync" is the failure this whole warner exists to
+    # prevent: ticket 245 measured it, and with `gh` absent the old code printed
+    # "in sync with the pin". A tripwire that lies is worse than none.
+    #
+    # The cause is deliberately not guessed. An earlier draft said "usually no
+    # `gh` on PATH or no auth", which misdiagnoses the missing-lockfile path
+    # (sync_wowsims.py:404 -- a legitimate exit 1 where the check ran fine).
+    # --check already names its own reason, so echo that and stay quiet.
+    if out.returncode != 0 and not drift_lines:
+        print("upstream drift: CHECK DID NOT RUN -- drift is UNKNOWN, not absent.")
+        print(f"  sync_wowsims.py --check exited {out.returncode} without reporting drift.")
+        for ln in body.strip().splitlines()[-3:]:
+            print(f"  | {ln.strip()}")
+        print("  run pnpm sync:wowsims:check to see it fail directly.")
         return 0
 
     if not drift_lines:
@@ -122,6 +147,15 @@ def warn_pin_behind_watched_refs() -> None:
             print(
                 "        Features on that branch are reachable by fast-forward -- "
                 "do not call them absent."
+            )
+            # Reachable is not the same as usable, and the gap between the two is
+            # where ticket 244 landed: moving the pin to a branch makes
+            # fetch_wowsimcli.py 404 (it builds a releases/download/<tag> URL),
+            # and ret_p3.gear.json is missing at cbf6b75. Saying only "reachable"
+            # invites the opposite over-correction to the one this line prevents.
+            print(
+                "        Reachable is not the same as usable -- moving the pin to a "
+                "branch has its own costs; measure before choosing."
             )
         elif status == "diverged":
             print(f"  NOTE: the pin has DIVERGED from watched ref {name} "
