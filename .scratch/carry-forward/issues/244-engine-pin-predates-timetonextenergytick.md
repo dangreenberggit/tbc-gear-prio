@@ -382,6 +382,73 @@ re-runs the command above at `cbf6b75` and compares sha256. Record the command,
 the commit, the `main.Version` value, and the resulting sha256 together —
 omitting any one of them breaks reproduction.
 
+## STOP — the chosen branch does not actually unblock the APL (2026-08-21)
+
+The pin was moved to `feature/backend-reforge` and the binary was built. The
+blocking field is fixed. **The APL still does not round-trip clean, because it
+uses two more fields the branch also predates.**
+
+Running the repo's own gate (`scripts/apl_schema.py`) over the owner's rotation:
+
+| schema | unknown fields in the owner's APL |
+| --- | --- |
+| `feature/backend-reforge` (pinned now) | `selectedConjured`, `selectedPotion`, `potionId` |
+| **`v0.0.119`** | **NONE** |
+
+`timeToNextEnergyTick` is known under both. The new blockers are
+`selected_potion = 131` and `selected_conjured = 132`, added upstream in
+`3267f8dfa` ("Add selected potion/conjured APL check", **2026-08-19**).
+`backend-reforge`'s last merge from master is dated 2026-08-13, six days
+earlier, so the branch predates them exactly as it predated the first field.
+
+Confirmed against the built binary, same probe the ticket used:
+
+```
+selected_conjured 0
+selected_potion   0
+potion_id         0
+```
+
+**This is the identical failure mode, not a new one.** These fields sit inside
+`condition` boolean trees (`/groups[3]/actions[2..4]/.../condition/and/vals[]`),
+so `DiscardUnknown: true` drops the leaves and the guards silently evaluate
+something else. A believable DPS number from a mutilated rotation — the exact
+trap this ticket exists to prevent.
+
+### What this does to the decision
+
+`3267f8dfa` **is** v0.0.119 (`status: identical`). So the fix is the tip of
+master, and the trade is now concrete rather than a preference:
+
+| | `feature/backend-reforge` | `v0.0.119` |
+| --- | --- | --- |
+| `timeToNextEnergyTick` | yes | yes |
+| `selectedPotion` / `selectedConjured` | **no** | **yes** |
+| owner's APL round-trips clean | **no** | **yes** |
+| reforge work (`getReforgeCacheGearKey`, `getGearIdentityKey`) | **yes (3 hits)** | **no (0 hits)** |
+| prebuilt binary | no, build from source | yes |
+
+The earlier framing had these as "reforge work vs. binary provenance", with the
+APL landing either way. **That was wrong** — only v0.0.119 actually lands the
+APL. The reforge work and the owner's APL are not currently available from the
+same ref.
+
+### Options, and none is free
+
+1. **Re-pin to v0.0.119.** The APL lands, prebuilt binary, provenance problem
+   disappears. **Loses the reforge work**, which was the whole reason the branch
+   was chosen.
+2. **Stay on `backend-reforge` and wait** for it to merge master past
+   `3267f8dfa`. Keeps reforge; the APL stays unlandable until upstream moves,
+   which is not in our control.
+3. **Rebase/merge `3267f8dfa` into a local branch off `backend-reforge`.** Gets
+   both. Means maintaining our own engine fork of the sim, and every sim number
+   traces to a ref that exists nowhere upstream — a strictly worse provenance
+   story than the one already accepted.
+
+**Not decided. Owner's call**, because the reforge work was the stated reason
+for the branch and this is the first evidence the two goals conflict.
+
 ## Acceptance
 
 - [x] Option chosen: **track `feature/backend-reforge`** (v0.0.115 + 54 reforge
