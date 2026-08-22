@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (pool coverage — worn items absent from the candidate pool)
 Origin: `gate-sme` seat 1, 2026-08-21, on the Stage 2 gate shortlists; handoff at
   `.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md` (verdict
@@ -7,6 +7,66 @@ Blocks: phase-2
 Blocked by: none
 
 # Worn gear missing from the pool scores rows against an empty slot
+
+## RESOLVED 2026-08-21 — `486f977`
+
+Fixed as a disclosure defect, in four files, with no scoring change: no
+`contentHash` change, no `ENGINE_VERSION` bump, no new source kind, no re-sim.
+
+**The message** (`plausibility.ts`) now says what is true:
+
+> neck has no baseline row: the worn Amulet of Bitter Hatred is not in the
+> candidate pool for this slot, so it gets no row of its own to compare against.
+> The rows shown for neck were still measured against Amulet of Bitter Hatred —
+> their deltas stand — but nothing here shows you what it is worth to keep it.
+
+**The styling** was lying in the same way and is narrowed to match. Ticket 164's
+`unmeasured` class desaturated deltas and marked the nav chip for *every*
+dead-slot cause. `isUnmeasuredSlot` (`rank-report.ts`) now excludes
+`worn-unrankable`, keeping it for `unique-effect`, `thin-pool` and
+`set-break-toll`, where no worn item is comparable and the claim is honest.
+
+Verified on the regenerated report:
+
+```
+python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shredzepelin.json'))['ranking'];[print(w.get('slot'),w.get('cause')) for w in r['plausibilityWarnings']]"
+grep -o 'class="slot[^"]*unmeasured" id="slot-[a-z]*"' .scratch/rank-reports/stage2-close-shredzepelin.html
+```
+
+→ warnings on neck/back/waist (`worn-unrankable`) and head/chest/shoulder
+(`unique-effect`, `set-break-toll`); the `unmeasured` class now appears on
+**head, chest and shoulder only**. Neck, back and waist keep their colours.
+
+### Why not the force-include fix that was planned
+
+A stage-gate plan proposed synthesizing a `PoolEntry` for the worn item so the
+slot gained an anchor row. Its plan review killed it on three measured grounds,
+all confirmed:
+
+- **The anchor row would never be seen.** It is `deltaDps ≈ 0` by construction,
+  `meetsCutoff` is `deltaDps >= absDps || deltaPct >= pct`, so it fails and
+  `partitionShortlist` drops it. Measured across the three shipped reports:
+  **0 of 44 owned rows clear the cutoff.**
+- **The dead-slot classifier join already works** (`dead-slots.ts:230-253`
+  handles worn-unrankable first and unconditionally); adding an anchor would
+  push the slot into the normal path and mislabel it `thin-pool`.
+- **Ticket 173 asks for the opposite.** It is a detection gap whose own text
+  warns that growing a force-include list "grows the manual list without adding
+  detection, which is the exact failure mode this ticket is about."
+
+The plan would also have shipped a caching bug: it instructed injection *after*
+the candidate cap, but `contentHash` is computed at `rank.ts:723`, before the cap
+at `:1022`, so injected candidates would never have been hashed.
+
+### What this does not do
+
+- **The gate box stays ☐.** The shortlists are now honestly presented, but the
+  SME verdict that closed it was `do-not-trust` on the old output. Closing the
+  box needs a fresh SME read of the corrected report. **That is the remaining
+  step**, and it is cheap now — no re-sim, the numbers never changed.
+- The worn item still has no row of its own. That is now stated rather than
+  dressed up as a scoring failure. Whether it is worth showing is a product
+  question nobody has asked.
 
 ## CORRECTION, 2026-08-21 — the defect is the warning, not the scoring
 

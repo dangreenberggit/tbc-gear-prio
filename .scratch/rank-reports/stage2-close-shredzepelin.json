@@ -6,7 +6,7 @@
     "spec": "feral",
     "maxPhase": 2,
     "poolSize": 228,
-    "generatedAt": "2026-08-22T03:45:28.470Z"
+    "generatedAt": "2026-08-22T06:05:07.859Z"
   },
   "ranking": {
     "contentHash": "b0b8b7f86d3b7969ed80e27a9b182a8897f5522c08d75e5278993f52047f7797",
@@ -4055,8 +4055,8 @@
       },
       {
         "rank": null,
-        "itemId": 30685,
-        "name": "Ravager's Wrist-Wraps",
+        "itemId": 30684,
+        "name": "Ravager's Cuffs",
         "slot": "wrist",
         "source": {
           "kind": "raid",
@@ -4081,8 +4081,8 @@
       },
       {
         "rank": null,
-        "itemId": 30684,
-        "name": "Ravager's Cuffs",
+        "itemId": 30685,
+        "name": "Ravager's Wrist-Wraps",
         "slot": "wrist",
         "source": {
           "kind": "raid",
@@ -6754,21 +6754,21 @@
         "slot": "neck",
         "cause": "worn-unrankable",
         "wornItemName": "Amulet of Bitter Hatred",
-        "message": "neck is unmeasured: the worn Amulet of Bitter Hatred is not in the candidate pool for this slot, so every row shown for neck was scored against an empty slot, not against Amulet of Bitter Hatred. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
+        "message": "neck has no baseline row: the worn Amulet of Bitter Hatred is not in the candidate pool for this slot, so it gets no row of its own to compare against. The rows shown for neck were still measured against Amulet of Bitter Hatred — their deltas stand — but nothing here shows you what it is worth to keep it."
       },
       {
         "kind": "dead-slot",
         "slot": "back",
         "cause": "worn-unrankable",
         "wornItemName": "The Frost Lord's War Cloak",
-        "message": "back is unmeasured: the worn The Frost Lord's War Cloak is not in the candidate pool for this slot, so every row shown for back was scored against an empty slot, not against The Frost Lord's War Cloak. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
+        "message": "back has no baseline row: the worn The Frost Lord's War Cloak is not in the candidate pool for this slot, so it gets no row of its own to compare against. The rows shown for back were still measured against The Frost Lord's War Cloak — their deltas stand — but nothing here shows you what it is worth to keep it."
       },
       {
         "kind": "dead-slot",
         "slot": "waist",
         "cause": "worn-unrankable",
         "wornItemName": "Girdle of the Deathdealer",
-        "message": "waist is unmeasured: the worn Girdle of the Deathdealer is not in the candidate pool for this slot, so every row shown for waist was scored against an empty slot, not against Girdle of the Deathdealer. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
+        "message": "waist has no baseline row: the worn Girdle of the Deathdealer is not in the candidate pool for this slot, so it gets no row of its own to compare against. The rows shown for waist were still measured against Girdle of the Deathdealer — their deltas stand — but nothing here shows you what it is worth to keep it."
       },
       {
         "kind": "dead-slot",
