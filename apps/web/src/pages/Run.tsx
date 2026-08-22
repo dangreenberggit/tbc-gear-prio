@@ -150,6 +150,7 @@ export function Run({ id }: { id: string }) {
             key={`${String(row.itemId)}|${row.slot}|${row.slotChoice ?? ""}`}
             row={row}
             greyOwned={view.greyOwned ?? true}
+            {...(done ? { jobId: job.id } : {})}
             belowCutoff={
               "belowCutoffInView" in row && row.belowCutoffInView === true
             }

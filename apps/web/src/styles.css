@@ -247,7 +247,7 @@ button.secondary {
 
 .row {
   display: grid;
-  grid-template-columns: 46px 1fr auto;
+  grid-template-columns: 46px 1fr auto auto;
   align-items: center;
   gap: var(--gap);
   height: var(--row-height);
@@ -273,6 +273,29 @@ button.secondary {
 
 .row__delta {
   font-variant-numeric: tabular-nums;
+}
+
+/* Fixed width whether or not the row has an action, so a row and the
+   skeleton standing in for it stay the same shape. */
+.row__actions {
+  width: 56px;
+  text-align: right;
+  font-size: 13px;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:disabled {
+  color: var(--muted);
+  cursor: default;
 }
 
 /* §12 / §8.3.3: owned rows are greyed, never removed. */

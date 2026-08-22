@@ -4,7 +4,9 @@
  * Both render at exactly `--row-height`, which is what lets a skeleton become
  * a row with no layout shift.
  */
+import { useState } from "react";
 import type { RankedItem } from "@tbc-gear-prio/core";
+import { fetchShareLink } from "../api.js";
 
 export function RowSkeleton() {
   return (
@@ -12,16 +14,23 @@ export function RowSkeleton() {
       <span className="row__rank">0</span>
       <span className="row__name">loading</span>
       <span className="row__delta">0.0</span>
+      <span className="row__actions" />
     </div>
   );
 }
 
 export function ResultRow({
   row,
+  jobId,
   belowCutoff = false,
   greyOwned = true,
 }: {
   row: RankedItem;
+  /**
+   * Enables the per-row export. Absent while the run is still going: the
+   * item-level endpoints need a finished ranking and answer 409 otherwise.
+   */
+  jobId?: string;
   /** The view's own verdict (`belowCutoffInView`), not the ranking's. */
   belowCutoff?: boolean;
   /**
@@ -31,6 +40,9 @@ export function ResultRow({
    */
   greyOwned?: boolean;
 }) {
+  const [link, setLink] = useState<string | undefined>(undefined);
+  const [pending, setPending] = useState(false);
+
   const classes = ["row"];
   if (row.owned === true && greyOwned) classes.push("row--owned");
   if (belowCutoff) classes.push("row--below");
@@ -53,6 +65,33 @@ export function ResultRow({
         {row.deltaDps >= 0 ? "+" : ""}
         {row.deltaDps.toFixed(1)} dps
         <span className="muted"> ±{row.se.toFixed(1)}</span>
+      </span>
+      <span className="row__actions">
+        {jobId !== undefined &&
+          (link === undefined ? (
+            <button
+              type="button"
+              className="link-button"
+              disabled={pending}
+              onClick={() => {
+                setPending(true);
+                void fetchShareLink(jobId, row.itemId)
+                  .then(setLink)
+                  .finally(() => {
+                    setPending(false);
+                  });
+              }}
+            >
+              {pending ? "…" : "wowsims"}
+            </button>
+          ) : (
+            /* Two clicks, not one: the link is fetched, and a popup blocker
+               eats a window opened from an async callback. The second click
+               is a plain anchor the browser trusts. */
+            <a href={link} target="_blank" rel="noreferrer noopener">
+              open
+            </a>
+          ))}
       </span>
     </div>
   );
