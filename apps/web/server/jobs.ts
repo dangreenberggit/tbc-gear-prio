@@ -23,6 +23,8 @@
 import {
   compose,
   equipmentFromLoggedGear,
+  gemContext,
+  gemsForPhase,
   rankUpgrades,
   RankError,
   type Deps,
@@ -30,7 +32,9 @@ import {
   type RaidSimRequest,
   type RankedItem,
   type Ranking,
+  type GemContext,
   type RankInput,
+  type SimItemSpec,
   type SpecId,
   type Store,
 } from "@tbc-gear-prio/core";
@@ -67,6 +71,15 @@ export type JobView = {
    * Present once the run has read gear.
    */
   readonly baselineRequest?: RaidSimRequest;
+  /**
+   * What a per-item export needs to reproduce the candidate the ranker
+   * actually measured: the worn 17-slot vector and the gem context the run
+   * was built with. `equipmentForCandidateSwap` takes exactly these, so the
+   * exported link carries the migrated gems, the filled sockets and the
+   * repaired meta rather than the item worn bare (ticket 266 / D1).
+   */
+  readonly baselineEquipment?: readonly SimItemSpec[];
+  readonly gems?: GemContext;
 };
 
 export type SubmitResult = {
@@ -111,6 +124,8 @@ type JobRecord = {
   simVersion: string;
   spec: SpecId;
   baselineRequest?: RaidSimRequest;
+  baselineEquipment?: readonly SimItemSpec[];
+  gems?: GemContext;
 };
 
 export type JobManager = {
@@ -194,11 +209,10 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
         // to every consumer, and nothing downstream can tell the two apart.
         record.contentHash = ranking.contentHash;
         record.result = ranking;
-        record.baselineRequest = await composeBaseline(
-          deps,
-          rankInput,
-          ranking
-        );
+        const baseline = await composeBaseline(deps, rankInput, ranking);
+        record.baselineRequest = baseline.request;
+        record.baselineEquipment = baseline.equipment;
+        record.gems = baseline.gems;
         record.status = "done";
       } else {
         // Only reachable once something passes `Deps.signal`; nothing here
@@ -227,6 +241,10 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
       ...(record.baselineRequest === undefined
         ? {}
         : { baselineRequest: record.baselineRequest }),
+      ...(record.baselineEquipment === undefined
+        ? {}
+        : { baselineEquipment: record.baselineEquipment }),
+      ...(record.gems === undefined ? {} : { gems: record.gems }),
       ...(record.result === undefined ? {} : { result: record.result }),
       ...(record.errorKind === undefined
         ? {}
@@ -250,28 +268,48 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
 }
 
 /**
- * The worn-gear request, re-composed from the fight the run actually resolved.
+ * The worn-gear request, re-composed from the fight the run actually resolved,
+ * plus the two things a per-item export needs to swap a candidate into it the
+ * way the ranker did.
  *
  * The ranker does not hand its baseline request back — a `Ranking` carries
  * numbers and provenance, not protobuf — so the export rebuilds it from the
  * same three inputs the ranker used: this fight's logged gear, the spec's
  * skeleton, and the race the assumptions record. `readGear` is a cache hit by
  * this point, so no second fetch happens.
+ *
+ * `gems` is built with the same arguments `rankUpgrades` uses internally
+ * (`Deps.gemPalette` or the phase palette, `Deps.epWeights`, the ranked spec),
+ * so `equipmentForCandidateSwap` in `exports.ts` reproduces the candidate that
+ * was measured rather than an approximation of it.
  */
 async function composeBaseline(
   deps: Deps,
   rankInput: RankInput,
   ranking: Ranking
-): Promise<RaidSimRequest> {
+): Promise<{
+  request: RaidSimRequest;
+  equipment: SimItemSpec[];
+  gems: GemContext;
+}> {
   const gear = await deps.gear.readGear({
     reportCode: ranking.fight.reportCode,
     fightId: ranking.fight.fightId,
   });
-  return compose(deps.raidSimSkeleton, {
-    name: rankInput.character.name,
-    race: ranking.assumptions.race,
-    equipment: equipmentFromLoggedGear(gear),
-  });
+  const equipment = equipmentFromLoggedGear(gear);
+  return {
+    request: compose(deps.raidSimSkeleton, {
+      name: rankInput.character.name,
+      race: ranking.assumptions.race,
+      equipment,
+    }),
+    equipment,
+    gems: gemContext(
+      deps.gemPalette ?? gemsForPhase(rankInput.maxPhase),
+      deps.epWeights,
+      rankInput.spec
+    ),
+  };
 }
 
 /**

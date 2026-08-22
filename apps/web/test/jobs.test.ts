@@ -268,6 +268,39 @@ describe("exports", () => {
     );
   });
 
+  it("carries gems and the enchant onto the exported candidate", async () => {
+    // D1: the per-item export used to write `{ id }` into the slot, dropping
+    // the worn enchant and every gem, so the link did not open the setup the
+    // ranker measured. The head slot is the one asserted because slamaltman's
+    // recorded helm is both enchanted and gemmed, so a bare swap is visible
+    // in two independent fields.
+    const { s, view } = await finished();
+    const decode = (url: string) =>
+      decodeShareLink(url, inflateSync).player!.equipment!.items;
+    const shareUrl = async (query = "") =>
+      (
+        (await s.get(`/api/jobs/${view.id}/share${query}`)).body as {
+          url: string;
+        }
+      ).url;
+
+    const worn = decode(await shareUrl());
+    const head = view.result!.items.find((r) => r.slot === "head");
+    expect(head).toBeDefined();
+
+    const swapped = decode(await shareUrl(`?item=${head!.itemId}`));
+    const index = swapped.findIndex((i) => i.id === head!.itemId);
+    expect(index).toBeGreaterThanOrEqual(0);
+
+    // The worn helm is the ranker's starting point for this swap, so what it
+    // had is what the export must not silently drop.
+    expect(worn[index]!.enchant).toBeGreaterThan(0);
+    expect(worn[index]!.gems.length).toBeGreaterThan(0);
+
+    expect(swapped[index]!.enchant).toBe(worn[index]!.enchant);
+    expect(swapped[index]!.gems.length).toBeGreaterThan(0);
+  });
+
   it("404s an export for a job id that does not exist", async () => {
     server = await startServer();
     const res = await server.get("/api/jobs/job_nope/export.json");

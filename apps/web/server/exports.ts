@@ -28,11 +28,14 @@ import { deflateSync } from "node:zlib";
 import {
   CURRENT_API_VERSION,
   encodeShareLink,
+  equipmentForCandidateSwap,
   simSlotsForPoolSlot,
   SIM_ORDER,
+  type GemContext,
   type RaidSimRequest,
   type RankedItem,
   type Ranking,
+  type SimItemSpec,
   type SpecId,
 } from "@tbc-gear-prio/core";
 import type { HandlerResult } from "./http.js";
@@ -118,7 +121,13 @@ function buildRequest(
       json: { error: "not-found", detail: `no job ${id}` },
     };
   }
-  if (view.status !== "done" || !view.result || !view.baselineRequest) {
+  if (
+    view.status !== "done" ||
+    !view.result ||
+    !view.baselineRequest ||
+    !view.baselineEquipment ||
+    !view.gems
+  ) {
     return {
       ok: false,
       status: 409,
@@ -155,7 +164,7 @@ function buildRequest(
 
   return {
     ok: true,
-    request: withCandidate(request, row),
+    request: withCandidate(request, row, view.baselineEquipment, view.gems),
     spec,
     filename: `${base}-${row.itemId}.json`,
   };
@@ -166,14 +175,18 @@ function buildRequest(
  * two placements produced its delta, and swapping into the other one would
  * export a setup the app never measured.
  *
- * A plain slot replacement, not the ranker's `equipmentForCandidateSwap`,
- * which also migrates gems and repairs the meta and is not exported from
- * core's index. What ships is the item in its slot with empty sockets; the
- * player re-gems on the site.
+ * The swap itself is the ranker's own `equipmentForCandidateSwap`, not a slot
+ * assignment: it migrates the worn gems onto the candidate, fills what is left
+ * empty, repairs the meta across the other worn items, and carries the worn
+ * enchant where `enchantAppliesToItem` allows. Writing `{ id }` into the slot
+ * instead — which is what this did before ticket 266 / review finding D1 —
+ * exported the item bare, so the link did not open what the app measured.
  */
 export function withCandidate(
   request: RaidSimRequest,
-  row: RankedItem
+  row: RankedItem,
+  worn: readonly SimItemSpec[],
+  gems: GemContext
 ): RaidSimRequest {
   const slot = row.slotChoice ?? simSlotsForPoolSlot(row.slot)[0];
   const index = SIM_ORDER.indexOf(slot as (typeof SIM_ORDER)[number]);
@@ -183,15 +196,27 @@ export function withCandidate(
     );
   }
 
+  const swapped = equipmentForCandidateSwap(worn, index, row.itemId, gems);
+
   const next = structuredClone(request) as Record<string, unknown>;
   const raid = next.raid as {
     parties: Array<{ players: Array<Record<string, unknown>> }>;
   };
   const player = raid.parties[0]?.players[0];
   if (!player) throw new Error("composed request has no player");
-  const equipment = player.equipment as {
-    items: Array<Record<string, unknown>>;
-  };
-  equipment.items[index] = { id: row.itemId };
+  player.equipment = { items: swapped.map(toProtoItem) };
   return next;
+}
+
+/**
+ * Protojson `ItemSpec`, matching `compose`'s own encoding: an empty slot is
+ * `{}` and empty gems are omitted, so a swapped request stays byte-comparable
+ * with the baseline the ranker composed.
+ */
+function toProtoItem(spec: SimItemSpec): Record<string, unknown> {
+  if (!spec.id) return {};
+  const out: Record<string, unknown> = { id: spec.id };
+  if (spec.enchant) out.enchant = spec.enchant;
+  if (spec.gems.length > 0) out.gems = [...spec.gems];
+  return out;
 }
