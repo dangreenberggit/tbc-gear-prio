@@ -1577,3 +1577,128 @@ the regression fixture for the off-tank warning itself, and the feral form tests
 bind it as `offtank` rather than `cat` so the name stops asserting the wrong
 thing. This closes the last open Stage 2 §14 gate box's shredzepelin half; the
 SME re-read of the corrected shortlist is still a human step.
+
+---
+
+## 2026-08-21 — Stage 2's last gate box: worked, and it stays open
+
+PLAN.md §14 Stage 2, `☐ ≥3 real characters produce believable shortlists`.
+**Outcome: the box stays ☐**, with the blocking finding named and ticketed.
+
+Everything below was produced at `feat/stage-2-close-shortlist-box`, base
+`1ecd2e5`, on the pinned v0.0.119 engine. The binary is gitignored, so no claim
+here asserts it is present: its path, byte size, sha256 and the commands to
+regenerate and verify it are in
+[`.scratch/stage-gate/stage-2-close-shortlist-box/binary-provenance.md`](../.scratch/stage-gate/stage-2-close-shortlist-box/binary-provenance.md),
+and every number in this entry was measured against that digest.
+
+### What was run
+
+`--offline` gates only the *gear* source. The CLI always constructs
+`CliSimRunner` (`cli.ts:52,408`) and live-sims the pool, so these shortlists are
+a full re-sim against the pinned binary, not a fixture replay.
+
+```
+pnpm rank --region US --realm dreamscythe --character slamaltman   --offline --spec ret   --max-phase 3 --report .scratch/rank-reports/stage2-close-slamaltman.html
+pnpm rank --region US --realm dreamscythe --character shredzepelin --offline --spec feral --max-phase 2 --report .scratch/rank-reports/stage2-close-shredzepelin.html
+pnpm rank --region US --realm dreamscythe --character nexess       --offline --spec feral --max-phase 2 --report .scratch/rank-reports/stage2-close-nexess.html
+```
+
+| character | spec | pool | wall | above cutoff | baseline DPS | gear read from |
+| --- | --- | --- | --- | --- | --- | --- |
+| slamaltman | ret p3 | 391 | 200 s | 44 | 2003.0 | Hydross the Unstable (fight 8) |
+| shredzepelin | feral p2 | 228 | 144 s | 14 | 2266.9 | **Void Reaver** (fight 63) |
+| nexess | feral p2 | 228 | 144 s | 12 | 2302.5 | Fathom-Lord Karathress (fight 32) |
+
+Each `.stdout.txt` transcript carries its invocation, its resolved fixture path,
+the binary digest and the CLI's own `gear read from …` line. shredzepelin reads
+Void Reaver rather than the Morogrim kill, which is the ticket-06 routing at
+`cli.ts:372` doing its job.
+
+### The verdicts
+
+Two `gate-sme` seats ran on different questions over different inputs. Seat 1
+read the three shortlists cold; its input note carried no framing from ticket 250
+and no healer or mana wording (verify: `grep -oiE
+'250|rotation|regression|227|healer|mana|intellect|spirit|mp5'` over
+`.scratch/stage-gate/stage-2-close-shortlist-box/sme-input-shortlists.md`
+prints nothing).
+
+Handoff: [`.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md`](../.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md)
+
+| character | verdict |
+| --- | --- |
+| slamaltman | `trust-with-caveats` |
+| shredzepelin | **`do-not-trust`** |
+| nexess | `trust-with-caveats` |
+
+**Why the box stays open.** The `do-not-trust` is not sim noise and not a
+disclosure gap. When a character's worn item is absent from the candidate pool
+for its slot, the slot is scored against an *empty slot*, inflating every
+candidate in it. shredzepelin has three such slots — neck, back, waist — so only
+**4 of his 14** above-cutoff rows are measured against real gear. nexess, on
+identical code, pool and spec, has one and is usable. The report does disclose
+each case in `ranking.plausibilityWarnings`; the rows still appear with inflated
+deltas. Re-observe with:
+
+```
+python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shredzepelin.json'))['ranking'];[print(w['slot'],w['cause'],w.get('wornItemName')) for w in r['plausibilityWarnings']]"
+```
+
+Tracked as **ticket 253**. Closing this box needs that fixed and shredzepelin
+re-read. Two non-blocking findings went to **254** (the cutoff is an OR of
+`absDps` and `pct`, so boundary rows can sit above it with a sub-threshold
+`deltaDps` — real, but the seat's "internal inconsistency" reading is too strong)
+and **255** (a comment that misled two readers running).
+
+### Ticket 250, re-measured and closed
+
+Seat 2 judged the ticket-250 question on different inputs, with an explicit
+instruction not to re-issue shortlist verdicts. Verdict `trust-with-caveats` on
+the re-measurement; handoff at
+[`.scratch/handoffs/sme-rank-judgment-stage2-close-ticket-250.md`](../.scratch/handoffs/sme-rank-judgment-stage2-close-ticket-250.md),
+method and literal invocations at
+[`q2-remeasure/commands.md`](../.scratch/stage-gate/stage-2-close-shortlist-box/q2-remeasure/commands.md).
+
+Three arms at 20000 iterations, seed 42: tip 782.14, whole old package 740.67,
+old-rotation-on-tip-consumables 739.23. **The rotation main effect is −42.91 DPS
+at 62 σ against a pre-registered 2×combined-SEM bound of 1.38** — the new
+rotation is *better*, contradicting the ticket's premise in sign. Consumables
+move −1.44 DPS with the rotation held constant, inside the bound. Arm 2
+reproduces the ticket's 740.67 to the cent, so the stale half of its pair is the
+722.55. Ticket 250 is **closed**, its pair superseded rather than kept.
+
+### Corrections to the 2026-08-08 entry
+
+That entry is left as written; these are the corrections, not edits to it.
+
+1. "Only shredzepelin was ever put through `sme-rank-review`" — false. Twelve
+   handoffs exist (`ls .scratch/handoffs/sme-rank-judgment-*.md | wc -l` → 12),
+   covering all three characters. All twelve predate the 2026-08-21 pin, rotation
+   and skeleton commits, which is why a fresh pass was needed — the conclusion
+   was right for a reason other than the one given.
+2. "The count of usable characters is 2, not 3 … needs a genuine cat capture for
+   shredzepelin" — resolved by `78ca9af`, which added
+   `test/fixtures/shredzepelin-cat.raw.json`; phase-2 ticket 06 is closed.
+3. PLAN.md's own gate paragraph carried the same two stale clauses; corrected in
+   place at PLAN.md §14 rather than here.
+
+### What this entry does not claim
+
+- **Fixture scope.** Only `packages/core/test/fixtures/synthetic-roster-recordings.json`
+  is uniformly `simVersion: v0.0.119`. The per-character
+  `test/fixtures/{slamaltman,shredzepelin-cat}.raid-sim-result.json` files are
+  still `v0.0.101`; they are read by no TS code. Nothing here claims all fixtures
+  were re-recorded.
+- **Ticket 236** (replicate seeds overlap RNG streams) is open and bounds the
+  cutoff-adjacent rows: only 8 rows per run carry `paired-replicate`, the rest
+  `independent` with se ~1.35–2.18 against cutoffs of 3.4–3.6. Seat 1's
+  boundary-row findings are stated against that spread.
+- **Ticket 240** (vendor-gated tests can silently skip) — checked rather than
+  assumed. The baseline `pnpm verify` skipped exactly one test,
+  `wowsims-fork-parity`, gated on generated protos under `vendor/tbc-new-fork`.
+  It does not gate the ranking path. Counts in `binary-provenance.md`.
+- **C11 superseded.** An earlier claim of 20 feral rows at p2 / 43 at p3 with
+  baseline 2145.6, sourced from the synthetic roster recordings, does not match
+  live output at this tip: 14 and 12 rows against baselines 2266.9 and 2302.5.
+  The counts in this entry are the observed ones.

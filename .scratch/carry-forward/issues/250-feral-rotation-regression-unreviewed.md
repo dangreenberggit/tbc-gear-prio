@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (domain review of an adopted upstream change)
 Origin: feat/engine-pin-backend-reforge review, 2026-08-21
 Blocks: none
@@ -20,7 +20,10 @@ skeleton gear:
 | old 12-action | 740.67 |
 | **new 22-action** | **722.55** |
 
-So their rewrite is **~18 DPS worse** on our gear. It also moved the ranking
+So their rewrite looked **~18 DPS worse** on our gear. **This sentence is wrong
+and is corrected below (2026-08-21) — the new rotation measures 42.91 DPS
+_better_ once the rotation is isolated. It is left in place because it has been
+quoted elsewhere; read the closing section before citing it.** It also moved the ranking
 more than the DPS: feral's above-cutoff set went 15 → 27 rows and feral-p3's
 36 → 55, meaning which items read as upgrades changed.
 
@@ -55,8 +58,82 @@ something other than what it says.
 
 ## Acceptance
 
-- [ ] A domain verdict recorded: the regression is expected, or it is a
-      mismatch, with the reasoning.
-- [ ] If a mismatch: what specifically is unmet, and whether the skeleton or the
-      rotation should change.
-- [ ] The 740.67 / 722.55 pair kept or superseded with a corrected measurement.
+- [x] A domain verdict recorded: the regression is expected, or it is a
+      mismatch, with the reasoning. → **Absent and reversed on the current pin.**
+- [x] If a mismatch: what specifically is unmet, and whether the skeleton or the
+      rotation should change. → **Nothing is unmet; neither should change.**
+- [x] The 740.67 / 722.55 pair kept or superseded with a corrected measurement.
+      → **Superseded by the Arm 1 / Arm 3 pair, with literal invocations.**
+
+## Closed 2026-08-21 — re-measured with the rotation isolated
+
+Verdict `trust-with-caveats` from a `gate-sme` seat on the re-measurement:
+`.scratch/handoffs/sme-rank-judgment-stage2-close-ticket-250.md`. Full method,
+literal invocations and re-runnable checks:
+`.scratch/stage-gate/stage-2-close-shortlist-box/q2-remeasure/commands.md`.
+Binary digest and regen commands: `../../stage-gate/stage-2-close-shortlist-box/binary-provenance.md`.
+
+Three arms on the pinned v0.0.119 binary, 20000 iterations, seed 42:
+
+| arm | rotation | consumables | DPS |
+| --- | --- | --- | --- |
+| Arm 1 | tip (22 actions) | tip | **782.14** |
+| Arm 2 | old (12 actions) | old | 740.67 |
+| Arm 3 | old (12 actions) | **tip** | 739.23 |
+
+**Rotation main effect = Arm 3 − Arm 1 = −42.91 DPS at 62 σ** against a
+pre-registered bound of 2× combined SEM (1.38). The new rotation is *better* by
+42.91 DPS; the ticket's premise is contradicted in sign. Holding the rotation at
+old, consumables move −1.44 DPS — inside the bound — so the rotation explains
+essentially the whole package effect.
+
+Arm 3 is a clean single-variable comparison because the rotation↔consumables
+coupling is one-directional: the old rotation references none of
+`selectedPotion`, `selectedConjured`, `22788`, `31677`, `22832`, and with
+`rotation` and `consumables` both removed the two requests are byte-identical.
+
+**Arm 2 reproduces this ticket's 740.67 to the cent.** So the old half of the
+pair is reproducible on the current binary and **722.55 is the stale number** —
+which is the failure this ticket suspected of itself.
+
+### Why the sign flip is believed rather than assumed
+
+Two independent lines agree with the mean, both read from the committed result
+JSONs by the SME seat:
+
+- **Cast-count shape.** Arm 1 vs Arm 3 per iteration: powershifts 39.1 → 46.8,
+  Shred 47.6 → 50.8, Ferocious Bite 3.9 → 5.8, Mangle 14.5 → 17.5, with Rip flat
+  at 10.3 → 10.1. More shifts feeding Shred and Bite while Rip stays a
+  maintenance debuff is the correct shape; a gain driven by over-Ripping would
+  have been the artifact tell.
+- **Variance.** Per-iteration stdev 32.23 (tip) vs 91.86 (old rotation). The old
+  list is ~3× noisier, which is what an energy-starving feral APL looks like.
+  This is a separate statistic from the mean and makes −42.91 conservative.
+
+Recalled/unverified (not load-bearing — the verdict rests on the measured counts
+and spread): Furor energy-on-shift, Wolfshead, and Tiger's Fury being a TBC DPS
+loss.
+
+### The zero-cast branches are correct, not a bug
+
+At tip, Dark Rune `22788`, Flame Cap `31677` and `22105` cast zero times despite
+appearing in tip's `conjuredItems`/`potions`. This is right: those arrays are the
+*available* menu and `conjuredId`/`potId` are the single *pick* (tip picks 12662
+and 22832, which fire 40,000 and 38,864 times). `22788`'s branch is guarded by
+`selectedConjured == 22788`; `31677` appears only inside a `not
+selectedPotion(31677)` threshold guard and is not castable; `22105` has zero
+rotation references. `build_feral_skeleton.py:92-97` warns about *dropping* the
+arrays, which disarms the item you did pick — a different failure. Ticket 255
+asks for that comment to state the distinction.
+
+### Scope of the claim
+
+One gear set at one phase on our pinned binary — the right question for this
+repo, not a general claim about upstream's rotation. Adoption in `d41c46c` was
+right on the merits, not only on the take-upstream rule.
+
+The above-cutoff movement this ticket cites (15 → 27 at p2, 36 → 55 at p3) does
+not bear on the rotation question: above-cutoff membership is measured against
+the character's own baseline, and the baseline rose (2145.6 → 2266.9 / 2302.5),
+so fewer marginal sidegrades clear the bar. Live at the 2026-08-21 tip the feral
+p2 counts are 14 (shredzepelin) and 12 (nexess).

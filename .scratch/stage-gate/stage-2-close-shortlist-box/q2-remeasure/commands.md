@@ -108,9 +108,30 @@ counts are corroboration, and Arm 3 vs Arm 1 remains the instrument.
 
 Separate observation, about tip's skeleton rather than about ticket 250: at Arm 1
 (tip) the two branches `scripts/build_feral_skeleton.py:92-97` names — Dark Rune
-`22788` and Flame Cap `31677` — cast **zero** times despite both being present in
-tip's `conjuredItems` / `potions`. `22105` is also zero. Selected pot `22832` (38,864)
-and conjured `12662` (40,000) fire normally, so the arrays are wired up; these three
-specific branches never win their priority slot. Not load-bearing for Q2 — it would,
-if anything, mean tip's 782.14 understates tip — but it is unexplained and goes to
-seat 2 and to a carry-forward ticket.
+`22788` and Flame Cap `31677` — cast **zero** times, and `22105` is zero too, despite
+all three appearing in tip's `conjuredItems` / `potions`.
+
+**This is correct behaviour, not a bug** — reviewed by the ticket-250 SME seat and
+re-verified here against the rotation JSON. `conjuredItems` / `potions` are the
+*available* menu; `conjuredId` / `potId` are the single *pick*. Tip picks
+`conjuredId: 12662` and `potId: 22832`, and both fire at full rate (40,000 and
+38,864 casts). The zeros follow from the guards:
+
+- `22788` is cast only under `selectedConjured == 22788`; the pick is `12662`, so
+  the branch correctly does nothing.
+- `31677` appears only inside a `not selectedPotion(31677)` guard — a mana-deficit
+  threshold modifier, not a castable action.
+- `22105` is referenced by zero rotation tokens, so no branch could cast it.
+
+Re-run the guard check with:
+
+```
+python -c "import json,re;p=json.load(open('data/presets/feral/p2.raid-sim-skeleton.json'))['raid']['parties'][0]['players'][0];print('picks',p['consumables']['conjuredId'],p['consumables']['potId']);s=json.dumps(p['rotation']);[print(t,s.count(t)) for t in ('22788','31677','22105')]"
+```
+
+An earlier draft of this file said the zeros mean tip's 782.14 understates tip. That
+was wrong and the SME seat corrected it: selecting Dark Rune would *replace* Demonic
+Rune, not add to it, so there is no headroom being lost. The script's warning at
+`build_feral_skeleton.py:92-97` is about *dropping* the arrays, which disarms the item
+you did select — a different failure, and not what is happening here. A carry-forward
+ticket asks for that comment to state the selected-vs-available distinction.
