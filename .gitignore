@@ -56,6 +56,7 @@ vendor/
 .scratch/stage-gate/*
 !.scratch/stage-gate/stage-2-close-shortlist-box/
 !.scratch/stage-gate/worn-item-pool-coverage/
+!.scratch/stage-gate/stage-3-web-shell/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
