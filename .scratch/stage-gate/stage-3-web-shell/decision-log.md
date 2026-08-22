@@ -24,3 +24,21 @@ One dated line per gate: gate, outcome, reason, round count.
   ("type a character") open by design; the orchestrator will raise that with the
   owner at hand-off. Note: the planner's four research subagents notified this
   session instead of the planner; their results were forwarded via SendMessage.
+- 2026-08-22 — **Reviewer seat ran clean** (no `WRONG_MODEL` misfire this time; the
+  spawn prompt pre-empted ticket 252's guard). `git status --porcelain` empty after.
+- 2026-08-22 — **Gate B: LOOP BACK (revision round 1).** Reviewer verdict `revise`:
+  2 blocking, 8 material, 2 minor. Orchestrator reconciliation against the brief:
+  **F1 (blocking) upheld** — `sed -n 13p packages/core/src/items.ts` imports
+  `data/items/index.json` (6,825,902 bytes) at runtime and `view.ts` reaches it via
+  `rank-report-rules.ts`; gate box 4 depends on `applyView` in the browser.
+  **F2 (blocking) upheld** — `grep -c '"BiS"' data/universes/{feral-p2,ret-p2,ret-p3}.json`
+  → 17 / 16 / 16, so no committed `maxPhase` yields `pinBisAvailable === false`.
+  **F3 (material) upheld** — `ls -la` on the main checkout's `.env` → 110 bytes; the
+  brief's Q1 rule was "if no credential, A wins by default", so the planner must now
+  perform the sizing measurement the brief asked for and decide Q1 on it.
+  **F10 (material) reconciled, not a defect** — `c256b34` is the SHA the orchestrator
+  handed the planner as base (brief commit); the plan must name it as such.
+  **F12 (minor) accepted** — Git Bash is a supported shell here (AGENTS.md CLI
+  environment), so `&&` and `/tmp` work; the recipe should use the scratchpad path
+  and state whether `jq` is present. F4–F9, F11 go to the planner for revision.
+  Revision via `SendMessage` to the same planner seat (retains its research context).
