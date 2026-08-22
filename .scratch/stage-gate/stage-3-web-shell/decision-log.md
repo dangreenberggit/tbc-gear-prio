@@ -49,3 +49,9 @@ One dated line per gate: gate, outcome, reason, round count.
   `rank-report-rules.ts`; F2 resolved by a no-BiS test pool through `Deps.pool`;
   Q1 re-decided on sizing (12 steps, about 8 files for the live adapter, against 17
   steps, about 45 files for the rest). Tree clean. Reviewer re-run on changed claims only.
+- 2026-08-22 — **Gate B (round 2): PROCEED.** Reviewer verdict `proceed` on revision 1:
+  0 blocking, 0 material, 2 minor (G1 argument order in `loadUniversePool`; G2 render
+  skeletons on the first poll where `candidates` is defined). All of F1–F12 addressed
+  or reconciled; register rows in scope all stand, C31 untestable until step 2b by
+  design. G1 and G2 ride to the executor as advisories. `git status --porcelain`
+  empty after the reviewer ran. Revision rounds used: 1 of the norm of 1.

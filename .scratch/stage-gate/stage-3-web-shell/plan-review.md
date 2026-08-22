@@ -64,3 +64,62 @@ Two blockers, both about evidence for gate boxes rather than about the architect
 The Approach's Q1 conclusion (offline-first) is correct, but reached on a false premise — F3 requires re-arguing it on PLAN.md §14's scoping line and performing the sizing count the brief asked for, not merely patching C1. Q2, Q3 and Q4 survive: Q4's reasoning is sound and its measurement is the right one (no Stage 3 box needs restart survival, confirmed against `PLAN.md` L909 vs L915), and Q3's "the export is the opposite lowering from ticket 72's lift" holds against the proto shapes.
 
 The two stated deviations from §12 are both legitimate and well-argued — deviation 1 in particular correctly identifies that `contentHash` is unavailable at submit time (C10 verified) and offers a real substitute. A third deviation (C25, TMB labels unconfirmed) should be promoted from a register row to a stated deviation, since the brief made confirming them in-scope.
+
+---
+
+# Plan review — round 2 (revision 1, changed claims only)
+
+Reviewer seat (`gate-reviewer`, opus) on plan at `bcc873b0172bcd213486baab4ab26011d61e3cb4`, 2026-08-22.
+
+VERDICT: proceed
+
+## Findings
+
+| ID | Severity | Where | What breaks | Evidence |
+| --- | --- | --- | --- | --- |
+| G1 | minor | Step 2a; C7 | Signature re-ordering is silent. The existing function is `loadUniversePool(maxPhase: ContentPhase, spec: SpecId)`; step 2a specifies `loadUniversePool(root, spec, maxPhase)` — the two kept params are in the opposite order. Both are narrow types, so a swap likely fails typecheck rather than silently — minor. Worth one line in the step telling the executor the order changed. | `sed -n 261p packages/core/src/cli.ts` |
+| G2 | minor | Step 11; deviation 4 | `rank.ts` emits `simming` from three sites (`:963`, `:1034`, `:1365`), and only `:1034` will carry `candidates` per step 2c. If the first poll that observes `stage: "simming"` lands on a `:963` or `:1365` emission, the client sees no `candidates` and must hold the fixed-height container rather than render zero skeleton rows. Fix: render skeletons on the first poll where `candidates` is **defined**, not the first `simming` poll. | `grep -n 'stage: "simming"' packages/core/src/rank.ts` → 963, 1034, 1365 |
+
+No blocking or material findings remain.
+
+## Register verdicts — rows in scope
+
+| Claim | Verdict | Evidence |
+| --- | --- | --- |
+| C1 (rev 1) | stands | `grep -o '^[A-Z_]*=' C:/Users/dgree/Code/lulz/tbc-gear-prio/.env` → `WCL_CLIENT_ID=`, `WCL_CLIENT_SECRET=`; `git check-ignore -v .env` → `.gitignore:2` |
+| C3 (rev 1) | stands | `sed -n 898p PLAN.md` → "needs its own real planning pass before Stage 3 closes — not scoped here"; L909 six boxes, no restart; L915 Stage 4 |
+| C6 (rev 1) | stands | `git ls-files test/fixtures` — `nexess.raw.json` present, no `nexess.raid-sim-result.json`; `cli.ts:372-373` maps the refs |
+| C7 (rev 1) | stands | `:58` root; `:261` `loadUniversePool` with `console.error` + `process.exit(2)` at `:267-271`; `:276` `resolveWowsimcli()` no-arg; `:300-322`. See G1 |
+| C16 (rev 1) | stands | `grep -rn "@tbc-gear-prio/core" --include=*.ts . \| grep -v node_modules` → one comment hit at `index.ts:1` |
+| C18 (rev 1) | stands | `view.ts:9` value import of `setPotentialIsConfounded`; `rank-report-rules.ts:11` imports `getItem` from `items.js`; `items.ts:13` imports the 6,825,902-byte JSON |
+| C21 (rev 1) | stands | `apiVersion` at `ui_pb.ts:985` (field 15); `individual_sim_ui.tsx:528` gate; `constants/other.ts:15`; the extension is generated in our protos at `common_pb.ts:3320` (`current_version_number = 50000`) with `ProtoVersionSchema` at `:33`, so step 3's preferred branch is reachable; preset `"apiVersion": 13` |
+| C22 (rev 1) | stands | v0.0.119 `--help` → `decodelink  decode wowsims link/url`; worktree `ls vendor` absent |
+| C26 (rev 1) | stands | `rank.ts:698-700`, `:1022` `candidateCap`, `:887-888`; `cli.ts:261-274` per-phase file |
+| C29 (new) | stands | Re-ran the row's command; all eight versions and counts match exactly |
+| C30 (new) | stands | `rank-report-rules.ts:676-681` six lines over `item.setContext?.prospectiveBonusBreaks`; callers `view.ts:285`, `rank-report-rules.ts:693`; no test calls it directly |
+| C31 (new) | untestable here, low risk | After the move, `view.ts`'s closure is `cutoff.ts` (type-only `SpecId`) and `pool.ts` (all `import type`, incl. `ItemSlot` from `items.ts`); `tsconfig.base.json:12` `verbatimModuleSyntax: true` guarantees erasure. 400 kB has headroom |
+| C32 (new) | stands | feral-p2 17, feral-p3 17, ret-p2 16, ret-p3 16, ret-p4 16, ret-p5 16 |
+| C33 (new) | stands | `rank.ts:1032` `totalSims = 1 + simCandidates.length + replicaSims`; `:965` `if (!best) return`. See G2 |
+| C34 (new) | stands | `git merge-base HEAD dev` → `8a1c01af…`; tip now `bcc873b` (row says `eae0fdd`, one commit stale, immaterial — recipe computes merge-base at run time) |
+| C35 (new) | stands | `jq --version` → command not found |
+
+## F1–F12 disposition
+
+| # | Status | Note |
+| --- | --- | --- |
+| F1 | addressed | `set-potential.ts` move genuinely drops `items.ts`: it is the only value import on the path, and `pool.ts`'s `ItemSlot` import is type-only under `verbatimModuleSyntax` |
+| F2 | addressed | `Deps.pool?: readonly PoolEntry[]` is a real injection point (`rank.ts:137`, "Curated (or test) candidate pool"); step 7 asserts both polarities; box 5 ☑ with the caveat stated |
+| F3 | addressed | C1 rewritten; Q1 performs the sizing (12 steps, ~8 files vs 17 steps, ~45 files) and cites L898; credential carried into the follow-up ticket |
+| F4 | addressed | `filterPoolByPhase` dropped; deviation 4 + step 2c `candidates` from `simCandidates.length` after the cap |
+| F5 | addressed | C7 corrected; `resolveWowsimcli(root)`; result union replaces `process.exit`, server returns 400 |
+| F6 | addressed | C21 load-bearing with `apiVersion`; step 3 reads the proto option (exists in our generated protos) with a constant-13 fallback and drift test; step 3 and step 8 acceptance check `apiVersion` |
+| F7 | addressed | C22 evidence is the 0.0.119 binary; C6 states the nexess gap and its consequence |
+| F8 | addressed | S1 owns every manifest and both placeholders; S2 and S3 share no path; `apps/web/test/fixtures/**` forbidden to S3 |
+| F9 | addressed | C29: two-sided registry counts, reproduced |
+| F10 | not a defect | Per orchestrator; C34 records provenance; recipe uses `$(git merge-base HEAD dev)` |
+| F11 | addressed | C16 carries the fact; step 4 adds the `types` condition on all three `exports` entries |
+| F12 | addressed | `$W` + `pnpm -C` / `git -C`, scratchpad path, `node -e` for JSON, foreground server in a second tool call |
+
+## Assessment
+
+Every blocking finding is resolved on its merits. The two resolutions probed hardest both hold under direct verification. The revision also improves the plan's honesty beyond what round 1 demanded (deviation 3 promotes the unconfirmed TMB labels; deviation 4 discloses the skeleton-timing compromise; box 5's log entry will say no committed universe reaches the state demonstrated). G1 and G2 are one-sentence fixes in step text; neither needs another review round.
