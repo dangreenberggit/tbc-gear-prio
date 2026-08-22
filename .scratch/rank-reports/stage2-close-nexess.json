@@ -6,7 +6,7 @@
     "spec": "feral",
     "maxPhase": 2,
     "poolSize": 228,
-    "generatedAt": "2026-08-22T03:47:52.243Z"
+    "generatedAt": "2026-08-22T06:16:02.399Z"
   },
   "ranking": {
     "contentHash": "2ac5a64bfc5f020d156a1078dbb47562f4ac475e56c609a724890b8aa7175fc9",
@@ -6747,7 +6747,7 @@
         "slot": "wrist",
         "cause": "worn-unrankable",
         "wornItemName": "Shackles of Quagmirran",
-        "message": "wrist is unmeasured: the worn Shackles of Quagmirran is not in the candidate pool for this slot, so every row shown for wrist was scored against an empty slot, not against Shackles of Quagmirran. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked."
+        "message": "wrist has no baseline row: the worn Shackles of Quagmirran is not in the candidate pool for this slot, so it gets no row of its own to compare against. The rows shown for wrist were still measured against Shackles of Quagmirran — their deltas stand — but nothing here shows you what it is worth to keep it."
       },
       {
         "kind": "dead-slot",

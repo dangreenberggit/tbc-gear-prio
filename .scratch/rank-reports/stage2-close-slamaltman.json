@@ -6,7 +6,7 @@
     "spec": "ret",
     "maxPhase": 3,
     "poolSize": 391,
-    "generatedAt": "2026-08-22T03:42:42.279Z"
+    "generatedAt": "2026-08-22T06:19:36.182Z"
   },
   "ranking": {
     "contentHash": "6f4dbc1749b1735dac541f5e4de78d19ec8f85acaf8d47813356c3038db491fb",
@@ -80,7 +80,7 @@
     "substitutions": [
       {
         "field": "candidate 30892 (shoulder)",
-        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 16 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff6d7713c40?, 0xc00082e120?})\\n\\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff6d79df830?, 0xc000124058})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff6d79df830, 0xc000124058}, 0xc003657c30, 0xc003657c60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc0034a4000, {0x7ff6d79df830, 0xc000124058})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:348 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc0034a4000, {0x7ff6d79df830, 0xc000124058}, 0xc000d48690, 0xc001f7a0b0, 0xc000d41ea0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:298 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc001f42160, 0xc000c61a00)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc001f42000, 0xc000c61a00, 0xc000cc63f0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc000c61a00, 0xc000cc63f0, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc000c0daa0, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc000c0daa0, 0xc00112a070, 0x0, {{0x0?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 9\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
+        "detail": "Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {\"type\":\"ErrorOutcomeError\",\"message\":\"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\ngoroutine 15 [running]:\\nruntime/debug.Stack()\\n\\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/debug/stack.go:26 +0x5e\\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\\npanic({0x7ff6d7713c40?, 0xc00110e9f0?})\\n\\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/panic.go:783 +0x132\\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff6d79df830?, 0xc00059a058})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff6d79df830, 0xc00059a058}, 0xc002649c30, 0xc002649c60, 0x1)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc002c88000, {0x7ff6d79df830, 0xc00059a058})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:348 +0x145\\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc002c88000, {0x7ff6d79df830, 0xc00059a058}, 0xc000b0f090, 0xc0024e60b0, 0xc000b0e960)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:298 +0xd1\\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc00110c160, 0xc000acf300)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc00110c000, 0xc000acf300, 0xc000ac9200)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc000acf300, 0xc000ac9200, 0x0)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc000abd260, {{0x1?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\\ngithub.com/wowsims/tbc/sim/core.runSim(0xc000abd260, 0xc000b67180, 0x0, {{0x5095095095095095?}})\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 9\\n\\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\\n\"}"
       }
     ],
     "items": [
@@ -8256,6 +8256,32 @@
       },
       {
         "rank": null,
+        "itemId": 32232,
+        "name": "Eternium Shell Bracers",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "High Warlord Naj'entus",
+          "origin": "db"
+        },
+        "deltaDps": -45.554388581145986,
+        "deltaPct": -2.274255611276136,
+        "se": 2.1160344646057263,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Black Temple",
+            "boss": "High Warlord Naj'entus",
+            "origin": "db"
+          }
+        ]
+      },
+      {
+        "rank": null,
         "itemId": 32395,
         "name": "Redeemed Soul Wristguards",
         "slot": "wrist",
@@ -8280,32 +8306,6 @@
             "recipeFaction": "Ashtongue Deathsworn",
             "recipeStanding": "Honored",
             "recipeFactionId": 1012,
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 32232,
-        "name": "Eternium Shell Bracers",
-        "slot": "wrist",
-        "source": {
-          "kind": "raid",
-          "zone": "Black Temple",
-          "boss": "High Warlord Naj'entus",
-          "origin": "db"
-        },
-        "deltaDps": -45.554388581145986,
-        "deltaPct": -2.274255611276136,
-        "se": 2.1160344646057263,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Black Temple",
-            "boss": "High Warlord Naj'entus",
             "origin": "db"
           }
         ]
