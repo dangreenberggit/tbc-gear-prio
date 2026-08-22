@@ -1,8 +1,8 @@
 Status: blocked
 Type: defect (a recorded design decision is no longer true)
 Origin: review of fix/fork-lockfile-after-rebase, 2026-08-21
-Blocked by: owner decision at push or PR time (see Owner ruling below)
 Blocks: 263 (deferred until this is settled — see below)
+Blocked by: owner decision at push or PR time (see Owner ruling below)
 
 # The fork sits on `cbf6b75` while the engine pin is v0.0.119
 
