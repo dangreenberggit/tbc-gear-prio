@@ -44,7 +44,21 @@ def main() -> int:
 
     preset_path = ROOT / f"data/presets/{args.spec}/{args.tier}.individual-sim-settings.json"
     golden_path = ROOT / f"data/presets/{args.spec}/{args.tier}.raid-sim-skeleton.json"
-    apl_path = ROOT / f"vendor/wowsims/{args.spec}_default.apl.json"
+    # Feral's skeleton is built from the owner's own export, not upstream's
+    # preset (ticket 244): the sim must model the rotation actually played, and
+    # upstream's default differs in ways that matter -- it hardcodes the bite
+    # trick at 2 combo points where the owner's APL branches on Wolfshead Helm.
+    # So feral's drift check compares against that export. Ret still tracks the
+    # pinned vendor APL, and a spec with no entry here keeps the old behaviour.
+    APL_SOURCES = {
+        "feral": (
+            ROOT / "data/presets/feral/owner-p2.settings-export.json",
+            ("player", "rotation"),
+        ),
+    }
+    apl_path, apl_at = APL_SOURCES.get(
+        args.spec, (ROOT / f"vendor/wowsims/{args.spec}_default.apl.json", ())
+    )
 
     for p in (golden_path, apl_path):
         if not p.is_file():
@@ -60,6 +74,15 @@ def main() -> int:
     preset = load(preset_path) if preset_path.is_file() else None
     golden = load(golden_path)
     apl = load(apl_path)
+    for key in apl_at:
+        if not isinstance(apl, dict) or key not in apl:
+            print(
+                f"{apl_path.relative_to(ROOT)} has no {'.'.join(apl_at)} -- "
+                "expected a wowsims settings export",
+                file=sys.stderr,
+            )
+            return 2
+        apl = apl[key]
     assert isinstance(golden, dict) and isinstance(apl, dict)
 
     errors: list[str] = []
@@ -95,7 +118,7 @@ def main() -> int:
     for key in APL_KEYS:
         if apl.get(key) != rot.get(key):
             errors.append(
-                f"drift: rotation.{key} ≠ vendor {args.spec}_default.apl.json"
+                f"drift: rotation.{key} ≠ {apl_path.relative_to(ROOT)}"
             )
 
     items = ((player.get("equipment") or {}).get("items")) or []
