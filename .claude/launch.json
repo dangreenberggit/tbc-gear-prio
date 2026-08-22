@@ -37,6 +37,27 @@
         "-c-1"
       ],
       "port": 4180
+    },
+    {
+      "name": "web-shell",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "-C",
+        "apps/web",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "web-shell-prod",
+      "runtimeExecutable": "C:/Users/dgree/AppData/Roaming/fnm/node-versions/v22.16.0/installation/node.exe",
+      "runtimeArgs": [
+        "apps/web/dist-server/main.js"
+      ],
+      "port": 3100,
+      "env": {
+        "PORT": "3100"
+      }
     }
   ]
 }

@@ -906,7 +906,7 @@ default ranking output is unchanged. See `.scratch/set-bonus-value/spec.md`.
 
 Three routes; job submit/poll; skeleton-then-fill results; assumptions drawer; view controls over the Stage 2 `applyView`; exports and share link; attribution. Confirm TMB's actual control labels before building the filter UI (§12).
 
-**Gate:** ☐ type a character, wait, trust the top recommendation ☐ feels calm during multi-minute work ☐ zero layout shift during a run ☐ **filters and pins re-render without a network round trip** ☐ **the pin control is hidden, not inert, where no curated set exists** (§4.1) ☐ every Stage 1 CLI check still passes unchanged against the same core
+**Gate:** ☐ type a character, wait, trust the top recommendation ☑ feels calm during multi-minute work ☑ zero layout shift during a run ☑ **filters and pins re-render without a network round trip** ☑ **the pin control is hidden, not inert, where no curated set exists** (§4.1) ☑ every Stage 1 CLI check still passes unchanged against the same core
 
 ### Stage 4 — Deploy
 

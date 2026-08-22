@@ -23,6 +23,7 @@ export {
 } from "./view.js";
 export {
   RankError,
+  equipmentForCandidateSwap,
   rankUpgrades,
   resolveFight,
   type Deps,
@@ -45,12 +46,14 @@ export {
   hitRegression,
   isHitDriven,
   statDeltaBetween,
+  HIT_CAP_PERCENT,
   HIT_CAP_RATING,
   HIT_CAP_UNCERTAINTY,
   PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
   type CapEntry,
   type CapState,
   type HitCapEntry,
+  type TalentHitAssumption,
 } from "./caps.js";
 export {
   buildStandingAssumptions,
@@ -134,8 +137,10 @@ export type {
 } from "./types.js";
 export {
   fillEmptyCandidateGems,
+  gemContext,
   gemEp,
   gemFillWeights,
+  type GemContext,
 } from "./candidate-gems.js";
 export { migrateGemsToItem, gemEligibleForSocket } from "./migrate-gems.js";
 export {
@@ -167,6 +172,10 @@ export {
   type EnchantEntry,
 } from "./enchants.js";
 export { compose, type ComposePlayer } from "./compose.js";
+export {
+  equipmentFromLoggedGear,
+  socketedItemsFromLoggedGear,
+} from "./logged-gear.js";
 export { setBreakNote } from "./set-bonus.js";
 export {
   classifyDeadSlots,
@@ -223,3 +232,35 @@ export {
   type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
+export {
+  RECORDED_CHARACTERS,
+  defaultMaxPhase,
+  loadOfflineInputs,
+  loadUniversePool,
+  offlineGearRecordings,
+  repoRoot,
+  resolveWowsimcli,
+  type LoadOfflineInputsResult,
+  type LoadUniversePoolResult,
+  type MissingInput,
+  type OfflineInputs,
+} from "./cli-wiring.js";
+export {
+  CURRENT_API_VERSION,
+  toIndividualSimSettings,
+  type ToIndividualSimSettingsOptions,
+} from "./individual-settings.js";
+export {
+  decodeShareLink,
+  encodeShareLink,
+  type ByteCodec,
+} from "./share-link.js";
+
+// The generated schemas an out-of-package caller needs to turn protojson into
+// a message. Everything here produces protojson — `compose` returns a plain
+// record, the committed skeletons are JSON, `CliSimRunner` writes JSON — but
+// `toIndividualSimSettings` and `encodeShareLink` take messages, and building
+// one needs its schema. Re-exported rather than adding a `./proto` subpath so
+// the generated tree stays an implementation detail.
+export { RaidSimRequestSchema, RaidSimResultSchema } from "./proto/api_pb.js";
+export { IndividualSimSettingsSchema } from "./proto/ui_pb.js";

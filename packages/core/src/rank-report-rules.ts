@@ -13,6 +13,11 @@ import type { SimSlotName } from "./pool.js";
 import type { ViewOptions } from "./view.js";
 import type { RankedItem, SetBonusValue } from "./rank.js";
 import type { SetThreshold } from "./set-value.js";
+import { setPotentialIsConfounded } from "./set-potential.js";
+
+// Re-exported so the report modules and their tests keep one import site,
+// while view.ts reaches the predicate without this module's items.js import.
+export { setPotentialIsConfounded };
 
 /** Display order for slot sections; also seeds `groupBySlot`'s empty buckets. */
 export const SLOT_ORDER: readonly ItemSlot[] = [
@@ -663,23 +668,6 @@ export function formatPackageMembershipLine(
  * bonus is inside `deltaDps` already, §2.1, so crediting it would double-count),
  * or a threshold whose bonus the sim never measured.
  */
-/**
- * Is this row's prospective bonus too confounded to rank on (ticket 90)?
- *
- * `bonus = packageDelta − Σ singles` charges a displaced set's lost bonus once
- * inside `packageDelta` but k times across the singles, so a figure whose
- * package breaks another worn set reads as `true + (k−1)·B`. `B` is not known
- * to within a factor of 4, so the figure is suppressed from ranking rather than
- * corrected — it stays visible in the Set potential panel, qualified by what it
- * breaks.
- */
-export function setPotentialIsConfounded(
-  item: Pick<RankedItem, "setContext">
-): boolean {
-  const breaks = item.setContext?.prospectiveBonusBreaks;
-  return breaks !== undefined && breaks.length > 0;
-}
-
 export function weightedSetPotentialDps(
   item: Pick<RankedItem, "deltaDps" | "setContext">,
   credit: SetPotentialCredit = "weighted"

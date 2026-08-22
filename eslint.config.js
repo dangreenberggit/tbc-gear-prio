@@ -32,6 +32,11 @@ export default tseslint.config(
     // it as hand-written code produces noise on every regen for no benefit.
     ignores: [
       "**/dist/**",
+      // apps/web emits its server build beside dist/, not inside it, so the
+      // rule above misses it. Linting emitted JS reports Node globals as
+      // undefined, and `pnpm verify` typechecks before it lints, so the
+      // output is always present by the time eslint runs.
+      "**/dist-server/**",
       "**/node_modules/**",
       "**/coverage/**",
       "vendor/**",
@@ -90,7 +95,11 @@ export default tseslint.config(
   },
   {
     files: ["packages/core/src/**/*.ts"],
-    ignores: ["packages/core/src/seams/**", "packages/core/src/cli.ts"],
+    ignores: [
+      "packages/core/src/seams/**",
+      "packages/core/src/cli.ts",
+      "packages/core/src/cli-wiring.ts",
+    ],
     rules: {
       "no-restricted-imports": ["error", { paths: PURITY_RESTRICTED_IMPORTS }],
       "no-restricted-globals": [

@@ -169,7 +169,19 @@ export type Progress =
   | { stage: "reading-gear" }
   | { stage: "composing" }
   | { stage: "building-pool" }
-  | { stage: "simming"; done: number; total: number }
+  /**
+   * `total` counts sims (baseline + candidates + paired replicas), not rows.
+   * `candidates` is the number of candidates that will be simmed, carried
+   * only on the first emission of the stage, so a UI can size a skeleton
+   * list once the cap has decided. A candidate can finish with no row, so
+   * the count is an upper bound on the rows that arrive.
+   */
+  | {
+      stage: "simming";
+      done: number;
+      total: number;
+      candidates?: number;
+    }
   /**
    * A single candidate's row finished — fired as each sim lands, ahead of
    * the "ranking" stage, so a caller can fill a skeleton row incrementally
@@ -1031,7 +1043,12 @@ export async function rankUpgrades(
       : 0;
     const totalSims = 1 + simCandidates.length + replicaSims;
     totalSimsForProgress = totalSims;
-    onProgress?.({ stage: "simming", done: simsDone, total: totalSims });
+    onProgress?.({
+      stage: "simming",
+      done: simsDone,
+      total: totalSims,
+      candidates: simCandidates.length,
+    });
 
     // Stop (candidate-pool.md §5.1.4): candidates not yet dispatched when
     // `signal` aborts are simply never started — `promisePool` stops

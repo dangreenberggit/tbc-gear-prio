@@ -1,8 +1,8 @@
-Status: open
+Status: blocked
 Type: defect (a recorded design decision is no longer true)
 Origin: review of fix/fork-lockfile-after-rebase, 2026-08-21
 Blocks: 263 (deferred until this is settled — see below)
-Blocked by: none
+Blocked by: owner decision at push or PR time (see Owner ruling below)
 
 # The fork sits on `cbf6b75` while the engine pin is v0.0.119
 
@@ -88,3 +88,11 @@ question.
 - [ ] `data/wowsims-fork.lock.json`'s `_comment` no longer claims
       `branchedFrom` equals the current engine pin unless that is true again.
 - [ ] `pnpm verify` green.
+
+## Owner ruling, 2026-08-22
+
+This is an upstream issue. We keep building on the fork's current base.
+Whether and how to reconcile the fork branch with the engine pin is decided
+when it is time to push or open a PR, if at all. Until then, nothing waits on
+this ticket. Status set to blocked because only the owner can move it, at
+that time. See ADR-0027 and `.scratch/handoffs/wowsims-tab/STATUS-2026-08-22.md`.

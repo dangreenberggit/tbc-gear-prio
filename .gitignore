@@ -4,6 +4,9 @@ __pycache__/
 coverage/
 .data/
 dist/
+# apps/web builds the server to a sibling of the client's dist/, so the rule
+# above does not cover it. Both are build output; neither is ever committed.
+dist-server/
 *.tsbuildinfo
 
 # Pinned wowsims build inputs — fetched by `pnpm sync:wowsims`, never committed.
@@ -56,6 +59,7 @@ vendor/
 .scratch/stage-gate/*
 !.scratch/stage-gate/stage-2-close-shortlist-box/
 !.scratch/stage-gate/worn-item-pool-coverage/
+!.scratch/stage-gate/stage-3-web-shell/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json

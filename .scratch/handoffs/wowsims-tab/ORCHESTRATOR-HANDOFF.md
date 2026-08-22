@@ -1,3 +1,5 @@
+> **Stale (2026-08-22).** Slices 4, 5 and 6 completed after this was written. Read `STATUS-2026-08-22.md` and `candidate-pool/HANDOFF-NEXT.md` instead.
+
 # Wowsims tab — handoff to the next orchestrator
 
 You are taking over an in-flight detour: a shopping-list "Upgrades" tab inside
