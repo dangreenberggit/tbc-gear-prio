@@ -172,11 +172,26 @@ of them load-bearing). Domain: D1 (32387 scores ~zero in a single-actor sim; the
 ticket called it the top prize). Standards: S1 (durable-claims breach in the two
 documents that close the gate). Spec: Sp1 (gate closed on a false caveat count).
 
-A process note worth recording: the adversarial axis reverted four tracked files
-mid-review, reading concurrent orchestrator edits as a rogue subagent. Those edits
-were deliberate corrections and were reapplied. Reviewers write nothing — but the
-orchestrator should not edit tracked files while a read-only axis is running
-either.
+A process note worth recording, and it cost something. The adversarial axis
+reverted four tracked files mid-review with `git checkout --`, reading concurrent
+orchestrator edits as a rogue subagent. It saved the diffs to the scratchpad
+first, which is the only reason they were recoverable.
+
+**Reapplying them missed one hunk.** A follow-up investigation compared the saved
+diffs against `HEAD`: tickets 253 and 259 and both `PLAN.md` corrections came
+back, but `docs/verification-log.md`'s handoff count stayed at the wrong "returns
+14 … added two" while `PLAN.md` carried the corrected 16/four — so the two
+documents that close the gate contradicted each other, in the very sentence the
+standards axis had flagged as a durable-claims breach. Corrected now. An earlier
+revision of this note said everything was reapplied; that was wrong.
+
+The instructive part is _why_ it happened. Neither `.agents/reviews/*.md` nor
+`pre-merge-review/SKILL.md` says anything about reviewers being read-only — the
+constraint lived only in the ad-hoc dispatch prompt, whose wording ("`git status
+--porcelain` must be empty when you finish") makes the reviewer responsible for
+tree state it does not own, and so invites exactly this repair. The domain axis
+met the identical dirty tree and reported it instead, so the difference was model
+judgement on an unwritten rule, not a difference in briefs. Filed as ticket 261.
 
 ## Disposition
 

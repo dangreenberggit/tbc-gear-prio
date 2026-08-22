@@ -1683,7 +1683,7 @@ geared feral would see. Raised by the pre-merge domain axis, 2026-08-21.
 That entry is left as written; these are the corrections, not edits to it.
 
 1. "Only shredzepelin was ever put through `sme-rank-review`" — false. Twelve
-   handoffs exist as of base `9a4b932` (`git ls-tree 9a4b932 -- .scratch/handoffs/ | grep -c sme-rank-judgment` → 12; the same `ls` at tip returns 14, because this branch added two),
+   handoffs exist as of base `9a4b932` (`git ls-tree 9a4b932 -- .scratch/handoffs/ | grep -c sme-rank-judgment` → 12; the same `ls` at tip returns 16, because this branch added four),
    covering all three characters. All twelve predate the 2026-08-21 pin, rotation
    and skeleton commits, which is why a fresh pass was needed — the conclusion
    was right for a reason other than the one given.
