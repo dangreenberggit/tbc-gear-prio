@@ -48,6 +48,17 @@ vendor/
 !.scratch/ticket-18/
 !.scratch/ticket-20/
 
+# Stage-gate pipeline evidence and the rank reports a gate cites. These are not
+# disposable working files: docs/verification-log.md's Stage 2 entry quotes them
+# as the evidence the gate box was closed on, and `git clean -fdx` would delete
+# an ignored file the log points at.
+!.scratch/stage-gate/
+.scratch/stage-gate/*
+!.scratch/stage-gate/stage-2-close-shortlist-box/
+!.scratch/rank-reports/
+.scratch/rank-reports/*
+!.scratch/rank-reports/stage2-close-*
+
 # Ticket 235 lock-race reproduction. docs/workflow.md cites these two scripts as
 # the evidence for the lint-staged flags, so they are tracked; the throwaway git
 # repos they build (lab-*) are not.
