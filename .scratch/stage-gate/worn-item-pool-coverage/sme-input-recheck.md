@@ -12,8 +12,13 @@ engineering team (gate and bugs), not player loot advice.
 | nexess | feral cat, maxPhase 2 | `.scratch/rank-reports/stage2-close-nexess.html` | `…-nexess.json` |
 
 The `.json` carries `ranking.items[]` with `deltaDps`, `deltaPct`, `se`,
-`belowCutoff`, `owned`, `sources`, plus `ranking.plausibilityWarnings`,
-`ranking.baseline`, `ranking.cutoff` and `ranking.fight`.
+`belowCutoff`, `owned`, `sources`, plus `ranking.baseline`, `ranking.cutoff`
+and `ranking.fight`.
+
+`ranking.plausibilityWarnings` is **optional and omitted when empty** — the
+renderer reads it as `?? []` (`rank-report.ts:302`). slamaltman has no dead
+slots and so has no such key; shredzepelin and nexess both do. An earlier
+revision of this note implied the key is always present, which is wrong.
 
 ## Regeneration commands
 

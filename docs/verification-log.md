@@ -1712,3 +1712,121 @@ That entry is left as written; these are the corrections, not edits to it.
   baseline 2145.6, sourced from the synthetic roster recordings, does not match
   live output at this tip: 14 and 12 rows against baselines 2266.9 and 2302.5.
   The counts in this entry are the observed ones.
+
+## 2026-08-22 — Stage 2's last gate box closes, and its blocker was never real
+
+**☑ ≥3 real characters produce believable shortlists.** All eight §14 Stage 2
+boxes are now closed. Stage 3 may start once this log is on `dev`.
+
+### The blocker was a lying warning, not a bad ranking
+
+The 2026-08-21 pass returned `do-not-trust` on shredzepelin, and that verdict
+held the box open. It was a correct response to what the report said, and what
+the report said was false.
+
+For a slot whose worn item is absent from the candidate pool, the
+`worn-unrankable` warning read:
+
+> "every row shown for neck was scored against an empty slot, not against Amulet
+> of Bitter Hatred. Do not read any of them as an upgrade or a loss"
+
+The report also applied its `unmeasured` styling to those rows, desaturating the
+deltas. Neither was true. `rankUpgrades` composes the baseline from the
+character's full logged equipment — `equipmentFromLoggedGear` in
+`packages/core/src/rank.ts`, with no pool filtering — so every one of those rows
+was measured against the worn item exactly like a healthy slot's. The numbers
+confirm it:
+
+```
+python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shredzepelin.json'))['ranking'];items=r['items'];[print(s,[(i['name'],round(i['deltaDps'],1)) for i in sorted([x for x in items if x['slot']==s],key=lambda x:-x['deltaDps'])[:3]]) for s in ('neck','back','waist')]"
+```
+
+Neck tops out at **+12.9**, back at **+7.8**. An empty neck would price a phase-2
+epic at roughly +80–150. A further check: every worn item that *is* in its own
+pool scores exactly `0.00` — thirteen of them on shredzepelin — which is the
+signature of a baseline built from worn gear.
+
+Fixed in `486f977`: the message now states only that the worn item has no row of
+its own, and `isUnmeasuredSlot` limits the desaturation to causes where no worn
+item is comparable (`unique-effect`, `set-break-toll`, `thin-pool`). Four files,
+**no scoring logic, no `contentHash` change, no number changed.** Recorded on
+ticket 253, which also records why the planned force-include fix was dropped: the
+anchor row it would add is `deltaDps ≈ 0`, fails `meetsCutoff`, and is filtered
+out of the shortlist — measured at **0 of 44 owned rows above cutoff** across the
+three reports.
+
+### The verdicts
+
+Re-judged on reports regenerated at this tip by live re-sim on the pinned
+v0.0.119 binary (sha256
+`4b60235dcbb0088c9644ba464223fc9f65fcb3fccb2710cfc37fa3c752db97b1`; `vendor/` is
+gitignored — regenerate with `pnpm fetch:wowsimcli && pnpm sync:wowsims` and
+verify the digest before trusting a re-run):
+
+| character | spec / tier | verdict |
+| --- | --- | --- |
+| slamaltman | ret, maxPhase 3 | `trust-with-caveats` |
+| shredzepelin | feral cat, maxPhase 2 | `trust-with-caveats` |
+| nexess | feral cat, maxPhase 2 | `trust-with-caveats` |
+
+Handoffs: [`sme-rank-judgment-stage2-recheck.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck.md)
+(slamaltman) and [`sme-rank-judgment-stage2-recheck-feral.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md)
+(both feral). The feral seat **explicitly declined to confirm** the earlier
+`do-not-trust`.
+
+Regeneration commands:
+
+```
+pnpm rank --region US --realm dreamscythe --character slamaltman   --offline --spec ret   --max-phase 3 --report .scratch/rank-reports/stage2-close-slamaltman.html
+pnpm rank --region US --realm dreamscythe --character shredzepelin --offline --spec feral --max-phase 2 --report .scratch/rank-reports/stage2-close-shredzepelin.html
+pnpm rank --region US --realm dreamscythe --character nexess       --offline --spec feral --max-phase 2 --report .scratch/rank-reports/stage2-close-nexess.html
+```
+
+Note `--offline` gates the **gear source only** — the CLI always spawns the
+pinned binary, so these are live sims, not fixture replays.
+
+### What made the verdicts credible
+
+The corroboration is upstream's, not ours. The pinned wowsims P2 feral sets
+(`vendor/wowsims/feral_p2_6p.gear.json`, `feral_p2_9p.gear.json`) line up with
+both feral shortlists nearly item for item — for shredzepelin, 9 of 18 upstream
+BiS items are already worn and score `0.00`, 6 unworn all land in the top 10. For
+slamaltman, 8 of 16 ret BiS-tagged rows are worn at `0.00` and all 8 unworn land
+in the top 22. No worn item appears as a nonzero upgrade on any character.
+
+Two figures that read as bugs and are not, recorded so the next reader does not
+stop on them:
+
+- **A tier-5 head at −208 DPS.** Nordrassil Headdress losing ~9% of total DPS to
+  a crafted helm is correct: the pinned sim branches the cat rotation on whether
+  Wolfshead Helm is equipped (`vendor/tbc-new-fork/sim/druid/feralcat/rotation.go:52,174,260`).
+  Losing the helm costs the powershift rotation, not the helm's stats.
+- **Shard-bound Bracers at +10.3** over a higher-ilvl worn bracer — a socket plus
+  a +4 AP socket bonus the worn item lacks.
+
+### What this box does not claim
+
+Exactly two `medium` caveats survive, and they are one defect seen twice: the
+feral **ranged slot offers a single candidate**, the idol already worn, because
+item 32387 Idol of the Raven Goddess — in both pinned upstream P2 feral sets —
+has no AtlasLoot source and never enters the pool. Filed as **carry-forward 259**
+(`Blocks: phase-2`). It is the third confirmed instance of one mechanism: an item
+with no source row silently never becomes a candidate, however good it is.
+
+Every other caveat is `low` and already disclosed in the output — the empty meta
+sockets on candidates (ticket 257, measured as not a scoring asymmetry: the worn
+baseline has no meta either), the assumed race and hit cap, caster cloth padding
+the feral pool, and the three slots whose worn item has no row of its own.
+
+So the box asserts that a ret and a feral player would act on these lists. It
+does **not** assert the candidate pool is complete, and 259 is the standing
+evidence that it is not.
+
+### Scope limits worth carrying
+
+- **Replicate noise is ruled out for the feral pair, not assumed away.** Both
+  shortlists are short (14 and 12 ranked rows) and every row clears twice its own
+  standard error, so ticket 236 cannot explain a finding there.
+- **Ticket 240 still applies:** `pnpm verify`'s one skipped suite is
+  `wowsims-fork-parity`, gated on ungenerated protos, and it does not cover the
+  ranking path.

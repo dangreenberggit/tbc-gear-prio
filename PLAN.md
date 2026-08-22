@@ -854,13 +854,43 @@ Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tag
 
 **Decomposed into five subplans, 2026-08-04.** This stage is too large for one branch, so it runs as an integration branch `phase-2/trust` with five sequential slices merging into it — `caches` → `disclosure-and-caps` → `apply-view` → `resolution-and-fallback` → `feral` — and only `phase-2/trust` merges to `dev`. Every gate box below is owned by exactly one slice. Feral is last on purpose: it is the falsification test for the seams, so it must run *after* the four trust slices have applied whatever pressure they were going to apply. They are sequential rather than a `parallel-phase` fan-out because three of them edit `rank.ts` and change the `Ranking` shape. See [`.scratch/phase-2/spec.md`](.scratch/phase-2/spec.md) for the topology, the box-to-ticket map, and what is explicitly out of scope.
 
-**Gate:** ☑ re-run hits cache; deltas stable ☑ inactive-meta baseline auto-repaired and disclosed ☑ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☐ ≥3 real characters produce believable shortlists ☑ fallback route exercised on a character with no ranked kills ☑ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☑ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☑ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Stage 3
+**Gate:** ☑ re-run hits cache; deltas stable ☑ inactive-meta baseline auto-repaired and disclosed ☑ **a meta repair that would break a socket bonus picks the other move** (§9, R4) ☑ ≥3 real characters produce believable shortlists ☑ fallback route exercised on a character with no ranked kills ☑ **a raid filter on a tier-token slot returns the tier piece** (§8.3.2 — the two-hop case, and the one that quietly fails) ☑ **toggling any `ViewOptions` field does not change `contentHash` or trigger a sim** ☑ **feral shipped without a structural change to `rankUpgrades` or its seams** — if it needed one, stop and fix the seam before Stage 3
 
 **7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work.
 
 **The open box was worked and stays open, 2026-08-21.** Two clauses in the paragraph above were stale and are corrected here rather than edited in place. "Only shredzepelin has been through `sme-rank-review`" was false — twelve SME handoffs exist under `.scratch/handoffs/` (`ls .scratch/handoffs/sme-rank-judgment-*.md | wc -l`), covering all three characters. "The feral universe it reads does not exist on `dev`" is also no longer true. The paragraph's operative conclusion — that a fresh domain pass was needed — was and remains correct, because all twelve handoffs predate the 2026-08-21 pin, rotation and skeleton commits.
 
-That fresh pass ran on 2026-08-21 against shortlists regenerated at this tip by live re-sim on the pinned v0.0.119 binary. Verdicts: slamaltman `trust-with-caveats`, shredzepelin **`do-not-trust`**, nexess `trust-with-caveats` — handoff at [`.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md`](.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md), full entry in [`docs/verification-log.md`](docs/verification-log.md). **The box therefore stays ☐.** The blocker is not sim noise and not a disclosure gap: worn gear missing from the candidate pool leaves slots scored against an *empty slot*, so only 4 of shredzepelin's 14 above-cutoff rows are measured against real gear, while nexess on identical code and pool has one such slot and is usable. Tracked as ticket 253; closing this box needs that fixed and shredzepelin re-read.
+That fresh pass ran on 2026-08-21 against shortlists regenerated at this tip by
+live re-sim on the pinned v0.0.119 binary, and returned slamaltman
+`trust-with-caveats`, shredzepelin **`do-not-trust`**, nexess `trust-with-caveats`
+— on which the box stayed ☐.
+
+**Box closed 2026-08-22, and the blocker turned out not to exist.** The
+`do-not-trust` was a correct response to a **false disclosure**, not to a bad
+ranking. The `worn-unrankable` warning told the reader that rows in three of
+shredzepelin's slots "were scored against an empty slot … Do not read any of them
+as an upgrade or a loss", and the report desaturated those deltas to match. Both
+were untrue: `rankUpgrades` composes the baseline from the full logged equipment
+(`packages/core/src/rank.ts`, `equipmentFromLoggedGear`, no pool filter), so every
+row was always measured against the worn item. Shredzepelin's neck topped out at
++12.9 DPS where an empty neck would price a phase-2 epic near +80–150. Fixed in
+`486f977` — disclosure text and report styling only, **no scoring logic and no
+number changed** — and recorded on ticket 253.
+
+Re-judged on the corrected reports: slamaltman `trust-with-caveats` (carried
+forward), shredzepelin **`trust-with-caveats`**, nexess **`trust-with-caveats`**.
+The recheck seat explicitly declined to confirm the earlier `do-not-trust`.
+Handoffs: [`…-stage2-recheck.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck.md)
+and [`…-stage2-recheck-feral.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md).
+Full entry in [`docs/verification-log.md`](docs/verification-log.md).
+
+**What the box does not claim.** Exactly two `medium` caveats survive, and they
+are one defect seen twice: the feral ranged slot offers a single candidate, the
+idol already worn, because item 32387 Idol of the Raven Goddess — present in both
+pinned upstream P2 feral sets — has no AtlasLoot source and never reaches the
+pool. Filed as carry-forward 259, `Blocks: phase-2`. Every other caveat is `low`
+and disclosed in the output itself. So "believable" here means a feral or ret
+player would act on these lists, **not** that the pool is complete.
 
 ### Stage 3 — Web shell
 
