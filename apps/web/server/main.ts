@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   RECORDED_CHARACTERS,
+  defaultMaxPhase,
   repoRoot,
   offlineGearRecordings,
   RecordedGearSource,
@@ -65,6 +66,7 @@ export function buildServer(options: ServerOptions = {}) {
     return data ? new RecordedGearSource(data) : undefined;
   };
 
+  const phase = defaultMaxPhase(root);
   const routes = createApiRoutes({
     store,
     clock,
@@ -72,6 +74,7 @@ export function buildServer(options: ServerOptions = {}) {
     depsFor,
     gearSourceFor,
     codec: settingsCodec(),
+    ...(phase === undefined ? {} : { defaultMaxPhase: phase }),
   });
 
   return createHttpServer({ routes, staticDir: staticDirFor(here) });

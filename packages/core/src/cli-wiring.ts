@@ -81,6 +81,20 @@ export function resolveWowsimcli(root: string): string {
   return join(root, "vendor", `wowsimcli-${tag}-${plat}`, binary);
 }
 
+/**
+ * The phase a run defaults to, from the wowsims lock — never a second
+ * hardcoded tier. Returns `undefined` when the lock carries no usable value,
+ * so the caller decides between an exit code and an HTTP status.
+ */
+export function defaultMaxPhase(root: string): ContentPhase | undefined {
+  const lock = loadJson<{
+    defaultMaxPhase?: number;
+    currentPhase?: number;
+  }>(root, "data/wowsims.lock.json");
+  const n = lock.defaultMaxPhase ?? lock.currentPhase;
+  return n === 1 || n === 2 || n === 3 || n === 4 || n === 5 ? n : undefined;
+}
+
 export function loadUniversePool(
   root: string,
   spec: SpecId,

@@ -45,14 +45,17 @@ export type CharacterView = {
   gear: { items: LoggedItemView[] };
 };
 
+/**
+ * Mirrors core's `RankInput`, which is what the server validates against —
+ * a flat shape here would have to be reassembled there, and the two spellings
+ * would drift. `maxPhase` is omitted on purpose: the server fills it from the
+ * wowsims lock so the browser never carries a second copy of the current tier.
+ */
 export type SubmitJob = {
-  region: string;
-  realm: string;
-  name: string;
+  character: { region: string; realm: string; name: string };
   spec: SpecId;
   maxPhase?: number;
-  reportCode?: string;
-  fightId?: number;
+  fight?: { reportCode: string; fightId: number };
 };
 
 /**

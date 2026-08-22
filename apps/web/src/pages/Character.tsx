@@ -163,12 +163,12 @@ export function Character({ region, realm, name, navigate }: Props) {
         onClick={() => {
           if (!selected) return;
           rank.mutate({
-            region,
-            realm,
-            name,
+            character: { region, realm, name },
             spec: character.spec,
-            reportCode: selected.reportCode,
-            fightId: selected.fightId,
+            fight: {
+              reportCode: selected.reportCode,
+              fightId: selected.fightId,
+            },
           });
         }}
       >

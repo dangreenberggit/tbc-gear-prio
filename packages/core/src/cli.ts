@@ -3,11 +3,12 @@
  * I/O lives here; the core module stays pure.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { cutoffForSpec } from "./cutoff.js";
 import {
+  defaultMaxPhase,
   loadOfflineInputs,
   offlineGearRecordings,
   repoRoot,
@@ -40,20 +41,12 @@ import type { ContentPhase, Region, SpecId } from "./types.js";
 
 const root = repoRoot();
 
-function loadJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
-}
-
 /** DEFAULT_MAX_PHASE from the wowsims lock — never a second hardcoded tier. */
 function defaultMaxPhaseFromLock(): ContentPhase {
-  const lock = loadJson<{
-    defaultMaxPhase?: number;
-    currentPhase?: number;
-  }>("data/wowsims.lock.json");
-  const n = lock.defaultMaxPhase ?? lock.currentPhase;
-  if (n !== 1 && n !== 2 && n !== 3 && n !== 4 && n !== 5) {
+  const n = defaultMaxPhase(root);
+  if (n === undefined) {
     console.error(
-      `wowsims.lock.json missing usable defaultMaxPhase/currentPhase (got ${String(n)})`
+      "wowsims.lock.json missing usable defaultMaxPhase/currentPhase"
     );
     process.exit(2);
     throw new Error("unreachable");

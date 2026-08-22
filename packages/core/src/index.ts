@@ -225,6 +225,7 @@ export {
 } from "./meta-repair.js";
 export {
   RECORDED_CHARACTERS,
+  defaultMaxPhase,
   loadOfflineInputs,
   loadUniversePool,
   offlineGearRecordings,

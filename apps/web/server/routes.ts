@@ -28,6 +28,8 @@ export type CreateApiRoutesInput = {
   readonly depsFor: DepsFor;
   readonly gearSourceFor: GearSourceFor;
   readonly codec: SettingsCodec;
+  /** What an omitted `maxPhase` becomes; read from the wowsims lock. */
+  readonly defaultMaxPhase?: ContentPhase;
 };
 
 const REGIONS: readonly string[] = ["US", "EU", "KR", "TW", "CN"];
@@ -48,7 +50,7 @@ export function createApiRoutes(input: CreateApiRoutesInput): Route[] {
       method: "POST",
       pattern: "/api/jobs",
       async handle({ body }) {
-        const parsed = parseRankInput(body);
+        const parsed = parseRankInput(body, input.defaultMaxPhase);
         if (!parsed.ok) {
           return {
             status: 400,
@@ -128,8 +130,15 @@ export type ParseResult =
  * The POST body is client input, so every field is checked before it reaches
  * `rankUpgrades` — an unvalidated `maxPhase` would read a universe path built
  * from whatever string arrived.
+ *
+ * `fallbackMaxPhase` is what an omitted `maxPhase` becomes. The browser has
+ * no business knowing the current tier: the server reads it from the wowsims
+ * lock, the same source the CLI defaults from, so the two cannot disagree.
  */
-export function parseRankInput(body: unknown): ParseResult {
+export function parseRankInput(
+  body: unknown,
+  fallbackMaxPhase?: ContentPhase
+): ParseResult {
   if (typeof body !== "object" || body === null) {
     return { ok: false, message: "expected a JSON object" };
   }
@@ -156,7 +165,7 @@ export function parseRankInput(body: unknown): ParseResult {
     return { ok: false, message: `spec must be one of ${SPECS.join(", ")}` };
   }
 
-  const maxPhase = b.maxPhase;
+  const maxPhase = b.maxPhase ?? fallbackMaxPhase;
   if (
     typeof maxPhase !== "number" ||
     !Number.isInteger(maxPhase) ||
