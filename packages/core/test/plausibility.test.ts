@@ -309,6 +309,31 @@ describe("deadSlotWarnings", () => {
       expect(found[0]?.message).toContain("unmeasured");
       expect(found[0]?.message).not.toMatch(/no positive candidate/i);
     });
+
+    it("does not claim the rows were scored against an empty slot", () => {
+      // Ticket 253. The message used to say "every row shown for ranged was
+      // scored against an empty slot ... Do not read any of them as an upgrade
+      // or a loss", and that is false: `rankUpgrades` composes the baseline
+      // from the full logged equipment (`rank.ts` equipmentFromLoggedGear) with
+      // no pool filtering, so every delta is already measured against the worn
+      // item. The retraction cost a real SME verdict -- a correct shortlist was
+      // read as untrustworthy because the disclosure lied about it.
+      //
+      // What is true is narrower: the worn item has no row of its own, because
+      // it is not in the pool.
+      const found = deadSlotWarnings(RANGED_NO_WORN_ROW, {
+        wornSetCounts: new Map(),
+        wornUnrankable: [
+          { itemId: 27484, itemName: "Libram of Avengement", slot: "ranged" },
+        ],
+      });
+      const message = found[0]?.message ?? "";
+      expect(message).not.toMatch(/empty slot/i);
+      expect(message).not.toMatch(/do not read any of them/i);
+      // And it must still say the useful thing: which item has no row.
+      expect(message).toContain("Libram of Avengement");
+      expect(message).toMatch(/no row of its own|has no row/i);
+    });
   });
 });
 
