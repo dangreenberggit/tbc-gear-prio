@@ -42,6 +42,35 @@ Scope. That ticket was about buff/debuff defaults diverging from wowsims; the
 extractor was built to serve it. Widening it mid-change would have mixed a
 correctness fix with a tooling refactor.
 
+## Partly overtaken by events, 2026-08-21
+
+**`CONSUMABLES` is gone** — deleted in `25e8173`, but not by extraction. The
+skeleton now reads consumables from the owner's committed export
+(`data/presets/feral/owner-p2.settings-export.json`), because ticket 244 moved
+the whole skeleton onto the rotation actually played rather than upstream's
+preset.
+
+That is a different answer to this ticket's question, and arguably a better one
+for this constant: extracting `DefaultConsumables` would have pinned us to
+upstream's idea of what a feral druid drinks, which is not what we want to
+simulate. The old constant was also **wrong** — `potId` 22838 against the
+owner's 22832, and no `potions` / `conjuredItems` lists at all, which silently
+disarmed the rotation's rune and Flame Cap branches.
+
+One field survives as a constant, `CONSUMABLES_EXTRA = {"drumsId": ...}`,
+deliberately: drums are a raid-provided buff rather than a personal consumable
+and the owner's export carries none.
+
+**`TALENTS` is untouched and this ticket still stands for it.** Note it now sits
+oddly: the rotation and consumables come from the owner's export, which also
+carries a `talentsString`, while `TALENTS` remains hand-ported from upstream's
+`StandardTalents`. Whoever picks this up should decide whether talents follow
+the export (consistent with 244's reasoning) or the extractor (consistent with
+ADR-0022) rather than assuming the extractor is still the goal.
+
+`RACE`, `PROFESSION1`, `PROFESSION2` are likewise still hand-ported, and the
+export carries those too.
+
 ## Scope
 
 1. Extend `extract_sim_defaults.mjs` to read `presets.ts` as well as `sim.ts`.
