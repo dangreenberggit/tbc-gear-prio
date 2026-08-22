@@ -154,6 +154,17 @@ describe("ticket 164 — dead-slot retraction travels to its section", () => {
       "ranged is unmeasured: the worn Libram of Avengement is not in the candidate pool for this slot, so every row shown for ranged was scored against an empty slot, not against Libram of Avengement.",
   };
 
+  // Ticket 253. Same slot, a cause where "unmeasured" is honest: no worn item
+  // is comparable, so the deltas really do not mean what they appear to.
+  const RANGED_UNIQUE_EFFECT: PlausibilityWarning = {
+    kind: "dead-slot",
+    slot: "ranged",
+    cause: "unique-effect",
+    wornItemName: "Libram of Avengement",
+    message:
+      "No positive candidate in ranged: nothing in a full pool matches the worn Libram of Avengement's effect.",
+  };
+
   const rangedItem: RankedItem = {
     rank: 3,
     itemId: 23203,
@@ -209,8 +220,12 @@ describe("ticket 164 — dead-slot retraction travels to its section", () => {
   });
 
   it("marks the dead-slot row unmeasured instead of an ordinary loss", () => {
+    // Ticket 253: this used RANGED_DEAD (`worn-unrankable`), but those rows
+    // WERE scored against the worn item, so desaturating them withdrew valid
+    // numbers. Ticket 164's intent is unchanged and still tested — it just
+    // needs a cause where the deltas really are unmeasured.
     const html = renderRankHtml(
-      ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      ranking([RANGED_UNIQUE_EFFECT], [rangedItem, chestItem]),
       meta()
     );
     const rowStart = html.indexOf('data-item-id="23203"');
@@ -220,9 +235,32 @@ describe("ticket 164 — dead-slot retraction travels to its section", () => {
     expect(row).toContain("row muted unmeasured");
   });
 
-  it("distinguishes the unmeasured nav chip from an ordinary no-BiS chip", () => {
+  it("does not desaturate a worn-unrankable slot — its deltas are real", () => {
+    // Ticket 253. `worn-unrankable` means the worn item has no row of its own,
+    // not that the rows are unscored: `rankUpgrades` composes the baseline from
+    // the full logged equipment, so every delta here was measured against the
+    // worn item. Greying them out withdrew numbers that stand, and the matching
+    // message told the reader outright to ignore them — which is what turned a
+    // correct shortlist into an SME `do-not-trust`.
     const html = renderRankHtml(
       ranking([RANGED_DEAD], [rangedItem, chestItem]),
+      meta()
+    );
+    const rowStart = html.indexOf('data-item-id="23203"');
+    const articleStart = html.lastIndexOf("<article", rowStart);
+    const articleEnd = html.indexOf("</article>", rowStart);
+    expect(html.slice(articleStart, articleEnd)).not.toContain("unmeasured");
+    expect(html).not.toMatch(
+      /<a href="#slot-ranged" class="nav-slot no-bis unmeasured"/
+    );
+    // The retraction paragraph still appears — the reader is still told the
+    // worn item has no baseline row, just not told to distrust the rest.
+    expect(html).toContain("slot-retraction");
+  });
+
+  it("distinguishes the unmeasured nav chip from an ordinary no-BiS chip", () => {
+    const html = renderRankHtml(
+      ranking([RANGED_UNIQUE_EFFECT], [rangedItem, chestItem]),
       meta()
     );
     expect(html).toMatch(

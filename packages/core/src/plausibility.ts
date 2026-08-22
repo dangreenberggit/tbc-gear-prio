@@ -194,11 +194,17 @@ function deadSlotMessage(
     );
   }
   if (cause === "worn-unrankable") {
+    // Ticket 253. This said the rows "were scored against an empty slot ... Do
+    // not read any of them as an upgrade or a loss", which is false: the
+    // baseline is composed from the full logged equipment, so every delta here
+    // is already measured against the worn item. That retraction cost a real
+    // SME verdict — a correct shortlist read as untrustworthy. Say only what is
+    // true: the worn item has no row of its own, because it is not in the pool.
     return (
-      `${slot} is unmeasured: the worn ${wornItemName} is not in the candidate pool for ` +
-      `this slot, so every row shown for ${slot} was scored against an empty slot, not against ` +
-      `${wornItemName}. Do not read any of them as an upgrade or a loss — this slot needs the ` +
-      `worn item added to the pool before it can be ranked.`
+      `${slot} has no baseline row: the worn ${wornItemName} is not in the candidate ` +
+      `pool for this slot, so it gets no row of its own to compare against. The rows ` +
+      `shown for ${slot} were still measured against ${wornItemName} — their deltas ` +
+      `stand — but nothing here shows you what it is worth to keep it.`
     );
   }
   if (cause === "set-break-toll") {

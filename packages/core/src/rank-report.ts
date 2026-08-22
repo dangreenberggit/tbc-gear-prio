@@ -254,6 +254,20 @@ function setPotentialUnmeasuredText(item: RankedItem): string {
   return "no further threshold to measure";
 }
 
+/**
+ * Whether a dead-slot warning means the slot's deltas are genuinely unmeasured.
+ *
+ * Ticket 253: `worn-unrankable` is the one cause where they are not. The
+ * baseline is composed from the full logged equipment, so those rows were
+ * scored against the worn item exactly like any healthy slot's; what the slot
+ * lacks is a row for the worn item itself. Styling them as unmeasured withdrew
+ * valid numbers, and the matching warning text told the reader outright not to
+ * trust them — which cost a real SME verdict on a correct shortlist.
+ */
+function isUnmeasuredSlot(warning: { cause?: string } | undefined): boolean {
+  return warning !== undefined && warning.cause !== "worn-unrankable";
+}
+
 export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // Report-time toggle semantics, same as the other optional facts this
   // report already gates on `meta.view` (§4) — the ranking always computes
@@ -313,7 +327,11 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       // "these rows cannot be trusted at all" — a reader deciding which chip
       // to click needs that distinction before they land on the section, not
       // after.
-      const unmeasuredCls = deadSlotWarningsBySlot.has(slot)
+      // Ticket 253: `worn-unrankable` is not an unmeasured slot. Its rows were
+      // scored against the worn item like any other slot's; what it lacks is a
+      // row for the worn item itself. Desaturating its deltas would withdraw
+      // numbers that are valid, which is the defect this ticket exists to fix.
+      const unmeasuredCls = isUnmeasuredSlot(deadSlotWarningsBySlot.get(slot))
         ? " unmeasured"
         : "";
       return `<a href="#slot-${slot}" class="nav-slot${bisCls}${unmeasuredCls}" data-hits="${n}" data-bis-hits="${bisN}">${esc(slot)}${badge}</a>`;
@@ -332,16 +350,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           // than filtered here, because the filter is a client-side view and
           // the artifact must still hold every row (§10, hidden not deleted).
           const bisCls = isCuratedBis(item) ? " is-bis" : "";
-          // Ticket 164: a row in an unmeasured slot was scored against an
-          // empty slot, not against the worn item, so `delta down` reading as
-          // an ordinary loss is the exact confusion the retraction exists to
-          // prevent. `unmeasured` overrides that styling without touching
-          // `belowCutoff`/`hit` — the cutoff math is unchanged, only the
-          // visual claim "this is a real loss" is withdrawn.
+          // Ticket 164: a row in a genuinely unmeasured slot has no worn item
+          // to be scored against, so `delta down` reading as an ordinary loss
+          // is the confusion the retraction exists to prevent. `unmeasured`
+          // overrides that styling without touching `belowCutoff`/`hit` — the
+          // cutoff math is unchanged, only the visual claim is withdrawn.
+          //
+          // Ticket 253 narrowed this: `worn-unrankable` rows WERE measured
+          // against the worn item, so desaturating them withdrew valid numbers.
           const cls =
             (item.belowCutoff ? "row muted" : "row hit") +
             bisCls +
-            (deadSlotWarning ? " unmeasured" : "");
+            (isUnmeasuredSlot(deadSlotWarning) ? " unmeasured" : "");
           const softRank =
             !item.belowCutoff &&
             Math.abs(item.deltaDps) < ranking.baseline.stdev;
@@ -495,7 +515,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
       const bisCount = list.filter(isCuratedBis).length;
       const sectionCls =
         (bisCount > 0 ? "slot" : "slot no-bis") +
-        (deadSlotWarning ? " unmeasured" : "");
+        (isUnmeasuredSlot(deadSlotWarning) ? " unmeasured" : "");
       // Ticket 164: the top-of-page plausibility panel retracts this slot,
       // but a reader who lands here via the sticky nav has scrolled past
       // that panel already. Echoing the same `message` locally (not a

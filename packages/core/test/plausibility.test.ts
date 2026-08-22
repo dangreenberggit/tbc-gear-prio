@@ -305,8 +305,11 @@ describe("deadSlotWarnings", () => {
       expect(found).toHaveLength(1);
       expect(found[0]?.cause).toBe("worn-unrankable");
       expect(found[0]?.wornItemName).toBe("Libram of Avengement");
-      // Must read as "unmeasured", not restate the rows as real upgrades/losses.
-      expect(found[0]?.message).toContain("unmeasured");
+      // Ticket 253 amended this. It used to require the word "unmeasured",
+      // which encoded the belief that the rows had not been scored against the
+      // worn item. They had been. What the slot actually lacks is a baseline
+      // row for the worn item, so that is what the message must name.
+      expect(found[0]?.message).toContain("no baseline row");
       expect(found[0]?.message).not.toMatch(/no positive candidate/i);
     });
 
