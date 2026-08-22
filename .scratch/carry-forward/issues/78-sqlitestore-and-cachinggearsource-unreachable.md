@@ -1,4 +1,5 @@
 Status: closed
+Closed: cd2becb
 Type: task
 Origin: docs/reviews/phase-2-trust.md (standards axis)
 Blocks: none
