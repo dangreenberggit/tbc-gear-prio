@@ -50,6 +50,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@bufbuild/protobuf':
+        specifier: ^2.13.0
+        version: 2.13.0
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.102.0(react@19.2.8)

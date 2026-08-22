@@ -19,7 +19,6 @@ import { readFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fromJson, toJson } from "@bufbuild/protobuf";
 import {
   loadOfflineInputs,
   MemoryStore,
@@ -28,7 +27,6 @@ import {
   repoRoot,
   RecordedGearSource,
   simCacheKey,
-  toIndividualSimSettings,
   type CharacterRef,
   type Deps,
   type PoolEntry,
@@ -41,11 +39,10 @@ import {
   type SpecId,
   type UniverseEntry,
 } from "@tbc-gear-prio/core";
-import { RaidSimRequestSchema } from "../../../packages/core/src/proto/api_pb.js";
-import { IndividualSimSettingsSchema } from "../../../packages/core/src/proto/ui_pb.js";
 import { createHttpServer } from "../server/http.js";
 import { createApiRoutes } from "../server/routes.js";
 import type { SettingsCodec } from "../server/exports.js";
+import { settingsCodec } from "../server/settings-codec.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -108,18 +105,13 @@ export function slamaltmanGearSource(): RecordedGearSource {
  * pin is that the *exporters* are right, so that when those two manifest
  * lines land the only change is which codec `main.ts` passes.
  */
+/**
+ * The production codec, not a copy of it. A duplicate here is what let the
+ * export endpoint ship broken while these tests passed: the server was wired
+ * to a stub that threw, and nothing exercised it.
+ */
 export function realSettingsCodec(): SettingsCodec {
-  return {
-    fromRequestJson(request) {
-      const message = toIndividualSimSettings(
-        fromJson(RaidSimRequestSchema, request as never)
-      );
-      return {
-        message,
-        json: toJson(IndividualSimSettingsSchema, message),
-      };
-    },
-  };
+  return settingsCodec();
 }
 
 /** The 20-entry ret-p2 slice with every `bisTags` emptied (F2). */

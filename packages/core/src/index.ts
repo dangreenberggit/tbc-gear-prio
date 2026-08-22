@@ -245,3 +245,12 @@ export {
   encodeShareLink,
   type ByteCodec,
 } from "./share-link.js";
+
+// The generated schemas an out-of-package caller needs to turn protojson into
+// a message. Everything here produces protojson — `compose` returns a plain
+// record, the committed skeletons are JSON, `CliSimRunner` writes JSON — but
+// `toIndividualSimSettings` and `encodeShareLink` take messages, and building
+// one needs its schema. Re-exported rather than adding a `./proto` subpath so
+// the generated tree stays an implementation detail.
+export { RaidSimRequestSchema, RaidSimResultSchema } from "./proto/api_pb.js";
+export { IndividualSimSettingsSchema } from "./proto/ui_pb.js";
