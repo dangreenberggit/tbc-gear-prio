@@ -28,6 +28,12 @@ a real raid night); it does not stub the sim.
 | shredzepelin | `.scratch/rank-reports/stage2-close-shredzepelin.html` | `…-shredzepelin.json` | `…-shredzepelin.stdout.txt` |
 | nexess | `.scratch/rank-reports/stage2-close-nexess.html` | `…-nexess.json` | `…-nexess.stdout.txt` |
 
+**Note added 2026-08-21, after the seat had read this.** The `.html` column is
+what seat 1 actually opened, but those three files were untracked in `1139926`
+because nothing cites them — so a later reader cannot obtain that exact input.
+Regenerate with the commands recorded in the verification-log entry, or read the
+`.json`, which carries the same ranking. Flagged by the pre-merge adversarial axis.
+
 The `.json` carries `ranking.items[]` with `deltaDps`, `deltaPct`, `se`, `seMethod`,
 `belowCutoff`, `slot`, `sources`, `bisTags`, plus `ranking.baseline`, `ranking.cutoff`,
 `ranking.caps`, `ranking.substitutions`, `ranking.setBonuses` and

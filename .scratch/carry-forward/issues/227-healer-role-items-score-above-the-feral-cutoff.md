@@ -5,7 +5,9 @@ Origin: second `sme-rank-review` opinion on ticket 225's closure, 2026-08-18 —
   `.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`
 Blocks: none
 Blocked by: none — 234 was parked `wontfix` on 2026-08-20 (owner punt), so the
-  ruling this waited on is not coming. See the note below.
+  ruling this waited on is not coming. See the note below. The retained
+  "Status, 2026-08-20 — `blocked`" line further down is superseded history, kept
+  for the trail; this header is the live state.
 
 # Ten healer-statted items score above the feral cutoff
 

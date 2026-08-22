@@ -83,10 +83,36 @@ the change.
 Note also: `.claude/agents/` registers at session start only, so any fix needs a
 fresh session before it takes effect.
 
+## Process note — how this ticket got its number
+
+This ticket was filed in `1ecd2e5` **in breach of the allocation rule**, and the
+breach is recorded here rather than quietly repaired.
+
+`docs/agents/issue-tracker.md` says: read `NEXT`, use that number, and write the
+incremented value back *in the same commit*; never allocate by listing the
+directory, because two branches doing that pick the same number and merge
+cleanly under different filenames (it happened — two 232s and two 233s on
+2026-08-19). This ticket was numbered by listing the directory, and `1ecd2e5`
+touched no `NEXT`. For six commits the branch carried a ticket numbered 252
+while `NEXT` still advertised 246, which is precisely the collision window the
+rule closes.
+
+The counter was later reconciled to 256 in `7cf9383`, so the state on disk is
+now correct and 252–255 do not collide with anything present. What cannot be
+undone from here is the window itself.
+
+Caught by the pre-merge standards axis, 2026-08-21.
+
 ## Acceptance
 
 - [ ] A decision on which of the three fix shapes to take (or another).
 - [ ] The guard reworded in all three Opus seat files, or removed.
 - [ ] Confirmed in a fresh session that a correctly-modelled Opus seat runs
       without returning `WRONG_MODEL`.
-- [ ] This ticket records whether `gate-executor` / `gate-sme` also misfired.
+- [x] This ticket records whether `gate-executor` / `gate-sme` also misfired.
+      → **Neither did, but the run does not test the guard.** All three seats
+      were spawned with a pre-emptive correction in the prompt telling them the
+      substring test passes on "Opus 5". `gate-executor` and both `gate-sme`
+      seats ran clean. That is evidence the **workaround** holds, not evidence
+      the guard is sound — the guard was never allowed to fire. A fresh session
+      without the correction is still what would test it.

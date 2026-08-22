@@ -18,6 +18,16 @@ The caveats are two, and neither touches the sign:
 1. Arm 1's absolute 782.14 is a **floor, not a ceiling** — three consumable
    branches never fire (finding G4), so tip's own number understates tip.
    The rotation gap is therefore at least 42.91 DPS, plausibly more.
+
+   > **Retracted 2026-08-21, after this handoff was committed.** This caveat
+   > rests on the G4 reading that the zero-cast branches mean tip understates
+   > itself. That reading was withdrawn in `q2-remeasure/commands.md` once the
+   > guards were read: `22788` sits behind `selectedConjured == 22788` while the
+   > pick is `12662`, `31677` appears only inside a `not selectedPotion(31677)`
+   > guard, and `22105` has zero rotation references — so selecting one would
+   > *replace* a consumable, not add one. 782.14 is not a floor on that basis.
+   > The verdict and the sign are unaffected. Left in place rather than edited
+   > away: this is the seat's own text. See ticket 255.
 2. The comparison is on **one gear set at one phase**. That is the right
    question for this repo, and it is not evidence about the rotation in
    general.

@@ -1662,18 +1662,28 @@ method and literal invocations at
 
 Three arms at 20000 iterations, seed 42: tip 782.14, whole old package 740.67,
 old-rotation-on-tip-consumables 739.23. **The rotation main effect is −42.91 DPS
-at 62 σ against a pre-registered 2×combined-SEM bound of 1.38** — the new
+against a pre-registered 2×combined-SEM bound of 1.38** — the new
 rotation is *better*, contradicting the ticket's premise in sign. Consumables
 move −1.44 DPS with the rotation held constant, inside the bound. Arm 2
 reproduces the ticket's 740.67 to the cent, so the stale half of its pair is the
 722.55. Ticket 250 is **closed**, its pair superseded rather than kept.
+
+**Measured on the unequipped skeleton.** All three arms carry 17 equipment slots
+with no item id — verified: `python -c "import json;eq=json.load(open('.scratch/stage-gate/stage-2-close-shortlist-box/q2-remeasure/arm1-tip.request.json'))['raid']['parties'][0]['players'][0]['equipment']['items'];print(len([i for i in eq if i.get('id')]),'of',len(eq))"` → `0 of 17`.
+That is why the arms read 740–782 DPS while the characters' own baselines are
+2266.9 and 2302.5. **The sign is safe and the comparison is valid** — all arms
+are equally unequipped, so the rotation contrast holds — but the *magnitude* is
+not transferable to a geared character. TBC powershift value scales with attack
+power and with the Wolfshead Helm interaction the new APL names in its
+variables, and shredzepelin wears Wolfshead. Do not cite −42.91 as the gain a
+geared feral would see. Raised by the pre-merge domain axis, 2026-08-21.
 
 ### Corrections to the 2026-08-08 entry
 
 That entry is left as written; these are the corrections, not edits to it.
 
 1. "Only shredzepelin was ever put through `sme-rank-review`" — false. Twelve
-   handoffs exist (`ls .scratch/handoffs/sme-rank-judgment-*.md | wc -l` → 12),
+   handoffs exist as of base `9a4b932` (`git ls-tree 9a4b932 -- .scratch/handoffs/ | grep -c sme-rank-judgment` → 12; the same `ls` at tip returns 14, because this branch added two),
    covering all three characters. All twelve predate the 2026-08-21 pin, rotation
    and skeleton commits, which is why a fresh pass was needed — the conclusion
    was right for a reason other than the one given.

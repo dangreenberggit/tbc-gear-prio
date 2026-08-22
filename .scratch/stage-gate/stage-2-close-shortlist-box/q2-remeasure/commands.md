@@ -70,7 +70,20 @@ The result JSON reports a per-iteration `stdev`, not an SE, so SEM is derived as
 
 | contrast | Δ DPS | combined SEM | bound (2×) | material? |
 | --- | --- | --- | --- | --- |
-| **Arm 3 − Arm 1 (rotation main effect)** | **−42.91** | 0.688 | 1.377 | **yes — 62.3 σ** |
+| **Arm 3 − Arm 1 (rotation main effect)** | **−42.91** | 0.688 | 1.377 | **yes — far outside** |
+
+**What the bound is, and is not.** All three arms ran on `randomSeed = "42"`, so
+they are **paired, not independent** — they share an encounter RNG stream.
+Combining per-arm SEMs in quadrature is the estimator for *independent* samples;
+the correct SE for a paired contrast is that of the per-iteration difference,
+which a common seed usually makes considerably smaller. The bound quoted here is
+therefore **conservative**, and the sign of a 42.91 DPS effect survives any
+plausible SE — but the quadrature figure is the wrong estimator for this design
+and no per-iteration difference was computed, so no sigma count is claimed.
+Measuring the paired SE properly needs per-iteration output the result JSON does
+not carry. Related: ticket 236 on `paired-replicate` vs independent seeds.
+Raised by the pre-merge adversarial axis, 2026-08-21.
+
 | Arm 2 − Arm 1 (whole package) | −41.47 | 0.547 | 1.094 | yes |
 | Arm 3 − Arm 2 (consumables, rotation held at old) | −1.44 | 0.818 | 1.636 | **no** |
 

@@ -81,11 +81,38 @@ Three arms on the pinned v0.0.119 binary, 20000 iterations, seed 42:
 | Arm 2 | old (12 actions) | old | 740.67 |
 | Arm 3 | old (12 actions) | **tip** | 739.23 |
 
-**Rotation main effect = Arm 3 − Arm 1 = −42.91 DPS at 62 σ** against a
+**Rotation main effect = Arm 3 − Arm 1 = −42.91 DPS (on the unequipped
+skeleton — see the scope note below)** against a
 pre-registered bound of 2× combined SEM (1.38). The new rotation is *better* by
 42.91 DPS; the ticket's premise is contradicted in sign. Holding the rotation at
 old, consumables move −1.44 DPS — inside the bound — so the rotation explains
 essentially the whole package effect.
+
+### Scope: the arms ran an unequipped druid
+
+Added 2026-08-21 after the pre-merge domain axis. All three arms carry 17
+equipment slots with no item id:
+
+```
+python -c "import json;eq=json.load(open('.scratch/stage-gate/stage-2-close-shortlist-box/q2-remeasure/arm1-tip.request.json'))['raid']['parties'][0]['players'][0]['equipment']['items'];print(len([i for i in eq if i.get('id')]),'of',len(eq))"
+```
+
+→ `0 of 17`. This is why the arms read 740-782 DPS against real baselines of
+2266.9 (shredzepelin) and 2302.5 (nexess).
+
+**What still holds:** the comparison. Every arm is equally unequipped, the only
+moved variable is the rotation, and the sign of the effect is unambiguous — the
+adopted rotation is better, and the ticket's original premise is contradicted.
+
+**What does not:** the magnitude as a statement about play. Powershift value in
+TBC scales with attack power, and with the Wolfshead Helm interaction the new
+APL names in its own variables — shredzepelin wears Wolfshead. A geared re-run
+would give a different number. Nobody should quote −42.91 as the gain a geared
+feral sees.
+
+**Untested:** whether the sign survives on geared characters. Hypothesis — it
+does, since the mechanism is a working powershift engine rather than a
+gear-specific interaction — but this was not measured.
 
 Arm 3 is a clean single-variable comparison because the rotation↔consumables
 coupling is one-directional: the old rotation references none of
