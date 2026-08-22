@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect (a stated game fact is wrong in three artifacts)
 Origin: pre-merge domain axis on feat/stage-2-close-shortlist-box, 2026-08-21
 Blocks: none
@@ -38,6 +38,34 @@ now quote. Fixing the source comment is the useful half.
 
 ## Acceptance
 
-- [ ] `scripts/build_feral_skeleton.py:96` names Fel Mana Potion.
-- [ ] The two scratch artifacts corrected or annotated.
-- [ ] Confirm no other file repeats the mislabel: `grep -rn "Flame Cap" --include=*.py --include=*.ts --include=*.md .`
+- [x] `scripts/build_feral_skeleton.py:96` names Fel Mana Potion.
+- [x] The two scratch artifacts corrected or annotated.
+- [x] Confirm no other file repeats the mislabel: `grep -rn "Flame Cap" --include=*.py --include=*.ts --include=*.md . | grep -v node_modules`
+
+## Resolution (2026-08-21, `fix/worn-item-pool-coverage`)
+
+`scripts/build_feral_skeleton.py:96` now names Fel Mana Potion, and the comment
+carries the *why* the ticket asked for: the guard thresholds differ per potion
+(Super Mana Potion `22832` at 2300, Fel Mana Potion `31677` at 2000) because the
+potions restore different amounts, cited to
+`vendor/tbc-new-fork/sim/core/consumes.go:161`.
+
+Both named scratch artifacts were corrected in place and carry a dated
+correction note saying no measurement changed:
+
+- `.scratch/handoffs/sme-rank-judgment-stage2-close-ticket-250.md` (7 occurrences)
+- `.scratch/stage-gate/stage-2-close-shortlist-box/q2-remeasure/commands.md` (1)
+
+The sweep found the mislabel in four further artifacts the ticket did not list.
+Two are **open** tickets that would be worked from a stale name, so they were
+corrected: `255-document-selected-versus-available-consumables.md` (2) and
+`73-extend-sim-defaults-extractor-to-talents-and-consumables.md` (1). Ticket 255
+quotes the `build_feral_skeleton.py` comment directly, so leaving it would have
+broken the quote.
+
+Deliberately **not** changed: closed tickets 250 and 244, the stage-gate
+plan/review/decision-log artifacts, `docs/reviews/feat-stage-2-close-shortlist-box.md`
+and `.scratch/carry-forward/map.md`. These are dated historical records of what
+was written at the time; the review file and this ticket name the mislabel *as
+the finding*, so the string is load-bearing there. Remaining `Flame Cap` matches
+in the tree are these records plus the correction notes above.

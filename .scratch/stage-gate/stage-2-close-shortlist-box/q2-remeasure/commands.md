@@ -5,6 +5,11 @@ This file is the invocation record its acceptance box asks for. Binary, digest a
 regen commands: `../binary-provenance.md`. Every number below was produced by the
 commands in this file and is re-runnable.
 
+> **Correction, 2026-08-21 (ticket 256).** Item `31677` was originally named
+> "Flame Cap" here. It is **Fel Mana Potion** —
+> `vendor/tbc-new-fork/sim/core/consumes.go:161`. The name is corrected in
+> place; no measured number changed.
+
 ## Design
 
 All three arms: pinned v0.0.119 binary, `simOptions.iterations = 20000`,
@@ -121,7 +126,7 @@ counts are corroboration, and Arm 3 vs Arm 1 remains the instrument.
 
 Separate observation, about tip's skeleton rather than about ticket 250: at Arm 1
 (tip) the two branches `scripts/build_feral_skeleton.py:92-97` names — Dark Rune
-`22788` and Flame Cap `31677` — cast **zero** times, and `22105` is zero too, despite
+`22788` and Fel Mana Potion `31677` — cast **zero** times, and `22105` is zero too, despite
 all three appearing in tip's `conjuredItems` / `potions`.
 
 **This is correct behaviour, not a bug** — reviewed by the ticket-250 SME seat and

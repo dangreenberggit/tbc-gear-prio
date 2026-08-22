@@ -8,14 +8,14 @@ Blocked by: none
 # build_feral_skeleton.py's consumables comment omits selected-vs-available
 
 `scripts/build_feral_skeleton.py:92-97` warns that dropping `potions` /
-`conjuredItems` "silently disarms the rotation's Dark Rune and Flame Cap branches
+`conjuredItems` "silently disarms the rotation's Dark Rune and Fel Mana Potion branches
 while the sim still returns a confident number". True, and load-bearing.
 
 What it does not say is that those two lists are the **available menu**, while
 `conjuredId` / `potId` are the single **pick** — so a branch naming an unpicked item
 correctly casts zero times even when the arrays are fully populated. On tip
 (`conjuredId: 12662`, `potId: 22832`) Dark Rune `22788` and `22105` cast zero, and
-Flame Cap `31677` appears only inside a `not selectedPotion(31677)` threshold guard
+Fel Mana Potion `31677` appears only inside a `not selectedPotion(31677)` threshold guard
 and is not castable from the list at all.
 
 Verify:

@@ -4,6 +4,12 @@ Seat: gate-sme (second SME seat, stage-gate `feat/stage-2-close-shortlist-box`).
 Scope: ticket 250 only. Shortlist believability for the three characters was
 judged by a different seat and is not re-issued here.
 
+> **Correction, 2026-08-21 (ticket 256).** This document originally called item
+> `31677` "Flame Cap". It is **Fel Mana Potion** —
+> `vendor/tbc-new-fork/sim/core/consumes.go:161`. Every occurrence of the name
+> has been corrected in place; no measurement, cast count or verdict changed,
+> because the APL guard behaves the same whatever the item is called.
+
 ## Verdict
 
 **trust-with-caveats** — trust the re-measurement, and trust its sign.
@@ -61,7 +67,7 @@ Every number below came from commands I ran; each is given inline.
 | G1 | The 42.91 DPS gap is real and has a clean feral-mechanics explanation: the new rotation lands more Shreds and far more Ferocious Bites. | high (resolves the ticket) | cast-count extract below |
 | G2 | The old rotation's DPS *variance* is 2.8× tip's, which is itself a sign the old list was mis-sequencing, not just scoring lower. | medium | `stdev` 32.229 (tip) vs 91.860 (old rot) |
 | G3 | Tiger's Fury is cast zero times in **both** arms. Expected for TBC feral at this gear. Not a defect. | none (rules out a false alarm) | cast table below |
-| G4 | Dark Rune `22788`, Flame Cap `31677`, Night Dragon's Breath `22105` never fire — but this is **correct APL behaviour**, not the disarm `build_feral_skeleton.py:92-97` warns about. | medium (ticket-worthy, not a bug) | APL condition read, below |
+| G4 | Dark Rune `22788`, Fel Mana Potion `31677`, Night Dragon's Breath `22105` never fire — but this is **correct APL behaviour**, not the disarm `build_feral_skeleton.py:92-97` warns about. | medium (ticket-worthy, not a bug) | APL condition read, below |
 | G5 | The feral above-cutoff sets are believable feral rows; the movement 27→14 / 55→12 is explained by a higher baseline, not by rotation damage. | low | baseline + row read below |
 
 ### G1 — why the new rotation wins (the actual game reason)
@@ -187,10 +193,10 @@ available to pick*, and `conjuredId` / `potId` are *what the player actually
 picked*. A druid can only have one conjured mana item and one potion selected
 at a time. The APL's `selectedConjured(22788)` branch is upstream saying "if the
 user picked Dark Rune, use it here" — and this user picked Demonic Rune. The
-branch correctly does nothing. Same for Flame Cap: `31677` appears only inside a
+branch correctly does nothing. Same for Fel Mana Potion: `31677` appears only inside a
 `not selectedPotion(31677)` guard, which is a *threshold modifier*, not a cast
-action — Flame Cap is never castable from this list at all, and the guard's
-purpose is to lower the mana-deficit bar when Flame Cap is the pick. `22105`
+action — Fel Mana Potion is never castable from this list at all, and the guard's
+purpose is to lower the mana-deficit bar when Fel Mana Potion is the pick. `22105`
 (Night Dragon's Breath) appears in the menu array but is referenced by **zero**
 APL tokens, so no branch could ever cast it.
 
@@ -310,10 +316,10 @@ on its measured merits, not merely on the "take upstream's rotation" rule.
 
 **One thing should carry forward as its own ticket**, and it is documentation,
 not a bug: `scripts/build_feral_skeleton.py:92-97` says dropping the arrays
-"silently disarms the rotation's Dark Rune and Flame Cap branches". That is
+"silently disarms the rotation's Dark Rune and Fel Mana Potion branches". That is
 true of dropping them, but the comment invites the misreading that those
 branches *should* fire when the arrays are present. They should not — Dark Rune
-is unselected and Flame Cap has no cast action at all. Add the selected-vs-
+is unselected and Fel Mana Potion has no cast action at all. Add the selected-vs-
 available distinction to that comment so the next reader does not spend a seat
 on it. That is exactly what happened here.
 
@@ -358,7 +364,7 @@ What must be true before an unqualified yes:
 - The old rotation's DPS spread is 2.8× the new one's. If any historical
   ranking was produced on the old rotation, its per-item deltas were noisier
   than the current ones, independent of the mean.
-- Zero casts for Dark Rune and Flame Cap are correct. Do not "fix" them.
+- Zero casts for Dark Rune and Fel Mana Potion are correct. Do not "fix" them.
 - Merciless Gladiator's Maul is arena loot sitting at the top of both feral
   lists. Correct, but expect it to be questioned.
 - I disagree with one line in `commands.md`: the zero-cast branches do not mean

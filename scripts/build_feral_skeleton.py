@@ -93,8 +93,15 @@ DISTANCE_FROM_TARGET = 0
 # consumables, and `selectedPotion` / `selectedConjured` compare the chosen id
 # against them; upstream's registerPotionCD / registerConjuredCD only make a
 # consumable usable if it appears there. Dropping them silently disarms the
-# rotation's Dark Rune and Flame Cap branches while the sim still returns a
-# confident number.
+# rotation's Dark Rune and Fel Mana Potion branches while the sim still returns
+# a confident number.
+#
+# The potion ids are not interchangeable labels: the rotation's mana-deficit
+# thresholds differ per potion because the potions restore different amounts.
+# Super Mana Potion (22832) guards at 2300, Fel Mana Potion (31677) at 2000 --
+# see vendor/tbc-new-fork/sim/core/consumes.go:161, where Fel Mana Potion
+# restores 3200 mana over 24s. Under a wrong item name those two numbers look
+# arbitrary; they are the point.
 #
 # drumsId is the one field kept from the old constant: it is a raid-provided
 # buff rather than a personal consumable, and the owner's export carries none.
