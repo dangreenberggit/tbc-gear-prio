@@ -1713,6 +1713,184 @@ That entry is left as written; these are the corrections, not edits to it.
   live output at this tip: 14 and 12 rows against baselines 2266.9 and 2302.5.
   The counts in this entry are the observed ones.
 
+## 2026-08-22 — Stage 3 web shell (offline-first)
+
+Closes five of §14 Stage 3's six gate boxes. The first stays ☐ on purpose: the
+shell resolves three recorded characters and 404s everything else, so nobody
+can type their own name yet. Ticket 263 owns that.
+
+Run from `phase-3/web-shell`. Bootstrap first — `vendor/` is gitignored, and a
+fresh worktree has neither the binary nor the pinned wowsims inputs:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm fetch:wowsimcli        # vendor/wowsimcli-v0.0.119-win32-x64/
+pnpm sync:wowsims:restore   # vendor/wowsims/, 15 files
+pnpm verify                 # exit 0
+```
+
+Without `sync:wowsims:restore` five `synthetic-fixtures` tests fail ENOENT on
+`vendor/wowsims/ret_preraid.gear.json`. That is worktree bootstrap, not a
+regression, and the plan did not budget for it.
+
+### ☐ 1 — type a character, wait, trust the top recommendation
+
+Open, and recorded here rather than quietly skipped. `/c/$region/$realm/$name`
+resolves slamaltman, shredzepelin and nexess from committed fixtures and
+answers `404 not a recorded character (offline build)` for anyone else.
+
+The plan chose offline-first on size, not on a missing credential:
+`WCL_CLIENT_ID` and `WCL_CLIENT_SECRET` **do** exist in the main checkout's
+`.env` (names read with `grep -o '^[A-Z_]*='`; values never read; the file is
+gitignored at `.gitignore:2`, which is why a worktree does not see it). The
+live adapter sized at ~12 steps and ~8 files against an API that fixtures
+cannot verify, versus 17 steps for the rest of the shell, and PLAN.md L898
+scopes it out. Ticket 263 carries the sizing and the credential note.
+
+### ☑ 2 — feels calm during multi-minute work
+
+Measured on the built server (`pnpm web:build`, then Node 22 on
+`apps/web/dist-server/main.js`), driving a real ret-p2 slamaltman run through
+the browser. The run is the real thing: 277 sims against wowsimcli v0.0.119.
+
+Mid-run the API reported, and the page rendered from:
+
+```
+stage: simming  done: 132 / 277  candidates: 240  rows: 131  simVersion: v0.0.119
+```
+
+`progressLabel` turns that into `simming 132/277`, and rows appear as each
+candidate lands rather than all at the end. Final state: 240 rows from 277
+sims — the two numbers differ because `total` counts sims (baseline +
+candidates + paired replicas) while `candidates` counts rows, which is why
+step 2c added the second field.
+
+### ☑ 3 — zero layout shift during a run
+
+A `PerformanceObserver` on `layout-shift` was installed before the run started
+and sampled every 400 ms through it. **CLS 0.00000, zero shift entries**, and
+the list container measured a constant **360 px** at every sample from page
+load onward — the fixed-height container holding its size before any row
+exists.
+
+Honest limit on this one: the sampling window covers page load through
+`building pool`, and the completed view. The headless tab reports
+`document.visibilityState === 'hidden'` permanently, and React Query pauses
+interval refetching while hidden, so the page stopped polling partway and the
+finished run was reloaded rather than watched filling live. **The
+skeleton-fill-to-completion transition was therefore not observed in the
+browser** — it is covered by `run-state.test.ts` and by the mid-run API
+snapshot above, not by a CLS measurement across that exact frame.
+
+### ☑ 4 — filters and pins re-render without a network round trip
+
+The box this plan was riskiest for, and the one now most directly measured.
+
+`applyView` had to reach the browser without the 6.8 MB item index. `view.ts`
+imported `setPotentialIsConfounded` from `rank-report-rules.ts`, which imports
+`getItem` from `items.ts`, which imports `data/items/index.json` (6,825,902
+bytes). The predicate reads one optional field and touches no item data, so it
+moved to `set-potential.ts`. The transitive runtime closure of `dist/view.js`
+is now five modules — `view`, `cutoff`, `pool`, `set-potential`,
+`item-source-kinds.generated` — and none mentions `index.json`.
+
+```bash
+grep -l "index.json" packages/core/dist/{view,pool,cutoff,set-potential}.js  # no output
+grep -c "index.json" apps/web/dist/assets/*.js                               # 0
+```
+
+Bundle cost of importing `applyView`: **190.40 kB → 192.61 kB**, +2.2 kB.
+Built with the full UI: **245.09 kB** (gzip 76.09 kB), against a 400 kB budget.
+
+On the completed run, with `fetch` and `XMLHttpRequest.open` both counted,
+every view control was toggled — Already have it, Pin BiS, Raid, Boss, Group
+by — giving **0 fetches, 0 XHR, CLS 0**. The filter did real work while making
+no request: Raid `Gruul's Lair` + boss `Gruul the Dragonkiller` → **0 rows**,
+back to All raids → **27 rows**.
+
+### ☑ 5 — the pin control is hidden, not inert, where no curated set exists
+
+**No committed universe produces `pinBisAvailable === false`** — feral-p2 and
+feral-p3 carry 17 BiS tags each, ret-p2/p3/p4/p5 sixteen each — so no
+`maxPhase` reaches the state. The reproducible input is a pool injected
+through `Deps.pool`: `apps/web/test/fixtures/pool-no-bis.json`, a ret-p2 slice
+with every `bisTags` emptied, ranked through the same server path as any run.
+`jobs.test.ts` asserts both polarities: ret-p2 → `true`, the fixture →
+`false`. `showPinControl` returns the flag and the component omits the control
+rather than disabling it.
+
+The browser demonstration above used ret-p2, where the control is correctly
+**present and enabled**. The absent case is closed on the test, on test data —
+stated plainly here so the reader is not left thinking a browser showed it.
+
+### ☑ 6 — every Stage 1 CLI check still passes unchanged
+
+```bash
+git diff --stat $(git merge-base HEAD dev) -- packages/core/test
+#  packages/core/test/individual-settings.test.ts | 77 ++++++
+#  packages/core/test/share-link.test.ts          | 69 ++++++
+```
+
+Two files added, none modified. The CLI's offline wiring moved into
+`packages/core/src/cli-wiring.ts`, and `pnpm rank --offline` for slamaltman is
+byte-identical before and after — twice, once after the extraction and again
+after `defaultMaxPhase` moved — modulo the pid in Node's SQLite warning.
+
+### Exports, against the real binary
+
+`toIndividualSimSettings` sets `apiVersion` from the `current_version_number`
+option on `proto.ProtoVersion`, read at runtime (13, matching the committed
+preset). wowsims runs an import through its migration chain when the field is
+lower, and the proto default of 0 would take every export down that path.
+
+From the running server:
+
+```
+GET /api/jobs/job_1/export.json
+  200, content-disposition: attachment, apiVersion 13, 17 equipment items
+GET /api/jobs/job_1/share             -> 1,525-char link
+GET /api/jobs/job_1/share?item=30106  -> 1,517-char link
+wowsimcli-windows.exe decodelink <link>   # exit 0 both times
+  apiVersion 13; 17 items; the chosen candidate (30106, the top-ranked belt)
+  present in the decoded equipment
+```
+
+### Deviations
+
+1. **Submit dedupe keys on the request, not `contentHash`.** `contentHash` is
+   computed inside `rankUpgrades` after gear is read, so it does not exist at
+   submit time. In-flight dedupe uses the canonical JSON of the `RankInput`;
+   cross-run dedupe stays `rankUpgrades`' own ranking cache. The server slice
+   then found in-flight-only dedupe too narrow — a run finishes in ~500 ms and
+   a resubmit started a second job — so the key outlives the run, and only a
+   failed run drops it.
+2. **`/c/...` is offline**: three recorded characters, 404 otherwise.
+3. **TMB's control labels are unconfirmed.** `thatsmybis.com` and
+   `thatsmybis.com/help` return marketing and FAQ copy; a live guild view needs
+   a login. The UI ships §12's wording (Raid, Boss, Group by, Already have it,
+   Pin BiS). Renaming later is a string change.
+4. **Skeletons appear when the candidate count is known**, not at submit.
+   `rank.ts` emits `simming` from three sites and only one carries
+   `candidates`, so the trigger is that field being defined, not the stage
+   being reached.
+5. **"Already have it" greys, and does not use core's `hideOwned`.** That
+   option *removes* owned rows, while §12 and §8.3.3 require them greyed and
+   kept. The UI carries its own `greyOwned` flag. Core's option name and the
+   plan's requirement genuinely disagree; nothing here changes core.
+
+### What the harness could not show
+
+- **No screenshot.** The browser pane does not composite in this environment,
+  so every visual claim above is a DOM or `PerformanceObserver` measurement,
+  not something seen.
+- **Node 20 in the preview harness.** `seams/store.ts` imports `node:sqlite` at
+  module scope, which does not exist before Node 22, so the server will not
+  boot under it even when `MemoryStore` is all that is wanted. The shell and CI
+  both run Node 22. No `engines` field declares that floor — a follow-up, not
+  fixed here.
+
+---
+
 ## 2026-08-22 — Stage 2's last gate box closes, and its blocker was never real
 
 **☑ ≥3 real characters produce believable shortlists.** All eight §14 Stage 2

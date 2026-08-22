@@ -3,6 +3,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     passWithNoTests: true,
+    // Several tests replay a full ranking sweep and take ~2-3 s on an idle
+    // machine, which fits vitest's 5 s default with almost no room. Once
+    // apps/web joined the suite the added parallel load pushed
+    // synthetic-fixtures over that line intermittently — green on its own,
+    // red inside `pnpm verify`. The budget is generous on purpose: it is
+    // here to stop machine load being reported as a test failure, not to
+    // accommodate a slow test, and a genuine hang still fails the run.
+    testTimeout: 30_000,
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
