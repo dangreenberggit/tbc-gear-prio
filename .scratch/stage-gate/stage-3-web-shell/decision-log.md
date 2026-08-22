@@ -42,3 +42,10 @@ One dated line per gate: gate, outcome, reason, round count.
   environment), so `&&` and `/tmp` work; the recipe should use the scratchpad path
   and state whether `jq` is present. F4–F9, F11 go to the planner for revision.
   Revision via `SendMessage` to the same planner seat (retains its research context).
+- 2026-08-22 — **Gate A (revision 1): PASS.** Planner revised via `SendMessage` (same
+  seat). Round-0 plan kept as `plan-r0.md`; `plan.md` is revision 1. All sections
+  present; register now C1–C35 (C1, C3, C6, C7, C16, C18, C21, C22, C26 rewritten,
+  C29–C35 new); F1 resolved by moving `setPotentialIsConfounded` out of
+  `rank-report-rules.ts`; F2 resolved by a no-BiS test pool through `Deps.pool`;
+  Q1 re-decided on sizing (12 steps, about 8 files for the live adapter, against 17
+  steps, about 45 files for the rest). Tree clean. Reviewer re-run on changed claims only.
