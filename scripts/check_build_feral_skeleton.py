@@ -42,69 +42,83 @@ def check_known_schema_accepts_the_real_ret_apl() -> list[str]:
 
 
 def check_rejects_unknown_apl_field() -> list[str]:
-    """The motivating case named in issue #1 step 8, re-aimed by ticket 244.
+    """unknown_field_keys must flag a field the pinned proto does not declare.
 
-    It originally used timeToNextEnergyTick. That field is now DECLARED by the
-    pinned proto, so asserting it is unknown asserted the opposite of the truth
-    and made this check fail for being right. selectedPotion replaces it: the
-    owner's APL uses it, upstream added it in 3267f8dfa (2026-08-19), and the
-    pin predates that commit -- so it is a real, current gap rather than a
-    synthetic one, and this check keeps documenting the live blocker.
-
-    When the pin next moves past 3267f8dfa this check will fail the same way.
-    That failure is the signal to re-aim it again at whatever is then absent,
-    not to weaken it."""
+    Deliberately a synthetic name. This check has been re-aimed twice already --
+    first at timeToNextEnergyTick, then at selectedPotion -- and both times a pin
+    move made the field known, so the check began asserting the opposite of the
+    truth and failed for being right. Any real field can arrive upstream; a name
+    that cannot exist tests the extraction mechanism instead of tracking the
+    schema, which is what this check is actually for.
+    """
     apl_value_with_bad_field = {
         "cmp": {
             "op": "OpLe",
-            "lhs": {"selectedPotion": {"potionId": {"itemId": 22832}}},
+            "lhs": {"notARealAplFieldEver": {}},
             "rhs": {"const": {"val": "1s"}},
         }
     }
     unknown = unknown_field_keys(apl_value_with_bad_field, known_fields())
-    if "selectedPotion" not in unknown:
+    if "notARealAplFieldEver" not in unknown:
         return [
-            "unknown_field_keys() did not flag selectedPotion -- either the "
-            "field has been added to data/proto/apl.proto (re-pin applied, this "
-            "check is stale and should be re-aimed at a field the new pin still "
-            "lacks) or the walk/extraction regressed"
+            "unknown_field_keys() did not flag a synthetic field name -- the "
+            "walk or the proto extraction has regressed, since this name cannot "
+            "be in any schema"
         ]
     return []
 
 
 def check_build_feral_skeleton_refuses_unknown_apl_field() -> list[str]:
     """End-to-end: point build_feral_skeleton.main() at a fabricated APL file
-    carrying the bad field and confirm it exits 1 and writes nothing, rather
-    than silently producing a skeleton the pinned binary would half-ignore."""
+    carrying a bad field and confirm it exits 1 and writes nothing, rather than
+    silently producing a skeleton the pinned binary would half-ignore.
+
+    Two things about the fixture are deliberate.
+
+    It is shaped like a wowsims **settings export** -- rotation under `player`,
+    with a `player.consumables` block -- because that is what the skeleton is
+    built from now (ticket 244). A flat RaidSimRequest-shaped fixture trips
+    build_feral_skeleton's own consumables guard first, so the check would fail
+    for the wrong reason and never exercise the gate it exists for.
+
+    The bad field is a **synthetic** name, not a real one. Earlier revisions
+    used timeToNextEnergyTick and then selectedPotion; the pin move to v0.0.119
+    made both of them known, so each in turn started asserting the opposite of
+    the truth. Any real field can be added upstream. A name that cannot exist
+    keeps this gate testing the mechanism rather than tracking the schema.
+    """
     problems: list[str] = []
     orig_feral_apl = build_feral_skeleton.FERAL_APL
     orig_out = build_feral_skeleton.OUT
     with tempfile.TemporaryDirectory() as td:
-        fake_apl_path = Path(td, "feral_default.apl.json")
+        fake_apl_path = Path(td, "owner-export.json")
         fake_apl_path.write_text(
             json.dumps(
                 {
-                    "prepullActions": [],
-                    "priorityList": [
-                        {
-                            "action": {
-                                "condition": {
-                                    "cmp": {
-                                        "op": "OpLe",
-                                        "lhs": {
-                                            "selectedPotion": {
-                                                "potionId": {"itemId": 22832}
+                    "player": {
+                        "consumables": {"potId": 22832},
+                        "rotation": {
+                            "prepullActions": [],
+                            "priorityList": [
+                                {
+                                    "action": {
+                                        "condition": {
+                                            "cmp": {
+                                                "op": "OpLe",
+                                                "lhs": {
+                                                    "notARealAplFieldEver": {}
+                                                },
+                                                "rhs": {"const": {"val": "1s"}},
                                             }
                                         },
-                                        "rhs": {"const": {"val": "1s"}},
+                                        "autocastOtherCooldowns": {},
                                     }
-                                },
-                                "autocastOtherCooldowns": {},
-                            }
-                        }
-                    ],
-                    "groups": [],
-                    "valueVariables": [],
+                                }
+                            ],
+                            "groups": [],
+                            "valueVariables": [],
+                        },
+                    }
                 }
             ),
             encoding="utf-8",

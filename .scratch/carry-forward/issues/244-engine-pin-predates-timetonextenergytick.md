@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (pin bump; blocks the feral APL replacement)
 Origin: owner-supplied feral APL, 2026-08-20 — the first real input to trip the
   ticket-239 gate. Supersedes ticket 239's acceptance criteria, which assume a
@@ -530,6 +530,76 @@ The watch was re-pointed at `cbf6b75` (2026-08-21) so any movement is reported.
 - **The rebased fork has never been compiled on its new base** (154 upstream
   commits). Keep `backup/pre-reforge-rebase` in `vendor/tbc-new-fork` until a
   build passes.
+
+## Resolved, 2026-08-21 — pinned v0.0.119, owner's APL landed
+
+The pin is **v0.0.119**, not `feature/backend-reforge`. That tag compares
+`status: identical` to upstream master and is what wowsims.com/tbc serves.
+
+### Why the branch was abandoned
+
+It was chosen so the engine would match the branch the fork's PR targets. It
+could not run the owner's APL: `selected_potion` and `selected_conjured` arrived
+upstream in `3267f8dfa` (2026-08-19), six days after `backend-reforge` last took
+master, and those fields sit inside `condition` trees — `DiscardUnknown: true`
+drops the leaves and the guards then evaluate something nobody wrote.
+
+Owner's call, and the reasoning is worth keeping: accuracy wins, and
+`backend-reforge` has to absorb master eventually regardless, so pinning master
+now is getting there early rather than abandoning the branch.
+
+Pinning the **tag** rather than master also fixed the collateral damage a branch
+ref caused: `fetch_wowsimcli.py` builds a release URL from `lock["tag"]`, which
+404s on a branch, and the `/` in the branch name split the vendor path into a
+nested directory. Both gone. The binary is a downloaded release artifact again,
+so the from-source provenance question this ticket agonised over is moot.
+
+Given up: the reforge work, which is not on master. Measured DPS-identical to
+the cent on the feral workload, and PR #385 is open and conflicted.
+
+### Verified
+
+```
+grep -c 'time_to_next_energy_tick\|selected_potion\|selected_conjured' data/proto/apl.proto   # 1 each
+python -c "b=open('vendor/wowsimcli-v0.0.119-win32-x64/wowsimcli-windows.exe','rb').read(); ..."  # 2 each
+```
+
+`apl_schema.unknown_field_keys` reports **NONE** against the owner's rotation.
+All 17 `timeToNextEnergyTick` uses and all three consumable conditions are known.
+
+### The owner's APL is now the skeleton
+
+`build_feral_skeleton.py` reads the rotation **and the consumables** from
+`data/presets/feral/owner-p2.settings-export.json`, so a regen reproduces them.
+
+Two things this surfaced that the ticket never anticipated:
+
+**Upstream's default rotation is rough.** It hardcodes the bite trick at 2
+combo points for everyone. The owner's APL branches on Wolfshead Helm
+(aura 17768): 2 with it, 4 without. Ticket 250 measured the flat 2 as costing
+~33 DPS and dropping Rip uptime from 65.5% to 42.0%. An override was written and
+then **discarded** — the owner's rotation already handles it correctly, and
+overriding a real player's APL would defeat the point of using it.
+
+**The skeleton's consumables were hardcoded and wrong.** `potId` 22838 against
+the owner's 22832, and no `potions` / `conjuredItems` lists at all. Those lists
+are the *available* consumables that `selectedPotion` / `selectedConjured`
+compare against, and upstream only registers a consumable as usable if it
+appears there. Without them the Dark Rune and Flame Cap branches could not fire:
+the sim was confidently modelling a druid who never used consumables.
+**782.14 DPS against 744.10**, 20k iterations, seed 42. Found because the owner
+challenged the claim that consumables were unset — they were not; the wrong key
+had been checked.
+
+### Retracted
+
+The **748.66** figure is withdrawn. It came from the owner's rotation grafted
+onto the old pin with the field silently dropped — a mutilated rotation, and
+evidence of the bug rather than any rotation's DPS.
+
+The ~2.4% "engine-wide" shift recorded earlier is also wrong: ret's rotation is
+byte-identical across the pins and moved -0.03%. That figure was feral's
+rotation rewrite, not the engine.
 
 ## Acceptance
 

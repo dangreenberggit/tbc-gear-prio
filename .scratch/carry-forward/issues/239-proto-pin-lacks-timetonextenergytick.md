@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (pinned-input drift; latent, gated)
 Origin: `feat/candidate-pool` stage-gate tail, 2026-08-20 — carried forward as
   the one advisory the branch did not act on
@@ -102,10 +102,25 @@ tightening if it ever bites.
       re-aimed (and renamed `check_rejects_unknown_apl_field`) at
       `selectedPotion`, a field the new pin still lacks, rather than deleted.
       Ticket 244 records why that field is the right replacement.
-- [ ] The feral skeleton regenerates from the re-pinned protos and the byte
-      compare over the regenerated artifact passes.
-- [ ] Whether the re-pin changes any committed sim numbers is stated either way,
-      with the command that shows it.
+- [x] The feral skeleton regenerates from the re-pinned protos and the byte
+      compare passes — done 2026-08-21. It now regenerates from the **owner's**
+      export rather than upstream's default APL (rotation and consumables both),
+      which is a change of source this ticket did not anticipate. See ticket 244.
+- [x] Committed sim numbers changed, and by more than the re-pin alone. Stated
+      with the measurements, all at 20k iterations / seed 42 on the committed p2
+      skeleton via
+      `vendor/wowsimcli-v0.0.119-win32-x64/wowsimcli-windows.exe sim --infile ... --outfile ...`
+      reading `raidMetrics.dps.avg`:
+
+      - **The engine alone is nearly a no-op.** Ret's rotation is byte-identical
+        across the old and new pins, so ret isolates the engine: 1909.74 ->
+        1909.09, **-0.03%**.
+      - **Feral moved because the rotation and consumables changed**, not
+        because of the engine: 723.5 on the old pin's 12-action default, and
+        **782.14** on the owner's rotation with their real consumables.
+
+      Every recorded fixture was re-recorded on the pinned binary; `simVersion`
+      is now the pinned ref rather than `v0.0.101`.
 
 ## Out of scope
 

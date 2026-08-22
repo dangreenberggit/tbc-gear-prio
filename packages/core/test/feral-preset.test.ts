@@ -44,10 +44,23 @@ describe("feral preset", () => {
   it("carries the APL, which the sim actually runs", () => {
     // verification-log 2026-07-27 measured this for ret and it holds for
     // feral: stripping the APL drops the smoke sim from ~2120 to ~666 DPS.
-    const apl = load<Record<string, unknown>>(
-      "vendor/wowsims/feral_default.apl.json"
+    //
+    // Compared against the OWNER'S export, not upstream's default APL: the
+    // skeleton is built from the rotation actually played (ticket 244), and
+    // upstream's preset is a generic one that differs -- it hardcodes the bite
+    // trick at 2 combo points where this APL branches on Wolfshead Helm.
+    // valueVariables is asserted too: the thresholds live there, so comparing
+    // only the action lists would pass while the tuning silently drifted.
+    const owner = load<{ player: { rotation: Record<string, unknown> } }>(
+      "data/presets/feral/owner-p2.settings-export.json"
     );
-    for (const key of ["prepullActions", "priorityList", "groups"]) {
+    const apl = owner.player.rotation;
+    for (const key of [
+      "prepullActions",
+      "priorityList",
+      "groups",
+      "valueVariables",
+    ]) {
       expect(player.rotation[key]).toEqual(apl[key]);
     }
     expect(player.rotation.type).toBe("TypeAPL");
