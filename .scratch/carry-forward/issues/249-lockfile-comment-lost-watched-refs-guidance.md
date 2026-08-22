@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect (institutional memory lost by regeneration)
 Origin: review of feat/engine-pin-backend-reforge, 2026-08-21
 Blocks: none
@@ -47,12 +47,42 @@ Whatever wording is chosen, it must survive `--update`. A comment that only
 lives in the committed file will be dropped again by the next pin move. The fix
 belongs in the template inside `scripts/sync_wowsims.py`, not in the JSON.
 
+## Resolution, 2026-08-21 — removed, not maintained
+
+Owner's call: this should either be maintained properly or removed. Removed,
+with a one-line pointer left behind.
+
+**Why removal.** `dev` now carries an `AGENTS.md` rule from ticket 245 —
+"A property measured against one option is not a comparison" — which covers the
+same failure, names `watchedRefs` explicitly, and does not carry the retracted
+ancestry claim. Keeping a second copy in a regenerated JSON string means two
+places to keep true, and the JSON copy is the one that goes stale silently.
+
+**Why it vanished in the first place, which settles it.** The paragraph was
+never in `sync_wowsims.py`'s `_comment` template — it had been hand-added to the
+JSON. `--update` rebuilds `_comment` from the template, so the text could not
+have survived any pin move. It was structurally doomed, not unluckily deleted.
+
+**What was done.** The template now ends with one sentence:
+
+> Before concluding an upstream feature is absent, resolve every ref in
+> watchedRefs -- see AGENTS.md.
+
+That is a pointer, not a duplicate: the reasoning stays in `AGENTS.md` where
+agents read it, and the lockfile says only enough to send you there. A comment
+above the template records why it is deliberately short, so the next person does
+not hand-add prose back into the JSON.
+
+Verified by running `sync_wowsims.py --update --ref feature/backend-reforge` and
+confirming the sentence survives regeneration and `watchedRefs` is preserved.
+
+The retracted ancestry claim ("reachable from our pin by fast-forward and is
+available to us") does not reappear in any form.
+
 ## Acceptance
 
-- [ ] A decision recorded: rewrite the guidance, or drop it in favour of the
-      `AGENTS.md` rule — with the reason.
-- [ ] If kept: the wording lives in `sync_wowsims.py`'s template so a future
-      `--update` preserves it, verified by running `--update` and confirming the
-      text survives.
-- [ ] The retracted ancestry claim does not reappear in any form.
-- [ ] `pnpm verify` green.
+- [x] Decision recorded: removed in favour of the `AGENTS.md` rule, with reason.
+- [x] The surviving pointer lives in `sync_wowsims.py`'s template, verified by
+      re-running `--update`.
+- [x] The retracted ancestry claim does not reappear.
+- [x] `pnpm verify` green.
