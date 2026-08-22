@@ -1,0 +1,380 @@
+/*
+ * PLAN.md §12 restraint: no gradients, no glass, no dense chrome, no
+ * serif-and-terracotta. A system font stack, one accent, generous line
+ * height. It should look like a tool made by someone who plays the game.
+ */
+
+:root {
+  --bg: #fbfbfa;
+  --surface: #ffffff;
+  --border: #dcdcd8;
+  --text: #1d1d1b;
+  --muted: #6a6a64;
+  --accent: #2f5d84;
+  --accent-text: #ffffff;
+  --warn-bg: #fdf6e3;
+  --warn-border: #e3d2a0;
+  --skeleton: #ececea;
+
+  --radius: 4px;
+  --row-height: 44px;
+  --gap: 12px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --surface: #1e2023;
+    --border: #34373b;
+    --text: #e8e8e6;
+    --muted: #9a9c9f;
+    --accent: #7ba7cd;
+    --accent-text: #14161a;
+    --warn-bg: #2c2820;
+    --warn-border: #4c452f;
+    --skeleton: #26282b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.page--narrow {
+  max-width: 560px;
+}
+
+a {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.framing {
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Forms */
+
+.field {
+  display: block;
+  margin-bottom: var(--gap);
+}
+
+.field > span {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+button {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+button.secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* Character page */
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.slot__name {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.slot--empty .slot__item {
+  color: var(--muted);
+}
+
+.fights {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+
+.fights li {
+  padding: 4px 0;
+}
+
+.fight-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Run page */
+
+.status-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+
+.status-line__stage {
+  font-variant-numeric: tabular-nums;
+}
+
+.banner {
+  border: 1px solid var(--warn-border);
+  background: var(--warn-bg);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: var(--gap);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: flex-end;
+  margin-bottom: var(--gap);
+}
+
+.controls .field {
+  margin-bottom: 0;
+  min-width: 150px;
+}
+
+.controls .toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controls .toggle input {
+  width: auto;
+}
+
+/*
+ * A fixed minimum height from page load, so the list area does not grow when
+ * the first rows land. Gate box 3 measures layout shift over exactly this
+ * window.
+ */
+.rows {
+  min-height: 360px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: var(--gap);
+  height: var(--row-height);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row__rank {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__delta {
+  font-variant-numeric: tabular-nums;
+}
+
+/* §12 / §8.3.3: owned rows are greyed, never removed. */
+.row--owned {
+  color: var(--muted);
+}
+
+.row--below {
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-block;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 6px;
+  margin-left: 6px;
+  color: var(--muted);
+  vertical-align: 1px;
+}
+
+.skeleton .row__name,
+.skeleton .row__delta,
+.skeleton .row__rank {
+  background: var(--skeleton);
+  border-radius: 3px;
+  color: transparent;
+}
+
+.skeleton .row__name {
+  max-width: 260px;
+}
+
+/*
+ * The single unprompted motion on the page: one FLIP at completion. Every
+ * transform is set from script; this only declares how long it takes.
+ */
+.row--flip {
+  transition: transform 300ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row--flip {
+    transition: none;
+  }
+}
+
+.expand {
+  margin-top: var(--gap);
+}
+
+details.drawer {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+details.drawer summary {
+  cursor: pointer;
+}
+
+.drawer dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+}
+
+.drawer dt {
+  color: var(--muted);
+}
+
+.drawer dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.exports {
+  display: flex;
+  gap: var(--gap);
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.error {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+}
+
+.muted {
+  color: var(--muted);
+}
