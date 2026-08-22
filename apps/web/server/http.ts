@@ -99,6 +99,13 @@ async function handle(
     const params = matchPath(route.pattern, url.pathname);
     if (!params) continue;
     const body = method === "POST" ? await readJsonBody(req) : undefined;
+    if (body === TOO_LARGE) {
+      sendJson(res, 413, {
+        error: "body-too-large",
+        detail: `request body exceeds ${String(MAX_JSON_BODY_BYTES)} bytes`,
+      });
+      return;
+    }
     const result = await route.handle({
       params,
       query: url.searchParams,
@@ -212,9 +219,37 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.end(text);
 }
 
-async function readJsonBody(req: IncomingMessage): Promise<unknown> {
+/**
+ * The largest POST body this API will buffer. Every route that takes one takes
+ * a `RankInput` — a character, a spec, a phase and maybe a fight ref, which is
+ * a few hundred bytes — so 64 KiB is orders of magnitude of headroom and still
+ * refuses a stream that would otherwise be read into memory without limit.
+ */
+export const MAX_JSON_BODY_BYTES = 64 * 1024;
+
+/** Distinguishes "too big" from a parse failure, which is a 400 and not a 413. */
+const TOO_LARGE = Symbol("body-too-large");
+
+async function readJsonBody(
+  req: IncomingMessage
+): Promise<unknown | typeof TOO_LARGE> {
   const chunks: Buffer[] = [];
-  for await (const chunk of req) chunks.push(chunk as Buffer);
+  let size = 0;
+  for await (const chunk of req) {
+    const buf = chunk as Buffer;
+    size += buf.length;
+    // Checked as the stream arrives, not after: buffering the whole body and
+    // then measuring it is the thing the cap exists to prevent.
+    if (size > MAX_JSON_BODY_BYTES) {
+      // `pause`, not `destroy`: destroying the socket takes the response down
+      // with it, and the caller learns nothing except that the connection
+      // dropped. Nothing more is buffered either way — the chunks already read
+      // go out of scope with this function.
+      req.pause();
+      return TOO_LARGE;
+    }
+    chunks.push(buf);
+  }
   if (chunks.length === 0) return undefined;
   const text = Buffer.concat(chunks).toString("utf8");
   if (text.trim() === "") return undefined;

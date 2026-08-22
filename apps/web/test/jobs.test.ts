@@ -14,6 +14,7 @@ import {
   decodeShareLink,
 } from "@tbc-gear-prio/core";
 import { createExporters } from "../server/exports.js";
+import { MAX_JSON_BODY_BYTES } from "../server/http.js";
 import type { JobManager, JobView } from "../server/jobs.js";
 import {
   poolWithoutBis,
@@ -112,6 +113,20 @@ describe("POST /api/jobs", () => {
     server = await startServer();
     const res = await server.post("/api/jobs", { spec: "ret" });
     expect(res.status).toBe(400);
+  });
+
+  it("refuses a body past the size cap with 413", async () => {
+    // The cap is on the stream, so the assertion is that an oversized body is
+    // rejected as oversized rather than parsed and then found invalid — a
+    // 400 here would mean the whole thing was buffered first.
+    server = await startServer();
+    const res = await server.post("/api/jobs", {
+      ...RET_P2,
+      padding: "x".repeat(MAX_JSON_BODY_BYTES + 1),
+    });
+
+    expect(res.status).toBe(413);
+    expect((res.body as { error: string }).error).toBe("body-too-large");
   });
 
   it("answers 404 for a character this build cannot resolve", async () => {
