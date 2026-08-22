@@ -8,6 +8,47 @@ Blocked by: none
 
 # Worn gear missing from the pool scores rows against an empty slot
 
+## CORRECTION, 2026-08-21 — the defect is the warning, not the scoring
+
+**The mechanism described below is wrong, and was wrong from the first filing.**
+Found by the stage-gate planner while planning the fix; confirmed independently
+before acceptance. Left in place rather than deleted, because three artifacts and
+an SME verdict were built on it.
+
+**The rankings were never scored against an empty slot.** The baseline sim is
+composed from the character's full logged equipment — `rank.ts:652` builds it via
+`equipmentFromLoggedGear(logged)` with no pool filtering — and every candidate
+delta is measured after swapping the candidate over the worn item. The worn Ahune
+items are in that request and the sim pays their stats (ticket 108, externally
+verified against Wowhead).
+
+The shipped numbers confirm it:
+
+```
+python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shredzepelin.json'))['ranking'];items=r['items'];[print(s,[(i['name'],round(i['deltaDps'],1)) for i in sorted([x for x in items if x['slot']==s],key=lambda x:-x['deltaDps'])[:3]]) for s in ('neck','back','waist')]"
+```
+
+→ neck tops out at **+12.9** (Telonicus's Pendant over the worn Amulet of Bitter
+Hatred), back at **+7.8**. Against a genuinely empty neck, a phase-2 epic would
+price at roughly +80–150. These deltas are already measured against real gear.
+
+**The actual defect is the disclosure.** Because the worn item has no `PoolEntry`,
+no identity row anchors the slot, `wornUnrankable` fires (`rank.ts:1195-1204`),
+and the emitted message says:
+
+> "every row shown for neck was scored against an empty slot, not against Amulet
+> of Bitter Hatred. Do not read any of them as an upgrade or a loss"
+
+That is false, and it is what the SME read. The `do-not-trust` verdict was a
+correct response to a lying warning, not to a bad ranking. **So the fix is
+narrower than this ticket assumed and the output was never wrong** — but the
+ticket stays open, because a false retraction that makes a good shortlist
+unreadable is still a defect worth fixing, and the missing anchor rows are real.
+
+Everything below predates this correction. The heroic/Ahune analysis in the
+earlier correction still stands as far as *pool membership* goes; only the
+"scored against an empty slot" consequence is retracted.
+
 ## What happens
 
 When a character's worn item is not in the candidate pool for its slot, that slot
