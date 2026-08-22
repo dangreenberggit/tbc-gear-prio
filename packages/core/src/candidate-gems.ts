@@ -113,46 +113,74 @@ const META_NEAR_EP = 1.0;
 const PREFERRED_META_IDS: readonly number[] = [32409];
 
 /**
- * Preferred meta gem per detected spec, read from upstream's gear presets.
+ * Preferred meta gem per detected spec.
  *
- * The evidence procedure is the one the ret comment above already describes,
- * extended per spec (step6-meta-choice-spike.md option 1): read the meta
- * socketed in that spec's presets, as of `wowsims/tbc-new` @ v0.0.101
- * (`8aa378b3`). It is not an EP ranking, because stat EP cannot rank metas at
- * all — the ordering it produces is the wrong one.
+ * The ret row is read from upstream's gear presets, per the evidence
+ * procedure the ret comment above describes, extended per spec
+ * (step6-meta-choice-spike.md option 1): read the meta socketed in that
+ * spec's presets, as of `wowsims/tbc-new` @ v0.0.101 (`8aa378b3`). It is not
+ * an EP ranking, because stat EP cannot rank metas at all — the ordering it
+ * produces is the wrong one.
  *
- * **A spec with no entry is deliberate, not an oversight.** All five vendored
- * feral presets (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear Wolfshead
- * Helm 8345, which has no sockets, so upstream records no feral meta to copy.
- * Inheriting ret's Relentless would be a guess dressed in the same clothes as
- * ret's evidence, so uncovered specs take the fail-loud path instead: keep the
- * worn meta, never fill or substitute one, and disclose
- * `missingMetaPreferenceNote`. Verified against the vendored presets in
- * `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
- * ("Local verification pass"), which also settles that Chaotic Skyfire 34220
- * is phase 1 in our own data — the one online claim that would have mattered
- * here had a caster spec been detectable.
+ * **The `feral` row is an owner ruling — 2026-08-22, ticket 257.** It is the
+ * one row here not read from a preset. All five vendored feral (cat) presets
+ * (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear socketless Wolfshead
+ * Helm 8345, so upstream socketed no cat meta to copy. Ticket 257 found that
+ * leaving the row out was not the neutral "disclose and skip" it looked like:
+ * for a feral who wears no meta (every Wolfshead wearer — the upstream-normal
+ * case), the worn head has no socket to be missing anything from, so the
+ * baseline prices at full value while every meta-socket candidate head prices
+ * with an empty socket against it. A real under-pricing, not a symmetric gap.
+ * The owner's ruling closes that gap rather than opening a general policy for
+ * inventing metas: *"if theyre based on wowsims code, leave it i guess... but
+ * if it is just for feral dps then you can just assume relentless earthstorm
+ * would be the chosen meta gem, ezpz, done."* 32409 is not invented for the
+ * occasion — every other row here reads it out of a wowsims preset.
+ *
+ * **The `feral-tank` row is read from upstream, like ret's.** It is sourced
+ * from wowsims' bear presets, which are a separate spec upstream
+ * (`SpecFeralBearDruid`, `ui/druid/feralbear/gear_sets/` in the fork clone)
+ * and were missed when this table was first written — hence the earlier claim
+ * here that upstream recorded no feral meta at all, which was wrong for bear.
+ * Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
+ * `p2_offensive`, `p2_survival`, `p3`, `p4`, `preraid`); of the rest, three
+ * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896.
+ * That last one is a genuine disagreement, not a scoping artefact: 25896 is
+ * phase 1 in `data/gems/palette.json`, so it is in range for every phase this
+ * project supports. The row follows the majority of the sets that socket a
+ * meta at all, and this is the judgment call — 7 of 11 — that a derived table
+ * would have to make explicit (ticket 263). Re-check with:
+ *
+ *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
+ *
+ * Note what the `feral-tank` row does and does not reach today. It is read —
+ * `missingMetaPreferenceNote` and `metaSocketUnpriced` below both consult the
+ * table for any spec, and its presence is what keeps them quiet for
+ * feral-tank. What it never reaches is a ranking: `feral-tank` is identified
+ * but never ranked (`SpecId = "ret" | "feral"`, `types.ts`), so no candidate
+ * is ever gemmed from it. It is recorded because the evidence exists, not
+ * because a ranking needs it.
  *
  * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
  * reach this code, so a row for one would be untestable decoration.
  *
  * **When the detectable-spec list grows, this table must grow with it**
- * (ticket 142, review row 5-D4). The safety above rests entirely on
- * `DetectedSpecId` staying `ret | feral | feral-tank`: today the two feral
- * entries are absent on purpose because upstream records no feral meta, and
- * `missingMetaPreferenceNote` makes that absence loud. A newly detectable spec
- * -- a caster one especially -- would fall into the same "no preference
- * recorded" branch, but there the outcome is a quiet quality regression (an
- * empty meta socket where a real preference exists upstream) rather than a
- * fact about the game. So on adding a `DetectedSpecId`: find that spec's meta
- * in the vendored presets and add a row, or, if upstream genuinely records
- * none, say so here in the same terms the feral entries are explained -- do
- * not leave it to the fallback and do not inherit ret's.
+ * (ticket 142, review row 5-D4). A newly detectable spec — a caster one
+ * especially — falls into the "no preference recorded" branch by default, and
+ * unlike feral's now-settled case that outcome is a quiet quality regression
+ * (an empty meta socket where a real preference exists upstream) rather than
+ * a fact about the game. So on adding a `DetectedSpecId`: find that spec's
+ * meta in the vendored presets and add a row, or, if upstream genuinely
+ * records none, get an owner ruling the way ticket 257 got one for feral — do
+ * not leave it to the fallback and do not inherit another spec's row without
+ * that ruling.
  */
 export const SPEC_PREFERRED_METAS: Partial<
   Record<DetectedSpecId, readonly number[]>
 > = {
   ret: PREFERRED_META_IDS,
+  feral: PREFERRED_META_IDS,
+  "feral-tank": PREFERRED_META_IDS,
 };
 
 /**

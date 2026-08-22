@@ -1,10 +1,20 @@
 Status: open
 Type: defect (a recorded design decision is no longer true)
 Origin: review of fix/fork-lockfile-after-rebase, 2026-08-21
-Blocks: none
+Blocks: 263 (deferred until this is settled — see below)
 Blocked by: none
 
 # The fork sits on `cbf6b75` while the engine pin is v0.0.119
+
+## Downstream: ticket 263 waits on this
+
+Ticket 263 (derive the meta-preference table from wowsims presets) was
+deferred by the owner on 2026-08-22 specifically because of this split:
+*"we'll kick this down the road until we're only looking at one wowsims code
+repo on one branch"*. Cat and ret presets come from the engine pin, bear's
+from the fork clone, so "read it from upstream" has no single referent while
+the two disagree. Settling this ticket is 263's trigger — when it moves, say
+so there.
 
 ## The finding
 
