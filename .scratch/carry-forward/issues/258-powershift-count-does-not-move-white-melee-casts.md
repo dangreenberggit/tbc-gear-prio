@@ -1,10 +1,32 @@
-Status: open
+Status: wontfix
 Type: investigation (an unexplained number in an otherwise coherent cast table)
 Origin: pre-merge domain axis on feat/stage-2-close-shortlist-box, 2026-08-21
 Blocks: none
 Blocked by: none
 
 # A 20% swing in powershifts moves white-melee casts by 0.0016%
+
+## Shelved 2026-08-21 — owner decision: upstream, not ours
+
+The owner's rule was to shelve this unless it is a bug in **our** code rather
+than wowsims. Measured, not assumed:
+
+```
+grep -rli 'powershift' packages/core/src/            # 0 files
+grep -rlin 'swingtimer|autoattack|white.melee' packages/core/src/   # only proto/apl_pb.ts (generated)
+grep -rli 'powershift' vendor/tbc-new-fork/sim/      # sim/druid/feralcat/rotation.go
+```
+
+Powershift and swing-timer behaviour live entirely in the upstream sim. This
+repo composes `RaidSimRequest`s and reads `RaidSimResult`s; it models no combat.
+Whatever explains the flat white-melee count, we cannot cause it and cannot fix
+it here.
+
+**Kept open as a note rather than deleted**, because it is still the one number
+in that cast table with no feral explanation, and it would matter if the arms
+are ever re-run with real gear (ticket 250's scope note) or if a future upstream
+bump changes powershift handling. If it ever needs answering, it is an upstream
+question for wowsims, not a work item here.
 
 ## The finding
 

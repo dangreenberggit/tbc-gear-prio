@@ -29,7 +29,7 @@ Reproduce:
 python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shredzepelin.json'))['ranking'];[print(w['slot'],w['cause'],w.get('wornItemName')) for w in r['plausibilityWarnings']]"
 ```
 
-## Two causes found, both unverified as to fix
+## Two causes found — and only one of them is a defect
 
 The SME seat identified two distinct gaps. **Both were independently re-derived
 by the pre-merge domain axis on 2026-08-21 and both hold — but cause 1 is
@@ -64,9 +64,58 @@ described wrongly here, and the correction matters for whoever fixes it.**
    ```
 
 **So the three items split two ways, not one:** neck and back are missing source
-data (holiday); waist is a filtered source kind (heroic). One filter explains
-shredzepelin's waist and nexess's wrist together; a different gap explains the
-other two slots. A fix aimed at only one of these leaves the box open.
+data (holiday); waist is a filtered source kind (heroic). A fix aimed at only one
+of these leaves the box open.
+
+## Correction, 2026-08-21 — cause 2 is deliberate, and cause 1 is not an AtlasLoot gap
+
+Checked against the pool builder and the owner's recollection of prior work.
+Both halves above needed narrowing.
+
+**Cause 2 is a recorded scope decision, not a bug.** `scripts/assemble_universe.py:68-76`
+says so in its own words: only Magisters' Terrace is admitted, because *"Every
+other heroic in the pinned db drops phase-1 items (measured: 284 ret-eligible
+items across 15 dungeons); admitting them would rewrite the phase-1 end of every
+tier, which belongs to ticket 17's pre-raid question, not here."* Girdle of the
+Deathdealer (Heroic Black Morass) is therefore excluded **by design**.
+
+That does not make shredzepelin's waist slot correct — a slot scored against an
+empty slot is still wrong output — but the fix is not "admit heroics". It is
+either ticket 17's pre-raid scope question, or the worn-item handling in cause 3
+below. **Do not widen the heroic gate as part of this ticket.**
+
+**Cause 1 is upstream-wide, not an AtlasLoot omission.** The Ahune items carry
+`sources: null` in wowsims' own `db.json`, not merely in
+`data/atlasloot_sources.json`:
+
+```
+python -c "import json;db=json.load(open('vendor/wowsims/db.json'));[print(i['id'],i['name'],'| phase',i.get('phase'),'| sources:',i.get('sources')) for i in db['items'] if i['id'] in (278827,278819)]"
+```
+
+→ both `phase 2`, both `sources: null`. And `grep -in 'holiday\|ahune\|midsummer\|world.event' scripts/assemble_universe.py` returns nothing — the builder has **no world-event concept at all**. So there is no source row to read and nowhere to read it from; these items cannot enter a source-driven pool by any amount of AtlasLoot fixing.
+
+**Related prior work the owner remembered correctly:** ticket 108 established
+that these ids are legitimate TBC items, correctly resolved, with full stats the
+sim pays (~96 DPS for the pair), externally verified against Wowhead on
+2026-08-11. **That fix holds and is not regressed.** It fixed *item resolution*;
+this ticket is about *pool membership*, a different layer. Nothing to re-do there.
+
+## Cause 3 — the one that actually generalises
+
+Both cases above are instances of a single defect that does not depend on why an
+item is missing: **a worn item that is not in the pool is dropped from the
+baseline instead of being scored against.** Whatever the reason for its absence —
+no source data, a deliberate scope gate, a future filter nobody has written yet —
+the engine should compare candidates against *what the player is wearing*.
+
+Fixing cause 3 fixes shredzepelin's neck, back **and** waist at once, and
+nexess's wrist, without reopening ticket 17's scope question or inventing
+holiday-loot source data. It is also the only one of the three that prevents the
+*next* silently-dropped worn item, which is ticket 173's standing complaint.
+
+Force-including worn items in their own slot is the obvious shape. Ticket 174
+("force-included items claim unknown origin they have") is adjacent and should
+be read first.
 
 ## Acceptance
 
