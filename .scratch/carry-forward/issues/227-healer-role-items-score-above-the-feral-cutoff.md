@@ -1,15 +1,49 @@
-Status: open
+Status: wontfix
 Type: bug (suspected scoring / role-relevance gap on the feral-p3 fixture)
 Origin: second `sme-rank-review` opinion on ticket 225's closure, 2026-08-18 —
   verdict `do-not-trust` on the closure; handoff at
   `.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`
 Blocks: none
-Blocked by: none — 234 was parked `wontfix` on 2026-08-20 (owner punt), so the
-  ruling this waited on is not coming. See the note below. The retained
-  "Status, 2026-08-20 — `blocked`" line further down is superseded history, kept
-  for the trail; this header is the live state.
+Blocked by: none — 234 was parked `wontfix` on 2026-08-20 (owner punt). This
+  ticket is now parked alongside it; see "PARKED" immediately below. The
+  retained "Status, 2026-08-20 — `blocked`" line further down is superseded
+  history, kept for the trail; this header is the live state.
 
 # Ten healer-statted items score above the feral cutoff
+
+## PARKED 2026-08-22 — owner punt, same as 234
+
+**Owner ruling: punted.** `wontfix` here means parked indefinitely, not judged
+wrong — the merge gate's vocabulary word for a ticket nobody is working
+(`KNOWN_STATUSES`, `scripts/check_merge_ready.py:62`). Reopen to `open` if the
+owner wants it picked up. No agent should spend measurement time on it.
+
+Two reasons, both the owner's, recorded in his words:
+
+1. **The mana explanation is an inference, not a measurement.** The owner:
+   *"'the cause is measured' i dont think this assumption is proven out. int and
+   mp5 buy 'real casts' but not necessarily enough. maybe. maybe not."* This is
+   correct as a reading of what the Resolution section below actually
+   established. What was measured (`npx tsx packages/core/test/measure-ticket-227-direct.ts`)
+   is that isolated int/mp5 additions raise DPS and saturate at a common
+   ceiling. What was **not** measured is that the fixture's mana starvation is
+   sufficient to account for these ten items' specific deltas. The second is an
+   inference from the first. Prior sessions — including the one that proposed
+   closing this ticket on 2026-08-22 — stated it as established fact. It is
+   **hypothesis, untested**.
+
+2. **Closing this by leaning on 234 is circular.** The owner: *"its
+   questionable that this is somehow 69-ing another ticket at the same time
+   thats also punted, so lets punt this too."* 227's one open acceptance box
+   (5e) *is* 234's question. 234 is parked. Resolving 227 by pointing at 234 —
+   or by shipping a caveat justified as "the cheap half of what 234 would have
+   decided" — enacts half of a parked ruling without making it. Both stay
+   parked together.
+
+**If you are an agent reading this: stop here.** Do not run sims, do not
+re-measure, do not "just add the caveat". The caveat proposal was considered
+and rejected on 2026-08-22 for reason 2 above. Only the owner may move this
+ticket.
 
 ## Stays open — not raised unprompted at the Stage 2 gate, 2026-08-21
 
@@ -238,6 +272,18 @@ anything that extends it buys casts.
 The cause is the fixture's raid setup, not the items:
 `data/presets/feral/p2.raid-sim-skeleton.json` runs a 180-second encounter
 with **no Blessing of Wisdom, no mana spring totem and no Innervate**.
+
+> **Overstated — corrected 2026-08-22.** The paragraph above asserts the raid
+> setup *is* the cause. The measurement supports a weaker claim: isolated
+> int/mp5 additions raise DPS and saturate at a common ceiling, and the
+> skeleton lacks those three mana buffs. That the starvation is severe enough
+> to account for **these ten items' specific deltas** is an inference from
+> those two facts, **not measured** — no arm was run with the mana buffs added
+> to see the ten rows move. Treat the causal sentence as **hypothesis,
+> untested**. The owner flagged exactly this on 2026-08-22 (see PARKED at the
+> top); it is why the ticket is parked rather than closed. The re-run that
+> would settle it — same ten ids, skeleton with Blessing of Wisdom restored —
+> has not been performed and should not be, while this ticket is parked.
 
 EP is not involved either way: no healer stat index carries a feral EP weight,
 and EP only orders the pool — the delta comes from the sim.
