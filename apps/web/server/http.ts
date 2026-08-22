@@ -169,6 +169,15 @@ function serveStatic(
     return;
   }
 
+  // A path that names a file extension asked for an asset, not a page. Falling
+  // back to index.html would answer a missing bundle with an HTML 200, and the
+  // browser would report a MIME-type error instead of the 404 that says the
+  // build is stale.
+  if (extname(pathname) !== "") {
+    sendJson(res, 404, { error: "not-found", detail: pathname });
+    return;
+  }
+
   const index = join(staticDir, "index.html");
   if (!existsSync(index)) {
     sendJson(res, 404, {

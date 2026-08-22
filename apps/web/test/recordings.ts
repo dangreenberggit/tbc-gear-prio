@@ -163,6 +163,8 @@ export type JobPoll = {
 export type StartServerOptions = {
   /** Overrides the universe the run ranks against (the pin-BiS-absent case). */
   readonly pool?: readonly PoolEntry[];
+  /** Serves a built SPA from this directory, with the same fallback rules. */
+  readonly staticDir?: string;
 };
 
 /**
@@ -225,7 +227,12 @@ export async function startServer(
     codec: realSettingsCodec(),
   });
 
-  const server = createHttpServer({ routes });
+  const server = createHttpServer({
+    routes,
+    ...(options.staticDir === undefined
+      ? {}
+      : { staticDir: options.staticDir }),
+  });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address() as AddressInfo;
   const base = `http://127.0.0.1:${port}`;
