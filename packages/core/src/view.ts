@@ -6,7 +6,7 @@
  */
 import { meetsCutoff, type Cutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
-import { setPotentialIsConfounded } from "./rank-report-rules.js";
+import { setPotentialIsConfounded } from "./set-potential.js";
 import type { RankedItem, Ranking } from "./rank.js";
 
 export type ViewOptions = {
