@@ -1,0 +1,510 @@
+invocation: pnpm rank --region US --realm dreamscythe --character slamaltman --offline --spec ret --max-phase 3 --report .scratch/rank-reports/stage2-close-slamaltman.html
+resolved fixture: test/fixtures/slamaltman.raw.json
+binary: vendor/wowsimcli-v0.0.119-win32-x64/wowsimcli-windows.exe sha256 4b60235dcbb0088c9644ba464223fc9f65fcb3fccb2710cfc37fa3c752db97b1
+
+> tbc-gear-prio@0.1.0 rank C:\Users\dgree\Code\lulz\tbc-gear-prio
+> tsx packages/core/src/cli.ts "--region" "US" "--realm" "dreamscythe" "--character" "slamaltman" "--offline" "--spec" "ret" "--max-phase" "3" "--report" ".scratch/rank-reports/stage2-close-slamaltman.html"
+
+(node:39448) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+rank slamaltman@dreamscythe-US (offline) maxPhase=3 universe=391 cutoff=3.4 DPS / 0.15%
+simming 1/428
+simming 2/428
+simming 3/428
+simming 4/428
+simming 5/428
+simming 6/428
+simming 7/428
+simming 8/428
+simming 9/428
+simming 10/428
+simming 11/428
+simming 12/428
+simming 13/428
+simming 14/428
+simming 15/428
+simming 16/428
+simming 17/428
+simming 18/428
+simming 19/428
+simming 20/428
+simming 21/428
+simming 22/428
+simming 23/428
+simming 24/428
+simming 25/428
+simming 26/428
+simming 27/428
+simming 28/428
+simming 29/428
+simming 30/428
+simming 31/428
+simming 32/428
+simming 33/428
+simming 34/428
+simming 35/428
+simming 36/428
+simming 37/428
+simming 38/428
+simming 39/428
+simming 40/428
+simming 41/428
+simming 42/428
+simming 43/428
+simming 44/428
+simming 45/428
+simming 46/428
+simming 47/428
+simming 48/428
+simming 49/428
+simming 50/428
+simming 51/428
+simming 52/428
+simming 53/428
+simming 54/428
+simming 55/428
+simming 56/428
+simming 57/428
+simming 58/428
+simming 59/428
+simming 60/428
+simming 61/428
+simming 62/428
+simming 63/428
+simming 64/428
+simming 65/428
+simming 66/428
+simming 67/428
+simming 68/428
+simming 69/428
+simming 70/428
+simming 71/428
+simming 72/428
+simming 73/428
+simming 74/428
+simming 75/428
+simming 76/428
+simming 77/428
+simming 78/428
+simming 79/428
+simming 80/428
+simming 81/428
+simming 82/428
+simming 83/428
+simming 84/428
+simming 85/428
+simming 86/428
+simming 87/428
+simming 88/428
+simming 89/428
+simming 90/428
+simming 91/428
+simming 92/428
+simming 93/428
+simming 94/428
+simming 95/428
+simming 96/428
+simming 97/428
+simming 98/428
+simming 99/428
+simming 100/428
+simming 101/428
+simming 102/428
+simming 103/428
+simming 104/428
+simming 105/428
+simming 106/428
+simming 107/428
+simming 108/428
+simming 109/428
+simming 110/428
+simming 111/428
+simming 112/428
+simming 113/428
+simming 114/428
+simming 115/428
+simming 116/428
+simming 117/428
+simming 118/428
+simming 119/428
+simming 120/428
+simming 121/428
+simming 122/428
+simming 123/428
+simming 124/428
+simming 125/428
+simming 126/428
+simming 127/428
+simming 128/428
+simming 129/428
+simming 130/428
+simming 131/428
+simming 132/428
+simming 133/428
+simming 134/428
+simming 135/428
+simming 136/428
+simming 137/428
+simming 138/428
+simming 139/428
+simming 140/428
+simming 141/428
+simming 142/428
+simming 143/428
+simming 144/428
+simming 145/428
+simming 146/428
+simming 147/428
+simming 148/428
+simming 149/428
+simming 150/428
+simming 151/428
+simming 152/428
+simming 153/428
+simming 154/428
+simming 155/428
+simming 156/428
+simming 157/428
+simming 158/428
+simming 159/428
+simming 160/428
+simming 161/428
+simming 162/428
+simming 163/428
+simming 164/428
+simming 165/428
+simming 166/428
+simming 167/428
+simming 168/428
+simming 169/428
+simming 170/428
+simming 171/428
+simming 172/428
+simming 173/428
+simming 174/428
+simming 175/428
+simming 176/428
+simming 177/428
+simming 178/428
+simming 179/428
+simming 180/428
+simming 181/428
+simming 182/428
+simming 183/428
+simming 184/428
+simming 185/428
+simming 186/428
+simming 187/428
+simming 188/428
+simming 189/428
+simming 190/428
+simming 191/428
+simming 192/428
+simming 193/428
+simming 194/428
+simming 195/428
+simming 196/428
+simming 197/428
+simming 198/428
+simming 199/428
+simming 200/428
+simming 201/428
+simming 202/428
+simming 203/428
+simming 204/428
+simming 205/428
+simming 206/428
+simming 207/428
+simming 208/428
+simming 209/428
+simming 210/428
+simming 211/428
+simming 212/428
+simming 213/428
+simming 214/428
+simming 215/428
+simming 216/428
+simming 217/428
+simming 218/428
+simming 219/428
+simming 220/428
+simming 221/428
+simming 222/428
+simming 223/428
+simming 224/428
+simming 225/428
+simming 226/428
+simming 227/428
+simming 228/428
+simming 229/428
+simming 230/428
+simming 231/428
+simming 232/428
+simming 233/428
+simming 234/428
+simming 235/428
+simming 236/428
+simming 237/428
+simming 238/428
+simming 239/428
+simming 240/428
+simming 241/428
+simming 242/428
+simming 243/428
+simming 244/428
+simming 245/428
+simming 246/428
+simming 247/428
+simming 248/428
+simming 249/428
+simming 250/428
+simming 251/428
+simming 252/428
+simming 253/428
+simming 254/428
+simming 255/428
+simming 256/428
+simming 257/428
+simming 258/428
+simming 259/428
+simming 260/428
+simming 261/428
+simming 262/428
+simming 263/428
+simming 264/428
+simming 265/428
+simming 266/428
+simming 267/428
+simming 268/428
+simming 269/428
+simming 270/428
+simming 271/428
+simming 272/428
+simming 273/428
+simming 274/428
+simming 275/428
+simming 276/428
+simming 277/428
+simming 278/428
+simming 279/428
+simming 280/428
+simming 281/428
+simming 282/428
+simming 283/428
+simming 284/428
+simming 285/428
+simming 286/428
+simming 287/428
+simming 288/428
+simming 289/428
+simming 290/428
+simming 291/428
+simming 292/428
+simming 293/428
+simming 294/428
+simming 295/428
+simming 296/428
+simming 297/428
+simming 298/428
+simming 299/428
+simming 300/428
+simming 301/428
+simming 302/428
+simming 303/428
+simming 304/428
+simming 305/428
+simming 306/428
+simming 307/428
+simming 308/428
+simming 309/428
+simming 310/428
+simming 311/428
+simming 312/428
+simming 313/428
+simming 314/428
+simming 315/428
+simming 316/428
+simming 317/428
+simming 318/428
+simming 319/428
+simming 320/428
+simming 321/428
+simming 322/428
+simming 323/428
+simming 324/428
+simming 325/428
+simming 326/428
+simming 327/428
+simming 328/428
+simming 329/428
+simming 330/428
+simming 331/428
+simming 332/428
+simming 333/428
+simming 334/428
+simming 335/428
+simming 336/428
+simming 337/428
+simming 338/428
+simming 339/428
+simming 340/428
+simming 341/428
+simming 342/428
+simming 343/428
+simming 344/428
+simming 345/428
+simming 346/428
+simming 347/428
+simming 348/428
+simming 349/428
+simming 350/428
+simming 351/428
+simming 352/428
+simming 353/428
+simming 354/428
+simming 355/428
+simming 356/428
+simming 357/428
+simming 358/428
+simming 359/428
+simming 360/428
+simming 361/428
+simming 362/428
+simming 363/428
+simming 364/428
+simming 365/428
+simming 366/428
+simming 367/428
+simming 368/428
+simming 369/428
+simming 370/428
+simming 371/428
+simming 372/428
+simming 373/428
+simming 374/428
+simming 375/428
+simming 376/428
+simming 377/428
+simming 378/428
+simming 379/428
+simming 380/428
+simming 381/428
+simming 382/428
+simming 383/428
+simming 384/428
+simming 385/428
+simming 386/428
+simming 387/428
+simming 388/428
+simming 389/428
+simming 390/428
+simming 391/428
+simming 392/428
+simming 393/428
+simming 394/428
+simming 395/428
+simming 396/428
+simming 397/428
+simming 398/428
+simming 399/428
+simming 400/428
+simming 401/428
+simming 402/428
+simming 403/428
+simming 404/428
+simming 405/428
+simming 406/428
+simming 407/428
+simming 408/428
+simming 409/428
+simming 410/428
+simming 411/428
+simming 412/428
+simming 413/428
+simming 414/428
+simming 415/428
+simming 416/428
+simming 417/428
+simming 418/428
+simming 419/428
+simming 420/428
+simming 421/428
+simming 422/428
+simming 423/428
+simming 424/428
+simming 425/428
+simming 426/428
+simming 427/428
+simming 428/428
+gear read from Hydross the Unstable (VGjFb3mtX9xHgyav fight 8, ranked route), spec confidence 100%
+baseline 2003.05 ± 118.81 (metaAdjusted=false)
+~23 rating under the hit cap — Heroic Presence in your party would lower the cap by ~16. The real shortfall could run either way. Assumes 3/3 Precision — your logged build is not read for talents yet.
+assumptions: 4 standing (--assumptions to expand)
+substitutions this run (1):
+  - candidate 30892 (shoulder): Beast-tamer's Shoulders was dropped from the ranking: the sim failed on this swap — sim error: {"type":"ErrorOutcomeError","message":"interface conversion: *retribution.RetributionPaladin is not hunter.HunterAgent: missing method GetHunter\nStack Trace:\ngoroutine 16 [running]:\nruntime/debug.Stack()\n\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/debug/stack.go:26 +0x5e\ngithub.com/wowsims/tbc/sim/core.runSim.func1()\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:130 +0xe9\npanic({0x7ff6d7713c40?, 0xc00082e120?})\n\t/opt/hostedtoolcache/go/1.25.13/x64/src/runtime/panic.go:783 +0x132\ngithub.com/wowsims/tbc/sim/hunter.init.0.func2({0x7ff6d79df830?, 0xc000124058})\n\t/home/runner/work/tbc-new/tbc-new/sim/hunter/item_sets.go:244 +0x6b\ngithub.com/wowsims/tbc/sim/core.(*Equipment).applyItemEffects(0x0?, {0x7ff6d79df830, 0xc000124058}, 0xc003657c30, 0xc003657c60, 0x1)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/item_effects.go:78 +0x129\ngithub.com/wowsims/tbc/sim/core.(*Character).applyItemEffects(0xc0034a4000, {0x7ff6d79df830, 0xc000124058})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:348 +0x145\ngithub.com/wowsims/tbc/sim/core.(*Character).applyAllEffects(0xc0034a4000, {0x7ff6d79df830, 0xc000124058}, 0xc000d48690, 0xc001f7a0b0, 0xc000d41ea0)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/character.go:298 +0xd1\ngithub.com/wowsims/tbc/sim/core.(*Raid).applyCharacterEffects(0xc001f42160, 0xc000c61a00)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/raid.go:329 +0x425\ngithub.com/wowsims/tbc/sim/core.(*Environment).initialize(0xc001f42000, 0xc000c61a00, 0xc000cc63f0)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:131 +0xf1\ngithub.com/wowsims/tbc/sim/core.NewEnvironment(0xc000c61a00, 0xc000cc63f0, 0x0)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/environment.go:59 +0x6e\ngithub.com/wowsims/tbc/sim/core.NewSim(0xc000c0daa0, {{0x0?}})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:191 +0x2a\ngithub.com/wowsims/tbc/sim/core.runSim(0xc000c0daa0, 0xc00112a070, 0x0, {{0x0?}})\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:146 +0x7b\ngithub.com/wowsims/tbc/sim/core.RunSim(...)\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim.go:115\ncreated by github.com/wowsims/tbc/sim/core.runSimConcurrent in goroutine 9\n\t/home/runner/work/tbc-new/tbc-new/sim/core/sim_concurrent.go:476 +0x6ef\n"}
+#1 Belt of One-Hundred Deaths (waist) Δ48.85 (2.44%)
+#2 Torch of the Damned (weapon) Δ44.50 (2.22%)
+#3 Cataclysm's Edge (weapon) Δ26.41 (1.32%)
+#4 Band of Devastation (finger) Δ21.86 (1.09%)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#5 Unstoppable Aggressor's Ring (finger) Δ20.27 (1.01%)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#6 Cursed Vision of Sargeras (head) Δ19.59 (0.98%)
+#7 Shadow-walker's Cord (waist) Δ16.63 (0.83%)
+#8 Band of the Eternal Champion (finger) Δ16.39 (0.82%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#9 Razor-Scale Battlecloak (back) Δ15.81 (0.79%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#10 Bulwark of the Ancient Kings (chest) Δ15.71 (0.78%)  (tied)
+#11 Valestalker Girdle (waist) Δ15.45 (0.77%)  (tied)
+#12 Cloak of Darkness (back) Δ14.38 (0.72%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#13 Thalassian Wildercloak (back) Δ14.37 (0.72%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#14 Belt of Seething Fury (waist) Δ14.24 (0.71%)  (tied)
+#15 Shadowmaster's Boots (feet) Δ13.95 (0.70%)  (tied)
+#16 Shadowmoon Destroyer's Drape (back) Δ13.67 (0.68%)  (tied)
+#17 Black-Iron Battlecloak (back) Δ13.43 (0.67%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#18 Leggings of Divine Retribution (legs) Δ13.19 (0.66%)  (tied)
+#19 Vengeance Wrap (back) Δ13.05 (0.65%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#20 Bow-stitched Leggings (legs) Δ12.68 (0.63%)  (tied)
+#21 Ancestral Ring of Conquest (finger) Δ10.38 (0.52%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#22 Bindings of Lightning Reflexes (wrist) Δ9.52 (0.48%)  (tied)
+#23 Band of Eternity (finger) Δ9.13 (0.46%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#24 Dreadboots of the Legion (feet) Δ8.96 (0.45%)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#25 Girdle of the Lightbearer (waist) Δ8.71 (0.43%)  (tied)
+#26 Don Alejandro's Money Belt (waist) Δ8.70 (0.43%)  (tied)
+#27 Vengeful Gladiator's Greatsword (weapon) Δ8.46 (0.42%)  (tied)
+#28 Cloak of the Pit Stalker (back) Δ7.98 (0.40%)  (tied)
+    costs hit: -17 hit rating, widening the gap above to 39.615397999999985
+#29 Forest Prowler's Helm (head) Δ7.58 (0.38%)  (tied)
+    costs hit: -13 hit rating, widening the gap above to 35.615397999999985
+#30 Band of the Ranger-General (finger) Δ7.55 (0.38%)  (tied)
+    costs hit: -1 hit rating, widening the gap above to 23.615397999999985
+#31 Lightbringer Greaves (legs) Δ7.54 (0.38%)  (tied)
+#32 Boneweave Girdle (waist) Δ7.14 (0.36%)  (tied)
+#33 Band of Eternity (finger) Δ6.52 (0.33%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#34 Legguards of Endless Rage (legs) Δ5.89 (0.29%)  (tied)
+#35 Grips of Damnation (hands) Δ5.82 (0.29%)  (tied)
+#36 Mithril Band of the Unscarred (finger) Δ5.78 (0.29%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#37 Swiftsteel Bracers (wrist) Δ5.60 (0.28%)  (tied)
+#38 Fists of Mukoa (hands) Δ4.53 (0.23%)  (tied)
+#39 A'dal's Command (finger) Δ4.07 (0.20%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 41.615397999999985
+#40 Ring of Reciprocity (finger) Δ3.75 (0.19%)  (tied)
+    costs hit: -4 hit rating, widening the gap above to 26.615397999999985
+#41 Stormrage Signet Ring (finger) Δ3.43 (0.17%)  (tied)
+#42 Softstep Boots of Tracking (feet) Δ3.41 (0.17%)  (tied)
+#43 Ring of Deceitful Intent (finger) Δ3.28 (0.16%)  (tied)
+#44 Lightbringer Breastplate (chest) Δ3.25 (0.16%)  (tied)
+    costs hit: -2 hit rating, widening the gap above to 24.615397999999985
+346 row(s) below cutoff hidden; --show-below-cutoff to list them
+report .scratch/rank-reports/stage2-close-slamaltman.html
+report-json .scratch/rank-reports/stage2-close-slamaltman.json
