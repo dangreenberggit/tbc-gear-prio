@@ -13,7 +13,7 @@ stage-gate pipeline (`.scratch/stage-gate/stage-3-web-shell/`). `apps/web` is a
 `node:http` server plus a Vite React SPA over the CLI's own offline wiring;
 core gained `cli-wiring.ts`, `set-potential.ts`, `share-link.ts`,
 `individual-settings.ts` and a `candidates` progress field. Five of six Stage 3
-gate boxes close; box 1 ("type a character") stays open on ticket 263.
+gate boxes close; box 1 ("type a character") stays open on ticket 267.
 
 ## Adversarial
 
@@ -31,7 +31,7 @@ gate boxes close; box 1 ("type a character") stays open on ticket 263.
   `equipmentFromLoggedGear`, `socketedItemsFromLoggedGear`, `gemContext`,
   `equipmentForCandidateSwap`; the copy is deleted.
 - **A4 (medium)** `seams/store.ts:7` imports `node:sqlite` at module scope, so
-  `DATABASE_URL` gates persistence, not the Node 22 floor. Ticket 264 owns the
+  `DATABASE_URL` gates persistence, not the Node 22 floor. Ticket 268 owns the
   `engines` field. **Fixed** (docstring) `46df87b`.
 - **A5 (medium)** the pin-BiS pair in `jobs.test.ts` recomputes the expected
   value the way the code does, so it catches wiring breaks, not meaning bugs.
@@ -90,7 +90,7 @@ gate boxes close; box 1 ("type a character") stays open on ticket 263.
 - Clean: comment policy (every added comment is a why), no type derived from a
   JSON import (`slots.ts` is a hand-written `as const` with a drift test), three
   seams only, tests at the module interface plus pure-function units, tickets
-  263–265 well-formed with `NEXT` bumped in the same commit, 24 of 25 commit
+  267–269 well-formed with `NEXT` bumped in the same commit, 24 of 25 commit
   messages within the seven rules.
 
 ### Spec
@@ -106,10 +106,10 @@ gate boxes close; box 1 ("type a character") stays open on ticket 263.
 - **Sp4** = A1. **Fixed**.
 - **Sp5** `share` returns `{ url, apiVersion }` where the plan said `{ url }`.
   **Wontfix**, harmless extra field.
-- **Sp6** three tickets where step 15 said one. **Wontfix** — 264 and 265 are
+- **Sp6** three tickets where step 15 said one. **Wontfix** — 268 and 269 are
   real findings; the step's acceptance wording was narrower than the work.
 - **Sp7** the "Already have it" control greys/un-greys; §12's table describes
-  a row state, not a toggle. **Defer** → ticket 266 (owner ruling).
+  a row state, not a toggle. **Defer** → ticket 270 (owner ruling).
 - **Sp8** banner said "under the 142 hit cap" where §12 says "under the 9% hit
   cap". **Fixed** `fd815c3`: exported `HIT_CAP_PERCENT`; banner renders
   percent, rating, what you have, assumed race and talent, and the ± band.
@@ -120,7 +120,7 @@ gate boxes close; box 1 ("type a character") stays open on ticket 263.
   read_, which this is not.
 - **Sp10** server `mostRecent` and page `mostRecentFirst` both encode the
   most-recent rule; the server returns fights unsorted, so the page's sort is
-  load-bearing. **Defer** → ticket 267 (server should own the order).
+  load-bearing. **Defer** → ticket 271 (server should own the order).
 - Correct and recorded: share-link shape matches §12 L781; assumptions drawer
   carries all eight L756 items plus `standing`; rank never renumbered; footer
   attribution + `simVersion` on every page; no re-sort during a run; pin
@@ -130,7 +130,7 @@ gate boxes close; box 1 ("type a character") stays open on ticket 263.
 ## Summary
 
 Twenty-three findings across the four axes; **no blocker to the merge**.
-Fourteen fixed in six commits, two deferred to tickets (266, 267), seven
+Fourteen fixed in six commits, two deferred to tickets (270, 271), seven
 wontfix with reasons. The one that mattered most was the domain axis's D1:
 the per-item share link opened a bare item where the app had measured a
 gemmed, enchanted, meta-repaired one — fixed by using the ranker's own swap
@@ -141,7 +141,7 @@ attach. Every reviewer separately noted the verification-log entry states its
 own limits (box 1 open, box 3's unobserved frame, box 5 on test data) and
 found no claim the code cannot support.
 
-**Merge note:** ticket 263 (`WclGearSource` goes live) carries `Blocks:
+**Merge note:** ticket 267 (`WclGearSource` goes live) carries `Blocks:
 phase-3` on purpose — gate box 1 is genuinely open — so `pnpm merge-to-dev`
 needs `--ack-open-blockers`. Tickets 74–77 also say `Blocks: phase-3` but are
 all `Status: closed`.
@@ -153,7 +153,7 @@ all `Status: closed`.
 | A1   | Adversarial | fixed       | `6d917f5` — dedupe key dropped on settle; hold/open test                             |
 | A2   | Adversarial | fixed       | `6d917f5` — `contentHash` only when complete                                         |
 | A3   | Adversarial | fixed       | `6d917f5` — core index exports; `equipment.ts` deleted                               |
-| A4   | Adversarial | fixed       | `46df87b` — docstring; floor itself is ticket 264                                    |
+| A4   | Adversarial | fixed       | `46df87b` — docstring; floor itself is ticket 268                                    |
 | A5   | Adversarial | wontfix     | wiring test by design; meaning tested in core                                        |
 | A6   | Adversarial | fixed       | `b940bc3` — 64 KiB body cap, 413                                                     |
 | D1   | Domain      | fixed       | `5bcb597` — `equipmentForCandidateSwap` in exports                                   |
@@ -169,7 +169,7 @@ all `Status: closed`.
 | Sp4  | Spec        | fixed       | = A1                                                                                 |
 | Sp5  | Spec        | wontfix     | harmless extra field                                                                 |
 | Sp6  | Spec        | wontfix     | extra tickets are real findings                                                      |
-| Sp7  | Spec        | defer       | `.scratch/carry-forward/issues/266-already-have-it-control-semantics-are-a-guess.md` |
+| Sp7  | Spec        | defer       | `.scratch/carry-forward/issues/270-already-have-it-control-semantics-are-a-guess.md` |
 | Sp8  | Spec        | fixed       | `fd815c3` — percent + rating wording                                                 |
 | Sp9  | Spec        | wontfix     | cutoff known only at completion; one motion                                          |
-| Sp10 | Spec        | defer       | `.scratch/carry-forward/issues/267-character-api-returns-fights-unsorted.md`         |
+| Sp10 | Spec        | defer       | `.scratch/carry-forward/issues/271-character-api-returns-fights-unsorted.md`         |

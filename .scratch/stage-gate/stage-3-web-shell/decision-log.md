@@ -66,24 +66,24 @@ One dated line per gate: gate, outcome, reason, round count.
   - Step 2a `loadUniversePool` argument order (G1) — **accepted**.
   - Step 5 `.gitignore` line for `apps/web/dist-server/` — **accepted** (out-of-manifest path, has its row).
   - Step 5 `pnpm.onlyBuiltDependencies` + `esbuild` — **accepted**; the AGENTS.md-sanctioned route.
-  - Steps 10–11 preview harness on Node 20 → pinned Node 22 binary in `launch.json`; ticket 264 — **accepted**.
+  - Steps 10–11 preview harness on Node 20 → pinned Node 22 binary in `launch.json`; ticket 268 — **accepted**.
   - Steps 10–11 `.claude/launch.json` added — **accepted** (out-of-manifest path, has its row).
   - Step 11 CLS window not fully observable (headless tab `visibilityState: hidden` pauses polling) — **accepted as a stated limit**, and **flagged to the owner**: box 3 is ☑ on CLS 0 across load → `building pool` → completed view plus a fixed 360 px container; the fill-to-completion frame was not observed.
   - Step 11 no screenshots, DOM/PerformanceObserver readings only — **accepted**, stated in the log.
   - Step 8 export codec stubbed in S2, fixed at fan-in (core re-exports + `@bufbuild/protobuf` dep) — **accepted**.
   - Step 7 dedupe key outlives the run — **accepted**: §12 says "attaches to a running job rather than starting a second" and pairs it with the `contentHash` ranking cache; keeping the `submitKey` mapped after completion serves the same intent. `pre-merge-review`'s spec axis re-checks it.
   - Steps 6–11 UI/server submit-body mismatch, fixed with `submit-contract.test.ts` — **accepted**.
-  - Step 11 `hideOwned` removes rows; UI `greyOwned`; ticket 265 — **accepted**.
+  - Step 11 `hideOwned` removes rows; UI `greyOwned`; ticket 269 — **accepted**.
   - Step 17 `vitest.config.ts` `testTimeout: 30_000` — **accepted** (out-of-manifest path, has its row); the merge-base was green 3/3 so the flake is load, not logic.
   - Fan-in brief committed after S3 branched — **accepted**, no impact.
   - Out-of-manifest `.scratch/stage-gate/stage-3-web-shell/fan-in-brief.md` — stage artifact, **accepted**.
   - `git diff --name-only e83f1dc..HEAD` shows no other path outside the Paths manifest.
-  - Executor note 1: ticket 263 `Blocks: phase-3` is deliberate (box 1 open). Pre-existing
-    `Blocks: phase-3` tickets 74–77 are all `Status: closed`, so 263 is the only live
+  - Executor note 1: ticket 267 `Blocks: phase-3` is deliberate (box 1 open). Pre-existing
+    `Blocks: phase-3` tickets 74–77 are all `Status: closed`, so 267 is the only live
     blocker; `pnpm merge-to-dev` will need `--ack-open-blockers` — owner's call at the merge ask.
   Gate C: **PASS**. Hand-off: `pre-merge-review` next, then ask before any merge.
 - 2026-08-22 — **Hand-off.** `pre-merge-review` run on `8a1c01a..6ef098c` (four fresh Opus
-  axes): 23 findings, no blocker; 14 fixed in `6d917f5..46df87b`, 2 deferred (266, 267),
+  axes): 23 findings, no blocker; 14 fixed in `6d917f5..46df87b`, 2 deferred (270, 271),
   7 wontfix. Review: `docs/reviews/phase-3-web-shell.md`. `pnpm merge-to-dev --check-only
   --ack-open-blockers` → ok. Not merged; waiting for the owner. Open `Blocks: phase-3`
-  veto: ticket 263 only (gate box 1 open by design).
+  veto: ticket 267 only (gate box 1 open by design).

@@ -1717,7 +1717,7 @@ That entry is left as written; these are the corrections, not edits to it.
 
 Closes five of §14 Stage 3's six gate boxes. The first stays ☐ on purpose: the
 shell resolves three recorded characters and 404s everything else, so nobody
-can type their own name yet. Ticket 263 owns that.
+can type their own name yet. Ticket 267 owns that.
 
 Run from `phase-3/web-shell`. Bootstrap first — `vendor/` is gitignored, and a
 fresh worktree has neither the binary nor the pinned wowsims inputs:
@@ -1745,7 +1745,7 @@ The plan chose offline-first on size, not on a missing credential:
 gitignored at `.gitignore:2`, which is why a worktree does not see it). The
 live adapter sized at ~12 steps and ~8 files against an API that fixtures
 cannot verify, versus 17 steps for the rest of the shell, and PLAN.md L898
-scopes it out. Ticket 263 carries the sizing and the credential note.
+scopes it out. Ticket 267 carries the sizing and the credential note.
 
 ### ☑ 2 — feels calm during multi-minute work
 

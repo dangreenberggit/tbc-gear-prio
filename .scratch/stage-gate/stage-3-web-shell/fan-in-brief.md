@@ -69,7 +69,7 @@ integrated tip, then S4 (steps 13–17).
 
 ## Merge-gate note for Gate C (not the Executor's call)
 
-Ticket `263-wcl-gear-source-goes-live.md` is deliberately filed with
+Ticket `267-wcl-gear-source-goes-live.md` is deliberately filed with
 `Blocks: phase-3`, because gate box 1 ("type a character…") genuinely stays
 open until a live `WclGearSource` exists. `scripts/check_merge_ready.py`
 vetoes a merge when an open ticket's `Blocks:` names the branch's phase, so
@@ -77,6 +77,6 @@ vetoes a merge when an open ticket's `Blocks:` names the branch's phase, so
 `--ack-open-blockers`.
 
 That is the tracker working, not a defect: the plan's own box 1 is ☐. The
-choice between acknowledging the blocker, re-scoping 263 off phase-3, or
+choice between acknowledging the blocker, re-scoping 267 off phase-3, or
 holding the merge belongs to the orchestrator at Gate C. Tickets 72
 (re-blocked to phase-5) and 78 (closed) no longer block.

@@ -120,7 +120,7 @@ function resolveSimBinary(
  * Only the *persistence* is a choice — the Node floor is not. `seams/store.ts`
  * imports `node:sqlite` at module scope, so the runtime must supply it whether
  * or not `DATABASE_URL` is set; leaving the variable unset does not buy an
- * older Node. Ticket 264 covers declaring that floor in an `engines` field.
+ * older Node. Ticket 268 covers declaring that floor in an `engines` field.
  */
 export function createStore(
   env: NodeJS.ProcessEnv,

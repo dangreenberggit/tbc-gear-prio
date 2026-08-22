@@ -76,7 +76,7 @@ export type JobView = {
    * actually measured: the worn 17-slot vector and the gem context the run
    * was built with. `equipmentForCandidateSwap` takes exactly these, so the
    * exported link carries the migrated gems, the filled sockets and the
-   * repaired meta rather than the item worn bare (ticket 266 / D1).
+   * repaired meta rather than the item worn bare (review finding D1).
    */
   readonly baselineEquipment?: readonly SimItemSpec[];
   readonly gems?: GemContext;

@@ -17,7 +17,7 @@ un-owned ones. TMB's equivalent control is show/hide received; ours is
 grey/un-grey, which no one asks for.
 
 The greyed-never-dropped rule itself is honoured: the UI never passes core's
-`hideOwned` to `applyView` (ticket 265 covers the core option's semantics).
+`hideOwned` to `applyView` (ticket 269 covers the core option's semantics).
 Only the control's meaning is a guess.
 
 ## Options (owner's call)

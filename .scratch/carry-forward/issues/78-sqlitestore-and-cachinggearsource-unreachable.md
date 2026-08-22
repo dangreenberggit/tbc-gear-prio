@@ -44,6 +44,6 @@ in memory and the SQLite path is an opt-in, not a durability claim.
 it caches an *inner* gear source, and the only source Stage 3 wires is
 `RecordedGearSource`, which reads committed fixtures. Wrapping a fixture
 reader in a cache would be a call site with no purpose. It moves to ticket
-263, the live-`WclGearSource` ticket, where a real API to defend actually
+267, the live-`WclGearSource` ticket, where a real API to defend actually
 exists — that ticket carries it as item 8, alongside ticket 32's
 point-budget instrument.

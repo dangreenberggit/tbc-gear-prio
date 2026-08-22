@@ -179,7 +179,7 @@ function buildRequest(
  * assignment: it migrates the worn gems onto the candidate, fills what is left
  * empty, repairs the meta across the other worn items, and carries the worn
  * enchant where `enchantAppliesToItem` allows. Writing `{ id }` into the slot
- * instead — which is what this did before ticket 266 / review finding D1 —
+ * instead — which is what this did before review finding D1 —
  * exported the item bare, so the link did not open what the app measured.
  */
 export function withCandidate(
