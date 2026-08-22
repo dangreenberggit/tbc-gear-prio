@@ -114,8 +114,13 @@ function resolveSimBinary(
 
 /**
  * `MemoryStore` unless `DATABASE_URL` asks for the file-backed one. Nothing in
- * Stage 3's gate needs state to survive a restart, so persistence is an
- * opt-in that gives `SqliteStore` a real call site rather than the default.
+ * Stage 3's gate needs state to survive a restart, so persistence is a
+ * non-default that gives `SqliteStore` a real call site.
+ *
+ * Only the *persistence* is a choice — the Node floor is not. `seams/store.ts`
+ * imports `node:sqlite` at module scope, so the runtime must supply it whether
+ * or not `DATABASE_URL` is set; leaving the variable unset does not buy an
+ * older Node. Ticket 264 covers declaring that floor in an `engines` field.
  */
 export function createStore(
   env: NodeJS.ProcessEnv,

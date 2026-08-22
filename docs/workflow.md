@@ -158,7 +158,8 @@ deterministically offline in a unit test. That's the thing worth protecting
 
 PLAN.md §4 states the rule directly: "enforced by lint rule, not by good
 intentions." `packages/core/src` has zero filesystem, network, `process`,
-or `console` access outside `seams/` and `cli.ts` — everything crosses one
+or `console` access outside `seams/`, `cli.ts` and `cli-wiring.ts` (the
+exemption list in `eslint.config.js`) — everything crosses one
 of the three seams (`GearSource`, `SimRunner`, `Store`). This is what makes
 the fixture-replay test possible at all: if I/O could leak in anywhere,
 "runs offline from fixtures" would need auditing on every change instead of
