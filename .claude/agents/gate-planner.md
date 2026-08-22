@@ -24,9 +24,9 @@ other document over ~30 kB, get a heading map first
 ## Rules
 
 - **Read-only.** You change no files, anywhere. The plan is your final
-  message; the orchestrator writes it to disk. The orchestrator checks
-  `git status --porcelain` after you return and discards your output if
-  the tree is dirty.
+  message; the orchestrator writes it to disk. The orchestrator compares
+  `git status --porcelain` against the SHA it logged when the stage opened,
+  and reports changes it cannot account for rather than reverting them.
 - **Research by subagent.** When a question takes many reads whose content
   you will not reuse, spawn an `Explore` subagent (model `sonnet` at the
   call site) rather than digging yourself. Cap 4 researchers, each with a

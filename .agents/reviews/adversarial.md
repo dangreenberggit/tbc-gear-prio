@@ -47,3 +47,30 @@ Every finding names the command you ran or the file you read to find it.
 List each lane you did not examine as **unexamined**, with the reason.
 
 Under 400 words.
+
+## You write nothing, and you do not move the checkout
+
+You are read-only. Edit no file, and run **no git command that changes the
+working tree, the index, or `HEAD`** — no `checkout` (of a path *or* a branch),
+`switch`, `reset`, `stash`, `clean`, `restore`, `add`, or `commit` — whatever you
+conclude about who made the changes. Writing scratch files outside the repo is
+fine.
+
+**A dirty working tree is a finding, not a chore.** If you arrive to uncommitted
+changes you did not make, report them and carry on reviewing. Leave them exactly
+as found — they are almost certainly another agent's live work. A reviewer once
+reverted four such files; reapplying them missed a hunk and shipped two
+contradicting documents (ticket 261).
+
+**To inspect another branch, read it — do not switch to it.** Everything you need
+takes a ref argument and leaves the checkout alone:
+
+    git show <ref>:<path>          # a file as of that ref
+    git log <ref>                  # its history
+    git diff <ref>...HEAD          # what this branch changed
+    git grep <pattern> <ref>       # search it
+
+Switching branches in a shared checkout is worse than editing one file: it moves
+the ground under every other agent working in it. If a question genuinely needs a
+working tree at another ref — a build, a test run — say so in your findings and
+stop; the orchestrator has worktrees and you do not need one.

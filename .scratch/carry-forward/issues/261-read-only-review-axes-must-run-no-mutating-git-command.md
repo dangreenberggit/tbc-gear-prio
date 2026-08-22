@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect (process — a read-only seat destroyed uncommitted work)
 Origin: pre-merge review of `fix/worn-item-pool-coverage`, 2026-08-22; investigated
   the same day, findings in this ticket
@@ -79,20 +79,48 @@ because a session happened to hold the diffs — different **mechanism** (a tool
 versus an agent's judgement call on an unwritten rule). Ticket 149 is worktree
 debris, unrelated.
 
+## RESOLVED 2026-08-22
+
+Six edits across seven files (five plus two mirrors). Reviewed independently
+against the `writing-for-agents` skill before applying; that review found the
+stage-gate and gate-planner copies, which this ticket had not enumerated, and
+argued the `AGENTS.md` paragraph down to one sentence on the grounds that edits
+1-5 already fail safe and always-loaded context is expensive.
+
+The proposal, with the full before/after text and the reasoning for each change,
+is at `.scratch/stage-gate/ticket-261/proposed-edits.md`.
+
+Note `.claude/agents/` registers at session start only, so edit 5 takes effect in
+the next session.
+
 ## Acceptance
 
 - [x] `docs/verification-log.md`'s handoff count corrected to 16/four, matching
       `PLAN.md` and `ls .scratch/handoffs/sme-rank-judgment-*.md | wc -l` → 16.
 - [x] The process note in `docs/reviews/fix-worn-item-pool-coverage.md` corrected —
       one hunk was lost, not all reapplied.
-- [ ] `.agents/reviews/adversarial.md` and `.agents/reviews/domain.md` each state
+- [x] `.agents/reviews/adversarial.md` and `.agents/reviews/domain.md` each state
       the reviewer writes nothing and runs no mutating git command, and reports a
       dirty tree rather than repairing it.
-- [ ] `.claude/skills/pre-merge-review/SKILL.md` § 2 carries the same constraint,
+- [x] `.claude/skills/pre-merge-review/SKILL.md` § 2 carries the same constraint,
       and no dispatch wording asks a reviewer to make `git status --porcelain`
-      empty.
-- [ ] `AGENTS.md`'s parallel-agents section extends the shared-index warning from
+      empty. (Both mirrors; `mirrors:check` gates them.)
+- [x] `AGENTS.md`'s parallel-agents section extends the shared-index warning from
       two writers to writer-plus-readers.
+- [x] **Added in review** — `.claude/skills/stage-gate/SKILL.md` and its mirror no
+      longer instruct `git checkout -- .` at Gate A. This was the incident written
+      down as procedure, in two byte-identical copies, and fixing only
+      pre-merge-review would have left it live next door.
+- [x] **Added in review** — `.claude/agents/gate-planner.md` no longer tells a
+      read-only seat its output is discarded on a dirty tree.
+- [x] **Added on an owner question** — the ban is stated by *effect* ("no git
+      command that changes the working tree, the index, or `HEAD`") rather than as
+      a list of names, because `git checkout <branch>` is not `git checkout --`
+      and the first draft missed it. Switching branches in a shared checkout is
+      worse than reverting one file. The block now also shows the read-only way to
+      inspect another ref (`git show <ref>:<path>`, `git log <ref>`,
+      `git diff <ref>...HEAD`, `git grep <pattern> <ref>`) and says to report and
+      stop if a question genuinely needs a working tree elsewhere.
 
 **Note:** the last three edit `AGENTS.md` and skill/brief files, which `AGENTS.md`
 requires be **proposed in chat and approved** before editing. This ticket is the
