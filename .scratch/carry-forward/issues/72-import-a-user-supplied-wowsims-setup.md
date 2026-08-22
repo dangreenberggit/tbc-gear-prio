@@ -1,7 +1,7 @@
 Status: open
 Type: feature
 Origin: chat, 2026-08-08
-Blocks: phase-3
+Blocks: phase-5
 Blocked by: none
 
 # Let a user supply their own wowsims setup instead of trusting our skeleton
@@ -140,3 +140,25 @@ export deliverable.
 
 Validating that a user's talents match the requested spec (carry-forward 61's
 territory), and reconciling imported gear against WCL-logged gear.
+
+## Re-blocked 2026-08-22
+
+Stage 3 built the **export** half of this ticket's codec, so what is left
+here is smaller and later than it was.
+
+`packages/core/src/share-link.ts` ships `encodeShareLink` and
+`decodeShareLink` — the wowsims link format in both directions
+(`toBinary` -> deflate -> base64 -> URL hash, and its inverse), verified
+against `wowsimcli v0.0.119 decodelink`. `packages/core/src/individual-settings.ts`
+ships `toIndividualSimSettings`, the `RaidSimRequest` -> `IndividualSimSettings`
+lowering, with `apiVersion` read from the `current_version_number` proto
+option so the site does not run an import through its migration chain.
+
+So the decode step this ticket needed is done and tested. What remains is
+the product half: the `--sim-settings` flag, the opposite lift
+(`IndividualSimSettings` -> `RaidSimRequest`), and the APL merge — deciding
+whose rotation wins when a user's setup disagrees with our skeleton. That is
+a product question, not a codec one, and it does not gate Stage 3's web
+shell, which only ever exports.
+
+Re-blocked to phase-5.
