@@ -50,7 +50,19 @@ from apl_schema import known_fields, unknown_field_keys  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 RET_SKELETON = ROOT / "data/presets/ret/p2.raid-sim-skeleton.json"
-FERAL_APL = ROOT / "vendor/wowsims/feral_default.apl.json"
+# The owner's own APL, not upstream's default. Fidelity is the reason: this is
+# the rotation actually played, so simming it is what makes a ranking mean
+# something. Upstream's default is a generic preset -- and a demonstrably rough
+# one: it hardcodes the bite trick at 2 combo points for everyone, where this
+# APL branches on whether Wolfshead Helm (aura 17768) is equipped and uses 2
+# with it and 4 without. Ticket 250.
+#
+# Committed verbatim, so this file is provenance as well as input. It is a
+# wowsims UI *settings export* rather than a RaidSimRequest, so the rotation
+# hangs off `player`, not `raid.parties[0].players[0]` -- hence FERAL_APL_PATH
+# below. See data/presets/feral/README-owner-export.md.
+FERAL_APL = ROOT / "data/presets/feral/owner-p2.settings-export.json"
+FERAL_APL_PATH = ("player", "rotation")
 OUT = ROOT / "data/presets/feral/p2.raid-sim-skeleton.json"
 
 APL_KEYS = ("prepullActions", "priorityList", "groups", "valueVariables")
@@ -71,19 +83,23 @@ DISTANCE_FROM_TARGET = 0
 # arrays ret carries are deliberately omitted: check_raid_sim_skeleton.py's
 # docstring records them as exported UI menus with an unknown filter, inert
 # for ret, so inventing feral values would be fabrication rather than a port.
-CONSUMABLES = {
-    "potId": 22838,
-    "battleElixirId": 22831,
-    "guardianElixirId": 32067,
-    "foodId": 27664,
-    "mhImbueId": 34340,
-    "conjuredId": 12662,
-    "drumsId": "GreaterDrumsOfBattle",
-    "superSapper": True,
-    "goblinSapper": True,
-    "scrollAgi": True,
-    "scrollStr": True,
-}
+# Taken from the owner's export, not hardcoded, for the same reason the
+# rotation is: this must be what is actually played. The previous constant
+# differed from the owner's real setup in ways that mattered --
+# potId 22838 against their 22832, and no `potions` / `conjuredItems` lists at
+# all.
+#
+# Those two lists are load-bearing, not decoration. They are the *available*
+# consumables, and `selectedPotion` / `selectedConjured` compare the chosen id
+# against them; upstream's registerPotionCD / registerConjuredCD only make a
+# consumable usable if it appears there. Dropping them silently disarms the
+# rotation's Dark Rune and Flame Cap branches while the sim still returns a
+# confident number.
+#
+# drumsId is the one field kept from the old constant: it is a raid-provided
+# buff rather than a personal consumable, and the owner's export carries none.
+CONSUMABLES_FROM_EXPORT = ("player", "consumables")
+CONSUMABLES_EXTRA = {"drumsId": "GreaterDrumsOfBattle"}
 
 # Buffs, debuffs and party buffs come from data/presets/feral/buff-defaults.json,
 # extracted from upstream's own sim.ts by scripts/extract_sim_defaults.mjs
@@ -108,13 +124,35 @@ def main() -> int:
         if not path.is_file():
             print(f"missing {path.relative_to(ROOT)}", file=sys.stderr)
             if path is FERAL_APL:
-                print("  run: pnpm sync:wowsims:restore", file=sys.stderr)
+                print(
+                    "  this is a committed file, not a vendor fetch -- restore it "
+                    "with git rather than a sync",
+                    file=sys.stderr,
+                )
             if path is BUFF_DEFAULTS:
                 print("  run: pnpm sim-defaults:build", file=sys.stderr)
             return 2
 
     skeleton = json.loads(RET_SKELETON.read_text(encoding="utf-8"))
     apl = json.loads(FERAL_APL.read_text(encoding="utf-8"))
+    owner_consumables = apl
+    for key in CONSUMABLES_FROM_EXPORT:
+        if key not in owner_consumables:
+            raise SystemExit(
+                f"{FERAL_APL} has no {'.'.join(CONSUMABLES_FROM_EXPORT)} -- the "
+                "skeleton's consumables come from the owner's export, so a "
+                "missing block would silently ship upstream defaults instead."
+            )
+        owner_consumables = owner_consumables[key]
+    for key in FERAL_APL_PATH:
+        if key not in apl:
+            raise SystemExit(
+                f"{FERAL_APL} has no {'.'.join(FERAL_APL_PATH)} -- expected a "
+                "wowsims settings export. If the file was replaced with a "
+                "RaidSimRequest, FERAL_APL_PATH needs updating rather than the "
+                "rotation being read from the wrong depth."
+            )
+        apl = apl[key]
     buffs = json.loads(BUFF_DEFAULTS.read_text(encoding="utf-8"))
 
     # DiscardUnknown: true means the pinned binary drops a field it doesn't
@@ -159,7 +197,10 @@ def main() -> int:
     player["profession2"] = PROFESSION2
     player["reactionTimeMs"] = REACTION_TIME_MS
     player["distanceFromTarget"] = DISTANCE_FROM_TARGET
-    player["consumables"] = CONSUMABLES
+    consumables = dict(owner_consumables)
+    for key, value in CONSUMABLES_EXTRA.items():
+        consumables.setdefault(key, value)
+    player["consumables"] = consumables
 
     # The spec-options oneof: exactly one of these may be set.
     player.pop("retributionPaladin", None)
