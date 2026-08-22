@@ -11,3 +11,6 @@ One dated line per gate: gate, outcome, reason, round count.
   and the brief carries the corrected location. Ticket 252 (seat `WRONG_MODEL`
   guard misfires on "Opus 5") is still open: expect the misfire on Opus seats and
   correct in place via `SendMessage`, not by editing seat files.
+- 2026-08-22 — Brief committed as `d52af0bffcff6ea52acad4695db29d83e716ba8c` (the stage
+  directory needed its own `.gitignore` negation line, like the earlier stages).
+  Gate A's clean-tree comparison runs against this SHA.
