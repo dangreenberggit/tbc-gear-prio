@@ -223,3 +223,15 @@ export {
   type MetaRepairSwap,
   type SocketedItem,
 } from "./meta-repair.js";
+export {
+  RECORDED_CHARACTERS,
+  loadOfflineInputs,
+  loadUniversePool,
+  offlineGearRecordings,
+  repoRoot,
+  resolveWowsimcli,
+  type LoadOfflineInputsResult,
+  type LoadUniversePoolResult,
+  type MissingInput,
+  type OfflineInputs,
+} from "./cli-wiring.js";

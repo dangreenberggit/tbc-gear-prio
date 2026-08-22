@@ -90,7 +90,11 @@ export default tseslint.config(
   },
   {
     files: ["packages/core/src/**/*.ts"],
-    ignores: ["packages/core/src/seams/**", "packages/core/src/cli.ts"],
+    ignores: [
+      "packages/core/src/seams/**",
+      "packages/core/src/cli.ts",
+      "packages/core/src/cli-wiring.ts",
+    ],
     rules: {
       "no-restricted-imports": ["error", { paths: PURITY_RESTRICTED_IMPORTS }],
       "no-restricted-globals": [

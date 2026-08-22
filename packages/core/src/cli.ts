@@ -5,34 +5,20 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { platform } from "node:os";
+import { pathToFileURL } from "node:url";
 import { cutoffForSpec } from "./cutoff.js";
 import {
-  resolveEpWeightsPath,
-  type EpWeightsByPhaseFile,
-} from "./ep-weights.js";
+  loadOfflineInputs,
+  offlineGearRecordings,
+  repoRoot,
+  resolveWowsimcli,
+} from "./cli-wiring.js";
 import {
   fightProvenanceLines,
   hitCapBanner,
   renderDisclosure,
   setPotentialDisclosureLine,
 } from "./disclosure.js";
-import {
-  slamaltmanOfflineRecordings,
-  SLAMALTMAN_REF,
-  type SlamaltmanRawFixture,
-} from "./fixtures/slamaltman-offline.js";
-import {
-  reportEventsOfflineRecordings,
-  type ReportEventsRawFixture,
-} from "./fixtures/report-events-offline.js";
-import {
-  feralOfflineRecordings,
-  NEXESS_REF,
-  SHREDZEPELIN_REF,
-  type FeralRawFixture,
-} from "./fixtures/feral-offline.js";
 import { renderRankHtml } from "./rank-report.js";
 import {
   formatSetBonusLine,
@@ -41,21 +27,18 @@ import {
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
   bossesInPool,
-  poolFromUniverse,
   validateViewFilter,
   viewFilterValue,
   zonesInPool,
-  type PoolEntry,
-  type UniverseEntry,
 } from "./pool.js";
 import { applyView, type ViewOptions } from "./view.js";
 import { CliSimRunner } from "./seams/cli-sim-runner.js";
 import { RecordedGearSource } from "./seams/gear-source.js";
-import type { RaidSimRequest, SimRunner } from "./seams/sim-runner.js";
+import type { SimRunner } from "./seams/sim-runner.js";
 import { MemoryStore } from "./seams/store.js";
-import type { CharacterRef, ContentPhase, Region, SpecId } from "./types.js";
+import type { ContentPhase, Region, SpecId } from "./types.js";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+const root = repoRoot();
 
 function loadJson<T>(rel: string): T {
   return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
@@ -258,28 +241,6 @@ function defaultReportPath(args: {
   return join(root, ".scratch", "rank-reports", name);
 }
 
-function loadUniversePool(maxPhase: ContentPhase, spec: SpecId): PoolEntry[] {
-  const rel = `data/universes/${spec}-p${maxPhase}.json`;
-  const path = join(root, rel);
-  if (!existsSync(path)) {
-    console.error(`missing universe file ${rel}`);
-    console.error(
-      `generate: python scripts/assemble_universe.py --max-phase ${maxPhase} --spec ${spec}`
-    );
-    process.exit(2);
-    throw new Error("unreachable");
-  }
-  const data = loadJson<{ entries: UniverseEntry[] }>(rel);
-  return poolFromUniverse(data);
-}
-
-function resolveWowsimcli(): string {
-  const tag = loadJson<{ tag: string }>("data/wowsims.lock.json").tag;
-  const plat = platform().startsWith("win") ? "win32-x64" : "linux-x64";
-  const binary = plat === "win32-x64" ? "wowsimcli-windows.exe" : "wowsimcli";
-  return join(root, "vendor", `wowsimcli-${tag}-${plat}`, binary);
-}
-
 export async function main(argv = process.argv.slice(2)): Promise<number> {
   const args = parseArgs(argv);
   if (!args.offline) {
@@ -299,26 +260,13 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     maxPhase: args.maxPhase,
   };
 
-  // Feral's EP preset is named p1 because upstream ships no p2 one for it;
-  // data/presets/feral/p1.ep-weights.json records why.
-  const skeleton = loadJson<RaidSimRequest>(
-    `data/presets/${args.spec}/p2.raid-sim-skeleton.json`
-  );
-  // Resolved by maxPhase (ticket 159), not hardcoded to p2 — the assembler
-  // scores universes with the same phase-resolved file via
-  // ep_weights_path_for(), and the two paths disagreeing was ticket 159's
-  // bug. Only `.weights` is read here, never `.pseudoWeights` — the ticket
-  // flags that as a pre-existing observation, not something to silently fix
-  // in this change.
-  const epWeightsPath = resolveEpWeightsPath(
-    loadJson<EpWeightsByPhaseFile>("data/presets/ep-weights-by-phase.json"),
-    args.spec,
-    args.maxPhase
-  );
-  const epWeights = loadJson<{ weights: Record<string, number> }>(
-    epWeightsPath
-  ).weights;
-  const pool = loadUniversePool(args.maxPhase, args.spec);
+  const inputs = loadOfflineInputs(root, args.spec, args.maxPhase);
+  if (!inputs.ok) {
+    console.error(`missing universe file ${inputs.missing}`);
+    console.error(`generate: ${inputs.generate}`);
+    return 2;
+  }
+  const { skeleton, epWeights, pool } = inputs;
 
   const raidFilter = viewFilterValue(args.raid);
 
@@ -351,55 +299,14 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     return 2;
   }
 
-  const isSlamaltman =
-    args.spec === "ret" &&
-    args.region === SLAMALTMAN_REF.region &&
-    args.realm.toLowerCase() === SLAMALTMAN_REF.realm &&
-    args.character.toLowerCase() === SLAMALTMAN_REF.name;
+  const gearData = offlineGearRecordings(
+    root,
+    args.spec,
+    input.character,
+    args.reportEvents
+  ) ?? { fights: new Map(), gear: new Map() };
 
-  // Two recordings of the same character, differing in the route that reached
-  // his gear. Slamaltman has ten SSC kills and zero encounterRankings, so the
-  // fallback capture is a real resolve rather than a simulated one — see
-  // docs/verification-log.md, 2026-08-05.
-  // Feral captures, keyed by character. Each is one kill from one raid night;
-  // `confidence` is measured from form uptime by feralOfflineRecordings rather
-  // than assumed, because cat and bear are the same talents.
-  const FERAL_FIXTURES: ReadonlyArray<readonly [CharacterRef, string]> = [
-    // Void Reaver, not the Morogrim kill: on Morogrim he was backup tank and
-    // wore tank gear in cat form, so form uptime read 99.1% cat while nine of
-    // seventeen slots were a tanking set (ticket 06). Void Reaver is 98.8% cat
-    // with 100% Blessing of Salvation — same form, never on a tank assignment.
-    [SHREDZEPELIN_REF, "test/fixtures/shredzepelin-cat.raw.json"],
-    [NEXESS_REF, "test/fixtures/nexess.raw.json"],
-  ];
-  const feralMatch =
-    args.spec === "feral"
-      ? FERAL_FIXTURES.find(
-          ([ref]) =>
-            args.region === ref.region &&
-            args.realm.toLowerCase() === ref.realm &&
-            args.character.toLowerCase() === ref.name
-        )
-      : undefined;
-
-  const gearData = isSlamaltman
-    ? args.reportEvents
-      ? reportEventsOfflineRecordings(
-          loadJson<ReportEventsRawFixture>(
-            "test/fixtures/slamaltman-report-events.raw.json"
-          )
-        )
-      : slamaltmanOfflineRecordings(
-          loadJson<SlamaltmanRawFixture>("test/fixtures/slamaltman.raw.json")
-        )
-    : feralMatch
-      ? feralOfflineRecordings(
-          loadJson<FeralRawFixture>(feralMatch[1]),
-          feralMatch[0]
-        )
-      : { fights: new Map(), gear: new Map() };
-
-  const binary = resolveWowsimcli();
+  const binary = resolveWowsimcli(root);
   if (!existsSync(binary)) {
     console.error(`missing wowsimcli at ${binary}`);
     console.error("fetch: pnpm fetch:wowsimcli");
