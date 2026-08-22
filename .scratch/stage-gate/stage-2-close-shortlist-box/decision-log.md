@@ -190,3 +190,18 @@ One dated line per gate: gate, outcome, reason, round count.
   (2) let C6's `3000 × 5 per candidate` cost arithmetic through unchecked when
   `rank.ts:1028-1032` and closed ticket 200 both contradict it. Both are the same
   failure: confirming a claim's premise without checking the inference drawn from it.
+- 2026-08-21 — **Gate C: PASS.** All 12 deviation-ledger rows and the single
+  out-of-manifest path (`.gitignore`) dispositioned `accepted`; none needed rework
+  or escalation. Full table in `gate-c.md`. Headline claims re-verified from the
+  committed artifacts, not taken on the executor's word: the three arm DPS values
+  to the cent, the 62 σ statistic recomputed from per-arm stdev, Arm 2 reproducing
+  ticket 250's 740.67 exactly, and shredzepelin's three `worn-unrankable` slots
+  against nexess's one. Orchestrator change: dropped the three `.html` reports from
+  tracking (`1139926`) since the log entry's verification command reads the `.json`;
+  `pnpm verify` re-run after, exit 0, tree clean.
+- 2026-08-21 — **Stage complete.** Outcome: the Stage 2 gate box **stays open** on
+  a pre-registered rule (Q1 → Candidate C), blocker ticketed as 253. Ticket 250
+  **closed** — its premise refuted in sign: the adopted rotation is ~43 DPS
+  *better*, not ~18 worse. Q3 → Candidate B, ticket 227 stays open with the limits
+  of the observation recorded. Next: `pre-merge-review`, then **ask** before any
+  merge to `dev`.
