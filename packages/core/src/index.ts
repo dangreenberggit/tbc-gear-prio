@@ -235,3 +235,13 @@ export {
   type MissingInput,
   type OfflineInputs,
 } from "./cli-wiring.js";
+export {
+  CURRENT_API_VERSION,
+  toIndividualSimSettings,
+  type ToIndividualSimSettingsOptions,
+} from "./individual-settings.js";
+export {
+  decodeShareLink,
+  encodeShareLink,
+  type ByteCodec,
+} from "./share-link.js";
