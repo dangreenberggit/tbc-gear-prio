@@ -72,6 +72,27 @@ function dpsFor(req: RaidSimRequest, opts: SimRunOpts): number {
  */
 export class SyntheticSimRunner implements SimRunner {
   readonly calls: Array<{ req: RaidSimRequest; opts: SimRunOpts }> = [];
+  /**
+   * When set, every sim waits on it. A run is otherwise ~500 ms of real work
+   * with no point a test can reliably hold it at, and in-flight behaviour
+   * (job dedupe) is only observable while a run is in flight. Awaiting a gate
+   * the test opens turns that window into something it can name.
+   */
+  private gate: Promise<void> | undefined;
+  private release: (() => void) | undefined;
+
+  /** Blocks every subsequent sim until `open()` is called. */
+  hold(): void {
+    this.gate = new Promise<void>((resolve) => {
+      this.release = resolve;
+    });
+  }
+
+  open(): void {
+    this.release?.();
+    this.gate = undefined;
+    this.release = undefined;
+  }
 
   async version(): Promise<string> {
     return SIM_VERSION;
@@ -79,6 +100,7 @@ export class SyntheticSimRunner implements SimRunner {
 
   async run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> {
     this.calls.push({ req, opts });
+    await this.gate;
     return {
       dps: dpsFor(req, opts),
       stdev: 40,
@@ -124,6 +146,8 @@ export function poolWithoutBis(): PoolEntry[] {
 
 export type TestServer = {
   readonly base: string;
+  /** The sim behind this server, so a test can hold a run mid-flight. */
+  readonly sim: SyntheticSimRunner;
   get(path: string): Promise<{ status: number; body: unknown }>;
   getRaw(
     path: string
@@ -209,7 +233,6 @@ export async function startServer(
 
   const routes = createApiRoutes({
     store: new MemoryStore(),
-    clock: () => new Date("2026-08-22T00:00:00.000Z"),
     simVersion: SIM_VERSION,
     depsFor,
     gearSourceFor: (ref, spec) =>
@@ -231,6 +254,7 @@ export async function startServer(
 
   return {
     base,
+    sim,
     async get(path) {
       const res = await fetch(base + path);
       return { status: res.status, body: await res.json() };

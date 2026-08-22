@@ -72,15 +72,32 @@ describe("POST /api/jobs", () => {
   });
 
   it("attaches a second identical submission to the run already in flight", async () => {
+    // The sim is held open for the whole test so the window dedupe covers is
+    // a state the test controls, not a race against a ~500 ms run.
     server = await startServer();
+    server.sim.hold();
     const first = await submit(server);
-    // No await between the two: the point is that the second arrives while
-    // the first is still going, which is the only window dedupe covers.
     const second = await submit(server);
 
     expect(second.id).toBe(first.id);
     expect(second.attached).toBe(true);
     expect(first.attached).toBe(false);
+
+    server.sim.open();
+  });
+
+  it("starts a fresh job for a resubmission after the run has finished", async () => {
+    // Dedupe is in-flight only. Holding the key past completion would hand a
+    // later client the id of a run it never asked for; the repeat is cheap
+    // anyway because `rankUpgrades` answers it from the ranking cache.
+    server = await startServer();
+    const first = await submit(server);
+    const { final } = await server.poll(first.id);
+    expect(final.status).toBe("done");
+
+    const again = await submit(server);
+    expect(again.id).not.toBe(first.id);
+    expect(again.attached).toBe(false);
   });
 
   it("starts a separate run for a different request", async () => {

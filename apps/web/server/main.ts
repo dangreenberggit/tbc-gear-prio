@@ -69,7 +69,6 @@ export function buildServer(options: ServerOptions = {}) {
   const phase = defaultMaxPhase(root);
   const routes = createApiRoutes({
     store,
-    clock,
     simVersion: simVersionLabel(root),
     depsFor,
     gearSourceFor,

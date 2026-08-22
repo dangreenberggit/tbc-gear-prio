@@ -11,14 +11,18 @@
  * canonical JSON of the `RankInput`, which is what the client actually sent.
  *
  * The two keys answer different questions and both are wanted. `submitKey`
- * dedupes *in-flight* work: two browsers asking for the same character at the
- * same time share one run. `contentHash` dedupes *across* runs, and
- * `rankUpgrades` already does that itself through the ranking cache in the
- * `Store`. The job row carries the content hash once the run has produced it.
+ * dedupes *in-flight* work only: two browsers asking for the same character at
+ * the same time share one run, and the entry is dropped the moment the run
+ * settles. Cross-run dedupe is not this map's job — `rankUpgrades` already does
+ * it through the `contentHash`-keyed ranking cache in the `Store`, so a resubmit
+ * after completion starts a job that answers from cache rather than attaching to
+ * a finished one whose id the client never asked about. The job row carries the
+ * content hash once the run has produced it.
  */
 
 import {
   compose,
+  equipmentFromLoggedGear,
   rankUpgrades,
   RankError,
   type Deps,
@@ -30,7 +34,6 @@ import {
   type SpecId,
   type Store,
 } from "@tbc-gear-prio/core";
-import { equipmentFromLogged } from "./equipment.js";
 
 export type JobStatus = "queued" | "running" | "done" | "error";
 
@@ -84,7 +87,6 @@ export type DepsFor = (input: RankInput) =>
 export type CreateJobManagerInput = {
   readonly store: Store;
   readonly depsFor: DepsFor;
-  readonly clock: () => Date;
   readonly simVersion?: string;
 };
 
@@ -119,16 +121,19 @@ export type JobManager = {
 };
 
 export function createJobManager(input: CreateJobManagerInput): JobManager {
-  const { store, depsFor, clock } = input;
+  const { store, depsFor } = input;
   const simVersion = input.simVersion ?? "unknown";
 
   const jobs = new Map<string, JobRecord>();
   /**
-   * submitKey → the job serving it. Kept after the run finishes, not only
-   * while it is in flight: a browser that reloads and re-posts the same
-   * request wants the ranking it already paid for, and re-running would spend
-   * the sims again to reach the same numbers. The entry is dropped only when
-   * the run failed, so a retry after an error is a real retry.
+   * submitKey → the job serving it, for as long as that job is in flight.
+   *
+   * PLAN.md §12 asks a resubmission to attach to a *running* job; holding the
+   * key past completion instead attaches a later, unrelated request to a
+   * finished one, so a client that expects a fresh run silently re-reads an
+   * old id. The entry is therefore deleted when the run settles either way —
+   * the sims are not re-paid for, because `rankUpgrades` answers the repeat
+   * from its `contentHash`-keyed ranking cache.
    */
   const byKey = new Map<string, string>();
   const running = new Set<Promise<void>>();
@@ -165,7 +170,7 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
     await store.job.create({ contentHash: "", input: rankInput });
 
     const run = execute(record, rankInput, built.deps).finally(() => {
-      if (record.status === "error") byKey.delete(key);
+      byKey.delete(key);
     });
     running.add(run);
     void run.finally(() => running.delete(run));
@@ -183,8 +188,11 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
       const ranking = await rankUpgrades(rankInput, deps, (p) => {
         applyProgress(record, p);
       });
-      record.contentHash = ranking.contentHash;
       if (ranking.complete) {
+        // Only a complete run publishes its hash: the same field on an
+        // aborted one reads as "this is the audited answer for that input"
+        // to every consumer, and nothing downstream can tell the two apart.
+        record.contentHash = ranking.contentHash;
         record.result = ranking;
         record.baselineRequest = await composeBaseline(
           deps,
@@ -205,7 +213,6 @@ export function createJobManager(input: CreateJobManagerInput): JobManager {
       record.errorKind = err instanceof RankError ? err.kind : "internal";
       record.errorDetail = err instanceof Error ? err.message : String(err);
     }
-    void clock();
   }
 
   function read(id: string): JobView | undefined {
@@ -263,7 +270,7 @@ async function composeBaseline(
   return compose(deps.raidSimSkeleton, {
     name: rankInput.character.name,
     race: ranking.assumptions.race,
-    equipment: equipmentFromLogged(gear),
+    equipment: equipmentFromLoggedGear(gear),
   });
 }
 

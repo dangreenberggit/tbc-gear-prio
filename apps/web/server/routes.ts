@@ -23,7 +23,6 @@ import type { Route } from "./http.js";
 
 export type CreateApiRoutesInput = {
   readonly store: Store;
-  readonly clock: () => Date;
   readonly simVersion: string;
   readonly depsFor: DepsFor;
   readonly gearSourceFor: GearSourceFor;
@@ -39,7 +38,6 @@ export function createApiRoutes(input: CreateApiRoutesInput): Route[] {
   const jobs = createJobManager({
     store: input.store,
     depsFor: input.depsFor,
-    clock: input.clock,
     simVersion: input.simVersion,
   });
   const characters = createCharacterResolver(input.gearSourceFor);

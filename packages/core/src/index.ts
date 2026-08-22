@@ -23,6 +23,7 @@ export {
 } from "./view.js";
 export {
   RankError,
+  equipmentForCandidateSwap,
   rankUpgrades,
   resolveFight,
   type Deps,
@@ -134,8 +135,10 @@ export type {
 } from "./types.js";
 export {
   fillEmptyCandidateGems,
+  gemContext,
   gemEp,
   gemFillWeights,
+  type GemContext,
 } from "./candidate-gems.js";
 export { migrateGemsToItem, gemEligibleForSocket } from "./migrate-gems.js";
 export {
@@ -167,6 +170,10 @@ export {
   type EnchantEntry,
 } from "./enchants.js";
 export { compose, type ComposePlayer } from "./compose.js";
+export {
+  equipmentFromLoggedGear,
+  socketedItemsFromLoggedGear,
+} from "./logged-gear.js";
 export { setBreakNote } from "./set-bonus.js";
 export {
   classifyDeadSlots,
