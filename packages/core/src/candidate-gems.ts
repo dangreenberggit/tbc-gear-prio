@@ -122,28 +122,36 @@ const PREFERRED_META_IDS: readonly number[] = [32409];
  * an EP ranking, because stat EP cannot rank metas at all — the ordering it
  * produces is the wrong one.
  *
- * **The feral and feral-tank rows have different provenance — owner ruling,
- * 2026-08-22, ticket 257.** All five vendored feral presets (`preraid`,
- * `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear socketless Wolfshead Helm 8345, so
- * upstream records no feral meta to copy the way the ret row was copied.
- * Ticket 257 found that leaving the table without a feral row was not the
- * neutral "disclose and skip" it looked like: for a feral player who already
- * wears no meta (i.e. every Wolfshead wearer, the upstream-normal case), the
- * worn head has no socket to be missing anything from, so the baseline is
- * priced at full value while every meta-socket candidate head is priced with
- * an empty socket against it — a real under-pricing, not a symmetric gap. The
- * two engine specs are `SpecId = "ret" | "feral"` (`types.ts`, `feral-tank`
- * existing only for identification), ret already had a row, so feral was the
- * entire gap. The owner's ruling closes it rather than opening a general
- * policy for inventing metas: *"if theyre based on wowsims code, leave it i
- * guess... but if it is just for feral dps then you can just assume
- * relentless earthstorm would be the chosen meta gem, ezpz, done."* Relentless
- * Earthstorm Diamond 32409 is not invented for this — it is the same id
- * `PREFERRED_META_IDS` already carries for ret, and it is the meta socketed in
- * wowsims' own vendored ret presets (`ret_p1`, `ret_p2`, `ret_p3` gear sets,
- * plus `db.json`), so seating it for feral is community/owner consensus
- * riding on an id wowsims itself vouches for, not a guess dressed in evidence
- * that does not exist.
+ * **The `feral` row is an owner ruling — 2026-08-22, ticket 257.** It is the
+ * one row here not read from a preset. All five vendored feral (cat) presets
+ * (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear socketless Wolfshead
+ * Helm 8345, so upstream socketed no cat meta to copy. Ticket 257 found that
+ * leaving the row out was not the neutral "disclose and skip" it looked like:
+ * for a feral who wears no meta (every Wolfshead wearer — the upstream-normal
+ * case), the worn head has no socket to be missing anything from, so the
+ * baseline prices at full value while every meta-socket candidate head prices
+ * with an empty socket against it. A real under-pricing, not a symmetric gap.
+ * The owner's ruling closes that gap rather than opening a general policy for
+ * inventing metas: *"if theyre based on wowsims code, leave it i guess... but
+ * if it is just for feral dps then you can just assume relentless earthstorm
+ * would be the chosen meta gem, ezpz, done."* 32409 is not invented for the
+ * occasion — every other row here reads it out of a wowsims preset.
+ *
+ * **The `feral-tank` row is read from upstream, like ret's.** It is sourced
+ * from wowsims' bear presets, which are a separate spec upstream
+ * (`SpecFeralBearDruid`, `ui/druid/feralbear/gear_sets/` in the fork clone)
+ * and were missed when this table was first written — hence the earlier claim
+ * here that upstream recorded no feral meta at all, which was wrong for bear.
+ * Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
+ * `p2_offensive`, `p2_survival`, `p3`, `p4`, `preraid`); of the rest, three
+ * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896,
+ * outside this project's phase range. Re-check with:
+ *
+ *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
+ *
+ * Note this row is currently inert: `feral-tank` is identified but never
+ * ranked (`SpecId = "ret" | "feral"`, `types.ts`), so nothing reads it today.
+ * It is recorded because the evidence exists, not because a caller needs it.
  *
  * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
  * reach this code, so a row for one would be untestable decoration.
