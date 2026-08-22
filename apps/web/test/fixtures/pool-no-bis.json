@@ -1,0 +1,397 @@
+{
+  "spec": "ret",
+  "maxPhase": 2,
+  "carryoverPolicy": "union",
+  "generatedBy": "scripts/assemble_universe.py",
+  "epWeights": {
+    "path": "data/presets/ret/p2.ep-weights.json",
+    "pin": "8aa378b3"
+  },
+  "entries": [
+    {
+      "itemId": 28672,
+      "name": "Drape of the Dark Reavers",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Shade of Aran",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 68.49,
+      "bisTags": []
+    },
+    {
+      "itemId": 28529,
+      "name": "Royal Cloak of Arathi Kings",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 60.4,
+      "bisTags": []
+    },
+    {
+      "itemId": 30098,
+      "name": "Razor-Scale Battlecloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Morogrim Tidewalker",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 50.25,
+      "curatedSets": ["p2"],
+      "bisTags": [],
+      "bisSets": ["p2"]
+    },
+    {
+      "itemId": 29994,
+      "name": "Thalassian Wildercloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.88,
+      "bisTags": []
+    },
+    {
+      "itemId": 30729,
+      "name": "Black-Iron Battlecloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doomwalker",
+          "kind": "raid",
+          "zone": "World Bosses",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 47.7,
+      "bisTags": []
+    },
+    {
+      "itemId": 33122,
+      "name": "Cloak of Darkness",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeFaction": "The Violet Eye",
+          "recipeStanding": "Exalted",
+          "recipeFactionId": 967,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 41.48,
+      "curatedSets": ["p3"],
+      "bisTags": []
+    },
+    {
+      "itemId": 28777,
+      "name": "Cloak of the Pit Stalker",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 41.44,
+      "bisTags": []
+    },
+    {
+      "itemId": 24259,
+      "name": "Vengeance Wrap",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 39.03,
+      "curatedSets": ["p1", "preraid"],
+      "bisTags": []
+    },
+    {
+      "itemId": 28764,
+      "name": "Farstrider Wildercloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 28.7,
+      "bisTags": []
+    },
+    {
+      "itemId": 29992,
+      "name": "Royal Cloak of the Sunstriders",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.48,
+      "bisTags": []
+    },
+    {
+      "itemId": 28570,
+      "name": "Shadow-Cloak of Dalaran",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.12,
+      "bisTags": []
+    },
+    {
+      "itemId": 30735,
+      "name": "Ancient Spellcloak of the Highborne",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "boss": "Doom Lord Kazzak",
+          "kind": "raid",
+          "zone": "World Bosses",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 6.12,
+      "bisTags": []
+    },
+    {
+      "itemId": 28766,
+      "name": "Ruby Drape of the Mysticant",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.1,
+      "bisTags": []
+    },
+    {
+      "itemId": 28797,
+      "name": "Brute Cloak of the Ogre-Magi",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "High King Maulgar",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.76,
+      "bisTags": []
+    },
+    {
+      "itemId": 29989,
+      "name": "Sunshower Light Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.42,
+      "bisTags": []
+    },
+    {
+      "itemId": 28765,
+      "name": "Stainless Cloak of the Pure Hearted",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.06,
+      "bisTags": []
+    },
+    {
+      "itemId": 28582,
+      "name": "Red Riding Hood's Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Big Bad Wolf",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72,
+      "bisTags": []
+    },
+    {
+      "itemId": 28653,
+      "name": "Shadowvine Cloak of Infusion",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0,
+      "bisTags": []
+    },
+    {
+      "itemId": 28660,
+      "name": "Gilded Thorium Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0,
+      "bisTags": []
+    },
+    {
+      "itemId": 29925,
+      "name": "Phoenix-Wing Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Al'ar",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0,
+      "bisTags": []
+    }
+  ]
+}
