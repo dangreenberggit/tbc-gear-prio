@@ -268,19 +268,19 @@ diagnosis rather than evidence against it.
 
 | ID       | Axis            | Disposition | Ticket / note                                                                                                                      |
 | -------- | --------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Adv-1    | Adversarial     | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 5)                                     |
-| Adv-2    | Adversarial     | defer       | `.scratch/carry-forward/issues/265-weakened-emptymetasocket-assertion-swallows-missing-row.md`                                     |
-| Adv-3    | Adversarial     | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 2)                                     |
+| Adv-1    | Adversarial     | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 5)                                     |
+| Adv-2    | Adversarial     | fixed       | `.scratch/carry-forward/issues/265-weakened-emptymetasocket-assertion-swallows-missing-row.md`                                     |
+| Adv-3    | Adversarial     | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 2)                                     |
 | Adv-4    | Adversarial     | wontfix     | Matches the repo's existing documented plan (comment already names the next-spec case); not a new defect                           |
-| Dom-1    | Domain          | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 1)                                     |
-| Dom-2    | Domain          | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 3)                                     |
-| Dom-3    | Domain          | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 4)                                     |
-| Std-1    | Standards       | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 4, typo)                               |
+| Dom-1    | Domain          | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 1)                                     |
+| Dom-2    | Domain          | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 3)                                     |
+| Dom-3    | Domain          | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 4)                                     |
+| Std-1    | Standards       | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 4, typo)                               |
 | Std-2    | Standards       | wontfix     | Commit-message wrap is a style nit on already-merged-worthy commits; not worth a rewrite of shipped history                        |
-| Std-3    | Standards       | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 5)                                     |
+| Std-3    | Standards       | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 5)                                     |
 | Std-4    | Standards       | wontfix     | Judgement call; the duplication is between a comment and its two test-file echoes, already captured by ticket 264's scope          |
 | Std-5    | Standards       | wontfix     | Judgement call; the repeated cast is 4 short lines, low cost to leave                                                              |
 | Spec-1   | Spec            | wontfix     | Ticket 263 and the ticket-251 edit are separately authorized by the owner, not undisclosed scope creep                             |
-| Spec-2   | Spec            | defer       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 3, same as Dom-2)                      |
+| Spec-2   | Spec            | fixed       | `.scratch/carry-forward/issues/264-shipped-comment-inaccuracies-in-ticket-257-fix.md` (item 3, same as Dom-2)                      |
 | Spec-3   | Spec            | wontfix     | Minor durable-claims gap (missing pre-fix sha); the claim is corroborated by the verification section's own probe table, not false |
 | Verify-1 | (review author) | defer       | `.scratch/carry-forward/issues/266-feral-p3-full-sweep-tests-time-out-at-default-5s.md`                                            |
