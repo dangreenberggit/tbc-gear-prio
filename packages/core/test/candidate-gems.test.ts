@@ -161,25 +161,29 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
 });
 
 /**
- * Per-spec preferred meta (step6-meta-choice-spike.md option 1). Stat EP
- * cannot rank meta gems — nine of eighteen score 0.00 and the multiplicative
- * effects invert the additive ordering — so the choice is read from upstream's
- * gear presets per spec, exactly as it already was for ret.
+ * Per-spec preferred meta (step6-meta-choice-spike.md option 1, extended by
+ * the owner's 2026-08-22 ruling on ticket 257). Stat EP cannot rank meta
+ * gems — nine of eighteen score 0.00 and the multiplicative effects invert
+ * the additive ordering — so the choice cannot come from an EP pick.
  *
- * The evidence for both entries below is in
- * `.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`
- * ("Local verification pass"), read from the vendored presets rather than from
- * guides: all three ret presets socket 32409 and no other meta; all five feral
- * presets wear Wolfshead Helm 8345, which has no sockets at all.
+ * Ret's entry is read from upstream's gear presets: all three ret presets
+ * socket 32409 and no other meta (`.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`,
+ * "Local verification pass"). Feral and feral-tank have no such preset —
+ * upstream's five vendored feral presets wear socketless Wolfshead Helm 8345 —
+ * so those two rows rest on the owner's ruling instead: ticket 257 found that
+ * leaving them absent was not a neutral "disclose and skip", it under-priced
+ * every meta-socket head candidate for a player who already wears no meta
+ * (i.e. every Wolfshead wearer, the upstream-normal case), because the
+ * baseline in that case is missing nothing while the candidate was priced
+ * with an empty socket. Relentless Earthstorm Diamond 32409 is not invented
+ * for feral — it is the same id ret's row already carries, and it is the meta
+ * wowsims' own vendored ret presets socket.
  */
 describe("SPEC_PREFERRED_METAS", () => {
-  it("records ret's Relentless entry and no invented feral one", () => {
+  it("records the same Relentless entry for ret, feral and feral-tank", () => {
     expect(SPEC_PREFERRED_METAS.ret).toEqual([32409]);
-    // Upstream has no feral meta to copy — the presets skip the socket
-    // entirely. An entry here would be a guess wearing the same clothes as
-    // ret's evidence-backed one.
-    expect(SPEC_PREFERRED_METAS.feral).toBeUndefined();
-    expect(SPEC_PREFERRED_METAS["feral-tank"]).toBeUndefined();
+    expect(SPEC_PREFERRED_METAS.feral).toEqual([32409]);
+    expect(SPEC_PREFERRED_METAS["feral-tank"]).toEqual([32409]);
   });
 
   it("seats ret's preferred meta when the spec is known", () => {
@@ -197,17 +201,40 @@ describe("SPEC_PREFERRED_METAS", () => {
     expect(gems[metaIdx]).toBe(32409);
   });
 
+  it("seats the same preferred meta for feral (ticket 257)", () => {
+    const headId = 32461;
+    const sockets = socketsFor(headId);
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const ctx = gemContext(gemsForPhase(3), retEpWeights, "feral");
+    const gems = fillEmptyCandidateGems(
+      headId,
+      [],
+      ctx.fillPalette,
+      ctx.weightRecord,
+      { spec: ctx.spec! }
+    );
+    expect(gems[metaIdx]).toBe(32409);
+  });
+
   /**
-   * The fail-loud path. A spec with no recorded preference must not inherit
-   * ret's gem — that is the silent-wrong outcome the spike rejected — and must
-   * not pick a meta by EP either, since EP cannot rank metas at all. It leaves
-   * the socket empty and says so, which a caller can disclose.
+   * The fail-loud path. Every `DetectedSpecId` (`ret | feral | feral-tank`)
+   * now has a recorded preference, so this branch cannot be reached through
+   * any spec the pipeline can actually detect today — the cast below is
+   * synthetic, standing in for the spec ticket 142 / review row 5-D4 warned
+   * about: the next one added to `DetectedSpecId` without a row here. A spec
+   * with no recorded preference must not inherit another spec's gem — that is
+   * the silent-wrong outcome the spike rejected — and must not pick a meta by
+   * EP either, since EP cannot rank metas at all. It leaves the socket empty
+   * and says so, which a caller can disclose.
    */
   it("leaves the meta socket empty for a spec with no recorded preference", () => {
     const headId = 32461;
     const sockets = socketsFor(headId);
     const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
-    const ctx = gemContext(gemsForPhase(3), retEpWeights, "feral");
+    const unlistedSpec = "unlisted-future-spec" as unknown as Parameters<
+      typeof gemContext
+    >[2];
+    const ctx = gemContext(gemsForPhase(3), retEpWeights, unlistedSpec);
     const gems = fillEmptyCandidateGems(
       headId,
       [],
@@ -225,28 +252,50 @@ describe("SPEC_PREFERRED_METAS", () => {
     // 29098 Stag-Helm of Malorne: [yellow, meta]. 8345 Wolfshead Helm: no
     // sockets. The flag is what lets a report row say "this number was
     // measured with the meta socket empty" instead of leaving the run-level
-    // footnote to explain twelve rows it never points at.
-    expect(metaSocketUnpriced(29098, [24028, 0], "feral")).toBe(true);
+    // footnote to explain twelve rows it never points at. Feral now has a
+    // recorded preference (ticket 257), so the fail-loud row-flag branch is
+    // exercised with a synthetic unlisted spec — see the block comment above.
+    const unlistedSpec = "unlisted-future-spec" as unknown as Parameters<
+      typeof metaSocketUnpriced
+    >[2];
+    expect(metaSocketUnpriced(29098, [24028, 0], unlistedSpec)).toBe(true);
     expect(metaSocketUnpriced(29098, [24028, 32409], "ret")).toBe(false);
-    expect(metaSocketUnpriced(8345, [], "feral")).toBe(false);
+    expect(metaSocketUnpriced(29098, [24028, 32409], "feral")).toBe(false);
+    expect(metaSocketUnpriced(8345, [], unlistedSpec)).toBe(false);
     expect(metaSocketUnpriced(29098, [24028, 0], undefined)).toBe(false);
   });
 
   it("does not flag a row whose meta socket the fill actually left filled", () => {
     // Ticket 139: the flag is a claim about what was *priced*, so it must read
     // the gems the candidate ended up with. `migrateGemsToItem` carries a worn
-    // meta onto the candidate before fill runs, so a feral player who already
-    // wears one leaves the socket full even with no recorded preference —
-    // deciding from socket colours alone printed "empty" over a seated gem.
-    expect(metaSocketUnpriced(29098, [24028, 34220], "feral")).toBe(false);
+    // meta onto the candidate before fill runs, so a player who already wears
+    // one leaves the socket full even with no recorded preference — deciding
+    // from socket colours alone printed "empty" over a seated gem. Exercised
+    // with the same synthetic unlisted spec as above, since feral itself no
+    // longer takes this branch.
+    const unlistedSpec = "unlisted-future-spec" as unknown as Parameters<
+      typeof metaSocketUnpriced
+    >[2];
+    expect(metaSocketUnpriced(29098, [24028, 34220], unlistedSpec)).toBe(false);
   });
 
   it("names the spec in its no-preference disclosure", () => {
-    expect(missingMetaPreferenceNote("feral")).toContain("feral");
-    expect(missingMetaPreferenceNote("feral")).toContain(
+    // Ticket 257 gave feral a recorded preference, so it no longer carries
+    // this disclosure — asserted here alongside ret's long-standing negative.
+    // The positive case uses the same synthetic unlisted spec as the branch
+    // tests above.
+    const unlistedSpec = "unlisted-future-spec" as unknown as Parameters<
+      typeof missingMetaPreferenceNote
+    >[0];
+    expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
+      "unlisted-future-spec"
+    );
+    expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
       "no meta preference recorded"
     );
     expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+    expect(missingMetaPreferenceNote("feral")).toBeUndefined();
+    expect(missingMetaPreferenceNote("feral-tank")).toBeUndefined();
   });
 
   /**
