@@ -96,7 +96,7 @@ the eight stages must stay reorganisable without touching a test.
 
 When you will have **two writers running at once** (independent slices — different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). Then tear down worktrees, `pnpm verify` on the integrated tip, run `pre-merge-review`, and **ask before** `pnpm merge-to-dev` — never merge each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
 
-"Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work.
+"Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work. Readers share that index too: a read-only agent sees your uncommitted edits and cannot tell them from a stray worker's.
 
 ### Stage-gate features
 

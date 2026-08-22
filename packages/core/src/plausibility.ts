@@ -73,11 +73,11 @@ const WARNED_DEAD_SLOT_CAUSES: readonly DeadSlotCause[] = [
   // not even identify the worn item, so it has no cause to report. It must
   // still warn — a dropped slot is indistinguishable from a healthy one.
   "unidentified-worn-item",
-  // The worn item is known but outside the candidate pool, so every row in
-  // the slot is scored against an empty slot rather than against it. This is
-  // the strongest of the four: the slot's rows are not just uninformative,
-  // they are wrong if read as upgrades or losses relative to what is worn
-  // (ticket 163).
+  // The worn item is known but outside the candidate pool, so the slot has no
+  // row for it. Ticket 253: the other rows are scored against the worn item
+  // like any healthy slot's and their deltas stand — this previously claimed
+  // they were wrong, which retracted correct numbers. What the reader loses is
+  // what it is worth to keep the item (ticket 163).
   "worn-unrankable",
 ];
 
@@ -194,11 +194,17 @@ function deadSlotMessage(
     );
   }
   if (cause === "worn-unrankable") {
+    // Ticket 253. This said the rows "were scored against an empty slot ... Do
+    // not read any of them as an upgrade or a loss", which is false: the
+    // baseline is composed from the full logged equipment, so every delta here
+    // is already measured against the worn item. That retraction cost a real
+    // SME verdict — a correct shortlist read as untrustworthy. Say only what is
+    // true: the worn item has no row of its own, because it is not in the pool.
     return (
-      `${slot} is unmeasured: the worn ${wornItemName} is not in the candidate pool for ` +
-      `this slot, so every row shown for ${slot} was scored against an empty slot, not against ` +
-      `${wornItemName}. Do not read any of them as an upgrade or a loss — this slot needs the ` +
-      `worn item added to the pool before it can be ranked.`
+      `${slot} has no baseline row: the worn ${wornItemName} is not in the candidate ` +
+      `pool for this slot, so it gets no row of its own to compare against. The rows ` +
+      `shown for ${slot} were still measured against ${wornItemName} — their deltas ` +
+      `stand — but nothing here shows you what it is worth to keep it.`
     );
   }
   if (cause === "set-break-toll") {

@@ -67,9 +67,10 @@ at startup only; restart the session.
    **Gate A (mechanical):** every template section present; Claims
    register nonempty; Paths manifest present; every open question in the
    brief answered with its three items; `git status --porcelain`
-   still empty. A dirty tree means the seat edited files: run
-   `git checkout -- .`, discard the output, respawn once with the
-   violation named. One respawn per gap; a second failure goes to the
+   still empty. Compare against the SHA logged in step 1.
+   New changes mean the seat edited files: **stop and report them to the
+   user** — never revert, because another agent's live work looks identical
+   from here (ticket 261). Respawn once with the violation named. One respawn per gap; a second failure goes to the
    user. Log the outcome.
 
 3. **Review.** Spawn `gate-reviewer` (`model: "opus"`) with the paths of

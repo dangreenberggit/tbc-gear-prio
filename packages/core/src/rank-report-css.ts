@@ -292,9 +292,11 @@ export const REPORT_CSS = `
   }
   .row.muted { opacity: 0.72; }
   .row:hover { border-color: var(--accent); opacity: 1; }
-  /* Ticket 164: an unmeasured-slot row was scored against an empty slot, not
-     the worn item, so it must not carry the same visual claim as a genuine
-     downgrade. Neutral border/background instead of the ordinary hit/muted
+  /* Ticket 164: a genuinely unmeasured slot has no worn item its rows could be
+     compared against, so those rows must not carry the same visual claim as a
+     genuine downgrade. Ticket 253 narrowed which causes qualify - see
+     isUnmeasuredSlot in rank-report.ts; worn-unrankable rows keep their colour
+     because their deltas are real. Neutral border/background instead of the ordinary hit/muted
      styling; the delta figure itself is desaturated below rather than left
      red, since red on this page always means "confirmed loss" elsewhere. */
   .row.unmeasured {

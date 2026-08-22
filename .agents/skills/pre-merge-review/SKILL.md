@@ -81,6 +81,12 @@ Run the **adversarial** and **domain** sub-agents with the briefs above.
 Invoke the **`code-review`** skill for the third axis — don't re-implement
 its Standards/Spec logic here.
 
+**Tell every axis it writes nothing**, and never ask one to leave
+`git status --porcelain` empty. That phrasing makes a reviewer responsible for
+tree state it does not own, and one duly "restored" a tree by reverting four
+files of live work (ticket 261). The constraint is *you write nothing*; a dirty
+tree is reported in the findings.
+
 ### 3. Aggregate, file tickets, write the review
 
 **Tickets are the source of truth for deferred work.** For every finding

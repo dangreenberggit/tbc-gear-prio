@@ -1,0 +1,317 @@
+invocation: pnpm rank --region US --realm dreamscythe --character shredzepelin --offline --spec feral --max-phase 2 --report .scratch/rank-reports/stage2-close-shredzepelin.html
+resolved fixture: test/fixtures/shredzepelin-cat.raw.json
+binary: vendor/wowsimcli-v0.0.119-win32-x64/wowsimcli-windows.exe sha256 4b60235dcbb0088c9644ba464223fc9f65fcb3fccb2710cfc37fa3c752db97b1
+
+> tbc-gear-prio@0.1.0 rank C:\Users\dgree\Code\lulz\tbc-gear-prio
+> tsx packages/core/src/cli.ts "--region" "US" "--realm" "dreamscythe" "--character" "shredzepelin" "--offline" "--spec" "feral" "--max-phase" "2" "--report" ".scratch/rank-reports/stage2-close-shredzepelin.html"
+
+(node:38704) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+rank shredzepelin@dreamscythe-US (offline) maxPhase=2 universe=228 cutoff=3.6 DPS / 0.15%
+simming 1/265
+simming 2/265
+simming 3/265
+simming 4/265
+simming 5/265
+simming 6/265
+simming 7/265
+simming 8/265
+simming 9/265
+simming 10/265
+simming 11/265
+simming 12/265
+simming 13/265
+simming 14/265
+simming 15/265
+simming 16/265
+simming 17/265
+simming 18/265
+simming 19/265
+simming 20/265
+simming 21/265
+simming 22/265
+simming 23/265
+simming 24/265
+simming 25/265
+simming 26/265
+simming 27/265
+simming 28/265
+simming 29/265
+simming 30/265
+simming 31/265
+simming 32/265
+simming 33/265
+simming 34/265
+simming 35/265
+simming 36/265
+simming 37/265
+simming 38/265
+simming 39/265
+simming 40/265
+simming 41/265
+simming 42/265
+simming 43/265
+simming 44/265
+simming 45/265
+simming 46/265
+simming 47/265
+simming 48/265
+simming 49/265
+simming 50/265
+simming 51/265
+simming 52/265
+simming 53/265
+simming 54/265
+simming 55/265
+simming 56/265
+simming 57/265
+simming 58/265
+simming 59/265
+simming 60/265
+simming 61/265
+simming 62/265
+simming 63/265
+simming 64/265
+simming 65/265
+simming 66/265
+simming 67/265
+simming 68/265
+simming 69/265
+simming 70/265
+simming 71/265
+simming 72/265
+simming 73/265
+simming 74/265
+simming 75/265
+simming 76/265
+simming 77/265
+simming 78/265
+simming 79/265
+simming 80/265
+simming 81/265
+simming 82/265
+simming 83/265
+simming 84/265
+simming 85/265
+simming 86/265
+simming 87/265
+simming 88/265
+simming 89/265
+simming 90/265
+simming 91/265
+simming 92/265
+simming 93/265
+simming 94/265
+simming 95/265
+simming 96/265
+simming 97/265
+simming 98/265
+simming 99/265
+simming 100/265
+simming 101/265
+simming 102/265
+simming 103/265
+simming 104/265
+simming 105/265
+simming 106/265
+simming 107/265
+simming 108/265
+simming 109/265
+simming 110/265
+simming 111/265
+simming 112/265
+simming 113/265
+simming 114/265
+simming 115/265
+simming 116/265
+simming 117/265
+simming 118/265
+simming 119/265
+simming 120/265
+simming 121/265
+simming 122/265
+simming 123/265
+simming 124/265
+simming 125/265
+simming 126/265
+simming 127/265
+simming 128/265
+simming 129/265
+simming 130/265
+simming 131/265
+simming 132/265
+simming 133/265
+simming 134/265
+simming 135/265
+simming 136/265
+simming 137/265
+simming 138/265
+simming 139/265
+simming 140/265
+simming 141/265
+simming 142/265
+simming 143/265
+simming 144/265
+simming 145/265
+simming 146/265
+simming 147/265
+simming 148/265
+simming 149/265
+simming 150/265
+simming 151/265
+simming 152/265
+simming 153/265
+simming 154/265
+simming 155/265
+simming 156/265
+simming 157/265
+simming 158/265
+simming 159/265
+simming 160/265
+simming 161/265
+simming 162/265
+simming 163/265
+simming 164/265
+simming 165/265
+simming 166/265
+simming 167/265
+simming 168/265
+simming 169/265
+simming 170/265
+simming 171/265
+simming 172/265
+simming 173/265
+simming 174/265
+simming 175/265
+simming 176/265
+simming 177/265
+simming 178/265
+simming 179/265
+simming 180/265
+simming 181/265
+simming 182/265
+simming 183/265
+simming 184/265
+simming 185/265
+simming 186/265
+simming 187/265
+simming 188/265
+simming 189/265
+simming 190/265
+simming 191/265
+simming 192/265
+simming 193/265
+simming 194/265
+simming 195/265
+simming 196/265
+simming 197/265
+simming 198/265
+simming 199/265
+simming 200/265
+simming 201/265
+simming 202/265
+simming 203/265
+simming 204/265
+simming 205/265
+simming 206/265
+simming 207/265
+simming 208/265
+simming 209/265
+simming 210/265
+simming 211/265
+simming 212/265
+simming 213/265
+simming 214/265
+simming 215/265
+simming 216/265
+simming 217/265
+simming 218/265
+simming 219/265
+simming 220/265
+simming 221/265
+simming 222/265
+simming 223/265
+simming 224/265
+simming 225/265
+simming 226/265
+simming 227/265
+simming 228/265
+simming 229/265
+simming 230/265
+simming 231/265
+simming 232/265
+simming 233/265
+simming 234/265
+simming 235/265
+simming 236/265
+simming 237/265
+simming 238/265
+simming 239/265
+simming 240/265
+simming 241/265
+simming 242/265
+simming 243/265
+simming 244/265
+simming 245/265
+simming 246/265
+simming 247/265
+simming 248/265
+simming 249/265
+simming 250/265
+simming 251/265
+simming 252/265
+simming 253/265
+simming 254/265
+simming 255/265
+simming 256/265
+simming 257/265
+simming 258/265
+simming 259/265
+simming 260/265
+simming 261/265
+simming 262/265
+simming 263/265
+simming 264/265
+simming 265/265
+gear read from Void Reaver (YwahQLgv2jBrZGn6 fight 63, ranked route), spec confidence 100%
+baseline 2266.91 ± 73.83 (metaAdjusted=false)
+~17 rating under the hit cap — Heroic Presence in your party would lower the cap by ~16. The real shortfall may be smaller than this.
+assumptions: 4 standing (--assumptions to expand)
+substitutions this run (1):
+  - gems.meta-preference: no meta preference recorded for feral — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect
+plausibility warnings (6):
+  neck is unmeasured: the worn Amulet of Bitter Hatred is not in the candidate pool for this slot, so every row shown for neck was scored against an empty slot, not against Amulet of Bitter Hatred. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked.
+  back is unmeasured: the worn The Frost Lord's War Cloak is not in the candidate pool for this slot, so every row shown for back was scored against an empty slot, not against The Frost Lord's War Cloak. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked.
+  waist is unmeasured: the worn Girdle of the Deathdealer is not in the candidate pool for this slot, so every row shown for waist was scored against an empty slot, not against Girdle of the Deathdealer. Do not read any of them as an upgrade or a loss — this slot needs the worn item added to the pool before it can be ranked.
+  No positive candidate in head: nothing in a full pool matches Wolfshead Helm's effect. Expected for a unique effect, but worth confirming it is not a measurement fault.
+  No positive candidate in chest: every alternative displaces Breastplate of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot.
+  No positive candidate in shoulder: every alternative displaces Mantle of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot.
+#1 Merciless Gladiator's Maul (weapon) Δ57.17 (2.52%)
+    costs hit: -7 hit rating, widening the gap above to 23.923096999999984
+#2 Belt of One-Hundred Deaths (waist) Δ48.03 (2.12%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#3 Belt of Deep Shadow (waist) Δ25.72 (1.13%)
+    costs hit: -2 hit rating, widening the gap above to 18.923096999999984
+#4 Leggings of Murderous Intent (legs) Δ24.68 (1.09%)
+    costs hit: -28 hit rating, widening the gap above to 44.923096999999984
+#5 Telonicus's Pendant of Mayhem (neck) Δ12.92 (0.57%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#6 Girdle of Treachery (waist) Δ11.59 (0.51%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#7 Belt of Natural Power (waist) Δ11.19 (0.49%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#8 Gronn-Stitched Girdle (waist) Δ10.86 (0.48%)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#9 Thalassian Wildercloak (back) Δ7.81 (0.34%)  (tied)
+#10 Tsunami Talisman (trinket) Δ7.22 (0.32%)  (tied)
+    hit-driven: most of this gain is hit rating, and you are under the cap
+#11 Haramad's Bargain (neck) Δ7.14 (0.32%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#12 Mithril Chain of Heroism (neck) Δ4.62 (0.20%)  (tied)
+    costs hit: -20 hit rating, widening the gap above to 36.923096999999984
+#13 Ancestral Ring of Conquest (finger) Δ3.92 (0.17%)  (tied)
+    costs hit: -19 hit rating, widening the gap above to 35.923096999999984
+#14 Razor-Scale Battlecloak (back) Δ3.77 (0.17%)  (tied)
+214 row(s) below cutoff hidden; --show-below-cutoff to list them
+report .scratch/rank-reports/stage2-close-shredzepelin.html
+report-json .scratch/rank-reports/stage2-close-shredzepelin.json

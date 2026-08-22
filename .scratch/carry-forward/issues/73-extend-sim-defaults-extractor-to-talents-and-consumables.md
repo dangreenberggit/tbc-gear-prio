@@ -55,7 +55,7 @@ for this constant: extracting `DefaultConsumables` would have pinned us to
 upstream's idea of what a feral druid drinks, which is not what we want to
 simulate. The old constant was also **wrong** — `potId` 22838 against the
 owner's 22832, and no `potions` / `conjuredItems` lists at all, which silently
-disarmed the rotation's rune and Flame Cap branches.
+disarmed the rotation's rune and Fel Mana Potion branches.
 
 One field survives as a constant, `CONSUMABLES_EXTRA = {"drumsId": ...}`,
 deliberately: drums are a raid-provided buff rather than a personal consumable

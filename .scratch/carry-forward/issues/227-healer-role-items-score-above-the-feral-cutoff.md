@@ -5,9 +5,39 @@ Origin: second `sme-rank-review` opinion on ticket 225's closure, 2026-08-18 —
   `.scratch/handoffs/sme-rank-judgment-ticket-225-second-opinion.md`
 Blocks: none
 Blocked by: none — 234 was parked `wontfix` on 2026-08-20 (owner punt), so the
-  ruling this waited on is not coming. See the note below.
+  ruling this waited on is not coming. See the note below. The retained
+  "Status, 2026-08-20 — `blocked`" line further down is superseded history, kept
+  for the trail; this header is the live state.
 
 # Ten healer-statted items score above the feral cutoff
+
+## Stays open — not raised unprompted at the Stage 2 gate, 2026-08-21
+
+Q3 of the Stage 2 gate work asked whether these rows are a disclosure problem
+serious enough to fix on that branch. The pre-registered measurement was whether
+an SME seat reading the shortlists cold would raise them **without being
+prompted**. It did not, so the answer is "no change this branch" and this ticket
+stays open, unchanged in scope.
+
+The measurement was set up so the silence means something. Seat 1's input note
+(`.scratch/stage-gate/stage-2-close-shortlist-box/sme-input-shortlists.md`)
+contained no healer, mana, intellect, spirit or mp5 wording and no framing from
+ticket 250 — verify with:
+
+```
+grep -oiE '250|rotation|regression|227|healer|mana|intellect|spirit|mp5'   .scratch/stage-gate/stage-2-close-shortlist-box/sme-input-shortlists.md   # no output
+grep -inE 'healer|mana|intellect|spirit|mp5|caster'   .scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md            # no output
+```
+
+The seat was not short of complaints — it returned `do-not-trust` on one of the
+three characters over pool coverage (ticket 253) — so this is a seat that read
+closely and did not reach for these rows.
+
+Two limits on what that shows. The seat read **feral p2** shortlists, while this
+ticket's measurement is on the committed **feral-p3** truth sweep, so the rows
+here are not necessarily the rows it saw. And an unprompted-judgment observation
+is weaker evidence than a direct question: it shows the rows did not stand out,
+not that they are harmless.
 
 ## Unblocked-but-unruled, 2026-08-20
 
