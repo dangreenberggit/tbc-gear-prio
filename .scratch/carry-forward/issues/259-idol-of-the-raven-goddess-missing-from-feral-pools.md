@@ -49,7 +49,53 @@ Unlike the worn-item case (ticket 253), no disclosure covers this one. A missing
 raises nothing — the slot just looks thin, which is what ticket 173 exists to
 complain about.
 
-## CORRECTION 2026-08-22 — 32387 is the wrong item to chase
+## SETTLED 2026-08-22 by measurement — both earlier corrections were wrong
+
+A third SME seat ran the sim instead of reasoning about the code. Same gear, same
+seed, 20,000 iterations each, only `equipment.items[16]` varied:
+
+| ranged slot | DPS | vs worn Everbloom |
+| --- | --- | --- |
+| Everbloom Idol (worn) | 2153.6 | — |
+| Idol of Feral Shadows | 2116.5 | −37.1 |
+| Idol of the Raven Goddess | 2113.3 | −40.3 |
+| nothing equipped | 2098.9 | −54.6 |
+
+Re-runnable: `vendor/wowsimcli-v0.0.119-win32-x64/wowsimcli-windows.exe sim --infile … --outfile …`
+from `test/fixtures/shredzepelin-cat.raid-sim-request.json` with
+`simOptions {"iterations":20000,"randomSeed":"443754031"}`; `iterationsDone: 20000`
+and `error: null` on all four arms. Full detail in
+`.scratch/handoffs/sme-idol-slot-settled.md`.
+
+**What this overturns, in order:**
+
+1. **The original framing (seat 1) was wrong.** The idol slot is *not* a live P2
+   decision. Everbloom wins by 37 DPS; the other two are within a few DPS of each
+   other. Nothing here is close.
+2. **The first correction (seat 2) was also wrong**, and so was this ticket after
+   I applied it. Seat 2 argued 32387 scores ~zero because Improved Leader of the
+   Pack buffs *party members* and these are single-actor sims. That reads off the
+   buff text but not the code: the druid sits in its own party and the sim hands
+   the aura to every party member, wearer included. **Measured, 32387 is worth
+   +14.3 DPS over an empty slot** — small, but not nothing, and the reasoning
+   behind the ~zero claim does not hold.
+3. **The acceptance criterion I rewrote is unworkable.** It demands 28372 Idol of
+   Feral Shadows reach the pool, but its only source is
+   `[{"dungeon": "The Arcatraz", "kind": "heroic"}]` — the heroic category
+   `assemble_universe.py:68-76` excludes **on purpose**, which is ticket 17's
+   pre-raid scope question. Chasing it here quietly reopens a decision this
+   ticket has no business reopening.
+
+**What survives, and it is the whole point:** the pool-coverage mechanism. An item
+with no recorded source is silently never considered — third confirmed instance,
+after the Ahune neck and back. That is worth fixing generally, and the general fix
+is the detector ticket 173 asks for, not a hunt for any particular idol.
+
+**The lesson worth more than the ticket:** two seats reasoned from source code to a
+DPS conclusion and both got it wrong in different directions. One sim run settled
+it. When the question is "what is this item worth", measure it.
+
+## Superseded correction, kept for the trail — 32387 is the wrong item to chase
 
 The pre-merge domain axis refuted this ticket's framing before merge. The
 pool-coverage gap is real; the item named as the prize is not.
@@ -106,9 +152,13 @@ the heroic exclusion, which is deliberate and belongs to ticket 17.
 
 ## Acceptance
 
-- [ ] **28372 Idol of Feral Shadows** appears as a ranged candidate for both feral
-      characters — it is the real personal-DPS competitor. 32387 may follow from
-      the same fix, but it scores ~zero in a single-actor sim and is not the goal.
+- [ ] The sourceless-item mechanism is addressed generally — an item with no
+      recorded drop source no longer vanishes from the pool without a trace.
+      **Do not chase a specific idol.** Measurement settled the slot: Everbloom
+      wins by 37 DPS and neither alternative is close, so no idol is a missing
+      upgrade. 28372 is heroic-sourced and pooling it would reopen ticket 17's
+      scope question; 32387 is worth +14.3 over an empty slot and loses to what
+      is worn.
 - [ ] The fix is stated in terms of the general mechanism, not hardcoded to this
       id — or, if hardcoded, says why and links the general ticket.
 - [ ] The diff of upstream BiS sets against the pools is run and its result

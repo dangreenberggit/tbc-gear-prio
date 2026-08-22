@@ -1817,20 +1817,38 @@ candidate**, the idol already worn. Filed as **carry-forward 259**
 (`Blocks: phase-2`). It is the third confirmed instance of one mechanism — an
 item with no AtlasLoot source row silently never becomes a candidate.
 
-**The SME named the wrong item as the prize, and the pre-merge domain axis caught
-it before merge.** Item 32387 Idol of the Raven Goddess is in both pinned
-upstream P2 feral sets, but its only sim effect upgrades the *party* Leader of
-the Pack aura (`sim/druid/druid.go:166`; `sim/core/buffs.go:817-830` grants the
-crit to party members, not the wearer). These are single-actor sims, so pooling
-it would produce a row scoring roughly zero against the worn Everbloom Idol's
-`IdolShredBonus += 88`. The real personal-DPS competitor is **28372 Idol of Feral
-Shadows**, and 259's acceptance now names it. Idol of Terror is `phase: 4` and so
-is correctly absent from a `maxPhase: 2` run, not missing.
+**Settled by measurement, 2026-08-22, after two seats reasoned to opposite wrong
+answers.** A third SME ran the sim rather than reading the code: same gear, same
+seed, 20,000 iterations, only the ranged slot varied.
 
-**Worth carrying beyond this ticket:** `bisTags` corroboration — the technique
-both SME handoffs leaned on hardest, and the thing that made these verdicts
-credible — **silently fails for party-buff items**. An item can be genuinely
-best-in-slot for a raiding feral and worth nothing in a solo-actor DPS ranking.
+| ranged slot | DPS | vs worn Everbloom |
+| --- | --- | --- |
+| Everbloom Idol (worn) | 2153.6 | — |
+| Idol of Feral Shadows | 2116.5 | −37.1 |
+| Idol of the Raven Goddess | 2113.3 | −40.3 |
+| nothing equipped | 2098.9 | −54.6 |
+
+**The feral idol slot is not a live P2 decision.** Everbloom wins by 37 DPS and
+neither alternative is close — so no idol is a missing upgrade, and the caveat's
+practical weight is smaller than either SME seat believed. The pool-coverage
+mechanism behind it is still real and still worth fixing, which is what ticket 259
+now asks for.
+
+Two claims recorded earlier in this entry are **withdrawn**. That 32387 scores
+"roughly zero" because Improved Leader of the Pack buffs party members rather than
+the wearer: false — the druid is in its own party and the sim grants the aura to
+every member, so it is worth **+14.3 DPS** over an empty slot. And that 28372 Idol
+of Feral Shadows is the item to chase: it is heroic-sourced
+(`[{"dungeon": "The Arcatraz", "kind": "heroic"}]`), the category
+`assemble_universe.py:68-76` excludes deliberately, so pooling it would reopen
+ticket 17's scope question.
+
+**The methodological lesson outlasts the item.** Two independent seats traced the
+vendored Go source to a DPS conclusion and both got it wrong, in opposite
+directions. One 20k-iteration run settled it. `bisTags` corroboration is still the
+technique that made these verdicts credible, and it still fails quietly for
+party-buff items — but when the question is what an item is *worth*, the answer is
+a measurement, not a reading.
 
 The third `medium` is **benign and dismissed here rather than ticketed**: the
 slamaltman seat flagged `ranking.plausibilityWarnings` as absent from that
