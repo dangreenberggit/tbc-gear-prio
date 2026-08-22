@@ -57,7 +57,8 @@ vendor/
 !.scratch/stage-gate/stage-2-close-shortlist-box/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
-!.scratch/rank-reports/stage2-close-*
+!.scratch/rank-reports/stage2-close-*.json
+!.scratch/rank-reports/stage2-close-*.stdout.txt
 
 # Ticket 235 lock-race reproduction. docs/workflow.md cites these two scripts as
 # the evidence for the lint-staged flags, so they are tracked; the throwaway git
