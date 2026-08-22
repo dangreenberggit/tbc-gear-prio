@@ -46,9 +46,14 @@ unexplained warning are the same slot. That is suggestive, not proven.
       **Decided: they already match. No code change.** See below.
 - [x] Re-run shredzepelin's feral p2 ranking and report whether the head warning
       survives. **It survives, and is correctly attributed as-is.**
-- [x] If the warning survives, update its stated cause to name both contributors.
-      **Not done, deliberately — the measurement shows there is no second
-      contributor.** Naming one would write a false cause into the product.
+- [~] If the warning survives, update its stated cause to name both contributors.
+      **Refused, deliberately — not done, and not obsolete either.** The
+      measurement shows there is no second contributor: the baseline is
+      socketless Wolfshead Helm, so no meta was repaired on either side, and the
+      head gap is ~208 DPS against a best-in-run upgrade of 57. Naming the empty
+      meta as a cause would write a false explanation into the product to satisfy
+      a checkbox. Marked `[~]` rather than `[x]`: this criterion was not met, it
+      was declined, and the reason is the finding.
 
 ## Investigation (2026-08-21, `fix/worn-item-pool-coverage`)
 
