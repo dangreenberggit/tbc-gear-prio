@@ -1,0 +1,2992 @@
+{
+  "encounter": {
+    "apiVersion": 13,
+    "duration": 180,
+    "durationVariation": 5,
+    "executeProportion20": 0.2,
+    "executeProportion25": 0.25,
+    "executeProportion35": 0.35,
+    "executeProportion45": 0.45,
+    "executeProportion90": 0.9,
+    "targets": [
+      {
+        "canCrush": true,
+        "damageSpread": 0.5,
+        "id": 31146,
+        "level": 73,
+        "minBaseDamage": 15113,
+        "mobType": "MobTypeMechanical",
+        "name": "Raid Target",
+        "parryHaste": true,
+        "stats": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          320,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          54,
+          0,
+          0,
+          0,
+          7685,
+          0,
+          6070400,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "swingSpeed": 2
+      }
+    ]
+  },
+  "raid": {
+    "buffs": {
+      "arcaneBrilliance": true,
+      "bloodlust": true,
+      "divineSpirit": "TristateEffectImproved",
+      "giftOfTheWild": "TristateEffectImproved",
+      "powerWordFortitude": "TristateEffectImproved",
+      "shadowProtection": true
+    },
+    "debuffs": {
+      "bloodFrenzy": true,
+      "curseOfRecklessness": true,
+      "exposeArmor": "TristateEffectImproved",
+      "exposeWeaknessHunterAgility": 1080,
+      "exposeWeaknessUptime": 0.9,
+      "faerieFire": "TristateEffectImproved",
+      "giftOfArthas": true,
+      "huntersMark": "TristateEffectImproved",
+      "improvedSealOfTheCrusader": "TristateEffectImproved",
+      "judgementOfWisdom": true,
+      "misery": true,
+      "sunderArmor": true
+    },
+    "numActiveParties": 5,
+    "parties": [
+      {
+        "buffs": {
+          "battleShout": "TristateEffectImproved",
+          "drums": "LesserDrumsOfBattle",
+          "ferociousInspiration": 2,
+          "graceOfAirTotem": "TristateEffectImproved",
+          "manaSpringTotem": "TristateEffectRegular",
+          "strengthOfEarthTotem": "TristateEffectImproved",
+          "totemTwisting": true,
+          "windfuryTotem": "TristateEffectImproved"
+        },
+        "players": [
+          {
+            "apiVersion": 13,
+            "bonusStats": {
+              "apiVersion": 13,
+              "pseudoStats": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "stats": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ]
+            },
+            "buffs": {
+              "blessingOfKings": true,
+              "blessingOfMight": "TristateEffectImproved",
+              "unleashedRage": true
+            },
+            "class": "ClassDruid",
+            "consumables": {
+              "battleElixirId": 22831,
+              "conjuredId": 12662,
+              "conjuredItems": [
+                22105,
+                12662,
+                22788
+              ],
+              "drumsId": "GreaterDrumsOfBattle",
+              "foodId": 27664,
+              "goblinSapper": true,
+              "guardianElixirId": 32067,
+              "mhImbueId": 34340,
+              "potId": 22832,
+              "potions": [
+                13442,
+                18253,
+                22828,
+                22832,
+                22837,
+                22838,
+                22850,
+                28101,
+                31677,
+                32948,
+                33935,
+                34440
+              ],
+              "scrollAgi": true,
+              "scrollStr": true,
+              "superSapper": true
+            },
+            "cooldowns": {},
+            "distanceFromTarget": 0,
+            "equipment": {
+              "items": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+              ]
+            },
+            "feralCatDruid": {
+              "options": {
+                "classOptions": {}
+              }
+            },
+            "healingModel": {},
+            "itemSwap": {
+              "items": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+              ],
+              "prepullBonusStats": {
+                "apiVersion": 13,
+                "pseudoStats": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "stats": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            "name": "feral",
+            "profession1": "Engineering",
+            "profession2": "Enchanting",
+            "race": "RaceNightElf",
+            "reactionTimeMs": 250,
+            "rotation": {
+              "groups": [
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "spellId": 35476
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "spellId": 35476,
+                            "tag": -1
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "Drums"
+                },
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 23827
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 10646
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "Engineering"
+                },
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28485
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28485
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 33831
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 33831
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 21670
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 21670
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29383
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29383
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 38287
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 38287
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 23041
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 23041
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28288
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28288
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 22954
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 22954
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28041
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28041
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28121
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28121
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 35702
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 35702
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 24128
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 24128
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29387
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29387
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 25937
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 25937
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29776
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29776
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 32654
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 32654
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 32658
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust Time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 32658
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "CD: Trinkets"
+                },
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "condition": {
+                          "gcdIsReady": {}
+                        },
+                        "groupReference": {
+                          "groupName": "Engineering"
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "condition": {
+                          "gcdIsReady": {}
+                        },
+                        "groupReference": {
+                          "groupName": "CD: Trinkets"
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 12662
+                          }
+                        },
+                        "condition": {
+                          "and": {
+                            "vals": [
+                              {
+                                "cmp": {
+                                  "lhs": {
+                                    "math": {
+                                      "lhs": {
+                                        "maxMana": {}
+                                      },
+                                      "op": "OpSub",
+                                      "rhs": {
+                                        "currentMana": {}
+                                      }
+                                    }
+                                  },
+                                  "op": "OpGe",
+                                  "rhs": {
+                                    "const": {
+                                      "val": "1200"
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "gcdIsReady": {}
+                              },
+                              {
+                                "selectedConjured": {
+                                  "conjuredId": {
+                                    "itemId": 12662
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 22788
+                          }
+                        },
+                        "condition": {
+                          "and": {
+                            "vals": [
+                              {
+                                "gcdIsReady": {}
+                              },
+                              {
+                                "selectedConjured": {
+                                  "conjuredId": {
+                                    "itemId": 22788
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "otherId": "OtherActionPotion"
+                          }
+                        },
+                        "condition": {
+                          "and": {
+                            "vals": [
+                              {
+                                "gcdIsReady": {}
+                              },
+                              {
+                                "or": {
+                                  "vals": [
+                                    {
+                                      "not": {
+                                        "val": {
+                                          "selectedPotion": {
+                                            "potionId": {
+                                              "itemId": 22832
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "cmp": {
+                                        "lhs": {
+                                          "math": {
+                                            "lhs": {
+                                              "maxMana": {}
+                                            },
+                                            "op": "OpSub",
+                                            "rhs": {
+                                              "currentMana": {}
+                                            }
+                                          }
+                                        },
+                                        "op": "OpGe",
+                                        "rhs": {
+                                          "const": {
+                                            "val": "2300"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "or": {
+                                  "vals": [
+                                    {
+                                      "not": {
+                                        "val": {
+                                          "selectedPotion": {
+                                            "potionId": {
+                                              "itemId": 31677
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "cmp": {
+                                        "lhs": {
+                                          "math": {
+                                            "lhs": {
+                                              "maxMana": {}
+                                            },
+                                            "op": "OpSub",
+                                            "rhs": {
+                                              "currentMana": {}
+                                            }
+                                          }
+                                        },
+                                        "op": "OpGe",
+                                        "rhs": {
+                                          "const": {
+                                            "val": "2000"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "spellId": 768
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "Powershifting"
+                }
+              ],
+              "prepullActions": [
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 768
+                      }
+                    }
+                  },
+                  "doAtValue": {
+                    "const": {
+                      "val": "-10s"
+                    }
+                  }
+                }
+              ],
+              "priorityList": [
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 1,
+                        "spellId": 2825,
+                        "tag": -1
+                      }
+                    },
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentTime": {}
+                        },
+                        "op": "OpGe",
+                        "rhs": {
+                          "variableRef": {
+                            "name": "Bloodlust Time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentTime": {}
+                        },
+                        "op": "OpGe",
+                        "rhs": {
+                          "const": {
+                            "val": "0s"
+                          }
+                        }
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Drums"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 27011
+                      }
+                    },
+                    "condition": {
+                      "auraIsInactive": {
+                        "auraId": {
+                          "rank": 5,
+                          "spellId": 26993
+                        },
+                        "includeReactionTime": true,
+                        "sourceUnit": {
+                          "type": "CurrentTarget"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27008
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentMana": {}
+                              },
+                              "op": "OpLt",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "spellId": 768
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Rip CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "remainingTime": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "10s"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "rank": 7,
+                                "spellId": 27008
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 3,
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentMana": {}
+                              },
+                              "op": "OpLt",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "spellId": 768
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 33876
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27002
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentMana": {}
+                              },
+                              "op": "OpLt",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "spellId": 768
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentEnergy": {}
+                        },
+                        "op": "OpLt",
+                        "rhs": {
+                          "const": {
+                            "val": "10"
+                          }
+                        }
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Powershifting"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27008
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Rip CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "remainingTime": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Rip End Threshold"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "rank": 7,
+                                "spellId": 27008
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpGe",
+                                    "rhs": {
+                                      "spellCurrentCost": {
+                                        "spellId": {
+                                          "rank": 7,
+                                          "spellId": 27008
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "auraIsActive": {
+                                    "auraId": {
+                                      "spellId": 16870
+                                    },
+                                    "includeReactionTime": true
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Rip CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "remainingTime": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Rip End Threshold"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "rank": 7,
+                                "spellId": 27008
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          },
+                          {
+                            "and": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "timeToNextEnergyTick": {}
+                                    },
+                                    "op": "OpGt",
+                                    "rhs": {
+                                      "variableRef": {
+                                        "name": "Max Wait Time"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "spellCurrentCost": {
+                                        "spellId": {
+                                          "rank": 7,
+                                          "spellId": 27008
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "auraIsInactive": {
+                                    "auraId": {
+                                      "spellId": 16870
+                                    },
+                                    "includeReactionTime": true
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Powershifting"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 3,
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 33876
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpGe",
+                                    "rhs": {
+                                      "spellCurrentCost": {
+                                        "spellId": {
+                                          "rank": 3,
+                                          "spellId": 33983
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "auraIsActive": {
+                                    "auraId": {
+                                      "spellId": 16870
+                                    },
+                                    "includeReactionTime": true
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 6,
+                        "spellId": 24248
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentComboPoints": {}
+                                          },
+                                          "op": "OpGe",
+                                          "rhs": {
+                                            "variableRef": {
+                                              "name": "Bite Trick CP (Wolfshead)"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "auraIsKnown": {
+                                          "auraId": {
+                                            "spellId": 17768
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentComboPoints": {}
+                                          },
+                                          "op": "OpGe",
+                                          "rhs": {
+                                            "variableRef": {
+                                              "name": "Bite Trick CP (Wolfsheadless)"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "not": {
+                                          "val": {
+                                            "auraIsKnown": {
+                                              "auraId": {
+                                                "spellId": 17768
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Bite Trick Max Energy"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 6,
+                                    "spellId": 24248
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 16870
+                              },
+                              "includeReactionTime": true
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "timeToNextEnergyTick": {}
+                              },
+                              "op": "OpGt",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Trick Window"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 5,
+                        "spellId": 27003
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLt",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 3,
+                                    "spellId": 33983
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 5,
+                                    "spellId": 27003
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 16870
+                              },
+                              "includeReactionTime": true
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "timeToNextEnergyTick": {}
+                              },
+                              "op": "OpGt",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Trick Window"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "hide": true
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 33876
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "math": {
+                                        "lhs": {
+                                          "spellCurrentCost": {
+                                            "spellId": {
+                                              "rank": 3,
+                                              "spellId": 33983
+                                            }
+                                          }
+                                        },
+                                        "op": "OpSub",
+                                        "rhs": {
+                                          "const": {
+                                            "val": "20"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "timeToNextEnergyTick": {}
+                                          },
+                                          "op": "OpGt",
+                                          "rhs": {
+                                            "variableRef": {
+                                              "name": "Max Wait Time"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentEnergy": {}
+                                          },
+                                          "op": "OpLt",
+                                          "rhs": {
+                                            "spellCurrentCost": {
+                                              "spellId": {
+                                                "rank": 3,
+                                                "spellId": 33983
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "auraIsInactive": {
+                                          "auraId": {
+                                            "spellId": 16870
+                                          },
+                                          "includeReactionTime": true
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Powershifting"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 3,
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "auraIsInactive": {
+                              "auraId": {
+                                "spellId": 33876
+                              },
+                              "includeReactionTime": true,
+                              "sourceUnit": {
+                                "type": "CurrentTarget"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27002
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Bite CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentEnergy": {}
+                                          },
+                                          "op": "OpGe",
+                                          "rhs": {
+                                            "const": {
+                                              "val": "57"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "timeToNextEnergyTick": {}
+                                          },
+                                          "op": "OpLe",
+                                          "rhs": {
+                                            "const": {
+                                              "val": "1.0s"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentEnergy": {}
+                                          },
+                                          "op": "OpGe",
+                                          "rhs": {
+                                            "const": {
+                                              "val": "77"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "timeToNextEnergyTick": {}
+                                          },
+                                          "op": "OpGt",
+                                          "rhs": {
+                                            "const": {
+                                              "val": "1.0s"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "or": {
+                                          "vals": [
+                                            {
+                                              "and": {
+                                                "vals": [
+                                                  {
+                                                    "cmp": {
+                                                      "lhs": {
+                                                        "currentEnergy": {}
+                                                      },
+                                                      "op": "OpGe",
+                                                      "rhs": {
+                                                        "const": {
+                                                          "val": "15"
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "cmp": {
+                                                      "lhs": {
+                                                        "timeToNextEnergyTick": {}
+                                                      },
+                                                      "op": "OpLe",
+                                                      "rhs": {
+                                                        "const": {
+                                                          "val": "1.0s"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "and": {
+                                                "vals": [
+                                                  {
+                                                    "cmp": {
+                                                      "lhs": {
+                                                        "currentEnergy": {}
+                                                      },
+                                                      "op": "OpGe",
+                                                      "rhs": {
+                                                        "const": {
+                                                          "val": "35"
+                                                        }
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "cmp": {
+                                                      "lhs": {
+                                                        "timeToNextEnergyTick": {}
+                                                      },
+                                                      "op": "OpGt",
+                                                      "rhs": {
+                                                        "const": {
+                                                          "val": "1.0s"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      {
+                                        "auraIsActive": {
+                                          "auraId": {
+                                            "spellId": 16870
+                                          },
+                                          "includeReactionTime": true
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 6,
+                        "spellId": 24248
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Bite CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 6,
+                                    "spellId": 24248
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Bite CP"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "const": {
+                                        "val": "22"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "auraIsInactive": {
+                                    "auraId": {
+                                      "rank": 7,
+                                      "spellId": 27008
+                                    },
+                                    "includeReactionTime": true,
+                                    "sourceUnit": {
+                                      "type": "CurrentTarget"
+                                    }
+                                  }
+                                },
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "auraRemainingTime": {
+                                        "auraId": {
+                                          "rank": 7,
+                                          "spellId": 27008
+                                        },
+                                        "sourceUnit": {
+                                          "type": "CurrentTarget"
+                                        }
+                                      }
+                                    },
+                                    "op": "OpGt",
+                                    "rhs": {
+                                      "timeToNextEnergyTick": {}
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "const": {
+                                        "val": "15"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "and": {
+                                    "vals": [
+                                      {
+                                        "auraIsActive": {
+                                          "auraId": {
+                                            "rank": 7,
+                                            "spellId": 27008
+                                          },
+                                          "includeReactionTime": true,
+                                          "sourceUnit": {
+                                            "type": "CurrentTarget"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "auraRemainingTime": {
+                                              "auraId": {
+                                                "rank": 7,
+                                                "spellId": 27008
+                                              },
+                                              "sourceUnit": {
+                                                "type": "CurrentTarget"
+                                              }
+                                            }
+                                          },
+                                          "op": "OpLe",
+                                          "rhs": {
+                                            "timeToNextEnergyTick": {}
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "math": {
+                                              "lhs": {
+                                                "remainingTime": {}
+                                              },
+                                              "op": "OpSub",
+                                              "rhs": {
+                                                "auraRemainingTime": {
+                                                  "auraId": {
+                                                    "rank": 7,
+                                                    "spellId": 27008
+                                                  },
+                                                  "sourceUnit": {
+                                                    "type": "CurrentTarget"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          },
+                                          "op": "OpGe",
+                                          "rhs": {
+                                            "variableRef": {
+                                              "name": "Rip End Threshold"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "not": {
+                              "val": {
+                                "variableRef": {
+                                  "name": "Rip Next"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "const": {
+                                        "val": "20"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "not": {
+                                    "val": {
+                                      "variableRef": {
+                                        "name": "Mangle Next"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Powershifting"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27002
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "22"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "auraIsActive": {
+                              "auraId": {
+                                "spellId": 16870
+                              },
+                              "includeReactionTime": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 3,
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "22"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "math": {
+                                  "lhs": {
+                                    "const": {
+                                      "val": "2"
+                                    }
+                                  },
+                                  "op": "OpMul",
+                                  "rhs": {
+                                    "spellCurrentCost": {
+                                      "spellId": {
+                                        "rank": 3,
+                                        "spellId": 33983
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "math": {
+                                  "lhs": {
+                                    "currentEnergy": {}
+                                  },
+                                  "op": "OpAdd",
+                                  "rhs": {
+                                    "const": {
+                                      "val": "20"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLt",
+                              "rhs": {
+                                "math": {
+                                  "lhs": {
+                                    "spellCurrentCost": {
+                                      "spellId": {
+                                        "rank": 3,
+                                        "spellId": 33983
+                                      }
+                                    }
+                                  },
+                                  "op": "OpAdd",
+                                  "rhs": {
+                                    "const": {
+                                      "val": "22"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "timeToNextEnergyTick": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "1.0"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 3,
+                                    "spellId": 33983
+                                  }
+                                }
+                              },
+                              "op": "OpEq",
+                              "rhs": {
+                                "const": {
+                                  "val": "35"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 7,
+                        "spellId": 27002
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 7,
+                                    "spellId": 27002
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 3,
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "rank": 3,
+                                    "spellId": 33983
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "timeToNextEnergyTick": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Trick Window"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "or": {
+                        "vals": [
+                          {
+                            "and": {
+                              "vals": [
+                                {
+                                  "not": {
+                                    "val": {
+                                      "variableRef": {
+                                        "name": "Rip Next"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "or": {
+                                    "vals": [
+                                      {
+                                        "cmp": {
+                                          "lhs": {
+                                            "currentEnergy": {}
+                                          },
+                                          "op": "OpLt",
+                                          "rhs": {
+                                            "math": {
+                                              "lhs": {
+                                                "spellCurrentCost": {
+                                                  "spellId": {
+                                                    "rank": 3,
+                                                    "spellId": 33983
+                                                  }
+                                                }
+                                              },
+                                              "op": "OpSub",
+                                              "rhs": {
+                                                "const": {
+                                                  "val": "20"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "not": {
+                                          "val": {
+                                            "variableRef": {
+                                              "name": "Wait To Mangle"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "currentEnergy": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "const": {
+                                        "val": "22"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "timeToNextEnergyTick": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "variableRef": {
+                                  "name": "Max Wait Time"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Powershifting"
+                    }
+                  }
+                }
+              ],
+              "type": "TypeAPL",
+              "valueVariables": [
+                {
+                  "name": "Bloodlust Time",
+                  "value": {
+                    "const": {
+                      "val": "5s"
+                    }
+                  }
+                },
+                {
+                  "name": "Max Wait Time",
+                  "value": {
+                    "const": {
+                      "val": "1s"
+                    }
+                  }
+                },
+                {
+                  "name": "Rip CP",
+                  "value": {
+                    "const": {
+                      "val": "5"
+                    }
+                  }
+                },
+                {
+                  "name": "Bite CP",
+                  "value": {
+                    "const": {
+                      "val": "5"
+                    }
+                  }
+                },
+                {
+                  "name": "Bite Trick CP (Wolfsheadless)",
+                  "value": {
+                    "const": {
+                      "val": "4"
+                    }
+                  }
+                },
+                {
+                  "name": "Bite Trick CP (Wolfshead)",
+                  "value": {
+                    "const": {
+                      "val": "2"
+                    }
+                  }
+                },
+                {
+                  "name": "Bite Trick Max Energy",
+                  "value": {
+                    "const": {
+                      "val": "39"
+                    }
+                  }
+                },
+                {
+                  "name": "Trick Window",
+                  "value": {
+                    "const": {
+                      "val": "1.0s"
+                    }
+                  }
+                },
+                {
+                  "name": "Bite Energy Cutoff Mod",
+                  "value": {
+                    "math": {
+                      "lhs": {
+                        "const": {
+                          "val": "20"
+                        }
+                      },
+                      "op": "OpMul",
+                      "rhs": {
+                        "cmp": {
+                          "lhs": {
+                            "timeToNextEnergyTick": {}
+                          },
+                          "op": "OpGt",
+                          "rhs": {
+                            "const": {
+                              "val": "1.0s"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Rip End Threshold",
+                  "value": {
+                    "const": {
+                      "val": "10s"
+                    }
+                  }
+                },
+                {
+                  "name": "Rip Now",
+                  "value": {
+                    "and": {
+                      "vals": [
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "currentComboPoints": {}
+                            },
+                            "op": "OpGe",
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Rip CP"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "auraIsInactive": {
+                            "auraId": {
+                              "rank": 7,
+                              "spellId": 27008
+                            },
+                            "includeReactionTime": true,
+                            "sourceUnit": {
+                              "type": "CurrentTarget"
+                            }
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "remainingTime": {}
+                            },
+                            "op": "OpGe",
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Rip End Threshold"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Rip Next",
+                  "value": {
+                    "and": {
+                      "vals": [
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "currentComboPoints": {}
+                            },
+                            "op": "OpGe",
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Rip CP"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "auraRemainingTime": {
+                                "auraId": {
+                                  "rank": 7,
+                                  "spellId": 27008
+                                },
+                                "sourceUnit": {
+                                  "type": "CurrentTarget"
+                                }
+                              }
+                            },
+                            "op": "OpLe",
+                            "rhs": {
+                              "timeToNextEnergyTick": {}
+                            }
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "math": {
+                                "lhs": {
+                                  "remainingTime": {}
+                                },
+                                "op": "OpSub",
+                                "rhs": {
+                                  "timeToNextEnergyTick": {}
+                                }
+                              }
+                            },
+                            "op": "OpGe",
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Rip End Threshold"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Mangle Now",
+                  "value": {
+                    "and": {
+                      "vals": [
+                        {
+                          "not": {
+                            "val": {
+                              "variableRef": {
+                                "name": "Rip Now"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "auraIsInactive": {
+                            "auraId": {
+                              "spellId": 33876
+                            },
+                            "includeReactionTime": true,
+                            "sourceUnit": {
+                              "type": "CurrentTarget"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Mangle Next",
+                  "value": {
+                    "and": {
+                      "vals": [
+                        {
+                          "not": {
+                            "val": {
+                              "variableRef": {
+                                "name": "Rip Next"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "lhs": {
+                              "auraRemainingTime": {
+                                "auraId": {
+                                  "spellId": 33876
+                                },
+                                "sourceUnit": {
+                                  "type": "CurrentTarget"
+                                }
+                              }
+                            },
+                            "op": "OpLe",
+                            "rhs": {
+                              "timeToNextEnergyTick": {}
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Wait To Mangle",
+                  "value": {
+                    "or": {
+                      "vals": [
+                        {
+                          "variableRef": {
+                            "name": "Mangle Next"
+                          }
+                        },
+                        {
+                          "and": {
+                            "vals": [
+                              {
+                                "cmp": {
+                                  "lhs": {
+                                    "spellCurrentCost": {
+                                      "spellId": {
+                                        "rank": 3,
+                                        "spellId": 33983
+                                      }
+                                    }
+                                  },
+                                  "op": "OpLe",
+                                  "rhs": {
+                                    "const": {
+                                      "val": "38"
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "not": {
+                                  "val": {
+                                    "auraIsKnown": {
+                                      "auraId": {
+                                        "spellId": 17768
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "talentsString": "-503032132322105301251-05503301"
+          },
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      }
+    ]
+  },
+  "requestId": "raidSimAsync-af1b7eafcaa6fedf",
+  "simOptions": {
+    "debugFirstIteration": true,
+    "iterations": 20000,
+    "randomSeed": "42"
+  },
+  "type": "SimTypeIndividual"
+}

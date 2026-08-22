@@ -1,0 +1,1296 @@
+{
+  "encounter": {
+    "apiVersion": 13,
+    "duration": 180,
+    "durationVariation": 5,
+    "executeProportion20": 0.2,
+    "executeProportion25": 0.25,
+    "executeProportion35": 0.35,
+    "executeProportion45": 0.45,
+    "executeProportion90": 0.9,
+    "targets": [
+      {
+        "canCrush": true,
+        "damageSpread": 0.5,
+        "id": 31146,
+        "level": 73,
+        "minBaseDamage": 15113,
+        "mobType": "MobTypeMechanical",
+        "name": "Raid Target",
+        "parryHaste": true,
+        "stats": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          320,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          54,
+          0,
+          0,
+          0,
+          7685,
+          0,
+          6070400,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "swingSpeed": 2
+      }
+    ]
+  },
+  "raid": {
+    "buffs": {
+      "arcaneBrilliance": true,
+      "bloodlust": true,
+      "divineSpirit": "TristateEffectImproved",
+      "giftOfTheWild": "TristateEffectImproved",
+      "powerWordFortitude": "TristateEffectImproved",
+      "shadowProtection": true
+    },
+    "debuffs": {
+      "bloodFrenzy": true,
+      "curseOfRecklessness": true,
+      "exposeArmor": "TristateEffectImproved",
+      "exposeWeaknessHunterAgility": 1080,
+      "exposeWeaknessUptime": 0.9,
+      "faerieFire": "TristateEffectImproved",
+      "giftOfArthas": true,
+      "huntersMark": "TristateEffectImproved",
+      "improvedSealOfTheCrusader": "TristateEffectImproved",
+      "judgementOfWisdom": true,
+      "misery": true,
+      "sunderArmor": true
+    },
+    "numActiveParties": 5,
+    "parties": [
+      {
+        "buffs": {
+          "battleShout": "TristateEffectImproved",
+          "drums": "LesserDrumsOfBattle",
+          "ferociousInspiration": 2,
+          "graceOfAirTotem": "TristateEffectImproved",
+          "manaSpringTotem": "TristateEffectRegular",
+          "strengthOfEarthTotem": "TristateEffectImproved",
+          "totemTwisting": true,
+          "windfuryTotem": "TristateEffectImproved"
+        },
+        "players": [
+          {
+            "apiVersion": 13,
+            "bonusStats": {
+              "apiVersion": 13,
+              "pseudoStats": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "stats": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+              ]
+            },
+            "buffs": {
+              "blessingOfKings": true,
+              "blessingOfMight": "TristateEffectImproved",
+              "unleashedRage": true
+            },
+            "class": "ClassDruid",
+            "consumables": {
+              "battleElixirId": 22831,
+              "conjuredId": 12662,
+              "conjuredItems": [
+                22105,
+                12662,
+                22788
+              ],
+              "drumsId": "GreaterDrumsOfBattle",
+              "foodId": 27664,
+              "goblinSapper": true,
+              "guardianElixirId": 32067,
+              "mhImbueId": 34340,
+              "potId": 22832,
+              "potions": [
+                13442,
+                18253,
+                22828,
+                22832,
+                22837,
+                22838,
+                22850,
+                28101,
+                31677,
+                32948,
+                33935,
+                34440
+              ],
+              "scrollAgi": true,
+              "scrollStr": true,
+              "superSapper": true
+            },
+            "cooldowns": {},
+            "distanceFromTarget": 0,
+            "equipment": {
+              "items": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+              ]
+            },
+            "feralCatDruid": {
+              "options": {
+                "classOptions": {}
+              }
+            },
+            "healingModel": {},
+            "itemSwap": {
+              "items": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {}
+              ],
+              "prepullBonusStats": {
+                "apiVersion": 13,
+                "pseudoStats": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "stats": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            "name": "feral",
+            "profession1": "Engineering",
+            "profession2": "Enchanting",
+            "race": "RaceNightElf",
+            "reactionTimeMs": 250,
+            "rotation": {
+              "groups": [
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "spellId": 35476
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "spellId": 35476,
+                            "tag": -1
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "Drums"
+                },
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 23827
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 10646
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "Engineering"
+                },
+                {
+                  "actions": [
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28485
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28485
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 33831
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 33831
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 21670
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 21670
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29383
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29383
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 38287
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 38287
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 23041
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 23041
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28288
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28288
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 22954
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 22954
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28041
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28041
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 28121
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 28121
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 35702
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 35702
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 24128
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 24128
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29387
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29387
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 25937
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 25937
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 29776
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 29776
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 32654
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 32654
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "action": {
+                        "castSpell": {
+                          "spellId": {
+                            "itemId": 32658
+                          }
+                        },
+                        "condition": {
+                          "multipleCdUsages": {
+                            "alignCdEnd": true,
+                            "baseSpellId": {
+                              "spellId": 2825,
+                              "tag": -1
+                            },
+                            "offset": {
+                              "variableRef": {
+                                "name": "Bloodlust time"
+                              }
+                            },
+                            "targetSpellId": {
+                              "itemId": 32658
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "name": "CD: Trinkets"
+                }
+              ],
+              "prepullActions": [
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 768
+                      }
+                    }
+                  },
+                  "doAtValue": {
+                    "const": {
+                      "val": "-10s"
+                    }
+                  }
+                }
+              ],
+              "priorityList": [
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "rank": 1,
+                        "spellId": 2825,
+                        "tag": -1
+                      }
+                    },
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentTime": {}
+                        },
+                        "op": "OpGe",
+                        "rhs": {
+                          "variableRef": {
+                            "name": "Bloodlust time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentTime": {}
+                        },
+                        "op": "OpGe",
+                        "rhs": {
+                          "const": {
+                            "val": "0s"
+                          }
+                        }
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Drums"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 27011
+                      }
+                    },
+                    "condition": {
+                      "auraIsInactive": {
+                        "auraId": {
+                          "rank": 5,
+                          "spellId": 26993
+                        },
+                        "includeReactionTime": true,
+                        "sourceUnit": {
+                          "type": "CurrentTarget"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 27008
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "5"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "not": {
+                              "val": {
+                                "dotIsActive": {
+                                  "spellId": {
+                                    "spellId": 27008
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "remainingTime": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "10s"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 24248
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentComboPoints": {}
+                              },
+                              "op": "OpGe",
+                              "rhs": {
+                                "const": {
+                                  "val": "5"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "or": {
+                              "vals": [
+                                {
+                                  "cmp": {
+                                    "lhs": {
+                                      "remainingTime": {}
+                                    },
+                                    "op": "OpLt",
+                                    "rhs": {
+                                      "const": {
+                                        "val": "10s"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "dotIsActive": {
+                                    "spellId": {
+                                      "spellId": 27008
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 33983
+                      }
+                    },
+                    "condition": {
+                      "not": {
+                        "val": {
+                          "auraIsActive": {
+                            "auraId": {
+                              "spellId": 33876
+                            },
+                            "includeReactionTime": true,
+                            "sourceUnit": {
+                              "type": "CurrentTarget"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 27002
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "30"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "gcdIsReady": {}
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "Engineering"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "30"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "gcdIsReady": {}
+                          }
+                        ]
+                      }
+                    },
+                    "groupReference": {
+                      "groupName": "CD: Trinkets"
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "otherId": "OtherActionPotion"
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "30"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "gcdIsReady": {}
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "itemId": 12662
+                      }
+                    },
+                    "condition": {
+                      "and": {
+                        "vals": [
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentEnergy": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "30"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "gcdIsReady": {}
+                          },
+                          {
+                            "cmp": {
+                              "lhs": {
+                                "currentManaPercent": {}
+                              },
+                              "op": "OpLe",
+                              "rhs": {
+                                "const": {
+                                  "val": "75"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "action": {
+                    "castSpell": {
+                      "spellId": {
+                        "spellId": 768
+                      }
+                    },
+                    "condition": {
+                      "cmp": {
+                        "lhs": {
+                          "currentEnergy": {}
+                        },
+                        "op": "OpLe",
+                        "rhs": {
+                          "const": {
+                            "val": "30"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "type": "TypeAPL",
+              "valueVariables": [
+                {
+                  "name": "Bloodlust time",
+                  "value": {
+                    "const": {
+                      "val": "5s"
+                    }
+                  }
+                }
+              ]
+            },
+            "talentsString": "-503032132322105301251-05503301"
+          },
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "buffs": {},
+        "players": [
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      }
+    ]
+  },
+  "requestId": "raidSimAsync-af1b7eafcaa6fedf",
+  "simOptions": {
+    "debugFirstIteration": true,
+    "iterations": 20000,
+    "randomSeed": "42"
+  },
+  "type": "SimTypeIndividual"
+}
