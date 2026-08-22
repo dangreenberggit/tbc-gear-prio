@@ -6,7 +6,7 @@ Origin: `gate-sme` recheck of the Stage 2 shortlists, 2026-08-22; handoff at
 Blocks: phase-2
 Blocked by: none
 
-# The feral ranged slot offers one candidate, and upstream's BiS idol is not it
+# The feral ranged slot offers one candidate, and no real competitor reaches it
 
 ## What happens
 
@@ -33,7 +33,7 @@ python -c "import json;[print(f,32387 in [i.get('id') for i in json.load(open('v
 The item is **present** in our index and **has no source**:
 
 ```
-python -c "import json;i=json.load(open('data/items/index.json'))['items']['32387'];print(i['name'],'| phase',i['phase'])"
+python -c "import json;i=json.load(open('data/items/index.json'))['32387'];print(i['name'],'| phase',i['phase'])"
 python -c "import json;print(json.load(open('data/atlasloot_sources.json')).get('32387'))"
 ```
 
@@ -49,7 +49,45 @@ Unlike the worn-item case (ticket 253), no disclosure covers this one. A missing
 raises nothing — the slot just looks thin, which is what ticket 173 exists to
 complain about.
 
-## Why this is the highest-value fix from the recheck
+## CORRECTION 2026-08-22 — 32387 is the wrong item to chase
+
+The pre-merge domain axis refuted this ticket's framing before merge. The
+pool-coverage gap is real; the item named as the prize is not.
+
+**32387 Idol of the Raven Goddess carries no personal DPS for a feral cat.** Its
+only effect in the pinned sim upgrades the *party* Leader of the Pack aura from
+Regular to Improved (`vendor/tbc-new-fork/sim/druid/druid.go:166`,
+`feralcat/feralcat.go:78-84`), and Improved LotP adds `MeleeCritRating, 20` to
+**party members**, not the wearer (`sim/core/buffs.go:817-830`) — the wearer's 5%
+crit is granted either way. `vendor/wowsims/db.json` lists its effect literally as
+`"Improved Party Auras (39926)"`, and `sim/druid/items.go:209-212` registers it as
+a no-op.
+
+These are **single-actor sims**. Pooling 32387 would produce a candidate scoring
+approximately **zero delta** against the worn Everbloom Idol, which grants
+`IdolShredBonus += 88` — a real personal gain (`items.go:194-207`). The original
+acceptance box would have been satisfied by a row that changes nothing, and this
+ticket's claim to be the highest-value fix of the recheck was exactly backwards.
+
+It sits in upstream's BiS *set* because a raiding feral brings the raid-wide crit
+aura — a consideration a solo-actor DPS ranking cannot express. **That is the
+durable lesson: `bisTags` corroboration silently fails for party-buff items**, and
+both SME handoffs leaned on that technique hardest.
+
+**The item actually worth pooling is 28372 Idol of Feral Shadows** — phase 1, Rip
+damage +7 per combo point per tick (`druid.go:30`), a genuine personal-DPS
+competitor to Everbloom. This ticket did not name it.
+
+**Idol of Terror (33509) is `phase: 4`** in upstream's own db, so it is correctly
+absent from a `maxPhase: 2` run rather than missing. The SME asserted P2 relevance
+while its own handoff admitted it had not confirmed that; withdrawn.
+
+**Severity, revised.** The slot is closer to "one idol dominates" than to "a live
+P2 decision" — for a solo-actor cat sim the field reduces to Everbloom (+88 Shred,
+flat) against Feral Shadows (Rip scaling), and **neither handoff measured either**.
+This stays open as a real pool gap, but it is not the recheck's top prize.
+
+## Why this looked like the highest-value fix (superseded above)
 
 It is the single caveat keeping **both** feral shortlists off a clean `trust`,
 it is one bug rather than two (both runs share the same 228-row pool), and it is
@@ -68,7 +106,9 @@ the heroic exclusion, which is deliberate and belongs to ticket 17.
 
 ## Acceptance
 
-- [ ] 32387 appears as a ranged candidate for both feral characters.
+- [ ] **28372 Idol of Feral Shadows** appears as a ranged candidate for both feral
+      characters — it is the real personal-DPS competitor. 32387 may follow from
+      the same fix, but it scores ~zero in a single-actor sim and is not the goal.
 - [ ] The fix is stated in terms of the general mechanism, not hardcoded to this
       id — or, if hardcoded, says why and links the general ticket.
 - [ ] The diff of upstream BiS sets against the pools is run and its result

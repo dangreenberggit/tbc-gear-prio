@@ -1742,7 +1742,7 @@ python -c "import json;r=json.load(open('.scratch/rank-reports/stage2-close-shre
 ```
 
 Neck tops out at **+12.9**, back at **+7.8**. An empty neck would price a phase-2
-epic at roughly +80–150. A further check: every worn item that *is* in its own
+epic at roughly +80-150. **That band is a hypothesis, untested** - a judgement about stat budgets, not a measurement; no arm was run with the slot emptied, and it is not what carries the conclusion. What carries it is the code path above plus the 44-of-44 worn rows at exactly `0.00` below, both directly checkable. Note also that waist, the third such slot, tops at **+48.0** - printed by the quoted command but omitted from earlier revisions of this prose, which cited the two most favourable slots.
 pool scores exactly `0.00` — thirteen of them on shredzepelin — which is the
 signature of a baseline built from worn gear.
 
@@ -1791,8 +1791,9 @@ The corroboration is upstream's, not ours. The pinned wowsims P2 feral sets
 (`vendor/wowsims/feral_p2_6p.gear.json`, `feral_p2_9p.gear.json`) line up with
 both feral shortlists nearly item for item — for shredzepelin, 9 of 18 upstream
 BiS items are already worn and score `0.00`, 6 unworn all land in the top 10. For
-slamaltman, 8 of 16 ret BiS-tagged rows are worn at `0.00` and all 8 unworn land
-in the top 22. No worn item appears as a nonzero upgrade on any character.
+slamaltman, **7** of 16 ret BiS-tagged rows are worn at `0.00` and the unworn ones
+land in the top 22. An earlier revision said 8 of 16; the pre-merge adversarial
+axis measured 7. No worn item appears as a nonzero upgrade on any character.
 
 Two figures that read as bugs and are not, recorded so the next reader does not
 stop on them:
@@ -1802,21 +1803,55 @@ stop on them:
   Wolfshead Helm is equipped (`vendor/tbc-new-fork/sim/druid/feralcat/rotation.go:52,174,260`).
   Losing the helm costs the powershift rotation, not the helm's stats.
 - **Shard-bound Bracers at +10.3** over a higher-ilvl worn bracer — a socket plus
-  a +4 AP socket bonus the worn item lacks.
+  a +4 AP socket bonus the worn item lacks. **This is nexess's row** (rank 9);
+  on shredzepelin the same item is -7.34 and unranked. An earlier revision
+  placed it in shredzepelin-framed prose.
 
 ### What this box does not claim
 
-Exactly two `medium` caveats survive, and they are one defect seen twice: the
-feral **ranged slot offers a single candidate**, the idol already worn, because
-item 32387 Idol of the Raven Goddess — in both pinned upstream P2 feral sets —
-has no AtlasLoot source and never enters the pool. Filed as **carry-forward 259**
-(`Blocks: phase-2`). It is the third confirmed instance of one mechanism: an item
-with no source row silently never becomes a candidate, however good it is.
+**Three `medium` caveats survive, not two** — the original wording here said two
+and was corrected by the pre-merge spec axis before merge.
 
-Every other caveat is `low` and already disclosed in the output — the empty meta
-sockets on candidates (ticket 257, measured as not a scoring asymmetry: the worn
-baseline has no meta either), the assumed race and hit cap, caster cloth padding
-the feral pool, and the three slots whose worn item has no row of its own.
+Two of them are one defect seen twice: the feral **ranged slot offers a single
+candidate**, the idol already worn. Filed as **carry-forward 259**
+(`Blocks: phase-2`). It is the third confirmed instance of one mechanism — an
+item with no AtlasLoot source row silently never becomes a candidate.
+
+**The SME named the wrong item as the prize, and the pre-merge domain axis caught
+it before merge.** Item 32387 Idol of the Raven Goddess is in both pinned
+upstream P2 feral sets, but its only sim effect upgrades the *party* Leader of
+the Pack aura (`sim/druid/druid.go:166`; `sim/core/buffs.go:817-830` grants the
+crit to party members, not the wearer). These are single-actor sims, so pooling
+it would produce a row scoring roughly zero against the worn Everbloom Idol's
+`IdolShredBonus += 88`. The real personal-DPS competitor is **28372 Idol of Feral
+Shadows**, and 259's acceptance now names it. Idol of Terror is `phase: 4` and so
+is correctly absent from a `maxPhase: 2` run, not missing.
+
+**Worth carrying beyond this ticket:** `bisTags` corroboration — the technique
+both SME handoffs leaned on hardest, and the thing that made these verdicts
+credible — **silently fails for party-buff items**. An item can be genuinely
+best-in-slot for a raiding feral and worth nothing in a solo-actor DPS ranking.
+
+The third `medium` is **benign and dismissed here rather than ticketed**: the
+slamaltman seat flagged `ranking.plausibilityWarnings` as absent from that
+character's JSON while the SME input note said it is always present. The note was
+wrong, not the emitter — the key is optional and omitted when empty
+(`rank-report.ts` reads it as `?? []`) and slamaltman has no dead slots. The note
+is corrected. Recorded because the gate rule is "every caveat fixed or
+SME-agreed-ticketed", and silently dropping one is worse than saying why it does
+not count.
+
+The remaining caveats are `low`. Three are disclosed in the product output — the
+assumed race and hit cap (`ranking.caps.hit`, `ranking.assumptions.standing`),
+the empty meta sockets on candidates (`ranking.substitutions[0]`; ticket 257
+measured this as *not* a scoring asymmetry, since the worn baseline has no meta
+either), and the three slots whose worn item has no row of its own
+(`plausibilityWarnings`). **Two are not disclosed anywhere**, and this entry
+should not have implied otherwise: caster cloth padding the feral pool appears in
+no warning or transcript (`grep -ci cloth` on the shredzepelin JSON and stdout
+both return 0), and per-row gem and enchant detail is absent from the report —
+that caveat *is* the absence of disclosure. Neither changes a number; both are
+presentation gaps a reader should know about.
 
 So the box asserts that a ret and a feral player would act on these lists. It
 does **not** assert the candidate pool is complete, and 259 is the standing

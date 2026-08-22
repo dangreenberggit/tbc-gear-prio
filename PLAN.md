@@ -858,7 +858,7 @@ Caches; assumptions and substitutions in CLI output (two-tier, per §9); BiS tag
 
 **7 of 8 recorded, 2026-08-07.** Each ☑ points at its own write-up in [`docs/verification-log.md`](docs/verification-log.md); the five from the `caches` / `disclosure-and-caps` / `apply-view` slices reached this branch only via the `claude/verification-log-five-boxes-4c2a8c` merge, which was stranded off `phase-2/trust` until then. The open box is a **domain** judgment, not pipeline work.
 
-**The open box was worked and stays open, 2026-08-21.** Two clauses in the paragraph above were stale and are corrected here rather than edited in place. "Only shredzepelin has been through `sme-rank-review`" was false — twelve SME handoffs exist under `.scratch/handoffs/` (`ls .scratch/handoffs/sme-rank-judgment-*.md | wc -l`), covering all three characters. "The feral universe it reads does not exist on `dev`" is also no longer true. The paragraph's operative conclusion — that a fresh domain pass was needed — was and remains correct, because all twelve handoffs predate the 2026-08-21 pin, rotation and skeleton commits.
+**The open box was worked and stays open, 2026-08-21.** Two clauses in the paragraph above were stale and are corrected here rather than edited in place. "Only shredzepelin has been through `sme-rank-review`" was false — twelve SME handoffs existed under `.scratch/handoffs/` as of base `9a4b932` (`git ls-tree 9a4b932 -- .scratch/handoffs/ | grep -c sme-rank-judgment`; the bare `ls` at tip returns 16, because this branch added four), covering all three characters. "The feral universe it reads does not exist on `dev`" is also no longer true. The paragraph's operative conclusion — that a fresh domain pass was needed — was and remains correct, because all twelve handoffs predate the 2026-08-21 pin, rotation and skeleton commits.
 
 That fresh pass ran on 2026-08-21 against shortlists regenerated at this tip by
 live re-sim on the pinned v0.0.119 binary, and returned slamaltman
@@ -884,8 +884,9 @@ Handoffs: [`…-stage2-recheck.md`](../.scratch/handoffs/sme-rank-judgment-stage
 and [`…-stage2-recheck-feral.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md).
 Full entry in [`docs/verification-log.md`](docs/verification-log.md).
 
-**What the box does not claim.** Exactly two `medium` caveats survive, and they
-are one defect seen twice: the feral ranged slot offers a single candidate, the
+**What the box does not claim.** Three `medium` caveats survive. One is benign
+and dismissed with its reasoning in the log entry (a stale line in an SME input
+note, not a product defect). The other two are one defect seen twice: the feral ranged slot offers a single candidate, the
 idol already worn, because item 32387 Idol of the Raven Goddess — present in both
 pinned upstream P2 feral sets — has no AtlasLoot source and never reaches the
 pool. Filed as carry-forward 259, `Blocks: phase-2`. Every other caveat is `low`

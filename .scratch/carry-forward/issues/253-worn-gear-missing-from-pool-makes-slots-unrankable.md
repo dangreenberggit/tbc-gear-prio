@@ -225,7 +225,14 @@ be read first.
       → **Both confirmed** by the pre-merge domain axis, 2026-08-21, with the
       commands above. Cause 1's description was corrected: it is a source-data
       gap, not an id ceiling.
-- [ ] A character's worn item is in the pool for its own slot, or the rows in that
+- [~] A character's worn item is in the pool for its own slot, or the rows in that
       slot are withheld from the shortlist rather than shown with an empty-slot delta.
-- [ ] Regenerating shredzepelin at p2 yields a shortlist whose above-cutoff rows are
+      → **Obsolete.** The premise was refuted: there is no empty-slot delta — the
+      rows were always measured against the worn item. Force-inclusion was planned,
+      reviewed and dropped for the measured reasons in the RESOLVED section, and
+      withholding correct rows would have hidden real information.
+- [x] Regenerating shredzepelin at p2 yields a shortlist whose above-cutoff rows are
       measured against worn gear, and an SME seat re-reads it.
+      → Regenerated at `3d09b34`; the SME re-read on 2026-08-22 returned
+      `trust-with-caveats`, handoff at
+      `.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md`.

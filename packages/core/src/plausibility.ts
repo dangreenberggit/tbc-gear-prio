@@ -73,11 +73,11 @@ const WARNED_DEAD_SLOT_CAUSES: readonly DeadSlotCause[] = [
   // not even identify the worn item, so it has no cause to report. It must
   // still warn — a dropped slot is indistinguishable from a healthy one.
   "unidentified-worn-item",
-  // The worn item is known but outside the candidate pool, so every row in
-  // the slot is scored against an empty slot rather than against it. This is
-  // the strongest of the four: the slot's rows are not just uninformative,
-  // they are wrong if read as upgrades or losses relative to what is worn
-  // (ticket 163).
+  // The worn item is known but outside the candidate pool, so the slot has no
+  // row for it. Ticket 253: the other rows are scored against the worn item
+  // like any healthy slot's and their deltas stand — this previously claimed
+  // they were wrong, which retracted correct numbers. What the reader loses is
+  // what it is worth to keep the item (ticket 163).
   "worn-unrankable",
 ];
 

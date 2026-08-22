@@ -63,11 +63,15 @@ export type DeadSlotCause =
    * The worn item is known by id and name (the caller read it off the
    * character's equipment) but never became a row at all — it is absent from
    * the candidate pool for its slot, so no candidate was ever compared
-   * against it and every row in the slot is scored against an empty slot
-   * instead. Distinct from `unidentified-worn-item`: there the classifier has
-   * rows but none says what is worn; here the worn item is known but has no
-   * row to anchor to. The slot's other rows (if any) are real deltas but
-   * against the wrong baseline, so they must not be read as upgrades or
+   * against it, so the slot has no anchor row. Distinct from
+   * `unidentified-worn-item`: there the classifier has rows but none says what
+   * is worn; here the worn item is known but has no row to anchor to.
+   *
+   * Ticket 253: the slot's other rows ARE scored against the worn item — the
+   * baseline is composed from full logged equipment — so their deltas stand.
+   * This comment previously said they were scored against an empty slot, which
+   * was false and drove a false retraction in the report. What is missing is
+   * the worn item's own row, not the comparison. The rows must not be read as
    * losses relative to what is actually equipped (ticket 163, ticket 124).
    */
   | "worn-unrankable"
@@ -226,11 +230,15 @@ export function classifyDeadSlots(
   const dead: DeadSlot[] = [];
 
   // Worn-unrankable slots first, and unconditionally — not gated on `best >
-  // 0`. Every row this slot does have was scored against an empty slot, not
-  // against the item actually worn, so a positive-looking row here is not a
-  // real upgrade either; the whole slot's numbers are compromised, which is
-  // why this bypasses the normal "only dead slots get classified" gate rather
-  // than waiting to be reached by it (ticket 163, ticket 124).
+  // 0`. A slot can have perfectly good positive rows and still need this
+  // classification, because what it lacks is the worn item's own row, so the
+  // normal "only dead slots get classified" gate would skip it entirely
+  // (ticket 163, ticket 124).
+  //
+  // Ticket 253 corrected the reason, not the behaviour: this previously said
+  // the slot's numbers were "compromised" because rows were scored against an
+  // empty slot. They are not — the baseline carries full logged equipment and
+  // the deltas stand. The bypass is still right; the justification was wrong.
   const unrankableSlots = new Set(
     (options.wornUnrankable ?? []).map((w) => w.slot)
   );
