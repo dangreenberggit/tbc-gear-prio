@@ -7,21 +7,42 @@ merged, `dev` untouched.
 - **Tip:** `3d09b34` ("Regenerate the other two shortlists on the fixed code")
 - **`pnpm verify`:** green at `486f977`; re-run it before doing anything.
 
-## The one thing in flight
+## Where the SME pass got to — one of three
 
-A `gate-sme` seat was running when the session ended. It writes to:
+The seat was told to wrap up when the machine went down and wrote a partial
+handoff: `.scratch/handoffs/sme-rank-judgment-stage2-recheck.md`
 
-`.scratch/handoffs/sme-rank-judgment-stage2-recheck.md`
+| character | verdict |
+| --- | --- |
+| slamaltman | **`trust-with-caveats`** — reached, full reasoning in the handoff |
+| shredzepelin | **not reached** — report never opened |
+| nexess | **not reached** — report never opened |
 
-**First action on resume: check whether that file exists.**
+**So the box cannot close yet**, and shredzepelin's earlier `do-not-trust` is
+neither confirmed nor overturned — which is the whole question this pass exists
+to settle.
 
-- **If it exists** — read it. It carries three verdict strings (slamaltman,
-  shredzepelin, nexess) on the corrected reports. Go to "If the verdicts are in"
-  below.
-- **If it does not exist** — the seat died with the session. Re-run it: spawn
-  `gate-sme` with `model: "opus"` named at the call site, pointing at
-  `.scratch/stage-gate/worn-item-pool-coverage/sme-input-recheck.md`, which is
-  written and ready. Nothing else needs redoing.
+**To resume:** spawn `gate-sme` with `model: "opus"` named at the call site,
+pointing at `.scratch/stage-gate/worn-item-pool-coverage/sme-input-recheck.md`
+(written and ready), and tell it slamaltman is already judged — it needs only
+shredzepelin and nexess. Keep the pre-emptive `WRONG_MODEL` correction in the
+prompt (ticket 252).
+
+**Two findings from the partial pass, worth not rediscovering:**
+
+- The 42-wide stat arrays in `data/items/index.json` are positional with no
+  mapping at the call site. The index is the `Stat` enum in
+  `packages/core/src/proto/common_pb.ts` around line 1900. This cost the seat
+  most of its session.
+- SE-versus-delta was measured for **all three** characters before it stopped:
+  both feral shortlists are short (14 and 12 ranked rows) and **every row clears
+  twice its own standard error**. So whatever may be wrong with them, it is not
+  replicate noise — a ticket-236 explanation cannot cover a finding there, and
+  the next seat can skip that line entirely.
+- Also flagged: `ranking.plausibilityWarnings` was **absent** from slamaltman's
+  JSON although `sme-input-recheck.md` says it is present. That character has no
+  dead slots, so an empty-or-absent key is plausible — but the input note and the
+  emitter disagree and one of them is wrong. Worth a look.
 
 ## Why this pass exists (the short version)
 
