@@ -473,6 +473,36 @@ so feral was the entire gap; and Relentless Earthstorm Diamond 32409 is
 wowsims-sourced — it is the meta socketed in wowsims' own vendored ret presets
 (`ret_p1`, `ret_p2`, `ret_p3` gear sets, plus `db.json`), not an invented value.
 
+### Provenance correction, 2026-08-22 (commit `39eb131`)
+
+The paragraph above, as first written, credited the owner's ruling for **both**
+new rows. That was an overreach: the ruling says *"just for feral dps"*, and
+covers the `feral` row only. The `feral-tank` row was added on top of it
+without authorisation.
+
+The row itself survives the correction, on evidence rather than on the ruling.
+Upstream does record a feral tank meta — bear is a **separate spec upstream**
+(`SpecFeralBearDruid`), and its gear sets live outside the vendored cat presets
+this ticket had been consulting, which is why both this ticket and the code
+comment asserted upstream records no feral meta at all. Wrong for bear: **7 of
+the 11 bear sets socket 32409** (`p1`, `p2_balanced`, `p2_offensive`,
+`p2_survival`, `p3`, `p4`, `preraid`). Of the remaining four, three wear
+socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896, outside
+this project's phase range. Re-derive the counts with:
+
+```
+node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
+```
+
+So `feral-tank` is a read-it-from-a-preset row like ret's, not a ruling row
+like feral's, and the code comment now says so. The row is also **inert
+today** — `feral-tank` is identified but never ranked, so nothing reads it; it
+is recorded because the evidence exists, not because a caller needs it.
+
+The owner's second condition ("if theyre based on wowsims code, leave it")
+therefore holds more strongly than the original write-up claimed: every row in
+this table except `feral` is now read out of a wowsims preset.
+
 ### The change
 
 Added `feral` and `feral-tank` rows to `SPEC_PREFERRED_METAS`
