@@ -111,9 +111,9 @@ export function Run({ id }: { id: string }) {
   const skeletons = skeletonCount(job.progress);
   const displayRows = viewResult?.rows ?? rows;
   const shortlist = viewResult?.shortlist;
-  const below = viewResult
-    ? viewResult.rows.filter((r) => r.belowCutoffInView)
-    : [];
+  // `belowCutoffCount` is the view's own count for this label, so the expand
+  // cannot disagree with the list it opens.
+  const belowCount = viewResult?.belowCutoffCount ?? 0;
   const visible = done && shortlist && !showBelow ? shortlist : displayRows;
 
   // Skeletons only stand in for candidates that have not reported yet. At
@@ -160,7 +160,7 @@ export function Run({ id }: { id: string }) {
         ))}
       </div>
 
-      {done && below.length > 0 && (
+      {done && belowCount > 0 && (
         <div className="expand">
           <button
             type="button"
@@ -170,8 +170,8 @@ export function Run({ id }: { id: string }) {
             }}
           >
             {showBelow
-              ? `Hide ${String(below.length)} below the cutoff`
-              : `Show ${String(below.length)} below the cutoff`}
+              ? `Hide ${String(belowCount)} below the cutoff`
+              : `Show ${String(belowCount)} below the cutoff`}
           </button>
         </div>
       )}
