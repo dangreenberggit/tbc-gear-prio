@@ -82,3 +82,8 @@ One dated line per gate: gate, outcome, reason, round count.
     `Blocks: phase-3` tickets 74–77 are all `Status: closed`, so 263 is the only live
     blocker; `pnpm merge-to-dev` will need `--ack-open-blockers` — owner's call at the merge ask.
   Gate C: **PASS**. Hand-off: `pre-merge-review` next, then ask before any merge.
+- 2026-08-22 — **Hand-off.** `pre-merge-review` run on `8a1c01a..6ef098c` (four fresh Opus
+  axes): 23 findings, no blocker; 14 fixed in `6d917f5..46df87b`, 2 deferred (266, 267),
+  7 wontfix. Review: `docs/reviews/phase-3-web-shell.md`. `pnpm merge-to-dev --check-only
+  --ack-open-blockers` → ok. Not merged; waiting for the owner. Open `Blocks: phase-3`
+  veto: ticket 263 only (gate box 1 open by design).
