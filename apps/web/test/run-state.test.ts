@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RankedItem, Ranking } from "@tbc-gear-prio/core";
+import { SIM_ORDER, type RankedItem, type Ranking } from "@tbc-gear-prio/core";
 import { applyView, type ViewResult } from "@tbc-gear-prio/core/view";
 import {
   finalOrder,
@@ -9,6 +9,8 @@ import {
   skeletonCount,
   type JobProgress,
 } from "../src/run-state.js";
+import { SLOT_LABELS, UI_SLOT_ORDER } from "../src/slots.js";
+import { toViewOptions, zonesOf } from "../src/view-options.js";
 
 function row(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
   const base: RankedItem = {
@@ -21,6 +23,7 @@ function row(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
     deltaPct: 0,
     se: 0.001,
     seMethod: "independent",
+    belowCutoff: false,
     bisTags: [],
   };
   return { ...base, ...over };
@@ -148,7 +151,7 @@ function ranking(items: RankedItem[]): Ranking {
       maxPhase: 2,
       seeds: [1],
       iterations: 10000,
-      race: "Human",
+      race: "RaceHuman",
       presetId: "ret-p2",
       standing: [],
     },
@@ -229,5 +232,105 @@ describe("JobProgress stages", () => {
     for (const stage of progressStages) {
       expect(progressLabel({ stage, done: 1, total: 2 })).toBeTruthy();
     }
+  });
+});
+
+describe("toViewOptions", () => {
+  it("strips greyOwned so applyView never removes an owned row", () => {
+    // §12 / §8.3.3: owned rows are greyed, never dropped. Core's `hideOwned`
+    // filters them out of `rows`, so the UI toggle must not become it.
+    expect(toViewOptions({ greyOwned: true, raid: "Karazhan" })).toEqual({
+      raid: "Karazhan",
+    });
+    expect("hideOwned" in toViewOptions({ greyOwned: true })).toBe(false);
+  });
+
+  it("passes every real ViewOptions field through untouched", () => {
+    const v = {
+      pinBis: true,
+      raid: "Karazhan",
+      boss: "Nightbane",
+      groupBy: "slot",
+      withSetPotential: true,
+    } as const;
+    expect(toViewOptions({ ...v, greyOwned: false })).toEqual(v);
+  });
+});
+
+describe("zonesOf", () => {
+  it("collects zones and their bosses from the rows", () => {
+    expect(
+      zonesOf([
+        row({
+          itemId: 1,
+          source: { kind: "raid", zone: "Karazhan", boss: "Nightbane" },
+        }),
+        row({
+          itemId: 2,
+          source: { kind: "raid", zone: "Karazhan", boss: "Attumen" },
+        }),
+        row({
+          itemId: 3,
+          source: { kind: "raid", zone: "Gruul's Lair", boss: "Gruul" },
+        }),
+      ])
+    ).toEqual([
+      { zone: "Gruul's Lair", bosses: ["Gruul"] },
+      { zone: "Karazhan", bosses: ["Attumen", "Nightbane"] },
+    ]);
+  });
+
+  it("reaches a tier piece through its token source (§8.3.2)", () => {
+    expect(
+      zonesOf([
+        row({
+          itemId: 1,
+          source: {
+            kind: "token",
+            zone: "Karazhan",
+            boss: "Prince",
+            token: "Helm of the Fallen Hero",
+          },
+        }),
+      ])
+    ).toEqual([{ zone: "Karazhan", bosses: ["Prince"] }]);
+  });
+
+  it("offers a zone-less source no filter entry", () => {
+    expect(
+      zonesOf([row({ itemId: 1, source: { kind: "badge", cost: 60 } })])
+    ).toEqual([]);
+  });
+
+  it("keeps a zone whose sources name no boss", () => {
+    expect(
+      zonesOf([row({ itemId: 1, source: { kind: "raid", zone: "Trash" } })])
+    ).toEqual([{ zone: "Trash", bosses: [] }]);
+  });
+
+  it("reads every source a row carries, not only the primary one", () => {
+    expect(
+      zonesOf([
+        row({
+          itemId: 1,
+          source: { kind: "raid", zone: "Karazhan", boss: "Prince" },
+          sources: [
+            { kind: "raid", zone: "Karazhan", boss: "Prince" },
+            { kind: "raid", zone: "Magtheridon's Lair", boss: "Magtheridon" },
+          ],
+        }),
+      ]).map((z) => z.zone)
+    ).toEqual(["Karazhan", "Magtheridon's Lair"]);
+  });
+});
+
+describe("UI_SLOT_ORDER", () => {
+  it("matches core's SIM_ORDER exactly", () => {
+    // `src/` restates the slot list so it never imports the core root at
+    // runtime — that closure reaches the 6.8 MB item index. This test is what
+    // catches the restatement drifting. A test file may import the root
+    // freely: it never ships to a browser.
+    expect(UI_SLOT_ORDER).toEqual([...SIM_ORDER]);
+    expect(Object.keys(SLOT_LABELS).sort()).toEqual([...SIM_ORDER].sort());
   });
 });

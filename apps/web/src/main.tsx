@@ -1,13 +1,27 @@
-/** Filled in by the UI slice (steps 10-12); the scaffold only has to mount. */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { applyView } from "@tbc-gear-prio/core/view";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { App } from "./App.js";
+import "./styles.css";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("no #root element");
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // A finished ranking is immutable — it is keyed by contentHash upstream
+      // — so a refocus must not refetch and restart the poll animation.
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
 createRoot(container).render(
   <StrictMode>
-    <p>tbc gear prio {typeof applyView}</p>
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </StrictMode>
 );
