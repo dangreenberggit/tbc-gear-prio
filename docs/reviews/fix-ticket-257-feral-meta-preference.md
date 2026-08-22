@@ -249,6 +249,21 @@ branch's diff cannot be the cause.
 task per the task's own instructions (review only, no merge action) — see
 Disposition below for how the ticket/review-file gate is expected to read.
 
+## Post-review fixes, 2026-08-22 (`980a87f`)
+
+Every `defer` above that pointed at tickets 264 or 265 was **fixed on this
+branch instead**, before any merge. Three of them were false statements in
+shipped comments (the 25896 phase claim, the stale feral-tank provenance in
+two test files, the overstated "inert" note) and one was the weakened
+`emptyMetaSocket` assertion. Tickets 264 and 265 are `resolved`; the
+Disposition rows below are kept as the review found them, not rewritten.
+
+Ticket 266 (feral-p3 timeouts) remains open and deferred, correctly: it
+reproduces on `dev`'s tip and this branch's diff cannot be its cause. The
+re-run of `pnpm verify` after these fixes came back fully green — 861
+passed, no timeouts — which is consistent with the review's flakiness
+diagnosis rather than evidence against it.
+
 ## Disposition
 
 | ID       | Axis            | Disposition | Ticket / note                                                                                                                      |

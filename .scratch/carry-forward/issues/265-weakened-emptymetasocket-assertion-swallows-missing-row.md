@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task (test hardening — not a currently-observed failure)
 Origin: docs/reviews/fix-ticket-257-feral-meta-preference.md
 Blocks: none
@@ -6,6 +6,16 @@ Blocked by: none
 
 # `emptyMetaSocket` assertion weakened to `toBeFalsy()`, and the optional
 chain in front of it can hide a dropped row
+
+## Resolved 2026-08-22 in `980a87f`, before merge
+
+Fixed on the branch rather than deferred. `expect(row).toBeDefined()` now
+precedes the flag assertion, so a dropped row fails loudly instead of
+satisfying `toBeFalsy()` through an undefined optional chain. The comment
+above it states why the order matters.
+
+`pnpm verify` green after the fix: 861 passed.
+
 
 `packages/core/test/rank.test.ts`, in `rankUpgrades per-spec meta
 preference` (the test renamed to "seats the feral preferred meta on a feral

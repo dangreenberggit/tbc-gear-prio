@@ -1,10 +1,33 @@
-Status: open
+Status: resolved
 Type: task (comment/test-comment accuracy — no behavioral defect)
 Origin: docs/reviews/fix-ticket-257-feral-meta-preference.md
 Blocks: none
 Blocked by: none
 
 # Shipped comment inaccuracies from the ticket-257 feral-meta-preference fix
+
+## Resolved 2026-08-22 in `980a87f`, before merge
+
+All five items fixed on the same branch rather than carried forward — three
+were false statements in shipped comments, which is not the kind of thing to
+leave sitting in the tree behind a ticket.
+
+- **Item 1 (phase fact).** The claim that 25896 is "outside this project's
+  phase range" is gone. It is phase 1 in `data/gems/palette.json`; verify with
+  `node -e "const p=require('./data/gems/palette.json');const a=Array.isArray(p)?p:p.gems;console.log(a.find(g=>g.id===25896).phase)"`.
+  The comment now states the bear presets genuinely disagree and names the
+  7-of-11 majority as the judgment call a derived table would have to make
+  explicit (ticket 263).
+- **Items 2 and 3 (stale provenance in the test files).** `candidate-gems.test.ts`
+  and `rank.test.ts` no longer say feral and feral-tank both rest on the
+  owner's ruling. Only the cat row does.
+- **Item 4 ("inert" imprecision + typo).** The row is read by
+  `missingMetaPreferenceNote` and `metaSocketUnpriced`; what it never reaches
+  is a ranking. Comment corrected to say so.
+- **Item 5 (sync precondition).** Folded into the same rewrite.
+
+`pnpm verify` green after the fix: 861 passed.
+
 
 Four small, independently-confirmed inaccuracies in comments shipped on
 `fix/ticket-257-feral-meta-preference` (commit `601dfd8` / `39eb131`). None
