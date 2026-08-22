@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   gemContext,
+  metaSocketUnpriced,
   missingMetaPreferenceNote,
 } from "../src/candidate-gems.js";
 import { compose } from "../src/compose.js";
@@ -2034,6 +2035,61 @@ describe("equipmentForCandidateSwap gem quality (ticket 117)", () => {
 });
 
 /**
+ * Ticket 257: a feral player who wears no meta gem (every Wolfshead wearer,
+ * which upstream's own presets say is the normal feral case) had every
+ * meta-socket head candidate priced with an empty meta socket, against a
+ * baseline that was missing nothing — the worn head has no socket to be
+ * missing anything from. `SPEC_PREFERRED_METAS` must carry a feral row so the
+ * candidate is priced with the gem the player would actually seat.
+ */
+describe("equipmentForCandidateSwap feral meta preference (ticket 257)", () => {
+  const feralWeights = (
+    JSON.parse(
+      readFileSync(join(root, "data/presets/feral/p1.ep-weights.json"), "utf8")
+    ) as { weights: Record<string, number> }
+  ).weights;
+
+  it("seats the feral preferred meta on a candidate when the worn head has no socket", () => {
+    const equipment: SimItemSpec[] = SIM_ORDER.map(() => ({
+      id: 0,
+      gems: [],
+    }));
+    // Wolfshead Helm: no sockets, so the baseline has no meta to be missing.
+    equipment[SIM_ORDER.indexOf("head")] = { id: 8345, gems: [] };
+    // Relentless needs 2R/2Y/2B. Candidate 30228 supplies one red socket;
+    // these three pieces (each a clean, colour-matched worn gem, no fill
+    // needed) supply the rest, so the repair step activates the meta without
+    // depending on what the auto-fill happens to pick for the candidate's own
+    // socket.
+    equipment[SIM_ORDER.indexOf("chest")] = {
+      id: 21865, // Soulcloth Vest: yellow, red, blue
+      gems: [23113, 24027, 23118],
+    };
+    equipment[SIM_ORDER.indexOf("waist")] = {
+      id: 23510, // Enchanted Adamantite Belt: blue, yellow
+      gems: [23118, 23113],
+    };
+    equipment[SIM_ORDER.indexOf("hands")] = {
+      id: 21863, // Soulcloth Gloves: yellow, red
+      gems: [23113, 24027],
+    };
+
+    const swapped = equipmentForCandidateSwap(
+      equipment,
+      SIM_ORDER.indexOf("head"),
+      30228, // Nordrassil Headdress: meta socket
+      gemContext(gemsForPhase(2), feralWeights, "feral")
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    const allGems = swapped.flatMap((s) => s.gems ?? []);
+    expect(head.gems).toContain(32409);
+    expect(metaStatus(getItem(30228)!.sockets, allGems).kind).toBe("active");
+    expect(metaSocketUnpriced(30228, head.gems, "feral")).toBe(false);
+  });
+});
+
+/**
  * End-to-end cover for both branches of the socket-bonus predicate that the
  * issue-1 slice changed (ticket 136 item 5, round-4 finding 4-S1). The
  * round-4 blast-radius check was a null result: the branches were pinned by
@@ -3427,9 +3483,14 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
  * 8 of its rows each silently recolour four gems.
  */
 /**
- * Per-spec preferred meta (step6-meta-choice-spike.md option 1). Ret has an
- * entry read from upstream's presets; feral has none, because all five
- * vendored feral presets wear Wolfshead Helm 8345 and socket no meta at all.
+ * Per-spec preferred meta (step6-meta-choice-spike.md option 1, extended by
+ * the owner's 2026-08-22 ruling on ticket 257). Ret and feral-tank are read
+ * from upstream's presets — ret's own, and bear's for feral-tank, bear being
+ * a separate upstream spec. Only the feral (cat) row rests on the ruling,
+ * because all five vendored cat presets wear Wolfshead Helm 8345 and socket
+ * no meta at all — see the block comment on `SPEC_PREFERRED_METAS` in
+ * `candidate-gems.ts` for the full reasoning. All three now carry the same
+ * Relentless Earthstorm Diamond 32409 entry.
  *
  * The fill behaviour for both cases is pinned directly in
  * candidate-gems.test.ts. What is pinned here is the *wiring*: that
@@ -3480,32 +3541,36 @@ describe("rankUpgrades per-spec meta preference", () => {
     ).toBe(false);
   });
 
-  it("names the spec in the note a spec without an entry would carry", () => {
-    // The note text itself, at its own seam — building a full feral
+  it("carries no no-preference note for any of the three detectable specs (ticket 257)", () => {
+    // The note's text and its fail-loud branch for an unlisted spec are
+    // pinned at their own seam in candidate-gems.test.ts — building a full
     // rankUpgrades harness to re-observe a pure function would test the
-    // harness, not the behaviour.
-    expect(missingMetaPreferenceNote("feral")).toContain("feral");
-    expect(missingMetaPreferenceNote("feral")).toContain(
-      "no meta preference recorded"
-    );
+    // harness, not the behaviour. All three `DetectedSpecId`s now have a
+    // recorded preference, so this file's job is just the negative.
     expect(missingMetaPreferenceNote("ret")).toBeUndefined();
+    expect(missingMetaPreferenceNote("feral")).toBeUndefined();
+    expect(missingMetaPreferenceNote("feral-tank")).toBeUndefined();
   });
 
   /**
-   * Ticket 141: every other `rankUpgrades` case in this file ranks ret — the
-   * one spec *with* a table entry — so nothing drove the branch the per-spec
-   * meta added, and ticket 139 shipped under a green suite. The ret case above
-   * asserts a *negative* (no note on a ret run), which passes identically if
-   * `spec` were dropped on the floor, since `missingMetaPreferenceNote`
-   * returns undefined for both `"ret"` and `undefined`. This is the positive.
+   * Ticket 141 (superseded by ticket 257): every other `rankUpgrades` case in
+   * this file ranks ret — the one spec that had a table entry before ticket
+   * 257 — so nothing drove the branch the per-spec meta added, and ticket 139
+   * shipped under a green suite. The ret case above asserts a *negative* (no
+   * note on a ret run), which passes identically if `spec` were dropped on
+   * the floor, since `missingMetaPreferenceNote` returns undefined for both
+   * `"ret"` and `undefined`. This is the positive for feral.
    *
-   * Shredzepelin wears socketless Wolfshead 8345, so migration carries no meta
-   * onto the candidate and the socket genuinely ends up empty — the flag
-   * should fire. Ticket 139's converse (a worn meta migrating in, so the
-   * socket is full and the flag must *not* fire) is pinned directly on
-   * `metaSocketUnpriced` in candidate-gems.test.ts.
+   * Shredzepelin wears socketless Wolfshead 8345, so migration carries no
+   * worn meta onto the candidate. Before ticket 257 that meant the socket
+   * genuinely ended up empty and the disclosure fired; the owner's ruling
+   * gave feral a recorded preference (Relentish Earthstorm Diamond 32409,
+   * same as ret's), so the fill now seats it instead and nothing is
+   * disclosed. Ticket 139's case (a worn meta migrating in, so the socket is
+   * full and the flag must not fire for an unrelated reason) is pinned
+   * directly on `metaSocketUnpriced` in candidate-gems.test.ts.
    */
-  it("discloses the unpriced meta socket on a feral run, per row and per run", async () => {
+  it("seats the feral preferred meta on a feral run instead of disclosing an empty socket (ticket 257)", async () => {
     const echoSim: SimRunner = {
       version: async () => "v0.0.101",
       run: async (_req: RaidSimRequest, runOpts: SimRunOpts) => ({
@@ -3542,12 +3607,15 @@ describe("rankUpgrades per-spec meta preference", () => {
     );
 
     const row = ranking.items.find((i) => i.itemId === 29098);
-    expect(row?.emptyMetaSocket).toBe(true);
+    // Assert the row is here before asserting about its flag: `row?.x` on a
+    // missing row is undefined, which a falsy check would have passed.
+    expect(row).toBeDefined();
+    expect(row?.emptyMetaSocket).toBeFalsy();
     expect(
       ranking.substitutions.some((s) =>
         s.detail.includes("no meta preference recorded")
       )
-    ).toBe(true);
+    ).toBe(false);
   });
 });
 
