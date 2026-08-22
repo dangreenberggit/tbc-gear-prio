@@ -168,9 +168,13 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
  *
  * Ret's entry is read from upstream's gear presets: all three ret presets
  * socket 32409 and no other meta (`.scratch/handoffs/issue-1-upstream-gem-cleanup/meta-gem-research.md`,
- * "Local verification pass"). Feral and feral-tank have no such preset —
- * upstream's five vendored feral presets wear socketless Wolfshead Helm 8345 —
- * so those two rows rest on the owner's ruling instead: ticket 257 found that
+ * "Local verification pass"). Feral-tank is read from upstream too, just from
+ * a different place: bear is a separate upstream spec (`SpecFeralBearDruid`)
+ * and 7 of its 11 gear sets socket 32409.
+ *
+ * Only the feral (cat) row rests on the owner's ruling — upstream's five
+ * vendored cat presets wear socketless Wolfshead Helm 8345, so there is no
+ * cat meta to read. Ticket 257 found that
  * leaving them absent was not a neutral "disclose and skip", it under-priced
  * every meta-socket head candidate for a player who already wears no meta
  * (i.e. every Wolfshead wearer, the upstream-normal case), because the

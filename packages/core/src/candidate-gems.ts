@@ -144,14 +144,22 @@ const PREFERRED_META_IDS: readonly number[] = [32409];
  * here that upstream recorded no feral meta at all, which was wrong for bear.
  * Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
  * `p2_offensive`, `p2_survival`, `p3`, `p4`, `preraid`); of the rest, three
- * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896,
- * outside this project's phase range. Re-check with:
+ * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896.
+ * That last one is a genuine disagreement, not a scoping artefact: 25896 is
+ * phase 1 in `data/gems/palette.json`, so it is in range for every phase this
+ * project supports. The row follows the majority of the sets that socket a
+ * meta at all, and this is the judgment call — 7 of 11 — that a derived table
+ * would have to make explicit (ticket 263). Re-check with:
  *
  *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
  *
- * Note this row is currently inert: `feral-tank` is identified but never
- * ranked (`SpecId = "ret" | "feral"`, `types.ts`), so nothing reads it today.
- * It is recorded because the evidence exists, not because a caller needs it.
+ * Note what the `feral-tank` row does and does not reach today. It is read —
+ * `missingMetaPreferenceNote` and `metaSocketUnpriced` below both consult the
+ * table for any spec, and its presence is what keeps them quiet for
+ * feral-tank. What it never reaches is a ranking: `feral-tank` is identified
+ * but never ranked (`SpecId = "ret" | "feral"`, `types.ts`), so no candidate
+ * is ever gemmed from it. It is recorded because the evidence exists, not
+ * because a ranking needs it.
  *
  * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
  * reach this code, so a row for one would be untestable decoration.

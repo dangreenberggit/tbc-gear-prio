@@ -3484,9 +3484,10 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
  */
 /**
  * Per-spec preferred meta (step6-meta-choice-spike.md option 1, extended by
- * the owner's 2026-08-22 ruling on ticket 257). Ret's entry is read from
- * upstream's presets; feral and feral-tank rest on the owner's ruling instead,
- * because all five vendored feral presets wear Wolfshead Helm 8345 and socket
+ * the owner's 2026-08-22 ruling on ticket 257). Ret and feral-tank are read
+ * from upstream's presets — ret's own, and bear's for feral-tank, bear being
+ * a separate upstream spec. Only the feral (cat) row rests on the ruling,
+ * because all five vendored cat presets wear Wolfshead Helm 8345 and socket
  * no meta at all — see the block comment on `SPEC_PREFERRED_METAS` in
  * `candidate-gems.ts` for the full reasoning. All three now carry the same
  * Relentless Earthstorm Diamond 32409 entry.
@@ -3606,6 +3607,9 @@ describe("rankUpgrades per-spec meta preference", () => {
     );
 
     const row = ranking.items.find((i) => i.itemId === 29098);
+    // Assert the row is here before asserting about its flag: `row?.x` on a
+    // missing row is undefined, which a falsy check would have passed.
+    expect(row).toBeDefined();
     expect(row?.emptyMetaSocket).toBeFalsy();
     expect(
       ranking.substitutions.some((s) =>
