@@ -37,6 +37,26 @@
         "-c-1"
       ],
       "port": 4180
+    },
+    {
+      "name": "web-shell",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "-C",
+        "apps/web",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "web-shell-prod",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "-C",
+        "apps/web",
+        "start"
+      ],
+      "port": 3000
     }
   ]
 }
