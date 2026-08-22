@@ -880,8 +880,8 @@ number changed** — and recorded on ticket 253.
 Re-judged on the corrected reports: slamaltman `trust-with-caveats` (carried
 forward), shredzepelin **`trust-with-caveats`**, nexess **`trust-with-caveats`**.
 The recheck seat explicitly declined to confirm the earlier `do-not-trust`.
-Handoffs: [`…-stage2-recheck.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck.md)
-and [`…-stage2-recheck-feral.md`](../.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md).
+Handoffs: [`…-stage2-recheck.md`](.scratch/handoffs/sme-rank-judgment-stage2-recheck.md)
+and [`…-stage2-recheck-feral.md`](.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md).
 Full entry in [`docs/verification-log.md`](docs/verification-log.md).
 
 **What the box does not claim.** Three `medium` caveats survive. One is benign
