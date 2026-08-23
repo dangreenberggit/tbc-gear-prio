@@ -187,3 +187,19 @@ One dated line per gate: gate, outcome, reason, round count.
   cells (prune off, racing; ~38 min each by the measured rate) are put to the owner,
   since they cost ~2.5 h of fronted-window time and decide only Q1, which ADR-0026
   already settled on three fixtures in core.
+- 2026-08-23 — **Cell 1 measured: goal line MET.** Ret prune-on 307 s, feral prune-on
+  61 s, against the proposed 600 s, fronted Brave, 0% hidden. `Simming n/N` ret = 53
+  (16 tagged + owned rows + paired-slot retries — same composition as ticket 156);
+  placeholder counts 16/17 match C17. Every result row ★ BiS. Gear via share links
+  (ret `slamaltman` fixture, baseline 1775.0 DPS; feral `owner-p2` export, rotation
+  stripped, baseline 842.3 DPS).
+- 2026-08-23 — **Gate C, Step 4 defect → rework.** Clicking `.upgrades-bis-only-toggle`
+  on a completed ranking rebuilds the tab to its idle shell (reproduced twice, once by
+  a real click). Hypothesis (untested): `renderSubTabs()` tears down panes before
+  `currentView()`, which throws when state is not `done`. Ruling: fix in the fork
+  (same Step 4 code), fork checks green, rebuild the `full` JS bundle (wasm unchanged),
+  repo commit re-pinning the lockfile and regenerating the effects file, then cells
+  2–3 as approved — with the BIS filter and set-bonus toggle observations taken on the
+  cell-2 ret (prune-off) run, which is the first run where either control has
+  anything to show. Set-bonus toggle correctly hidden on prune-on runs (no rankable
+  set potential in a BIS-only pool) — that polarity is recorded.
