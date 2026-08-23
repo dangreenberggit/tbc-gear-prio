@@ -65,7 +65,8 @@ the most specific one:
 - **a** — per-spec weapon/hand/armor exclusion
 - **b** — fails the eligible_d7 stat and slot screen
 - **c** — stub-only sim effect
-- **e** — drops outside this phase's zones
+- **e1** — drops only outside this phase's zones
+- **e2** — sourced, but by a route the local assembly did not admit
 - **f** — no recognized source route
 - **g** — unexplained
 
@@ -79,12 +80,23 @@ quietly dropped.
 
 Each of the remaining categories is a test that can fail, which is what
 keeps **g** reachable and this listing's zero-unexplained claim worth
-something. **e** asks whether the item drops anywhere in this phase's
-zone list — the local assembler admits raid drops by zone, so content
-outside the phase is out of scope by design rather than missing by
-accident. **f** asks whether the DB records any source at all. An item
-that is sourced, drops inside a phase zone, and is still absent falls
-through to **g** and gets read by a person; nothing absorbs it silently.
+something:
+
+- **e1** — the item drops, but only outside this phase's zone list. The
+  local assembler admits raid drops by zone, so older content is out of
+  scope by design rather than missing by accident.
+- **e2** — the item is sourced and never drops at all (crafted, or a
+  reputation reward), and the local assembly's route for that kind did
+  not admit it. Split from **e1** because "drops outside this phase" is
+  simply false about an item that drops nowhere, and the two want
+  different follow-up: e1 is working as designed, e2 is a question about
+  a local route.
+- **f** — the DB records no source at all, so no local route could find
+  it.
+
+An item that is sourced, drops inside one of this phase's zones, and is
+still absent falls through to **g** and gets read by a person; nothing
+absorbs it silently.
 
 ## Source inventory
 
@@ -141,9 +153,9 @@ carry. Each row names the rule that explains the absence.
 | 1443 | Jeweled Amulet of Cainwyn | 1 | f | no recognized source route | — |
 | 2801 | Blade of Hanna | 1 | f | no recognized source route | — |
 | 3475 | Cloak of Flames | 1 | c | stub-only sim effect | — |
-| 12592 | Blackblade of Shahram | 1 | e | drops outside this phase's zones | — |
+| 12592 | Blackblade of Shahram | 1 | e1 | drops only outside this phase's zones | — |
 | 12639 | Stronghold Gauntlets | 1 | c | stub-only sim effect | — |
-| 12640 | Lionheart Helm | 1 | e | drops outside this phase's zones | — |
+| 12640 | Lionheart Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 12641 | Invulnerable Mail | 1 | c | stub-only sim effect | — |
 | 12756 | Leggings of Arcana | 1 | f | no recognized source route | — |
 | 12757 | Breastplate of Bloodthirst | 1 | f | no recognized source route | — |
@@ -157,62 +169,62 @@ carry. Each row names the rule that explains the absence.
 | 14554 | Cloudkeeper Legplates | 1 | f | no recognized source route | — |
 | 14557 | The Lion Horn of Stormwind | 1 | f | no recognized source route | — |
 | 14558 | Lady Maye's Pendant | 1 | f | no recognized source route | — |
-| 15141 | Onyxia Scale Breastplate | 1 | e | drops outside this phase's zones | — |
+| 15141 | Onyxia Scale Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 16471 | Marshal's Lamellar Gloves | 1 | c | stub-only sim effect | — |
 | 16472 | Marshal's Lamellar Boots | 1 | f | no recognized source route | — |
 | 16473 | Field Marshal's Lamellar Chestplate | 1 | f | no recognized source route | — |
 | 16474 | Field Marshal's Lamellar Faceguard | 1 | f | no recognized source route | — |
 | 16475 | Marshal's Lamellar Legplates | 1 | f | no recognized source route | — |
 | 16476 | Field Marshal's Lamellar Pauldrons | 1 | f | no recognized source route | — |
-| 16853 | Lawbringer Chestguard | 1 | e | drops outside this phase's zones | — |
-| 16854 | Lawbringer Helm | 1 | e | drops outside this phase's zones | — |
-| 16855 | Lawbringer Legplates | 1 | e | drops outside this phase's zones | — |
-| 16856 | Lawbringer Spaulders | 1 | e | drops outside this phase's zones | — |
-| 16857 | Lawbringer Bracers | 1 | e | drops outside this phase's zones | — |
-| 16858 | Lawbringer Belt | 1 | e | drops outside this phase's zones | — |
-| 16859 | Lawbringer Boots | 1 | e | drops outside this phase's zones | — |
-| 16860 | Lawbringer Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 16951 | Judgement Bindings | 1 | e | drops outside this phase's zones | — |
-| 16952 | Judgement Belt | 1 | e | drops outside this phase's zones | — |
-| 16953 | Judgement Spaulders | 1 | e | drops outside this phase's zones | — |
-| 16954 | Judgement Legplates | 1 | e | drops outside this phase's zones | — |
-| 16955 | Judgement Crown | 1 | e | drops outside this phase's zones | — |
-| 16956 | Judgement Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 16957 | Judgement Sabatons | 1 | e | drops outside this phase's zones | — |
-| 16958 | Judgement Breastplate | 1 | e | drops outside this phase's zones | — |
-| 16983 | Molten Helm | 1 | e | drops outside this phase's zones | — |
-| 16984 | Black Dragonscale Boots | 1 | e | drops outside this phase's zones | — |
-| 16988 | Fiery Chain Shoulders | 1 | e | drops outside this phase's zones | — |
-| 17013 | Dark Iron Leggings | 1 | e | drops outside this phase's zones | — |
-| 17063 | Band of Accuria | 1 | e | drops outside this phase's zones | — |
-| 17064 | Shard of the Scale | 1 | e | drops outside this phase's zones | — |
-| 17065 | Medallion of Steadfast Might | 1 | e | drops outside this phase's zones | — |
-| 17073 | Earthshaker | 1 | e | drops outside this phase's zones | — |
-| 17074 | Shadowstrike | 1 | e | drops outside this phase's zones | — |
-| 17076 | Bonereaver's Edge | 1 | e | drops outside this phase's zones | — |
-| 17078 | Sapphiron Drape | 1 | e | drops outside this phase's zones | — |
+| 16853 | Lawbringer Chestguard | 1 | e1 | drops only outside this phase's zones | — |
+| 16854 | Lawbringer Helm | 1 | e1 | drops only outside this phase's zones | — |
+| 16855 | Lawbringer Legplates | 1 | e1 | drops only outside this phase's zones | — |
+| 16856 | Lawbringer Spaulders | 1 | e1 | drops only outside this phase's zones | — |
+| 16857 | Lawbringer Bracers | 1 | e1 | drops only outside this phase's zones | — |
+| 16858 | Lawbringer Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 16859 | Lawbringer Boots | 1 | e1 | drops only outside this phase's zones | — |
+| 16860 | Lawbringer Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 16951 | Judgement Bindings | 1 | e1 | drops only outside this phase's zones | — |
+| 16952 | Judgement Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 16953 | Judgement Spaulders | 1 | e1 | drops only outside this phase's zones | — |
+| 16954 | Judgement Legplates | 1 | e1 | drops only outside this phase's zones | — |
+| 16955 | Judgement Crown | 1 | e1 | drops only outside this phase's zones | — |
+| 16956 | Judgement Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 16957 | Judgement Sabatons | 1 | e1 | drops only outside this phase's zones | — |
+| 16958 | Judgement Breastplate | 1 | e1 | drops only outside this phase's zones | — |
+| 16983 | Molten Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 16984 | Black Dragonscale Boots | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 16988 | Fiery Chain Shoulders | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 17013 | Dark Iron Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 17063 | Band of Accuria | 1 | e1 | drops only outside this phase's zones | — |
+| 17064 | Shard of the Scale | 1 | e1 | drops only outside this phase's zones | — |
+| 17065 | Medallion of Steadfast Might | 1 | e1 | drops only outside this phase's zones | — |
+| 17073 | Earthshaker | 1 | e1 | drops only outside this phase's zones | — |
+| 17074 | Shadowstrike | 1 | e1 | drops only outside this phase's zones | — |
+| 17076 | Bonereaver's Edge | 1 | e1 | drops only outside this phase's zones | — |
+| 17078 | Sapphiron Drape | 1 | e1 | drops only outside this phase's zones | — |
 | 17082 | Shard of the Flame | 1 | c | stub-only sim effect | — |
-| 17102 | Cloak of the Shrouded Mists | 1 | e | drops outside this phase's zones | — |
+| 17102 | Cloak of the Shrouded Mists | 1 | e1 | drops only outside this phase's zones | — |
 | 17104 | Spinal Reaper | 1 | c | stub-only sim effect | — |
-| 17107 | Dragon's Blood Cape | 1 | e | drops outside this phase's zones | — |
+| 17107 | Dragon's Blood Cape | 1 | e1 | drops only outside this phase's zones | — |
 | 17108 | Mark of Deflection | 1 | f | no recognized source route | — |
-| 17109 | Choker of Enlightenment | 1 | e | drops outside this phase's zones | — |
-| 17110 | Seal of the Archmagus | 1 | e | drops outside this phase's zones | — |
+| 17109 | Choker of Enlightenment | 1 | e1 | drops only outside this phase's zones | — |
+| 17110 | Seal of the Archmagus | 1 | e1 | drops only outside this phase's zones | — |
 | 17111 | Blazefury Medallion | 1 | f | no recognized source route | — |
-| 17193 | Sulfuron Hammer | 1 | e | drops outside this phase's zones | — |
+| 17193 | Sulfuron Hammer | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 17223 | Thunderstrike | 1 | f | no recognized source route | — |
 | 17904 | Stormpike Insignia Rank 6 | 1 | c | stub-only sim effect | — |
 | 17909 | Frostwolf Insignia Rank 6 | 1 | c | stub-only sim effect | — |
 | 18204 | Eskhandar's Pelt | 1 | f | no recognized source route | — |
-| 18205 | Eskhandar's Collar | 1 | e | drops outside this phase's zones | — |
+| 18205 | Eskhandar's Collar | 1 | e1 | drops only outside this phase's zones | — |
 | 18208 | Drape of Benediction | 1 | f | no recognized source route | — |
 | 18403 | Dragonslayer's Signet | 1 | f | no recognized source route | — |
 | 18404 | Onyxia Tooth Pendant | 1 | f | no recognized source route | — |
 | 18406 | Onyxia Blood Talisman | 1 | c | stub-only sim effect | — |
-| 18509 | Chromatic Cloak | 1 | e | drops outside this phase's zones | — |
-| 18510 | Hide of the Wild | 1 | e | drops outside this phase's zones | — |
-| 18511 | Shifting Cloak | 1 | e | drops outside this phase's zones | — |
-| 18538 | Treant's Bane | 1 | e | drops outside this phase's zones | — |
+| 18509 | Chromatic Cloak | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 18510 | Hide of the Wild | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 18511 | Shifting Cloak | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 18538 | Treant's Bane | 1 | e1 | drops only outside this phase's zones | — |
 | 18541 | Puissant Cape | 1 | f | no recognized source route | — |
 | 18542 | Typhoon | 1 | f | no recognized source route | — |
 | 18543 | Ring of Entropy | 1 | f | no recognized source route | — |
@@ -220,99 +232,99 @@ carry. Each row names the rule that explains the absence.
 | 18546 | Infernal Headcage | 1 | f | no recognized source route | — |
 | 18547 | Unmelting Ice Girdle | 1 | f | no recognized source route | — |
 | 18665 | The Eye of Shadow | 1 | f | no recognized source route | — |
-| 18803 | Hyperthermically Insulated Lava Dredger | 1 | e | drops outside this phase's zones | — |
-| 18806 | Core Forged Greaves | 1 | e | drops outside this phase's zones | — |
-| 18810 | Wild Growth Spaulders | 1 | e | drops outside this phase's zones | — |
-| 18811 | Fireproof Cloak | 1 | e | drops outside this phase's zones | — |
-| 18812 | Wristguards of True Flight | 1 | e | drops outside this phase's zones | — |
-| 18813 | Ring of Binding | 1 | e | drops outside this phase's zones | — |
-| 18814 | Choker of the Fire Lord | 1 | e | drops outside this phase's zones | — |
+| 18803 | Hyperthermically Insulated Lava Dredger | 1 | e1 | drops only outside this phase's zones | — |
+| 18806 | Core Forged Greaves | 1 | e1 | drops only outside this phase's zones | — |
+| 18810 | Wild Growth Spaulders | 1 | e1 | drops only outside this phase's zones | — |
+| 18811 | Fireproof Cloak | 1 | e1 | drops only outside this phase's zones | — |
+| 18812 | Wristguards of True Flight | 1 | e1 | drops only outside this phase's zones | — |
+| 18813 | Ring of Binding | 1 | e1 | drops only outside this phase's zones | — |
+| 18814 | Choker of the Fire Lord | 1 | e1 | drops only outside this phase's zones | — |
 | 18815 | Essence of the Pure Flame | 1 | c | stub-only sim effect | — |
-| 18817 | Crown of Destruction | 1 | e | drops outside this phase's zones | — |
-| 18820 | Talisman of Ephemeral Power | 1 | e | drops outside this phase's zones | — |
-| 18821 | Quick Strike Ring | 1 | e | drops outside this phase's zones | — |
-| 18822 | Obsidian Edged Blade | 1 | e | drops outside this phase's zones | — |
-| 18823 | Aged Core Leather Gloves | 1 | e | drops outside this phase's zones | — |
-| 18824 | Magma Tempered Boots | 1 | e | drops outside this phase's zones | — |
-| 18829 | Deep Earth Spaulders | 1 | e | drops outside this phase's zones | — |
+| 18817 | Crown of Destruction | 1 | e1 | drops only outside this phase's zones | — |
+| 18820 | Talisman of Ephemeral Power | 1 | e1 | drops only outside this phase's zones | — |
+| 18821 | Quick Strike Ring | 1 | e1 | drops only outside this phase's zones | — |
+| 18822 | Obsidian Edged Blade | 1 | e1 | drops only outside this phase's zones | — |
+| 18823 | Aged Core Leather Gloves | 1 | e1 | drops only outside this phase's zones | — |
+| 18824 | Magma Tempered Boots | 1 | e1 | drops only outside this phase's zones | — |
+| 18829 | Deep Earth Spaulders | 1 | e1 | drops only outside this phase's zones | — |
 | 18830 | Grand Marshal's Sunderer | 1 | f | no recognized source route | — |
 | 18831 | High Warlord's Battle Axe | 1 | f | no recognized source route | — |
-| 18861 | Flamewaker Legplates | 1 | e | drops outside this phase's zones | — |
+| 18861 | Flamewaker Legplates | 1 | e1 | drops only outside this phase's zones | — |
 | 18867 | Grand Marshal's Battle Hammer | 1 | f | no recognized source route | — |
 | 18868 | High Warlord's Pulverizer | 1 | f | no recognized source route | — |
 | 18869 | Grand Marshal's Glaive | 1 | f | no recognized source route | — |
-| 18870 | Helm of the Lifegiver | 1 | e | drops outside this phase's zones | — |
+| 18870 | Helm of the Lifegiver | 1 | e1 | drops only outside this phase's zones | — |
 | 18871 | High Warlord's Pig Sticker | 1 | f | no recognized source route | — |
-| 18875 | Salamander Scale Pants | 1 | e | drops outside this phase's zones | — |
+| 18875 | Salamander Scale Pants | 1 | e1 | drops only outside this phase's zones | — |
 | 18876 | Grand Marshal's Claymore | 1 | f | no recognized source route | — |
 | 18877 | High Warlord's Greatsword | 1 | f | no recognized source route | — |
-| 18879 | Heavy Dark Iron Ring | 1 | e | drops outside this phase's zones | — |
+| 18879 | Heavy Dark Iron Ring | 1 | e1 | drops only outside this phase's zones | — |
 | 19134 | Flayed Doomguard Belt | 1 | f | no recognized source route | — |
-| 19137 | Onslaught Girdle | 1 | e | drops outside this phase's zones | — |
-| 19138 | Band of Sulfuras | 1 | e | drops outside this phase's zones | — |
-| 19139 | Fireguard Shoulders | 1 | e | drops outside this phase's zones | — |
-| 19140 | Cauterizing Band | 1 | e | drops outside this phase's zones | — |
-| 19143 | Flameguard Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 19144 | Sabatons of the Flamewalker | 1 | e | drops outside this phase's zones | — |
-| 19146 | Wristguards of Stability | 1 | e | drops outside this phase's zones | — |
-| 19147 | Ring of Spell Power | 1 | e | drops outside this phase's zones | — |
-| 19148 | Dark Iron Helm | 1 | e | drops outside this phase's zones | — |
-| 19149 | Lava Belt | 1 | e | drops outside this phase's zones | — |
-| 19157 | Chromatic Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 19162 | Corehound Belt | 1 | e | drops outside this phase's zones | — |
-| 19163 | Molten Belt | 1 | e | drops outside this phase's zones | — |
-| 19164 | Dark Iron Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 19167 | Blackfury | 1 | e | drops outside this phase's zones | — |
-| 19169 | Nightfall | 1 | e | drops outside this phase's zones | — |
+| 19137 | Onslaught Girdle | 1 | e1 | drops only outside this phase's zones | — |
+| 19138 | Band of Sulfuras | 1 | e1 | drops only outside this phase's zones | — |
+| 19139 | Fireguard Shoulders | 1 | e1 | drops only outside this phase's zones | — |
+| 19140 | Cauterizing Band | 1 | e1 | drops only outside this phase's zones | — |
+| 19143 | Flameguard Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 19144 | Sabatons of the Flamewalker | 1 | e1 | drops only outside this phase's zones | — |
+| 19146 | Wristguards of Stability | 1 | e1 | drops only outside this phase's zones | — |
+| 19147 | Ring of Spell Power | 1 | e1 | drops only outside this phase's zones | — |
+| 19148 | Dark Iron Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19149 | Lava Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19157 | Chromatic Gauntlets | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19162 | Corehound Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19163 | Molten Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19164 | Dark Iron Gauntlets | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19167 | Blackfury | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 19169 | Nightfall | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 19287 | Darkmoon Card: Heroism | 1 | c | stub-only sim effect | — |
 | 19288 | Darkmoon Card: Blue Dragon | 1 | c | stub-only sim effect | — |
 | 19289 | Darkmoon Card: Maelstrom | 1 | c | stub-only sim effect | — |
 | 19290 | Darkmoon Card: Twisting Nether | 1 | c | stub-only sim effect | — |
 | 19323 | The Unstoppable Force | 1 | f | no recognized source route | — |
 | 19325 | Don Julio's Band | 1 | f | no recognized source route | — |
-| 19334 | The Untamed Blade | 1 | e | drops outside this phase's zones | — |
-| 19343 | Scrolls of Blinding Light | 1 | e | drops outside this phase's zones | — |
-| 19353 | Drake Talon Cleaver | 1 | e | drops outside this phase's zones | — |
-| 19354 | Draconic Avenger | 1 | e | drops outside this phase's zones | — |
-| 19357 | Herald of Woe | 1 | e | drops outside this phase's zones | — |
-| 19358 | Draconic Maul | 1 | e | drops outside this phase's zones | — |
-| 19364 | Ashkandi, Greatsword of the Brotherhood | 1 | e | drops outside this phase's zones | — |
-| 19371 | Pendant of the Fallen Dragon | 1 | e | drops outside this phase's zones | — |
-| 19372 | Helm of Endless Rage | 1 | e | drops outside this phase's zones | — |
-| 19373 | Black Brood Pauldrons | 1 | e | drops outside this phase's zones | — |
-| 19376 | Archimtiros' Ring of Reckoning | 1 | e | drops outside this phase's zones | — |
-| 19377 | Prestor's Talisman of Connivery | 1 | e | drops outside this phase's zones | — |
-| 19378 | Cloak of the Brood Lord | 1 | e | drops outside this phase's zones | — |
-| 19379 | Neltharion's Tear | 1 | e | drops outside this phase's zones | — |
-| 19380 | Therazane's Link | 1 | e | drops outside this phase's zones | — |
-| 19381 | Boots of the Shadow Flame | 1 | e | drops outside this phase's zones | — |
-| 19382 | Pure Elementium Band | 1 | e | drops outside this phase's zones | — |
+| 19334 | The Untamed Blade | 1 | e1 | drops only outside this phase's zones | — |
+| 19343 | Scrolls of Blinding Light | 1 | e1 | drops only outside this phase's zones | — |
+| 19353 | Drake Talon Cleaver | 1 | e1 | drops only outside this phase's zones | — |
+| 19354 | Draconic Avenger | 1 | e1 | drops only outside this phase's zones | — |
+| 19357 | Herald of Woe | 1 | e1 | drops only outside this phase's zones | — |
+| 19358 | Draconic Maul | 1 | e1 | drops only outside this phase's zones | — |
+| 19364 | Ashkandi, Greatsword of the Brotherhood | 1 | e1 | drops only outside this phase's zones | — |
+| 19371 | Pendant of the Fallen Dragon | 1 | e1 | drops only outside this phase's zones | — |
+| 19372 | Helm of Endless Rage | 1 | e1 | drops only outside this phase's zones | — |
+| 19373 | Black Brood Pauldrons | 1 | e1 | drops only outside this phase's zones | — |
+| 19376 | Archimtiros' Ring of Reckoning | 1 | e1 | drops only outside this phase's zones | — |
+| 19377 | Prestor's Talisman of Connivery | 1 | e1 | drops only outside this phase's zones | — |
+| 19378 | Cloak of the Brood Lord | 1 | e1 | drops only outside this phase's zones | — |
+| 19379 | Neltharion's Tear | 1 | e1 | drops only outside this phase's zones | — |
+| 19380 | Therazane's Link | 1 | e1 | drops only outside this phase's zones | — |
+| 19381 | Boots of the Shadow Flame | 1 | e1 | drops only outside this phase's zones | — |
+| 19382 | Pure Elementium Band | 1 | e1 | drops only outside this phase's zones | — |
 | 19383 | Master Dragonslayer's Medallion | 1 | f | no recognized source route | — |
 | 19384 | Master Dragonslayer's Ring | 1 | f | no recognized source route | — |
-| 19386 | Elementium Threaded Cloak | 1 | e | drops outside this phase's zones | — |
-| 19387 | Chromatic Boots | 1 | e | drops outside this phase's zones | — |
-| 19389 | Taut Dragonhide Shoulderpads | 1 | e | drops outside this phase's zones | — |
-| 19390 | Taut Dragonhide Gloves | 1 | e | drops outside this phase's zones | — |
-| 19392 | Girdle of the Fallen Crusader | 1 | e | drops outside this phase's zones | — |
-| 19393 | Primalist's Linked Waistguard | 1 | e | drops outside this phase's zones | — |
-| 19394 | Drake Talon Pauldrons | 1 | e | drops outside this phase's zones | — |
-| 19395 | Rejuvenating Gem | 1 | e | drops outside this phase's zones | — |
-| 19396 | Taut Dragonhide Belt | 1 | e | drops outside this phase's zones | — |
-| 19397 | Ring of Blackrock | 1 | e | drops outside this phase's zones | — |
-| 19398 | Cloak of Firemaw | 1 | e | drops outside this phase's zones | — |
-| 19401 | Primalist's Linked Legguards | 1 | e | drops outside this phase's zones | — |
-| 19402 | Legguards of the Fallen Crusader | 1 | e | drops outside this phase's zones | — |
-| 19403 | Band of Forced Concentration | 1 | e | drops outside this phase's zones | — |
-| 19405 | Malfurion's Blessed Bulwark | 1 | e | drops outside this phase's zones | — |
-| 19406 | Drake Fang Talisman | 1 | e | drops outside this phase's zones | — |
+| 19386 | Elementium Threaded Cloak | 1 | e1 | drops only outside this phase's zones | — |
+| 19387 | Chromatic Boots | 1 | e1 | drops only outside this phase's zones | — |
+| 19389 | Taut Dragonhide Shoulderpads | 1 | e1 | drops only outside this phase's zones | — |
+| 19390 | Taut Dragonhide Gloves | 1 | e1 | drops only outside this phase's zones | — |
+| 19392 | Girdle of the Fallen Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 19393 | Primalist's Linked Waistguard | 1 | e1 | drops only outside this phase's zones | — |
+| 19394 | Drake Talon Pauldrons | 1 | e1 | drops only outside this phase's zones | — |
+| 19395 | Rejuvenating Gem | 1 | e1 | drops only outside this phase's zones | — |
+| 19396 | Taut Dragonhide Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 19397 | Ring of Blackrock | 1 | e1 | drops only outside this phase's zones | — |
+| 19398 | Cloak of Firemaw | 1 | e1 | drops only outside this phase's zones | — |
+| 19401 | Primalist's Linked Legguards | 1 | e1 | drops only outside this phase's zones | — |
+| 19402 | Legguards of the Fallen Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 19403 | Band of Forced Concentration | 1 | e1 | drops only outside this phase's zones | — |
+| 19405 | Malfurion's Blessed Bulwark | 1 | e1 | drops only outside this phase's zones | — |
+| 19406 | Drake Fang Talisman | 1 | e1 | drops only outside this phase's zones | — |
 | 19426 | Orb of the Darkmoon | 1 | f | no recognized source route | — |
-| 19430 | Shroud of Pure Thought | 1 | e | drops outside this phase's zones | — |
-| 19431 | Styleen's Impeding Scarab | 1 | e | drops outside this phase's zones | — |
-| 19432 | Circle of Applied Force | 1 | e | drops outside this phase's zones | — |
-| 19433 | Emberweave Leggings | 1 | e | drops outside this phase's zones | — |
-| 19434 | Band of Dark Dominion | 1 | e | drops outside this phase's zones | — |
-| 19436 | Cloak of Draconic Might | 1 | e | drops outside this phase's zones | — |
-| 19439 | Interlaced Shadow Jerkin | 1 | e | drops outside this phase's zones | — |
+| 19430 | Shroud of Pure Thought | 1 | e1 | drops only outside this phase's zones | — |
+| 19431 | Styleen's Impeding Scarab | 1 | e1 | drops only outside this phase's zones | — |
+| 19432 | Circle of Applied Force | 1 | e1 | drops only outside this phase's zones | — |
+| 19433 | Emberweave Leggings | 1 | e1 | drops only outside this phase's zones | — |
+| 19434 | Band of Dark Dominion | 1 | e1 | drops only outside this phase's zones | — |
+| 19436 | Cloak of Draconic Might | 1 | e1 | drops only outside this phase's zones | — |
+| 19439 | Interlaced Shadow Jerkin | 1 | e1 | drops only outside this phase's zones | — |
 | 19491 | Amulet of the Darkmoon | 1 | f | no recognized source route | — |
 | 19578 | Berserker Bracers | 1 | f | no recognized source route | — |
 | 19582 | Windtalker's Wristguards | 1 | f | no recognized source route | — |
@@ -321,21 +333,21 @@ carry. Each row names the rule that explains the absence.
 | 19825 | Zandalar Freethinker's Breastplate | 1 | f | no recognized source route | — |
 | 19826 | Zandalar Freethinker's Belt | 1 | f | no recognized source route | — |
 | 19827 | Zandalar Freethinker's Armguards | 1 | f | no recognized source route | — |
-| 19854 | Zin'rokh, Destroyer of Worlds | 1 | e | drops outside this phase's zones | — |
-| 19855 | Bloodsoaked Legplates | 1 | e | drops outside this phase's zones | — |
-| 19856 | The Eye of Hakkar | 1 | e | drops outside this phase's zones | — |
-| 19857 | Cloak of Consumption | 1 | e | drops outside this phase's zones | — |
+| 19854 | Zin'rokh, Destroyer of Worlds | 1 | e1 | drops only outside this phase's zones | — |
+| 19855 | Bloodsoaked Legplates | 1 | e1 | drops only outside this phase's zones | — |
+| 19856 | The Eye of Hakkar | 1 | e1 | drops only outside this phase's zones | — |
+| 19857 | Cloak of Consumption | 1 | e1 | drops only outside this phase's zones | — |
 | 19874 | Halberd of Smiting | 1 | c | stub-only sim effect | — |
-| 19876 | Soul Corrupter's Necklace | 1 | e | drops outside this phase's zones | — |
-| 19885 | Jin'do's Evil Eye | 1 | e | drops outside this phase's zones | — |
-| 19904 | Runed Bloodstained Hauberk | 1 | e | drops outside this phase's zones | — |
-| 19918 | Jeklik's Crusher | 1 | e | drops outside this phase's zones | — |
-| 19945 | Lizardscale Eyepatch | 1 | e | drops outside this phase's zones | — |
+| 19876 | Soul Corrupter's Necklace | 1 | e1 | drops only outside this phase's zones | — |
+| 19885 | Jin'do's Evil Eye | 1 | e1 | drops only outside this phase's zones | — |
+| 19904 | Runed Bloodstained Hauberk | 1 | e1 | drops only outside this phase's zones | — |
+| 19918 | Jeklik's Crusher | 1 | e1 | drops only outside this phase's zones | — |
+| 19945 | Lizardscale Eyepatch | 1 | e1 | drops only outside this phase's zones | — |
 | 19948 | Zandalarian Hero Badge | 1 | f | no recognized source route | — |
 | 19949 | Zandalarian Hero Medallion | 1 | c | stub-only sim effect | — |
 | 19950 | Zandalarian Hero Charm | 1 | c | stub-only sim effect | — |
 | 19952 | Gri'lek's Charm of Valor | 1 | f | no recognized source route | — |
-| 20039 | Dark Iron Boots | 1 | e | drops outside this phase's zones | — |
+| 20039 | Dark Iron Boots | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 20057 | Highlander's Plate Spaulders | 1 | f | no recognized source route | — |
 | 20058 | Highlander's Lamellar Spaulders | 1 | f | no recognized source route | — |
 | 20068 | Deathguard's Cloak | 1 | f | no recognized source route | — |
@@ -343,9 +355,9 @@ carry. Each row names the rule that explains the absence.
 | 20134 | Skyfury Helm | 1 | f | no recognized source route | — |
 | 20184 | Defiler's Lamellar Spaulders | 1 | f | no recognized source route | — |
 | 20212 | Defiler's Plate Spaulders | 1 | f | no recognized source route | — |
-| 20257 | Seafury Gauntlets | 1 | e | drops outside this phase's zones | — |
+| 20257 | Seafury Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
 | 20264 | Peacekeeper Gauntlets | 1 | f | no recognized source route | — |
-| 20380 | Dreamscale Breastplate | 1 | e | drops outside this phase's zones | — |
+| 20380 | Dreamscale Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 20579 | Green Dragonskin Cloak | 1 | c | stub-only sim effect | — |
 | 20600 | Malfurion's Signet Ring | 1 | f | no recognized source route | — |
 | 20615 | Dragonspur Wraps | 1 | f | no recognized source route | — |
@@ -370,7 +382,7 @@ carry. Each row names the rule that explains the absence.
 | 20682 | Elemental Focus Band | 1 | f | no recognized source route | — |
 | 20685 | Wavefront Necklace | 1 | f | no recognized source route | — |
 | 20691 | Windshear Cape | 1 | f | no recognized source route | — |
-| 21134 | Dark Edge of Insanity | 1 | e | drops outside this phase's zones | — |
+| 21134 | Dark Edge of Insanity | 1 | e1 | drops only outside this phase's zones | — |
 | 21180 | Earthstrike | 1 | f | no recognized source route | — |
 | 21184 | Deeprock Bracers | 1 | f | no recognized source route | — |
 | 21188 | Fist of Cenarius | 1 | f | no recognized source route | — |
@@ -400,18 +412,18 @@ carry. Each row names the rule that explains the absence.
 | 21396 | Ring of Eternal Justice | 1 | f | no recognized source route | — |
 | 21397 | Cape of Eternal Justice | 1 | f | no recognized source route | — |
 | 21453 | Mantle of the Horusath | 1 | f | no recognized source route | — |
-| 21454 | Runic Stone Shoulders | 1 | e | drops outside this phase's zones | — |
-| 21456 | Sandstorm Cloak | 1 | e | drops outside this phase's zones | — |
-| 21457 | Bracers of Brutality | 1 | e | drops outside this phase's zones | — |
-| 21458 | Gauntlets of New Life | 1 | e | drops outside this phase's zones | — |
-| 21460 | Helm of Domination | 1 | e | drops outside this phase's zones | — |
-| 21463 | Ossirian's Binding | 1 | e | drops outside this phase's zones | — |
-| 21467 | Thick Silithid Chestguard | 1 | e | drops outside this phase's zones | — |
-| 21479 | Gauntlets of the Immovable | 1 | e | drops outside this phase's zones | — |
+| 21454 | Runic Stone Shoulders | 1 | e1 | drops only outside this phase's zones | — |
+| 21456 | Sandstorm Cloak | 1 | e1 | drops only outside this phase's zones | — |
+| 21457 | Bracers of Brutality | 1 | e1 | drops only outside this phase's zones | — |
+| 21458 | Gauntlets of New Life | 1 | e1 | drops only outside this phase's zones | — |
+| 21460 | Helm of Domination | 1 | e1 | drops only outside this phase's zones | — |
+| 21463 | Ossirian's Binding | 1 | e1 | drops only outside this phase's zones | — |
+| 21467 | Thick Silithid Chestguard | 1 | e1 | drops only outside this phase's zones | — |
+| 21479 | Gauntlets of the Immovable | 1 | e1 | drops only outside this phase's zones | — |
 | 21486 | Gloves of the Swarm | 1 | f | no recognized source route | — |
-| 21487 | Slimy Scaled Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 21492 | Manslayer of the Qiraji | 1 | e | drops outside this phase's zones | — |
-| 21493 | Boots of the Vanguard | 1 | e | drops outside this phase's zones | — |
+| 21487 | Slimy Scaled Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 21492 | Manslayer of the Qiraji | 1 | e1 | drops only outside this phase's zones | — |
+| 21493 | Boots of the Vanguard | 1 | e1 | drops only outside this phase's zones | — |
 | 21504 | Charm of the Shifting Sands | 1 | f | no recognized source route | — |
 | 21505 | Choker of the Shifting Sands | 1 | f | no recognized source route | — |
 | 21506 | Pendant of the Shifting Sands | 1 | f | no recognized source route | — |
@@ -422,87 +434,87 @@ carry. Each row names the rule that explains the absence.
 | 21531 | Drake Tooth Necklace | 1 | f | no recognized source route | — |
 | 21532 | Drudge Boots | 1 | f | no recognized source route | — |
 | 21563 | Don Rodrigo's Band | 1 | f | no recognized source route | — |
-| 21579 | Vanquished Tentacle of C'Thun | 1 | e | drops outside this phase's zones | — |
-| 21581 | Gauntlets of Annihilation | 1 | e | drops outside this phase's zones | — |
-| 21583 | Cloak of Clarity | 1 | e | drops outside this phase's zones | — |
+| 21579 | Vanquished Tentacle of C'Thun | 1 | e1 | drops only outside this phase's zones | — |
+| 21581 | Gauntlets of Annihilation | 1 | e1 | drops only outside this phase's zones | — |
+| 21583 | Cloak of Clarity | 1 | e1 | drops only outside this phase's zones | — |
 | 21584 | Bracers of Eternal Reckoning | 1 | f | no recognized source route | — |
-| 21586 | Belt of Never-ending Agony | 1 | e | drops outside this phase's zones | — |
+| 21586 | Belt of Never-ending Agony | 1 | e1 | drops only outside this phase's zones | — |
 | 21587 | Wristguards of Castigation | 1 | f | no recognized source route | — |
 | 21588 | Wristguards of Elemental Fury | 1 | f | no recognized source route | — |
 | 21594 | Bracers of the Fallen Son | 1 | f | no recognized source route | — |
-| 21596 | Ring of the Godslayer | 1 | e | drops outside this phase's zones | — |
-| 21598 | Royal Qiraji Belt | 1 | e | drops outside this phase's zones | — |
-| 21599 | Vek'lor's Gloves of Devastation | 1 | e | drops outside this phase's zones | — |
-| 21601 | Ring of Emperor Vek'lor | 1 | e | drops outside this phase's zones | — |
-| 21602 | Qiraji Execution Bracers | 1 | e | drops outside this phase's zones | — |
-| 21605 | Gloves of the Hidden Temple | 1 | e | drops outside this phase's zones | — |
-| 21606 | Belt of the Fallen Emperor | 1 | e | drops outside this phase's zones | — |
-| 21607 | Grasp of the Fallen Emperor | 1 | e | drops outside this phase's zones | — |
-| 21608 | Amulet of Vek'nilash | 1 | e | drops outside this phase's zones | — |
-| 21609 | Regenerating Belt of Vek'nilash | 1 | e | drops outside this phase's zones | — |
+| 21596 | Ring of the Godslayer | 1 | e1 | drops only outside this phase's zones | — |
+| 21598 | Royal Qiraji Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 21599 | Vek'lor's Gloves of Devastation | 1 | e1 | drops only outside this phase's zones | — |
+| 21601 | Ring of Emperor Vek'lor | 1 | e1 | drops only outside this phase's zones | — |
+| 21602 | Qiraji Execution Bracers | 1 | e1 | drops only outside this phase's zones | — |
+| 21605 | Gloves of the Hidden Temple | 1 | e1 | drops only outside this phase's zones | — |
+| 21606 | Belt of the Fallen Emperor | 1 | e1 | drops only outside this phase's zones | — |
+| 21607 | Grasp of the Fallen Emperor | 1 | e1 | drops only outside this phase's zones | — |
+| 21608 | Amulet of Vek'nilash | 1 | e1 | drops only outside this phase's zones | — |
+| 21609 | Regenerating Belt of Vek'nilash | 1 | e1 | drops only outside this phase's zones | — |
 | 21612 | Wormscale Stompers | 1 | f | no recognized source route | — |
 | 21613 | Wormhide Boots | 1 | f | no recognized source route | — |
 | 21614 | Wormhide Protector | 1 | f | no recognized source route | — |
-| 21617 | Wasphide Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 21618 | Hive Defiler Wristguards | 1 | e | drops outside this phase's zones | — |
-| 21620 | Ring of the Martyr | 1 | e | drops outside this phase's zones | — |
-| 21621 | Cloak of the Golden Hive | 1 | e | drops outside this phase's zones | — |
-| 21623 | Gauntlets of the Righteous Champion | 1 | e | drops outside this phase's zones | — |
-| 21624 | Gauntlets of Kalimdor | 1 | e | drops outside this phase's zones | — |
+| 21617 | Wasphide Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 21618 | Hive Defiler Wristguards | 1 | e1 | drops only outside this phase's zones | — |
+| 21620 | Ring of the Martyr | 1 | e1 | drops only outside this phase's zones | — |
+| 21621 | Cloak of the Golden Hive | 1 | e1 | drops only outside this phase's zones | — |
+| 21623 | Gauntlets of the Righteous Champion | 1 | e1 | drops only outside this phase's zones | — |
+| 21624 | Gauntlets of Kalimdor | 1 | e1 | drops only outside this phase's zones | — |
 | 21625 | Scarab Brooch | 1 | c | stub-only sim effect | — |
-| 21626 | Slime-coated Leggings | 1 | e | drops outside this phase's zones | — |
-| 21627 | Cloak of Untold Secrets | 1 | e | drops outside this phase's zones | — |
-| 21635 | Barb of the Sand Reaver | 1 | e | drops outside this phase's zones | — |
-| 21639 | Pauldrons of the Unrelenting | 1 | e | drops outside this phase's zones | — |
-| 21645 | Hive Tunneler's Boots | 1 | e | drops outside this phase's zones | — |
+| 21626 | Slime-coated Leggings | 1 | e1 | drops only outside this phase's zones | — |
+| 21627 | Cloak of Untold Secrets | 1 | e1 | drops only outside this phase's zones | — |
+| 21635 | Barb of the Sand Reaver | 1 | e1 | drops only outside this phase's zones | — |
+| 21639 | Pauldrons of the Unrelenting | 1 | e1 | drops only outside this phase's zones | — |
+| 21645 | Hive Tunneler's Boots | 1 | e1 | drops only outside this phase's zones | — |
 | 21647 | Fetish of the Sand Reaver | 1 | c | stub-only sim effect | — |
-| 21651 | Scaled Sand Reaver Leggings | 1 | e | drops outside this phase's zones | — |
-| 21652 | Silithid Carapace Chestguard | 1 | e | drops outside this phase's zones | — |
-| 21664 | Barbed Choker | 1 | e | drops outside this phase's zones | — |
-| 21665 | Mantle of Wicked Revenge | 1 | e | drops outside this phase's zones | — |
-| 21667 | Legplates of Blazing Light | 1 | e | drops outside this phase's zones | — |
-| 21668 | Scaled Leggings of Qiraji Fury | 1 | e | drops outside this phase's zones | — |
-| 21669 | Creeping Vine Helm | 1 | e | drops outside this phase's zones | — |
-| 21670 | Badge of the Swarmguard | 1 | e | drops outside this phase's zones | — |
-| 21672 | Gloves of Enforcement | 1 | e | drops outside this phase's zones | — |
-| 21674 | Gauntlets of Steadfast Determination | 1 | e | drops outside this phase's zones | — |
-| 21675 | Thick Qirajihide Belt | 1 | e | drops outside this phase's zones | — |
-| 21677 | Ring of the Qiraji Fury | 1 | e | drops outside this phase's zones | — |
-| 21678 | Necklace of Purity | 1 | e | drops outside this phase's zones | — |
-| 21679 | Kalimdor's Revenge | 1 | e | drops outside this phase's zones | — |
-| 21680 | Vest of Swift Execution | 1 | e | drops outside this phase's zones | — |
-| 21681 | Ring of the Devoured | 1 | e | drops outside this phase's zones | — |
-| 21682 | Bile-Covered Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 21683 | Mantle of the Desert Crusade | 1 | e | drops outside this phase's zones | — |
-| 21684 | Mantle of the Desert's Fury | 1 | e | drops outside this phase's zones | — |
+| 21651 | Scaled Sand Reaver Leggings | 1 | e1 | drops only outside this phase's zones | — |
+| 21652 | Silithid Carapace Chestguard | 1 | e1 | drops only outside this phase's zones | — |
+| 21664 | Barbed Choker | 1 | e1 | drops only outside this phase's zones | — |
+| 21665 | Mantle of Wicked Revenge | 1 | e1 | drops only outside this phase's zones | — |
+| 21667 | Legplates of Blazing Light | 1 | e1 | drops only outside this phase's zones | — |
+| 21668 | Scaled Leggings of Qiraji Fury | 1 | e1 | drops only outside this phase's zones | — |
+| 21669 | Creeping Vine Helm | 1 | e1 | drops only outside this phase's zones | — |
+| 21670 | Badge of the Swarmguard | 1 | e1 | drops only outside this phase's zones | — |
+| 21672 | Gloves of Enforcement | 1 | e1 | drops only outside this phase's zones | — |
+| 21674 | Gauntlets of Steadfast Determination | 1 | e1 | drops only outside this phase's zones | — |
+| 21675 | Thick Qirajihide Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 21677 | Ring of the Qiraji Fury | 1 | e1 | drops only outside this phase's zones | — |
+| 21678 | Necklace of Purity | 1 | e1 | drops only outside this phase's zones | — |
+| 21679 | Kalimdor's Revenge | 1 | e1 | drops only outside this phase's zones | — |
+| 21680 | Vest of Swift Execution | 1 | e1 | drops only outside this phase's zones | — |
+| 21681 | Ring of the Devoured | 1 | e1 | drops only outside this phase's zones | — |
+| 21682 | Bile-Covered Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 21683 | Mantle of the Desert Crusade | 1 | e1 | drops only outside this phase's zones | — |
+| 21684 | Mantle of the Desert's Fury | 1 | e1 | drops only outside this phase's zones | — |
 | 21685 | Petrified Scarab | 1 | c | stub-only sim effect | — |
 | 21687 | Ukko's Ring of Darkness | 1 | c | stub-only sim effect | — |
-| 21688 | Boots of the Fallen Hero | 1 | e | drops outside this phase's zones | — |
-| 21689 | Gloves of Ebru | 1 | e | drops outside this phase's zones | — |
-| 21690 | Angelista's Charm | 1 | e | drops outside this phase's zones | — |
-| 21691 | Ooze-ridden Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 21692 | Triad Girdle | 1 | e | drops outside this phase's zones | — |
-| 21693 | Guise of the Devourer | 1 | e | drops outside this phase's zones | — |
-| 21695 | Angelista's Touch | 1 | e | drops outside this phase's zones | — |
-| 21697 | Cape of the Trinity | 1 | e | drops outside this phase's zones | — |
-| 21698 | Leggings of Immersion | 1 | e | drops outside this phase's zones | — |
-| 21699 | Barrage Shoulders | 1 | e | drops outside this phase's zones | — |
-| 21700 | Pendant of the Qiraji Guardian | 1 | e | drops outside this phase's zones | — |
-| 21701 | Cloak of Concentrated Hatred | 1 | e | drops outside this phase's zones | — |
-| 21702 | Amulet of Foul Warding | 1 | e | drops outside this phase's zones | — |
-| 21703 | Hammer of Ji'zhi | 1 | e | drops outside this phase's zones | — |
-| 21704 | Boots of the Redeemed Prophecy | 1 | e | drops outside this phase's zones | — |
-| 21705 | Boots of the Fallen Prophet | 1 | e | drops outside this phase's zones | — |
-| 21706 | Boots of the Unwavering Will | 1 | e | drops outside this phase's zones | — |
-| 21707 | Ring of Swarming Thought | 1 | e | drops outside this phase's zones | — |
-| 21708 | Beetle Scaled Wristguards | 1 | e | drops outside this phase's zones | — |
+| 21688 | Boots of the Fallen Hero | 1 | e1 | drops only outside this phase's zones | — |
+| 21689 | Gloves of Ebru | 1 | e1 | drops only outside this phase's zones | — |
+| 21690 | Angelista's Charm | 1 | e1 | drops only outside this phase's zones | — |
+| 21691 | Ooze-ridden Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 21692 | Triad Girdle | 1 | e1 | drops only outside this phase's zones | — |
+| 21693 | Guise of the Devourer | 1 | e1 | drops only outside this phase's zones | — |
+| 21695 | Angelista's Touch | 1 | e1 | drops only outside this phase's zones | — |
+| 21697 | Cape of the Trinity | 1 | e1 | drops only outside this phase's zones | — |
+| 21698 | Leggings of Immersion | 1 | e1 | drops only outside this phase's zones | — |
+| 21699 | Barrage Shoulders | 1 | e1 | drops only outside this phase's zones | — |
+| 21700 | Pendant of the Qiraji Guardian | 1 | e1 | drops only outside this phase's zones | — |
+| 21701 | Cloak of Concentrated Hatred | 1 | e1 | drops only outside this phase's zones | — |
+| 21702 | Amulet of Foul Warding | 1 | e1 | drops only outside this phase's zones | — |
+| 21703 | Hammer of Ji'zhi | 1 | e1 | drops only outside this phase's zones | — |
+| 21704 | Boots of the Redeemed Prophecy | 1 | e1 | drops only outside this phase's zones | — |
+| 21705 | Boots of the Fallen Prophet | 1 | e1 | drops only outside this phase's zones | — |
+| 21706 | Boots of the Unwavering Will | 1 | e1 | drops only outside this phase's zones | — |
+| 21707 | Ring of Swarming Thought | 1 | e1 | drops only outside this phase's zones | — |
+| 21708 | Beetle Scaled Wristguards | 1 | e1 | drops only outside this phase's zones | — |
 | 21709 | Ring of the Fallen God | 1 | f | no recognized source route | — |
 | 21710 | Cloak of the Fallen God | 1 | f | no recognized source route | — |
 | 21712 | Amulet of the Fallen God | 1 | f | no recognized source route | — |
-| 21814 | Breastplate of Annihilation | 1 | e | drops outside this phase's zones | — |
-| 21836 | Ritssyn's Ring of Chaos | 1 | e | drops outside this phase's zones | — |
-| 21856 | Neretzek, The Blood Drinker | 1 | e | drops outside this phase's zones | — |
-| 21889 | Gloves of the Redeemed Prophecy | 1 | e | drops outside this phase's zones | — |
+| 21814 | Breastplate of Annihilation | 1 | e1 | drops only outside this phase's zones | — |
+| 21836 | Ritssyn's Ring of Chaos | 1 | e1 | drops only outside this phase's zones | — |
+| 21856 | Neretzek, The Blood Drinker | 1 | e1 | drops only outside this phase's zones | — |
+| 21889 | Gloves of the Redeemed Prophecy | 1 | e1 | drops only outside this phase's zones | — |
 | 21891 | Shard of the Fallen Star | 1 | c | stub-only sim effect | — |
 | 21995 | Boots of Heroism | 1 | f | no recognized source route | — |
 | 21997 | Breastplate of Heroism | 1 | f | no recognized source route | — |
@@ -525,7 +537,7 @@ carry. Each row names the rule that explains the absence.
 | 22191 | Obsidian Mail Tunic | 1 | c | stub-only sim effect | — |
 | 22194 | Black Grasp of the Destroyer | 1 | c | stub-only sim effect | — |
 | 22196 | Thick Obsidian Breastplate | 1 | c | stub-only sim effect | — |
-| 22385 | Titanic Leggings | 1 | e | drops outside this phase's zones | — |
+| 22385 | Titanic Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22402 | Libram of Grace | 1 | c | stub-only sim effect | — |
 | 22416 | Dreadnaught Breastplate | 1 | f | no recognized source route | — |
 | 22417 | Dreadnaught Legplates | 1 | f | no recognized source route | — |
@@ -577,18 +589,18 @@ carry. Each row names the rule that explains the absence.
 | 22495 | Dreamwalker Wristguards | 1 | f | no recognized source route | — |
 | 22651 | Outrider's Plate Legguards | 1 | f | no recognized source route | — |
 | 22657 | Amulet of the Dawn | 1 | f | no recognized source route | — |
-| 22658 | Glacial Cloak | 1 | e | drops outside this phase's zones | — |
+| 22658 | Glacial Cloak | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22659 | Medallion of the Dawn | 1 | f | no recognized source route | — |
-| 22661 | Polar Tunic | 1 | e | drops outside this phase's zones | — |
-| 22662 | Polar Gloves | 1 | e | drops outside this phase's zones | — |
-| 22663 | Polar Bracers | 1 | e | drops outside this phase's zones | — |
-| 22664 | Icy Scale Breastplate | 1 | e | drops outside this phase's zones | — |
-| 22665 | Icy Scale Bracers | 1 | e | drops outside this phase's zones | — |
-| 22666 | Icy Scale Gauntlets | 1 | e | drops outside this phase's zones | — |
+| 22661 | Polar Tunic | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22662 | Polar Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22663 | Polar Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22664 | Icy Scale Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22665 | Icy Scale Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22666 | Icy Scale Gauntlets | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22668 | Bracers of Subterfuge | 1 | f | no recognized source route | — |
-| 22669 | Icebane Breastplate | 1 | e | drops outside this phase's zones | — |
-| 22670 | Icebane Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 22671 | Icebane Bracers | 1 | e | drops outside this phase's zones | — |
+| 22669 | Icebane Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22670 | Icebane Gauntlets | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 22671 | Icebane Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22672 | Sentinel's Plate Legguards | 1 | f | no recognized source route | — |
 | 22673 | Outrider's Chain Leggings | 1 | f | no recognized source route | — |
 | 22676 | Outrider's Mail Leggings | 1 | f | no recognized source route | — |
@@ -598,98 +610,98 @@ carry. Each row names the rule that explains the absence.
 | 22701 | Polar Leggings | 1 | f | no recognized source route | — |
 | 22702 | Icy Scale Leggings | 1 | f | no recognized source route | — |
 | 22707 | Ramaladni's Icy Grasp | 1 | f | no recognized source route | — |
-| 22721 | Band of Servitude | 1 | e | drops outside this phase's zones | — |
-| 22722 | Seal of the Gurubashi Berserker | 1 | e | drops outside this phase's zones | — |
-| 22731 | Cloak of the Devoured | 1 | e | drops outside this phase's zones | — |
-| 22732 | Mark of C'Thun | 1 | e | drops outside this phase's zones | — |
+| 22721 | Band of Servitude | 1 | e1 | drops only outside this phase's zones | — |
+| 22722 | Seal of the Gurubashi Berserker | 1 | e1 | drops only outside this phase's zones | — |
+| 22731 | Cloak of the Devoured | 1 | e1 | drops only outside this phase's zones | — |
+| 22732 | Mark of C'Thun | 1 | e1 | drops only outside this phase's zones | — |
 | 22740 | Outrider's Leather Pants | 1 | f | no recognized source route | — |
 | 22741 | Outrider's Lizardhide Pants | 1 | f | no recognized source route | — |
 | 22748 | Sentinel's Chain Leggings | 1 | f | no recognized source route | — |
 | 22749 | Sentinel's Leather Pants | 1 | f | no recognized source route | — |
 | 22750 | Sentinel's Lizardhide Pants | 1 | f | no recognized source route | — |
 | 22753 | Sentinel's Lamellar Legguards | 1 | f | no recognized source route | — |
-| 22798 | Might of Menethil | 1 | e | drops outside this phase's zones | — |
-| 22809 | Maul of the Redeemed Crusader | 1 | e | drops outside this phase's zones | — |
-| 22813 | Claymore of Unholy Might | 1 | e | drops outside this phase's zones | — |
-| 22815 | Severance | 1 | e | drops outside this phase's zones | — |
-| 22935 | Touch of Frost | 1 | e | drops outside this phase's zones | — |
-| 22936 | Wristguards of Vengeance | 1 | e | drops outside this phase's zones | — |
-| 22938 | Cryptfiend Silk Cloak | 1 | e | drops outside this phase's zones | — |
-| 22939 | Band of Unanswered Prayers | 1 | e | drops outside this phase's zones | — |
-| 22940 | Icebane Pauldrons | 1 | e | drops outside this phase's zones | — |
-| 22941 | Polar Shoulder Pads | 1 | e | drops outside this phase's zones | — |
-| 22943 | Malice Stone Pendant | 1 | e | drops outside this phase's zones | — |
-| 22947 | Pendant of Forgotten Names | 1 | e | drops outside this phase's zones | — |
-| 22954 | Kiss of the Spider | 1 | e | drops outside this phase's zones | — |
-| 22960 | Cloak of Suturing | 1 | e | drops outside this phase's zones | — |
-| 22961 | Band of Reanimation | 1 | e | drops outside this phase's zones | — |
-| 22967 | Icy Scale Spaulders | 1 | e | drops outside this phase's zones | — |
-| 22981 | Gluth's Missing Collar | 1 | e | drops outside this phase's zones | — |
-| 23000 | Plated Abomination Ribcage | 1 | e | drops outside this phase's zones | — |
+| 22798 | Might of Menethil | 1 | e1 | drops only outside this phase's zones | — |
+| 22809 | Maul of the Redeemed Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 22813 | Claymore of Unholy Might | 1 | e1 | drops only outside this phase's zones | — |
+| 22815 | Severance | 1 | e1 | drops only outside this phase's zones | — |
+| 22935 | Touch of Frost | 1 | e1 | drops only outside this phase's zones | — |
+| 22936 | Wristguards of Vengeance | 1 | e1 | drops only outside this phase's zones | — |
+| 22938 | Cryptfiend Silk Cloak | 1 | e1 | drops only outside this phase's zones | — |
+| 22939 | Band of Unanswered Prayers | 1 | e1 | drops only outside this phase's zones | — |
+| 22940 | Icebane Pauldrons | 1 | e1 | drops only outside this phase's zones | — |
+| 22941 | Polar Shoulder Pads | 1 | e1 | drops only outside this phase's zones | — |
+| 22943 | Malice Stone Pendant | 1 | e1 | drops only outside this phase's zones | — |
+| 22947 | Pendant of Forgotten Names | 1 | e1 | drops only outside this phase's zones | — |
+| 22954 | Kiss of the Spider | 1 | e1 | drops only outside this phase's zones | — |
+| 22960 | Cloak of Suturing | 1 | e1 | drops only outside this phase's zones | — |
+| 22961 | Band of Reanimation | 1 | e1 | drops only outside this phase's zones | — |
+| 22967 | Icy Scale Spaulders | 1 | e1 | drops only outside this phase's zones | — |
+| 22981 | Gluth's Missing Collar | 1 | e1 | drops only outside this phase's zones | — |
+| 23000 | Plated Abomination Ribcage | 1 | e1 | drops only outside this phase's zones | — |
 | 23001 | Eye of Diminution | 1 | c | stub-only sim effect | — |
 | 23006 | Libram of Light | 1 | c | stub-only sim effect | — |
-| 23017 | Veil of Eclipse | 1 | e | drops outside this phase's zones | — |
-| 23018 | Signet of the Fallen Defender | 1 | e | drops outside this phase's zones | — |
-| 23019 | Icebane Helmet | 1 | e | drops outside this phase's zones | — |
-| 23020 | Polar Helmet | 1 | e | drops outside this phase's zones | — |
-| 23023 | Sadist's Collar | 1 | e | drops outside this phase's zones | — |
-| 23025 | Seal of the Damned | 1 | e | drops outside this phase's zones | — |
+| 23017 | Veil of Eclipse | 1 | e1 | drops only outside this phase's zones | — |
+| 23018 | Signet of the Fallen Defender | 1 | e1 | drops only outside this phase's zones | — |
+| 23019 | Icebane Helmet | 1 | e1 | drops only outside this phase's zones | — |
+| 23020 | Polar Helmet | 1 | e1 | drops only outside this phase's zones | — |
+| 23023 | Sadist's Collar | 1 | e1 | drops only outside this phase's zones | — |
+| 23025 | Seal of the Damned | 1 | e1 | drops only outside this phase's zones | — |
 | 23027 | Warmth of Forgiveness | 1 | c | stub-only sim effect | — |
-| 23028 | Hailstone Band | 1 | e | drops outside this phase's zones | — |
-| 23030 | Cloak of the Scourge | 1 | e | drops outside this phase's zones | — |
-| 23031 | Band of the Inevitable | 1 | e | drops outside this phase's zones | — |
-| 23033 | Icy Scale Coif | 1 | e | drops outside this phase's zones | — |
-| 23036 | Necklace of Necropsy | 1 | e | drops outside this phase's zones | — |
-| 23037 | Ring of Spiritual Fervor | 1 | e | drops outside this phase's zones | — |
-| 23038 | Band of Unnatural Forces | 1 | e | drops outside this phase's zones | — |
-| 23039 | The Eye of Nerub | 1 | e | drops outside this phase's zones | — |
-| 23040 | Glyph of Deflection | 1 | e | drops outside this phase's zones | — |
-| 23041 | Slayer's Crest | 1 | e | drops outside this phase's zones | — |
-| 23042 | Loatheb's Reflection | 1 | e | drops outside this phase's zones | — |
-| 23045 | Shroud of Dominion | 1 | e | drops outside this phase's zones | — |
-| 23046 | The Restrained Essence of Sapphiron | 1 | e | drops outside this phase's zones | — |
-| 23047 | Eye of the Dead | 1 | e | drops outside this phase's zones | — |
-| 23050 | Cloak of the Necropolis | 1 | e | drops outside this phase's zones | — |
-| 23053 | Stormrage's Talisman of Seething | 1 | e | drops outside this phase's zones | — |
-| 23057 | Gem of Trapped Innocents | 1 | e | drops outside this phase's zones | — |
+| 23028 | Hailstone Band | 1 | e1 | drops only outside this phase's zones | — |
+| 23030 | Cloak of the Scourge | 1 | e1 | drops only outside this phase's zones | — |
+| 23031 | Band of the Inevitable | 1 | e1 | drops only outside this phase's zones | — |
+| 23033 | Icy Scale Coif | 1 | e1 | drops only outside this phase's zones | — |
+| 23036 | Necklace of Necropsy | 1 | e1 | drops only outside this phase's zones | — |
+| 23037 | Ring of Spiritual Fervor | 1 | e1 | drops only outside this phase's zones | — |
+| 23038 | Band of Unnatural Forces | 1 | e1 | drops only outside this phase's zones | — |
+| 23039 | The Eye of Nerub | 1 | e1 | drops only outside this phase's zones | — |
+| 23040 | Glyph of Deflection | 1 | e1 | drops only outside this phase's zones | — |
+| 23041 | Slayer's Crest | 1 | e1 | drops only outside this phase's zones | — |
+| 23042 | Loatheb's Reflection | 1 | e1 | drops only outside this phase's zones | — |
+| 23045 | Shroud of Dominion | 1 | e1 | drops only outside this phase's zones | — |
+| 23046 | The Restrained Essence of Sapphiron | 1 | e1 | drops only outside this phase's zones | — |
+| 23047 | Eye of the Dead | 1 | e1 | drops only outside this phase's zones | — |
+| 23050 | Cloak of the Necropolis | 1 | e1 | drops only outside this phase's zones | — |
+| 23053 | Stormrage's Talisman of Seething | 1 | e1 | drops only outside this phase's zones | — |
+| 23057 | Gem of Trapped Innocents | 1 | e1 | drops only outside this phase's zones | — |
 | 23058 | Life Channeling Necklace | 1 | f | no recognized source route | — |
-| 23066 | Ring of Redemption | 1 | e | drops outside this phase's zones | — |
-| 23068 | Legplates of Carnage | 1 | e | drops outside this phase's zones | — |
-| 23071 | Leggings of Apocalypse | 1 | e | drops outside this phase's zones | — |
+| 23066 | Ring of Redemption | 1 | e1 | drops only outside this phase's zones | — |
+| 23068 | Legplates of Carnage | 1 | e1 | drops only outside this phase's zones | — |
+| 23071 | Leggings of Apocalypse | 1 | e1 | drops only outside this phase's zones | — |
 | 23072 | Fists of the Unrelenting | 1 | c | stub-only sim effect | — |
-| 23073 | Boots of Displacement | 1 | e | drops outside this phase's zones | — |
+| 23073 | Boots of Displacement | 1 | e1 | drops only outside this phase's zones | — |
 | 23206 | Mark of the Champion | 1 | f | no recognized source route | — |
 | 23207 | Mark of the Champion | 1 | f | no recognized source route | — |
-| 23219 | Girdle of the Mentor | 1 | e | drops outside this phase's zones | — |
-| 23226 | Ghoul Skin Tunic | 1 | e | drops outside this phase's zones | — |
-| 23237 | Ring of the Eternal Flame | 1 | e | drops outside this phase's zones | — |
+| 23219 | Girdle of the Mentor | 1 | e1 | drops only outside this phase's zones | — |
+| 23226 | Ghoul Skin Tunic | 1 | e1 | drops only outside this phase's zones | — |
+| 23237 | Ring of the Eternal Flame | 1 | e1 | drops only outside this phase's zones | — |
 | 23455 | Grand Marshal's Demolisher | 1 | f | no recognized source route | — |
 | 23457 | High Warlord's Destroyer | 1 | f | no recognized source route | — |
 | 23465 | High Warlord's Destroyer | 1 | f | no recognized source route | — |
-| 23531 | Felfury Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 23532 | Gauntlets of the Iron Tower | 1 | e | drops outside this phase's zones | — |
+| 23531 | Felfury Gauntlets | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23532 | Gauntlets of the Iron Tower | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 23533 | Steelgrip Gauntlets | 1 | c | stub-only sim effect | — |
-| 23534 | Storm Helm | 1 | e | drops outside this phase's zones | — |
-| 23535 | Helm of the Stalwart Defender | 1 | e | drops outside this phase's zones | — |
-| 23536 | Oathkeeper's Helm | 1 | e | drops outside this phase's zones | — |
-| 23538 | Bracers of the Green Fortress | 1 | e | drops outside this phase's zones | — |
-| 23539 | Blessed Bracers | 1 | e | drops outside this phase's zones | — |
-| 23541 | Khorium Champion | 1 | e | drops outside this phase's zones | — |
-| 23543 | Felsteel Reaper | 1 | e | drops outside this phase's zones | — |
-| 23546 | Fel Hardened Maul | 1 | e | drops outside this phase's zones | — |
+| 23534 | Storm Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23535 | Helm of the Stalwart Defender | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23536 | Oathkeeper's Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23538 | Bracers of the Green Fortress | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23539 | Blessed Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23541 | Khorium Champion | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23543 | Felsteel Reaper | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23546 | Fel Hardened Maul | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 23558 | The Burrower's Shell | 1 | c | stub-only sim effect | — |
-| 23563 | Nether Chain Shirt | 1 | e | drops outside this phase's zones | — |
+| 23563 | Nether Chain Shirt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 23564 | Twisting Nether Chain Shirt | 1 | c | stub-only sim effect | — |
 | 23565 | Embrace of the Twisting Nether | 2 | c | stub-only sim effect | — |
-| 23570 | Jom Gabbar | 1 | e | drops outside this phase's zones | — |
-| 23663 | Girdle of Elemental Fury | 1 | e | drops outside this phase's zones | — |
-| 23666 | Belt of the Grand Crusader | 1 | e | drops outside this phase's zones | — |
-| 23667 | Spaulders of the Grand Crusader | 1 | e | drops outside this phase's zones | — |
-| 23668 | Leggings of the Grand Crusader | 1 | e | drops outside this phase's zones | — |
-| 23829 | Gnomish Battle Goggles | 1 | e | drops outside this phase's zones | — |
-| 23839 | Foreman's Reinforced Helmet | 1 | e | drops outside this phase's zones | — |
-| 24258 | Resolute Cape | 1 | e | drops outside this phase's zones | — |
-| 24260 | Manaweave Cloak | 1 | e | drops outside this phase's zones | — |
+| 23570 | Jom Gabbar | 1 | e1 | drops only outside this phase's zones | — |
+| 23663 | Girdle of Elemental Fury | 1 | e1 | drops only outside this phase's zones | — |
+| 23666 | Belt of the Grand Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 23667 | Spaulders of the Grand Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 23668 | Leggings of the Grand Crusader | 1 | e1 | drops only outside this phase's zones | — |
+| 23829 | Gnomish Battle Goggles | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 23839 | Foreman's Reinforced Helmet | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 24258 | Resolute Cape | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 24260 | Manaweave Cloak | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 24550 | Gladiator's Greatsword | 1 | f | no recognized source route | — |
 | 24551 | Talisman of the Horde | 1 | c | stub-only sim effect | — |
 | 25829 | Talisman of the Alliance | 1 | c | stub-only sim effect | — |
@@ -716,15 +728,15 @@ carry. Each row names the rule that explains the absence.
 | 28381 | General's Plate Bracers | 1 | f | no recognized source route | — |
 | 28383 | General's Plate Greaves | 1 | f | no recognized source route | — |
 | 28385 | General's Plate Belt | 1 | f | no recognized source route | — |
-| 28428 | Lionheart Blade | 1 | e | drops outside this phase's zones | — |
-| 28434 | Lunar Crescent | 1 | e | drops outside this phase's zones | — |
-| 28435 | Mooncleaver | 1 | e | drops outside this phase's zones | — |
-| 28436 | Bloodmoon | 2 | e | drops outside this phase's zones | — |
-| 28440 | Thunder | 1 | e | drops outside this phase's zones | — |
-| 28441 | Deep Thunder | 1 | e | drops outside this phase's zones | — |
+| 28428 | Lionheart Blade | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28434 | Lunar Crescent | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28435 | Mooncleaver | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28436 | Bloodmoon | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28440 | Thunder | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28441 | Deep Thunder | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28476 | Gladiator's Maul | 1 | f | no recognized source route | — |
-| 28483 | Breastplate of Kings | 1 | e | drops outside this phase's zones | — |
-| 28484 | Bulwark of Kings | 1 | e | drops outside this phase's zones | — |
+| 28483 | Breastplate of Kings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 28484 | Bulwark of Kings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28553 | Band of the Exorcist | 1 | f | no recognized source route | — |
 | 28555 | Seal of the Exorcist | 1 | f | no recognized source route | — |
 | 28590 | Ribbon of Sacrifice | 1 | c | stub-only sim effect | Karazhan |
@@ -762,27 +774,27 @@ carry. Each row names the rule that explains the absence.
 | 29070 | Justicar Shoulderguards | 1 | f | no recognized source route | — |
 | 29123 | Medallion of the Lightbearer | 1 | f | no recognized source route | — |
 | 29126 | Seer's Signet | 1 | f | no recognized source route | — |
-| 29171 | Earthwarden | 1 | e | drops outside this phase's zones | — |
-| 29172 | Ashyen's Gift | 1 | e | drops outside this phase's zones | — |
+| 29171 | Earthwarden | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29172 | Ashyen's Gift | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29181 | Timelapse Shard | 1 | c | stub-only sim effect | — |
 | 29237 | Warpath Bracers | 1 | f | no recognized source route | — |
-| 29238 | Lion's Heart Girdle | 1 | e | drops outside this phase's zones | — |
-| 29239 | Eaglecrest Warboots | 1 | e | drops outside this phase's zones | — |
-| 29243 | Wave-Fury Vambraces | 1 | e | drops outside this phase's zones | — |
-| 29244 | Wave-Song Girdle | 1 | e | drops outside this phase's zones | — |
-| 29245 | Wave-Crest Striders | 1 | e | drops outside this phase's zones | — |
-| 29246 | Nightfall Wristguards | 1 | e | drops outside this phase's zones | — |
-| 29247 | Girdle of the Deathdealer | 1 | e | drops outside this phase's zones | — |
-| 29248 | Shadowstep Striders | 1 | e | drops outside this phase's zones | — |
-| 29252 | Bracers of Dignity | 1 | e | drops outside this phase's zones | — |
-| 29253 | Girdle of Valorous Deeds | 1 | e | drops outside this phase's zones | — |
-| 29254 | Boots of the Righteous Path | 1 | e | drops outside this phase's zones | — |
-| 29259 | Bracers of the Hunt | 1 | e | drops outside this phase's zones | — |
-| 29261 | Girdle of Ferocity | 1 | e | drops outside this phase's zones | — |
-| 29262 | Boots of the Endless Hunt | 1 | e | drops outside this phase's zones | — |
-| 29263 | Forestheart Bracers | 1 | e | drops outside this phase's zones | — |
-| 29264 | Tree-Mender's Belt | 1 | e | drops outside this phase's zones | — |
-| 29265 | Barkchip Boots | 1 | e | drops outside this phase's zones | — |
+| 29238 | Lion's Heart Girdle | 1 | e1 | drops only outside this phase's zones | — |
+| 29239 | Eaglecrest Warboots | 1 | e1 | drops only outside this phase's zones | — |
+| 29243 | Wave-Fury Vambraces | 1 | e1 | drops only outside this phase's zones | — |
+| 29244 | Wave-Song Girdle | 1 | e1 | drops only outside this phase's zones | — |
+| 29245 | Wave-Crest Striders | 1 | e1 | drops only outside this phase's zones | — |
+| 29246 | Nightfall Wristguards | 1 | e1 | drops only outside this phase's zones | — |
+| 29247 | Girdle of the Deathdealer | 1 | e1 | drops only outside this phase's zones | — |
+| 29248 | Shadowstep Striders | 1 | e1 | drops only outside this phase's zones | — |
+| 29252 | Bracers of Dignity | 1 | e1 | drops only outside this phase's zones | — |
+| 29253 | Girdle of Valorous Deeds | 1 | e1 | drops only outside this phase's zones | — |
+| 29254 | Boots of the Righteous Path | 1 | e1 | drops only outside this phase's zones | — |
+| 29259 | Bracers of the Hunt | 1 | e1 | drops only outside this phase's zones | — |
+| 29261 | Girdle of Ferocity | 1 | e1 | drops only outside this phase's zones | — |
+| 29262 | Boots of the Endless Hunt | 1 | e1 | drops only outside this phase's zones | — |
+| 29263 | Forestheart Bracers | 1 | e1 | drops only outside this phase's zones | — |
+| 29264 | Tree-Mender's Belt | 1 | e1 | drops only outside this phase's zones | — |
+| 29265 | Barkchip Boots | 1 | e1 | drops only outside this phase's zones | — |
 | 29277 | Violet Signet | 1 | f | no recognized source route | — |
 | 29278 | Violet Signet | 1 | f | no recognized source route | — |
 | 29279 | Violet Signet of the Great Protector | 1 | f | no recognized source route | — |
@@ -796,10 +808,10 @@ carry. Each row names the rule that explains the absence.
 | 29290 | Violet Signet of the Grand Restorer | 1 | f | no recognized source route | — |
 | 29291 | Violet Signet | 1 | f | no recognized source route | — |
 | 29347 | Talisman of the Breaker | 1 | c | stub-only sim effect | — |
-| 29349 | Adamantine Chain of the Unbroken | 1 | e | drops outside this phase's zones | — |
-| 29352 | Cobalt Band of Tyrigosa | 1 | e | drops outside this phase's zones | — |
-| 29354 | Light-Touched Stole of Altruism | 1 | e | drops outside this phase's zones | — |
-| 29356 | Quantum Blade | 1 | e | drops outside this phase's zones | — |
+| 29349 | Adamantine Chain of the Unbroken | 1 | e1 | drops only outside this phase's zones | — |
+| 29352 | Cobalt Band of Tyrigosa | 1 | e1 | drops only outside this phase's zones | — |
+| 29354 | Light-Touched Stole of Altruism | 1 | e1 | drops only outside this phase's zones | — |
+| 29356 | Quantum Blade | 1 | e1 | drops only outside this phase's zones | — |
 | 29357 | Master Thief's Gloves | 1 | c | stub-only sim effect | — |
 | 29367 | Ring of Cryptic Dreams | 1 | f | no recognized source route | — |
 | 29368 | Manasurge Pendant | 1 | f | no recognized source route | — |
@@ -816,31 +828,31 @@ carry. Each row names the rule that explains the absence.
 | 29386 | Necklace of the Juggernaut | 1 | f | no recognized source route | — |
 | 29387 | Gnomeregan Auto-Blocker 600 | 1 | f | no recognized source route | — |
 | 29388 | Libram of Repentance | 1 | f | no recognized source route | — |
-| 29463 | Amber Bands of the Aggressor | 1 | e | drops outside this phase's zones | — |
-| 29502 | Cobrascale Hood | 1 | e | drops outside this phase's zones | — |
-| 29503 | Cobrascale Gloves | 1 | e | drops outside this phase's zones | — |
-| 29504 | Windscale Hood | 1 | e | drops outside this phase's zones | — |
-| 29505 | Hood of Primal Life | 1 | e | drops outside this phase's zones | — |
-| 29506 | Gloves of the Living Touch | 1 | e | drops outside this phase's zones | — |
-| 29507 | Windslayer Wraps | 1 | e | drops outside this phase's zones | — |
-| 29508 | Living Dragonscale Helm | 1 | e | drops outside this phase's zones | — |
-| 29509 | Windstrike Gloves | 1 | e | drops outside this phase's zones | — |
-| 29510 | Netherdrake Helm | 1 | e | drops outside this phase's zones | — |
-| 29511 | Netherdrake Gloves | 1 | e | drops outside this phase's zones | — |
+| 29463 | Amber Bands of the Aggressor | 1 | e1 | drops only outside this phase's zones | — |
+| 29502 | Cobrascale Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29503 | Cobrascale Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29504 | Windscale Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29505 | Hood of Primal Life | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29506 | Gloves of the Living Touch | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29507 | Windslayer Wraps | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29508 | Living Dragonscale Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29509 | Windstrike Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29510 | Netherdrake Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29511 | Netherdrake Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29512 | Earthen Netherscale Boots | 1 | c | stub-only sim effect | — |
-| 29514 | Thick Netherscale Breastplate | 1 | e | drops outside this phase's zones | — |
-| 29515 | Ebon Netherscale Breastplate | 1 | e | drops outside this phase's zones | — |
-| 29516 | Ebon Netherscale Belt | 1 | e | drops outside this phase's zones | — |
-| 29517 | Ebon Netherscale Bracers | 1 | e | drops outside this phase's zones | — |
-| 29519 | Netherstrike Breastplate | 1 | e | drops outside this phase's zones | — |
-| 29520 | Netherstrike Belt | 1 | e | drops outside this phase's zones | — |
-| 29521 | Netherstrike Bracers | 1 | e | drops outside this phase's zones | — |
-| 29522 | Windhawk Hauberk | 1 | e | drops outside this phase's zones | — |
-| 29523 | Windhawk Bracers | 1 | e | drops outside this phase's zones | — |
-| 29524 | Windhawk Belt | 1 | e | drops outside this phase's zones | — |
-| 29525 | Primalstrike Vest | 1 | e | drops outside this phase's zones | — |
-| 29526 | Primalstrike Belt | 1 | e | drops outside this phase's zones | — |
-| 29527 | Primalstrike Bracers | 1 | e | drops outside this phase's zones | — |
+| 29514 | Thick Netherscale Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29515 | Ebon Netherscale Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29516 | Ebon Netherscale Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29517 | Ebon Netherscale Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29519 | Netherstrike Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29520 | Netherstrike Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29521 | Netherstrike Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29522 | Windhawk Hauberk | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29523 | Windhawk Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29524 | Windhawk Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29525 | Primalstrike Vest | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29526 | Primalstrike Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 29527 | Primalstrike Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29612 | General's Lamellar Boots | 1 | f | no recognized source route | — |
 | 29613 | General's Lamellar Gloves | 1 | c | stub-only sim effect | — |
 | 29614 | General's Lamellar Legplates | 1 | f | no recognized source route | — |
@@ -851,15 +863,15 @@ carry. Each row names the rule that explains the absence.
 | 30008 | Pendant of the Lost Ages | 2 | c | stub-only sim effect | Serpentshrine Cavern |
 | 30015 | The Sun King's Talisman | 2 | f | no recognized source route | — |
 | 30018 | Lord Sanguinar's Claim | 2 | f | no recognized source route | — |
-| 30031 | Red Havoc Boots | 2 | e | drops outside this phase's zones | — |
-| 30033 | Boots of the Protector | 2 | e | drops outside this phase's zones | — |
-| 30034 | Belt of the Guardian | 2 | e | drops outside this phase's zones | — |
-| 30039 | Boots of Utter Darkness | 2 | e | drops outside this phase's zones | — |
-| 30041 | Boots of Natural Grace | 2 | e | drops outside this phase's zones | — |
-| 30042 | Belt of Natural Power | 2 | e | drops outside this phase's zones | — |
-| 30043 | Hurricane Boots | 2 | e | drops outside this phase's zones | — |
-| 30044 | Monsoon Belt | 2 | e | drops outside this phase's zones | — |
-| 30045 | Boots of the Crimson Hawk | 2 | e | drops outside this phase's zones | — |
+| 30031 | Red Havoc Boots | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30033 | Boots of the Protector | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30034 | Belt of the Guardian | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30039 | Boots of Utter Darkness | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30041 | Boots of Natural Grace | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30042 | Belt of Natural Power | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30043 | Hurricane Boots | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30044 | Monsoon Belt | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 30045 | Boots of the Crimson Hawk | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 30063 | Libram of Absolute Truth | 2 | c | stub-only sim effect | Serpentshrine Cavern |
 | 30123 | Crystalforge Chestguard | 2 | f | no recognized source route | — |
 | 30124 | Crystalforge Handguards | 2 | f | no recognized source route | — |
@@ -874,12 +886,12 @@ carry. Each row names the rule that explains the absence.
 | 30491 | General's Plate Greaves Tier 2 | 1 | f | no recognized source route | — |
 | 30497 | Sentinel's Mail Leggings | 1 | f | no recognized source route | — |
 | 30498 | Outrider's Lamellar Legguards | 1 | f | no recognized source route | — |
-| 30533 | Vanquisher's Legplates | 1 | e | drops outside this phase's zones | — |
-| 30534 | Wyrmscale Greaves | 1 | e | drops outside this phase's zones | — |
-| 30535 | Forestwalker Kilt | 1 | e | drops outside this phase's zones | — |
-| 30536 | Greaves of the Martyr | 1 | e | drops outside this phase's zones | — |
-| 30538 | Midnight Legguards | 1 | e | drops outside this phase's zones | — |
-| 30541 | Stormsong Kilt | 1 | e | drops outside this phase's zones | — |
+| 30533 | Vanquisher's Legplates | 1 | e1 | drops only outside this phase's zones | — |
+| 30534 | Wyrmscale Greaves | 1 | e1 | drops only outside this phase's zones | — |
+| 30535 | Forestwalker Kilt | 1 | e1 | drops only outside this phase's zones | — |
+| 30536 | Greaves of the Martyr | 1 | e1 | drops only outside this phase's zones | — |
+| 30538 | Midnight Legguards | 1 | e1 | drops only outside this phase's zones | — |
+| 30541 | Stormsong Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30619 | Fel Reaver's Piston | 2 | c | stub-only sim effect | Tempest Keep |
 | 30766 | Inferno Tempered Leggings | 1 | f | no recognized source route | — |
 | 30767 | Inferno Tempered Gauntlets | 1 | f | no recognized source route | — |
@@ -918,14 +930,14 @@ carry. Each row names the rule that explains the absence.
 | 31335 | Pants of Living Growth | 1 | f | no recognized source route | — |
 | 31338 | Charlotte's Ivy | 1 | f | no recognized source route | — |
 | 31339 | Lola's Eve | 1 | f | no recognized source route | — |
-| 31364 | Wildguard Breastplate | 1 | e | drops outside this phase's zones | — |
-| 31367 | Wildguard Leggings | 1 | e | drops outside this phase's zones | — |
-| 31368 | Wildguard Helm | 1 | e | drops outside this phase's zones | — |
-| 31369 | Iceguard Breastplate | 1 | e | drops outside this phase's zones | — |
-| 31370 | Iceguard Leggings | 1 | e | drops outside this phase's zones | — |
-| 31371 | Iceguard Helm | 1 | e | drops outside this phase's zones | — |
-| 31398 | The Frozen Eye | 1 | e | drops outside this phase's zones | — |
-| 31399 | The Natural Ward | 1 | e | drops outside this phase's zones | — |
+| 31364 | Wildguard Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31367 | Wildguard Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31368 | Wildguard Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31369 | Iceguard Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31370 | Iceguard Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31371 | Iceguard Helm | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31398 | The Frozen Eye | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 31399 | The Natural Ward | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 31613 | Gladiator's Ornamented Chestguard | 1 | f | no recognized source route | — |
 | 31614 | Gladiator's Ornamented Gloves | 1 | c | stub-only sim effect | — |
 | 31616 | Gladiator's Ornamented Headcover | 1 | f | no recognized source route | — |
@@ -935,12 +947,12 @@ carry. Each row names the rule that explains the absence.
 | 31857 | Darkmoon Card: Wrath | 1 | f | no recognized source route | — |
 | 31858 | Darkmoon Card: Vengeance | 1 | f | no recognized source route | — |
 | 31859 | Darkmoon Card: Madness | 1 | c | stub-only sim effect | — |
-| 31919 | Nexus-Prince's Ring of Balance | 1 | e | drops outside this phase's zones | — |
-| 31920 | Shaffar's Band of Brutality | 1 | e | drops outside this phase's zones | — |
-| 31921 | Yor's Collapsing Band | 1 | e | drops outside this phase's zones | — |
-| 31922 | Ring of Conflict Survival | 1 | e | drops outside this phase's zones | — |
-| 31923 | Band of the Crystalline Void | 1 | e | drops outside this phase's zones | — |
-| 31924 | Yor's Revenge | 1 | e | drops outside this phase's zones | — |
+| 31919 | Nexus-Prince's Ring of Balance | 1 | e1 | drops only outside this phase's zones | — |
+| 31920 | Shaffar's Band of Brutality | 1 | e1 | drops only outside this phase's zones | — |
+| 31921 | Yor's Collapsing Band | 1 | e1 | drops only outside this phase's zones | — |
+| 31922 | Ring of Conflict Survival | 1 | e1 | drops only outside this phase's zones | — |
+| 31923 | Band of the Crystalline Void | 1 | e1 | drops only outside this phase's zones | — |
+| 31924 | Yor's Revenge | 1 | e1 | drops only outside this phase's zones | — |
 | 31959 | Merciless Gladiator's Bonegrinder | 2 | f | no recognized source route | — |
 | 31966 | Merciless Gladiator's Decapitator | 2 | f | no recognized source route | — |
 | 31992 | Merciless Gladiator's Lamellar Chestpiece | 2 | f | no recognized source route | — |
@@ -959,13 +971,13 @@ carry. Each row names the rule that explains the absence.
 | 32040 | Merciless Gladiator's Scaled Gauntlets | 2 | c | stub-only sim effect | — |
 | 32042 | Merciless Gladiator's Scaled Legguards | 2 | f | no recognized source route | — |
 | 32043 | Merciless Gladiator's Scaled Shoulders | 2 | f | no recognized source route | — |
-| 32072 | Gauntlets of Dissension | 1 | e | drops outside this phase's zones | — |
-| 32073 | Spaulders of Dementia | 1 | e | drops outside this phase's zones | — |
-| 32076 | Handguards of the Steady | 1 | e | drops outside this phase's zones | — |
-| 32077 | Wrath Infused Gauntlets | 1 | e | drops outside this phase's zones | — |
-| 32078 | Pauldrons of Wild Magic | 1 | e | drops outside this phase's zones | — |
-| 32080 | Mantle of Shadowy Embrace | 1 | e | drops outside this phase's zones | — |
-| 32081 | Eye of the Stalker | 1 | e | drops outside this phase's zones | — |
+| 32072 | Gauntlets of Dissension | 1 | e1 | drops only outside this phase's zones | — |
+| 32073 | Spaulders of Dementia | 1 | e1 | drops only outside this phase's zones | — |
+| 32076 | Handguards of the Steady | 1 | e1 | drops only outside this phase's zones | — |
+| 32077 | Wrath Infused Gauntlets | 1 | e1 | drops only outside this phase's zones | — |
+| 32078 | Pauldrons of Wild Magic | 1 | e1 | drops only outside this phase's zones | — |
+| 32080 | Mantle of Shadowy Embrace | 1 | e1 | drops only outside this phase's zones | — |
+| 32081 | Eye of the Stalker | 1 | e1 | drops only outside this phase's zones | — |
 | 32083 | Faceguard of Determination | 1 | f | no recognized source route | — |
 | 32084 | Helmet of the Steadfast Champion | 1 | f | no recognized source route | — |
 | 32085 | Warpstalker Helm | 1 | f | no recognized source route | — |
@@ -992,28 +1004,28 @@ carry. Each row names the rule that explains the absence.
 | 32184 | Chancellor's Painsaw | 1 | f | no recognized source route | — |
 | 32186 | Chancellor's Warblade | 1 | f | no recognized source route | — |
 | 32368 | Tome of the Lightbringer | 3 | c | stub-only sim effect | Black Temple |
-| 32472 | Justicebringer 2000 Specs | 2 | e | drops outside this phase's zones | — |
-| 32473 | Tankatronic Goggles | 2 | e | drops outside this phase's zones | — |
-| 32474 | Surestrike Goggles v2.0 | 2 | e | drops outside this phase's zones | — |
-| 32475 | Living Replicator Specs | 2 | e | drops outside this phase's zones | — |
-| 32476 | Gadgetstorm Goggles | 2 | e | drops outside this phase's zones | — |
-| 32478 | Deathblow X11 Goggles | 2 | e | drops outside this phase's zones | — |
-| 32479 | Wonderheal XT40 Shades | 2 | e | drops outside this phase's zones | — |
-| 32480 | Magnified Moon Specs | 2 | e | drops outside this phase's zones | — |
+| 32472 | Justicebringer 2000 Specs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32473 | Tankatronic Goggles | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32474 | Surestrike Goggles v2.0 | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32475 | Living Replicator Specs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32476 | Gadgetstorm Goggles | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32478 | Deathblow X11 Goggles | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32479 | Wonderheal XT40 Shades | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32480 | Magnified Moon Specs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32489 | Ashtongue Talisman of Zeal | 3 | c | stub-only sim effect | — |
 | 32540 | Terokk's Might | 1 | f | no recognized source route | — |
 | 32541 | Terokk's Wisdom | 1 | f | no recognized source route | — |
-| 32570 | Swiftsteel Shoulders | 3 | e | drops outside this phase's zones | — |
-| 32571 | Dawnsteel Bracers | 3 | e | drops outside this phase's zones | — |
-| 32573 | Dawnsteel Shoulders | 3 | e | drops outside this phase's zones | — |
-| 32575 | Shoulders of Lightning Reflexes | 3 | e | drops outside this phase's zones | — |
-| 32577 | Living Earth Bindings | 3 | e | drops outside this phase's zones | — |
-| 32579 | Living Earth Shoulders | 3 | e | drops outside this phase's zones | — |
-| 32580 | Swiftstrike Bracers | 3 | e | drops outside this phase's zones | — |
-| 32582 | Bracers of Renewed Life | 3 | e | drops outside this phase's zones | — |
-| 32583 | Shoulderpads of Renewed Life | 3 | e | drops outside this phase's zones | — |
-| 32647 | Shard-bound Bracers | 1 | e | drops outside this phase's zones | — |
-| 32648 | Vortex Walking Boots | 1 | e | drops outside this phase's zones | — |
+| 32570 | Swiftsteel Shoulders | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32571 | Dawnsteel Bracers | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32573 | Dawnsteel Shoulders | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32575 | Shoulders of Lightning Reflexes | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32577 | Living Earth Bindings | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32579 | Living Earth Shoulders | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32580 | Swiftstrike Bracers | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32582 | Bracers of Renewed Life | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32583 | Shoulderpads of Renewed Life | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32647 | Shard-bound Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
+| 32648 | Vortex Walking Boots | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32649 | Medallion of Karabor | 3 | f | no recognized source route | — |
 | 32656 | Crystalhide Handwraps | 1 | f | no recognized source route | — |
 | 32757 | Blessed Medallion of Karabor | 3 | f | no recognized source route | — |
@@ -1028,7 +1040,7 @@ carry. Each row names the rule that explains the absence.
 | 32813 | Veteran's Lamellar Bracers | 2 | f | no recognized source route | — |
 | 32818 | Veteran's Plate Bracers | 2 | f | no recognized source route | — |
 | 32819 | Veteran's Scaled Bracers | 2 | f | no recognized source route | — |
-| 32854 | Hammer of Righteous Might | 1 | e | drops outside this phase's zones | — |
+| 32854 | Hammer of Righteous Might | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32941 | Corruptor's Signet | 1 | f | no recognized source route | — |
 | 32942 | Ring of the Overseer | 1 | f | no recognized source route | — |
 | 32982 | General's Ornamented Belt | 1 | f | no recognized source route | — |
@@ -1048,7 +1060,7 @@ carry. Each row names the rule that explains the absence.
 | 33067 | Veteran's Pendant of Conquest | 2 | f | no recognized source route | — |
 | 33068 | Veteran's Pendant of Salvation | 2 | f | no recognized source route | — |
 | 33077 | Merciless Gladiator's Libram of Justice | 2 | c | stub-only sim effect | — |
-| 33204 | Shadowprowler's Chestguard | 1 | e | drops outside this phase's zones | — |
+| 33204 | Shadowprowler's Chestguard | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 33663 | Vengeful Gladiator's Bonegrinder | 3 | f | no recognized source route | — |
 | 33670 | Vengeful Gladiator's Decapitator | 3 | f | no recognized source route | — |
 | 33695 | Vengeful Gladiator's Lamellar Chestpiece | 3 | f | no recognized source route | — |
@@ -1120,7 +1132,8 @@ carry. Each row names the rule that explains the absence.
 | a — per-spec weapon/hand/armor exclusion | 0 |
 | b — fails the eligible_d7 stat and slot screen | 0 |
 | c — stub-only sim effect | 80 |
-| e — drops outside this phase's zones | 400 |
+| e1 — drops only outside this phase's zones | 283 |
+| e2 — sourced, but by a route the local assembly did not admit | 117 |
 | f — no recognized source route | 494 |
 | g — unexplained | 0 |
 

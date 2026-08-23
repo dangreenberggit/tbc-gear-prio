@@ -82,10 +82,13 @@ CATEGORY_LABELS = {
     "a": "per-spec weapon/hand/armor exclusion",
     "b": "fails the eligible_d7 stat and slot screen",
     "c": "stub-only sim effect",
-    "e": "drops outside this phase's zones",
+    "e1": "drops only outside this phase's zones",
+    "e2": "sourced, but by a route the local assembly did not admit",
     "f": "no recognized source route",
     "g": "unexplained",
 }
+
+WOWSIMS_ONLY_CATEGORIES = ("d", "a", "b", "c", "e1", "e2", "f", "g")
 
 
 def load_json(path: Path) -> dict:
@@ -121,8 +124,8 @@ def wowsims_only_category(
 ) -> str:
     """Why a wowsims-primary item is absent from the local universe.
 
-    Only c, e, f and g can apply here, and that is a fact about the audit's
-    shape rather than an omission. Membership in W is *defined* by
+    Only c, e1, e2, f and g can apply here, and that is a fact about the
+    audit's shape rather than an omission. Membership in W is *defined* by
     `eligible_d7` passing, so no member of W can fail it: the plan's
     categories a, b and d name eligibility rules, and eligibility rules
     explain why an item never entered W at all, never why a W-member is
@@ -132,12 +135,17 @@ def wowsims_only_category(
     Every remaining category is a test that can fail, which is what keeps g
     reachable and the "unexplained" section honest:
 
-      c  the item's only sim effect is an unimplemented stub.
-      e  the item drops somewhere, but nowhere in this phase's zone list --
-         the local assembler admits raid drops by zone (`zoneMatch` in the
-         universe report), so content outside the phase is out of scope by
-         design rather than missing by accident.
-      f  the DB records no source at all, so no local route could find it.
+      c   the item's only sim effect is an unimplemented stub.
+      e1  the item drops, but only outside this phase's zone list. The local
+          assembler admits raid drops by zone (`zoneMatch` in the universe
+          report), so older content is out of scope by design.
+      e2  the item is sourced and never drops -- crafted, or a rep reward --
+          and the local assembly's route for that kind did not admit it.
+          Split from e1 because "drops outside this phase" is simply false
+          about an item that drops nowhere, and the two need different
+          follow-up: e1 is working as designed, e2 is a question about a
+          local route.
+      f   the DB records no source at all, so no local route could find it.
 
     An item that is sourced, drops inside a phase zone, and still is not in
     the pool falls through to g and gets read by a person. Nothing absorbs
@@ -153,9 +161,9 @@ def wowsims_only_category(
         for s in sources
         if s.get("drop")
     }
-    if not dropped_in & phase_zones:
-        return "e"
-    return "g"
+    if dropped_in & phase_zones:
+        return "g"
+    return "e1" if dropped_in else "e2"
 
 
 def raid_drop_zones(item: dict, zone_names: dict[int, str]) -> list[str]:
@@ -322,7 +330,7 @@ def render(spec: str, db: dict, zone_names: dict[int, str], pins: list[str]) -> 
     w("this order, so an item that several rules would reject is reported under")
     w("the most specific one:")
     w("")
-    for key in ("d", "a", "b", "c", "e", "f", "g"):
+    for key in WOWSIMS_ONLY_CATEGORIES:
         w(f"- **{key}** — {CATEGORY_LABELS[key]}")
     w("")
     w("**Categories d, a and b are always zero here, for a structural reason")
@@ -335,12 +343,23 @@ def render(spec: str, db: dict, zone_names: dict[int, str], pins: list[str]) -> 
     w("")
     w("Each of the remaining categories is a test that can fail, which is what")
     w("keeps **g** reachable and this listing's zero-unexplained claim worth")
-    w("something. **e** asks whether the item drops anywhere in this phase's")
-    w("zone list — the local assembler admits raid drops by zone, so content")
-    w("outside the phase is out of scope by design rather than missing by")
-    w("accident. **f** asks whether the DB records any source at all. An item")
-    w("that is sourced, drops inside a phase zone, and is still absent falls")
-    w("through to **g** and gets read by a person; nothing absorbs it silently.")
+    w("something:")
+    w("")
+    w("- **e1** — the item drops, but only outside this phase's zone list. The")
+    w("  local assembler admits raid drops by zone, so older content is out of")
+    w("  scope by design rather than missing by accident.")
+    w("- **e2** — the item is sourced and never drops at all (crafted, or a")
+    w("  reputation reward), and the local assembly's route for that kind did")
+    w("  not admit it. Split from **e1** because \"drops outside this phase\" is")
+    w("  simply false about an item that drops nowhere, and the two want")
+    w("  different follow-up: e1 is working as designed, e2 is a question about")
+    w("  a local route.")
+    w("- **f** — the DB records no source at all, so no local route could find")
+    w("  it.")
+    w("")
+    w("An item that is sourced, drops inside one of this phase's zones, and is")
+    w("still absent falls through to **g** and gets read by a person; nothing")
+    w("absorbs it silently.")
     w("")
     w("## Source inventory")
     w("")
@@ -426,7 +445,7 @@ def render(spec: str, db: dict, zone_names: dict[int, str], pins: list[str]) -> 
     w("")
     w("| category | count |")
     w("|---|---|")
-    for key in ("d", "a", "b", "c", "e", "f", "g"):
+    for key in WOWSIMS_ONLY_CATEGORIES:
         w(f"| {key} — {CATEGORY_LABELS[key]} | {sum(1 for v in classified.values() if v == key)} |")
     w("")
     w("## Universe-only items, classified")
