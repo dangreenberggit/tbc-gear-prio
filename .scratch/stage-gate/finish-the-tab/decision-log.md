@@ -45,3 +45,9 @@ One dated line per gate: gate, outcome, reason, round count.
   executor advisories; F15 is folded into the Step 7 ordering fix.
   Owner note received mid-gate and folded into the brief: one weighted set-bonus
   variant is wanted later, with its own researcher and nested planner — tranche 2.
+- 2026-08-22 — **Gate A (revision 1): PASS.** Planner resumed via `SendMessage` (context
+  retained). Round-0 plan kept as `plan-r0.md`. Revised plan: 7 sections, C1–C38 (C14,
+  C36, C38 hypothesis/untested), Q1–Q7 with three items each; pre-sim prune is Step 5;
+  all fork code steps precede the Step 8 stop-and-report milestone. Both trees clean
+  after the planner ran. Reviewer re-run on the changed claims only: C8 (narrowed),
+  C10, C21, C30 (corrected), C32–C38 (new), and the Step 6 sub-brief.
