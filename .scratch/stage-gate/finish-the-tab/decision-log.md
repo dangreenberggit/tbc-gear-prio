@@ -51,3 +51,32 @@ One dated line per gate: gate, outcome, reason, round count.
   all fork code steps precede the Step 8 stop-and-report milestone. Both trees clean
   after the planner ran. Reviewer re-run on the changed claims only: C8 (narrowed),
   C10, C21, C30 (corrected), C32–C38 (new), and the Step 6 sub-brief.
+- 2026-08-22 — Reviewer re-ran on the changed claims (resumed via `SendMessage`); both
+  trees clean after. Verdict `proceed`: F1–F15 resolved, F16 accepted with reason;
+  six new findings G1–G6 (two material, four minor), none blocking.
+- 2026-08-22 — **Gate B (round 2): PROCEED.** No blocking finding stands. Material
+  findings accepted in this log with a ruling each, handed to the executor as
+  advisories rather than a second planner round (they are precision fixes, not
+  approach changes):
+  **G1 accepted** — the Step 6 test deletion retires ticket 217's fork-only route
+  because the screening compose site is deleted; say so in the repo commit message
+  and STATUS; drop the unreachable `grep -c fullPool … # 0` line from the verify
+  recipe (prose mentions at 359/363/1008 stay).
+  **G2 accepted** — C36's candidate count is phase-scoped: 16 (ret-p2) / 17
+  (feral-p2) at `maxPhase 2`; 9 (ret-p3+) / 5 (feral-p3). Budget cell is at maxPhase
+  2; record the phase-scoped figures in measurements and STATUS.
+  **G3 accepted** — C38 stands on `parity.test.ts:367,499`; the fallback ordering is
+  dead and the executor ignores it.
+  **G4 accepted** — Step 5 acceptance is `grep -n 'pool: this.effectivePool'` → one
+  hit and no direct `poolFor(` inside `run()`.
+  **G5 accepted** — `effectivePool` applies the bisTags filter to the raw
+  `poolFor(...)` result, before `filterPoolByPhase`; `eligibleCount` keeps its
+  existing phase/Kael wrapping around the helper's output, so both sites apply the
+  same tag filter on the same side of the phase filter.
+  **G6 ruled (product decision, orchestrator on the owner's behalf, overturnable at
+  hand-off)** — the pre-sim prune is tags-only; untagged worn gear is dropped from
+  that run. Honest degradation is the assumptions-drawer line Step 5 already adds
+  ("Candidate pool: BIS-list items only") plus the control's own label. Step 9's
+  observation is restated as "`Simming n/N` total equals the phase-scoped tagged
+  count"; if the engine still rescues a worn row, record the actual count and why.
+  Minor findings ride along as advisories. Round count: 2 (one revision).

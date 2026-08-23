@@ -76,3 +76,36 @@ VERDICT: revise
 5. **Sequence around the human** (F8) — move the fork code steps ahead of the measurement gate so an unattended executor makes progress.
 
 VERDICT: revise
+
+---
+
+# Plan review — round 2 (changed claims only), against plan commit `daa6258`
+
+VERDICT: proceed (reviewer wrote "sound").
+
+Scope: C8 (narrowed), C10, C21, C30, C32–C38; Step 6 sub-brief and ordering; Step 5 prune mechanics; Step 8/9 sequencing. Unchanged claims carry forward from round 1.
+
+## Findings
+
+| ID | Severity | Where | What breaks | Evidence |
+| --- | --- | --- | --- | --- |
+| G1 | material | Step 6 sub-brief, "delete the `fullPool: false` racing case (~1069)" | That block is `it("gives the fork's screening requests their own database")` — ticket 217's fork-only closing route, not incidental cleanup. Deleting it is right once screening is gone, but the sub-brief and commit message must say it retires 217's route. Also `grep -c fullPool …parity.test.ts # 0` in the verify recipe is unreachable: lines 359, 363, 1008 are prose. | `wowsims-fork-parity.test.ts:1006-1071`; `grep -n fullPool` → 359, 363, 900, 1008, 1070 |
+| G2 | material | C36 and the Goal's budget line, "16–17 tagged candidates" | Tagged count is phase-scoped: at `phase <= 2` it is 16 (ret-p2) and 17 (feral-p2) but only 9 for ret-p3/p4/p5 and 5 for feral-p3, because `filterPoolByPhase` runs before any bisTags filter (`rank.ts:541`). Budget cell is at maxPhase 2 so the test is safe; restate the figures so a higher-phase run is not read as a bug. | python over the six universes |
+| G3 | minor | C38 | Not a hypothesis: `extraInput?: Record<string, unknown>` (`:367`) spread at `:499`; the type-check fallback ordering is dead. Promote to stands, delete the fallback. | `sed -n 364,368p`, `:499` |
+| G4 | minor | Step 5 acceptance `grep -c 'poolFor(' → 2 … or as the executor documents` | Self-ratifying. Use `grep -n 'pool: this.effectivePool'` → one hit, and no direct `poolFor(` inside `run()`. | `:343`, `:407` |
+| G5 | minor | Step 5 `effectivePool` | The two call sites compose filters differently today (`eligibleCount` wraps `filterPoolByPhase(...).filter(!isKaelTempLegendary)`; `run()` passes the raw pool and `rank.ts:541` filters). The bisTags filter must land on the same side of `filterPoolByPhase` in both or placeholder and `Simming n/N` diverge. State the order. | `:343` vs `:407`; `rank.ts:541` |
+| G6 | minor | Step 9 observation "`Simming n/N` equals tagged plus owned" | Owned-row rescue lives in cap/promotion (`rank.ts:157`, `:1010`), not in `deps.pool`. A tags-only prune drops untagged worn gear before the engine sees it. Either preserve owned entries or restate as "equals the tagged count" and name the product decision (brief Q7: degrade honestly). | `rank.ts:157, :786, :1010` |
+
+## Register verdicts (changed/new)
+
+C8 stands (narrowed); C10 stands; C21 stands (corrected); C30 stands (corrected, drop the hypothesis label); C32 stands; C33 stands (`grep -n 'tieGroupId\|\.groups\|groupBy' <tab>` → no output; retires F5); C34 stands; C35 stands (`rank.ts:541-597`, `PoolEntry.bisTags` copied by `data/data.ts:119`); C36 untestable as filed, input figure wrong above phase 2 (G2); C37 stands (retires round-0 F3); C38 stands — upgrade from hypothesis (G3).
+
+## Round-0 findings
+
+F1–F15 resolved; F16 accepted with reason (predicate mirror is labelled drift; `view.ts` edits are out of scope).
+
+## Coordinator questions
+
+Step 6 ordering keeps `pnpm verify` green on every repo commit; the C38 fallback is unnecessary. Step 5's cache key is distinct (C35) and the two call sites are `:343`, `:407`; composition order and owned handling must be stated (G5, G6). Every fork code step precedes the Step 8 milestone; the Step 1b racing archive is sufficient to measure candidate (a) after Step 6, and its runs are prune-off by construction, consistent with Step 9 cell 3.
+
+VERDICT: proceed
