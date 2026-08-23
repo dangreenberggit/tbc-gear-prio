@@ -1,10 +1,12 @@
 Status: open
-Type: coverage gap (a planned measurement was never taken)
+Type: coverage gap
 Origin: stage-gate finish-the-tab, Step 9 cell 3, 2026-08-23
 Blocks: none
 Blocked by: none
 
 # The racing-vs-full-sweep cell was never measured
+
+A planned measurement was never taken.
 
 Step 9 of the finish-the-tab plan called for six timed runs. Four were taken.
 The two that would have measured **candidate (a), M2 racing** — ret and feral on

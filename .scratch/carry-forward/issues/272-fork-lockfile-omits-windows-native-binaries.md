@@ -1,10 +1,12 @@
 Status: open
-Type: defect (a committed lockfile cannot install a working toolchain on this machine)
+Type: defect
 Origin: stage-gate finish-the-tab, executor Step 1b, 2026-08-22
 Blocks: none
 Blocked by: none
 
 # The fork's `package-lock.json` carries no Windows native binaries
+
+A committed lockfile cannot install a working toolchain on this machine.
 
 `vendor/tbc-new-fork/package-lock.json` was generated on Linux by an npm that
 pruned every foreign-platform optional dependency. A clean `npm ci` from it on

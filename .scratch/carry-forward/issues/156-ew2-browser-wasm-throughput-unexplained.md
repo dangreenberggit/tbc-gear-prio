@@ -1,14 +1,18 @@
 Status: closed
 Type: measurement blocked (unexplained performance)
 Origin: slice 3 + orchestrator follow-up, 2026-08-14
-(`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
-Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3). The
-5,000-iteration run is done (2026-08-17). AC2 met 2026-08-18 by a
-foregrounded Brave run. Remaining: the restated 20-candidate table
-(three runs per cell) and the unexplained run-to-run variance.
+Blocked by: none
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
+
+Raised in `.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections.
+
+Nothing blocked this ticket by the time it closed. Ticket 212 resolved
+2026-08-17 (94ec4e3); the 5,000-iteration run finished the same day; AC2 was
+met 2026-08-18 by a foregrounded Brave run. What remained at that point was the
+restated 20-candidate table (three runs per cell) and the unexplained
+run-to-run variance — both addressed in the closing note below.
 
 Plan §8's E-W2 asks for wall-clock per candidate at 3,000 and 5,000 iterations
 in-browser. **Not obtained.** Sims that finish in seconds outside the browser do
