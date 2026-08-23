@@ -25,3 +25,23 @@ One dated line per gate: gate, outcome, reason, round count.
   0 lines in the fork at `f359239` after the planner ran. Orchestrator note for Gate B:
   Steps 2–3 and 5–6 need a foregrounded Brave tab the owner fronts (C29); the owner is
   not watching in real time, so that dependency is raised at hand-off, not assumed.
+- 2026-08-22 — Plan committed as `4d028f5`; reviewer ran clean (no `WRONG_MODEL`
+  misfire; spawn prompt pre-empted ticket 252). Both trees clean after.
+- 2026-08-22 — **Gate B: LOOP BACK (revision round 1).** Reviewer verdict `revise`:
+  3 blocking, 8 material, 5 minor. Orchestrator reconciliation against the brief:
+  **F1+F2 (blocking) upheld, and resolved by amending the brief, not just the plan** —
+  `grep -n D7 PLAN.md` confirms D7 carries no time number; the brief's "state the
+  number from plan.md" was unanswerable. Ruling: the plan proposes a budget labelled
+  "proposed, not D7"; the pre-sim BIS prune moves from tranche 2 into tranche 1 (the
+  owner listed it as part of the finished tab in chat, the plan sized it at ~20 tab
+  lines with no engine change, and it is the only in-scope lever that reaches any
+  budget); "within budget" is judged with the prune on, the uncapped run is recorded
+  as a measurement. The owner can overturn this at hand-off.
+  **F3 (blocking) upheld** — core freezes four hash fields, the fork computes three;
+  the sub-brief must not import `promoteTopJ`. **F4, F5, F6, F7, F8, F9, F10, F11
+  (material) upheld** as written; F8's remedy is to order the fork code steps before
+  the measurement milestone, and to make that milestone an explicit stop-and-report
+  because the owner is not watching in real time. **F12–F16 (minor) ride along** as
+  executor advisories; F15 is folded into the Step 7 ordering fix.
+  Owner note received mid-gate and folded into the brief: one weighted set-bonus
+  variant is wanted later, with its own researcher and nested planner — tranche 2.

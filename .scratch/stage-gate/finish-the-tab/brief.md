@@ -63,11 +63,24 @@ budget, with honest progress; **plus** the set-bonus toggle and the
 **post-sim** BIS-list filter are in the tab; **plus** nothing on the
 "required" ticket list (156, 199) is open.
 
-Tranche 2 (separate stage-gate later, not this plan): the **pre-sim**
-BIS-list prune and additional specs. The plan must still answer Q5–Q7 below
-so tranche 2 starts from a recorded decision, and must not build tranche 1 in
-a way that blocks them. A planner that believes one of those belongs in
-tranche 1 says why, with the cost.
+**Amended at Gate B (2026-08-22).** The **pre-sim** BIS-list prune is in
+tranche 1: the owner listed it as part of the finished tab, the round-1 plan
+sized it at ~20 tab lines with no engine change, and it is the only lever the
+plan found that brings a run inside any reasonable time budget with shipped
+data. It is a user-selectable control (off by default; hidden where the pool
+has no tags), so the uncapped full sweep stays available and is still
+measured.
+
+The time budget: plan.md D7 carries **no number** (reviewer F1). The plan
+**proposes** one, labelled "proposed, not D7", with its reasoning; the owner
+ratifies at hand-off. The goal line "within the plan's time budget" is judged
+on the run with the pre-sim prune **on**; the uncapped run's wall-clock is
+recorded as a measurement, not a pass/fail.
+
+Tranche 2 (separate stage-gate later, not this plan): additional specs, and
+the **weighted** set-bonus variant (below). The plan must still answer Q7 so
+tranche 2 starts from a recorded decision, and must not build tranche 1 in a
+way that blocks it.
 
 ## Facts established on this tip (re-verify what the plan leans on)
 
@@ -76,10 +89,15 @@ tranche 1 says why, with the cost.
   and `belowCutoffUnderView` (`view.ts:263`); `setPotentialIsConfounded` was
   split into `packages/core/src/set-potential.ts:23` so `applyView` fits a
   browser bundle (verification-log Stage 3 entry, box 4). The web shell
-  exposes it at `apps/web/src/view-options.ts:37`. A *weighted* 0.5x/0.25x
-  variant was built and reverted
-  (`.scratch/handoffs/set-potential-weighted-toggle-scope-miss.md`) — do not
-  rebuild it. The fork's `upgrades_tab.tsx` has **no** set-bonus toggle;
+  exposes it at `apps/web/src/view-options.ts:37`. A *weighted* set-bonus
+  credit was tried in 2–4 variants; one 0.5x/0.25x attempt was built and
+  reverted (`.scratch/handoffs/set-potential-weighted-toggle-scope-miss.md`).
+  **Owner, 2026-08-22 in chat:** one of those variants made sense and is
+  wanted later; it is tricky and gets its own researcher plus a focused
+  (nested) planner when its turn comes — **tranche 2, not this plan**.
+  Tranche 1 ships the existing binary `withSetPotential` toggle and must not
+  shape the control so a weighted mode cannot be added beside it. The fork's
+  `upgrades_tab.tsx` has **no** set-bonus toggle;
   `currentViewOptions()` (~line 571) hardcodes `hideOwned: false` and passes
   no `withSetPotential`.
 - Core's BIS-list feature is a **pin** (`ViewOptions.pinBis`, `view.ts:14`;
@@ -152,12 +170,15 @@ tranche 1 says why, with the cost.
   say which and why. Win: with the filter on, only `bisTags`-tagged rows
   show; where the universe has no tags the control is hidden, not inert
   (PLAN.md §4.1 rule).
-- **Q7. Pre-sim BIS prune and more specs (tranche 2 — decide, do not
-  build).** Where should the BIS list come from for pruning — the universe's
-  `bisTags` (phase-scoped, already bundled) or wowsims' runtime
-  `gear_sets` (every spec has one)? What makes adding a spec a pure data
-  drop-in (universe JSON + EP weights + one map line, or less)? Record the
-  recommendation and what tranche 1 must not do to keep it open.
+- **Q7. Pre-sim BIS prune (build — amended at Gate B) and more specs
+  (decide only).** Where should the BIS list come from for pruning — the
+  universe's `bisTags` (phase-scoped, already bundled) or wowsims' runtime
+  `gear_sets` (every spec has one)? Win for the prune: with the control on,
+  only tagged candidates are simmed, the eligible count shown before the run
+  matches, the cache key still distinguishes the two pools, and a (spec,
+  phase) with no tags hides the control. What makes adding a spec a pure
+  data drop-in (universe JSON + EP weights + one map line, or less)? Record
+  the spec recommendation and what tranche 1 must not do to keep it open.
 
 ## Constraints
 
