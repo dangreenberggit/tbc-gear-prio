@@ -41,3 +41,15 @@ One dated line per gate: gate, outcome, reason, round count.
   inversion itself SURVIVED adversarial scrutiny (the reviewer independently hunted
   wowsims-side source carriers and found none) — it still goes to the owner at
   hand-off as an explicit confirmation item.
+- 2026-08-23 — **Gate A (revision 1): PASS.** Planner resumed via `SendMessage`
+  (context retained); round-0 plan kept as `plan-r0.md`. Revised plan: 7 sections,
+  C1–C31 with C16 split into C16a/C16b (C29–C31 hypothesis/untested), Q1–Q4 intact,
+  property-based acceptance replacing numeric baselines (F1), five-file drift in
+  Steps 1–2 (F2), `test:locales` in the fork recipe with the schema fix in Step 7
+  (F3), zoneless buckets as first-class filter targets with the view.ts change
+  routed core-first then ported (F4 ruling — one new consequence, honestly named),
+  C16 split (F5), membership definition stated incl. the legendary exclusion (F6),
+  locale-parity instruction deleted (F7), C21 emitter set corrected (F8). Both trees
+  clean after the planner ran. Reviewer re-check scoped to the changed claims: C12,
+  C14, C16a/C16b, C21, C26, C28, C31, the new Step 6, and the revised Steps 1–2, 4,
+  7–8 acceptance.
