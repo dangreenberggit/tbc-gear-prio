@@ -80,3 +80,26 @@ One dated line per gate: gate, outcome, reason, round count.
   observation is restated as "`Simming n/N` total equals the phase-scoped tagged
   count"; if the engine still rescues a worn row, record the actual count and why.
   Minor findings ride along as advisories. Round count: 2 (one revision).
+- 2026-08-22 — **Executor spawned** (Opus, shared checkout, base `b64256e`), told to stop
+  at Step 8. Stopped there: repo `b64256e` → `b5fe81d` (3 commits), fork `f359239` →
+  `0993f944b` (7 commits), lockfile matches, drift `ok: 32`, E-W3 green and not
+  skipped, `pnpm verify` exit 0. Nothing pushed (`git -C vendor/tbc-new-fork branch -r
+  --contains HEAD` → 0 rows). Report saved as `execution-report.md` part 1.
+- 2026-08-22 — **Gate C, part 1 (Steps 0–8).** Ledger rows: type-check workaround
+  **accepted** (gate held at 0 errors; the fork lockfile defect becomes a ticket at
+  Step 10); `format` substitution **rework** — `git -C vendor/tbc-new-fork show --stat
+  1095e8a1a -- …/upgrades_tab.tsx` → 1,067/1,007 lines while `diff --stat -w
+  f359239..HEAD` on the same file → 216/58: the BIS-filter commit reflowed the whole
+  file, contradicting "edits written in the file's existing style"; the executor must
+  say what reformatted it and either split it into a formatting-only commit followed
+  by the feature commit (history rewrite is fine — the fork branch is unpushed) or
+  restore the original layout; build-repair, cwd-for-vite, ADR-commit lookup,
+  unlisted rank.ts touchpoints, `make` absent (sim/web failure pre-existing, 0 Go
+  files changed), `sim-implemented-effects.json` regen (only `forkCommit` moved) —
+  all **accepted**. G2 flag **accepted**: the budget cell is maxPhase 2 where both
+  measurements agree; Step 11 records both figures and which one the prune uses.
+  Out-of-manifest paths: ticket 217 append (G1 ruling — accepted);
+  `data/sim-implemented-effects.json` (ledger row — accepted). Orchestrator checked
+  the fork diff, not only the report: 8 files, matching the manifest plus
+  `content-hash.ts` comments. Executor resumed into the rework and Step 9; the owner
+  reported Brave open in the foreground.
