@@ -203,3 +203,22 @@ One dated line per gate: gate, outcome, reason, round count.
   cell-2 ret (prune-off) run, which is the first run where either control has
   anything to show. Set-bonus toggle correctly hidden on prune-on runs (no rankable
   set potential in a BIS-only pool) — that polarity is recorded.
+- 2026-08-23 — **Cells 1–2 measured; Gate C part 2.** Prune-on: ret 307 s, feral 61 s
+  (goal line MET on both). Prune-off: ret 1017 s (earlier run 866 s; 17% spread,
+  recorded not averaged), feral 395 s. Controls verified on the completed cell-2 ret
+  ranking: prune 240→16/17 and ★ BiS-only rows; post-sim filter 480→32→480, 17 slot
+  tabs, zero sims; set-bonus toggle visible only where rankable set potential exists
+  (both polarities observed), 12 positions change with zero sims — Q5 and Q6 win
+  conditions met. BIS-filter defect fixed in two fork commits (`118f708d8` genuine
+  fault; `8bb02b028` the actual cause, `parentElement.remove()` deleting the shared
+  container) — **accepted**, diff read by the orchestrator (36/10, one file).
+  **Rework**: `data/wowsims-fork.lock.json` points at `118f708d8`, not the tip
+  `8bb02b028` — re-pin in the Step 10/11 sitting.
+  **Q1 ruled**: cell 3 (racing archive) unmeasured — the 08-22 `racing` build does not
+  apply share-link gear, cause undiagnosed; by the pre-stated rule candidate (c) full
+  sweep wins by default, and ADR-0026's core measurements are the justification. No
+  further window time spent on a throwaway archive: the unmeasured cell becomes a
+  ticket (`Blocks: none`) carrying the archive path, the recipe, and the symptom, so
+  it can be run later if anyone wants the browser number. The 7.8 vs 3.8 s/sim rate
+  discrepancy is recorded in ticket 156's closing comment as an observation, not a
+  blocker. Proceed to Steps 10–11.
