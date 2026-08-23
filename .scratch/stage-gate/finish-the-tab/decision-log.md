@@ -135,3 +135,17 @@ One dated line per gate: gate, outcome, reason, round count.
   dist ticket 156 measured against had them), fixes the build *procedure* for both
   archives, and runs Step 9. Any fork source change needed to get presets into the
   bundle is a flag to the orchestrator, not an adapt.
+- 2026-08-23 — Executor retracted its "presets absent from the bundle" finding (minified
+  symbol names defeated the grep; item-id probe finds the gear sets in both archives;
+  no rebuild done, `racing/` untouched). Remaining blocker: the preset picker widget
+  constructs but populates zero chips, observed on two surfaces, both while the window
+  had gone `hidden` again — throttling not separated from a page defect. Ruling:
+  **adapt, no fork change** — load gear through the page's share-link hash, encoded by
+  this repo's core (`encodeShareLink` in `packages/core/src/share-link.ts`): ret from
+  `test/fixtures/slamaltman.raid-sim-request.json` via `toIndividualSimSettings`;
+  feral from `data/presets/feral/owner-p2.settings-export.json` (already
+  `IndividualSimSettings` protojson, 17 equipped items). The loaded settings are
+  recorded per cell and supersede the plan's "page defaults + preset" wording. The
+  empty picker becomes a ticket (`Blocks: none`) at Step 10 with the reproduction,
+  and the executor re-checks it once with the window visible so the ticket says which
+  of the two causes it is. Owner asked in chat to front the window again.
