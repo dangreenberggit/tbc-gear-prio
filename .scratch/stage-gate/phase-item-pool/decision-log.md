@@ -68,3 +68,15 @@ One dated line per gate: gate, outcome, reason, round count.
   ret-p5 29297+34470; `5c42a37` → feral-p2/feral-p3 weapon rows); C31 updated to
   measured. **G3 folded into G2.** Step 9(c) adds the slot-tab set under a narrow
   filter. Everything else confirmed resolved; the F4 route holds under attack.
+- 2026-08-23 — **Gate A (revision 2): PASS; Gate B (round 3): PROCEED.** The revision
+  adopts the reviewer's own prescriptions verbatim, so no disagreement stands: C26
+  rewritten around the Windows-vacuous glob with the direct-ajv command as the
+  observable (orchestrator ran it on this machine: prints `INVALID: data must NOT
+  have additional properties` — the acceptance criterion is checkable here); Step 7
+  fixes both the schema and the glob, `test-locales.mjs` added to the fork manifest;
+  Step 2/C31 carry the established two-commit → five-file mapping (C31 now
+  measured); Step 9(c) measures the slot-tab set. No blocking finding stands; all
+  material findings fixed in the plan; minors folded in. Round count: 3 (two
+  revisions — the second on a new finding surfaced while verifying the first's
+  fix, not a survivor). Owner confirmation items carried to hand-off: Q1 inversion,
+  C16a/C16b membership, C29 crafted-phase question.
