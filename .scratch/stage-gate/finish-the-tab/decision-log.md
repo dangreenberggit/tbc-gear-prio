@@ -234,3 +234,12 @@ One dated line per gate: gate, outcome, reason, round count.
   Open for the owner at hand-off: ratify the proposed 600 s budget; overturnable
   rulings (pre-sim prune in tranche 1; prune is tags-only). Next: `pre-merge-review`,
   then ask before `pnpm merge-to-dev`.
+- 2026-08-23 — **Owner rulings at hand-off.** (2) No time target: the 600 s proposal
+  is not ratified; measured figures stand as measurements; speed work (caching,
+  workers, tricks) is later work and the sim process itself is out of scope. A
+  read-only check (`wasm_sim_runner.ts:112-152`, `rank.ts:777-798`) confirms one full
+  `RaidSimRequest` per candidate, ≤4 in flight, and that wowsims' Batch tab has no
+  cheaper bulk path (`wasm_sim_runner.ts:12-23`). (3) Pre-sim prune in tranche 1
+  confirmed; its only condition is that the control appears only when a BiS list
+  exists for the phase in question — already implemented (`upgrades_tab.tsx:363`,
+  phase from `sim.getPhase()` at `:360`). Merge not yet asked for.

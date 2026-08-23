@@ -2112,7 +2112,9 @@ landing as they finished, and the elapsed wall-clock on completion.
 
 `PLAN.md`'s D7 sets an iteration default and carries no time number. The 600 s
 figure is this plan's own proposal, read from `candidate-pool.md:11`'s
-"single-digit minutes", and **awaits owner ratification**.
+"single-digit minutes". **Owner ruling, 2026-08-23: there is no time target**;
+the column below is the yardstick the cells were judged against when they ran,
+and the elapsed figures stand as measurements, not pass/fail.
 
 | Cell | Spec | Pre-sim prune | Elapsed | Simming n/N | vs 600 s |
 | --- | --- | --- | --- | --- | --- |
