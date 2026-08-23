@@ -126,3 +126,12 @@ One dated line per gate: gate, outcome, reason, round count.
   the post-rework `full` build (chunk verified from the live origin), presets
   identified (ret "P2"; feral "BiS 9%"). Waiting on the owner; executor retains
   context for `SendMessage` resume.
+- 2026-08-23 — Tab reads `visible`; the pre-sim prune measured live on the ret page
+  (Candidates placeholder 240 → 16 → 240 as the control toggles; 16 = ret-p2 tagged
+  count). Step 9 stopped again: the archived builds carry **no gear presets** (preset
+  containers empty, `grep -rl makePresetGear` across the bundle → none, no failed
+  fetch). Ruling: **rework** — a measurement-surface precondition, not a product
+  change. The executor establishes how the fork's own build produces presets (the
+  dist ticket 156 measured against had them), fixes the build *procedure* for both
+  archives, and runs Step 9. Any fork source change needed to get presets into the
+  bundle is a flag to the orchestrator, not an adapt.
