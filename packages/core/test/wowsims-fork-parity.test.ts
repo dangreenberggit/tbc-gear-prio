@@ -351,20 +351,6 @@ async function buildRecordingsAndRun<TRanking>(engine: {
   RecordedSimRunner: typeof RecordedSimRunner;
   MemoryStore: typeof MemoryStore;
   simCacheKey: typeof simCacheKey;
-  /**
-   * Extra `rankUpgrades` input this engine needs and the other does not.
-   *
-   * The two engines diverged at ADR-0026: this repo removed racing, the fork
-   * still has it (`vendor/tbc-new-fork/.../engine/rank.ts:554`,
-   * `const racing = input.fullPool !== true`), and porting the removal is not
-   * this ticket's job. The recordings below are pinned at ITERATIONS only, so
-   * a screening pass would ask `RecordedSimRunner` for keys at the fork's
-   * DEFAULT_SCREEN_ITERATIONS that it rejects — the fork therefore still
-   * needs `fullPool: true` to take the same full-sweep path this repo now
-   * takes unconditionally. Parity of the ranked deltas is unaffected: both
-   * engines full-sweep, which is the comparison this case is about.
-   */
-  extraInput?: Record<string, unknown>;
 }): Promise<{ ranking: TRanking; composedRequests: unknown[] }> {
   const logged = slamaltmanLoggedGear();
   const equipment = mapWclGearToSim(
@@ -496,7 +482,6 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       spec: "ret",
       maxPhase: 2,
       seeds: SEEDS,
-      ...engine.extraInput,
     },
     {
       gear: new engine.RecordedGearSource({
@@ -896,8 +881,6 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         RecordedSimRunner: forkSimRunner.RecordedSimRunner,
         MemoryStore: forkStore.MemoryStore,
         simCacheKey: forkSimRunner.simCacheKey,
-        // The fork still races; see `extraInput` on the signature.
-        extraInput: { fullPool: true },
       });
 
     // Ticket 165: assert the composed requests themselves, BEFORE comparing
