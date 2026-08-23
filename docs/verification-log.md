@@ -2079,12 +2079,29 @@ worker picker 4 (`__tbc_new_wasmconcurrency`). Production bundle served with
 **Gear, per cell.** Loaded through the page's own share-link hash, encoded from
 committed data by this repo's `encodeShareLink`. Ret:
 `test/fixtures/slamaltman.raid-sim-request.json` via `toIndividualSimSettings`,
-17 items, baseline **1775.0 DPS**. Feral:
-`data/presets/feral/owner-p2.settings-export.json`, 17 items, baseline
-**842.3 DPS** — its `player.rotation` was stripped before decoding because it
-uses `timeToNextEnergyTick`, a field newer than this repo's pinned proto, and
-the page supplies its own rotation. Not wowsims gear presets: the preset picker
+17 equipment slots of which 16 carry an item id, baseline **1775.0 DPS**.
+Feral: `data/presets/feral/owner-p2.settings-export.json`, likewise 16 ids
+persisted, baseline **842.3 DPS**. Not wowsims gear presets: the preset picker
 was unusable at the time the gear was loaded (see the wasm finding below).
+
+**The ret baseline is unreconciled.** This repo recorded **2042.85 DPS** for the
+same `slamaltman` fixture at the same 3,000 iterations (`docs/stage0-findings.md`
+§11, and the table earlier in this log). 1775.0 is **13 % below** that, and this
+run did not establish why. Two candidates, neither tested: the settings the page
+received came through `toIndividualSimSettings`, which may carry a different
+encounter or buff set than the raid-sim request the 2042.85 figure was produced
+from; and the share link persisted 16 item ids where an earlier draft of this
+entry claimed 17, so a slot may be arriving empty. **Every ret figure below is a
+self-consistent comparison between cells on one baseline, not a number to
+compare against the fixture's own recorded DPS.** Ticket 274 tracks it.
+
+**The feral cell ran the fork's default APL, not the owner's.** The committed
+export carries a rotation using `timeToNextEnergyTick`, a field newer than this
+repo's pinned proto, so protojson refused the whole message; `player.rotation`
+was stripped before decoding and the page supplied its own default rotation.
+**Every feral figure in this entry inherits that** — the 61 s and 395 s
+elapsed, and the finding that no feral row carried rankable set potential. A
+run with the owner's rotation could differ on all three.
 
 ### Goal line: a ranked shopping list from an in-browser run
 
@@ -2227,6 +2244,7 @@ read from.
 
 156 closed with the numbers above and "D7 stays 3,000"; 199 closed on its three
 done-when items; 205 and 206 closed as moot (racing deleted in fork commit
-`f70378155`, porting ADR-0026); 201 annotated as not blocking; 272 (the fork's
-lockfile carries no Windows native binaries) and 273 (the unmeasured racing cell)
-filed and open.
+`f70378155`, porting ADR-0026); 201 annotated as not blocking. Filed and open:
+272 (the fork's lockfile carries no Windows native binaries), 273 (the
+unmeasured racing cell), 274 (this entry's unreconciled ret baseline) and 275
+(the tab's three repeated toggle controls).
