@@ -103,3 +103,18 @@ One dated line per gate: gate, outcome, reason, round count.
   the fork diff, not only the report: 8 files, matching the manifest plus
   `content-hash.ts` comments. Executor resumed into the rework and Step 9; the owner
   reported Brave open in the foreground.
+- 2026-08-22 — **Gate C, rework row closed.** Cause was the executor's own Python
+  rewrite converting the CRLF-only `upgrades_tab.tsx` to LF (the other 113 tracked
+  `.tsx` files are LF). History rewritten on the unpushed fork branch: `caf36cf68`
+  whitespace-only, then `9f327af9a` 62/2; tree hash identical to the prior tip
+  (`692dce3a…`). New fork tip `e79916172`; repo `ff23b75` re-pins the lockfile and
+  files ticket 272 (fork lockfile lacks Windows binaries). **Accepted.**
+- 2026-08-22 — **Step 9 stop, dispositioned.** Executor stopped (correctly) before
+  any timed run: tab read `visibilityState: hidden`, and the character had 0
+  equipped items. Ruling: (1) fronting — the executor selects its own tab through
+  Claude in Chrome and re-reads `visibilityState`; if still `hidden`, the owner
+  fronts it (asked in chat); (2) gear — the plan's "page defaults" was wrong for a
+  fresh-origin localhost page; the executor loads the spec's phase-2 wowsims preset
+  gear set through the page's own Gear presets UI and records the set name per
+  cell, which is the same kind of setup ticket 156's runs used. Both are
+  measurement setup, not product changes: `adapt`.
