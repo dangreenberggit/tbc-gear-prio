@@ -1,4 +1,4 @@
-Status: open (data fixed; the missing sync check is what remains)
+Status: closed 2026-08-23 (the sync check now exists and gates verify)
 Type: data divergence (no mechanism keeps two copies in step)
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 4, §9)
@@ -98,4 +98,29 @@ Options, none chosen:
       divergences were core changes the copy predated.
 - [x] Bring the copies back into line, extended to p2/p4/p5 and feral rather
       than ret-p3 alone.
-- [ ] A check that fails when the two diverge again.
+- [x] A check that fails when the two diverge again.
+
+## Closed 2026-08-23
+
+Option 1, the option this ticket called cheapest.
+`scripts/sync_fork_universes.py --check` byte-compares every pair and runs in
+`pnpm verify` as `pnpm fork-universes:check`. It reads its file list from the
+fork's own `upgrades/data/PROVENANCE.md` mapping table rather than a second
+hardcoded list, and it covers all eight copied files -- the six universes and
+the two EP-weight files this ticket checked by hand -- not the six universes
+alone. It skips with a message when the gitignored clone is absent, the
+defined skip this ticket asked for, matching `check_engine_port_drift.py`.
+
+The prediction in "What this ticket still owns" was right: the copies drifted
+again before the gate landed. Five of eight were stale by 2026-08-23 --
+membership only this time, from `5cf0ea0` (Band of the Eternal Defender to
+ret-p3/p4/p5 and feral-p3, Timbal's Focusing Crystal to ret-p5) and `5c42a37`
+(druid-unusable weapon rows out of feral-p2 and feral-p3). Refreshed by
+`python scripts/sync_fork_universes.py --write` in fork commit `a00a50c`,
+attributed per file in the fork's `upgrades/data/PROVENANCE.md`.
+
+Re-runnable:
+
+```bash
+pnpm fork-universes:check
+```
