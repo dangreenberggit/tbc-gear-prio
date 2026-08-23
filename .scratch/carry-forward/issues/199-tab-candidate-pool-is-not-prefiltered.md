@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: plan defect
 Origin: ticket 156 setup (2026-08-15) — read against the fork engine at 3e64016dd
 Blocks: none
@@ -48,3 +48,16 @@ recipe is rewritten around an achievable run (full universe at the lowest
 phase, normalized per candidate — or upstream's Batch tab, which CAN be capped
 at 20, noting it is a different code path); and a decision is recorded on
 whether a candidate cap/prefilter should exist at all.
+
+
+## Closed 2026-08-23
+
+All three "Done when" items are met on `dev` (plan claim C25, verified during
+stage-gate `finish-the-tab`): the tab's candidate pool is pre-filtered, the
+recipe was rewritten, and `feat/candidate-pool` is merged
+(`git merge-base --is-ancestor feat/candidate-pool dev` succeeds).
+
+Confirmed again on a real page this run: the Candidates placeholder reads
+"all 240 eligible" for ret and "all 246 eligible" for feral, which is the
+phase-and-Kael-filtered eligible count the engine itself would sim, not the raw
+universe size.
