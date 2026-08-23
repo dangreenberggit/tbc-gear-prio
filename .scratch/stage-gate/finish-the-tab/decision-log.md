@@ -177,3 +177,13 @@ One dated line per gate: gate, outcome, reason, round count.
   makefile's own command (`GOOS=js GOARCH=wasm go build -o ./dist/tbc/lib.wasm
   ./sim/wasm/`), places the same fresh wasm in BOTH archives (Go sources are identical
   across all fork commits on the branch), re-verifies settings apply, then runs Step 9.
+- 2026-08-23 — Wasm rebuilt (`393bee73…`, 21.5 MB, go1.25.4), placed in both archives;
+  `Worker[0] Ready` logs, share-link gear applies (Strength 878, AP 3801), presets
+  render (7 sections / 18 chips), warm-up ran (`Simming 30/58`). Empty-picker ticket
+  **not filed** — not a defect. C22 refuted in effect; corrected build recipe in
+  measurements.md. Warm-up rate 7.8 s/sim visible (ticket 156: 3.8 s) — open
+  discrepancy, recorded. Hidden-window throttling confirmed severe. Ruling: run cell 1
+  (prune on, ret then feral — the goal-line cells, minutes each) now; the four long
+  cells (prune off, racing; ~38 min each by the measured rate) are put to the owner,
+  since they cost ~2.5 h of fronted-window time and decide only Q1, which ADR-0026
+  already settled on three fixtures in core.
