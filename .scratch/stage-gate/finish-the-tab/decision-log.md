@@ -118,3 +118,11 @@ One dated line per gate: gate, outcome, reason, round count.
   gear set through the page's own Gear presets UI and records the set name per
   cell, which is the same kind of setup ticket 156's runs used. Both are
   measurement setup, not product changes: `adapt`.
+- 2026-08-22 — **Step 9 blocked on the Brave window.** Executor selected and clicked
+  its tab (`hasFocus` → true), opened a fresh tab, and armed a `visibilitychange`
+  watcher for 10 min (20:59–21:09): `visibilityState` stayed `hidden` throughout, so
+  the Brave window holding the Claude-in-Chrome tab group is minimised or fully
+  occluded, not merely un-selected. Setup otherwise staged: server on 8123 serving
+  the post-rework `full` build (chunk verified from the live origin), presets
+  identified (ret "P2"; feral "BiS 9%"). Waiting on the owner; executor retains
+  context for `SendMessage` resume.
