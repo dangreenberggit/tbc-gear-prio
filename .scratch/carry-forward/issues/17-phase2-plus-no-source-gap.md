@@ -178,3 +178,29 @@ Note this does not by itself resolve 30257 Shattrath Leggings — that one has
   with documented source, or accept exclude with reason.
 - 30257 either enters the universe with a real source row, or a ticket note
   explains why it stays out (and the `it.todo` is updated).
+
+## A detector now exists (2026-08-23, ADR-0028)
+
+This ticket's "Done when" asks for "a short inventory (script or report
+section) [that] lists phase>=2 `excludedNoSource` IDs". `pnpm
+pool-listings:check` and the two committed listings under
+`data/pool-listings/` are that inventory, for phase 3 and for both specs:
+every item the wowsims DB admits and the local pool does not is classified,
+and **category f is exactly this ticket's bucket** -- "no recognized source
+route", meaning the wowsims DB records no source at all for the item.
+
+What that does and does not settle:
+
+- **Done:** the inventory exists, is committed, is regenerated on every
+  `pnpm verify`, and names each item rather than counting them.
+- **Still open:** the per-bucket decision this ticket asks for. The listing
+  reports; it never adds an item to a pool. Nobody has gone through the
+  category f rows and decided add / force-include / accept-with-reason.
+- **Still open:** 30257 Shattrath Leggings. It is Rare quality, so it sits in
+  the universe-only table under the audit's Epic bound rather than in
+  category f. Its `sources: null` in db.json is unchanged.
+- **Not covered:** phases other than 3, and the ranking-by-relevance this
+  ticket wants. The listing sorts by item id.
+
+Re-runnable: `pnpm pool-listings:check`, then read the category f rows of
+`data/pool-listings/ret-p3.md` and `feral-p3.md`.

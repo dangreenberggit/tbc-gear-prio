@@ -61,3 +61,32 @@ consequence deliberately.
 Do not resolve this by adding 27878 and 29247 to `TICKET_157_FORCE_INCLUDE`.
 That grows the manual list without adding detection, which is the exact
 failure mode this ticket is about.
+
+## Partly answered (2026-08-23, ADR-0028)
+
+This ticket says "nothing detects the next silently dropped item". Something
+does now, for phase 3: `pnpm pool-listings:check` regenerates
+`data/pool-listings/{ret,feral}-p3.md` on every `pnpm verify` and fails when
+the committed listing no longer matches what the data produces. An item that
+leaves the pool changes a listing, and the diff has to be read before the
+commit lands.
+
+It is a better tripwire than the one this ticket suggested -- it names the
+item and the rule rather than pinning a count -- but read what it does not do
+before calling this closed:
+
+- It covers **phase 3, ret and feral**. Other phases and specs are
+  unwatched.
+- It is a **byte-compare, not a judgement**. A regeneration that drops an
+  item passes the gate the moment someone commits the regenerated listing.
+  The protection is that the diff is legible and item-named, not that the
+  gate refuses.
+- It does **not** fix `map_db_source`. Ticket 17's deferred question and its
+  ~280-item consequence are untouched.
+- The audit's own zero-unexplained property is real but narrow: it says
+  every difference has a citable rule, not that every rule is right.
+
+The ticket's closing warning still holds -- do not resolve this by growing
+`TICKET_157_FORCE_INCLUDE`. The listing exists so that growth is visible.
+
+Re-runnable: `pnpm pool-listings:check`.
