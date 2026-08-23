@@ -163,3 +163,11 @@ check; "What would close this" named two alternatives and the second is done.
 The open design question — what parity means under divergent promotion — is
 **not** closed by this and stays recorded above for whoever needs cross-engine
 `fullPool: false` comparison later.
+
+2026-08-22: the fork-only closing route — the "gives the fork's screening
+requests their own database" case in `packages/core/test/wowsims-fork-parity.test.ts`
+— is deleted, because the fork's screening compose site it covered is itself
+deleted (ADR-0026 ported to the fork engine). The ticket stays `resolved`:
+there is no screening compose site left to gate. The open design question
+above (what parity means under divergent promotion) is unaffected and now
+moot on the fork side too, since neither engine races.
