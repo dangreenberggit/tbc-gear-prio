@@ -222,3 +222,15 @@ One dated line per gate: gate, outcome, reason, round count.
   it can be run later if anyone wants the browser number. The 7.8 vs 3.8 s/sim rate
   discrepancy is recorded in ticket 156's closing comment as an observation, not a
   blocker. Proceed to Steps 10–11.
+- 2026-08-23 — **Gate C: CLOSED.** Steps 10–11 landed (`0b4741c` re-pin to tip,
+  `8d5eeae` tickets, `6136d67` log + STATUS-2026-08-23 + measurements + nested plan).
+  Orchestrator cross-check: `git diff --stat b64256e..HEAD` → 19 files = manifest +
+  accepted out-of-manifest (ticket 217 append, tickets 272/273 + `NEXT`,
+  `sim-implemented-effects.json`); fork `diff --stat f359239..8bb02b028` → the
+  manifest's 8 files; both trees clean; lockfile = fork tip; `pushed: false`;
+  `branch -r --contains HEAD` → 0; 156/199/205/206 off `pnpm issues:open`; one
+  STATUS file; verification-log entry at line 2065. Every ledger row dispositioned
+  (all `accepted`; the two reworks closed; the cell-3 `stop` ruled into ticket 273).
+  Open for the owner at hand-off: ratify the proposed 600 s budget; overturnable
+  rulings (pre-sim prune in tranche 1; prune is tags-only). Next: `pre-merge-review`,
+  then ask before `pnpm merge-to-dev`.

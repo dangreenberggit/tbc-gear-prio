@@ -71,3 +71,55 @@ Both are the only untracked entries in the repo; the fork tree is empty. Nothing
 The owner needs to front a Brave tab driven through Claude in Chrome. Serve one archive at a time (`npx http-server <dir> -p 8123 -c-1`); pages are `http://localhost:8123/tbc/paladin/retribution/` and `http://localhost:8123/tbc/druid/feralcat/`.
 
 One caveat worth flagging before those runs: the fork's lockfile ships no Windows native binaries, so these builds depend on six `--no-save` packages installed into `node_modules` this session. They survive in the working clone but not a fresh `npm ci`, and that is a genuine fork defect this plan had no mandate to fix.
+
+## Part 2 — Steps 9–11 and reworks (2026-08-23), final report
+
+Saved from the executor's final message. Intermediate part reports (2–9) are
+summarised in `decision-log.md`; full readings are in `measurements.md`.
+
+### Commits
+
+**This repo** (`feat/finish-the-tab`, base `b64256e`):
+
+| SHA | Subject |
+| --- | --- |
+| `eaaae45` | Retire the fork screening parity case |
+| `a381482` | Drop the fork's fullPool parity input |
+| `b5fe81d` | Point the fork lockfile at the de-raced engine |
+| `ff23b75` | Re-pin the fork after splitting out its reformat |
+| `828c39a` | Re-pin the fork after the BIS-filter fix |
+| `0b4741c` | Re-pin the fork to the teardown fix |
+| `8d5eeae` | Close the tickets the tab measurements settle |
+| `6136d67` | Record the tab measurements and hand tranche 1 over |
+
+**Fork** (`vendor/tbc-new-fork`, `feat/upgrades-tab`, base `f359239` → tip `8bb02b0283664244f9cc8ce32bf0fa735cf6a0c7`): `a2ddf2a42` elapsed status · `41e226019` full sweep · `44c73690b` set-bonus toggle · `caf36cf68` LF normalisation · `9f327af9a` BIS filter · `70a38b51e` pre-sim prune · `f70378155` racing removed · `e79916172` PROVENANCE · `118f708d8` filter fix 1 · `8bb02b028` filter fix 2.
+
+### Verify recipe — all green
+
+Repo: `pnpm verify` exit 0 · drift `ok: 32 ported files` · E-W3 passed, not skipped · `fullPool` in parity test 0 · lockfile-matches · status empty · 156/199 off the open list · exactly 1 STATUS file · log entry present.
+
+Fork: status empty · tsc 0 errors · lint:css and locales ok · 3 toggles · `applyView(` 1 · `rankUpgrades(` 1 · `screened` 0 · racing 0 in both `rank.ts` and `view.ts` · `promotion.ts` absent · frozen literal 1 · `promoteTopJ` 0 in code (3 doc mentions all saying it is deliberately absent — C37 honoured).
+
+### Results
+
+Goal line met on both specs: ret 307 s, feral 61 s with the prune on, against the proposed 600 s. Prune-off recorded: ret 1017 s (missed), feral 395 s. All four runs 0% hidden. All three controls observed working.
+
+### Deviation ledger (complete)
+
+| Step | Plan said | Found | Action | Why |
+| --- | --- | --- | --- | --- |
+| all fork | type-check/lint/format green per commit | `type-check` unrunnable (TS7 win32 binary absent from lockfile); `format` is a writer over a non-clean tree | adapt | Installed binaries `--no-save`; substituted per-file checks. Ticket 272. |
+| 1b | fork is buildable | 6 deps missing; 6 win32 native binaries absent; TS and Go protos stale | adapt | Repaired with `npm ci`, one combined install, makefile protoc recipes. No tracked file touched. |
+| 1b/8 | build with root as argument | fails — `vite.config.mts:128` resolves against cwd | adapt | Ran with fork as cwd; `cd` is safe after `fnm use`. |
+| 6 | get core commit via `git log -1 -- docs/adr/0026-*` | yields a ticket-renumber commit; real one is `28b00f9` | adapt | Nested planner caught it; verified independently. |
+| 6 | sub-brief's `rank.ts` scope | 5 further racing touchpoints unlisted | adapt | Removing only the listed set would not compile. |
+| 6 | `make -C <fork> test` | `make` absent — exit 0 was the pipeline's | adapt | Ran the target's own command. 21 packages pass; `sim/web` fails on a missing generated file, pre-existing. |
+| 7 | bump lockfile, verify | verify failed — `sim-implemented-effects.json` keys on the commit | adapt | Regenerated; only `forkCommit` moved. Recurred twice more. |
+| 5 | G2: tagged counts drop at higher phases | universes are already phase-scoped; no drop | flag | Different measurements; budget cell unaffected. Recorded. |
+| 4 (rework) | edits in existing style | Python rewrite flipped CRLF→LF, inflating the diff | adapt | Split into `caf36cf68` + `9f327af9a`; tree hash identical. |
+| 9 | preset picker / gear load | all three symptoms were one stale `lib.wasm` | adapt | C22 refuted — rebuilt wasm; glue change obsoletes it even with no Go change. |
+| 9 | grep bundle for `makePresetGear` | false negative — minification renames identifiers | adapt | Corrected probe (item ids); retracted the "presets missing" claim. |
+| 4 (rework 2) | one fix | first fix real but wrong cause; actual was `parentElement.remove()` | adapt | Both committed; wrong call recorded rather than hidden. |
+| 9 cell 3 | racing timings | archive persists settings but never applies gear; undiagnosed | stop | Q1 falls to (c) by the pre-stated rule. Ticket 273. |
+
+Nothing pushed, no PR, `"pushed": false` untouched, nothing merged to `dev`, no `--no-verify`. Server stopped, browser tab closed.
