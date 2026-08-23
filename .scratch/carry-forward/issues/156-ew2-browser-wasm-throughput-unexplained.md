@@ -1,14 +1,18 @@
-Status: open
+Status: closed
 Type: measurement blocked (unexplained performance)
 Origin: slice 3 + orchestrator follow-up, 2026-08-14
-(`.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections)
 Blocks: plan §9.3 (slice 3 done-when), decision D7's iteration default
-Blocked by: none — ticket 212 resolved 2026-08-17 (94ec4e3). The
-5,000-iteration run is done (2026-08-17). AC2 met 2026-08-18 by a
-foregrounded Brave run. Remaining: the restated 20-candidate table
-(three runs per cell) and the unexplained run-to-run variance.
+Blocked by: none
 
 # E-W2 unmeasured: browser WASM sim is inexplicably slow
+
+Raised in `.scratch/handoffs/wowsims-tab/slice-3/HANDOFF.md`, E-W2 sections.
+
+Nothing blocked this ticket by the time it closed. Ticket 212 resolved
+2026-08-17 (94ec4e3); the 5,000-iteration run finished the same day; AC2 was
+met 2026-08-18 by a foregrounded Brave run. What remained at that point was the
+restated 20-candidate table (three runs per cell) and the unexplained
+run-to-run variance — both addressed in the closing note below.
 
 Plan §8's E-W2 asks for wall-clock per candidate at 3,000 and 5,000 iterations
 in-browser. **Not obtained.** Sims that finish in seconds outside the browser do
@@ -1336,3 +1340,59 @@ not an explanation.
    disabled first.
 5. A finished run replaces the controls with a results view, so runs need a page
    reload between them.
+
+## Closed 2026-08-23 — measured on a foregrounded Brave tab
+
+Measured during stage-gate `finish-the-tab`, Step 9, after the throughput
+blocker was found and fixed. Full detail in
+`.scratch/stage-gate/finish-the-tab/measurements.md`; the entry in
+`docs/verification-log.md` carries the same figures.
+
+Surface: Brave, window fronted, `visibilityState: "visible"` for the whole of
+every run (an in-page sampler recorded 0 hidden milliseconds on all four).
+`hardwareConcurrency: 20`, worker picker 4. Iterations 3,000, Candidates empty,
+maxPhase 2, gear loaded from committed settings via a wowsims share link.
+
+| Spec | Pre-sim BIS prune | Elapsed | Simming n/N |
+| --- | --- | --- | --- |
+| ret   | on  |  307 s | 53 |
+| feral | on  |   61 s | -- |
+| ret   | off | 1017 s | 277 |
+| feral | off |  395 s | -- |
+
+**D7 stays 3,000.** Full-sim cost is linear in iterations, so raising the
+default multiplies every run; lowering it trades precision the prune buys back
+for free. The proposed 600 s budget is met on both specs with the prune on
+(307 s and 61 s) and missed by ret without it (1017 s). The budget itself is a
+proposal awaiting owner ratification — D7 carries no time number.
+
+### What the throughput was: a stale wasm, not the engine
+
+The original unexplained slowness has a cause. The settings/gear path runs
+inside `sim.waitForInit()`, which awaits the worker's `ready` message with no
+timeout, and `ready` fires only from the Go program's `wasmready()`. The served
+`dist/tbc/lib.wasm` was the 2026-08-14 binary (md5 `4811d1a5...`) while
+`sim_worker.js` had been rebuilt with Go 1.25.4's `wasm_exec.js`, so the wasm
+never instantiated. Silently: `instantiateStreaming(...)` has no `.catch`.
+Rebuilding it (`GOOS=js GOARCH=wasm go build -o ./dist/tbc/lib.wasm ./sim/wasm/`,
+md5 `393bee73...`) fixed gear, presets and the engine at once. This run's own
+build recipe had reused the old wasm on the strength of "no Go file changed" —
+true, but the *glue* had changed.
+
+### Two observations recorded, neither explained
+
+**Per-sim rate.** A sampled interval on a fronted tab gave 7.8 s per sim
+(16 s / 2 sims, 4 workers). This ticket's 2026-08-18 resolution measured 3.8 s
+per sim (130.1 s for 34 full sims). Roughly 2x slower, on the same machine.
+Candidates are the newly built wasm (Go 1.25.4 vs whatever built the 08-14
+binary) and machine load; neither was tested.
+
+**Run-to-run spread.** The ret prune-off cell was run twice under the same
+conditions — 0 % hidden both times — and gave 866 s and 1017 s, a 17 % spread.
+This ticket's own runs spread 3.6 % and 1.3 %. Both figures exceed the budget so
+the verdict is unaffected, but a 17 % spread means a single run is not a precise
+number, and the two runs were not averaged.
+
+Throttling is separately confirmed and much larger than either effect: while the
+tab was hidden the same run took ~6 minutes to reach its first sim and advanced
+23 -> 24 in 60 s; visible, it advanced 28 -> 30 in 16 s.

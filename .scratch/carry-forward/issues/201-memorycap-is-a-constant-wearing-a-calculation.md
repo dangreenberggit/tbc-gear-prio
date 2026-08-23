@@ -71,3 +71,16 @@ above with the real number in hand, and should fold in M2's screening pass
 (§3.4.1), which changes how many concurrent sims are in flight.
 
 Status: **open** (input measured; the design decision remains).
+
+
+## Note 2026-08-23
+
+Does not block `finished` for the wowsims tab. The tranche-1 goal line was met
+with the worker picker at its current value of 4 (ret 307 s, feral 61 s at
+3,000 iterations with the pre-sim BIS prune on, against a proposed 600 s
+budget), so nothing in this ticket stands between the tab and done.
+
+It is named in `STATUS-2026-08-23.md` as a tranche-2 budget lever: raising
+`DEFAULT_WORKER_COUNT` is the obvious way to buy back the prune-off case
+(ret measured 1017 s uncapped), on a machine reporting
+`hardwareConcurrency: 20` while the picker uses 4.

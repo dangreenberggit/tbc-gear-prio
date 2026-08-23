@@ -351,20 +351,6 @@ async function buildRecordingsAndRun<TRanking>(engine: {
   RecordedSimRunner: typeof RecordedSimRunner;
   MemoryStore: typeof MemoryStore;
   simCacheKey: typeof simCacheKey;
-  /**
-   * Extra `rankUpgrades` input this engine needs and the other does not.
-   *
-   * The two engines diverged at ADR-0026: this repo removed racing, the fork
-   * still has it (`vendor/tbc-new-fork/.../engine/rank.ts:554`,
-   * `const racing = input.fullPool !== true`), and porting the removal is not
-   * this ticket's job. The recordings below are pinned at ITERATIONS only, so
-   * a screening pass would ask `RecordedSimRunner` for keys at the fork's
-   * DEFAULT_SCREEN_ITERATIONS that it rejects — the fork therefore still
-   * needs `fullPool: true` to take the same full-sweep path this repo now
-   * takes unconditionally. Parity of the ranked deltas is unaffected: both
-   * engines full-sweep, which is the comparison this case is about.
-   */
-  extraInput?: Record<string, unknown>;
 }): Promise<{ ranking: TRanking; composedRequests: unknown[] }> {
   const logged = slamaltmanLoggedGear();
   const equipment = mapWclGearToSim(
@@ -496,7 +482,6 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       spec: "ret",
       maxPhase: 2,
       seeds: SEEDS,
-      ...engine.extraInput,
     },
     {
       gear: new engine.RecordedGearSource({
@@ -896,8 +881,6 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         RecordedSimRunner: forkSimRunner.RecordedSimRunner,
         MemoryStore: forkStore.MemoryStore,
         simCacheKey: forkSimRunner.simCacheKey,
-        // The fork still races; see `extraInput` on the signature.
-        extraInput: { fullPool: true },
       });
 
     // Ticket 165: assert the composed requests themselves, BEFORE comparing
@@ -1001,124 +984,6 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     // Broadening the pool and seed count (ticket 155) pushed real elapsed
     // time for both engines' dynamic-imported dependency graphs past
     // vitest's 5s default; this is wall-clock reality, not slow test logic.
-  }, 30000);
-
-  /**
-   * Ticket 217: the fork's SCREENING compose site, which the case above
-   * cannot reach. That one passes `fullPool: true`, which skips screening on
-   * both engines by design — its recordings are pinned at one iteration count
-   * and a screening pass would ask the recorded runner for keys at
-   * `DEFAULT_SCREEN_ITERATIONS` that it rejects. So a port that threads the
-   * other three compose sites correctly and botches the screening one passed
-   * every E-W3 run before this case existed.
-   *
-   * This is the ticket's SECOND closing route: a fork-only check that needs no
-   * cross-engine parity at all. "The screening request carries a database
-   * describing its own equipment" is a property of ONE engine, so it can be
-   * asserted directly on the fork's captured requests — no recordings at
-   * screening iterations, and no answer required to the design question the
-   * first route would have forced.
-   *
-   * Cross-engine request equality is deliberately NOT asserted here. The
-   * fork's `promotion.ts` is a documented adapted port (its PROVENANCE row:
-   * no `promoteTopJ`, keeps the pre-§6.4 best-in-slot floor), so under
-   * `fullPool: false` the two engines may legitimately promote different
-   * candidate sets. What request-level parity should mean under divergent
-   * promotion is an open design question recorded on ticket 217; this case
-   * does not prejudge it.
-   *
-   * Nor does it assert WHICH candidates promote. The stub runner returns one
-   * constant observation, so every `deltaDps` is 0 and promotion falls back to
-   * `itemId` ordering — an artefact of the stub, not engine behaviour worth
-   * pinning. The assertions range over the captured screening requests only.
-   *
-   * The mirror of core's own gate for this site, `rank.test.ts:4495`
-   * ("gives screening requests their own database too").
-   */
-  it("gives the fork's screening requests their own database", async () => {
-    const { forkRank, forkGearSource, forkStore } = await loadForkEngine();
-
-    const screeningRequests: unknown[] = [];
-    // A stub rather than `RecordedSimRunner`: recordings are keyed by request
-    // content at a fixed iteration count, which is exactly what makes the
-    // screening pass unreachable in the case above. This runner answers any
-    // request at any iteration count, and captures what it was asked. The
-    // constant result is why nothing below asserts on promotion order.
-    const capturingSim = {
-      version: async () => SIM_VERSION,
-      run: async (req: unknown, opts: { seed: number; iterations: number }) => {
-        // Screening runs at its own (lower) iteration count; the
-        // full-iteration calls for whatever gets promoted are not this
-        // case's subject.
-        if (opts.iterations !== ITERATIONS) screeningRequests.push(req);
-        return {
-          dps: 1000,
-          stdev: 10,
-          iterationsDone: opts.iterations,
-          simVersion: SIM_VERSION,
-        };
-      },
-    };
-
-    await forkRank.rankUpgrades(
-      {
-        character: CHAR,
-        spec: "ret",
-        maxPhase: 2,
-        seeds: [SEEDS[0]!],
-        // The point of this case: screening runs only when fullPool is false.
-        fullPool: false,
-      },
-      {
-        gear: new forkGearSource.RecordedGearSource({
-          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
-          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
-        }),
-        sim: capturingSim,
-        store: new forkStore.MemoryStore(),
-        clock: () => new Date("2026-07-26T12:00:00.000Z"),
-        raidSimSkeleton: skeleton,
-        epWeights,
-        simDatabaseFor: stubSimDatabaseFor,
-        pool: [
-          {
-            itemId: CANDIDATE_ITEM_ID,
-            name: CANDIDATE_NAME,
-            slot: "head",
-            phase: 2,
-            source: { kind: "raid", zone: "Tempest Keep", boss: "Void Reaver" },
-          },
-          {
-            itemId: SET_CANDIDATE_HEAD_ID,
-            name: SET_CANDIDATE_HEAD_NAME,
-            slot: "head",
-            phase: 2,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          },
-          {
-            itemId: SET_CANDIDATE_SHOULDER_ID,
-            name: SET_CANDIDATE_SHOULDER_NAME,
-            slot: "shoulder",
-            phase: 2,
-            source: {
-              kind: "raid",
-              zone: "Karazhan",
-              boss: "Prince Malchezaar",
-            },
-          },
-        ],
-      }
-    );
-
-    // Guards the assertion below against vacuity: if screening ever stops
-    // running here, the forEach would pass over an empty list and this case
-    // would silently stop gating anything.
-    expect(screeningRequests.length).toBeGreaterThan(0);
-    expectRequestsCarryOwnDatabase(screeningRequests, "forkScreeningRequests");
   }, 30000);
 });
 
