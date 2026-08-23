@@ -80,3 +80,21 @@ One dated line per gate: gate, outcome, reason, round count.
   revisions — the second on a new finding surfaced while verifying the first's
   fix, not a survivor). Owner confirmation items carried to hand-off: Q1 inversion,
   C16a/C16b membership, C29 crafted-phase question.
+- 2026-08-23 — **Gate C, part 1 (Steps 1–8).** Orchestrator cross-checked both diffs
+  against the manifest. Repo: 19 files = manifest + accepted additions (ticket 89
+  re-scope in place of the planned annotation — upheld by its own evidence; tickets
+  276/277; `data.ts` gained `poolSourceFor` for Step 7's assumptions row — accepted,
+  in-spec). Ledger: all ten `adapt` rows **accepted** (several are catches: the
+  fail-loud "precedent" soft-skips; the wowsims pin points upstream, not at the fork
+  copy; categories a/b/d are structurally unfireable and now say so; category g
+  proven reachable before the zeros were accepted; e split into e1/e2). The
+  `makePhaseSelector` grep flag **accepted** (criterion as written can't be met while
+  importing; one mounted selector is the substance). Two **rework** items:
+  (1) CRLF reintroduced — subagent-verified with hex evidence: `c544c139a` flipped
+  `translation.json` LF→CRLF (~2,530 non-content line changes; upstream base is LF)
+  and `074da83f` flipped `upgrades_tab.tsx` back to CRLF (undoing `caf36cf68`'s
+  normalisation); `core.autocrlf=false`, no `.gitattributes` — the writes themselves
+  carried CRLF. Both commits must be rewritten on the unpushed branch so the net
+  diff is content-only on LF files, same standard as last stage.
+  (2) `NEXT` still reads 276 with 276/277 consumed — bump to 278 (the known
+  collision-window rule).
