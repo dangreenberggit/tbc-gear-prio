@@ -149,3 +149,14 @@ One dated line per gate: gate, outcome, reason, round count.
   empty picker becomes a ticket (`Blocks: none`) at Step 10 with the reproduction,
   and the executor re-checks it once with the window visible so the ticket says which
   of the two causes it is. Owner asked in chat to front the window again.
+- 2026-08-23 — Share-link gear load works up to storage (ret: 16 real item ids in
+  `__tbc_new_retribution_paladin__currentSettings__`, persists across reload) but the
+  page applies nothing: 0 equipped icons, all stats 0, preset picker empty — with the
+  window visible and focused. Throttling ruled out. Inputs deviated and recorded: ret
+  fixture is at repo-root `test/fixtures/`; feral export carries a post-pin APL field
+  (`timeToNextEnergyTick`), `player.rotation` stripped before encoding. Executor
+  stopped (no fork source change allowed). Orchestrator: before ticketing this as a
+  fork defect, a read-only diagnosis (Opus) tests the hypothesis that the archive
+  builds skipped the makefile's `gen_db -gen=go-to-ts` / generated-input steps and
+  serve an item database the UI cannot apply — ticket 156 measured a geared character
+  on a `make`-built dist on 2026-08-18, so gear application worked on this fork then.
