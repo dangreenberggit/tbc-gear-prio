@@ -17,6 +17,7 @@ export {
 } from "./se.js";
 export {
   applyView,
+  raidFilterOptions,
   type ViewOptions,
   type ViewResult,
   type ViewRow,

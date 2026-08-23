@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
-import { applyView, type ViewOptions } from "../src/view.js";
+import { applyView, raidFilterOptions, type ViewOptions } from "../src/view.js";
 import { realPoolEntry } from "./real-source.js";
 
 function item(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
@@ -309,7 +309,7 @@ describe("applyView", () => {
       ).toEqual([1, 2]);
     });
 
-    it("drops sourceless-zone rows when a raid filter is on", () => {
+    it("drops zoneless rows when a zone filter is on", () => {
       const r = ranking([
         item({
           itemId: 1,
@@ -319,6 +319,83 @@ describe("applyView", () => {
         }),
       ]);
       expect(applyView(r, { raid: "Karazhan" }).rows).toHaveLength(0);
+    });
+  });
+
+  describe("zoneless source buckets as filter values", () => {
+    // A raid filter that only understands zone names makes badge, crafted,
+    // PvP, reputation and world gear unreachable: no filter value shows them
+    // and every zone value hides them. The buckets `groupBy: 'raid'` already
+    // renders are reused as filter values so those items stay one click away
+    // under their own label, rather than needing a second vocabulary.
+    const badge = item({
+      itemId: 1,
+      deltaDps: 30,
+      deltaPct: 1.5,
+      source: { kind: "badge", cost: 60 },
+    });
+    const crafted = item({
+      itemId: 2,
+      deltaDps: 25,
+      deltaPct: 1.2,
+      source: { kind: "crafted", profession: "Blacksmithing" },
+    });
+    const kara = item({
+      itemId: 3,
+      deltaDps: 20,
+      deltaPct: 1,
+      source: { kind: "raid", zone: "Karazhan", boss: "Nightbane" },
+    });
+
+    it("shows a badge item under its bucket label", () => {
+      const r = ranking([badge, crafted, kara]);
+      expect(
+        applyView(r, { raid: "Badge vendor" }).rows.map((x) => x.itemId)
+      ).toEqual([1]);
+    });
+
+    it("hides a badge item under a zone filter", () => {
+      const r = ranking([badge, crafted, kara]);
+      expect(
+        applyView(r, { raid: "Karazhan" }).rows.map((x) => x.itemId)
+      ).toEqual([3]);
+    });
+
+    it("keeps zone filtering unchanged for zoned items", () => {
+      const r = ranking([badge, crafted, kara]);
+      expect(
+        applyView(r, { raid: "Karazhan" }).rows.map((x) => x.itemId)
+      ).toEqual([3]);
+      expect(applyView(r, { raid: "Tempest Keep" }).rows).toHaveLength(0);
+    });
+
+    it("matches each row under exactly one filter value", () => {
+      // The property that makes the control safe: pick every option the
+      // helper offers, and each row appears under one and only one of them.
+      // A row matched twice would double-count; a row matched zero times
+      // would be unreachable, which is the bug this whole change fixes.
+      const r = ranking([badge, crafted, kara]);
+      const options = raidFilterOptions(r.items);
+      for (const row of r.items) {
+        const matching = options.filter((o) =>
+          applyView(r, { raid: o }).rows.some((x) => x.itemId === row.itemId)
+        );
+        expect(matching).toHaveLength(1);
+      }
+    });
+
+    it("offers zones first, then the zoneless buckets present in the pool", () => {
+      const r = ranking([badge, crafted, kara]);
+      expect(raidFilterOptions(r.items)).toEqual([
+        "Karazhan",
+        "Badge vendor",
+        "Crafted",
+      ]);
+    });
+
+    it("offers no bucket for a kind the pool does not contain", () => {
+      const r = ranking([kara]);
+      expect(raidFilterOptions(r.items)).toEqual(["Karazhan"]);
     });
   });
 
