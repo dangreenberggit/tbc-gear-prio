@@ -2061,3 +2061,172 @@ evidence that it is not.
 - **Ticket 240 still applies:** `pnpm verify`'s one skipped suite is
   `wowsims-fork-parity`, gated on ungenerated protos, and it does not cover the
   ranking path.
+
+## 2026-08-23 — finish-the-tab, tranche 1: the Upgrades tab ranks in the browser
+
+Stage-gate run `finish-the-tab`. Every figure below is from a real Brave window,
+fronted, driven through Claude in Chrome. Nothing was timed from the Claude Code
+Browser pane, which never composites. Working notes and raw readings:
+`.scratch/stage-gate/finish-the-tab/measurements.md`.
+
+**Surface and machine, identical for all four timed runs.** Brave, window
+fronted; an in-page `visibilitychange` sampler recorded **0 hidden milliseconds
+on every run**, so none is throttle-contaminated. `hardwareConcurrency: 20`,
+worker picker 4 (`__tbc_new_wasmconcurrency`). Production bundle served with
+`npx http-server <archive> -p 8123 -c-1`. Iterations 3,000, Candidates empty
+(uncapped), maxPhase 2. Fork tip `8bb02b028`.
+
+**Gear, per cell.** Loaded through the page's own share-link hash, encoded from
+committed data by this repo's `encodeShareLink`. Ret:
+`test/fixtures/slamaltman.raid-sim-request.json` via `toIndividualSimSettings`,
+17 items, baseline **1775.0 DPS**. Feral:
+`data/presets/feral/owner-p2.settings-export.json`, 17 items, baseline
+**842.3 DPS** — its `player.rotation` was stripped before decoding because it
+uses `timeToNextEnergyTick`, a field newer than this repo's pinned proto, and
+the page supplies its own rotation. Not wowsims gear presets: the preset picker
+was unusable at the time the gear was loaded (see the wasm finding below).
+
+### Goal line: a ranked shopping list from an in-browser run
+
+Met. Both specs produced a ranked list with per-slot sub-tabs, stage labels, rows
+landing as they finished, and the elapsed wall-clock on completion.
+
+### Time budget — proposed 600 s, not D7
+
+`PLAN.md`'s D7 sets an iteration default and carries no time number. The 600 s
+figure is this plan's own proposal, read from `candidate-pool.md:11`'s
+"single-digit minutes", and **awaits owner ratification**.
+
+| Cell | Spec | Pre-sim prune | Elapsed | Simming n/N | vs 600 s |
+| --- | --- | --- | --- | --- | --- |
+| 1 | ret | on | **307 s** | 53 | met |
+| 1 | feral | on | **61 s** | — | met |
+| 2 | ret | off | **1017 s** | 277 | missed by 417 s |
+| 2 | feral | off | **395 s** | — | met |
+
+Elapsed is the page's own `Took N s.` status. **The goal line is judged with the
+prune on and is met on both specs.** Prune-off figures are recorded as
+measurements: ret needs the prune to fit the budget, feral does not.
+
+Two honest caveats. The ret prune-off cell was run twice under identical
+conditions and gave 866 s and 1017 s — a **17 % spread**, against the 3.6 % and
+1.3 % ticket 156 saw; a single run here is not a precise number. And a sampled
+interval gave **7.8 s per sim** against ticket 156's 3.8 s, roughly 2x slower on
+the same machine, unexplained.
+
+### The racing comparison was not measured
+
+Cell 3 (candidate (a), M2 racing) was never run: that archive persists
+share-link settings but never applies them to the character, and no run was
+started rather than time a 0-stat character. Q1 was decided by the plan's
+pre-stated rule — an unmeasured candidate cannot satisfy a win condition, so
+candidate (c), the full sweep, wins. That is where ADR-0026's core-side
+measurements already had it, so nothing was reverted. Ticket 273 records the gap.
+
+### C22 is refuted, and the build recipe with it
+
+Plan claim C22 held that the wasm could be reused because the fork branch
+changes no Go file. The premise is true — `git diff --name-only f359239..HEAD`
+matches 0 `.go` or `.proto` files — but the conclusion does not follow.
+
+The served `dist/tbc/lib.wasm` was the 2026-08-14 binary (md5
+`4811d1a5e93a422f732e81da3a214ff0`) while `sim_worker.js` had been rebuilt with
+Go 1.25.4's `wasm_exec.js`. The wasm never instantiated, **silently**:
+`instantiateStreaming(...)` at `sim_worker.js:3444` has no `.catch`, so the
+workers never posted `ready`, `waitForInit()` never resolved, and the whole
+settings/gear/preset callback at `individual_sim_ui.tsx:333-359` never ran. The
+page rendered with no gear, no presets and an empty Settings pane — three
+symptoms of one cause, which this run first misdiagnosed as a fork page defect.
+Rebuilding the wasm (md5 `393bee733c304016472af3589a57225f`) fixed all three.
+
+**Reusing a wasm is only safe when its toolchain matches the glue's.** The
+corrected recipe, superseding C21 (which omitted both the wasm step and the
+working directory):
+
+```
+eval "$(fnm env --shell bash)"; fnm use 22.17.1
+export PATH="<fork>/node_modules/.bin:/c/Program Files/Go/bin:/c/Users/dgree/go/bin:$PATH"
+cd <fork>                       # vite.config.mts:128 resolves i18nextLoader
+                                # paths against the process cwd
+protoc -I=./proto --ts_opt generate_dependencies --ts_out ui/core/proto proto/api.proto
+protoc -I=./proto --ts_out ui/core/proto proto/test.proto
+protoc -I=./proto --ts_out ui/core/proto proto/ui.proto
+protoc -I=./proto --go_opt=Mgoogle/protobuf/descriptor.proto=google.golang.org/protobuf/types/descriptorpb \
+       --go_out=./sim/core ./proto/*.proto
+GOOS=js GOARCH=wasm go build -o ./dist/tbc/lib.wasm ./sim/wasm/    # NOT optional
+npx tsx vite.build-workers.mts
+npx vite build
+```
+
+`make dist/tbc/.dirstamp` does all of it in order where `make` exists (it is not
+installed on this machine). Verify a build with a gear-set **item id**, never a
+source identifier — oxc minification renames identifiers, and grepping for
+`makePresetGear` produced a false "presets are missing from the bundle" reading
+this run. Verify the engine with `Worker[0] Ready, isWasm: true` in the console.
+
+### Control 1 — pre-sim BIS prune ("Sim only items on a BIS list")
+
+The Candidates placeholder tracks the control exactly: **240 eligible** off,
+**16** on for ret and **17** on for feral. Those match the tagged counts measured
+independently from the universe files (ret-p2 16, feral-p2 17). With the prune on
+every result row carried the BiS badge on both specs. The control was visible for
+both specs, so the hidden polarity is unreachable with shipped data, as predicted.
+
+`Simming n/N` is **53** for ret prune-on, not 16. The prune bounds the *tagged
+candidates* it sims; the engine still sims owned rows and retries paired slots,
+the same composition ticket 156 recorded when its `Candidates=20` run landed 34
+rows. The assumptions drawer names which pool a result came from.
+
+### Control 2 — post-sim BIS filter ("Only items on a BIS list")
+
+On the completed 480-row ret ranking, clicking the checkbox:
+
+```
+off -> on :  480 rows -> 32, every one tagged;  slot tabs 17 -> 17;  status unchanged
+on  -> off:  32 rows -> 480 (exactly restored); slot tabs 17 -> 17;  status unchanged
+```
+
+Fully reversible, no sim dispatched — the status line still read `Took 1017 s.`
+throughout. The 32 survivors equal the tagged count in the unfiltered ranking.
+
+This control shipped broken and was fixed during the run. Toggling it destroyed
+the ranking: the teardown loop called `parentElement.remove()` on each slot pane,
+and slot panes are children of the same container as the shopping-list pane, so
+it deleted the whole tab body. Fixed in fork commit `8bb02b028` by removing the
+pane itself under an identity check. An earlier commit, `118f708d8`, fixed a
+second real fault in the same area (the slot strip was built from the filtered
+view, and the shopping list computed its own view separately) but was not the
+cause of the teardown.
+
+### Control 3 — set-bonus toggle ("Include set-bonus potential")
+
+Visible on the ret prune-off ranking; correctly **hidden** on both prune-on runs
+and on feral prune-off, where no row carried rankable set potential. Both
+polarities of PLAN.md §4's hide-when-absent rule were observed.
+
+Toggling it on a completed ranking re-ranks with **zero sim calls**: row count
+unchanged at 480, **12 positions reordered** (first at index 50), status text and
+slot tabs unchanged. The clearest case, at positions 50/51 — `Crystalforge
+Shoulderbraces`, a tier piece carrying prospective set-bonus DPS, rises above
+`Leggings of Murderous Intent`:
+
+```
+off:  50 Leggings of Murderous Intent   51 Crystalforge Shoulderbraces
+on:   50 Crystalforge Shoulderbraces    51 Leggings of Murderous Intent
+```
+
+### Honest progress
+
+Observed on every run: stage labels in sequence (resolving, reading gear,
+composing, building the candidate pool, `Simming n/N`, ranking results), the
+row-landed counter climbing as rows arrived, and the elapsed figure on
+completion. The elapsed status is new this run and is what every number above is
+read from.
+
+### Required tickets
+
+156 closed with the numbers above and "D7 stays 3,000"; 199 closed on its three
+done-when items; 205 and 206 closed as moot (racing deleted in fork commit
+`f70378155`, porting ADR-0026); 201 annotated as not blocking; 272 (the fork's
+lockfile carries no Windows native binaries) and 273 (the unmeasured racing cell)
+filed and open.
