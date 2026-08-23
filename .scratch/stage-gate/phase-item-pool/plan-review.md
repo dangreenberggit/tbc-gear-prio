@@ -72,3 +72,40 @@ Nothing in the plan pushes the fork, opens a PR, merges, flips `"pushed": false`
 The two-repo discipline, the gate design, the CI story, and the Q1 decision itself all survive scrutiny — this is a revise on measurement accuracy and three executor traps, not on the approach.
 
 VERDICT: revise
+
+---
+
+# Plan review — round 2 (changed claims only), against plan commit `5e5b898`
+
+VERDICT: revise (one new blocking finding, found while checking F3's fix).
+
+## Findings
+
+| ID | Severity | Where | What breaks | Evidence |
+| --- | --- | --- | --- | --- |
+| G1 | blocking | C26, Step 2/7 interim exception, Step 7 acceptance, Verify recipe | `test:locales` passes vacuously on Windows — `test-locales.mjs:34` builds its glob with `path.join`, producing backslashes that `glob` treats as escapes, so all four schemas match 0 files and the script exits 0. So C26's "red on the branch today" is false on the executor's platform; the interim exception ("red only with the known `upgrades_tab` message") is unobservable; and Step 7's acceptance `test:locales exits 0` passes whether or not the schema is fixed. The violation is real (direct ajv run: `translation INVALID: schema must NOT have additional properties`) and would fire on the fork's Linux CI. | `node ./test-locales.mjs` → EXIT=0, no output; pattern diagnostic → `matched: []` with backslashes, one file with forward slashes; direct ajv INVALID. |
+| G2 | material | C31, Step 2 acceptance ("five causes") | Five drifted files, exactly **two** causes: `5cf0ea0` added 29297 to ret-p3/ret-p4/feral-p3 and 29297+34470 (Timbal's Focusing Crystal) to ret-p5; `5c42a37` removed druid-unusable weapon rows from feral-p2 (18) and feral-p3 (33). An executor honestly deriving causes finds two commits and fails "five causes". | `git show 5cf0ea0 --stat`; `git show 5c42a37 --stat`; per-file drift ids. |
+| G3 | minor | C31 | The ret-p4/p5 causes are now established (G2); the register row is stale and ret-p5's second item (34470, phase 5) is unmentioned anywhere. | As G2. |
+
+## Register verdicts (re-run)
+
+C12 stands (as rewritten; no acceptance baseline; retained number is the reproduced one). C14 stands (cmp reproduces word for word). C16a stands; C16b stands. C21 stands. C22 stands. **C26 refuted** (G1; type-check/lint/no-format parts stand). C28 stands. C31 stands but understated (two causes, established). C3 re-checked for Step 6: stands (core `view.ts` — `matchesZone` :110, `ZONELESS_SOURCE_LABELS` :123, `zoneKeyOf` :132, raid filter :316/:323, groupBy keyOf :352-353).
+
+## F4 implementation — attacked as asked, holds
+
+`zoneKeyOf` and `ZONELESS_SOURCE_LABELS` exist byte-identically in core and fork (the fork copy strips comments, per the port convention); the racing removal did not remove them; the six labels match the plan's Q3 text. Core's raid option behaves identically to the fork's. The port direction is possible without dragging diffs — the drift gate hashes only the fork file, and `e79916172` is a genuine re-hash precedent. One consequence confirmed: `renderSubTabs()` derives the slot-tab set from the single `applyView` call site, so a narrow filter changes which slot tabs appear — correct under the bucket ruling (every item stays reachable), and Step 9(c) should quote the slot-tab set under a narrow filter. `currentViewOptions()` today has no `raid`/`groupBy`, so Step 8's threading is genuinely new work, correctly scoped.
+
+## F3 — fixing the schema is the right call
+
+The fork must pass its own Linux CI (`run_tests.yml:54`), the tab needs its strings, so extending `schemas/translation.schema.json` is the only CI-green route. The problem was only that the plan's evidence and acceptance were unobservable on Windows.
+
+## What revision needs
+
+1. Rewrite C26 and the interim exception around G1; replace the acceptance with the direct ajv command printing `VALID` after the schema fix (`test:locales exits 0` proves nothing on this box).
+2. Decide whether to fix the glob bug (one character: forward slashes or `windowsPathsNoEscape`) so the gate is real locally; if declined, say why.
+3. Step 2's acceptance becomes "each of the five files attributed to its cause", with the established two-commit mapping; C31 updated from hypothesis to measured.
+4. Add the slot-tab set to Step 9(c)'s measurement.
+
+F1, F2, F5–F8 all correctly resolved. Q1 inversion, gate design, two-repo discipline, and the F4 route survive unchanged. Both trees clean; nothing written.
+
+revise

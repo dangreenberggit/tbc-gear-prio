@@ -53,3 +53,18 @@ One dated line per gate: gate, outcome, reason, round count.
   clean after the planner ran. Reviewer re-check scoped to the changed claims: C12,
   C14, C16a/C16b, C21, C26, C28, C31, the new Step 6, and the revised Steps 1–2, 4,
   7–8 acceptance.
+- 2026-08-23 — **Gate B (round 2): LOOP BACK (revision round 2).** Reviewer verdict
+  `revise` on one NEW blocking finding surfaced while verifying F3's fix — not a
+  survivor of round 1, so a second loop-back is within the skill's rule. **G1
+  upheld**: the fork's `test:locales` validates zero files on Windows
+  (`path.join` backslashes defeat the glob), so the plan's "red today" evidence and
+  its interim exception were unobservable here; the schema violation itself is real
+  (direct ajv run) and fires on the fork's Linux CI. Ruling: acceptance moves to the
+  direct ajv command printing VALID, and **the glob bug is fixed too** (one
+  character; it makes the gate real on every platform and is squarely "fix the fork
+  gate that is red today") — `test-locales.mjs` joins the fork Paths manifest. **G2
+  upheld**: Step 2's acceptance becomes "each of the five files attributed to its
+  cause", with the established mapping (`5cf0ea0` → ret-p3/ret-p4/feral-p3 29297,
+  ret-p5 29297+34470; `5c42a37` → feral-p2/feral-p3 weapon rows); C31 updated to
+  measured. **G3 folded into G2.** Step 9(c) adds the slot-tab set under a narrow
+  filter. Everything else confirmed resolved; the F4 route holds under attack.
