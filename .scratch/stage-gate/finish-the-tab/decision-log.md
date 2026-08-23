@@ -160,3 +160,20 @@ One dated line per gate: gate, outcome, reason, round count.
   builds skipped the makefile's `gen_db -gen=go-to-ts` / generated-input steps and
   serve an item database the UI cannot apply — ticket 156 measured a geared character
   on a `make`-built dist on 2026-08-18, so gear application worked on this fork then.
+- 2026-08-23 — **Diagnosis (Opus, read-only): stale `lib.wasm`, not a fork defect.**
+  `individual_sim_ui.tsx:333-359` runs `loadSettings()` and the topbar/preset
+  population inside `sim.waitForInit().then(...)`; `sim.ts:186-226` awaits
+  `workerPool.isWasm()` → `SimWorker.onReady` with no timeout; `ready` fires only from
+  the Go program's `wasmready()`. The served `lib.wasm` is the 2026-08-14 binary (md5
+  `4811d1a5…`), while the executor regenerated the protos and rebuilt `sim_worker.js`
+  with Go 1.25.4's `wasm_exec.js` on 08-22, so instantiation fails silently (the
+  `instantiateStreaming` call has no `.catch`). Losers: skipped `gen_db` (ticket 156
+  used the same two-command shortcut and was geared the day the wasm was built);
+  db.json (8,257 items, the 16 ids present with paladin allowlist); branch commits
+  (touch nothing on the settings path); apiVersion (catches would have warned);
+  `/version` warning (cosmetic). Plan claim **C22 refuted in effect**: Go sources did
+  not change, but the glue did. Ruling: **adapt** — executor confirms with the
+  `Worker[0] Ready` log / unhandled-rejection check, rebuilds the wasm by the
+  makefile's own command (`GOOS=js GOARCH=wasm go build -o ./dist/tbc/lib.wasm
+  ./sim/wasm/`), places the same fresh wasm in BOTH archives (Go sources are identical
+  across all fork commits on the branch), re-verifies settings apply, then runs Step 9.
