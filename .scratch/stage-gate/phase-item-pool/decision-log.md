@@ -117,3 +117,14 @@ One dated line per gate: gate, outcome, reason, round count.
   stage's run pre-dated the racing removal's replication behaviour on tiny pools,
   different worn set, machine load — hypotheses, untested). Executor proceeds to
   Step 10.
+- 2026-08-23 — **Gate C: CLOSED.** Step 10 landed (`490bab6`). Orchestrator
+  cross-check on the tips: repo log 7a12bd8..HEAD = the nine executor commits plus
+  two orchestrator decision-log commits; fork log cfcdd7ea1..eb65670 = the three
+  planned commits (two LF rewrites); both trees clean; lockfile = fork tip
+  `eb65670`, `pushed: false`; `branch -r --contains HEAD` → 0; both new gates green
+  re-run by the orchestrator; one STATUS file; verification-log entry present.
+  Every ledger row dispositioned (all accepted; the R1 rework closed; three flags
+  accepted). Owner items at hand-off: Q1 inversion (ADR-0028), ticket 276 (two
+  membership buckets + Swiftsteel/Swiftstrike phase doubt, SME read wanted), the
+  302 s vs 61 s unexplained delta. Next: `pre-merge-review`, then ask before
+  `pnpm merge-to-dev`.
