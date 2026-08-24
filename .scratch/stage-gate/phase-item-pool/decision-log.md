@@ -98,3 +98,22 @@ One dated line per gate: gate, outcome, reason, round count.
   diff is content-only on LF files, same standard as last stage.
   (2) `NEXT` still reads 276 with 276/277 consumed — bump to 278 (the known
   collision-window rule).
+- 2026-08-23 — **Step 9 measured; Gate C part 2.** The extension tab lived in a
+  0×0 background window (why every poll read hidden while the owner's Brave was
+  up); `resize_window` to 1600×1000 made it real and visible. Measurements (a)–(d)
+  in measurements.md, 0% hidden during the timed run: no "this phase" on any of the
+  four spec/phase pages; drawer names max phase and `Pool source:
+  feral-p3.universe.json (366 entries)` = the committed listing's membership;
+  selector shared-state proven tab→page and page→tab; feral prune-on run
+  `2132.2 DPS, Took 302 s`, 366→17 candidates; the eight filter values partition
+  the 17 rows exactly (no overlap, none unreachable), zoneless bucket carries the
+  largest upgrade (+90.9 Vengeful Gladiator's Staff, PvP vendor). (d) recorded as a
+  substitute measurement, honestly labelled: the console tool cannot capture
+  load-time logs, so the worker's `ready(isWasm=true)` was read from a directly
+  spawned worker. **Dispositions**: substitute measurement accepted; the serving
+  trap (`dist` not `dist/tbc`) and the empty-row counting trap accepted as recorded
+  warnings; **302 s vs the plan's ~61 s estimate accepted as measured** — Step 10's
+  log entry must carry 302 s and mark the delta unexplained (candidates: last
+  stage's run pre-dated the racing removal's replication behaviour on tiny pools,
+  different worn set, machine load — hypotheses, untested). Executor proceeds to
+  Step 10.
