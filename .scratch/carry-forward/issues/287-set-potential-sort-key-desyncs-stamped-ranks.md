@@ -27,6 +27,15 @@ A second divergence, `pinBis`, exists in `compareRows` but is unreachable
 from this UI today (`upgrades_tab.tsx` never passes it; defaults false).
 Note it if the fix restructures the comparators.
 
+## Owner ruling (2026-08-24)
+
+Show the engine's original rank for now — the current behaviour (rank
+pinned to the row, so numbers can read out of order under set-potential)
+is accepted. The likely future direction is removing the engine rank from
+the UI entirely and numbering only the displayed rows; if that lands, this
+ticket's desync becomes moot and the agreement test below is only needed
+if the engine rank stays user-visible.
+
 ## Done when
 
 - With set-potential ON and a ranking where set bonuses reorder rows, the

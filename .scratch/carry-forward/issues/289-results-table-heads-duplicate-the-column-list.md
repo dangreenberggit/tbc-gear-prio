@@ -1,4 +1,6 @@
-Status: open
+Status: closed (2026-08-24, fork commit fe1e4ad42 — both heads render from
+RESULTS_SORT_COLUMNS via the shared label helper; rendered output verified
+unchanged.)
 Type: refactor
 Origin: pre-merge review feat/upgrades-ui-fit, standards axis, 2026-08-24
 Blocks: none

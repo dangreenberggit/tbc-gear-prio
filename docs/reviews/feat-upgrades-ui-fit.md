@@ -88,3 +88,34 @@ against both ported-file edits.
 | F1  | Spec        | fixed       | duplicate ticket 284 renumbered to 287; `NEXT` advanced (was stale at 279 before this pass)                                                                                                                                                                                                                                                                               |
 | W1  | Spec        | fixed       | WP5 affordance ruling recorded here: **wontfix** — no placeholder/skeleton precedent on the site, an always-laid-out row would relitigate the WP2 empty-group ruling (whose `!important` exists to stop the hidden group claiming toolbar gap), and the controls appear exactly when they become meaningful; the real defect underneath (stopped-state gap) is ticket 286 |
 | F3  | Spec        | wontfix     | served-page evidence lives in commit prose + gitignored stage artifacts; accepted — the fork has no harness, the handoff names measurement as the coverage, and every claim carries its re-run protocol                                                                                                                                                                   |
+
+# Round 2 — owner-directed follow-ups
+
+Reviewed range: `d0c662a..b8767eb` (repo, bookkeeping only) plus the fork
+clone's `e637fa284..fe1e4ad42`. One combined Opus review over the
+three-ticket diff; fix commits after dispatch: fork `fe1e4ad42..ccf30ef01`
+(comment fixes + PROVENANCE), repo re-pin.
+
+The owner ruled on the round-1 deferrals: 288 and 289 (the two drift
+refactors) were promoted from defer to do-now; 286 was re-scoped — Stop
+resets the tab instead of exposing a partial table; 287 stays deferred with
+a recorded ruling (show the engine's original rank for now; the rank column
+may leave the UI entirely). Ticket 290 (deliberate state-presentation
+design) was filed from the owner's observation that the tab's states were
+verified individually but never designed as a set.
+
+Verdict: COMMIT, three non-blocking findings, all statement-vs-behavior
+drift. Dispositions:
+
+| ID  | Disposition | Note                                                                                                                                                                                                                           |
+| --- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1  | fixed       | stale `ZONELESS_SOURCE_LABELS` comment reference updated (fork `fe1e4ad42`)                                                                                                                                                    |
+| R2  | fixed       | "same empty body as idle" comment narrowed to the results table; the assumptions/substitutions drawers deliberately still render for stopped (they describe the abandoned run's inputs) — recorded in the code comment         |
+| R3  | defer       | `.scratch/carry-forward/issues/290-design-the-upgrades-tab-state-presentations.md` — the stopped message's "rows still simming were skipped" now misleads over an empty body; wording is reconciled in 290's state-design pass |
+
+Verified by the reviewer independently: E-W3 green with the claimed
+view.ts sha; the two old label maps byte-identical at base; Stop → 0 rows,
+0 tables, 1 status line at both viewports with re-Run working; ticket
+285's filter selection surviving stop-then-rerun; hygiene identical to
+base by stash-check. Tickets 286, 288, 289 closed; open deferrals now 287
+and 290. `pnpm verify` green at pin `ccf30ef01`.

@@ -1,4 +1,8 @@
-Status: open
+Status: closed (2026-08-24, fork commit fe1e4ad42, per the owner ruling —
+Stop renders idle's empty results body, PartialRanking retained in memory
+unread, re-Run verified working with the 285 filter selection surviving.
+Assumptions drawer deliberately still renders (describes inputs); stopped
+message wording reconciled under ticket 290.)
 Type: UI defect
 Origin: WP5 review, 2026-08-24
 Blocks: none
@@ -43,11 +47,21 @@ sources of truth for one value. When reworking the gates here, route the
 applied filter through `pendingRaidFilter` so the invariant is structural,
 not order-dependent.
 
+## Owner ruling (2026-08-24)
+
+A half-finished ranking is not worth exposing: **Stop resets the tab**
+instead of showing a partial table with withheld controls. Keep what the
+run already computed behind the scenes only if that is cheap and minimal
+(the stopped state already carries a `PartialRanking` in memory — keeping
+that reference is free; no persistence/local-storage work). This replaces
+the earlier direction of enabling filters/sorting over partial rows.
+
 ## Done when
 
-- After Stop, the on-screen partial rows can be filtered and sorted, with
-  the semantics of each view control over a partial ranking decided and
-  written down.
-- The seven-state matrix (idle, running, done, done+stale, stopped, error,
-  unsupported-spec) still renders one status line per state on the served
-  page.
+- Pressing Stop returns the tab to a state with no partial results table:
+  the status line says the run was stopped, and the controls/table read as
+  idle (no half-populated rows, no withheld-controls limbo).
+- The already-computed partial ranking may be retained in memory but is
+  not rendered; no new persistence is added.
+- The status-state matrix still renders one status line per state on the
+  served page, and a subsequent Run works normally after a Stop.
