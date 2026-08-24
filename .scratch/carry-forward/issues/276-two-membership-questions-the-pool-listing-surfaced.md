@@ -87,6 +87,95 @@ force-include list, which is ticket 173's warning.
 
 ## Done when
 
-- A decision is recorded per bucket: admit with a source, force-include with
-  a documented reason, or accept the exclusion with the reason written down.
-- The Swiftsteel/Swiftstrike phase question is either confirmed or dismissed.
+- ~~A decision is recorded per bucket.~~ Done, 2026-08-23 — see the ruling
+  below. All five items are to be included.
+- Each of the five reaches the pool through a **source route the assembler
+  recognises**, not a force-include.
+- The pool listings show them moving out of the gap and into membership.
+
+## Owner ruling, 2026-08-23: include all five
+
+The owner ruled that every item in both buckets belongs in the pools. The
+reasons they gave, paraphrased, with the provenance of each marked — none of
+the three has been checked against the data yet:
+
+| Item(s) | Owner reason | Status |
+| --- | --- | --- |
+| Medallion of Karabor 32649, Blessed Medallion of Karabor 32757 | a quest item | **owner recall, unverified** |
+| Thunderheart Vest 31043 | a tier-token turn-in — vendor exchange for a druid token | **owner recall, unverified** |
+| Swiftsteel Shoulders 32570, Swiftstrike Shoulders 32581 | the recipes drop in phase-3 raids: Black Temple, possibly Hyjal — the owner was unsure which | **owner recall, unverified, and explicitly uncertain on the zone** |
+
+Verified independently and unchanged: all five pass `eligible_d7`, none is
+stub-only, and the wowsims DB records **no** source for 31043, 32649 or 32757
+while giving 32570 and 32581 a Leatherworking `crafted` source. That is why
+the audit could not place them; it is not evidence for or against the reasons
+above.
+
+The Swiftsteel/Swiftstrike phase doubt recorded earlier in this ticket is
+**not** dismissed by this ruling. The owner says the recipes drop in a
+phase-3 raid; the concern was that both are patch-2.3 recipes carrying
+`phase: 3` from an item-level band. Those can both be true, or the phase can
+still be wrong. Resolve it while implementing, not before.
+
+## What implementing the ruling takes
+
+**Not a hand-edit, and not a force-include.** Each item needs a source route
+the assembler recognises and re-derives on every run — otherwise the next
+universe regen drops them again, which is the failure ticket 173 exists to
+prevent. The three reasons imply three different amounts of work, and one of
+them is far smaller than it looked.
+
+### The shoulders: the data is already here, so this is a bug, not a feature
+
+Checked while recording the ruling, and it corroborates the owner exactly.
+`data/two-hop/raid-recipes.json` already maps both products to a recipe that
+drops in **Black Temple** — not Hyjal, which resolves the uncertainty the
+owner flagged:
+
+```bash
+python -c "import json;d=json.load(open('data/two-hop/raid-recipes.json'));print([(e['productId'],e['recipeId'],e['zones']) for e in d['entries'] if e['productId'] in (32570,32581)])"
+```
+
+That file is loaded by `scripts/assemble_universe.py` (`RAID_RECIPES`, read at
+line 1381) and its `zones` branch is consumed, not only its `reps`. So a
+recognised route exists and the items still do not reach the pools:
+
+| item | ret-p3 | feral-p3 |
+| --- | --- | --- |
+| Swiftsteel Shoulders 32570 | absent | absent |
+| Swiftstrike Shoulders 32581 | **present** | absent |
+
+32581 reaching ret but not feral, on identical recipe data, is the thread to
+pull first — that asymmetry points at a spec-side filter rather than a missing
+route. **Cause not established. Do not assume it is the crafted route until it
+is measured.**
+
+### The medallions: a genuinely new source kind
+
+`ItemSource` in `packages/core/src/pool.ts` has no `quest` kind — the kinds are
+raid, token, badge, crafted, rep, heroic, pvp, world and unknown, verified by
+reading the union. A quest route therefore means a new kind, the input data to
+populate it, and rendering wherever sources are displayed. This is the largest
+of the three.
+
+### Thunderheart Vest: probably data, confirm before assuming
+
+The two-hop tier machinery exists (`data/two-hop/feral-tokens.json`,
+`ret-tokens.json`) and `kind: "token"` is already a source kind, so a vendor
+turn-in may need only data. **Unverified.** Check whether the vest is absent
+from the token map or present and filtered out — the same question as the
+shoulders, and worth answering at the same time.
+
+### Then
+
+Universe regen, then a fork-bundle refresh
+(`python scripts/sync_fork_universes.py --write`) so the tab sees it too.
+
+**The gate will show the work landing.** These five sit in the wowsims-only
+tables of `data/pool-listings/{ret,feral}-p3.md` today. When the routes work
+they move into local membership, the counts change, and
+`pnpm pool-listings:check` fails until the regenerated listings are committed.
+That diff is the proof.
+
+No universe, assembler or two-hop file was edited when this ruling was
+recorded.

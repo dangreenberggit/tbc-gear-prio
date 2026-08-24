@@ -152,3 +152,26 @@ where the crafted-shoulder question below lives.
 - Two membership questions the audit surfaced are **not** decided here and go
   to the owner as tickets: items with no source route in either system, and
   items wowsims can source that a local rule excluded.
+
+## Future direction (owner, 2026-08-23)
+
+**The precedence rule above stands for now.** This note records a direction to
+explore, not a decision that changes it.
+
+The owner wants a future stage to examine whether this repo's hardcoded source
+data could **extend** the data wowsims already carries for the tab, rather than
+sitting beside it as a second store. The goals are one source of truth and
+minimal clutter added to the wowsims repo — today the tab bundles copies of
+artifacts this repo owns (universes, EP weights), and the audit above exists
+partly because two stores can disagree.
+
+That is a design question, not a plan. Nothing about it is measured: whether
+wowsims' schema can carry origins it has no field for (badge, PvP, tier tokens
+— the very gap that motivated the decision above), whether upstream would take
+such an extension, and what it would cost to maintain are all **untested
+hypotheses**. It also interacts with the standing rule that the fork is not
+pushed, so any shape that requires upstream changes is gated on a decision the
+owner has not made.
+
+Revisit when a stage is scoped for it. The decision above is what holds until
+then.
