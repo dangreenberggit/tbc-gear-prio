@@ -1,8 +1,31 @@
-Status: open
+Status: closed
 Type: refactor
 Origin: docs/reviews/feat-finish-the-tab.md
 Blocks: none
 Blocked by: none
+Closed: 2026-08-23, branch feat/upgrades-ui-pass
+
+## Outcome
+
+Folded, as part of the ticket-278 UI pass. One `ToggleControl` class owns
+label, input and `setVisible`; the four checkbox controls use it, and the raid
+filter — a `<select>`, not a toggle — borrows only the free
+`setControlVisible` function and keeps its own populate logic. The two
+near-duplicate visibility methods and `setPruneAvailable` are all gone,
+replaced by one `refreshViewControlVisibility`. `isBisTagged` replaces the
+four hand-written copies of the same tag test.
+
+One behaviour deliberately changed. `setPruneAvailable` forced the prune
+checkbox off whenever it hid the control, which threw away the user's choice.
+Visibility now only shows and hides, and the safety that force-off provided is
+provided instead at the single read site: `pruneEffective()` is
+`visible && checked`. Verified on a served page in both directions — visible
+and checked prunes the pool to 16 candidates, hidden and checked leaves all
+240, with the assumptions drawer recording "every eligible item".
+
+The BiS-only and set-potential reads were deliberately left ungated: they feed
+the done-state view's sort key, and gating them would have moved the very
+order the ticket-278 measurement was taken against.
 
 # Upgrades tab toggle controls repeat the same field/label/visibility shape
 
