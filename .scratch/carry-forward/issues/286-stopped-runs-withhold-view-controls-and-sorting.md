@@ -34,8 +34,14 @@ gate, the raid-filter populate path, and the table-header choice, with the
 seven-state matrix re-verified. Probable direction: gate on "a ranking
 exists" rather than `kind === 'done'` — hypothesis, untested.
 
-Related: ticket 285 (filter selection wiped during running ticks) touches
-the same refreshRaidFilter code; fix together or sequence deliberately.
+Related: ticket 285 (filter selection wiped during running ticks) touched
+the same refreshRaidFilter code; its fix landed first (fork 270f57da9).
+The pre-merge adversarial axis added: `currentViewOptions()` still reads
+`raidFilterSelect.value` off the DOM, correct today only because
+`refreshRaidFilter()` runs before `renderSubTabs()` in `render()` — two
+sources of truth for one value. When reworking the gates here, route the
+applied filter through `pendingRaidFilter` so the invariant is structural,
+not order-dependent.
 
 ## Done when
 

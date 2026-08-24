@@ -35,3 +35,7 @@ Note it if the fix restructures the comparators.
 - The chosen rule is written down: either stamp ranks from the view's
   effective sort key, or re-stamp at render time — whichever, `rank.ts` and
   `view.ts` must agree by construction, not coincidence.
+- A comparator-agreement test exists in `packages/core` (both surfaces are
+  named unit-testable in AGENTS.md) so the next divergence fails
+  mechanically instead of by review — the pre-merge adversarial axis noted
+  this class of bug is exactly what such a test would have caught.

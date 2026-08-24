@@ -1,7 +1,7 @@
 Status: closed (2026-08-24, fork commit 711c55ac2 on feat/upgrades-tab —
 bySimmedThenDelta given compareRows' bisTags-then-itemId tiebreak; re-measured
 under this ticket's protocol: 5 shortlist tie groups incl. a three-way, 0 rank
-inversions across 65 + 175 rows. Follow-up defect split to ticket 284.)
+inversions across 65 + 175 rows. Follow-up defect split to ticket 287.)
 Type: engine defect
 Origin: stage-gate `upgrades-ui-pass`, Q1 measurement, 2026-08-23
 Blocks: none
