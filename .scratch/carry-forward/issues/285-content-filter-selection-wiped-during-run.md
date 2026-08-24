@@ -1,4 +1,7 @@
-Status: open
+Status: closed (2026-08-24, fork commit 270f57da9 on feat/upgrades-tab —
+pendingRaidFilter instance field holds the choice off the DOM; survival and
+non-degenerate fallback both verified live. Line numbers re-verified at the
+fixed tip: 795/829/966-969.)
 Type: UI defect
 Origin: ticket-282 review, 2026-08-24
 Blocks: none
