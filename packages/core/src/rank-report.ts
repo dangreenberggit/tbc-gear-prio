@@ -220,8 +220,17 @@ function sourceKeyLabel(key: string): string {
   return ZONELESS_SOURCE_LABELS[value] ?? value;
 }
 
-// Mirrors `view.ts`'s labels for the same zone-less kinds, so the filter and
-// `--group-by raid` name a bucket the same way.
+// A superset of `view.ts`'s ZONELESS_SOURCE_LABELS: every key there is
+// here with the same wording, so the report and `--group-by raid` name a
+// shared bucket identically, plus `heroic`, which view.ts deliberately lacks.
+//
+// The extra key is not an oversight on either side. `kind: "heroic"` carries a
+// `dungeon` and no `zone`, so view.ts's zoneKeyOf falls through to its
+// `?? item.source.kind` escape and buckets the item under the bare string
+// `heroic`. That is tolerable for a filter value, which is matched rather
+// than read; it is not tolerable in report prose, which a person reads.
+// Adding `heroic` to view.ts would change a filter value and the grouping
+// vocabulary, so the two tables are kept deliberately unequal, not merged.
 const ZONELESS_SOURCE_LABELS: Record<string, string> = {
   badge: "Badge vendor",
   crafted: "Crafted",

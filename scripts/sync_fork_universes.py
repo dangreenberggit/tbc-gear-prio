@@ -133,6 +133,27 @@ def main() -> int:
 
     mapping = parse_provenance(PROVENANCE_MD.read_text(encoding="utf-8"))
 
+    # Checked before any copy is written, so --write is all-or-nothing. A
+    # partial refresh that still exits nonzero leaves the fork in a state
+    # nobody can name: some copies new, some stale, and an error code that
+    # does not say which.
+    absent = sorted(
+        f"{copy_name} <- {source_rel}"
+        for copy_name, source_rel in mapping.items()
+        if not (ROOT / source_rel).is_file()
+    )
+    if args.write and absent:
+        for line in absent:
+            print(f"  missing source: {line}", file=sys.stderr)
+        print(
+            f"\n{len(absent)} of {len(mapping)} sources named by PROVENANCE.md "
+            "do not exist in this repo. Nothing was written -- refusing a "
+            "partial refresh. Restore the missing sources, or fix the "
+            "PROVENANCE.md table if a file was renamed.",
+            file=sys.stderr,
+        )
+        return 1
+
     missing_source: list[str] = []
     drifted: list[tuple[str, str, str]] = []
     same: list[str] = []
@@ -168,9 +189,7 @@ def main() -> int:
             f"fork universes: {len(written)} refreshed, {len(same)} already "
             f"matching, {len(mapping)} listed in PROVENANCE.md"
         )
-        for line in missing_source:
-            print(f"  missing source: {line}", file=sys.stderr)
-        return 1 if missing_source else 0
+        return 0
 
     if not drifted and not missing_source:
         print(
