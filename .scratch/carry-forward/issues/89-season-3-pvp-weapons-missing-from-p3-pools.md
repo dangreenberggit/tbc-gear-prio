@@ -1,6 +1,11 @@
+Status: open
+Type: pool membership gap
+Origin: feral P3 rank report review, 2026-08-10
+Blocks: none
+Blocked by: none
+
 # 89 — Season 3 PvP weapons are missing from the P3 pool
 
-Status: open
 **Found:** 2026-08-10, reviewing the feral P3 rank report.
 
 ## Scope correction up front
@@ -62,3 +67,41 @@ page instead of requiring a db diff to notice.
 Whether an S3 one-hander is actually competitive for feral is a ranking
 question the sim answers once the items are in the pool. This ticket is only
 about pool membership.
+
+## What the 2026-08-23 pool listing says (ticket 211 / ADR-0028 work)
+
+`data/pool-listings/{ret,feral}-p3.md` now classify every item the wowsims
+DB admits that the local pool does not, so this ticket's gap has evidence
+rather than a hypothesis. The answer is **two different causes**, and the
+ticket's own suspicion about a per-slot scrape is neither confirmed nor
+refuted by it:
+
+- **PvP armor is stub-only.** Vengeful Gladiator's Scaled Gauntlets (33750),
+  Vengeful Gladiator's Dragonhide Gloves (33671) and Ashtongue Talisman of
+  Zeal (32489) all classify as category **c** -- their only sim effect is an
+  unimplemented stub in the fork's Go tree, so ticket 171's ruling excludes
+  them by design. That is a decided exclusion, not a gap.
+- **The S3 weapons this ticket names are not stub-only.** 33662, 33762,
+  33716 and 32014 are all absent from the stub list:
+
+  ```bash
+  python -c "import json;s={x['itemId'] for x in json.load(open('data/sim-implemented-effects.json'))['stubOnlyItemIds']};print({i: i in s for i in (33662,33762,33716,32014)})"
+  ```
+
+  Vengeful Gladiator's Bonecracker (33662) classifies as category **f** --
+  the wowsims DB records no source for it at all, so no local route could
+  find it. Merciless Gladiator's Maul (32014) is a more interesting case:
+  it is **already in the feral universe** with `pvp via=arena`, while the
+  ret listing puts it in category f. Vengeful Gladiator's Staff (33716) is
+  likewise present in a universe with a PvP source.
+
+**What this changes for the ticket.** The blanket framing "S3 PvP weapons are
+missing" does not survive the listing -- some are present, some are excluded
+by a decided rule, and at least one (33662) is absent because wowsims records
+no source. Re-scope before working it: read the category f rows of both
+listings, which are the items no source route reaches, and decide per bucket.
+The "Also worth fixing while here" note about the unpopulated `season` field
+is untouched by any of this and still stands.
+
+Re-runnable: `pnpm pool-listings:check`, then read the "Wowsims-only items,
+classified" table in each listing.

@@ -137,6 +137,55 @@ function zoneKeyOf(item: RankedItem): string {
 }
 
 /**
+ * The filter values a pool offers: its zones, then the zoneless buckets it
+ * actually contains.
+ *
+ * Same vocabulary as `groupBy: 'raid'` — deliberately, and this is the whole
+ * point of the helper. A raid filter that understood only zone names would
+ * make badge, crafted, PvP, reputation and world gear unreachable: no filter
+ * value would show it and every zone value would hide it. Reusing the
+ * grouping buckets as filter values keeps that gear one click away under a
+ * label a player recognises, and keeps the filter and the grouping speaking
+ * one vocabulary instead of two that can disagree.
+ *
+ * Only buckets present in the pool are offered, so the control never shows a
+ * value that selects nothing.
+ *
+ * Zones come first because they are what a player narrowing to "the content I
+ * am running tonight" reaches for; within each half the order is the pool's
+ * own, so the list is stable across renders of the same ranking.
+ */
+export function raidFilterOptions(items: readonly RankedItem[]): string[] {
+  const zoneless = new Set(Object.values(ZONELESS_SOURCE_LABELS));
+  const zones: string[] = [];
+  const buckets: string[] = [];
+  const seen = new Set<string>();
+  for (const item of items) {
+    const key = zoneKeyOf(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    (zoneless.has(key) ? buckets : zones).push(key);
+  }
+  return [...zones, ...buckets];
+}
+
+/**
+ * Whether a row belongs under the selected filter value.
+ *
+ * A zone name matches any source carrying that zone — over every source, not
+ * just the primary one, so a tier token's raid still reaches its piece
+ * (`matchesZone`'s two-hop). A zoneless bucket label matches the row whose
+ * own `zoneKeyOf` is that bucket, which is exactly what `groupBy: 'raid'`
+ * would file it under. The two cases are disjoint: a row with any zone never
+ * has a bucket key, and a row with none never matches a zone.
+ */
+function matchesRaidFilter(item: RankedItem, value: string): boolean {
+  if (matchesZone(item, value)) return true;
+  const key = zoneKeyOf(item);
+  return key === value && !sourcesOf(item).some((s) => "zone" in s);
+}
+
+/**
  * Half-width of the interval within which two rows read as tied, in DPS.
  *
  * Two `seMethod`s ship at once — paired replication rewrites the top 8
@@ -320,7 +369,7 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const filtered: ViewRow[] = r.items
     .filter((item) => {
       if (v.hideOwned === true && item.owned === true) return false;
-      if (zone !== undefined && !matchesZone(item, zone)) return false;
+      if (zone !== undefined && !matchesRaidFilter(item, zone)) return false;
       if (boss !== undefined && !matchesBoss(item, zone, boss)) return false;
       return true;
     })

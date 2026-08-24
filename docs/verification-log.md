@@ -2250,3 +2250,192 @@ done-when items; 205 and 206 closed as moot (racing deleted in fork commit
 272 (the fork's lockfile carries no Windows native binaries), 273 (the
 unmeasured racing cell), 274 (this entry's unreconciled ret baseline) and 275
 (the tab's three repeated toggle controls).
+
+## 2026-08-23 — phase-item-pool: the pool is explainable, and the tab names its phase
+
+Stage-gate run `phase-item-pool`. One line per brief goal with the command or
+measurement that establishes it. Working notes and raw browser readings:
+`.scratch/stage-gate/phase-item-pool/measurements.md`.
+
+### Goal 1 — a committed listing says why each item is in or out of the pool
+
+`data/pool-listings/ret-p3.md` and `feral-p3.md` put the local universe beside a
+membership derived from the pinned wowsims DB and classify every difference by a
+rule they can cite. `scripts/list_phase_pool.py` regenerates them;
+`pnpm pool-listings:check` regenerates and byte-compares, inside `pnpm verify`.
+
+```bash
+pnpm pool-listings:check
+# pool listings check ok: both listings match a fresh regeneration
+grep -h 'phase-disagreements:' data/pool-listings/*.md
+grep -h 'raid drops lacking a reason:' data/pool-listings/*.md
+```
+
+Both properties hold as measured results rather than by construction: **zero**
+phase disagreements and **zero** phase-3 raid drops lacking a reason, in both
+listings. Every wowsims-only raid drop (8 ret, 7 feral) is a stub-only sim
+effect, which is a citable rule.
+
+Two shape facts recorded because each was a way to get this wrong. Categories a,
+b and d from the plan **cannot fire**: the audited membership is *defined* by
+`eligible_d7` passing, so no member of it can fail that rule. They stay in the
+table at a structural zero with the reason stated, rather than reading as three
+checks that passed. Separately, an early draft made the last category
+unconditional, which would have made the zero-unexplained claim pass vacuously;
+the shipped categories are each a test that can fail, so "unexplained" stays
+reachable.
+
+The precedence rule and its grounds are in
+`docs/adr/0028-pool-membership-precedence-local-universe-primary-wowsims-audits.md`.
+The owner's stated ideal — wowsims primary for membership — is inverted on
+measured grounds: the DB records no source at all for badge, PvP and tier-token
+items.
+
+```bash
+python -c "import json,collections;db=json.load(open('vendor/wowsims/db.json'));print(collections.Counter(k for i in db['items'] for s in i.get('sources') or [] for k in s))"
+# Counter({'drop': 2821, 'crafted': 1113, 'rep': 111})
+```
+
+### Goal 2 — the fork's bundled universes match `data/`, and a gate says so
+
+Ticket 211 closes. Five of the eight copied files had drifted again before the
+gate landed, exactly as that ticket predicted. Membership only, traced to two
+commits: `5cf0ea0` added 29297 to ret-p3, ret-p4, ret-p5 and feral-p3 plus 34470
+to ret-p5; `5c42a37` removed druid-unusable weapon rows from feral-p2 and
+feral-p3.
+
+```bash
+pnpm fork-universes:check
+# fork universes check ok: 8 bundled copies byte-match their data/ sources
+python scripts/sync_fork_universes.py --write   # the one-command refresh
+```
+
+### Goal 3 — the tab names the phase in plain words
+
+Measured on the served page in a fronted Brave window, **zero hidden
+milliseconds** across the timed run. `document.body.innerText.includes('this
+phase')` is **false** on ret p2, ret p3, feral p2 and feral p3. Rendered
+strings:
+
+```
+Sim only Phase 3 (2.2 - T6) BiS-list items
+Only items on a Phase 3 (2.2 - T6) BIS list
+Max phase        Phase 3 (2.2 - T6)
+Candidate pool   BiS-list items for Phase 3 (2.2 - T6)
+Pool source      feral-p3.universe.json (366 entries)
+```
+
+The tab mounts the page's own `makePhaseSelector` against the same `sim`, so tab
+and page cannot disagree. Verified in **both** directions: setting the tab's
+selector to 3 moved every page picker to 3, and driving a Gear-side picker to 5
+moved the tab's selector and both its labels to Phase 5.
+
+The `366` in the pool-source row equals the local membership the committed feral
+listing records, so the bundled universe and the committed artifact agree.
+
+### Goal 4 — a post-sim raid filter, with zoneless gear still reachable
+
+On the completed feral run the filter offers zones first, then only the zoneless
+buckets present in the pool:
+
+```
+All, Serpentshrine Cavern, Black Temple, Hyjal Summit, Tempest Keep,
+PvP vendor, Reputation vendor, Badge vendor, Crafted
+```
+
+| Filter | rows | zoneless | slot tabs |
+| --- | --- | --- | --- |
+| All | 17 | 5 | all 14 slots |
+| Serpentshrine Cavern | 2 | 0 | Waist, Trinket 1 |
+| Black Temple | 8 | 0 | Neck, Shoulder, Back, Chest, Legs, Feet, Finger 1 |
+| Hyjal Summit | 1 | 0 | Hands |
+| Tempest Keep | 1 | 0 | Back |
+| PvP vendor | 2 | 2 | Wrist, Main Hand |
+| Reputation vendor | 1 | 1 | Finger 1 |
+| Badge vendor | 1 | 1 | Trinket 2 |
+| Crafted | 1 | 1 | Head |
+
+The eight non-All values sum to **17**, exactly the All count; no item matched
+two values and none was unreachable. That is the same exactly-one-bucket
+property `packages/core/test/view.test.ts` asserts, now confirmed on a served
+page. The run's largest single upgrade is a PvP-vendor item at +90.9 DPS, which
+a zone-only filter would have hidden entirely.
+
+Accepted consequence: the slot strip narrows with the filtered view — 7 tabs
+under Black Temple against 14 under All — because `renderSubTabs()` derives the
+slot set from the same view. Nothing is unreachable, only regrouped.
+
+The boss sub-filter is deferred behind ticket 35, because multi-zone items
+bucket arbitrarily today and boss narrowing would be confidently wrong. Ticket
+277 records the deferral.
+
+### The feral prune-on run, and a 5x discrepancy that is not explained
+
+```
+Your current gear: 2132.2 DPS. Took 302 s.
+```
+
+Phase 3, prune on (366 candidates down to 17), 3,000 iterations, seeds
+11/22/33/44/55, `visibilityState: visible` with **zero hidden intervals**.
+
+**302 s against the 61 s this log recorded for the feral prune-on cell earlier
+today in the finish-the-tab entry — roughly 5x, and unexplained.** Both runs
+were fronted and unthrottled, so throttling is ruled out. Candidate causes, all
+**hypotheses, none tested**:
+
+- The feral universes were refreshed between the two runs (fork `a00a50c6f`
+  restored 33 rows to feral-p3), so the pruned candidate set could differ. Both
+  runs report the prune reaching 17, which argues against membership alone
+  accounting for the gap.
+- The earlier feral cell ran the **fork's default APL**, because the owner's
+  rotation was stripped when `timeToNextEnergyTick` proved unknown to the pinned
+  proto. Whether this run did the same was not checked.
+- Machine state: other load, worker count or thermal conditions may differ
+  between sittings. `hardwareConcurrency` and the worker picker were not re-read
+  this run.
+- Run-to-run variance in this area is already known to be wide. The
+  finish-the-tab entry records 7.8 s per sim against ticket 156's 3.8 s, and a
+  17 % spread between two runs of the same ret cell.
+
+The engine diff between the two fork tips touches only `view.ts`, a post-sim
+display filter that cannot affect sim time:
+
+```bash
+git -C vendor/tbc-new-fork diff --stat 8bb02b028..eb65670 -- ui/core/components/individual_sim_ui/upgrades/engine/
+# PROVENANCE.md | 2 +-    view.ts | 22 +++++-
+```
+
+**302 s is the measured figure and stands.** The discrepancy is recorded, not
+resolved.
+
+### Engine on wasm — a substitute measurement, labelled as one
+
+The literal `Worker[0] Ready, isWasm: true` line could not be captured: the
+browser tooling's console tracker re-initialises on every navigation and so
+never observes load-time logs. The same fact was measured at its source instead,
+since `sim_worker.js` posts `ready(isWasm)` rather than logging it:
+
+```js
+const w = new Worker('/tbc/sim_worker.js');
+w.onmessage = e => console.log(JSON.stringify(e.data));
+// {"msg":"ready","outputData":{"0":1}}   outputData[0] === 1 is isWasm true
+```
+
+### Two traps this run hit
+
+- **Serve `dist`, not `dist/tbc`.** The bundle hardcodes a `/tbc/` prefix, so
+  serving `dist/tbc` as the web root 404s the entry script and the page renders
+  blank white with no console error. Measuring then would have recorded a blank
+  page as a finding.
+- **An empty filter view renders a one-cell "No upgrades found above the
+  cutoff." row.** A naive `tbody tr` count treats it as data; it inflated one
+  filter's row count and produced a phantom item appearing to match three
+  filters. Count only rows with `cells.length >= 5`.
+
+### Tickets
+
+211 closed, its mechanism now built. 89, 17 and 173 annotated with what the
+listing does and does not settle — 89's blanket framing does not survive the
+evidence and needs re-scoping. Filed: 276 (two membership buckets for the owner,
+plus the Swiftsteel/Swiftstrike phase doubt) and 277 (the boss sub-filter
+deferral).
