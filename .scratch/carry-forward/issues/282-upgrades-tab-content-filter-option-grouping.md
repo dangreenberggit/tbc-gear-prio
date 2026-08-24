@@ -1,4 +1,7 @@
-Status: open
+Status: closed (2026-08-24, fork commit e565d4a67 on feat/upgrades-tab —
+labelled optgroups driven by the engine's ZONELESS_SOURCE_LABELS split;
+option conservation proven against the old flat list. Review also confirmed
+a pre-existing selection-wipe bug, filed as ticket 285.)
 Type: deferred feature
 Origin: stage-gate `upgrades-ui-pass`, deferral decision, 2026-08-23
 Blocks: none
