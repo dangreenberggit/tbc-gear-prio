@@ -1,4 +1,7 @@
-Status: open
+Status: closed (2026-08-24, fork commit da04366f5 on feat/upgrades-tab —
+Bulk-tab progress idiom reused inside the single status line; determinate
+only for the simming stage's real ratio, indeterminate striped otherwise;
+26/26 live samples matched the counter text.)
 Type: deferred feature
 Origin: stage-gate `upgrades-ui-pass`, deferral decision, 2026-08-23
 Blocks: none
