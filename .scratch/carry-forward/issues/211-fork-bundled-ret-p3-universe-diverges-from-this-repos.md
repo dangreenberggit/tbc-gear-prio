@@ -1,15 +1,18 @@
-Status: closed 2026-08-23 (the sync check now exists and gates verify)
-Type: data divergence (no mechanism keeps two copies in step)
+Status: closed
+Type: data divergence
 Origin: ticket 156 slice C session, 2026-08-16
 (`.scratch/carry-forward/plans/ticket-156/handoff-2026-08-16.md` §8 item 4, §9)
 Blocks: none
 Blocked by: none
 
-Note for any in-browser measurement: the tab's pool comes from the fork's
-bundled copy. It matches `data/universes/` as of 2026-08-16, and nothing
-enforces that it still will.
-
 # The fork's bundled universes drifted from this repo's, with nothing to catch it
+
+Closed 2026-08-23: the sync check now exists and gates `pnpm verify`. Filed as
+a data divergence because no mechanism kept the two copies in step.
+
+Note for any in-browser measurement: the tab's pool comes from the fork's
+bundled copy. It matched `data/universes/` as of 2026-08-16, and until this
+ticket closed nothing enforced that it still would.
 
 Filed as "the fork has 394 ret-p3 entries against this repo's 390, probably
 benign". Both halves of that were wrong: the divergence was **not** four extra

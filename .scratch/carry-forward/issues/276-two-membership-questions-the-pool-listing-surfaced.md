@@ -1,4 +1,4 @@
-Status: open (owner decision, not an engineering bug)
+Status: open
 Type: pool membership question
 Origin: stage-gate `phase-item-pool`, Step 5, 2026-08-23
 (`docs/adr/0028-pool-membership-precedence-local-universe-primary-wowsims-audits.md`)
@@ -6,6 +6,8 @@ Blocks: none
 Blocked by: none
 
 # Two buckets of phase-3 items the pool omits, each for a different reason
+
+An owner decision, not an engineering bug.
 
 The pool listing (`pnpm pool-listings:check`,
 `data/pool-listings/{ret,feral}-p3.md`) classifies every item the wowsims DB

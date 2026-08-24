@@ -1,10 +1,12 @@
-Status: open (deferred deliberately; reason recorded)
+Status: open
 Type: deferred feature
 Origin: stage-gate `phase-item-pool`, Q3 decision, 2026-08-23
 Blocks: none
 Blocked by: 35
 
 # The Upgrades tab's raid filter has no boss sub-filter, on purpose
+
+Deferred deliberately; the reason is recorded below.
 
 The tab now has a post-sim raid filter: a completed shopping list can be
 narrowed to one zone, or to one of the labelled zoneless buckets (badge
