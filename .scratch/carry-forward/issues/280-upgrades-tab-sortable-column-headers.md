@@ -1,4 +1,7 @@
-Status: open
+Status: closed (2026-08-24, fork commit 37306d55c on feat/upgrades-tab —
+sortable headers on all done-state tables with rank pinned to the row;
+mid-run/Stop tables ruled out of scope at review because their Rank cells
+are provisional landing-order counters, not engine ranks.)
 Type: deferred feature
 Origin: stage-gate `upgrades-ui-pass`, deferral decision, 2026-08-23
 Blocks: none
