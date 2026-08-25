@@ -1,0 +1,505 @@
+{
+  "maxPhase": 3,
+  "carryoverPolicy": "union",
+  "epWeights": {
+    "path": "data/presets/warlock/fallback.ep-weights.json",
+    "pin": "282d7b77c6f45f070b92d82b84bbb934c5dd3678"
+  },
+  "phaseZones": [
+    "Black Temple",
+    "Gruul's Lair",
+    "Hyjal Summit",
+    "Karazhan",
+    "Magtheridon's Lair",
+    "Serpentshrine Cavern",
+    "Tempest Keep",
+    "World Bosses"
+  ],
+  "phaseRepFactions": [
+    990,
+    1012
+  ],
+  "d7EligibleTotal": 2351,
+  "excludedNoSource": 538,
+  "universeTotal": 681,
+  "listOnlyMembership": 0,
+  "perSlot": {
+    "back": 50,
+    "chest": 33,
+    "feet": 39,
+    "finger": 108,
+    "hands": 16,
+    "head": 31,
+    "legs": 34,
+    "neck": 65,
+    "ranged": 13,
+    "shoulder": 27,
+    "trinket": 38,
+    "waist": 32,
+    "weapon": 160,
+    "wrist": 35
+  },
+  "sourceRecordAdds": {
+    "atlasloot": 214,
+    "curated": 6,
+    "db": 1714,
+    "two-hop": 18
+  },
+  "membershipByOrigin": {
+    "curated": 19,
+    "dbPhase": 404,
+    "itemHasOrigin:atlasloot": 52,
+    "itemHasOrigin:curated": 5,
+    "itemHasOrigin:db": 634,
+    "itemHasOrigin:two-hop": 15,
+    "repFactionMatch": 22,
+    "zoneMatch": 236
+  },
+  "exclusivePrimaryOrigin": {
+    "db": 634,
+    "atlasloot-only": 27,
+    "two-hop": 15,
+    "other": 5
+  },
+  "tierPiecesExpected": 15,
+  "tierPiecesPresent": 15,
+  "tierPiecesMissing": [],
+  "junkFilter": {
+    "total": 681,
+    "casterOnlyReject": 434,
+    "epFloorReject": 8,
+    "combinedReject": 442,
+    "combinedKeep": 239,
+    "casterRejectPct": 63.7,
+    "combinedRejectPct": 64.9,
+    "applied": false
+  },
+  "wowheadListIds": 0,
+  "wowheadRecall": {
+    "heldOut": false,
+    "listTotal": 0,
+    "recalled": 0,
+    "missed": 0,
+    "recallPct": null,
+    "missedItems": []
+  },
+  "ticket157ForceIncluded": [],
+  "excludedUnimplementedEffect": [
+    {
+      "itemId": 3475,
+      "name": "Cloak of Flames"
+    },
+    {
+      "itemId": 11810,
+      "name": "Force of Will"
+    },
+    {
+      "itemId": 12709,
+      "name": "Pip's Skinner"
+    },
+    {
+      "itemId": 13143,
+      "name": "Mark of the Dragon Lord"
+    },
+    {
+      "itemId": 13212,
+      "name": "Halycon's Spiked Collar"
+    },
+    {
+      "itemId": 13213,
+      "name": "Smolderweb's Eye"
+    },
+    {
+      "itemId": 13503,
+      "name": "Alchemist's Stone"
+    },
+    {
+      "itemId": 13505,
+      "name": "Runeblade of Baron Rivendare"
+    },
+    {
+      "itemId": 13515,
+      "name": "Ramstein's Lightning Bolts"
+    },
+    {
+      "itemId": 13937,
+      "name": "Headmaster's Charge"
+    },
+    {
+      "itemId": 14153,
+      "name": "Robe of the Void"
+    },
+    {
+      "itemId": 15138,
+      "name": "Onyxia Scale Cloak"
+    },
+    {
+      "itemId": 16928,
+      "name": "Nemesis Gloves"
+    },
+    {
+      "itemId": 16929,
+      "name": "Nemesis Skullcap"
+    },
+    {
+      "itemId": 16932,
+      "name": "Nemesis Spaulders"
+    },
+    {
+      "itemId": 17082,
+      "name": "Shard of the Flame"
+    },
+    {
+      "itemId": 17584,
+      "name": "Marshal's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17588,
+      "name": "General's Dreadweave Gloves"
+    },
+    {
+      "itemId": 17904,
+      "name": "Stormpike Insignia Rank 6"
+    },
+    {
+      "itemId": 17909,
+      "name": "Frostwolf Insignia Rank 6"
+    },
+    {
+      "itemId": 18382,
+      "name": "Fluctuating Cloak"
+    },
+    {
+      "itemId": 18406,
+      "name": "Onyxia Blood Talisman"
+    },
+    {
+      "itemId": 18639,
+      "name": "Ultra-Flash Shadow Reflector"
+    },
+    {
+      "itemId": 18758,
+      "name": "Specter's Blade"
+    },
+    {
+      "itemId": 18760,
+      "name": "Necromantic Band"
+    },
+    {
+      "itemId": 18809,
+      "name": "Sash of Whispered Secrets"
+    },
+    {
+      "itemId": 18815,
+      "name": "Essence of the Pure Flame"
+    },
+    {
+      "itemId": 19287,
+      "name": "Darkmoon Card: Heroism"
+    },
+    {
+      "itemId": 19288,
+      "name": "Darkmoon Card: Blue Dragon"
+    },
+    {
+      "itemId": 19289,
+      "name": "Darkmoon Card: Maelstrom"
+    },
+    {
+      "itemId": 19290,
+      "name": "Darkmoon Card: Twisting Nether"
+    },
+    {
+      "itemId": 19605,
+      "name": "Kezan's Unstoppable Taint"
+    },
+    {
+      "itemId": 19930,
+      "name": "Mar'li's Eye"
+    },
+    {
+      "itemId": 19949,
+      "name": "Zandalarian Hero Medallion"
+    },
+    {
+      "itemId": 19950,
+      "name": "Zandalarian Hero Charm"
+    },
+    {
+      "itemId": 20579,
+      "name": "Green Dragonskin Cloak"
+    },
+    {
+      "itemId": 21488,
+      "name": "Fetish of Chitinous Spikes"
+    },
+    {
+      "itemId": 21517,
+      "name": "Gnomish Turban of Psychic Might"
+    },
+    {
+      "itemId": 21526,
+      "name": "Band of Icy Depths"
+    },
+    {
+      "itemId": 21625,
+      "name": "Scarab Brooch"
+    },
+    {
+      "itemId": 21647,
+      "name": "Fetish of the Sand Reaver"
+    },
+    {
+      "itemId": 21685,
+      "name": "Petrified Scarab"
+    },
+    {
+      "itemId": 21687,
+      "name": "Ukko's Ring of Darkness"
+    },
+    {
+      "itemId": 21780,
+      "name": "Blood Crown"
+    },
+    {
+      "itemId": 21891,
+      "name": "Shard of the Fallen Star"
+    },
+    {
+      "itemId": 22321,
+      "name": "Heart of Wyrmthalak"
+    },
+    {
+      "itemId": 22589,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22630,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22631,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22632,
+      "name": "Atiesh, Greatstaff of the Guardian"
+    },
+    {
+      "itemId": 22691,
+      "name": "Corrupted Ashbringer"
+    },
+    {
+      "itemId": 23001,
+      "name": "Eye of Diminution"
+    },
+    {
+      "itemId": 23027,
+      "name": "Warmth of Forgiveness"
+    },
+    {
+      "itemId": 23558,
+      "name": "The Burrower's Shell"
+    },
+    {
+      "itemId": 23825,
+      "name": "Nigh Invulnerability Belt"
+    },
+    {
+      "itemId": 23835,
+      "name": "Gnomish Poultryizer"
+    },
+    {
+      "itemId": 23836,
+      "name": "Goblin Rocket Launcher"
+    },
+    {
+      "itemId": 24106,
+      "name": "Thick Felsteel Necklace"
+    },
+    {
+      "itemId": 24110,
+      "name": "Living Ruby Pendant"
+    },
+    {
+      "itemId": 24117,
+      "name": "Embrace of the Dawn"
+    },
+    {
+      "itemId": 24127,
+      "name": "Figurine - Talasite Owl"
+    },
+    {
+      "itemId": 24376,
+      "name": "Runed Fungalcap"
+    },
+    {
+      "itemId": 24390,
+      "name": "Auslese's Light Channeler"
+    },
+    {
+      "itemId": 24551,
+      "name": "Talisman of the Horde"
+    },
+    {
+      "itemId": 24556,
+      "name": "Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 25827,
+      "name": "Muck-Covered Drape"
+    },
+    {
+      "itemId": 25829,
+      "name": "Talisman of the Alliance"
+    },
+    {
+      "itemId": 25835,
+      "name": "Explorer's Walking Stick"
+    },
+    {
+      "itemId": 26055,
+      "name": "Oculus of the Hidden Eye"
+    },
+    {
+      "itemId": 27416,
+      "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27896,
+      "name": "Alembic of Infernal Power"
+    },
+    {
+      "itemId": 27900,
+      "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28590,
+      "name": "Ribbon of Sacrifice"
+    },
+    {
+      "itemId": 28823,
+      "name": "Eye of Gruul"
+    },
+    {
+      "itemId": 29181,
+      "name": "Timelapse Shard"
+    },
+    {
+      "itemId": 29347,
+      "name": "Talisman of the Breaker"
+    },
+    {
+      "itemId": 30008,
+      "name": "Pendant of the Lost Ages"
+    },
+    {
+      "itemId": 30188,
+      "name": "Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 30619,
+      "name": "Fel Reaver's Piston"
+    },
+    {
+      "itemId": 30841,
+      "name": "Lower City Prayerbook"
+    },
+    {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31973,
+      "name": "Merciless Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 31981,
+      "name": "Merciless Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 32093,
+      "name": "Chancellor's Dreadweave Gloves"
+    },
+    {
+      "itemId": 32538,
+      "name": "Skywitch's Drape"
+    },
+    {
+      "itemId": 32539,
+      "name": "Skyguard's Drape"
+    },
+    {
+      "itemId": 32770,
+      "name": "Skyguard Silver Cross"
+    },
+    {
+      "itemId": 32771,
+      "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33676,
+      "name": "Vengeful Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 33684,
+      "name": "Vengeful Gladiator's Felweave Handguards"
+    },
+    {
+      "itemId": 34430,
+      "name": "Glimmering Naaru Sliver"
+    },
+    {
+      "itemId": 34471,
+      "name": "Vial of the Sunwell"
+    },
+    {
+      "itemId": 34677,
+      "name": "Shattered Sun Pendant of Restoration"
+    },
+    {
+      "itemId": 34678,
+      "name": "Shattered Sun Pendant of Acumen"
+    },
+    {
+      "itemId": 34679,
+      "name": "Shattered Sun Pendant of Might"
+    },
+    {
+      "itemId": 34680,
+      "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 35581,
+      "name": "Rocket Boots Xtreme Lite"
+    },
+    {
+      "itemId": 35703,
+      "name": "Figurine - Seaspray Albatross"
+    },
+    {
+      "itemId": 35748,
+      "name": "Guardian's Alchemist Stone"
+    },
+    {
+      "itemId": 35749,
+      "name": "Sorcerer's Alchemist Stone"
+    },
+    {
+      "itemId": 35750,
+      "name": "Redeemer's Alchemist Stone"
+    },
+    {
+      "itemId": 35751,
+      "name": "Assassin's Alchemist Stone"
+    },
+    {
+      "itemId": 38175,
+      "name": "The Horseman's Blade"
+    },
+    {
+      "itemId": 38506,
+      "name": "Don Carlos' Famous Hat"
+    }
+  ]
+}
