@@ -557,6 +557,15 @@ function defaultSeedsFor(iterations: number): number[] {
 const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
   ret: "ret/p2.raid-sim-skeleton",
   feral: "feral/p2.raid-sim-skeleton",
+  balance: "balance/p2.raid-sim-skeleton",
+  hunter: "hunter/p2.raid-sim-skeleton",
+  mage: "mage/p2.raid-sim-skeleton",
+  shadow: "shadow/p2.raid-sim-skeleton",
+  rogue: "rogue/p2.raid-sim-skeleton",
+  ele: "ele/p2.raid-sim-skeleton",
+  enh: "enh/p2.raid-sim-skeleton",
+  warlock: "warlock/p2.raid-sim-skeleton",
+  warrior: "warrior/p2.raid-sim-skeleton",
 };
 
 function presetIdFor(spec: SpecId): string {
@@ -717,7 +726,8 @@ export async function rankUpgrades(
     eligible,
     equipment,
     deps.epWeights,
-    (itemId) => getItem(itemId)?.stats ?? []
+    (itemId) => getItem(itemId)?.stats ?? [],
+    input.spec
   );
 
   // Read once and shared with the sim cache below, so the version a result is
@@ -871,7 +881,11 @@ export async function rankUpgrades(
      */
     async function runCandidate(entry: PoolEntry): Promise<void> {
       const owned = equippedIds.has(entry.itemId);
-      const slotNames = simSlotsForPoolSlot(entry.slot);
+      const slotNames = simSlotsForPoolSlot(
+        entry.slot,
+        input.spec,
+        entry.itemId
+      );
       let best: BestSwap | null = null;
 
       for (let s = 0; s < slotNames.length; s++) {
@@ -1461,7 +1475,11 @@ async function buildSetBonuses(
 
   const wornCounts = setCounts(equipment);
   const slotIndexForPoolEntry = (entry: PoolEntry): number | undefined => {
-    for (const slotName of simSlotsForPoolSlot(entry.slot)) {
+    for (const slotName of simSlotsForPoolSlot(
+      entry.slot,
+      input.spec,
+      entry.itemId
+    )) {
       const idx = SIM_ORDER.indexOf(slotName);
       if (idx >= 0) return idx;
     }

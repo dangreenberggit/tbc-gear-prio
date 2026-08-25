@@ -39,6 +39,23 @@ export const CUTOFF_FERAL: Cutoff = { absDps: 3.6, pct: 0.15 };
 const CUTOFF_BY_SPEC: Readonly<Record<SpecId, Cutoff>> = {
   ret: CUTOFF,
   feral: CUTOFF_FERAL,
+
+  // untested: no five-seed spread has been run for any spec below, so each
+  // carries ret's derived numbers. That is the same value they would have got
+  // from the old `?? CUTOFF` fallback — the difference is that the debt is
+  // written down here instead of hiding in an operator. Feral's spread came
+  // out 6% higher than ret's on the same method, so a noisier rotation than
+  // ret's is expected to be under-filtered until measured.
+  // Carry-forward: .scratch/carry-forward/issues — per-spec cutoff spreads.
+  balance: CUTOFF,
+  hunter: CUTOFF,
+  mage: CUTOFF,
+  shadow: CUTOFF,
+  rogue: CUTOFF,
+  ele: CUTOFF,
+  enh: CUTOFF,
+  warlock: CUTOFF,
+  warrior: CUTOFF,
 };
 
 /**

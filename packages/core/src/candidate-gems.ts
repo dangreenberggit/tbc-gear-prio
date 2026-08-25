@@ -187,13 +187,55 @@ const PREFERRED_META_IDS: readonly number[] = [32409];
  * records none, get an owner ruling the way ticket 257 got one for feral — do
  * not leave it to the fallback and do not inherit another spec's row without
  * that ruling.
+ *
+ * The type below enforces exactly that rule for the *rankable* specs: it is
+ * total over `SpecId` and optional only for the identify-but-not-rank
+ * remainder of `DetectedSpecId`. A new rankable spec cannot reach the
+ * empty-socket branch by omission any more — the compiler asks first.
+ *
+ * The nine rows added for the all-DPS-specs pass were each read out of that
+ * spec's **highest-phase** vendored gear set, by gem colour rather than array
+ * position: the meta is not reliably `gems[0]`, since the array follows the
+ * head item's own socket order (Cowl of Gul'dan, id 34332, sockets `[4,1]`,
+ * carries its meta second). Every one of the nine is stable across every phase
+ * of that spec that seats a meta at all — no spec changes meta between phases.
+ * Two carry a wrinkle worth knowing rather than a disagreement: priest's
+ * pre-raid and p1 sets wear the socketless Spellstrike Hood (24266), and only
+ * p2/p3 seat 25893; feral's 15 lower sets wear socketless Wolfshead (8345) and
+ * only p5 seats 32409.
  */
-export const SPEC_PREFERRED_METAS: Partial<
-  Record<DetectedSpecId, readonly number[]>
+export const SPEC_PREFERRED_METAS: Readonly<
+  Record<SpecId, readonly number[]> &
+    Partial<Record<DetectedSpecId, readonly number[]>>
 > = {
   ret: PREFERRED_META_IDS,
   feral: PREFERRED_META_IDS,
   "feral-tank": PREFERRED_META_IDS,
+
+  // Chaotic Skyfire Diamond — the caster crit meta.
+  // ui/druid/balance/gear_sets/p5.gear.json, head 34403.
+  balance: [34220],
+  // ui/mage/dps/gear_sets/p2Arcane.gear.json, head 30206.
+  mage: [34220],
+  // ui/shaman/elemental/gear_sets/p5.gear.json, head 34332 (meta second).
+  ele: [34220],
+  // ui/warlock/dps/gear_sets/swp.gear.json, head 34340.
+  warlock: [34220],
+
+  // Mystical Skyfire Diamond. Shadow is the one caster here not on 34220:
+  // ui/priest/dps/gear_sets/p3.gear.json, head 31064, seats 25893.
+  shadow: [25893],
+
+  // Relentless Earthstorm Diamond — the same melee meta ret and feral use.
+  // ui/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json, head 32235.
+  hunter: PREFERRED_META_IDS,
+  // ui/rogue/dps/gear_sets/p3.gear.json, head 32235.
+  rogue: PREFERRED_META_IDS,
+  // ui/shaman/enhancement/gear_sets/p5.gear.json, head 34333 (meta second).
+  enh: PREFERRED_META_IDS,
+  // ui/warrior/dps/gear_sets/p5_fury.gear.json, head 34333 (meta second);
+  // p5_arms.gear.json seats the same one.
+  warrior: PREFERRED_META_IDS,
 };
 
 /**
