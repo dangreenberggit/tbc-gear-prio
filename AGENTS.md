@@ -68,6 +68,8 @@ Windows-native binaries — `node`, `python` — read `C:/Users/...`, not Git Ba
 
 Read a command's error text before forming a theory about it. Tool-manager errors in particular usually name their own fix, and pattern-matching past them costs more than reading them.
 
+**Before** a ported-engine-file edit, a scripted/generated file edit, filing a ticket, writing a review Disposition table, or starting the dev servers — or when a node/pnpm command fails strangely — read [`docs/agents/known-traps.md`](docs/agents/known-traps.md): the trap each of those actions arms, and the move that disarms it.
+
 ### Types from JSON
 
 **Never derive a TypeScript type from a JSON import.** `resolveJsonModule` widens every string to `string`, and `as const` cannot be applied to a JSON import (TS1355), so `(typeof json.list)[number]` is `string` and any `extends` assertion against it **passes vacuously** — a check that reads as rigour and proves nothing. This repo has hit it twice; both times the wrong conclusion ("impossible, needs codegen") was written down as fact. JSON is a **value** source of truth, never a **type** one. Shared lists go through `scripts/generate_json_literal_types.py`, which emits committed `as const` code gated by `pnpm verify`. See [`docs/workflow.md`](docs/workflow.md#never-derive-a-type-from-a-json-import).
