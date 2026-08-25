@@ -136,3 +136,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 298 feral SWP token pieces unmapped — pre-merge feat/upgrades-all-dps-specs (D3)
 - 299 badge source classification breadth — pre-merge feat/upgrades-all-dps-specs (D4)
 - 300 assemble_universe spec-profile duplication — pre-merge feat/upgrades-all-dps-specs (standards)
+- 301 eligible_d7 re-implements canEquipItem (drift class) — user, post pre-merge feat/upgrades-all-dps-specs
