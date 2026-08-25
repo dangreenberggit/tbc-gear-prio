@@ -22,9 +22,9 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 3066,
-  "excludedNoSource": 1316,
-  "universeTotal": 486,
+  "d7EligibleTotal": 3028,
+  "excludedNoSource": 1288,
+  "universeTotal": 481,
   "listOnlyMembership": 35,
   "perSlot": {
     "back": 38,
@@ -39,30 +39,30 @@
     "shoulder": 26,
     "trinket": 35,
     "waist": 30,
-    "weapon": 91,
+    "weapon": 86,
     "wrist": 28
   },
   "sourceRecordAdds": {
-    "atlasloot": 254,
+    "atlasloot": 251,
     "curated": 3,
-    "db": 1632,
+    "db": 1622,
     "two-hop": 15,
     "wowhead": 27
   },
   "membershipByOrigin": {
     "curated": 4,
     "heroicMatch": 11,
-    "itemHasOrigin:atlasloot": 86,
+    "itemHasOrigin:atlasloot": 84,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 417,
+    "itemHasOrigin:db": 412,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 19,
     "listOnly": 35,
     "repFactionMatch": 33,
-    "zoneMatch": 403
+    "zoneMatch": 398
   },
   "exclusivePrimaryOrigin": {
-    "db": 417,
+    "db": 412,
     "wowhead-only": 19,
     "atlasloot-only": 32,
     "other": 3,
@@ -72,13 +72,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 486,
+    "total": 481,
     "casterOnlyReject": 240,
     "epFloorReject": 0,
     "combinedReject": 240,
-    "combinedKeep": 246,
-    "casterRejectPct": 49.4,
-    "combinedRejectPct": 49.4,
+    "combinedKeep": 241,
+    "casterRejectPct": 49.9,
+    "combinedRejectPct": 49.9,
     "applied": false
   },
   "wowheadListIds": 115,

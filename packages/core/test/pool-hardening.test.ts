@@ -459,10 +459,16 @@ describe("data/universes/ret-p3.json hardening", () => {
     // stub-only. The ruling is unchanged -- what changed is that the fork now
     // implements this effect (stat_bonus_procs_auto_gen.go, and every spec's
     // TestAllItems results carry it).
+    // 391 -> 467: ret's pool stopped filtering by armor class. Equip legality
+    // now comes from the fork's own canEquipItem, which says a paladin can wear
+    // cloth (it can), and the SME gate ruled the old cloth omission an
+    // unexplained outlier rather than policy -- every other spec, warrior
+    // included, already admitted cloth. +76 cloth rows at p3. Weapons are
+    // unaffected: the 2H-only rule survives as a named policy exclusion.
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(391);
+    expect(universeP3.length).toBe(467);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -618,20 +624,23 @@ describe("data/universes/ret-p3.json hardening", () => {
     // false provenance claim.
     expect(shadesteel?.sources[0]).not.toHaveProperty("recipeZone");
 
-    // All 13 Ashtongue-taught crafts a paladin can wear. The 4 cloth Soulguard
-    // pieces are held out by armor type, not by this route.
+    // All 17 Ashtongue-taught crafts a paladin can wear, the 4 cloth Soulguard
+    // pieces included. Ret's pool no longer filters by armor class: a paladin
+    // can equip cloth, every other spec's pool already admitted it (warrior,
+    // the other plate class, ships 177 cloth pieces), and the EP ranking buries
+    // caster gear on its stats rather than by hiding it. See the SME ruling in
+    // .scratch/handoffs/sme-rank-judgment-upgrades-dedup-wowsims-ret-cloth-and-
+    // onehand.md -- which also found that every back-slot item is armorType
+    // cloth, so an armor-class filter would have deleted all 36 of ret's cloaks.
     const taught = [
-      32393, 32394, 32395, 32396, 32397, 32398, 32399, 32400, 32401, 32402,
-      32403, 32404, 32420,
+      32389, 32390, 32391, 32392, 32393, 32394, 32395, 32396, 32397, 32398,
+      32399, 32400, 32401, 32402, 32403, 32404, 32420,
     ];
     for (const id of taught) {
       expect(
         byId.get(id)?.sources[0],
         `${id} ${byId.get(id)?.name ?? "absent"}`
       ).toMatchObject({ kind: "crafted", recipeFactionId: 1012 });
-    }
-    for (const cloth of [32389, 32390, 32391, 32392]) {
-      expect(byId.has(cloth), `${cloth} is cloth`).toBe(false);
     }
   });
 

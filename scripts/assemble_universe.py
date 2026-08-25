@@ -26,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
+EQUIP_ELIGIBILITY = ROOT / "data/equip-eligibility.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 FACTION_IDS = ROOT / "data/faction_ids.json"
@@ -93,28 +94,17 @@ ITEM_TYPE_SLOT = {
     14: "ranged",
 }
 
-ARMOR_CLOTH = 1
-ARMOR_LEATHER = 2
-ARMOR_MAIL = 3
-ARMOR_PLATE = 4
-WEAPON_AXE = 1
-WEAPON_DAGGER = 2
-WEAPON_FIST = 3
+# Armor classes, weapon types and hand types used to be enumerated here so this
+# script could re-implement the fork's equip rules. It no longer does -- the
+# fork answers that question directly (see `_equip_eligibility`) -- so only the
+# codes something still names survive. Add one back only for a *policy* rule,
+# never to re-derive equip legality.
+WEAPON_OFFHAND = 5
 WEAPON_POLEARM = 6
 WEAPON_SHIELD = 7
-WEAPON_STAFF = 8
-WEAPON_SWORD = 9
+# proto HandType: 1 MainHand, 2 OneHand, 3 OffHand, 4 TwoHand. Only the
+# two-hand code is named, and only a *policy* rule reads it.
 HAND_TYPE_TWO_HAND = 4
-WEAPON_MACE = 4
-WEAPON_OFFHAND = 5
-RANGED_BOW = 1
-RANGED_CROSSBOW = 2
-RANGED_GUN = 3
-RANGED_THROWN = 4
-RANGED_WAND = 5
-RANGED_IDOL = 6
-RANGED_LIBRAM = 7
-RANGED_TOTEM = 8
 MIN_QUALITY = 3
 
 # Quality floor for the db-phase membership route only (plan amendment 1).
@@ -518,11 +508,9 @@ class SpecProfile:
         sunmote_upgrades: Path | None,
         tier_piece_ids: frozenset[int],
         class_id: int,
-        armor_types: frozenset[int],
-        ranged_type: int | frozenset[int],
-        allow_one_hand: bool,
-        excluded_weapon_types: frozenset[int],
-        two_hand_weapon_types: frozenset[int] | None = None,
+        policy_excluded_weapon_types: frozenset[int] = frozenset(),
+        policy_two_hand_only: bool = False,
+        policy_exclusion_note: str = "",
         ep_weights_by_phase: dict[int, Path] | None = None,
         db_phase_membership: bool = False,
         exclude_ids: frozenset[int] = frozenset(),
@@ -547,34 +535,35 @@ class SpecProfile:
         self.sunmote_upgrades = sunmote_upgrades
         self.tier_piece_ids = tier_piece_ids
         self.class_id = class_id
-        self.armor_types = armor_types
-        # Ret and feral each have exactly one ranged type (Libram, Idol), and
-        # the field was an int to match. Hunter, rogue and warrior each carry
-        # several (Bow/Crossbow/Gun, plus Thrown for the last two), so the
-        # equality test that served the first two specs cannot express them.
-        # Both forms are accepted; the set is what `eligible_d7` reads.
-        self.ranged_types: frozenset[int] = (
-            ranged_type
-            if isinstance(ranged_type, frozenset)
-            else frozenset({ranged_type})
-        )
-        self.allow_one_hand = allow_one_hand
-        self.excluded_weapon_types = excluded_weapon_types
-        # Which weapon types this class may wield in a TWO-HANDED form.
-        #
-        # `allow_one_hand` alone cannot express this: it says "one-handers are
-        # eligible", and the gate built on it was one-directional, so every
-        # spec that set it True silently admitted every two-hander of an
-        # otherwise-eligible weapon type. A rogue cannot use a two-hander at
-        # all, and a priest, mage or warlock can use exactly one kind (a
-        # staff) while their eligible daggers and swords are one-hand only.
-        #
-        # Values come from the fork's generated capability table,
-        # `ui/core/player_classes/capabilities_auto_gen.ts` CLASS_WEAPON_TYPES,
-        # where each eligible weapon type carries its own `canUseTwoHand`
-        # flag. `None` means "no restriction recorded" and preserves the old
-        # behaviour, which is what ret and feral keep.
-        self.two_hand_weapon_types = two_hand_weapon_types
+        # Which item ids this spec can physically equip, per the fork's own
+        # canEquipItem. Armor types, weapon types, one-hand/two-hand rules and
+        # the classAllowlist all fold into this one set, because the fork
+        # already applies every one of them. See `_equip_eligibility()`.
+        self.equip_eligible_ids = EQUIP_ELIGIBLE_BY_FORK_SPEC[
+            SLUG_TO_FORK_SPEC[spec]
+        ]
+        # Weapon types this project excludes that the sim would allow. A
+        # *policy* call, not an equip rule -- the sim is right that the class
+        # can hold the thing, and we are saying it does not belong in an
+        # upgrade pool anyway. Empty for every spec unless a domain gate ruled
+        # otherwise, and never a place to work around a wrong equip answer:
+        # that would put the drift this whole mechanism removes straight back.
+        # Any spec that sets it must also set policy_exclusion_note, which is
+        # published in the universe payload's d7Note.
+        self.policy_excluded_weapon_types = policy_excluded_weapon_types
+        # The same kind of call, on hand type rather than weapon type. A
+        # separate field because weapon type cannot express it: ret-eligible
+        # swords split 48 two-handed against 116 one-handed and off-hand, so
+        # "no one-handers" is not a statement about swords.
+        self.policy_two_hand_only = policy_two_hand_only
+        self.policy_exclusion_note = policy_exclusion_note
+        if (
+            policy_excluded_weapon_types or policy_two_hand_only
+        ) and not policy_exclusion_note:
+            raise ValueError(
+                f"{spec}: a policy exclusion needs a policy_exclusion_note -- "
+                "an unexplained policy exclusion is indistinguishable from a bug"
+            )
         # Admit eligible db items that carry a `phase` but no parseable
         # `sources`, in place of the Wowhead-list membership layer the 9 new
         # specs do not have (plan amendment 1). Off for ret/feral, whose
@@ -678,6 +667,61 @@ def _arena_gear_ids() -> frozenset[int]:
 ARENA_GEAR_IDS = _arena_gear_ids()
 
 
+# This repo's spec slugs vs the fork's PlayerSpecs names.
+#
+# Two vocabularies exist because this repo predates the fork, so eleven rows of
+# correspondence are unavoidable. They get exactly ONE hand-written home --
+# here -- and no logic: anything that needs the fork's name for a slug reads
+# this dict rather than deriving it from a slug's spelling.
+#
+# What makes a hand map safe is the gate, not care. check_equip_eligibility.py
+# asserts on every `pnpm verify` that this map is **total** (every SPEC_PROFILES
+# slug appears) and **injective** (no two slugs claim one fork spec), and that
+# every name it uses exists in data/equip-eligibility.json. A rename on either
+# side fails there rather than silently mis-filtering a pool.
+SLUG_TO_FORK_SPEC: dict[str, str] = {
+    "ret": "RetributionPaladin",
+    "feral": "FeralCatDruid",
+    "balance": "BalanceDruid",
+    "hunter": "Hunter",
+    "mage": "Mage",
+    "shadow": "Priest",
+    "rogue": "Rogue",
+    "ele": "ElementalShaman",
+    "enh": "EnhancementShaman",
+    "warlock": "Warlock",
+    "warrior": "DpsWarrior",
+}
+
+
+def _equip_eligibility() -> dict[str, frozenset[int]]:
+    """Per-spec equippable item ids, computed by the fork's own canEquipItem.
+
+    The equip rules used to live here as a Python re-implementation of the
+    fork's `canEquipItem` plus per-spec constants hand-copied from its
+    `capabilities_auto_gen.ts`. That copy drifted and offered a rogue a
+    two-handed sword the sim's own gear picker refuses (ticket 301). The
+    constants were never the whole bug: the per-weapon-type two-hand rule was
+    mis-ported, so borrowing the constants alone would have left the same class
+    of drift in place.
+
+    So the decision is borrowed instead of the data. The fork exporter at
+    ui/core/components/individual_sim_ui/upgrades/tools/export_equip_eligibility.mts
+    runs the real canEquipItem over the fork's own db and writes this file;
+    check_equip_eligibility.py re-runs it at the pin and diffs on every
+    `pnpm verify`, so a fork-side rule change lands as a failed check rather
+    than a wrong pool listing.
+    """
+    raw = load_json(EQUIP_ELIGIBILITY)
+    assert isinstance(raw, dict)
+    specs = raw["specs"]
+    assert isinstance(specs, dict)
+    return {name: frozenset(int(i) for i in ids) for name, ids in specs.items()}
+
+
+EQUIP_ELIGIBLE_BY_FORK_SPEC = _equip_eligibility()
+
+
 SPEC_PROFILES: dict[str, SpecProfile] = {
     "ret": SpecProfile(
         "ret",
@@ -705,14 +749,30 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=ROOT / "data/two-hop/ret-sunmote-upgrades.json",
         tier_piece_ids=RET_TIER_PIECE_IDS,
         class_id=CLASS_PALADIN,
-        armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
-        ranged_type=RANGED_LIBRAM,
-        allow_one_hand=False,
-        # wowsims ui/core/player_classes/paladin.ts static weaponTypes lists
-        # only Axe, Mace, OffHand, Polearm, Shield, Sword as eligible --
-        # Dagger, Fist and Staff are all absent from that list, so all three
-        # are excluded here.
-        excluded_weapon_types=frozenset({WEAPON_DAGGER, WEAPON_FIST, WEAPON_STAFF}),
+        # Retribution is a two-hander spec. The sim is right that a paladin can
+        # hold a one-hander, a shield or an off-hand -- and that is a fact about
+        # the class, while the pool's question is about the spec. Ruled by the
+        # SME gate for this branch; see .scratch/handoffs/sme-rank-judgment-
+        # upgrades-dedup-wowsims-ret-cloth-and-onehand.md.
+        #
+        # Deliberately NOT paired with an armor-class exclusion. The same gate
+        # found that every back-slot item in the db is armorType 1 (cloth), so
+        # a "ret excludes cloth" rule would delete all 36 of ret's cloaks --
+        # its top-ranked entry among them -- which is a data-loss bug wearing a
+        # policy's clothes.
+        policy_two_hand_only=True,
+        policy_excluded_weapon_types=frozenset({WEAPON_OFFHAND, WEAPON_SHIELD}),
+        policy_exclusion_note=(
+            "Retribution is a two-handed spec: Seal of Command and the ret "
+            "talent tree are built around a single slow two-hander, and a "
+            "paladin wielding a one-hander with a shield is playing protection "
+            "or holy. This repo builds no holy or protection universe, so a "
+            "shield like Bulwark of Azzinoth (id 28593) has no list it "
+            "legitimately belongs to. Shields and one-handers are excluded "
+            "because they are not low-ranked ret candidates but correct items "
+            "for a different spec, and their presence in a retribution list "
+            "reads as a build recommendation the tool is not making."
+        ),
     ),
     "feral": SpecProfile(
         "feral",
@@ -740,21 +800,22 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=FERAL_TIER_PIECE_IDS,
         class_id=CLASS_DRUID,
-        # Druid is Leather + Cloth, per wowsims
-        # ui/core/player_classes/druid.ts. Not a subset of ret's set either
-        # way: druids take cloth, and never mail or plate.
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
-        ranged_type=RANGED_IDOL,
-        # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
-        # one-handers are eligible and staves are the signature weapon.
-        # The exclusions are the complement of that list, per wowsims
-        # ui/core/player_classes/druid.ts lines 25-31. WeaponType has no
-        # two-hand members (data/proto/common.proto lines 338-349): a
-        # two-handed sword carries WeaponTypeSword and is told apart by
-        # HandType, so excluding the type covers both hand types at once.
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        # Polearms: the sim says a druid can hold one, and it is right. This is
+        # a pool call on top of that, ruled by the SME gate for this branch --
+        # see .scratch/handoffs/sme-rank-judgment-upgrades-dedup-wowsims-feral-
+        # polearms.md. Cheap to delete if TBC itemisation ever changes under
+        # the pin, which is the only thing holding the argument up.
+        policy_excluded_weapon_types=frozenset({WEAPON_POLEARM}),
+        policy_exclusion_note=(
+            "Druids can equip polearms, but TBC never itemised one for them: "
+            "of the 49 items carrying feral attack power, 39 are staves and 10 "
+            "are maces, and no polearm carries any. In cat form the weapon is a "
+            "pure stat stick -- its damage is discarded -- so a polearm with no "
+            "feral attack power is not a low-ranked candidate, it is a "
+            "non-candidate, and nine of the 39 druid-equippable polearms have "
+            "an entirely empty stat line. They are excluded from the pool "
+            "because their presence in a feral weapon list reads as a tool bug "
+            "rather than as a correct last place."
         ),
     ),
     "balance": SpecProfile(
@@ -783,15 +844,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=BALANCE_TIER_PIECE_IDS,
         class_id=CLASS_DRUID,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
-        ranged_type=RANGED_IDOL,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_SHIELD, WEAPON_SWORD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_MACE, WEAPON_POLEARM, WEAPON_STAFF}
-        ),
     ),
     "hunter": SpecProfile(
         "hunter",
@@ -845,17 +897,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=HUNTER_TIER_PIECE_IDS,
         class_id=CLASS_HUNTER,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
-        ranged_type=frozenset(
-            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN}
-        ),
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_MACE, WEAPON_OFFHAND, WEAPON_SHIELD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_STAFF, WEAPON_SWORD}
-        ),
     ),
     "mage": SpecProfile(
         "mage",
@@ -884,15 +925,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=MAGE_TIER_PIECE_IDS,
         class_id=CLASS_MAGE,
-        armor_types=frozenset({ARMOR_CLOTH}),
-        ranged_type=RANGED_WAND,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_STAFF}
-        ),
     ),
     "shadow": SpecProfile(
         "shadow",
@@ -917,15 +949,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=SHADOW_TIER_PIECE_IDS,
         class_id=CLASS_PRIEST,
-        armor_types=frozenset({ARMOR_CLOTH}),
-        ranged_type=RANGED_WAND,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_FIST, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_STAFF}
-        ),
     ),
     "rogue": SpecProfile(
         "rogue",
@@ -950,17 +973,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=ROGUE_TIER_PIECE_IDS,
         class_id=CLASS_ROGUE,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
-        ranged_type=frozenset(
-            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN, RANGED_THROWN}
-        ),
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_STAFF}
-        ),
-        # Rogues cannot two-hand anything: every eligible weapon type
-        # carries canUseTwoHand: false upstream.
-        two_hand_weapon_types=frozenset(),
     ),
     "ele": SpecProfile(
         "ele",
@@ -990,15 +1002,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=ELE_TIER_PIECE_IDS,
         class_id=CLASS_SHAMAN,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
-        ranged_type=RANGED_TOTEM,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_POLEARM, WEAPON_SWORD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_MACE, WEAPON_STAFF}
-        ),
     ),
     "enh": SpecProfile(
         "enh",
@@ -1026,15 +1029,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=ENH_TIER_PIECE_IDS,
         class_id=CLASS_SHAMAN,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
-        ranged_type=RANGED_TOTEM,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_POLEARM, WEAPON_SWORD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_MACE, WEAPON_STAFF}
-        ),
     ),
     "warlock": SpecProfile(
         "warlock",
@@ -1068,15 +1062,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=WARLOCK_TIER_PIECE_IDS,
         class_id=CLASS_WARLOCK,
-        armor_types=frozenset({ARMOR_CLOTH}),
-        ranged_type=RANGED_WAND,
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
-        ),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_STAFF}
-        ),
     ),
     "warrior": SpecProfile(
         "warrior",
@@ -1111,16 +1096,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=WARRIOR_TIER_PIECE_IDS,
         class_id=CLASS_WARRIOR,
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
-        ranged_type=frozenset(
-            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN, RANGED_THROWN}
-        ),
-        allow_one_hand=True,
-        # Warriors can equip every weapon type in the enum.
-        excluded_weapon_types=frozenset(),
-        two_hand_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_MACE, WEAPON_POLEARM, WEAPON_STAFF, WEAPON_SWORD}
-        ),
     ),
 }
 
@@ -1132,6 +1107,60 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
 EXCLUSIONS_MANIFEST = ROOT / "data/weapon-type-exclusions.json"
 
 
+def _weapon_types_in_db() -> frozenset[int]:
+    """Every weapon type the pinned db actually uses.
+
+    The universe of types has to come from the data rather than from a written
+    list, or the manifest would silently stop covering a type the day one
+    appeared.
+    """
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    return frozenset(
+        int(it["weaponType"]) for it in db["items"] if it.get("weaponType")
+    )
+
+
+def excluded_weapon_types_for(profile: SpecProfile) -> frozenset[int]:
+    """Weapon types this spec cannot use — the complement of what it can.
+
+    Derived, not written down. `profile.equip_eligible_ids` is the fork's own
+    `canEquipItem` answer, so "which weapon types can this spec hold" is a view
+    over it: any type with no equippable item of that type is excluded. The
+    hand-written per-spec exclusion sets this replaced were a second source of
+    truth for a fact the fork already owns, and they disagreed with it for two
+    specs (ret omitted OffHand, feral added Polearm).
+    """
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    usable = {
+        int(it["weaponType"])
+        for it in db["items"]
+        if it.get("weaponType") and int(it["id"]) in profile.equip_eligible_ids
+    }
+    return frozenset(_weapon_types_in_db() - usable) | profile.policy_excluded_weapon_types
+
+
+_D7_NOTE_BASE = "D7 eligibility implemented in assemble_universe.py."
+
+
+def d7_note(profile: SpecProfile) -> str:
+    """The payload's eligibility note, plus any policy overlay this spec carries.
+
+    The base sentence is unchanged, so a spec with no policy exclusion keeps a
+    byte-identical payload. A spec that does carry one publishes the reason
+    here: the exclusion is then visible in the committed artifact rather than
+    living only in the generator.
+    """
+    if not profile.policy_excluded_weapon_types:
+        return _D7_NOTE_BASE
+    types = ", ".join(str(t) for t in sorted(profile.policy_excluded_weapon_types))
+    return (
+        f"{_D7_NOTE_BASE} Policy exclusion beyond the sim's equip rules -- "
+        f"weapon type(s) {types}: {profile.policy_exclusion_note}"
+    )
+
+
 def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, list[int]]:
     """Emit every spec's excluded weapon types, not just the one being built.
 
@@ -1141,9 +1170,17 @@ def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, lis
     would silently win. packages/core/test/weapon-type-exclusion.test.ts reads
     this file to decide which specs it must cover, so that silent gap would be
     the very coverage hole the manifest exists to close.
+
+    Each spec's set now comes from the fork's equip answer (see
+    `excluded_weapon_types_for`). A spec whose set carries a *policy* exclusion
+    -- one this project imposes that the sim would not -- says so in that
+    spec's universe payload `d7Note`, so the overlay is visible in a committed
+    artifact rather than applied silently. The manifest itself stays a plain
+    spec -> int[] map because packages/core/test/weapon-type-exclusion.test.ts
+    reads every key as a spec.
     """
     manifest = {
-        name: sorted(profile.excluded_weapon_types)
+        name: sorted(excluded_weapon_types_for(profile))
         for name, profile in sorted(SPEC_PROFILES.items())
     }
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1420,17 +1457,17 @@ def wowsims_curated_sets_by_item(profile: SpecProfile) -> dict[int, list[str]]:
     return {iid: sorted(set(names)) for iid, names in by_item.items()}
 
 
-ARMOR_SLOTS = frozenset(
-    {"head", "shoulder", "chest", "wrist", "hands", "waist", "legs", "feet"}
-)
-
-
 def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable().
 
-    Previously `ret_eligible_d7`, whose name was honest: four of these rules
-    are class-specific, so they now come from `profile` rather than from
-    module constants.
+    Two different questions live here, and only one of them is ours:
+
+    - *Can this class physically equip the item?* The fork already answers
+      that, in `canEquipItem`. We look the answer up rather than re-deriving
+      it — see `_equip_eligibility()` for why the re-derivation was deleted.
+    - *Do we want it in an upgrade pool?* Quality floor, Kael's temporary
+      legendaries, per-spec SME exclusions. These are our policy, the fork has
+      no opinion on them, and they stay here.
     """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
@@ -1438,47 +1475,23 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     # excluded id cannot re-enter through a different one.
     if int(it["id"]) in profile.exclude_ids:
         return False
-    # A non-empty classAllowlist is a hard equip restriction, so an item that
-    # omits this class cannot be worn by this character at all. db.json carries
-    # the field on 2006 items and nothing read it, which let 8 class-specific
-    # SSC/TK trinkets into both shipping universes.
-    allowlist = it.get("classAllowlist")
-    if allowlist and profile.class_id not in allowlist:
+    if int(it["id"]) not in profile.equip_eligible_ids:
         return False
+    weapon_type = it.get("weaponType")
+    if weapon_type and int(weapon_type) in profile.policy_excluded_weapon_types:
+        return False
+    # Scoped to weapons: an off-hand frill or a shield is not a "one-hander"
+    # this rule is refusing on hand type, it is refused as a weapon type above
+    # when a spec excludes it. Armor and trinkets carry no handType at all.
+    if profile.policy_two_hand_only and weapon_type:
+        if it.get("handType") != HAND_TYPE_TWO_HAND:
+            return False
     t = it.get("type")
     if t is None:
         return False
-    slot = ITEM_TYPE_SLOT.get(t)
-    if slot is None:
+    if ITEM_TYPE_SLOT.get(t) is None:
         return False
-    if (it.get("quality") or 0) < MIN_QUALITY:
-        return False
-    if slot in ARMOR_SLOTS:
-        return it.get("armorType") in profile.armor_types
-    if slot == "weapon":
-        hand_type = it.get("handType")
-        if not profile.allow_one_hand and hand_type != HAND_TYPE_TWO_HAND:
-            return False
-        weapon_type = it.get("weaponType")
-        if weapon_type in profile.excluded_weapon_types:
-            return False
-        # The mirror of the `allow_one_hand` test above, and the reason this
-        # is per weapon type rather than a second boolean: a class's ability
-        # to hold a two-hander is a property of the weapon type, not of the
-        # class. A shaman may swing a two-handed axe but not a two-handed
-        # dagger; a mage's only two-hander is a staff. Without this a rogue's
-        # pool carried 37 two-handers it can never equip, Ashbringer among
-        # them.
-        if (
-            hand_type == HAND_TYPE_TWO_HAND
-            and profile.two_hand_weapon_types is not None
-            and weapon_type not in profile.two_hand_weapon_types
-        ):
-            return False
-        return True
-    if slot == "ranged":
-        return it.get("rangedWeaponType") in profile.ranged_types
-    return True
+    return (it.get("quality") or 0) >= MIN_QUALITY
 
 
 def item_stats(it: dict) -> list[float]:
@@ -2939,7 +2952,7 @@ def assemble(
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
-        "d7Note": "D7 eligibility implemented in assemble_universe.py.",
+        "d7Note": d7_note(profile),
         "epWeights": ep_weights_provenance,
         "entries": entries,
     }

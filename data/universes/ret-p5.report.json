@@ -22,50 +22,50 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 3140,
-  "excludedNoSource": 1294,
-  "universeTotal": 520,
+  "d7EligibleTotal": 3730,
+  "excludedNoSource": 1473,
+  "universeTotal": 617,
   "listOnlyMembership": 33,
   "perSlot": {
     "back": 36,
-    "chest": 47,
-    "feet": 45,
+    "chest": 59,
+    "feet": 60,
     "finger": 65,
-    "hands": 34,
-    "head": 38,
-    "legs": 33,
+    "hands": 43,
+    "head": 50,
+    "legs": 45,
     "neck": 36,
     "ranged": 5,
-    "shoulder": 42,
+    "shoulder": 53,
     "trinket": 35,
-    "waist": 43,
+    "waist": 57,
     "weapon": 23,
-    "wrist": 38
+    "wrist": 50
   },
   "sourceRecordAdds": {
-    "atlasloot": 253,
+    "atlasloot": 301,
     "curated": 8,
-    "db": 1729,
+    "db": 2134,
     "sunmote": 3,
     "two-hop": 18,
     "wowhead": 17
   },
   "membershipByOrigin": {
     "curated": 12,
-    "heroicMatch": 10,
-    "itemHasOrigin:atlasloot": 86,
+    "heroicMatch": 12,
+    "itemHasOrigin:atlasloot": 98,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 445,
+    "itemHasOrigin:db": 539,
     "itemHasOrigin:sunmote": 3,
     "itemHasOrigin:two-hop": 18,
     "itemHasOrigin:wowhead": 14,
     "listOnly": 33,
-    "repFactionMatch": 34,
-    "zoneMatch": 431
+    "repFactionMatch": 38,
+    "zoneMatch": 522
   },
   "exclusivePrimaryOrigin": {
-    "db": 445,
-    "atlasloot-only": 32,
+    "db": 539,
+    "atlasloot-only": 35,
     "other": 11,
     "two-hop": 18,
     "wowhead-only": 14
@@ -74,13 +74,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 520,
-    "casterOnlyReject": 174,
+    "total": 617,
+    "casterOnlyReject": 264,
     "epFloorReject": 18,
-    "combinedReject": 192,
-    "combinedKeep": 328,
-    "casterRejectPct": 33.5,
-    "combinedRejectPct": 36.9,
+    "combinedReject": 282,
+    "combinedKeep": 335,
+    "casterRejectPct": 42.8,
+    "combinedRejectPct": 45.7,
     "applied": false
   },
   "wowheadListIds": 160,
@@ -259,6 +259,10 @@
       "name": "Necromantic Band"
     },
     {
+      "itemId": 18809,
+      "name": "Sash of Whispered Secrets"
+    },
+    {
       "itemId": 18815,
       "name": "Essence of the Pure Flame"
     },
@@ -301,6 +305,10 @@
     {
       "itemId": 21687,
       "name": "Ukko's Ring of Darkness"
+    },
+    {
+      "itemId": 21780,
+      "name": "Blood Crown"
     },
     {
       "itemId": 21891,
@@ -365,6 +373,10 @@
     {
       "itemId": 23824,
       "name": "Rocket Boots Xtreme"
+    },
+    {
+      "itemId": 23825,
+      "name": "Nigh Invulnerability Belt"
     },
     {
       "itemId": 23835,
@@ -535,6 +547,10 @@
       "name": "Crusader's Scaled Gauntlets"
     },
     {
+      "itemId": 35581,
+      "name": "Rocket Boots Xtreme Lite"
+    },
+    {
       "itemId": 35703,
       "name": "Figurine - Seaspray Albatross"
     },
@@ -553,6 +569,23 @@
     {
       "itemId": 35751,
       "name": "Assassin's Alchemist Stone"
+    },
+    {
+      "itemId": 38506,
+      "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 5,
+    "tagsFromPhase": 3,
+    "degraded": true,
+    "curatedSets": [
+      "p3"
+    ]
+  },
+  "excludedIds": {
+    "total": 0,
+    "reason": "",
+    "curatedSetCollisions": []
+  }
 }
