@@ -105,9 +105,28 @@ WEAPON_SHIELD = 7
 WEAPON_STAFF = 8
 WEAPON_SWORD = 9
 HAND_TYPE_TWO_HAND = 4
+WEAPON_MACE = 4
+WEAPON_OFFHAND = 5
+RANGED_BOW = 1
+RANGED_CROSSBOW = 2
+RANGED_GUN = 3
+RANGED_THROWN = 4
+RANGED_WAND = 5
 RANGED_IDOL = 6
 RANGED_LIBRAM = 7
+RANGED_TOTEM = 8
 MIN_QUALITY = 3
+
+# Quality floor for the db-phase membership route only (plan amendment 1).
+# The general MIN_QUALITY above admits rares; this route admits items that
+# carry a `phase` but no `sources` at all -- badge, PvP and vendor gear, which
+# are epic -- and at rare quality the same unsourced set is overwhelmingly
+# quest and normal-dungeon leftovers. Measured on the ret profile as a stand-in
+# at phase <= 3: 1,213 unsourced eligible items, 594 of them epic. The 619 this
+# floor drops are asserted rather than sampled to be leftovers, so a 10-item
+# sample of what it EXCLUDES goes to the SME gate for a knowing accept-or-loosen
+# ruling.
+DB_PHASE_MIN_QUALITY = 4
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
 # the pool despite being real, well-known TBC drops/quest rewards. Every one
@@ -179,10 +198,288 @@ FERAL_TIER_PIECE_IDS = frozenset(
     }
 )
 
+# Balance tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Malorne Regalia (setId 639, 5 pieces), T5 Nordrassil Regalia (setId 643, 5 pieces), T6 Thunderheart Regalia (setId 677, 8 pieces)
+BALANCE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Malorne Regalia
+        29091,
+        29092,
+        29093,
+        29094,
+        29095,
+        # T5 Nordrassil Regalia
+        30231,
+        30232,
+        30233,
+        30234,
+        30235,
+        # T6 Thunderheart Regalia
+        31035,
+        31040,
+        31043,
+        31046,
+        31049,
+        34446,
+        34555,
+        34572,
+    }
+)
+
+# Hunter tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Demon Stalker Armor (setId 651, 5 pieces), T5 Rift Stalker Armor (setId 652, 5 pieces), T6 Gronnstalker's Armor (setId 669, 8 pieces)
+HUNTER_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Demon Stalker Armor
+        29081,
+        29082,
+        29083,
+        29084,
+        29085,
+        # T5 Rift Stalker Armor
+        30139,
+        30140,
+        30141,
+        30142,
+        30143,
+        # T6 Gronnstalker's Armor
+        31001,
+        31003,
+        31004,
+        31005,
+        31006,
+        34443,
+        34549,
+        34570,
+    }
+)
+
+# Mage tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Aldor Regalia (setId 648, 5 pieces), T5 Tirisfal Regalia (setId 649, 5 pieces), T6 Tempest Regalia (setId 671, 8 pieces)
+MAGE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Aldor Regalia
+        29076,
+        29077,
+        29078,
+        29079,
+        29080,
+        # T5 Tirisfal Regalia
+        30196,
+        30205,
+        30206,
+        30207,
+        30210,
+        # T6 Tempest Regalia
+        31055,
+        31056,
+        31057,
+        31058,
+        31059,
+        34447,
+        34557,
+        34574,
+    }
+)
+
+# Shadow tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Incarnate Regalia (setId 664, 5 pieces), T5 Avatar Regalia (setId 666, 5 pieces), T6 Absolution Regalia (setId 674, 8 pieces)
+SHADOW_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Incarnate Regalia
+        29056,
+        29057,
+        29058,
+        29059,
+        29060,
+        # T5 Avatar Regalia
+        30159,
+        30160,
+        30161,
+        30162,
+        30163,
+        # T6 Absolution Regalia
+        31061,
+        31064,
+        31065,
+        31067,
+        31070,
+        34434,
+        34528,
+        34563,
+    }
+)
+
+# Rogue tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Netherblade (setId 621, 5 pieces), T5 Deathmantle (setId 622, 5 pieces), T6 Slayer's Armor (setId 668, 8 pieces)
+ROGUE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Netherblade
+        29044,
+        29045,
+        29046,
+        29047,
+        29048,
+        # T5 Deathmantle
+        30144,
+        30145,
+        30146,
+        30148,
+        30149,
+        # T6 Slayer's Armor
+        31026,
+        31027,
+        31028,
+        31029,
+        31030,
+        34448,
+        34558,
+        34575,
+    }
+)
+
+# Ele tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Cyclone Regalia (setId 632, 5 pieces), T5 Cataclysm Regalia (setId 635, 5 pieces), T6 Skyshatter Regalia (setId 684, 8 pieces)
+ELE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Cyclone Regalia
+        29033,
+        29034,
+        29035,
+        29036,
+        29037,
+        # T5 Cataclysm Regalia
+        30169,
+        30170,
+        30171,
+        30172,
+        30173,
+        # T6 Skyshatter Regalia
+        31008,
+        31014,
+        31017,
+        31020,
+        31023,
+        34437,
+        34542,
+        34566,
+    }
+)
+
+# Enh tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Cyclone Harness (setId 633, 5 pieces), T5 Cataclysm Harness (setId 636, 5 pieces), T6 Skyshatter Harness (setId 682, 8 pieces)
+ENH_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Cyclone Harness
+        29038,
+        29039,
+        29040,
+        29042,
+        29043,
+        # T5 Cataclysm Harness
+        30185,
+        30189,
+        30190,
+        30192,
+        30194,
+        # T6 Skyshatter Harness
+        31011,
+        31015,
+        31018,
+        31021,
+        31024,
+        34439,
+        34545,
+        34567,
+    }
+)
+
+# Warlock tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Voidheart Raiment (setId 645, 5 pieces), T5 Corruptor Raiment (setId 646, 5 pieces), T6 Malefic Raiment (setId 670, 8 pieces)
+WARLOCK_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Voidheart Raiment
+        28963,
+        28964,
+        28966,
+        28967,
+        28968,
+        # T5 Corruptor Raiment
+        30211,
+        30212,
+        30213,
+        30214,
+        30215,
+        # T6 Malefic Raiment
+        31050,
+        31051,
+        31052,
+        31053,
+        31054,
+        34436,
+        34541,
+        34564,
+    }
+)
+
+# Warrior tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Warbringer Battlegear (setId 655, 5 pieces), T5 Destroyer Battlegear (setId 657, 5 pieces), T6 Onslaught Battlegear (setId 672, 8 pieces)
+WARRIOR_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Warbringer Battlegear
+        29019,
+        29020,
+        29021,
+        29022,
+        29023,
+        # T5 Destroyer Battlegear
+        30118,
+        30119,
+        30120,
+        30121,
+        30122,
+        # T6 Onslaught Battlegear
+        30969,
+        30972,
+        30975,
+        30977,
+        30979,
+        34441,
+        34546,
+        34569,
+    }
+)
+
+
 # common.proto Class enum. These are wowsims ids and are NOT WCL's class ids:
 # WCL numbers Druid 2 and Warrior 11, which is the reverse reading of the same
 # two numbers. Anything crossing between the two needs an explicit map.
+CLASS_WARRIOR = 1
 CLASS_PALADIN = 2
+CLASS_HUNTER = 3
+CLASS_ROGUE = 4
+CLASS_PRIEST = 5
+CLASS_SHAMAN = 7
+CLASS_MAGE = 8
+CLASS_WARLOCK = 9
 CLASS_DRUID = 11
 
 
@@ -202,16 +499,18 @@ class SpecProfile:
         *,
         ep_weights: Path,
         gear_sets: list[Path],
-        wowhead_dir: Path,
+        wowhead_dir: Path | None,
         two_hop: Path | None,
         sunmote_upgrades: Path | None,
         tier_piece_ids: frozenset[int],
         class_id: int,
         armor_types: frozenset[int],
-        ranged_type: int,
+        ranged_type: int | frozenset[int],
         allow_one_hand: bool,
         excluded_weapon_types: frozenset[int],
         ep_weights_by_phase: dict[int, Path] | None = None,
+        db_phase_membership: bool = False,
+        exclude_ids: frozenset[int] = frozenset(),
     ):
         self.spec = spec
         self.ep_weights = ep_weights
@@ -222,15 +521,41 @@ class SpecProfile:
         # that never sets it, like feral, is byte-for-byte unaffected.
         self.ep_weights_by_phase = ep_weights_by_phase or {}
         self.gear_sets = gear_sets
+        # `None` is a deliberate sentinel, not "the directory happens to be
+        # missing". The 9 specs added by plan amendment 1 ship no Wowhead
+        # lists at all, and a profile pointing at an absent path would
+        # silently start reading lists the day a backfill ticket created the
+        # directory. With `None`, activating lists is an edit to this profile
+        # and shows up in a diff.
         self.wowhead_dir = wowhead_dir
         self.two_hop = two_hop
         self.sunmote_upgrades = sunmote_upgrades
         self.tier_piece_ids = tier_piece_ids
         self.class_id = class_id
         self.armor_types = armor_types
-        self.ranged_type = ranged_type
+        # Ret and feral each have exactly one ranged type (Libram, Idol), and
+        # the field was an int to match. Hunter, rogue and warrior each carry
+        # several (Bow/Crossbow/Gun, plus Thrown for the last two), so the
+        # equality test that served the first two specs cannot express them.
+        # Both forms are accepted; the set is what `eligible_d7` reads.
+        self.ranged_types: frozenset[int] = (
+            ranged_type
+            if isinstance(ranged_type, frozenset)
+            else frozenset({ranged_type})
+        )
         self.allow_one_hand = allow_one_hand
         self.excluded_weapon_types = excluded_weapon_types
+        # Admit eligible db items that carry a `phase` but no parseable
+        # `sources`, in place of the Wowhead-list membership layer the 9 new
+        # specs do not have (plan amendment 1). Off for ret/feral, whose
+        # universes must stay byte-identical.
+        self.db_phase_membership = db_phase_membership
+        # The exclude counterpart to TICKET_157_FORCE_INCLUDE, which had none.
+        # Applied inside eligible_d7, so *every* route respects it rather than
+        # just the db-phase one -- that is what makes it a usable remedy for an
+        # SME "this item does not belong in this spec's pool" ruling, and for
+        # trimming a pool that overruns the runtime budget.
+        self.exclude_ids = exclude_ids
 
 
 def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
@@ -602,6 +927,10 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
+    # Applied here rather than at any single admission route so that an
+    # excluded id cannot re-enter through a different one.
+    if int(it["id"]) in profile.exclude_ids:
+        return False
     # A non-empty classAllowlist is a hard equip restriction, so an item that
     # omits this class cannot be worn by this character at all. db.json carries
     # the field on 2006 items and nothing read it, which let 8 class-specific
@@ -629,7 +958,7 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
             return False
         return True
     if slot == "ranged":
-        return it.get("rangedWeaponType") == profile.ranged_type
+        return it.get("rangedWeaponType") in profile.ranged_types
     return True
 
 
@@ -1272,6 +1601,11 @@ def source_rep_factions(source: dict) -> set[int]:
 def wowhead_lists_for_phase(
     max_phase: int, profile: SpecProfile
 ) -> list[tuple[str, dict]]:
+    # `None` means the spec ships no list layer at all (see SpecProfile), which
+    # is different from "the configured directory has no file for this stage" —
+    # the loop below already handles that per stage.
+    if profile.wowhead_dir is None:
+        return []
     stages = WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, [])
     out: list[tuple[str, dict]] = []
     for stage in stages:
@@ -1692,6 +2026,39 @@ def assemble(
         curated_unsourced.add(iid)
         ticket_157_included.add(iid)
 
+    # db-phase membership (plan amendment 1). The 9 specs added by that
+    # amendment have no Wowhead lists, so the layer that admits badge, PvP and
+    # vendor gear for ret/feral is missing for them. Those items do carry a
+    # `phase` in db.json -- every one of the 8,257 items does -- they just
+    # carry no `sources`, so map_db_source returns None, add_source drops it,
+    # and they die below as `no_zone_excluded`.
+    #
+    # This admits them on phase alone, with `{"kind": "unknown"}` because that
+    # is the honest claim: we know when the item became available, not where it
+    # came from. Step 8's Assumptions block discloses that partial attribution.
+    #
+    # Placement is load-bearing and deliberate:
+    #   - after the force-include block, so an id can be both;
+    #   - downstream of the machine-locus freeze and the Wowhead loop, both
+    #     inert here (no lists), and it cannot suppress another route's rows;
+    #   - admitted items carry a pair, so they pass the empty-pairs check below
+    #     and still reach the stub_only_ids unimplemented-effects check, which
+    #     admission must not bypass.
+    db_phase_admitted: set[int] = set()
+    if profile.db_phase_membership:
+        for it in db["items"]:
+            iid = int(it["id"])
+            if iid in source_acc:
+                continue
+            if not eligible_d7(it, profile):
+                continue
+            if int(it.get("phase") or 99) > max_phase:
+                continue
+            if int(it.get("quality") or 0) < DB_PHASE_MIN_QUALITY:
+                continue
+            add_source(iid, {"kind": "unknown"}, "db")
+            db_phase_admitted.add(iid)
+
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
     )
@@ -1770,12 +2137,19 @@ def assemble(
         curated = (
             iid in curated_unsourced or iid in curated_list_only
         ) and int(it.get("phase") or 99) <= max_phase
+        # Same `phase <= max_phase` idiom the routes above carry. The admit
+        # block already applied it, but re-applying costs nothing and keeps
+        # every route's guard visible at the disjunction.
+        db_phase = iid in db_phase_admitted and int(
+            it.get("phase") or 99
+        ) <= max_phase
         if (
             not in_phase
             and not in_heroic
             and not in_rep_phase
             and not list_only
             and not curated
+            and not db_phase
         ):
             continue
 
@@ -1790,6 +2164,8 @@ def assemble(
             membership_stats["listOnly"] += 1
         elif curated:
             membership_stats["curated"] += 1
+        elif db_phase:
+            membership_stats["dbPhase"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
