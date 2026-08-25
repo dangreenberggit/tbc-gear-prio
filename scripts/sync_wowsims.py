@@ -390,6 +390,7 @@ def do_update(tag, ref=None):
     os.makedirs(os.path.dirname(LOCKFILE), exist_ok=True)
 
     files, current_phase = {}, None
+    fetch_errors: list[str] = []
     for local, path in TRACKED.items():
         # PER_FILE_PIN wins over the ref/tag this call resolved: a file listed
         # there is deliberately ahead of the main pin (see its comment), and a
@@ -400,7 +401,22 @@ def do_update(tag, ref=None):
         try:
             blob = fetch(file_sha, path)
         except Exception as e:
-            print(f"    !! {path}: {e}")
+            # Collected and re-raised after the loop rather than skipped. This
+            # used to print and `continue`, which wrote a lockfile missing the
+            # failed file and exited 0 -- a partial vendor that reads as a
+            # success, and whose absence only surfaces later as a confusing
+            # "file not in lock" from --restore.
+            print(f"    !! {path}: {e}", file=sys.stderr)
+            fetch_errors.append(f"{local}: {e}")
+            continue
+        # An empty body is never a legitimate tracked file here -- every one is
+        # JSON or TypeScript with content -- and vendoring it would be worse
+        # than failing: `lock_entry` hashes the blob it was handed, so an
+        # empty or truncated fetch would certify its own emptiness and every
+        # later --check and --restore would agree with it.
+        if not blob:
+            print(f"    !! {path}: fetched 0 bytes", file=sys.stderr)
+            fetch_errors.append(f"{local}: fetched 0 bytes")
             continue
         dest = os.path.join(VENDOR, local)
         with open(dest, "wb") as fh:
@@ -414,6 +430,17 @@ def do_update(tag, ref=None):
         print(f"    {local:<26} {len(blob):>9,} bytes  {digest[:12]}{pin_note}")
         if local == "constants_other.ts":
             current_phase = parse_current_phase(blob.decode("utf-8"))
+
+    # Refuse to write a lockfile that does not describe every tracked
+    # file. A partial vendor is the failure this guards: it exits 0,
+    # looks like a success, and leaves --restore unable to fetch a file
+    # nothing recorded.
+    if fetch_errors:
+        raise SystemExit(
+            "refusing to write a lockfile -- "
+            + f"{len(fetch_errors)} file(s) could not be vendored: "
+            + "; ".join(fetch_errors)
+        )
 
     if current_phase is None:
         raise SystemExit("never resolved CURRENT_PHASE -- refusing to write a lockfile")

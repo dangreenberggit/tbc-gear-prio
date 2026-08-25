@@ -222,18 +222,58 @@ describe("rogue — a dual-wield melee archetype", () => {
     const offhandRows = ranking.items.filter((i) => i.slotChoice === "offhand");
     expect(offhandRows.length).toBeGreaterThan(0);
 
-    // And nothing placed there may be a two-hander: the game cannot equip
-    // that, so such a row would advertise an upgrade the player cannot take.
+    // Everything placed there must be something the game will actually put
+    // in an off hand: a one-hander or a dedicated off-hand item. Asserting
+    // only "not a two-hander" was too weak — it passed while
+    // HandTypeMainHand items were reaching the slot (review A3).
     const itemIndex = loadJson<
       Record<string, { name: string; handType: number | null }>
     >("data/items/index.json");
-    const HAND_TYPE_TWO_HAND = 4;
+    const HAND_TYPE_ONE_HAND = 2;
+    const HAND_TYPE_OFF_HAND = 3;
     const offenders = offhandRows
-      .filter(
-        (i) => itemIndex[String(i.itemId)]?.handType === HAND_TYPE_TWO_HAND
-      )
-      .map((i) => `${i.itemId} ${i.name}`);
+      .filter((i) => {
+        const handType = itemIndex[String(i.itemId)]?.handType;
+        return (
+          handType !== HAND_TYPE_ONE_HAND && handType !== HAND_TYPE_OFF_HAND
+        );
+      })
+      .map(
+        (i) =>
+          `${i.itemId} ${i.name} (handType ${itemIndex[String(i.itemId)]?.handType})`
+      );
     expect(offenders).toEqual([]);
+  });
+
+  it("offers no off-hand candidate while a two-hander is worn", async () => {
+    // Review A2. simSlotsForPoolSlot filters the *candidate's* hand type and
+    // knows nothing about what is worn, so before this guard the ranker simmed
+    // one-handers into an empty off hand while a two-hander sat in the main
+    // hand — a pairing the game cannot equip, priced as an upgrade.
+    //
+    // warrior_p5_arms is a real such baseline: it wears 34247 Apolyon, the
+    // Soul-Render (handType 4) with the off hand empty.
+    const worn = loadJson<PresetGearFile>(
+      "vendor/wowsims/warrior_p5_arms.gear.json"
+    );
+    const itemIndex = loadJson<
+      Record<string, { name: string; handType: number | null }>
+    >("data/items/index.json");
+    const mainHandId = worn.items[SIM_ORDER.indexOf("mainhand")]?.id;
+    // Pin the fixture's own shape first: if upstream ever re-gears this set
+    // with a one-hander, the assertion below stops testing anything and this
+    // line is what says so.
+    expect(mainHandId).toBe(34247);
+    expect(itemIndex[String(mainHandId)]?.handType).toBe(4);
+
+    const ranking = await rankSpec({
+      spec: "warrior",
+      className: "ClassWarrior",
+      gearFile: "vendor/wowsims/warrior_p5_arms.gear.json",
+      maxPhase: 5,
+    });
+    expect(ranking.items.length).toBeGreaterThan(0);
+    expect(slotsChosen(ranking).has("offhand")).toBe(false);
   });
 });
 

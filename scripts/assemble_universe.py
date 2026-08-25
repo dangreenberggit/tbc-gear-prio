@@ -121,11 +121,25 @@ MIN_QUALITY = 3
 # The general MIN_QUALITY above admits rares; this route admits items that
 # carry a `phase` but no `sources` at all -- badge, PvP and vendor gear, which
 # are epic -- and at rare quality the same unsourced set is overwhelmingly
-# quest and normal-dungeon leftovers. Measured on the ret profile as a stand-in
-# at phase <= 3: 1,213 unsourced eligible items, 594 of them epic. The 619 this
-# floor drops are asserted rather than sampled to be leftovers, so a 10-item
-# sample of what it EXCLUDES goes to the SME gate for a knowing accept-or-loosen
-# ruling.
+# quest and normal-dungeon leftovers.
+#
+# The figures below are **post-`eligible_d7` and ret-scoped**, not db-wide: they
+# count only what one spec's own equip rules already admit, which is the set
+# this floor actually filters. A naive db-wide count of the same predicate
+# gives 4,807 / 1,726 and is not the number to reason about. Re-run either with:
+#
+#     python -c "import sys,json;sys.path.insert(0,'scripts');\
+#     import assemble_universe as A;\
+#     db=json.load(open('vendor/wowsims/db.json'));p=A.SPEC_PROFILES['ret'];\
+#     u=[i for i in db['items'] if A.eligible_d7(i,p) and not i.get('sources') \
+#     and int(i.get('phase') or 99)<=3];\
+#     print(len(u), sum(1 for i in u if int(i.get('quality') or 0)>=4))"
+#
+# That prints `1213 594` at the current pin: 1,213 unsourced eligible items at
+# phase <= 3, 594 of them epic. The 619 this floor drops are asserted rather
+# than sampled to be leftovers, so a 10-item sample of what it EXCLUDES went to
+# the SME gate, which accepted the floor (finding F9) after seeing that the
+# sample was Classic-era gear -- Serathil at ilvl 61, Deathmist Bracers at 65.
 DB_PHASE_MIN_QUALITY = 4
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
