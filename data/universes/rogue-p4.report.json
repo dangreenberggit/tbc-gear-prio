@@ -20,9 +20,9 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3083,
-  "excludedNoSource": 669,
-  "universeTotal": 907,
+  "d7EligibleTotal": 2940,
+  "excludedNoSource": 642,
+  "universeTotal": 873,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 60,
@@ -37,28 +37,28 @@
     "shoulder": 36,
     "trinket": 54,
     "waist": 54,
-    "weapon": 188,
+    "weapon": 154,
     "wrist": 60
   },
   "sourceRecordAdds": {
-    "atlasloot": 272,
+    "atlasloot": 265,
     "curated": 3,
-    "db": 2310,
+    "db": 2196,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 10,
-    "dbPhase": 497,
-    "itemHasOrigin:atlasloot": 84,
+    "dbPhase": 476,
+    "itemHasOrigin:atlasloot": 82,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 857,
+    "itemHasOrigin:db": 824,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 26,
-    "zoneMatch": 374
+    "zoneMatch": 361
   },
   "exclusivePrimaryOrigin": {
-    "db": 857,
-    "atlasloot-only": 32,
+    "db": 824,
+    "atlasloot-only": 31,
     "two-hop": 15,
     "other": 3
   },
@@ -66,13 +66,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 907,
-    "casterOnlyReject": 412,
+    "total": 873,
+    "casterOnlyReject": 408,
     "epFloorReject": 6,
-    "combinedReject": 418,
-    "combinedKeep": 489,
-    "casterRejectPct": 45.4,
-    "combinedRejectPct": 46.1,
+    "combinedReject": 414,
+    "combinedKeep": 459,
+    "casterRejectPct": 46.7,
+    "combinedRejectPct": 47.4,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -115,10 +115,6 @@
       "name": "Alchemist's Stone"
     },
     {
-      "itemId": 13505,
-      "name": "Runeblade of Baron Rivendare"
-    },
-    {
       "itemId": 13515,
       "name": "Ramstein's Lightning Bolts"
     },
@@ -141,14 +137,6 @@
     {
       "itemId": 17082,
       "name": "Shard of the Flame"
-    },
-    {
-      "itemId": 17104,
-      "name": "Spinal Reaper"
-    },
-    {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
     },
     {
       "itemId": 17904,
@@ -231,10 +219,6 @@
       "name": "Gri'lek's Grinder"
     },
     {
-      "itemId": 19962,
-      "name": "Gri'lek's Carver"
-    },
-    {
       "itemId": 20579,
       "name": "Green Dragonskin Cloak"
     },
@@ -277,10 +261,6 @@
     {
       "itemId": 22321,
       "name": "Heart of Wyrmthalak"
-    },
-    {
-      "itemId": 22691,
-      "name": "Corrupted Ashbringer"
     },
     {
       "itemId": 23001,
@@ -494,5 +474,33 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 4,
+    "tagsFromPhase": 3,
+    "degraded": true,
+    "curatedSets": [
+      "p3"
+    ]
+  },
+  "excludedIds": {
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": [
+      {
+        "itemId": 28295,
+        "name": "Gladiator's Slicer",
+        "curatedSets": [
+          "p1"
+        ]
+      },
+      {
+        "itemId": 32027,
+        "name": "Merciless Gladiator's Quickblade",
+        "curatedSets": [
+          "p2"
+        ]
+      }
+    ]
+  }
 }

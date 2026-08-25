@@ -14,9 +14,9 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2256,
-  "excludedNoSource": 527,
-  "universeTotal": 503,
+  "d7EligibleTotal": 2212,
+  "excludedNoSource": 519,
+  "universeTotal": 495,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 43,
@@ -31,26 +31,26 @@
     "shoulder": 17,
     "trinket": 33,
     "waist": 23,
-    "weapon": 111,
+    "weapon": 103,
     "wrist": 25
   },
   "sourceRecordAdds": {
-    "atlasloot": 214,
+    "atlasloot": 213,
     "curated": 8,
-    "db": 1628,
+    "db": 1592,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 18,
-    "dbPhase": 324,
+    "dbPhase": 318,
     "itemHasOrigin:atlasloot": 29,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 472,
+    "itemHasOrigin:db": 464,
     "itemHasOrigin:two-hop": 10,
-    "zoneMatch": 161
+    "zoneMatch": 159
   },
   "exclusivePrimaryOrigin": {
-    "db": 472,
+    "db": 464,
     "atlasloot-only": 13,
     "other": 8,
     "two-hop": 10
@@ -59,13 +59,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 503,
+    "total": 495,
     "casterOnlyReject": 321,
     "epFloorReject": 5,
     "combinedReject": 326,
-    "combinedKeep": 177,
-    "casterRejectPct": 63.8,
-    "combinedRejectPct": 64.8,
+    "combinedKeep": 169,
+    "casterRejectPct": 64.8,
+    "combinedRejectPct": 65.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -106,10 +106,6 @@
     {
       "itemId": 13503,
       "name": "Alchemist's Stone"
-    },
-    {
-      "itemId": 13505,
-      "name": "Runeblade of Baron Rivendare"
     },
     {
       "itemId": 13515,
@@ -266,10 +262,6 @@
     {
       "itemId": 22632,
       "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22691,
-      "name": "Corrupted Ashbringer"
     },
     {
       "itemId": 23001,
@@ -459,5 +451,18 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 2,
+    "tagsFromPhase": 2,
+    "degraded": false,
+    "curatedSets": [
+      "p2"
+    ]
+  },
+  "excludedIds": {
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": []
+  }
 }

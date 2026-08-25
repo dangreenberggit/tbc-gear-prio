@@ -22,9 +22,9 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2302,
-  "excludedNoSource": 449,
-  "universeTotal": 819,
+  "d7EligibleTotal": 2249,
+  "excludedNoSource": 440,
+  "universeTotal": 806,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 64,
@@ -39,28 +39,28 @@
     "shoulder": 30,
     "trinket": 64,
     "waist": 39,
-    "weapon": 168,
+    "weapon": 155,
     "wrist": 44
   },
   "sourceRecordAdds": {
-    "atlasloot": 213,
+    "atlasloot": 211,
     "curated": 10,
-    "db": 1752,
+    "db": 1708,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 19,
-    "dbPhase": 442,
+    "dbPhase": 432,
     "heroicMatch": 9,
     "itemHasOrigin:atlasloot": 71,
     "itemHasOrigin:curated": 10,
-    "itemHasOrigin:db": 761,
+    "itemHasOrigin:db": 748,
     "itemHasOrigin:two-hop": 18,
     "repFactionMatch": 29,
-    "zoneMatch": 320
+    "zoneMatch": 317
   },
   "exclusivePrimaryOrigin": {
-    "db": 761,
+    "db": 748,
     "atlasloot-only": 30,
     "other": 10,
     "two-hop": 18
@@ -69,13 +69,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 819,
-    "casterOnlyReject": 534,
+    "total": 806,
+    "casterOnlyReject": 530,
     "epFloorReject": 11,
-    "combinedReject": 545,
-    "combinedKeep": 274,
-    "casterRejectPct": 65.2,
-    "combinedRejectPct": 66.5,
+    "combinedReject": 541,
+    "combinedKeep": 265,
+    "casterRejectPct": 65.8,
+    "combinedRejectPct": 67.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -136,10 +136,6 @@
     {
       "itemId": 17082,
       "name": "Shard of the Flame"
-    },
-    {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
     },
     {
       "itemId": 17608,
@@ -477,5 +473,18 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 5,
+    "tagsFromPhase": 3,
+    "degraded": true,
+    "curatedSets": [
+      "p3"
+    ]
+  },
+  "excludedIds": {
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": []
+  }
 }

@@ -547,5 +547,23 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 2,
+    "tagsFromPhase": 2,
+    "degraded": false,
+    "curatedSets": [
+      "p2_bm_2h_6p",
+      "p2_bm_2h_9p",
+      "p2_bm_dw_6p",
+      "p2_bm_dw_9p",
+      "p2_sv_2h_6p",
+      "p2_sv_dw_6p"
+    ]
+  },
+  "excludedIds": {
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": []
+  }
 }

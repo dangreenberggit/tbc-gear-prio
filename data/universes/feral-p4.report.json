@@ -526,5 +526,19 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 4,
+    "tagsFromPhase": 3,
+    "degraded": true,
+    "curatedSets": [
+      "p3_6p",
+      "p3_9p"
+    ]
+  },
+  "excludedIds": {
+    "total": 0,
+    "reason": "",
+    "curatedSetCollisions": []
+  }
 }

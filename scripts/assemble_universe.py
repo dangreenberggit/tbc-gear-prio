@@ -508,6 +508,7 @@ class SpecProfile:
         ranged_type: int | frozenset[int],
         allow_one_hand: bool,
         excluded_weapon_types: frozenset[int],
+        two_hand_weapon_types: frozenset[int] | None = None,
         ep_weights_by_phase: dict[int, Path] | None = None,
         db_phase_membership: bool = False,
         exclude_ids: frozenset[int] = frozenset(),
@@ -545,6 +546,21 @@ class SpecProfile:
         )
         self.allow_one_hand = allow_one_hand
         self.excluded_weapon_types = excluded_weapon_types
+        # Which weapon types this class may wield in a TWO-HANDED form.
+        #
+        # `allow_one_hand` alone cannot express this: it says "one-handers are
+        # eligible", and the gate built on it was one-directional, so every
+        # spec that set it True silently admitted every two-hander of an
+        # otherwise-eligible weapon type. A rogue cannot use a two-hander at
+        # all, and a priest, mage or warlock can use exactly one kind (a
+        # staff) while their eligible daggers and swords are one-hand only.
+        #
+        # Values come from the fork's generated capability table,
+        # `ui/core/player_classes/capabilities_auto_gen.ts` CLASS_WEAPON_TYPES,
+        # where each eligible weapon type carries its own `canUseTwoHand`
+        # flag. `None` means "no restriction recorded" and preserves the old
+        # behaviour, which is what ret and feral keep.
+        self.two_hand_weapon_types = two_hand_weapon_types
         # Admit eligible db items that carry a `phase` but no parseable
         # `sources`, in place of the Wowhead-list membership layer the 9 new
         # specs do not have (plan amendment 1). Off for ret/feral, whose
@@ -759,6 +775,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_AXE, WEAPON_SHIELD, WEAPON_SWORD}
         ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_MACE, WEAPON_POLEARM, WEAPON_STAFF}
+        ),
     ),
     "hunter": SpecProfile(
         "hunter",
@@ -820,6 +839,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_MACE, WEAPON_OFFHAND, WEAPON_SHIELD}
         ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_STAFF, WEAPON_SWORD}
+        ),
     ),
     "mage": SpecProfile(
         "mage",
@@ -854,6 +876,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
         ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_STAFF}
+        ),
     ),
     "shadow": SpecProfile(
         "shadow",
@@ -883,6 +908,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         allow_one_hand=True,
         excluded_weapon_types=frozenset(
             {WEAPON_AXE, WEAPON_FIST, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_STAFF}
         ),
     ),
     "rogue": SpecProfile(
@@ -916,6 +944,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_STAFF}
         ),
+        # Rogues cannot two-hand anything: every eligible weapon type
+        # carries canUseTwoHand: false upstream.
+        two_hand_weapon_types=frozenset(),
     ),
     "ele": SpecProfile(
         "ele",
@@ -951,6 +982,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_POLEARM, WEAPON_SWORD}
         ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_MACE, WEAPON_STAFF}
+        ),
     ),
     "enh": SpecProfile(
         "enh",
@@ -983,6 +1017,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         allow_one_hand=True,
         excluded_weapon_types=frozenset(
             {WEAPON_POLEARM, WEAPON_SWORD}
+        ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_MACE, WEAPON_STAFF}
         ),
     ),
     "warlock": SpecProfile(
@@ -1022,6 +1059,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         allow_one_hand=True,
         excluded_weapon_types=frozenset(
             {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
+        ),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_STAFF}
         ),
     ),
     "warrior": SpecProfile(
@@ -1064,6 +1104,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         allow_one_hand=True,
         # Warriors can equip every weapon type in the enum.
         excluded_weapon_types=frozenset(),
+        two_hand_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_MACE, WEAPON_POLEARM, WEAPON_STAFF, WEAPON_SWORD}
+        ),
     ),
 }
 
@@ -1399,12 +1442,24 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     if slot in ARMOR_SLOTS:
         return it.get("armorType") in profile.armor_types
     if slot == "weapon":
-        if (
-            not profile.allow_one_hand
-            and it.get("handType") != HAND_TYPE_TWO_HAND
-        ):
+        hand_type = it.get("handType")
+        if not profile.allow_one_hand and hand_type != HAND_TYPE_TWO_HAND:
             return False
-        if it.get("weaponType") in profile.excluded_weapon_types:
+        weapon_type = it.get("weaponType")
+        if weapon_type in profile.excluded_weapon_types:
+            return False
+        # The mirror of the `allow_one_hand` test above, and the reason this
+        # is per weapon type rather than a second boolean: a class's ability
+        # to hold a two-hander is a property of the weapon type, not of the
+        # class. A shaman may swing a two-handed axe but not a two-handed
+        # dagger; a mage's only two-hander is a staff. Without this a rogue's
+        # pool carried 37 two-handers it can never equip, Ashbringer among
+        # them.
+        if (
+            hand_type == HAND_TYPE_TWO_HAND
+            and profile.two_hand_weapon_types is not None
+            and weapon_type not in profile.two_hand_weapon_types
+        ):
             return False
         return True
     if slot == "ranged":
@@ -2239,6 +2294,17 @@ def assemble(
     bis_sets_at_phase = bis_set_labels_for_max_phase(
         curated_sets_by_item, max_phase
     )
+    # The phase the surviving tags speak for. `bis_set_labels_for_max_phase`
+    # keeps exactly one phase's labels, so reading it back off the result is
+    # the same answer that function chose rather than a second derivation.
+    bis_tags_phase = next(
+        (
+            curated_set_phase(label)
+            for labels in bis_sets_at_phase.values()
+            for label in labels
+        ),
+        None,
+    )
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
@@ -2791,6 +2857,67 @@ def assemble(
         "excludedUnimplementedEffect": sorted(
             excluded_unimplemented, key=lambda e: e["itemId"]
         ),
+        # Per-spec `exclude_ids`, and specifically the ones that collide with
+        # a curated BiS set (SME gate finding A1).
+        #
+        # The exclusion itself is a ruling, not a defect: rating-gated arena
+        # gear is out of a PvE pool. What the review caught is that it was
+        # SILENT -- upstream really does equip 28295 and 32027 in rogue's p1
+        # and p2 sets and 28308 in enhancement's p1, so those universes ship
+        # a curated set with members missing and nothing said which, or why.
+        # A reader diffing membership could not tell a deliberate exclusion
+        # from a pipeline bug.
+        #
+        # `curatedSetCollisions` is the honest half: an excluded id that some
+        # curated set equips, with the sets naming it. `total` is the size of
+        # the exclusion set as configured, so a reader can see the ruling's
+        # scope without this list implying it is the whole of it.
+        # Which phase the BiS tags in this universe actually speak for.
+        #
+        # `bis_set_labels_for_max_phase` scopes the claim to the newest
+        # curated set at or below `max_phase`; where upstream stops short,
+        # that is an earlier phase than the one being ranked, and the tags
+        # then mean "BiS as of the latest set we have" rather than "BiS now".
+        # Ret already shipped that way for p4/p5 and the fork's own
+        # PROVENANCE records it; this makes it a machine-readable field
+        # instead of a fact a reader has to know (plan step 8, review S1).
+        #
+        # `null` means no curated set resolved to a phase at all, so nothing
+        # is tagged.
+        "bisTagProvenance": {
+            "requestedPhase": max_phase,
+            "tagsFromPhase": bis_tags_phase,
+            "degraded": bis_tags_phase is not None
+            and bis_tags_phase < max_phase,
+            "curatedSets": sorted(
+                {label for labels in bis_sets_at_phase.values() for label in labels}
+            ),
+        },
+        "excludedIds": {
+            "total": len(profile.exclude_ids),
+            "reason": (
+                "rating-gated arena gear (Gladiator season lines); SME gate "
+                "finding F3 -- bought with a currency PvE play does not "
+                "generate, rating-gated, and mis-valued by a PvE sim because "
+                "part of its budget is resilience"
+            )
+            if profile.exclude_ids
+            else "",
+            "curatedSetCollisions": [
+                {
+                    "itemId": iid,
+                    "name": (db_by_id.get(iid) or {}).get("name") or "",
+                    "curatedSets": labels,
+                }
+                for iid, labels in sorted(
+                    (
+                        (iid, labels)
+                        for iid, labels in curated_sets_by_item.items()
+                        if iid in profile.exclude_ids
+                    )
+                )
+            ],
+        },
     }
 
     payload = {
