@@ -170,7 +170,7 @@ const PREFERRED_META_IDS: readonly number[] = [32409];
  * `missingMetaPreferenceNote` and `metaSocketUnpriced` below both consult the
  * table for any spec, and its presence is what keeps them quiet for
  * feral-tank. What it never reaches is a ranking: `feral-tank` is identified
- * but never ranked (`SpecId = "ret" | "feral"`, `types.ts`), so no candidate
+ * but never ranked (it is not a member of `SpecId`, `types.ts`), so no candidate
  * is ever gemmed from it. It is recorded because the evidence exists, not
  * because a ranking needs it.
  *
