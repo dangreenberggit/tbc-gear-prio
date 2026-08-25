@@ -66,6 +66,23 @@ describe("per-item hand-type filter", () => {
     expect(simSlotsForPoolSlot("weapon", "rogue", id)).toEqual(["mainhand"]);
   });
 
+  it("keeps a main-hand-only weapon out of the off hand", () => {
+    // Regression, found in the browser smoke rather than here: HandTypeMainHand
+    // is a distinct value from HandTypeTwoHand, carried by 235 items in the
+    // pinned db. The first version of this filter excluded only two-handers, so
+    // a main-hand-only weapon reached the off hand and the fork's equip logic
+    // rejected it with "No slots left to equip" -- which fails the whole
+    // ranking run, not just that row. Talon of the Phoenix (32944) is the item
+    // that actually broke it.
+    expect(getItem(32944)?.handType).toBe(HandType.HandTypeMainHand);
+    expect(simSlotsForPoolSlot("weapon", "rogue", 32944)).toEqual(["mainhand"]);
+
+    // And not just that one id: no HandTypeMainHand item may reach the offhand.
+    for (const id of findByHandType(HandType.HandTypeMainHand)) {
+      expect(simSlotsForPoolSlot("weapon", "rogue", id)).toEqual(["mainhand"]);
+    }
+  });
+
   it("keeps an offhand-only item out of the main hand", () => {
     const offhandOnly = findByHandType(HandType.HandTypeOffHand);
     expect(offhandOnly.length).toBeGreaterThan(0);
