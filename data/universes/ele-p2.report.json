@@ -14,42 +14,42 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3770,
-  "excludedNoSource": 987,
-  "universeTotal": 811,
+  "d7EligibleTotal": 3608,
+  "excludedNoSource": 899,
+  "universeTotal": 749,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 42,
-    "chest": 53,
+    "chest": 47,
     "feet": 60,
     "finger": 80,
     "hands": 38,
-    "head": 59,
-    "legs": 66,
+    "head": 53,
+    "legs": 60,
     "neck": 53,
-    "shoulder": 42,
+    "shoulder": 36,
     "trinket": 31,
     "waist": 46,
-    "weapon": 190,
+    "weapon": 152,
     "wrist": 51
   },
   "sourceRecordAdds": {
     "atlasloot": 306,
     "curated": 7,
-    "db": 2673,
+    "db": 2599,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 12,
-    "dbPhase": 550,
+    "dbPhase": 488,
     "itemHasOrigin:atlasloot": 46,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 778,
+    "itemHasOrigin:db": 716,
     "itemHasOrigin:two-hop": 10,
     "zoneMatch": 249
   },
   "exclusivePrimaryOrigin": {
-    "db": 778,
+    "db": 716,
     "atlasloot-only": 17,
     "other": 6,
     "two-hop": 10
@@ -58,13 +58,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 811,
-    "casterOnlyReject": 404,
+    "total": 749,
+    "casterOnlyReject": 374,
     "epFloorReject": 20,
-    "combinedReject": 424,
-    "combinedKeep": 387,
-    "casterRejectPct": 49.8,
-    "combinedRejectPct": 52.3,
+    "combinedReject": 394,
+    "combinedKeep": 355,
+    "casterRejectPct": 49.9,
+    "combinedRejectPct": 52.6,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -423,20 +423,12 @@
       "name": "Explorer's Walking Stick"
     },
     {
-      "itemId": 26000,
-      "name": "Gladiator's Linked Gauntlets"
-    },
-    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
-    },
-    {
-      "itemId": 27470,
-      "name": "Gladiator's Mail Gauntlets"
     },
     {
       "itemId": 27544,
@@ -449,10 +441,6 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
-    },
-    {
-      "itemId": 28357,
-      "name": "Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 28523,
@@ -519,24 +507,8 @@
       "name": "Leggings of Beast Mastery"
     },
     {
-      "itemId": 31397,
-      "name": "Gladiator's Ringmail Gauntlets"
-    },
-    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 32005,
-      "name": "Merciless Gladiator's Linked Gauntlets"
-    },
-    {
-      "itemId": 32010,
-      "name": "Merciless Gladiator's Mail Gauntlets"
-    },
-    {
-      "itemId": 32030,
-      "name": "Merciless Gladiator's Ringmail Gauntlets"
     },
     {
       "itemId": 32139,
@@ -569,26 +541,6 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
-    },
-    {
-      "itemId": 33078,
-      "name": "Merciless Gladiator's Totem of the Third Wind"
-    },
-    {
-      "itemId": 33939,
-      "name": "Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 33940,
-      "name": "Merciless Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 33951,
-      "name": "Gladiator's Totem of Survival"
-    },
-    {
-      "itemId": 33952,
-      "name": "Merciless Gladiator's Totem of Survival"
     },
     {
       "itemId": 34430,

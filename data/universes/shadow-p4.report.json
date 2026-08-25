@@ -20,44 +20,44 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2406,
-  "excludedNoSource": 525,
-  "universeTotal": 776,
+  "d7EligibleTotal": 2302,
+  "excludedNoSource": 495,
+  "universeTotal": 708,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 60,
-    "chest": 37,
+    "chest": 31,
     "feet": 40,
     "finger": 114,
     "hands": 21,
-    "head": 38,
-    "legs": 40,
+    "head": 32,
+    "legs": 34,
     "neck": 71,
-    "ranged": 14,
-    "shoulder": 32,
+    "ranged": 9,
+    "shoulder": 26,
     "trinket": 54,
     "waist": 34,
-    "weapon": 182,
+    "weapon": 143,
     "wrist": 39
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 10,
-    "db": 1780,
+    "db": 1706,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 19,
-    "dbPhase": 464,
+    "dbPhase": 396,
     "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:curated": 10,
-    "itemHasOrigin:db": 724,
+    "itemHasOrigin:db": 656,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 22,
     "zoneMatch": 271
   },
   "exclusivePrimaryOrigin": {
-    "db": 724,
+    "db": 656,
     "atlasloot-only": 27,
     "other": 10,
     "two-hop": 15
@@ -66,13 +66,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 776,
-    "casterOnlyReject": 501,
+    "total": 708,
+    "casterOnlyReject": 457,
     "epFloorReject": 11,
-    "combinedReject": 512,
-    "combinedKeep": 264,
-    "casterRejectPct": 64.6,
-    "combinedRejectPct": 66.0,
+    "combinedReject": 468,
+    "combinedKeep": 240,
+    "casterRejectPct": 64.5,
+    "combinedRejectPct": 66.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -355,10 +355,6 @@
       "name": "Fetish of the Fallen"
     },
     {
-      "itemId": 27707,
-      "name": "Gladiator's Satin Gloves"
-    },
-    {
       "itemId": 27896,
       "name": "Alembic of Infernal Power"
     },
@@ -395,20 +391,8 @@
       "name": "Lower City Prayerbook"
     },
     {
-      "itemId": 31409,
-      "name": "Gladiator's Mooncloth Gloves"
-    },
-    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 32015,
-      "name": "Merciless Gladiator's Mooncloth Gloves"
-    },
-    {
-      "itemId": 32034,
-      "name": "Merciless Gladiator's Satin Gloves"
     },
     {
       "itemId": 32100,
@@ -437,14 +421,6 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
-    },
-    {
-      "itemId": 33717,
-      "name": "Vengeful Gladiator's Mooncloth Gloves"
-    },
-    {
-      "itemId": 33744,
-      "name": "Vengeful Gladiator's Satin Gloves"
     },
     {
       "itemId": 34430,

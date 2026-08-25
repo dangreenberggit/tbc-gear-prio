@@ -604,6 +604,50 @@ _WARRIOR_EP_FALLBACK, _WARRIOR_EP_BY_PHASE = _ep_weights_map(
 )
 
 
+def _arena_gear_ids() -> frozenset[int]:
+    """Rating-gated arena gear, read from the pinned db by set line.
+
+    The SME gate ruled this out of a PvE upgrade pool (step 12, finding F3),
+    on three grounds: it is bought with a currency PvE play does not generate
+    and gated behind a personal and team rating, so a player reading a PvE
+    list cannot act on it the way they can act on a raid drop or a badge
+    purchase; a PvE sim systematically mis-values it, because part of its
+    budget is spent on resilience, which does nothing to a boss; and ret and
+    feral ship 5 and 12 such rows against 104-182 for the new specs, so
+    admitting them would make the nine a different product from the two
+    already reviewed.
+
+    Deliberately the **narrow** cut the gate preferred. Only the four
+    Gladiator season lines are matched -- the rating-gated ones. Honour and
+    badge-adjacent PvP gear is reachable without a rating and stays in, as
+    does anything merely PvP-flavoured by name: a broader net over
+    "Veteran's"/"Vindicator's"/Marshal doubles the count to 1,011 and would
+    sweep in vanilla world drops such as 19822 Zandalar Vindicator's
+    Breastplate, which is Zul'Gurub loot rather than arena gear at all.
+
+    Derived from the pinned db rather than written out as 505 literal ids:
+    a hand-copied list is a second source of truth that drifts the moment the
+    pin moves, and the set line is exactly the property being excluded.
+    """
+    prefixes = (
+        "Gladiator's ",
+        "Merciless Gladiator's ",
+        "Vengeful Gladiator's ",
+        "Brutal Gladiator's ",
+    )
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    return frozenset(
+        int(it["id"])
+        for it in db["items"]
+        if isinstance(it.get("name"), str)
+        and it["name"].startswith(prefixes)
+    )
+
+
+ARENA_GEAR_IDS = _arena_gear_ids()
+
+
 SPEC_PROFILES: dict[str, SpecProfile] = {
     "ret": SpecProfile(
         "ret",
@@ -702,7 +746,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/balance-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -760,7 +805,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/hunter-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -795,7 +841,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/mage-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -824,7 +871,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/shadow-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -853,7 +901,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/rogue-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -889,7 +938,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/ele-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -921,7 +971,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/enh-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -959,7 +1010,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warlock-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,
@@ -998,7 +1050,8 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
         db_phase_membership=True,
-        exclude_ids=frozenset(),
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warrior-tokens.json",
         # No Sunmote map collected for this spec.
         sunmote_upgrades=None,

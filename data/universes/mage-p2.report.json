@@ -14,43 +14,43 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2329,
-  "excludedNoSource": 570,
-  "universeTotal": 531,
+  "d7EligibleTotal": 2256,
+  "excludedNoSource": 527,
+  "universeTotal": 503,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 43,
-    "chest": 24,
+    "chest": 22,
     "feet": 29,
     "finger": 82,
     "hands": 14,
-    "head": 24,
-    "legs": 25,
+    "head": 22,
+    "legs": 23,
     "neck": 53,
-    "ranged": 8,
-    "shoulder": 19,
+    "ranged": 6,
+    "shoulder": 17,
     "trinket": 33,
     "waist": 23,
-    "weapon": 129,
+    "weapon": 111,
     "wrist": 25
   },
   "sourceRecordAdds": {
     "atlasloot": 214,
     "curated": 8,
-    "db": 1658,
+    "db": 1628,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 18,
-    "dbPhase": 352,
+    "dbPhase": 324,
     "itemHasOrigin:atlasloot": 29,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 500,
+    "itemHasOrigin:db": 472,
     "itemHasOrigin:two-hop": 10,
     "zoneMatch": 161
   },
   "exclusivePrimaryOrigin": {
-    "db": 500,
+    "db": 472,
     "atlasloot-only": 13,
     "other": 8,
     "two-hop": 10
@@ -59,13 +59,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 531,
-    "casterOnlyReject": 337,
+    "total": 503,
+    "casterOnlyReject": 321,
     "epFloorReject": 5,
-    "combinedReject": 342,
-    "combinedKeep": 189,
-    "casterRejectPct": 63.5,
-    "combinedRejectPct": 64.4,
+    "combinedReject": 326,
+    "combinedKeep": 177,
+    "casterRejectPct": 63.8,
+    "combinedRejectPct": 64.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -336,10 +336,6 @@
       "name": "Explorer's Walking Stick"
     },
     {
-      "itemId": 25857,
-      "name": "Gladiator's Silk Handguards"
-    },
-    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -386,10 +382,6 @@
     {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 32049,
-      "name": "Merciless Gladiator's Silk Handguards"
     },
     {
       "itemId": 32110,

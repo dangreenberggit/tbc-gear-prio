@@ -22,45 +22,45 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 3770,
+  "d7EligibleTotal": 3608,
   "excludedNoSource": 710,
-  "universeTotal": 1393,
+  "universeTotal": 1255,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 63,
-    "chest": 103,
+    "chest": 91,
     "feet": 97,
     "finger": 131,
     "hands": 68,
-    "head": 92,
-    "legs": 113,
+    "head": 80,
+    "legs": 101,
     "neck": 84,
     "ranged": 2,
-    "shoulder": 79,
+    "shoulder": 67,
     "trinket": 62,
     "waist": 84,
-    "weapon": 326,
+    "weapon": 236,
     "wrist": 89
   },
   "sourceRecordAdds": {
     "atlasloot": 306,
     "curated": 7,
-    "db": 2950,
+    "db": 2788,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 14,
-    "dbPhase": 813,
+    "dbPhase": 675,
     "heroicMatch": 13,
     "itemHasOrigin:atlasloot": 105,
     "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 1329,
+    "itemHasOrigin:db": 1191,
     "itemHasOrigin:two-hop": 18,
     "repFactionMatch": 40,
     "zoneMatch": 513
   },
   "exclusivePrimaryOrigin": {
-    "db": 1329,
+    "db": 1191,
     "atlasloot-only": 39,
     "other": 7,
     "two-hop": 18
@@ -69,13 +69,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1393,
-    "casterOnlyReject": 722,
+    "total": 1255,
+    "casterOnlyReject": 654,
     "epFloorReject": 35,
-    "combinedReject": 757,
-    "combinedKeep": 636,
-    "casterRejectPct": 51.8,
-    "combinedRejectPct": 54.3,
+    "combinedReject": 689,
+    "combinedKeep": 566,
+    "casterRejectPct": 52.1,
+    "combinedRejectPct": 54.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -434,20 +434,12 @@
       "name": "Explorer's Walking Stick"
     },
     {
-      "itemId": 26000,
-      "name": "Gladiator's Linked Gauntlets"
-    },
-    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
-    },
-    {
-      "itemId": 27470,
-      "name": "Gladiator's Mail Gauntlets"
     },
     {
       "itemId": 27544,
@@ -460,10 +452,6 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
-    },
-    {
-      "itemId": 28357,
-      "name": "Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 28523,
@@ -530,24 +518,8 @@
       "name": "Leggings of Beast Mastery"
     },
     {
-      "itemId": 31397,
-      "name": "Gladiator's Ringmail Gauntlets"
-    },
-    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 32005,
-      "name": "Merciless Gladiator's Linked Gauntlets"
-    },
-    {
-      "itemId": 32010,
-      "name": "Merciless Gladiator's Mail Gauntlets"
-    },
-    {
-      "itemId": 32030,
-      "name": "Merciless Gladiator's Ringmail Gauntlets"
     },
     {
       "itemId": 32139,
@@ -582,56 +554,12 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
-      "itemId": 33078,
-      "name": "Merciless Gladiator's Totem of the Third Wind"
-    },
-    {
       "itemId": 33505,
       "name": "Totem of Living Water"
     },
     {
       "itemId": 33507,
       "name": "Stonebreaker's Totem"
-    },
-    {
-      "itemId": 33707,
-      "name": "Vengeful Gladiator's Linked Gauntlets"
-    },
-    {
-      "itemId": 33712,
-      "name": "Vengeful Gladiator's Mail Gauntlets"
-    },
-    {
-      "itemId": 33739,
-      "name": "Vengeful Gladiator's Ringmail Gauntlets"
-    },
-    {
-      "itemId": 33843,
-      "name": "Vengeful Gladiator's Totem of the Third Wind"
-    },
-    {
-      "itemId": 33939,
-      "name": "Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 33940,
-      "name": "Merciless Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 33941,
-      "name": "Vengeful Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 33951,
-      "name": "Gladiator's Totem of Survival"
-    },
-    {
-      "itemId": 33952,
-      "name": "Merciless Gladiator's Totem of Survival"
-    },
-    {
-      "itemId": 33953,
-      "name": "Vengeful Gladiator's Totem of Survival"
     },
     {
       "itemId": 34430,
@@ -656,30 +584,6 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
-    },
-    {
-      "itemId": 35043,
-      "name": "Brutal Gladiator's Linked Gauntlets"
-    },
-    {
-      "itemId": 35049,
-      "name": "Brutal Gladiator's Mail Gauntlets"
-    },
-    {
-      "itemId": 35078,
-      "name": "Brutal Gladiator's Ringmail Gauntlets"
-    },
-    {
-      "itemId": 35104,
-      "name": "Brutal Gladiator's Totem of Indomitability"
-    },
-    {
-      "itemId": 35105,
-      "name": "Brutal Gladiator's Totem of Survival"
-    },
-    {
-      "itemId": 35106,
-      "name": "Brutal Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 35387,

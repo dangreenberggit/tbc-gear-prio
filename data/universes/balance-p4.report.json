@@ -20,44 +20,44 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3105,
-  "excludedNoSource": 708,
-  "universeTotal": 986,
+  "d7EligibleTotal": 2963,
+  "excludedNoSource": 669,
+  "universeTotal": 901,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 59,
-    "chest": 63,
+    "chest": 54,
     "feet": 68,
     "finger": 116,
     "hands": 40,
-    "head": 63,
-    "legs": 67,
+    "head": 54,
+    "legs": 58,
     "neck": 72,
     "ranged": 4,
-    "shoulder": 52,
+    "shoulder": 43,
     "trinket": 54,
     "waist": 57,
-    "weapon": 209,
+    "weapon": 160,
     "wrist": 62
   },
   "sourceRecordAdds": {
     "atlasloot": 258,
     "curated": 7,
-    "db": 2295,
+    "db": 2192,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 15,
-    "dbPhase": 599,
+    "dbPhase": 514,
     "itemHasOrigin:atlasloot": 80,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 938,
+    "itemHasOrigin:db": 853,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 26,
     "zoneMatch": 346
   },
   "exclusivePrimaryOrigin": {
-    "db": 938,
+    "db": 853,
     "atlasloot-only": 29,
     "two-hop": 15,
     "other": 4
@@ -66,13 +66,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 986,
-    "casterOnlyReject": 524,
+    "total": 901,
+    "casterOnlyReject": 480,
     "epFloorReject": 24,
-    "combinedReject": 548,
-    "combinedKeep": 438,
-    "casterRejectPct": 53.1,
-    "combinedRejectPct": 55.6,
+    "combinedReject": 504,
+    "combinedKeep": 397,
+    "casterRejectPct": 53.3,
+    "combinedRejectPct": 55.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -387,18 +387,6 @@
       "name": "Jewel of Charismatic Mystique"
     },
     {
-      "itemId": 28126,
-      "name": "Gladiator's Dragonhide Gloves"
-    },
-    {
-      "itemId": 28136,
-      "name": "Gladiator's Wyrmhide Gloves"
-    },
-    {
-      "itemId": 28355,
-      "name": "Gladiator's Idol of Tenacity"
-    },
-    {
       "itemId": 28568,
       "name": "Idol of the Avian Heart"
     },
@@ -443,24 +431,8 @@
       "name": "Lower City Prayerbook"
     },
     {
-      "itemId": 31375,
-      "name": "Gladiator's Kodohide Gloves"
-    },
-    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 31967,
-      "name": "Merciless Gladiator's Dragonhide Gloves"
-    },
-    {
-      "itemId": 31987,
-      "name": "Merciless Gladiator's Kodohide Gloves"
-    },
-    {
-      "itemId": 32056,
-      "name": "Merciless Gladiator's Wyrmhide Gloves"
     },
     {
       "itemId": 32113,
@@ -495,56 +467,12 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
-      "itemId": 33076,
-      "name": "Merciless Gladiator's Idol of Tenacity"
-    },
-    {
       "itemId": 33508,
       "name": "Idol of Budding Life"
     },
     {
       "itemId": 33510,
       "name": "Idol of the Unseen Moon"
-    },
-    {
-      "itemId": 33671,
-      "name": "Vengeful Gladiator's Dragonhide Gloves"
-    },
-    {
-      "itemId": 33690,
-      "name": "Vengeful Gladiator's Kodohide Gloves"
-    },
-    {
-      "itemId": 33767,
-      "name": "Vengeful Gladiator's Wyrmhide Gloves"
-    },
-    {
-      "itemId": 33841,
-      "name": "Vengeful Gladiator's Idol of Tenacity"
-    },
-    {
-      "itemId": 33942,
-      "name": "Gladiator's Idol of Steadfastness"
-    },
-    {
-      "itemId": 33943,
-      "name": "Merciless Gladiator's Idol of Steadfastness"
-    },
-    {
-      "itemId": 33944,
-      "name": "Vengeful Gladiator's Idol of Steadfastness"
-    },
-    {
-      "itemId": 33945,
-      "name": "Gladiator's Idol of Resolve"
-    },
-    {
-      "itemId": 33946,
-      "name": "Merciless Gladiator's Idol of Resolve"
-    },
-    {
-      "itemId": 33947,
-      "name": "Vengeful Gladiator's Idol of Resolve"
     },
     {
       "itemId": 34430,

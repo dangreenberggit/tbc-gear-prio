@@ -19,44 +19,44 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2329,
-  "excludedNoSource": 531,
-  "universeTotal": 665,
+  "d7EligibleTotal": 2256,
+  "excludedNoSource": 509,
+  "universeTotal": 617,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 29,
+    "chest": 26,
     "feet": 37,
     "finger": 109,
     "hands": 16,
-    "head": 28,
-    "legs": 31,
+    "head": 25,
+    "legs": 28,
     "neck": 65,
-    "ranged": 13,
-    "shoulder": 24,
+    "ranged": 8,
+    "shoulder": 21,
     "trinket": 38,
     "waist": 31,
-    "weapon": 160,
+    "weapon": 129,
     "wrist": 33
   },
   "sourceRecordAdds": {
     "atlasloot": 214,
     "curated": 8,
-    "db": 1697,
+    "db": 1646,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 17,
-    "dbPhase": 390,
+    "dbPhase": 342,
     "itemHasOrigin:atlasloot": 53,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 614,
+    "itemHasOrigin:db": 566,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 22,
     "zoneMatch": 236
   },
   "exclusivePrimaryOrigin": {
-    "db": 614,
+    "db": 566,
     "atlasloot-only": 28,
     "other": 8,
     "two-hop": 15
@@ -65,13 +65,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 665,
-    "casterOnlyReject": 418,
+    "total": 617,
+    "casterOnlyReject": 392,
     "epFloorReject": 8,
-    "combinedReject": 426,
-    "combinedKeep": 239,
-    "casterRejectPct": 62.9,
-    "combinedRejectPct": 64.1,
+    "combinedReject": 400,
+    "combinedKeep": 217,
+    "casterRejectPct": 63.5,
+    "combinedRejectPct": 64.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -342,10 +342,6 @@
       "name": "Explorer's Walking Stick"
     },
     {
-      "itemId": 25857,
-      "name": "Gladiator's Silk Handguards"
-    },
-    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -394,10 +390,6 @@
       "name": "Darkmoon Card: Madness"
     },
     {
-      "itemId": 32049,
-      "name": "Merciless Gladiator's Silk Handguards"
-    },
-    {
       "itemId": 32110,
       "name": "Chancellor's Silk Handguards"
     },
@@ -416,10 +408,6 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
-    },
-    {
-      "itemId": 33759,
-      "name": "Vengeful Gladiator's Silk Handguards"
     },
     {
       "itemId": 34430,

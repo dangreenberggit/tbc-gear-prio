@@ -19,59 +19,59 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3197,
-  "excludedNoSource": 748,
-  "universeTotal": 889,
+  "d7EligibleTotal": 3083,
+  "excludedNoSource": 717,
+  "universeTotal": 809,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 42,
+    "chest": 39,
     "feet": 62,
     "finger": 108,
     "hands": 30,
-    "head": 42,
-    "legs": 47,
+    "head": 39,
+    "legs": 44,
     "neck": 66,
-    "ranged": 35,
-    "shoulder": 35,
+    "ranged": 27,
+    "shoulder": 32,
     "trinket": 38,
     "waist": 48,
-    "weapon": 232,
+    "weapon": 172,
     "wrist": 53
   },
   "sourceRecordAdds": {
     "atlasloot": 272,
-    "curated": 5,
-    "db": 2343,
+    "curated": 3,
+    "db": 2262,
     "two-hop": 18
   },
   "membershipByOrigin": {
-    "curated": 12,
-    "dbPhase": 527,
+    "curated": 10,
+    "dbPhase": 449,
     "itemHasOrigin:atlasloot": 69,
-    "itemHasOrigin:curated": 5,
-    "itemHasOrigin:db": 837,
+    "itemHasOrigin:curated": 3,
+    "itemHasOrigin:db": 759,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 26,
     "zoneMatch": 324
   },
   "exclusivePrimaryOrigin": {
-    "db": 837,
+    "db": 759,
     "atlasloot-only": 32,
     "two-hop": 15,
-    "other": 5
+    "other": 3
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 889,
-    "casterOnlyReject": 378,
+    "total": 809,
+    "casterOnlyReject": 362,
     "epFloorReject": 6,
-    "combinedReject": 384,
-    "combinedKeep": 505,
-    "casterRejectPct": 42.5,
-    "combinedRejectPct": 43.2,
+    "combinedReject": 368,
+    "combinedKeep": 441,
+    "casterRejectPct": 44.7,
+    "combinedRejectPct": 45.5,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -350,10 +350,6 @@
       "name": "Talisman of the Alliance"
     },
     {
-      "itemId": 25834,
-      "name": "Gladiator's Leather Gloves"
-    },
-    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -410,10 +406,6 @@
       "name": "Darkmoon Card: Madness"
     },
     {
-      "itemId": 31998,
-      "name": "Merciless Gladiator's Leather Gloves"
-    },
-    {
       "itemId": 32124,
       "name": "Chancellor's Leather Gloves"
     },
@@ -436,10 +428,6 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
-    },
-    {
-      "itemId": 33700,
-      "name": "Vengeful Gladiator's Leather Gloves"
     },
     {
       "itemId": 34430,

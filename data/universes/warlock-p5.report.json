@@ -22,45 +22,45 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2351,
+  "d7EligibleTotal": 2258,
   "excludedNoSource": 439,
-  "universeTotal": 884,
+  "universeTotal": 799,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 63,
-    "chest": 45,
+    "chest": 37,
     "feet": 47,
     "finger": 132,
     "hands": 22,
-    "head": 38,
-    "legs": 44,
+    "head": 30,
+    "legs": 36,
     "neck": 84,
-    "ranged": 19,
-    "shoulder": 34,
+    "ranged": 11,
+    "shoulder": 26,
     "trinket": 64,
     "waist": 38,
-    "weapon": 212,
+    "weapon": 167,
     "wrist": 42
   },
   "sourceRecordAdds": {
     "atlasloot": 214,
     "curated": 6,
-    "db": 1813,
+    "db": 1720,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 22,
-    "dbPhase": 501,
+    "dbPhase": 416,
     "heroicMatch": 9,
     "itemHasOrigin:atlasloot": 71,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 829,
+    "itemHasOrigin:db": 744,
     "itemHasOrigin:two-hop": 18,
     "repFactionMatch": 30,
     "zoneMatch": 322
   },
   "exclusivePrimaryOrigin": {
-    "db": 829,
+    "db": 744,
     "atlasloot-only": 31,
     "two-hop": 18,
     "other": 6
@@ -69,13 +69,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 884,
-    "casterOnlyReject": 555,
+    "total": 799,
+    "casterOnlyReject": 502,
     "epFloorReject": 8,
-    "combinedReject": 563,
-    "combinedKeep": 321,
+    "combinedReject": 510,
+    "combinedKeep": 289,
     "casterRejectPct": 62.8,
-    "combinedRejectPct": 63.7,
+    "combinedRejectPct": 63.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -346,10 +346,6 @@
       "name": "Talisman of the Horde"
     },
     {
-      "itemId": 24556,
-      "name": "Gladiator's Dreadweave Gloves"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
     },
@@ -398,10 +394,6 @@
       "name": "Pendant of the Lost Ages"
     },
     {
-      "itemId": 30188,
-      "name": "Gladiator's Felweave Handguards"
-    },
-    {
       "itemId": 30619,
       "name": "Fel Reaver's Piston"
     },
@@ -412,14 +404,6 @@
     {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
-    },
-    {
-      "itemId": 31973,
-      "name": "Merciless Gladiator's Dreadweave Gloves"
-    },
-    {
-      "itemId": 31981,
-      "name": "Merciless Gladiator's Felweave Handguards"
     },
     {
       "itemId": 32093,
@@ -440,14 +424,6 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
-    },
-    {
-      "itemId": 33676,
-      "name": "Vengeful Gladiator's Dreadweave Gloves"
-    },
-    {
-      "itemId": 33684,
-      "name": "Vengeful Gladiator's Felweave Handguards"
     },
     {
       "itemId": 34430,
@@ -472,14 +448,6 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
-    },
-    {
-      "itemId": 35003,
-      "name": "Brutal Gladiator's Dreadweave Gloves"
-    },
-    {
-      "itemId": 35011,
-      "name": "Brutal Gladiator's Felweave Handguards"
     },
     {
       "itemId": 35581,
