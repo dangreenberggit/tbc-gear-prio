@@ -1,4 +1,8 @@
-Status: open
+Status: closed (2026-08-24, superseded by fork commit 62e77f625 — the
+engine rank is no longer rendered anywhere; every table numbers its rows
+by display position, so the set-potential desync cannot surface and the
+comparator-agreement test would guard an invariant nothing displays. The
+Owner ruling below pre-authorized exactly this outcome.)
 Type: engine defect
 Origin: ticket-279 review, 2026-08-24
 Blocks: none

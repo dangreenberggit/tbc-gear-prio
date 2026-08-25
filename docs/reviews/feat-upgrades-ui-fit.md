@@ -75,11 +75,11 @@ against both ported-file edits.
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                             |
 | --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/287-set-potential-sort-key-desyncs-stamped-ranks.md` (pre-filed by the WP4 review); the comment overclaim is fixed in fork `e637fa284`                                                                                                                                                                                                     |
+| A1  | Adversarial | fixed       | was deferred as ticket 287; superseded in round 3 — the engine rank is no longer rendered (fork `62e77f625`), so the desync cannot surface; ticket 287 closed as superseded; the comment overclaim was fixed in fork `e637fa284`                                                                                                                                          |
 | A2  | Adversarial | fixed       | was deferred into ticket 286; superseded by the round-2 owner ruling — Stop now resets the tab (fork `fe1e4ad42`), removing the partial-table path the DOM-read coupling served; ticket 286 closed                                                                                                                                                                        |
 | A3  | Adversarial | wontfix     | the "unobservable" claim was measured by the ticket-280 review (uniform rank nullity per sortable table); null-rank collapse to engine order is the documented intent                                                                                                                                                                                                     |
 | A4  | Adversarial | wontfix     | whitespace-only-fragment edge in `isEmptyElement`; no producing case exists in `getSourceInfo` today                                                                                                                                                                                                                                                                      |
-| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/287-set-potential-sort-key-desyncs-stamped-ranks.md` — agreement-test requirement added to its Done-when                                                                                                                                                                                                                                   |
+| A5  | Adversarial | fixed       | was deferred into ticket 287's Done-when; superseded with it in round 3 — the agreement test would guard an invariant nothing displays now that no engine rank is rendered                                                                                                                                                                                                |
 | D1  | Domain      | fixed       | heroic label added to `ZONELESS_SOURCE_LABELS` (fork `e637fa284`), verified live at phase 5                                                                                                                                                                                                                                                                               |
 | D2  | Domain      | fixed       | ticket 288 promoted to do-now by the owner and closed — one `SOURCE_LABELS` map exported from the engine (fork `fe1e4ad42`, round 2)                                                                                                                                                                                                                                      |
 | S1  | Standards   | wontfix     | two comments drift toward what-restating; judgment-call level, the bulk of the added comments are load-bearing, and a comment-trim commit would move the pin again for no behavioural gain                                                                                                                                                                                |
@@ -119,3 +119,23 @@ view.ts sha; the two old label maps byte-identical at base; Stop → 0 rows,
 285's filter selection surviving stop-then-rerun; hygiene identical to
 base by stash-check. Tickets 286, 288, 289 closed; open deferrals now 287
 and 290. `pnpm verify` green at pin `ccf30ef01`.
+
+# Round 3 — dump the engine rank from the UI
+
+Reviewed range: `b8767eb..1ebb104` covered by round 2's records; this round
+reviews the fork clone's `ccf30ef01..62e77f625` (one commit, one file,
+owner-directed). One Opus review, verdict COMMIT.
+
+The engine's `RankedItem.rank` is no longer surfaced: every results table
+numbers its rows by 1-based display position (renumbering under sort and
+filter, independent per table; the below-cutoff "—" is gone), and Rank
+left the sortable columns. Reviewer verified live at both viewports:
+gapless 1..N with deltas non-increasing, Item-desc renumbering, no button
+or aria-sort on the Rank th, mid-run/stopped tables unaffected, mobile
+375/375 with 40px buttons; grep of the whole ui/ tree found zero surviving
+readers of `RankedItem.rank` (two comments only). The special-cased Rank
+th was judged a narrower seam than the one ticket 289 closed (both heads
+call one `rankColumnLabel` helper). Ticket 287 closes as superseded — its
+Owner ruling pre-authorized exactly this outcome; tickets 279/280 stand as
+accurate history. Engine untouched, so E-W3 is not applicable this round.
+`pnpm verify` green at pin `62e77f625`.
