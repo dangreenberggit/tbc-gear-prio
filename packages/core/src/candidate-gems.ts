@@ -19,7 +19,20 @@ import {
 } from "./meta.js";
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat, type EpWeights } from "./stats.js";
-import type { DetectedSpecId } from "./types.js";
+import { capProfileFor } from "./cap-profile.js";
+import type { DetectedSpecId, SpecId } from "./types.js";
+
+/**
+ * Narrow a detected spec to one the cap table knows.
+ *
+ * `feral-tank` is detectable but not rankable, so it has no cap profile. It
+ * reaches gem code only via `SPEC_PREFERRED_METAS`, and dropping it here yields
+ * the undefined-spec default — the melee profile, which is the right school for
+ * a bear regardless.
+ */
+function rankableSpec(spec: DetectedSpecId | undefined): SpecId | undefined {
+  return spec === undefined || spec === "feral-tank" ? undefined : spec;
+}
 
 /**
  * Record-only weights. Narrower than `stats.ts`'s `EpWeights` union — this
@@ -259,7 +272,7 @@ export function fillEmptyCandidateGems(
   const sockets = socketsFor(itemId);
   if (sockets.length === 0) return [];
 
-  const weights = gemFillWeights(epWeights);
+  const weights = gemFillWeights(epWeights, opts.spec);
   const base = sockets.map((_, i) => gems[i] ?? 0);
   const matched = fillEmpties(sockets, base, palette, weights, true, opts);
   const free = fillEmpties(sockets, base, palette, weights, false, opts);
@@ -270,15 +283,24 @@ export function fillEmptyCandidateGems(
 }
 
 /**
- * Softcaps: melee hit / expertise EP overstates gems on capped raid sets.
+ * Softcaps: hit / expertise EP overstates gems on capped raid sets.
  * Used only for candidate socket fills — meta-repair keeps full EP weights.
+ *
+ * Which stats are softcapped is the spec's own question, and getting it wrong
+ * is silent in both directions: zeroing melee hit for a caster leaves spell hit
+ * gems overvalued *and* discards nothing, while zeroing expertise for a hunter
+ * suppresses a stat the spec was never going to gem anyway. The profile answers
+ * both — `hitStat` names the one hit stat that softcaps, and `trackExpertise`
+ * says whether expertise is a cap this spec has at all.
  */
 export function gemFillWeights(
-  epWeights: EpWeightRecord
+  epWeights: EpWeightRecord,
+  spec?: DetectedSpecId
 ): Record<string, number> {
+  const profile = capProfileFor(rankableSpec(spec));
   const out: Record<string, number> = { ...epWeights };
-  out[String(Stat.StatMeleeHitRating)] = 0;
-  out[String(Stat.StatExpertiseRating)] = 0;
+  out[String(profile.hitStat)] = 0;
+  if (profile.trackExpertise) out[String(Stat.StatExpertiseRating)] = 0;
   return out;
 }
 

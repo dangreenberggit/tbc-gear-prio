@@ -27,16 +27,30 @@ export const CUTOFF: Cutoff = { absDps: 3.4, pct: 0.15 };
 export const CUTOFF_FERAL: Cutoff = { absDps: 3.6, pct: 0.15 };
 
 /**
- * Per-spec cutoff lookup. Only `ret` and `feral` have their own derived
- * spread experiment; every other `SpecId` falls back to the ret-derived
- * `CUTOFF` until it gets its own five-seed spread (mirrors how `CUTOFF` was
- * applied to every spec before this file existed).
+ * Per-spec cutoff lookup, **total** over `SpecId`.
+ *
+ * Totality is the point: the previous `Partial` + `?? CUTOFF` shape meant a
+ * newly added spec silently inherited ret's noise floor, and nothing in the
+ * type system or the output said so. A spec that has not had its own five-seed
+ * spread run still gets the ret-derived numbers — there is no better value to
+ * give it — but it must now say so at the point of definition, so the debt is
+ * visible in a diff rather than hiding in a fallback operator.
  */
-const CUTOFF_BY_SPEC: Partial<Record<SpecId, Cutoff>> = {
+const CUTOFF_BY_SPEC: Readonly<Record<SpecId, Cutoff>> = {
   ret: CUTOFF,
   feral: CUTOFF_FERAL,
 };
 
+/**
+ * The `?? CUTOFF` here is not the fallback this change set out to delete.
+ * That one hid *unfilled rows in a `Partial`* — a new `SpecId` type-checked
+ * while silently inheriting ret's noise floor. The Record is now total, so a
+ * typed `SpecId` always hits a row and the compiler forces every new spec to
+ * choose. This coalesce covers only the untyped boundary: `DetectedSpecId`
+ * values like `feral-tank` that are identifiable but not rankable, which
+ * `cutoff.test.ts` passes through a cast. Throwing there would turn a
+ * detection edge case into a crash.
+ */
 export function cutoffForSpec(spec: SpecId): Cutoff {
   return CUTOFF_BY_SPEC[spec] ?? CUTOFF;
 }

@@ -958,8 +958,18 @@ export async function rankUpgrades(
             stdev: candObs.stdev,
             request: candReq,
             slotIndex,
-            hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
-            hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
+            hitDriven: isHitDriven(
+              statDelta,
+              caps.hit,
+              { deltaDps },
+              input.spec
+            ),
+            hitRegression: hitRegression(
+              statDelta,
+              caps.hit,
+              { deltaDps },
+              input.spec
+            ),
             repairSwaps,
             candidateGems: swapped[slotIndex]?.gems ?? [],
           };
