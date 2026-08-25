@@ -575,6 +575,33 @@ def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
 
 _RET_EP_FALLBACK, _RET_EP_BY_PHASE = _ep_weights_map("ret")
 _FERAL_EP_FALLBACK, _FERAL_EP_BY_PHASE = _ep_weights_map("feral")
+_BALANCE_EP_FALLBACK, _BALANCE_EP_BY_PHASE = _ep_weights_map(
+    "balance"
+)
+_HUNTER_EP_FALLBACK, _HUNTER_EP_BY_PHASE = _ep_weights_map(
+    "hunter"
+)
+_MAGE_EP_FALLBACK, _MAGE_EP_BY_PHASE = _ep_weights_map(
+    "mage"
+)
+_SHADOW_EP_FALLBACK, _SHADOW_EP_BY_PHASE = _ep_weights_map(
+    "shadow"
+)
+_ROGUE_EP_FALLBACK, _ROGUE_EP_BY_PHASE = _ep_weights_map(
+    "rogue"
+)
+_ELE_EP_FALLBACK, _ELE_EP_BY_PHASE = _ep_weights_map(
+    "ele"
+)
+_ENH_EP_FALLBACK, _ENH_EP_BY_PHASE = _ep_weights_map(
+    "enh"
+)
+_WARLOCK_EP_FALLBACK, _WARLOCK_EP_BY_PHASE = _ep_weights_map(
+    "warlock"
+)
+_WARRIOR_EP_FALLBACK, _WARRIOR_EP_BY_PHASE = _ep_weights_map(
+    "warrior"
+)
 
 
 SPEC_PROFILES: dict[str, SpecProfile] = {
@@ -655,6 +682,335 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         excluded_weapon_types=frozenset(
             {WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
         ),
+    ),
+    "balance": SpecProfile(
+        "balance",
+        # Upstream ships a full preraid-p5 ladder, so every shipped phase's
+        # bisTags come from that phase's own curated set.
+        ep_weights=_BALANCE_EP_FALLBACK,
+        ep_weights_by_phase=_BALANCE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/balance_preraid.gear.json",
+            ROOT / "vendor/wowsims/balance_p1.gear.json",
+            ROOT / "vendor/wowsims/balance_p2.gear.json",
+            ROOT / "vendor/wowsims/balance_p3.gear.json",
+            ROOT / "vendor/wowsims/balance_p4.gear.json",
+            ROOT / "vendor/wowsims/balance_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/balance-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=BALANCE_TIER_PIECE_IDS,
+        class_id=CLASS_DRUID,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
+        ranged_type=RANGED_IDOL,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_SHIELD, WEAPON_SWORD}
+        ),
+    ),
+    "hunter": SpecProfile(
+        "hunter",
+        # Both builds (bm/sv) and both weapon layouts (2h/dw) are vendored and
+        # union-tagged. Upstream stops at phase_4, so p5 bisTags trace to <=p4.
+        # The EP weights are BM's alone -- see data/presets/hunter/.
+        ep_weights=_HUNTER_EP_FALLBACK,
+        ep_weights_by_phase=_HUNTER_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/hunter_p1_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_2h_3p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_dw_3p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_preraid.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/hunter-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=HUNTER_TIER_PIECE_IDS,
+        class_id=CLASS_HUNTER,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
+        ranged_type=frozenset(
+            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN}
+        ),
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_MACE, WEAPON_OFFHAND, WEAPON_SHIELD}
+        ),
+    ),
+    "mage": SpecProfile(
+        "mage",
+        # Every vendored mage set is an ARCANE set -- upstream curates no fire or
+        # frost sets at all -- and the p3 pair differs only by weapon layout.
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3. Mage carries the
+        # most stacked degradations of the nine; all of them go to the SME gate.
+        ep_weights=_MAGE_EP_FALLBACK,
+        ep_weights_by_phase=_MAGE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/mage_prebis.gear.json",
+            ROOT / "vendor/wowsims/mage_p1.gear.json",
+            ROOT / "vendor/wowsims/mage_p2.gear.json",
+            ROOT / "vendor/wowsims/mage_p3_staff.gear.json",
+            ROOT / "vendor/wowsims/mage_p3_sword.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/mage-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=MAGE_TIER_PIECE_IDS,
+        class_id=CLASS_MAGE,
+        armor_types=frozenset({ARMOR_CLOTH}),
+        ranged_type=RANGED_WAND,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
+        ),
+    ),
+    "shadow": SpecProfile(
+        "shadow",
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
+        ep_weights=_SHADOW_EP_FALLBACK,
+        ep_weights_by_phase=_SHADOW_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/shadow_preraid.gear.json",
+            ROOT / "vendor/wowsims/shadow_p1.gear.json",
+            ROOT / "vendor/wowsims/shadow_p2.gear.json",
+            ROOT / "vendor/wowsims/shadow_p3.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/shadow-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=SHADOW_TIER_PIECE_IDS,
+        class_id=CLASS_PRIEST,
+        armor_types=frozenset({ARMOR_CLOTH}),
+        ranged_type=RANGED_WAND,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_FIST, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        ),
+    ),
+    "rogue": SpecProfile(
+        "rogue",
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
+        ep_weights=_ROGUE_EP_FALLBACK,
+        ep_weights_by_phase=_ROGUE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/rogue_preraid.gear.json",
+            ROOT / "vendor/wowsims/rogue_p1.gear.json",
+            ROOT / "vendor/wowsims/rogue_p2.gear.json",
+            ROOT / "vendor/wowsims/rogue_p3.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/rogue-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ROGUE_TIER_PIECE_IDS,
+        class_id=CLASS_ROGUE,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
+        ranged_type=frozenset(
+            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN, RANGED_THROWN}
+        ),
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_STAFF}
+        ),
+    ),
+    "ele": SpecProfile(
+        "ele",
+        # p1 ships an alliance/horde pair; both are vendored and union-tagged.
+        # Elemental and enhancement share shaman TOKEN ids but no piece ids --
+        # Cyclone Regalia against Cyclone Harness, distinct setIds.
+        ep_weights=_ELE_EP_FALLBACK,
+        ep_weights_by_phase=_ELE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/ele_preraid.gear.json",
+            ROOT / "vendor/wowsims/ele_p1_a.gear.json",
+            ROOT / "vendor/wowsims/ele_p1_h.gear.json",
+            ROOT / "vendor/wowsims/ele_p2.gear.json",
+            ROOT / "vendor/wowsims/ele_p3.gear.json",
+            ROOT / "vendor/wowsims/ele_p4.gear.json",
+            ROOT / "vendor/wowsims/ele_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/ele-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ELE_TIER_PIECE_IDS,
+        class_id=CLASS_SHAMAN,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
+        ranged_type=RANGED_TOTEM,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_POLEARM, WEAPON_SWORD}
+        ),
+    ),
+    "enh": SpecProfile(
+        "enh",
+        # The *.itemswap.json files upstream ships beside these describe a weapon
+        # swap rather than a gear set and are deliberately not vendored.
+        ep_weights=_ENH_EP_FALLBACK,
+        ep_weights_by_phase=_ENH_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/enh_preraid.gear.json",
+            ROOT / "vendor/wowsims/enh_p1.gear.json",
+            ROOT / "vendor/wowsims/enh_p2.gear.json",
+            ROOT / "vendor/wowsims/enh_p3.gear.json",
+            ROOT / "vendor/wowsims/enh_p4.gear.json",
+            ROOT / "vendor/wowsims/enh_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/enh-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ENH_TIER_PIECE_IDS,
+        class_id=CLASS_SHAMAN,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL}),
+        ranged_type=RANGED_TOTEM,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_POLEARM, WEAPON_SWORD}
+        ),
+    ),
+    "warlock": SpecProfile(
+        "warlock",
+        # Warlock names its sets by RAID TIER, not phase. The mapping applied
+        # here is t4->p1, t5->p2, t6->p3, za->p4, swp->p5, which is TBC raid
+        # release order. data/phase_raids.json is a second in-repo witness for
+        # the last two (Zul'Aman p4, Sunwell p5); the first three are the SME's
+        # to confirm. The destro_fire family is vendored and union-tagged, but
+        # the EP weights are the Affli/Demo/Destro default's alone.
+        ep_weights=_WARLOCK_EP_FALLBACK,
+        ep_weights_by_phase=_WARLOCK_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/warlock_preraid.gear.json",
+            ROOT / "vendor/wowsims/warlock_t4.gear.json",
+            ROOT / "vendor/wowsims/warlock_t5.gear.json",
+            ROOT / "vendor/wowsims/warlock_t6.gear.json",
+            ROOT / "vendor/wowsims/warlock_za.gear.json",
+            ROOT / "vendor/wowsims/warlock_swp.gear.json",
+            ROOT / "vendor/wowsims/warlock_destro_preraid.gear.json",
+            ROOT / "vendor/wowsims/warlock_destro_t4.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/warlock-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=WARLOCK_TIER_PIECE_IDS,
+        class_id=CLASS_WARLOCK,
+        armor_types=frozenset({ARMOR_CLOTH}),
+        ranged_type=RANGED_WAND,
+        allow_one_hand=True,
+        excluded_weapon_types=frozenset(
+            {WEAPON_AXE, WEAPON_FIST, WEAPON_MACE, WEAPON_POLEARM, WEAPON_SHIELD}
+        ),
+    ),
+    "warrior": SpecProfile(
+        "warrior",
+        # Every phase ships as an arms/fury pair; both are vendored and
+        # union-tagged, the way feral's 6p/9p pair is. The EP weights are
+        # Fury's alone, per the fork's own default.
+        ep_weights=_WARRIOR_EP_FALLBACK,
+        ep_weights_by_phase=_WARRIOR_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/warrior_preraid_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_preraid_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p1_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p1_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p2_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p2_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p3_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p3_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p4_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p4_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p5_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p5_fury.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        exclude_ids=frozenset(),
+        two_hop=ROOT / "data/two-hop/warrior-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=WARRIOR_TIER_PIECE_IDS,
+        class_id=CLASS_WARRIOR,
+        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
+        ranged_type=frozenset(
+            {RANGED_BOW, RANGED_CROSSBOW, RANGED_GUN, RANGED_THROWN}
+        ),
+        allow_one_hand=True,
+        # Warriors can equip every weapon type in the enum.
+        excluded_weapon_types=frozenset(),
     ),
 }
 
