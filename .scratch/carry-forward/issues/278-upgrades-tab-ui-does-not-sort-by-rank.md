@@ -1,8 +1,39 @@
-Status: open
+Status: closed
 Type: UI defect
 Origin: owner report, 2026-08-23
 Blocks: none
 Blocked by: none
+Closed: 2026-08-23, branch feat/upgrades-ui-pass
+
+## Outcome
+
+Both halves reproduced on a served page and fixed, except one engine-side
+finding that is its own ticket (see below).
+
+**The mid-run path was the one losing the order**, as the "places the order
+could be lost" list suspected first. `landedRowsTable` rendered rows in the
+order their sims finished, with four columns and no Rank at all: 96 of 239
+adjacent pairs inverted in the recorded repro. It now sorts a copy by delta at
+render time and shares one row renderer and one header with the done-state
+tables. Confirmed on a served page: 240 rows, five columns including Rank,
+zero delta inversions across 239 adjacent pairs.
+
+**The done-state order was measured, not inferred** — on the unmodified tip
+`d49096e`, before any edit, with all four toggle states recorded (prune off,
+set-potential off, BiS-only off, raid filter default), reading the shortlist
+table and the below-cutoff table separately. 52 shortlist rows and 188
+below-cutoff rows; deltas non-increasing in both, zero inversions.
+
+**But the Rank column was not strictly ascending**: two inversions, at rows
+21/20 and 25/24, both strictly inside exact delta ties. This is the question
+line 34 of the original report anticipated — "sort by rank" and "sort by
+delta" are not the same order once ties are involved. It is an engine defect,
+not a UI one, and is filed as its own ticket rather than fixed in flight.
+
+Full measurement record in `docs/verification-log.md`.
+
+The wider UI pass was scoped into a plan and executed on this branch; the
+parts deliberately not taken are tickets 279-281.
 
 # The Upgrades tab UI does not sort by rank, and wants a UI pass
 

@@ -2439,3 +2439,79 @@ listing does and does not settle — 89's blanket framing does not survive the
 evidence and needs re-scoping. Filed: 276 (two membership buckets for the owner,
 plus the Swiftsteel/Swiftstrike phase doubt) and 277 (the boss sub-filter
 deferral).
+
+## 2026-08-23 — upgrades-ui-pass: the mid-run table was the one losing the order
+
+Ticket 278 said "the Upgrades tab UI does not sort by rank". Both halves are
+now settled on a served page, and they have different answers.
+
+### Q1: was the done-state order broken? Measured before any change
+
+Taken on the unmodified fork tip `d49096e`, before a single edit, so a pass
+could not be an artifact of the fix. Served `vendor/tbc-new-fork/dist` on
+`http://localhost:8975`, page `/tbc/paladin/retribution/`, iterations 1,
+candidates left at default (blank → full pool).
+
+Toggle states at read time, all four recorded:
+
+| Control | Checked | Visible |
+| --- | --- | --- |
+| prune | false | true |
+| set-potential | false | false (no set data this run) |
+| BiS-only / pin | false | true |
+| raid filter | "" (default, all) | true |
+
+The shortlist table and the below-cutoff table were read **separately** — they
+are two tables, and a concatenated `querySelectorAll` manufactures an inversion
+at the seam. 52 shortlist rows (the pre-registered underpowered floor was 10)
+and 188 below-cutoff rows.
+
+**Deltas: non-increasing in both tables, zero inversions** across 51 and 187
+adjacent pairs. The engine's ordering is not lost on the way to the screen.
+
+**Rank numbers: two inversions**, rendering `... 19, 21, 20, 22, 23, 25, 24,
+26 ...`. Both sit strictly inside an exact delta tie (+18.1 twice, +14.2
+three times). Two comparators order the same rows and disagree on ties:
+`rank.ts:883-891` stamps `rank` after sorting with a delta-only tiebreak,
+while `view.ts:205` renders through `compareRows`, which breaks ties on
+bisTags richness then `itemId`. Filed as ticket 279; engine changes were
+scoped out of this plan, and the UI fix below is correct either way.
+
+### Q2: the mid-run table, which is what the owner was looking at
+
+`landedRowsTable` rendered rows in whatever order their sims finished — 96 of
+239 adjacent pairs inverted in the recorded repro — with four columns and no
+Rank at all. It now sorts a copy by delta at render time and shares one row
+renderer and one header with the done-state tables.
+
+Confirmed on the rebuilt page: 240 rows, five columns including Rank, **zero
+delta inversions across 239 adjacent pairs**, Rank sequential 1…240.
+
+### The prune toggle's behaviour change, verified both directions
+
+`setPruneAvailable` used to force the checkbox off whenever it hid the
+control, destroying the user's preference. Visibility now only shows and
+hides; the safety is provided at the single read site instead
+(`pruneEffective()` = `visible && checked`).
+
+- visible + checked → placeholder "all 16 eligible", the pool is pruned;
+- hidden + checked → run used all 240, assumptions drawer recorded
+  "Candidate pool: every eligible item".
+
+So the gate is not vacuously false in one direction, and a hidden prune cannot
+silently apply.
+
+### A trap worth recording
+
+**The browser pane again reported `document.hidden: true` and
+`outerWidth/outerHeight: 0` for the whole session**, the same condition that
+stalled the earlier repro. In-page DOM reads and clicks worked fine and runs
+completed in ~10 s at iterations 1. The earlier session's conclusion that runs
+cannot finish in this state was a function of default iterations, not of the
+0×0 window: C9 held.
+
+### Tickets
+
+278 closed (measured, and the mid-run path fixed). 275 closed (toggle fold).
+Filed: 279 (the rank/view tie-order disagreement), 280 (sortable headers),
+281 (progress bar), 282 (content-filter option grouping).
