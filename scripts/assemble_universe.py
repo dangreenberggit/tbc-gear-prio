@@ -1187,16 +1187,57 @@ def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
 # Upstream names its gear sets by the phase they are BiS *for*: `preraid`
 # before Karazhan, `p1` for T4 content, `p2` for T5. Pre-raid is phase 1 --
 # it is the set you take into a phase-1 raid.
-CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2, "p3": 3}
+CURATED_SET_PHASE: dict[str, int] = {
+    "preraid": 1,
+    # Mage spells its pre-raid set `preBisArcane`, which the vendored name
+    # lowercases to `prebis`. Same claim as `preraid`, different upstream
+    # spelling.
+    "prebis": 1,
+    "p1": 1,
+    "p2": 2,
+    "p3": 3,
+    "p4": 4,
+    "p5": 5,
+    # Warlock is the one spec whose upstream sets are named by raid TIER
+    # rather than by phase, so without these rows every one of its labels
+    # resolves to None, `bis_set_labels_for_max_phase` filters them all out,
+    # and only `preraid` survives -- which is exactly what shipped before this
+    # entry existed: warlock carried the same ten pre-raid items tagged BiS at
+    # p2, p3, p4 AND p5, with its Sunwell set contributing nothing.
+    #
+    # The mapping is not a guess about release order. Median item level of
+    # each warlock set, joined to db.json, against the same measure on
+    # balance's phase-named ladder:
+    #
+    #     warlock  preraid 110  t4 115  t5 128  t6 146  za 146  swp 154
+    #     balance  preraid 110  p1 115  p2 128  p3 143  p4 141  p5 154
+    #
+    # Each tier lands on its phase counterpart. `t6` and `za` are the same
+    # power because `za` IS the t6 set with two Zul'Aman pieces swapped in
+    # (they share 13 of 15 items), which is why za maps to the later phase
+    # without implying it is stronger content.
+    "t4": 1,
+    "t5": 2,
+    "t6": 3,
+    "za": 4,
+    "swp": 5,
+}
 
 
 def curated_set_phase(label: str) -> int | None:
     """The phase a curated set is BiS for, or None if unrecognised.
 
     `feral_p2_6p` / `p2_9p` are the same phase split by tier-bonus count, so
-    the leading `pN` is the phase and the suffix is a variant.
+    the leading `pN` is the phase and the suffix is a variant. The same split
+    reads a build prefix off warlock's `destro_fire_*` family and hunter's
+    `bm`/`sv` sets, so the phase token is not always first -- try each
+    underscore-separated token and take the first that names a phase.
     """
-    return CURATED_SET_PHASE.get(label.split("_", 1)[0])
+    for token in label.split("_"):
+        phase = CURATED_SET_PHASE.get(token)
+        if phase is not None:
+            return phase
+    return None
 
 
 def bis_set_labels_for_max_phase(
