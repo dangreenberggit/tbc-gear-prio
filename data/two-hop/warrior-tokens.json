@@ -1,0 +1,175 @@
+{
+  "spec": "warrior",
+  "kind": "token-map",
+  "collectedDate": "2026-08-25",
+  "notes": [
+    "Token ids and names come from the AtlasLoot parse (vendor/atlasloot/data-tbc.lua row comments); zone and boss from data/atlasloot_sources.json keyed on the TOKEN id. The TBC tier tokens do not appear in db.json at all, so no classAllowlist or tooltip witnesses their class grouping.",
+    "Set piece ids come from db.json by `setId`, and the piece-to-token pairing is a SLOT JOIN on db.json's `type` field, not a witnessed redemption list. No committed input states which token buys which piece. The join reproduces both committed files (ret 18 entries, feral 15) exactly, which is a consistency check rather than an independent one.",
+    "T4/T5 group: Defender. T6 group: Protector. The T6 vocabulary is Conqueror/Vanquisher/Protector and the class triples are RE-CUT, not renamed -- paladin goes Champion->Conqueror but druid goes Defender->Vanquisher. See data/two-hop/feral-tokens.json notes 9-10, which record that 'druid uses the Defender-equivalent' would have been wrong.",
+    "SME GATE ITEM: the T6 triples are witnessed in-repo by feral-tokens.json (Vanquisher = Rogue/Mage/Druid, Protector = Warrior/Hunter/Shaman, leaving Conqueror = Paladin/Priest/Warlock). The T4/T5 HERO column (hunter/mage/warlock) is NOT witnessed by any committed file -- it is elimination against paladin=Champion and druid=Defender, the only two anchors. Confirm before trust."
+  ],
+  "entries": [
+    {
+      "pieceId": 29019,
+      "pieceName": "Warbringer Breastplate",
+      "tokenId": 29753,
+      "tokenName": "Chestguard of the Fallen Defender",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29020,
+      "pieceName": "Warbringer Gauntlets",
+      "tokenId": 29758,
+      "tokenName": "Gloves of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29021,
+      "pieceName": "Warbringer Battle-Helm",
+      "tokenId": 29761,
+      "tokenName": "Helm of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29022,
+      "pieceName": "Warbringer Greaves",
+      "tokenId": 29767,
+      "tokenName": "Leggings of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29023,
+      "pieceName": "Warbringer Shoulderplates",
+      "tokenId": 29764,
+      "tokenName": "Pauldrons of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30118,
+      "pieceName": "Destroyer Breastplate",
+      "tokenId": 30237,
+      "tokenName": "Chestguard of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30119,
+      "pieceName": "Destroyer Gauntlets",
+      "tokenId": 30240,
+      "tokenName": "Gloves of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30120,
+      "pieceName": "Destroyer Battle-Helm",
+      "tokenId": 30243,
+      "tokenName": "Helm of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30121,
+      "pieceName": "Destroyer Greaves",
+      "tokenId": 30246,
+      "tokenName": "Leggings of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30122,
+      "pieceName": "Destroyer Shoulderblades",
+      "tokenId": 30249,
+      "tokenName": "Pauldrons of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30969,
+      "pieceName": "Onslaught Gauntlets",
+      "tokenId": 31094,
+      "tokenName": "Gloves of the Forgotten Protector",
+      "zone": "Hyjal Summit",
+      "boss": "Azgalor",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30972,
+      "pieceName": "Onslaught Battle-Helm",
+      "tokenId": 31095,
+      "tokenName": "Helm of the Forgotten Protector",
+      "zone": "Hyjal Summit",
+      "boss": "Archimonde",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30975,
+      "pieceName": "Onslaught Breastplate",
+      "tokenId": 31091,
+      "tokenName": "Chestguard of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "Illidan Stormrage",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30977,
+      "pieceName": "Onslaught Greaves",
+      "tokenId": 31100,
+      "tokenName": "Leggings of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30979,
+      "pieceName": "Onslaught Shoulderblades",
+      "tokenId": 31103,
+      "tokenName": "Pauldrons of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34441,
+      "pieceName": "Onslaught Bracers",
+      "tokenId": 34851,
+      "tokenName": "Bracers of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Kalecgos",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34546,
+      "pieceName": "Onslaught Belt",
+      "tokenId": 34854,
+      "tokenName": "Belt of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Brutallus",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34569,
+      "pieceName": "Onslaught Treads",
+      "tokenId": 34857,
+      "tokenName": "Boots of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Felmyst",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}

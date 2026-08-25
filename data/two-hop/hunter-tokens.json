@@ -1,0 +1,175 @@
+{
+  "spec": "hunter",
+  "kind": "token-map",
+  "collectedDate": "2026-08-25",
+  "notes": [
+    "Token ids and names come from the AtlasLoot parse (vendor/atlasloot/data-tbc.lua row comments); zone and boss from data/atlasloot_sources.json keyed on the TOKEN id. The TBC tier tokens do not appear in db.json at all, so no classAllowlist or tooltip witnesses their class grouping.",
+    "Set piece ids come from db.json by `setId`, and the piece-to-token pairing is a SLOT JOIN on db.json's `type` field, not a witnessed redemption list. No committed input states which token buys which piece. The join reproduces both committed files (ret 18 entries, feral 15) exactly, which is a consistency check rather than an independent one.",
+    "T4/T5 group: Hero. T6 group: Protector. The T6 vocabulary is Conqueror/Vanquisher/Protector and the class triples are RE-CUT, not renamed -- paladin goes Champion->Conqueror but druid goes Defender->Vanquisher. See data/two-hop/feral-tokens.json notes 9-10, which record that 'druid uses the Defender-equivalent' would have been wrong.",
+    "SME GATE ITEM: the T6 triples are witnessed in-repo by feral-tokens.json (Vanquisher = Rogue/Mage/Druid, Protector = Warrior/Hunter/Shaman, leaving Conqueror = Paladin/Priest/Warlock). The T4/T5 HERO column (hunter/mage/warlock) is NOT witnessed by any committed file -- it is elimination against paladin=Champion and druid=Defender, the only two anchors. Confirm before trust."
+  ],
+  "entries": [
+    {
+      "pieceId": 29081,
+      "pieceName": "Demon Stalker Greathelm",
+      "tokenId": 29759,
+      "tokenName": "Helm of the Fallen Hero",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29082,
+      "pieceName": "Demon Stalker Harness",
+      "tokenId": 29755,
+      "tokenName": "Chestguard of the Fallen Hero",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29083,
+      "pieceName": "Demon Stalker Greaves",
+      "tokenId": 29765,
+      "tokenName": "Leggings of the Fallen Hero",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29084,
+      "pieceName": "Demon Stalker Shoulderguards",
+      "tokenId": 29762,
+      "tokenName": "Pauldrons of the Fallen Hero",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29085,
+      "pieceName": "Demon Stalker Gauntlets",
+      "tokenId": 29756,
+      "tokenName": "Gloves of the Fallen Hero",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30139,
+      "pieceName": "Rift Stalker Hauberk",
+      "tokenId": 30238,
+      "tokenName": "Chestguard of the Vanquished Hero",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30140,
+      "pieceName": "Rift Stalker Gauntlets",
+      "tokenId": 30241,
+      "tokenName": "Gloves of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30141,
+      "pieceName": "Rift Stalker Helm",
+      "tokenId": 30244,
+      "tokenName": "Helm of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30142,
+      "pieceName": "Rift Stalker Leggings",
+      "tokenId": 30247,
+      "tokenName": "Leggings of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30143,
+      "pieceName": "Rift Stalker Mantle",
+      "tokenId": 30250,
+      "tokenName": "Pauldrons of the Vanquished Hero",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31001,
+      "pieceName": "Gronnstalker's Gloves",
+      "tokenId": 31094,
+      "tokenName": "Gloves of the Forgotten Protector",
+      "zone": "Hyjal Summit",
+      "boss": "Azgalor",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31003,
+      "pieceName": "Gronnstalker's Helmet",
+      "tokenId": 31095,
+      "tokenName": "Helm of the Forgotten Protector",
+      "zone": "Hyjal Summit",
+      "boss": "Archimonde",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31004,
+      "pieceName": "Gronnstalker's Chestguard",
+      "tokenId": 31091,
+      "tokenName": "Chestguard of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "Illidan Stormrage",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31005,
+      "pieceName": "Gronnstalker's Leggings",
+      "tokenId": 31100,
+      "tokenName": "Leggings of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31006,
+      "pieceName": "Gronnstalker's Spaulders",
+      "tokenId": 31103,
+      "tokenName": "Pauldrons of the Forgotten Protector",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34443,
+      "pieceName": "Gronnstalker's Bracers",
+      "tokenId": 34851,
+      "tokenName": "Bracers of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Kalecgos",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34549,
+      "pieceName": "Gronnstalker's Belt",
+      "tokenId": 34854,
+      "tokenName": "Belt of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Brutallus",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34570,
+      "pieceName": "Gronnstalker's Boots",
+      "tokenId": 34857,
+      "tokenName": "Boots of the Forgotten Protector",
+      "zone": "Sunwell Plateau",
+      "boss": "Felmyst",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}

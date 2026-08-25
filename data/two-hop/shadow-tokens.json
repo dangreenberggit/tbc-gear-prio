@@ -1,0 +1,175 @@
+{
+  "spec": "shadow",
+  "kind": "token-map",
+  "collectedDate": "2026-08-25",
+  "notes": [
+    "Token ids and names come from the AtlasLoot parse (vendor/atlasloot/data-tbc.lua row comments); zone and boss from data/atlasloot_sources.json keyed on the TOKEN id. The TBC tier tokens do not appear in db.json at all, so no classAllowlist or tooltip witnesses their class grouping.",
+    "Set piece ids come from db.json by `setId`, and the piece-to-token pairing is a SLOT JOIN on db.json's `type` field, not a witnessed redemption list. No committed input states which token buys which piece. The join reproduces both committed files (ret 18 entries, feral 15) exactly, which is a consistency check rather than an independent one.",
+    "T4/T5 group: Defender. T6 group: Conqueror. The T6 vocabulary is Conqueror/Vanquisher/Protector and the class triples are RE-CUT, not renamed -- paladin goes Champion->Conqueror but druid goes Defender->Vanquisher. See data/two-hop/feral-tokens.json notes 9-10, which record that 'druid uses the Defender-equivalent' would have been wrong.",
+    "SME GATE ITEM: the T6 triples are witnessed in-repo by feral-tokens.json (Vanquisher = Rogue/Mage/Druid, Protector = Warrior/Hunter/Shaman, leaving Conqueror = Paladin/Priest/Warlock). The T4/T5 HERO column (hunter/mage/warlock) is NOT witnessed by any committed file -- it is elimination against paladin=Champion and druid=Defender, the only two anchors. Confirm before trust."
+  ],
+  "entries": [
+    {
+      "pieceId": 29056,
+      "pieceName": "Shroud of the Incarnate",
+      "tokenId": 29753,
+      "tokenName": "Chestguard of the Fallen Defender",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29057,
+      "pieceName": "Gloves of the Incarnate",
+      "tokenId": 29758,
+      "tokenName": "Gloves of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29058,
+      "pieceName": "Soul-Collar of the Incarnate",
+      "tokenId": 29761,
+      "tokenName": "Helm of the Fallen Defender",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29059,
+      "pieceName": "Leggings of the Incarnate",
+      "tokenId": 29767,
+      "tokenName": "Leggings of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 29060,
+      "pieceName": "Soul-Mantle of the Incarnate",
+      "tokenId": 29764,
+      "tokenName": "Pauldrons of the Fallen Defender",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30159,
+      "pieceName": "Shroud of the Avatar",
+      "tokenId": 30237,
+      "tokenName": "Chestguard of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30160,
+      "pieceName": "Handguards of the Avatar",
+      "tokenId": 30240,
+      "tokenName": "Gloves of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30161,
+      "pieceName": "Hood of the Avatar",
+      "tokenId": 30243,
+      "tokenName": "Helm of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30162,
+      "pieceName": "Leggings of the Avatar",
+      "tokenId": 30246,
+      "tokenName": "Leggings of the Vanquished Defender",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30163,
+      "pieceName": "Wings of the Avatar",
+      "tokenId": 30249,
+      "tokenName": "Pauldrons of the Vanquished Defender",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31061,
+      "pieceName": "Handguards of Absolution",
+      "tokenId": 31092,
+      "tokenName": "Gloves of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Azgalor",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31064,
+      "pieceName": "Hood of Absolution",
+      "tokenId": 31097,
+      "tokenName": "Helm of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Archimonde",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31065,
+      "pieceName": "Shroud of Absolution",
+      "tokenId": 31089,
+      "tokenName": "Chestguard of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Illidan Stormrage",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31067,
+      "pieceName": "Leggings of Absolution",
+      "tokenId": 31098,
+      "tokenName": "Leggings of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31070,
+      "pieceName": "Shoulderpads of Absolution",
+      "tokenId": 31101,
+      "tokenName": "Pauldrons of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34434,
+      "pieceName": "Bracers of Absolution",
+      "tokenId": 34848,
+      "tokenName": "Bracers of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Kalecgos",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34528,
+      "pieceName": "Cord of Absolution",
+      "tokenId": 34853,
+      "tokenName": "Belt of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Brutallus",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34563,
+      "pieceName": "Treads of Absolution",
+      "tokenId": 34856,
+      "tokenName": "Boots of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Felmyst",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}
