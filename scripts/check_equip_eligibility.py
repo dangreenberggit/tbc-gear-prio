@@ -216,14 +216,49 @@ def check_slug_map(spec_keys: set[str]) -> list[str]:
     return problems
 
 
+def slug_map_only() -> int:
+    """The half that needs no fork: the slug map against the committed JSON.
+
+    Split out because it must run everywhere. Both inputs -- SLUG_TO_FORK_SPEC
+    in assemble_universe.py and data/equip-eligibility.json -- are committed, so
+    skipping this when vendor/ is absent left a broken map passing verify on
+    every fresh clone and every CI run, which is where verify runs unattended.
+    Only the fork-diff half genuinely needs the clone.
+    """
+    if not COMMITTED.is_file():
+        print(
+            f"equip eligibility check: {COMMITTED.relative_to(ROOT)} is missing. "
+            "Regenerate it with the fork exporter (see the fork's "
+            "upgrades/tools/README.md).",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"equip eligibility check: could not read JSON: {exc}", file=sys.stderr)
+        return 2
+
+    problems = check_slug_map(set(committed.get("specs") or {}))
+    if problems:
+        print("the slug map that reads data/equip-eligibility.json is wrong:\n", file=sys.stderr)
+        for problem in problems:
+            print(f"  - {problem}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main() -> int:
     if not FORK_ROOT.is_dir():
-        print(
-            "equip eligibility check: skipped -- vendor/tbc-new-fork is absent "
-            "(it is gitignored, so a fresh clone has none). Clone the fork to "
-            "check the committed data/equip-eligibility.json against it."
-        )
-        return 0
+        rc = slug_map_only()
+        if rc == 0:
+            print(
+                "equip eligibility check: slug map total and injective. Fork diff "
+                "skipped -- vendor/tbc-new-fork is absent (it is gitignored, so a "
+                "fresh clone has none). Clone the fork to check the committed "
+                "data/equip-eligibility.json against it."
+            )
+        return rc
 
     if not EXPORTER.is_file():
         print(
