@@ -767,7 +767,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             "talent tree are built around a single slow two-hander, and a "
             "paladin wielding a one-hander with a shield is playing protection "
             "or holy. This repo builds no holy or protection universe, so a "
-            "shield like Bulwark of Azzinoth (id 28593) has no list it "
+            "shield like Bulwark of Azzinoth (id 32375) has no list it "
             "legitimately belongs to. Shields and one-handers are excluded "
             "because they are not low-ranked ret candidates but correct items "
             "for a different spec, and their presence in a retribution list "
@@ -1151,13 +1151,25 @@ def d7_note(profile: SpecProfile) -> str:
     byte-identical payload. A spec that does carry one publishes the reason
     here: the exclusion is then visible in the committed artifact rather than
     living only in the generator.
+
+    Every policy kind must reach this note. The constructor demands a
+    justification for any of them, so a kind the publisher does not know about
+    swallows a mandatory note and the artifact goes out unexplained -- which is
+    what happened when this branched on `policy_excluded_weapon_types` alone
+    and ret's two-hander rule shipped silently. `check_policy_notes.py` pins
+    each kind separately.
     """
-    if not profile.policy_excluded_weapon_types:
+    scopes: list[str] = []
+    if profile.policy_excluded_weapon_types:
+        types = ", ".join(str(t) for t in sorted(profile.policy_excluded_weapon_types))
+        scopes.append(f"weapon type(s) {types}")
+    if profile.policy_two_hand_only:
+        scopes.append("one-handed weapons")
+    if not scopes:
         return _D7_NOTE_BASE
-    types = ", ".join(str(t) for t in sorted(profile.policy_excluded_weapon_types))
     return (
         f"{_D7_NOTE_BASE} Policy exclusion beyond the sim's equip rules -- "
-        f"weapon type(s) {types}: {profile.policy_exclusion_note}"
+        f"{' and '.join(scopes)}: {profile.policy_exclusion_note}"
     )
 
 

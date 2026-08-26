@@ -2,7 +2,7 @@
   "_comment": "GENERATED -- do not hand-edit. Per-spec equip eligibility computed by the fork's own canEquipItem over its own db.json. Regenerate via the fork exporter at ui/core/components/individual_sim_ui/upgrades/tools/; scripts/check_equip_eligibility.py re-runs it and diffs on every pnpm verify.",
   "generatedFrom": {
       "repo": "dangreenberggit/tbc-new",
-      "commit": "ae5a7cc82515ebb5f77d51339db85d6cfedb2adc",
+      "commit": "fd4d65c4a2f439f905913a77205078d5d911363b",
       "source": "ui/core/proto_utils/utils.ts canEquipItem over assets/database/db.json"
   },
   "itemCount": 8257,

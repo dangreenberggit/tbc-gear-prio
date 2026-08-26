@@ -148,3 +148,27 @@ cloth today.
   a ret-only axis. I would support that; what I will not support is ret and
   warrior disagreeing.
 - **Part 2 I am confident in** and would not expect a second opinion to move it.
+
+---
+
+## Correction appended 2026-08-25 (pre-merge review, finding D1)
+
+This handoff is a record and is left as written. One factual error in it, for
+anyone reading it later:
+
+The paste-ready justification above cites "Bulwark of Azzinoth (id 28593)".
+**28593 is Eternium Greathelm**, a plate helm that is legitimately in ret's
+pool. **Bulwark of Azzinoth is 32375**, and it is correctly excluded by the
+policy. Verified against the pinned `vendor/wowsims/db.json`:
+
+```
+python -c "
+import json
+db=json.load(open('vendor/wowsims/db.json',encoding='utf-8'))
+by={int(i['id']):i for i in db['items']}
+for i in (28593,32375): print(i, by[i]['name'], by[i].get('weaponType'))"
+```
+
+The verdict is unaffected — only the illustrative id was wrong. The shipped
+note in `scripts/assemble_universe.py` and the regenerated ret universes carry
+32375.
