@@ -18,6 +18,7 @@ Exit 0 ok, 2 missing inputs.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
@@ -50,6 +51,24 @@ EP_WEIGHTS_BY_PHASE = ROOT / "data/presets/ep-weights-by-phase.json"
 
 def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@functools.lru_cache(maxsize=1)
+def load_db() -> dict:
+    """The pinned item DB, parsed once per process.
+
+    Four call sites read it and it is ~3 MB, so parsing it per call cost about
+    0.25s of every invocation and this script runs 44 times in a full sweep.
+
+    Returns a **shared** structure: callers read it and must not mutate it.
+    That is why this is a separate function rather than a cache on `load_json`,
+    which serves sixteen different files and whose callers have no reason to
+    expect a shared object.
+    """
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    return db
+
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -654,8 +673,7 @@ def _arena_gear_ids() -> frozenset[int]:
         "Vengeful Gladiator's ",
         "Brutal Gladiator's ",
     )
-    db = load_json(DB)
-    assert isinstance(db, dict)
+    db = load_db()
     return frozenset(
         int(it["id"])
         for it in db["items"]
@@ -1114,8 +1132,7 @@ def _weapon_types_in_db() -> frozenset[int]:
     list, or the manifest would silently stop covering a type the day one
     appeared.
     """
-    db = load_json(DB)
-    assert isinstance(db, dict)
+    db = load_db()
     return frozenset(
         int(it["weaponType"]) for it in db["items"] if it.get("weaponType")
     )
@@ -1131,8 +1148,7 @@ def excluded_weapon_types_for(profile: SpecProfile) -> frozenset[int]:
     truth for a fact the fork already owns, and they disagreed with it for two
     specs (ret omitted OffHand, feral added Polearm).
     """
-    db = load_json(DB)
-    assert isinstance(db, dict)
+    db = load_db()
     usable = {
         int(it["weaponType"])
         for it in db["items"]
@@ -2241,8 +2257,7 @@ def assemble(
         print(f"missing {DB} — run pnpm sync:wowsims:restore", file=sys.stderr)
         sys.exit(2)
 
-    db = load_json(DB)
-    assert isinstance(db, dict)
+    db = load_db()
     phase_raids = load_json(PHASE_RAIDS)
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}

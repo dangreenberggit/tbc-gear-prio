@@ -126,7 +126,9 @@ That would reintroduce the drift the borrow removes.
 
 The same gate also refused a third exclusion that looked symmetrical. Ret's
 profile had omitted cloth armor, and it was the only spec that did — warrior,
-the other plate class, already shipped 241 cloth pieces at p5. The omission was an
+the other plate class, already shipped 241 `armorType`-cloth rows at p5 — 177 in
+the eight body slots plus 64 cloaks, which carry the cloth armor type but are
+not what "wearing cloth" means. The omission was an
 unexplained outlier rather than policy, so it was dropped. The SME further
 found that **every back-slot item in the db is `armorType` cloth**, so a
 plausible-looking "ret excludes cloth" rule would have deleted all 36 of ret's
