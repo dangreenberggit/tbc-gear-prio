@@ -41,6 +41,20 @@ class ForkGateError(Exception):
         self.message = message
 
 
+def _display(path: Path) -> str:
+    """Repo-relative when it can be, absolute otherwise.
+
+    `relative_to` raises for a path outside the repo, and these are used only
+    to build error text -- so without the fallback a caller passing an override
+    path gets a ValueError where this module promised a printable
+    ForkGateError, losing the message it was in the middle of writing.
+    """
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def lockfile_pin(lock_path: Path = LOCK_PATH) -> str | None:
     """The pinned fork commit, or None when the lockfile cannot supply one."""
     try:
@@ -82,7 +96,7 @@ def require_pinned_fork(
     if pin is None:
         raise ForkGateError(
             f"{check_name}: could not read the pin from "
-            f"{lock_path.relative_to(ROOT)} -- the file is missing, is not valid "
+            f"{_display(lock_path)} -- the file is missing, is not valid "
             "JSON, is not a JSON object, or has no string 'commit' field."
         )
 
@@ -90,7 +104,7 @@ def require_pinned_fork(
     if commit != pin:
         raise ForkGateError(
             f"{check_name}: clone HEAD is {commit or 'unknown'} but "
-            f"{lock_path.relative_to(ROOT)} pins {pin}. The committed artifact "
+            f"{_display(lock_path)} pins {pin}. The committed artifact "
             "describes the pinned commit, so re-deriving it from a different "
             "commit compares two different questions. Reset the clone to the "
             "pin, or bump the pin and regenerate."
