@@ -43,43 +43,22 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 TOOLS_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/tools"
 EXPORTER = TOOLS_DIR / "export_equip_eligibility.mts"
 REGISTER = TOOLS_DIR / "register.mjs"
 TSX_LOADER = ROOT / "node_modules/tsx/dist/loader.mjs"
-LOCK_PATH = ROOT / "data/wowsims-fork.lock.json"
 COMMITTED = ROOT / "data/equip-eligibility.json"
 ASSEMBLE = ROOT / "scripts/assemble_universe.py"
 
 # How many differing ids to name before summarising. A real drift is usually a
 # handful; a rule change is hundreds and the count is the useful part.
 MAX_LISTED = 15
-
-
-def lockfile_pin() -> str | None:
-    try:
-        data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    if not isinstance(data, dict):
-        return None
-    pin = data.get("commit")
-    return pin if isinstance(pin, str) and pin else None
-
-
-def fork_commit() -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(FORK_ROOT), "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return None
-    return result.stdout.strip() or None
 
 
 def run_exporter(out_path: Path) -> str | None:
@@ -278,26 +257,10 @@ def main() -> int:
         )
         return 2
 
-    pin = lockfile_pin()
-    if pin is None:
-        print(
-            "equip eligibility check: could not read the pin from "
-            "data/wowsims-fork.lock.json -- the file is missing, is not valid "
-            "JSON, is not a JSON object, or has no 'commit' field.",
-            file=sys.stderr,
-        )
-        return 2
-
-    commit = fork_commit()
-    if commit != pin:
-        print(
-            f"equip eligibility check: clone HEAD is {commit or 'unknown'} but "
-            f"data/wowsims-fork.lock.json pins {pin}. The committed JSON "
-            "describes the pinned commit, so re-deriving it from a different "
-            "commit compares two different questions. Reset the clone to the "
-            "pin, or bump the pin and regenerate.",
-            file=sys.stderr,
-        )
+    try:
+        pin = require_pinned_fork("equip eligibility check", FORK_ROOT)
+    except ForkGateError as exc:
+        print(exc.message, file=sys.stderr)
         return 2
 
     if not COMMITTED.is_file():

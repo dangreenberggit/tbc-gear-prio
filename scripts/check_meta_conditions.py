@@ -31,15 +31,17 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 GEMS_TS = FORK_ROOT / "ui/core/proto_utils/gems.ts"
 PROTO_COMMON = FORK_ROOT / "ui/core/proto/common.ts"
-LOCK_PATH = ROOT / "data/wowsims-fork.lock.json"
 CONDITIONS = ROOT / "data/gems/meta-conditions.json"
 
 GEM_COLOR_RE = re.compile(r"^\s*(?P<name>GemColor\w+)\s*=\s*(?P<value>\d+),?\s*$", re.MULTILINE)
@@ -60,25 +62,6 @@ COMPARE_COLORS_RE = re.compile(
 def unquote(literal: str) -> str:
     """A TS single-quoted string literal -> its value."""
     return literal[1:-1].replace("\\'", "'").replace("\\\\", "\\")
-
-
-def lockfile_pin() -> str | None:
-    try:
-        data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    return data.get("commit") if isinstance(data, dict) else None
-
-
-def fork_commit() -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(FORK_ROOT), "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return None
-    return result.stdout.strip() or None
 
 
 def fork_conditions(text: str, colors: dict[str, int]) -> dict[int, dict]:
@@ -117,22 +100,10 @@ def main() -> int:
             print(f"meta conditions check: {path} is missing.", file=sys.stderr)
             return 2
 
-    pin = lockfile_pin()
-    commit = fork_commit()
-    if pin is None:
-        print(
-            "meta conditions check: could not read the pin from "
-            "data/wowsims-fork.lock.json.",
-            file=sys.stderr,
-        )
-        return 2
-    if commit != pin:
-        print(
-            f"meta conditions check: clone HEAD is {commit or 'unknown'} but "
-            f"data/wowsims-fork.lock.json pins {pin}. Reset the clone to the pin, "
-            "or bump the pin.",
-            file=sys.stderr,
-        )
+    try:
+        require_pinned_fork("meta conditions check", FORK_ROOT)
+    except ForkGateError as exc:
+        print(exc.message, file=sys.stderr)
         return 2
 
     colors = {

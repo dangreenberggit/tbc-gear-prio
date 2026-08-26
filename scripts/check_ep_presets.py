@@ -37,18 +37,25 @@ from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 PROTO_COMMON = FORK_ROOT / "ui/core/proto/common.ts"
-LOCK_PATH = ROOT / "data/wowsims-fork.lock.json"
 PRESETS_DIR = ROOT / "data/presets"
 
-# Floats are transcribed by hand from decimal literals on both sides, so an
-# exact compare is right: any difference is a real edit, not float drift.
+# Both sides are short decimal literals a human typed, so any real difference is
+# an edit, not accumulated float error. The tolerance exists only so that a
+# value which round-trips through JSON and Python floats at a different last
+# bit -- 0.1 + 0.2 territory -- is not reported as drift. It is deliberately far
+# tighter than any transcription difference could be: across the 199 non-zero
+# values in the committed set the smallest magnitude is 0.01, so a genuine typo
+# is at least seven orders of magnitude above this.
 TOLERANCE = 1e-9
 
 # Two prefixes are in use and both name this same fork: files transcribed
@@ -62,28 +69,6 @@ ENUM_MEMBER_RE = re.compile(
     r"^\s*(?P<name>(?:Stat|PseudoStat)\w+)\s*=\s*(?P<value>\d+),?\s*$", re.MULTILINE
 )
 STAT_ENTRY_RE = re.compile(r"\[(?:Stat|PseudoStat)\.(?P<name>\w+)\]\s*:\s*(?P<value>-?[\d.]+)")
-
-
-def lockfile_pin() -> str | None:
-    try:
-        data = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
-    if not isinstance(data, dict):
-        return None
-    pin = data.get("commit")
-    return pin if isinstance(pin, str) and pin else None
-
-
-def fork_commit() -> str | None:
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(FORK_ROOT), "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True,
-        )
-    except (OSError, subprocess.CalledProcessError):
-        return None
-    return result.stdout.strip() or None
 
 
 def stat_numbers() -> dict[str, int]:
@@ -149,23 +134,12 @@ def main() -> int:
         )
         return 0
 
-    pin = lockfile_pin()
-    if pin is None:
-        print(
-            "ep presets check: could not read the pin from "
-            "data/wowsims-fork.lock.json.",
-            file=sys.stderr,
-        )
+    try:
+        require_pinned_fork("ep presets check", FORK_ROOT)
+    except ForkGateError as exc:
+        print(exc.message, file=sys.stderr)
         return 2
-    commit = fork_commit()
-    if commit != pin:
-        print(
-            f"ep presets check: clone HEAD is {commit or 'unknown'} but "
-            f"data/wowsims-fork.lock.json pins {pin}. Reset the clone to the pin, "
-            "or bump the pin.",
-            file=sys.stderr,
-        )
-        return 2
+
     if not PROTO_COMMON.is_file():
         print(
             f"ep presets check: {PROTO_COMMON.relative_to(ROOT)} is missing -- the "
