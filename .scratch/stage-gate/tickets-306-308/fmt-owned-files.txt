@@ -1,0 +1,35 @@
+# Files this project owns in the fork's oxfmt failing set (ticket 306).
+#
+# Recomputed during execution 2026-08-27, not copied from the plan:
+#   tip  (fork HEAD)      194 failing over 643 files
+#   base (cbf6b75a889e)    85 failing over 529 files
+#   tip - base           = 109 files
+#     34  ui/core/components/individual_sim_ui/upgrades/engine/**  (byte-gated
+#         by scripts/check_engine_port_drift.py against engine/PROVENANCE.md --
+#         reformatting stales the hashes)
+#     65  ui/core/components/individual_sim_ui/upgrades/data/**    (committed
+#         generated artifacts plus their own PROVENANCE.md -- never hand-edited)
+#     10  ours, listed below
+#
+# Both checks were run from INSIDE their tree so .oxfmtrc.json resolves. The
+# invocation form is verified by scan count, not by a config message: the
+# correct form scans 529 files at base, the wrong by-path form scans 674 and
+# reports 157. oxfmt 0.62.0 prints no "no config found" diagnostic, so a string
+# check would pass on exactly the run it should reject.
+#
+# sim_header.tsx sits outside the upgrades tree but is ours: it passes at
+# pristine base, and its redness at tip comes from a commit on this branch
+# (d7ea63197 "Unbreak the Upgrades tab on mobile").
+#
+# Paths are relative to vendor/tbc-new-fork.
+
+ui/core/components/individual_sim_ui/upgrades/adapters/local.wcl-credentials.example.ts
+ui/core/components/individual_sim_ui/upgrades/adapters/player_gear_source.ts
+ui/core/components/individual_sim_ui/upgrades/adapters/sim_database.ts
+ui/core/components/individual_sim_ui/upgrades/adapters/skeleton.ts
+ui/core/components/individual_sim_ui/upgrades/adapters/wasm_sim_runner.ts
+ui/core/components/individual_sim_ui/upgrades/adapters/wcl_gear_import.ts
+ui/core/components/individual_sim_ui/upgrades/engine_provenance.ts
+ui/core/components/individual_sim_ui/upgrades/wcl_import_modal.tsx
+ui/core/components/individual_sim_ui/upgrades_tab.tsx
+ui/core/components/sim_header.tsx

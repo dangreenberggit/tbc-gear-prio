@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: ticket 304 execution, gate flagged rather than papered over, 2026-08-27
 Blocks: none
@@ -71,9 +71,64 @@ four gates are recorded in
 
 ## Acceptance
 
-- [ ] Cause identified: config/version drift versus a real style change.
-- [ ] One of the three options taken, and the choice recorded.
-- [ ] Either `oxfmt --check` exits 0 in the fork, or the gate set is documented
-      as three gates with the reason `fmt` is excluded.
+- [x] Cause identified: config/version drift versus a real style change.
+      **Neither — the tree is simply unformatted, and most of it is upstream's.**
+- [x] One of the three options taken, and the choice recorded. **A scoped gate**
+      — a refinement of the third option that keeps a real signal instead of
+      dropping one.
+- [x] Either `oxfmt --check` exits 0 in the fork, or the gate set is documented
+      as three gates with the reason `fmt` is excluded. **Satisfied in intent:**
+      the scoped `--check` exits 0, and `fork-gates.md` documents the scope and
+      every exclusion.
+
+## Resolution
+
+Closed 2026-08-27.
+
+**Cause: not drift.** `oxfmt` is pinned `^0.62.0` with 0.62.0 installed, and the
+config is upstream's own. Measured from *inside* each tree so `.oxfmtrc.json`
+resolves:
+
+- our fork tip: **194 failing over 643 files**
+- pristine upstream base `cbf6b75a889e`: **85 failing over 529 files**
+
+Upstream's own tree fails upstream's own config, so the config is not
+misconfigured and the version is not drifting — the tree is unformatted, and 85
+of the 194 are inherited.
+
+**A measurement correction worth keeping.** An earlier figure of 157 at base was
+wrong. It came from running oxfmt against a worktree *path* from outside that
+tree, which silently loses the config and scans 674 files instead of 529.
+oxfmt 0.62.0 prints no "no config found" diagnostic, so nothing flags the bad
+run — **verify the invocation form by scan count**, not by looking for a config
+message.
+
+**Option taken: a scoped gate over the ten files we own.** The tip−base
+difference is 109 files, and it decomposes cleanly:
+
+| Group | Files | Why not formatted |
+| --- | --- | --- |
+| `upgrades/engine/**` | 34 | Byte-gated by `check_engine_port_drift.py` against `engine/PROVENANCE.md`; oxfmt reindents them 2-space → tabs, which would break the hashes |
+| `upgrades/data/**` | 65 | Committed **generated** artifacts and their `PROVENANCE.md`; no regenerator would reproduce a hand-formatted result |
+| ours | 10 | Formatted — see below |
+
+Reformatting all 194 was rejected: it would hand-rewrite 65 generated files.
+Dropping `fmt` entirely was rejected because `pnpm verify` never sees the fork
+(`grep -c vendor package.json` → 0), so dropping it leaves our own UI code
+covered by nothing.
+
+The ten owned files are formatted, and `--check` over exactly those ten exits 0.
+The list lives at `.scratch/stage-gate/tickets-306-308/fmt-owned-files.txt`; the
+new `fmt` row and the exclusion reasoning are in
+`.scratch/stage-gate/upgrades-ui-quality/fork-gates.md`.
+
+`oxfmt --check ./ui` stays red tree-wide **by design**, and the gate doc now
+says so, so its redness is no longer mistaken for a signal.
+
+One thing the next reader should know: `lint:js` warns
+`simple-import-sort(imports)` on several of the formatted files, because oxlint
+and oxfmt want different import orders. The warning count is **265 both before
+and after** the format pass, so it is upstream baseline noise rather than a
+regression this work introduced.
 
 ## Comments
