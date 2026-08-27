@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: user UI review, 2026-08-27 (chat, with screenshots)
 Blocks: none
@@ -226,13 +226,75 @@ These are not eleven independent jobs. Rough clusters:
 
 ## Acceptance
 
-- [ ] Every item 1–11 is either fixed or explicitly deferred with a reason.
-- [ ] Item 7 has a decided-and-recorded behaviour, not just a hidden row.
-- [ ] Spacing, text styling and layout borrow from existing site partials;
-      no new one-off idiom where one already exists.
-- [ ] Contrast checked against a ratio, not by eye.
-- [ ] Jitter (5, 11) verified gone by watching a real run start and finish, not
-      by reasoning about the CSS.
-- [ ] `pnpm verify` green.
+- [x] Every item 1–11 is either fixed or explicitly deferred with a reason.
+      See the per-item disposition below.
+- [x] Item 7 has a decided-and-recorded behaviour, not just a hidden row.
+      Owned rows are dropped from the below-cutoff group only; the engine's
+      `belowCutoffCount` keeps delta-only semantics and the divergence is
+      commented at the filter site (it has no reader in the UI).
+- [x] Spacing, text styling and layout borrow from existing site partials;
+      no new one-off idiom where one already exists. Borrowed:
+      `.content-block` rhythm, `badge rounded-pill`, the progress-tracker's
+      bar cap, `#noResultsTab`'s centring, and `var(--bs-gray-*)` for
+      de-emphasised text. Two local rules are stated as such in comments:
+      the reserved status-label width and the content-sized drawer grid.
+- [x] Contrast checked against a ratio, not by eye. Measured in devtools:
+      `text-muted` computed to 1.11:1 and is gone from both files;
+      secondary text is now `--bs-gray-500` at 8.63:1, primary text white
+      at 17.9:1.
+- [x] Jitter (5, 11) verified gone by watching a real run start and finish.
+      Item 11: the progress bar's left edge holds at 700.5px across 41
+      distinct running labels (spread 0px, was 21px). Item 5: toolbar
+      height is constant at 111.6px through a full run (was 69.6→108.1px).
+      One residual shift remains and is recorded below.
+- [x] `pnpm verify` green **with the fork clone at its pinned commit**, which
+      is the state the gate is written for. It does not lint, typecheck or
+      test the fork itself. The gates that cover the changed code are the
+      fork's own: `test:locales`, `type-check`, `lint:css`, `lint:js`, all
+      exit 0. `fmt` (oxfmt --check) is red on 194 files, identical at the
+      stage-open SHA and at the tip, so it is a pre-existing tree-wide
+      condition and not this work — see below.
+
+      **Open, needs a decision:** `equip-eligibility:check` compares the fork
+      clone's HEAD against `data/wowsims-fork.lock.json`, which pins
+      `fd4d65c4a` — the fork's stage-open commit. The four fork commits move
+      the clone off that pin, so `pnpm verify` exits 2 while they are checked
+      out. Verified both ways: with the clone reset to the pin the whole of
+      `pnpm verify` passes; with the branch checked out only this one gate
+      fails. Bumping the pin declares these fork commits the paired state and
+      regenerates `data/equip-eligibility.json`, which is outside this
+      ticket's scope (`data/` is not in its paths manifest), so it was not
+      done here.
+
+## Disposition
+
+Fork commits on `feat/upgrades-tab`: `05bbd8c1d`, `30c2f9c3a`, `2f9d0eebe`,
+`44f63ae78`.
+
+| Item | Disposition |
+| --- | --- |
+| 1 unreadable grey | **Fixed.** Not a hierarchy problem: measured 1.11:1. `text-muted` was our own invention (only in this tab and its WCL modal, both added by us); nothing upstream uses it. All 14 uses replaced with the site's `var(--bs-gray-*)` convention. |
+| 2 empty state | **Fixed.** Three distinct messages with heading, explanation and a Run CTA where Run can help; none where it cannot. |
+| 3 control row clips | **Fixed.** `6ch` won the cascade but was too narrow under `border-box`; probed to `8ch`. Toolbar split into two rows. Five-digit values still clip — the field is sized for the four the default uses. |
+| 4 vertical spacing | **Fixed.** `.content-block` rhythm replaces the `mt-gap` one-offs. |
+| 5 jitter simming/not | **Mostly fixed.** Toolbar height now constant; the recorded cause (status line) was refuted by measurement. Residual: the sub-tab strip wraps to a second row when slot tabs appear, shifting content ~48px once at completion. Left open because it depends on the owner question about empty slot tabs. |
+| 6 table spacing | **Fixed.** Desktop rules added outside the mobile guards. |
+| 7 worn items below cutoff | **Fixed.** Live A/B: 192 rows with 16 owned before, 176 with 0 after. |
+| 8 assumptions hard to read | **Fixed.** Content-sized grid; label column 117.6px vs 730.3px, was a fixed 1:2. |
+| 9 developer-only detail | **Fixed.** Engine SHA and `api-v` move to one `console.info`; degradation and run-provenance rows stay on the page. |
+| 10 tabs carry no information | **Fixed** for counts, de-emphasis and organisation (pinned-first, canonical order, badges, muted empty tabs). Badge/pane agreement verified under the BiS-only filter: 0 mismatches across 16 tabs. **Deferred:** grouped rows (no site idiom to borrow) and rendering all 17 slots (a behaviour ruling) — both owner questions in the state-design note. **Dropped with reason:** the batch UI's hero-#1 card — that file has dividers and flex ratios but no emphasis idiom to borrow. |
+| 11 bar jitters horizontally | **Fixed.** Bar left edge spread 21px → 0px. |
+
+Design note: `.scratch/carry-forward/notes/upgrades-tab-state-design.md`
+(closes ticket 290).
+
+### Known-not-fixed
+
+- **`oxfmt --check` red on 194 files.** Pre-existing: identical count at the
+  stage-open SHA `fd4d65c4a` and at the tip. The installed oxfmt disagrees
+  with the committed formatting across the whole tree (arrow-parens, line
+  width), so running it would reformat 194 unrelated files. Its own ticket
+  if wanted; not actionable inside this one.
+- **Residual layout shift at completion** (item 5, above).
 
 ## Comments
