@@ -47,3 +47,47 @@ For 308: the `wornAt` guard exists in **two** copies — the fork's
 | 2026-08-27 | Owner decision pending | held | Orchestrator measured the real payoff of implementing 308 before recommending: of 163 non-unique rings/trinkets, **152 are Phase 1**, and the **actual ret-p3 pool contains exactly 3** (Band of Devastation, Ring of Ancient Knowledge, Blessed Band of Karabor). That is new information the plan did not have, and it argues the out-of-scope choice is right on payoff as well as on cost. Not executing until the owner rules, since they asked for both tickets 'taken care of' and out-of-scope is a narrower outcome than that phrasing implies. | — |
 | 2026-08-27 | Gate B (judgment, round 2) | proceed | Reviewer returned `revise` narrowly: all ten round-1 findings genuinely resolved, Q2 reversal judged **sound, not evasion**, with the reviewer stating explicitly that C13/C14/C15 carry Q2 on their own and it would stand unchanged if C20 were deleted. Two new defects, both applied by the orchestrator rather than spending a third planner round: **G1** (owned set is 10 files not 9 — `upgrades/engine_provenance.ts` sits above `upgrades/engine/` so neither exclusion catches it; verified ungated and ours, C16 corrected to 34/10, all stale counts swept) and **G2** (A1's config guard checked for a string oxfmt never prints, so it passed on exactly the run it should reject; now verifies by scan counts). Reviewer also independently re-ran C20 and reproduced it exactly, while correctly holding it non-load-bearing. | 2 |
 | 2026-08-27 | Execution | NOT started | Owner instruction: stop after the plan is done and hand off to a fresh agent. Plan is cleared; no code written; both trees clean at base SHA `b1d4467`. | — |
+| 2026-08-27 | Execution | started | Owner asked to run the orchestration and pointed at `HANDOFF.md`, whose whole premise is that the out-of-scope ruling for 308 stands — taken as the ruling the previous row was waiting on. `gate-executor` spawned with `model: "opus"`, shared checkout, base SHA `7da81963939c0fe84d0a6265f6548e608b3283b8` resolved fresh (one commit ahead of the handoff's `b1d4467`; the extra commit is the stage artifacts themselves, and the executor was told so). Tree clean, fork at the pin. | — |
+| 2026-08-27 | Execution | complete | Executor returned complete; final message written verbatim to `execution-report.md`. Two commits main (`8d94174`, `4b948e4`), two fork (`ada242cb`, `342f6a74`), fork not pushed. | 1 |
+
+## Gate C — deviation ledger dispositions
+
+Seven ledger rows, all dispositioned. Nothing sent back for rework.
+
+| Row | Disposition | Orchestrator check |
+| --- | --- | --- |
+| B5 oxfmt probe reformatted `engine/rank.ts` | **accepted** | Self-reported error, caught pre-commit and reverted; exactly the flagged-not-papered-over behaviour this seat exists for. Verified the outcome rather than the story: `git diff --name-only 38cb8ff..HEAD` under `upgrades/(engine\|data)/` returns only `PROVENANCE.md` and `rank.ts` — the intended Track B edit. No generated artifact was reformatted. Track A touched 0 files under `engine/`. |
+| B6 fnm hook failure | **accepted** | Documented trap, documented fix. Reproduced it myself twice during Gate C (a `cd` into the fork in a compound Bash command), which corroborates the report. |
+| B6 BOM in commit subject | **accepted** | `git log --oneline` shows clean subjects on all four commits. |
+| A2 line-endings heuristic false positive | **accepted** | The plan's heuristic was a proxy; the executor measured the underlying property (0 CR bytes, diff survives `--ignore-cr-at-eol`) instead of satisfying the proxy. Better evidence than the plan asked for. |
+| A2 `lint:js` warnings name touched files | **accepted** | Judged by before/after count (265 both ways) rather than by whether warnings mention touched files. Measures the right thing — introduced vs pre-existing. |
+| A3 `lint:css` path defect | **escalated to a ticket** | Verified independently: `ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss` exists, `ui/core/components/individual_sim_ui/_upgrades_tab.scss` does not. Executor correctly declined to edit a row outside both tickets' scope. Filed as **ticket 310**; `NEXT` bumped to 311. |
+| Stashed the orchestrator's dirty `decision-log.md` | **accepted** | My row, written after the executor sampled status. Restored exactly as found and still the only dirty file. Correct handling given lint-staged runs against `*` with `--no-stash`. |
+
+## Gate C — paths manifest cross-check
+
+`git diff --stat 7da8196..HEAD` yields 9 files. Eight are ticket/stage artifacts
+plus the two regenerated data files (`sim-implemented-effects.json`,
+`wowsims-fork.lock.json`) that the B6/A4 re-pin cycle is required to move. The
+ninth, `packages/core/src/rank.ts`, is **comment-only**: the diff adds 14 lines
+above `const wornAt = ...` and changes no expression. All in-manifest; no
+out-of-manifest path needed a new ledger row.
+
+## Gate C — independent gate verification
+
+Re-ran rather than trusting the pasted output:
+
+- `pnpm verify` on the tip — `VERIFY_EXIT=0`.
+- `packages/core/test/wowsims-fork-parity.test.ts` — 1 passed, 1 skipped,
+  `PARITY_EXIT=0`. The two engine copies still agree after the comment edits.
+- Scoped fmt gate, PATH pinned, from inside the fork —
+  `All matched files use the correct format. Finished in 237ms on 10 files`,
+  `SCOPED_FMT_EXIT=0`.
+- Lock pin `342f6a74e68bfb5604d043bc32c0bca324a2f1de` equals fork HEAD;
+  `pushed: false` untouched.
+- Track B diff on `upgrades_tab.tsx` has **zero deletion lines**, confirming the
+  owned-row filter expression is byte-identical.
+
+| Date | Gate | Outcome | Reason | Rounds |
+| --- | --- | --- | --- | --- |
+| 2026-08-27 | Gate C | pass | Every ledger row dispositioned (6 accepted, 1 escalated to ticket 310); every changed path in-manifest; `pnpm verify`, parity, engine byte gate and the new scoped fmt gate all re-run green by the orchestrator. Tickets 306 and 308 closed, 309 and 310 open. Stage complete — `pre-merge-review` is next, then the owner is asked about merging. | 1 |
