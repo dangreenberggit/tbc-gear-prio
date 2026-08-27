@@ -38,24 +38,42 @@ white page. `.text-muted` resolves to it. Confirmed by reading
 `grep -rn secondary-color ui/scss`, which finds only
 `--main-secondary-color`, an unrelated token.
 
-**This is not an Upgrades-tab bug.** Every `.text-muted` on the site has
-the same computed colour. The tab is simply where it was noticed, and it
-is the tab that uses muting most (10 uses, `grep -n text-muted
-upgrades_tab.tsx`).
+**But `.text-muted` is not site styling — we invented it.** It appears in
+exactly two files, `upgrades_tab.tsx` (10 uses) and
+`upgrades/wcl_import_modal.tsx` (4), both added by our own commits
+(`git log --diff-filter=A`). Nothing else in `ui/` uses `text-muted`,
+`text-body-secondary` or `text-secondary`, and no SCSS reads
+`--bs-secondary-color`.
+
+What upstream actually does for de-emphasised text is set an explicit
+grey: `var(--bs-gray-300)` (`_dropdown_picker.scss:26`),
+`var(--bs-gray-500)` (`_stat_weights_action.scss:124`), `$gray-600` for
+`$form-text-color` (`_variables.scss:354`).
+
+Measured against the `#15171e` body background:
+
+| Colour | Ratio |
+| --- | --- |
+| `--bs-gray-300` (#dee2e6) | 13.75:1 |
+| `--bs-gray-500` (#adb5bd) | **8.63:1** |
+| `--bs-gray-600` (#6c757d) | 3.82:1 — fails AA, not used for text |
+| body white (#fff) | 17.9:1 |
 
 ### What follows for this tab
 
 Two things must not be confused:
 
-1. **The token is broken site-wide.** Fixing `--bs-secondary-color`
-   belongs in the theme, not in this tab's partial, and it changes every
-   tab. That is a separate change with a separate blast radius — see
-   "Owner questions" below.
-2. **This tab over-mutes regardless.** Even with a readable muted token,
-   muting is currently the default rather than an emphasis choice:
-   status lines, all three empty states, and whole owned rows are muted,
-   so nothing reads as primary. That part is this tab's to fix and is
-   what the emphasis map below decides.
+**Decided (owner ruling): do not touch the theme token.** Setting
+`$body-secondary-color` would re-theme every tab to fix a token only
+these two files read. Creating a tab-local muted colour would be a
+second idiom, which is the exact failure ticket 304 exists to correct.
+Instead `.text-muted` is dropped from both files and the site's own
+`var(--bs-gray-*)` convention is used, at the level the emphasis map
+below assigns. The whole change stays inside the files we own.
+
+That still leaves this tab over-muting: muting was the default rather
+than an emphasis choice, so nothing read as primary. The emphasis map
+settles that separately from the colour question.
 
 ## The seven states
 
@@ -99,6 +117,11 @@ Decided from the measurement above, not by eye. Once the muted token is
 readable, muting means "deliberately secondary". Until then, every one
 of these should be body colour, because muted is currently invisible.
 
+Expressed in `--bs-gray-*` levels, not `text-muted`, which no longer
+exists in either file. "body" means no colour class at all — inherit
+white at 17.9:1. "secondary" means `.upgrades-text-secondary`, backed by
+`var(--bs-gray-500)` at 8.63:1.
+
 | Site (tsx line) | Today | Should be | Why |
 | --- | --- | --- | --- |
 | idle status (934) | muted | **body** | The only instruction on the screen. |
@@ -118,13 +141,10 @@ owned/pending uses stay secondary because secondary is what they mean.
 
 Neither is guessed here.
 
-1. **Fix `--bs-secondary-color` site-wide?** The token is wrong for a
-   dark theme on every tab, and 1.11:1 is unreadable everywhere it is
-   used, not only here. Setting `$body-secondary-color` in
-   `_variables.scss` is a one-line theme change with a site-wide blast
-   radius, so it is not made inside a tab-scoped UI pass. If the answer
-   is no, this tab needs its own readable secondary colour, which is a
-   second idiom and worse.
+1. ~~Fix `--bs-secondary-color` site-wide?~~ **Answered: no.** The token
+   is read only by the two files we added, so the fix is to adopt
+   upstream's `var(--bs-gray-*)` convention in those files rather than
+   change the theme. No cross-tab blast radius. See above.
 2. **Should slot sub-tabs appear for slots with no rows?** Today a tab
    exists only for slots present in the ranking
    (`slotsInView(unfilteredView())`, deliberate per the comment at
@@ -148,10 +168,13 @@ comes from `.upgrades-toolbar` growing from 69.6px to 108.1px at
 completion, when `refreshViewControlVisibility()` reveals the view
 filters and pushes everything below down ~82px.
 
-Reserving that space permanently would contradict the recorded WP5
-decision that view options stay hidden until a run produces rows. The
-options are: accept the one-time shift at completion (it happens once,
-not every tick, and the user is looking at newly-arrived results);
-reserve the row height always and accept an empty gap in idle; or
-animate it. This is a design call, so it is listed here rather than
-decided in a CSS commit.
+**Answered (owner ruling): reserve the height always**, accepting an
+empty strip before the first run. This overrides WP5's decision to drop
+the group from layout while empty. WP5's stated concern was not drawing
+an empty *bordered box* in the pre-run states; bare reserved height with
+no border and no separator honours that concern while removing the jump
+the owner reported. Measured after the change: toolbar height is a
+single value, 111.6px, across every sample of a full run.
+
+One residual shift remains and belongs to item 10, not item 5: the slot
+sub-tab strip grows as tabs appear for slots in the ranking.
