@@ -238,6 +238,14 @@ These are not eleven independent jobs. Rough clusters:
       bar cap, `#noResultsTab`'s centring, and `var(--bs-gray-*)` for
       de-emphasised text. Two local rules are stated as such in comments:
       the reserved status-label width and the content-sized drawer grid.
+      **Qualified by the round-3 review:** the `.content-block` borrow is
+      partial — the wrapper and `.content-block-body` carry the spacing, but
+      the `.content-block-header` with title and row count that the plan
+      promised was never added (review S1), so what is borrowed there is the
+      `gap` value rather than the header/body structure. And a **third**
+      local rule went unannounced: the two-row strip's
+      `min-height: calc(2 * 45.6px + 1px)`, which is a measured constant no
+      gate protects, not a borrow (review T2). Both are carried by ticket 307.
 - [x] Contrast checked against a ratio, not by eye. Measured in devtools:
       `text-muted` computed to 1.11:1 and is gone from both files;
       secondary text is now `--bs-gray-500` at 8.63:1, primary text white
@@ -284,7 +292,7 @@ Fork commits on `feat/upgrades-tab`: `05bbd8c1d`, `30c2f9c3a`, `2f9d0eebe`,
 | 7 worn items below cutoff | **Fixed.** Live A/B: 192 rows with 16 owned before, 176 with 0 after. |
 | 8 assumptions hard to read | **Fixed.** Content-sized grid; label column 117.6px vs 730.3px, was a fixed 1:2. |
 | 9 developer-only detail | **Fixed.** Engine SHA and `api-v` move to one `console.info`; degradation and run-provenance rows stay on the page. |
-| 10 tabs carry no information | **Fixed**, all four sub-asks. Counts: badge per tab, agreement with its own pane verified under the BiS-only filter (0 mismatches across 16 tabs). De-emphasis: filter-emptied tabs muted but still clickable. Organisation: the strip is a deliberate two-row shape (owner ruling), reserved from first paint, with canonical order and Shopping List pinned first. Batch-UI inspiration: the divider idiom adopted; the hero-#1 card **dropped with reason** — that file has dividers and flex ratios but no emphasis idiom to borrow. **Still open, separately:** whether all 17 equip slots should render, greyed when empty — a behaviour ruling, recorded in the state-design note. Two rows does not decide it, and the strip reserves its height either way. |
+| 10 tabs carry no information | **Fixed**, all four sub-asks. Counts: badge per tab, agreement with its own pane verified under the BiS-only filter (0 mismatches across 16 tabs). De-emphasis: filter-emptied tabs muted but still clickable. Organisation: the strip is a deliberate two-row shape (owner ruling), reserved from first paint, with canonical order and Shopping List pinned first. Batch-UI inspiration: **NOT done — see ticket 307.** The hero-#1 card was dropped with a measured reason (that file has dividers and flex ratios but no emphasis idiom to borrow), but the divider idiom chosen in its place was never implemented. An earlier revision of this row claimed it was adopted; the pre-merge review (round 3, S2) refuted that by grep — `_upgrades_tab.scss` has no `:not(:last-child)` / `border-bottom` rule, and its one `--border-default` hit is a pre-existing icon border. So three of item 10's four sub-asks shipped, not four. **Still open, separately:** whether all 17 equip slots should render, greyed when empty — a behaviour ruling, recorded in the state-design note. Two rows does not decide it, and the strip reserves its height either way. |
 | 11 bar jitters horizontally | **Fixed.** Bar left edge spread 21px → 0px. |
 
 Design note: `.scratch/carry-forward/notes/upgrades-tab-state-design.md`
