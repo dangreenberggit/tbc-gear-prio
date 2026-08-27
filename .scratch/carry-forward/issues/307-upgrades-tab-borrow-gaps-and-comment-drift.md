@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upgrades-dedup-wowsims.md (round 3 — S1, S2, S3, T1, T2, T3, T4)
 Blocks: none
@@ -126,18 +126,71 @@ sentence closes the gap.
 
 ## Acceptance
 
-- [ ] S1: either the `.content-block-header` exists with title + row count, or
+- [x] S1: either the `.content-block-header` exists with title + row count, or
       the borrow is described accurately as spacing-only.
-- [ ] S2: the divider idiom is adopted, or item 10's fourth sub-ask is
+- [x] S2: the divider idiom is adopted, or item 10's fourth sub-ask is
       explicitly deferred with a reason rather than left implied.
-- [ ] T1: the three comments are trimmed; the `:188-192` contradiction is
+- [x] T1: the three comments are trimmed; the `:188-192` contradiction is
       resolved by measurement, not by guess.
-- [ ] T2: the `45.6px` constant is either derived from tokens or disclosed as
-      an invention like its siblings.
-- [ ] T3: comment and rule agree about what the grid does in all seven states.
-- [ ] T4: an active-but-empty tab has a decided appearance.
-- [ ] S3: the residual five-digit clip is noted in the code comment.
-- [ ] Fork gates green (`tsc`, `stylelint`, `oxlint`, `test:locales`). `oxfmt`
+- [x] T2: disclosed as an invention (the token derivation was tried and
+      measured wrong — see Resolution).
+- [x] T3: comment and rule agree about what the grid does in all seven states.
+- [x] T4: an active-but-empty tab has a decided appearance.
+- [x] S3: the residual five-digit clip is noted in the code comment.
+- [x] Fork gates green (`tsc`, `stylelint`, `oxlint`, `test:locales`). `oxfmt`
       is red at baseline — see ticket 306; do not reformat the tree here.
 
 ## Comments
+
+## Resolution (2026-08-27, fork `38cb8ff80`)
+
+All seven findings addressed in one commit on `feat/upgrades-tab`.
+
+- **S1 done.** The results table sits in a real `.content-block`: an
+  `h6.content-block-title` inside `.content-block-header`, matching the markup
+  `content_block.tsx` builds, so the bold heading and its bottom border come
+  from the partial. The classes are written out rather than built through
+  `new ContentBlock(...)` because this node is rebuilt by `replaceChildren` on
+  every view change while the component owns a persistent root. Only the table
+  gets a header — the empty states carry their own title, and the running
+  skeleton has no final count to name. Two new i18n keys, added to the locale
+  file and to the schema's `properties` *and* `required`.
+- **S2 done.** The bulk renderer's divider is copied rule for rule between the
+  shortlist table and the below-cutoff group — the two sibling result groups it
+  is written for. Each is wrapped in `.upgrades-result-group` so the selector
+  has siblings to match on. The `:not(:only-child)` guard is the reason it is
+  copied rather than approximated: a lone table must not grow a trailing border.
+- **S3 done.** The residual five-digit clip is now stated in the SCSS comment,
+  not only in ticket 304.
+- **T1 done.** Three comments trimmed from lab-notebook narration to the
+  constraint plus its reason. The `:188-192` contradiction is **resolved in
+  favour of the rule**: the comment claimed the floor *was* the measured
+  17.5px, when it reserves 24px deliberately so a font change has room before
+  the block below starts moving. The comment now says that.
+- **T2 partly done, and the honest half is the part that matters.** The rule now
+  declares itself a local invention with no site idiom to borrow, and names its
+  own exposure. The measured constant **stays**: deriving it from
+  `$nav-link-padding-y` (`--spacer-3`, 1rem) and `$line-height-base` computes
+  **113px** against the **92.2px** the strip actually occupies, which would
+  strand ~21px of empty space under the tabs. Verified by compiling the partial
+  with the app's own preamble. A token-derived height needs the effective nav
+  padding exposed as a token first; that is not this ticket.
+- **T3 done.** The status-line comment no longer claims "one line, one idiom,
+  for all seven run states". It now says what is true: the three columns size
+  the running state, other states leave columns empty, `done + stale` renders
+  four children and wraps, and it is `.upgrades-status`'s floor — not the grid —
+  that holds the block below in place.
+- **T4 done.** `.upgrades-subtab-empty` is now `:not(.active)`, so an
+  active-but-empty tab keeps its active colour. Which tab you are on outranks
+  whether it is empty, and the `(0)` badge already says the latter.
+
+### Verification
+
+Compiled the partial with the app's real preamble (Bootstrap functions,
+variables, maps, mixins, `shared/variables`, `shared/mixins`) — the emitted CSS
+is `min-height: 92.2px` on the strip and the divider with both guards intact.
+Gates: `tsc` 0, `stylelint` 0, `oxlint` 0 (pre-existing warnings only),
+`test:locales` 0. `oxfmt` remains red at its baseline — ticket 306.
+
+**Not done here:** nothing. Ticket 305 (empty slot tabs) and 306 (oxfmt) were
+always separate and remain open.
