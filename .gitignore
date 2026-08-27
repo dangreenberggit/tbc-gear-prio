@@ -63,6 +63,7 @@ vendor/
 !.scratch/stage-gate/finish-the-tab/
 !.scratch/stage-gate/phase-item-pool/
 !.scratch/stage-gate/upgrades-ui-quality/
+!.scratch/stage-gate/tickets-306-308/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
