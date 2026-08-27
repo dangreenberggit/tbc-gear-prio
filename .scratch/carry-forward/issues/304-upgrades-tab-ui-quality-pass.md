@@ -245,8 +245,10 @@ These are not eleven independent jobs. Rough clusters:
 - [x] Jitter (5, 11) verified gone by watching a real run start and finish.
       Item 11: the progress bar's left edge holds at 700.5px across 41
       distinct running labels (spread 0px, was 21px). Item 5: toolbar
-      height is constant at 111.6px through a full run (was 69.6→108.1px).
-      One residual shift remains and is recorded below.
+      height constant at 111.6px (was 69.6→108.1px) and sub-tab strip
+      height constant at 92.2px (was 44.3→92.2px), so the results table's
+      top edge holds at 371.8px across idle, running and done — spread 0.
+      No vertical shift remains.
 - [x] `pnpm verify` green **with the fork clone at its pinned commit**, which
       is the state the gate is written for. It does not lint, typecheck or
       test the fork itself. The gates that cover the changed code are the
@@ -257,7 +259,7 @@ These are not eleven independent jobs. Rough clusters:
 
       **Open, needs a decision:** `equip-eligibility:check` compares the fork
       clone's HEAD against `data/wowsims-fork.lock.json`, which pins
-      `fd4d65c4a` — the fork's stage-open commit. The four fork commits move
+      `fd4d65c4a` — the fork's stage-open commit. The five fork commits move
       the clone off that pin, so `pnpm verify` exits 2 while they are checked
       out. Verified both ways: with the clone reset to the pin the whole of
       `pnpm verify` passes; with the branch checked out only this one gate
@@ -269,7 +271,7 @@ These are not eleven independent jobs. Rough clusters:
 ## Disposition
 
 Fork commits on `feat/upgrades-tab`: `05bbd8c1d`, `30c2f9c3a`, `2f9d0eebe`,
-`44f63ae78`.
+`44f63ae78`, `0666c60ba`.
 
 | Item | Disposition |
 | --- | --- |
@@ -277,12 +279,12 @@ Fork commits on `feat/upgrades-tab`: `05bbd8c1d`, `30c2f9c3a`, `2f9d0eebe`,
 | 2 empty state | **Fixed.** Three distinct messages with heading, explanation and a Run CTA where Run can help; none where it cannot. |
 | 3 control row clips | **Fixed.** `6ch` won the cascade but was too narrow under `border-box`; probed to `8ch`. Toolbar split into two rows. Five-digit values still clip — the field is sized for the four the default uses. |
 | 4 vertical spacing | **Fixed.** `.content-block` rhythm replaces the `mt-gap` one-offs. |
-| 5 jitter simming/not | **Mostly fixed.** Toolbar height now constant; the recorded cause (status line) was refuted by measurement. Residual: the sub-tab strip wraps to a second row when slot tabs appear, shifting content ~48px once at completion. Left open because it depends on the owner question about empty slot tabs. |
+| 5 jitter simming/not | **Fixed.** The recorded cause (status line) was refuted by measurement — the status host is a constant height in every state. The two real causes were the toolbar growing when the view filters appear and the sub-tab strip wrapping to a second row when slot tabs appear; both now reserve their height from first paint. Measured across a full run: strip 92.2px, results top 371.8px, table top 371.8px, toolbar 111.6px, status 21px — every one a single value in idle, running and done. |
 | 6 table spacing | **Fixed.** Desktop rules added outside the mobile guards. |
 | 7 worn items below cutoff | **Fixed.** Live A/B: 192 rows with 16 owned before, 176 with 0 after. |
 | 8 assumptions hard to read | **Fixed.** Content-sized grid; label column 117.6px vs 730.3px, was a fixed 1:2. |
 | 9 developer-only detail | **Fixed.** Engine SHA and `api-v` move to one `console.info`; degradation and run-provenance rows stay on the page. |
-| 10 tabs carry no information | **Fixed** for counts, de-emphasis and organisation (pinned-first, canonical order, badges, muted empty tabs). Badge/pane agreement verified under the BiS-only filter: 0 mismatches across 16 tabs. **Deferred:** grouped rows (no site idiom to borrow) and rendering all 17 slots (a behaviour ruling) — both owner questions in the state-design note. **Dropped with reason:** the batch UI's hero-#1 card — that file has dividers and flex ratios but no emphasis idiom to borrow. |
+| 10 tabs carry no information | **Fixed**, all four sub-asks. Counts: badge per tab, agreement with its own pane verified under the BiS-only filter (0 mismatches across 16 tabs). De-emphasis: filter-emptied tabs muted but still clickable. Organisation: the strip is a deliberate two-row shape (owner ruling), reserved from first paint, with canonical order and Shopping List pinned first. Batch-UI inspiration: the divider idiom adopted; the hero-#1 card **dropped with reason** — that file has dividers and flex ratios but no emphasis idiom to borrow. **Still open, separately:** whether all 17 equip slots should render, greyed when empty — a behaviour ruling, recorded in the state-design note. Two rows does not decide it, and the strip reserves its height either way. |
 | 11 bar jitters horizontally | **Fixed.** Bar left edge spread 21px → 0px. |
 
 Design note: `.scratch/carry-forward/notes/upgrades-tab-state-design.md`
@@ -295,6 +297,9 @@ Design note: `.scratch/carry-forward/notes/upgrades-tab-state-design.md`
   with the committed formatting across the whole tree (arrow-parens, line
   width), so running it would reformat 194 unrelated files. Its own ticket
   if wanted; not actionable inside this one.
-- **Residual layout shift at completion** (item 5, above).
+- **Whether all 17 equip slots should always render, greyed when empty.**
+  A behaviour ruling, not styling; recorded as an owner question in the
+  state-design note. Independent of the two-row strip, which reserves its
+  height either way.
 
 ## Comments

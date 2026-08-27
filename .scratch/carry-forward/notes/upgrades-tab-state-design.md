@@ -145,21 +145,28 @@ Neither is guessed here.
    is read only by the two files we added, so the fix is to adopt
    upstream's `var(--bs-gray-*)` convention in those files rather than
    change the theme. No cross-tab blast radius. See above.
-2. **Should slot sub-tabs appear for slots with no rows?** Today a tab
-   exists only for slots present in the ranking
-   (`slotsInView(unfilteredView())`, deliberate per the comment at
-   tsx:~1130). Rendering all 17 equip slots and grey-disabling the empty
-   ones is a behaviour change, not styling, and it is a product ruling
-   about whether "no upgrade for this slot" is information worth showing.
-3. **Should the tab strip be grouped into rows (armour / jewellery /
-   weapons)?** Ticket 304 item 10 asks for organisation. Counts,
-   pinned-first ordering and muted zero-count tabs are shipping as the
-   baseline. A grouped strip has **no site idiom to borrow** — no other
-   nav on the site groups tabs into labelled sections — so inventing one
-   is exactly the failure mode the ticket's summary judgment names. Left
-   as a follow-up if the owner wants it.
+2. **Should slot sub-tabs appear for slots with no rows?** Still open —
+   the two-row ruling does not decide it. Today a tab exists only for
+   slots present in the ranking (`slotsInView(unfilteredView())`,
+   deliberate per the comment at tsx:~1130). Rendering all 17 equip slots
+   and grey-disabling the empty ones is a behaviour change, not styling,
+   and it is a product ruling about whether "no upgrade for this slot" is
+   information worth showing. Note the strip now reserves two rows either
+   way, so answering this does not move the layout.
+3. ~~Should the tab strip be grouped into rows?~~ **Answered: the strip
+   is two rows.** The owner ruled that seventeen tabs on one row is too
+   many to read, so two rows is the strip's normal form, reserved from
+   the first paint rather than reached by wrapping. That completes ticket
+   304 item 10's "organise them, rather than one long wrapping strip",
+   which counts, pinned-first order and muted empty tabs had only
+   answered in part.
 
-## Known gap, recorded rather than fixed
+   What is *not* ruled on is labelled grouping — armour / jewellery /
+   weapons as named sections. That still has no site idiom to borrow, and
+   two rows does not require it. Order within the two rows stays
+   canonical.
+
+## Layout stability, and how it was settled
 
 Ticket 304 item 5 (vertical jitter) is only half addressed by the
 ticket-304 pass. Measured: `.upgrades-status` is a constant height in
@@ -176,5 +183,13 @@ no border and no separator honours that concern while removing the jump
 the owner reported. Measured after the change: toolbar height is a
 single value, 111.6px, across every sample of a full run.
 
-One residual shift remains and belongs to item 10, not item 5: the slot
-sub-tab strip grows as tabs appear for slots in the ranking.
+The residual shift that remained after that — the slot sub-tab strip
+growing as tabs appeared — is also fixed, under item 10's two-row ruling
+above. The strip reserves its two-row height from the first paint.
+
+Measured across a full run, 51 samples plus a separate pre-run reading:
+strip height 92.2px, results top 371.8px and table top 371.8px are each a
+single value in idle, running and done, spread 0, while the tab count
+goes 1 → 17. Toolbar height (111.6px), status height (21px) and the
+progress bar's left edge (700.5px) are constant too. No vertical shift
+remains in the tab.
