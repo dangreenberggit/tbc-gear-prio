@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-upgrades-dedup-wowsims.md (round 3 — domain axis, D1)
 Blocks: none
@@ -56,12 +56,60 @@ That coupling is the reason this is filed rather than left as folklore.
 
 ## Acceptance
 
-- [ ] Decide whether second-copy placement is in scope for this tool at all —
+- [x] Decide whether second-copy placement is in scope for this tool at all —
       it may be deliberately out of scope, which is a fine answer to record.
-- [ ] If in scope: item uniqueness is consulted, and a second copy of a
+      **Decided: deliberately out of scope.** See the decision below.
+- [x] If in scope: item uniqueness is consulted, and a second copy of a
       non-unique item becomes a candidate for the other slot of its pair.
-- [ ] The `owned`-row drop in `rowsTable` is revisited in the same change, so a
-      genuinely positive owned row cannot be hidden.
-- [ ] A test covers the second-copy case at the module interface.
+      Vacuous — the "if in scope" arm does not apply. The work is mapped in
+      ticket 309.
+- [x] The `owned`-row drop in `rowsTable` is revisited in the same change, so a
+      genuinely positive owned row cannot be hidden. **Revisited and left
+      unchanged, deliberately** — see below.
+- [x] A test covers the second-copy case at the module interface. Carried to
+      ticket 309 with its honest form (a live recording, not a fabricated
+      fixture) — see below.
+
+## Decision: deliberately out of scope
+
+Recorded 2026-08-27. No ranking behaviour changed; comments only.
+
+**The guard named above is not the only thing suppressing the row, so relaxing
+it does not produce one.** `rankUpgrades` emits one row per *item*, not per
+*placement*: it loops the item's eligible slots, keeps only the best swap, and
+emits a single `RankedItem`. For an owned ring the worn-slot placement is the
+identity swap at delta ~0, so an unguarded second placement would not appear
+alongside it — it would **win and overwrite it**, silently turning "you already
+wear this" into "wear a second one" with nothing in the row saying which. That
+is a silent wrong answer, which is worse than the missing feature.
+
+Doing it correctly is a **per-placement row redesign** spanning engine output,
+the view, and the UI — not a guard edit. Two further structural blockers:
+
+- **The fixtures cannot measure it honestly.** `RecordedSimRunner.run` throws
+  `no recording for sim key ${key}` on any unrecorded request, so a
+  duplicate-equip probe cannot distinguish "the sim rejects it" from "no
+  recording exists". A test would need a live recording; fabricating one would
+  decide its outcome in advance.
+- **The UI has no worn-slot signal.** `ViewRow.owned` derives from
+  `equippedIds.has(entry.itemId)` — it records *that* an item is worn, never
+  *where*, so the filter adjustment an implementation needs has no left-hand
+  side.
+
+**Why the `rowsTable` filter stays unchanged.** Its safety argument — an owned
+item is only ever re-simmed into its own slot, so its delta is ~0 — remains true
+while the guard stands, and this change leaves the guard standing. Changing the
+filter now would alter behaviour with no defect to fix. The revisit is
+discharged as documentation instead: the comment block at the filter now names
+the guard coupling, ticket 309, and the `ViewRow` plumbing an implementation
+would need, so the next reader finds it by reference rather than by folklore.
+
+The reasoning is written at all three sites — the guard in `packages/core/src/rank.ts`,
+the guard in the fork's `upgrades/engine/rank.ts`, and the `rowsTable` filter in
+`upgrades_tab.tsx` — so nobody has to re-derive it from a closed ticket.
+
+**Follow-up: ticket 309** (`309-per-placement-rows-second-copy.md`) carries the
+redesign map, the ready item data, the live-recording test requirement, and the
+filter coupling.
 
 ## Comments

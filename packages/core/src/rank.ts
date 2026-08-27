@@ -938,6 +938,20 @@ export async function rankUpgrades(
         // outcome for a worn item, which is what every unpaired slot already
         // does. Written against the equipment array rather than special-cased
         // to fingers so trinkets and any later paired slot inherit it.
+        //
+        // Wearing a second copy of a *non-unique* ring or trinket is legal in
+        // TBC, and this guard blocks that row. Ticket 308 decided it is
+        // deliberately out of scope, because relaxing the guard here does not
+        // produce the missing row. This loop emits one row per *item*, not per
+        // placement: it keeps only the best swap across slots, so an unguarded
+        // second placement would not appear alongside the worn item's identity
+        // swap — it would win the comparison and overwrite it, turning "you
+        // already wear this" into "wear a second one" with nothing in the row
+        // saying so. Producing it honestly needs a per-placement row concept
+        // through the engine output, the view, and the UI. The item data is
+        // already there when someone builds it: every item entry carries
+        // `unique`, currently read only by the gem solver. Ticket 309 holds
+        // the redesign map.
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
         if (wornAt >= 0 && wornAt !== slotIndex) continue;
         let swapped: SimItemSpec[];
