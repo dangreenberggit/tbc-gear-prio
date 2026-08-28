@@ -12,6 +12,40 @@ overlapping or broken, which is exactly why two automated passes missed it.
 Both reported the toolbar as "aligned, evenly spaced, nothing overlapping." All
 true, and not the point.
 
+## This is a re-report of ticket 304 item 3, which was closed as Fixed
+
+**Do not treat this as a new finding.** The owner raised it in the original UI
+review (2026-08-27) as item 3: *"the one row of options is shit: there's too
+much on one line and stuff inside the numbers iterations field for example gets
+cut off."* Ticket 304 dispositioned it **Fixed**, with: *"`6ch` won the cascade
+but was too narrow under `border-box`; probed to `8ch`. Toolbar split into two
+rows. Five-digit values still clip."*
+
+The owner has now looked at the running page and raised it again. Verified in
+the markup (`upgrades_tab.tsx:461, 514`):
+
+- `.upgrades-run-controls` holds **all seven** crowded controls — Run, Stop,
+  Import log, Iterations, Candidates, the BiS checkbox, the Phase selector.
+- `.upgrades-view-controls` is the second row — and it holds the **post-run
+  view toggles** (set-potential, BiS-only, Content), whose children carry
+  `d-none` until a run completes.
+
+So the "split into two rows" is real markup that **did not split the crowded
+row**. It counted a second row that already existed for a different purpose and
+is invisible in the state the owner is complaining about. Pre-run — the state in
+the owner's screenshot — there is exactly **one** row with seven controls on it.
+
+**The half of item 3 that was closed honestly:** the `8ch` iterations width. The
+SCSS comment records 6ch and 7ch clipping "3000" and 8ch being the first that
+does not, and explicitly records that five-digit values still clip. That
+measurement should be re-confirmed at the current tip rather than assumed —
+the owner's screenshot shows `3000` sitting tight against the field edge — but
+it was not a false claim.
+
+**The lesson for whoever picks this up:** a disposition can be literally true
+and still not do the thing. Do not close this one by pointing at markup; close
+it by looking at the pre-run toolbar.
+
 ## What is on the row today
 
 Eight controls, left to right, all at the same visual weight:
