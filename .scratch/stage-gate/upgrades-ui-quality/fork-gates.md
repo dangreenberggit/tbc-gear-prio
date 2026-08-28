@@ -28,10 +28,14 @@ All four gates were run at stage open. Every one works when invoked through
 | Gate | Command that works | Result at stage open |
 | --- | --- | --- |
 | `test:locales` | `node ./test-locales.mjs` | **exit 0** — validated 3 locale files; `en/translation.json` valid |
-| `lint:css` | `node ./node_modules/stylelint/bin/stylelint.mjs "<path>"` | **exit 0** on `_upgrades_tab.scss` |
+| `lint:css` | `node ./node_modules/stylelint/bin/stylelint.mjs "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss"` | **exit 0** (path re-verified 2026-08-27) |
 | `type-check` | `node ./node_modules/typescript/bin/tsc --noEmit` | **exit 0**, clean |
 | `lint:js` | `node ./node_modules/oxlint/dist/cli.js ./ui` | **exit 0** with pre-existing warnings |
 | `fmt` (scoped) | `node ./node_modules/oxfmt/dist/cli.js --check <the ten owned files>` | **exit 0** (added 2026-08-27, ticket 306) |
+
+The scss lives under **`ui/scss/core/...`**, which does not mirror the `ui/core/...`
+layout of the `.ts`/`.tsx` files in the rows around it. The `lint:css` row spells
+its path out in full for that reason — the mirrored path does not exist.
 
 ## The `fmt` gate is scoped on purpose
 

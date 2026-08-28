@@ -132,6 +132,16 @@ diagnosis.
 - **Nothing from the plan is outstanding.** Every Verify-recipe item passes.
 - The `lint:css` row in `fork-gates.md` names a path that does not exist
   (flagged above, not fixed).
+  <!-- Orchestrator note, added at Gate C: discharged. The row now spells the
+  path out in full and the command was re-verified (CSS_EXIT=0). The rest of
+  this report is the executor's verbatim final message and is unedited. -->
+
+## Orchestrator note
+
+Everything above this heading is the executor's final message, verbatim. Gate C
+dispositions are in `decision-log.md`. One of them was revised after the owner
+challenged it: the `lint:css` defect was fixed in place rather than escalated,
+and the ticket 310 that briefly held it was deleted.
 - Nothing was pushed; `pushed: false` is untouched. No merge to `dev`, no
   `pre-merge-review` — the orchestrator owns Gate C.
 - `.scratch/stage-gate/tickets-306-308/decision-log.md` is dirty by design; that

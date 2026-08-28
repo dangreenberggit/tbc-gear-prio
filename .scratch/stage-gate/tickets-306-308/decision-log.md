@@ -52,7 +52,8 @@ For 308: the `wornAt` guard exists in **two** copies — the fork's
 
 ## Gate C — deviation ledger dispositions
 
-Seven ledger rows, all dispositioned. Nothing sent back for rework.
+Seven ledger rows, all dispositioned. Nothing sent back for rework. One
+disposition was revised after the fact — see the `lint:css` row.
 
 | Row | Disposition | Orchestrator check |
 | --- | --- | --- |
@@ -61,7 +62,7 @@ Seven ledger rows, all dispositioned. Nothing sent back for rework.
 | B6 BOM in commit subject | **accepted** | `git log --oneline` shows clean subjects on all four commits. |
 | A2 line-endings heuristic false positive | **accepted** | The plan's heuristic was a proxy; the executor measured the underlying property (0 CR bytes, diff survives `--ignore-cr-at-eol`) instead of satisfying the proxy. Better evidence than the plan asked for. |
 | A2 `lint:js` warnings name touched files | **accepted** | Judged by before/after count (265 both ways) rather than by whether warnings mention touched files. Measures the right thing — introduced vs pre-existing. |
-| A3 `lint:css` path defect | **escalated to a ticket** | Verified independently: `ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss` exists, `ui/core/components/individual_sim_ui/_upgrades_tab.scss` does not. Executor correctly declined to edit a row outside both tickets' scope. Filed as **ticket 310**; `NEXT` bumped to 311. |
+| A3 `lint:css` path defect | **fixed in place** | Verified independently: `ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss` exists, `ui/core/components/individual_sim_ui/_upgrades_tab.scss` does not. Executor correctly declined to edit a row outside both tickets' scope. I first filed it as ticket 310 — **wrong call, corrected on owner challenge:** a one-line doc fix does not warrant a board entry, and filing one is bureaucracy dressed as rigour. Row now spells the path out in full, verified `CSS_EXIT=0` before writing it, with a note that the scss tree does not mirror the `ui/core/...` layout of its neighbours. Ticket 310 deleted; `NEXT` back to 310. |
 | Stashed the orchestrator's dirty `decision-log.md` | **accepted** | My row, written after the executor sampled status. Restored exactly as found and still the only dirty file. Correct handling given lint-staged runs against `*` with `--no-stash`. |
 
 ## Gate C — paths manifest cross-check
@@ -90,4 +91,5 @@ Re-ran rather than trusting the pasted output:
 
 | Date | Gate | Outcome | Reason | Rounds |
 | --- | --- | --- | --- | --- |
-| 2026-08-27 | Gate C | pass | Every ledger row dispositioned (6 accepted, 1 escalated to ticket 310); every changed path in-manifest; `pnpm verify`, parity, engine byte gate and the new scoped fmt gate all re-run green by the orchestrator. Tickets 306 and 308 closed, 309 and 310 open. Stage complete — `pre-merge-review` is next, then the owner is asked about merging. | 1 |
+| 2026-08-27 | Gate C | pass | Every ledger row dispositioned (6 accepted, 1 fixed in place); every changed path in-manifest; `pnpm verify`, parity, engine byte gate and the new scoped fmt gate all re-run green by the orchestrator. Tickets 306 and 308 closed, 309 open. Stage complete — `pre-merge-review` is next, then the owner is asked about merging. | 1 |
+| 2026-08-27 | Gate C follow-up | corrected | Owner challenged the new-ticket pattern ("sounds sus"). Re-read 309 and 308 against the challenge. **309 stands:** 308's first acceptance box named "deliberately out of scope" as a sanctioned outcome when it was filed, before this pipeline existed, and the close is honest that no behaviour changed. **310 did not:** a one-line doc-path fix filed as a board entry is over-processing, so it was fixed in place and the ticket deleted. Recorded because the failure mode the owner named — closing tickets by filing tickets — is real, and one of the two instances was it. | — |
