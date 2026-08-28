@@ -1,8 +1,9 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner report, 2026-08-27 ("mobile view bad"); measured in the running page the same day
 Blocks: none
 Blocked by: none
+Closed: 2026-08-28 (fork `0e94d3ea9`, re-pin `c673c1f`)
 
 # Upgrades tab is built desktop-only; run controls land below the results on mobile
 
@@ -59,3 +60,34 @@ Owner's call on the shape. Options, cheapest first: order the settings card
 above the results at narrow widths; make it a collapsible panel; or keep the
 run affordance pinned while the results scroll. Each is a different answer to
 "what should a phone user see first".
+
+
+## Closed 2026-08-28
+
+Fixed to the owner's spec: settings card above the results at narrow widths,
+the four set-once controls collapsed behind a "Run settings" toggle that starts
+closed, Run and Stop always visible. Scoped to `media-breakpoint-down(xl)` —
+`xl`, not `lg`, because 1200px is where the container stacks and an `lg` rule
+would have left the 992-1200px band broken.
+
+Verified live by the orchestrator, independently of the executor's report:
+
+| Width | Run y | Results y | Settings |
+| --- | --- | --- | --- |
+| 375 | 1043 | 1271 | collapsed; expands and re-collapses correctly |
+| 1100 | 159 | 383 | collapsed (confirms the `xl` scoping) |
+| 1280 | — | — | **unchanged**: all four controls `checkVisibility()` true |
+
+Run is now above the results at both narrow widths, inverted from the 1255-vs-1025
+that opened this ticket. No horizontal overflow at any width. At 1280px both
+`.upgrades-tab-left` children still compute `grid-column: 1 / -1` and the panel
+still reserves `31.5px` for the anti-jitter row, so the F11 containment and the
+height reservation both survive.
+
+**Note for ticket 322.** The executor's first attempt used `<details>`,
+neutralised at `xl` with `display: contents`. All five gates exited 0 while every
+one of the four settings controls measured `checkVisibility() === false` at
+1280px — desktop would have shipped with no run settings at all. A closed
+`<details>` hides its children through a UA behaviour `display: contents` does
+not defeat. It was caught only by measuring the DOM, which is the case 322 is
+about.

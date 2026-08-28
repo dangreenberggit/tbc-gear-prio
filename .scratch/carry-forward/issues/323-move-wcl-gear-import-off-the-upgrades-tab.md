@@ -4,7 +4,7 @@ Origin: owner review of the mobile layout, 2026-08-27
 Blocks: none
 Blocked by: none
 
-# "Import log" does not belong on the Upgrades tab, and the label is wrong
+# (Button removed 2026-08-28; the move itself is still open) "Import log" does not belong on the Upgrades tab, and the label is wrong
 
 The owner, on seeing it in the run controls: they did not know what it was,
 guessed WCL, and said that if so the label is bad and the Upgrades tab is not
@@ -41,3 +41,17 @@ Immediate step, in the mobile/collapsible work: drop the button from the
 Upgrades tab's run controls. Nothing else in the tab references it beyond its
 own wiring (`grep -n importButton` → 5 hits, all declaration/mount/handler), so
 removing it is self-contained.
+
+
+## Update 2026-08-28 — button removed, move still open
+
+The button, its ref, its handler, the now-unused `WclGearImportModal` import and
+both locale keys (plus their `properties`/`required` schema entries) were removed
+from the Upgrades tab in fork `0e94d3ea9`. Confirmed gone by measurement at 375px
+(`.upgrades-import-button` is null) and by the locales gate passing, which it
+would not with a schema mismatch.
+
+**This ticket stays open**, because removing the button is not the work it
+describes. Re-homing WCL gear import in the header import menu — and answering
+whether importing gear from a log should also apply race/talents/professions,
+which is why it was never a header importer — is still to do, on its own PR.
