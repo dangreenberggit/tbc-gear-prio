@@ -15,7 +15,20 @@ The HTML report already has exactly this. **The tab has nothing.** Measured:
 `grep -c` for `export|textarea|clipboard` in `upgrades_tab.tsx` returns 3, none
 of them an export control.
 
-## What already exists — reuse it, do not reinvent
+## Correction 2026-08-27: it cannot be *imported*, only re-implemented
+
+This ticket originally said "reuse it, do not reinvent". **Verified false for
+this surface:** none of `wowsimsItemIdsJson`, `firstLineOf`,
+`formatSetPotentialLine` or `SET_POTENTIAL_WEIGHTS` exists anywhere in the
+fork's `ui/` (`grep -rln` over `vendor/tbc-new-fork/ui/` returns nothing), and
+the engine port directory is byte-gated, so nothing can be added there to bridge
+it. The tab must carry a **local re-implementation** — `wowsimsItemIdsJson` is
+nine lines — each with a comment naming the report-path original it mirrors, the
+same deliberate-drift pattern already used at `upgrades_tab.tsx:1840-1852`.
+
+Read the sections below as *the specification to copy*, not as importable code.
+
+## What already exists — the behaviour to mirror
 
 The report path (`packages/core/src/rank-report.ts`) ships a complete version:
 

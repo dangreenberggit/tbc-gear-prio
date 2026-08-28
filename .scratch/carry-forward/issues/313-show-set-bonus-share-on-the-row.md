@@ -56,12 +56,22 @@ this is a sub-line, not a column, and not a redesign of the row.
    way to separate it after the fact. Ticket 90 already ruled such a figure is
    disclosed but never ranked on; whatever this ticket shows must keep that
    distinction visible rather than flattening it.
-3. **The displayed value is discounted.** `SET_POTENTIAL_WEIGHTS` credits 2-piece
-   at 0.5 and 4-piece at 0.25, and the code comment says the weighting is chosen
-   so a reader can check it in their head against `formatSetPotentialLine`'s
-   number. If this ticket shows a raw undiscounted bonus next to a discounted
-   ranking value, those two numbers will not reconcile and the row becomes less
-   trustworthy, not more.
+3. ~~**The displayed value is discounted.**~~ **CORRECTED 2026-08-27 — this trap
+   does not apply on the tab, and following it would have introduced the bug it
+   warns about.** `SET_POTENTIAL_WEIGHTS` (0.5 / 0.25) governs the **report**
+   path. The fork's own view does not discount: `rankableSetPotential`
+   (`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/view.ts:169-172`)
+   returns the raw `prospectiveBonusDps` (zeroed when confounded), and the view
+   adds it straight to `deltaDps` — `const effectiveDps = item.deltaDps +
+   prospective` (`view.ts:163`). The row displays raw `deltaDps`
+   (`formatDelta(row.deltaDps)`, `upgrades_tab.tsx:1606`).
+
+   So **the number to show is the raw `prospectiveBonusDps`**, which reconciles
+   exactly with what the toggle adds to the sort. Showing a *discounted* figure —
+   what this ticket originally told an implementer to do — would have failed to
+   reconcile with the ordering on screen. Verified by reading `view.ts:160-172`.
+
+   Caught by the plan for this work, not by the ticket author.
 
 ## Acceptance
 
@@ -71,9 +81,14 @@ this is a sub-line, not a column, and not a redesign of the row.
       neither can be misread as the other.
 - [ ] A confounded figure (`prospectiveBonusBreaks` non-empty) is visibly not the
       same kind of claim as a clean one.
-- [ ] The shown number reconciles with the row's ranking value given
-      `SET_POTENTIAL_WEIGHTS`, or the discount is stated.
-- [ ] The existing report-path formatters are reused, not reimplemented.
+- [ ] The shown number is the **raw** `prospectiveBonusDps` — not discounted —
+      so it reconciles with what the toggle adds to the on-screen ordering.
+- [ ] The report-path formatters are **re-implemented locally** in the tab, each
+      with a comment naming its original. They cannot be imported: none of
+      `firstLineOf`, `wowsimsItemIdsJson`, `formatSetPotentialLine` or
+      `SET_POTENTIAL_WEIGHTS` exists anywhere in the fork's `ui/` (verified by
+      `grep -rln` over `vendor/tbc-new-fork/ui/`), and the engine port directory
+      is byte-gated.
 - [ ] Nothing is shown on rows with no set context.
 
 ## Comments
