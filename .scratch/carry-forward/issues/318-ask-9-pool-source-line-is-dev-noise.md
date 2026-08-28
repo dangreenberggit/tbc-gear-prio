@@ -1,8 +1,9 @@
-Status: open
+Status: closed
 Type: enhancement
 Origin: pre-merge review round 4, Spec axis (the owner's ask 9 has no disposition anywhere), 2026-08-27
 Blocks: none
 Blocked by: none
+Closed: 2026-08-28 (fork `141786023`, re-pin `31fcf02`)
 
 # Ask 9 — the pool-source line is developer noise, and nobody ruled on it
 
@@ -55,3 +56,33 @@ anyone debugging a ranking, which is the audience that was always reading them.
 Whether anything the UI *already* knows deserves to be surfaced in its place is
 a separate question -- ticket 324, filed at the owner's request. This ticket does
 not wait on it; the demotion stands on its own.
+
+
+## Closed 2026-08-28
+
+The block and its `<details>` drawer are gone from the UI, along with 19 dead
+locale keys and their `properties`/`required` schema entries. The information
+survives as one `console.info` from the run's `finally` — so a run that throws
+still reports its configuration — next to the existing `[upgrades] engine ...`
+line an earlier ticket demoted for the same reason:
+
+```
+[upgrades] assumptions — seeds: 11, 22, 33, 44, 55 · iterations: 3000 · max phase: 2 · candidate pool: every eligible item · pool source: ret-p2.universe.json (288 entries)
+```
+
+Verified by measurement at both 1280 and 375: `.upgrades-assumptions` is null,
+the console line is emitted on completion, no horizontal overflow, no console
+errors, 551 result rows still render, and the collapsible run-settings summary
+from ticket 321 still mounts.
+
+### One adaptation the owner should know about
+
+The drawer also wrapped the **substitutions list** (ticket 156), which the
+executor kept on the page in its own host. Its reasoning: a substitutions entry
+explains why an item a player expected is missing from the list — the opposite
+of the developer detail this demotion targeted — so removing it would have been
+an unrequested deletion. Two locale keys survive with it, including the `:219`
+`substitution_truncated_suffix` helper.
+
+That judgment stands unless the owner says otherwise; it was flagged, not
+buried.
