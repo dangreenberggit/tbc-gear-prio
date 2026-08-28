@@ -207,6 +207,69 @@ grouping treatment as the run row, plus a clear signal that it acts on
 ("Set potential", "BiS only") with any qualifier demoted to secondary text, and
 a visual separation from the run controls, are the minimum.
 
+## Owner's direction, 2026-08-27 — decided
+
+Three directions were designed in parallel: (A) group everything in place on one
+surface, (B) demote all configuration behind a settings trigger, (C) copy the
+Bulk/Batch tab's structure.
+
+**Owner chose C for the run settings:** *"copy the batch tab for run settings."*
+
+What that means concretely, from the C proposal (the only one of the three whose
+research was done against the actual files — 17 reads vs. zero for A and B, so
+its file:line claims are the trustworthy ones):
+
+- Run settings move into a **sticky settings card** modelled on
+  `.bulk-settings-outer-container` / `.bulk-settings-container`
+  (`_bulk_tab.scss:11-23`) — bordered, padded, `display: grid`, stacking
+  vertically instead of wrapping horizontally.
+- Internal order borrowed from Bulk: **info readout → primary CTA → config
+  controls** (`bulk_tab.tsx:820-861`, `:159-161`, `:667-818`). The action sits
+  next to the count it gates; the knobs that rarely change sit below it.
+- Iterations, Candidates, BiS-prune and Phase become picker rows in that card,
+  using the same `BooleanPicker` / `EnumPicker` row shape Bulk and Settings
+  already use — which is also what lets the BiS-prune label **wrap normally**
+  instead of being the widest thing in a horizontal row.
+- Two-pane split via the site's existing `.tab-panel-left` / `.tab-panel-right`
+  (`_sim_tab.scss:14-37`), collapsing to one column on mobile exactly as Bulk
+  does (`_bulk_tab.scss:88-93`) — borrowed, not written.
+
+### Carried from C, and independently the answer to the owner's post-run complaint
+
+C observed that the three post-run controls are **named** "view controls" but
+live beside the run controls as though they were run inputs, and proposed moving
+them **above the results list** they act on. That is the structural fix for the
+owner failing to find the BiS-only toggle: it is not merely worded badly, it is
+in the wrong place. Bulk has no equivalent to borrow (its results are not
+post-filterable), so C flagged this as a deliberate divergence rather than
+forcing a false borrow. Keep it.
+
+### Explicitly NOT taken from C
+
+**The progress modal.** C also proposed moving the running state into
+`ProgressTrackerModal` as Bulk does. C flagged the risk against itself: Upgrades
+runs can be short, and a modal that flashes open and shut is worse than the
+inline status line, which was built deliberately (see the live-region comments
+at `upgrades_tab.tsx:529-561`). **Keep the inline status line.** Take the
+settings-card structure, not the modal.
+
+### Worth taking from A, independently of the direction
+
+A's diagnosis of the clipping: the label currently sits **inline beside** the
+input (`display: flex; align-items: center`, `_upgrades_tab.scss:50-61`), which
+squeezes the field — that is why `8ch` was needed and why five digits still clip.
+Stacking the label above the input frees the width and fixes the cause rather
+than the symptom. Verified against the CSS. This composes with C's picker rows
+rather than competing with them.
+
+### Verify before building
+
+C did **not** confirm that the Upgrades tab's outer markup already sits inside a
+`.tab-pane-content-container` with `.tab-panel-left` / `.tab-panel-right` as its
+direct children. If it does not, the two-pane split is a larger structural change
+than C advertised. C flagged this itself and called it a five-minute check.
+**Do that check first.**
+
 ## Constraints a proposal must respect
 
 - The tab lives in the gitignored fork checkout `vendor/tbc-new-fork`, and its
