@@ -64,6 +64,65 @@ Something in that chain is wrong, and reading the SCSS cannot say which.
 - Desktop was checked and is fine: columns well-proportioned, long two-line
   Source strings wrap inside their cells without breaking row height.
 
+## Investigation round 1 (2026-08-27) — candidate 1 ruled out, bug unreproduced
+
+A Chrome-driving investigation returned **one settled result and one serious
+doubt**. It measured honestly and reported what it could not do, rather than
+forcing a number.
+
+**Candidate 1 is ruled out.** Walking `document.styleSheets` on the live page
+found the mobile rule present in the served bundle, at the right selector,
+inside the right media condition:
+
+```
+.upgrades-results-table { table-layout: fixed; width: 100%; }   media: (max-width: 767.98px)
+.upgrades-results-table th, td { padding: var(--spacer-1); overflow-wrap: break-word; }   media: (max-width: 767.98px)
+```
+
+So the CSS is not missing, not mis-scoped, and did reach the bundle.
+
+**The bug could not be reproduced, because the viewport could not be changed.**
+`resize_window` was inert: 375px, 662px, 500px and 320px were all requested,
+every call reported success, and `window.innerWidth` read back as **1755**
+every time. That is a worse failure than the 662px ceiling this ticket already
+recorded.
+
+**Therefore candidate 4 is now the live one, and it undercuts the original
+observation.** If the resize tool silently no-ops while reporting success, the
+first pass's "662px" was plausibly not a viewport anyone set — just whatever the
+window already was, which happened to fall inside `media-breakpoint-down(md)`
+and so made the contradiction look sharp. The wrapping *was* seen in screenshots
+(`R/a/n/k` stacked vertically is not imagination), but **the width label attached
+to that observation is no longer trustworthy.**
+
+Also measured, at the only verified width (1755px, desktop): computed
+`table-layout` is `auto` (correct above `md`), `matchMedia('(max-width:
+767.98px)').matches` is `false` (correct), and no ancestor of the table is
+narrower than the viewport — the chain runs 1264px (table) → 1306px
+(`.tab-panel-left`) → 1755px (body). This does **not** settle candidate 2, whose
+claim is about the *mobile* layout, where `.tab-panel-left` restructures below
+the `lg` breakpoint into `flex-direction: column; width: 100%`. That layout was
+never rendered.
+
+Note: grepping for the SCSS comment's "319-361px column-panel container" finds
+only the comment itself — it records a prior measurement, not a fixed-width rule
+that can be re-located in the CSS.
+
+**Candidates 2 and 3 remain untestable** until the viewport problem is solved.
+
+## What this needs next — the blocker is tooling, not analysis
+
+The question cannot be answered by more source reading. It needs a **real narrow
+viewport**, by one of:
+
+- Chrome DevTools' own device-emulation panel (the `chrome-devtools` skill in
+  this repo drives CDP directly and may not share the MCP resize defect).
+- A manually resized browser window, driven or confirmed by the owner.
+- A real device.
+
+Whichever is used, **`window.innerWidth` must be read back**, not assumed from
+the resize call succeeding. That is the trap this ticket has now hit twice.
+
 ## What would close this ticket
 
 - A reproduction at a **verified** viewport width, with `window.innerWidth`
