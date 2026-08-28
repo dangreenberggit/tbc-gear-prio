@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-08-28
 Type: investigation
 Origin: owner request, 2026-08-27, alongside the ticket 318 decision
 Blocks: none
@@ -52,3 +53,29 @@ A list of candidate values with a verdict against those three questions, and a
 recommendation. **Do not implement anything** — if something survives all three,
 it becomes its own ticket with the owner's sign-off. If nothing does, close this
 and the answer is on record, which is worth as much.
+
+## Outcome (2026-08-28) — closed, nothing surfaced
+
+Investigation ran (read-only, no code written). Every computed field the view
+receives was enumerated against `RankedItem` / `Ranking` / `ViewResult` and
+cross-referenced with what `upgrades_tab.tsx` already renders. The owner's prior
+— nothing worth surfacing — holds for all assumptions-style data, internal
+diagnostics, and advisory numbers: they failed either **Q1 (not new** — restate
+a control or a rendered column: `assumptions`, `cutoff`, `baseline.dps`,
+`substitutions`, `slotChoice`, `source`, `owned`, `deltaDps`, …) or **Q2 (new
+but not actionable** — `contentHash`, `seMethod`, `baseline.stdev`,
+`belowCutoffCount`, `emptyMetaSocket`, per-row `se`/`deltaPct`, …).
+
+**One candidate passed all three and was deliberately declined:** the
+**dead-slot subset of `plausibilityWarnings`** (`plausibility.ts:138-157`,
+attached only when non-empty at `rank.ts:1040`, **zero references in
+`upgrades_tab.tsx`**). Its `worn-unrankable` case tells a player that a slot's
+rows were scored against an empty slot and must not be read as upgrades or
+losses — new, decision-changing, and populated only when true (the opposite of
+ticket 315's rarely-present `setContext`). Owner ruling: keep the tab lean, do
+not surface it. Recorded here rather than spun into a ticket. If that changes,
+it becomes its own ticket with owner sign-off.
+
+**Runner-up, also declined:** `hitDriven` / `hitRegression` (`caps.ts:278,317`)
+— genuinely new and per-row relevant, but only pays off bundled with a hit-cap
+banner that does not exist, so it would confuse more than help on its own.
