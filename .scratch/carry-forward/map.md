@@ -152,3 +152,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 320 "Raid zones" filter group may list non-raid zones — pre-merge round 4 (Domain D3); hypothesis, needs the distinct `zone` values enumerated
 - 321 Upgrades tab is desktop-only: at 375px the settings card and Run button land BELOW the results (y 1383/1255 vs 1025) and sticky drops to `static` — owner report 2026-08-27, measured live; none of the four classes the rebuild added appears in any of the file's 8 breakpoint blocks
 - 322 no gate renders the page, so layout regressions are invisible — owner ask 2026-08-27; all five fork gates are static and the repo has no browser-driving dep; prefer measured DOM assertions over screenshots, which were inert in this environment
+- 324 does the UI already know anything worth showing a player? — owner request 2026-08-27 alongside the 318 ruling; a check, not a build, and "nothing" is an acceptable answer

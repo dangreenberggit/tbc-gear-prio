@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: enhancement
 Origin: owner review of the mobile layout, 2026-08-27
 Blocks: none
@@ -55,3 +55,22 @@ would not with a schema mismatch.
 describes. Re-homing WCL gear import in the header import menu — and answering
 whether importing gear from a log should also apply race/talents/professions,
 which is why it was never a header importer — is still to do, on its own PR.
+
+## Deferred 2026-08-27 — owner
+
+> WCL gear import is deferred for now here. the upgrades tab simming will use
+> whatever settings and gear a user already has set up
+
+So the Upgrades tab has **no import path of its own**, by decision rather than by
+omission: it sims the gear and settings already configured on the character. That
+is the shipped state — the button was removed in fork `0e94d3ea9` and nothing
+replaced it, so no further work is needed to reach the decided behaviour.
+
+What stays deferred is the *re-homing*: whether WCL gear import returns anywhere
+(the header import menu being the obvious candidate), and the question that
+governs it — whether importing gear from a log should also apply
+race/talents/professions, as every other header importer does. Nobody is blocked
+on that answer today.
+
+Reopen if WCL import is wanted back. The constraint recorded above is the thing
+to read first.

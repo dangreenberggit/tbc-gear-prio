@@ -28,9 +28,30 @@ no disposition in any ticket, plan or review, which is how it would have been
 lost. Asks 2 and 8 are likewise untouched by this stage but are already covered
 by their own tickets.
 
-## The decision needed
+## Decided 2026-08-27
 
-The owner offered a direction ("maybe assumptions should just be a console log
-for now"), but framed it as a question about what a normal user can act on. So
-the call is theirs: drop the line, demote the whole assumptions block to a
-console log, or rewrite it in terms of data the UI already shows elsewhere.
+**Owner: demote the whole assumptions block to a console log.** Not just the
+pool-source line -- the entire block leaves the UI and is logged instead.
+
+The block's five rows, read off the running page:
+
+| Row | Value | What it is |
+| --- | --- | --- |
+| Seeds | 11, 22, 33, 44, 55 | developer detail |
+| Iterations | 3000 | **echoes a control the user just set** |
+| Max phase | Phase 2 (2.1 - T5) | **echoes a control the user just set** |
+| Candidate pool | every eligible item | **echoes the BiS-prune toggle** |
+| Pool source | `ret-p2.universe.json (288 entries)` | developer detail; the row that prompted ask 9 |
+
+That is the sharper version of the owner's "almost useless for a user": three of
+the five rows are not new information at all, they restate settings visible in
+the card above; the other two are internal detail no player can act on. So
+nothing here is lost to a user by moving it to the console -- which is what makes
+the demotion safe rather than merely expedient.
+
+Keep it a real log line, not a deleted feature: the values stay diagnostic for
+anyone debugging a ranking, which is the audience that was always reading them.
+
+Whether anything the UI *already* knows deserves to be surfaced in its place is
+a separate question -- ticket 324, filed at the owner's request. This ticket does
+not wait on it; the demotion stands on its own.

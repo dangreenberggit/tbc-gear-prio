@@ -30,9 +30,17 @@ screen. Ticket 314 and the plan both rule on slot grouping and below-cutoff
 exclusion, and **neither rules on owned shortlist rows**, so the implementation
 did not contradict a written instruction — it hit a case nobody wrote down.
 
-## The decision needed
+## Decided 2026-08-27
 
-Should the export drop owned rows, or keep them because they are displayed?
-This is the owner's call, not a mechanical fix. If dropped, the count shown next
-to the copy affordance must drop with it, or the number stops matching the
-payload.
+**Owner: drop them.** "TMB does not need to include gear someone already has."
+
+So the export filters owned rows out of the payload, while the table keeps
+showing them greyed (ticket 269's behaviour is unchanged -- this is an export
+concern, not a display one).
+
+**The count must move with it.** The number shown next to the copy affordance
+counts the payload, so it has to count the filtered set; otherwise it claims a
+row count the copied JSON does not contain.
+
+Worth an explicit test: an export taken while every shortlist row is owned
+should produce an empty item list and a zero count, not a malformed payload.
