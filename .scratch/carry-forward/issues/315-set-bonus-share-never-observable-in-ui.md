@@ -70,3 +70,51 @@ ticket 313's UI cannot be validated by inspection at all.
 Related: ticket 91 (closed) covers a different layer — the engine crediting a
 measured 4pc bonus to no row. This ticket is about no `setContext` reaching
 the UI in the first place.
+
+
+## Handoff notes (orchestrator, 2026-08-28)
+
+The owner is assigning this to a separate agent. Everything below was confirmed
+by command in this session so the next seat does not have to rediscover it.
+
+### The probe, concretely
+
+`setIdsWithCandidates` is built at `packages/core/src/rank.ts:1511-1514` and
+short-circuits the whole set-bonus path at `:1516`
+(`if (setIdsWithCandidates.size === 0) return [];`), then drives the loop at
+`:1532`. `selectPackage` is `packages/core/src/set-value.ts:155`. Instrument
+those two for setId 629 and the reachability question is answered.
+
+### The trap: the engine exists in two copies
+
+`packages/core/src/` is the source. The fork carries a **ported copy** under
+`ui/core/components/individual_sim_ui/upgrades/engine/`, hash-gated by that
+directory's `PROVENANCE.md` and checked by `scripts/check_engine_port_drift.py`.
+
+A probe added to the wrong copy measures nothing, because **the running page
+executes the fork's ported files, not `packages/core`**. Any real edit has to go
+through the ported-file cycle (see `docs/agents/known-traps.md` before touching
+either copy) — a temporary probe is easier to run in the fork copy and then
+revert, but do not commit a hash-breaking edit by accident.
+
+### What "done" looks like
+
+Two possible outcomes, and they are different tickets:
+
+1. **Reachable** — construct a character/phase where a row carries a
+   `setContext`, then verify all four of ticket 313's display states on screen.
+   That closes this ticket and finally validates 313.
+2. **Unreachable in practice** — if no realistic configuration produces one,
+   313's display code is dead as written and the design question reopens: the
+   toggle advertises a feature the engine will not feed. That is a bigger
+   finding than a bug, and it should come back to the owner rather than being
+   fixed quietly.
+
+Do not close 313 on either path without the owner seeing the answer.
+
+### Do not trust these figures without re-running
+
+The five-sweep results above are the executing seat's report; its measurement
+tables lived in a session scratchpad that is gone. The *reasoning* about why
+2/5 should have worked was independently verified by domain review, but the
+sweep numbers themselves were not re-run.
