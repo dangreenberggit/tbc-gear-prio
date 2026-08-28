@@ -1,7 +1,9 @@
 # Handoff — Upgrades tab UI rebuild
 
-Written 2026-08-27 by the orchestrator seat that opened this stage. **The plan
-is written. Nothing has been implemented. No agents are running.**
+Opened 2026-08-27 by the orchestrator seat that started this stage; updated the
+same day by the seat that finished it. **The plan is written, reviewed and
+executed. No agents are running.** The process defects below are kept because
+they are worth not repeating, not because they are still live.
 
 ## How the previous orchestrator wasted the owner's time — read this first
 
@@ -18,9 +20,10 @@ session out of patience, not because the work was finished.
    burned a full round doing so. Check your inputs exist before spawning.
 3. **I sent the planner a summary of the review instead of the review file** —
    I wrote `plan-review.md` to disk *after* dispatching the revision. Revision 2
-   was therefore written against my paraphrase. It appears to have landed the
-   fixes anyway, but nobody has confirmed the fixes match the reviewer's actual
-   text rather than my summary of it. **That is the open risk in this stage.**
+   was therefore written against my paraphrase. **This risk is now closed**: a
+   fresh reviewer seat, pointed at `plan-review.md` itself, found revision 2
+   carries details present only in the reviewer's own text, so the fixes
+   answered the review rather than my summary of it.
 4. **I did investigation work that belonged to subagents** — three toolbar
    designs, the ticket writing, long grep sessions. The owner had to correct me
    twice: "you're not the planner or executor, you orchestrate them."
@@ -38,24 +41,35 @@ unless a claims-register row names a command you can re-run.
 | Stage | State |
 | --- | --- |
 | Brief | written — `brief.md` |
-| Plan | **revision 2** written — `plan.md` |
-| Plan review | done — `plan-review.md`, verdict **revise** (4 blocking, 3 material, 3 minor) |
-| Re-review | **not done** — this is the open loop |
-| Execution | not started |
+| Plan | **revision 3** — `plan.md` |
+| Plan review | done — `plan-review.md` (revise), `plan-review-2.md` (**approve**, no conditions) |
+| Re-review | done — the paraphrase risk below is **closed** |
+| Execution | **done** — 6 slices + re-pin, all gates green |
+| Pre-merge review | **not started — this is the open loop** |
 
-Read `decision-log.md` for how each gate was judged. The last logged row is
-where you are.
+**Stage status 2026-08-27: the plan gate and execution are both closed.** The
+re-review confirmed revision 2 answered the reviewer's real text, not the
+orchestrator's paraphrase — that risk is resolved, not outstanding. Revision 3
+then fixed one new blocking finding (F11, the `auto-fit` grid) and Gate B passed
+with no standing conditions.
+
+Execution landed six fork commits (`b2dc451c1`..`97a326e49`) plus the main-repo
+re-pin (`ae1cb0f`). All five fork gates exit 0, re-run by hand rather than taken
+on the executor's word; `pnpm verify` exits 0 **under the project's Node 22**
+(system Node 20 fails 14 files on `node:sqlite` — environmental, not a defect).
+F11 containment, the C23 rule survival and the F1 pane-independence were each
+measured live in the running sim and hold.
+
+**One thing did not meet acceptance and was not papered over:** slice 4's
+set-bonus share shipped without ever being observed — no row carried a
+`setContext` across five sweeps. Filed as ticket **315**; the code is not known
+to be wrong, it is known to be unverified.
 
 ## Your next step
 
-Re-review **the changed findings only** (F1-F7) against `plan-review.md` — the
-file, not a summary. The register rows the reviewer already validated do not
-need re-litigating. Pay particular attention to whether the revision addressed
-the reviewer's actual findings or my paraphrase of them (defect 3 above); the
-planner's own summary of what it changed is in the decision log and should not
-be taken on trust.
-
-Then Gate B, then execution.
+Run `pre-merge-review` on `feat/upgrades-dedup-wowsims` → `docs/reviews/`.
+**Do not merge and do not raise merging** — the owner asks for that separately,
+after they have seen the review.
 
 ## The owner does not want the plan relayed
 
@@ -64,9 +78,7 @@ the owner. Point them at the file. They will ask if they want detail.
 
 ## Read these, in this order
 
-1. `plan.md` — the instructions. Its Claims register (C1-C26) marks which rows
-   are verified and which are hypothesis. **C17, C18 and C26 are self-declared
-   unverified**; step 0 exists to confirm them before anything depends on them.
+1. `plan.md` — revision 3, now **executed**. Its Claims register runs C1-C28.
 2. `.scratch/carry-forward/notes/upgrades-ui-original-asks.md` — **the acceptance
    rubric.** The owner's eleven original UI complaints, verbatim. The finished
    work is judged against this, not against the plan.
