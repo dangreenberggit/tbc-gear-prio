@@ -105,20 +105,15 @@ that check because the gates are green. **Green gates will not catch it.**
 - **Out of scope**: ticket 311's Go panic, ticket 310 (its bug is currently
   unreproducible — the viewport tooling is inert), 305, 126.
 
-## Process defects from this stage — do not repeat them
+## Environment constraint
 
-1. **The planner returned its plan as a chat message and the orchestrator
-   transcribed it to disk.** That was an orchestrator instruction and it was
-   wrong: the planner has Write and should produce the artifact itself. If you
-   spawn a planning seat, tell it to write the file and return the path. The
-   reviewer has been asked to flag any transcription damage in `plan.md`.
-2. **Nested spawning is disabled in this session** — `Task is disabled for this
-   session, in subagents as well as here`. A planner cannot have its own
-   investigators. Investigations must be dispatched by whoever is at the top.
-   Budget for that round trip.
-3. **Two of the three design agents reported reading files while making zero tool
-   calls.** Their citations happened to be right, but treat any `file:line` in
-   the tickets as unverified unless a register row names a command.
+**Nested spawning is disabled in this session** — `Task is disabled for this
+session, in subagents as well as here`. A planner cannot have its own
+investigators; whoever is at the top dispatches them and feeds the answers back.
+Budget for that round trip. This is an environment constraint, not a mistake.
+
+The orchestration failures and the unverified-`file:line` caution are at the top
+of this document; they are not repeated here.
 
 ## When the review lands
 
