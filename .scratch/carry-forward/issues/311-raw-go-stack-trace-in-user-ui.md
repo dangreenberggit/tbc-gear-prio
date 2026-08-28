@@ -47,6 +47,79 @@ candidate-swap path, not a cosmetic one. It is not known whether:
 **Beast-tamer's Shoulders** is the one observed trigger. Whether other items hit
 it is unknown — only one occurrence was seen in one run.
 
+## Investigated 2026-08-27 — diagnosed, and the pool is not at fault
+
+**A. The immediate cause.** `vendor/tbc-new-fork/sim/hunter/item_sets.go:243-248`:
+
+```go
+// Beast-tamer's Shoulders
+core.NewItemEffect(30892, func(agent core.Agent) {
+	hunter := agent.(HunterAgent).GetHunter()
+	...
+})
+```
+
+An unchecked assertion (no comma-ok). `applyItemEffects`
+(`sim/core/item_effects.go:75-95`) walks the equipped items and fires any
+registered effect **keyed purely by item id, with no class check**. So the
+hunter-flavored effect runs for a paladin and panics.
+
+**B. Blast radius — one item, by construction.** Method:
+`grep -rEn "agent\.\([A-Za-z]+Agent\)"` across every class package's
+`items.go` / `item_sets.go` / `item_librams.go` / `item_trinkets.go` under
+`sim/{hunter,mage,warrior,warlock,priest,rogue,druid,shaman}` (no `deathknight`
+package exists in this TBC fork). **Every match is the unguarded form; none use
+comma-ok.** Each `NewItemEffect` item id and each `ApplySetBonus` set id was
+resolved and intersected against `data/universes/ret-p{3,4,5}.json`:
+
+- **Per-item effects: 1 hit** — `30892`, present in all three ret pool phases.
+- **Set-bonus effects: 0 hits.**
+
+Exact for effects registered today. **Not future-proof:** any new off-class
+on-equip effect on an item the pool's armor-type ceiling admits (cloth/leather/
+mail — 250 of 467 ret-p3 rows) reproduces this same panic class. Other specs'
+pools were not checked; the same mechanism applies to them.
+
+**C. Ownership — the backend's bug, and NOT a duplicate of 228 or 301.**
+Item 30892 is `itemType: 3` = Mail (`proto/common.proto:330-335`).
+`canEquipItem` (`ui/core/proto_utils/utils.ts:1116`) uses
+`playerClass.armorTypes[0] >= item.armorType` — the real WoW proficiency rule,
+where a plate class may legally wear mail. `data/equip-eligibility.json`
+confirms `RetributionPaladin` eligibility includes `30892`.
+
+**The pool is correct — a paladin genuinely can equip this item.** So 228
+(weapon proficiency) does not apply, this being armor; and 301 (eligibility
+mirror drift) does not apply, the eligibility data being right. The defect is
+that the Go sim's item-effect registration is **class-flavored but not
+class-gated**: a legally-equippable item panics instead of no-op'ing or
+returning a structured error. **We sent a valid request; the sim's dispatch has
+no class check.**
+
+**D. Presentation path.** The raw error is captured at
+`packages/core/src/rank.ts:1002` (`err.message`, carrying the panic and stack
+trace verbatim) and wrapped at `:1327-1333`. **The CLI/HTML report already fixes
+this** — `firstLineOf` (`packages/core/src/rank-report.ts:154`) applied at
+`:560`. **The Upgrades tab never got that fix:** `upgrades_tab.tsx:1783` renders
+`{s.detail}` untrimmed. JSX auto-escapes, so this is a content defect, not an
+injection risk.
+
+### What this changes about the ticket
+
+The ticket guessed the panic might be the larger half. It is — but not in the
+way it guessed. There is no correctness bug on our side: the swap path is
+behaving correctly and the pool is right. The two halves are now cleanly
+separable and can be fixed independently:
+
+1. **Presentation (ours, small).** Apply the existing `firstLineOf` treatment at
+   `upgrades_tab.tsx:1783`. The helper already exists and is already used on the
+   report path — this is borrowing, not inventing.
+2. **The panic (the fork's, larger).** Class-flavored item effects need a guard.
+   Whether that is comma-ok returning a no-op, a structured "not applicable"
+   signal, or a class gate at registration is a **design decision, not made
+   here**. Note this is upstream-shaped code: a change there arms the ported-file
+   cycle in `docs/agents/known-traps.md` if it touches a ported file, and is a
+   candidate to send upstream rather than carry as fork drift.
+
 ## What would close this ticket
 
 - How many pool entries trigger this, not just the one observed. Run wider and
