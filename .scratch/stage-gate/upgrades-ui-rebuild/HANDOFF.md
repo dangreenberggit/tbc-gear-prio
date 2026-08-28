@@ -8,12 +8,23 @@ is written and under adversarial review. Nothing has been implemented.**
 | Stage | State |
 | --- | --- |
 | Brief | written — `brief.md` |
-| Plan | written — `plan.md` (round 2, four investigations folded in) |
-| Plan review | **in flight** — a `gate-reviewer` (Opus) is running against `plan.md` |
+| Plan | round 2 written — `plan.md`; **round 3 in flight** (see below) |
+| Plan review | done — `plan-review.md`, verdict **revise** |
 | Execution | not started |
 
 Read `decision-log.md` for how each gate was judged. The last logged row is
 where you are.
+
+**In flight right now:** the planner is writing plan round 3 directly to
+`plan.md`, addressing the review's four blocking and three material findings.
+When it lands, **re-review the changed findings only** (F1-F7) rather than
+re-running the whole review — the register rows the reviewer already validated
+do not need re-litigating.
+
+## The owner does not want the plan relayed
+
+Standing instruction, 2026-08-27: do not summarise plans or agent output back to
+the owner. Point them at the file. They will ask if they want detail.
 
 ## Read these, in this order
 
