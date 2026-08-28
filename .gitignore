@@ -64,6 +64,7 @@ vendor/
 !.scratch/stage-gate/phase-item-pool/
 !.scratch/stage-gate/upgrades-ui-quality/
 !.scratch/stage-gate/tickets-306-308/
+!.scratch/stage-gate/upgrades-ui-rebuild/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
