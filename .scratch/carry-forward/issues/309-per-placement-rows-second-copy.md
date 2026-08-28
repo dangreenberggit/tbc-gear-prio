@@ -6,6 +6,10 @@ Blocked by: none
 
 # Per-placement rows, so a second copy of a non-unique item can be ranked
 
+Intended shape, per the owner: a **user-facing option**, default off — see
+"If this ships as a user-facing option" below. The switch is cheap; everything
+in front of it is not, and the switch cannot be built without it.
+
 Ticket 308 asked for a second copy of a non-unique ring or trinket to become a
 rankable candidate. It was closed as **deliberately out of scope** because the
 change it names is not the change it needs. This ticket carries what an actual
@@ -94,6 +98,58 @@ count of pool entries a player actually holds two copies of is smaller still.
 It is context for prioritisation, not an argument — the out-of-scope decision in
 308 rests on the structural facts above and stands without this number.
 
+## If this ships as a user-facing option
+
+The owner's framing (2026-08-27): second-copy rows would be **a toggle the user
+turns on**, not unconditional behaviour. Recording the shape now so the option
+is specified whenever this is picked up.
+
+**The toggle is strictly additive to everything above — it does not replace any
+of it.** The per-placement row model has to exist and label its rows honestly
+*before* a switch can turn them on. There is no version of this that skips the
+redesign: the cheap version is flipping the guard, and that is the silent wrong
+answer this ticket exists to avoid. Read the toggle as *redesign + switch*, and
+size it accordingly.
+
+**The switch itself is the cheap part, and cheaper than it looks.** Measured
+2026-08-27:
+
+- The tab already has a `ToggleControl` class (`upgrades_tab.tsx`) and **three
+  existing checkboxes** built on it — `bisPrune`, `setPotential`, `bisOnly`. A
+  fourth copies an established pattern rather than inventing one, and
+  `ToggleControl` already handles the preference-preservation problem its own
+  comment describes (forcing a control off must not destroy the user's setting).
+- `ViewOptions` (`packages/core/src/view.ts`) already carries exactly this kind
+  of flag — `hideOwned`, `pinBis`, `withSetPotential` — and `applyView` is a
+  **pure post-sim filter**: zero `await`, zero `SimRunner` references in the
+  whole file. A view-level toggle therefore costs no re-sim and no recording.
+
+**But the toggle probably cannot live entirely in `ViewOptions`,** and this is
+the design question to settle first. `applyView` filters rows that already
+exist; second-copy rows do not exist unless the ranker produced them. Two
+options, and they differ in cost:
+
+1. **Rank-time flag.** The ranker emits second-copy placements only when the
+   option is on. Cheapest row model — nothing downstream sees a placement
+   concept when the toggle is off — but flipping the switch requires a re-rank,
+   and `content-hash.ts` deliberately excludes `ViewOptions` from the hash
+   (see its comment at line 106), so this flag is **not** a `ViewOptions` field
+   and must not be added as one.
+2. **Always rank, filter at view.** The ranker always emits per-placement rows;
+   the toggle hides them. Flipping is instant and needs no re-sim, but every
+   downstream consumer of `RankedItem` sees the placement concept permanently,
+   whether or not any user enables it — which is the larger of the two blast
+   radii against those 51 references.
+
+Choose deliberately; do not let the choice fall out of whichever file gets
+edited first.
+
+**A default and a reason to switch it off are part of the work.** A toggle
+nobody would ever turn off should not be a toggle. The honest default is
+**off**, because the rows are only meaningful to a player who actually holds two
+copies of a non-unique item, and an always-on second-copy row is noise for
+everyone else.
+
 ## Acceptance
 
 - [ ] A row model that can express per-placement candidacy, agreed before it is
@@ -105,5 +161,11 @@ It is context for prioritisation, not an argument — the out-of-scope decision 
       fixture.
 - [ ] The comments at both `rank.ts` guards and at the `rowsTable` filter are
       updated to match whatever is built.
+- [ ] **Toggle:** rank-time-flag vs always-rank-filter-at-view decided on the
+      record, with the blast radius each implies stated.
+- [ ] **Toggle:** if rank-time, the flag is kept out of `ViewOptions` so
+      `content-hash.ts`'s exclusion stays honest.
+- [ ] **Toggle:** default is off, with the reason a user would turn it on
+      written where the control lives.
 
 ## Comments
