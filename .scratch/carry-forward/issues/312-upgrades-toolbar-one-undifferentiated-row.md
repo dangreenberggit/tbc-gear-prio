@@ -166,6 +166,47 @@ elsewhere on the site."* Available vocabulary, all already in the fork:
 - `badge rounded-pill` — already borrowed twice in this file
   (`_upgrades_tab.scss:313-316`, `566-572`), if a count belongs on a control.
 
+## Owner review of the post-run row, 2026-08-27 (screenshot)
+
+Two further defects, on the **second** row (`.upgrades-view-controls`), which
+this ticket had until now treated only as a constraint to preserve. Owner's
+words: *"this is unreadable btw, theres no clear organization separating
+label/elements such as checkbox and description"* and *"theres a missing toggle
+for 'Bis-only' — which should be less wordy and should be able to be applied
+post-siming to the results."*
+
+**1. Checkbox and label do not read as a unit.** The row renders, left to right:
+
+```
+☐ Include set-bonus potential   ☐ Only items on a Phase 3 (2.2 - T6) BIS list   Content [All ▾]
+```
+
+Two bare checkboxes each followed by a sentence, then a bare label followed by a
+select — with the same gap between *every* element. Nothing groups a control
+with its own text, so a reader cannot tell where one control ends and the next
+begins. Strings: `view.set_potential`, `view.only_bis`, `view.raid_filter` in
+`assets/locales/en/translation.json:879-881`.
+
+**2. The BiS-only toggle is not missing — it is unrecognisable.** Verified:
+`bisOnlyControl` exists, is gated post-run on `state.kind === 'done'`
+(`upgrades_tab.tsx:1049`), and does filter the rendered results (independently
+click-tested in an earlier pass: 272 rows → 10, all BiS, and back). Its string is
+`"only_bis": "Only items on a {{phase}} BIS list"`.
+
+So **the capability the owner asked for already ships.** The defect is that it
+does not read as a post-run filter: the wording is a sentence rather than a
+control name, and it sits in a row visually indistinguishable from the run
+options above it. The owner looked at the running page and concluded the feature
+was absent — that is the bug, and no amount of correct filtering behaviour fixes
+it.
+
+**Implication for a proposal.** This row can no longer be treated as
+"preserve the height reservation and otherwise leave alone". It needs the same
+grouping treatment as the run row, plus a clear signal that it acts on
+**results already computed**, not on the next run. Shorter labels
+("Set potential", "BiS only") with any qualifier demoted to secondary text, and
+a visual separation from the run controls, are the minimum.
+
 ## Constraints a proposal must respect
 
 - The tab lives in the gitignored fork checkout `vendor/tbc-new-fork`, and its
