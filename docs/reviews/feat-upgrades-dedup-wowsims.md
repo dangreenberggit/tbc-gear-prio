@@ -275,3 +275,155 @@ because fixing 308 would make it matter.
 | T5  | Standards+Spec | wontfix     | Commit-message nits only; the messages pass the seven rules                                                                                                                     |
 | T6  | Standards+Spec | wontfix     | 304 carries the `pnpm sync:wowsims` precondition; 307 repeats it                                                                                                                |
 | T7  | Standards+Spec | wontfix     | Same dirty file as A2                                                                                                                                                           |
+
+---
+
+# Round 4 — Upgrades tab UI rebuild (tickets 312, 313, 314, 311 presentation half)
+
+Reviewed range: `607fb79bd3478437d7ebf21feba376a0bf02f234..cdb0a5c4c917cfee3ed36c3cd2d344c84238a493`
+
+**Dispatch note.** Four reviewers, fresh context, review lane (Claude Code: Opus)
+— adversarial and domain per `.agents/reviews/`, plus the `code-review` skill's
+Standards and Spec axes. `codex exec` is not on `PATH` in this environment, so
+option 2 of the skill's dispatch order was used; that is the harness's review
+lane, not a downgrade.
+
+As in round 3, every reviewer was given **both** diffs: the main-repo range above
+and the fork UI diff `342f6a74..97a326e49` (six commits, four files) in the
+gitignored clone `vendor/tbc-new-fork`. A reviewer given only the main-repo range
+would read tickets and plans and miss every line of the product change — the
+main-repo half of this round is almost entirely process artifacts, one `rank.ts`
+change, the fork pin, and a regenerated artifact.
+
+## Adversarial
+
+Opus, fresh context, both diffs. The axis ran all five fork gates itself
+(PowerShell, per the documented fnm shim trap) and confirmed both trees clean
+before reporting. It attacked the four claims the stage flagged as load-bearing,
+and **all four held**:
+
+- **C23, the silent SCSS break, was genuinely fixed rather than gated past.**
+  `.upgrades-toolbar` was _deleted_, not orphaned — `grep -c upgrades-toolbar`
+  returns zero code matches, the only three occurrences being comments that
+  explain the removal. Each moved row re-declares its own layout on its own
+  class (`_upgrades_tab.scss:100-107`, `:47-70`).
+- **Grid containment is sound**, and correctly applied to _both_ children —
+  spanning only the new child would have stranded the sub-tab area in one
+  `auto-fit` track.
+- **The anti-jitter reservation is two rules, not one** (`align-self: start` plus
+  `grid-template-rows: max-content auto`); either alone leaves a path to the
+  ~50px jump.
+- **The export tracks displayed order**, computed in `resultsContent` rather than
+  the pane-shared `rowsTable` — which is exactly why the last-pane-overwrite bug
+  ticket 314 names cannot recur.
+
+Two findings, neither a live failure:
+
+- **A1 (medium)** — `settingsChangedEmitter` is declared and wired to three
+  pickers but never emitted; the four emit sites in `ui/` are all in
+  `bulk_tab.tsx`. Independently re-verified by the orchestrator. Latent, because
+  the pickers write through their own DOM listener, but invisible to every gate.
+  Ticket 317.
+- **A2 (low)** — `readIterations`/`readCandidateCap` still guard against `NaN`
+  and `Infinity`, which `NumberPicker.getInputValue()` can no longer produce.
+  Harmless, but the doc comments above both still describe parsing a string
+  input, which is now false and will mislead the next reader. Ticket 319.
+
+The axis noted it verified the CSS by reasoning about the cascade, not by
+driving the page — the orchestrator measured those two claims live instead (see
+the decision log), so that gap is closed by a different lane rather than left
+open.
+
+## Domain
+
+Opus, fresh context. Four clean answers, one major narrowing, one minor
+unverified label question. No contradictions of `docs/stage0-findings.md` or
+`docs/verification-log.md`.
+
+- **D1 — the corrected set-bonus understanding is right.** `rankableSetPotential`
+  (`engine/view.ts:169-172`) returns the **raw** `prospectiveBonusDps` and
+  `sortKeyFor` adds that same raw value to `deltaDps`; `SET_POTENTIAL_WEIGHTS`
+  lives on the report path and is never referenced by the fork's view. So the
+  displayed figure reconciles as a player reads it. The ticket correction made
+  in `b8c0d8e` was correct, and the earlier "discounted" claim was wrong.
+- **D2 (major, but it sharpens ticket 315 rather than opposing it)** — the "one
+  added piece" explanation covers only the 3/5 sweep. At 2/5 only the 4pc row is
+  built, needing two pieces, so `unmeasurable-at-this-worn-count` is not the
+  cause there. The likelier cause is that `selectPackage` requires each
+  completing piece to be in-pool _and individually simmed_. Folded into ticket
+  315 as the first thing to instrument. Domain's verdict: the feature is **not**
+  structurally dead, but far narrower than the toggle's presence implies.
+- **D3 (minor, unverified)** — any source carrying a `zone` lands under the
+  "Raid zones" group label, so a normal dungeon or world boss would read as a
+  raid zone. Heroics are correctly bucketed elsewhere. Whether this actually
+  occurs depends on source data the axis did not enumerate. Ticket 320.
+- **D4, D5, D6 — clean.** Phase strings are TBC-accurate and, importantly, are
+  read from the page's own phase picker rather than hardcoded. The TMB payload
+  matches the report path's shape byte-for-byte and is ids-only, which is
+  domain-correct since a candidate is an item the player does not own. The
+  `rank.ts` comment's TBC claim about non-unique rings and trinkets is accurate.
+
+## Standards + Spec
+
+Both axes on Opus, fresh context, via the `code-review` skill.
+
+**Standards — no hard violations.** Every added comment was checked against
+`AGENTS.md`'s comment policy and is _why_, not _what_: ticket references,
+rejected alternatives, measured numbers with the width they were measured at.
+No JSON-derived types. The ported-file trap does not apply (these files are not
+under `upgrades/engine/`), and the re-pin's steps 3-5 were done. Four judgement
+calls, all already commented with their constraint in the code: three duplicated
+helpers that mirror `packages/core` functions the fork cannot import; two
+`querySelector` reaches into picker internals; a hand-rolled re-spelling of
+`ToggleControl.visible`; and one import-order deviation in a file whose import
+block was already unsorted and which no tooling enforces.
+
+**Spec — the structural half of the brief is delivered.** The settings card,
+picker rows and the view controls' move above the sub-tabs all borrow real site
+idioms rather than inventing a second one, which was the owner's overriding
+complaint (ask 10, ask 3). Three gaps:
+
+- **A1** — the export includes owned shortlist rows. Ticket 316.
+- **A2** — the five-digit iterations clip measurement the plan demanded _before_
+  deleting the `8ch` rule has no recorded result; the deletion was justified by
+  an argument about `NumberPicker.updateSize` instead. The executor reports
+  measuring it (`scrollWidth` 281 == `clientWidth` 281 with "30000" typed), so
+  the measurement was taken but not written where the plan said to record it.
+- **A3** — slice 4 shipped past its own written stop-and-report condition. See
+  the summary below.
+
+Ask 9 has no disposition anywhere in this stage. Ticket 318.
+
+## Summary
+
+Four axes, eight findings, **no correctness bug that produces a wrong number and
+no test theatre**. The three claims most likely to fail silently — the C23 SCSS
+re-homing, the F11 grid containment, and the export's displayed order — were
+each attacked directly and each held, verified twice over: statically by the
+adversarial axis, and live in the running page by the orchestrator.
+
+The one finding that deserves the owner's eye is not a bug. **Slice 4 shipped
+past a stop-and-report condition the plan itself wrote** ("State (c) must be
+observed, not assumed... do not ship (c) unobserved"). The executor could not
+observe any of the four set-bonus display states, said so plainly rather than
+claiming success, and filed ticket 315. Filing rather than stopping was the
+better engineering call — the cause is upstream in byte-gated engine code this
+stage was forbidden to touch — but it means **ticket 313 is committed unmet, not
+met**, and `setBonusLine`'s four branches have never once executed. That is the
+honest state, and 313 should not be closed on this branch.
+
+## Disposition
+
+| ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                             |
+| ----- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1    | Adversarial | defer       | `.scratch/carry-forward/issues/317-upgrades-settings-emitter-never-emitted.md` — emitter wired to three pickers, never emitted; latent, no gate sees it                                   |
+| A2    | Adversarial | defer       | `.scratch/carry-forward/issues/319-stale-guard-comments-in-read-helpers.md` — unreachable `NaN`/`Infinity` guards, and doc comments that describe parsing a string input                  |
+| D1    | Domain      | wontfix     | No defect — confirms the ticket correction made in `b8c0d8e` was right                                                                                                                    |
+| D2    | Domain      | fixed       | Narrowing folded into ticket 315: `unmeasurable-at-this-worn-count` cannot explain the 2/5 sweep; instrument `setIdsWithCandidates.size` and `selection.ok` for setId 629 first           |
+| D3    | Domain      | defer       | `.scratch/carry-forward/issues/320-raid-zones-group-may-cover-non-raid-zones.md` — unverified; depends on source data nobody enumerated                                                   |
+| D4-D6 | Domain      | wontfix     | No defect found on phase framing, TMB format, or the `rank.ts` TBC claim                                                                                                                  |
+| S1-S4 | Standards   | wontfix     | Four judgement calls, each already carrying a code comment naming the constraint that forced it; no documented standard breached                                                          |
+| Sp1   | Spec        | defer       | `.scratch/carry-forward/issues/316-tmb-export-includes-owned-shortlist-rows.md` — owner's call: "displayed rows" honestly covers greyed owned rows, and no ticket ruled on them           |
+| Sp2   | Spec        | wontfix     | Clip measurement was taken (executor reports `scrollWidth` 281 == `clientWidth` 281) but recorded in a session scratchpad rather than the plan's acceptance box; the rule deletion stands |
+| Sp3   | Spec        | defer       | Ticket 315 — 313 committed unmet; see Summary. Do not close 313 on this branch                                                                                                            |
+| Sp4   | Spec        | defer       | `.scratch/carry-forward/issues/318-ask-9-pool-source-line-is-dev-noise.md` — the eleven asks outrank the plan, so an ask cannot be narrowed away by omission                              |

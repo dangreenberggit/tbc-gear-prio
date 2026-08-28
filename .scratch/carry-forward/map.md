@@ -144,3 +144,9 @@ file contention, worker prompt. This file stays the chronological log.
 - 306 oxfmt red at baseline in the fork (194 files) — from 304, gate honesty
 - 307 upgrades tab: two promised borrows never landed + SCSS comment drift — pre-merge feat/upgrades-dedup-wowsims round 3 (S1, S2, S3, T1-T4)
 - 308 second copy of a non-unique ring/trinket is unrankable — pre-merge round 3 (D1); coupled to the owned-row drop in 304
+- 315 set-bonus share shipped but never observed (no row carried a `setContext` in five sweeps) — stage-gate upgrades-ui-rebuild, slice 4; domain review round 4 (D2) adds the cheapest narrowing: instrument `setIdsWithCandidates.size` and `selection.ok` for setId 629, since the completing pieces must themselves be in-pool and individually simmed
+- 316 TMB export includes owned shortlist rows — pre-merge round 4 (Spec A1); owner's call, since "displayed rows" honestly covers greyed owned rows and no ticket ruled on them
+- 317 upgrades `settingsChangedEmitter` wired to three pickers but never emitted — pre-merge round 4 (Adversarial A1); latent, no gate can see it
+- 318 ask 9 (pool-source line is dev noise) has no disposition anywhere — pre-merge round 4 (Spec); the eleven asks outrank the plan, so an ask cannot be narrowed away by omission
+- 319 read-helper guards and comments describe a string input that no longer exists — pre-merge round 4 (Adversarial A2); behaviour correct, the comments are the defect
+- 320 "Raid zones" filter group may list non-raid zones — pre-merge round 4 (Domain D3); hypothesis, needs the distinct `zone` values enumerated
