@@ -150,3 +150,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 318 ask 9 (pool-source line is dev noise) has no disposition anywhere — pre-merge round 4 (Spec); the eleven asks outrank the plan, so an ask cannot be narrowed away by omission
 - 319 read-helper guards and comments describe a string input that no longer exists — pre-merge round 4 (Adversarial A2); behaviour correct, the comments are the defect
 - 320 "Raid zones" filter group may list non-raid zones — pre-merge round 4 (Domain D3); hypothesis, needs the distinct `zone` values enumerated
+- 321 Upgrades tab is desktop-only: at 375px the settings card and Run button land BELOW the results (y 1383/1255 vs 1025) and sticky drops to `static` — owner report 2026-08-27, measured live; none of the four classes the rebuild added appears in any of the file's 8 breakpoint blocks
+- 322 no gate renders the page, so layout regressions are invisible — owner ask 2026-08-27; all five fork gates are static and the repo has no browser-driving dep; prefer measured DOM assertions over screenshots, which were inert in this environment

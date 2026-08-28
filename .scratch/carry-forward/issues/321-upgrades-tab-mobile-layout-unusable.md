@@ -1,0 +1,61 @@
+Status: open
+Type: bug
+Origin: owner report, 2026-08-27 ("mobile view bad"); measured in the running page the same day
+Blocks: none
+Blocked by: none
+
+# Upgrades tab is built desktop-only; run controls land below the results on mobile
+
+Measured live in the Ret Paladin sim at 375x812 (`resize_window` mobile preset,
+page reloaded so load-time gates re-ran).
+
+## What is wrong
+
+At 375px `.tab-pane-content-container` stacks to `flex-direction: column`, so the
+right-hand settings panel falls **below** the left panel. Absolute offsets
+measured on the page:
+
+| Element | Absolute y |
+| --- | --- |
+| view controls (`.upgrades-view-controls-host`) | 966 |
+| results / sub-tabs (`.upgrades-tab-tabs`) | 1025 |
+| **settings card** (`.upgrades-settings-container`) | **1383** |
+| **Run button** (ours, `.upgrades-run-button`) | **1255** |
+
+So the controls you use *before* a run sit under the output *of* the run — about
+1.5 viewport heights down. On desktop the card is a right-hand panel beside the
+results and this never appears.
+
+Compounding it: the card's `position` computes to **`static`** at this width —
+sticky is dropped below the breakpoint, so nothing pins the controls while you
+scroll the results.
+
+## Why it shipped
+
+Verified by grep over `_upgrades_tab.scss`: the file has **8** breakpoint blocks,
+but **none of the four classes this stage introduced** — `.upgrades-settings-container`,
+`.upgrades-view-controls-host`, `.upgrades-run-controls`, `.upgrades-view-controls` —
+appears inside any of them. The rebuild was written for desktop and never given
+a narrow-width pass. The stage's own acceptance checks all pinned desktop widths
+on purpose (a narrow check would have passed vacuously against the F11 grid
+containment, which is inert below `lg`), so nothing looked at this.
+
+## Not in scope of this ticket
+
+Touch-target sizes. Most controls measure 40px tall, marginally under the usual
+44px guidance, but that is the site's own Bootstrap sizing and is not something
+this stage changed. The one genuine outlier (40x27 `btn-sm` Run) is upstream
+header chrome, not the rebuilt card.
+
+## What is not wrong
+
+No horizontal overflow: `document.documentElement.scrollWidth` equals the 375px
+viewport and zero elements extend past it. This is a stacking-order and
+affordance problem, not a blowout.
+
+## The decision needed
+
+Owner's call on the shape. Options, cheapest first: order the settings card
+above the results at narrow widths; make it a collapsible panel; or keep the
+run affordance pinned while the results scroll. Each is a different answer to
+"what should a phone user see first".
