@@ -1,4 +1,9 @@
-Status: open
+Status: closed
+Resolved: b03749871c7e46f5c6522625852c5ff76bbc6252 (2026-08-29) — two near-boundary
+assertions (10.001 → 10.001, 9.999 → 0) added to the 331 describe block in
+packages/core/test/view.test.ts; mutation check confirms floor→15 fails the
+just-above and floor→5 would fail the just-below, so the value is pinned from
+both sides. pnpm verify green.
 Type: test-coverage
 Origin: round-6 pre-merge review (adversarial axis), 2026-08-29; feat/upgrades-dedup-wowsims
 Blocks: none
