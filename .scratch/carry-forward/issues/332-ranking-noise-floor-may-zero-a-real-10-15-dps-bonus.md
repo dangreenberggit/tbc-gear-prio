@@ -1,4 +1,21 @@
-Status: open
+Status: closed
+Resolved: fork 4a76e06 + repo 7c10366 (core+tests) + 5bce509 (re-pin), 2026-08-29.
+The flat SET_BONUS_NOISE_FLOOR_DPS = 10 is replaced by a per-spec derivation
+setBonusNoiseFloorDps(cutoff) = √2 × cutoff.absDps (≈4.81 ret / ≈5.09 feral),
+reusing the existing total CUTOFF_BY_SPEC so all 11 specs get a value. Both the
+ranking gate (rankableSetPotential, view.ts) and the fork-tab display gate obtain
+the floor from the SAME frozen per-spec Cutoff carried on the Ranking — the
+display gate threads it from the done-narrowing point (renderSubTabs) as a
+parameter, never a live picker lookup and never a state field the mid-run
+skeleton lacks — so the 331 "layers can never disagree" invariant survives in
+per-spec form (adversarial plan review caught and blocked two would-be crashes en
+route: a stale-spec divergence and a skeleton null-deref, both fixed pre-code).
+Ported drift cycle completed for cutoff.ts + view.ts (engine-port-drift green,
+comment-only twin differences); 333's near-boundary tests updated to the per-spec
+boundary (expressed as Math.SQRT2 × absDps so a derivation mutation reds a test);
+ranking-identity demonstration shows 0 of 13 committed prospectiveBonusDps values
+change tier; effects diff stamp-only; pnpm verify green. Stage-gate artifacts:
+.scratch/stage-gate/ticket-332-per-spec-ranking-floor/.
 Type: enhancement
 Origin: round-6 pre-merge review (domain axis), 2026-08-29; feat/upgrades-dedup-wowsims
 Blocks: none
