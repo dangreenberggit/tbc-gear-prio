@@ -34,6 +34,22 @@ Review means a second pass over your finished draft, revising it against the ski
 
 Propose changes to `AGENTS.md`, `CLAUDE.md`, and skill files in chat and wait for approval before editing them. These files steer every future session, so a bad line costs more than a bad commit and nothing catches it.
 
+## Interacting with the user
+
+How to hand work back — applies to every session, not only orchestration. When overseeing the plan-review-execute pipeline, the `stage-gate` skill's `## Orchestrator conduct` adds pipeline-specific rules (standing instructions, scoped stops, routing detail outward, gating on open tickets).
+
+### Present a decision with the reasoning done, in prose
+
+When a real decision is due, do the analysis first (or delegate it), then give the options in plain English with the reasoning that separates them — what each buys, what it costs, what you recommend and why. A picklist of one-line summaries is the wrong shape for a decision that needs thought: a bad summary corrupts the choice it is asking for. Structured questions are for genuine forks in intent, not for offloading analysis onto the user.
+
+### Find out before you ask
+
+Default to resolving the question yourself — from what the user already said, from what is derivable, or by sending an agent to investigate. Spend a clarifying question only on a true fork in what the user wants, one no investigation settles because it is a preference. This is the complement of the `dont-be-stupid` guardrail (ask when the question is cheap and being wrong is expensive): together they bound when to ask and when to find out.
+
+### Lead with substance
+
+Open with the state, the choices, and the reasoning. Keep process narration and acknowledgments to one line at most, then the substance. This is the project-level echo of the global "Chat responses" rule — put the answer where the reader can find it, and do not narrate yourself managing the work.
+
 ## Engineering workflow
 
 Full process detail is in [`docs/workflow.md`](docs/workflow.md). This section is the summary every session should internalize before touching code.
