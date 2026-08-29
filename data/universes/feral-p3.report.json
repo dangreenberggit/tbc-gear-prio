@@ -19,9 +19,9 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3066,
-  "excludedNoSource": 1316,
-  "universeTotal": 366,
+  "d7EligibleTotal": 3028,
+  "excludedNoSource": 1288,
+  "universeTotal": 364,
   "listOnlyMembership": 35,
   "perSlot": {
     "back": 31,
@@ -36,29 +36,29 @@
     "shoulder": 18,
     "trinket": 20,
     "waist": 27,
-    "weapon": 58,
+    "weapon": 56,
     "wrist": 26
   },
   "sourceRecordAdds": {
-    "atlasloot": 254,
+    "atlasloot": 251,
     "curated": 3,
-    "db": 1632,
+    "db": 1622,
     "two-hop": 15,
     "wowhead": 27
   },
   "membershipByOrigin": {
     "curated": 4,
-    "itemHasOrigin:atlasloot": 65,
+    "itemHasOrigin:atlasloot": 64,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 300,
+    "itemHasOrigin:db": 298,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 19,
     "listOnly": 35,
     "repFactionMatch": 26,
-    "zoneMatch": 301
+    "zoneMatch": 299
   },
   "exclusivePrimaryOrigin": {
-    "db": 300,
+    "db": 298,
     "wowhead-only": 19,
     "atlasloot-only": 29,
     "other": 3,
@@ -68,13 +68,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 366,
+    "total": 364,
     "casterOnlyReject": 173,
     "epFloorReject": 0,
     "combinedReject": 173,
-    "combinedKeep": 193,
-    "casterRejectPct": 47.3,
-    "combinedRejectPct": 47.3,
+    "combinedKeep": 191,
+    "casterRejectPct": 47.5,
+    "combinedRejectPct": 47.5,
     "applied": false
   },
   "wowheadListIds": 115,
@@ -525,5 +525,19 @@
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
     }
-  ]
+  ],
+  "bisTagProvenance": {
+    "requestedPhase": 3,
+    "tagsFromPhase": 3,
+    "degraded": false,
+    "curatedSets": [
+      "p3_6p",
+      "p3_9p"
+    ]
+  },
+  "excludedIds": {
+    "total": 0,
+    "reason": "",
+    "curatedSetCollisions": []
+  }
 }

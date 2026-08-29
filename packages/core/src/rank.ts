@@ -94,6 +94,7 @@ import {
 } from "./plausibility.js";
 import type { WornUnrankableItem } from "./dead-slots.js";
 import { getItem } from "./items.js";
+import { HandType } from "./proto/common_pb.js";
 import { classifySpec, matchesRequestedSpec, treeName } from "./spec.js";
 import { SIM_ORDER, type SimItemSpec } from "./slots.js";
 import type {
@@ -557,6 +558,15 @@ function defaultSeedsFor(iterations: number): number[] {
 const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
   ret: "ret/p2.raid-sim-skeleton",
   feral: "feral/p2.raid-sim-skeleton",
+  balance: "balance/p2.raid-sim-skeleton",
+  hunter: "hunter/p2.raid-sim-skeleton",
+  mage: "mage/p2.raid-sim-skeleton",
+  shadow: "shadow/p2.raid-sim-skeleton",
+  rogue: "rogue/p2.raid-sim-skeleton",
+  ele: "ele/p2.raid-sim-skeleton",
+  enh: "enh/p2.raid-sim-skeleton",
+  warlock: "warlock/p2.raid-sim-skeleton",
+  warrior: "warrior/p2.raid-sim-skeleton",
 };
 
 function presetIdFor(spec: SpecId): string {
@@ -707,6 +717,19 @@ export async function rankUpgrades(
   const equippedIds = new Set(
     equipment.map((s) => s.id).filter((id): id is number => !!id)
   );
+  /**
+   * Whether the worn main hand leaves the off hand usable at all.
+   *
+   * A two-hander occupies both hands, so no off-hand candidate is legal
+   * beside it. An *empty* main hand counts as usable: nothing blocks the off
+   * hand, and a character with no weapon at all should still see off-hand
+   * rows rather than silently losing the slot.
+   */
+  const mainHandIsOneHanded = ((): boolean => {
+    const wornMainHandId = equipment[SIM_ORDER.indexOf("mainhand")]?.id;
+    if (!wornMainHandId) return true;
+    return getItem(wornMainHandId)?.handType !== HandType.HandTypeTwoHand;
+  })();
   const eligible = filterPoolByPhase(deps.pool ?? [], input.maxPhase).filter(
     (e) => !isKaelTempLegendary(e.itemId)
   );
@@ -717,7 +740,8 @@ export async function rankUpgrades(
     eligible,
     equipment,
     deps.epWeights,
-    (itemId) => getItem(itemId)?.stats ?? []
+    (itemId) => getItem(itemId)?.stats ?? [],
+    input.spec
   );
 
   // Read once and shared with the sim cache below, so the version a result is
@@ -871,11 +895,29 @@ export async function rankUpgrades(
      */
     async function runCandidate(entry: PoolEntry): Promise<void> {
       const owned = equippedIds.has(entry.itemId);
-      const slotNames = simSlotsForPoolSlot(entry.slot);
+      const slotNames = simSlotsForPoolSlot(
+        entry.slot,
+        input.spec,
+        entry.itemId
+      );
       let best: BestSwap | null = null;
 
       for (let s = 0; s < slotNames.length; s++) {
         const slotName = slotNames[s]!;
+        // A one-hander is only a legal off-hand candidate if the weapon
+        // already in the main hand is itself one-handed. `simSlotsForPoolSlot`
+        // filters the *candidate's* hand type and knows nothing about what is
+        // worn, so without this the ranker sims a one-hander into an empty off
+        // hand while a two-hander stays in the main hand — a pairing the game
+        // cannot equip, priced as an upgrade.
+        //
+        // Skipping is the minimal correct semantics. The alternative, letting
+        // the off-hand pick displace the worn two-hander, prices a two-item
+        // swap under a one-item row: the delta would silently include losing
+        // the two-hander, which is not what the row claims. A player holding a
+        // two-hander who wants to dual-wield gets that answer from the
+        // main-hand rows, which are ranked normally.
+        if (slotName === "offhand" && !mainHandIsOneHanded) continue;
         const slotIndex = SIM_ORDER.indexOf(slotName);
         // `continue` here would drop the candidate from the ranking silently —
         // the item just never appears, with no error and no substitution row.
@@ -896,6 +938,20 @@ export async function rankUpgrades(
         // outcome for a worn item, which is what every unpaired slot already
         // does. Written against the equipment array rather than special-cased
         // to fingers so trinkets and any later paired slot inherit it.
+        //
+        // Wearing a second copy of a *non-unique* ring or trinket is legal in
+        // TBC, and this guard blocks that row. Ticket 308 decided it is
+        // deliberately out of scope, because relaxing the guard here does not
+        // produce the missing row. This loop emits one row per *item*, not per
+        // placement: it keeps only the best swap across slots, so an unguarded
+        // second placement would not appear alongside the worn item's identity
+        // swap — it would win the comparison and overwrite it, turning "you
+        // already wear this" into "wear a second one" with nothing in the row
+        // saying so. Producing it honestly needs a per-placement row concept
+        // through the engine output, the view, and the UI. The item data is
+        // already there when someone builds it: every item entry carries
+        // `unique`, currently read only by the gem solver. Ticket 309 holds
+        // the redesign map.
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
         if (wornAt >= 0 && wornAt !== slotIndex) continue;
         let swapped: SimItemSpec[];
@@ -958,8 +1014,18 @@ export async function rankUpgrades(
             stdev: candObs.stdev,
             request: candReq,
             slotIndex,
-            hitDriven: isHitDriven(statDelta, caps.hit, { deltaDps }),
-            hitRegression: hitRegression(statDelta, caps.hit, { deltaDps }),
+            hitDriven: isHitDriven(
+              statDelta,
+              caps.hit,
+              { deltaDps },
+              input.spec
+            ),
+            hitRegression: hitRegression(
+              statDelta,
+              caps.hit,
+              { deltaDps },
+              input.spec
+            ),
             repairSwaps,
             candidateGems: swapped[slotIndex]?.gems ?? [],
           };
@@ -1451,7 +1517,11 @@ async function buildSetBonuses(
 
   const wornCounts = setCounts(equipment);
   const slotIndexForPoolEntry = (entry: PoolEntry): number | undefined => {
-    for (const slotName of simSlotsForPoolSlot(entry.slot)) {
+    for (const slotName of simSlotsForPoolSlot(
+      entry.slot,
+      input.spec,
+      entry.itemId
+    )) {
       const idx = SIM_ORDER.indexOf(slotName);
       if (idx >= 0) return idx;
     }

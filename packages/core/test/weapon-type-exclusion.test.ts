@@ -99,14 +99,46 @@ describe("weapon-type exclusions are covered for every supported spec", () => {
     expect(specsInManifest).toEqual(expect.arrayContaining(specsWithUniverses));
   });
 
-  it("gives every manifest spec a non-empty exclusion set", () => {
+  /**
+   * The manifest entry must exist and be well formed. It may legitimately be
+   * *empty*: a warrior can equip every WeaponType in the enum, so the
+   * complement of what the class can hold is the empty set, and the generator
+   * emitting `[]` is the correct answer rather than a missing entry.
+   *
+   * This assertion previously required every set to be non-empty, which held
+   * only while ret and feral were the sole specs. That is a fact about those
+   * two classes, not an invariant — the coverage guard above is what catches a
+   * spec the generator forgot, and it does so by absence of the key rather
+   * than by emptiness of the value.
+   */
+  it("gives every manifest spec a well-formed exclusion set", () => {
     for (const [spec, types] of Object.entries(exclusions)) {
       expect(
         Array.isArray(types),
         `${spec} exclusion set is not an array`
       ).toBe(true);
-      expect(types.length, `${spec} excludes nothing`).toBeGreaterThan(0);
+      for (const t of types) {
+        expect(
+          Number.isInteger(t),
+          `${spec} exclusion set holds a non-integer weapon type`
+        ).toBe(true);
+      }
+      expect(
+        new Set(types).size,
+        `${spec} exclusion set repeats a weapon type`
+      ).toBe(types.length);
     }
+  });
+
+  it("leaves the exclusion set empty only for a class that equips everything", () => {
+    // Warrior is the one such class in TBC. Pinning it by name keeps the
+    // empty set from becoming a silent default for a spec whose profile was
+    // filled in wrongly.
+    const empty = Object.entries(exclusions)
+      .filter(([, types]) => types.length === 0)
+      .map(([spec]) => spec)
+      .sort();
+    expect(empty).toEqual(["warrior"]);
   });
 
   it("derives the same spec from the filename as the payload declares", () => {

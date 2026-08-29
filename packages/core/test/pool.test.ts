@@ -455,7 +455,12 @@ describe("data/universes/ret-p2.json", () => {
     // 247 -> 240: ticket 171 (user ruling, exclusion by design) drops every
     // stub-only item — 7 in ret-p2's phase-1/2 slice: 28590, 28592, 28774,
     // 28823, 30008, 30063, 30619. See data/sim-implemented-effects.json.
-    expect(entries.length).toBe(240);
+    // 240 -> 288: ret's pool stopped filtering by armor class when equip
+    // legality moved to the fork's own canEquipItem. A paladin can wear cloth,
+    // and the SME gate ruled the old omission an unexplained outlier rather
+    // than policy (every other spec, warrior included, already admitted it).
+    // +48 cloth rows at p2. The 2H-only weapon rule survives as a named policy.
+    expect(entries.length).toBe(288);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

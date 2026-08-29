@@ -473,19 +473,45 @@ export function wowsimsItemIdsJson(
  * the mirror drifted once and failed *silently*, suppressing the staleness
  * warning rather than erroring (carry-forward 102).
  *
- * The suffix on a variant label (`p2_6p`, `p2_9p`) is not part of the phase, so
- * only the leading `pN` is read. That suffix is a hit percentage rather than a
- * piece count — see carry-forward 88.
+ * The suffix on a variant label (`p2_6p`, `p2_9p`) is not part of the phase.
+ * That suffix is a hit percentage rather than a piece count — see
+ * carry-forward 88.
+ *
+ * The phase token is not always the *leading* one: warlock's `destro_t4` and
+ * hunter's `p1_bm_dw_9p` put a build or weapon-layout prefix in front of it,
+ * so every underscore-separated token is tried and the first that names a
+ * phase wins.
+ *
+ * Warlock is the one spec whose upstream sets are named by raid **tier**
+ * rather than phase, which is why `t4`-`swp` appear here. Their mapping is
+ * measured rather than assumed: the median item level of each warlock set
+ * lands on its phase counterpart in a phase-named spec's ladder (warlock
+ * preraid/t4/t5/t6/za/swp = 110/115/128/146/146/154; balance
+ * preraid/p1/p2/p3/p4/p5 = 110/115/128/143/141/154). `t6` and `za` tie
+ * because `za` *is* the t6 set with two Zul'Aman pieces swapped in.
  */
 const CURATED_SET_PHASE: Record<string, number> = {
   preraid: 1,
+  // Mage spells its pre-raid set `preBisArcane`, lowercased to `prebis`.
+  prebis: 1,
   p1: 1,
   p2: 2,
   p3: 3,
+  p4: 4,
+  p5: 5,
+  t4: 1,
+  t5: 2,
+  t6: 3,
+  za: 4,
+  swp: 5,
 };
 
 export function curatedSetPhase(label: string): number | null {
-  return CURATED_SET_PHASE[label.split("_", 1)[0] ?? ""] ?? null;
+  for (const token of label.split("_")) {
+    const phase = CURATED_SET_PHASE[token];
+    if (phase !== undefined) return phase;
+  }
+  return null;
 }
 
 /**

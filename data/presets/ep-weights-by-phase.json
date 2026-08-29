@@ -9,5 +9,54 @@
   "feral": {
     "fallback": "data/presets/feral/p1.ep-weights.json",
     "byPhase": {}
+  },
+  "balance": {
+    "fallback": "data/presets/balance/fallback.ep-weights.json",
+    "byPhase": {
+      "1": "data/presets/balance/p1.ep-weights.json",
+      "2": "data/presets/balance/p2.ep-weights.json",
+      "3": "data/presets/balance/p3.ep-weights.json",
+      "4": "data/presets/balance/p4.ep-weights.json"
+    }
+  },
+  "hunter": {
+    "fallback": "data/presets/hunter/fallback.ep-weights.json",
+    "byPhase": {}
+  },
+  "mage": {
+    "fallback": "data/presets/mage/fallback.ep-weights.json",
+    "byPhase": {
+      "2": "data/presets/mage/p2.ep-weights.json"
+    }
+  },
+  "shadow": {
+    "fallback": "data/presets/shadow/fallback.ep-weights.json",
+    "byPhase": {
+      "3": "data/presets/shadow/p3.ep-weights.json"
+    }
+  },
+  "rogue": {
+    "fallback": "data/presets/rogue/fallback.ep-weights.json",
+    "byPhase": {}
+  },
+  "ele": {
+    "fallback": "data/presets/ele/fallback.ep-weights.json",
+    "byPhase": {}
+  },
+  "enh": {
+    "fallback": "data/presets/enh/fallback.ep-weights.json",
+    "byPhase": {
+      "3": "data/presets/enh/p3.ep-weights.json"
+    }
+  },
+  "warlock": {
+    "fallback": "data/presets/warlock/fallback.ep-weights.json",
+    "byPhase": {}
+  },
+  "warrior": {
+    "fallback": "data/presets/warrior/fallback.ep-weights.json",
+    "byPhase": {
+      "2": "data/presets/warrior/p2.ep-weights.json"
+    }
   }
 }

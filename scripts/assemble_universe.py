@@ -18,6 +18,7 @@ Exit 0 ok, 2 missing inputs.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
@@ -26,6 +27,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "vendor/wowsims/db.json"
+EQUIP_ELIGIBILITY = ROOT / "data/equip-eligibility.json"
 PHASE_RAIDS = ROOT / "data/phase_raids.json"
 ATLASLOOT = ROOT / "data/atlasloot_sources.json"
 FACTION_IDS = ROOT / "data/faction_ids.json"
@@ -49,6 +51,24 @@ EP_WEIGHTS_BY_PHASE = ROOT / "data/presets/ep-weights-by-phase.json"
 
 def load_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@functools.lru_cache(maxsize=1)
+def load_db() -> dict:
+    """The pinned item DB, parsed once per process.
+
+    Four call sites read it and it is ~3 MB, so parsing it per call cost about
+    0.25s of every invocation and this script runs 44 times in a full sweep.
+
+    Returns a **shared** structure: callers read it and must not mutate it.
+    That is why this is a separate function rather than a cache on `load_json`,
+    which serves sixteen different files and whose callers have no reason to
+    expect a shared object.
+    """
+    db = load_json(DB)
+    assert isinstance(db, dict)
+    return db
+
 
 # Must match the row in data/phase_raids.json and AtlasLoot's WorldBossesBC
 # alias — outdoor bosses have no zoneId anywhere in db.json, so this string is
@@ -93,21 +113,43 @@ ITEM_TYPE_SLOT = {
     14: "ranged",
 }
 
-ARMOR_CLOTH = 1
-ARMOR_LEATHER = 2
-ARMOR_MAIL = 3
-ARMOR_PLATE = 4
-WEAPON_AXE = 1
-WEAPON_DAGGER = 2
-WEAPON_FIST = 3
+# Armor classes, weapon types and hand types used to be enumerated here so this
+# script could re-implement the fork's equip rules. It no longer does -- the
+# fork answers that question directly (see `_equip_eligibility`) -- so only the
+# codes something still names survive. Add one back only for a *policy* rule,
+# never to re-derive equip legality.
+WEAPON_OFFHAND = 5
 WEAPON_POLEARM = 6
 WEAPON_SHIELD = 7
-WEAPON_STAFF = 8
-WEAPON_SWORD = 9
+# proto HandType: 1 MainHand, 2 OneHand, 3 OffHand, 4 TwoHand. Only the
+# two-hand code is named, and only a *policy* rule reads it.
 HAND_TYPE_TWO_HAND = 4
-RANGED_IDOL = 6
-RANGED_LIBRAM = 7
 MIN_QUALITY = 3
+
+# Quality floor for the db-phase membership route only (plan amendment 1).
+# The general MIN_QUALITY above admits rares; this route admits items that
+# carry a `phase` but no `sources` at all -- badge, PvP and vendor gear, which
+# are epic -- and at rare quality the same unsourced set is overwhelmingly
+# quest and normal-dungeon leftovers.
+#
+# The figures below are **post-`eligible_d7` and ret-scoped**, not db-wide: they
+# count only what one spec's own equip rules already admit, which is the set
+# this floor actually filters. A naive db-wide count of the same predicate
+# gives 4,807 / 1,726 and is not the number to reason about. Re-run either with:
+#
+#     python -c "import sys,json;sys.path.insert(0,'scripts');\
+#     import assemble_universe as A;\
+#     db=json.load(open('vendor/wowsims/db.json'));p=A.SPEC_PROFILES['ret'];\
+#     u=[i for i in db['items'] if A.eligible_d7(i,p) and not i.get('sources') \
+#     and int(i.get('phase') or 99)<=3];\
+#     print(len(u), sum(1 for i in u if int(i.get('quality') or 0)>=4))"
+#
+# That prints `1213 594` at the current pin: 1,213 unsourced eligible items at
+# phase <= 3, 594 of them epic. The 619 this floor drops are asserted rather
+# than sampled to be leftovers, so a 10-item sample of what it EXCLUDES went to
+# the SME gate, which accepted the floor (finding F9) after seeing that the
+# sample was Classic-era gear -- Serathil at ilvl 61, Deathmist Bracers at 65.
+DB_PHASE_MIN_QUALITY = 4
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
 # the pool despite being real, well-known TBC drops/quest rewards. Every one
@@ -179,10 +221,288 @@ FERAL_TIER_PIECE_IDS = frozenset(
     }
 )
 
+# Balance tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Malorne Regalia (setId 639, 5 pieces), T5 Nordrassil Regalia (setId 643, 5 pieces), T6 Thunderheart Regalia (setId 677, 8 pieces)
+BALANCE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Malorne Regalia
+        29091,
+        29092,
+        29093,
+        29094,
+        29095,
+        # T5 Nordrassil Regalia
+        30231,
+        30232,
+        30233,
+        30234,
+        30235,
+        # T6 Thunderheart Regalia
+        31035,
+        31040,
+        31043,
+        31046,
+        31049,
+        34446,
+        34555,
+        34572,
+    }
+)
+
+# Hunter tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Demon Stalker Armor (setId 651, 5 pieces), T5 Rift Stalker Armor (setId 652, 5 pieces), T6 Gronnstalker's Armor (setId 669, 8 pieces)
+HUNTER_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Demon Stalker Armor
+        29081,
+        29082,
+        29083,
+        29084,
+        29085,
+        # T5 Rift Stalker Armor
+        30139,
+        30140,
+        30141,
+        30142,
+        30143,
+        # T6 Gronnstalker's Armor
+        31001,
+        31003,
+        31004,
+        31005,
+        31006,
+        34443,
+        34549,
+        34570,
+    }
+)
+
+# Mage tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Aldor Regalia (setId 648, 5 pieces), T5 Tirisfal Regalia (setId 649, 5 pieces), T6 Tempest Regalia (setId 671, 8 pieces)
+MAGE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Aldor Regalia
+        29076,
+        29077,
+        29078,
+        29079,
+        29080,
+        # T5 Tirisfal Regalia
+        30196,
+        30205,
+        30206,
+        30207,
+        30210,
+        # T6 Tempest Regalia
+        31055,
+        31056,
+        31057,
+        31058,
+        31059,
+        34447,
+        34557,
+        34574,
+    }
+)
+
+# Shadow tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Incarnate Regalia (setId 664, 5 pieces), T5 Avatar Regalia (setId 666, 5 pieces), T6 Absolution Regalia (setId 674, 8 pieces)
+SHADOW_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Incarnate Regalia
+        29056,
+        29057,
+        29058,
+        29059,
+        29060,
+        # T5 Avatar Regalia
+        30159,
+        30160,
+        30161,
+        30162,
+        30163,
+        # T6 Absolution Regalia
+        31061,
+        31064,
+        31065,
+        31067,
+        31070,
+        34434,
+        34528,
+        34563,
+    }
+)
+
+# Rogue tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Netherblade (setId 621, 5 pieces), T5 Deathmantle (setId 622, 5 pieces), T6 Slayer's Armor (setId 668, 8 pieces)
+ROGUE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Netherblade
+        29044,
+        29045,
+        29046,
+        29047,
+        29048,
+        # T5 Deathmantle
+        30144,
+        30145,
+        30146,
+        30148,
+        30149,
+        # T6 Slayer's Armor
+        31026,
+        31027,
+        31028,
+        31029,
+        31030,
+        34448,
+        34558,
+        34575,
+    }
+)
+
+# Ele tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Cyclone Regalia (setId 632, 5 pieces), T5 Cataclysm Regalia (setId 635, 5 pieces), T6 Skyshatter Regalia (setId 684, 8 pieces)
+ELE_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Cyclone Regalia
+        29033,
+        29034,
+        29035,
+        29036,
+        29037,
+        # T5 Cataclysm Regalia
+        30169,
+        30170,
+        30171,
+        30172,
+        30173,
+        # T6 Skyshatter Regalia
+        31008,
+        31014,
+        31017,
+        31020,
+        31023,
+        34437,
+        34542,
+        34566,
+    }
+)
+
+# Enh tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Cyclone Harness (setId 633, 5 pieces), T5 Cataclysm Harness (setId 636, 5 pieces), T6 Skyshatter Harness (setId 682, 8 pieces)
+ENH_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Cyclone Harness
+        29038,
+        29039,
+        29040,
+        29042,
+        29043,
+        # T5 Cataclysm Harness
+        30185,
+        30189,
+        30190,
+        30192,
+        30194,
+        # T6 Skyshatter Harness
+        31011,
+        31015,
+        31018,
+        31021,
+        31024,
+        34439,
+        34545,
+        34567,
+    }
+)
+
+# Warlock tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Voidheart Raiment (setId 645, 5 pieces), T5 Corruptor Raiment (setId 646, 5 pieces), T6 Malefic Raiment (setId 670, 8 pieces)
+WARLOCK_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Voidheart Raiment
+        28963,
+        28964,
+        28966,
+        28967,
+        28968,
+        # T5 Corruptor Raiment
+        30211,
+        30212,
+        30213,
+        30214,
+        30215,
+        # T6 Malefic Raiment
+        31050,
+        31051,
+        31052,
+        31053,
+        31054,
+        34436,
+        34541,
+        34564,
+    }
+)
+
+# Warrior tier, by db.json `setId` rather than name: several tier
+# set names collide across classes and expansions (three Classic
+# sets match "Slayer", a dozen match "Regalia"), and setId is unique.
+# T4 Warbringer Battlegear (setId 655, 5 pieces), T5 Destroyer Battlegear (setId 657, 5 pieces), T6 Onslaught Battlegear (setId 672, 8 pieces)
+WARRIOR_TIER_PIECE_IDS = frozenset(
+    {
+        # T4 Warbringer Battlegear
+        29019,
+        29020,
+        29021,
+        29022,
+        29023,
+        # T5 Destroyer Battlegear
+        30118,
+        30119,
+        30120,
+        30121,
+        30122,
+        # T6 Onslaught Battlegear
+        30969,
+        30972,
+        30975,
+        30977,
+        30979,
+        34441,
+        34546,
+        34569,
+    }
+)
+
+
 # common.proto Class enum. These are wowsims ids and are NOT WCL's class ids:
 # WCL numbers Druid 2 and Warrior 11, which is the reverse reading of the same
 # two numbers. Anything crossing between the two needs an explicit map.
+CLASS_WARRIOR = 1
 CLASS_PALADIN = 2
+CLASS_HUNTER = 3
+CLASS_ROGUE = 4
+CLASS_PRIEST = 5
+CLASS_SHAMAN = 7
+CLASS_MAGE = 8
+CLASS_WARLOCK = 9
 CLASS_DRUID = 11
 
 
@@ -202,16 +522,17 @@ class SpecProfile:
         *,
         ep_weights: Path,
         gear_sets: list[Path],
-        wowhead_dir: Path,
+        wowhead_dir: Path | None,
         two_hop: Path | None,
         sunmote_upgrades: Path | None,
         tier_piece_ids: frozenset[int],
         class_id: int,
-        armor_types: frozenset[int],
-        ranged_type: int,
-        allow_one_hand: bool,
-        excluded_weapon_types: frozenset[int],
+        policy_excluded_weapon_types: frozenset[int] = frozenset(),
+        policy_two_hand_only: bool = False,
+        policy_exclusion_note: str = "",
         ep_weights_by_phase: dict[int, Path] | None = None,
+        db_phase_membership: bool = False,
+        exclude_ids: frozenset[int] = frozenset(),
     ):
         self.spec = spec
         self.ep_weights = ep_weights
@@ -222,15 +543,57 @@ class SpecProfile:
         # that never sets it, like feral, is byte-for-byte unaffected.
         self.ep_weights_by_phase = ep_weights_by_phase or {}
         self.gear_sets = gear_sets
+        # `None` is a deliberate sentinel, not "the directory happens to be
+        # missing". The 9 specs added by plan amendment 1 ship no Wowhead
+        # lists at all, and a profile pointing at an absent path would
+        # silently start reading lists the day a backfill ticket created the
+        # directory. With `None`, activating lists is an edit to this profile
+        # and shows up in a diff.
         self.wowhead_dir = wowhead_dir
         self.two_hop = two_hop
         self.sunmote_upgrades = sunmote_upgrades
         self.tier_piece_ids = tier_piece_ids
         self.class_id = class_id
-        self.armor_types = armor_types
-        self.ranged_type = ranged_type
-        self.allow_one_hand = allow_one_hand
-        self.excluded_weapon_types = excluded_weapon_types
+        # Which item ids this spec can physically equip, per the fork's own
+        # canEquipItem. Armor types, weapon types, one-hand/two-hand rules and
+        # the classAllowlist all fold into this one set, because the fork
+        # already applies every one of them. See `_equip_eligibility()`.
+        self.equip_eligible_ids = EQUIP_ELIGIBLE_BY_FORK_SPEC[
+            SLUG_TO_FORK_SPEC[spec]
+        ]
+        # Weapon types this project excludes that the sim would allow. A
+        # *policy* call, not an equip rule -- the sim is right that the class
+        # can hold the thing, and we are saying it does not belong in an
+        # upgrade pool anyway. Empty for every spec unless a domain gate ruled
+        # otherwise, and never a place to work around a wrong equip answer:
+        # that would put the drift this whole mechanism removes straight back.
+        # Any spec that sets it must also set policy_exclusion_note, which is
+        # published in the universe payload's d7Note.
+        self.policy_excluded_weapon_types = policy_excluded_weapon_types
+        # The same kind of call, on hand type rather than weapon type. A
+        # separate field because weapon type cannot express it: ret-eligible
+        # swords split 48 two-handed against 116 one-handed and off-hand, so
+        # "no one-handers" is not a statement about swords.
+        self.policy_two_hand_only = policy_two_hand_only
+        self.policy_exclusion_note = policy_exclusion_note
+        if (
+            policy_excluded_weapon_types or policy_two_hand_only
+        ) and not policy_exclusion_note:
+            raise ValueError(
+                f"{spec}: a policy exclusion needs a policy_exclusion_note -- "
+                "an unexplained policy exclusion is indistinguishable from a bug"
+            )
+        # Admit eligible db items that carry a `phase` but no parseable
+        # `sources`, in place of the Wowhead-list membership layer the 9 new
+        # specs do not have (plan amendment 1). Off for ret/feral, whose
+        # universes must stay byte-identical.
+        self.db_phase_membership = db_phase_membership
+        # The exclude counterpart to TICKET_157_FORCE_INCLUDE, which had none.
+        # Applied inside eligible_d7, so *every* route respects it rather than
+        # just the db-phase one -- that is what makes it a usable remedy for an
+        # SME "this item does not belong in this spec's pool" ruling, and for
+        # trimming a pool that overruns the runtime budget.
+        self.exclude_ids = exclude_ids
 
 
 def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
@@ -250,6 +613,131 @@ def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
 
 _RET_EP_FALLBACK, _RET_EP_BY_PHASE = _ep_weights_map("ret")
 _FERAL_EP_FALLBACK, _FERAL_EP_BY_PHASE = _ep_weights_map("feral")
+_BALANCE_EP_FALLBACK, _BALANCE_EP_BY_PHASE = _ep_weights_map(
+    "balance"
+)
+_HUNTER_EP_FALLBACK, _HUNTER_EP_BY_PHASE = _ep_weights_map(
+    "hunter"
+)
+_MAGE_EP_FALLBACK, _MAGE_EP_BY_PHASE = _ep_weights_map(
+    "mage"
+)
+_SHADOW_EP_FALLBACK, _SHADOW_EP_BY_PHASE = _ep_weights_map(
+    "shadow"
+)
+_ROGUE_EP_FALLBACK, _ROGUE_EP_BY_PHASE = _ep_weights_map(
+    "rogue"
+)
+_ELE_EP_FALLBACK, _ELE_EP_BY_PHASE = _ep_weights_map(
+    "ele"
+)
+_ENH_EP_FALLBACK, _ENH_EP_BY_PHASE = _ep_weights_map(
+    "enh"
+)
+_WARLOCK_EP_FALLBACK, _WARLOCK_EP_BY_PHASE = _ep_weights_map(
+    "warlock"
+)
+_WARRIOR_EP_FALLBACK, _WARRIOR_EP_BY_PHASE = _ep_weights_map(
+    "warrior"
+)
+
+
+def _arena_gear_ids() -> frozenset[int]:
+    """Rating-gated arena gear, read from the pinned db by set line.
+
+    The SME gate ruled this out of a PvE upgrade pool (step 12, finding F3),
+    on three grounds: it is bought with a currency PvE play does not generate
+    and gated behind a personal and team rating, so a player reading a PvE
+    list cannot act on it the way they can act on a raid drop or a badge
+    purchase; a PvE sim systematically mis-values it, because part of its
+    budget is spent on resilience, which does nothing to a boss; and ret and
+    feral ship 5 and 12 such rows against 104-182 for the new specs, so
+    admitting them would make the nine a different product from the two
+    already reviewed.
+
+    Deliberately the **narrow** cut the gate preferred. Only the four
+    Gladiator season lines are matched -- the rating-gated ones. Honour and
+    badge-adjacent PvP gear is reachable without a rating and stays in, as
+    does anything merely PvP-flavoured by name: a broader net over
+    "Veteran's"/"Vindicator's"/Marshal doubles the count to 1,011 and would
+    sweep in vanilla world drops such as 19822 Zandalar Vindicator's
+    Breastplate, which is Zul'Gurub loot rather than arena gear at all.
+
+    Derived from the pinned db rather than written out as 505 literal ids:
+    a hand-copied list is a second source of truth that drifts the moment the
+    pin moves, and the set line is exactly the property being excluded.
+    """
+    prefixes = (
+        "Gladiator's ",
+        "Merciless Gladiator's ",
+        "Vengeful Gladiator's ",
+        "Brutal Gladiator's ",
+    )
+    db = load_db()
+    return frozenset(
+        int(it["id"])
+        for it in db["items"]
+        if isinstance(it.get("name"), str)
+        and it["name"].startswith(prefixes)
+    )
+
+
+ARENA_GEAR_IDS = _arena_gear_ids()
+
+
+# This repo's spec slugs vs the fork's PlayerSpecs names.
+#
+# Two vocabularies exist because this repo predates the fork, so eleven rows of
+# correspondence are unavoidable. They get exactly ONE hand-written home --
+# here -- and no logic: anything that needs the fork's name for a slug reads
+# this dict rather than deriving it from a slug's spelling.
+#
+# What makes a hand map safe is the gate, not care. check_equip_eligibility.py
+# asserts on every `pnpm verify` that this map is **total** (every SPEC_PROFILES
+# slug appears) and **injective** (no two slugs claim one fork spec), and that
+# every name it uses exists in data/equip-eligibility.json. A rename on either
+# side fails there rather than silently mis-filtering a pool.
+SLUG_TO_FORK_SPEC: dict[str, str] = {
+    "ret": "RetributionPaladin",
+    "feral": "FeralCatDruid",
+    "balance": "BalanceDruid",
+    "hunter": "Hunter",
+    "mage": "Mage",
+    "shadow": "Priest",
+    "rogue": "Rogue",
+    "ele": "ElementalShaman",
+    "enh": "EnhancementShaman",
+    "warlock": "Warlock",
+    "warrior": "DpsWarrior",
+}
+
+
+def _equip_eligibility() -> dict[str, frozenset[int]]:
+    """Per-spec equippable item ids, computed by the fork's own canEquipItem.
+
+    The equip rules used to live here as a Python re-implementation of the
+    fork's `canEquipItem` plus per-spec constants hand-copied from its
+    `capabilities_auto_gen.ts`. That copy drifted and offered a rogue a
+    two-handed sword the sim's own gear picker refuses (ticket 301). The
+    constants were never the whole bug: the per-weapon-type two-hand rule was
+    mis-ported, so borrowing the constants alone would have left the same class
+    of drift in place.
+
+    So the decision is borrowed instead of the data. The fork exporter at
+    ui/core/components/individual_sim_ui/upgrades/tools/export_equip_eligibility.mts
+    runs the real canEquipItem over the fork's own db and writes this file;
+    check_equip_eligibility.py re-runs it at the pin and diffs on every
+    `pnpm verify`, so a fork-side rule change lands as a failed check rather
+    than a wrong pool listing.
+    """
+    raw = load_json(EQUIP_ELIGIBILITY)
+    assert isinstance(raw, dict)
+    specs = raw["specs"]
+    assert isinstance(specs, dict)
+    return {name: frozenset(int(i) for i in ids) for name, ids in specs.items()}
+
+
+EQUIP_ELIGIBLE_BY_FORK_SPEC = _equip_eligibility()
 
 
 SPEC_PROFILES: dict[str, SpecProfile] = {
@@ -279,14 +767,30 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=ROOT / "data/two-hop/ret-sunmote-upgrades.json",
         tier_piece_ids=RET_TIER_PIECE_IDS,
         class_id=CLASS_PALADIN,
-        armor_types=frozenset({ARMOR_LEATHER, ARMOR_MAIL, ARMOR_PLATE}),
-        ranged_type=RANGED_LIBRAM,
-        allow_one_hand=False,
-        # wowsims ui/core/player_classes/paladin.ts static weaponTypes lists
-        # only Axe, Mace, OffHand, Polearm, Shield, Sword as eligible --
-        # Dagger, Fist and Staff are all absent from that list, so all three
-        # are excluded here.
-        excluded_weapon_types=frozenset({WEAPON_DAGGER, WEAPON_FIST, WEAPON_STAFF}),
+        # Retribution is a two-hander spec. The sim is right that a paladin can
+        # hold a one-hander, a shield or an off-hand -- and that is a fact about
+        # the class, while the pool's question is about the spec. Ruled by the
+        # SME gate for this branch; see .scratch/handoffs/sme-rank-judgment-
+        # upgrades-dedup-wowsims-ret-cloth-and-onehand.md.
+        #
+        # Deliberately NOT paired with an armor-class exclusion. The same gate
+        # found that every back-slot item in the db is armorType 1 (cloth), so
+        # a "ret excludes cloth" rule would delete all 36 of ret's cloaks --
+        # its top-ranked entry among them -- which is a data-loss bug wearing a
+        # policy's clothes.
+        policy_two_hand_only=True,
+        policy_excluded_weapon_types=frozenset({WEAPON_OFFHAND, WEAPON_SHIELD}),
+        policy_exclusion_note=(
+            "Retribution is a two-handed spec: Seal of Command and the ret "
+            "talent tree are built around a single slow two-hander, and a "
+            "paladin wielding a one-hander with a shield is playing protection "
+            "or holy. This repo builds no holy or protection universe, so a "
+            "shield like Bulwark of Azzinoth (id 32375) has no list it "
+            "legitimately belongs to. Shields and one-handers are excluded "
+            "because they are not low-ranked ret candidates but correct items "
+            "for a different spec, and their presence in a retribution list "
+            "reads as a build recommendation the tool is not making."
+        ),
     ),
     "feral": SpecProfile(
         "feral",
@@ -314,22 +818,302 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         sunmote_upgrades=None,
         tier_piece_ids=FERAL_TIER_PIECE_IDS,
         class_id=CLASS_DRUID,
-        # Druid is Leather + Cloth, per wowsims
-        # ui/core/player_classes/druid.ts. Not a subset of ret's set either
-        # way: druids take cloth, and never mail or plate.
-        armor_types=frozenset({ARMOR_CLOTH, ARMOR_LEATHER}),
-        ranged_type=RANGED_IDOL,
-        # Dagger, Fist, Mace (1H and 2H), Off-hand and Staff -- so unlike ret,
-        # one-handers are eligible and staves are the signature weapon.
-        # The exclusions are the complement of that list, per wowsims
-        # ui/core/player_classes/druid.ts lines 25-31. WeaponType has no
-        # two-hand members (data/proto/common.proto lines 338-349): a
-        # two-handed sword carries WeaponTypeSword and is told apart by
-        # HandType, so excluding the type covers both hand types at once.
-        allow_one_hand=True,
-        excluded_weapon_types=frozenset(
-            {WEAPON_AXE, WEAPON_POLEARM, WEAPON_SHIELD, WEAPON_SWORD}
+        # Polearms: the sim says a druid can hold one, and it is right. This is
+        # a pool call on top of that, ruled by the SME gate for this branch --
+        # see .scratch/handoffs/sme-rank-judgment-upgrades-dedup-wowsims-feral-
+        # polearms.md. Cheap to delete if TBC itemisation ever changes under
+        # the pin, which is the only thing holding the argument up.
+        policy_excluded_weapon_types=frozenset({WEAPON_POLEARM}),
+        policy_exclusion_note=(
+            "Druids can equip polearms, but TBC never itemised one for them: "
+            "of the 49 items carrying feral attack power, 39 are staves and 10 "
+            "are maces, and no polearm carries any. In cat form the weapon is a "
+            "pure stat stick -- its damage is discarded -- so a polearm with no "
+            "feral attack power is not a low-ranked candidate, it is a "
+            "non-candidate, and nine of the 39 druid-equippable polearms have "
+            "an entirely empty stat line. They are excluded from the pool "
+            "because their presence in a feral weapon list reads as a tool bug "
+            "rather than as a correct last place."
         ),
+    ),
+    "balance": SpecProfile(
+        "balance",
+        # Upstream ships a full preraid-p5 ladder, so every shipped phase's
+        # bisTags come from that phase's own curated set.
+        ep_weights=_BALANCE_EP_FALLBACK,
+        ep_weights_by_phase=_BALANCE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/balance_preraid.gear.json",
+            ROOT / "vendor/wowsims/balance_p1.gear.json",
+            ROOT / "vendor/wowsims/balance_p2.gear.json",
+            ROOT / "vendor/wowsims/balance_p3.gear.json",
+            ROOT / "vendor/wowsims/balance_p4.gear.json",
+            ROOT / "vendor/wowsims/balance_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/balance-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=BALANCE_TIER_PIECE_IDS,
+        class_id=CLASS_DRUID,
+    ),
+    "hunter": SpecProfile(
+        "hunter",
+        # Both builds (bm/sv) and both weapon layouts (2h/dw) are vendored and
+        # union-tagged. Upstream stops at phase_4, so p5 bisTags trace to <=p4.
+        # The EP weights are BM's alone -- see data/presets/hunter/.
+        ep_weights=_HUNTER_EP_FALLBACK,
+        ep_weights_by_phase=_HUNTER_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/hunter_p1_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_2h_3p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_dw_3p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p2_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p3_sv_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_bm_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_2h_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_2h_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_dw_6p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p4_sv_dw_9p.gear.json",
+            ROOT / "vendor/wowsims/hunter_p1_bm_preraid.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/hunter-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=HUNTER_TIER_PIECE_IDS,
+        class_id=CLASS_HUNTER,
+    ),
+    "mage": SpecProfile(
+        "mage",
+        # Every vendored mage set is an ARCANE set -- upstream curates no fire or
+        # frost sets at all -- and the p3 pair differs only by weapon layout.
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3. Mage carries the
+        # most stacked degradations of the nine; all of them go to the SME gate.
+        ep_weights=_MAGE_EP_FALLBACK,
+        ep_weights_by_phase=_MAGE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/mage_prebis.gear.json",
+            ROOT / "vendor/wowsims/mage_p1.gear.json",
+            ROOT / "vendor/wowsims/mage_p2.gear.json",
+            ROOT / "vendor/wowsims/mage_p3_staff.gear.json",
+            ROOT / "vendor/wowsims/mage_p3_sword.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/mage-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=MAGE_TIER_PIECE_IDS,
+        class_id=CLASS_MAGE,
+    ),
+    "shadow": SpecProfile(
+        "shadow",
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
+        ep_weights=_SHADOW_EP_FALLBACK,
+        ep_weights_by_phase=_SHADOW_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/shadow_preraid.gear.json",
+            ROOT / "vendor/wowsims/shadow_p1.gear.json",
+            ROOT / "vendor/wowsims/shadow_p2.gear.json",
+            ROOT / "vendor/wowsims/shadow_p3.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/shadow-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=SHADOW_TIER_PIECE_IDS,
+        class_id=CLASS_PRIEST,
+    ),
+    "rogue": SpecProfile(
+        "rogue",
+        # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
+        ep_weights=_ROGUE_EP_FALLBACK,
+        ep_weights_by_phase=_ROGUE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/rogue_preraid.gear.json",
+            ROOT / "vendor/wowsims/rogue_p1.gear.json",
+            ROOT / "vendor/wowsims/rogue_p2.gear.json",
+            ROOT / "vendor/wowsims/rogue_p3.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/rogue-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ROGUE_TIER_PIECE_IDS,
+        class_id=CLASS_ROGUE,
+    ),
+    "ele": SpecProfile(
+        "ele",
+        # p1 ships an alliance/horde pair; both are vendored and union-tagged.
+        # Elemental and enhancement share shaman TOKEN ids but no piece ids --
+        # Cyclone Regalia against Cyclone Harness, distinct setIds.
+        ep_weights=_ELE_EP_FALLBACK,
+        ep_weights_by_phase=_ELE_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/ele_preraid.gear.json",
+            ROOT / "vendor/wowsims/ele_p1_a.gear.json",
+            ROOT / "vendor/wowsims/ele_p1_h.gear.json",
+            ROOT / "vendor/wowsims/ele_p2.gear.json",
+            ROOT / "vendor/wowsims/ele_p3.gear.json",
+            ROOT / "vendor/wowsims/ele_p4.gear.json",
+            ROOT / "vendor/wowsims/ele_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/ele-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ELE_TIER_PIECE_IDS,
+        class_id=CLASS_SHAMAN,
+    ),
+    "enh": SpecProfile(
+        "enh",
+        # The *.itemswap.json files upstream ships beside these describe a weapon
+        # swap rather than a gear set and are deliberately not vendored.
+        ep_weights=_ENH_EP_FALLBACK,
+        ep_weights_by_phase=_ENH_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/enh_preraid.gear.json",
+            ROOT / "vendor/wowsims/enh_p1.gear.json",
+            ROOT / "vendor/wowsims/enh_p2.gear.json",
+            ROOT / "vendor/wowsims/enh_p3.gear.json",
+            ROOT / "vendor/wowsims/enh_p4.gear.json",
+            ROOT / "vendor/wowsims/enh_p5.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/enh-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=ENH_TIER_PIECE_IDS,
+        class_id=CLASS_SHAMAN,
+    ),
+    "warlock": SpecProfile(
+        "warlock",
+        # Warlock names its sets by RAID TIER, not phase. The mapping applied
+        # here is t4->p1, t5->p2, t6->p3, za->p4, swp->p5, which is TBC raid
+        # release order. data/phase_raids.json is a second in-repo witness for
+        # the last two (Zul'Aman p4, Sunwell p5); the first three are the SME's
+        # to confirm. The destro_fire family is vendored and union-tagged, but
+        # the EP weights are the Affli/Demo/Destro default's alone.
+        ep_weights=_WARLOCK_EP_FALLBACK,
+        ep_weights_by_phase=_WARLOCK_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/warlock_preraid.gear.json",
+            ROOT / "vendor/wowsims/warlock_t4.gear.json",
+            ROOT / "vendor/wowsims/warlock_t5.gear.json",
+            ROOT / "vendor/wowsims/warlock_t6.gear.json",
+            ROOT / "vendor/wowsims/warlock_za.gear.json",
+            ROOT / "vendor/wowsims/warlock_swp.gear.json",
+            ROOT / "vendor/wowsims/warlock_destro_preraid.gear.json",
+            ROOT / "vendor/wowsims/warlock_destro_t4.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/warlock-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=WARLOCK_TIER_PIECE_IDS,
+        class_id=CLASS_WARLOCK,
+    ),
+    "warrior": SpecProfile(
+        "warrior",
+        # Every phase ships as an arms/fury pair; both are vendored and
+        # union-tagged, the way feral's 6p/9p pair is. The EP weights are
+        # Fury's alone, per the fork's own default.
+        ep_weights=_WARRIOR_EP_FALLBACK,
+        ep_weights_by_phase=_WARRIOR_EP_BY_PHASE,
+        gear_sets=[
+            ROOT / "vendor/wowsims/warrior_preraid_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_preraid_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p1_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p1_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p2_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p2_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p3_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p3_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p4_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p4_fury.gear.json",
+            ROOT / "vendor/wowsims/warrior_p5_arms.gear.json",
+            ROOT / "vendor/wowsims/warrior_p5_fury.gear.json",
+        ],
+        # No Wowhead list layer for this spec; membership comes
+        # from db phase instead. `None` is a sentinel, not a
+        # missing directory -- see SpecProfile.
+        wowhead_dir=None,
+        db_phase_membership=True,
+        # SME gate F3: rating-gated arena gear is out of a PvE pool.
+        exclude_ids=ARENA_GEAR_IDS,
+        two_hop=ROOT / "data/two-hop/warrior-tokens.json",
+        # No Sunmote map collected for this spec.
+        sunmote_upgrades=None,
+        tier_piece_ids=WARRIOR_TIER_PIECE_IDS,
+        class_id=CLASS_WARRIOR,
     ),
 }
 
@@ -341,6 +1125,70 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
 EXCLUSIONS_MANIFEST = ROOT / "data/weapon-type-exclusions.json"
 
 
+def _weapon_types_in_db() -> frozenset[int]:
+    """Every weapon type the pinned db actually uses.
+
+    The universe of types has to come from the data rather than from a written
+    list, or the manifest would silently stop covering a type the day one
+    appeared.
+    """
+    db = load_db()
+    return frozenset(
+        int(it["weaponType"]) for it in db["items"] if it.get("weaponType")
+    )
+
+
+def excluded_weapon_types_for(profile: SpecProfile) -> frozenset[int]:
+    """Weapon types this spec cannot use — the complement of what it can.
+
+    Derived, not written down. `profile.equip_eligible_ids` is the fork's own
+    `canEquipItem` answer, so "which weapon types can this spec hold" is a view
+    over it: any type with no equippable item of that type is excluded. The
+    hand-written per-spec exclusion sets this replaced were a second source of
+    truth for a fact the fork already owns, and they disagreed with it for two
+    specs (ret omitted OffHand, feral added Polearm).
+    """
+    db = load_db()
+    usable = {
+        int(it["weaponType"])
+        for it in db["items"]
+        if it.get("weaponType") and int(it["id"]) in profile.equip_eligible_ids
+    }
+    return frozenset(_weapon_types_in_db() - usable) | profile.policy_excluded_weapon_types
+
+
+_D7_NOTE_BASE = "D7 eligibility implemented in assemble_universe.py."
+
+
+def d7_note(profile: SpecProfile) -> str:
+    """The payload's eligibility note, plus any policy overlay this spec carries.
+
+    The base sentence is unchanged, so a spec with no policy exclusion keeps a
+    byte-identical payload. A spec that does carry one publishes the reason
+    here: the exclusion is then visible in the committed artifact rather than
+    living only in the generator.
+
+    Every policy kind must reach this note. The constructor demands a
+    justification for any of them, so a kind the publisher does not know about
+    swallows a mandatory note and the artifact goes out unexplained -- which is
+    what happened when this branched on `policy_excluded_weapon_types` alone
+    and ret's two-hander rule shipped silently. `check_policy_notes.py` pins
+    each kind separately.
+    """
+    scopes: list[str] = []
+    if profile.policy_excluded_weapon_types:
+        types = ", ".join(str(t) for t in sorted(profile.policy_excluded_weapon_types))
+        scopes.append(f"weapon type(s) {types}")
+    if profile.policy_two_hand_only:
+        scopes.append("one-handed weapons")
+    if not scopes:
+        return _D7_NOTE_BASE
+    return (
+        f"{_D7_NOTE_BASE} Policy exclusion beyond the sim's equip rules -- "
+        f"{' and '.join(scopes)}: {profile.policy_exclusion_note}"
+    )
+
+
 def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, list[int]]:
     """Emit every spec's excluded weapon types, not just the one being built.
 
@@ -350,9 +1198,17 @@ def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, lis
     would silently win. packages/core/test/weapon-type-exclusion.test.ts reads
     this file to decide which specs it must cover, so that silent gap would be
     the very coverage hole the manifest exists to close.
+
+    Each spec's set now comes from the fork's equip answer (see
+    `excluded_weapon_types_for`). A spec whose set carries a *policy* exclusion
+    -- one this project imposes that the sim would not -- says so in that
+    spec's universe payload `d7Note`, so the overlay is visible in a committed
+    artifact rather than applied silently. The manifest itself stays a plain
+    spec -> int[] map because packages/core/test/weapon-type-exclusion.test.ts
+    reads every key as a spec.
     """
     manifest = {
-        name: sorted(profile.excluded_weapon_types)
+        name: sorted(excluded_weapon_types_for(profile))
         for name, profile in sorted(SPEC_PROFILES.items())
     }
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -506,16 +1362,57 @@ def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
 # Upstream names its gear sets by the phase they are BiS *for*: `preraid`
 # before Karazhan, `p1` for T4 content, `p2` for T5. Pre-raid is phase 1 --
 # it is the set you take into a phase-1 raid.
-CURATED_SET_PHASE: dict[str, int] = {"preraid": 1, "p1": 1, "p2": 2, "p3": 3}
+CURATED_SET_PHASE: dict[str, int] = {
+    "preraid": 1,
+    # Mage spells its pre-raid set `preBisArcane`, which the vendored name
+    # lowercases to `prebis`. Same claim as `preraid`, different upstream
+    # spelling.
+    "prebis": 1,
+    "p1": 1,
+    "p2": 2,
+    "p3": 3,
+    "p4": 4,
+    "p5": 5,
+    # Warlock is the one spec whose upstream sets are named by raid TIER
+    # rather than by phase, so without these rows every one of its labels
+    # resolves to None, `bis_set_labels_for_max_phase` filters them all out,
+    # and only `preraid` survives -- which is exactly what shipped before this
+    # entry existed: warlock carried the same ten pre-raid items tagged BiS at
+    # p2, p3, p4 AND p5, with its Sunwell set contributing nothing.
+    #
+    # The mapping is not a guess about release order. Median item level of
+    # each warlock set, joined to db.json, against the same measure on
+    # balance's phase-named ladder:
+    #
+    #     warlock  preraid 110  t4 115  t5 128  t6 146  za 146  swp 154
+    #     balance  preraid 110  p1 115  p2 128  p3 143  p4 141  p5 154
+    #
+    # Each tier lands on its phase counterpart. `t6` and `za` are the same
+    # power because `za` IS the t6 set with two Zul'Aman pieces swapped in
+    # (they share 13 of 15 items), which is why za maps to the later phase
+    # without implying it is stronger content.
+    "t4": 1,
+    "t5": 2,
+    "t6": 3,
+    "za": 4,
+    "swp": 5,
+}
 
 
 def curated_set_phase(label: str) -> int | None:
     """The phase a curated set is BiS for, or None if unrecognised.
 
     `feral_p2_6p` / `p2_9p` are the same phase split by tier-bonus count, so
-    the leading `pN` is the phase and the suffix is a variant.
+    the leading `pN` is the phase and the suffix is a variant. The same split
+    reads a build prefix off warlock's `destro_fire_*` family and hunter's
+    `bm`/`sv` sets, so the phase token is not always first -- try each
+    underscore-separated token and take the first that names a phase.
     """
-    return CURATED_SET_PHASE.get(label.split("_", 1)[0])
+    for token in label.split("_"):
+        phase = CURATED_SET_PHASE.get(token)
+        if phase is not None:
+            return phase
+    return None
 
 
 def bis_set_labels_for_max_phase(
@@ -588,49 +1485,41 @@ def wowsims_curated_sets_by_item(profile: SpecProfile) -> dict[int, list[str]]:
     return {iid: sorted(set(names)) for iid, names in by_item.items()}
 
 
-ARMOR_SLOTS = frozenset(
-    {"head", "shoulder", "chest", "wrist", "hands", "waist", "legs", "feet"}
-)
-
-
 def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     """D7 rules from PLAN.md / sub-phase 0 — not generate_pool.ret_equippable().
 
-    Previously `ret_eligible_d7`, whose name was honest: four of these rules
-    are class-specific, so they now come from `profile` rather than from
-    module constants.
+    Two different questions live here, and only one of them is ours:
+
+    - *Can this class physically equip the item?* The fork already answers
+      that, in `canEquipItem`. We look the answer up rather than re-deriving
+      it — see `_equip_eligibility()` for why the re-derivation was deleted.
+    - *Do we want it in an upgrade pool?* Quality floor, Kael's temporary
+      legendaries, per-spec SME exclusions. These are our policy, the fork has
+      no opinion on them, and they stay here.
     """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
-    # A non-empty classAllowlist is a hard equip restriction, so an item that
-    # omits this class cannot be worn by this character at all. db.json carries
-    # the field on 2006 items and nothing read it, which let 8 class-specific
-    # SSC/TK trinkets into both shipping universes.
-    allowlist = it.get("classAllowlist")
-    if allowlist and profile.class_id not in allowlist:
+    # Applied here rather than at any single admission route so that an
+    # excluded id cannot re-enter through a different one.
+    if int(it["id"]) in profile.exclude_ids:
         return False
+    if int(it["id"]) not in profile.equip_eligible_ids:
+        return False
+    weapon_type = it.get("weaponType")
+    if weapon_type and int(weapon_type) in profile.policy_excluded_weapon_types:
+        return False
+    # Scoped to weapons: an off-hand frill or a shield is not a "one-hander"
+    # this rule is refusing on hand type, it is refused as a weapon type above
+    # when a spec excludes it. Armor and trinkets carry no handType at all.
+    if profile.policy_two_hand_only and weapon_type:
+        if it.get("handType") != HAND_TYPE_TWO_HAND:
+            return False
     t = it.get("type")
     if t is None:
         return False
-    slot = ITEM_TYPE_SLOT.get(t)
-    if slot is None:
+    if ITEM_TYPE_SLOT.get(t) is None:
         return False
-    if (it.get("quality") or 0) < MIN_QUALITY:
-        return False
-    if slot in ARMOR_SLOTS:
-        return it.get("armorType") in profile.armor_types
-    if slot == "weapon":
-        if (
-            not profile.allow_one_hand
-            and it.get("handType") != HAND_TYPE_TWO_HAND
-        ):
-            return False
-        if it.get("weaponType") in profile.excluded_weapon_types:
-            return False
-        return True
-    if slot == "ranged":
-        return it.get("rangedWeaponType") == profile.ranged_type
-    return True
+    return (it.get("quality") or 0) >= MIN_QUALITY
 
 
 def item_stats(it: dict) -> list[float]:
@@ -1272,6 +2161,11 @@ def source_rep_factions(source: dict) -> set[int]:
 def wowhead_lists_for_phase(
     max_phase: int, profile: SpecProfile
 ) -> list[tuple[str, dict]]:
+    # `None` means the spec ships no list layer at all (see SpecProfile), which
+    # is different from "the configured directory has no file for this stage" —
+    # the loop below already handles that per stage.
+    if profile.wowhead_dir is None:
+        return []
     stages = WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, [])
     out: list[tuple[str, dict]] = []
     for stage in stages:
@@ -1363,8 +2257,7 @@ def assemble(
         print(f"missing {DB} — run pnpm sync:wowsims:restore", file=sys.stderr)
         sys.exit(2)
 
-    db = load_json(DB)
-    assert isinstance(db, dict)
+    db = load_db()
     phase_raids = load_json(PHASE_RAIDS)
     assert isinstance(phase_raids, dict)
     atlasloot = load_json(ATLASLOOT) if ATLASLOOT.is_file() else {}
@@ -1454,6 +2347,17 @@ def assemble(
     bis_ids = set(curated_sets_by_item)
     bis_sets_at_phase = bis_set_labels_for_max_phase(
         curated_sets_by_item, max_phase
+    )
+    # The phase the surviving tags speak for. `bis_set_labels_for_max_phase`
+    # keeps exactly one phase's labels, so reading it back off the result is
+    # the same answer that function chose rather than a second derivation.
+    bis_tags_phase = next(
+        (
+            curated_set_phase(label)
+            for labels in bis_sets_at_phase.values()
+            for label in labels
+        ),
+        None,
     )
 
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
@@ -1692,6 +2596,39 @@ def assemble(
         curated_unsourced.add(iid)
         ticket_157_included.add(iid)
 
+    # db-phase membership (plan amendment 1). The 9 specs added by that
+    # amendment have no Wowhead lists, so the layer that admits badge, PvP and
+    # vendor gear for ret/feral is missing for them. Those items do carry a
+    # `phase` in db.json -- every one of the 8,257 items does -- they just
+    # carry no `sources`, so map_db_source returns None, add_source drops it,
+    # and they die below as `no_zone_excluded`.
+    #
+    # This admits them on phase alone, with `{"kind": "unknown"}` because that
+    # is the honest claim: we know when the item became available, not where it
+    # came from. Step 8's Assumptions block discloses that partial attribution.
+    #
+    # Placement is load-bearing and deliberate:
+    #   - after the force-include block, so an id can be both;
+    #   - downstream of the machine-locus freeze and the Wowhead loop, both
+    #     inert here (no lists), and it cannot suppress another route's rows;
+    #   - admitted items carry a pair, so they pass the empty-pairs check below
+    #     and still reach the stub_only_ids unimplemented-effects check, which
+    #     admission must not bypass.
+    db_phase_admitted: set[int] = set()
+    if profile.db_phase_membership:
+        for it in db["items"]:
+            iid = int(it["id"])
+            if iid in source_acc:
+                continue
+            if not eligible_d7(it, profile):
+                continue
+            if int(it.get("phase") or 99) > max_phase:
+                continue
+            if int(it.get("quality") or 0) < DB_PHASE_MIN_QUALITY:
+                continue
+            add_source(iid, {"kind": "unknown"}, "db")
+            db_phase_admitted.add(iid)
+
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
     )
@@ -1770,12 +2707,19 @@ def assemble(
         curated = (
             iid in curated_unsourced or iid in curated_list_only
         ) and int(it.get("phase") or 99) <= max_phase
+        # Same `phase <= max_phase` idiom the routes above carry. The admit
+        # block already applied it, but re-applying costs nothing and keeps
+        # every route's guard visible at the disjunction.
+        db_phase = iid in db_phase_admitted and int(
+            it.get("phase") or 99
+        ) <= max_phase
         if (
             not in_phase
             and not in_heroic
             and not in_rep_phase
             and not list_only
             and not curated
+            and not db_phase
         ):
             continue
 
@@ -1790,6 +2734,8 @@ def assemble(
             membership_stats["listOnly"] += 1
         elif curated:
             membership_stats["curated"] += 1
+        elif db_phase:
+            membership_stats["dbPhase"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
@@ -1965,6 +2911,67 @@ def assemble(
         "excludedUnimplementedEffect": sorted(
             excluded_unimplemented, key=lambda e: e["itemId"]
         ),
+        # Per-spec `exclude_ids`, and specifically the ones that collide with
+        # a curated BiS set (SME gate finding A1).
+        #
+        # The exclusion itself is a ruling, not a defect: rating-gated arena
+        # gear is out of a PvE pool. What the review caught is that it was
+        # SILENT -- upstream really does equip 28295 and 32027 in rogue's p1
+        # and p2 sets and 28308 in enhancement's p1, so those universes ship
+        # a curated set with members missing and nothing said which, or why.
+        # A reader diffing membership could not tell a deliberate exclusion
+        # from a pipeline bug.
+        #
+        # `curatedSetCollisions` is the honest half: an excluded id that some
+        # curated set equips, with the sets naming it. `total` is the size of
+        # the exclusion set as configured, so a reader can see the ruling's
+        # scope without this list implying it is the whole of it.
+        # Which phase the BiS tags in this universe actually speak for.
+        #
+        # `bis_set_labels_for_max_phase` scopes the claim to the newest
+        # curated set at or below `max_phase`; where upstream stops short,
+        # that is an earlier phase than the one being ranked, and the tags
+        # then mean "BiS as of the latest set we have" rather than "BiS now".
+        # Ret already shipped that way for p4/p5 and the fork's own
+        # PROVENANCE records it; this makes it a machine-readable field
+        # instead of a fact a reader has to know (plan step 8, review S1).
+        #
+        # `null` means no curated set resolved to a phase at all, so nothing
+        # is tagged.
+        "bisTagProvenance": {
+            "requestedPhase": max_phase,
+            "tagsFromPhase": bis_tags_phase,
+            "degraded": bis_tags_phase is not None
+            and bis_tags_phase < max_phase,
+            "curatedSets": sorted(
+                {label for labels in bis_sets_at_phase.values() for label in labels}
+            ),
+        },
+        "excludedIds": {
+            "total": len(profile.exclude_ids),
+            "reason": (
+                "rating-gated arena gear (Gladiator season lines); SME gate "
+                "finding F3 -- bought with a currency PvE play does not "
+                "generate, rating-gated, and mis-valued by a PvE sim because "
+                "part of its budget is resilience"
+            )
+            if profile.exclude_ids
+            else "",
+            "curatedSetCollisions": [
+                {
+                    "itemId": iid,
+                    "name": (db_by_id.get(iid) or {}).get("name") or "",
+                    "curatedSets": labels,
+                }
+                for iid, labels in sorted(
+                    (
+                        (iid, labels)
+                        for iid, labels in curated_sets_by_item.items()
+                        if iid in profile.exclude_ids
+                    )
+                )
+            ],
+        },
     }
 
     payload = {
@@ -1972,7 +2979,7 @@ def assemble(
         "maxPhase": max_phase,
         "carryoverPolicy": "union",
         "generatedBy": "scripts/assemble_universe.py",
-        "d7Note": "D7 eligibility implemented in assemble_universe.py.",
+        "d7Note": d7_note(profile),
         "epWeights": ep_weights_provenance,
         "entries": entries,
     }

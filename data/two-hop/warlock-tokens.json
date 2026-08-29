@@ -1,0 +1,175 @@
+{
+  "spec": "warlock",
+  "kind": "token-map",
+  "collectedDate": "2026-08-25",
+  "notes": [
+    "Token ids and names come from the AtlasLoot parse (vendor/atlasloot/data-tbc.lua row comments); zone and boss from data/atlasloot_sources.json keyed on the TOKEN id. The TBC tier tokens do not appear in db.json at all, so no classAllowlist or tooltip witnesses their class grouping.",
+    "Set piece ids come from db.json by `setId`, and the piece-to-token pairing is a SLOT JOIN on db.json's `type` field, not a witnessed redemption list. No committed input states which token buys which piece. The join reproduces both committed files (ret 18 entries, feral 15) exactly, which is a consistency check rather than an independent one.",
+    "T4/T5 group: Hero. T6 group: Conqueror. The T6 vocabulary is Conqueror/Vanquisher/Protector and the class triples are RE-CUT, not renamed -- paladin goes Champion->Conqueror but druid goes Defender->Vanquisher. See data/two-hop/feral-tokens.json notes 9-10, which record that 'druid uses the Defender-equivalent' would have been wrong.",
+    "The class triples are witnessed by committed data, not by elimination: each tier piece's `classAllowlist` in vendor/wowsims/db.json names the one class that can wear it (decode against data/proto/common.proto:96-104 -- 3 Hunter, 8 Mage, 9 Warlock, and so on), so grouping the pieces a token buys yields its triple directly. Champion = Paladin/Rogue/Shaman, Defender = Druid/Priest/Warrior, Hero = Hunter/Mage/Warlock at T4 and T5; at T6 the vocabulary changes to Conqueror/Vanquisher/Protector AND the triples are re-cut -- Vanquisher = Rogue/Mage/Druid, Protector = Warrior/Hunter/Shaman, Conqueror = Paladin/Priest/Warlock. Re-derive with: python -c \"import json,glob;from collections import defaultdict;db=json.load(open('vendor/wowsims/db.json'));byid={int(i['id']):i for i in db['items']};t=defaultdict(set);[t[e['tokenName']].add(c) for f in glob.glob('data/two-hop/*-tokens.json') for e in json.load(open(f))['entries'] for c in (byid.get(e['pieceId'],{}).get('classAllowlist') or [])];print({k:sorted(v) for k,v in sorted(t.items())})\". An earlier version of this note called the T4/T5 Hero column unwitnessed; that was wrong -- it was derived by elimination when the allowlist was there all along."
+  ],
+  "entries": [
+    {
+      "pieceId": 28963,
+      "pieceName": "Voidheart Crown",
+      "tokenId": 29759,
+      "tokenName": "Helm of the Fallen Hero",
+      "zone": "Karazhan",
+      "boss": "Prince Malchezaar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 28964,
+      "pieceName": "Voidheart Robe",
+      "tokenId": 29755,
+      "tokenName": "Chestguard of the Fallen Hero",
+      "zone": "Magtheridon's Lair",
+      "boss": "Magtheridon",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 28966,
+      "pieceName": "Voidheart Leggings",
+      "tokenId": 29765,
+      "tokenName": "Leggings of the Fallen Hero",
+      "zone": "Gruul's Lair",
+      "boss": "Gruul the Dragonkiller",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 28967,
+      "pieceName": "Voidheart Mantle",
+      "tokenId": 29762,
+      "tokenName": "Pauldrons of the Fallen Hero",
+      "zone": "Gruul's Lair",
+      "boss": "High King Maulgar",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 28968,
+      "pieceName": "Voidheart Gloves",
+      "tokenId": 29756,
+      "tokenName": "Gloves of the Fallen Hero",
+      "zone": "Karazhan",
+      "boss": "The Curator",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30211,
+      "pieceName": "Gloves of the Corruptor",
+      "tokenId": 30241,
+      "tokenName": "Gloves of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Leotheras the Blind",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30212,
+      "pieceName": "Hood of the Corruptor",
+      "tokenId": 30244,
+      "tokenName": "Helm of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Lady Vashj",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30213,
+      "pieceName": "Leggings of the Corruptor",
+      "tokenId": 30247,
+      "tokenName": "Leggings of the Vanquished Hero",
+      "zone": "Serpentshrine Cavern",
+      "boss": "Fathom-Lord Karathress",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30214,
+      "pieceName": "Robe of the Corruptor",
+      "tokenId": 30238,
+      "tokenName": "Chestguard of the Vanquished Hero",
+      "zone": "Tempest Keep",
+      "boss": "Kael'thas Sunstrider",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 30215,
+      "pieceName": "Mantle of the Corruptor",
+      "tokenId": 30250,
+      "tokenName": "Pauldrons of the Vanquished Hero",
+      "zone": "Tempest Keep",
+      "boss": "Void Reaver",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31050,
+      "pieceName": "Gloves of the Malefic",
+      "tokenId": 31092,
+      "tokenName": "Gloves of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Azgalor",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31051,
+      "pieceName": "Hood of the Malefic",
+      "tokenId": 31097,
+      "tokenName": "Helm of the Forgotten Conqueror",
+      "zone": "Hyjal Summit",
+      "boss": "Archimonde",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31052,
+      "pieceName": "Robe of the Malefic",
+      "tokenId": 31089,
+      "tokenName": "Chestguard of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Illidan Stormrage",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31053,
+      "pieceName": "Leggings of the Malefic",
+      "tokenId": 31098,
+      "tokenName": "Leggings of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "The Illidari Council",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 31054,
+      "pieceName": "Mantle of the Malefic",
+      "tokenId": 31101,
+      "tokenName": "Pauldrons of the Forgotten Conqueror",
+      "zone": "Black Temple",
+      "boss": "Mother Shahraz",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34436,
+      "pieceName": "Bracers of the Malefic",
+      "tokenId": 34848,
+      "tokenName": "Bracers of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Kalecgos",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34541,
+      "pieceName": "Belt of the Malefic",
+      "tokenId": 34853,
+      "tokenName": "Belt of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Brutallus",
+      "assertTokenIdDiffers": true
+    },
+    {
+      "pieceId": 34564,
+      "pieceName": "Boots of the Malefic",
+      "tokenId": 34856,
+      "tokenName": "Boots of the Forgotten Conqueror",
+      "zone": "Sunwell Plateau",
+      "boss": "Felmyst",
+      "assertTokenIdDiffers": true
+    }
+  ]
+}

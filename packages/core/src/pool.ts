@@ -4,8 +4,10 @@
  */
 
 import type { ItemSourceKindName } from "./item-source-kinds.generated.js";
-import type { ItemSlot } from "./items.js";
+import { getItem, type ItemSlot } from "./items.js";
+import { HandType } from "./proto/common_pb.js";
 import type { SimOrderName } from "./slots-sim-order.generated.js";
+import type { SpecId } from "./types.js";
 
 export {
   ITEM_SOURCE_KINDS,
@@ -311,8 +313,8 @@ export function bossesInPool(
  * `slots-table.json` widens to `string` under `resolveJsonModule` — true of
  * the JSON import, but `SimOrderName` now comes from generated `as const`
  * code, so constraining against it is a real check. This stays a hand-written
- * union because it is a *subset*: `SIM_ORDER` also carries `offhand`, which
- * ret never fills and no pool slot maps onto.
+ * union because it is a *subset* of `SIM_ORDER`, which also carries slots no
+ * pool slot maps onto.
  */
 export type SimSlotName = Extract<
   SimOrderName,
@@ -322,30 +324,107 @@ export type SimSlotName = Extract<
   | "trinket1"
   | "trinket2"
   | "mainhand"
+  | "offhand"
 >;
 
 /**
  * `Extract` yields `never` for a member absent from `SIM_ORDER`, which would
  * turn a typo into a quietly-narrower type rather than an error. These pin the
- * two shapes that would go missing first; `pool.test.ts` still checks every
+ * three shapes that would go missing first; `pool.test.ts` still checks every
  * value against `SIM_ORDER` at runtime.
  */
 type _SimSlotNameKeepsWeapon = Assert<Extends<"mainhand", SimSlotName>>;
+type _SimSlotNameKeepsOffhand = Assert<Extends<"offhand", SimSlotName>>;
 type _SimSlotNameKeepsRings = Assert<Extends<"finger2", SimSlotName>>;
 
 /**
- * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; ret
- * two-handers land in mainhand.
+ * Specs that put a weapon in the off hand.
+ *
+ * Membership is about what the spec *can* equip, not what its BiS set happens
+ * to use: a fury warrior and a combat rogue always dual-wield, while a hunter
+ * or an enhancement shaman may be playing a two-hander build this week. Listing
+ * the latter two anyway is correct, because the per-item hand-type filter below
+ * is what actually decides whether any given item can go there — a spec that
+ * could dual-wield but currently holds a two-hander simply produces no offhand
+ * candidates. Excluding them instead would hide real offhand upgrades from
+ * every dual-wielding hunter.
+ *
+ * Ret and feral are absent deliberately: neither can put anything in the off
+ * hand, so `"weapon"` keeps mapping to mainhand alone and their rankings are
+ * bit-for-bit what they were.
  */
-export function simSlotsForPoolSlot(slot: ItemSlot): readonly SimSlotName[] {
-  switch (slot) {
-    case "finger":
-      return ["finger1", "finger2"];
-    case "trinket":
-      return ["trinket1", "trinket2"];
-    case "weapon":
-      return ["mainhand"];
-    default:
-      return [slot];
+const DUAL_WIELD_SPECS: ReadonlySet<SpecId> = new Set<SpecId>([
+  "rogue",
+  "enh",
+  "warrior",
+  "hunter",
+]);
+
+/**
+ * Whether an item can physically be placed in the given sim slot.
+ *
+ * Only weapons need this, and the off hand is an **allowlist**, not a
+ * denylist: a one-hander or a dedicated off-hand item, and nothing else.
+ * Excluding just two-handers is not enough — `HandTypeMainHand` is a distinct
+ * value carried by 235 items in the pinned db (Talon of the Phoenix among
+ * them), and letting one through produces a candidate the fork's own equip
+ * logic then rejects with "No slots left to equip", failing the whole run
+ * rather than one row.
+ *
+ * The main hand is the mirror: everything except a dedicated off-hand item.
+ *
+ * Items with no recorded hand type (`null`, which the index writes for
+ * everything that is not a weapon) are left alone rather than filtered, since
+ * a missing field is not evidence of a restriction.
+ */
+function itemFitsSimSlot(itemId: number, slotName: SimSlotName): boolean {
+  if (slotName !== "mainhand" && slotName !== "offhand") return true;
+  const handType = getItem(itemId)?.handType;
+  if (handType == null) return true;
+  if (slotName === "offhand") {
+    return (
+      handType === HandType.HandTypeOneHand ||
+      handType === HandType.HandTypeOffHand
+    );
   }
+  return handType !== HandType.HandTypeOffHand;
+}
+
+/**
+ * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; a
+ * dual-wield spec's weapons try both hands.
+ *
+ * Resolving the off hand here rather than adding an `offhand` member to
+ * `ItemSlot` is deliberate: a new pool slot would duplicate every one-hander
+ * across two pool rows, and every universe on disk would need regenerating to
+ * carry the split. The off hand is a *placement* of a weapon, exactly as
+ * `finger2` is a placement of a ring, so it belongs on the same axis the
+ * finger/trinket pairs already use.
+ *
+ * `itemId` is optional so callers that only want the candidate placements for a
+ * slot — with no particular item in hand — keep working. Passing it filters the
+ * list down to placements that item can actually occupy.
+ */
+export function simSlotsForPoolSlot(
+  slot: ItemSlot,
+  spec?: SpecId,
+  itemId?: number
+): readonly SimSlotName[] {
+  const placements: readonly SimSlotName[] = ((): readonly SimSlotName[] => {
+    switch (slot) {
+      case "finger":
+        return ["finger1", "finger2"];
+      case "trinket":
+        return ["trinket1", "trinket2"];
+      case "weapon":
+        return spec !== undefined && DUAL_WIELD_SPECS.has(spec)
+          ? ["mainhand", "offhand"]
+          : ["mainhand"];
+      default:
+        return [slot];
+    }
+  })();
+
+  if (itemId === undefined) return placements;
+  return placements.filter((slotName) => itemFitsSimSlot(itemId, slotName));
 }

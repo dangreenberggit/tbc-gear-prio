@@ -102,7 +102,7 @@ absorbs it silently.
 
 - `vendor/wowsims/db.json` — 8257 items, sha256 `f95b94d8d140cb8d2b4cd1e4b5c87e60f0ad2e5eb8719b65813f8687d31b6ec7` per `data/wowsims.lock.json`
 - pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `v0.0.119`, commit `3267f8dfa4a20746d4982c1522fdec1d4eb77f4c`
-- `data/universes/feral-p3.json` — 366 entries
+- `data/universes/feral-p3.json` — 364 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
 The fork clone `vendor/tbc-new-fork` is **not** read, and the distinction
@@ -120,11 +120,11 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 
 ## Counts
 
-- local membership (U): 366
-- wowsims-primary membership (W): 1367
-- in both: 357
+- local membership (U): 364
+- wowsims-primary membership (W): 1347
+- in both: 355
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 1010
+- wowsims-only (W \ U): 992
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -218,7 +218,6 @@ carry. Each row names the rule that explains the absence.
 | 17193 | Sulfuron Hammer | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 17904 | Stormpike Insignia Rank 6 | 1 | c | stub-only sim effect | — |
 | 17909 | Frostwolf Insignia Rank 6 | 1 | c | stub-only sim effect | — |
-| 18202 | Eskhandar's Left Claw | 1 | f | no recognized source route | — |
 | 18203 | Eskhandar's Right Claw | 1 | e1 | drops only outside this phase's zones | — |
 | 18204 | Eskhandar's Pelt | 1 | f | no recognized source route | — |
 | 18205 | Eskhandar's Collar | 1 | e1 | drops only outside this phase's zones | — |
@@ -254,8 +253,6 @@ carry. Each row names the rule that explains the absence.
 | 18842 | Staff of Dominance | 1 | e1 | drops only outside this phase's zones | — |
 | 18843 | Grand Marshal's Right Hand Blade | 1 | f | no recognized source route | — |
 | 18844 | High Warlord's Right Claw | 1 | f | no recognized source route | — |
-| 18847 | Grand Marshal's Left Hand Blade | 1 | f | no recognized source route | — |
-| 18848 | High Warlord's Left Claw | 1 | f | no recognized source route | — |
 | 18865 | Grand Marshal's Punisher | 1 | f | no recognized source route | — |
 | 18866 | High Warlord's Bludgeon | 1 | f | no recognized source route | — |
 | 18867 | Grand Marshal's Battle Hammer | 1 | f | no recognized source route | — |
@@ -367,7 +364,6 @@ carry. Each row names the rule that explains the absence.
 | 19897 | Betrayer's Boots | 1 | e1 | drops only outside this phase's zones | — |
 | 19903 | Fang of Venoxis | 1 | e1 | drops only outside this phase's zones | — |
 | 19909 | Will of Arlokk | 1 | e1 | drops only outside this phase's zones | — |
-| 19910 | Arlokk's Grasp | 1 | e1 | drops only outside this phase's zones | — |
 | 19918 | Jeklik's Crusher | 1 | e1 | drops only outside this phase's zones | — |
 | 19944 | Nat Pagle's Fish Terminator | 1 | e1 | drops only outside this phase's zones | — |
 | 19945 | Lizardscale Eyepatch | 1 | e1 | drops only outside this phase's zones | — |
@@ -706,7 +702,6 @@ carry. Each row names the rule that explains the absence.
 | 23221 | Misplaced Servo Arm | 1 | c | stub-only sim effect | — |
 | 23226 | Ghoul Skin Tunic | 1 | e1 | drops only outside this phase's zones | — |
 | 23237 | Ring of the Eternal Flame | 1 | e1 | drops only outside this phase's zones | — |
-| 23242 | Claw of the Frost Wyrm | 1 | e1 | drops only outside this phase's zones | — |
 | 23362 | Hammer of the Sun | 1 | f | no recognized source route | — |
 | 23451 | Grand Marshal's Mageblade | 1 | f | no recognized source route | — |
 | 23452 | Grand Marshal's Tome of Power | 1 | f | no recognized source route | — |
@@ -763,12 +758,9 @@ carry. Each row names the rule that explains the absence.
 | 28245 | Pendant of Dominance | 1 | f | no recognized source route | — |
 | 28297 | Gladiator's Spellblade | 1 | f | no recognized source route | — |
 | 28299 | Gladiator's Bonegrinder | 1 | f | no recognized source route | — |
-| 28302 | Gladiator's Bonecracker | 1 | f | no recognized source route | — |
 | 28305 | Gladiator's Pummeler | 1 | f | no recognized source route | — |
-| 28310 | Gladiator's Shiv | 1 | f | no recognized source route | — |
 | 28312 | Gladiator's Shanker | 1 | f | no recognized source route | — |
 | 28313 | Gladiator's Right Ripper | 1 | f | no recognized source route | — |
-| 28314 | Gladiator's Left Ripper | 1 | f | no recognized source route | — |
 | 28346 | Gladiator's Endgame | 1 | f | no recognized source route | — |
 | 28355 | Gladiator's Idol of Tenacity | 1 | c | stub-only sim effect | — |
 | 28377 | Sergeant's Heavy Cloak | 1 | f | no recognized source route | — |
@@ -851,7 +843,6 @@ carry. Each row names the rule that explains the absence.
 | 29272 | Orb of the Soul-Eater | 1 | f | no recognized source route | — |
 | 29273 | Khadgar's Knapsack | 1 | f | no recognized source route | — |
 | 29274 | Tears of Heaven | 1 | f | no recognized source route | — |
-| 29275 | Searing Sunblade | 1 | f | no recognized source route | — |
 | 29277 | Violet Signet | 1 | f | no recognized source route | — |
 | 29278 | Violet Signet | 1 | f | no recognized source route | — |
 | 29279 | Violet Signet of the Great Protector | 1 | f | no recognized source route | — |
@@ -980,7 +971,6 @@ carry. Each row names the rule that explains the absence.
 | 31922 | Ring of Conflict Survival | 1 | e1 | drops only outside this phase's zones | — |
 | 31923 | Band of the Crystalline Void | 1 | e1 | drops only outside this phase's zones | — |
 | 31924 | Yor's Revenge | 1 | e1 | drops only outside this phase's zones | — |
-| 31958 | Merciless Gladiator's Bonecracker | 2 | f | no recognized source route | — |
 | 31959 | Merciless Gladiator's Bonegrinder | 2 | f | no recognized source route | — |
 | 31967 | Merciless Gladiator's Dragonhide Gloves | 2 | c | stub-only sim effect | — |
 | 31968 | Merciless Gladiator's Dragonhide Helm | 2 | f | no recognized source route | — |
@@ -993,11 +983,9 @@ carry. Each row names the rule that explains the absence.
 | 31989 | Merciless Gladiator's Kodohide Legguards | 2 | f | no recognized source route | — |
 | 31990 | Merciless Gladiator's Kodohide Spaulders | 2 | f | no recognized source route | — |
 | 31991 | Merciless Gladiator's Kodohide Tunic | 2 | f | no recognized source route | — |
-| 32003 | Merciless Gladiator's Left Ripper | 2 | f | no recognized source route | — |
 | 32026 | Merciless Gladiator's Pummeler | 2 | f | no recognized source route | — |
 | 32028 | Merciless Gladiator's Right Ripper | 2 | f | no recognized source route | — |
 | 32044 | Merciless Gladiator's Shanker | 2 | f | no recognized source route | — |
-| 32046 | Merciless Gladiator's Shiv | 2 | f | no recognized source route | — |
 | 32053 | Merciless Gladiator's Spellblade | 2 | f | no recognized source route | — |
 | 32055 | Merciless Gladiator's War Staff | 2 | f | no recognized source route | — |
 | 32056 | Merciless Gladiator's Wyrmhide Gloves | 2 | c | stub-only sim effect | — |
@@ -1033,7 +1021,6 @@ carry. Each row names the rule that explains the absence.
 | 32181 | Chancellor's Bonegrinder | 1 | f | no recognized source route | — |
 | 32183 | Chancellor's Maul | 1 | f | no recognized source route | — |
 | 32185 | Chancellor's War Staff | 1 | f | no recognized source route | — |
-| 32188 | Chancellor's Left Ripper | 1 | f | no recognized source route | — |
 | 32189 | Chancellor's Right Ripper | 1 | f | no recognized source route | — |
 | 32190 | Chancellor's Spellblade | 1 | f | no recognized source route | — |
 | 32191 | Chancellor's Battletome | 1 | f | no recognized source route | — |
@@ -1088,7 +1075,6 @@ carry. Each row names the rule that explains the absence.
 | 33068 | Veteran's Pendant of Salvation | 2 | f | no recognized source route | — |
 | 33076 | Merciless Gladiator's Idol of Tenacity | 2 | c | stub-only sim effect | — |
 | 33204 | Shadowprowler's Chestguard | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 33662 | Vengeful Gladiator's Bonecracker | 3 | f | no recognized source route | — |
 | 33663 | Vengeful Gladiator's Bonegrinder | 3 | f | no recognized source route | — |
 | 33671 | Vengeful Gladiator's Dragonhide Gloves | 3 | c | stub-only sim effect | — |
 | 33681 | Vengeful Gladiator's Endgame | 3 | f | no recognized source route | — |
@@ -1098,13 +1084,11 @@ carry. Each row names the rule that explains the absence.
 | 33692 | Vengeful Gladiator's Kodohide Legguards | 3 | f | no recognized source route | — |
 | 33693 | Vengeful Gladiator's Kodohide Spaulders | 3 | f | no recognized source route | — |
 | 33694 | Vengeful Gladiator's Kodohide Tunic | 3 | f | no recognized source route | — |
-| 33705 | Vengeful Gladiator's Left Ripper | 3 | f | no recognized source route | — |
 | 33733 | Vengeful Gladiator's Pummeler | 3 | f | no recognized source route | — |
 | 33736 | Vengeful Gladiator's Reprieve | 3 | f | no recognized source route | — |
 | 33737 | Vengeful Gladiator's Right Ripper | 3 | f | no recognized source route | — |
 | 33743 | Vengeful Gladiator's Salvation | 3 | f | no recognized source route | — |
 | 33754 | Vengeful Gladiator's Shanker | 3 | f | no recognized source route | — |
-| 33756 | Vengeful Gladiator's Shiv | 3 | f | no recognized source route | — |
 | 33763 | Vengeful Gladiator's Spellblade | 3 | f | no recognized source route | — |
 | 33766 | Vengeful Gladiator's War Staff | 3 | f | no recognized source route | — |
 | 33767 | Vengeful Gladiator's Wyrmhide Gloves | 3 | c | stub-only sim effect | — |
@@ -1112,7 +1096,6 @@ carry. Each row names the rule that explains the absence.
 | 33769 | Vengeful Gladiator's Wyrmhide Legguards | 3 | f | no recognized source route | — |
 | 33770 | Vengeful Gladiator's Wyrmhide Spaulders | 3 | f | no recognized source route | — |
 | 33771 | Vengeful Gladiator's Wyrmhide Tunic | 3 | f | no recognized source route | — |
-| 33801 | Vengeful Gladiator's Mutilator | 3 | f | no recognized source route | — |
 | 33841 | Vengeful Gladiator's Idol of Tenacity | 3 | c | stub-only sim effect | — |
 | 33853 | Vindicator's Band of Dominance | 3 | f | no recognized source route | — |
 | 33885 | Vindicator's Kodohide Belt | 3 | f | no recognized source route | — |
@@ -1138,7 +1121,6 @@ carry. Each row names the rule that explains the absence.
 | 33957 | Witches Band | 1 | f | no recognized source route | — |
 | 33958 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 33959 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
-| 34016 | Vengeful Gladiator's Left Render | 3 | f | no recognized source route | — |
 | 34033 | Vengeful Gladiator's Grimoire | 3 | f | no recognized source route | — |
 | 34073 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 34074 | Witches Band | 1 | f | no recognized source route | — |
@@ -1168,9 +1150,9 @@ carry. Each row names the rule that explains the absence.
 | a — per-spec weapon/hand/armor exclusion | 0 |
 | b — fails the eligible_d7 stat and slot screen | 0 |
 | c — stub-only sim effect | 67 |
-| e1 — drops only outside this phase's zones | 298 |
+| e1 — drops only outside this phase's zones | 296 |
 | e2 — sourced, but by a route the local assembly did not admit | 97 |
-| f — no recognized source route | 548 |
+| f — no recognized source route | 532 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
@@ -1205,7 +1187,7 @@ it would mean a piece of current raid content the pool silently omits.
 
 ## Full local membership
 
-All 366 entries of the universe the tab sims, with the source
+All 364 entries of the universe the tab sims, with the source
 metadata the local assembly resolved for each.
 
 | itemId | name | slot | phase | sources |
@@ -1348,7 +1330,6 @@ metadata the local assembly resolved for each.
 | 29923 | Talisman of the Sun King | weapon | 2 | raid zone=Tempest Keep boss=Al'ar |
 | 29925 | Phoenix-Wing Cloak | back | 2 | raid zone=Tempest Keep boss=Al'ar |
 | 29947 | Gloves of the Searing Grip | hands | 2 | raid zone=Tempest Keep boss=Al'ar |
-| 29948 | Claw of the Phoenix | weapon | 2 | raid zone=Tempest Keep boss=Al'ar |
 | 29962 | Heartrazor | weapon | 2 | raid zone=Tempest Keep boss=High Astromancer Solarian |
 | 29966 | Vambraces of Ending | wrist | 2 | raid zone=Tempest Keep boss=High Astromancer Solarian |
 | 29972 | Trousers of the Astromancer | legs | 2 | raid zone=Tempest Keep boss=High Astromancer Solarian |
@@ -1558,7 +1539,6 @@ metadata the local assembly resolved for each.
 | 32814 | Veteran's Leather Bracers | wrist | 2 | pvp via=honor |
 | 32943 | Swiftsteel Bludgeon | weapon | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32944 | Talon of the Phoenix | weapon | 2 | raid zone=Tempest Keep boss=Al'ar |
-| 32945 | Fist of Molten Fury | weapon | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash |
 | 32946 | Claw of Molten Fury | weapon | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash |
 | 33054 | The Seal of Danzalar | finger | 2 | raid zone=Serpentshrine Cavern boss=The Lurker Below |
 | 33055 | Band of Vile Aggression | finger | 2 | raid zone=Serpentshrine Cavern boss=Hydross the Unstable |

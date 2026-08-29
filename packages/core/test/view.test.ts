@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { CUTOFF } from "../src/cutoff.js";
+import { CUTOFF, CUTOFF_FERAL, setBonusNoiseFloorDps } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
-import { applyView, raidFilterOptions, type ViewOptions } from "../src/view.js";
+import {
+  applyView,
+  raidFilterOptions,
+  rankableSetPotential,
+  type ViewOptions,
+} from "../src/view.js";
 import { realPoolEntry } from "./real-source.js";
 
 function item(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
@@ -656,6 +661,147 @@ describe("applyView", () => {
       ]);
       const on = applyView(r, { withSetPotential: true });
       expect(on.shortlist.map((x) => x.itemId)).toEqual([6]);
+    });
+
+    /**
+     * Ticket 331: a sub-noise-floor prospective bonus must not move the row's
+     * sort position or its cutoff verdict — the toggle is a no-op for it,
+     * matching the display gate that already hides it. The values here are
+     * chosen so the *ungated* behaviour would differ (a +9 bonus below the 10
+     * floor would otherwise flip the order and clear the cutoff), so the test
+     * is red without the gate and green with it.
+     */
+    it("does not move a sub-floor prospective bonus in sort or cutoff (331/332)", () => {
+      // `ranking()` uses ret's `CUTOFF`, so the per-spec floor here is
+      // `setBonusNoiseFloorDps(CUTOFF)` ≈ 4.81. A prospective figure just under
+      // that floor is noise, so the toggle must leave this row's index and its
+      // belowCutoff verdict identical on and off. The figure is chosen so that,
+      // ungated, 1 + 4.807 = 5.807 WOULD clear the 3.4 cutoff and beat item 2's
+      // 3 — so it is the gate, not a small sum, that keeps the row put.
+      const subFloorBonus = setBonusNoiseFloorDps(CUTOFF) - 0.001;
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: 1,
+          deltaPct: 0.05,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: subFloorBonus,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 3, deltaPct: 0.14, rank: 1 }),
+      ]);
+
+      const off = applyView(r);
+      const on = applyView(r, { withSetPotential: true });
+      // Same order and same per-row belowCutoff verdict across the toggle.
+      expect(on.rows.map((x) => x.itemId)).toEqual(
+        off.rows.map((x) => x.itemId)
+      );
+      const offRow1 = off.rows.find((x) => x.itemId === 1)!;
+      const onRow1 = on.rows.find((x) => x.itemId === 1)!;
+      expect(onRow1.belowCutoffInView).toBe(offRow1.belowCutoffInView);
+      expect(onRow1.belowCutoffInView).toBe(true);
+    });
+
+    it("still moves an above-floor prospective bonus (331)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 18.039,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, deltaPct: 1, rank: 1 }),
+      ]);
+      const off = applyView(r);
+      // Off: bare -5 sorts last and stays below cutoff.
+      expect(off.rows.map((x) => x.itemId)).toEqual([2, 1]);
+      const on = applyView(r, { withSetPotential: true });
+      // On: -5 + 18.039 = 13.039 clears both the noise floor and the sort of 20's peer,
+      // and the row is promoted out of below-cutoff.
+      expect(on.belowCutoffCount).toBe(0);
+    });
+  });
+
+  /**
+   * Tickets 331/332: the gate lives in the exported pure function so a sub-noise
+   * (including negative) figure contributes 0 to both the sort key and the
+   * cutoff path. The floor is now per-spec and derived from the ranking's own
+   * `Cutoff` — `setBonusNoiseFloorDps(cutoff) = √2 × cutoff.absDps`, ≈4.81 ret
+   * (`CUTOFF`) / ≈5.09 feral (`CUTOFF_FERAL`) — and arrives as a parameter, so
+   * these tests pass it explicitly. The boundary is strict (`>`), matching the
+   * display gate's strict `> setBonusNoiseFloorDps(cutoff)` on the same frozen
+   * cutoff. Boundaries are written as `Math.SQRT2 * absDps`, never as decimals,
+   * so a mutation of the derivation turns a boundary test red.
+   */
+  describe("rankableSetPotential noise floor (331/332)", () => {
+    const retFloor = setBonusNoiseFloorDps(CUTOFF);
+    const feralFloor = setBonusNoiseFloorDps(CUTOFF_FERAL);
+    const withBonus = (prospectiveBonusDps: number) =>
+      item({
+        itemId: 1,
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps,
+        },
+      });
+
+    it("returns 0 for a negative sub-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(-3.876), retFloor)).toBe(0);
+    });
+
+    it("returns 0 for a small positive sub-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(0.545), retFloor)).toBe(0);
+    });
+
+    it("returns 0 at exactly the ret floor (strict >)", () => {
+      expect(rankableSetPotential(withBonus(retFloor), retFloor)).toBe(0);
+    });
+
+    it("passes a just-above-ret-floor bonus through unchanged", () => {
+      const bonus = retFloor + 0.001;
+      expect(rankableSetPotential(withBonus(bonus), retFloor)).toBe(bonus);
+    });
+
+    it("returns 0 for a just-below-ret-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(retFloor - 0.001), retFloor)).toBe(
+        0
+      );
+    });
+
+    it("passes a well-above-floor bonus through unchanged", () => {
+      expect(rankableSetPotential(withBonus(18.039), retFloor)).toBe(18.039);
+    });
+
+    it("gates the same bonus differently by spec (feral floor is higher)", () => {
+      // A bonus between the two per-spec floors: above ret's ≈4.81, below
+      // feral's ≈5.09. Passes ret, zeroed for feral — the floor differs by spec.
+      const between = (retFloor + feralFloor) / 2;
+      expect(between).toBeGreaterThan(retFloor);
+      expect(between).toBeLessThan(feralFloor);
+      expect(rankableSetPotential(withBonus(between), retFloor)).toBe(between);
+      expect(rankableSetPotential(withBonus(between), feralFloor)).toBe(0);
     });
   });
 

@@ -24,17 +24,19 @@
  * slamaltman fixture character read 72 from gear against a 142 cap, gear
  * alone, but sits near 119 once Precision is counted.
  *
- * `TALENT_HIT_BY_SPEC` is a hand-maintained per-spec table (only
- * "ret" → Precision is populated); an unrecognised spec or a talent string
- * with no points in the mapped slot contributes 0 rather than guessing, so
- * feral (no hit talent in druid.proto — see carry-forward 05 for its own gap)
- * is unaffected.
+ * Which stat, which cap, which conversion, and which talent all come from the
+ * spec's `CapProfile` (`cap-profile.ts`) rather than from branches here: a
+ * caster's cap differs from ret's in every one of those four numbers, and the
+ * only way to keep one implementation honest across both schools is to make the
+ * numbers data. A talent string with no points in the mapped slot, or a spec
+ * whose profile records no hit talent, contributes 0 rather than guessing.
  *
  * No TBC raid buff grants melee hit; Heroic Presence (Draenei, party-scoped,
  * +1%) is the only other source and is unreadable from WCL, which is what
  * HIT_CAP_UNCERTAINTY stands for. It only ever *reduces* the shortfall — so
  * the banner must state the direction rather than dress a one-sided gap up as
- * symmetric noise.
+ * symmetric noise. The band is one percent of hit *in the spec's own school*,
+ * so it scales with the profile's conversion.
  */
 
 import { getItem } from "./items.js";
@@ -43,22 +45,28 @@ import type { SimItemSpec } from "./slots.js";
 import type { SocketedItem } from "./meta-repair.js";
 import { Stat, statAt } from "./stats.js";
 import type { Race, SpecId } from "./types.js";
+import {
+  PHYSICAL_HIT_CAP_PERCENT,
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  capProfileFor,
+  type CapProfile,
+} from "./cap-profile.js";
+
+export {
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  SPELL_HIT_RATING_PER_HIT_PERCENT,
+} from "./cap-profile.js";
 
 /**
- * ui/core/constants/mechanics.ts @ wowsims/tbc-new
- * 8aa378b3671a0923fd11fb34b4b3753e53f20c9b (data/wowsims.lock.json).
- * Copied rather than imported: the vendor tree is a build input, never a
- * runtime dependency (PLAN.md §8.3 [S0]).
+ * Yellow-attack hit cap vs a boss (level 73): 9% missing.
  *
- * Must be the PHYSICAL constant. `SPELL_HIT_RATING_PER_HIT_PERCENT` is
- * 12.615385 and a melee hit cap built on it is wrong by ~28 rating.
+ * Re-exported under its original name because it predates the per-spec table
+ * and callers outside this module read it. Per-spec code must go through the
+ * profile — a caster's cap is 16, not 9.
  */
-export const PHYSICAL_HIT_RATING_PER_HIT_PERCENT = 15.769233;
+export const HIT_CAP_PERCENT = PHYSICAL_HIT_CAP_PERCENT;
 
-/** Yellow-attack hit cap vs a boss (level 73): 9% missing. */
-export const HIT_CAP_PERCENT = 9;
-
-/** ~142 rating. */
+/** ~142 rating. Ret/feral's cap; per-spec callers use `hitCapRatingFor`. */
 export const HIT_CAP_RATING =
   HIT_CAP_PERCENT * PHYSICAL_HIT_RATING_PER_HIT_PERCENT;
 
@@ -67,6 +75,11 @@ export const HIT_CAP_RATING =
  * party is not readable from WCL, so the cap is only ever known to ±1%.
  */
 export const HIT_CAP_UNCERTAINTY = PHYSICAL_HIT_RATING_PER_HIT_PERCENT;
+
+/** The spec's cap in rating: its cap percent through its own conversion. */
+export function hitCapRatingFor(profile: CapProfile): number {
+  return profile.hitCapPercent * profile.ratingPerPercent;
+}
 
 export type CapEntry = {
   rating: number;
@@ -149,52 +162,14 @@ function sumStat(
 }
 
 /**
- * Talent-string tree segment index (`str.split("-")[treeIndex]`) and
- * in-tree talent index (`segment.charAt(talentIndex)`) that carry hit for a
- * spec, plus the percent-per-point the talent grants.
- *
- * Layout order is the tree's UI order (ui/core/talents/trees/paladin.json in
- * the pinned wowsims-tbc-new source), which matches proto declaration order
- * here but is not guaranteed to in general — do not assume it holds for a
- * spec added later without checking that spec's tree json.
- *
- * Ret's entry: paladin.proto's Protection block is talentIndex 21-40
- * (`precision = 23` is local index 2); wowsims-tbc-new's talent-string
- * encoder writes trees in Holy(0)/Protection(1)/Retribution(2) order, so
- * `5-053201-…` splits to Holy `"5"` / Protection `"053201"` / Retribution
- * `"0523005120033125331051"`. The segments sum to 5/11/45 — the same
- * Holy/Prot/Ret point split asserted for this fixture at `spec.test.ts:16`
- * and `rank.test.ts:103`, which is what confirms the alignment. Segment 1 is
- * therefore Protection.
- */
-const TALENT_HIT_BY_SPEC: Readonly<
-  Record<
-    SpecId,
-    | {
-        treeSegment: number;
-        talentIndex: number;
-        percentPerPoint: number;
-        talent: string;
-        maxPoints: number;
-      }
-    | undefined
-  >
-> = {
-  ret: {
-    treeSegment: 1,
-    talentIndex: 2,
-    percentPerPoint: 1,
-    talent: "Precision",
-    maxPoints: 3,
-  },
-  feral: undefined,
-};
-
-/**
- * Talent-granted physical hit rating from a wowhead-format `talentsString`
- * (proto.Player.talents_string), decoded per `TALENT_HIT_BY_SPEC`, returned
- * alongside what it was read from so callers that must disclose the
+ * Talent-granted hit rating from a wowhead-format `talentsString`
+ * (proto.Player.talents_string), decoded per the spec's `talentHit` descriptor,
+ * returned alongside what it was read from so callers that must disclose the
  * assumption (carry-forward 60) do not re-decode the string themselves.
+ *
+ * The talent grants a flat hit *percent*, so it converts through the spec's own
+ * rating-per-percent — a caster's 2%-per-point talent is worth ~25 rating, not
+ * the ~32 a physical conversion would claim.
  *
  * Returns 0 rather than throwing for a spec with no mapped hit talent, a
  * string with fewer segments/characters than the mapped position, or a
@@ -203,9 +178,9 @@ const TALENT_HIT_BY_SPEC: Readonly<
  */
 function talentHitFromString(
   talentsString: string,
-  spec: SpecId
+  profile: CapProfile
 ): { rating: number; assumed?: TalentHitAssumption } {
-  const entry = TALENT_HIT_BY_SPEC[spec];
+  const entry = profile.talentHit;
   if (!entry) return { rating: 0 };
 
   const segment = talentsString.split("-")[entry.treeSegment];
@@ -215,8 +190,7 @@ function talentHitFromString(
   if (!Number.isFinite(points) || points <= 0) return { rating: 0 };
 
   return {
-    rating:
-      points * entry.percentPerPoint * PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+    rating: points * entry.percentPerPoint * profile.ratingPerPercent,
     assumed: { talent: entry.talent, points, maxPoints: entry.maxPoints },
   };
 }
@@ -226,23 +200,25 @@ export function capStateFrom(
   socketed: readonly SocketedItem[],
   opts: { assumedRace?: Race; talentsString?: string; spec?: SpecId } = {}
 ): CapState {
-  const gearHitRating = sumStat(equipment, socketed, Stat.StatMeleeHitRating);
+  const profile = capProfileFor(opts.spec);
+  const gearHitRating = sumStat(equipment, socketed, profile.hitStat);
   const talentHit =
     opts.talentsString !== undefined && opts.spec !== undefined
-      ? talentHitFromString(opts.talentsString, opts.spec)
+      ? talentHitFromString(opts.talentsString, profile)
       : { rating: 0 };
   const hitRating = gearHitRating + talentHit.rating;
-  const expertiseRating = sumStat(
-    equipment,
-    socketed,
-    Stat.StatExpertiseRating
-  );
+  // A spec that cannot be dodged or parried has no expertise line to sum; the
+  // entry still exists so the shape stays one type, reading a flat zero.
+  const expertiseRating = profile.trackExpertise
+    ? sumStat(equipment, socketed, Stat.StatExpertiseRating)
+    : 0;
+  const capRating = hitCapRatingFor(profile);
 
   const hit: HitCapEntry = {
     rating: hitRating,
-    capRating: HIT_CAP_RATING,
-    gap: HIT_CAP_RATING - hitRating,
-    capUncertainty: HIT_CAP_UNCERTAINTY,
+    capRating,
+    gap: capRating - hitRating,
+    capUncertainty: profile.ratingPerPercent,
   };
   if (opts.assumedRace !== undefined) hit.assumedRace = opts.assumedRace;
   if (talentHit.assumed !== undefined) hit.talentHitAssumed = talentHit.assumed;
@@ -335,8 +311,10 @@ const CONTRIBUTES_TO_DAMAGE = (stat: number): boolean =>
 export function isHitDriven(
   statDelta: Readonly<Record<number, number>>,
   hit: { gap: number },
-  candidate: { deltaDps: number }
+  candidate: { deltaDps: number },
+  spec?: SpecId
 ): boolean {
+  const hitStat = capProfileFor(spec).hitStat;
   // A loss has no gain to be driven by, and the warning this flag gives —
   // "this stops being an upgrade past the cap" — says nothing about an item
   // that is not an upgrade now. Without this, below-cutoff items with negative
@@ -349,7 +327,7 @@ export function isHitDriven(
     if (value <= 0) continue;
     if (!CONTRIBUTES_TO_DAMAGE(Number(index))) continue;
     totalGain += value;
-    if (Number(index) === Stat.StatMeleeHitRating) hitGain += value;
+    if (Number(index) === hitStat) hitGain += value;
   }
   if (totalGain <= 0) return false;
   return hitGain / totalGain > HIT_DRIVEN_SHARE;
@@ -372,11 +350,12 @@ export function isHitDriven(
 export function hitRegression(
   statDelta: Readonly<Record<number, number>>,
   hit: { gap: number },
-  candidate: { deltaDps: number }
+  candidate: { deltaDps: number },
+  spec?: SpecId
 ): { lost: number; gapAfter: number } | null {
   if (candidate.deltaDps <= 0) return null;
   if (hit.gap <= 0) return null;
-  const delta = statDelta[Stat.StatMeleeHitRating] ?? 0;
+  const delta = statDelta[capProfileFor(spec).hitStat] ?? 0;
   if (delta >= 0) return null;
   const lost = -delta;
   return { lost, gapAfter: hit.gap + lost };

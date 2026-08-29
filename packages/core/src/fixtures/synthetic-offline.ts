@@ -42,11 +42,29 @@ export type PresetGearFile = {
 const SPEC_TREE_INDEX: Record<SpecId, 0 | 1 | 2> = {
   ret: 2,
   feral: 1,
+  balance: 0,
+  hunter: 2, // Survival — the tree a hunter's talent-string plurality lands in
+  mage: 0, // Arcane, matching the Arcane-only gear sets this repo vendors
+  shadow: 2,
+  rogue: 1, // Combat
+  ele: 0,
+  enh: 1,
+  warlock: 0, // Affliction, matching the fork's default Affli/Demo/Destro EP
+  warrior: 1, // Fury, the fork's default warrior variant
 };
 
 const SPEC_CLASS_NAME: Record<SpecId, string> = {
   ret: "Paladin",
   feral: "Druid",
+  balance: "Druid",
+  hunter: "Hunter",
+  mage: "Mage",
+  shadow: "Priest",
+  rogue: "Rogue",
+  ele: "Shaman",
+  enh: "Shaman",
+  warlock: "Warlock",
+  warrior: "Warrior",
 };
 
 /**

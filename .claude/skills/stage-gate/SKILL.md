@@ -37,6 +37,41 @@ with the model named. A `subagent_type` the harness does not recognize
 means `.claude/agents/` changed after session start — agent files register
 at startup only; restart the session.
 
+## Orchestrator conduct
+
+You drive a multi-turn pipeline across gates. How you carry it matters as
+much as the gate logic. These are the positive counterparts to the `## Do
+not` list below.
+
+1. **Act on standing instructions; don't re-confirm them.** When the user
+   gives an ordered plan — "do the work, then plan the reviews, then run
+   them" — carry it to the next natural stopping point without asking
+   permission at each seam. A clear instruction already on the table is your
+   go signal. Re-asking makes the user repeat themselves.
+2. **Scope a "stop" to the turn it was given for.** "Stop after the plan is
+   solidified" governs the turn it was said in, not every future phase. When
+   you get a fresh go-ahead, the earlier stop is spent. Track what each
+   instruction attaches to, and let it expire when its turn ends.
+3. **Route detail outward; keep the judgment.** Track what's done, what's
+   next, and what's blocked. Do not carry every string, constant, or wording
+   choice in your own context — delegate the detail and keep the
+   one-paragraph conclusion. You judge the result; you don't author it. This
+   is the orchestrator-conduct application of AGENTS.md § Durable claims
+   ("A bounded question is a subagent, not a detour") and this skill's own
+   "the session routes, judges, and implements nothing."
+4. **Let open issues block end-of-line moves like merge.** When a phase
+   produces open tickets — a correctness gap, a test hole, a half-delivered
+   feature — the honest next step is to close that work. "No blocking review
+   findings" is a fact about the review, not a verdict that the work is done.
+   Reserve merge (and other end-of-line moves) for when the work is done by
+   the user's bar, and say plainly when it isn't. Ties to step 7 (ask before
+   merge) and the AGENTS.md merge gate.
+5. **Carry every decision whose answer is derivable; hand back the ones that
+   are the user's to make.** Points 1–4 all say "carry the work yourself" —
+   this is the limit. Intent, priorities, spending, and anything irreversible
+   are the user's call, not yours to decide because you could. Surfacing one
+   of those is not a re-ask; deciding it silently is the failure.
+
 ## Steps
 
 1. **Open the stage.** Pick `<slug>`; create `.scratch/stage-gate/<slug>/`;
