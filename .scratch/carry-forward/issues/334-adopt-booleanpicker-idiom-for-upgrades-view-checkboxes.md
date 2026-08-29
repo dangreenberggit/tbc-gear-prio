@@ -1,4 +1,15 @@
-Status: open
+Status: closed
+Resolved: fork f17b77db7a6c + repo re-pin 2c14735 (2026-08-29). Both view
+checkboxes now render via native BooleanPicker(inline: true), behind a thin
+ViewToggle wrapper that keeps ToggleControl's exact external surface (checked /
+visible / setVisible / setText) so no consumer binds to two-state picker shapes
+— the design comment reserving a possible three-state future is preserved, not
+broken. OQ1 win-condition held: the three read sites, two visibility drivers,
+and the setText call are byte-unchanged. Per-width browser observation confirms
+28x28 at 375/653/768/1280, toggle re-renders the view, hide/show retains checked
+state, qualifier text + Set-potential tooltip present. Fork-only, non-ported (no
+drift cycle); effects diff stamp-only; pnpm verify green. Stage-gate artifacts:
+.scratch/stage-gate/ticket-334-booleanpicker-view-checkboxes/.
 Type: refactor
 Origin: Gate C (upgrades-css-controls-copy stage-gate) + round-6 pre-merge review (spec axis), 2026-08-29; feat/upgrades-dedup-wowsims
 Blocks: none
