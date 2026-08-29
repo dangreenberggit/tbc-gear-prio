@@ -118,3 +118,64 @@ The five-sweep results above are the executing seat's report; its measurement
 tables lived in a session scratchpad that is gone. The *reasoning* about why
 2/5 should have worked was independently verified by domain review, but the
 sweep numbers themselves were not re-run.
+
+## Resolution (2026-08-28) — reachable, observed, and a display floor added
+
+Three findings, all re-runnable:
+
+### 1. Reachability: REACHABLE (outcome 1, not the dead-feature outcome)
+
+A committed real `rankUpgrades` artifact
+(`.scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.json`, commit
+`801065a`) already carries a populated `setContext` on 11 rows — Lightbringer
+(set 680, a measured 2pc from two un-worn pieces) and Crystalforge (set 629, the
+probe target, a measured 4pc). So `setIdsWithCandidates.size > 0`, `selection.ok`
+succeeds, and the short-circuit at `rank.ts:1516` never fires. The five failed
+sweeps were default gear on the live page, not a config whose pool carries ≥2
+un-worn same-set pieces. The set-bonus path is **not** structurally dead.
+
+### 2. Observed on screen (headless CDP, the browser pane is inert here)
+
+The MCP browser pane cannot give this page a viewport (`window.innerWidth === 0`),
+which is why every prior sweep failed to observe anything. Driving a headless
+Chromium over raw CDP (the mechanism ticket 322's gate proved) gets a real
+viewport. All four of ticket 313's display states rendered, text read back from
+the live DOM:
+- prospective: `+27.5 set bonus (0/2 → 1/2 Lightbringer Battlegear)` (ret p5)
+- crosses: `includes the 2-piece Crystalforge Battlegear bonus`
+- confounded: `+3.4 set bonus (Justicar Battlegear) — not counted in ranking:
+  breaks Crystalforge Battlegear 2pc`
+- no-context: the ordinary row, no sub-line
+
+### 3. The `-47.3` was a fluke; owner ruling added a noise floor
+
+One live run rendered `-47.3 set bonus`. A set bonus cannot be negative, and
+-47.3 is ~10.7 SE from zero — far too large for noise. Re-simming the exact rows
+did **not** reproduce it: the engine measures these ret bonuses at ~0 ± ~5
+(Lightbringer 2pc +0.31, Justicar 4pc -4.10; committed data agrees within
+noise). The -47.3 was a one-off degraded package sim, not a stable measurement —
+**no engine bug.**
+
+The real display issue it exposed: a near-zero bonus shown raw (`-4.1 set bonus`)
+reads as a real negative figure. **Owner ruling (2026-08-28): "if it's at or
+below noise, don't show it."** Implemented as a display floor
+`SET_BONUS_MIN_DISPLAY_DPS = 10` gating only the prospective line
+(`upgrades_tab.tsx`), fork commit `e7f147443`. The floor is a deliberately
+conservative ~4-SE round number: reported per-run SE is ~1.678 DPS
+(`docs/verification-log.md`), a prospective bonus folds two deltas so its noise
+is ~2.37 SE, and a strict 2-SE bar would be ~4.7 — 10 is chosen high of that.
+This is **not** the per-spec, CUTOFF-derived treatment the single-item cutoff
+uses (`packages/core/src/cutoff.ts`); a fixed global floor was accepted as
+proportionate for a display gate. Making it per-spec/CUTOFF-derived is a possible
+follow-up, not done here.
+
+Re-validated on screen after the floor: ret p3 (all bonuses below 10) shows zero
+prospective lines; ret p5 shows the genuine `+27.5` Lightbringer line — so it is
+a noise floor, not a blanket suppressor, and the crosses/confounded branches are
+untouched.
+
+Noise reduction (which would let a lower floor work) stays ticket 105.
+
+**Left open pending the owner viewing the running tab** (per the do-not-close
+rule above). Ticket 313's rendering is validated; 313 and 315 close together on
+the owner's sign-off.

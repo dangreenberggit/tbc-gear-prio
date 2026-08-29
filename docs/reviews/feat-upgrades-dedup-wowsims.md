@@ -427,3 +427,101 @@ honest state, and 313 should not be closed on this branch.
 | Sp2   | Spec        | wontfix     | Clip measurement was taken (executor reports `scrollWidth` 281 == `clientWidth` 281) but recorded in a session scratchpad rather than the plan's acceptance box; the rule deletion stands |
 | Sp3   | Spec        | defer       | Ticket 315 — 313 committed unmet; see Summary. Do not close 313 on this branch                                                                                                            |
 | Sp4   | Spec        | defer       | `.scratch/carry-forward/issues/318-ask-9-pool-source-line-is-dev-noise.md` — the eleven asks outrank the plan, so an ask cannot be narrowed away by omission                              |
+
+---
+
+# Round 5 — the six-ticket batch (315, 317, 319, 320, 322, 324) + re-pins
+
+Reviewed range: `cdb0a5c4c917cfee3ed36c3cd2d344c84238a493..8edf764ff1b3dfa65d3cd1b96ddf4880cf4cd157`
+Companion fork range: `97a326e497da29aceb70c2530ce2463b5719bc7c..e7f147443` (the
+actual code — the main-repo diff over this round is ticket markdown + re-pins).
+
+Dispatch: no `codex` on PATH; adversarial + domain + standards/spec as three
+fresh-context Opus (4.8) subagents on the review lane, one parallel batch, each
+handed both diffs (main + fork). Fixes for this round's findings land in fork
+commit `bc7925362` and the re-pin above it (`8edf764`'s successor); a round 6
+window opens at fork `bc7925362` / main `<next through-sha>` and is not covered
+here.
+
+## Adversarial
+
+No correctness bug that yields a wrong number, no test theatre that inverts a
+real result. The guard removal (317/319), the emitter fix (317, no re-render
+loop or double-emit), the noise-gate ordering (315, `> 10` guards only the
+prospective branch), and the owned-row export filter were each cleared under
+scrutiny with the traced reason.
+
+- **A1 (medium)** — the layout gate is invoked by nothing. `grep test:layout`
+  across the fork's yml/json/mjs hits only the `package.json` script definition;
+  `pnpm verify` does not see the fork and no fork CI calls it. Ticket 322's "a
+  gate that runs" premise is half-met — the script must be run by hand.
+- **A2 (low)** — layout assertion #5 (`ok = spans || widthMatch`) can pass with
+  the F11 span dropped in a one-column layout. Non-vacuous at 1280's two-column
+  layout, so sound as it stands, but the `|| widthMatch` fallback is a
+  robustness hole under a future layout change.
+- **A3 (unverified → resolved)** — reviewer could not byte-compare the re-pinned
+  `sim-implemented-effects.json` against a regen (fnm blocked their Node).
+  Settled after the review: regenerating at the pin produces no diff.
+
+## Domain
+
+- **320 — verified correct (no defect).** Enumerated every distinct `zone` value
+  across all 44 built universes: 9 genuine TBC raids + `World Bosses` (Doom Lord
+  Kazzak, Doomwalker — real outdoor world bosses, not raid encounters). The
+  ticket's claim that World Bosses is the only non-raid zone value holds against
+  the data; renaming the group to "Content" is correct, spec-neutral terminology.
+- **315 — floor is safe, but the comment's figure was wrong.** The `10` floor is
+  a defensible ~4-SE conservative bar (reported per-run SE ~1.678 DPS per
+  `docs/verification-log.md`; a set bonus folds two deltas so its noise is
+  ~2.37 SE), and hiding a near-zero bonus is domain-correct. But the comment
+  claimed a "~5 DPS run-to-run spread" that appears nowhere in the tree and is
+  ~3x the measured SE, and the floor is a fixed global where this project's
+  cutoffs are per-spec (`cutoff.ts` ret 3.4 / feral 3.6).
+- Re-pin (217 implemented / 451 stub-only) is domain-plausible; no sync anomaly.
+
+## Standards + Spec
+
+- **SP-1 / SP-2 / STD-1 (major, one defect from three angles)** — the shipped
+  315 display floor is a different change from what the (open) ticket asked
+  (reachability), and its `~5 DPS` justification is an unsourced causal claim in
+  committed code with the owner's "at or below noise, don't show it" ruling
+  recorded nowhere in the tree — an AGENTS.md durable-claims breach.
+- **SP-3 (clean)** — 317, 319, 320, 322, 324 each match their ticket: 317 emits
+  coherently; 319 did both halves (dropped the unreachable finite guard, fixed
+  both comments); 320 renamed the one i18n value; 322 is a zero-dependency
+  DOM-geometry gate asserting real geometry at 375/768/1280; 324 closed as a
+  read-only investigation with no code.
+- **STD-2/3/4 (clean)** — comment policy (why not what), `SET_BONUS_MIN_DISPLAY_DPS`
+  naming idiom, and `test-layout.mjs` house style all hold.
+- **Minor** — the stage `decision-log.md` / `map.md` were not updated for this
+  round's fork work; the decision trail lived only in commit messages and ticket
+  prose until this review.
+
+## Summary
+
+The batch is clean on 317/319/320/322/324 — five tickets implemented to spec
+with no correctness or standards defect. The one substantive finding, raised
+independently by all three axes, was ticket **315**: the display floor was
+shipped with an unsourced `~5 DPS` comment and the owner ruling recorded nowhere.
+Fixed in-round — both comments now cite the measured SE (1.678) and the
+quadrature reasoning (fork `bc7925362`), and ticket 315 now records the owner
+ruling, the reachability answer (reachable), the on-screen validation, and that
+the `-47.3` was a non-reproducing fluke. 315 and 313 stay open pending the owner
+viewing the running tab. Two adversarial findings on the layout gate (A1 not
+wired, A2 assertion escape hatch) are deferred to new tickets.
+
+## Disposition
+
+| ID   | Axis        | Disposition | Ticket / note                                                                                                                            |
+| ---- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial | defer       | `.scratch/carry-forward/issues/325-layout-gate-is-wired-into-no-gate.md` — `test:layout` runs by hand; wire it into a fork gate/CI       |
+| A2   | Adversarial | defer       | `.scratch/carry-forward/issues/326-layout-gate-span-assertion-has-an-escape-hatch.md` — assert `grid-column` directly, not width parity  |
+| A3   | Adversarial | fixed       | Regenerating `sim-implemented-effects.json` at the pin produces no diff — artifact is byte-identical to a fresh regen at HEAD            |
+| D1   | Domain      | fixed       | 320 verified correct against all 44 universes; enumeration closed as not-a-defect (World Bosses is the only non-raid zone; "Content" ok) |
+| D2   | Domain      | fixed       | 315 floor comment corrected to cite the measured SE 1.678 and the quadrature reasoning (fork `bc7925362`)                                |
+| SP1  | Spec        | fixed       | 315 owner ruling ("at or below noise, don't show it"), reachability answer, and on-screen validation recorded in ticket 315              |
+| SP2  | Spec        | fixed       | Same as D2/STD1 — the unsourced `~5 DPS` claim replaced with the sourced figure and reasoning (fork `bc7925362`)                         |
+| SP3  | Spec        | wontfix     | No defect — 317/319/320/322/324 match their tickets                                                                                      |
+| STD1 | Standards   | fixed       | Durable-claims breach fixed with SP2                                                                                                     |
+| STD2 | Standards   | fixed       | decision-log / map.md updated this round (325, 326 mapped; 315 resolution recorded in-ticket)                                            |
+| STD3 | Standards   | wontfix     | No defect — comment policy, naming, gate house style all hold                                                                            |
