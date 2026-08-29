@@ -696,11 +696,150 @@ weighted/full report path remains open on ticket 331.
 
 ## Disposition
 
-| ID   | Axis        | Disposition | Ticket / note                                                                                                                         |
-| ---- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| A6   | Adversarial | wontfix     | Scroller check only exercised at 375 (table==wrap at 653, overflow-x visible at 768/1280) — low harm; the 375 case does exercise it   |
-| A7   | Adversarial | defer       | `.scratch/carry-forward/issues/333-noise-floor-value-not-pinned-by-a-near-boundary-test.md` — add ~10.001 passthrough + ~9.999->0     |
-| D3   | Domain      | defer       | `.scratch/carry-forward/issues/332-ranking-noise-floor-may-zero-a-real-10-15-dps-bonus.md` — per-spec ranking floor; band empty today |
-| SP4  | Spec        | wontfix     | No defect — every change traces to a ticket + plan step; no scope creep; honest-deferral of the weighted/full path confirmed          |
-| STD4 | Standards   | defer       | `.scratch/carry-forward/issues/334-adopt-booleanpicker-idiom-for-upgrades-view-checkboxes.md` — 28x28 sizing met; idiom deferred      |
-| STD5 | Standards   | wontfix     | Primitive Obsession on the shared floor constant is deliberate and documented (one shared value for display + ranking); no wrapper    |
+| ID   | Axis        | Disposition | Ticket / note                                                                                                                       |
+| ---- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| A6   | Adversarial | wontfix     | Scroller check only exercised at 375 (table==wrap at 653, overflow-x visible at 768/1280) — low harm; the 375 case does exercise it |
+| A7   | Adversarial | fixed       | superseded in round 7 — ticket 333 closed (`b037498`): near-boundary passthrough assertions added                                   |
+| D3   | Domain      | fixed       | superseded in round 7 — ticket 332 closed (fork `4a76e06` + `7c10366`): per-spec √2 ranking floor landed                            |
+| SP4  | Spec        | wontfix     | No defect — every change traces to a ticket + plan step; no scope creep; honest-deferral of the weighted/full path confirmed        |
+| STD4 | Standards   | fixed       | superseded in round 7 — ticket 334 closed (fork `f17b77d` + `2c14735`): native BooleanPicker idiom adopted via ViewToggle           |
+| STD5 | Standards   | wontfix     | Primitive Obsession on the shared floor constant is deliberate and documented (one shared value for display + ranking); no wrapper  |
+
+# Round 7 — the three round-6 follow-up tickets (333, 334, 332)
+
+Reviewed range: `e10581b3e4b218612617177c74d432229b526705..8bad70258d0cbfef41759bd9a333f580b4dc6d79`
+Companion fork range: `4ae6afe988208fd7acaf1304d2fa1b3c80718cac..4a76e06f54dcd016448296735134a98d6239868c`
+
+Closes the three tickets the round-6 review deferred (A7/D3/STD4), each through a
+stage-gate run:
+
+- **333** (`b037498`): near-boundary tests pin `SET_BONUS_NOISE_FLOOR_DPS` from
+  both sides — core `packages/core/test/view.test.ts` only, no fork.
+- **334** (fork `f17b77d` + re-pin `2c14735`): the two Upgrades view checkboxes
+  render via native `BooleanPicker(inline:true)` behind a `ViewToggle` wrapper
+  preserving the old external surface — fork-only, non-ported.
+- **332** (fork `4a76e06` + core `7c10366` + re-pin `5bce509`): the flat 10 DPS
+  ranking floor becomes a per-spec `setBonusNoiseFloorDps(cutoff) = √2 ×
+cutoff.absDps`, read by both the ranking and display gates off the same frozen
+  ranking cutoff — ported drift cycle (cutoff.ts + view.ts) + fork tab display
+  gate. The plan-before-code review blocked two would-be crashes (stale-spec
+  divergence; skeleton null-deref) before any code was written.
+
+Also in-window (not this three-ticket job, carried for coverage): the
+orchestrator conduct guidance in `AGENTS.md` + `stage-gate/SKILL.md` (mirror pair)
+and the copy reword (fork `2f992cc`), both from `542651d`/`e6d7777`.
+
+## Adversarial
+
+Nothing survives scrutiny as a defect. The ticket-332 change holds on every axis:
+
+- **Display/ranking floor agreement (central risk) — sound.** `applyView` derives
+  the floor from `r.cutoff` where `r = this.state.ranking`; the fork display gate
+  (`renderSubTabs`/`render`) derives from the same `this.state.ranking.cutoff`.
+  Same frozen object → same `√2 × absDps` → the two layers cannot diverge for a
+  displayed row.
+- **Skeleton null-deref — absent.** `setBonusLine` reads only the control's
+  `checked`, `row`, and the `noiseFloorDps` param — no `this.state`
+  (grep-confirmed). The mid-run skeleton passes `undefined`; the strict
+  `noiseFloorDps !== undefined &&` guard skips the prospective line.
+- **Fork twin agreement — byte-identical code regions** (both `cutoff.ts` and
+  `view.ts`; only comment prose differs).
+- **No fixture changes tier.** Band (0.545, 17.14) empty; floor 10 → ~4.81/5.09
+  moves nothing across a boundary.
+- **Tests not theatre.** Boundaries written as `setBonusNoiseFloorDps(CUTOFF)` /
+  `Math.SQRT2 * absDps`, never decimals — a derivation mutation reds them.
+- Incidental non-defect: the i18n `prospective` reword drops `{{after}}` and the
+  code correctly removed the matching `after:` arg — no orphan placeholder.
+
+Unexamined: SCSS (presentational), `BooleanPicker`/`ViewToggle` runtime DOM (no
+fork test harness — surface verified statically), PROVENANCE re-hash/E-W3 run
+(pipeline gate, not code correctness). The fork display-gate end-to-end agreement
+the domain axis left unexamined is covered here.
+
+## Domain
+
+Verdict: domain-sound and safe to merge. Two accuracy caveats, neither a blocker.
+
+- **√2 is right for a 2pc, approximate for a 4pc.** The `1.678`/`1.774` figures
+  are `meanReportedSe` (single-run SE). A bonus's measured SE is
+  `combineSe = sqrt(Σ se_i²)` over folded sims: single delta folds 2 (√2×SE), a
+  2pc folds 4 (2×SE), a 4pc folds 6 (√6×SE). So the bonus/single ratio is exactly
+  √2 for 2pc but √3 for 4pc — the code applies the same `√2 × absDps ≈ 4.81` floor
+  to both, so 4pc bonuses in ~(4.8, 6) DPS are slightly under-filtered, and the
+  `cutoff.ts` doc comment overstates the floor as the 2×SE bar for 4pc rows.
+  Empty band → no effect today. **Filed as ticket 335.**
+- **Untested-spec inheritance — mostly defensible.** The 9 specs inherit ret's
+  floor (only available default, debt annotated in one place). Feral already
+  measured 6% noisier; among the inheritors, enh shaman (windfury), aff/destro
+  warlock (DoT+proc), and rogue (combo-point RNG) are the likeliest to exceed
+  ret's floor if ever measured. Anticipated by `cutoff.ts`'s own comment; folded
+  into ticket 335's note, not a separate finding.
+- **Empty-band safety — verified** (max-below 0.545, min-above 17.14); the right
+  necessary property; the ticket correctly scopes the unmeasured-spec case as a
+  follow-up, not a gap.
+- **Per-spec-for-ranking vs flat-10 display floor — sound call** (the
+  false-negative asymmetry argument is correct).
+- No TBC/wowsims fact misstated.
+
+## Standards + Spec
+
+### Standards
+
+Verdict: clean. No hard violations; three defensible judgement calls.
+
+- **Comment policy — PASS.** The 332 rewrites (`cutoff.ts`, `view.ts`, the tab
+  comments) are load-bearing WHY (frozen-cutoff invariant, √2 derivation,
+  why-by-parameter), not WHAT restatement.
+- **`ViewToggle` (334) — NOT a Middle Man.** Owns the two-state `value`/`emitter`,
+  drives the `BooleanPicker` triad, confines two-state semantics inside the class;
+  same external surface as the old `ToggleControl`.
+- **Threaded `noiseFloorDps: number` — no finding.** One scalar derived once at
+  the done-narrowing point, `undefined` cleanly encodes the skeleton; STD5's
+  round-6 ruling (primitive shape deliberate) still holds.
+- **Commit messages — PASS** (seven rules; `7c10366`'s "why √2" body exemplary).
+  Minor cosmetic: `2c14735` uses `--` where siblings use `—`.
+- **Mirror pairs + fork twins — VERIFIED byte-identical** (`.claude/skills` vs
+  `.agents/skills`; fork `cutoff.ts`/`view.ts` code regions vs core; PROVENANCE
+  updated).
+
+### Spec
+
+Verdict: all three tickets met, faithfully.
+
+- **333 — met.** Both-sides near-boundary assertions, expressed against the
+  per-spec floor (`retFloor ± 0.001`, plus the exactly-floor strict-`>` case) —
+  the intent held and is stronger than the literal 10.001/9.999 asked.
+- **332 — met, gates reconciled.** `setBonusNoiseFloorDps(cutoff) = √2 ×
+cutoff.absDps` (≈4.81 ret / ≈5.09 feral, inside the ticket's ≈4.75-5.02 band);
+  the ticket left display/ranking reconciliation open and the implementation
+  **reconciled** — both gates read the same per-spec floor from the frozen ranking
+  cutoff by parameter. Explicit in comments; honest.
+- **334 — met.** Both checkboxes render via native `BooleanPicker(inline:true)`
+  behind `ViewToggle`; event wiring, BiS qualifier `setText`, and Set-potential
+  `labelTooltip` preserved. The idiom, not just the sizing.
+- **Scope-creep flag (b):** a copy reword (`translation.json` tooltip/caveat/
+  prospective/crosses + the `after:` param drop) appears in-window. Traced: the
+  string rewords are the round-6 css-controls boundary commit (`4ae6afe`) and the
+  handoff-documented, independently-reviewed reword (`2f992cc`) — pre-authorized
+  work from before this three-ticket job, not stray scope. Dispositioned wontfix.
+
+## Summary
+
+Round 7 reviews the three round-6 follow-up tickets (333, 334, 332). **No blocking
+or material findings across any axis.** All three tickets are met and spec-faithful;
+the ticket-332 ported-engine change is byte-identical across the fork twins, the
+two feared crashes (stale-spec divergence, skeleton null-deref) are independently
+confirmed absent in the landed code, and no committed fixture changes tier. One
+enhancement deferred (335: the √2 floor under-models 4pc noise — empty band today,
+so a doc-accuracy + future-refinement item). Everything else is clean or a
+documented judgement call. `pnpm merge-to-dev --check-only` green.
+
+## Disposition
+
+| ID   | Axis        | Disposition | Ticket / note                                                                                                                                          |
+| ---- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1   | Adversarial | wontfix     | No defect — display/ranking agreement, skeleton-deref absence, fork twin byte-identity, empty-band tier-stability, and test integrity all verified     |
+| D1   | Domain      | defer       | `.scratch/carry-forward/issues/335-set-bonus-floor-under-models-4pc-noise.md` — √2 is the 2pc fold factor; 4pc folds 6 sims (√3); empty band today     |
+| D2   | Domain      | wontfix     | Untested-spec inheritance (enh/warlock/rogue likeliest to exceed ret's floor) — folded into 335's note; already anticipated by cutoff.ts's own comment |
+| SP1  | Spec        | wontfix     | Copy-reword scope flag — pre-authorized work (`4ae6afe` round-6 boundary + `2f992cc` handoff-documented independent reword), not this job's scope      |
+| STD1 | Standards   | wontfix     | `2c14735` commit body uses `--` where siblings use `—` — cosmetic, no standard breached                                                                |
