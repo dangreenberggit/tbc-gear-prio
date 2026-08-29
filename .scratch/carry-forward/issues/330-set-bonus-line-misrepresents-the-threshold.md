@@ -42,6 +42,31 @@ the "overreaching" the owner means and is bigger than a reword.
 
 Candidate replacement strings from the copy pass; owner picks before it lands.
 
+## Update (2026-08-28) — two findings, one bigger than a reword
+
+**The displayed number is NOT mislabeled.** Traced: when the line shows `/2`,
+`nextThreshold` is genuinely 2 and `+46.3` is the incremental 2pc bonus (the
+lower tier is subtracted out in `computeSynergy`, `set-value.ts:372`). So the
+number matches its threshold — not a data bug at that level.
+
+**The arrow still overreaches.** `nextThreshold` is always strictly greater than
+`piecesAfterSwap`, so a row can never show `after === threshold` — "0/2 → 1/2"
+advertises the +46.3 two-piece bonus while the swap only lands the player at 1 of
+2. The framing implies arrival at a bonus not yet earned. Owner picked the
+plain, honest reword (a "need N more" / "at 2pc" form; exact string TBD with the
+copy landing).
+
+**The bigger issue (owner, verbatim): "the whole system is failing to take into
+account a 4-piece bonus and its implications... I know the system got it wrong."**
+The owner has a specific case in mind and is testing whether it's found
+independently. This is escalated to its own investigation
+(`.scratch/carry-forward/issues/331-...`): does the system correctly account for
+4pc bonuses in ranking AND display — e.g. a row below 3 pieces shows only the
+next (2pc) threshold and hides the 4pc implication; ranking may under-credit an
+item that is a stepping-stone to a strong 4pc; the panel may be the only place a
+4pc surfaces. The reword here does not fix that — 330 stays scoped to the line's
+wording; 331 owns the system question.
+
 ## Where
 
 `assets/locales/en/translation.json` key `upgrades_tab.set_bonus.prospective`;
