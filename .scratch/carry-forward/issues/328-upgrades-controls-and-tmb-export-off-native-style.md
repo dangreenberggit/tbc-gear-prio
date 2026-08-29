@@ -16,6 +16,15 @@ pointing at the tab not matching how wowsims styles its own pages:
    and is clankerbrain." (Copy rework tracked as its own item — see below.)
 2. **The "Set potential" and "BiS only" checkboxes look too big.**
 3. **The "Content" dropdown looks too big.**
+4. **The set-potential toggle needs a tooltip** — a plain-English, reviewed
+   explanation of what the toggle actually does (owner note, 2026-08-28).
+   Dependency: the *precise* wording waits on ticket 331's open question being
+   settled (does a noise-level set bonus move the ranking, or only show as gated
+   extra info — see `.scratch/set-bonus-value/README-set-bonus-truth.md`). Once
+   331 resolves what the toggle does, write the tooltip to match it, in plain
+   English, and have it reviewed (writing-for-agents / plain-English rules).
+   Until then the tooltip text is not final. Match wowsims' native tooltip idiom
+   (tippy.js is already a dependency; see how other controls attach tooltips).
 
 ## Owner direction
 
