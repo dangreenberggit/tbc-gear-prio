@@ -4,6 +4,7 @@ import {
   CUTOFF_FERAL,
   cutoffForSpec,
   meetsCutoff,
+  setBonusNoiseFloorDps,
 } from "../src/cutoff.js";
 
 describe("per-spec cutoff", () => {
@@ -44,5 +45,23 @@ describe("per-spec cutoff", () => {
   it("meetsCutoff still reads whichever Cutoff object it's given", () => {
     expect(meetsCutoff(3.5, 0.1, CUTOFF)).toBe(true);
     expect(meetsCutoff(3.5, 0.1, CUTOFF_FERAL)).toBe(false);
+  });
+});
+
+describe("setBonusNoiseFloorDps (332)", () => {
+  it("derives √2 × absDps per spec", () => {
+    // A prospective set bonus folds two measured deltas, so its combined 2×SE
+    // bar is √2 larger than the per-spec `absDps` bar. Expressed via Math.SQRT2,
+    // not decimals, so a mutation of the derivation turns this red.
+    expect(setBonusNoiseFloorDps(CUTOFF)).toBe(Math.SQRT2 * CUTOFF.absDps);
+    expect(setBonusNoiseFloorDps(CUTOFF_FERAL)).toBe(
+      Math.SQRT2 * CUTOFF_FERAL.absDps
+    );
+  });
+
+  it("gives feral a strictly higher floor than ret", () => {
+    expect(setBonusNoiseFloorDps(CUTOFF_FERAL)).toBeGreaterThan(
+      setBonusNoiseFloorDps(CUTOFF)
+    );
   });
 });

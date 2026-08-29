@@ -4,11 +4,7 @@
  * that is the property the Stage 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
-import {
-  meetsCutoff,
-  SET_BONUS_NOISE_FLOOR_DPS,
-  type Cutoff,
-} from "./cutoff.js";
+import { meetsCutoff, setBonusNoiseFloorDps, type Cutoff } from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
 import { setPotentialIsConfounded } from "./set-potential.js";
 import type { RankedItem, Ranking } from "./rank.js";
@@ -318,7 +314,7 @@ function belowCutoffUnderView(
   cutoff: Cutoff
 ): boolean {
   if (!withSetPotential) return item.belowCutoff;
-  const prospective = rankableSetPotential(item);
+  const prospective = rankableSetPotential(item, setBonusNoiseFloorDps(cutoff));
   if (prospective === 0) return item.belowCutoff;
   const effectiveDps = item.deltaDps + prospective;
   // Percentage arm scaled off the same baseline `rank.ts` used for `deltaPct`,
@@ -334,23 +330,31 @@ function belowCutoffUnderView(
  * the fact, so it contributes nothing here — it is still disclosed on the row
  * and in the Set potential panel (ticket 90).
  *
- * A figure at or below `SET_BONUS_NOISE_FLOOR_DPS` is noise around a true zero,
+ * A figure at or below the per-spec noise floor (`setBonusNoiseFloorDps` of the
+ * ranking's own `Cutoff`, ≈4.81 ret / ≈5.09 feral) is noise around a true zero,
  * so it also contributes nothing: it must not move the sort key or the cutoff
- * verdict. The comparison is strict (`>`), matching the display gate's strict
- * `> SET_BONUS_NOISE_FLOOR_DPS` so a boundary value behaves identically in both
- * layers — no row sorts on a bonus the display hides (ticket 331).
+ * verdict. The floor arrives as a parameter — the caller derives it from the
+ * frozen per-spec cutoff — so this predicate stays ignorant of the `Cutoff`
+ * shape. The comparison is strict (`>`), matching the display gate's strict
+ * `> setBonusNoiseFloorDps(cutoff)` on the same frozen cutoff so a boundary
+ * value behaves identically in both layers — no row sorts on a bonus the
+ * display hides (tickets 331, 332).
  */
 export function rankableSetPotential(
-  item: Pick<RankedItem, "setContext">
+  item: Pick<RankedItem, "setContext">,
+  noiseFloorDps: number
 ): number {
   if (setPotentialIsConfounded(item)) return 0;
   const bonus = item.setContext?.prospectiveBonusDps ?? 0;
-  return bonus > SET_BONUS_NOISE_FLOOR_DPS ? bonus : 0;
+  return bonus > noiseFloorDps ? bonus : 0;
 }
 
-function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {
+function sortKeyFor(
+  withSetPotential: boolean,
+  noiseFloorDps: number
+): (r: ViewRow) => number {
   return withSetPotential
-    ? (r) => r.deltaDps + rankableSetPotential(r)
+    ? (r) => r.deltaDps + rankableSetPotential(r, noiseFloorDps)
     : (r) => r.deltaDps;
 }
 
@@ -377,7 +381,8 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
   const pinBis = v.pinBis ?? false;
   const zone = v.raid === undefined || v.raid === "all" ? undefined : v.raid;
   const boss = v.boss === undefined || v.boss === "all" ? undefined : v.boss;
-  const sortKey = sortKeyFor(v.withSetPotential ?? false);
+  const noiseFloorDps = setBonusNoiseFloorDps(r.cutoff);
+  const sortKey = sortKeyFor(v.withSetPotential ?? false, noiseFloorDps);
 
   const filtered: ViewRow[] = r.items
     .filter((item) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CUTOFF } from "../src/cutoff.js";
+import { CUTOFF, CUTOFF_FERAL, setBonusNoiseFloorDps } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import {
@@ -671,16 +671,19 @@ describe("applyView", () => {
      * floor would otherwise flip the order and clear the cutoff), so the test
      * is red without the gate and green with it.
      */
-    it("does not move a sub-floor prospective bonus in sort or cutoff (331)", () => {
-      // Below-cutoff on its own stats; a +9 prospective figure is under the 10
-      // noise floor, so the toggle must leave its rows index and its
-      // belowCutoff verdict identical on and off. Ungated, -1 + 9 = 8 would
-      // beat item 2's 5 and clear the 3.4 cutoff.
+    it("does not move a sub-floor prospective bonus in sort or cutoff (331/332)", () => {
+      // `ranking()` uses ret's `CUTOFF`, so the per-spec floor here is
+      // `setBonusNoiseFloorDps(CUTOFF)` ≈ 4.81. A prospective figure just under
+      // that floor is noise, so the toggle must leave this row's index and its
+      // belowCutoff verdict identical on and off. The figure is chosen so that,
+      // ungated, 1 + 4.807 = 5.807 WOULD clear the 3.4 cutoff and beat item 2's
+      // 3 — so it is the gate, not a small sum, that keeps the row put.
+      const subFloorBonus = setBonusNoiseFloorDps(CUTOFF) - 0.001;
       const r = ranking([
         item({
           itemId: 1,
-          deltaDps: -1,
-          deltaPct: -0.05,
+          deltaDps: 1,
+          deltaPct: 0.05,
           belowCutoff: true,
           setContext: {
             setId: 626,
@@ -689,10 +692,10 @@ describe("applyView", () => {
             piecesAfterSwap: 2,
             nextThreshold: 4,
             crossesThreshold: false,
-            prospectiveBonusDps: 9,
+            prospectiveBonusDps: subFloorBonus,
           },
         }),
-        item({ itemId: 2, deltaDps: 5, deltaPct: 0.25, rank: 1 }),
+        item({ itemId: 2, deltaDps: 3, deltaPct: 0.14, rank: 1 }),
       ]);
 
       const off = applyView(r);
@@ -737,12 +740,19 @@ describe("applyView", () => {
   });
 
   /**
-   * Ticket 331: the gate lives in the exported pure function so a sub-noise
+   * Tickets 331/332: the gate lives in the exported pure function so a sub-noise
    * (including negative) figure contributes 0 to both the sort key and the
-   * cutoff path, and the boundary is strict (`> SET_BONUS_NOISE_FLOOR_DPS`),
-   * matching the display gate's strict `> 10`.
+   * cutoff path. The floor is now per-spec and derived from the ranking's own
+   * `Cutoff` — `setBonusNoiseFloorDps(cutoff) = √2 × cutoff.absDps`, ≈4.81 ret
+   * (`CUTOFF`) / ≈5.09 feral (`CUTOFF_FERAL`) — and arrives as a parameter, so
+   * these tests pass it explicitly. The boundary is strict (`>`), matching the
+   * display gate's strict `> setBonusNoiseFloorDps(cutoff)` on the same frozen
+   * cutoff. Boundaries are written as `Math.SQRT2 * absDps`, never as decimals,
+   * so a mutation of the derivation turns a boundary test red.
    */
-  describe("rankableSetPotential noise floor (331)", () => {
+  describe("rankableSetPotential noise floor (331/332)", () => {
+    const retFloor = setBonusNoiseFloorDps(CUTOFF);
+    const feralFloor = setBonusNoiseFloorDps(CUTOFF_FERAL);
     const withBonus = (prospectiveBonusDps: number) =>
       item({
         itemId: 1,
@@ -758,27 +768,40 @@ describe("applyView", () => {
       });
 
     it("returns 0 for a negative sub-floor bonus", () => {
-      expect(rankableSetPotential(withBonus(-3.876))).toBe(0);
+      expect(rankableSetPotential(withBonus(-3.876), retFloor)).toBe(0);
     });
 
     it("returns 0 for a small positive sub-floor bonus", () => {
-      expect(rankableSetPotential(withBonus(0.545))).toBe(0);
+      expect(rankableSetPotential(withBonus(0.545), retFloor)).toBe(0);
     });
 
-    it("returns 0 at exactly the floor (strict >)", () => {
-      expect(rankableSetPotential(withBonus(10))).toBe(0);
+    it("returns 0 at exactly the ret floor (strict >)", () => {
+      expect(rankableSetPotential(withBonus(retFloor), retFloor)).toBe(0);
     });
 
-    it("passes an above-floor bonus through unchanged", () => {
-      expect(rankableSetPotential(withBonus(18.039))).toBe(18.039);
+    it("passes a just-above-ret-floor bonus through unchanged", () => {
+      const bonus = retFloor + 0.001;
+      expect(rankableSetPotential(withBonus(bonus), retFloor)).toBe(bonus);
     });
 
-    it("passes a just-above-floor bonus through unchanged", () => {
-      expect(rankableSetPotential(withBonus(10.001))).toBe(10.001);
+    it("returns 0 for a just-below-ret-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(retFloor - 0.001), retFloor)).toBe(
+        0
+      );
     });
 
-    it("returns 0 for a just-below-floor bonus", () => {
-      expect(rankableSetPotential(withBonus(9.999))).toBe(0);
+    it("passes a well-above-floor bonus through unchanged", () => {
+      expect(rankableSetPotential(withBonus(18.039), retFloor)).toBe(18.039);
+    });
+
+    it("gates the same bonus differently by spec (feral floor is higher)", () => {
+      // A bonus between the two per-spec floors: above ret's ≈4.81, below
+      // feral's ≈5.09. Passes ret, zeroed for feral — the floor differs by spec.
+      const between = (retFloor + feralFloor) / 2;
+      expect(between).toBeGreaterThan(retFloor);
+      expect(between).toBeLessThan(feralFloor);
+      expect(rankableSetPotential(withBonus(between), retFloor)).toBe(between);
+      expect(rankableSetPotential(withBonus(between), feralFloor)).toBe(0);
     });
   });
 
