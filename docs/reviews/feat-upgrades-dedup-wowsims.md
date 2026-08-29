@@ -525,3 +525,182 @@ wired, A2 assertion escape hatch) are deferred to new tickets.
 | STD1 | Standards   | fixed       | Durable-claims breach fixed with SP2                                                                                                     |
 | STD2 | Standards   | fixed       | decision-log / map.md updated this round (325, 326 mapped; 315 resolution recorded in-ticket)                                            |
 | STD3 | Standards   | wontfix     | No defect — comment policy, naming, gate house style all hold                                                                            |
+
+# Round 6 — the 331 noise-floor ranking gate + the 327/328/329/330 presentation batch
+
+Reviewed range: `8edf764ff1b3dfa65d3cd1b96ddf4880cf4cd157..e10581b3e4b218612617177c74d432229b526705`
+Companion fork range: `bc79253625b040bd04718b141cbf94ffc75e20fe..4ae6afe988208fd7acaf1304d2fa1b3c80718cac`
+
+Two stage-gate runs land in this round: the **331** set-bonus noise-floor gate
+(a single shared `SET_BONUS_NOISE_FLOOR_DPS = 10` in `packages/core/src/cutoff.ts`,
+imported by both the display gate and the ranking gate; `rankableSetPotential`
+now returns 0 for a sub-floor prospective bonus so it moves neither the sort key
+nor the cutoff; byte-identical ported fork twin + full drift cycle) and the
+**327/328/329/330** presentation batch (native auto-layout results table with an
+`overflow-x:auto` fallback, native-styled controls, a layout gate that now drives
+a real headless WASM run to assert legibility on real rows, and one reworded
+set-bonus line). Stage artifacts in `.scratch/stage-gate/upgrades-331-noise-rank/`
+and `.scratch/stage-gate/upgrades-css-controls-copy/`; the round-6 review plan is
+`.scratch/review-plans/round-6-plan.md`.
+
+Dispatch: no `codex` on PATH; three fresh-context Opus subagents (review lane),
+one parallel batch — adversarial + domain briefs, Standards+Spec via the
+`code-review` skill (its own two sub-agents). Each axis handed both diffs and the
+stage-gate/ticket inputs; each told it writes nothing. **No blocking or material
+finding on any axis.** Five minor findings; three become follow-up tickets
+(332/333/334), two are recorded as known limitations.
+
+## Adversarial
+
+**No blocking or material findings; all three priority targets sound.** The
+reviewer ran the layout gate twice, mutation-tested the noise boundary offline,
+and verified twin identity by sha256; working tree clean in both repos.
+
+- **Headless WASM gate (`test-layout.mjs`) — cannot pass vacuously.** A timed-out
+  run pushes a failure; `legibilityProbeExpression` returns `{error:'only N rows'}`
+  below `MIN_ROWS`, `assertLegibility` pushes `ok:false` on any error, and
+  `failures.length` drives `process.exit(1)`. The legibility phase cannot pass
+  without >=5 landed rows. A missing `lib.wasm`/assets makes `build()` **throw**
+  (fail loudly), not skip. Ran `node ./test-layout.mjs` (fork, Node v22.16.0)
+  **twice: exit 0, 68s and 69s wall** (7 rows in 26.4s, well inside the 120s
+  deadline), 37 assertions across 375/653/768/1280, deterministic — no flakiness.
+- **A6 minor (new, not 325/326):** the assertion-(7) scroller check is guarded by
+  `needsScroll`, so at 653 (table == wrap) and 768/1280 (`overflow-x visible`) it
+  passes without exercising the scroll path; only 375 (`table 407 vs wrap 319`,
+  `overflow-x auto`) truly bites. Low harm — the 375 case does exercise it.
+- **Noise gate boundary — not test theatre.** Strict `>` routes through the one
+  `rankableSetPotential` on both feed paths (`sortKeyFor`, `belowCutoffUnderView`);
+  a negative bonus returns 0. Offline mutation: gate-removed fails 3 assertions,
+  `>=` fails the "exactly 10 -> 0" test (pins the operator), floor->0 fails 2.
+  `vitest run view.test.ts` -> 56 passed.
+- **A7 minor (new):** the just-above boundary is only tested at 18.039, never
+  ~10.001 — a constant change `10->15` would slip the unit suite (operator pinned,
+  value not). -> ticket 333.
+- **Twin identity holds by measurement:** committed `cutoff.ts` (`4efa3639...`) and
+  `view.ts` (`d23bc93c...`) sha256 exactly match the PROVENANCE rows; the gate
+  bodies are byte-identical (only the recorded `setPotentialIsConfounded` inlining
+  differs).
+
+## Domain
+
+**Domain reasoning sound; no blocking or material finding.** Every load-bearing
+number re-derived independently.
+
+- **The floor value 10 as a ranking gate — defensible, one bounded limitation.**
+  Re-derived: per-run SE ~1.678 (ret)/1.774 (feral); a prospective bonus folds two
+  deltas -> noise ~~sqrt(2)xSE~~2.373 SE; a strict 2xSE bar ~4.75/5.02, so 10 ~4xSE
+  (conservative). The distribution of every committed `prospectiveBonusDps` is
+  either sub-floor noise (-4.10, -3.88, +0.31, +0.545) or far above (17.14, 18.04,
+  20.29, 32.26, 43.09, 114, 119, 185): the **(0.545, 17.14] band is empty** —
+  nothing lands in 10-15. A **display** false-negative is invisible-vs-shown; a
+  **ranking** false-negative is a genuinely-missed upgrade — higher stakes for the
+  same number. A real set bonus is quantized, so a true 10-15 DPS 4pc is
+  physically possible on a not-yet-measured spec. **D3 minor:** record as a known
+  limitation; the per-spec/CUTOFF-derived floor (`cutoff.ts:32-33`) is the
+  documented follow-up. -> ticket 332.
+- **ADR-0024 reconciliation on ticket 331 — correct, no amendment needed.**
+  ADR-0024 decision 2 governs `packageDeltaDps` in package mode ("never `bonusDps`").
+  `rankableSetPotential` reads `prospectiveBonusDps` = `rank.ts:1850`'s
+  `matching.bonusDps` — the increment currency the ADR excludes, in the toggle path
+  it makes no decision about. Gating it amends nothing. (The earlier handoff wrongly
+  called an amendment "bookkeeping"; the landed ticket text corrected to
+  "un-amended" — the right call.)
+- **The 330 reword — game-honest.** Landed P1 no longer implies arrival; `after <
+threshold` always (`nextThreshold > piecesAfterSwap`), `{{threshold}}` is
+  `ctx.nextThreshold` (2/4), and `rank.ts:1849` pins `bonusDps` to that threshold,
+  so "more at {{threshold}}pc" correctly describes what the sim credits, against the
+  threshold never piece count.
+- **Copy-string domain sanity — clean.** "raid-drop upgrades", "loot-priority tool"
+  (TMB), the tooltip's "complete a set bonus"/"too small ... ignored", and "BiS" all
+  used the project's way.
+
+## Standards + Spec
+
+**No hard violations of a documented standard; no spec-conformance defect; no
+scope creep.**
+
+- **Drift cycle (331) — clean, verified reproducible.** PROVENANCE hashes match
+  `git show 4ae6afe98:` sha256sum; the lock (`ad965d1`) pins the actual fork tip;
+  the effects stamp (`e10581b`) is **stamp-only** (net diff is the single
+  `forkCommit` line, id set 217/451 unchanged); regenerating at the pin left
+  `git status` clean — reproducible, as round 5's A3 required. Order correct:
+  fork edit+PROVENANCE -> re-pin -> stamp.
+- **Spec conformance — every change traces to a ticket + plan step.** 327
+  (auto-layout, `overflow-x:auto` fallback, **nowrap on both Slot and DPS** per the
+  Gate-B F3-new requirement, desktop `up(md)` block untouched); 328 (native
+  CopyButton filled+icon, dropdown matches the phase selector, tippy tooltip); 329
+  (real-run gate at 375/653/768/1280, one-line Slot+DPS assertion, assertion #1
+  exempts sanctioned scrollers); 330 (**exactly one** string reworded;
+  `crosses`/`confounded` untouched; `{{before}}` var removed from string and call
+  site); 331 (gate + tests, ADR reconciliation on the ticket).
+- **Honest-deferral check PASSES.** Ticket 331 records the weighted/full path
+  `rank-report-rules.ts:697-714` as "a second, still-unfixed instance of the same
+  defect ... out of scope," notes the `* factor` discount, stays `Status: open`; no
+  round-6 prose claims 331 is fully fixed.
+- **Gate-C deviation re-judgment.** The checkbox fix deleted the 40px inflation
+  SCSS rule rather than adopting `BooleanPicker` — plan-sanctioned (Step 2(2)
+  allowed either path), honestly recorded in the SCSS comment, **not** a silent
+  drop. **STD4 minor:** the `BooleanPicker` idiom is deferred, worth a follow-up.
+  -> ticket 334. Assertion (8)'s row-height ceiling 4x->7x is a documented backstop,
+  not an escape hatch (assertion (6) asserts one-line Slot/DPS directly). The
+  effects regen is stamp-only (above).
+- **Comments / commits / durable claims — clean.** `cutoff.ts:20-34` and
+  `view.ts:337-341` explain _why_ (floor + strict comparison for cross-layer
+  agreement); all five commit subjects are imperative <=50 chars with wrapped
+  why-bodies (`68fc6e0` exemplary); the handoff and `README-set-bonus-truth.md`
+  cite re-runnable commands for causal claims or mark open questions unresolved.
+- **STD5 minor (Fowler judgement call):** the floor is a bare `number` reused
+  across display and ranking (Primitive Obsession) — deliberate and documented
+  (one shared constant is the point of the drift); not worth a wrapper type. No
+  ticket.
+
+## Owner decision — three copy strings (surfaced, not resolved)
+
+The three copy strings landed as sensible defaults; **the owner picks the final
+wording.** Each landed default plus its alternatives:
+
+**Set-bonus line** (`set_bonus.prospective`) — landed **P1**:
+
+- **P1 (landed):** `+{{dps}} more at {{threshold}}pc {{set}} ({{after}}/{{threshold}} after this swap)` — keeps the `+dps` scan anchor; honest; shows progress.
+- P2: `{{after}}/{{threshold}} {{set}} after this swap — {{threshold}}pc bonus adds +{{dps}}` — progress-first; longest.
+- P3: `counts toward {{threshold}}pc {{set}} (+{{dps}} when complete)` — tersest; drops numeric progress.
+
+**Set-potential tooltip** (`view.set_potential_tooltip`) — landed **T1**:
+
+- **T1 (landed):** `Include set bonuses in the ranking. An item that would complete a set bonus gets credit for it; bonuses too small to change the ranking are ignored.`
+- T2: `When on, a row's DPS gain includes any set bonus the swap would unlock. Very small bonuses are left out.` — shorter, per-row framing.
+
+**TMB export blurb** (`export.caveat`) — landed **B2**:
+
+- B1: `A ranked list of raid-drop upgrades, as JSON for your guild's loot planning.` — purpose-first.
+- **B2 (landed):** `Copy your best raid-drop upgrades as JSON to import into a loot-priority tool.` — native verb-first house pattern.
+- B3: `Your BiS raid-drop upgrade list, as JSON.` — tersest.
+
+If the owner's pick differs from a landed default, the change is a follow-up edit
+after this review (fork commit + re-pin), not an in-review fix.
+
+## Summary
+
+Round 6 covers the 331 noise-floor ranking gate and the 327/328/329/330
+presentation batch. All four axes clear it with **no blocking or material
+findings**: the noise gate is not test theatre and its currency reconciles with
+ADR-0024 without amendment; the drift cycle is complete and reproducible; the
+headless-run layout gate cannot pass vacuously and runs deterministically in ~68s;
+every change traces to a ticket, and 331's still-open weighted/full instance is
+honestly recorded. Five minor findings — three filed as follow-up tickets (332
+per-spec ranking floor, 333 near-boundary test, 334 BooleanPicker idiom), two
+recorded as known limitations (the scroller check only bites at 375; the shared
+floor constant's Primitive Obsession is deliberate). The three copy strings are
+surfaced for the owner's pick above. 331 is **not** claimed fully fixed — the
+weighted/full report path remains open on ticket 331.
+
+## Disposition
+
+| ID   | Axis        | Disposition | Ticket / note                                                                                                                         |
+| ---- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| A6   | Adversarial | wontfix     | Scroller check only exercised at 375 (table==wrap at 653, overflow-x visible at 768/1280) — low harm; the 375 case does exercise it   |
+| A7   | Adversarial | defer       | `.scratch/carry-forward/issues/333-noise-floor-value-not-pinned-by-a-near-boundary-test.md` — add ~10.001 passthrough + ~9.999->0     |
+| D3   | Domain      | defer       | `.scratch/carry-forward/issues/332-ranking-noise-floor-may-zero-a-real-10-15-dps-bonus.md` — per-spec ranking floor; band empty today |
+| SP4  | Spec        | wontfix     | No defect — every change traces to a ticket + plan step; no scope creep; honest-deferral of the weighted/full path confirmed          |
+| STD4 | Standards   | defer       | `.scratch/carry-forward/issues/334-adopt-booleanpicker-idiom-for-upgrades-view-checkboxes.md` — 28x28 sizing met; idiom deferred      |
+| STD5 | Standards   | wontfix     | Primitive Obsession on the shared floor constant is deliberate and documented (one shared value for display + ranking); no wrapper    |
