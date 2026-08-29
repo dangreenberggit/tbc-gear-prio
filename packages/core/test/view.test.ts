@@ -772,6 +772,14 @@ describe("applyView", () => {
     it("passes an above-floor bonus through unchanged", () => {
       expect(rankableSetPotential(withBonus(18.039))).toBe(18.039);
     });
+
+    it("passes a just-above-floor bonus through unchanged", () => {
+      expect(rankableSetPotential(withBonus(10.001))).toBe(10.001);
+    });
+
+    it("returns 0 for a just-below-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(9.999))).toBe(0);
+    });
   });
 
   describe("hideOwned", () => {
