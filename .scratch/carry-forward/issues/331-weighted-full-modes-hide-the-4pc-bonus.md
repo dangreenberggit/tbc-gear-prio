@@ -79,3 +79,39 @@ reads by default.
 This is an engine-logic change touching `rank.ts` / `set-value.ts` /
 `rank-report-rules.ts` and their ported fork copies (drift cycle). Ticket 330
 (the line's wording) is downstream of whatever this decides to show.
+
+## Reframed 2026-08-28 — the original framing was wrong; do NOT execute the parked plan
+
+**Read `.scratch/set-bonus-value/README-set-bonus-truth.md` first.** A stage-gate
+plan was written and reviewed for this ticket
+(`.scratch/stage-gate/upgrades-4pc-visibility/plan.md`) that would "surface the
+4pc by summing per-threshold increments." Investigation showed that plan **solves
+the wrong problem** and it is superseded, not executed:
+
+- `bonusDps` **already excludes swap cost** (`computeSynergy` subtracts each
+  piece's single-swap delta). It is the isolated marginal bonus effect.
+- A negative 4pc `bonusDps` (Lightbringer ≈ −9.3) is **sim noise around a true
+  zero**, not a real loss — settled in `.scratch/set-bonus-value/verification.md`.
+  A set bonus is ≥0 by nature. Summing/showing that negative was making the
+  problem worse, not fixing it.
+- For ret specifically, no tier set bonus clears the noise, so correctly nothing
+  should show.
+
+**Owner's corrected design (2026-08-28):** the row's **main/ranked number is the
+net effect**; the **set bonus is a secondary annotation shown only above the
+noise floor** (a real, ≥0 bonus). Below noise → shown nowhere.
+
+**The actual open question (UNRESOLVED — needs settling before any code):** with
+set-potential ON, the ranked number is `deltaDps + rankableSetPotential(item)`
+(`view.ts:317-341`), and `rankableSetPotential` returns the **ungated**
+`prospectiveBonusDps` — so a below-noise bonus silently moves the sort key and
+cutoff even though the displayed line (ticket 315's `SET_BONUS_MIN_DISPLAY_DPS`
+floor) correctly hides it. **Whether that is a bug or intended is unresolved:**
+ADR-0024 says the opt-in view MAY score a member by the package it completes, but
+predates the 315 noise floor. Reconciling the owner's "net effect ranks, bonus is
+gated extra" intent with ADR-0024 is the next step — it may amend ADR-0024 or
+confirm current behavior. **Do not gate `rankableSetPotential` on the noise floor
+without settling ADR-0024 first.**
+
+No execution taken 2026-08-28 — owner directed stop-and-consolidate. The
+stage-gate is parked at Gate B with the plan superseded (see its decision-log).
