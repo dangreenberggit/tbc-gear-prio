@@ -115,3 +115,30 @@ without settling ADR-0024 first.**
 
 No execution taken 2026-08-28 — owner directed stop-and-consolidate. The
 stage-gate is parked at Gate B with the plan superseded (see its decision-log).
+
+## 2026-08-29 — the `view.ts` ranking gate landed (open question settled)
+
+The set-potential ranking gate landed on `feat/upgrades-dedup-wowsims`
+(stage-gate plan `.scratch/stage-gate/upgrades-331-noise-rank/plan.md`):
+`rankableSetPotential` (`packages/core/src/view.ts`, and its ported fork twin)
+now returns `0` unless the unconfounded `prospectiveBonusDps` is strictly greater
+than the shared `SET_BONUS_NOISE_FLOOR_DPS = 10` (`packages/core/src/cutoff.ts`),
+which the fork tab's display gate also imports — so display and ranking read one
+floor and can never disagree. A sub-noise (including negative) figure now moves
+neither the toggle's sort key nor the cutoff verdict.
+
+**ADR-0024 confirmed un-amended.** `rankableSetPotential` feeds
+`setContext.prospectiveBonusDps`, which `rank.ts:1850` assigns from
+`matching.bonusDps` — the per-threshold **increment** currency. ADR-0024's
+decisions 2/5 and amendment-3 govern the `packageDeltaDps` currency in **package
+mode** only, a different currency in a different mode, so gating the toggle path
+amends nothing ADR-0024 decided; the ADR itself is untouched.
+
+**Still open (why this ticket stays open):** the weighted/full report-mode path
+(`rank-report-rules.ts:697-714`, `weightedSetPotentialDps`) sorts by `deltaDps +
+prospectiveBonusDps * factor` with **no** noise floor — a second, still-unfixed
+instance of the same defect, in the core report rather than the fork tab, and the
+`* factor` discount (0.5/0.25) can pull an above-floor value below the floor, so
+the empty (3.4, 10] gap in the committed fixtures does not fully protect it.
+This awaits this ticket's weighted/full redesign; it was out of scope for the
+`rankableSetPotential`-shaped fix above.

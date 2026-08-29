@@ -4,7 +4,11 @@
  * that is the property the Stage 2 gate box asserts, and the reason this is the
  * module's second export rather than logic duplicated in the CLI and the web.
  */
-import { meetsCutoff, type Cutoff } from "./cutoff.js";
+import {
+  meetsCutoff,
+  SET_BONUS_NOISE_FLOOR_DPS,
+  type Cutoff,
+} from "./cutoff.js";
 import { sourceMatchesBoss, type ItemSource } from "./pool.js";
 import { setPotentialIsConfounded } from "./set-potential.js";
 import type { RankedItem, Ranking } from "./rank.js";
@@ -329,10 +333,19 @@ function belowCutoffUnderView(
  * breaks another worn set is inflated by an amount no sim can separate after
  * the fact, so it contributes nothing here — it is still disclosed on the row
  * and in the Set potential panel (ticket 90).
+ *
+ * A figure at or below `SET_BONUS_NOISE_FLOOR_DPS` is noise around a true zero,
+ * so it also contributes nothing: it must not move the sort key or the cutoff
+ * verdict. The comparison is strict (`>`), matching the display gate's strict
+ * `> SET_BONUS_NOISE_FLOOR_DPS` so a boundary value behaves identically in both
+ * layers — no row sorts on a bonus the display hides (ticket 331).
  */
-function rankableSetPotential(item: Pick<RankedItem, "setContext">): number {
+export function rankableSetPotential(
+  item: Pick<RankedItem, "setContext">
+): number {
   if (setPotentialIsConfounded(item)) return 0;
-  return item.setContext?.prospectiveBonusDps ?? 0;
+  const bonus = item.setContext?.prospectiveBonusDps ?? 0;
+  return bonus > SET_BONUS_NOISE_FLOOR_DPS ? bonus : 0;
 }
 
 function sortKeyFor(withSetPotential: boolean): (r: ViewRow) => number {

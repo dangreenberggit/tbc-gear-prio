@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
 import type { ItemSource } from "../src/pool.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
-import { applyView, raidFilterOptions, type ViewOptions } from "../src/view.js";
+import {
+  applyView,
+  raidFilterOptions,
+  rankableSetPotential,
+  type ViewOptions,
+} from "../src/view.js";
 import { realPoolEntry } from "./real-source.js";
 
 function item(over: Partial<RankedItem> & Pick<RankedItem, "itemId">) {
@@ -656,6 +661,116 @@ describe("applyView", () => {
       ]);
       const on = applyView(r, { withSetPotential: true });
       expect(on.shortlist.map((x) => x.itemId)).toEqual([6]);
+    });
+
+    /**
+     * Ticket 331: a sub-noise-floor prospective bonus must not move the row's
+     * sort position or its cutoff verdict — the toggle is a no-op for it,
+     * matching the display gate that already hides it. The values here are
+     * chosen so the *ungated* behaviour would differ (a +9 bonus below the 10
+     * floor would otherwise flip the order and clear the cutoff), so the test
+     * is red without the gate and green with it.
+     */
+    it("does not move a sub-floor prospective bonus in sort or cutoff (331)", () => {
+      // Below-cutoff on its own stats; a +9 prospective figure is under the 10
+      // noise floor, so the toggle must leave its rows index and its
+      // belowCutoff verdict identical on and off. Ungated, -1 + 9 = 8 would
+      // beat item 2's 5 and clear the 3.4 cutoff.
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: -1,
+          deltaPct: -0.05,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 9,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 5, deltaPct: 0.25, rank: 1 }),
+      ]);
+
+      const off = applyView(r);
+      const on = applyView(r, { withSetPotential: true });
+      // Same order and same per-row belowCutoff verdict across the toggle.
+      expect(on.rows.map((x) => x.itemId)).toEqual(
+        off.rows.map((x) => x.itemId)
+      );
+      const offRow1 = off.rows.find((x) => x.itemId === 1)!;
+      const onRow1 = on.rows.find((x) => x.itemId === 1)!;
+      expect(onRow1.belowCutoffInView).toBe(offRow1.belowCutoffInView);
+      expect(onRow1.belowCutoffInView).toBe(true);
+    });
+
+    it("still moves an above-floor prospective bonus (331)", () => {
+      const r = ranking([
+        item({
+          itemId: 1,
+          deltaDps: -5,
+          deltaPct: -0.25,
+          belowCutoff: true,
+          setContext: {
+            setId: 626,
+            setName: "Justicar Battlegear",
+            piecesWornBefore: 1,
+            piecesAfterSwap: 2,
+            nextThreshold: 4,
+            crossesThreshold: false,
+            prospectiveBonusDps: 18.039,
+          },
+        }),
+        item({ itemId: 2, deltaDps: 20, deltaPct: 1, rank: 1 }),
+      ]);
+      const off = applyView(r);
+      // Off: bare -5 sorts last and stays below cutoff.
+      expect(off.rows.map((x) => x.itemId)).toEqual([2, 1]);
+      const on = applyView(r, { withSetPotential: true });
+      // On: -5 + 18.039 = 13.039 clears both the noise floor and the sort of 20's peer,
+      // and the row is promoted out of below-cutoff.
+      expect(on.belowCutoffCount).toBe(0);
+    });
+  });
+
+  /**
+   * Ticket 331: the gate lives in the exported pure function so a sub-noise
+   * (including negative) figure contributes 0 to both the sort key and the
+   * cutoff path, and the boundary is strict (`> SET_BONUS_NOISE_FLOOR_DPS`),
+   * matching the display gate's strict `> 10`.
+   */
+  describe("rankableSetPotential noise floor (331)", () => {
+    const withBonus = (prospectiveBonusDps: number) =>
+      item({
+        itemId: 1,
+        setContext: {
+          setId: 626,
+          setName: "Justicar Battlegear",
+          piecesWornBefore: 1,
+          piecesAfterSwap: 2,
+          nextThreshold: 4,
+          crossesThreshold: false,
+          prospectiveBonusDps,
+        },
+      });
+
+    it("returns 0 for a negative sub-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(-3.876))).toBe(0);
+    });
+
+    it("returns 0 for a small positive sub-floor bonus", () => {
+      expect(rankableSetPotential(withBonus(0.545))).toBe(0);
+    });
+
+    it("returns 0 at exactly the floor (strict >)", () => {
+      expect(rankableSetPotential(withBonus(10))).toBe(0);
+    });
+
+    it("passes an above-floor bonus through unchanged", () => {
+      expect(rankableSetPotential(withBonus(18.039))).toBe(18.039);
     });
   });
 
