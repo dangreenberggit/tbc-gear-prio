@@ -155,3 +155,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 324 does the UI already know anything worth showing a player? — owner request 2026-08-27 alongside the 318 ruling; a check, not a build, and "nothing" is an acceptable answer
 - 325 Upgrades-tab layout gate runs by hand, not as a gate — pre-merge round 5 (Adversarial A1); `test:layout` is defined but no CI/verify/aggregate calls it, so 322's "a gate that runs" premise is half-met
 - 326 layout gate assertion #5 has an `|| widthMatch` escape hatch — pre-merge round 5 (Adversarial A2); sound at 1280's two-column layout but could go vacuous under a future one-column layout; assert `grid-column` directly
+- 327 Upgrades results table illegible below 768px — owner report 2026-08-28 (3rd time); text goes vertical/clipped, huge row gaps; use wowsims-native table styling; the 322 gate missed it
+- 328 Upgrades controls + TMB export box off native style — owner report 2026-08-28; export button looks disabled + embarrassing blurb, oversized checkboxes and Content dropdown; match native wowsims components
+- 329 layout gate must assert legibility not just structure — owner report 2026-08-28; 322's gate passed vertical/clipped text because it tests structure, not readable cells; add below-768 legibility assertions
+- 330 set-bonus line names 2pc step but shows a higher-threshold number — owner report 2026-08-28 (relates 313/315); "+46.3 (0/2 → 1/2)" likely a 4pc figure mislabeled as 2pc; confirm what the number is, then reword/fix
