@@ -1,4 +1,4 @@
-Status: deferred (owner decision 2026-08-30: stay Phase 2 until reforge is)
+Status: blocked (owner decision 2026-08-30: stay Phase 2 until reforge reaches Phase 3)
 Type: task
 Origin: upstream-drift:warn during `pnpm verify` on feat/wowsims-tab-tickets, 2026-08-30; confirmed live via gh
 Blocks: none
