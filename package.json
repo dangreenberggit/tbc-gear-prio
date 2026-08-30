@@ -5,9 +5,13 @@
   "description": "tbc gear prio",
   "type": "module",
   "packageManager": "pnpm@10.6.2",
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "scripts": {
     "prepare": "git config core.hooksPath .githooks",
-    "verify": "pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run curated-set-phase:check && pnpm run mirrors:check && pnpm run lock-merge:check && pnpm run sync-wowsims:unit:check && pnpm run feral-skeleton-apl:check && pnpm run sim-implemented-effects-classifier:check && pnpm run sim-implemented-effects:check && pnpm run engine-port-drift:check && pnpm run equip-eligibility:check && pnpm run ep-presets:check && pnpm run meta-conditions:check && pnpm run policy-notes:check && pnpm run fork-universes:check && pnpm run pool-listings:check && pnpm run upstream-drift:warn",
+    "preflight:node": "node -e \"const [maj,min]=process.versions.node.split('.').map(Number); if (maj<22 || (maj===22 && min<5)) { console.error('\\n[tbc-gear-prio] Node '+process.versions.node+' is too old. This repo needs Node >=22.5.0 (node:sqlite). Use fnm/nvm: `fnm use` (see .node-version).\\n'); process.exit(1); }\"",
+    "verify": "pnpm run preflight:node && pnpm run codegen:json-types:check && pnpm run typecheck && pnpm run lint && pnpm run format:check && pnpm run test && pnpm run sim-defaults:check && pnpm run skeleton:check && pnpm run boss-aliases:check && pnpm run sync:atlasloot:verify-local && pnpm run atlasloot:regen:check && pnpm run rep-tables:check && pnpm run wowhead-prose:check && pnpm run curated-set-phase:check && pnpm run mirrors:check && pnpm run lock-merge:check && pnpm run sync-wowsims:unit:check && pnpm run feral-skeleton-apl:check && pnpm run sim-implemented-effects-classifier:check && pnpm run sim-implemented-effects:check && pnpm run engine-port-drift:check && pnpm run equip-eligibility:check && pnpm run ep-presets:check && pnpm run meta-conditions:check && pnpm run policy-notes:check && pnpm run fork-universes:check && pnpm run pool-listings:check && pnpm run upstream-drift:warn",
     "typecheck": "tsc --build",
     "lint": "eslint .",
     "format:check": "prettier --check .",
