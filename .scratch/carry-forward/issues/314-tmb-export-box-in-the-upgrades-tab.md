@@ -126,4 +126,23 @@ box asks for was not captured). The **styling** sub-concern (328) and the
 a data-pipeline pass this run. 314's functional export behaviour is verified;
 the ticket stays open for its 126/328 sub-concerns and owner sign-off.
 
+## 2026-08-29 — export-box styling verified (Execution B, layout subset)
+
+The 314 **styling** sub-concern is landed and verified. The export box uses the
+site's own block idiom — `.upgrades-export.content-block` with a
+`content-block-header` title, a `form-control` monospace textarea, and the native
+`CopyButton` (`upgrades_tab.tsx:725-739`, `793-797`; `_upgrades_tab.scss:146-171`)
+— rather than a bespoke look. It sits with the results (post-`done`), matching the
+"exports what is displayed" placement the ticket argued for.
+
+DOM readback (`.scratch/.../layout-evidence/ranking-stage-evidence.json`): the
+reworded caveat renders ("Copy these raid-drop upgrades as JSON to import into a
+loot-priority tool."), the copy button is the filled native `btn-secondary` with
+the `fa-copy` icon (see 328). The populated, visible export box (15-item payload,
+count "15 items") is captured in Execution A's `.scratch/.../cdp-reverify.json`
+(done:true) — the fully-`done` state is hard to reach in a headless budget for a
+full 288-candidate phase-2 run, so the visible-populated state is cited from that
+artifact rather than re-captured. The 126 token/pattern-id sub-concern remains for
+Execution C. State: **styled, owner-checklist-pending.**
+
 ## Comments

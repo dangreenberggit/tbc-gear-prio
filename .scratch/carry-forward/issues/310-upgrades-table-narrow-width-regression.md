@@ -143,4 +143,39 @@ pass over ten owned files (ticket 306) — formatting only, `tsc` green, and the
 scss was **not** among the ten, so it is not a plausible cause. Recorded so the
 next reader does not spend time on it.
 
+## Investigation round 2 (2026-08-29) — REFUTED at verified viewports (Execution B)
+
+The blocker this ticket named — "the viewport could not be changed" — is
+resolved. CDP via `Emulation.setDeviceMetricsOverride` drives real viewports and
+`window.innerWidth` reads back **equal to the requested width** at 375, 653, 767
+and 1280 (F3 proof; `.scratch/.../layout-evidence/layout-evidence.json`
+`cdpProof`). This is the reliable path the earlier `resize_window`-based passes
+lacked.
+
+**The char-by-char wrap does not reproduce at the current tip.** Measured with a
+real WASM run (`vendor/tbc-new-fork/test-layout.mjs`, 37 assertions green at
+375/653/768/1280):
+
+- Computed `table-layout`: `auto` at every width (the mobile block sets it to
+  `auto` deliberately, `_upgrades_tab.scss:562-564`) — NOT `fixed`.
+- Slot and DPS cells: content height ≤ 1.5× line-height (17.5px) at every width.
+  No `R/a/n/k` / `Wa/ist` / `+61./2/DPS` stacking.
+- **Candidate 2 confirmed as the mechanism, now handled:** at 375px the table
+  content is 407px inside a 319px `.upgrades-results` panel — the container IS
+  narrower than the content, exactly as candidate 2 predicted. The current SCSS
+  handles it by making `.upgrades-results` an `overflow-x: auto` scroller
+  (`:557-560`), so the table scrolls horizontally rather than shattering per
+  character. Candidates 1, 3, 4 are moot: the fix does not depend on fixed
+  column widths at all.
+
+**Cause of the original observation:** the branch it was filed on (`342f6a74`)
+predates fork commit `f0c63af40` "Make the mobile results table legible below
+768px", which replaced the fixed-column treatment with the native scroller. The
+wrap was real on that older fork; it is fixed on the current tip (`5ed4436a8`).
+Not a live regression.
+
+Screenshots: `.scratch/stage-gate/wowsims-tab-tickets/layout-evidence/postrun-375.png`
+(and 653/767/1280). State: **refuted / styled, owner-checklist-pending** —
+closes on owner sign-off with 327.
+
 ## Comments

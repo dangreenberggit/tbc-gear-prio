@@ -286,4 +286,36 @@ than C advertised. C flagged this itself and called it a five-minute check.
 - Ticket 310 (narrow-width table wrapping) is open against the same component.
   Coordinate; do not let two changes land on the same SCSS blind to each other.
 
+## 2026-08-29 — styled, owner-checklist-pending (Execution B, layout-residual)
+
+State: **styled — awaiting owner sign-off on the rendered result.** The owner's
+chosen direction C (copy the Batch tab for run settings) is landed on the fork
+before base SHA `43f460c`; this executor verified the rendered result, it did not
+re-architect (C17: structure landed; no progress modal; inline status preserved).
+
+Landed structure, confirmed in the DOM and screenshots:
+
+- **Run-settings card** modelled on the Batch tab (`.upgrades-settings-container`,
+  `_upgrades_tab.scss:31-43`): info readout ("N eligible items") → Run (primary
+  `btn-primary`, full width) → Stop (outline) → the four set-once knobs
+  (Iterations, Candidates, BiS-prune, Phase) as native picker rows. Below `xl`
+  the four knobs collapse behind a "Run settings ›" disclosure so Run sits above
+  the results on a phone; at `xl`+ they show inline (`_upgrades_tab.scss:854-950`).
+- **Post-run view controls** ("Set potential", "BiS only", "Content") moved
+  ABOVE the results as a labelled "Filter results" group
+  (`upgrades_tab.tsx:646-676`), with short labels — resolving the owner's
+  "couldn't find the BiS-only toggle" and "no grouping" complaints.
+- Run carries primary-action weight; the crowded single row is gone.
+
+Evidence (CDP, innerWidth read back; F3):
+`.scratch/stage-gate/wowsims-tab-tickets/layout-evidence/prerun-{375,653,767,1280}.png`
+(pre-run toolbar), `postrun-*.png` and `ranking-stage-1280.png` (post-run view
+controls + card). The 322 layout gate (`test-layout.mjs`) asserts the settings
+panel renders above the results at narrow widths and the view-controls host sits
+above the sub-tabs — 37 assertions green at 375/653/768/1280.
+
+Note: the fully-`done` state (all three view controls visible together) is also
+captured in Execution A's `.scratch/.../cdp-reverify.json` (done:true). Closes on
+owner sign-off.
+
 ## Comments
