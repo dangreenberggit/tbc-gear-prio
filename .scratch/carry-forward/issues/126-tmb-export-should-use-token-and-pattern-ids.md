@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: feature
 Origin: owner request, 2026-08-12
 Blocks: none
@@ -87,3 +87,49 @@ hand-build a partial. **126 stays open** for a data-pipeline pass that: adds
 token/recipe sources in `assemble_universe.py`, regenerates universes + fork
 bundled copies, threads the id through `ItemSource`/the export on both sides,
 keeps the plain gear-id flavour, and captions which flavour is shown.
+
+## 2026-08-29 — RESOLVED (stage-gate wowsims-tab-tickets, Execution C)
+
+The data-pipeline pass above was executed. What shipped, tier-token half in
+full, pattern half deliberately deferred:
+
+**Tier tokens — done both paths.**
+- `assemble_universe.py` now carries each tier piece's `tokenId` (from
+  `data/two-hop/<spec>-tokens.json`) onto its `token` `ItemSource`. `tokenId`
+  added to the `token` variant in `packages/core/src/pool.ts`. All committed
+  universes regenerated: 635 `tokenId` fields added, no membership/other
+  content change (`git diff --ignore-cr-at-eol` over `data/` shows only
+  `+"tokenId"` lines). Generator deterministic (two runs cmp-identical).
+- **Report path:** `wowsimsTmbItemIdsJson` (+ `tokenIdForExport`) in
+  `packages/core/src/rank-report-rules.ts` emits the token id for tier rows,
+  gear id otherwise; the gear-id `wowsimsItemIdsJson` stays. Pure unit test
+  with a **whole-tier-set** assertion (all 18 ret pieces → their token ids,
+  read from the data file) in `packages/core/test/rank-report.test.ts`.
+- **Tab path:** `updateExport` in `upgrades_tab.tsx` gained a token/gear
+  flavour toggle (default token), reading `tokenId` off the row's own source
+  via `exportIdForRow` (local re-impl of the core function — import across the
+  port boundary is impossible); a caption names the active flavour; keys in
+  `assets/locales/en/translation.json`. The bundled universes carry the id
+  (re-synced in the same pass — see ticket 211).
+- **Verified on both paths (G3):**
+  - Report: pure unit test green (whole ret set).
+  - Tab-read: a deterministic check ran the exact `exportIdForRow` logic over
+    the **fork's bundled** `ret-p3.universe.json` — all 15 ret tier pieces
+    present map to their token ids, a non-tier row keeps its gear id.
+  - Tab live (CDP, `window.innerWidth` asserted): a real ret run surfaced
+    Crystalforge War-Helm (30131) and Crystalforge Breastplate (30129); the
+    token-flavour export emitted 30242 and 30236 (their tokens) in displayed
+    order with the gear ids absent; flipping the toggle emitted the gear ids
+    and dropped the tokens; the caption tracked each flavour.
+
+**Craftable patterns — note-and-skip (per the ticket's own fall-through).**
+Whether thatsmybis.com tracks profession *patterns* as lootable was not
+cheaply confirmable (no prior confirmation in-repo; would need live TMB
+inspection). Per this ticket ("Confirm TMB actually tracks patterns this way
+before building; if it doesn't, note that in this ticket and skip"),
+craftables keep their gear id in both flavours. The plumbing is ready if it is
+ever confirmed: `raid-recipes.json` carries `recipeId`, and a single
+`s.kind === "crafted"` branch in `tokenIdForExport` / `exportIdForRow`
+completes it with no new data work.
+
+`pnpm verify` fully green, including `fork-universes:check`, at branch tip.
