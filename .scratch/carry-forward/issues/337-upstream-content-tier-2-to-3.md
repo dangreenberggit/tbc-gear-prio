@@ -52,6 +52,12 @@ pool and gem palette.
 
 ## The migration work — when the trigger fires (reforge reaches Phase 3)
 
+**Start from the seam map:** [`docs/fork-phase-seams.md`](../../../docs/fork-phase-seams.md)
+inventories every joint in our fork code where phase is read, clamped, or shipped
+as data — the checklist for upgrading the fork/tab. It was measured 2026-08-30 and
+confirms our fork forces nothing Phase-3-specific today (all p3+ data is bundled
+but gated behind `<= maxPhase`, which follows upstream's `CURRENT_PHASE`).
+
 From `sync_wowsims.py:489-493` / `:571-574`, a tier bump requires:
 
 1. Regenerate `data/items/index.json` and `data/gems/palette.json` for the new
