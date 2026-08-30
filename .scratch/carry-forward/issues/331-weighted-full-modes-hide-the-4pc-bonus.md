@@ -1,5 +1,6 @@
 Status: open
 Type: bug
+Tab-scope: out-of-scope — core report path only (re-filed 2026-08-29, see below)
 Origin: owner report 2026-08-28 ("the system got it wrong on the 4pc"); confirmed by investigation same day
 Blocks: none
 Blocked by: none
@@ -142,3 +143,36 @@ instance of the same defect, in the core report rather than the fork tab, and th
 the empty (3.4, 10] gap in the committed fixtures does not fully protect it.
 This awaits this ticket's weighted/full redesign; it was out of scope for the
 `rankableSetPotential`-shaped fix above.
+
+## 2026-08-29 — re-filed as out-of-scope for the tab (not tab-blocking)
+
+The residual weighted/full defect is real but lives **only in the core report /
+CLI path** (`packages/core/src/rank-report-rules.ts`, `rank-report.ts`). It has
+**no path into the wowsims Upgrades tab**, so it does not block a finished tab.
+This ticket stays `Status: open` as a core bug for a later run; it is moved out of
+Tab-blocking in `docs/upgrades-tab-scope.md` with the same evidence.
+
+Evidence (re-run 2026-08-29; commands are Git-Bash `grep -rn` / `ls` from repo
+root). The decisive pair is the first two — they are sufficient on their own:
+
+- `grep -rn "weightedSetPotentialDps" packages/core/src vendor/tbc-new-fork/ui`
+  → defined at `rank-report-rules.ts:697`, called only from `rank-report.ts`
+  (lines 32, 116, 117, 491, 492, 630); **zero occurrences under
+  `vendor/tbc-new-fork/ui/`**. The function the defect lives in is never invoked
+  by the tab.
+- `ls vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`
+  → the ported engine twin dir contains **no `rank-report.ts` / `rank-report-rules.ts`**.
+  The report layer that carries weighted/full is not ported into the fork at all.
+- `grep -rn "SET_POTENTIAL_WEIGHTS\|'weighted'\|'full'" vendor/tbc-new-fork/ui`
+  → the only hit is a **comment** in `upgrades_tab.tsx:2011` referencing the
+  report-path discount; the fork tab implements no `weighted`/`full`
+  set-potential mode. (Loose grep — its evidentiary weight is subordinate to the
+  two commands above.)
+
+The tab's only set-potential surface is `rankableSetPotential`
+(`packages/core/src/view.ts` and its ported twin
+`.../upgrades/engine/view.ts`), which is already noise-gated identically in both
+copies on `setBonusNoiseFloorDps` (verified: `grep -n "setBonusNoiseFloorDps"
+packages/core/src/view.ts vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/view.ts`).
+The weighted/full path (`weightedSetPotentialDps`) applies no floor, but the tab
+does not read it. So no tab surface can show the wrong weighted/full number.
