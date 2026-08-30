@@ -202,3 +202,23 @@ is unchanged since that run, so the earlier four-state readback still stands.
 
 Status unchanged: **verified, owner-checklist-pending.** 313/315 close together
 on the owner's sign-off, never by the executor (per the do-not-close rule).
+
+## 2026-08-29 (Execution D) — all four states re-captured with the final strings
+
+Re-captured after 330's reword and 336's disclosure landed (fork commit
+`a21681c33`). CDP proven first
+(`.scratch/stage-gate/wowsims-tab-tickets/d-cdp-proof.json`). All four
+display states observed by live DOM readback across the feral and ret
+runs (`.../d-evidence/after/readback.json`):
+
+- **prospective** (330's new string): `"toward Malorne Harness 4pc (+15.9)"`
+- **crosses**: `"includes the 4pc Justicar Battlegear bonus"`
+- **confounded**: `"+83.3 set bonus (Nordrassil Harness) — not counted in
+  ranking: breaks Malorne Harness 2pc"`
+- **no-context**: rows without a set context carry no line
+
+Plus 336's new **package-disclosure** state rendered live on ret
+(`"also opens Crystalforge Battlegear 4pc (+15.5, 4 pieces) — not in this
+row's number"`) and in the layout harness (`.../d-evidence/disclosure-harness/`).
+Row-credit invariance held byte-for-byte before/after the disclosure (see
+the execution report). Still closes with 313 on owner sign-off.

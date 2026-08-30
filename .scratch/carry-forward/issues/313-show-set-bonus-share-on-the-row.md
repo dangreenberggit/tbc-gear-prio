@@ -106,4 +106,22 @@ note and the readback artifact.
 Acceptance boxes are met by the rendering evidence, but per the do-not-close
 rule 313 closes together with 315 on the owner's sign-off, not by the executor.
 
+## 2026-08-29 (Execution D) — re-captured with the final strings (owner-checklist-pending)
+
+Re-captured after 330's wording landed and 336's disclosure was added
+(fork commit `a21681c33`). CDP proven first
+(`.scratch/stage-gate/wowsims-tab-tickets/d-cdp-proof.json`: innerWidth
+reads back == requested at 375 and 1280 on both the feralcat and
+retribution pages). Live headless runs with the set-potential toggle ON,
+DOM readback in `.../d-evidence/after/readback.json`:
+
+- **prospective** (330's new string): feral `"toward Malorne Harness 4pc
+  (+15.9)"`.
+- **crosses**: ret `"includes the 4pc Justicar Battlegear bonus"`.
+- **confounded**: feral `"+83.3 set bonus (Nordrassil Harness) — not
+  counted in ranking: breaks Malorne Harness 2pc"`.
+- **no-context / empty**: rows without a set context show no line (unchanged).
+
+Still closes with 315 on owner sign-off, not by the executor.
+
 ## Comments
