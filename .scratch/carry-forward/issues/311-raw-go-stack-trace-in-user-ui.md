@@ -139,4 +139,36 @@ separable and can be fixed independently:
   above.
 - No check was made of whether the same item fails outside the Upgrades tab.
 
+## 2026-08-29 — panic guard landed (both halves now addressed)
+
+**Presentation half (already landed, verified C5):** `firstLineOf` is applied in
+`upgrades_tab.tsx` (defined ~line 268, used ~line 2206) — the tab no longer
+renders the untrimmed `{s.detail}` the ticket observed. Verified by
+`grep -n "firstLineOf" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+
+**The panic (fork commit `c4d1cb661`):** converted all ten
+`agent.(HunterAgent).GetHunter()` assertions in
+`vendor/tbc-new-fork/sim/hunter/item_sets.go` to comma-ok no-op guards. The five
+`NewItemEffect` callbacks (incl. Beast-tamer's Shoulders 30892) are the live bug
+— they fire keyed by item id with no class check; the five `ApplySetBonus`
+callbacks get the same guard as defense-in-depth (0 hits in the ret pool today
+per §B, but future-proofed). Item 30892 is still registered; the guard makes the
+effect a no-op for a non-hunter agent instead of panicking.
+
+Verified: `go build ./sim/...` exit 0, `go vet ./sim/hunter/` exit 0, `gofmt -l`
+clean. The package's `TestHunter` is pre-broken on a stale `assets/database/db.bin`
+fixture (`panic: No DB data for enchant with id: 2613`) — reproduces identically
+with the file reverted, so it is unrelated to this guard (a hypothesis about the
+db.bin being stale relative to the fork tip; the source db.json does carry
+enchant 2613). Not this run's problem.
+
+Blast radius unchanged from §B: one confirmed item (30892) in the ret pool; other
+specs' pools **hypothesis, untested**. Upstream candidate (§2), not sent this run.
+
+**Remaining before close:** the behavioral no-panic check — a targeted ret run
+including 30892 renders the item ranked or cleanly dropped with a one-line reason
+and NO raw stack trace. This is a runtime/CDP check performed in the same
+automated re-verification pass as 313/315 (stage-gate step 7); the ticket closes
+on that readback plus owner sign-off, not on the build signals alone.
+
 ## Comments
