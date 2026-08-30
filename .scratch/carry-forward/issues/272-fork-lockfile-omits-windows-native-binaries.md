@@ -1,6 +1,7 @@
-Status: open
+Status: closed
 Type: defect
 Origin: stage-gate finish-the-tab, executor Step 1b, 2026-08-22
+Resolved: 2026-08-29 by fork commit 5ed4436a8 (lockfile regenerated all-platform); verified by clean npm ci + tsc + vite build
 Blocks: none
 Blocked by: none
 
@@ -105,3 +106,47 @@ build or type-check on a fresh clone as blocked, and re-run the workaround.
   from the makefile's own recipes (`makefile:76-78` and `makefile:223-225`).
   That is a separate gap from this ticket's lockfile defect, but a fresh clone
   hits all three together.
+
+## 2026-08-29 — RESOLVED (lockfile regenerated; the grep was not the test)
+
+The stage-gate review noted the lockfile appeared to already carry win32/
+typescript-platform entries (a `grep` showed them), so 272 might be
+already-resolved. It was NOT. The grep counted `optionalDependencies` version
+**strings**; the lockfile's `packages` map held an installable node only for
+`linux-x64` (the platform it was generated on). So the corrected acceptance —
+a clean `rm -rf node_modules && npm ci` then `tsc` + vite build, **no** `--no-save`
+— reproduced the exact defect:
+
+```
+$ rm -rf node_modules && npm ci          # 365 pkgs, exit 0 -- but win32 natives absent
+$ ls node_modules/@typescript/           # empty
+$ node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json
+Error: Unable to resolve @typescript/typescript-win32-x64.   # the 272 error, verbatim
+```
+
+Fix: removed the linux-only lockfile and ran `npm install` (npm 10.9.2) so every
+platform's optional deps are recorded as installable nodes — 20 typescript
+platform nodes (incl. win32-x64/arm64) and win32 bindings for rolldown, oxlint,
+oxfmt, lightningcss, sass-embedded, alongside the linux nodes CI needs. Fork
+commit `5ed4436a8`.
+
+Re-verified from scratch, **no** `--no-save` installs (artifacts confirmed by
+`ls`, not exit codes):
+
+```
+$ rm -rf node_modules && npm ci                 # 373 packages
+$ ls node_modules/@typescript/typescript-win32-x64   # present
+  (also @rolldown/binding-win32-x64-msvc, @oxlint/@oxfmt win32,
+   lightningcss-win32-x64-msvc, sass-embedded-win32-x64 -- all present)
+$ node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json   # 0 errors
+$ npx tsx vite.build-workers.mts                # dist/tbc/sim_worker.js
+$ npx vite build                                # dist/tbc/bundle, 53 entries, exit 0
+```
+
+The lockfile carries both win32 and linux installable nodes for all six native
+packages, so `npm ci` works on the dev machine and on CI-Linux. The two stale
+proto trees noted above were already present in this checkout (Go builds and the
+vite build both succeeded), so they were not a blocker this run.
+
+**Status: resolved by fork commit `5ed4436a8`; re-pinned in
+`data/wowsims-fork.lock.json`.** Closing on this command evidence.
