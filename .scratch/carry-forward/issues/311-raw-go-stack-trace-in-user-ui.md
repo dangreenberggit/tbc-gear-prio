@@ -165,10 +165,29 @@ enchant 2613). Not this run's problem.
 Blast radius unchanged from §B: one confirmed item (30892) in the ret pool; other
 specs' pools **hypothesis, untested**. Upstream candidate (§2), not sent this run.
 
-**Remaining before close:** the behavioral no-panic check — a targeted ret run
-including 30892 renders the item ranked or cleanly dropped with a one-line reason
-and NO raw stack trace. This is a runtime/CDP check performed in the same
-automated re-verification pass as 313/315 (stage-gate step 7); the ticket closes
-on that readback plus owner sign-off, not on the build signals alone.
+**Behavioral no-panic check — DONE (2026-08-29).** Rebuilt the WASM with the
+guard (`GOOS=js GOARCH=wasm go build -o dist/tbc/lib.wasm ./sim/wasm/`) and drove
+a **full-pool** ret p5 run over headless CDP (no candidate cap, so item 30892 —
+a low-curationHint mail shoulder — is actually swapped; it is present in ret-p3/
+p4/p5). Harness `vendor/tbc-new-fork/reverify-311.mjs`; readback at
+`.scratch/stage-gate/wowsims-tab-tickets/cdp-311.json`:
+
+- run completed: `"Your current gear: 1789.0 DPS. Took 38s."`, 551 rows, 16 above
+  the cutoff
+- `panicHit: false` — no `interface conversion` / `goroutine N` / `.go:NNN` /
+  `RetributionPaladin is not hunter.HunterAgent` text anywhere in the pane
+- `hasDropNote: false` — 30892 was not even dropped-with-a-reason; the guarded
+  effect no-ops for the paladin agent and the item ranks normally
+
+So on the guarded WASM the exact scenario that produced the raw Go stack trace
+now sims cleanly to completion. Combined with `go build ./sim/...` (0),
+`go vet ./sim/hunter/` (0) and gofmt-clean, the guard is verified statically and
+behaviorally.
+
+**Remaining before close:** owner sign-off (the ticket's own do-not-skip
+diagnosis + the panic UI decision were owner-facing). Recommend closing on the
+owner's end-of-run review. Blast radius unchanged: one confirmed item in the ret
+pool; other specs' pools stay `hypothesis, untested`. Upstream candidate, not
+sent this run.
 
 ## Comments

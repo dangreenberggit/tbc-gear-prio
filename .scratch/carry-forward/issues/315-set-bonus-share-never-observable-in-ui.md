@@ -179,3 +179,26 @@ Noise reduction (which would let a lower floor work) stays ticket 105.
 **Left open pending the owner viewing the running tab** (per the do-not-close
 rule above). Ticket 313's rendering is validated; 313 and 315 close together on
 the owner's sign-off.
+
+## 2026-08-29 — re-verified on the current tip (stage-gate wowsims-tab-tickets)
+
+Re-ran the CDP re-verification (F3: proved CDP first —
+`window.innerWidth === 1280` read back from the live DOM before any acceptance
+was marked). Harness: `vendor/tbc-new-fork/reverify-tab.mjs` (reuses ticket
+322's raw-CDP plumbing over the on-disk Playwright Chromium; readback stored at
+`.scratch/stage-gate/wowsims-tab-tickets/cdp-reverify.json`, gitignored). A real
+headless WASM ret run (set-potential toggle ON) rendered a **crosses** set-bonus
+line, read verbatim from the live DOM:
+
+- `"includes the 4pc Justicar Battlegear bonus"` (two rows)
+
+So `setBonusLine` is wired and a real `setContext` row reaches the UI on the
+current tip — the feature is observably alive (over-satisfies C10: the committed
+artifact carries 19 setContext rows, not the stale "11"). The **prospective**
+(+dps), **confounded**, and **no-context** states were captured on the earlier
+full-pool run recorded above (2026-08-28); this pass's capped pool happened to
+land on the crosses state rather than re-exercising all four — the display code
+is unchanged since that run, so the earlier four-state readback still stands.
+
+Status unchanged: **verified, owner-checklist-pending.** 313/315 close together
+on the owner's sign-off, never by the executor (per the do-not-close rule).

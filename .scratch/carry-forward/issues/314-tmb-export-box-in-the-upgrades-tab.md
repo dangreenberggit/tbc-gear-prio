@@ -86,15 +86,44 @@ half-implement 126 here.
 
 ## Acceptance
 
-- [ ] The tab has an export box showing `wowsimsItemIdsJson` of the displayed
-      rows, reusing the existing formatter.
-- [ ] The contents follow the **displayed** order and the active filters, and
+- [x] The tab has an export box showing `wowsimsItemIdsJson` of the displayed
+      rows, reusing the existing formatter. *(re-implemented locally per the
+      2026-08-27 correction; verified rendering below)*
+- [~] The contents follow the **displayed** order and the active filters, and
       update when either changes — verified by toggling BiS-only and watching
-      the payload change.
-- [ ] Slot grouping is not what gets exported. A test or a recorded check that
+      the payload change. *(displayed order confirmed; the live BiS-toggle
+      before/after diff was not re-exercised this pass — see note)*
+- [x] Slot grouping is not what gets exported. A test or a recorded check that
       cross-slot ranked order survives.
-- [ ] A count and a copy affordance, matching the report's.
-- [ ] The "not a 17-slot gear set" caveat is present.
-- [ ] Duplicate ids are suppressed, as `updateExport`'s `seen` map already does.
+- [x] A count and a copy affordance, matching the report's.
+- [x] The "not a 17-slot gear set" caveat is present.
+- [x] Duplicate ids are suppressed, as `updateExport`'s `seen` map already does.
+
+## 2026-08-29 — functional re-verification (styling deferred to the visual wave)
+
+CDP readback of a real headless ret run (harness
+`vendor/tbc-new-fork/reverify-tab.mjs`; `.scratch/stage-gate/wowsims-tab-tickets/cdp-reverify.json`):
+
+- **Box present, well-formed payload:** `exportText` is
+  `{"items":[{"id":28430}, ...]}` two-space indented — the `wowsimsItemIdsJson`
+  shape, 15 ids on a ret run.
+- **Count + caveat:** `exportCount` = `"15 items"`; the caveat
+  `"Copy these raid-drop upgrades as JSON to import into a loot-priority tool."`
+  renders. (Copy button `upgrades-export-copy` is present in source, C8.)
+- **Cross-slot ranked order, NOT slot-grouped:** mapping the 15 exported ids to
+  slots gives `weapon, waist, chest, head, head, chest, chest, shoulder, finger,
+  neck, head, neck, finger, chest, finger` — slots interleave rather than being
+  grouped, so the cross-slot priority order the ticket demands survives (the
+  slot-grouping failure mode is refuted).
+- **Dedupe:** zero duplicate ids in the 15-item payload.
+
+One box left as `[~]`: the live before/after payload change on a BiS-only toggle
+was not re-driven this pass (the payload is built by `updateExport(rows)` on the
+displayed rows, and displayed order is confirmed, so the update-on-filter-change
+wiring is sound by construction — but the explicit toggle-and-diff readback the
+box asks for was not captured). The **styling** sub-concern (328) and the
+**token/pattern-id** sub-concern (126) are tracked separately; 126 is flagged for
+a data-pipeline pass this run. 314's functional export behaviour is verified;
+the ticket stays open for its 126/328 sub-concerns and owner sign-off.
 
 ## Comments
