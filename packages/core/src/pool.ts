@@ -31,7 +31,24 @@ export type ItemSourceOrigin =
 
 export type ItemSource = { origin?: ItemSourceOrigin } & (
   | { kind: "raid"; zone: string; boss?: string }
-  | { kind: "token"; zone: string; boss?: string; token: string }
+  /**
+   * `tokenId` is the class-token item id the player trades in for this tier
+   * piece (e.g. 31089 Chestguard of the Forgotten Conqueror for 30990
+   * Lightbringer Breastplate). It is what actually drops in the raid, so the
+   * ThatsMyBis export emits it in place of the gear id for tier pieces
+   * (ticket 126). Optional because Sunmote-exchange tokens carry a synthetic
+   * `token` name with no single tradeable item id; those keep the gear id.
+   * Threaded from `data/two-hop/<spec>-tokens.json` at assemble time
+   * (`assemble_universe.py`), so it reaches both the report export and the
+   * bundled universe the tab exports from — the same field on both paths.
+   */
+  | {
+      kind: "token";
+      zone: string;
+      boss?: string;
+      token: string;
+      tokenId?: number;
+    }
   | { kind: "badge"; cost: number }
   /**
    * `recipeZone` is set only when the recipe itself drops in a raid, so raid

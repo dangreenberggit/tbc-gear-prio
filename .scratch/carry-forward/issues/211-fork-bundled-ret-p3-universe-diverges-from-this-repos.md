@@ -127,3 +127,31 @@ Re-runnable:
 ```bash
 pnpm fork-universes:check
 ```
+
+## 2026-08-29 — gate fixed again (stage-gate wowsims-tab-tickets, Execution C)
+
+The gate went red again — 43 of 63 bundled copies drifted, all
+**formatting-only** (`0 local-only; 0 fork-only; 0 shared entries differ in
+content` on every one) — and had been red since before branch
+`feat/wowsims-tab-tickets` (verified pre-existing in the Execution A/B gate
+notes). Execution C's universe regen for ticket 126 (token ids) touched the
+same files, so the fix was folded in there per the Gate C (Execution A)
+disposition rather than fixed-forward separately.
+
+One `python scripts/sync_fork_universes.py --write` refreshed all 63 copies:
+it shipped 126's `tokenId` additions AND cleared the 43 formatting-only
+drifts in the same pass. `feral-p3.universe.json` was additionally normalised
+CRLF→LF (its committed source had been LF-inconsistent). Fork commit
+`6fca0d8bd` (bundle + `upgrades/data/PROVENANCE.md` note), re-pinned in
+`data/wowsims-fork.lock.json` → fork tip `ed31676ae`.
+
+Command evidence (gate is now GREEN):
+
+```
+$ pnpm fork-universes:check
+fork universes check ok: 63 bundled copies byte-match their data/ sources
+```
+
+`pnpm verify` is fully green including this gate. The full close is the
+ticket owner's call; Execution C fixed the gate on the branch and did not
+unilaterally close 211.

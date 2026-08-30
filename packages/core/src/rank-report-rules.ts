@@ -9,7 +9,7 @@
  */
 
 import { getItem, type ItemSlot } from "./items.js";
-import type { SimSlotName } from "./pool.js";
+import type { ItemSource, SimSlotName } from "./pool.js";
 import type { ViewOptions } from "./view.js";
 import type { RankedItem, SetBonusValue } from "./rank.js";
 import type { SetThreshold } from "./set-value.js";
@@ -454,6 +454,65 @@ export function wowsimsItemIdsJson(
 ): string {
   return JSON.stringify(
     { items: items.map((i) => ({ id: i.itemId })) },
+    null,
+    2
+  );
+}
+
+/**
+ * The class-token item id a tier row trades in for, or `undefined` for a row
+ * that is not a tier piece obtained by token.
+ *
+ * A tier piece does not drop in the raid — a class token drops (e.g.
+ * Chestguard of the Forgotten Conqueror, id 31089) and the player buys the
+ * gear with it — so a loot list keyed to what the raid actually awards wants
+ * the token id, not the gear id (ticket 126). The id rides on the row's own
+ * `token` source (`tokenId`, threaded in by `assemble_universe.py` from
+ * `data/two-hop/<spec>-tokens.json`), so this reads the ranking already in
+ * hand and needs no second data source.
+ *
+ * Reads every source, not just the primary: a row can carry a token source
+ * behind a drop source, and the token id is the one this export wants
+ * wherever it sits. A Sunmote-exchange token carries no single tradeable
+ * `tokenId` (its `token` name is synthetic), so those rows fall through to
+ * the gear id — exactly the fall-through this returns `undefined` for.
+ */
+export function tokenIdForExport(
+  item: Pick<RankedItem, "source"> & { sources?: readonly ItemSource[] }
+): number | undefined {
+  const sources: readonly ItemSource[] = item.sources ?? [item.source];
+  for (const s of sources) {
+    if (s.kind === "token" && typeof s.tokenId === "number") return s.tokenId;
+  }
+  return undefined;
+}
+
+/**
+ * The ThatsMyBis (TMB) flavour of {@link wowsimsItemIdsJson}: the same
+ * `{"items":[{"id":N}]}` envelope and the same display order, but each tier
+ * row emits the class-token id that actually drops in the raid rather than the
+ * gear id (ticket 126). Every non-tier row — and any tier row whose token has
+ * no single tradeable id (Sunmote exchange) — keeps its gear id.
+ *
+ * Craftable/pattern ids are deliberately NOT remapped here: whether TMB tracks
+ * profession patterns as lootable is unconfirmed, so per the ticket's own
+ * fall-through instruction craftables keep their gear id. If that is ever
+ * confirmed, the recipe id is already available on the `crafted` source and a
+ * second `s.kind === "crafted"` branch in {@link tokenIdForExport} completes
+ * it — no new data plumbing.
+ *
+ * The plain gear-id flavour ({@link wowsimsItemIdsJson}) stays available; the
+ * caller captions which flavour it is emitting (ticket 126).
+ */
+export function wowsimsTmbItemIdsJson(
+  items: ReadonlyArray<
+    Pick<RankedItem, "itemId" | "source"> & {
+      sources?: readonly ItemSource[];
+    }
+  >
+): string {
+  return JSON.stringify(
+    { items: items.map((i) => ({ id: tokenIdForExport(i) ?? i.itemId })) },
     null,
     2
   );

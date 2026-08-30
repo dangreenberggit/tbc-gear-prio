@@ -5,6 +5,25 @@ description: Sequential stage-gate pipeline - plan, adversarial plan review, fre
 
 # Stage-gate
 
+Stage-gate turns your intent into finished work through a pipeline of
+specialized seats — planning, reviewing, executing, judging domain
+output — while the session stays a thin overseer. The seats do the
+digging and the deciding within their scope; the session routes their
+findings to the next seat, judges each gate, and passes plain-English
+conclusions back to you. It does no seat work itself — its only writes
+are the stage artifacts.
+
+This division keeps the session's context clean enough to judge: the
+heavy detail lives in the seats, so the session holds conclusions, not
+raw output. So when a step raises a question, its default move is to send
+it to a seat, not to guess and not to ask you — investigating is what the
+pipeline is for. Bring a question up to you only when a seat's findings
+genuinely fork on what you want, one no further investigation settles.
+
+Each seat's report carries a plain-English summary alongside its detail,
+so that when something does reach you, it reaches you in language you can
+act on.
+
 A sequential pipeline of distinct seats — Planner → Reviewer → Executor —
 with the **session as orchestrator**: it routes, judges at the gates, and
 implements nothing; its only writes are the stage artifacts below.

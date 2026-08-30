@@ -47,3 +47,42 @@ separate, engine-touching issue — ticket 330.)
 `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
 `_upgrades_tab.scss`, and `assets/locales/en/translation.json` (the export
 blurb string).
+
+## 2026-08-29 — styling landed, owner-checklist-pending (Execution B split)
+
+This ticket splits into a **styling half** (this executor's scope) and a **copy
+half** (tooltip wording + export blurb — normally the ticket-330 writing pass).
+Both were found already landed on the fork before base SHA `43f460c`. This
+executor verified the styling; it did not draft or alter copy.
+
+**Styling half — verified landed (fork commits `4ae6afe98` "Match Upgrades
+controls to native wowsims styling", `f17b77db7` "Build Upgrades view checkboxes
+on native BooleanPicker"):**
+
+- **Item 1 — copy button no longer "looks disabled".** Now a filled native
+  `CopyButton`: classes `btn btn-secondary upgrades-export-copy copy-button`,
+  computed background `rgb(108,117,125)` (solid secondary grey, not transparent),
+  opacity 1, `fa-copy` icon present, text "Copy JSON"
+  (`upgrades_tab.tsx:793-797`; DOM readback in
+  `.scratch/.../layout-evidence/ranking-stage-evidence.json`).
+- **Item 2 — checkboxes not oversized.** The view toggles are native
+  `BooleanPicker`s (`.boolean-picker-input.form-check-input`) and are
+  deliberately NOT floored to 40px (`_upgrades_tab.scss:324-344` records this),
+  so they render at wowsims' native ~28px, matching their siblings.
+- **Item 3 — Content dropdown not oversized.** `.upgrades-raid-filter` is a
+  native `.form-select`; the phase `EnumPicker` select measures h≈28.3px at
+  1280px (native `.form-select`, no floor).
+
+**Copy half — landed, DEFERRED to the 330 pass (NOT touched by this executor):**
+
+- **Item 1 blurb / Item 4 tooltip WORDING.** The export blurb was reworded to
+  "Copy these raid-drop upgrades as JSON to import into a loot-priority tool."
+  and the set-potential tooltip to "When on, a row's DPS gain includes a set
+  bonus the swap would earn. Bonuses too small to change the ranking are
+  ignored." (both fork commit `2f992cc29` "Reword the three Upgrades copy
+  strings"; `translation.json:882,892`). The tooltip is attached via the site's
+  tippy idiom (`labelTooltip`, `upgrades_tab.tsx:759`; verified `_tippy` prop +
+  content in the DOM readback). This wording is copy; it is left exactly as it
+  landed. Any further wording change belongs to the held 330 review, not here.
+
+State: **styling landed, owner-checklist-pending.** Closes on owner sign-off.

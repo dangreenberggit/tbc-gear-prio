@@ -33,3 +33,33 @@ is **below 768px**; verify the fix there (375 / 653 / 767) and at a desktop widt
 selector+property; the fix reuses native table styling. The environment CAN
 drive narrow widths now (the browser pane's `resize_window` works this session),
 so the fix must be verified by direct observation, not asserted.
+
+## 2026-08-29 — styled, owner-checklist-pending (Execution B, layout subset)
+
+State: **styled — awaiting owner sign-off on the rendered result.**
+
+The fix already landed on this branch's fork before base SHA `43f460c` (fork
+commit `f0c63af40` "Make the mobile results table legible below 768px"): the
+from-scratch pared-column `table-layout: fixed` treatment that shattered cells
+was replaced by the native content-table pattern — `table-layout: auto`,
+`white-space: nowrap` on Slot/DPS, and an `overflow-x: auto` scroller on
+`.upgrades-results` (`_upgrades_tab.scss:557-616`). This executor verified the
+result at verified viewports rather than re-writing it.
+
+Evidence (CDP, `window.innerWidth` read back at every capture — F3):
+
+- `vendor/tbc-new-fork/test-layout.mjs` (the committed 322 layout gate) run
+  green: **37 assertions pass at 375/653/768/1280** against a real 6-row WASM
+  run. The char-by-char wrap is **refuted** — every Slot/DPS cell content height
+  ≤ 1.5× line-height (no vertical letter-stacking); no clipped text under a
+  hidden-overflow ancestor; the `.upgrades-results` scroller scrolls the
+  407px-wide table inside its 319px panel at 375px instead of shattering; no
+  outsized row gaps. Log:
+  `.scratch/.../layout-evidence/` (see report; run
+  `.scratch/.../layout-evidence/evidence-capture.mjs`).
+- Screenshots at 375/653/767/1280, pre-run and post-run (with 88/85/54 landed
+  rows): `.scratch/stage-gate/wowsims-tab-tickets/layout-evidence/prerun-*.png`,
+  `postrun-*.png`, `ranking-stage-*.png`. `postrun-375.png` shows "Chest"/"Head"
+  slot labels and "+22.0 DPS"/"-30.8 DPS" figures each on one horizontal line.
+
+Closes on owner sign-off, not by this executor.

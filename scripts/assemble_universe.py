@@ -2456,6 +2456,14 @@ def assemble(
         }
         if entry.get("boss"):
             token_src["boss"] = entry["boss"]
+        # The class-token item id the player trades in for this tier piece.
+        # It is what actually drops in the raid, so the ThatsMyBis export emits
+        # it in place of the gear id (ticket 126). Carried through ItemSource so
+        # both the report export and the tab (via the bundled universe copy)
+        # read the same id. The Sunmote block below has no single tradeable id,
+        # so it deliberately omits this and those pieces keep the gear id.
+        if entry.get("tokenId") is not None:
+            token_src["tokenId"] = int(entry["tokenId"])
         add_source(piece_id, token_src, "two-hop")
 
     # Sunmote upgrades. Same `token` shape -- the piece is obtained from a

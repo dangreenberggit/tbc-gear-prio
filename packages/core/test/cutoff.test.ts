@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CUTOFF,
   CUTOFF_FERAL,
+  cutoffAdmittingArm,
   cutoffForSpec,
   meetsCutoff,
   setBonusNoiseFloorDps,
@@ -45,6 +46,50 @@ describe("per-spec cutoff", () => {
   it("meetsCutoff still reads whichever Cutoff object it's given", () => {
     expect(meetsCutoff(3.5, 0.1, CUTOFF)).toBe(true);
     expect(meetsCutoff(3.5, 0.1, CUTOFF_FERAL)).toBe(false);
+  });
+});
+
+describe("cutoffAdmittingArm (254)", () => {
+  // Ticket 254: the cutoff is an OR (abs OR pct); a boundary row can sit above
+  // the cutoff via the percentage arm while its absolute DPS is below the abs
+  // threshold. The report gave no way to see which arm admitted a row, and an
+  // SME read that as an inconsistency. This helper names the arm.
+
+  it("names the %-arm when a row clears pct but its abs DPS is below the bar", () => {
+    // The two committed slamaltman boundary rows (ticket 254 table), against
+    // ret's {absDps: 3.4, pct: 0.15}: deltaDps 3.28/3.25 < 3.4 (abs fails),
+    // deltaPct 0.164/0.162 >= 0.15 (pct clears). Only the %-arm admitted them.
+    expect(
+      cutoffAdmittingArm(3.2766067307575213, 0.1635811932827611, CUTOFF)
+    ).toBe("pct");
+    expect(
+      cutoffAdmittingArm(3.24775956279359, 0.162141028335875, CUTOFF)
+    ).toBe("pct");
+  });
+
+  it("names the abs-arm when a row clears abs but its pct is below the bar", () => {
+    expect(cutoffAdmittingArm(5.0, 0.1, CUTOFF)).toBe("abs");
+  });
+
+  it("reports both when a row clears both arms", () => {
+    expect(cutoffAdmittingArm(5.0, 0.2, CUTOFF)).toBe("both");
+  });
+
+  it("reports neither when a row clears no arm", () => {
+    expect(cutoffAdmittingArm(1.0, 0.05, CUTOFF)).toBe("none");
+  });
+
+  it("agrees with meetsCutoff: any admitting arm means the row met the cutoff", () => {
+    const cases: ReadonlyArray<readonly [number, number]> = [
+      [5.0, 0.1],
+      [3.28, 0.164],
+      [5.0, 0.2],
+      [1.0, 0.05],
+    ];
+    for (const [dps, pct] of cases) {
+      const arm = cutoffAdmittingArm(dps, pct, CUTOFF);
+      expect(arm !== "none").toBe(meetsCutoff(dps, pct, CUTOFF));
+    }
   });
 });
 

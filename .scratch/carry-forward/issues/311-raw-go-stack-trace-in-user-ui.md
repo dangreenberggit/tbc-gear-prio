@@ -139,4 +139,55 @@ separable and can be fixed independently:
   above.
 - No check was made of whether the same item fails outside the Upgrades tab.
 
+## 2026-08-29 — panic guard landed (both halves now addressed)
+
+**Presentation half (already landed, verified C5):** `firstLineOf` is applied in
+`upgrades_tab.tsx` (defined ~line 268, used ~line 2206) — the tab no longer
+renders the untrimmed `{s.detail}` the ticket observed. Verified by
+`grep -n "firstLineOf" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+
+**The panic (fork commit `c4d1cb661`):** converted all ten
+`agent.(HunterAgent).GetHunter()` assertions in
+`vendor/tbc-new-fork/sim/hunter/item_sets.go` to comma-ok no-op guards. The five
+`NewItemEffect` callbacks (incl. Beast-tamer's Shoulders 30892) are the live bug
+— they fire keyed by item id with no class check; the five `ApplySetBonus`
+callbacks get the same guard as defense-in-depth (0 hits in the ret pool today
+per §B, but future-proofed). Item 30892 is still registered; the guard makes the
+effect a no-op for a non-hunter agent instead of panicking.
+
+Verified: `go build ./sim/...` exit 0, `go vet ./sim/hunter/` exit 0, `gofmt -l`
+clean. The package's `TestHunter` is pre-broken on a stale `assets/database/db.bin`
+fixture (`panic: No DB data for enchant with id: 2613`) — reproduces identically
+with the file reverted, so it is unrelated to this guard (a hypothesis about the
+db.bin being stale relative to the fork tip; the source db.json does carry
+enchant 2613). Not this run's problem.
+
+Blast radius unchanged from §B: one confirmed item (30892) in the ret pool; other
+specs' pools **hypothesis, untested**. Upstream candidate (§2), not sent this run.
+
+**Behavioral no-panic check — DONE (2026-08-29).** Rebuilt the WASM with the
+guard (`GOOS=js GOARCH=wasm go build -o dist/tbc/lib.wasm ./sim/wasm/`) and drove
+a **full-pool** ret p5 run over headless CDP (no candidate cap, so item 30892 —
+a low-curationHint mail shoulder — is actually swapped; it is present in ret-p3/
+p4/p5). Harness `vendor/tbc-new-fork/reverify-311.mjs`; readback at
+`.scratch/stage-gate/wowsims-tab-tickets/cdp-311.json`:
+
+- run completed: `"Your current gear: 1789.0 DPS. Took 38s."`, 551 rows, 16 above
+  the cutoff
+- `panicHit: false` — no `interface conversion` / `goroutine N` / `.go:NNN` /
+  `RetributionPaladin is not hunter.HunterAgent` text anywhere in the pane
+- `hasDropNote: false` — 30892 was not even dropped-with-a-reason; the guarded
+  effect no-ops for the paladin agent and the item ranks normally
+
+So on the guarded WASM the exact scenario that produced the raw Go stack trace
+now sims cleanly to completion. Combined with `go build ./sim/...` (0),
+`go vet ./sim/hunter/` (0) and gofmt-clean, the guard is verified statically and
+behaviorally.
+
+**Remaining before close:** owner sign-off (the ticket's own do-not-skip
+diagnosis + the panic UI decision were owner-facing). Recommend closing on the
+owner's end-of-run review. Blast radius unchanged: one confirmed item in the ret
+pool; other specs' pools stay `hypothesis, untested`. Upstream candidate, not
+sent this run.
+
 ## Comments

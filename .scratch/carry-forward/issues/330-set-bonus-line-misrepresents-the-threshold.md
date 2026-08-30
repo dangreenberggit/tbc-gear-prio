@@ -72,3 +72,22 @@ wording; 331 owns the system question.
 `assets/locales/en/translation.json` key `upgrades_tab.set_bonus.prospective`;
 `upgrades_tab.tsx` `setBonusLine`; the value computation in `rank.ts` /
 `set-value.ts`.
+
+## Update (2026-08-29) — reworded, owner-checklist-pending
+
+Reworded in fork commit `a21681c33` (stage-gate wowsims-tab-tickets,
+Execution D). SME step done (no ranking bug; number is correct). Landed
+string in `upgrades_tab.set_bonus.prospective`:
+
+    old: "counts toward {{threshold}}pc {{set}} (+{{dps}} at {{threshold}}pc)"
+    new: "toward {{set}} {{threshold}}pc (+{{dps}})"
+
+Win condition met: names the threshold exactly once, keeps the correct
+number, implies no arrival ("toward"), implies no combo (the 4pc combo
+story is 336's disclosure, a separate line), and is shorter than the old
+string. Rendered live at both widths (feral: "toward Malorne Harness 4pc
+(+15.9)"; readbacks in
+`.scratch/stage-gate/wowsims-tab-tickets/d-evidence/after/readback.json`,
+harness layout shots in `.../d-evidence/disclosure-harness/`).
+
+NOT closed here — closes on owner sign-off of the rendered line.

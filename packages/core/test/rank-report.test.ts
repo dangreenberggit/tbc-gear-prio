@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
@@ -22,6 +25,7 @@ import {
   weightedSetPotentialDps,
   withSelfConfoundDisclosed,
   wowsimsItemIdsJson,
+  wowsimsTmbItemIdsJson,
 } from "../src/rank-report-rules.js";
 import { realPoolEntry } from "./real-source.js";
 
@@ -2180,6 +2184,124 @@ describe("wowsimsItemIdsJson", () => {
       items: Array<Record<string, unknown>>;
     };
     expect(Object.keys(parsed.items[0]!)).toEqual(["id"]);
+  });
+});
+
+describe("wowsimsTmbItemIdsJson (ticket 126, token flavour)", () => {
+  // The full ret tier set, read from the source of truth rather than a
+  // second hand-copied list: G3 asks for a WHOLE-SET assertion, not one
+  // piece, because a mis-keyed remap can be right for a single sample and
+  // wrong for every other. Reading data/two-hop/ret-tokens.json here means
+  // the test moves with the map — a wrong pairing there fails this too.
+  const retTokens = JSON.parse(
+    readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "../../../data/two-hop/ret-tokens.json"
+      ),
+      "utf8"
+    )
+  ) as { entries: Array<{ pieceId: number; tokenId: number }> };
+
+  function tierRow(pieceId: number, tokenId: number): TestItem {
+    // Exactly the source shape assemble_universe.py emits for a tier piece
+    // after this ticket: a single `token` source carrying `tokenId`.
+    return item({
+      name: `Tier piece ${pieceId}`,
+      slot: "chest",
+      deltaDps: 1,
+      itemId: pieceId,
+      source: { kind: "token", zone: "z", token: "t", tokenId },
+      sources: [{ kind: "token", zone: "z", token: "t", tokenId }],
+    });
+  }
+
+  it("emits the token id for every piece of the tier set, not just one", () => {
+    const rows = retTokens.entries.map((e) => tierRow(e.pieceId, e.tokenId));
+    const parsed = JSON.parse(wowsimsTmbItemIdsJson(rows)) as {
+      items: Array<{ id: number }>;
+    };
+    // Whole-set: each emitted id is the token id, in display order, and none
+    // is the gear id. Compared as the full ordered list so a single swapped
+    // pairing (right token on the wrong piece) fails here.
+    expect(parsed.items.map((i) => i.id)).toEqual(
+      retTokens.entries.map((e) => e.tokenId)
+    );
+    // Belt-and-suspenders: no gear id leaked through.
+    const gearIds = new Set(retTokens.entries.map((e) => e.pieceId));
+    expect(parsed.items.some((i) => gearIds.has(i.id))).toBe(false);
+  });
+
+  it("keeps the gear id for a non-tier row", () => {
+    const row = item({
+      name: "Raid drop",
+      slot: "head",
+      deltaDps: 5,
+      itemId: 32014,
+      source: { kind: "raid", zone: "Black Temple", boss: "Illidan" },
+    });
+    const parsed = JSON.parse(wowsimsTmbItemIdsJson([row])) as {
+      items: Array<{ id: number }>;
+    };
+    expect(parsed.items).toEqual([{ id: 32014 }]);
+  });
+
+  it("keeps the gear id for a token source with no tradeable tokenId (Sunmote)", () => {
+    const row = item({
+      name: "Sunmote piece",
+      slot: "legs",
+      deltaDps: 5,
+      itemId: 34242,
+      source: {
+        kind: "token",
+        zone: "Sunwell Plateau",
+        token: "Sunmote + base",
+      },
+    });
+    const parsed = JSON.parse(wowsimsTmbItemIdsJson([row])) as {
+      items: Array<{ id: number }>;
+    };
+    expect(parsed.items).toEqual([{ id: 34242 }]);
+  });
+
+  it("finds the token id behind a non-token primary source", () => {
+    const row = item({
+      name: "Tier piece with a drop primary",
+      slot: "chest",
+      deltaDps: 3,
+      itemId: 30990,
+      source: { kind: "unknown" },
+      sources: [
+        { kind: "unknown" },
+        {
+          kind: "token",
+          zone: "Black Temple",
+          token: "Chestguard",
+          tokenId: 31089,
+        },
+      ],
+    });
+    const parsed = JSON.parse(wowsimsTmbItemIdsJson([row])) as {
+      items: Array<{ id: number }>;
+    };
+    expect(parsed.items).toEqual([{ id: 31089 }]);
+  });
+
+  it("preserves display order and the envelope shape", () => {
+    const rows = [
+      tierRow(30990, 31089),
+      item({ name: "x", slot: "head", deltaDps: 2, itemId: 32014 }),
+    ];
+    expect(wowsimsTmbItemIdsJson(rows)).toBe(`{
+  "items": [
+    {
+      "id": 31089
+    },
+    {
+      "id": 32014
+    }
+  ]
+}`);
   });
 });
 
