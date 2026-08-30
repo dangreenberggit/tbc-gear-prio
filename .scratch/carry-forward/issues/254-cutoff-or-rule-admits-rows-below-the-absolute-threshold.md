@@ -33,6 +33,34 @@ membership is inside the measurement error either way (ticket 236 territory).
 
 ## Acceptance
 
-- [ ] A reader can tell from the report which cutoff arm admitted a boundary row.
+- [x] A reader can tell from the report which cutoff arm admitted a boundary row.
 - [ ] A fresh SME read of a shortlist containing such a row does not flag it as an
       inconsistency.
+
+## 2026-08-29 — resolved (report + tab annotation; owner/SME sign-off pending)
+
+Added the pure helper `cutoffAdmittingArm(deltaDps, deltaPct, cutoff)` to
+`packages/core/src/cutoff.ts` (unit-tested directly in
+`packages/core/test/cutoff.test.ts`) and its verbatim engine twin
+`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/cutoff.ts`
+(full port-drift cycle: parity test green, PROVENANCE re-hashed, fork commit
+`b0aedfa02`, `data/wowsims-fork.lock.json` re-pinned, `sim-implemented-effects`
+regenerated).
+
+The helper names which arm of the OR cutoff admitted a row. The report
+(`rank-report.ts`) and the tab (`upgrades_tab.tsx`, new `upgrades_tab.cutoff.*`
+locale keys) now show a `cleared by %-arm` marker on exactly the above-cutoff
+rows the percentage arm alone admitted, with the OR rule in the tooltip.
+
+Verified against the committed fixture `.scratch/rank-reports/stage2-close-slamaltman.json`:
+the two boundary rows the ticket names — #43 Ring of Deceitful Intent
+(dps 3.28 < 3.4, pct 0.164 >= 0.15) and #44 Lightbringer Breastplate
+(dps 3.25, pct 0.162) — both carry the marker and a `data-cutoff-arm="pct"`
+attribute; the report has exactly 2 markers and zero false positives on
+abs-cleared rows.
+
+First acceptance box (a reader can tell which arm) is met by command. The
+second box is a fresh-SME judgment and stays for owner/SME sign-off. The tab
+marker's visual polish (placement, styling) is deferred to the styling wave per
+the stage-gate F7 disposition; its content (which arm) is the correctness fix
+landed here.
