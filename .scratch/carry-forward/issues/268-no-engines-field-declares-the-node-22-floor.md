@@ -48,3 +48,37 @@ optional adapter.
 
 Not urgent: every supported path already runs Node 22. This is about the error
 being legible when someone lands on an older runtime.
+
+## 2026-08-30 — resolved on `fix/node-22-engines-floor` (commit 733d4a4), pending merge
+
+Fixed after it bit for real: `pnpm verify` failed on `node:sqlite` because the
+shell defaulted to Node 20 (the tool's PowerShell reads `v20.18.1`). Measured
+floor is **Node >=22.5.0** — `node:sqlite` first shipped in Node 22.5.0
+(experimental built-in); it does not exist in Node 20 or Node 22.0–22.4. The
+import site is `packages/core/src/seams/store.ts` (`import { DatabaseSync } from
+"node:sqlite"`), on the path to `packages/core`'s index, so it loads even for
+`MemoryStore`-only callers.
+
+Landed (all measured, not the coarse `>=22` the ticket suggested):
+
+- `engines.node ">=22.5.0"` on root, `apps/web`, and `packages/core` (the
+  package that actually owns the import).
+- `.npmrc` `engine-strict=true` — the ticket's `engines` alone only warns;
+  pnpm enforces it at install only with this flag.
+- `.node-version` `22.17.1` (matches the vendored fork's pin; confirmed
+  installed in fnm) so `cd`/`fnm use` auto-selects a good Node.
+- a `preflight:node` guard prepended to the `verify` script. **Verified**: run
+  under Node 20.18.1 it exits 1 with
+  `[tbc-gear-prio] Node 20.18.1 is too old. This repo needs Node >=22.5.0
+  (node:sqlite). Use fnm/nvm: fnm use (see .node-version).` — instead of the
+  opaque `node:sqlite` trace deep in verify.
+
+**Untested here:** `pnpm install` under `engine-strict` on Node 22 (the tool
+shell defaults to Node 20; run it once on Node 22 before merge to confirm it
+stays green). CI already pins `node-version: 22` (`.github/workflows/verify.yml`),
+so this is purely local-dev legibility.
+
+**Not done (deliberate, follow-up):** the lazy-`SqliteStore`-import idea the
+ticket floats — a code change with test implications, out of scope for a
+config-only fix. Close 268 on merge; open a separate ticket if the lazy import
+is still wanted.
