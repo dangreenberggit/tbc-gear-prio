@@ -12,7 +12,10 @@ Steps:
   2. Require a clean working tree
   3. pnpm verify
   4. merge-ready check (review + deferred tickets filed)
-  5. git checkout dev && git merge --no-ff <branch>
+  5. layout gate (Upgrades tab) -- runs only if the fork's tab source changed
+     since the last green run, and only when its prereqs are present; skips
+     cleanly otherwise (ticket 325). See scripts/check_layout_gate.py.
+  6. git checkout dev && git merge --no-ff <branch>
 
 Does not push. Does not touch main.
 
@@ -34,6 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Import sibling check module without packaging it.
 sys.path.insert(0, str(ROOT / "scripts"))
+import check_layout_gate  # noqa: E402
 import check_merge_ready  # noqa: E402
 
 # pre-commit on `dev` refuses merge commits unless this is set (see .githooks/pre-commit).
@@ -117,6 +121,16 @@ def main() -> int:
     )
     if ready != 0:
         return ready
+
+    # The Upgrades-tab layout gate. Runs only when the fork's tab source changed
+    # since the last green run AND the fork, its built dist/, and a Chromium are
+    # all present; skips cleanly (returns 0) otherwise. A real assertion failure
+    # returns nonzero and blocks the merge. See scripts/check_layout_gate.py and
+    # ticket 325.
+    print("\n=== layout gate (Upgrades tab) ===")
+    layout_rc = check_layout_gate.run()
+    if layout_rc != 0:
+        die("layout gate failed — Upgrades tab layout is broken", layout_rc)
 
     if args.check_only:
         print("\ncheck-only: ok (not merging)")

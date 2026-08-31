@@ -55,6 +55,7 @@
     "codegen:json-types": "python scripts/generate_json_literal_types.py",
     "codegen:json-types:check": "python scripts/generate_json_literal_types.py --check",
     "engine-port-drift:check": "python scripts/check_engine_port_drift.py",
+    "layout-gate:check": "python scripts/check_layout_gate.py",
     "equip-eligibility:check": "python scripts/check_equip_eligibility.py",
     "ep-presets:check": "python scripts/check_ep_presets.py",
     "meta-conditions:check": "python scripts/check_meta_conditions.py",

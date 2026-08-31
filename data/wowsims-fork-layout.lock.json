@@ -1,0 +1,4 @@
+{
+  "testedTabHash": "d4a986e9c64250fc048695b9791ddb1bc2bfd0035dd2d75b06e63612e2ea1291",
+  "_comment": "testedTabHash is the sha256 (over fork-relative path + bytes of the Upgrades-tab layout source: upgrades_tab.tsx, _upgrades_tab.scss, _sim_tab.scss, sim_tab.ts, and upgrades/engine/**/*.ts) at the last green run of the layout gate. scripts/check_layout_gate.py compares the live digest to this on `pnpm merge-to-dev`; equal means the tab source that last passed is still on disk, so the ~2m19s gate is skipped. Advanced only by a green gate run (commit the change) or by --update-baseline after a hand-proven layout change. The fork itself is gitignored, so this record lives here rather than in the fork."
+}
