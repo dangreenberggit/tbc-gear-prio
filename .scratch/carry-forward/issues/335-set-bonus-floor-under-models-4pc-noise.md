@@ -1,8 +1,27 @@
-Status: open
+Status: closed
 Type: enhancement
 Origin: round-7 pre-merge review (domain axis), 2026-08-29; feat/upgrades-dedup-wowsims
 Blocks: none
 Blocked by: none
+Resolution: Fix (b) — the honest-comment minimum. Measured the band first:
+across every committed fixture carrying `prospectiveBonusDps` (the six tracked
+`.scratch/**` reports), no 4pc bonus (and no bonus of any threshold) lands in the
+(4.808, 5.889) under-filtered window — distinct 4pc values are ≤ −3.88 or ≥ 17.14
+(scan re-runnable per the ticket's own math). So fix (a) — branching the floor by
+piece count — would move zero observed rows today, and would *raise* the 4pc bar,
+which filters more bonuses out; the wrong direction for a bar the design (ADR-0021)
+deliberately keeps conservative-low and inclusive because it runs before
+replication. Corrected the `setBonusNoiseFloorDps` doc comment in
+packages/core/src/cutoff.ts to say the `√2` factor is the **2pc** bar specifically,
+applied flat to 2pc and 4pc alike on purpose, intentionally below the 4pc noise
+level, with the reason and the fixtures measurement. Ported the identical comment
+to the verbatim fork twin
+(vendor/tbc-new-fork/…/upgrades/engine/cutoff.ts, fork commit 03f5f003c) and ran
+the full ported-file cycle: E-W3 re-run green, PROVENANCE.md hash bumped, lock
+re-pinned, `data/sim-implemented-effects.json` regenerated to the new fork tip.
+Proven by: `pnpm verify` (EXIT=0; engine-port-drift, sim-implemented-effects and
+equip-eligibility gates all green) and `npx vitest run
+packages/core/test/wowsims-fork-parity.test.ts packages/core/test/cutoff.test.ts`.
 
 # The per-spec set-bonus floor uses √2, which under-models 4pc noise (it is the 2pc factor)
 

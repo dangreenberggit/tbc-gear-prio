@@ -1,8 +1,24 @@
-Status: open
+Status: closed
 Type: enhancement
 Origin: owner report, 2026-08-27 ("requires scoping them out the views visually (plus monitoring css changes)")
 Blocks: none
 Blocked by: none
+Resolution: The gate this ticket asked for is built, runnable in this
+environment, and proven to bite. `vendor/tbc-new-fork/test-layout.mjs` renders
+the Upgrades tab headless over raw CDP (Playwright's on-disk Chromium, no new
+dep) at 375/653/768/1280 and asserts structural facts (no viewport overflow,
+control-group order, sticky Run, anti-jitter height reservation, F11 span) plus —
+since ticket 329 — cell legibility on a real WASM run. Verified this pass: `npm
+run test:layout` in vendor/tbc-new-fork prints "layout gate: OK -- 37
+assertion(s) passed" (EXIT=0), and two deliberate breaks each fail it (dropping
+the sub-md Slot nowrap → assertion 6 fails at 375/653; dropping the host's
+`grid-column: 1 / -1` → assertion 5 fails at 1280). Every candidate assertion
+this ticket listed is present. The DOM-geometry approach the ticket steered
+toward (over screenshot capture, which was inert here) is exactly what shipped.
+The one remaining half — making it run automatically rather than by hand — is
+ticket 325, which stays open for an owner ruling (see that ticket for the
+measured CI constraint). Closing 322 as "gate built and biting"; 325 owns the
+wiring decision.
 
 # Nothing in any gate renders the page, so layout regressions are invisible
 

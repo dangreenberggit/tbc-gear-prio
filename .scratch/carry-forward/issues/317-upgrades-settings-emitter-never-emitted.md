@@ -1,8 +1,19 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review round 4, Adversarial axis finding A1, 2026-08-27
 Blocks: none
 Blocked by: none
+Resolution: Already fixed on the fork tip — the first, defensible option in this
+ticket ("emit the event where the tab changes those fields"). At fork commit
+ea65fbfc2 ("Rework set-bonus lines…"), each of the three pickers' `setValue`
+now calls `this.settingsChangedEmitter.emit(eventID)` after writing its field
+(upgrades_tab.tsx:863 iterations, :879 candidateCap, :894 bisPrune), and the
+block comment at :838-854 documents exactly the re-sync rationale this ticket
+named (the `Input` base's repaint path, parity with bulk_tab.tsx's emitting
+setters, and that a programmatic write now shows through instead of leaving a
+stale display). No longer half-wired. Verified during this bucket-2 pass by
+`npm run type-check` in vendor/tbc-new-fork (tsc --noEmit, EXIT=0). No new code
+change needed; closing as resolved-upstream-of-this-pass.
 
 # Upgrades tab's settings emitter is wired but never emitted
 
