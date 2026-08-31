@@ -77,3 +77,37 @@ prereq-heavy gate.
 
 The gate itself is done; this ticket asked only for the "where", which is now
 decided and wired. Closed.
+
+## Round-2 review fixes (2026-08-31, still closed)
+
+The pre-merge review of `feat/layout-gate-merge-to-dev`
+(`docs/reviews/feat-layout-gate-merge-to-dev.md`) found two defects in the gate
+wired above. Both are fixed on-branch (commit `592afc2`); this ticket stays
+closed because the gate is still wired where it was decided — the fixes harden
+the wiring, they do not reopen the "where" question.
+
+- **A1 (HIGH) false green — fixed.** The digest hashed only the tab's own files,
+  but the two tab SCSS files import nothing and resolve their asserted geometry
+  through globally-injected Sass variables / CSS custom properties, so a
+  breakpoint or token edit in a shared file (e.g. `xl: 1200px → 1100px` in
+  `ui/scss/shared/_variables.scss`) re-laid the tab at the asserted widths while
+  `testedTabHash` stayed put → the gate SKIPPED a broken tab. Fix: the hashed set
+  now also covers `shared/_variables.scss` (breakpoints + layout tokens),
+  `shared/_global.scss` (root font-size + lg/xxl spacer overrides), and
+  `core/sim_ui/_shared.scss` (`--sim-header-height` + the sim-content host). The
+  lock `_comment` and script docstring now state what the digest covers and its
+  boundary (Bootstrap's own mixins live in `node_modules`, pinned by the
+  lockfile, not hashed). Proven: editing `xl` moved the digest `b4456f71 →
+  07c0dc24`; revert restored it and left the fork tree clean.
+- **A2 (MEDIUM) stranded baseline advance — fixed.** A green run rewrote the lock
+  after `merge_to_dev`'s clean-tree check, so the advance never entered the merge
+  and the dirty lock rode onto dev. Fix: `check_layout_gate.run()` gained
+  `on_baseline_advanced`, which `merge_to_dev` uses to commit the lock onto the
+  feature branch before `git checkout dev`. Proven: the callback fires once with
+  `(LOCK_PATH, digest)` after `write_baseline` only on the green-advance path; a
+  real green run committed the advanced baseline and left the tree clean.
+
+One finding was deferred, not fixed:
+`.scratch/carry-forward/issues/338-layout-gate-fnm-node-22-not-verified.md`
+(Standards S1 — the `fnm exec --using=22` fallback is not verified to yield a
+v22; low likelihood on the main checkout).
