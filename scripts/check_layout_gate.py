@@ -27,9 +27,13 @@ because the fork's files are not tracked here at all. So the merge diff is the
 wrong instrument.
 
 Instead this compares CONTENT. It hashes the fork's layout source -- the tab
-component, its SCSS, the sim-tab shell, and the ranking engine that produces the
-result rows assertions 6-8 measure -- into one digest, and compares it to the
-digest recorded the last time the gate ran green
+component, its SCSS, the sim-tab shell, the ranking engine that produces the
+result rows assertions 6-8 measure, AND the shared SCSS the tab's asserted
+geometry resolves through (the breakpoint map and layout tokens in
+`shared/_variables.scss`, the root font-size and spacer overrides in
+`shared/_global.scss`, and `--sim-header-height` in `core/sim_ui/_shared.scss`
+-- see SHARED_LAYOUT_FILES for why each is load-bearing) -- into one digest, and
+compares it to the digest recorded the last time the gate ran green
 (`data/wowsims-fork-layout.lock.json`, `testedTabHash`). Equal digest ->
 the exact tab source that last passed is still on disk -> nothing to re-test ->
 skip. Different digest -> the layout source moved since the last green run ->
@@ -84,6 +88,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,15 +107,44 @@ ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 # The engine directory drives assertions 6-8 (row legibility): those measure the
 # result rows a real WASM run lands, and the ranking engine is what produces
 # them. A change to any of these can change what the gate observes, so any of
-# them moving must re-arm the gate. `*.scss` partials the tab imports transitively
-# are covered only if they are one of these named files; the gate's own comments
-# name `_upgrades_tab.scss` and `_sim_tab.scss` as the styles it asserts on
-# (`test-layout.mjs:248`), so those two are the layout contract.
+# them moving must re-arm the gate.
 SHELL_FILES = (
     "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
     "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss",
     "ui/scss/core/components/_sim_tab.scss",
     "ui/core/components/sim_tab.ts",
+)
+
+# The shared SCSS the tab's asserted geometry resolves THROUGH. The two tab SCSS
+# files above declare no `@use`/`@import`; they consume globally-injected Sass
+# variables and CSS custom properties, so a change in these shared files re-lays
+# the tab at the exact widths the gate measures without touching a SHELL_FILE.
+# Omitting them was finding A1 (round-2 review): editing `xl: 1200px -> 1100px`
+# re-lays the tab at the asserted widths while `testedTabHash` stays put, so the
+# gate would SKIP and a broken tab would merge green.
+#
+# Each is here because it feeds a measured assertion, not merely because the tab
+# imports it:
+#   - shared/_variables.scss  -- `$grid-breakpoints` (the values the
+#     `media-breakpoint-*` mixins read; asserts 2/4/5 gate on xl=1200 / lg=992 /
+#     md) AND the layout tokens the asserted rules consume (`--gap-width`,
+#     `--container-padding`, `--section-spacer`, `--spacer-3`, `--border-default`).
+#   - shared/_global.scss  -- the `:root` font-size (the rem base under every
+#     dimension) and the `lg`/`xxl` `!important` overrides of `--section-spacer`
+#     / `--container-padding` (they apply at >= lg = 992, i.e. the 1280 band).
+#   - core/sim_ui/_shared.scss  -- `--sim-header-height` (assert 3's sticky
+#     `top:`) with its `lg` override, and the `.sim-container` / `.sim-content`
+#     flex host the tab renders inside.
+#
+# Boundary this digest does NOT cover (stated, not hidden): the Bootstrap
+# `media-breakpoint-*` mixins themselves live in `node_modules`
+# (`bootstrap/scss/mixins`), pinned by the fork's lockfile, not in the fork's own
+# source -- a Bootstrap bump is governed by the lockfile, not by this hash. The
+# digest is over the fork's OWN layout source.
+SHARED_LAYOUT_FILES = (
+    "ui/scss/shared/_variables.scss",
+    "ui/scss/shared/_global.scss",
+    "ui/scss/core/sim_ui/_shared.scss",
 )
 
 
@@ -122,7 +156,7 @@ def _iter_layout_files() -> list[Path]:
     are a real error -- the tab cannot render without them); the engine dir is
     globbed, so a renamed engine file just changes the digest.
     """
-    files = [FORK_ROOT / rel for rel in SHELL_FILES]
+    files = [FORK_ROOT / rel for rel in SHELL_FILES + SHARED_LAYOUT_FILES]
     if ENGINE_DIR.is_dir():
         files.extend(sorted(ENGINE_DIR.rglob("*.ts")))
     return files
@@ -187,17 +221,26 @@ def write_baseline(digest: str) -> None:
         except ValueError:
             pass
     data["testedTabHash"] = digest
-    data.setdefault(
-        "_comment",
-        "testedTabHash is the sha256 (over fork-relative path + bytes of the "
-        "Upgrades-tab layout source: upgrades_tab.tsx, _upgrades_tab.scss, "
-        "_sim_tab.scss, sim_tab.ts, and upgrades/engine/**/*.ts) at the last "
-        "green run of the layout gate. scripts/check_layout_gate.py compares "
-        "the live digest to this on `pnpm merge-to-dev`; equal means the tab "
-        "source that last passed is still on disk, so the ~2m19s gate is "
-        "skipped. Advanced only by a green gate run (commit the change) or by "
-        "--update-baseline after a hand-proven layout change. The fork itself "
-        "is gitignored, so this record lives here rather than in the fork.",
+    data["_comment"] = (
+        "testedTabHash is the sha256 (over fork-relative path + bytes) of the "
+        "Upgrades-tab layout source at the last green run of the layout gate: the "
+        "shell files (upgrades_tab.tsx, _upgrades_tab.scss, _sim_tab.scss, "
+        "sim_tab.ts), the ranking engine (upgrades/engine/**/*.ts), AND the shared "
+        "SCSS the tab's asserted geometry resolves through -- shared/_variables.scss "
+        "($grid-breakpoints + the layout tokens the asserted rules read), "
+        "shared/_global.scss (root font-size + lg/xxl spacer overrides), and "
+        "core/sim_ui/_shared.scss (--sim-header-height + the sim-content host). The "
+        "shared files are hashed because the two tab SCSS files import nothing and "
+        "consume globally-injected variables, so a breakpoint or token edit re-lays "
+        "the tab at the asserted widths without touching a shell file (review "
+        "finding A1). NOT covered: Bootstrap's own media-breakpoint mixins, which "
+        "live in node_modules and are pinned by the fork's lockfile, not the fork's "
+        "source. scripts/check_layout_gate.py compares the live digest to this on "
+        "`pnpm merge-to-dev`; equal means the layout source that last passed is "
+        "still on disk, so the ~2m19s gate is skipped. Advanced only by a green gate "
+        "run (merge_to_dev commits the advance onto the feature branch so it enters "
+        "the merge) or by --update-baseline after a hand-proven layout change. The "
+        "fork itself is gitignored, so this record lives here rather than in the fork."
     )
     LOCK_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
@@ -285,13 +328,26 @@ def _skip(msg: str) -> int:
     return 0
 
 
-def run(print_hash: bool = False, update_baseline: bool = False) -> int:
+def run(
+    print_hash: bool = False,
+    update_baseline: bool = False,
+    on_baseline_advanced: Callable[[Path, str], None] | None = None,
+) -> int:
     """The gate. `merge_to_dev.py` calls this directly, argv-free.
 
     Kept separate from `main()` so the merge path never re-parses its own
     command line through this module's argparse -- `pnpm merge-to-dev
     --check-only` would otherwise hand `--check-only` to a parser that does not
     know it.
+
+    `on_baseline_advanced`, when given, is called with (LOCK_PATH, new_digest)
+    after -- and only after -- a green gate run rewrites the lock to a NEW
+    digest. It is the caller's hook to persist that write so it does not leave
+    the tree dirty: `merge_to_dev.py` uses it to commit the lock onto the
+    feature branch BEFORE `git checkout dev`, so the advance enters the merge
+    instead of being stranded uncommitted (review finding A2). The callback
+    fires only on the green-advance path, so the skip-clean and fail-closed
+    paths never touch git.
     """
     if not FORK_ROOT.is_dir():
         return _skip(
@@ -373,6 +429,11 @@ def run(print_hash: bool = False, update_baseline: bool = False) -> int:
             "the merge; commit it so the next merge skips a re-test of the same "
             "source."
         )
+        if on_baseline_advanced is not None:
+            # Persist the advance now, before control returns to a caller that
+            # may `git checkout dev` -- otherwise the write is stranded
+            # uncommitted and never enters the merge (review finding A2).
+            on_baseline_advanced(LOCK_PATH, digest)
         return 0
 
     print(

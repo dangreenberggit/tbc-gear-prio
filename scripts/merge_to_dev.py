@@ -75,6 +75,34 @@ def die(msg: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
+def _commit_layout_baseline(lock_path: Path, digest: str) -> None:
+    """Commit a green-run layout-gate baseline advance onto the feature branch.
+
+    Called by check_layout_gate.run() only after a green gate run rewrites the
+    lock to a new digest, and before this script's `git checkout dev`. Commits
+    ONLY the lock file, so the advance enters the merge and the tree is clean at
+    checkout (review finding A2). Scoping to the lock alone matters because the
+    pre-commit `lint-staged` runs against `*`; the tree was verified clean
+    before the gate ran, so the lock is the only dirty path here, but the
+    explicit pathspec keeps that true even if that assumption ever weakens.
+    """
+    rel = os.path.relpath(lock_path, ROOT)
+    add = run(["git", "add", "--", rel])
+    if add.returncode != 0:
+        die("layout gate advanced the baseline but `git add` of the lock failed")
+    msg = (
+        f"Advance Upgrades-tab layout baseline to {digest[:12]}\n\n"
+        "The layout gate ran green against changed tab source and rewrote\n"
+        "data/wowsims-fork-layout.lock.json. Commit the advance on the feature\n"
+        "branch so it enters this merge and the next qualifying merge skips the\n"
+        "~2m19s re-test of the same source."
+    )
+    commit = run(["git", "commit", "-m", msg, "--", rel])
+    if commit.returncode != 0:
+        die("layout gate advanced the baseline but committing the lock failed")
+    print(f"committed layout baseline advance ({rel}) onto {ROOT.name}'s branch")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
@@ -127,8 +155,17 @@ def main() -> int:
     # all present; skips cleanly (returns 0) otherwise. A real assertion failure
     # returns nonzero and blocks the merge. See scripts/check_layout_gate.py and
     # ticket 325.
+    #
+    # A green run advances data/wowsims-fork-layout.lock.json. That write lands
+    # AFTER the clean-tree check above, so without this callback it would ride
+    # onto dev uncommitted or trip a merge conflict, and the ~2m19s re-test would
+    # be re-paid on the next qualifying merge (review finding A2). The callback
+    # commits the advance onto the feature branch BEFORE `git checkout dev`, so
+    # the tree is clean at checkout and the new digest enters the merge.
     print("\n=== layout gate (Upgrades tab) ===")
-    layout_rc = check_layout_gate.run()
+    layout_rc = check_layout_gate.run(
+        on_baseline_advanced=_commit_layout_baseline if not args.check_only else None
+    )
     if layout_rc != 0:
         die("layout gate failed — Upgrades tab layout is broken", layout_rc)
 
