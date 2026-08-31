@@ -1,8 +1,21 @@
-Status: open
+Status: closed
 Type: chore
 Origin: pre-merge review round 4, Adversarial axis finding A2, 2026-08-27
 Blocks: none
 Blocked by: none
+Resolution: Already fixed on the fork tip (commit ea65fbfc2). Both stale comments
+are corrected and both unreachable guards are gone. `readIterations`
+(upgrades_tab.tsx:1057-1069): the comment now says "The field is a plain `number`
+written by the `NumberPicker`; the picker coerces user input in `getInputValue()`
+(`parseInt(value || '') || 0`), so this only ever sees `0` or a positive integer,
+never `NaN`/`Infinity`" — naming exactly where coercion happens — and the body is
+`parsed > 0 ? Math.floor(parsed) : DEFAULT_ITERATIONS`, with the old
+`Number.isFinite && > 0` guard replaced by the honest `> 0` check.
+`readCandidateCap` (:1107-1120) mirrors it: comment says "a plain `number` coerced
+by the `NumberPicker` (see `readIterations`), so it is only ever `0` or a positive
+integer", body `parsed > 0 ? Math.floor(parsed) : undefined`. No `NaN`/`Infinity`
+guard survives to be misread as load-bearing. Verified `npm run type-check`
+(EXIT=0). No new code change needed; closing as resolved-upstream-of-this-pass.
 
 # Read-helper guards and comments describe an input that no longer exists
 
