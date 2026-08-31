@@ -1,10 +1,18 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review round 4, Domain axis finding D3, 2026-08-27
 Blocks: none
 Blocked by: none
 
-## Measured 2026-08-30 (bucket-2 pass) — hypothesis PARTIALLY confirmed; left open for an owner rename call
+## Closed 2026-08-30 (owner ruling) — Option C, accept status quo, no code change
+
+Owner decision: keep World Bosses under "Raid zones". Rationale — world bosses
+require a raid to kill, and the principle is to rely on the grouping wowsims /
+AtlasLoot already emit rather than invent a new label or data structure. The one
+outlier the measurement found is therefore working-as-intended, not a mislabel.
+Zero code change; the value of this ticket was the measurement below, now recorded.
+
+## Measured 2026-08-30 (bucket-2 pass) — hypothesis PARTIALLY confirmed
 
 Enumerated every distinct `zone` value across all 44 built universes
 (`data/universes/<spec>-p<N>.json`), with the source `kind`(s) each carries and
@@ -36,22 +44,9 @@ own `WorldBossesBC` alias (`parse_atlasloot.py:65`), which groups them alongside
 raids. (Note the separate zoneless `world` bucket, labelled "World drop", is for
 BoE world drops — a different thing.)
 
-So it is a real, narrow mislabel, but the fix is a **taste/labeling decision only
-the owner should make**, not an objective bug fix — hence left open, not closed:
-
-- Option A — rename the group label from "Raid zones" to the ticket's own
-  suggestion **"Content"** (true of raids and world bosses alike; the filter's
-  internal key is already `zone`, and the flat-list label is what a player reads).
-  Cleanest; touches one i18n string.
-- Option B — move "World Bosses" into the zoneless "Other sources" group (add it
-  to the bucket list / `SOURCE_LABELS` handling). But it is legitimately
-  raid-tier gear a raider shortlists, so demoting it to "Other" may read as more
-  wrong than the current placement.
-- Option C — accept the status quo (AtlasLoot groups world bosses with raids;
-  many players do too) and only fix the *hypothesis-was-unmeasured* gap by
-  recording this measurement. Zero code change.
-
-On the human-inspection checklist as an owner rename decision.
+The placement is a labeling choice, and the owner ruled it working-as-intended
+(see the Closed note above): World Bosses stay under "Raid zones" because they
+require a raid and because AtlasLoot already groups them there. No code change.
 
 # "Raid zones" filter group may list non-raid zones
 
