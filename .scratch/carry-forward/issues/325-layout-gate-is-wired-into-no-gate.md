@@ -34,25 +34,32 @@ finding rules out the ticket's assumed home ("the fork's own lint/CI path"):
   built `dist/tbc` + Chromium.
 
 So the layout gate can only run automatically from **the main checkout, as a
-local/pre-merge step**, never in either repo's CI. Which of the surviving homes
-to use is a workflow-ownership call for the owner, not an objective fix:
+local/pre-merge step**, never in either repo's CI.
 
-- Option A — a documented **pre-merge step** (e.g. folded into the
-  `pre-merge-review` skill or `docs/workflow.md`'s loop) that says: when a change
-  touches the fork's tab SCSS/tsx, run `npm run test:layout` from
-  vendor/tbc-new-fork and record the result in the review. No new automation;
-  relies on the reviewer.
-- Option B — a **soft local check** invoked from a main-checkout-only script
-  (guarded to no-op/skip when the fork or its `dist/` or Chromium is absent, like
-  the port-drift check skips), optionally surfaced by `pnpm verify` as a
-  warning-only line the way `upstream-drift:warn` already is.
-- Option C — accept manual invocation and just **document its existence** in
-  `docs/upgrades-tab-scope.md` so the next person knows to run it.
+## Decision-ready options written 2026-08-30 — awaiting an owner pick
 
-Recommend A or B (both keep the gate honest without pretending CI runs it);
-the choice is the owner's. On the human-inspection checklist. Note: the gate
-itself is done and biting (ticket 322, closed) — this ticket is only the "where
-does it run" decision.
+A full plain-English options write-up is at
+[`.scratch/carry-forward/325-options.md`](../325-options.md). It lays out four
+distinct homes (A: documented pre-merge-review step; B: a warn-only self-skipping
+check chained onto `pnpm verify`, modeled on `upstream-drift:warn`; C: just
+document the test's existence; D: run it in CI — ruled out, blocked on the
+fork's environment and the deferred split-repo thread). Each option has its
+cost, what it protects, what it leaves exposed, and its blockers, with every
+claim grounded in a file path.
+
+**Recommendation (write-up's):** do **Option B** — wire the layout test onto
+`pnpm verify` as a warn-only check that self-skips when the fork / its `dist/` /
+Chromium is absent (the `warn_upstream_drift.py` + `_fork_gate.py` pattern this
+repo already uses), so it runs unprompted on every push and merge from the main
+checkout — and fold in Option A's one useful half (a pre-merge-review line so a
+tab-touching branch records the `test:layout` result in `docs/reviews/<branch>.md`).
+B is the only option that makes the test run without a human remembering; A and C
+keep it a reminder. **Not blocked on the 251/263 split-repo thread** — that thread
+is about which upstream source supplies gear presets, which the layout test does
+not read. Only Option D (CI) is entangled with it, and D is ruled out.
+
+The gate itself is done and biting (ticket 322, closed); this ticket is only the
+"where does it run" decision. On the human-inspection checklist.
 
 # The Upgrades-tab layout gate runs by hand, not as a gate
 

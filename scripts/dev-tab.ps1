@@ -69,7 +69,6 @@ $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $ForkDir = Join-Path $RepoRoot 'vendor\tbc-new-fork'
-$Node22Home = Join-Path $env:USERPROFILE 'AppData\Roaming\fnm\node-versions\v22.17.1\installation'
 
 if (-not (Test-Path $ForkDir)) {
     throw "Fork checkout not found at $ForkDir. This script only works from the main checkout (vendor/ is gitignored)."
