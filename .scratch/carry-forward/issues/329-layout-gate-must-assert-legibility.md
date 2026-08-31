@@ -1,8 +1,28 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner report, 2026-08-28; supersedes the framing of ticket 322
 Blocks: none
 Blocked by: none
+Resolution: The legibility assertions this ticket asked for are present in
+`vendor/tbc-new-fork/test-layout.mjs` and proven to bite. The gate drives one
+real headless WASM run and then measures the landed result cells across
+375/653/768/1280 with three DOM-geometry assertions matching the ticket's list:
+(6) one-line Slot/DPS cells — content height (padding excluded, via a Range over
+the cell contents) must be <= 1.5x line-height, catching vertical/per-character
+wrap; (7)/(7b) no clipped text — a cell overflowing its box under an
+overflow-hidden ancestor fails, and the sanctioned `.upgrades-results` scroller
+must actually scroll (overflow-x auto/scroll) when the table is wider than it,
+not clip; (8) sane row spacing — each row <= 7x line-height with consecutive rows
+adjacent (no huge gaps). Verified this pass: `npm run test:layout` passes
+(EXIT=0, 37 assertions), and a deliberate break — shattering the sub-md Slot cell
+to `max-width: 1ch; word-break: break-all` (the ticket-327 vertical-text defect)
+— makes assertion (6) fail at 375 and 653 ("Slot cell 'Chest' content height 88.0
+> 1.5x line-height 17.5 -- text wrapped to multiple lines"), EXIT=1, while
+768/1280 (where the sub-md rule is inert) correctly still pass. Break reverted;
+gate green. The two folded-in items (325 wiring, 326 escape hatch) are handled
+under their own tickets — 326 hardened this pass, 325 left open for an owner
+placement ruling. No code change was needed for 329 itself (the assertions had
+landed on the fork tip); closing as verified-and-biting.
 
 # The layout gate must assert cell legibility, not just structure
 

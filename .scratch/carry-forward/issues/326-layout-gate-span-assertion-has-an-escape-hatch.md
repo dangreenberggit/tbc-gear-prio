@@ -1,8 +1,24 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review round 5, Adversarial finding A2, 2026-08-28
 Blocks: none
 Blocked by: none
+Resolution: Hardened assertion #5 in `vendor/tbc-new-fork/test-layout.mjs` so the
+`|| widthMatch` escape hatch can no longer let a dropped span pass silently. The
+span is now the primary assertion (`grid-column: 1 / -1`, via computed
+`gridColumnStart/End`); width parity is admitted as a proxy ONLY when the panel
+genuinely has >=2 column tracks — the two-column layout the span exists to
+survive, where a dropped span really would narrow the host and break parity. The
+probe now returns the resolved `grid-template-columns`, and the assertion counts
+its tracks (`display:grid && >=2 non-'none' tracks`) to gate the fallback; at 1
+track the span must hold on its own. Verified this pass: `npm run test:layout`
+still passes (EXIT=0; the 1280 assertion reports "spans full width (grid-column
+1/-1)" via the primary path), and a deliberate break — dropping the host's
+`grid-column: 1 / -1` while keeping it on the sub-tabs — makes the assertion fail
+at 1280 ("did NOT span: grid-column auto/auto, width 321.6 vs tabs 664.3, 2
+column track(s) -- width parity is not accepted as a proxy"), EXIT=1. Break
+reverted; gate green. Only `test-layout.mjs` changed (SCSS byte-identical to
+HEAD). Proven by: `npm run test:layout` in vendor/tbc-new-fork.
 
 # Layout gate assertion #5 can pass with the F11 span dropped
 
