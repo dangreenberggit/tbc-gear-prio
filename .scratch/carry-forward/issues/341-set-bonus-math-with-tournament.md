@@ -49,5 +49,22 @@ the tournament.
 
 ## Acceptance
 
-- [ ] The set-bonus feature's exact input requirement written down.
-- [ ] A verdict (a/b/c above) with reasoning, feeding ticket 340's design.
+- [x] The set-bonus feature's exact input requirement written down.
+- [x] A verdict (a/b/c above) with reasoning, feeding ticket 340's design.
+
+Answered in `.scratch/stage-gate/341-set-bonus-tournament/report.md` —
+**verdict (a)**: set bonuses work through the tournament via a two-run
+combining scheme (one-swap run, then a run of at most 10 package
+candidates), with `top_results = candidateCount` required on both runs
+or the response truncates to 5.
+
+Pool-size note (the report's first framing of this was wrong and is
+retracted in its correction note + addendum): ticket 340's "~16-27" is
+**correct** for the BiS-prune path. Measured across all 44 committed
+universes, `bisTags`-carrying entries number **15-27** per file. The
+240/228/366 `poolSize` figures in the fixtures count a different,
+earlier stage (phase-filtered `PoolEntry[]`, `record_synthetic_fixtures.mjs:288-293`)
+and apply only to the unpruned pool. Caveat for 340: 10 of the 44
+universes sit at or above the 20-candidate single-stage floor (all
+hunter phases, mage p3-p5, warrior p2-p4) and would need the no-cull
+path forced; the other 34 take it unaided.
