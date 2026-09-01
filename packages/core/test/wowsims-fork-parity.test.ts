@@ -482,6 +482,14 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       spec: "ret",
       maxPhase: 2,
       seeds: SEEDS,
+      // Pinned, not defaulted. This fixture's recordings are keyed at
+      // `ITERATIONS` (the key embeds the iteration count), so leaving it to
+      // `DEFAULT_ITERATIONS` silently couples the fixture to that constant --
+      // and when the default moved 3000 -> 5000 for the bulk screening pass,
+      // every key missed and the whole parity test failed with "no recording
+      // for sim key". Passing it explicitly makes the fixture describe its own
+      // conditions, which is what a recording should do.
+      iterations: ITERATIONS,
     },
     {
       gear: new engine.RecordedGearSource({
