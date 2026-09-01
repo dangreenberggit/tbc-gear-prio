@@ -56,8 +56,17 @@ context may not survive. Settle 341 before designing how far 340 goes.
 
 ## Acceptance
 
-- [ ] 341 answered.
-- [ ] Small-pool no-cull behavior confirmed on our real BiS pools, with numbers.
-- [ ] A measured comparison: tournament vs our flat pass for BiS mode (accuracy,
-      speed, and whether every needed row/number is present).
-- [ ] A decision recorded with reasoning.
+Decision report: `.scratch/stage-gate/340-tournament-route/report.md` (gitignored).
+
+- [x] 341 answered.
+- [x] Small-pool no-cull behavior confirmed on our real BiS pools, with numbers.
+      All 44 universes take the single-stage no-cull path; the 10 at/above the
+      20 floor are caught by the cost-estimate branch, not the floor, so
+      `use_legacy_bulk_sim` is never needed. Report section Q1.
+- [x] A measured comparison: tournament vs our flat pass for BiS mode (accuracy,
+      speed, and whether every needed row/number is present). Accuracy 100%
+      agreement within 3 combined SEs on three universes; every row returned at
+      BiS sizes; iterations 1.7x-7.2x MORE expensive than the flat pass.
+      Report section Q2 (three-baseline table + agreement table).
+- [x] A decision recorded with reasoning. Verdict: direction 1 answered NO -
+      do not route through the bulk sim; move to ticket 339. Report section Verdict.
