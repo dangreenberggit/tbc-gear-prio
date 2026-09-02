@@ -1665,3 +1665,22 @@ Nothing is adjusted unilaterally: if arm A is still running materially past its
 175-min prediction, the executor stops and reports rather than letting an
 unbounded arm run, since "how much compute is this worth" is the owner question
 that produced the cap in the first place.
+
+**Gate C ruling on the above (binding) — the 175-min stop rule is WITHDRAWN.**
+
+My "stop arm A if it passes its prediction" rule was wrong and is retracted. The
+5.5 h figure was the orchestrator's ceiling for **choosing the cap**, not a
+runtime kill switch. Once an arm is running, abandoning it at its predicted
+duration wastes the compute already spent and buys nothing — the budget decision
+was already made when the cap was set at 213.
+
+**The plan's own per-arm rule governs instead** (Step 3): abort only at
+
+- **2x the arm's predicted duration**, or
+- **20 minutes with no console sim line** (a wedge),
+
+then re-run once, then report lost. On those numbers arm A's abort threshold is
+**~350 min**, not 175, and arm B's is ~308 min.
+
+Both WASM arms run to completion under that rule. The budget projection above
+stays as a record of what the arms were expected to cost; it is not a trigger.
