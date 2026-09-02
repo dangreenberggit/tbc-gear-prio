@@ -37,9 +37,10 @@ const candidates = (n: number): Candidate[] =>
 describe.skipIf(!forkPresent)("partitionForBulkScreen", () => {
   it("keeps the shared constant inside both engines' no-culling regimes", async () => {
     const { MAX_CANDIDATES_PER_BULK_REQUEST } = await load();
-    // Go engages Medium at 26; TS stays High-only to 32 at 5,000 iterations.
-    // 25 is the largest value inside both — a change here is a cross-engine
-    // decision, not a tuning knob.
+    // 25 is single-stage on both engines at every iteration count measured, so
+    // the bound is iteration-invariant rather than tuned to today's default —
+    // see `bulk-boundary.test.ts` for the table and the mechanism. A change
+    // here is a cross-engine decision, not a tuning knob.
     expect(MAX_CANDIDATES_PER_BULK_REQUEST).toBe(25);
     expect(MAX_CANDIDATES_PER_BULK_REQUEST).toBeLessThan(26);
   });
