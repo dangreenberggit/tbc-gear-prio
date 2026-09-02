@@ -129,6 +129,23 @@ until there is something real for it to test.
 - [ ] If disclosing: Stop's user-visible contract and candidate-pool.md §5.1.4
       agree, and the WASM-side latency is stated.
 
+## Rider (pre-merge review P5): chunk-level failure does not degrade to the loop
+
+Same code region, deferred here rather than in its own ticket. One rejected
+candidate fails its entire chunk's request (`ui/core/wasm/bulk_sim/index.ts:121-122`
+converts any candidate error into a request-level error), and the runner's
+row-count guard then fails the screening pass — whereas the per-candidate loop
+records a `candidateSkips` row and continues. It never fired in any measured
+arm, and adding an untested fallback at close-out was judged worse than naming
+the gap (web execution ledger, "Two gaps I'm flagging"). Whoever reworks this
+region for cancel should decide the degradation story at the same time:
+fall back to the loop for the failed chunk's candidates, or surface the chunk
+error with the failing candidate identified.
+
+- [ ] A chunk-level bulk failure either degrades to per-candidate simming for
+      that chunk, or produces a user-legible error naming the candidate —
+      decided and tested, not left as a pass-level abort.
+
 ## Notes
 
 Related but distinct: ticket 345 (equivalence metric granularity) and ticket 346
