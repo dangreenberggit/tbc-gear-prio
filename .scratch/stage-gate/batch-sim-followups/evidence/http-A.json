@@ -1,7 +1,9 @@
 {
 	"meta": {
 		"what": "Campaign arm A (bulk screening), HTTP transport, frozen capped configuration",
-		"finding": "Arm A's per-item deltaDps equals arm B's on all 202 rows. This is a real result, not an artefact: the Gate C diagnostic (evidence/diag-identical-deltas.json) showed the screened map IS used (2 screening sims vs the loop's 34 at cap 30) and the Go engine is deterministic at matched settings (the same request replayed twice returned 2245.447435998697 both times). At matched (request, seed, iterations, concurrency) the two routes are numerically identical on this transport.",
+		"WITHDRAWN_finding": "SUPERSEDED - DO NOT USE. This file previously claimed that arm A's deltas equalling arm B's was 'a real result, not an artefact'. That claim is WITHDRAWN. The harness never passed its seeds into rankUpgrades (RankInput.seeds, rank.ts:138/564), so EVERY arm ran at DEFAULT_SEEDS[0] = 11. Arms A and B matched because they were the same seed on a deterministic engine, not because the two routes agree. See execution-ledger-b.md, 'CORRECTION - the harness never passed its seeds'.",
+		"stillValid": "The COST figures and the bulk path's structural facts are unaffected by the seed bug: 10 chunks, all single-stage, all achieving exactly 8000 iterations; screening 115.1 s; first row 117.1 s. Timings and chunk shape do not depend on which seed was used.",
+		"notValidFor": "Any 345 or 348 claim. Those need a genuine null arm, which this campaign did not have. Arms A, B and C must be re-run with the seed fix before scoring.",
 		"preconditions346": "ALL PASS on the bulk route: 10 chunks, every chunk stages=1, every chunk achieved exactly 8000 iterations (no adaptive overshoot), every chunk n<=25, 1 measured probe per chunk."
 	},
 	"armId": "A",

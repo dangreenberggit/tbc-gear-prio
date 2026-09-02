@@ -1065,7 +1065,90 @@ Three things the owner needs alongside that sentence, none of which change it:
 
 ---
 
-## Step 4 — `http-C` (null arm) running at hand-back
+## CORRECTION — the harness never passed its seeds. D-2's conclusion is WITHDRAWN.
+
+Arm C completed and returned deltas **identical to arm B** — 33716 at
+99.41011710030534, 32014 at 53.817706155452925, 30106 at 38.072508714707965,
+matching arm B to every recorded digit. Arm C is supposed to run at seed 777 and
+arm B at seed 11, so that is impossible for two genuine samples.
+
+The dump explains it. `RunRecord.seed` shows what each sim was actually
+dispatched at:
+
+| | declared `seeds` | screening sims actually ran at |
+| --- | --- | --- |
+| arm C | `[777, 22, 33, 44, 55]` | **11** |
+
+**This is a defect in my harness, not in the engine.** `rank.ts:564` resolves
+seeds from **`input.seeds ?? DEFAULT_SEEDS`** and takes `seeds[0]` as the
+screening seed (`rank.ts:572-573`). `RankInput` has a `seeds?: number[]` field
+(`rank.ts:138`). `runCampaignArm` recorded `opts.seeds` into the dump but never
+put it into `input`, so **every arm of this campaign ran at `DEFAULT_SEEDS`,
+whose first element is 11.**
+
+`rank.ts:835-836` states precisely what that cost: *"two runs of the same route
+at different seeds differ by more than the two routes do. The engines agree; the
+seeds do not."* The engine's own comment describes the control I failed to run.
+
+### What is withdrawn, and what survives
+
+**WITHDRAWN — the D-2 determinism finding as an explanation of A ≡ B.** D-2
+measured something real (the same request replayed twice does return identical
+DPS, so the Go engine *is* deterministic at a fixed seed), but it was the wrong
+explanation for the arms matching, and I over-concluded from it. A and B matched
+because **both ran at seed 11 on a deterministic engine** — the routes were
+never compared at genuinely independent samples. The claim "on the Go transport
+at matched settings the two routes are numerically identical" is **not
+established**: it was never tested against seed variation.
+
+**Also withdrawn:** the ledger's and `http-A.json`'s statement that rho = 1.0 is
+"a real result, not an artefact", and the corresponding line queued for ticket
+345. Rho = 1.0 here is exactly an artefact — of a control that was not a control.
+
+**SURVIVES (unaffected by the seed bug, because none of it depends on seed
+variation):**
+
+- **D-1** — the screened map is used, not missed (2 screening sims vs 34 at cap
+  30). That is a comparison of *call counts*, not of DPS values.
+- **All 346 preconditions on arm A** — 10 chunks, single-stage, each achieving
+  exactly 8,000. Structural facts about the bulk path.
+- **All cost figures** — screening 115.1 s (A) vs 394.3 s (B) vs 371.0 s (C),
+  first row 117.1 s vs 2.6 s vs 2.7 s, `R_wall_s` 0.292. Timings do not depend
+  on which seed was used.
+- **The depth gate** — 31 rows ≥ 2·se at 8,000, and the N11 refutation. A
+  property of one arm's own precision, not of a cross-arm comparison.
+- **The scorer**, validated independently on fixtures and the prior dump.
+
+Note arm C is a *useful* accident in one narrow way: as an unintended
+same-route, same-seed repeat it confirms the campaign is reproducible end to end
+(202 rows, identical deltas, screening 371.0 s vs B's 394.3 s — a 5.9% wall-clock
+spread on identical work, which is real machine-noise information for 346).
+
+### Fix applied
+
+`runCampaignArm` now passes `{ ...opts.input, seeds: opts.seeds }` to
+`rankUpgrades`, and a new guard compares the declared `seeds[0]` against the
+seeds observed on the recorded `RunRecord`s, throwing if they disagree. A
+mislabelled arm now fails loudly instead of reaching the scorer. Fork typecheck
+exit 0.
+
+### Consequence for the campaign
+
+`http-A.json`, `http-B.json` and this arm C run were **all produced at seed 11**.
+They remain valid as *cost* evidence and as evidence about the bulk path's
+structure, but they cannot support any 345 or 348 claim, because those need a
+genuine null. Arms A, B and C must be **re-run with the fix** before anything is
+scored for 345/348. That is ~13 minutes of HTTP time (A ≈ 2.5 min, B and C ≈ 2
+min each at the observed rates, plus page setup), so this is cheap to correct —
+far cheaper than the WASM arms it would have corrupted.
+
+**Stopping here for Gate C** rather than immediately re-running: the withdrawal
+changes what two committed artifacts claim, and an executor should not quietly
+overwrite its own published conclusions.
+
+---
+
+## Step 4 — `http-C` (null arm) as originally run
 
 `?bulkEquiv=C&cap=213&iters=8000`, feral phase 3 (364 eligible), seeds
 `[777, 22, 33, 44, 55]`. Servers 3333 + 5173 up, tab foregrounded.
