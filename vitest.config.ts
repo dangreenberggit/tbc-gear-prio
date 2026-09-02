@@ -1,6 +1,23 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      // Not a file — the fork's Vite build materialises this specifier with
+      // `vite-plugin-i18next-loader`, which vitest does not run. A test that
+      // imports the fork's engine reaches it transitively (rank.ts -> items.ts
+      // -> proto_utils/database.ts -> i18n config) and the module graph dies
+      // before the test body. The stub is empty on purpose; see its own header.
+      // Scoped to a specifier nothing outside the vendored fork imports.
+      "virtual:i18next-loader": fileURLToPath(
+        new URL(
+          "./packages/core/test/fork-virtual-i18next-loader.ts",
+          import.meta.url
+        )
+      ),
+    },
+  },
   test: {
     passWithNoTests: true,
     // Several tests replay a full ranking sweep and take ~2-3 s on an idle

@@ -95,10 +95,26 @@ call, not a detail.
    rather than leaving it unmet. Note this reads very differently at 9 s (HTTP)
    than at 332 s (WASM).
 
-Whichever is chosen, the pre-dispatch `signals.abort.isTriggered()` check already
-in `BulkHttpSimRunner.runBulkScreen` starts working the moment a real trigger
-reaches it — it skips every remaining chunk. The equivalent guard should exist in
-the WASM runner too.
+**Correction (pre-merge review round, 2026-09-01).** An earlier version of this
+ticket said the pre-dispatch `signals.abort.isTriggered()` check already in
+`BulkHttpSimRunner.runBulkScreen` "starts working the moment a real trigger
+reaches it". That is wrong, and the check has since been removed as dead code.
+
+The signal it tested was created by `this.bulkSignals.registerRunning(...)` on
+the immediately preceding line, once per chunk. Nothing holds a reference to that
+object before the check runs, so no trigger can have reached it — the condition
+was unconditionally false, and its comment described behaviour the code did not
+have. The current per-chunk fresh-signal structure **cannot** support a
+pre-dispatch check as written: a signal manufactured inside the loop body has no
+history to test.
+
+So option 1 below is not "wire a trigger to an existing working guard"; it needs
+a cancel source that outlives the chunk. Whatever this ticket implements must
+introduce one — the caller's `AbortSignal` observed directly in the loop
+condition, or a manager-level abort the runner registers against once outside the
+loop — and then re-add a guard that tests *that*. The equivalent guard is
+likewise absent from the WASM runner, and for the same reason should not be added
+until there is something real for it to test.
 
 ## Acceptance
 

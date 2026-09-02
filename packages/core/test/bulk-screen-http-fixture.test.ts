@@ -69,6 +69,7 @@ type BulkScreenRequest = {
     gear: Readonly<Record<string, unknown>>;
   }[];
   iterations: number;
+  seed: number;
 };
 
 type BulkScreenResult = {
@@ -102,6 +103,8 @@ const RECORDED_REQUEST: BulkScreenRequest = {
     { index: 2, gear: { items: [{ id: 31255 }] } },
   ],
   iterations: 5000,
+  // The seed the recording was made at, and the engine's first default seed.
+  seed: 11,
 };
 
 const obs = (dps: number): SimObservation => ({

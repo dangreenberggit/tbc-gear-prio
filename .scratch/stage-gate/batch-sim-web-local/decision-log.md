@@ -224,3 +224,18 @@
     → NEW TICKET ordered (filed by the local seat).
   - Evidence tracking verified by command: web artifacts ARE tracked;
     local ledger + dump force-added in the Gate C commit.
+- 2026-09-01 — Pre-merge review round 1 (range 15541f8..cf83e95 outer,
+  cab940cd6..52679533f fork; four fresh Opus axes, codex absent):
+  BLOCKING x2 confirmed cross-axis — (1) screened deltas subtract the
+  loop baseline while observations carry the bulk engine's own
+  (measured offset 65.3 DPS vs 3.4 cutoff; below-cutoff gate defeated
+  for screened rows; only top-8 replicated rows immune); (2) the
+  N1-promised rankUpgrades-through-bulk test is test theatre (never
+  calls rankUpgrades — the gap that let the composeForBulk defect
+  ship). Material: seed hardcoded '11' in builder (seam lacks a seed
+  field); dead pre-dispatch abort check; screened observations bypass
+  the sim cache; guard divergence screening vs loop. Minor: stale "no
+  bulk RPC" comment; "Medium at 26" mechanism misstatement; 5000
+  default undocumented; Off/corrupt localStorage conflation; 25-bound
+  not coupled to iterations. Fix round dispatched (F1-F9, one
+  executor); review file written after it lands.
