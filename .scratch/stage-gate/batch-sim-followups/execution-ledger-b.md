@@ -1704,3 +1704,24 @@ So an M1 trigger, a mislabelled transport, a wrong seed or a multi-stage chunk
 now fails **at the builder**, before anything reaches the scorer or the ledger.
 Verified while arm B ran, using outer-repo and scratchpad files only (standing
 rule 1); dry-run artifacts deleted afterwards.
+
+### Step 6's scorer invocation dry-run (before the WASM arms land)
+
+Ran the exact Step 6 command shape — two WASM-labelled arms plus
+`--null http-C.json` — using stand-ins built from the HTTP arms, to exercise the
+code path rather than to produce a result. Two pre-registered predictions are
+now **verified rather than argued**:
+
+- **`V = 0.008 (HTTP loop variance — labelled per the precedence rule)`.** The
+  scorer reads `isWasm` off the *null* arm, which stays HTTP, so it correctly
+  refuses to present a borrowed null as a WASM measurement.
+- **`thresholds: faster < 0.900, slower > 1.100`.** Exactly what the
+  borrowed-null caveat predicted: at V = 0.008 the `1 ± V` bounds are wider than
+  the fixed 0.9/1.1, so the fixed bounds bind and the borrowed null **cannot
+  flip a verdict on its own**.
+
+The whole Step 6 path — precondition gate, depth gate, (c), control, (c′), 346
+ratios and verdict, owner surfacing, 348 OLS with the null — runs clean. When the
+real WASM arms land, only the numbers change, not the machinery.
+
+Stand-ins deleted; scratchpad and outer-repo files only (standing rule 1).
