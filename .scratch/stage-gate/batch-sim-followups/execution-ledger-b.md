@@ -750,6 +750,32 @@ gets its timers throttled, which both slows the run and makes in-page
 is the reliable progress signal, and the tab should be foregrounded for long
 arms.
 
+`k_B = 24` ranked rows at the engine cutoff — that is the set (c)'s overlap is
+scored over.
+
+---
+
+## Step 4 in progress — `http-A` running at hand-back
+
+`?bulkEquiv=A&cap=213&iters=8000`, feral phase 3, tab foregrounded, servers
+3333 + 5173 up. The Go log shows continuous `Running 8000 iterations on 20
+concurrent sims` / `All 20 sims finished successfully`, so the arm is healthy,
+just long: 213 candidates partition into **9 chunks** (8 × 25 + 13), and each
+chunk pays its own baseline probe on top of its 25 candidates, so arm A does
+more total sim work than arm B's 239 screening sims did.
+
+**To resume:** read `window.__bulkEquiv` on the foregrounded tab; when `done`,
+write it to `evidence/http-A.json` (same compaction as `http-B.json`: aggregate
+`cost.runs` into `runsByPhase`, keep `cost.chunks` in full — the chunk records
+are what the 346 precondition gate reads), commit it, then run `http-C`
+(`?bulkEquiv=C&cap=213&iters=8000`, seeds `[777,22,33,44,55]`), commit, then the
+two WASM arms on 4180 with 15-minute background timers.
+
+**Remaining state that must hold:** cap 213 on every arm; the temporary
+dispatch is currently **present** in `upgrades_tab.tsx` (44 lines, marked
+`TEMPORARY`) and must be removed before the final commit; the fork's committed
+tree is otherwise clean at `75769a7f3`; the WASM default is untouched.
+
 
 ## Deviation ledger
 
