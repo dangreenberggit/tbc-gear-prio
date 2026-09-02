@@ -705,6 +705,51 @@ max phase 3), one page session.
 
 No reinterpretation of the measured count in either direction.
 
+### Result: PASS — 31 rows clear the gate. Cap 213 frozen on every arm.
+
+HTTP arm B, `cap=213`, `iters=8000`, feral phase 3 (364 eligible items, so the
+cap truncates 41% of the pool). Dump: `evidence/http-B.json` — **this IS
+`http-B.json`**, since it is arm B at the campaign's own settings.
+
+| measure | at 1,000 (failed pilot) | **at 8,000 (this run)** |
+| --- | --- | --- |
+| rows | 202 | 202 |
+| `deltaDps > 0` | 30 | 32 |
+| **`deltaDps ≥ 2·se`** | 17 — FAIL | **31 — PASS** (threshold 20) |
+| mean `se`, independent rows (n=194) | 2.347 | **0.827** |
+| mean `se`, paired-replicate rows (n=8) | 0.144 | 0.017 |
+
+**The precision explanation is confirmed by measurement, not assumed.** The
+independent-row `se` fell by a factor of **2.84**, against the predicted
+√8 = 2.828 — agreement to within 0.4%. My earlier projection said 24 rows would
+clear; the measurement gives 31, better than projected because the deltas
+themselves also firmed up as the screening noise fell. Every `run` recorded
+`iterationsDone == 8000`, so M2's pin held exactly on the loop route.
+
+This settles the D5/N11 question: **the N10 gate is precision-relative, and
+piloting it at non-campaign precision produces the wrong answer.** N11's "depth
+depends on gear, not precision" is refuted for this gate (it remains true for a
+bare `deltaDps > 0` count: 30 → 32, essentially flat).
+
+Cost figures for 346, already usable from this arm:
+
+| phase | sims | iterations | seconds |
+| --- | --- | --- | --- |
+| screening (`screen:simming`) | 239 | 1,912,000 | 394.3 |
+| baseline probe | 1 | 8,000 | 0.6 |
+| tail (replication + set-bonus) | 36 | 288,000 | 19.9 |
+
+The tail is 36 sims — matching C25's predicted "36 sims per arm at five seeds",
+a nice independent confirmation of the register. First row at 2.6 s.
+
+**One lost run, recorded per the plan's abort rule.** A first attempt at these
+settings was killed when the page navigated to `/tbc/` (the site index) mid-run.
+Re-run once, which is what this dump is. Also noted: a backgrounded browser tab
+gets its timers throttled, which both slows the run and makes in-page
+`performance.now()`/`Date.now()` useless as progress clocks — the Go server log
+is the reliable progress signal, and the tab should be foregrounded for long
+arms.
+
 
 ## Deviation ledger
 
