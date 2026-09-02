@@ -1576,3 +1576,36 @@ untouched**. Box 3's cross-route consumer identified as `computeSynergy`
 Both closures are explicitly **scoped to HTTP**, where the engine is
 deterministic and the two routes sample identically. Each says in its own text
 that WASM is the substantive test and stays with 346.
+
+### Pre-registered caveat on the WASM 346 verdict (recorded before the arms land)
+
+The WASM arms will be scored with `--null http-C.json` per the precedence rule
+(WASM arm C was dropped at Step 0 to fit the budget). The scorer reads the label
+off the null arm's own `transport.isWasm`, so it will correctly print
+**"HTTP loop variance"** rather than claiming a WASM measurement — verified by
+reading `campaign-scorer.mjs:330` before the run, not after.
+
+**What that substitution costs, stated now so it cannot look like post-hoc
+reasoning.** `V` enters the verdict as the threshold width: faster if
+`R_wall_s < min(0.9, 1 − V)`, slower if `R_wall_s > max(1.1, 1 + V)`. The HTTP
+V is **0.008**, which is unusually tight — the Go server threads one request
+across NumCPU, so two 239-sim arms average out almost all per-sim noise. WASM's
+four-worker pool has no such smoothing and its true V is plausibly larger.
+
+So substituting HTTP's V makes the thresholds **tighter than a real WASM V
+would**, which biases toward declaring a difference rather than a wash. Two
+consequences, both binding:
+
+1. A WASM verdict of **BULK FASTER** or **BULK SLOWER** that depends on the
+   `1 ± V` bound rather than clearing the fixed `0.9 / 1.1` bound must be
+   reported as **"outside the fixed bound"** only if it also clears 0.9 or 1.1.
+   Since `min(0.9, 1 − 0.008) = 0.9` and `max(1.1, 1.008) = 1.1`, the fixed
+   bounds are what actually bind at this V — so in practice the substitution
+   changes nothing unless the true WASM V exceeded 0.1, which would have
+   triggered the "indistinguishable at one run per arm" branch anyway.
+2. The C31 caveat still applies regardless: one tournament run, tournament
+   run-to-run variance unmeasured.
+
+Point 1 is the reassuring half — at V = 0.008 the pre-registered thresholds
+collapse to the fixed 0.9/1.1, so the borrowed null cannot flip a verdict on its
+own. Recorded because the reasoning had to happen before the numbers, not after.
