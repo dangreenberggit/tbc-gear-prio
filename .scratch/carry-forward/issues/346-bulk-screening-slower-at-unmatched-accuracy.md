@@ -82,3 +82,33 @@ Raw evidence: `.scratch/stage-gate/batch-sim-web-local/equiv-dump.json` carries
 `elapsedSeconds` and `hasBulkCapability` per arm. The run was 124.9 min of page
 uptime with no reload and no competing work, so the wall-clock figures are clean
 for what they measure — they simply do not measure equal work.
+
+## This ticket is now the revisit trigger for the WASM bulk default
+
+`makeSimRunner(bulk = false)` (`bulk_wasm_sim_runner.ts`) defaults the **WASM**
+transport to the per-candidate loop; `BulkHttpSimRunner` keeps bulk screening on
+the HTTP transport. Reason, measured: one 25-candidate chunk costs **332 s** on
+the in-browser TS tournament (`execution-ledger-web.md`, Step 2/3 arm table,
+pool 4) versus **9.35 s** on the Go server (ticket 347's chunk table), and
+because `screenCandidates` is a single `await` that prices every candidate
+before `rank.ts` emits its first row, that cost is *first-row latency* — the
+table sits empty for minutes. This reproduced as a layout-gate failure
+(`test-layout.mjs` run phase: 0 rows after 120 s, "Simming 1/325" throughout,
+no console error).
+
+`BulkWasmSimRunner` is **not deleted** — it stays constructible via
+`makeSimRunner(true)`, so if this ticket's matched-accuracy measurement finds the
+WASM tournament competitive, restoring the default is a one-argument change.
+
+**Alternative considered and rejected: smaller chunks on WASM.** Shrinking
+`MAX_CANDIDATES_PER_BULK_REQUEST` is always safe for culling (the bound only
+needs to stay *under* the 32/33 flip), so only the constant's justification would
+change. But each chunk pays up to 2 baseline probes regardless of size
+(`stage.ts:279`, `maxBaselineSims = 2`). **Estimate, untested** (arithmetic from
+the 332 s / 25-candidate arm, ~13 s per sim): a 5-candidate chunk still costs
+about `5+2` sims ≈ 90 s to its first row — inside the 120 s gate only
+marginally, while *raising* total screening cost by multiplying the per-chunk
+baseline overhead across more chunks. Nobody has run this arm; it was rejected
+on the arithmetic rather than measured. That trades this ticket's 1.6x slowdown
+for a worse one to buy a partial latency fix, so it was not shipped. Worth
+re-testing here once matched-accuracy numbers exist.
