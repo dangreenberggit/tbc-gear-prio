@@ -603,6 +603,73 @@ ruling):
 D5 disposition: **resolved by ruling — campaign resumes capped, pending the
 pilot's depth measurement.**
 
+---
+
+## Depth pilot at cap 213 — FAILS the gate. STOP per the pre-registered rule.
+
+HTTP arm B, `cap=213`, `iters=1000`, feral **max phase 3** (set on the page; the
+pool grows 227 → **364 eligible items** at phase 3, so the cap truncates ~41% of
+the pool — a real truncation, which is what the pilot had to test).
+Dump: `evidence/pilot-cap213-http-B.json`.
+
+| measure | value |
+| --- | --- |
+| rows returned | 202 |
+| `deltaDps > 0` | 30 |
+| **`deltaDps ≥ 2·se` (the gate)** | **17** |
+| threshold | 20 |
+| **verdict** | **FAIL** |
+
+**Stopping per the rule I committed before running it** (`ee352e2`): "< 20 →
+STOP and report. That is an owner budget decision … The executor does not
+choose." The pilot measured 17. The campaign stops.
+
+### One thing the orchestrator needs, stated carefully
+
+The pilot ran at **1,000** iterations; the campaign runs at **8,000**. `se`
+falls as 1/√iterations, so the screened rows' error bars shrink by √8 = 2.828.
+Projecting each row's `se` to 8,000, **24 rows would clear the gate** — above
+the threshold of 20.
+
+**This is a projection, not the pre-registered measurement, and it does not
+change the verdict.** The rule said measure the pilot; the pilot failed; that
+stands. But the distinction matters for the decision, so here is why the
+projection is mechanically sound rather than wishful:
+
+- The 202 rows split into **194 `independent`-se rows** (`se` ≈ 2.18–2.49,
+  carrying the 1,000-iteration screening error) and **8 `paired-replicate`
+  rows** (`se` ≈ 0.09–0.20, already accurate).
+- **All 7 borderline rows are `independent`-se**, so their `se` genuinely does
+  shrink with iterations. None of them is borderline because of a small true
+  delta held up by an already-tight bar.
+- The 7: Shadowmoon Destroyer's Drape (3.67), Band of Eternity (3.66),
+  Unstoppable Aggressor's Ring (3.31), Veteran's Leather Bracers (3.19),
+  Tsunami Talisman (2.34), Choker of Serrated Blades (2.20), Shard-bound
+  Bracers (2.09) — each against `se` ≈ 2.37 at 1,000, ≈ 0.84 at 8,000.
+
+So the honest reading is: **the pilot cannot distinguish "the cap removed real
+upgrades" from "1,000 iterations is too noisy to see the upgrades that remain."**
+N11 chose 1,000 for the pilots on the reasoning that "depth depends on gear, not
+precision" — that reasoning holds for a bare `deltaDps > 0` count, but **not**
+for the N10 gate, which is a *precision-relative* test. The gate and the pilot's
+iteration count interact, which the plan did not anticipate.
+
+### Options for the owner
+
+| option | cost | what it buys |
+| --- | --- | --- |
+| a. Re-run the pilot at 8,000 at cap 213 | ~15 min HTTP | Settles it by **measurement** instead of projection. If ≥ 20 clears, the capped campaign proceeds exactly as ruled; if not, the cap is genuinely too tight and (b)/(c) follow. **Executor's recommendation** — it is cheap, and it is the same instrument the rule already trusts. |
+| b. Accept ~10.5 h of unattended WASM compute at full depth (N ≈ 364–407) | 10.5 h | The campaign as originally designed, no cap, no depth question. |
+| c. Accept 345 on (c') alone | — | Drops the (c) overlap metric; 346 and 348 still need the WASM arms, so this does not by itself unblock the budget. |
+| d. Raise the cap and re-pilot | ~15 min per try | Between 213 and 364 there may be a cap that both fits a stretched budget and clears the gate at 8,000. |
+
+Option (a) is one cheap HTTP arm and converts the one genuinely uncertain number
+into a measured one. Every other option spends either hours of compute or a
+metric, on a question a 15-minute run can answer.
+
+**No arm beyond this pilot was run. The temporary dispatch is removed again and
+the fork tree is clean.**
+
 
 ## Deviation ledger
 
@@ -613,4 +680,5 @@ pilot's depth measurement.**
 | 0 / 3 | Step 3 budgets the WASM arms from the frozen N and applies the precedence rule | At N ≈ 407 (feral p3), A+B+C ≈ 6.9 h > 6 h budget; A+B ≈ 4.7 h | adapt | The plan's own precedence rule names this exact branch: drop WASM arm C first, never cap below the depth gate. Rule applied as written, at its first branch; no cap set, so depth is preserved. Superseded by D5 once the rate was measured rather than assumed. |
 | 2 | Screening-only work is separable by tagging each `run` with the engine's progress stage | The `Progress` vocabulary has no screening/tail distinction — `simming` covers both the screening sims and the replication/set-bonus tail, which is exactly the work the 346 verdict must exclude | adapt | Intent unambiguous, fix local to the harness: latch a `tail` flag on the `stage: "ranking"` event, which `rank.ts` emits between `screenCandidates` (1213) and `replicateTopItems` (1336)/set-bonus (1297). Confirmed by re-measurement — 8 of 14 sims moved to the tail bucket at `cap=5`. No engine edit. |
 | 1 | Fixtures encode the engine cutoff | Fixtures used ret's `absDps 3.4` with `deltaPct` as a 0–1 fraction; feral's cutoff is **3.6** and `deltaPct` is on a 0–100 scale (`rank.ts:1137` vs `cutoff.ts:137`) | adapt | Local to the fixtures, and the campaign's spec is feral. Corrected; all five scorer cases re-validated against the right units. The differential dump independently confirms `{absDps: 3.6, pct: 0.15}`. |
+| 3 (Gate C pilot) | N11: pilots run at 1,000 iterations because "depth depends on gear, not precision" | The N10 depth gate (`deltaDps ≥ 2·se`) is **precision-relative**, so the pilot's iteration count changes its answer: 17 rows clear at 1,000, but 24 clear on the √8 projection to the campaign's 8,000. N11's reasoning holds for a bare `deltaDps > 0` count (30 rows, stable) and fails for the gate. | **stop** | The pre-registered rule says < 20 → STOP, and 17 was measured, so the verdict stands and the executor does not reinterpret it. But the pilot cannot separate "the cap removed real upgrades" from "1,000 iterations is too noisy to resolve the ones left" — all 7 borderline rows are `independent`-se, whose error bars genuinely shrink with iterations. Recommended resolution: re-run the pilot at 8,000 (~15 min HTTP) and settle it by measurement. |
 | 5 | C18: WASM ≈ 19.6 s/candidate (loop) and 22.2 s (bulk) at 8,000 — the register marks this "hypothesis, untested (arithmetic on C17)" | **Measured 43.5 s/candidate** — four sims at 43.34 / 43.40 / 43.59 / 43.61 s, pool 4, `isWasm true`. HTTP corroborates independently: 32.3 s per 25-chunk against C11's recorded 9.35 s. This machine is materially slower than the one C17/C18 derive from. | **stop** | At N ≈ 407 the WASM arms cost ~10.5 h against a 6 h budget, and both precedence-rule branches are exhausted. Dropping arm C was already applied and is not enough. Capping to ~232 cannot be justified: `rank.ts:1178` keeps the first N of the **EP order** (`orderCandidatesByEp`, 599), not the measured-delta order, and the EP order is not reconstructable from the committed artifact — so depth retention at that cap is unverified, and the rule forbids capping below the depth gate. A pre-registered rule landing on re-scope is a stop-and-report trigger, not an executor decision. |

@@ -1,0 +1,72 @@
+{
+	"meta": {
+		"what": "Gate C depth pilot: HTTP arm B at the proposed cap, 1,000 iterations",
+		"rule": "Pre-registered in execution-ledger-b.md (commit ee352e2) BEFORE this ran: count(deltaDps >= 2*se) >= 20 on arm B => freeze the cap on every arm; < 20 => STOP and report, because the branch is an owner budget decision.",
+		"result": "FAIL at 1,000 iterations — 17 rows clear 2*se against a threshold of 20.",
+		"projection_note": "At the campaign's own 8,000 iterations the screened (independent-se) rows shrink by sqrt(8) = 2.828, and on that projection 24 rows clear the gate. This is a PROJECTION, not the pre-registered measurement, and is recorded only as context for the owner decision. The rule was measured and it failed.",
+		"gate_at_1000": 17,
+		"gate_projected_8000": 24,
+		"positives": 30,
+		"rows": 202,
+		"poolAtPhase3": 364,
+		"cap": 213,
+		"seStructure": {
+			"independent": { "n": 194, "min": 2.184, "mean": 2.347, "max": 2.492 },
+			"paired-replicate": { "n": 8, "min": 0.091, "mean": 0.144, "max": 0.197 },
+			"note": "The 194 independent-se rows carry the 1,000-iteration screening error; they are the ones whose se shrinks with more iterations. The 8 paired-replicate rows are already accurate. All 7 borderline rows are independent-se, so the projection is mechanically sound rather than wishful."
+		},
+		"passingByMethod": { "independent": 9, "paired-replicate": 8 }
+	},
+	"armId": "B",
+	"mode": "harness",
+	"iterations": 1000,
+	"seeds": [11, 22, 33, 44, 55],
+	"transport": { "isWasm": false, "hasBulkCapability": false, "concurrency": 4 },
+	"config": {
+		"spec": "feral",
+		"maxPhase": 3,
+		"pruned": false,
+		"candidateCap": 213,
+		"character": { "region": "US", "realm": "current-page", "name": "Player" },
+		"href": "http://localhost:5173/tbc/druid/feralcat/?bulkEquiv=B&cap=213&iters=1000"
+	},
+	"engineCutoff": { "absDps": 3.6, "pct": 0.15 },
+	"cost": {
+		"wallSeconds": 54.7615,
+		"screeningSeconds": 129.344000000596,
+		"firstRowSeconds": 1.2421000000238418,
+		"simsByPhase": { "building-pool": 1, "simming": 274, "ranking": 1 },
+		"totalIterations": 276000,
+		"screeningIterations": 239000,
+		"chunks": []
+	},
+	"complete": true,
+	"borderline_rows_pass_at_8000_only": [
+		{ "itemId": 32323, "name": "Shadowmoon Destroyer's Drape", "deltaDps": 3.6668301528466145, "se_at_1000": 2.3711824398331567, "se_projected_8000": 0.8383395913182439 },
+		{ "itemId": 29299, "name": "Band of Eternity", "deltaDps": 3.663744779425997, "se_at_1000": 2.3504717446697674, "se_projected_8000": 0.8310172548216839 },
+		{ "itemId": 32335, "name": "Unstoppable Aggressor's Ring", "deltaDps": 3.308797688782761, "se_at_1000": 2.3583252872600227, "se_projected_8000": 0.8337939014326373 },
+		{ "itemId": 32814, "name": "Veteran's Leather Bracers", "deltaDps": 3.1897229441510717, "se_at_1000": 2.3687539134710387, "se_projected_8000": 0.8374809775887719 },
+		{ "itemId": 30627, "name": "Tsunami Talisman", "deltaDps": 2.3419574938370715, "se_at_1000": 2.3727659577069797, "se_projected_8000": 0.838899449431599 },
+		{ "itemId": 32591, "name": "Choker of Serrated Blades", "deltaDps": 2.2042283559608222, "se_at_1000": 2.3983949674902956, "se_projected_8000": 0.8479606727380385 },
+		{ "itemId": 32647, "name": "Shard-bound Bracers", "deltaDps": 2.09365140091586, "se_at_1000": 2.3513347428073574, "se_projected_8000": 0.8313223707393045 }
+	],
+	"gate_clearing_rows_at_1000": [
+		{ "itemId": 33716, "name": "Vengeful Gladiator's Staff", "deltaDps": 96.78863626008933, "se": 0.12681785029647613, "seMethod": "paired-replicate" },
+		{ "itemId": 32014, "name": "Merciless Gladiator's Maul", "deltaDps": 52.1311313284541, "se": 0.18343572392895865, "seMethod": "paired-replicate" },
+		{ "itemId": 30106, "name": "Belt of One-Hundred Deaths", "deltaDps": 31.377256212064914, "se": 0.09124214170318466, "seMethod": "paired-replicate" },
+		{ "itemId": 30883, "name": "Pillar of Ferocity", "deltaDps": 29.35444055116195, "se": 0.14821562083447945, "seMethod": "paired-replicate" },
+		{ "itemId": 30879, "name": "Don Alejandro's Money Belt", "deltaDps": 28.902108619541558, "se": 0.14742996922167867, "seMethod": "paired-replicate" },
+		{ "itemId": 33881, "name": "Vindicator's Dragonhide Bracers", "deltaDps": 23.8988823163837, "se": 0.14759477527456355, "seMethod": "paired-replicate" },
+		{ "itemId": 32324, "name": "Insidious Bands", "deltaDps": 16.460212327317002, "se": 0.10872181750577356, "seMethod": "paired-replicate" },
+		{ "itemId": 32366, "name": "Shadowmaster's Boots", "deltaDps": 16.324915237638105, "se": 0.19740996392667737, "seMethod": "paired-replicate" },
+		{ "itemId": 29301, "name": "Band of the Eternal Champion", "deltaDps": 15.224235733240675, "se": 2.375212605251647, "seMethod": "independent" },
+		{ "itemId": 30040, "name": "Belt of Deep Shadow", "deltaDps": 13.99242941596367, "se": 2.372700477916951, "seMethod": "independent" },
+		{ "itemId": 33893, "name": "Vindicator's Leather Bracers", "deltaDps": 12.549003511530827, "se": 2.356861190323738, "seMethod": "independent" },
+		{ "itemId": 33879, "name": "Vindicator's Dragonhide Belt", "deltaDps": 10.083854266506933, "se": 2.3677883226728302, "seMethod": "independent" },
+		{ "itemId": 29966, "name": "Vambraces of Ending", "deltaDps": 9.049559839903395, "se": 2.378387553455784, "seMethod": "independent" },
+		{ "itemId": 31044, "name": "Thunderheart Leggings", "deltaDps": 7.804998227699343, "se": 2.3713221259815027, "seMethod": "independent" },
+		{ "itemId": 29300, "name": "Band of Eternity", "deltaDps": 6.40499155745465, "se": 2.367012357171408, "seMethod": "independent" },
+		{ "itemId": 30863, "name": "Deadly Cuffs", "deltaDps": 5.967671869829701, "se": 2.358398265425753, "seMethod": "independent" },
+		{ "itemId": 30017, "name": "Telonicus's Pendant of Mayhem", "deltaDps": 5.132858097230837, "se": 2.3740484536226756, "seMethod": "independent" }
+	]
+}
