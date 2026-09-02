@@ -1,10 +1,11 @@
 {
 	"meta": {
 		"what": "Campaign arm A (bulk screening), HTTP transport, frozen capped configuration",
-		"WITHDRAWN_finding": "SUPERSEDED - DO NOT USE. This file previously claimed that arm A's deltas equalling arm B's was 'a real result, not an artefact'. That claim is WITHDRAWN. The harness never passed its seeds into rankUpgrades (RankInput.seeds, rank.ts:138/564), so EVERY arm ran at DEFAULT_SEEDS[0] = 11. Arms A and B matched because they were the same seed on a deterministic engine, not because the two routes agree. See execution-ledger-b.md, 'CORRECTION - the harness never passed its seeds'.",
-		"stillValid": "The COST figures and the bulk path's structural facts are unaffected by the seed bug: 10 chunks, all single-stage, all achieving exactly 8000 iterations; screening 115.1 s; first row 117.1 s. Timings and chunk shape do not depend on which seed was used.",
-		"notValidFor": "Any 345 or 348 claim. Those need a genuine null arm, which this campaign did not have. Arms A, B and C must be re-run with the seed fix before scoring.",
-		"preconditions346": "ALL PASS on the bulk route: 10 chunks, every chunk stages=1, every chunk achieved exactly 8000 iterations (no adaptive overshoot), every chunk n<=25, 1 measured probe per chunk."
+		"role": "Re-measured after the harness seed fix. The seeds-observed guard passed: declared seeds[0]=11, screening sims observed at 11.",
+		"seedFixNote": "An earlier run of this arm predated the seed fix and its file carried a WITHDRAWN marker. This re-run reproduces the same deltaDps values with the guard in place, and arm B independently reproduced ITS withdrawn values to the digit, so the rows are confirmed correct and the marker is lifted.",
+		"preconditions346": "ALL PASS: 10 chunks, every chunk stages=1, every chunk achieved exactly 8000 iterations, every chunk n<=25, 1 measured probe per chunk.",
+		"d1Confirmed": "D-1 reconfirmed at full scale: 4 screening run() calls against arm B's 239 for the same 213 candidates, so the screened map is consumed rather than missed.",
+		"routeComparisonCaveat": "A and B agreeing here is NOT evidence that the routes agree: both ran at seed 11 on an engine measured deterministic at fixed seed. The route question is judged against arm C (seed 777)."
 	},
 	"armId": "A",
 	"mode": "harness",
@@ -43,9 +44,9 @@
 		"stdev": 74.69972896407917
 	},
 	"cost": {
-		"wallSeconds": 146.49629999995233,
-		"screeningSeconds": 115.08939999997615,
-		"firstRowSeconds": 117.08189999997616,
+		"wallSeconds": 146.25220000004768,
+		"screeningSeconds": 113.8095,
+		"firstRowSeconds": 116.56489999997616,
 		"simsByPhase": {
 			"building-pool": 1,
 			"simming": 47,
@@ -56,7 +57,7 @@
 		"chunks": [
 			{
 				"n": 25,
-				"seconds": 13.028700000047683,
+				"seconds": 11.291100000023842,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -67,7 +68,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.633200000047683,
+				"seconds": 11.4205,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -78,7 +79,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.319799999952316,
+				"seconds": 10.940399999976158,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -89,7 +90,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.037699999928474,
+				"seconds": 11.900700000047683,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -100,7 +101,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.1115,
+				"seconds": 11.429699999928474,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -111,7 +112,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.033900000095368,
+				"seconds": 11.579699999928474,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -122,7 +123,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 12.2735,
+				"seconds": 10.821800000071526,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -133,7 +134,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.033399999976158,
+				"seconds": 11.950399999976158,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -144,7 +145,7 @@
 			},
 			{
 				"n": 25,
-				"seconds": 11.609300000071526,
+				"seconds": 11.273399999976158,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -155,7 +156,7 @@
 			},
 			{
 				"n": 24,
-				"seconds": 10.8655,
+				"seconds": 11.063200000047683,
 				"stages": 1,
 				"stageIterations": 8000,
 				"stageIterationsAll": [
@@ -168,22 +169,22 @@
 		"runsByPhase": {
 			"screen:building-pool": {
 				"n": 1,
-				"seconds": 0.616,
+				"seconds": 0.629,
 				"iterationsDone": 8000
 			},
 			"screen:simming": {
 				"n": 4,
-				"seconds": 2.286,
+				"seconds": 2.256,
 				"iterationsDone": 32000
 			},
 			"tail:ranking": {
 				"n": 1,
-				"seconds": 0.539,
+				"seconds": 0.542,
 				"iterationsDone": 8000
 			},
 			"tail:simming": {
 				"n": 43,
-				"seconds": 24.571,
+				"seconds": 24.531,
 				"iterationsDone": 344000
 			}
 		}
@@ -2412,5 +2413,6 @@
 			"belowCutoff": true,
 			"iterationsDone": 8000
 		}
-	]
+	],
+	"baselineCv": 0.033267
 }
