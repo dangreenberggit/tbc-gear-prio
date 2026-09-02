@@ -1505,3 +1505,39 @@ measured across same-seed repeats, because V compares *screening totals* of two
 Verdict per the rule: **BULK FASTER** on screening-only. The owner paragraph
 fires again and is dispositioned exactly as before (NO ACTION: the HTTP
 transport already defaults to bulk; the default 346 asks about is WASM).
+
+---
+
+## Step 5 — WASM arms
+
+`dist` rebuilt with `npx vite build` from the fork root after the seed fix
+(exit 0); the built bundle carries both `BULK_EQUIV_RUN` (5 chunks) and the seed
+guard string, and `dist/tbc/lib.wasm` is present. 4180 served by
+`node node_modules/http-server/bin/http-server dist -p 4180 -c-1` under the
+Node 22 PATH pin, started by the executor.
+
+**Standing rule 4 (new).** The 4180 origin has its own `localStorage`, so the
+page opens at **Phase 2 / 227 eligible** even when 5173 was left at Phase 3.
+Worse, on the built bundle the `.nav-link` click does not switch panes, so every
+`select` reports `offsetParent: false` and a visibility-filtered selector finds
+nothing. **Set the phase by selecting on the option text without a visibility
+filter** — `[...document.querySelectorAll('select')].find(s => [...s.options].some(o => /Phase 3 \(2\.2/.test(o.textContent)))` — then confirm
+**364 eligible items** before starting. One WASM arm B was started at the wrong
+phase (227 items) and abandoned before it could produce a dump; no data lost.
+
+`http-B` (WASM, seed 11, cap 213, 8,000, phase 3 confirmed at 364 eligible)
+started 20:19 UTC. Expected ~2.6 h at the measured 43.5 s/candidate. Polled at
+15-minute intervals per the mandate.
+
+**To resume:** read `window.__bulkEquiv` on `tab-4`. Assert
+`transport.isWasm === true` and `hasBulkCapability === false` for arm B, then
+write `evidence/wasm-B.json` (same compaction as the HTTP dumps), commit, then
+run WASM arm A (`?bulkEquiv=A`, `hasBulkCapability` must be `true`), commit, and
+score with `--null http-C.json` labelled "HTTP loop variance" per the precedence
+rule (WASM arm C was dropped at Step 0).
+
+**Why WASM is the substantive test.** The HTTP result cannot distinguish the two
+routes because both sample identically there. On WASM the loop runs one worker
+per candidate while the tournament splits one request's iterations across the
+pool — a genuinely different sampling arrangement, and the only place the routes
+can diverge.
