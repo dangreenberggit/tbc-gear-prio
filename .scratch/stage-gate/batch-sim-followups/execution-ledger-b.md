@@ -1684,3 +1684,23 @@ then re-run once, then report lost. On those numbers arm A's abort threshold is
 
 Both WASM arms run to completion under that rule. The budget projection above
 stays as a record of what the arms were expected to cost; it is not a trigger.
+
+### WASM dump builder verified before the arms land
+
+`build-wasm.mjs` was dry-run against HTTP arm A's real shape (relabelled as
+WASM) and produced a valid 202-row, 10-chunk dump. More importantly, each of its
+five assertions was checked by feeding it deliberately broken input — a guard
+that never fires is worthless:
+
+| injected fault | message produced |
+| --- | --- |
+| `isWasm: false` | `isWasm must be true for a WASM arm` |
+| arm B carrying bulk capability | `arm B hasBulkCapability=true` |
+| arm A screened at seed 777 | `arm A screened at 777 not 11` |
+| a chunk achieving 9,500 | `chunk achieved 9500 != 8000 — M1 territory` |
+| a chunk reporting 2 stages | `chunk stages=2` |
+
+So an M1 trigger, a mislabelled transport, a wrong seed or a multi-stage chunk
+now fails **at the builder**, before anything reaches the scorer or the ledger.
+Verified while arm B ran, using outer-repo and scratchpad files only (standing
+rule 1); dry-run artifacts deleted afterwards.
