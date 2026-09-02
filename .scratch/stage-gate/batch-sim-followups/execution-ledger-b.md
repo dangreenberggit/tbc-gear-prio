@@ -1148,6 +1148,61 @@ overwrite its own published conclusions.
 
 ---
 
+## Gate C: withdrawal accepted, fix approved. Re-run pre-registration.
+
+Recorded BEFORE the re-runs. The seed defect turned an untestable claim into a
+testable one, and the re-run is now two experiments at once.
+
+### Standing rules adopted into this ledger (Gate C)
+
+1. **No edit anywhere under `$F` while an arm is running.** Vite serves that
+   tree; an edit triggers HMR, which reloads the page and destroys in-page run
+   state. Outer-repo files (ledger, evidence) are safe to write mid-arm.
+2. **A visible results table proves the harness did NOT run.** `runCampaignArm`
+   sets `state = idle` and returns without rendering, so a rendered ranking
+   means the `?bulkEquiv=` dispatch was missed and the page took the ordinary
+   path.
+
+### Pre-registered predictions for the re-run
+
+**(i) Engine determinism — now properly testable.** Re-run arm B at seed 11 is
+the *same route at the same seed* as the withdrawn arm B.
+
+- **If re-run B reproduces the withdrawn B to the digit** → the Go engine is
+  deterministic at fixed `(request, seed, iterations)`. D-2 then stands as a
+  fact **about the engine**, independently confirmed at 213 candidates rather
+  than one replayed request — while remaining, as established, no evidence at
+  all about the two routes.
+- **If it does not** → the engine carries run-to-run variation at a fixed seed,
+  D-2 is wrong even as an engine fact, and every same-seed comparison in this
+  campaign needs rethinking.
+
+**(ii) The route comparison, as the plan actually defines it.** A(11) vs B(11)
+vs C(777).
+
+- **C must now differ from B.** Different first seed, so a different sample.
+- **If C still equals B after the fix → STOP AGAIN.** That means the seed is
+  still not reaching the sims and the guard did not catch it, which would be a
+  deeper defect than the one just fixed.
+- A vs B remains the route question. Whether they agree at seed 11 is now
+  interpretable *because* C supplies the yardstick for how much a same-route
+  change of seed moves things (`rank.ts:835-836`: two runs of one route at
+  different seeds differ by more than the two routes do).
+
+### The guard that makes this self-checking
+
+`runCampaignArm` now throws if the declared `seeds[0]` disagrees with the seeds
+observed on the recorded `RunRecord`s. So a re-run that silently reverts to the
+default seed cannot reach the scorer — it fails at the arm.
+
+### Order of work
+
+`http-B` (seed 11) → `http-A` (seed 11) → `http-C` (seed 777), each dump
+committed before the next arm starts, then score with `--null http-C.json`, then
+WASM A and B at cap 213 / 8,000 on 15-minute background timers.
+
+---
+
 ## Step 4 — `http-C` (null arm) as originally run
 
 `?bulkEquiv=C&cap=213&iters=8000`, feral phase 3 (364 eligible), seeds
