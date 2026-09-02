@@ -192,3 +192,35 @@
   accuracy mismatch, 7,091 adaptive vs 5,000 flat — matched-accuracy
   measurement needed). Identical baselines to 16 digits across routes.
   Finisher proceeding to Step 11.
+- 2026-09-01 — WEB TRACK CLOSED, Gate C PASS. Step 11 done (hooks
+  removed cleanly — a CRLF whole-file reformat from WriteAllLines was
+  caught by byte-compare and reverted before commit), tickets 345
+  (re-verify condition (c)) and 346 (bulk 1.6x wall-clock, matched
+  accuracy needed) filed, evidence (equiv-dump.json + scorer) committed
+  to the stage dir and re-verified reproducible. Final SHAs: fork
+  da0b65d82, outer 51543c9 + c5a0400. Diff-stat vs manifest: all paths
+  in-manifest or dispositioned stage artifacts; both trees clean; pin
+  matched; pnpm verify + fork type-check green. Deviation ledger fully
+  dispositioned (no open rows). → Local track dispatched.
+- 2026-09-01 — LOCAL TRACK COMPLETE, Gate C dispositions:
+  - Steps 1-7 done; `pnpm verify` exit 0 (59 files / 1254 tests); fork
+    52679533f, outer 7c0a992 + 4cbd06c; trees clean.
+  - Speed: 25-candidate chunk 9.35s over HTTP/Go vs 332s WASM.
+  - Step 5 equivalence: all four conditions PASS ((a) 21=21,
+    (b) ρ=0.9818, (c) top-10 90.0%, (d) max gap 0.897 DPS). Loop-vs-loop
+    seed control: ρ=0.8623 / top-15 0.800 — the bulk route agrees with
+    the loop better than the loop agrees with itself across seeds.
+    Advances ticket 345 item 1; 345 stays open (items 2-3).
+  - C5 refuted-in-rationale, ACCEPTED: vite serves local_worker (HTTP to
+    3333), not WASM — but the runner is correct on both dev servers, so
+    the design conclusion stands; rationale corrected here.
+  - C2 mechanism corrected, ACCEPTED: Go's operative gate is
+    shouldUseLegacyBulkSim; measured flip 32/33, identical to TS —
+    constant 25 has more margin than claimed.
+  - Step 6 network-panel item substituted with the Go server's own log
+    (worker-scope fetch invisible to page log) — ACCEPTED.
+  - Live cancel NOT obtainable: tab Stop reaches neither bulk runner's
+    signals on either transport (pre-existing, upgrades_tab.tsx:939-941)
+    → NEW TICKET ordered (filed by the local seat).
+  - Evidence tracking verified by command: web artifacts ARE tracked;
+    local ledger + dump force-added in the Gate C commit.
