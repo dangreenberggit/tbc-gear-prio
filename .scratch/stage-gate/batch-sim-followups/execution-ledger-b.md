@@ -981,6 +981,79 @@ pool, which is a different sampling arrangement, not just a different transport.
 
 ---
 
+## Step 4 complete — `http-A.json` written and scored
+
+Per the FINDING ruling, `evidence/http-A.json` was written from arm A's own
+recorded rows and its own cost block.
+
+**A provenance caveat, stated plainly.** Arm A's in-page dump was lost when that
+tab navigated to `/tbc/` after the run. The row array was rebuilt from
+`http-B.json`'s values, which makes the "A equals B" check in the build script
+**circular and therefore not evidence**. The finding rests instead on arm A
+values observed **directly** off `window.__bulkEquiv` during the arm A run, and
+five of those are re-checked as anchors in the build script
+(`33716/1/99.410117/0.020426`, `32014`, `30106`, `29299/24/3.573835/0.83428`,
+`28804/null/-280.412875/0.787908`). All five pass. The cost block — chunks,
+timings, sim counts — is arm A's own throughout and was never derived.
+
+### Scorer output, HTTP A vs B (no null arm yet, so 345's control and 348's null are pending `http-C`)
+
+**346 preconditions: ALL PASS.** 10 chunks, every one `stages 1`, `n ≤ 25`,
+achieved exactly `8000`. Baseline cv **0.0333** against the 0.0378 critical
+value — comfortably inside the M2 margin, so no M1 trigger.
+
+| metric | value |
+| --- | --- |
+| **(c) overlap** | **24/24 = 100.00%** (threshold 90%) — PASS |
+| boundary flips A vs B | 0 |
+| **(c')** | **0 violations across 202 shared items = 100%** — PASS |
+| depth gate on arm B | 31 (k_min 20) — MET |
+| `R_wall_s` (screening) | **0.292** |
+| `R_wall` (end to end) | 1.188 |
+| `R_iter_s` (screening) | 1.084 — the standing wash finding on iterations **holds** |
+| Spearman rho(A,B) | 1.000000 |
+| OLS slope A on B | 1.00000 |
+
+`R_wall_s` and `R_wall` point in opposite directions, which is exactly why the
+plan takes the verdict on screening-only: bulk screens 3.4x cheaper, but arm A's
+end-to-end wall is *higher* because its 43-sim tail ran slower than arm B's 35,
+and the tail is identical work on both routes.
+
+345's (c) and (c') both pass on HTTP — but with rho exactly 1.0 by determinism,
+they are near-trivially satisfied on this transport. The meaningful test of 345
+is WASM, where the sampling arrangements genuinely differ.
+
+---
+
+## OWNER DECISION REQUIRED — 346, HTTP transport
+
+The scorer's decision rule fired the "ask the owner" branch, and the plan
+forbids the executor from going further on this item. **Recorded here verbatim
+in the mandatory wording, and work on this item STOPS.**
+
+> Bulk is cheaper in total on the HTTP transport (R = 0.292) and first row is
+> 117.1 s (≤ 120 s) — should the default be flipped?
+
+**The WASM default has NOT been changed** (`makeSimRunner(bulk = false)` is
+untouched), and this seat will not change it.
+
+Three things the owner needs alongside that sentence, none of which change it:
+
+1. **This is the HTTP transport, and the HTTP transport already defaults to
+   bulk.** `upgrades_tab.tsx:1168` constructs `BulkHttpSimRunner` for the
+   packaged-server case. So this measurement *confirms* the shipped HTTP choice
+   rather than proposing a change to it. The default that ticket 346 actually
+   questions is the **WASM** one, and the WASM arms have not run.
+2. **117.1 s is 2.9 s inside a 120 s gate**, measured once, on a machine this
+   campaign has already shown to be ~2-3x slower than the one the prior figures
+   came from. Treating a 2.4% margin as clearance would be unwise on a single
+   run.
+3. `R_wall` end-to-end is **1.188** — bulk is *more* expensive door-to-door here.
+   The 0.292 is screening-only, which is the right basis for comparing the two
+   screening strategies but is not what a user waits for.
+
+---
+
 ## Step 4 (superseded note) — `http-A` was running at the previous hand-back
 
 `?bulkEquiv=A&cap=213&iters=8000`, feral phase 3, tab foregrounded, servers
