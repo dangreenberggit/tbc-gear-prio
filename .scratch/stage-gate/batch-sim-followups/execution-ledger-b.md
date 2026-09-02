@@ -1395,3 +1395,36 @@ producing bit-identical outputs:
 the computation was identical, so every bit of that variation is measurement
 environment. It is a useful floor for interpreting `R_wall_s`: a wall-clock
 ratio inside ~6% is not distinguishable from noise on this machine.
+
+### `http-A` re-run (seed 11) — all structural facts reproduce
+
+Guard passed (`declaredSeeds[0] = 11`, screening observed at `11`). Every 346
+precondition holds again:
+
+| check | result |
+| --- | --- |
+| chunks | 10 (9x25 + 24) |
+| every chunk `stages` | 1 |
+| every chunk achieved | **8000 exactly** |
+| probes | 1 per chunk |
+| baseline cv | 0.033267 (critical 0.0378) |
+
+**D-1 reconfirmed at full scale:** 4 screening `run()` calls against arm B's
+239 for the same 213 candidates. The screened map is consumed, not missed.
+
+Costs (re-run vs the withdrawn run, same seed, deterministic engine):
+
+| | re-run | withdrawn run |
+| --- | --- | --- |
+| screening | 113.8 s | 115.1 s |
+| end to end | 146.3 s | 146.5 s |
+| first row | 116.6 s | 117.1 s |
+
+Sub-1.2% wall-clock differences on identical computation — consistent with the
+5.9% noise envelope measured on arm B.
+
+`http-A.json`'s `WITHDRAWN_` marker is **lifted**: arm B independently
+reproduced its own withdrawn values to the digit, so these rows are confirmed
+rather than assumed. The file now states explicitly that A agreeing with B is
+**not** evidence about the routes — both ran at seed 11 on a deterministic
+engine — and that arm C judges the route question.
