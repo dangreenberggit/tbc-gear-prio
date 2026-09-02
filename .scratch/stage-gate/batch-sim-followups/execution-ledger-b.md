@@ -1350,3 +1350,48 @@ sims actually ran at. Then:
    the seed is still not reaching the sims.
 5. Score with `--null http-C.json`; then WASM A and B at cap 213 / 8,000 on
    15-minute background timers.
+
+---
+
+## Re-run results
+
+### Prediction (i): CONFIRMED — the engine is deterministic at a fixed seed
+
+`http-B` re-run (seed 11, cap 213, 8,000, phase 3), with the seed guard passing
+(`declaredSeeds[0] = 11`, screening sims observed at `11`, every sim at exactly
+8,000 iterations).
+
+Re-run B reproduced the withdrawn arm B **to the digit**, across a fresh 239-sim
+run:
+
+| item | withdrawn B | re-run B |
+| --- | --- | --- |
+| 33716 | 99.41011710030534 | **99.41011710030534** |
+| 32014 | 53.817706155452925 | **53.817706155452925** |
+| 30106 | 38.072508714707965 | **38.072508714707965** |
+
+202 rows both times; depth gate 31 both times.
+
+**So D-2 stands as a fact about the ENGINE** — now established at 213
+candidates rather than one replayed request. It remains, as the withdrawal
+said, **no evidence about the two routes**: that question needs C.
+
+`evidence/http-B.json` keeps its rows (confirmed correct by this reproduction)
+with its metadata updated to the re-run's cost figures and the seed-fix
+provenance.
+
+### Machine-noise datum for 346's V discussion
+
+Three same-seed, same-work runs of arm B's screening phase, on identical inputs
+producing bit-identical outputs:
+
+| run | screening wall clock |
+| --- | --- |
+| original arm B | 394.3 s |
+| re-run arm B | 383.4 s |
+| mislabelled arm C (accidental same-route same-seed repeat) | 371.0 s |
+
+**Spread: 5.9% max-to-min on bit-identical work.** This is pure machine noise —
+the computation was identical, so every bit of that variation is measurement
+environment. It is a useful floor for interpreting `R_wall_s`: a wall-clock
+ratio inside ~6% is not distinguishable from noise on this machine.

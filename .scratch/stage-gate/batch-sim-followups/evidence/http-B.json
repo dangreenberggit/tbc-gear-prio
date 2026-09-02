@@ -1,14 +1,15 @@
 {
 	"meta": {
-		"what": "Campaign arm B (per-candidate loop), HTTP transport, at the frozen capped configuration",
-		"role": "This IS http-B.json per the Gate C rule: it is arm B at the campaign settings (cap 213, 8,000 iterations), so it doubles as the depth pilot and the campaign arm.",
+		"what": "Campaign arm B (per-candidate loop), HTTP transport, frozen capped configuration",
+		"role": "This IS http-B.json. Re-measured after the seed fix; the seeds-observed guard passed (declared seeds[0]=11, screening sims observed at 11).",
+		"seedFixNote": "The original run of this configuration predated the harness seed fix. It was re-run afterwards and reproduced these deltaDps values TO THE DIGIT across a fresh 239-sim run (33716 -> 99.41011710030534, 32014 -> 53.817706155452925, 30106 -> 38.072508714707965), so the rows below are confirmed correct and are the re-run values.",
+		"determinismResult": "PREDICTION (i) CONFIRMED: the Go engine is deterministic at fixed (request, seed, iterations). Established here at 213 candidates, not just one replayed request. This is a fact about the ENGINE and remains no evidence about the two routes.",
+		"machineNoise": "Screening wall clock across three same-seed, same-work runs of this arm: 394.3 s, 383.4 s (this re-run), and 371.0 s (the mislabelled arm C, which was an accidental same-route same-seed repeat). Spread 5.9% max-to-min on bit-identical work - the machine-noise datum for 346 V discussion.",
 		"depthGate": {
 			"rule": "count(deltaDps >= 2*se) >= 20",
 			"measured": 31,
 			"verdict": "PASS"
-		},
-		"note": "The 1,000-iteration pilot of the same configuration measured 17 and failed. Independent-row se fell 2.347 -> 0.827, a ratio of 2.84 against the predicted sqrt(8) = 2.828, confirming the gate is precision-relative and that N11 (pilots at 1,000) is wrong for this gate.",
-		"lostRun": "A first attempt at these settings was killed when the page navigated to /tbc/. Re-run once per the plan's abort rule; this dump is the re-run."
+		}
 	},
 	"armId": "B",
 	"mode": "harness",
@@ -43,9 +44,9 @@
 		"pct": 0.15
 	},
 	"cost": {
-		"wallSeconds": 123.362,
-		"screeningSeconds": 394.3244000000954,
-		"firstRowSeconds": 2.566200000047684,
+		"wallSeconds": 123.452,
+		"screeningSeconds": 383.3776000002622,
+		"firstRowSeconds": 2.7398000000715257,
 		"simsByPhase": {
 			"building-pool": 1,
 			"simming": 274,
@@ -57,22 +58,22 @@
 		"runsByPhase": {
 			"screen:building-pool": {
 				"n": 1,
-				"seconds": 0.582,
+				"seconds": 0.591,
 				"iterationsDone": 8000
 			},
 			"screen:simming": {
 				"n": 239,
-				"seconds": 394.324,
+				"seconds": 383.378,
 				"iterationsDone": 1912000
 			},
 			"tail:ranking": {
 				"n": 1,
-				"seconds": 0.571,
+				"seconds": 0.566,
 				"iterationsDone": 8000
 			},
 			"tail:simming": {
 				"n": 35,
-				"seconds": 19.335,
+				"seconds": 21.928,
 				"iterationsDone": 280000
 			}
 		}
