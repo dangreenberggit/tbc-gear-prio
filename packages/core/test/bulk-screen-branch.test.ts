@@ -11,15 +11,25 @@
  * changes WHERE a screening DPS comes from and nothing else.
  *
  * The comparison is only meaningful because the bulk fixture's baseline is
- * deliberately OFFSET from the loop's. The bulk engine probes its own baseline
- * inside the batch, and the local HTTP measurement recorded in
+ * deliberately OFFSET from the loop's. The screening pass probes its own
+ * baseline inside the batch at a seed it picks itself, and the local HTTP
+ * measurement in
  * `.scratch/stage-gate/batch-sim-web-local/execution-ledger-local.md` put that
  * probe 65.3 DPS away from the loop's seed-11 baseline (2181.67 vs 2246.99)
- * against a 3.4 DPS cutoff. A fixture whose two baselines agreed would pass
- * whether or not the engine differenced each observation against the right one,
- * which is exactly the hole the previous version of this file left open: it
- * promised a `rankUpgrades` test in its header and never called `rankUpgrades`.
- * The offset is what makes this test able to fail.
+ * against a 3.4 DPS cutoff. (That gap is a seed artifact rather than an engine
+ * one — the same ledger has the loop at seed 777 giving 2181.37, within 0.3 DPS
+ * of the bulk probe — but its size is what the engine has to handle correctly
+ * either way.) A fixture whose two baselines agreed would pass whether or not
+ * the engine differenced each observation against the right one, which is
+ * exactly the hole the previous version of this file left open: it promised a
+ * `rankUpgrades` test in its header and never called `rankUpgrades`. The offset
+ * is what makes this test able to fail.
+ *
+ * The set-bonus assertions cover the second way a baseline can leak. Row deltas
+ * only ever compare against each other, so a shared offset cancels; but
+ * `computeSynergy` subtracts summed per-item deltas from a package delta simmed
+ * through the loop, so a screened delta that had been re-scaled would corrupt
+ * `bonusDps` once per added piece and compound into the 4-piece result.
  *
  * **The seam's recorded runner.** The smaller tests below pin the capability
  * check and the batch key scheme that the first layer relies on.
@@ -28,9 +38,9 @@
  * DPS values are computed from the request, not measured — because what is under
  * test is which baseline the engine subtracts and which rows survive, not the
  * sim's arithmetic. The one number taken from a real measurement is the
- * cross-engine baseline offset, which is the thing the synthetic data cannot
- * invent honestly. Gear, EP weights and the raid-sim skeleton are the repo's
- * real committed feral fixtures.
+ * baseline gap between the two routes, which is the thing the synthetic data
+ * cannot invent honestly. Gear, EP weights, the raid-sim skeleton and the
+ * candidate universe are the repo's real committed feral fixtures.
  *
  * The fork is gitignored (`vendor/`), so the suite skips when it is absent.
  */
@@ -100,9 +110,9 @@ const SIM_VERSION = "v0.0.101";
 const ITERATIONS = 5000;
 
 /**
- * The measured cross-engine offset, applied to the synthetic fixture so the
- * two routes disagree about the baseline exactly the way the real engines do.
- * Loop baseline 2246.99, bulk probe 2181.67 (execution-ledger-local.md).
+ * The measured baseline gap, applied to the synthetic fixture so the two routes
+ * disagree about the baseline exactly the way the real ones did. Loop baseline
+ * 2246.99, screening probe 2181.67 (execution-ledger-local.md).
  */
 const LOOP_BASELINE_DPS = 2246.99;
 const BULK_BASELINE_DPS = 2181.67;
@@ -209,8 +219,18 @@ describe.skipIf(!forkPresent)("rankUpgrades bulk screening branch", () => {
           rank: number | null;
           deltaDps: number;
           belowCutoff: boolean;
+          setContext?: { rankableSetPotential?: number };
         }>;
         baseline: { dps: number };
+        setBonuses?: Array<{
+          setId: number;
+          setName: string;
+          threshold: number;
+          packageItemIds: number[];
+          packageDeltaDps: number;
+          bonusDps?: number;
+          unmeasured?: string;
+        }>;
       }>;
     }>("engine/rank.ts");
     const storeMod = await importForkUpgrades<{
@@ -296,7 +316,10 @@ describe.skipIf(!forkPresent)("rankUpgrades bulk screening branch", () => {
       // One seed: paired replication re-sims through `deps.sim.run`, and this
       // test is about the screening route, not the final pass.
       seeds: [11],
-      candidateCap: 12,
+      // Wide enough that the set pieces reach the candidate set. Below roughly
+      // this, package selection reports `insufficient-pieces`, `computeSynergy`
+      // never runs, and the set-potential assertions below cannot fail.
+      candidateCap: 60,
     };
 
     // Pass 1 — no bulk capability. A capturing runner prices every request the
@@ -339,7 +362,7 @@ describe.skipIf(!forkPresent)("rankUpgrades bulk screening branch", () => {
     const loopBaselineDps = loopRanking.baseline.dps;
 
     // Pass 2 — the bulk route. Every candidate observation is the SAME
-    // measurement as pass 1, shifted down by the measured cross-engine offset,
+    // measurement as pass 1, shifted down by the measured baseline gap,
     // and served alongside a baseline shifted by the same amount. Differencing
     // each row against the bulk baseline must therefore reproduce pass 1's
     // deltas exactly; differencing against the loop's baseline (the defect this
@@ -419,6 +442,59 @@ describe.skipIf(!forkPresent)("rankUpgrades bulk screening branch", () => {
     // Reached the end of the flow: a `RankError` anywhere (including
     // replication's "no recorded request" internal error) would have rejected.
     expect(bulkRanking.items.length).toBe(loopRanking.items.length);
+
+    // Set-bonus arithmetic agrees between the routes.
+    //
+    // This is a separate obligation from the row assertions below, and the one
+    // place a screened delta stops being compared only against other screened
+    // deltas. `computeSynergy` (set-value.ts) computes `bonusDps =
+    // (packageDps - baseline) - sum(addedPieceDeltas)`, where the package is
+    // always simmed through `deps.sim.run` while the summed pieces may have been
+    // screened. If a screened delta were ever re-scaled — or if screening left
+    // one on a different footing than the loop — the difference would land in
+    // `bonusDps` once PER ADDED PIECE and compound through `twoPieceBonus` into
+    // the 4-piece result, rather than cancelling the way a shared offset does in
+    // a sort or a per-row cutoff.
+    const measuredBonuses = (r: typeof loopRanking) =>
+      (r.setBonuses ?? [])
+        .filter((b) => b.unmeasured === undefined)
+        .map((b) => ({
+          setId: b.setId,
+          threshold: b.threshold,
+          packageItemIds: b.packageItemIds,
+          packageDeltaDps: b.packageDeltaDps,
+          bonusDps: b.bonusDps,
+        }));
+    const loopBonuses = measuredBonuses(loopRanking);
+    const bulkBonuses = measuredBonuses(bulkRanking);
+
+    // The fixture has to actually reach `computeSynergy`, with a package whose
+    // pieces were screened. Every bonus coming back `unmeasured` would make the
+    // comparison below vacuous — which is exactly what a too-small
+    // `candidateCap` produces (`insufficient-pieces`).
+    expect(loopBonuses.length).toBeGreaterThan(0);
+    const screenedPieceIds = new Set(
+      (capturedBulkRequest?.candidates ?? []).flatMap((c) =>
+        (
+          ((c.gear as { items?: unknown[] }).items ?? []) as Array<{
+            id?: number;
+          }>
+        ).map((i) => i.id ?? 0)
+      )
+    );
+    expect(
+      loopBonuses.some((b) =>
+        b.packageItemIds.some((id) => screenedPieceIds.has(id))
+      )
+    ).toBe(true);
+
+    expect(bulkBonuses).toEqual(loopBonuses);
+
+    // And the per-row set potential those bonuses feed, which is what the view
+    // actually sorts on when set-potential is enabled.
+    const setPotentials = (r: typeof loopRanking) =>
+      r.items.map((i) => i.setContext?.rankableSetPotential ?? null);
+    expect(setPotentials(bulkRanking)).toEqual(setPotentials(loopRanking));
 
     // The reported baseline is the loop's on both routes — screening never
     // replaces the ranking's own baseline, only the DPS of the screened rows.
