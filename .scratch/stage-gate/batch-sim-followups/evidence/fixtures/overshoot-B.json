@@ -1,0 +1,339 @@
+{
+	"armId": "B",
+	"iterations": 8000,
+	"seeds": [
+		11,
+		22,
+		33,
+		44,
+		55
+	],
+	"transport": {
+		"isWasm": false,
+		"hasBulkCapability": false
+	},
+	"engineCutoff": {
+		"absDps": 3.4,
+		"pct": 0.15
+	},
+	"baseline": {
+		"dps": 2131.71,
+		"stdev": 75.91
+	},
+	"cost": {
+		"wallSeconds": 1000,
+		"screeningSeconds": 600,
+		"firstRowSeconds": 30,
+		"simsByPhase": {
+			"baseline": 1,
+			"screening": 30,
+			"replication": 36,
+			"setBonus": 4
+		},
+		"totalIterations": 1000000,
+		"screeningIterations": 600000,
+		"chunks": []
+	},
+	"items": [
+		{
+			"itemId": 1000,
+			"name": "item-0",
+			"deltaDps": 60,
+			"deltaPct": 0.03,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 1,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1001,
+			"name": "item-1",
+			"deltaDps": 57.8,
+			"deltaPct": 0.0289,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 2,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1002,
+			"name": "item-2",
+			"deltaDps": 55.6,
+			"deltaPct": 0.0278,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 3,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1003,
+			"name": "item-3",
+			"deltaDps": 53.4,
+			"deltaPct": 0.0267,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 4,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1004,
+			"name": "item-4",
+			"deltaDps": 51.2,
+			"deltaPct": 0.0256,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 5,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1005,
+			"name": "item-5",
+			"deltaDps": 49,
+			"deltaPct": 0.0245,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 6,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1006,
+			"name": "item-6",
+			"deltaDps": 46.8,
+			"deltaPct": 0.0234,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 7,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1007,
+			"name": "item-7",
+			"deltaDps": 44.6,
+			"deltaPct": 0.0223,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 8,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1008,
+			"name": "item-8",
+			"deltaDps": 42.4,
+			"deltaPct": 0.0212,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 9,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1009,
+			"name": "item-9",
+			"deltaDps": 40.2,
+			"deltaPct": 0.0201,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 10,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1010,
+			"name": "item-10",
+			"deltaDps": 38,
+			"deltaPct": 0.019,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 11,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1011,
+			"name": "item-11",
+			"deltaDps": 35.8,
+			"deltaPct": 0.0179,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 12,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1012,
+			"name": "item-12",
+			"deltaDps": 33.6,
+			"deltaPct": 0.0168,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 13,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1013,
+			"name": "item-13",
+			"deltaDps": 31.4,
+			"deltaPct": 0.0157,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 14,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1014,
+			"name": "item-14",
+			"deltaDps": 29.2,
+			"deltaPct": 0.0146,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 15,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1015,
+			"name": "item-15",
+			"deltaDps": 27,
+			"deltaPct": 0.0135,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 16,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1016,
+			"name": "item-16",
+			"deltaDps": 24.8,
+			"deltaPct": 0.0124,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 17,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1017,
+			"name": "item-17",
+			"deltaDps": 22.6,
+			"deltaPct": 0.0113,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 18,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1018,
+			"name": "item-18",
+			"deltaDps": 20.4,
+			"deltaPct": 0.0102,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 19,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1019,
+			"name": "item-19",
+			"deltaDps": 18.2,
+			"deltaPct": 0.0091,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 20,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1020,
+			"name": "item-20",
+			"deltaDps": 16,
+			"deltaPct": 0.008,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 21,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1021,
+			"name": "item-21",
+			"deltaDps": 13.8,
+			"deltaPct": 0.0069,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 22,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1022,
+			"name": "item-22",
+			"deltaDps": 11.6,
+			"deltaPct": 0.0058,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 23,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1023,
+			"name": "item-23",
+			"deltaDps": 9.4,
+			"deltaPct": 0.0047,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 24,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1024,
+			"name": "item-24",
+			"deltaDps": 7.2,
+			"deltaPct": 0.0036,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 25,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1025,
+			"name": "item-25",
+			"deltaDps": 5,
+			"deltaPct": 0.0025,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": 26,
+			"belowCutoff": false
+		},
+		{
+			"itemId": 1026,
+			"name": "item-26",
+			"deltaDps": 2.8,
+			"deltaPct": 0.0014,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": null,
+			"belowCutoff": true
+		},
+		{
+			"itemId": 1027,
+			"name": "item-27",
+			"deltaDps": 0.6,
+			"deltaPct": 0.0003,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": null,
+			"belowCutoff": true
+		},
+		{
+			"itemId": 1028,
+			"name": "item-28",
+			"deltaDps": -1.6,
+			"deltaPct": -0.0008,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": null,
+			"belowCutoff": true
+		},
+		{
+			"itemId": 1029,
+			"name": "item-29",
+			"deltaDps": -3.8,
+			"deltaPct": -0.0019,
+			"se": 0.4,
+			"iterationsDone": 8000,
+			"rank": null,
+			"belowCutoff": true
+		}
+	]
+}
