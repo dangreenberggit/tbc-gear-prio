@@ -1320,3 +1320,33 @@ the sim page mid-arm. This killed the first arm C and the first arm B re-run;
 the signature. Both survivors so far (arm A, arm B at 8,000, the diagnostic) ran
 in a tab created separately with `tabs_create`. **Open a fresh tab with
 `tabs_create` and run every arm there.**
+
+### Re-run status at hand-back
+
+`http-B` (seed 11) is running in `tab-4` — a tab created with `tabs_create`, per
+standing rule 3 — at cap 213 / 8,000 / feral phase 3, foregrounded. The Go
+server shows continuous `Running 8000 iterations on 20 concurrent sims`, so the
+arm is healthy; it is slower in wall-clock terms than the pre-fix arm B (~2 min)
+because a backgrounded tab has its timers throttled, which also makes in-page
+`performance.now()` useless as a progress clock. The server log is the reliable
+signal.
+
+**Two arms were lost before this one started**, both to standing rule 3's cause
+(the preview harness re-navigating its own tab to `/tbc/`); neither produced
+data, so nothing is lost but time.
+
+**To resume:** read `window.__bulkEquiv` on `tab-4`. The dump now carries the
+seed guard, so if it returns at all, `seeds[0]` provably matched the seeds the
+sims actually ran at. Then:
+
+1. Check prediction (i): does re-run B reproduce the withdrawn B's deltas to the
+   digit? (33716 → 99.410117, 32014 → 53.817706, 30106 → 38.072509.) Yes → the
+   engine is deterministic at fixed seed, D-2 stands as an engine fact. No → D-2
+   is wrong even as an engine fact.
+2. Write `evidence/http-B.json` (overwriting the seed-11 file, which is the same
+   configuration re-measured), commit.
+3. Run `http-A` (seed 11), commit; then `http-C` (seed 777), commit.
+4. Check prediction (ii): C **must** differ from B. If C still equals B, STOP —
+   the seed is still not reaching the sims.
+5. Score with `--null http-C.json`; then WASM A and B at cap 213 / 8,000 on
+   15-minute background timers.
