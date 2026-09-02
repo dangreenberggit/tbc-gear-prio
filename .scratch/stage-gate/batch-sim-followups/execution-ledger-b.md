@@ -1302,3 +1302,21 @@ tree is otherwise clean at `75769a7f3`; the WASM default is untouched.
 | 1 | Fixtures encode the engine cutoff | Fixtures used ret's `absDps 3.4` with `deltaPct` as a 0–1 fraction; feral's cutoff is **3.6** and `deltaPct` is on a 0–100 scale (`rank.ts:1137` vs `cutoff.ts:137`) | adapt | Local to the fixtures, and the campaign's spec is feral. Corrected; all five scorer cases re-validated against the right units. The differential dump independently confirms `{absDps: 3.6, pct: 0.15}`. |
 | 3 (Gate C pilot) | N11: pilots run at 1,000 iterations because "depth depends on gear, not precision" | The N10 depth gate (`deltaDps ≥ 2·se`) is **precision-relative**, so the pilot's iteration count changes its answer: 17 rows clear at 1,000, but 24 clear on the √8 projection to the campaign's 8,000. N11's reasoning holds for a bare `deltaDps > 0` count (30 rows, stable) and fails for the gate. | **stop** | The pre-registered rule says < 20 → STOP, and 17 was measured, so the verdict stands and the executor does not reinterpret it. But the pilot cannot separate "the cap removed real upgrades" from "1,000 iterations is too noisy to resolve the ones left" — all 7 borderline rows are `independent`-se, whose error bars genuinely shrink with iterations. Recommended resolution: re-run the pilot at 8,000 (~15 min HTTP) and settle it by measurement. |
 | 5 | C18: WASM ≈ 19.6 s/candidate (loop) and 22.2 s (bulk) at 8,000 — the register marks this "hypothesis, untested (arithmetic on C17)" | **Measured 43.5 s/candidate** — four sims at 43.34 / 43.40 / 43.59 / 43.61 s, pool 4, `isWasm true`. HTTP corroborates independently: 32.3 s per 25-chunk against C11's recorded 9.35 s. This machine is materially slower than the one C17/C18 derive from. | **stop** | At N ≈ 407 the WASM arms cost ~10.5 h against a 6 h budget, and both precedence-rule branches are exhausted. Dropping arm C was already applied and is not enough. Capping to ~232 cannot be justified: `rank.ts:1178` keeps the first N of the **EP order** (`orderCandidatesByEp`, 599), not the measured-delta order, and the EP order is not reconstructable from the committed artifact — so depth retention at that cap is unverified, and the rule forbids capping below the depth gate. A pre-registered rule landing on re-scope is a stop-and-report trigger, not an executor decision. |
+
+**Refinement to standing rule 2 (found immediately on first use).** "A visible
+results table proves the harness did not run" must test for a **ranking** table,
+not any `<table>`: the character stats sidebar (Health/Mana/Strength) is a table
+and is always present, so `document.querySelector('table tbody tr')` returns
+truthy on every page. The reliable checks are the status text — "Starting…
+(0 rows landed)" while a harness arm runs — and row content, since a ranking
+table's rows carry item names and DPS deltas rather than stat labels.
+
+**Standing rule 3 (new, diagnosed on the second occurrence).** Never drive a
+campaign arm in the tab that `preview_start` created. Vite's ready banner
+advertises `http://localhost:5173/tbc/`, and the preview harness navigates the
+tab it owns to that URL when the server signals ready — which silently replaces
+the sim page mid-arm. This killed the first arm C and the first arm B re-run;
+`navType: "navigate"` to `/tbc/` with an empty referrer and ~20 s since load is
+the signature. Both survivors so far (arm A, arm B at 8,000, the diagnostic) ran
+in a tab created separately with `tabs_create`. **Open a fresh tab with
+`tabs_create` and run every arm there.**
