@@ -1025,7 +1025,18 @@ is WASM, where the sampling arrangements genuinely differ.
 
 ---
 
-## OWNER DECISION REQUIRED — 346, HTTP transport
+## OWNER DECISION — 346, HTTP transport — **DISPOSITIONED: NO ACTION**
+
+**Gate C disposition (2026-09-02):** *No action. This confirms the shipped
+default.* The HTTP transport already defaults to bulk
+(`upgrades_tab.tsx:1168` constructs `BulkHttpSimRunner`), so the measurement
+ratifies the existing choice rather than proposing a change. The plan's owner
+branch is about the **WASM** default, which stays unmeasured until WASM A and B
+run. **Not carried as an open owner item.** The paragraph below is kept verbatim
+because the plan requires the mandatory wording to be recorded whenever the rule
+fires, not because a decision is pending.
+
+### (paragraph as the scorer produced it, kept verbatim)
 
 The scorer's decision rule fired the "ask the owner" branch, and the plan
 forbids the executor from going further on this item. **Recorded here verbatim
@@ -1073,17 +1084,14 @@ with the same compaction as `http-A.json` / `http-B.json` (aggregate
 with `--null evidence/http-C.json` to complete 345's control and 348's null
 slope; then the two WASM arms on 4180 with 15-minute background timers.
 
-### Working-tree state at hand-back (both must be resolved at Step 8)
+### Working-tree state (resolved at Step 8)
 
-- `upgrades_tab.tsx` — the temporary `?bulkDiag=1` block (**4** `bulkDiag`/
-  `TEMPORARY` matches). Removed before the final commit, as with the earlier
-  `?bulkEquiv=` block.
-- `tools/equiv-campaign.mts` — `runDiagnostic` appended (uncommitted). **Flagged
-  for the orchestrator:** the Paths manifest names `equiv-campaign.mts` as a
-  committed file but was written before this function existed. It is a genuine
-  measurement tool that earned its keep — it is what distinguished the finding
-  from the defect — so the executor's recommendation is to commit it with the
-  module. Say so if you would rather it were dropped.
+- `upgrades_tab.tsx` — the temporary `?bulkDiag=1` block. **Comes OUT before the
+  final commit** (Gate C ruling 3), same as the earlier `?bulkEquiv=` block.
+- `tools/equiv-campaign.mts` — `runDiagnostic` appended. **Gate C ruling 3:
+  KEEP and commit.** It is the discriminator that separated finding from defect.
+  Recorded as a **Gate-C-approved addition to the Paths manifest**, which was
+  written before this function existed; one README sentence added alongside.
 
 ---
 
