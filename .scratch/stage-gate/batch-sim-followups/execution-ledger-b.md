@@ -253,17 +253,125 @@ LF endings confirmed on all committed artifacts (0 CR bytes).
 
 ---
 
-## Step 2 — NOT STARTED. Stopped and reported to the orchestrator.
+## Gate C rulings (orchestrator, 2026-09-02) — campaign resumed from Step 2
 
-No sim arm has been run. No edit has been made to `upgrades_tab.tsx`; no
-temporary `?bulkEquiv=` dispatch exists; the fork tree is clean at the pin.
+Work stopped at Step 2 pending these rulings; all three were returned and are
+binding on the rest of this ledger.
 
-Reason: deviations **D1** and **D2** below both land on Step 2, and both are
-`flag`-class under the plan's deviation protocol (they cross a step boundary
-and change a step's acceptance criterion), not `adapt`-class. D2 in particular
-changes what the campaign would be measuring, which is the orchestrator's call.
-Steps 3–8 all consume Step 2's harness, so no independent step remains to
-advance.
+- **D2 — APPROVED as proposed.** Re-implementation is dropped. The harness calls
+  the **real** `runBulkScreenChunks` and instruments the injected `dispatch`
+  (per-chunk raw `stageMetrics`, timings, baseline-probe events), plus the
+  counting decorator at the `SimRunner` seam. **Step 2's differential is
+  redefined:** `mode=real` = the shipped `BulkWasmSimRunner` / `BulkHttpSimRunner`
+  wrapped only by the seam decorator; `mode=harness` = the same runner class with
+  the instrumented dispatch injected. Bit-identical per-item deltas still
+  required on both transports at 30 candidates (chunks 25+5, two-chunk baseline
+  carry exercised). **The differential now proves the instrumentation is
+  observation-only** — it no longer proves a re-implementation's fidelity,
+  because there is no longer a re-implementation to prove anything about.
+- **D1 — ACCEPTED.** Every 346 statement says "single-stage High pass over
+  25-candidate chunks", never "tournament" as if multi-stage. **C14's wording is
+  corrected here:** `shouldUseLegacyBulkSim` gates *per chunk* inside
+  `runConcurrentBulkSim` (`wasm/bulk_sim/index.ts:107`), and since the driver
+  partitions at 25 first, the `BULK_SIM_MIN_COMBINATIONS = 20` threshold is never
+  reached by a campaign chunk. The Step 0 legacy-per-chunk table goes into the
+  346 write-up as the mechanism.
+- **D3 — ACCEPTED.** WASM arm C dropped per the plan's own precedence branch; no
+  cap; depth 34 ≥ 20 preserved; V from HTTP B vs C, labelled "HTTP loop
+  variance".
+
+Continuation base: outer `2b0b3ae`, fork `80395e68c` (clean).
+
+---
+
+## Step 2 — Harness, temporary dispatch, smoke, differential
+
+**Harness:** `$U/tools/equiv-campaign.mts` (new, committed at Step 8).
+**Temporary dispatch:** 44 added lines in `upgrades_tab.tsx`, marked
+`// TEMPORARY`, gated on `?bulkEquiv=A|B|C`. Never committed; removed in Step 8.
+Fork typecheck exit 0 at every stage.
+
+Servers: `wowsims-backend` on 3333 and `wowsims-fork` (vite) on 5173, both
+started fresh (all three ports confirmed free first). Route
+`/tbc/druid/feralcat/`.
+
+**Smoke, HTTP (5173 + 3333), `cap=5&iters=200`:**
+
+| arm | isWasm | hasBulkCapability | chunks | result |
+| --- | --- | --- | --- | --- |
+| A | false | **true** | 1 (n=19, stages **1**) | achieved 6,953 iterations |
+| B | false | **false** | 0 | every `run` `iterationsDone` == 200 exactly |
+
+Two things worth recording from the smoke:
+
+1. **The adaptive top-up is real and visible.** Arm A was asked for 200
+   iterations and its chunk achieved **6,953** — C1's "a request sets a floor,
+   never a cap", observed rather than assumed. This is exactly why M2 pins 8,000
+   *and* verifies achieved, and why the scorer gates 346 on achieved == 8,000.
+   The loop arm honours the requested count exactly, which is the accuracy
+   mismatch ticket 346 exists to remove.
+2. **`stages: 1` on a 19-candidate chunk**, consistent with D1.
+
+**Correction found by the smoke (D4, adapt — see the deviation ledger).** The
+first arm-B smoke reported `screeningIterations: 0`. The harness had tagged
+screening with a guessed phase regex, but the engine's `Progress` vocabulary is
+`resolving | reading-gear | composing | building-pool | simming | ranking`, and
+`simming` covers **both** the screening sims and the set-bonus/replication tail
+— the very work the pre-registration excludes from the 346 verdict because it is
+identical on both routes.
+
+Fixed by tagging from the observed event order instead of a name guess:
+`rank.ts` emits `stage: "ranking"` (line 1314) after `screenCandidates` (1213)
+and before `replicateTopItems` (1336) and the set-bonus packages (1297), so that
+event is the boundary. The harness latches a `tail` flag on it and stamps every
+`RunRecord`. `building-pool` (the baseline probe) is excluded from screening
+too: one sim, identical on both routes.
+
+Re-measured arm B smoke after the fix — the split is now correct:
+
+| bucket | sims | note |
+| --- | --- | --- |
+| `screen:building-pool` | 1 | baseline probe (excluded from screening) |
+| `screen:simming` | 5 | one per candidate at `cap=5` → 1,000 screening iterations |
+| `tail:ranking` + `tail:simming` | 8 | replication + set-bonus, correctly excluded |
+
+Total 2,800 iterations over 14 sims; first row 0.67 s. The tail was **8 of 14
+sims** at this size — over half the run, identical on both routes, and it would
+have diluted `R_wall` badly. The plan's insistence on a screening-only ratio is
+vindicated by measurement, not just by argument.
+
+### Differential at 30 candidates, HTTP — PASS
+
+`?bulkEquiv=A&cap=30&iters=500`, `mode=real` then `mode=harness`, same page
+session, back to back. Dump: `evidence/diff-http.json`.
+
+| criterion | required | measured |
+| --- | --- | --- |
+| `cost.bulkChunks` | 2 | **2** |
+| chunk shape | n ≤ 25, single-stage | **[25, 1 stage], [25, 1 stage]** |
+| per-item `deltaDps` real vs harness | bit-identical | **bit-identical, 44/44 rows, 0 mismatches** |
+
+`cap=30` caps *candidates*; the pool expands to 44 ranked rows, and the
+partition bound of 25 yields the required two chunks with the `baseline ??=`
+carry exercised.
+
+**What this differential now proves (per the Gate C ruling):** the injected
+dispatch is **observation-only**. `mode=real` is the shipped
+`BulkHttpSimRunner`; `mode=harness` is the same class with the instrumented
+dispatch. Identical deltas therefore show the instrumentation perturbs nothing.
+It is no longer evidence about a re-implementation's fidelity — there is no
+re-implementation.
+
+Incidental confirmations: `engineCutoff = {absDps: 3.6, pct: 0.15}` (feral's
+own cutoff, `CUTOFF_FERAL` — **not** ret's 3.4; the fixtures were corrected to
+match, along with `deltaPct`'s 0-100 scale per `rank.ts:1137`). The two chunks
+achieved **7,610 and 6,369** iterations from the same 500-iteration request —
+the adaptive top-up differing per chunk, which is precisely why M2 pins 8,000
+and the scorer gates on achieved.
+
+**Step 2 acceptance: PASS on HTTP.** Fork typecheck exit 0; `MemoryStore`
+constructed inside `runCampaignArm`; A `hasBulkCapability true`, B `false`.
+
 
 ## Deviation ledger
 

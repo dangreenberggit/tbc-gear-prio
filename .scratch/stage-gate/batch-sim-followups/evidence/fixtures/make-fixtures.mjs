@@ -6,17 +6,22 @@ import { writeFileSync } from 'node:fs';
 
 const here = new URL('.', import.meta.url);
 const ITER = 8000;
-const CUTOFF = { absDps: 3.4, pct: 0.15 };
+// Feral's cutoff (`engine/cutoff.ts` CUTOFF_FERAL) — pilot 0 is feral. `pct` is
+// on the engine's 0-100 scale: `rank.ts:1137` computes deltaPct as
+// (deltaDps / baselineDps) * 100 and `meetsCutoff` compares it to `pct`
+// directly, so 0.15 means 0.15%, not 15%.
+const BASELINE_DPS = 2131.71;
+const CUTOFF = { absDps: 3.6, pct: 0.15 };
 
 // 30 items with a wide, well-separated delta range so ranked sets are stable
 // and the depth gate is comfortably met.
 const base = Array.from({ length: 30 }, (_, i) => {
-	const deltaDps = 60 - i * 2.2; // 60 down to -3.8: straddles the 3.4 cutoff
+	const deltaDps = 60 - i * 2.2; // 60 down to -3.8: straddles the 3.6 cutoff
 	return {
 		itemId: 1000 + i,
 		name: `item-${i}`,
 		deltaDps: Number(deltaDps.toFixed(4)),
-		deltaPct: Number((deltaDps / 2000).toFixed(6)),
+		deltaPct: Number(((deltaDps / BASELINE_DPS) * 100).toFixed(6)),
 		se: 0.4,
 		iterationsDone: ITER,
 		rank: null,
