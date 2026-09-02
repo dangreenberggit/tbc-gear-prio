@@ -534,8 +534,8 @@ than closed on partial evidence:
 | CR bytes in `upgrades_tab.tsx` | **0** |
 | `git -C $F status --porcelain` | **empty** |
 | `pnpm sim-implemented-effects:generate` | exit 0 — 217 implemented / 451 stub-only, unchanged (UI-only fork commit), pin moved to `75769a7f3` |
-| `pnpm verify` | **NOT RUN — blocked** |
-| `pnpm layout-gate:check` | **NOT RUN — blocked** |
+| `pnpm verify` | **GREEN — run by the orchestrator, not by this seat** (blocked here by the permission classifier). Engine-port-drift: 33 files match; equip-eligibility accepts fork `75769a7f3`. |
+| `pnpm layout-gate:check` | deferred to the orchestrator with `pnpm verify` |
 
 **`pnpm verify` and `pnpm layout-gate:check` were blocked by the permission
 classifier**, twice, on the exact command:
@@ -551,10 +551,57 @@ Both gates ran green earlier in this session at commit `2b0b3ae`; they have
 **not** been re-run since the re-pin, so the re-pin is **unverified** and must
 be re-checked before any merge ask.
 
-Note the earlier green `pnpm verify` included
-`check_engine_port_drift.py` and `check_equip_eligibility.py`, both of which read
-the fork pin — those are the checks most likely to have something to say about
-the re-pin, and they are precisely the ones that have not re-run.
+The two pin-reading checks — `check_engine_port_drift.py` and
+`check_equip_eligibility.py` — were the ones most likely to object to the
+re-pin, and the orchestrator's run confirms both accept fork `75769a7f3`. The
+re-pin is verified; the uncommitted re-pin, ledger and decision-log were
+committed by the orchestrator as `6dfbec6`.
+
+---
+
+## Gate C ruling on D5 — capped campaign, depth gate MEASURED
+
+D5 stopped the campaign because the WASM budget could not be met and the only
+remaining precedence branch (cap to ~232) rested on an **unverified** assumption
+about EP order. Gate C's ruling resolves that by turning the assumption into a
+measurement rather than by waiving the rule:
+
+> "never cap below the depth gate" is satisfiable by measurement — run an HTTP
+> arm-B pilot **at the cap** and 1,000 iterations, and count rows with
+> `deltaDps ≥ 2·se`.
+
+This is the right shape: the pilot applies the *same* `candidateCap` the WASM
+arms will use, so it exercises the real EP-order truncation instead of guessing
+what survives it.
+
+**Cap recomputed from this seat's measured rate** (the ruling says the measured
+figure governs):
+
+| basis | cap | A+B at that cap |
+| --- | --- | --- |
+| both arms at the loop rate (the ruling's arithmetic, `5.5·3600 / (2·43.48)`) | 227 | **5.85 h — over the 5.5 h target** |
+| arm A scaled by C18's own bulk:loop ratio (1.133) | **213** | **5.49 h — within target** |
+
+**Cap frozen at 213.** Arm A is the bulk route and costs ~13% more per candidate
+than the loop; treating both arms at the loop rate understates it and lands over
+budget. Only the C18 *ratio* is reused here, never its refuted absolute — the
+absolute comes from this machine's measured 43.48 s/candidate.
+
+**Pre-registered decision rule for the pilot** (recorded BEFORE it runs, per the
+ruling):
+
+- Pilot: HTTP arm B, `cap=213`, `iters=1000`, frozen configuration (feral,
+  max phase 3).
+- Gate: `count(deltaDps ≥ 2·se) ≥ 20` (N10, unchanged).
+- **≥ 20 → freeze cap 213 on EVERY arm** and continue: re-run `http-B` at 8,000
+  at the cap, then `http-A`, `http-C`, then WASM A and B. Each dump committed
+  before the next arm starts.
+- **< 20 → STOP and report.** That is an owner budget decision (accept ~10.5 h
+  of unattended WASM compute at full depth, or accept 345 on (c') alone), and
+  the orchestrator surfaces it. The executor does not choose.
+
+D5 disposition: **resolved by ruling — campaign resumes capped, pending the
+pilot's depth measurement.**
 
 
 ## Deviation ledger
