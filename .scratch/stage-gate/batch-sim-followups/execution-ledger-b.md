@@ -1609,3 +1609,36 @@ consequences, both binding:
 Point 1 is the reassuring half — at V = 0.008 the pre-registered thresholds
 collapse to the fixed 0.9/1.1, so the borrowed null cannot flip a verdict on its
 own. Recorded because the reasoning had to happen before the numbers, not after.
+
+### Pre-registered cross-transport accuracy check (recorded before the WASM arms land)
+
+The plan gates the depth requirement on arm B, and both transports run arm B at
+the same 8,000 iterations on the same 213 candidates. That makes the two arm-Bs
+directly comparable, which is a free check nobody asked for but which the data
+supports — so the expectation is written down first.
+
+HTTP arm B reference:
+
+| quantity | value |
+| --- | --- |
+| rows clearing `deltaDps ≥ 2·se` | **31** (threshold 20) |
+| mean `se`, independent rows | **0.8268** (n = 194) |
+| ranked rows at the engine cutoff | 24 |
+
+**Expectation:** WASM arm B should land close to these. `se` is a property of
+how many iterations were simmed, not of which engine simmed them, so two
+transports at 8,000 iterations should agree on precision.
+
+**If they diverge materially, that is itself a finding**, and it must be
+reported rather than smoothed over:
+
+- **WASM `se` noticeably larger** → the WASM engine extracts less precision per
+  iteration, which would mean "8,000 iterations" does not denote the same
+  accuracy on both transports, and M2's matching is weaker than assumed.
+- **WASM gate count below 20** → the depth gate fails on the transport that
+  matters most, and 345's WASM leg cannot be judged on (c) — it would fall back
+  to (c') plus the control, exactly as the plan's pre-registered fallback
+  provides for.
+
+Either outcome is recorded with its numbers; neither is grounds for adjusting a
+threshold after the fact.
