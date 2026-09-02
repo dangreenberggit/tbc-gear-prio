@@ -1541,3 +1541,38 @@ routes because both sample identically there. On WASM the loop runs one worker
 per candidate while the tournament splits one request's iterations across the
 pool — a genuinely different sampling arrangement, and the only place the routes
 can diverge.
+
+---
+
+## Step 7 (partial) — tickets 345 and 348 closed
+
+Both closed with their measured answers written in; `pnpm issues:open` confirms
+neither appears in the open list, and **346 correctly remains open** pending the
+WASM arms.
+
+**345 — closed, confirmed.** The ticket named two structural problems and both
+are now fixed rather than argued around: the metric could not express 90% at
+k = 9 (now k = 24, so one flip moves it 4.2 points not 11), and there was no
+control (now arm C, same route at seed 777). Overlap 100% on the route
+comparison *and* on the control, (c') 100%, 0 boundary flips either way. The
+control is what makes the pass readable: a seed change moved **188 of 202**
+deltas while moving no ranked-set membership at all. All four acceptance boxes
+ticked; the original "accepted with reason" disposition is **confirmed**.
+
+**348 — closed into 346 as an accuracy-mismatch artifact.** This is the outcome
+the ticket's own step 1 specified. Route slope **1.00000**; null slope
+**0.99955 ± 0.00031** (t = −1.45). Both pre-registered reproduction conditions
+fail. The null is what rules out an insensitive instrument: it resolves a
+**sub-0.1%** departure at the same n, so it would comfortably have seen the
+original 1.6%. Cause is the one the ticket listed first — the adaptive iteration
+count (5,000 flat vs 7,091 adaptive) — removed by M2's matched pin. Acceptance
+box 2 is recorded as not-applicable with reasoning (it was conditional on the
+slope reproducing), so no doc-comment edit and **no follow-up ticket; `NEXT`
+untouched**. Box 3's cross-route consumer identified as `computeSynergy`
+(`engine/set-value.ts`), reached via `individualDeltasByItemId` (written
+`rank.ts:1127`, consumed `:1583`/`:1687`), already safe by construction per
+`rank.ts:1110`.
+
+Both closures are explicitly **scoped to HTTP**, where the engine is
+deterministic and the two routes sample identically. Each says in its own text
+that WASM is the substantive test and stays with 346.
