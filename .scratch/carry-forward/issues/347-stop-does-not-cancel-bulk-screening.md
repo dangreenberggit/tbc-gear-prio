@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: Step 6 of the batch-sim local track (stage-gate, 2026-09-01)
 Blocks: none
@@ -145,6 +145,152 @@ error with the failing candidate identified.
 - [ ] A chunk-level bulk failure either degrades to per-candidate simming for
       that chunk, or produces a user-legible error naming the candidate —
       decided and tested, not left as a pass-level abort.
+
+## Resolution (2026-09-02, `feat/upgrades-tab-batch-sim`, fork `80395e68c`)
+
+**Option 1** — bridge the caller's `AbortSignal` through the seam — implemented
+once, in a shared chunk driver both runners call.
+
+### What changed
+
+`BulkScreenRequest` gains `signal?: AbortSignal`. Both bulk runners' chunk loops
+are replaced by one `adapters/bulk_screen_driver.ts`, so each runner is now a
+constructor plus a one-line `dispatch`. Identical behaviour on the two transports
+is therefore a property of the code shape, not of two edits staying in step —
+which is what the "both runners behave identically" acceptance item asks for.
+
+The abort itself rides on machinery upstream already has: `worker_pool.ts`
+subscribes each request to `signals.abort` and calls `sendAbortById`, the Go
+server's `/abortById` reaches `simsignals.AbortById`, and the raid sim checks the
+flag every iteration.
+
+### Why the driver keeps its own flag rather than reading the signal
+
+`signals.abort.isTriggered()` cannot distinguish a user Stop from a candidate
+failure: upstream triggers the chunk's own signals on **any** candidate error
+(`ui/core/wasm/bulk_sim/batch.ts:132-134`) to stop the rest of that batch, and
+then RESOLVES with a `BulkSimResult` carrying `error` (`index.ts:121-123`) rather
+than rejecting. Classifying on the signal would have turned one panicking
+candidate into "the user pressed Stop" — every remaining chunk skipped, every
+candidate returned unsimmed.
+
+So the driver keeps `userAborted`, written only by the `AbortSignal` listener or
+by `signal.aborted` at entry, and classifies on that alone. For the same reason
+`SimSignals` are registered **per chunk** rather than once per pass: an
+error-trigger on chunk k must not reach chunk k+1. Both properties have
+regression tests (`packages/core/test/bulk-screen-driver.test.ts`, cases 3 and 4).
+
+### Measured cancel latency
+
+Both measured live on `feat/upgrades-tab-batch-sim`, feral cat druid, 5,000
+iterations, with this instrument (Stop click → the button going disabled, which
+is the tab entering its terminal state):
+
+```js
+const b = document.querySelector('.upgrades-stop-button');
+const t0 = performance.now();
+const obs = new MutationObserver(() => {
+  if (b.disabled) { console.log('stop→disabled ms', performance.now() - t0); obs.disconnect(); }
+});
+obs.observe(b, { attributes: true, attributeFilter: ['disabled'] });
+b.click();
+```
+
+| transport | setup | Stop → `stopped` | pre-registered | verdict |
+| --- | --- | --- | --- | --- |
+| Go / HTTP | packaged `wowsimtbc` on :3333, `/tbc/druid/feralcat/` | **481 ms** | ≤ 3,000 ms | pass |
+| WASM | static `dist` on :4180, `__tbc_new_wasmconcurrency=4`, :3333 stopped so no HTTP fallback | **12,131 ms** | ≤ 5,000 ms | **missed, 2.4x** |
+
+On HTTP the server log is the instrument the acceptance asks for. The 4th chunk
+began at `08:17:33`; Stop was pressed a few seconds in, and the log's final line
+is:
+
+```
+2026/09/02 08:17:33 [Bulk Sim] - Stage: high - Starting
+  Candidates: 25
+  ...
+2026/09/02 08:17:36 [Bulk Sim] Cancelled
+```
+
+The chunk died ~3 s into a ~9 s batch, and **no further `Stage: high - Starting`
+line follows** — no bulk request was issued after the Stop. Before this change
+the same press would have waited out the full chunk.
+
+On WASM the run was confirmed genuinely in-browser before measuring: every worker
+resource loaded was `sim_worker.js`, with zero `net_worker.js`, so nothing had
+fallen back to HTTP.
+
+**The WASM figure misses its pre-registered bound and is recorded rather than
+explained away.** C21 labelled ≤ 5,000 ms a hypothesis, and it was wrong for this
+transport. The abort does work — 12.1 s against a 332 s chunk is a ~27x
+improvement, and the tab lands in `stopped` with a `PartialRanking` — but the
+in-browser tournament dispatches a per-candidate sim per worker and each in-flight
+one must reach its own next abort check, so the pass cannot stop faster than the
+currently-dispatched batch of individual sims drains. That is a property of
+upstream's tournament, not of the wiring, and shortening it would mean changing
+how `batch.ts` dispatches. Not attempted here; the WASM bulk route is default-off
+(ticket 346 is the revisit trigger), so the figure that a user can reach today is
+the 481 ms HTTP one.
+
+### Rider (P5): chunk-level failure now degrades to the loop
+
+Three error kinds leave a chunk, and they are deliberately not treated alike:
+
+1. **Engine-reported (`result.error`) or transport (dispatch rejection).** The
+   driver records `{ indices, reason }` and continues to the next chunk. Those
+   candidates carry no screened row, so `rank.ts` prices them through
+   `deps.sim.run` exactly as a runner with no bulk capability would, and a
+   genuinely bad candidate becomes the loop's own `candidateSkips` row — which
+   names it, something a bulk error cannot. Disclosed as
+   `Ranking.screeningFallbacks` and as a `console.warn` in the tab.
+2. **Integrity (`BulkScreenIntegrityError`: row shortfall, no baseline).**
+   Rethrown unconditionally. These are the checks that stand between a silent
+   cull and a truncated ranking; degrading them would hide exactly what they
+   exist to catch.
+3. **The single-stage guard.** Thrown outside the inner try — a bound
+   programming error, never degradable.
+
+Naming the failing candidate instead was rejected: a bulk error does not identify
+it, and for a ≤25-candidate chunk one bad candidate would deny the user the 24
+rows the loop produces.
+
+**An integrity error on chunk k discards the completed chunks' rows and skips the
+rest.** That is intended, and the reason is that nothing is lost by it: screening
+supplies only DPS numbers, every row is composed by the loop's `runCandidate`
+anyway, and `rank.ts` re-sims those candidates through the loop on the same run.
+No §5.1.4 constraint applies here — that clause governs what a *Stop* may
+dispatch, and this is not a Stop.
+
+### Stop discards completed chunks' screening numbers
+
+On abort the driver throws and the finished chunks' rows go with it. `rank.ts`
+dispatches no candidate once `signal.aborted`, and screening supplies only DPS
+numbers — every row is composed by `runCandidate`, which also calls
+`deps.sim.run` for attempts screening never priced. Running the loop after Stop
+to "land the paid-for rows" would therefore issue **new** sims, which §5.1.4
+forbids. The cost is bounded: at most the finished chunks are re-screened next
+run (≤ 12.7 s each on HTTP), and per-sim cache rows are unaffected. Caching at
+the driver level was rejected because the `screen:` cache key is per composed
+request and is only known inside the loop.
+
+`docs/plans/wowsims-tab/candidate-pool.md` §5.1.4 is amended to say all of this.
+
+## Acceptance
+
+- [x] A Stop pressed during bulk screening either aborts the in-flight chunk, or
+      the contract is amended to say it does not — decided, not left ambiguous.
+      **Aborts**, and the contract is amended to match.
+- [x] Whichever is chosen, **both** runners behave identically; the two transports
+      must not differ on cancel. One shared driver; the runners hold no loop.
+- [x] If aborting: verified live on both transports, with the chunk observed to
+      stop and no further bulk request issued. Go log shows `[Bulk Sim]
+      Cancelled` as its last line; WASM confirmed sim_worker-only and reached
+      `stopped`.
+- [x] A chunk-level bulk failure either degrades to per-candidate simming for
+      that chunk, or produces a user-legible error naming the candidate —
+      decided and tested. Degrades, with the integrity checks exempt;
+      `packages/core/test/bulk-screen-fallback.test.ts` asserts all three
+      outcomes through `rankUpgrades`.
 
 ## Notes
 
