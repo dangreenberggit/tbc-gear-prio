@@ -670,6 +670,41 @@ metric, on a question a 15-minute run can answer.
 **No arm beyond this pilot was run. The temporary dispatch is removed again and
 the fork tree is clean.**
 
+---
+
+## Gate C: option (a) approved — re-pilot at 8,000. Pre-registered before running.
+
+**N11 is refuted for the N10 gate, and the ledger says so plainly.** N11 set
+pilots at 1,000 iterations on the reasoning "depth depends on gear, not
+precision". That is true of a bare `deltaDps > 0` count — 30 positives at the
+cap, and iteration count does not move it — and **false of the N10 gate**, which
+compares each row's delta against its own standard error. `se` falls as
+1/√iterations, so the gate's answer moves with the pilot's precision: 17 rows
+cleared at 1,000, and the √8 projection to 8,000 put 24 over the line. A
+precision-relative test cannot be piloted at non-campaign precision. Pilots for
+this gate run at the campaign's own iteration count.
+
+The cap arithmetic is settled at **213** (accepted by Gate C over 227): C18's
+bulk:loop ratio 1.133 applied to this seat's measured 43.48 s/candidate, giving
+A+B ≈ 5.49 h inside the 5.5 h target. Only the ratio is reused from C18; its
+absolute was refuted by measurement.
+
+### Decision rule (binding, recorded BEFORE the run)
+
+Pilot: HTTP arm B, `cap=213`, **`iters=8000`**, frozen configuration (feral,
+max phase 3), one page session.
+
+- **≥ 20 rows with `deltaDps ≥ 2·se` → freeze cap 213 on EVERY arm.** That
+  pilot's dump **is** `http-B.json` (it is arm B at the campaign's own settings,
+  so it needs no re-run). Continue Steps 4→8: `http-A`, `http-C`, then WASM A
+  and WASM B on 15-minute background timers, each dump committed before the next
+  arm starts, temporary dispatch removed before the final commit, WASM default
+  untouched, owner-decision paragraph only on a measured `R_wall_s < 1`.
+- **< 20 → STOP and report.** The owner then chooses between ~10.5 h uncapped
+  WASM, a higher-cap re-pilot, or 345 on (c') alone.
+
+No reinterpretation of the measured count in either direction.
+
 
 ## Deviation ledger
 
