@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/fork-tab-native-bulk-sim-finding.md (investigation 2026-08-31)
 Blocks: none
@@ -68,3 +68,20 @@ and apply only to the unpruned pool. Caveat for 340: 10 of the 44
 universes sit at or above the 20-candidate single-stage floor (all
 hunter phases, mage p3-p5, warrior p2-p4) and would need the no-cull
 path forced; the other 34 take it unaided.
+
+## Resolution
+
+Verdict (a) stands: set bonuses survive through the tournament. Two facts
+sharpened it while building `feat/upgrades-tab-batch-sim`:
+
+- The per-piece delta must be candidate-minus-baseline from the **same
+  run**. This invariant is now documented on `IndividualDelta` in the fork
+  (fork commit `7b736a0c2`). A round-2 fix-round attempt to re-base a
+  screened delta onto a different baseline was empirically shown to break
+  `computeSynergy` — it injected exactly 4×65.32 DPS of error on a
+  Nordrassil 4pc case (`.scratch/stage-gate/batch-sim-web-local/decision-log.md`,
+  "round-2's prescribed set-bonus re-base EMPIRICALLY REFUTED"; see also
+  `execution-ledger-web.md` for the round-2 fix).
+- `topResults` must be set to the candidate count on every request, or the
+  response silently truncates to 5. This is now enforced in
+  `buildBulkSimRequest` (fork code).

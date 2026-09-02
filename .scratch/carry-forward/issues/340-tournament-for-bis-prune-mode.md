@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/fork-tab-native-bulk-sim-finding.md (investigation 2026-08-31)
 Blocks: none
@@ -70,3 +70,21 @@ Decision report: `.scratch/stage-gate/340-tournament-route/report.md` (gitignore
       Report section Q2 (three-baseline table + agreement table).
 - [x] A decision recorded with reasoning. Verdict: direction 1 answered NO -
       do not route through the bulk sim; move to ticket 339. Report section Verdict.
+
+## Resolution
+
+The ticket's own verdict stands: do not route BiS-prune through the flat
+tournament. Cost is a wash at matched accuracy, and the tournament culls to
+20 rows for the 212-candidate pool tried, erasing whole slots (head,
+shoulder, hands, and trinket1 returned zero rows); `MinSurvivors` has no
+proto/request knob to widen it.
+
+What got built instead, on `feat/upgrades-tab-batch-sim`: chunked screening
+at 25 candidates per request through the native bulk engine, kept below
+both engines' measured 32/33 no-cull-to-cull flip at 5,000 iterations. This
+ships **default ON** for the local Go server (9.35s per 25-candidate
+chunk over HTTP) and **default OFF** on web/WASM (332s per chunk, no row
+streaming before the chunk completes — the loop runner is used there
+instead; ticket 346 is the revisit trigger for the WASM path). See
+`docs/reviews/feat-upgrades-tab-batch-sim.md` and
+`.scratch/stage-gate/batch-sim-web-local/decision-log.md`.

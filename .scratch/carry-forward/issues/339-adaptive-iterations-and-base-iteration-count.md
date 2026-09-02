@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/fork-tab-native-bulk-sim-finding.md (investigation 2026-08-31)
 Blocks: none
@@ -45,7 +45,26 @@ task, not folded into anything else.
 
 ## Acceptance
 
-- [ ] A measured accuracy-vs-cost comparison (flat vs adaptive vs raised-base).
-- [ ] A decision recorded, with numbers, on target error + base count.
-- [ ] Implemented in our fan-out if the trade is favorable; if not, the "why not"
+- [x] A measured accuracy-vs-cost comparison (flat vs adaptive vs raised-base).
+- [x] A decision recorded, with numbers, on target error + base count.
+- [x] Implemented in our fan-out if the trade is favorable; if not, the "why not"
       is written down.
+
+## Resolution
+
+(a) Adaptive iterations — **measured no gain, not adopted.** At matched
+accuracy, wowsims' adaptive pass costs 0.98x/1.00x/0.99x a flat pass across
+three universes (`.scratch/stage-gate/340-tournament-route/HANDOFF.md`
+§Cost, corrected finding). On slot-9 (19 candidates, feral-p2) the adaptive
+arm spent 5,633 iterations/candidate to reach 0.0439% error, and a flat pass
+needs ~5,597 iterations/candidate for the same accuracy — a 1.01x wash
+(`.scratch/stage-gate/batch-sim-web-local/research-local.md` §Q5). The
+originally reported 2.4x-10x saving was an artifact of comparing the
+adaptive rule against an unmatched flat-3000 baseline. `getBulkSimTargetIterations`
+is wowsims' function (`statistics.go` / `statistics.ts`) and is not called by
+our code.
+
+(b) Raise the base iteration count — **done.** `DEFAULT_ITERATIONS` raised
+3000→5000 as an owner decision, independent of (a)'s wash finding; fork
+commit `164fce593` carries the why-comment
+(`.scratch/stage-gate/batch-sim-web-local/decision-log.md`, fix-round entry).
