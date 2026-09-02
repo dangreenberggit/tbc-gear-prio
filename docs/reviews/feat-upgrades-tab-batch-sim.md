@@ -3,6 +3,7 @@
 Reviewed range: `15541f8895409c6d898dc8e9bc539ac3fae6fcde..cf83e95decdcd683fbf82b68b09b27ad24375695`
 Reviewed range: `cf83e95decdcd683fbf82b68b09b27ad24375695..21d48b5` (fix round; fork `52679533f548..164fce593`)
 Reviewed range: `21d48b5..2e2430d2c9c25fa1d2fa64464a94717b273687d1` (round-2 fix + tickets; fork `164fce593..7b736a0c2`)
+Reviewed range: `2e2430d2c9c25fa1d2fa64464a94717b273687d1..e546443` (layout-gate red → measured diagnosis + default flip; fork `7b736a0c2..20dbb6f5d`)
 
 Dispatch: four fresh Opus subagents (adversarial, domain, standards, spec —
 `codex` not on PATH; Claude Code review lane). The fork-side diff
@@ -83,6 +84,27 @@ been green while testing nothing). A residual observation — a ~1.6%
 multiplicative route difference confined to deep downgrades (slope
 1.016 ± 0.002, intercept ≈ 0, robust to excluding replicated rows) —
 became ticket 348.
+
+## Round 4 (layout gate)
+
+`pnpm merge-to-dev --check-only` went red at the layout gate's run check
+(0 rows in 120s; all layout assertions passing). A diagnosis seat
+distinguished latency from crash by measurement: a headless run with
+console/exception capture showed zero errors and live progress
+("Simming 1/325…") for 200s — the bulk branch cannot stream a row before
+the whole screening pass completes, and a 25-candidate WASM chunk costs
+332s against the loop's ~40s first row (HTTP: 9.35s — a ~35x transport
+gap). Fix: `makeSimRunner` defaults bulk screening to the HTTP transport
+only; WASM keeps the streaming per-candidate loop, `BulkWasmSimRunner`
+stays constructible, and load-bearing comments cite the measured numbers
+with ticket 346 as the revisit trigger (the smaller-chunks alternative is
+recorded there as estimate, untested — per-chunk baseline probes make it
+costlier). This is the written justification owner constraint 3 requires
+for the WASM default. Layout gate re-run green (37 assertions);
+`merge-to-dev --check-only` ok; `pnpm verify` green. Fork `20dbb6f5d`,
+outer `ecaa3f3` + `e546443`. No engine files touched (no PROVENANCE
+cycle needed); the interface tests assert runners directly and were
+unaffected.
 
 ## Summary
 
