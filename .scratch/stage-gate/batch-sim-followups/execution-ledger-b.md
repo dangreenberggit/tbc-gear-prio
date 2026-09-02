@@ -1428,3 +1428,80 @@ reproduced its own withdrawn values to the digit, so these rows are confirmed
 rather than assumed. The file now states explicitly that A agreeing with B is
 **not** evidence about the routes — both ran at seed 11 on a deterministic
 engine — and that arm C judges the route question.
+
+### Prediction (ii): CONFIRMED — arm C is a genuine null
+
+`http-C` (seed 777), guard passed (`declaredSeeds[0] = 777`, screening observed
+at **777** — the fix reaches the sims). **188 of 202 rows differ from arm B**,
+by amounts consistent with sampling noise:
+
+| item | B (seed 11) | C (seed 777) |
+| --- | --- | --- |
+| 33716 | 99.410117 | 99.531885 |
+| 32014 | 53.817706 | 53.943913 |
+| 30106 | 38.072509 | 38.068412 |
+
+The ranked order moves too: 29301 is rank 9 in B and rank 8 in C, swapping with
+32366. That is precisely the tail jitter the control exists to quantify.
+
+Depth gate on C: 29 (vs B's 31) — sampling variation, both well clear of 20.
+
+## HTTP CAMPAIGN COMPLETE — scored with a valid null
+
+`node evidence/campaign-scorer.mjs http-A.json http-B.json --null http-C.json`
+
+**346 preconditions: ALL PASS.** Arm A: 10 chunks, every one `stages 1`,
+`n ≤ 25`, achieving exactly `8000`; baseline cv 0.0333 vs critical 0.0378.
+
+### Ticket 345 — (c) and (c') both PASS, and the control makes them meaningful
+
+| metric | A vs B | control C vs B |
+| --- | --- | --- |
+| overlap over `k = 24` | **100.00%** | **100.00%** |
+| boundary flips | **0** | **0** |
+| (c') confident-side agreement | **0 violations / 202 rows = 100%** | — |
+
+Depth gate met (31 ≥ 20). **Decision rule: (c) ≥ 90% and (c') = 100% → close
+345, confirmed.**
+
+The control is what makes this readable. A same-route change of seed moves 188
+of 202 deltas, yet moves **no** ranked-set membership and **no** boundary flip —
+so the ranked set at this configuration is robust to sampling noise, and the
+bulk route reproducing it exactly is a real equivalence result rather than a
+metric too coarse to notice a difference.
+
+### Ticket 348 — NOT REPRODUCED
+
+| | slope | SE | t vs 1 |
+| --- | --- | --- | --- |
+| A on B (route) | **1.00000** | 0.00000 | — |
+| C on B (null) | 0.99955 | 0.00031 | −1.45 |
+
+Both reproduction conditions fail: `|slope_AB − 1| = 0` is not `> 3·SE_AB`, and
+not `> |slope_CB − 1| + 3·SE_CB = 0.00137`. **The prior 1.6% multiplicative
+slope does not survive at matched iterations** — it was the accuracy mismatch
+(5,000 flat vs 7,091 adaptive), exactly as the plan hypothesised. Decision rule:
+close 348 into 346 as an accuracy-mismatch artifact.
+
+The null slope being 0.99955 ± 0.00031 rather than exactly 1.0 is the useful
+part: it shows the OLS machinery *can* resolve a sub-0.1% deviation at this
+sample size, so the A-vs-B slope of exactly 1.0 is a real null, not an
+insensitive instrument.
+
+### Ticket 346 — HTTP numbers (WASM still pending)
+
+| metric | value |
+| --- | --- |
+| `R_wall_s` (screening) | **0.297** |
+| `R_wall` (end to end) | 1.185 |
+| `R_iter_s` | 1.084 — standing wash finding **holds** |
+| V (HTTP loop variance, B vs C) | **0.008** |
+| first row | A 116.6 s vs B 2.7 s |
+
+V = 0.008 is a far tighter loop-variance figure than the 5.9% wall-clock spread
+measured across same-seed repeats, because V compares *screening totals* of two
+239-sim arms rather than single runs — the per-sim noise averages out.
+
+Verdict per the rule: **BULK FASTER** on screening-only. The owner paragraph
+fires again and is dispositioned exactly as before (NO ACTION: the HTTP
+transport already defaults to bulk; the default 346 asks about is WASM).
