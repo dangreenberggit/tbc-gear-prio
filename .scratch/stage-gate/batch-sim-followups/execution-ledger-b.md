@@ -228,10 +228,47 @@ failure. Record the numbers and report rather than adapt.
 
 ---
 
+---
+
+## Step 1 — Scorer built and validated (COMPLETE, committed `128dfa0`)
+
+`evidence/campaign-scorer.mjs`, with `evidence/fixtures/` and their generator.
+
+Acceptance table — every target met:
+
+| case | required | measured |
+| --- | --- | --- |
+| clean | all PASS, slope 1.000 | all PASS; overlap 26/26 = 100%; (c') 0 violations; slope 1.00000 |
+| inverted | (a)(b)(d) FAIL, rho −1 | overlap 22/26 = 84.62% FAIL; (c') 8 violations FAIL; flips 8 vs control 0; rho −1.000000 |
+| slope102 | slope 1.020 | slope 1.02000; both 348 conditions true |
+| overshoot | `NO VERDICT` | `346: NO VERDICT`; `I_max = 9500` → M1 (no cap, per N9) |
+| prior `equiv-dump.json` | rho 0.999229, overlap 88.89%, slope 1.016 via the C22 fallback | rho **0.999229**, overlap **8/9 = 88.89%**, slope **1.016 ± 0.002, t = 7.40**, fallback path confirmed firing |
+
+The prior-dump slope reproduces C23's independently recorded 1.016 ± 0.0022
+(t 7.4) from ticket 348, so the statistics are validated against real noise and
+not only against constructed fixtures.
+
+Pre-registration was committed **before** any pilot or arm ran, as required.
+LF endings confirmed on all committed artifacts (0 CR bytes).
+
+---
+
+## Step 2 — NOT STARTED. Stopped and reported to the orchestrator.
+
+No sim arm has been run. No edit has been made to `upgrades_tab.tsx`; no
+temporary `?bulkEquiv=` dispatch exists; the fork tree is clean at the pin.
+
+Reason: deviations **D1** and **D2** below both land on Step 2, and both are
+`flag`-class under the plan's deviation protocol (they cross a step boundary
+and change a step's acceptance criterion), not `adapt`-class. D2 in particular
+changes what the campaign would be measuring, which is the orchestrator's call.
+Steps 3–8 all consume Step 2's harness, so no independent step remains to
+advance.
+
 ## Deviation ledger
 
 | Step | Plan said | Found | Action | Why |
 | --- | --- | --- | --- | --- |
 | 0 / 2 | N9: "the Step 2 differential at 30 candidates exercises the tournament path (30 > `BULK_SIM_MIN_COMBINATIONS` = 20)" | The legacy gate runs per **chunk** inside `runConcurrentBulkSim` (`wasm/bulk_sim/index.ts:107`); the driver partitions at 25 first, so 30 candidates yield chunks of 25 and 5 — both LEGACY at every iteration count. No campaign chunk ever runs a multi-stage tournament. | flag | Corrects a claim the register marks load-bearing (C14, already once-corrected by N9). Differential **parameters stand** — at n ≤ 25 the legacy flag and stage gating select the same High-only path, so 30 candidates still exercise the campaign's real stage path plus the two-chunk baseline carry. Only the justification and the 346 wording change. |
-| 0 / 2 | C12: the WASM harness "re-implements `BulkWasmSimRunner.runBulkScreen`" (~30 lines of exported calls) | Track A moved that loop into the shared, exported `runBulkScreenChunks` (`adapters/bulk_screen_driver.ts`); `runBulkScreen` is now a 10-line delegation. | flag | Re-implementing it now would *reduce* fidelity — the harness would drift from the very code path being measured, and would bypass Track A's `assertSingleStageChunk` guard and cancel wiring. Pending orchestrator direction; see the report. |
+| 0 / 2 | C12: the WASM harness "re-implements `BulkWasmSimRunner.runBulkScreen`" (~30 lines of exported calls) | Track A moved that loop into the shared, exported `runBulkScreenChunks` (`adapters/bulk_screen_driver.ts`); `runBulkScreen` is now a 10-line delegation whose transport arrives as an injected `dispatch` callback. | flag | Re-implementing it now would *reduce* fidelity — the harness would drift from the very code path being measured, and would bypass Track A's `assertSingleStageChunk` guard and cancel wiring. The plan's `mode=real` vs `mode=harness` differential also stops being a real check, since the two modes would share the driver. Proposed resolution (orchestrator's call): call the real driver and instrument the injected `dispatch`, capturing each chunk's raw `stageMetrics`, timings and probe events — zero re-implementation, guard still fires, strictly higher fidelity than the planned design. |
 | 0 / 3 | Step 3 budgets the WASM arms from the frozen N and applies the precedence rule | At N ≈ 407 (feral p3), A+B+C ≈ 6.9 h > 6 h budget; A+B ≈ 4.7 h | adapt | The plan's own precedence rule names this exact branch: drop WASM arm C first, never cap below the depth gate. Rule applied as written, at its first branch; no cap set, so depth is preserved. |
