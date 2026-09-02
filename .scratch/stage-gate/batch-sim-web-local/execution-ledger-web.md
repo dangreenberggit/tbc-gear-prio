@@ -1615,3 +1615,86 @@ pre-registered threshold, because it did not.
 **Cost, measured:** loop 2,699.5 s (45.0 min), bulk 4,333.1 s (72.2 min) for the
 same 220-row ranking. The bulk route was **1.6x slower**, not faster, on this
 machine at pool 4 — see the note below.
+
+## Gate decision on condition (c): ACCEPTED WITH REASON (orchestrator)
+
+Dispositioned by the orchestrator and recorded in `decision-log.md`, not by this
+seat. The reasoning on the record: at a ranked set of 9 the metric can only
+express 88.89% or 100%, so the registered 90% threshold sits in a gap only
+perfection could clear; and the mechanism is characterised rather than
+rationalised — every disputed item agrees between routes within combined
+1-sigma, the disagreement being cutoff-boundary jitter roughly three times
+smaller than the error bars.
+
+Recorded for the avoidance of doubt: this seat measured 88.89% and refused to
+call it a pass. The acceptance is the orchestrator's, which is the correct
+division — the executor cannot choose a gate's exit.
+
+Carry-forward tickets filed (directory listing used as the numbering authority
+per `known-traps.md`; the `tail -20` listing is lexicographic and hides the real
+maximum, so the numeric sort was used — highest existing was 344, `NEXT` was
+correct at 345):
+
+- **345** — re-verify condition (c) with a design the metric can express: a
+  deeper ranked set, plus a loop-vs-loop different-seeds control to establish
+  the baseline tail-membership jitter any route comparison should be judged
+  against. Carries the three disputed items and all the numbers.
+- **346** — bulk screening measured 1.6x slower than the loop (4,333 s vs
+  2,700 s, same 220-row ranking). States as **hypothesis, untested** that the
+  arms ran at unmatched accuracy (adaptive 7,091 vs flat 5,000 = 1.42x, plus
+  per-chunk baseline probes), and states explicitly that the owner's standing
+  "cost is a wash at matched accuracy" finding is **not** contradicted, because
+  this was not measured at matched accuracy.
+
+`NEXT` updated to 347.
+
+## Step 11 — hooks removed, gates green, committed
+
+Boundaries re-verified against the file immediately before cutting (they had not
+moved: the `rank.ts` fix touched a different file). Removed lines 1127-1348 (the
+two temporary methods) and 1362-1379 (the two dispatch blocks) — **240 lines**,
+matching the mapped 222 + 18 exactly. Kept line 21 (`import { makeSimRunner }`)
+and line 451 (`private readonly sim = makeSimRunner()`), which are R1's permanent
+factory.
+
+**A whole-file reformat was caught and reverted before it could be committed.**
+Writing the file back with .NET's `WriteAllLines` emitted CRLF on all 2,505
+lines, where the original was LF-only; `git diff --stat` showed
+`2505 insertions(+), 2500 deletions(-)` — a reformat wearing the costume of a
+6-line change. Converted back to LF with no BOM and the original trailing-newline
+framing, after which the diff read as it should. Verified by byte-comparing
+against the git blob (`tail -c 3`, CR count) rather than by eye.
+
+The resulting diff against `HEAD` shows **only** the R1 factory, because the
+harness hooks were never committed in the first place — they were the
+uncommitted working-tree edit throughout. Removing them returns the file to its
+committed shape, which is exactly the intended end state.
+
+Verification, all on the final tip:
+
+- Fork type-check (`node node_modules/typescript/bin/tsc --noEmit`, cwd fork
+  root): **exit 0**
+- Harness residue grep (`bulkSpike|bulkEquiv|runBulkSpike|runBulkEquivalence|BULK_SPIKE|BULK_EQUIV|__bulkEquiv|TEMPORARY`):
+  **0 matches**
+- `git -C $F status --porcelain`: only `upgrades/`-adjacent tab path, as Step 11
+  requires
+- `pnpm verify`: **exit 0**, including the two pin-sensitive gates at the new
+  pin — `equip eligibility check ok: 17 specs match the fork at da0b65d82ef4`
+  and `engine port drift check ok: 33 ported files match PROVENANCE.md`
+
+`upgrades_tab.tsx` carries no PROVENANCE row (outside `engine/`, project-owned
+per R1), confirmed by grep, so no sha256 update was owed for this commit.
+
+Commits:
+
+- fork **`da0b65d82`** "Wire the tab to the bulk-capable sim runner factory"
+- outer **`51543c9`** "Re-pin fork to da0b65d82 and close the batch-sim web track"
+
+The pin was set from a SHA **read** via `git rev-parse HEAD` and substituted
+programmatically — never typed. This ledger records an earlier fabricated-SHA
+incident that matched for 8 characters and diverged after; the read-and-substitute
+path is what forecloses it.
+
+Evidence committed alongside this ledger so it outlives the session scratchpad:
+`equiv-dump.json` (69,995 bytes, both arms) and `equiv-scorer.mjs`. The scorer
+was re-run from the committed copies and reproduces the four verdicts exactly.
