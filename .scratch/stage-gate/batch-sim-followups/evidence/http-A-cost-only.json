@@ -1,0 +1,62 @@
+{
+	"meta": {
+		"what": "Campaign arm A (bulk screening), HTTP transport, frozen capped configuration",
+		"why_cost_only": "The COST figures below are trustworthy and are recorded. The per-item deltaDps values are NOT written here, because arm A returned values byte-identical to arm B's on all 202 rows including 178 rows that never enter paired replication. Two independent samplings cannot agree to six decimals, so the delta values are unexplained and must not be scored until diagnosed. See execution-ledger-b.md, 'Step 4 - http-A completed, and it exposes a blocking anomaly'.",
+		"preconditions346": "ALL PASS on the bulk route: 10 chunks, every chunk stages=1, every chunk achieved exactly 8000 iterations (no adaptive overshoot), every chunk n<=25, 1 measured probe per chunk.",
+		"armAisRealBulk": "Confirmed: 4 loop sims in screening against arm B's 239, 249 rows returned through 10 chunks, hasBulkCapability true. Arm A did not fall back to the loop."
+	},
+	"armId": "A",
+	"mode": "harness",
+	"iterations": 8000,
+	"seeds": [11, 22, 33, 44, 55],
+	"transport": { "isWasm": false, "hasBulkCapability": true, "concurrency": 4 },
+	"config": {
+		"spec": "feral",
+		"maxPhase": 3,
+		"pruned": false,
+		"candidateCap": 213,
+		"poolEligibleAtPhase3": 364,
+		"character": { "region": "US", "realm": "current-page", "name": "Player" },
+		"href": "http://localhost:5173/tbc/druid/feralcat/?bulkEquiv=A&cap=213&iters=8000"
+	},
+	"engineCutoff": { "absDps": 3.6, "pct": 0.15 },
+	"baseline": { "dps": 2245.447435998697, "stdev": 74.69972896407917 },
+	"baselineCv": 0.03326705,
+	"cost": {
+		"wallSeconds": 146.49629999995233,
+		"screeningSeconds": 115.08939999997615,
+		"firstRowSeconds": 117.08189999997616,
+		"simsByPhase": { "building-pool": 1, "simming": 47, "ranking": 1 },
+		"totalIterations": 2464000,
+		"screeningIterations": 2072000,
+		"chunks": [
+			{ "n": 25, "seconds": 13.028700000047683, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.633200000047683, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.319799999952316, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.037699999928474, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.1115, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.033900000095368, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 12.2735, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.033399999976158, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 25, "seconds": 11.609300000071526, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 25 },
+			{ "n": 24, "seconds": 10.8655, "stages": 1, "stageIterations": 8000, "stageIterationsAll": [8000], "probes": 1, "rows": 24 }
+		],
+		"runsByPhase": {
+			"screen:building-pool": { "n": 1, "seconds": 0.616, "iterationsDone": 8000 },
+			"screen:simming": { "n": 4, "seconds": 2.286, "iterationsDone": 32000 },
+			"tail:ranking": { "n": 1, "seconds": 0.539, "iterationsDone": 8000 },
+			"tail:simming": { "n": 43, "seconds": 24.571, "iterationsDone": 344000 }
+		}
+	},
+	"complete": true,
+	"itemCount": 202,
+	"comparisonWithArmB": {
+		"note": "Screening-only ratios, the figures ticket 346's verdict is taken on. Reported here as measured; the verdict itself is not issued because the campaign stopped.",
+		"R_wall_s": 0.2918,
+		"R_iter_s": 1.0837,
+		"screeningSeconds": { "A": 115.089, "B": 394.324 },
+		"screeningIterations": { "A": 2072000, "B": 1912000 },
+		"firstRowSeconds": { "A": 117.082, "B": 2.566 },
+		"endToEndWallSeconds": { "A": 146.496, "B": 123.362 }
+	}
+}

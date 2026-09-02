@@ -755,7 +755,98 @@ scored over.
 
 ---
 
-## Step 4 in progress — `http-A` running at hand-back
+## Step 4 — `http-A` completed, and it exposes a blocking anomaly. STOP.
+
+Arm A finished. **All 346 preconditions pass on the bulk route**, which is the
+first time the campaign has confirmed M2 on real chunks:
+
+| check | result |
+| --- | --- |
+| chunks | **10** (9 × 25 + 1 × 24) |
+| every chunk `stages` | **1** |
+| every chunk achieved `stageIterations` | **8000 exactly** — no adaptive overshoot |
+| every chunk `n ≤ 25` | yes |
+| probes | 1 per chunk (10 total, measured) |
+| `hasBulkCapability` | true |
+
+Cost, against arm B at the same configuration:
+
+| | arm A (bulk) | arm B (loop) |
+| --- | --- | --- |
+| screening wall | **115.1 s** | **394.3 s** |
+| screening iterations | 2,072,000 | 1,912,000 |
+| screening sims via `run()` | 4 | 239 |
+| chunk rows returned | 249 | — |
+| end-to-end wall | 146.5 s | 123.4 s |
+| first row | **117.1 s** | **2.6 s** |
+| tail sims | 43 | 35 |
+
+Arm A really did screen through the bulk RPC: 4 loop sims against arm B's 239,
+10 chunks at ~11–13 s each. On screening-only wall clock bulk is **3.4x faster**
+on HTTP; on first-row latency it is **45x worse** (117 s vs 2.6 s), which is the
+tension ticket 346 exists to quantify.
+
+### The anomaly — A and B report byte-identical deltas
+
+**Arm A's `deltaDps` equals arm B's on all 202 rows, to six decimal places**
+(33716: 99.410117 both; 32014: 53.817706 both; 30106: 38.072509 both; and so on
+through the negative tail).
+
+That cannot be right. 178 of those rows are unranked with `seMethod:
+"independent"` — they never enter the paired-replication pass, so their numbers
+come **straight from screening**. Arm A screened through the Go bulk engine and
+arm B through 239 individual `raidSimAsync` calls. Two independent Monte-Carlo
+samplings cannot agree to six decimals on 178 rows.
+
+Hypotheses checked and **ruled out**:
+
+- *Shared `MemoryStore` across arms* — ruled out. `runCampaignArm` constructs
+  `new MemoryStore()` per arm (`equiv-campaign.mts:284`), and a fresh store
+  cannot hold arm B's values.
+- *Arm A silently fell back to the loop* — ruled out. It ran 10 real chunks
+  costing 115 s and only 4 loop sims.
+- *Replication overwrote everything* — ruled out. Only the 24 ranked rows go
+  through replication; the other 178 do not.
+
+So the cause is **not yet identified**, and it sits directly on the campaign's
+central comparison. Two candidate directions for whoever picks this up:
+
+1. `rank.ts:1026-1046` — `candObs` is taken from `screened.byKey`, else from
+   `readCachedScreen`, else `readCachedSim`, else a fresh `run()`. If the
+   screening map misses for most candidates, every arm falls through to the same
+   deterministic per-candidate path and both arms converge — which would also
+   explain arm A's screening iterations (2,072,000 = 259 × 8,000, i.e. the chunk
+   work) being *paid* but not *used*. The 4 stray screening sims and the
+   249-vs-213 row count suggest the screen keys and the loop's attempt keys may
+   not line up.
+2. A deterministic seed path — if both routes sim the same gear at the same seed
+   and the engine is deterministic in seed, identical results are expected and
+   **the whole A-vs-B premise of 345/348 needs restating**. The prior campaign's
+   dump showed A and B differing (rho 0.999229, not 1.0), so this would be new
+   behaviour, but the prior arms ran at *unmatched* iteration counts — matching
+   them at 8,000 may be what removed the difference.
+
+Direction 2 would be a genuinely important finding rather than a defect: it
+would mean bulk-vs-loop screening is exactly equivalent at matched iterations,
+which is 345's question answered in the strongest possible form. But it must be
+**diagnosed, not assumed** — and either way the scorer would report rho = 1.0,
+overlap 100%, slope exactly 1.0, which is a result no one should accept without
+knowing which of the two explanations produced it.
+
+**`http-A.json` was deliberately NOT written.** Writing a dump whose central
+numbers I cannot explain, and scoring 345/346/348 off it, is precisely the
+failure mode this campaign's pre-registration exists to prevent. The cost
+figures above are trustworthy and recorded here; the delta values are not yet.
+
+**Recommended next step:** a bounded diagnostic — run arm A at a small cap
+(say 30) with the screening map instrumented to report hit/miss per candidate,
+and compare one candidate's screened DPS against its loop DPS directly. That
+distinguishes hypothesis 1 from hypothesis 2 in a few minutes and does not need
+the full campaign.
+
+---
+
+## Step 4 (superseded note) — `http-A` was running at the previous hand-back
 
 `?bulkEquiv=A&cap=213&iters=8000`, feral phase 3, tab foregrounded, servers
 3333 + 5173 up. The Go log shows continuous `Running 8000 iterations on 20
