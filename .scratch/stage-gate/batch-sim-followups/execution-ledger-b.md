@@ -846,6 +846,59 @@ the full campaign.
 
 ---
 
+## Gate C: bounded diagnostic approved. Pre-registered before running.
+
+Two discriminators, both cheap on HTTP. Recorded here BEFORE either runs, so
+neither outcome can be reinterpreted after the fact.
+
+### D-1 — screening map hit/miss
+
+Arm A at `cap=30`, 8,000 iterations, with the screening map instrumented per
+`(item, slot)` attempt: record HIT (the row's delta came from the bulk chunk via
+`screened.byKey` or `readCachedScreen`) or MISS (fell through to
+`deps.sim.run`).
+
+- **FINDING shape:** hits for every attempt the chunks covered; arm A's `run()`
+  count stays at the baseline + replication + set-bonus tail only.
+- **DEFECT shape:** widespread misses — a key mismatch between the keys
+  `screenCandidates` stores and the keys the loop composes. Leads to check:
+  seed, iterations, or the bulk base request's composition. Existing hints: arm
+  A returned **249** chunk rows for **213** candidates, and made **4** stray
+  screening `run()` calls that should not exist if every attempt hit.
+
+### D-2 — determinism on the Go engine
+
+Two comparisons at matched `(request, seed 11, 8,000 iterations, concurrency)`:
+
+1. **loop vs loop** — the same per-candidate request twice through the loop
+   route, DPS compared to six decimals.
+2. **screened vs loop** — one candidate's chunk-screened DPS against its loop
+   DPS, same precision.
+
+- **FINDING:** loop-vs-loop bit-identical **and** screened-vs-loop
+  bit-identical → the routes are deterministic on the Go engine at matched
+  settings. This explains the prior campaign's rho 0.999229 exactly: those arms
+  ran at *unmatched* iteration counts (5,000 loop vs 7,091 adaptive bulk), and
+  matching them at 8,000 removed the only source of difference.
+- **DEFECT:** loop-vs-loop differs but A equals B → something is copying rather
+  than measuring.
+
+### Rulings (Gate C, binding)
+
+- **FINDING →** write `http-A.json` from the completed arm A run, score it, and
+  record in this ledger and in ticket 345 that **on the Go transport at matched
+  settings the two routes are numerically identical** — rho 1.0 is then a real
+  result, stated with its mechanism, not an artefact. Continue with `http-C` and
+  the WASM arms. WASM stays the primary campaign precisely because that is where
+  the two routes may genuinely diverge: the loop runs one worker per candidate
+  while the tournament splits iterations across workers.
+- **DEFECT →** stop; report the key mismatch with `file:line`. It becomes a fix
+  ticket before any further arm — and it would mean **the shipped HTTP bulk path
+  re-sims everything it screened**, a correctness-and-cost bug the pre-merge
+  review must see.
+
+---
+
 ## Step 4 (superseded note) — `http-A` was running at the previous hand-back
 
 `?bulkEquiv=A&cap=213&iters=8000`, feral phase 3, tab foregrounded, servers
