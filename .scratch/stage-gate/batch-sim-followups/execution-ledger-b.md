@@ -1078,6 +1078,42 @@ sampling spread, which is the yardstick (c)'s overlap and 348's slope are judged
 against. If C came back identical to B as well, the determinism finding would be
 wrong and the whole comparison would need re-opening.
 
+**Two executor errors on arm C, both recorded rather than quietly retried.**
+
+1. **Run 1 lost to an HMR reload.** While arm C was in flight I edited
+   `tools/README.md` inside the fork to satisfy Gate C ruling 3. Vite was
+   serving that tree, so HMR reloaded the page, dropping `__bulkEquiv` and
+   resetting the tab to Phase 2 mid-run — exactly the trap
+   `docs/agents/known-traps.md` documents ("an engine-file edit reloads the
+   page, dropping in-page run state"). **Rule for the rest of this campaign: no
+   edit anywhere under `$F` while an arm is running.** Ledger and evidence files
+   are in the outer repo and are safe to write; fork files are not.
+
+2. **Run 2 was not a campaign arm at all — the `?bulkEquiv=` dispatch was
+   missing.** When re-adding the temporary block for the diagnostic I *replaced*
+   the `?bulkEquiv=` handler with the `?bulkDiag=1` one instead of keeping both.
+   So `?bulkEquiv=C` had no handler and the page ran an ordinary ranking, which
+   rendered a normal results table. Caught by noticing the table at all: the
+   harness sets `state = idle` and returns without rendering, so **a visible
+   ranking table is proof the harness did not run.** Both blocks are now present
+   (3 `bulkEquiv` and 3 `bulkDiag` occurrences on disk and in the served
+   transform, `runCampaignArm` and `BULK_EQUIV_RUN` both reaching the browser).
+
+   A false alarm inside that diagnosis, also worth recording: testing the served
+   bundle for the literal `params.get('bulkEquiv')` returned false even when the
+   block was present, because vite's transform rewrites the quoting. Substring
+   tests against a transformed bundle need a token that survives transformation
+   — `BULK_EQUIV_RUN` and `runCampaignArm` were the reliable ones.
+
+Neither run produced campaign data, so nothing was lost but time. Arm C re-run
+per the plan's abort rule.
+
+**Resolved separately: the `6280 iterations` server-log line was not an M2
+breach.** It came from the tail of the diagnostic run still draining, not from a
+campaign arm. `http-B.json`'s `runsByPhase` shows every phase averaging exactly
+8,000 iterations per sim (`iterationsDone / n` = 8000 for all four buckets), and
+the scorer's precondition gate passed on both HTTP arms.
+
 **To resume:** read `window.__bulkEquiv`; write it to `evidence/http-C.json`
 with the same compaction as `http-A.json` / `http-B.json` (aggregate
 `cost.runs` into `runsByPhase`; keep `cost.chunks` intact); commit; then re-score
