@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: Step 10 of the batch-sim web track (stage-gate, 2026-09-01)
 Blocks: none
@@ -100,3 +100,68 @@ The raw dump for the original measurement is committed at
 that produced these numbers is described in the execution ledger alongside it.
 The scorer was verified in both directions (passes a clean fixture, fails an
 inverted one) before its output was trusted.
+
+---
+
+## Resolution (2026-09-02, batch-sim-followups Track B)
+
+**Closed: condition (c) passes on a design the metric can express, judged
+against a control.** Evidence under
+`.scratch/stage-gate/batch-sim-followups/evidence/`; method and every deviation
+in `execution-ledger-b.md` alongside it.
+
+### Design that answers the two structural problems
+
+| problem in this ticket | what was run |
+| --- | --- |
+| metric could not express 90% at k=9 | feral at **max phase 3**, 364 eligible items, candidate cap 213 → **k = 24** ranked rows. One flip moves the metric 4.2 points, not 11. Minimum depth was pre-registered *before* running as `count(deltaDps ≥ 2·se) ≥ 20` on the loop arm, and measured **31**. |
+| no control | arm **C**: the same loop route at first seed **777** against arm B's **11**, everything else identical. |
+
+All three arms ran at **8,000 iterations** with the count verified per sim, so
+the routes are compared at matched accuracy rather than the 5,000-vs-7,091
+mismatch of the original measurement.
+
+### Result
+
+| metric | A (bulk) vs B (loop) | control C vs B |
+| --- | --- | --- |
+| overlap over `k = 24` | **100.00%** | **100.00%** |
+| boundary flips | **0** | **0** |
+| (c′) confident-side agreement, 202 items | **0 violations = 100%** | — |
+
+**The control is what makes the pass meaningful.** Changing only the seed moved
+**188 of 202** per-item deltas — so the measurement is genuinely resampling —
+yet moved **no** ranked-set membership and **no** boundary flip. The ranked set
+at this depth is robust to sampling noise, and the bulk route reproducing it
+exactly is therefore a real equivalence result rather than a metric too coarse
+to notice a difference. That is the baseline jitter this ticket asked for:
+**zero at k = 24**, against the one-item flip seen at k = 9.
+
+The original 88.89% is retrospectively explained rather than contradicted: at
+k = 9 a single tail item swings the metric 11 points, and the three disputed
+items agreed within noise on both routes even then. Deepening the set removed
+the resolution problem; matching the iteration counts removed the accuracy gap.
+
+### A caveat this ticket should carry
+
+This is the **HTTP transport (Go server)**, where the campaign separately
+established that the engine is deterministic at fixed
+`(request, seed, iterations)` — arm B re-run reproduced its own deltas to the
+digit across a fresh 239-sim pass. So on this transport the two routes sample
+identically and agreement is close to structural. The substantive test of route
+equivalence is **WASM**, where the loop runs one worker per candidate while the
+tournament splits one request's iterations across the pool. That arm is measured
+separately; this closure covers HTTP.
+
+### Acceptance
+
+- [x] Control run (loop vs loop, different seeds) measured; baseline
+      tail-membership jitter quoted: **0 flips, 100% overlap at k = 24**, while
+      188/202 deltas moved.
+- [x] Re-run on a ranked set large enough for the threshold to be expressible;
+      minimum depth recorded before the run (pre-registered `≥ 20` rows clearing
+      2·se; measured 31).
+- [x] Condition (c) passes on the new design (100% ≥ 90%), with (c′) passing at
+      100% alongside it.
+- [x] Folded back into the batch-sim record: the "accepted with reason"
+      disposition is **confirmed**.
