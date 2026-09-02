@@ -239,3 +239,27 @@
   default undocumented; Off/corrupt localStorage conflation; 25-bound
   not coupled to iterations. Fix round dispatched (F1-F9, one
   executor); review file written after it lands.
+- 2026-09-01 — Fix rounds complete (fork 164fce593 + 7b736a0c2, outer
+  21d48b5 + e35fae9 + 2e2430d): all round-1 findings fixed or ticketed
+  (347 updated, 348/349 filed); round-2's prescribed set-bonus re-base
+  EMPIRICALLY REFUTED by the fix seat (injected the predicted 4x65.32
+  error) — code correct as shipped, test extended with anti-vacuity
+  guards; "65 DPS cross-engine offset" corrected to a seed artifact.
+  Review committed: docs/reviews/feat-upgrades-tab-batch-sim.md
+  (7bd1afc), 17 disposition rows, all parse.
+- 2026-09-01 — merge-to-dev --check-only RED at the layout gate:
+  layout assertions all pass; the run check got 0 rows in 120s.
+  Suspected first-row latency (bulk WASM path renders per completed
+  ~330s chunk vs the loop streaming per candidate) vs a headless crash
+  — diagnose-then-fix seat dispatched; if latency confirmed, measured
+  evidence justifies defaulting bulk to the HTTP transport only (loop
+  on WASM) with the written justification owner rule 3 requires.
+- 2026-09-01 — Layout gate GREEN, stage CLOSED. Diagnosis measured (a):
+  zero console errors, live progress; bulk branch cannot stream before
+  screening completes (332s/chunk WASM vs ~40s first loop row vs 9.35s
+  HTTP chunk). Fix: makeSimRunner defaults bulk to HTTP only; WASM
+  streams via the loop; BulkWasmSimRunner constructible; ticket 346 =
+  revisit trigger; smaller-chunks alternative recorded there as
+  estimate/untested. Fork 20dbb6f5d, outer ecaa3f3 + e546443 + bcbd9d4
+  (review round 4). merge-to-dev --check-only: ok. Awaiting the owner's
+  explicit merge ask; open tickets 345-349 ride with the branch.
