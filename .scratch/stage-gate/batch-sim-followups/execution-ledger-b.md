@@ -1054,6 +1054,39 @@ Three things the owner needs alongside that sentence, none of which change it:
 
 ---
 
+## Step 4 — `http-C` (null arm) running at hand-back
+
+`?bulkEquiv=C&cap=213&iters=8000`, feral phase 3 (364 eligible), seeds
+`[777, 22, 33, 44, 55]`. Servers 3333 + 5173 up, tab foregrounded.
+
+**What arm C is expected to show, stated before it lands.** D-2 established the
+Go engine is deterministic *in its seed*. Arm C differs from arm B only in the
+first seed, so C **should** differ from B — a different seed is a genuinely
+different sample. That is what makes it a valid null: it measures loop-vs-loop
+sampling spread, which is the yardstick (c)'s overlap and 348's slope are judged
+against. If C came back identical to B as well, the determinism finding would be
+wrong and the whole comparison would need re-opening.
+
+**To resume:** read `window.__bulkEquiv`; write it to `evidence/http-C.json`
+with the same compaction as `http-A.json` / `http-B.json` (aggregate
+`cost.runs` into `runsByPhase`; keep `cost.chunks` intact); commit; then re-score
+with `--null evidence/http-C.json` to complete 345's control and 348's null
+slope; then the two WASM arms on 4180 with 15-minute background timers.
+
+### Working-tree state at hand-back (both must be resolved at Step 8)
+
+- `upgrades_tab.tsx` — the temporary `?bulkDiag=1` block (**4** `bulkDiag`/
+  `TEMPORARY` matches). Removed before the final commit, as with the earlier
+  `?bulkEquiv=` block.
+- `tools/equiv-campaign.mts` — `runDiagnostic` appended (uncommitted). **Flagged
+  for the orchestrator:** the Paths manifest names `equiv-campaign.mts` as a
+  committed file but was written before this function existed. It is a genuine
+  measurement tool that earned its keep — it is what distinguished the finding
+  from the defect — so the executor's recommendation is to commit it with the
+  module. Say so if you would rather it were dropped.
+
+---
+
 ## Step 4 (superseded note) — `http-A` was running at the previous hand-back
 
 `?bulkEquiv=A&cap=213&iters=8000`, feral phase 3, tab foregrounded, servers
