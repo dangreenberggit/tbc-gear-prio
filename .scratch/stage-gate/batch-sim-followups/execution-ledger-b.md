@@ -1642,3 +1642,26 @@ reported rather than smoothed over:
 
 Either outcome is recorded with its numbers; neither is grounds for adjusting a
 threshold after the fact.
+
+### Budget tracking mid-arm (WASM arm B)
+
+At 63.5 min elapsed, arm B is at **41% of its predicted 154-min screening time**
+(213 candidates x 43.48 s/candidate, the rate measured in the Step 5 probe). The
+prediction is holding, which also means the cap-213 arithmetic that Gate C
+approved is behaving as designed.
+
+Projected totals on the same basis:
+
+| arm | predicted screening |
+| --- | --- |
+| B (loop) | 154 min |
+| A (bulk, C18 ratio 1.133) | 175 min |
+| **A + B** | **5.49 h against the 5.5 h budget** |
+
+**The margin is ~0.6 minutes.** That is not a comfortable fit, and it is
+recorded now rather than discovered at the end. If arm A overruns its prediction
+by more than a couple of percent the campaign crosses the budget Gate C set.
+Nothing is adjusted unilaterally: if arm A is still running materially past its
+175-min prediction, the executor stops and reports rather than letting an
+unbounded arm run, since "how much compute is this worth" is the owner question
+that produced the cap in the first place.
