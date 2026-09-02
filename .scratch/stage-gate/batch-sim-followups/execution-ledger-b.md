@@ -883,6 +883,31 @@ Two comparisons at matched `(request, seed 11, 8,000 iterations, concurrency)`:
 - **DEFECT:** loop-vs-loop differs but A equals B → something is copying rather
   than measuring.
 
+### Reading result before the runs — the key-mismatch theory is excluded
+
+Two of my own earlier "hints" toward the defect hypothesis dissolve on reading
+the engine, and this is recorded before the diagnostic runs so it cannot look
+like post-hoc rationalisation:
+
+- **249 attempts vs 213 candidates is correct, not a symptom.** `screenCandidates`
+  builds one attempt per **`(item, slot)` pair** (`rank.ts:874-900`, via
+  `simSlotsForPoolSlot`), and a single pool entry maps to several slots for
+  rings, trinkets and weapons. 213 candidates legitimately produce 249 attempts.
+- **The keys cannot mismatch by construction.** `screenKey` is
+  `` `${itemId}:${slotIndex}` `` at both the store site (`rank.ts:895`) and the
+  read site (`rank.ts:1026`), and `byKey` is filled as
+  `byKey.set(attempts[row.index].key, row.observation)` (`rank.ts:944-947`) — the
+  same attempt objects the loop re-walks. The engine's own comment at
+  `rank.ts:747-759` says both routes share one `attemptEligibility`
+  implementation *precisely* so the two attempt sets agree exactly, calling out
+  that a disagreement would otherwise yield "a wrong number rather than a
+  failure".
+
+So a seed/iterations/base-request key mismatch of the kind D-1 was written to
+catch is architecturally excluded on this code. That shifts the prior weight
+toward D-2's determinism explanation — but "excluded by reading" is not
+"measured", and both discriminators still run.
+
 ### Rulings (Gate C, binding)
 
 - **FINDING →** write `http-A.json` from the completed arm A run, score it, and
@@ -896,6 +921,63 @@ Two comparisons at matched `(request, seed 11, 8,000 iterations, concurrency)`:
   ticket before any further arm — and it would mean **the shipped HTTP bulk path
   re-sims everything it screened**, a correctness-and-cost bug the pre-merge
   review must see.
+
+### Diagnostic result: FINDING. Both discriminators agree.
+
+Run: `?bulkDiag=1&cap=30&iters=8000`, feral phase 3, HTTP (5173 + 3333). The
+diagnostic drives the **real** `rankUpgrades` twice — once with the bulk
+capability exposed, once without — through a runner that records every `run()`
+request, so both discriminators come from the code path the campaign measures.
+
+**D-1 — the screened map is USED, not missed.**
+
+| arm | screening-phase `run()` calls, 30 candidates |
+| --- | --- |
+| bulk | **2** |
+| loop | **34** |
+
+Had the map missed, the bulk arm would have fallen through to ~34 per-candidate
+sims like the loop. It made 2. The chunk numbers are consumed. This refutes the
+defect hypothesis and also refutes my own earlier worry that arm A "pays for
+chunk work it doesn't use" — it pays for it and uses it.
+
+**D-2 — the Go engine is deterministic at matched settings.**
+
+The same per-candidate request (seed 11, 8,000 iterations) replayed twice
+through the loop route:
+
+```
+replay 1: 2245.447435998697
+replay 2: 2245.447435998697   -> bit-identical
+original: 2245.447435998697   -> and equal to the observation recorded in-run
+```
+
+**Verdict: `bulk arm screened via chunks yet matched the loop exactly`**, with
+0 of 44 shared rows differing.
+
+### What this means
+
+On the Go transport, at matched `(request, seed, iterations, concurrency)`, the
+bulk screening pass and the per-candidate loop are **numerically identical** —
+not "close", identical. The engine is deterministic in its seed, so two routes
+that ask the same question at the same seed and iteration count get the same
+answer bit-for-bit.
+
+This explains the prior campaign's rho = 0.999229 exactly, and retires it as a
+puzzle: those arms ran at **unmatched** counts (5,000 flat loop vs 7,091
+adaptive bulk), so the residual difference was the iteration mismatch, not the
+route. M2's whole purpose was to remove that mismatch — and having removed it,
+the difference vanished completely. The 0.999229 was measuring the accuracy gap
+the plan set out to eliminate.
+
+Per the Gate C ruling this is **FINDING**, so: write `http-A.json` from the
+completed arm A run, score it, record the result in ticket 345 with the
+mechanism stated, and continue with `http-C` and the WASM arms. **WASM remains
+the primary campaign**, and now for a sharper reason than before: the HTTP
+result shows the routes agree whenever both sample the same way, so WASM is the
+one place they might genuinely diverge — the loop runs one worker per candidate
+while the tournament splits a single request's iterations across the worker
+pool, which is a different sampling arrangement, not just a different transport.
 
 ---
 
