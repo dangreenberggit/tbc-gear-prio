@@ -1725,3 +1725,57 @@ ratios and verdict, owner surfacing, 348 OLS with the null — runs clean. When 
 real WASM arms land, only the numbers change, not the machinery.
 
 Stand-ins deleted; scratchpad and outer-repo files only (standing rule 1).
+
+---
+
+## WASM arm B — complete. Every gate passes.
+
+| check | value |
+| --- | --- |
+| `transport.isWasm` | **true** |
+| `hasBulkCapability` | **false** (correct for the loop arm) |
+| seed guard | declared `[11,...]`, screening observed at **11** |
+| every sim `iterationsDone` | **8000** |
+| depth gate `deltaDps ≥ 2·se` | **36** (threshold 20) |
+| rows | 202 |
+| wall clock | **5,571 s = 93 min** |
+| first row | 113.1 s |
+
+### Cross-transport accuracy check (pre-registered `7bbbe44`) — MATCHES
+
+| quantity | HTTP arm B | WASM arm B | ratio |
+| --- | --- | --- | --- |
+| mean `se`, independent rows | 0.8268 | **0.8383** | **1.014** |
+| depth-gate rows | 31 | 36 | — |
+
+The two transports agree on precision to **1.4%** at the same iteration count.
+Neither pre-registered divergence branch fires: `se` does track iterations
+rather than engine, so **"8,000 iterations" denotes the same accuracy on both
+transports and M2's matching is sound**. The depth gate passes comfortably on
+the transport that matters.
+
+### A correction to my own budget arithmetic
+
+Arm B's `screeningSeconds` is **13,656 s**, but its **wall clock is 5,571 s
+(93 min)**. Those differ because `screeningSeconds` sums *per-sim* durations
+across a **4-worker pool** that runs them concurrently — it is worker-seconds,
+not elapsed time. Wall clock is the real cost.
+
+So arm B finished **under** its 154-min prediction, not over it. My earlier
+"1.47x overrun" reading was wrong: it compared worker-seconds against a
+wall-clock prediction. Arm A's wall estimate on the same basis is
+**~105 min**, and the campaign is comfortably inside budget. (The Gate C ruling
+withdrawing the mid-arm stop rule stands regardless — this just removes the
+worry that prompted it.)
+
+### First substantive finding: the transports rank differently
+
+WASM arm B has **30 ranked rows** against HTTP arm B's **24**, and the order
+differs materially — e.g. `33879 Vindicator's Dragonhide Belt` is **rank 7** on
+WASM and **rank 14** on HTTP; `31044 Thunderheart Leggings` is 10 vs 13.
+
+This is expected and is *not* a defect: the two engines are independent
+implementations sampling independently, so at 8,000 iterations they land on
+different draws. It is precisely why the plan made WASM the primary campaign —
+and it means the WASM A-vs-B comparison is a real test rather than the
+near-tautology the HTTP comparison turned out to be.
