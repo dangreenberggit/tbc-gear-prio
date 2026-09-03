@@ -1916,3 +1916,56 @@ untouched.**
 | fork `status --porcelain` | **empty** |
 | re-pin | `data/wowsims-fork.lock.json` → `1f8a4969055e62f54c335dce45fdd5d4c403e9d9`, SHA read via `rev-parse` |
 | `pnpm sim-implemented-effects:generate` | exit 0 — **217 implemented / 451 stub-only unchanged**, only the embedded pin moved (matches the `ecaa3f3` precedent for a UI-only fork commit) |
+
+---
+
+## Gate C: apply M1. Pre-registered BEFORE the re-run.
+
+**Ruling:** re-run **WASM arm B only** at `I_max = 8,617` (cap 213, seed 11,
+same frozen configuration, ~100 min under the 2x abort rule). WASM C was dropped
+at Step 0, so B alone is the M1 re-run; the null stays `http-C.json`, labelled.
+**Do NOT re-run arm A; do NOT re-score the voided pair.**
+
+### (1) The residual mismatch, stated up front
+
+M1 pins B to `I_max`, but arm A's chunks are **not** uniform. The comparison is:
+
+| | iterations |
+| --- | --- |
+| arm A, 8 chunks | 8,000 |
+| arm A, chunk 1 | 8,490 |
+| arm A, chunk 5 | 8,617 |
+| **arm B-m1, all screening sims** | **8,617** |
+
+So B-m1 is matched to A's *largest* chunk and runs **7.7% more iterations than
+A's eight 8,000-chunks**. This is a real residual mismatch, in the direction
+that makes **B look more expensive than a perfectly matched B would**. It is
+recorded now, not discovered later, because it is the reason for check (2).
+
+### (2) Robustness check — the verdict must survive the worst-case correction
+
+`R_wall_s` and `R_iter_s` are computed **twice**:
+
+- **raw** — B-m1 as measured against A as measured;
+- **corrected** — A's screening wall and iterations scaled by **8,617 / 8,000 =
+  1.0771**, i.e. pricing arm A as if *every* chunk had run the full 8,617. That
+  is the worst case **against bulk**: it inflates A's cost to the maximum the
+  mismatch could justify.
+
+**The verdict stands only if raw and corrected land on the same side of the
+fixed 0.9 / 1.1 bounds.** If they straddle, the verdict is
+**"indistinguishable"** per the plan's wording. No other reading is permitted.
+
+### (3) Accuracy check on the re-run
+
+B-m1's mean independent `se` should fall by **√(8000/8617) = 0.9635** relative
+to `wasm-B.json`'s 0.8383 — i.e. an expected **≈ 0.8077**. Recorded as a
+prediction; the measured value goes in the ledger either way.
+
+### Owner surfacing
+
+If `R_wall_s < 1`, the owner paragraph is written in the mandatory wording,
+quoting WASM arm A's first-row latency (**3,399.2 s**) beside the 120 s gate —
+which it exceeds by ~28x, so the "cheaper in total … and still fails the 120 s
+first-row gate" form applies. **Work STOPS there for the owner; the WASM default
+is not changed.**
