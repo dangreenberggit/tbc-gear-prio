@@ -207,4 +207,4 @@ measured control above.
 | D5-3 | Domain      | wontfix     | pre-existing mixed-baseline `deltaPct` (~0.03 pp at the measured gap, two orders below the cutoff); noted so it is not rediscovered                                          |
 | S5-1 | Standards   | wontfix     | commit-message wrapping/length on landed history: ledgers and tickets cite those SHAs, rewriting would break the evidence chain; complied with from the fix commits on       |
 | S5-2 | Standards   | fixed       | Summary sentence corrected (outer `abfb37c`)                                                                                                                                 |
-| P5-1 | Spec        | defer       | `.scratch/carry-forward/issues/346-bulk-screening-slower-at-unmatched-accuracy.md` — answered by measurement; open only on the owner's WASM default decision                 |
+| P5-1 | Spec        | fixed       | superseded in round 5: 346 closed by owner decision (keep loop default)                                                                                                      |

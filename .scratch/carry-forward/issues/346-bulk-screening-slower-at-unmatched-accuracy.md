@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: Step 10 of the batch-sim web track (stage-gate, 2026-09-01)
 Blocks: none
@@ -207,3 +207,30 @@ one-argument change if the owner decides the trade is worth it.
 **Status: open** — the cost question is answered, but the default-flip decision
 this ticket triggers is the owner's and is recorded in
 `.scratch/stage-gate/batch-sim-followups/decision-log.md`.
+
+## Decision (owner, 2026-09-03)
+
+Keep the per-candidate loop as the web/WASM default. `makeSimRunner(bulk =
+false)` is unchanged.
+
+At matched accuracy (8,000 iterations, 4 WASM workers, feral phase 3, 213
+candidates), batch screening uses about 4x less CPU work than the loop
+(3,352 vs 12,814 worker-seconds), but that saving never reaches the user as
+time: the loop shows its first ranking row after 112 s, batch screening
+after 3,399 s, and end-to-end the loop finishes the whole ranking sooner
+(5,551 s vs 6,055 s). A route that is cheaper on the machine but slower to
+the first row, and no faster overall, is not a win for this UI.
+
+**Precondition for revisiting:** the batch path must render rows as each
+chunk completes, instead of the current single `await` that prices every
+candidate before `rank.ts` emits anything. Once that streaming exists, the
+first-row number changes and this decision should be re-measured.
+
+The local Go-server default (batch on) is unchanged — this decision is
+about the WASM/web transport only, where the first-row cost is paid in the
+browser.
+
+Evidence: `.scratch/stage-gate/batch-sim-followups/evidence/wasm-A.json`,
+`wasm-B.json`, `wasm-B-m1.json` (matched-accuracy WASM arms and the M1
+fallback re-run); `execution-ledger-b.md` (method, deviations,
+pre-registrations) in the same directory.
