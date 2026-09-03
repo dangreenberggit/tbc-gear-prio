@@ -157,3 +157,54 @@ to flip the WASM bulk default.
 Related open tickets from execution (not review findings): 345
 (equivalence condition (c) metric granularity), 346 (bulk 1.6× wall-clock
 on WASM at unmatched accuracy).
+
+## Round 5 (follow-up tickets 345–349)
+
+Reviewed range: `4d5bcbcc0a75067f01887304716e20bb8b0a58d5..abfb37c60a9de5c80a97b226086497f1f897565c` (fork `20dbb6f5d..6d0edd69d`)
+
+Dispatch: three fresh Opus axes (adversarial, domain, standards+spec)
+over the follow-up range — Track A (tickets 347/349: shared
+`bulk_screen_driver.ts`, `assertSingleStageChunk`, seam additions,
+`screeningFallbacks`) and Track B (the measurement campaign for
+345/346/348: `tools/equiv-campaign.mts`, evidence, closures). The round
+ran against `bede3e4`; the fix commits (`abfb37c` outer, `6d0edd69d`
+fork) were verified by the fix seat's mutation checks (reverting the
+guard's error class fails both new assertions).
+
+Adversarial: driver and tests sound (per-chunk signals + `userAborted`
+flag close every ordering traced; no listener/unregister leak; none of
+the three new suites can pass with the feature disabled). A5-1
+(material): `assertSingleStageChunk` threw a bare `Error`, so `rank.ts`
+degraded a guard failure to the loop instead of surfacing it. A5-2
+(minor): a synchronous pre-dispatch window where an abort could not
+reach the engine. Domain: no blocking/material — the 25-bound was
+re-derived on both engines, engine determinism is consistent with
+per-iteration reseeding, cancel/degrade semantics have no TBC
+consequence; three comment-level minors. Standards: commit bodies over
+72 chars in most of the range's commits and 10 subjects over 50; one
+stale Summary sentence. Spec: nothing missing beyond 346 (then in
+flight), no scope creep.
+
+Measured outcomes recorded on this range: 345 closed (WASM overlap
+30/30 with 0 boundary flips against a seed control at 79% with 8
+flips; (c') 202/202); 348 closed into 346 (route slope 0.99919 ±
+0.00019 vs null 0.94170 ± 0.00935); 346 answered — at matched accuracy
+bulk screening on WASM is 3.8× cheaper in total work (R_wall_s 0.262,
+worst-case 0.282; R_iter_s 1.020 so the iteration wash holds) but the
+first row lands at 3,399 s against the 120 s gate and end-to-end is
+within 9%. 346 stays open only on the owner's default-flip decision.
+Withdrawn finding on record: an early "routes numerically identical on
+Go" claim was retracted when the harness was found to run every arm at
+seed 11; fixed with a guard, re-run, and the claim replaced by the
+measured control above.
+
+| ID   | Axis        | Disposition | Ticket / note                                                                                                                                                                |
+| ---- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A5-1 | Adversarial | fixed       | guard throws `BulkScreenIntegrityError`; boundary test asserts the type; `rankUpgrades` case trips the real guard and requires rejection (fork `6d0edd69d`, outer `abfb37c`) |
+| A5-2 | Adversarial | fixed       | `userAborted` re-checked after signals register; window shown synchronous (comment) — fork `6d0edd69d`                                                                       |
+| D5-1 | Domain      | fixed       | blast-radius comment in `bulk_wasm_sim_runner.ts` (fork `6d0edd69d`)                                                                                                         |
+| D5-2 | Domain      | fixed       | `rank.ts` "first successful chunk's probe" (fork `6d0edd69d`)                                                                                                                |
+| D5-3 | Domain      | wontfix     | pre-existing mixed-baseline `deltaPct` (~0.03 pp at the measured gap, two orders below the cutoff); noted so it is not rediscovered                                          |
+| S5-1 | Standards   | wontfix     | commit-message wrapping/length on landed history: ledgers and tickets cite those SHAs, rewriting would break the evidence chain; complied with from the fix commits on       |
+| S5-2 | Standards   | fixed       | Summary sentence corrected (outer `abfb37c`)                                                                                                                                 |
+| P5-1 | Spec        | defer       | `.scratch/carry-forward/issues/346-bulk-screening-slower-at-unmatched-accuracy.md` — answered by measurement; open only on the owner's WASM default decision                 |
