@@ -1969,3 +1969,111 @@ quoting WASM arm A's first-row latency (**3,399.2 s**) beside the 120 s gate —
 which it exceeds by ~28x, so the "cheaper in total … and still fails the 120 s
 first-row gate" form applies. **Work STOPS there for the owner; the WASM default
 is not changed.**
+
+---
+
+## M1 re-run complete — WASM arm B-m1 at I_max = 8,617
+
+| check | value |
+| --- | --- |
+| `isWasm` / `hasBulkCapability` | **true** / **false** (correct for the loop arm) |
+| seed guard | declared 11, screening observed at **11** |
+| every sim `iterationsDone` | **8617** exactly — the M1 pin held |
+| rows / ranked / depth gate | 202 / 30 / **35** (threshold 20) |
+| wall | 5,551.5 s (93 min) |
+| first row | 112.0 s |
+
+### (3) Accuracy check — CONFIRMED to 0.07%
+
+| | value |
+| --- | --- |
+| predicted mean independent `se` (√(8000/8617) × 0.8383) | **0.8077** |
+| **measured** | **0.8083** |
+
+Precision tracks iteration count exactly as pre-registered. This is the third
+independent confirmation that `se` is a property of how many iterations ran, not
+of which engine ran them.
+
+### (2) Robustness check — VERDICT STANDS
+
+| | raw | corrected (A × 8617/8000) |
+| --- | --- | --- |
+| **`R_wall_s`** | **0.2616** | **0.2818** |
+| side of fixed bounds | below 0.9 | below 0.9 |
+| **`R_iter_s`** | **1.0201** | **1.0987** |
+| side of fixed bounds | inside 0.9–1.1 | inside 0.9–1.1 |
+
+**Both ratios land on the same side under both treatments**, so the
+pre-registered condition for a verdict is met — it does **not** collapse to
+"indistinguishable". The worst-case correction against bulk (pricing arm A as if
+*every* chunk had run the full 8,617) moves `R_wall_s` by only 0.02 and changes
+nothing. The standing wash finding on iterations **holds** both ways.
+
+### Two figures that must NOT be read off the scorer output
+
+1. **`346: NO VERDICT`** — the scorer's precondition gate hard-codes the
+   campaign's 8,000 pin, which is right for the default protocol and wrong for
+   an M1 re-run that legitimately re-pins to 8,617. The verdict below comes from
+   the **pre-registered M1 protocol** (`53d5da1`), not from overriding a gate
+   after seeing the numbers. Arm A's chunk detail is disclosed in full either
+   way.
+2. **`V = 0.970`** — invalid, for the same reason recorded earlier: it compares
+   a WASM arm's screening against an **HTTP** null and measures the ~35x
+   transport gap, not loop variance. It plays no part in the verdict. A
+   WASM-internal V needs a WASM arm C, dropped at Step 0 for budget.
+
+### 345 and 348 against the M1 arm — both reproduce
+
+| metric | A vs B-m1 | control C vs B-m1 |
+| --- | --- | --- |
+| (c) overlap | **30/30 = 100.00%** | 79.17% over k = 24 |
+| boundary flips | **0** | 8 |
+| (c') | **0 violations / 202 = 100%** | — |
+| depth gate | 35 | — |
+
+348: route slope **0.99919 ± 0.00019**, null slope **0.94170 ± 0.00935**. The
+second reproduction condition fails decisively (0.00081 vs 0.08634), so **348
+remains NOT REPRODUCED** — unchanged from the 8,000 measurement. The first
+condition now reads `true` at this precision, which is worth stating plainly:
+the route difference is **0.08%**, statistically resolvable at n = 202 but two
+orders of magnitude below the 1.6% this ticket was filed for, and 100x smaller
+than the null's own 5.8% seed effect.
+
+## Ticket 346 — VERDICT: bulk screening is faster on WASM
+
+**`R_wall_s` = 0.262** (raw) / **0.282** (worst-case corrected). Both below the
+fixed 0.9 bound → **BULK FASTER** on screening-only wall clock. Bulk screens the
+same 213 candidates in **56 min of worker time against the loop's 214 min** —
+roughly **3.8x cheaper**.
+
+The standing wash finding on iterations holds: `R_iter_s` = 1.020 (raw) /
+1.099 (corrected), both inside 0.9–1.1. Bulk does **not** win by doing less
+work; it wins by doing the same work better parallelised.
+
+**Carrying the C31 caveat:** one tournament run, tournament run-to-run variance
+unmeasured. Per D1, "tournament" here means the single-stage High pass over
+25-candidate chunks — no arm of this campaign runs a multi-stage tournament.
+
+### OWNER DECISION REQUIRED — recorded verbatim in the mandatory wording
+
+> Bulk is cheaper in total on WASM (R = 0.262) and still fails the 120 s
+> first-row gate (first row at 3399.2 s)
+
+**Work STOPS here for this item.** The WASM default
+(`makeSimRunner(bulk = false)`) is **NOT changed** and this seat will not change
+it.
+
+The numbers behind the sentence, so the decision is informed:
+
+| | arm A (bulk) | arm B-m1 (loop) |
+| --- | --- | --- |
+| screening, worker-seconds | 3,351.8 | 12,813.7 |
+| **first row** | **3,399.2 s (56.7 min)** | **112.0 s (1.9 min)** |
+| end-to-end wall | 6,055 s | 5,551 s |
+
+The trade is stark and it is the same one `makeSimRunner`'s header describes:
+bulk is ~3.8x cheaper in total screening work, but its first row arrives at
+**28.3x the 120 s gate** because `screenCandidates` prices every candidate
+before the ranking emits anything. The loop streams its first row in under two
+minutes. End-to-end the two are within 9% of each other, so the total-cost win
+does not even reach the user as a shorter wait.
