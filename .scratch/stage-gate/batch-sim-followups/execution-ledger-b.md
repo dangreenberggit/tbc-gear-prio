@@ -1779,3 +1779,88 @@ implementations sampling independently, so at 8,000 iterations they land on
 different draws. It is precisely why the plan made WASM the primary campaign —
 and it means the WASM A-vs-B comparison is a real test rather than the
 near-tautology the HTTP comparison turned out to be.
+
+---
+
+## WASM arm A — complete, and it TRIGGERS M1. 346 stops here.
+
+| check | value |
+| --- | --- |
+| `transport.isWasm` / `hasBulkCapability` | **true** / **true** (correct for the bulk arm) |
+| seed guard | declared 11, screening observed at **11** |
+| chunks | 10, every one `n ≤ 25` and **single-stage** |
+| **achieved iterations** | **[8490, 8000, 8000, 8000, 8617, 8000, 8000, 8000, 8000, 8000]** |
+| **`I_max`** | **8617** — 2 of 10 chunks over the pin |
+| baseline cv | **0.0357** (critical 0.0378) |
+| wall / first row | 6,055 s (101 min) / **3,399 s** |
+| depth gate | 35 |
+
+**M1 is triggered.** The pre-registered common precondition — every chunk
+achieving exactly 8,000 — fails on two chunks, so **346 gets NO VERDICT** from
+this arm. The scorer printed exactly that, and the guarded builder *refused to
+write the file* (`chunk achieved 8490 != 8000 — M1 territory`). The dump was then
+written deliberately and visibly with the pin check bypassed, flagged
+`STATUS: M1 TRIGGERED — NOT SCOREABLE FOR 346 AS-IS`, to preserve a 101-minute
+arm as evidence rather than discard it. Every other builder assertion was
+re-checked and passes.
+
+**Why it happened — C4's thin margin, observed rather than predicted.** Arm A's
+baseline cv is **0.0357**, just under C4's critical **0.0378** for n = 25 at
+8,000. Most chunks therefore cleared the floor, but two drew slightly noisier
+baselines and C1's adaptive top-up lifted them. C4 called this margin 6.2%; the
+campaign has now walked into it. This is the floor-not-cap behaviour the plan
+documented, doing exactly what it said it would.
+
+**Direction of the error matters:** `se` scales as 1/√iterations, so the
+overshooting chunks are ~3.7% **more** precise, not less. Nothing is degraded;
+the arms are simply not matched, which is what M2 exists to guarantee.
+
+### V = 0.972 is INVALID and must not be reused
+
+The scorer printed `V = 0.972`. **That figure is meaningless here** and is
+recorded only so nobody resurrects it. V is
+`|screening_B − screening_C| / screening_B`, and the arms are on **different
+transports**: WASM B's 13,655.8 s against HTTP C's 380.4 s. It measures the
+~35x transport gap, not loop variance.
+
+My borrowed-null caveat (`1651f6c`) predicted V would stay ≈ 0.008 and the fixed
+0.9/1.1 bounds would bind. **That reasoning was wrong in one respect I should
+have caught:** it held while *both* compared arms were HTTP, and silently fails
+once arm B is WASM and the null is HTTP. The prediction about the *thresholds*
+was right; the assumption that V stays small across a transport boundary was
+not. A WASM-internal V needs a WASM arm C (seed 777, ~1.6 h wall), which the
+Step 0 precedence rule dropped for budget.
+
+### What DID come through cleanly
+
+**345 on WASM — both conditions pass, and now against a control that moves.**
+
+| metric | A vs B (WASM) | control C vs B |
+| --- | --- | --- |
+| overlap | **30/30 = 100.00%** | **79.17%** over k = 24 |
+| boundary flips | **0** | **8** |
+| (c') | **0 violations / 202 = 100%** | — |
+| depth gate on B | 36 (threshold 20) | — |
+
+This is the result the whole campaign was built to get. On HTTP the control was
+degenerate — 100% overlap, 0 flips — because that engine is deterministic and
+both arms sampled identically. **On WASM the control finally has teeth: a seed
+change moves 8 items across the cutoff and drops overlap to 79%.** Against that
+yardstick, the bulk route reproducing the loop's ranked set *exactly* (100%, 0
+flips) is a genuine equivalence result, not a metric too blunt to notice.
+
+**348 on WASM — NOT REPRODUCED, with a sensitive instrument.**
+
+| fit | slope | SE | t vs 1 |
+| --- | --- | --- | --- |
+| A on B (route) | **1.00022** | 0.00011 | 2.03 |
+| C on B (null) | 0.94281 | 0.00929 | −6.16 |
+
+Both conditions fail: `0.00022 > 0.00033` is false, and
+`0.00022 > 0.08505` is false. The null slope of **0.943** shows what a real
+same-route seed change does — a 5.7% departure — while the route change produces
+0.02%. The 1.6% slope does not reproduce on WASM either, and here the null
+proves the test could easily have seen it.
+
+Spearman rho(A,B) = **0.999620** — high but *not* 1.0, confirming these are two
+genuinely independent samplings rather than the HTTP tautology.
