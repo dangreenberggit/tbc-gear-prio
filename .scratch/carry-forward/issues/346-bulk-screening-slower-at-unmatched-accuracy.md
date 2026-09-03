@@ -112,3 +112,98 @@ baseline overhead across more chunks. Nobody has run this arm; it was rejected
 on the arithmetic rather than measured. That trades this ticket's 1.6x slowdown
 for a worse one to buy a partial latency fix, so it was not shipped. Worth
 re-testing here once matched-accuracy numbers exist.
+
+---
+
+## Resolution (2026-09-03, batch-sim-followups Track B)
+
+**Measured at matched accuracy on both transports. The 1.6x slower finding does
+not survive: bulk screening is ~3.8x FASTER on WASM and ~3.4x faster on HTTP.**
+Evidence under `.scratch/stage-gate/batch-sim-followups/evidence/`; method,
+every deviation and the pre-registrations in `execution-ledger-b.md`.
+
+### Matching method (M2)
+
+Every arm pinned to `input.iterations = 8000` with the achieved count **verified
+per sim**, against the original's 5,000-flat loop vs 7,091-adaptive bulk. The
+pin is a floor, not a cap (`wasm/bulk_sim/stage.ts` — a request sets
+`highStageIterations`, and an adaptive pass tops up when observed error misses
+the 0.05% target), so achieved counts are recorded per chunk rather than
+assumed.
+
+**M1 fired on WASM.** Arm A's baseline cv was 0.0357 against the 0.0378 critical
+value for n = 25 at 8,000, so two of ten chunks topped up to 8,490 and 8,617.
+Per the pre-registered fallback the loop arm was re-run at `I_max = 8,617`
+(`wasm-B-m1.json`), and the verdict is taken there.
+
+### Cost at matched accuracy
+
+**WASM** (arm A bulk vs arm B-m1 loop, 213 candidates, feral phase 3):
+
+| | bulk | loop |
+| --- | --- | --- |
+| screening, worker-seconds | **3,351.8** | **12,813.7** |
+| screening iterations | 2,100,782 | 2,059,463 |
+| sims by phase | baseline 1, screening 4, replication+set-bonus 43 | baseline 1, screening 239, tail 35 |
+| chunks / baseline probes | 10 / **1 per chunk, measured** | — |
+| **first row** | **3,399.2 s** | **112.0 s** |
+| end-to-end wall | 6,055 s | 5,551 s |
+
+**HTTP** (same configuration): screening 115.1 s vs 394.3 s; first row 117.1 s
+vs 2.7 s; `R_wall_s` = 0.297.
+
+### Verdict
+
+**`R_wall_s` = 0.262** on WASM (raw) — **BULK FASTER** against the fixed 0.9
+bound. A pre-registered robustness check re-computed the ratio with arm A priced
+as if *every* chunk had run the full 8,617 (the worst case against bulk):
+**0.282**, same side of the bound, so the verdict does not depend on the
+residual per-chunk mismatch.
+
+**The standing "wash" finding on iterations HOLDS.** `R_iter_s` = 1.020 raw /
+1.099 corrected, both inside 0.9–1.1. Bulk does not win by doing less work — it
+does the same work, better parallelised. The original 1.6x slower figure was the
+accuracy mismatch: the bulk arm was running 42% more iterations per candidate
+than the loop it was compared against.
+
+**Caveats carried:** one tournament run, tournament run-to-run variance
+unmeasured (no same-route bulk repeat exists in this arm set). "Tournament" here
+means the **single-stage High pass over 25-candidate chunks** — at n ≤ 25 no
+pre-High stage runs at any iteration count, so no arm of this campaign exercised
+a multi-stage tournament. The loop-variance figure `V` could not be measured on
+WASM: the WASM null arm was dropped for budget, and substituting the HTTP null
+yields a cross-transport figure that measures the ~35x transport gap, not
+variance.
+
+### The WASM default is NOT changed — owner decision
+
+This ticket is the revisit trigger for `makeSimRunner(bulk = false)`. The
+measurement does not settle it, because the two costs point opposite ways:
+
+> Bulk is cheaper in total on WASM (R = 0.262) and still fails the 120 s
+> first-row gate (first row at 3399.2 s)
+
+Bulk is ~3.8x cheaper in total screening work, but its first row arrives at
+**28.3x the 120 s layout-gate deadline**, because `screenCandidates` is a single
+`await` that prices every candidate before `rank.ts` emits a row. The loop
+streams its first row in 112 s. End-to-end the two are within **9%**, so the
+total-cost win does not reach the user as a shorter wait — it buys machine time,
+not responsiveness.
+
+`BulkWasmSimRunner` remains constructible, so flipping the default stays a
+one-argument change if the owner decides the trade is worth it.
+
+### Acceptance
+
+- [x] Both arms measured at matched accuracy, matching method stated (M2, with
+      the M1 fallback exercised and documented).
+- [x] Sim counts and total iterations quoted per arm alongside wall clock.
+- [x] Baseline-probe count per chunk quoted and **measured** (1 per chunk,
+      counted from rising edges of `presimRunning` on the progress stream) —
+      10 probes across 10 chunks.
+- [x] Verdict stated (**bulk faster at matched accuracy, on both transports**),
+      and the standing wash finding on iterations **holds**.
+
+**Status: open** — the cost question is answered, but the default-flip decision
+this ticket triggers is the owner's and is recorded in
+`.scratch/stage-gate/batch-sim-followups/decision-log.md`.
