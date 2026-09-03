@@ -33,6 +33,7 @@ const estimateModule = join(forkRoot, "ui/core/wasm/bulk_sim/estimate.ts");
 const apiModule = join(forkRoot, "ui/core/proto/api.ts");
 const partitionModule = join(forkUpgradesDir, "engine/bulk/partition.ts");
 const builderModule = join(forkUpgradesDir, "adapters/bulk_request_builder.ts");
+const seamModule = join(forkUpgradesDir, "engine/seams/sim-runner.ts");
 
 /**
  * The measured first multi-stage `n` per iteration count. `n` below the listed
@@ -82,11 +83,15 @@ const load = async () => {
       candidateCount: number
     ) => void;
   };
+  const { BulkScreenIntegrityError } = (await import(
+    pathToFileURL(seamModule).href
+  )) as { BulkScreenIntegrityError: new (message: string) => Error };
   return {
     shouldUseLegacyBulkSim,
     BulkSimRequest,
     MAX_CANDIDATES_PER_BULK_REQUEST,
     assertSingleStageChunk,
+    BulkScreenIntegrityError,
   };
 };
 
@@ -120,13 +125,20 @@ describe.skipIf(!forkPresent)("bulk single-stage boundary", () => {
   });
 
   it("refuses a chunk the estimator would cull, and passes 25 and 26 at any count", async () => {
-    const { BulkSimRequest, assertSingleStageChunk } = await load();
-    expect(() =>
+    const { BulkSimRequest, assertSingleStageChunk, BulkScreenIntegrityError } =
+      await load();
+    const cullable = () =>
       assertSingleStageChunk(
         BulkSimRequest.create({ highStageIterations: 30_000 }),
         27
-      )
-    ).toThrow(/multi-stage/);
+      );
+    // The TYPE is the load-bearing half, not the wording: the driver and
+    // `rank.ts` both rethrow `BulkScreenIntegrityError` unconditionally and
+    // degrade everything else to the per-candidate loop, so a guard throwing a
+    // bare `Error` would fail quietly — the opposite of what ticket 349 asked
+    // for — while still matching a message assertion.
+    expect(cullable).toThrow(BulkScreenIntegrityError);
+    expect(cullable).toThrow(/multi-stage/);
     expect(() =>
       assertSingleStageChunk(
         BulkSimRequest.create({ highStageIterations: 1_000_000 }),

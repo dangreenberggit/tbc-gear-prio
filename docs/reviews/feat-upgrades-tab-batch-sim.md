@@ -124,8 +124,13 @@ engine-file edits. Deferred work was fully ticketed: 345, 346, 347, 348, 349. **
 `80395e68c`) — Stop now aborts the in-flight screening chunk on both
 transports, a chunk failure degrades to the per-candidate loop, and every
 built chunk is checked against upstream's own estimator for the
-single-stage path. The rows below are updated accordingly; 345, 346 and
-348 remain open.
+single-stage path. The rows below are updated accordingly. **345 and 348
+have since been closed as well** — 345 by the WASM route-equivalence
+campaign (30/30 overlap, 0 flips, against a seed control at 79% with 8
+flips) and 348 into 346 as an accuracy-mismatch artifact (route slope
+0.99919 ± 0.00019 against a null of 0.94170 ± 0.00935). **346 is measured
+and answered**, and stays open only for the owner's decision on whether
+to flip the WASM bulk default.
 
 ## Disposition
 

@@ -20,7 +20,15 @@
 
 import { describe, expect, it } from "vitest";
 
-import { forkPresent } from "./fork-engine-harness.js";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+
+import {
+  forkPresent,
+  forkRoot,
+  importForkUpgrades,
+  loadForkEngineEnvironment,
+} from "./fork-engine-harness.js";
 import {
   baseDeps,
   buildRankFixture,
@@ -36,6 +44,40 @@ import {
   type SimObservation,
   type SimRunOpts,
 } from "./bulk-screen-fixture.js";
+
+/**
+ * The single-stage guard and the proto its argument is, so one test can trip
+ * the real guard rather than stand in a look-alike error for it.
+ */
+const loadBuilder = async (): Promise<{
+  assertSingleStageChunk: (
+    request: { highStageIterations: number },
+    candidateCount: number
+  ) => void;
+  BulkSimRequest: {
+    create: (init: { highStageIterations: number }) => {
+      highStageIterations: number;
+    };
+  };
+}> => {
+  await loadForkEngineEnvironment();
+  const builder = await importForkUpgrades<{
+    assertSingleStageChunk: (
+      request: { highStageIterations: number },
+      candidateCount: number
+    ) => void;
+  }>("adapters/bulk_request_builder.ts");
+  const api = (await import(
+    pathToFileURL(join(forkRoot, "ui/core/proto/api.ts")).href
+  )) as {
+    BulkSimRequest: {
+      create: (init: { highStageIterations: number }) => {
+        highStageIterations: number;
+      };
+    };
+  };
+  return { ...builder, ...api };
+};
 
 /** Prices any request the same deterministic way, counting the calls. */
 function countingRunner(): {
@@ -193,6 +235,35 @@ describe.skipIf(!forkPresent)("screening failure handling", () => {
         pool,
       })
     ).rejects.toBe(thrown);
+  }, 120_000);
+
+  it("surfaces the single-stage guard's own refusal rather than degrading it", async () => {
+    const { rankUpgrades } = await loadRank();
+    const { BulkScreenIntegrityError } = await loadSeam();
+    const { assertSingleStageChunk, BulkSimRequest } = await loadBuilder();
+    const { input, makeGearSource, pool } = await buildRankFixture();
+
+    // The guard's real refusal, produced by calling it — not a hand-made error
+    // that happens to look like one. A chunk of 27 at 30,000 iterations is the
+    // measured first multi-stage combination (`bulk-boundary.test.ts`), which is
+    // what a raised `MAX_CANDIDATES_PER_BULK_REQUEST` would hand it.
+    await expect(
+      rankUpgrades(input, {
+        ...(await baseDeps()),
+        gear: makeGearSource(),
+        sim: {
+          ...countingRunner().runner,
+          runBulkScreen: async () => {
+            assertSingleStageChunk(
+              BulkSimRequest.create({ highStageIterations: 30_000 }),
+              27
+            );
+            throw new Error("unreachable: the guard must have refused");
+          },
+        },
+        pool,
+      })
+    ).rejects.toThrow(BulkScreenIntegrityError);
   }, 120_000);
 
   it("lands a partial ranking when Stop aborts the screening pass", async () => {
