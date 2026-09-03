@@ -1864,3 +1864,55 @@ proves the test could easily have seen it.
 
 Spearman rho(A,B) = **0.999620** — high but *not* 1.0, confirming these are two
 genuinely independent samplings rather than the HTTP tautology.
+
+---
+
+## Ticket 346 — NO VERDICT. Stop-and-report, not a disposition.
+
+**346 stays open.** The plan's stop triggers name "an M1 trigger you cannot
+satisfy" explicitly, and this is one: the precondition gate fails, the scorer
+prints `346: NO VERDICT`, and resolving it is the orchestrator's call.
+
+**What resolving it would take.** M1 as written says: re-run arms **B and C** at
+`I_max = 8,617`. Two problems:
+
+1. **There is no WASM arm C to re-run** — it was dropped at Step 0 by the
+   precedence rule to fit the 6 h budget.
+2. **Re-running WASM arm B at 8,617 costs ~1.7 h wall** and would still leave
+   arm A's two chunks at 8,490 and 8,617 rather than a common count, because the
+   adaptive top-up is a *floor* response to each chunk's own baseline noise
+   (C1). Pinning B to `I_max` matches B to the *largest* chunk, not to all ten.
+
+So M1's remedy does not straightforwardly apply to a bulk arm whose chunks
+disagree with each other. **That is the orchestrator's decision, not the
+executor's**, and the numbers are recorded for it.
+
+**Options, with costs, for whoever decides:**
+
+| option | cost | what it buys |
+| --- | --- | --- |
+| a. Accept the arm with the overshoot disclosed | 0 | The two chunks are ~3.7% *more* precise, and the 346 cost ratios (`R_wall_s` 0.245, first row 3,399 s) are barely sensitive to a 6% iteration difference on 2 of 10 chunks. Requires waiving a pre-registered gate — which the executor will not do unilaterally. |
+| b. Re-run WASM arm A only, hoping all ten chunks clear 8,000 | ~1.7 h | The cv is 0.0357 against a 0.0378 critical value, so it is a coin-flip whether a fresh baseline draw clears everywhere. |
+| c. Raise the pin to 8,617 and re-run **both** WASM arms | ~3.4 h | Matched at a count the adaptive pass will not exceed. The clean answer, at real cost. |
+| d. Close 346 on the HTTP measurement alone | 0 | Already has a full verdict (`R_wall_s` 0.297, BULK FASTER) but does not answer the WASM default question 346 actually asks. |
+
+**No owner-decision paragraph is due.** That fires only on a measured
+`R_wall_s < 1` *with* the preconditions met. `R_wall_s` = 0.245 was computed,
+but the gate voided the verdict, so quoting it as an owner surfacing would be
+exactly the reinterpretation the pre-registration forbids. **The WASM default is
+untouched.**
+
+---
+
+## Step 8 — cleanup, fork commit, re-pin: COMPLETE
+
+| item | result |
+| --- | --- |
+| both temporary dispatch blocks removed | `bulkEquiv`/`bulkDiag`/`TEMPORARY` count → **0** |
+| `upgrades_tab.tsx` vs HEAD | **byte-identical** (absent from `git diff --numstat`) |
+| CR bytes in that file | **0** |
+| fork typecheck | **exit 0** |
+| fork commit | **`1f8a49690`** — `equiv-campaign.mts` (seed fix + guard + `runDiagnostic`) and `README.md` only |
+| fork `status --porcelain` | **empty** |
+| re-pin | `data/wowsims-fork.lock.json` → `1f8a4969055e62f54c335dce45fdd5d4c403e9d9`, SHA read via `rev-parse` |
+| `pnpm sim-implemented-effects:generate` | exit 0 — **217 implemented / 451 stub-only unchanged**, only the embedded pin moved (matches the `ecaa3f3` precedent for a UI-only fork commit) |
