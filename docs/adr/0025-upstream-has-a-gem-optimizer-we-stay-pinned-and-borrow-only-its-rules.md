@@ -7,6 +7,9 @@
 `.scratch/handoffs/issue-1-upstream-gem-cleanup/` (snapshots and worker handoffs)
 **Origin:** Stage 2's gem repair was built on the belief "there is no upstream
 optimizer to borrow" (PLAN.md §9, now corrected)
+**See also:** [`fork-tab-batch-sim-architecture.md`](../fork-tab-batch-sim-architecture.md)
+— the same backend-reforge engine also ships a native bulk-sim + reforge path
+the upgrades tab does not use
 
 ## Context
 

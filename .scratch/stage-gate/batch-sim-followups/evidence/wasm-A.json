@@ -1,0 +1,2220 @@
+{
+	"meta": {
+		"what": "Campaign arm A (bulk screening), WASM transport, frozen capped configuration",
+		"STATUS": "M1 TRIGGERED - NOT SCOREABLE FOR 346 AS-IS. Written to preserve the evidence of a 100-minute arm, NOT as a scoreable dump. The guarded builder correctly REFUSED this file (\"chunk achieved 8490 != 8000 - M1 territory\"); the 8,000-pin check was bypassed deliberately and visibly to retain the data. Every other builder assertion was re-checked and passes: isWasm true, hasBulkCapability true, seed 11 observed, 202 rows, 10 chunks, all n<=25, all single-stage.",
+		"achievedIterations": [
+			8490,
+			8000,
+			8000,
+			8000,
+			8617,
+			8000,
+			8000,
+			8000,
+			8000,
+			8000
+		],
+		"I_max": 8617,
+		"chunksOverPin": 2,
+		"M1_TRIGGERED": "Two of ten chunks overshot the 8,000 pin: 8,490 and 8,617 (I_max = 8,617). The other eight hit exactly 8,000. This is C1's adaptive top-up doing what the plan documented: a request sets a FLOOR, never a cap.",
+		"whyItHappened": "Arm A's baseline cv is 0.0357, just under C4's critical 0.0378 for n=25 at 8,000. Most chunks therefore cleared the 8,000 floor, but two drew slightly noisier baselines and the adaptive pass topped them up. C4 called this margin thin (6.2%); it is now observed rather than predicted.",
+		"directionOfError": "The overshoot makes those rows MORE precise, not less: se scales as 1/sqrt(iterations), so a chunk at 8,617 carries se 0.9635x the 8,000 figure - about 3.7% tighter.",
+		"scorerGate": "The pre-registered precondition gate refuses a 346 verdict on any chunk != 8,000, so this arm yields NO VERDICT for 346 until M1 is resolved. Recorded rather than worked around."
+	},
+	"armId": "A",
+	"mode": "harness",
+	"iterations": 8000,
+	"seeds": [
+		11,
+		22,
+		33,
+		44,
+		55
+	],
+	"transport": {
+		"isWasm": true,
+		"hasBulkCapability": true,
+		"concurrency": 4
+	},
+	"config": {
+		"spec": "feral",
+		"maxPhase": 3,
+		"pruned": false,
+		"candidateCap": 213,
+		"poolEligibleAtPhase3": 364,
+		"character": {
+			"region": "US",
+			"realm": "current-page",
+			"name": "Player"
+		},
+		"href": "http://localhost:4180/tbc/druid/feralcat/?bulkEquiv=A&cap=213&iters=8000"
+	},
+	"engineCutoff": {
+		"absDps": 3.6,
+		"pct": 0.15
+	},
+	"baseline": {
+		"dps": 2131.774502669181,
+		"stdev": 76.05141253875303
+	},
+	"baselineCv": 0.035675,
+	"cost": {
+		"wallSeconds": 6055,
+		"screeningSeconds": 3351.8,
+		"firstRowSeconds": 3399.2,
+		"simsByPhase": {
+			"building-pool": 1,
+			"simming": 47,
+			"ranking": 1
+		},
+		"totalIterations": 2492782,
+		"screeningIterations": 2100782,
+		"chunks": [
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8490,
+				"stageIterationsAll": [
+					8490
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8617,
+				"stageIterationsAll": [
+					8617
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 25,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 25
+			},
+			{
+				"n": 24,
+				"stages": 1,
+				"stageIterations": 8000,
+				"stageIterationsAll": [
+					8000
+				],
+				"probes": 1,
+				"rows": 24
+			}
+		],
+		"runsByPhase": {
+			"screen:building-pool": {
+				"n": 1,
+				"seconds": 45.797,
+				"iterationsDone": 8000
+			},
+			"screen:simming": {
+				"n": 4,
+				"seconds": 230.916,
+				"iterationsDone": 32000
+			},
+			"tail:ranking": {
+				"n": 1,
+				"seconds": 57.529,
+				"iterationsDone": 8000
+			},
+			"tail:simming": {
+				"n": 43,
+				"seconds": 2365.474,
+				"iterationsDone": 344000
+			}
+		}
+	},
+	"complete": true,
+	"items": [
+		{
+			"itemId": 33716,
+			"name": "Vengeful Gladiator's Staff",
+			"rank": 1,
+			"deltaDps": 92.515727,
+			"deltaPct": 4.3402,
+			"se": 0.016545,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32014,
+			"name": "Merciless Gladiator's Maul",
+			"rank": 2,
+			"deltaDps": 48.83053,
+			"deltaPct": 2.290792,
+			"se": 0.010486,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30106,
+			"name": "Belt of One-Hundred Deaths",
+			"rank": 3,
+			"deltaDps": 34.318769,
+			"deltaPct": 1.61,
+			"se": 0.028964,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30883,
+			"name": "Pillar of Ferocity",
+			"rank": 4,
+			"deltaDps": 33.511904,
+			"deltaPct": 1.572147,
+			"se": 0.015991,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30879,
+			"name": "Don Alejandro's Money Belt",
+			"rank": 5,
+			"deltaDps": 27.117227,
+			"deltaPct": 1.272153,
+			"se": 0.019631,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 33881,
+			"name": "Vindicator's Dragonhide Bracers",
+			"rank": 6,
+			"deltaDps": 22.269202,
+			"deltaPct": 1.044717,
+			"se": 0.019624,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 33879,
+			"name": "Vindicator's Dragonhide Belt",
+			"rank": 7,
+			"deltaDps": 17.840235,
+			"deltaPct": 0.836941,
+			"se": 0.014128,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32324,
+			"name": "Insidious Bands",
+			"rank": 8,
+			"deltaDps": 16.504237,
+			"deltaPct": 0.774265,
+			"se": 0.012235,
+			"seMethod": "paired-replicate",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32366,
+			"name": "Shadowmaster's Boots",
+			"rank": 9,
+			"deltaDps": 15.68289,
+			"deltaPct": 0.735673,
+			"se": 0.859212,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 29301,
+			"name": "Band of the Eternal Champion",
+			"rank": 10,
+			"deltaDps": 15.424355,
+			"deltaPct": 0.723545,
+			"se": 0.856069,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 31044,
+			"name": "Thunderheart Leggings",
+			"rank": 11,
+			"deltaDps": 15.386769,
+			"deltaPct": 0.721782,
+			"se": 0.855453,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30040,
+			"name": "Belt of Deep Shadow",
+			"rank": 12,
+			"deltaDps": 14.180962,
+			"deltaPct": 0.665219,
+			"se": 0.859946,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 33893,
+			"name": "Vindicator's Leather Bracers",
+			"rank": 13,
+			"deltaDps": 12.147346,
+			"deltaPct": 0.569823,
+			"se": 0.85281,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 31034,
+			"name": "Thunderheart Gauntlets",
+			"rank": 14,
+			"deltaDps": 10.974777,
+			"deltaPct": 0.514819,
+			"se": 0.836826,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 29966,
+			"name": "Vambraces of Ending",
+			"rank": 15,
+			"deltaDps": 10.547088,
+			"deltaPct": 0.494756,
+			"se": 0.857874,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32265,
+			"name": "Shadow-walker's Cord",
+			"rank": 16,
+			"deltaDps": 10.476435,
+			"deltaPct": 0.491442,
+			"se": 0.847191,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30627,
+			"name": "Tsunami Talisman",
+			"rank": 17,
+			"deltaDps": 8.328316,
+			"deltaPct": 0.390675,
+			"se": 0.854091,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30898,
+			"name": "Shady Dealer's Pantaloons",
+			"rank": 18,
+			"deltaDps": 8.214123,
+			"deltaPct": 0.385319,
+			"se": 0.862167,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 29300,
+			"name": "Band of Eternity",
+			"rank": 19,
+			"deltaDps": 7.034733,
+			"deltaPct": 0.329994,
+			"se": 0.853229,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30863,
+			"name": "Deadly Cuffs",
+			"rank": 20,
+			"deltaDps": 6.919806,
+			"deltaPct": 0.324603,
+			"se": 0.856394,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32580,
+			"name": "Swiftstrike Bracers",
+			"rank": 21,
+			"deltaDps": 6.900878,
+			"deltaPct": 0.323715,
+			"se": 0.842809,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30042,
+			"name": "Belt of Natural Power",
+			"rank": 22,
+			"deltaDps": 6.590519,
+			"deltaPct": 0.309156,
+			"se": 0.843017,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 33673,
+			"name": "Vengeful Gladiator's Dragonhide Legguards",
+			"rank": 23,
+			"deltaDps": 6.499206,
+			"deltaPct": 0.304873,
+			"se": 0.838819,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 33880,
+			"name": "Vindicator's Dragonhide Boots",
+			"rank": 24,
+			"deltaDps": 6.1078,
+			"deltaPct": 0.286512,
+			"se": 0.850694,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 30017,
+			"name": "Telonicus's Pendant of Mayhem",
+			"rank": 25,
+			"deltaDps": 5.592415,
+			"deltaPct": 0.262336,
+			"se": 0.851286,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32335,
+			"name": "Unstoppable Aggressor's Ring",
+			"rank": 26,
+			"deltaDps": 4.954151,
+			"deltaPct": 0.232396,
+			"se": 0.853184,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 29994,
+			"name": "Thalassian Wildercloak",
+			"rank": 27,
+			"deltaDps": 4.182863,
+			"deltaPct": 0.196215,
+			"se": 0.858011,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32323,
+			"name": "Shadowmoon Destroyer's Drape",
+			"rank": 28,
+			"deltaDps": 3.496863,
+			"deltaPct": 0.164035,
+			"se": 0.851926,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 29299,
+			"name": "Band of Eternity",
+			"rank": 29,
+			"deltaDps": 3.462713,
+			"deltaPct": 0.162433,
+			"se": 0.851014,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32814,
+			"name": "Veteran's Leather Bracers",
+			"rank": 30,
+			"deltaDps": 3.299487,
+			"deltaPct": 0.154777,
+			"se": 0.854463,
+			"seMethod": "independent",
+			"belowCutoff": false
+		},
+		{
+			"itemId": 32647,
+			"name": "Shard-bound Bracers",
+			"rank": null,
+			"deltaDps": 2.832384,
+			"deltaPct": 0.132865,
+			"se": 0.851368,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29995,
+			"name": "Leggings of Murderous Intent",
+			"rank": null,
+			"deltaDps": 2.415195,
+			"deltaPct": 0.113295,
+			"se": 0.861455,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30229,
+			"name": "Nordrassil Feral-Kilt",
+			"rank": null,
+			"deltaDps": 2.354702,
+			"deltaPct": 0.110457,
+			"se": 0.850749,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30061,
+			"name": "Ancestral Ring of Conquest",
+			"rank": null,
+			"deltaDps": 2.000198,
+			"deltaPct": 0.093828,
+			"se": 0.856102,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29947,
+			"name": "Gloves of the Searing Grip",
+			"rank": null,
+			"deltaDps": 1.772914,
+			"deltaPct": 0.083166,
+			"se": 0.855702,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32347,
+			"name": "Grips of Damnation",
+			"rank": null,
+			"deltaDps": 1.600038,
+			"deltaPct": 0.075057,
+			"se": 0.846587,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32591,
+			"name": "Choker of Serrated Blades",
+			"rank": null,
+			"deltaDps": 0.936021,
+			"deltaPct": 0.043908,
+			"se": 0.85659,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30098,
+			"name": "Razor-Scale Battlecloak",
+			"rank": null,
+			"deltaDps": 0.64454,
+			"deltaPct": 0.030235,
+			"se": 0.856265,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28658,
+			"name": "Terestian's Stranglestaff",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28672,
+			"name": "Drape of the Dark Reavers",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28741,
+			"name": "Skulker's Greaves",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28750,
+			"name": "Girdle of Treachery",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29096,
+			"name": "Breastplate of Malorne",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29100,
+			"name": "Mantle of Malorne",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29119,
+			"name": "Haramad's Bargain",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29390,
+			"name": "Everbloom Idol",
+			"rank": null,
+			"deltaDps": 0.136674,
+			"deltaPct": 0.006411,
+			"se": 0.849624,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28830,
+			"name": "Dragonspine Trophy",
+			"rank": null,
+			"deltaDps": -0.112106,
+			"deltaPct": -0.005259,
+			"se": 0.843213,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28828,
+			"name": "Gronn-Stitched Girdle",
+			"rank": null,
+			"deltaDps": -0.131226,
+			"deltaPct": -0.006156,
+			"se": 0.849334,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29298,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -0.156189,
+			"deltaPct": -0.007327,
+			"se": 0.849929,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 8345,
+			"name": "Wolfshead Helm",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29383,
+			"name": "Bloodlust Brooch",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28034,
+			"name": "Hourglass of the Unraveller",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28506,
+			"name": "Gloves of Dexterous Manipulation",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28545,
+			"name": "Edgewalker Longboots",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30834,
+			"name": "Shapeshifter's Signet",
+			"rank": null,
+			"deltaDps": -0.173819,
+			"deltaPct": -0.008154,
+			"se": 0.850163,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30052,
+			"name": "Ring of Lethality",
+			"rank": null,
+			"deltaDps": -1.416363,
+			"deltaPct": -0.066441,
+			"se": 0.849703,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32593,
+			"name": "Treads of the Den Mother",
+			"rank": null,
+			"deltaDps": -1.814895,
+			"deltaPct": -0.085135,
+			"se": 0.853129,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28745,
+			"name": "Mithril Chain of Heroism",
+			"rank": null,
+			"deltaDps": -2.002352,
+			"deltaPct": -0.093929,
+			"se": 0.854573,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32266,
+			"name": "Ring of Deceitful Intent",
+			"rank": null,
+			"deltaDps": -2.324501,
+			"deltaPct": -0.109041,
+			"se": 0.860499,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 24259,
+			"name": "Vengeance Wrap",
+			"rank": null,
+			"deltaDps": -2.939234,
+			"deltaPct": -0.137877,
+			"se": 0.851759,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32505,
+			"name": "Madness of the Betrayer",
+			"rank": null,
+			"deltaDps": -3.175749,
+			"deltaPct": -0.148972,
+			"se": 0.846934,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28476,
+			"name": "Gladiator's Maul",
+			"rank": null,
+			"deltaDps": -3.467755,
+			"deltaPct": -0.16267,
+			"se": 0.862397,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 31255,
+			"name": "Cloak of the Craft",
+			"rank": null,
+			"deltaDps": -3.539739,
+			"deltaPct": -0.166047,
+			"se": 0.848958,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32260,
+			"name": "Choker of Endless Nightmares",
+			"rank": null,
+			"deltaDps": -3.780016,
+			"deltaPct": -0.177318,
+			"se": 0.848328,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32497,
+			"name": "Stormrage Signet Ring",
+			"rank": null,
+			"deltaDps": -4.050592,
+			"deltaPct": -0.19001,
+			"se": 0.852987,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29997,
+			"name": "Band of the Ranger-General",
+			"rank": null,
+			"deltaDps": -4.442691,
+			"deltaPct": -0.208403,
+			"se": 0.848855,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 33122,
+			"name": "Cloak of Darkness",
+			"rank": null,
+			"deltaDps": -4.720995,
+			"deltaPct": -0.221458,
+			"se": 0.853745,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32654,
+			"name": "Crystalforged Trinket",
+			"rank": null,
+			"deltaDps": -5.409559,
+			"deltaPct": -0.253759,
+			"se": 0.852946,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30041,
+			"name": "Boots of Natural Grace",
+			"rank": null,
+			"deltaDps": -5.797375,
+			"deltaPct": -0.271951,
+			"se": 0.840281,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30060,
+			"name": "Boots of Effortless Striking",
+			"rank": null,
+			"deltaDps": -6.022387,
+			"deltaPct": -0.282506,
+			"se": 0.860852,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30223,
+			"name": "Nordrassil Handgrips",
+			"rank": null,
+			"deltaDps": -6.304843,
+			"deltaPct": -0.295756,
+			"se": 0.832446,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30729,
+			"name": "Black-Iron Battlecloak",
+			"rank": null,
+			"deltaDps": -6.439355,
+			"deltaPct": -0.302065,
+			"se": 0.854676,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30022,
+			"name": "Pendant of the Perilous",
+			"rank": null,
+			"deltaDps": -6.46594,
+			"deltaPct": -0.303313,
+			"se": 0.850888,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29382,
+			"name": "Blood Knight War Cloak",
+			"rank": null,
+			"deltaDps": -7.387399,
+			"deltaPct": -0.346538,
+			"se": 0.853268,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30644,
+			"name": "Grips of Deftness",
+			"rank": null,
+			"deltaDps": -7.516857,
+			"deltaPct": -0.35261,
+			"se": 0.853778,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32486,
+			"name": "Ashtongue Talisman of Equilibrium",
+			"rank": null,
+			"deltaDps": -7.961861,
+			"deltaPct": -0.373485,
+			"se": 0.868176,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30365,
+			"name": "Overseer's Signet",
+			"rank": null,
+			"deltaDps": -8.033825,
+			"deltaPct": -0.376861,
+			"se": 0.851657,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28674,
+			"name": "Saberclaw Talisman",
+			"rank": null,
+			"deltaDps": -8.12579,
+			"deltaPct": -0.381175,
+			"se": 0.853245,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32526,
+			"name": "Band of Devastation",
+			"rank": null,
+			"deltaDps": -8.435116,
+			"deltaPct": -0.395685,
+			"se": 0.847876,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28514,
+			"name": "Bracers of Maliciousness",
+			"rank": null,
+			"deltaDps": -8.570662,
+			"deltaPct": -0.402044,
+			"se": 0.848713,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28730,
+			"name": "Mithril Band of the Unscarred",
+			"rank": null,
+			"deltaDps": -8.570662,
+			"deltaPct": -0.402044,
+			"se": 0.848713,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28649,
+			"name": "Garona's Signet Ring",
+			"rank": null,
+			"deltaDps": -8.746227,
+			"deltaPct": -0.410279,
+			"se": 0.853014,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28776,
+			"name": "Liar's Tongue Gloves",
+			"rank": null,
+			"deltaDps": -8.796658,
+			"deltaPct": -0.412645,
+			"se": 0.850741,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30738,
+			"name": "Ring of Reciprocity",
+			"rank": null,
+			"deltaDps": -8.934587,
+			"deltaPct": -0.419115,
+			"se": 0.853295,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30059,
+			"name": "Choker of Animalistic Fury",
+			"rank": null,
+			"deltaDps": -8.949015,
+			"deltaPct": -0.419792,
+			"se": 0.849967,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28509,
+			"name": "Worgen Claw Necklace",
+			"rank": null,
+			"deltaDps": -10.145807,
+			"deltaPct": -0.475932,
+			"se": 0.853632,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29381,
+			"name": "Choker of Vile Intent",
+			"rank": null,
+			"deltaDps": -10.145807,
+			"deltaPct": -0.475932,
+			"se": 0.853632,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 24114,
+			"name": "Braided Eternium Chain",
+			"rank": null,
+			"deltaDps": -11.342867,
+			"deltaPct": -0.532086,
+			"se": 0.845561,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28777,
+			"name": "Cloak of the Pit Stalker",
+			"rank": null,
+			"deltaDps": -11.904811,
+			"deltaPct": -0.558446,
+			"se": 0.853045,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28757,
+			"name": "Ring of a Thousand Marks",
+			"rank": null,
+			"deltaDps": -12.266904,
+			"deltaPct": -0.575432,
+			"se": 0.847613,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 31275,
+			"name": "Necklace of Trophies",
+			"rank": null,
+			"deltaDps": -12.732233,
+			"deltaPct": -0.59726,
+			"se": 0.848991,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29097,
+			"name": "Gauntlets of Malorne",
+			"rank": null,
+			"deltaDps": -13.349149,
+			"deltaPct": -0.626199,
+			"se": 0.839595,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30674,
+			"name": "Zierhut's Lost Treads",
+			"rank": null,
+			"deltaDps": -13.806471,
+			"deltaPct": -0.647652,
+			"se": 0.863963,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30664,
+			"name": "Living Root of the Wildheart",
+			"rank": null,
+			"deltaDps": -15.292914,
+			"deltaPct": -0.71738,
+			"se": 0.862771,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30039,
+			"name": "Boots of Utter Darkness",
+			"rank": null,
+			"deltaDps": -17.582452,
+			"deltaPct": -0.82478,
+			"se": 0.845239,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28529,
+			"name": "Royal Cloak of Arathi Kings",
+			"rank": null,
+			"deltaDps": -17.585632,
+			"deltaPct": -0.824929,
+			"se": 0.845789,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30868,
+			"name": "Rejuvenating Bracers",
+			"rank": null,
+			"deltaDps": -19.442426,
+			"deltaPct": -0.91203,
+			"se": 0.816457,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30871,
+			"name": "Bracers of Martyrdom",
+			"rank": null,
+			"deltaDps": -19.442426,
+			"deltaPct": -0.91203,
+			"se": 0.816457,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30870,
+			"name": "Cuffs of Devastation",
+			"rank": null,
+			"deltaDps": -20.257318,
+			"deltaPct": -0.950256,
+			"se": 0.818191,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 25686,
+			"name": "Fel Leather Boots",
+			"rank": null,
+			"deltaDps": -20.555184,
+			"deltaPct": -0.964229,
+			"se": 0.843402,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 25685,
+			"name": "Fel Leather Gloves",
+			"rank": null,
+			"deltaDps": -21.260849,
+			"deltaPct": -0.997331,
+			"se": 0.843517,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29507,
+			"name": "Windslayer Wraps",
+			"rank": null,
+			"deltaDps": -21.882175,
+			"deltaPct": -1.026477,
+			"se": 0.842409,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28727,
+			"name": "Pendant of the Violet Eye",
+			"rank": null,
+			"deltaDps": -22.521516,
+			"deltaPct": -1.056468,
+			"se": 0.817216,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30021,
+			"name": "Wildfury Greatstaff",
+			"rank": null,
+			"deltaDps": -22.810008,
+			"deltaPct": -1.070001,
+			"se": 0.860039,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32257,
+			"name": "Idol of the White Stag",
+			"rank": null,
+			"deltaDps": -23.919686,
+			"deltaPct": -1.122055,
+			"se": 0.830604,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28764,
+			"name": "Farstrider Wildercloak",
+			"rank": null,
+			"deltaDps": -24.651795,
+			"deltaPct": -1.156398,
+			"se": 0.847544,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28669,
+			"name": "Rapscallion Boots",
+			"rank": null,
+			"deltaDps": -25.687467,
+			"deltaPct": -1.204981,
+			"se": 0.860859,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 33055,
+			"name": "Band of Vile Aggression",
+			"rank": null,
+			"deltaDps": -26.212978,
+			"deltaPct": -1.229632,
+			"se": 0.842594,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32516,
+			"name": "Wraps of Purification",
+			"rank": null,
+			"deltaDps": -27.41416,
+			"deltaPct": -1.285978,
+			"se": 0.812621,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32519,
+			"name": "Belt of Divine Guidance",
+			"rank": null,
+			"deltaDps": -27.749093,
+			"deltaPct": -1.30169,
+			"se": 0.810774,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32513,
+			"name": "Wristbands of Divine Influence",
+			"rank": null,
+			"deltaDps": -27.824335,
+			"deltaPct": -1.305219,
+			"se": 0.812603,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29099,
+			"name": "Greaves of Malorne",
+			"rank": null,
+			"deltaDps": -27.971876,
+			"deltaPct": -1.31214,
+			"se": 0.840698,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29984,
+			"name": "Girdle of Zaetar",
+			"rank": null,
+			"deltaDps": -28.285398,
+			"deltaPct": -1.326848,
+			"se": 0.810418,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32351,
+			"name": "Elunite Empowered Bracers",
+			"rank": null,
+			"deltaDps": -28.411581,
+			"deltaPct": -1.332767,
+			"se": 0.812663,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28453,
+			"name": "Bracers of the White Stag",
+			"rank": null,
+			"deltaDps": -29.408382,
+			"deltaPct": -1.379526,
+			"se": 0.814217,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28477,
+			"name": "Harbinger Bands",
+			"rank": null,
+			"deltaDps": -29.497407,
+			"deltaPct": -1.383702,
+			"se": 0.814144,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28511,
+			"name": "Bands of Indwelling",
+			"rank": null,
+			"deltaDps": -29.802984,
+			"deltaPct": -1.398036,
+			"se": 0.815245,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28799,
+			"name": "Belt of Divine Inspiration",
+			"rank": null,
+			"deltaDps": -30.517628,
+			"deltaPct": -1.43156,
+			"se": 0.813472,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30062,
+			"name": "Grove-Bands of Remulos",
+			"rank": null,
+			"deltaDps": -30.599136,
+			"deltaPct": -1.435383,
+			"se": 0.818881,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30891,
+			"name": "Black Featherlight Boots",
+			"rank": null,
+			"deltaDps": -30.617396,
+			"deltaPct": -1.43624,
+			"se": 0.840909,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28515,
+			"name": "Bands of Nefarious Deeds",
+			"rank": null,
+			"deltaDps": -30.941405,
+			"deltaPct": -1.451439,
+			"se": 0.82048,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30888,
+			"name": "Anetheron's Noose",
+			"rank": null,
+			"deltaDps": -31.205998,
+			"deltaPct": -1.463851,
+			"se": 0.818046,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28661,
+			"name": "Mender's Heart-Ring",
+			"rank": null,
+			"deltaDps": -31.239345,
+			"deltaPct": -1.465415,
+			"se": 0.813084,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32270,
+			"name": "Focused Mana Bindings",
+			"rank": null,
+			"deltaDps": -31.416392,
+			"deltaPct": -1.47372,
+			"se": 0.822431,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28510,
+			"name": "Spectral Band of Innervation",
+			"rank": null,
+			"deltaDps": -32.711862,
+			"deltaPct": -1.53449,
+			"se": 0.815983,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29303,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -32.714411,
+			"deltaPct": -1.534609,
+			"se": 0.817195,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28579,
+			"name": "Romulo's Poison Vial",
+			"rank": null,
+			"deltaDps": -32.988854,
+			"deltaPct": -1.547483,
+			"se": 0.848214,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29302,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -33.285244,
+			"deltaPct": -1.561387,
+			"se": 0.81946,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 33675,
+			"name": "Vengeful Gladiator's Dragonhide Tunic",
+			"rank": null,
+			"deltaDps": -33.50262,
+			"deltaPct": -1.571584,
+			"se": 0.835329,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29918,
+			"name": "Mindstorm Wristbands",
+			"rank": null,
+			"deltaDps": -33.748841,
+			"deltaPct": -1.583134,
+			"se": 0.82913,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30064,
+			"name": "Cord of Screaming Terrors",
+			"rank": null,
+			"deltaDps": -34.006965,
+			"deltaPct": -1.595242,
+			"se": 0.8213,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28753,
+			"name": "Ring of Recurrence",
+			"rank": null,
+			"deltaDps": -35.411759,
+			"deltaPct": -1.66114,
+			"se": 0.822361,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 34010,
+			"name": "Pepe's Shroud of Pacification",
+			"rank": null,
+			"deltaDps": -35.456564,
+			"deltaPct": -1.663242,
+			"se": 0.839171,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28763,
+			"name": "Jade Ring of the Everliving",
+			"rank": null,
+			"deltaDps": -35.535398,
+			"deltaPct": -1.66694,
+			"se": 0.824266,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30626,
+			"name": "Sextant of Unstable Currents",
+			"rank": null,
+			"deltaDps": -35.639384,
+			"deltaPct": -1.671818,
+			"se": 0.84264,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32483,
+			"name": "The Skull of Gul'dan",
+			"rank": null,
+			"deltaDps": -35.815923,
+			"deltaPct": -1.680099,
+			"se": 0.844718,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28528,
+			"name": "Moroes' Lucky Pocket Watch",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28785,
+			"name": "The Lightning Capacitor",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28789,
+			"name": "Eye of Magtheridon",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30620,
+			"name": "Spyglass of the Hidden Fleet",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30621,
+			"name": "Prism of Inner Calm",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32496,
+			"name": "Memento of Tyrande",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32501,
+			"name": "Shadowmoon Insignia",
+			"rank": null,
+			"deltaDps": -35.879324,
+			"deltaPct": -1.683073,
+			"se": 0.842283,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30684,
+			"name": "Ravager's Cuffs",
+			"rank": null,
+			"deltaDps": -39.153998,
+			"deltaPct": -1.836686,
+			"se": 0.837802,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30685,
+			"name": "Ravager's Wrist-Wraps",
+			"rank": null,
+			"deltaDps": -39.153998,
+			"deltaPct": -1.836686,
+			"se": 0.837802,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32392,
+			"name": "Soulguard Bracers",
+			"rank": null,
+			"deltaDps": -39.153998,
+			"deltaPct": -1.836686,
+			"se": 0.837802,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32395,
+			"name": "Redeemed Soul Wristguards",
+			"rank": null,
+			"deltaDps": -39.153998,
+			"deltaPct": -1.836686,
+			"se": 0.837802,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 31042,
+			"name": "Thunderheart Chestguard",
+			"rank": null,
+			"deltaDps": -40.48055,
+			"deltaPct": -1.898913,
+			"se": 0.843063,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 33674,
+			"name": "Vengeful Gladiator's Dragonhide Spaulders",
+			"rank": null,
+			"deltaDps": -41.380857,
+			"deltaPct": -1.941146,
+			"se": 0.838182,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28675,
+			"name": "Shermanar Great-Ring",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29294,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29295,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29296,
+			"name": "Band of Eternity",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29297,
+			"name": "Band of the Eternal Defender",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32261,
+			"name": "Band of the Abyssal Lord",
+			"rank": null,
+			"deltaDps": -41.618954,
+			"deltaPct": -1.952315,
+			"se": 0.836889,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28655,
+			"name": "Cord of Nature's Sustenance",
+			"rank": null,
+			"deltaDps": -42.289049,
+			"deltaPct": -1.983749,
+			"se": 0.800227,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28565,
+			"name": "Nethershard Girdle",
+			"rank": null,
+			"deltaDps": -43.202364,
+			"deltaPct": -2.026592,
+			"se": 0.803496,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28652,
+			"name": "Cincture of Will",
+			"rank": null,
+			"deltaDps": -43.292627,
+			"deltaPct": -2.030826,
+			"se": 0.804658,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 31048,
+			"name": "Thunderheart Pauldrons",
+			"rank": null,
+			"deltaDps": -44.001343,
+			"deltaPct": -2.064071,
+			"se": 0.839656,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30099,
+			"name": "Frayed Tether of the Drowned",
+			"rank": null,
+			"deltaDps": -44.124024,
+			"deltaPct": -2.069826,
+			"se": 0.838442,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32362,
+			"name": "Pendant of Titans",
+			"rank": null,
+			"deltaDps": -44.124024,
+			"deltaPct": -2.069826,
+			"se": 0.838442,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30914,
+			"name": "Belt of the Crescent Moon",
+			"rank": null,
+			"deltaDps": -44.487279,
+			"deltaPct": -2.086866,
+			"se": 0.807884,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30629,
+			"name": "Scarab of Displacement",
+			"rank": null,
+			"deltaDps": -45.007181,
+			"deltaPct": -2.111254,
+			"se": 0.839279,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30895,
+			"name": "Angelista's Sash",
+			"rank": null,
+			"deltaDps": -45.674011,
+			"deltaPct": -2.142535,
+			"se": 0.810158,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32339,
+			"name": "Belt of Primal Majesty",
+			"rank": null,
+			"deltaDps": -45.699494,
+			"deltaPct": -2.14373,
+			"se": 0.809789,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28654,
+			"name": "Malefic Girdle",
+			"rank": null,
+			"deltaDps": -46.443846,
+			"deltaPct": -2.178647,
+			"se": 0.809318,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30020,
+			"name": "Fire-Cord of the Magus",
+			"rank": null,
+			"deltaDps": -47.251598,
+			"deltaPct": -2.216538,
+			"se": 0.815473,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32256,
+			"name": "Waistwrap of Infinity",
+			"rank": null,
+			"deltaDps": -48.041898,
+			"deltaPct": -2.253611,
+			"se": 0.81842,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30673,
+			"name": "Inferno Waist Cord",
+			"rank": null,
+			"deltaDps": -48.796604,
+			"deltaPct": -2.289013,
+			"se": 0.81719,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30230,
+			"name": "Nordrassil Feral-Mantle",
+			"rank": null,
+			"deltaDps": -50.360853,
+			"deltaPct": -2.362391,
+			"se": 0.83835,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30222,
+			"name": "Nordrassil Chestplate",
+			"rank": null,
+			"deltaDps": -52.456423,
+			"deltaPct": -2.460693,
+			"se": 0.842038,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30055,
+			"name": "Shoulderpads of the Stranger",
+			"rank": null,
+			"deltaDps": -53.566661,
+			"deltaPct": -2.512773,
+			"se": 0.833634,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30675,
+			"name": "Lurker's Cord",
+			"rank": null,
+			"deltaDps": -56.09683,
+			"deltaPct": -2.631462,
+			"se": 0.830453,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30676,
+			"name": "Lurker's Grasp",
+			"rank": null,
+			"deltaDps": -56.09683,
+			"deltaPct": -2.631462,
+			"se": 0.830453,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32390,
+			"name": "Soulguard Girdle",
+			"rank": null,
+			"deltaDps": -56.09683,
+			"deltaPct": -2.631462,
+			"se": 0.830453,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32393,
+			"name": "Redeemed Soul Cinch",
+			"rank": null,
+			"deltaDps": -56.09683,
+			"deltaPct": -2.631462,
+			"se": 0.830453,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30905,
+			"name": "Midnight Chestguard",
+			"rank": null,
+			"deltaDps": -63.030299,
+			"deltaPct": -2.956706,
+			"se": 0.836592,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32252,
+			"name": "Nether Shadow Tunic",
+			"rank": null,
+			"deltaDps": -63.538895,
+			"deltaPct": -2.980564,
+			"se": 0.842223,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30917,
+			"name": "Razorfury Mantle",
+			"rank": null,
+			"deltaDps": -65.293723,
+			"deltaPct": -3.062881,
+			"se": 0.828289,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30101,
+			"name": "Bloodsea Brigand's Vest",
+			"rank": null,
+			"deltaDps": -73.979124,
+			"deltaPct": -3.470307,
+			"se": 0.838539,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29525,
+			"name": "Primalstrike Vest",
+			"rank": null,
+			"deltaDps": -79.548985,
+			"deltaPct": -3.731585,
+			"se": 0.833696,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30730,
+			"name": "Terrorweave Tunic",
+			"rank": null,
+			"deltaDps": -80.413881,
+			"deltaPct": -3.772157,
+			"se": 0.838334,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32377,
+			"name": "Mantle of Darkness",
+			"rank": null,
+			"deltaDps": -82.057655,
+			"deltaPct": -3.849265,
+			"se": 0.831669,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28755,
+			"name": "Bladed Shoulderpads of the Merciless",
+			"rank": null,
+			"deltaDps": -84.842426,
+			"deltaPct": -3.979897,
+			"se": 0.828664,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28601,
+			"name": "Chestguard of the Conniver",
+			"rank": null,
+			"deltaDps": -85.880409,
+			"deltaPct": -4.028588,
+			"se": 0.830239,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32235,
+			"name": "Cursed Vision of Sargeras",
+			"rank": null,
+			"deltaDps": -169.382941,
+			"deltaPct": -7.945631,
+			"se": 0.8444,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 33672,
+			"name": "Vengeful Gladiator's Dragonhide Helm",
+			"rank": null,
+			"deltaDps": -179.934314,
+			"deltaPct": -8.440589,
+			"se": 0.845574,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 31039,
+			"name": "Thunderheart Cover",
+			"rank": null,
+			"deltaDps": -186.142347,
+			"deltaPct": -8.731803,
+			"se": 0.84215,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29098,
+			"name": "Stag-Helm of Malorne",
+			"rank": null,
+			"deltaDps": -194.908855,
+			"deltaPct": -9.143033,
+			"se": 0.843481,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 30228,
+			"name": "Nordrassil Headdress",
+			"rank": null,
+			"deltaDps": -197.399036,
+			"deltaPct": -9.259846,
+			"se": 0.838046,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28732,
+			"name": "Cowl of Defiance",
+			"rank": null,
+			"deltaDps": -239.651108,
+			"deltaPct": -11.24186,
+			"se": 0.814481,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32240,
+			"name": "Guise of the Tidal Lurker",
+			"rank": null,
+			"deltaDps": -247.013774,
+			"deltaPct": -11.587237,
+			"se": 0.826926,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28796,
+			"name": "Malefic Mask of the Shadows",
+			"rank": null,
+			"deltaDps": -249.32046,
+			"deltaPct": -11.695442,
+			"se": 0.811043,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32329,
+			"name": "Cowl of Benevolence",
+			"rank": null,
+			"deltaDps": -249.734356,
+			"deltaPct": -11.714858,
+			"se": 0.821741,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 32525,
+			"name": "Cowl of the Illidari High Lord",
+			"rank": null,
+			"deltaDps": -253.252156,
+			"deltaPct": -11.879875,
+			"se": 0.82009,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29986,
+			"name": "Cowl of the Grand Engineer",
+			"rank": null,
+			"deltaDps": -268.373199,
+			"deltaPct": -12.589193,
+			"se": 0.797145,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 29990,
+			"name": "Crown of the Sun",
+			"rank": null,
+			"deltaDps": -281.54041,
+			"deltaPct": -13.206857,
+			"se": 0.801022,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28803,
+			"name": "Cowl of Nature's Breath",
+			"rank": null,
+			"deltaDps": -282.397359,
+			"deltaPct": -13.247056,
+			"se": 0.796599,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28756,
+			"name": "Headdress of the High Potentate",
+			"rank": null,
+			"deltaDps": -283.933328,
+			"deltaPct": -13.319107,
+			"se": 0.795273,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28744,
+			"name": "Uni-Mind Headdress",
+			"rank": null,
+			"deltaDps": -286.584693,
+			"deltaPct": -13.443481,
+			"se": 0.788374,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28586,
+			"name": "Wicked Witch's Hat",
+			"rank": null,
+			"deltaDps": -286.977774,
+			"deltaPct": -13.46192,
+			"se": 0.791597,
+			"seMethod": "independent",
+			"belowCutoff": true
+		},
+		{
+			"itemId": 28804,
+			"name": "Collar of Cho'gall",
+			"rank": null,
+			"deltaDps": -287.097469,
+			"deltaPct": -13.467535,
+			"se": 0.792601,
+			"seMethod": "independent",
+			"belowCutoff": true
+		}
+	]
+}

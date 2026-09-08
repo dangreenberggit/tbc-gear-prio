@@ -12,6 +12,10 @@ which holds the _decision_ (stay Phase 2 until our PR target
 `feature/backend-reforge` reaches Phase 3) and the _trigger_. 337 points back
 here for the seam list; this file points to 337 for the why and when.
 
+For a different fork-vs-engine seam — how the tab dispatches sims, and the
+native bulk-sim + reforge path it does not use — see
+[`fork-tab-batch-sim-architecture.md`](fork-tab-batch-sim-architecture.md).
+
 ## How this was produced
 
 Two read-only audits (2026-08-30, Opus review lane) over our fork diff

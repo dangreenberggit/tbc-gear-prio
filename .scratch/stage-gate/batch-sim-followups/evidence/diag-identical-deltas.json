@@ -1,0 +1,33 @@
+{
+	"meta": {
+		"what": "Bounded diagnostic for the identical-deltas anomaly (Gate C discriminators D-1 and D-2)",
+		"page": "http://localhost:5173/tbc/druid/feralcat/?bulkDiag=1&cap=30&iters=8000",
+		"transport": "HTTP (vite 5173 page, Go server 3333)",
+		"config": { "spec": "feral", "maxPhase": 3, "cap": 30, "iterations": 8000 },
+		"method": "Drives the real rankUpgrades twice - once with the bulk capability exposed, once without - through a runner that records every run() request, so both discriminators come from the code path the campaign measures rather than a re-composed request.",
+		"verdict": "FINDING (not defect)"
+	},
+	"D1_hitMiss": {
+		"question": "Is the screened map used, or does every attempt fall through to deps.sim.run?",
+		"bulkArmScreeningRunCalls": 2,
+		"loopArmScreeningRunCalls": 34,
+		"conclusion": "USED. Had the map missed, the bulk arm would have fallen through to ~34 per-candidate sims like the loop. It made 2. The chunk numbers are consumed, not discarded.",
+		"refutes": "Both the defect hypothesis and the earlier worry that arm A pays for chunk work it does not use."
+	},
+	"D2_determinism": {
+		"question": "Is the Go engine deterministic at matched (request, seed, iterations, concurrency)?",
+		"sampleSeed": 11,
+		"sampleIterations": 8000,
+		"replayDps": [2245.447435998697, 2245.447435998697],
+		"replayIdentical": true,
+		"originalObservationDps": 2245.447435998697,
+		"conclusion": "DETERMINISTIC. The same request replayed twice returns bit-identical DPS, equal to the observation recorded during the run."
+	},
+	"rows": { "bulk": 44, "loop": 44, "shared": 44, "deltasDiffering": 0, "firstDiffering": [] },
+	"interpretation": {
+		"WITHDRAWN_finding": "SUPERSEDED - DO NOT USE. Previously claimed that bulk screening and the per-candidate loop are numerically identical on the Go transport at matched settings. WITHDRAWN: the harness never passed its seeds into rankUpgrades, so every arm ran at DEFAULT_SEEDS[0] = 11 and the routes were never compared at independent samples. D-1's call-count result (2 screening sims vs 34) and D-2's narrow determinism result (the same request replayed twice returns identical DPS) both stand; the CONCLUSION drawn from them about the two routes does not. See execution-ledger-b.md, 'CORRECTION - the harness never passed its seeds'.",
+		"explainsPriorRho": "The prior campaign's rho = 0.999229 came from arms at UNMATCHED counts (5,000 flat loop vs 7,091 adaptive bulk). The residual difference was the iteration mismatch, not the route. M2 removed that mismatch and the difference vanished, so 0.999229 was measuring the accuracy gap the plan set out to eliminate.",
+		"whyWasmStillMatters": "The HTTP routes agree whenever both sample the same way. WASM is the one place they might genuinely diverge: the loop runs one worker per candidate while the tournament splits a single request's iterations across the worker pool - a different sampling arrangement, not just a different transport.",
+		"keyMismatchExcludedByReading": "screenKey is `${itemId}:${slotIndex}` at both the store site (rank.ts:895) and the read site (rank.ts:1026); byKey is filled from the same attempt objects the loop re-walks (rank.ts:944-947); and rank.ts:747-759 states both routes share one attemptEligibility implementation precisely so the attempt sets agree. The 249-attempts-vs-213-candidates gap is also correct by design: one attempt per (item, slot) pair, and rings/trinkets/weapons map to several slots."
+	}
+}

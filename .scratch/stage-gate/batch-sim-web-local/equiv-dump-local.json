@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "track": "local (HTTP transport)",
+    "server": "packaged Go wowsimtbc :3333; page served by vite :5173 whose local_worker posts to :3333",
+    "isWasm": false,
+    "spec": "feral",
+    "phase": 2,
+    "iterations": 5000,
+    "n": 21,
+    "note": "candidates = baseline gear with one back/neck slot replaced by an unworn phase-2 pool item; union SimDatabase merged per candidate",
+    "arms": {
+      "bulkDps": "one buildBulkSimRequest chunk through pool.bulkSimAsync, mapped by bulkScreenResultFrom (BulkHttpSimRunner's code path)",
+      "loopDps_seed11": "21 individual pool.raidSimAsync calls at seed 11 (the per-candidate route the runner replaces)",
+      "loopDps_seed777": "ticket 345 control: the same loop route repeated at seed 777"
+    },
+    "caveat": "candidate indices 9-20 are neck swaps whose DPS is within ~1 of the baseline, so their relative order is noise in every arm; that is what the tail-overlap metric is measuring at this set size (ticket 345)."
+  },
+  "baselines": {
+    "bulk": 2181.6723670119713,
+    "loop_seed11": 2246.985484193792,
+    "loop_seed777": 2181.372051628223
+  },
+  "scores": {
+    "bulk_vs_loop_seed11": { "spearman": 0.9818, "top5": 1.0, "top10": 0.9, "top15": 0.933 },
+    "bulk_vs_loop_seed777": { "spearman": 0.9039, "top5": 1.0, "top10": 0.9, "top15": 0.867 },
+    "CONTROL_loop_vs_loop": { "spearman": 0.8623, "top5": 1.0, "top10": 0.9, "top15": 0.8 },
+    "maxAbsDpsDiff_bulk_vs_loop": 0.897,
+    "meanAbsDpsDiff_bulk_vs_loop": 0.351
+  },
+  "bulkDps": [
+    2234.1162967202495, 2230.2092660165404, 2228.9121045295165, 2222.363724422307,
+    2221.810745701311, 2216.7151521965175, 2213.76848146244, 2214.750038610512,
+    2203.6691653305584, 2181.52775244561, 2181.8431097175653, 2181.766370419506,
+    2181.234907746311, 2181.896959241334, 2181.639098180616, 2181.752526318846,
+    2181.234907746311, 2181.9400132007154, 2181.694159770251, 2181.826823057017,
+    2181.672367011972
+  ],
+  "loopDps_seed11": [
+    2234.8348990545232, 2231.0615762808447, 2229.6565944602203, 2223.106219734937,
+    2222.6597998530015, 2217.61246517058, 2214.2078159284665, 2215.5944372167332,
+    2203.4991176917915, 2181.4489658288376, 2181.8355895240256, 2181.91084916926,
+    2181.0663235662882, 2181.871783398854, 2181.5730698729367, 2181.6051116876556,
+    2181.0663235662882, 2181.9089630444523, 2181.633115932784, 2181.6448593052482,
+    2181.6421986957494
+  ],
+  "loopDps_seed777": [
+    2233.8559365369324, 2229.8747390400936, 2228.65268445659, 2222.0435628942328,
+    2221.4774209064067, 2216.415333440585, 2213.5968395490895, 2214.4198746299885,
+    2203.2428939343354, 2181.341433844347, 2181.4482065986367, 2181.240057571896,
+    2180.8126475948516, 2181.456065587356, 2181.541595074041, 2181.61139842092,
+    2180.8126475948516, 2181.463420471376, 2181.579816247979, 2181.410371535021,
+    2181.372051628223
+  ],
+  "chunkArms": [
+    { "n": 21, "rows": 21, "rowsWithDpsMetrics": 21, "stages": 1, "stageIterations": [6075], "secs": 7.39 },
+    { "n": 25, "rows": 25, "rowsWithDpsMetrics": 25, "stages": 1, "stageIterations": [6432], "secs": 9.35 },
+    { "n": 26, "rows": 26, "rowsWithDpsMetrics": 26, "stages": 1, "stageIterations": [6504], "secs": 9.62 },
+    { "n": 30, "rows": 30, "rowsWithDpsMetrics": 30, "stages": 1, "stageIterations": [6816], "secs": 12.17 },
+    { "n": 32, "rows": 32, "rowsWithDpsMetrics": 32, "stages": 1, "stageIterations": [6932], "secs": 12.71 },
+    { "n": 33, "rows": 5, "rowsWithDpsMetrics": 5, "stages": 2, "stageIterations": [1000, 5000], "secs": 3.76,
+      "note": "culled and silently truncated: 5 rows of 33 requested, every row carrying dpsMetrics, error unset" }
+  ]
+}
