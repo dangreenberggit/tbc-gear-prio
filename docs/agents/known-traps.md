@@ -65,6 +65,45 @@ The full cycle, in order, every time:
 
 A fork commit that touches nothing ported still needs steps 3–5.
 
+## Before moving the wowsims engine pin
+
+**Symptom when armed:** `pnpm fetch:wowsimcli` 404s, or writes into a nested
+`vendor/wowsimcli-feature/backend-reforge-.../`; or three fork gates exit 2
+with "clone HEAD is X but lock pins Y"; or a regen moves a file nobody
+predicted and it gets committed as though it were expected.
+
+Pin a **commit sha, not a branch name**:
+`python scripts/sync_wowsims.py --update --ref <sha>`. A branch name contains a
+`/`, and both `fetch_wowsimcli.py` and `cli-wiring.ts` build
+`vendor/wowsimcli-<tag>-<platform>` from the raw `tag`, so a slash nests the
+directory. The branch belongs in `watchedRefs`, via a separate
+`--watch-ref --ref <branch>` — `--update` carries the old `watchedRefs`
+forward unchanged, so skipping it leaves the watched entry stale while the pin
+moves (ADR-0030).
+
+`--update --ref` writes `currentPhase` **and** `defaultMaxPhase` in the same
+run, both from upstream's `CURRENT_PHASE`, so a tier move lands in the pin
+commit whether or not you meant it to. Let both fields stand as the generator
+wrote them, and put the deliberate half of the bump — `ENGINE_VERSION`, the
+docs — in its own commit. The acceptance check is
+`--update --ref <sha>` again, then `git diff --exit-code` on the lock: it holds
+only while the file is purely generated. Nothing in `pnpm verify` reads either
+field, so a hand edit there is invisible to every gate.
+
+For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
+`protoc` and `protoc-gen-go` on PATH, and it hard-fails without them where it
+used to download a zip. CI never runs it, so CI will not tell you.
+
+The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`) exit 2
+until `data/wowsims-fork.lock.json` names the clone's actual HEAD. Between a
+fork commit and that lock edit they are red **by design** — read the message
+before chasing it.
+
+Predict the regen list before running anything, then diff (`data-pipeline-work`
+rule 2). Every unpredicted path is a finding to explain, not to absorb: the pin
+move that produced ADR-0030 turned up upstream phase corrections, pre-existing
+codegen drift and a broken extractor exactly this way.
+
 ## Before filing a ticket
 
 **Symptom when armed:** two open tickets share a number (`pnpm

@@ -4,20 +4,41 @@ Origin: ticket 257 follow-up, 2026-08-22 — owner asked what deriving
   `SPEC_PREFERRED_METAS` from wowsims would take, then deferred it once the
   "which upstream?" ambiguity surfaced
 Blocks: none
-Blocked by: none in this repo — see "The precondition" below. This is waiting
-  on a state of the world, not on another ticket.
+Blocked by: none — the precondition was satisfied 2026-09-10 (ticket 251
+  closed, both pins on one branch; see below)
 
 # Derive the meta-preference table from wowsims, once "upstream" means one repo on one branch
 
-## Deferred 2026-08-22 — do not start this yet
+## Precondition satisfied 2026-09-10 — this is ready to start
+
+The deferral below is **lifted**. Ticket 251 closed, and the ambiguity it
+described is gone: both preset sources now resolve to one commit on one branch,
+`ec5c5f205e61049d730e460967f8488774a7fe2a` on `feature/backend-reforge`
+(ADR-0030).
+
+Measured 2026-09-10:
+
+| what | value |
+| --- | --- |
+| `data/wowsims.lock.json` `commit` | `ec5c5f205e61049d730e460967f8488774a7fe2a` |
+| `data/wowsims-fork.lock.json` `commit` | `ab59127d9faad30cdd4190b5f7e6780e34405822` (merge commit) |
+| `data/wowsims-fork.lock.json` `branchedFrom` | `ec5c5f205e61049d730e460967f8488774a7fe2a` |
+
+So ret and feral-cat presets (`vendor/wowsims/*.gear.json`) and feral-tank bear
+presets (`vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/`, confirmed present)
+now come from the same upstream commit. "Read it from upstream" has a single
+referent for the first time.
+
+`Blocked by: none`.
+
+### Original deferral, 2026-08-22 (kept as history)
 
 **Owner ruling:** *"it seems like the ambiguity of 'upstream' is the kicker for
 now, so we'll kick this down the road until we're only looking at one wowsims
 code repo on one branch"*.
 
 The investigation into deriving the table was stopped partway on that ruling.
-Do not restart it until the precondition below holds — a derivation written
-now would harden today's ambiguity into a script.
+The precondition below is the one that has now been met.
 
 ## The precondition
 

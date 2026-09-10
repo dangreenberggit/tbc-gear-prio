@@ -1,6 +1,6 @@
 # ADR-0025 — Upstream has a gem optimizer; we stay pinned and borrow only its rules
 
-**Status:** accepted
+**Status:** accepted — Decision 1 superseded by [`ADR-0030`](0030-build-from-feature-backend-reforge-on-both-pins.md) (2026-09-10)
 **Date:** 2026-08-12
 **Relates to:** PLAN.md §9 (gem and enchant policy), §8 (upstream pin)
 **Tickets:** [issue #1](https://github.com/dangreenberggit/tbc-gear-prio/issues/1) (canonical record);
@@ -33,6 +33,12 @@ one in theirs, and a trap for the next re-pin. All facts below are as of
 1. **Stay pinned to tag `v0.0.101` for building.** The branch is reference
    material only. Re-pin when upstream tags a release (checklist:
    `.scratch/handoffs/issue-1-upstream-gem-cleanup/impact-comment.md`, bottom).
+
+   > **Superseded 2026-09-10 by [`ADR-0030`](0030-build-from-feature-backend-reforge-on-both-pins.md).**
+   > Both pins now name a commit sha on `feature/backend-reforge`, and this repo
+   > builds from that branch rather than treating it as reference material.
+   > Decisions 2–4 below are unaffected.
+
 2. **Keep our repair pass ours** (repair, not re-optimize — PLAN.md §9
    acceptance unchanged). Upstream's `socketBonusActive`
    (`sim/core/reforge_optimizer/gear.go`) is an oracle to compare predicates
