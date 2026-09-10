@@ -2903,7 +2903,7 @@
     },
     "debuffs": {
       "exposeWeaknessUptime": 0.9,
-      "exposeWeaknessHunterAgility": 1080,
+      "exposeWeaknessHunterAgility": 1210,
       "bloodFrenzy": true,
       "exposeArmor": "TristateEffectImproved",
       "huntersMark": "TristateEffectImproved",

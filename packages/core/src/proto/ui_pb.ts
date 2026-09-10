@@ -4,11 +4,11 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { Player, Raid, RaidSimRequest, RaidSimResult } from "./api_pb.js";
+import type { Player, Raid, RaidSimRequest, RaidSimResult, ReforgeSettings } from "./api_pb.js";
 import { file_api } from "./api_pb.js";
 import type { APLRotation } from "./apl_pb.js";
 import { file_apl } from "./apl_pb.js";
-import type { ArmorType, Class, ConsumesSpec, Debuffs, EnchantType, Encounter, EquipmentSpec, Faction, GemColor, HandType, HealingModel, IndividualBuffs, ItemQuality, ItemRandomSuffix, ItemSlot, ItemSwap, ItemType, PartyBuffs, PresetEncounter, Profession, PseudoStat, Race, RaidBuffs, RangedWeaponType, ScalingItemProperties, Stat, UnitReference, UnitStats, WeaponType } from "./common_pb.js";
+import type { ArmorType, Class, ConsumesSpec, Debuffs, EnchantType, Encounter, EquipmentSpec, Faction, GemColor, HandType, HealingModel, IndividualBuffs, ItemQuality, ItemRandomSuffix, ItemSwap, ItemType, PartyBuffs, PresetEncounter, Profession, PseudoStat, Race, RaidBuffs, RangedWeaponType, ScalingItemProperties, Stat, UnitReference, UnitStats, WeaponType } from "./common_pb.js";
 import { file_common } from "./common_pb.js";
 import type { Consumable, ItemEffectRandPropPoints } from "./db_pb.js";
 import { file_db } from "./db_pb.js";
@@ -22,7 +22,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file ui.proto.
  */
 export const file_ui: GenFile = /*@__PURE__*/
-  fileDesc("Cgh1aS5wcm90bxIFcHJvdG8i5wMKClVJRGF0YWJhc2USHAoFaXRlbXMYASADKAsyDS5wcm90by5VSUl0ZW0SMAoPcmFuZG9tX3N1ZmZpeGVzGAsgAygLMhcucHJvdG8uSXRlbVJhbmRvbVN1ZmZpeBIiCghlbmNoYW50cxgCIAMoCzIQLnByb3RvLlVJRW5jaGFudBIaCgRnZW1zGAMgAygLMgwucHJvdG8uVUlHZW0SKgoKZW5jb3VudGVycxgGIAMoCzIWLnByb3RvLlByZXNldEVuY291bnRlchIcCgV6b25lcxgIIAMoCzINLnByb3RvLlVJWm9uZRIaCgRucGNzGAkgAygLMgwucHJvdG8uVUlOUEMSIwoKaXRlbV9pY29ucxgEIAMoCzIPLnByb3RvLkljb25EYXRhEiQKC3NwZWxsX2ljb25zGAUgAygLMg8ucHJvdG8uSWNvbkRhdGESRQocaXRlbV9lZmZlY3RfcmFuZF9wcm9wX3BvaW50cxgPIAMoCzIfLnByb3RvLkl0ZW1FZmZlY3RSYW5kUHJvcFBvaW50cxImCgtjb25zdW1hYmxlcxgNIAMoCzIRLnByb3RvLkNvbnN1bWFibGUSKQoNc3BlbGxfZWZmZWN0cxgOIAMoCzISLnByb3RvLlNwZWxsRWZmZWN0IkcKBlVJWm9uZRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEiMKCWV4cGFuc2lvbhgDIAEoDjIQLnByb3RvLkV4cGFuc2lvbiIyCgVVSU5QQxIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEg8KB3pvbmVfaWQYAyABKAUipwkKBlVJSXRlbRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEgwKBGljb24YAyABKAkSHQoEdHlwZRgEIAEoDjIPLnByb3RvLkl0ZW1UeXBlEiQKCmFybW9yX3R5cGUYBSABKA4yEC5wcm90by5Bcm1vclR5cGUSJgoLd2VhcG9uX3R5cGUYBiABKA4yES5wcm90by5XZWFwb25UeXBlEiIKCWhhbmRfdHlwZRgHIAEoDjIPLnByb3RvLkhhbmRUeXBlEjMKEnJhbmdlZF93ZWFwb25fdHlwZRgIIAEoDjIXLnByb3RvLlJhbmdlZFdlYXBvblR5cGUSDQoFc3RhdHMYCSADKAESJAoLZ2VtX3NvY2tldHMYCiADKA4yDy5wcm90by5HZW1Db2xvchITCgtzb2NrZXRCb251cxgLIAMoARIdChVyYW5kb21fc3VmZml4X29wdGlvbnMYGiADKAUSGAoQcmFuZF9wcm9wX3BvaW50cxgbIAEoBRIZChF3ZWFwb25fZGFtYWdlX21pbhgMIAEoARIZChF3ZWFwb25fZGFtYWdlX21heBgNIAEoARIUCgx3ZWFwb25fc3BlZWQYDiABKAESDAoEaWx2bBgPIAEoBRINCgVwaGFzZRgQIAEoBRIjCgdxdWFsaXR5GBEgASgOMhIucHJvdG8uSXRlbVF1YWxpdHkSGAoQcXVhbGl0eV9tb2RpZmllchghIAEoARIOCgZ1bmlxdWUYEiABKAgSFgoObGltaXRfY2F0ZWdvcnkYICABKAUSGAoQbmFtZV9kZXNjcmlwdGlvbhgTIAEoCRIlCg9jbGFzc19hbGxvd2xpc3QYFCADKA4yDC5wcm90by5DbGFzcxIuChNyZXF1aXJlZF9wcm9mZXNzaW9uGBUgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIQCghzZXRfbmFtZRgWIAEoCRIOCgZzZXRfaWQYHCABKAUSIwoJZXhwYW5zaW9uGBggASgOMhAucHJvdG8uRXhwYW5zaW9uEiQKB3NvdXJjZXMYFyADKAsyEy5wcm90by5VSUl0ZW1Tb3VyY2USPQoTZmFjdGlvbl9yZXN0cmljdGlvbhgZIAEoDjIgLnByb3RvLlVJSXRlbS5GYWN0aW9uUmVzdHJpY3Rpb24SOgoPc2NhbGluZ19vcHRpb25zGB0gAygLMiEucHJvdG8uVUlJdGVtLlNjYWxpbmdPcHRpb25zRW50cnkSJwoMaXRlbV9lZmZlY3RzGB4gAygLMhEucHJvdG8uSXRlbUVmZmVjdBpTChNTY2FsaW5nT3B0aW9uc0VudHJ5EgsKA2tleRgBIAEoBRIrCgV2YWx1ZRgCIAEoCzIcLnByb3RvLlNjYWxpbmdJdGVtUHJvcGVydGllczoCOAEihAEKEkZhY3Rpb25SZXN0cmljdGlvbhIjCh9GQUNUSU9OX1JFU1RSSUNUSU9OX1VOU1BFQ0lGSUVEEAASJQohRkFDVElPTl9SRVNUUklDVElPTl9BTExJQU5DRV9PTkxZEAESIgoeRkFDVElPTl9SRVNUUklDVElPTl9IT1JERV9PTkxZEAIi0gEKDFVJSXRlbVNvdXJjZRInCgdjcmFmdGVkGAEgASgLMhQucHJvdG8uQ3JhZnRlZFNvdXJjZUgAEiEKBGRyb3AYAiABKAsyES5wcm90by5Ecm9wU291cmNlSAASIwoFcXVlc3QYAyABKAsyEi5wcm90by5RdWVzdFNvdXJjZUgAEiYKB3NvbGRfYnkYBCABKAsyEy5wcm90by5Tb2xkQnlTb3VyY2VIABIfCgNyZXAYBSABKAsyEC5wcm90by5SZXBTb3VyY2VIAEIICgZzb3VyY2UiSAoNQ3JhZnRlZFNvdXJjZRIlCgpwcm9mZXNzaW9uGAEgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIQCghzcGVsbF9pZBgCIAEoBSKBAQoKRHJvcFNvdXJjZRIsCgpkaWZmaWN1bHR5GAEgASgOMhgucHJvdG8uRHVuZ2VvbkRpZmZpY3VsdHkSDgoGbnBjX2lkGAIgASgFEg8KB3pvbmVfaWQYAyABKAUSEgoKb3RoZXJfbmFtZRgEIAEoCRIQCghjYXRlZ29yeRgFIAEoCSInCgtRdWVzdFNvdXJjZRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJIkEKDFNvbGRCeVNvdXJjZRIOCgZucGNfaWQYASABKAUSEAoIbnBjX25hbWUYAiABKAkSDwoHem9uZV9pZBgDIAEoBSJ+CglSZXBTb3VyY2USKQoOcmVwX2ZhY3Rpb25faWQYASABKA4yES5wcm90by5SZXBGYWN0aW9uEiIKCXJlcF9sZXZlbBgCIAEoDjIPLnByb3RvLlJlcExldmVsEiIKCmZhY3Rpb25faWQYAyABKA4yDi5wcm90by5GYWN0aW9uIpIDCglVSUVuY2hhbnQSEQoJZWZmZWN0X2lkGAEgASgFEg8KB2l0ZW1faWQYAiABKAUSEAoIc3BlbGxfaWQYAyABKAUSDAoEbmFtZRgEIAEoCRIMCgRpY29uGAUgASgJEh0KBHR5cGUYBiABKA4yDy5wcm90by5JdGVtVHlwZRIkCgtleHRyYV90eXBlcxgNIAMoDjIPLnByb3RvLkl0ZW1UeXBlEigKDGVuY2hhbnRfdHlwZRgHIAEoDjISLnByb3RvLkVuY2hhbnRUeXBlEg0KBXN0YXRzGAggAygBEiMKB3F1YWxpdHkYCSABKA4yEi5wcm90by5JdGVtUXVhbGl0eRINCgVwaGFzZRgKIAEoBRIlCg9jbGFzc19hbGxvd2xpc3QYCyADKA4yDC5wcm90by5DbGFzcxIuChNyZXF1aXJlZF9wcm9mZXNzaW9uGAwgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIqCg9lbmNoYW50X2VmZmVjdHMYDiADKAsyES5wcm90by5JdGVtRWZmZWN0IvYBCgVVSUdlbRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEgwKBGljb24YAyABKAkSHgoFY29sb3IYBCABKA4yDy5wcm90by5HZW1Db2xvchINCgVzdGF0cxgFIAMoARINCgVwaGFzZRgGIAEoBRIjCgdxdWFsaXR5GAcgASgOMhIucHJvdG8uSXRlbVF1YWxpdHkSDgoGdW5pcXVlGAggASgIEi4KE3JlcXVpcmVkX3Byb2Zlc3Npb24YCSABKA4yES5wcm90by5Qcm9mZXNzaW9uEiIKGmRpc2FibGVkX2luX2NoYWxsZW5nZV9tb2RlGAogASgIIlIKCEljb25EYXRhEgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSDAoEaWNvbhgDIAEoCRIMCgRyYW5rGAQgASgFEhAKCGhhc19idWZmGAUgASgIIt8FCg9EYXRhYmFzZUZpbHRlcnMSJQoLYXJtb3JfdHlwZXMYASADKA4yEC5wcm90by5Bcm1vclR5cGUSJwoMd2VhcG9uX3R5cGVzGAIgAygOMhEucHJvdG8uV2VhcG9uVHlwZRI0ChNyYW5nZWRfd2VhcG9uX3R5cGVzGBAgAygOMhcucHJvdG8uUmFuZ2VkV2VhcG9uVHlwZRIqCgdzb3VyY2VzGBEgAygOMhkucHJvdG8uU291cmNlRmlsdGVyT3B0aW9uEiYKBXJhaWRzGBIgAygOMhcucHJvdG8uUmFpZEZpbHRlck9wdGlvbhI9ChNmYWN0aW9uX3Jlc3RyaWN0aW9uGBMgASgOMiAucHJvdG8uVUlJdGVtLkZhY3Rpb25SZXN0cmljdGlvbhIQCghtaW5faWx2bBgUIAEoBRIQCghtYXhfaWx2bBgVIAEoBRIbChNtaW5fbWhfd2VhcG9uX3NwZWVkGAQgASgBEhsKE21heF9taF93ZWFwb25fc3BlZWQYBSABKAESGwoTbWluX29oX3dlYXBvbl9zcGVlZBgJIAEoARIbChNtYXhfb2hfd2VhcG9uX3NwZWVkGAogASgBEh8KF21pbl9yYW5nZWRfd2VhcG9uX3NwZWVkGA4gASgBEh8KF21heF9yYW5nZWRfd2VhcG9uX3NwZWVkGA8gASgBEhoKEm9uZV9oYW5kZWRfd2VhcG9ucxgGIAEoCBIaChJ0d29faGFuZGVkX3dlYXBvbnMYByABKAgSGgoSbWF0Y2hpbmdfZ2Vtc19vbmx5GAggASgIEhYKDmZhdm9yaXRlX2l0ZW1zGAsgAygFEhUKDWZhdm9yaXRlX2dlbXMYDCADKAUSIAoYZmF2b3JpdGVfcmFuZG9tX3N1ZmZpeGVzGBYgAygFEhkKEWZhdm9yaXRlX3JlZm9yZ2VzGBcgAygFEhkKEWZhdm9yaXRlX2VuY2hhbnRzGA0gAygJIpADCgtTaW1TZXR0aW5ncxISCgppdGVyYXRpb25zGAEgASgFEg0KBXBoYXNlGAIgASgFEhYKDmZpeGVkX3JuZ19zZWVkGAMgASgDEhsKE3Nob3dfZGFtYWdlX21ldHJpY3MYCCABKAgSGwoTc2hvd190aHJlYXRfbWV0cmljcxgEIAEoCBIcChRzaG93X2hlYWxpbmdfbWV0cmljcxgHIAEoCBIZChFzaG93X2V4cGVyaW1lbnRhbBgFIAEoCBIXCg9zaG93X3F1aWNrX3N3YXAYDCABKAgSFgoOc2hvd19lcF92YWx1ZXMYCyABKAgSIAoUdXNlX2N1c3RvbV9lcF92YWx1ZXMYDSABKAhCAhgBEiQKGHVzZV9zb2Z0X2NhcF9icmVha3BvaW50cxgOIAEoCEICGAESEAoIbGFuZ3VhZ2UYCSABKAkSHwoHZmFjdGlvbhgGIAEoDjIOLnByb3RvLkZhY3Rpb24SJwoHZmlsdGVycxgKIAEoCzIWLnByb3RvLkRhdGFiYXNlRmlsdGVycyL4BAoVSW5kaXZpZHVhbFNpbVNldHRpbmdzEhMKC2FwaV92ZXJzaW9uGA8gASgFEiQKCHNldHRpbmdzGAUgASgLMhIucHJvdG8uU2ltU2V0dGluZ3MSJAoKcmFpZF9idWZmcxgBIAEoCzIQLnByb3RvLlJhaWRCdWZmcxIfCgdkZWJ1ZmZzGAggASgLMg4ucHJvdG8uRGVidWZmcxIjCgV0YW5rcxgHIAMoCzIULnByb3RvLlVuaXRSZWZlcmVuY2USJgoLcGFydHlfYnVmZnMYAiABKAsyES5wcm90by5QYXJ0eUJ1ZmZzEh0KBnBsYXllchgDIAEoCzINLnByb3RvLlBsYXllchIjCgllbmNvdW50ZXIYBCABKAsyEC5wcm90by5FbmNvdW50ZXISFgoOdGFyZ2V0X2R1bW1pZXMYCSABKAUSKgoQZXBfd2VpZ2h0c19zdGF0cxgKIAEoCzIQLnByb3RvLlVuaXRTdGF0cxIRCgllcF9yYXRpb3MYCyADKAESIQoMZHBzX3JlZl9zdGF0GAwgASgOMgsucHJvdG8uU3RhdBIiCg1oZWFsX3JlZl9zdGF0GA0gASgOMgsucHJvdG8uU3RhdBIiCg10YW5rX3JlZl9zdGF0GA4gASgOMgsucHJvdG8uU3RhdBInCglzdGF0X2NhcHMYECABKAsyEC5wcm90by5Vbml0U3RhdHNCAhgBEi8KEWJyZWFrcG9pbnRfbGltaXRzGBEgASgLMhAucHJvdG8uVW5pdFN0YXRzQgIYARIwChByZWZvcmdlX3NldHRpbmdzGBIgASgLMhYucHJvdG8uUmVmb3JnZVNldHRpbmdzIssCCg9SZWZvcmdlU2V0dGluZ3MSHAoUdXNlX2N1c3RvbV9lcF92YWx1ZXMYASABKAgSIAoYdXNlX3NvZnRfY2FwX2JyZWFrcG9pbnRzGAIgASgIEhkKEWZyZWV6ZV9pdGVtX3Nsb3RzGAMgASgIEioKEWZyb3plbl9pdGVtX3Nsb3RzGAQgAygOMg8ucHJvdG8uSXRlbVNsb3QSIwoJc3RhdF9jYXBzGAUgASgLMhAucHJvdG8uVW5pdFN0YXRzEisKEWJyZWFrcG9pbnRfbGltaXRzGAYgASgLMhAucHJvdG8uVW5pdFN0YXRzEhUKDW1heF9nZW1fcGhhc2UYByABKAUSKwoPbWF4X2dlbV9xdWFsaXR5GAggASgOMhIucHJvdG8uSXRlbVF1YWxpdHkSGwoTZGlzYWJsZV91bmlxdWVfZ2VtcxgJIAEoCCKCAQoNU3RhdENhcENvbmZpZxIgCgl1bml0X3N0YXQYASABKAsyDS5wcm90by5VSVN0YXQSEwoLYnJlYWtwb2ludHMYAiADKAESJAoIY2FwX3R5cGUYAyABKA4yEi5wcm90by5TdGF0Q2FwVHlwZRIUCgxwb3N0X2NhcF9FUHMYBCADKAEicQoGVUlTdGF0EhMKC2FwaV92ZXJzaW9uGAMgASgFEhsKBHN0YXQYASABKA4yCy5wcm90by5TdGF0SAASKAoLcHNldWRvX3N0YXQYAiABKA4yES5wcm90by5Qc2V1ZG9TdGF0SABCCwoJdW5pdF9zdGF0Il8KDFNhdmVkR2VhclNldBIiCgRnZWFyGAEgASgLMhQucHJvdG8uRXF1aXBtZW50U3BlYxIrChFib251c19zdGF0c19zdGF0cxgDIAEoCzIQLnByb3RvLlVuaXRTdGF0cyKFAQoXU2F2ZWRTdGF0V2VpZ2h0U2V0dGluZ3MSIwoOZXhjbHVkZWRfc3RhdHMYASADKA4yCy5wcm90by5TdGF0EjAKFWV4Y2x1ZGVkX3BzZXVkb19zdGF0cxgCIAMoDjIRLnByb3RvLlBzZXVkb1N0YXQSEwoLYXBpX3ZlcnNpb24YAyABKAUiqgQKDVNhdmVkU2V0dGluZ3MSJAoKcmFpZF9idWZmcxgBIAEoCzIQLnByb3RvLlJhaWRCdWZmcxImCgtwYXJ0eV9idWZmcxgCIAEoCzIRLnByb3RvLlBhcnR5QnVmZnMSHwoHZGVidWZmcxgHIAEoCzIOLnByb3RvLkRlYnVmZnMSLAoMcGxheWVyX2J1ZmZzGAMgASgLMhYucHJvdG8uSW5kaXZpZHVhbEJ1ZmZzEigKC2NvbnN1bWFibGVzGAQgASgLMhMucHJvdG8uQ29uc3VtZXNTcGVjEhkKBHJhY2UYBSABKA4yCy5wcm90by5SYWNlEiYKC3Byb2Zlc3Npb25zGAkgAygOMhEucHJvdG8uUHJvZmVzc2lvbhIYChBlbmFibGVfaXRlbV9zd2FwGBIgASgIEiIKCWl0ZW1fc3dhcBgRIAEoCzIPLnByb3RvLkl0ZW1Td2FwEhgKEHJlYWN0aW9uX3RpbWVfbXMYCiABKAUSHQoVY2hhbm5lbF9jbGlwX2RlbGF5X21zGA4gASgFEhoKEmluX2Zyb250X29mX3RhcmdldBgLIAEoCBIcChRkaXN0YW5jZV9mcm9tX3RhcmdldBgMIAEoARIqCg1oZWFsaW5nX21vZGVsGA0gASgLMhMucHJvdG8uSGVhbGluZ01vZGVsEhoKEmRhcmtfaW50ZW50X3VwdGltZRgTIAEoARIWCg5jaGFsbGVuZ2VfbW9kZRgUIAEoCCImCgxTYXZlZFRhbGVudHMSFgoOdGFsZW50c19zdHJpbmcYASABKAkiNQoNU2F2ZWRSb3RhdGlvbhIkCghyb3RhdGlvbhgBIAEoCzISLnByb3RvLkFQTFJvdGF0aW9uIjYKDlNhdmVkRVBXZWlnaHRzEiQKCmVwX3dlaWdodHMYASABKAsyEC5wcm90by5Vbml0U3RhdHMiOgoTQmxlc3NpbmdzQXNzaWdubWVudBIjCglibGVzc2luZ3MYASADKA4yEC5wcm90by5CbGVzc2luZ3MiRAoUQmxlc3NpbmdzQXNzaWdubWVudHMSLAoIcGFsYWRpbnMYASADKAsyGi5wcm90by5CbGVzc2luZ3NBc3NpZ25tZW50IjUKDlNhdmVkRW5jb3VudGVyEiMKCWVuY291bnRlchgBIAEoCzIQLnByb3RvLkVuY291bnRlciKGAQoJU2F2ZWRSYWlkEhkKBHJhaWQYASABKAsyCy5wcm90by5SYWlkEi4KCWJsZXNzaW5ncxgDIAEoCzIbLnByb3RvLkJsZXNzaW5nc0Fzc2lnbm1lbnRzEh8KB2ZhY3Rpb24YBCABKA4yDi5wcm90by5GYWN0aW9uEg0KBXBoYXNlGAUgASgFIqcBCg9SYWlkU2ltU2V0dGluZ3MSJAoIc2V0dGluZ3MYBSABKAsyEi5wcm90by5TaW1TZXR0aW5ncxIZCgRyYWlkGAEgASgLMgsucHJvdG8uUmFpZBIuCglibGVzc2luZ3MYAyABKAsyGy5wcm90by5CbGVzc2luZ3NBc3NpZ25tZW50cxIjCgllbmNvdW50ZXIYBCABKAsyEC5wcm90by5FbmNvdW50ZXIiVgoGU2ltUnVuEiYKB3JlcXVlc3QYASABKAsyFS5wcm90by5SYWlkU2ltUmVxdWVzdBIkCgZyZXN1bHQYAiABKAsyFC5wcm90by5SYWlkU2ltUmVzdWx0Ik4KClNpbVJ1bkRhdGESGgoDcnVuGAEgASgLMg0ucHJvdG8uU2ltUnVuEiQKDXJlZmVyZW5jZV9ydW4YAiABKAsyDS5wcm90by5TaW1SdW4ibgoVRGV0YWlsZWRSZXN1bHRzVXBkYXRlEiUKCHJ1bl9kYXRhGAEgASgLMhEucHJvdG8uU2ltUnVuRGF0YUgAEiYKCHNldHRpbmdzGAIgASgLMhIucHJvdG8uU2ltU2V0dGluZ3NIAEIGCgRkYXRhKoIBCglFeHBhbnNpb24SFAoQRXhwYW5zaW9uVW5rbm93bhAAEhQKEEV4cGFuc2lvblZhbmlsbGEQARIQCgxFeHBhbnNpb25UYmMQAhISCg5FeHBhbnNpb25Xb3RsaxADEhEKDUV4cGFuc2lvbkNhdGEQBBIQCgxFeHBhbnNpb25Nb3AQBSrKAgoRRHVuZ2VvbkRpZmZpY3VsdHkSFQoRRGlmZmljdWx0eVVua25vd24QABIUChBEaWZmaWN1bHR5Tm9ybWFsEAESFAoQRGlmZmljdWx0eUhlcm9pYxACEhwKGERpZmZpY3VsdHlUaXRhblJ1bmVBbHBoYRAHEhsKF0RpZmZpY3VsdHlUaXRhblJ1bmVCZXRhEAgSFwoTRGlmZmljdWx0eUNlbGVzdGlhbBAKEhQKEERpZmZpY3VsdHlSYWlkMTAQAxIVChFEaWZmaWN1bHR5UmFpZDEwSBAEEhQKEERpZmZpY3VsdHlSYWlkMjUQBRIVChFEaWZmaWN1bHR5UmFpZDI1SBAGEhYKEkRpZmZpY3VsdHlSYWlkMjVSRhAJEhYKEkRpZmZpY3VsdHlSYWlkRmxleBALEhQKEERpZmZpY3VsdHlWZW5kb3IQDCrJAQoIUmVwTGV2ZWwSEwoPUmVwTGV2ZWxVbmtub3duEAASEQoNUmVwTGV2ZWxIYXRlZBABEhMKD1JlcExldmVsSG9zdGlsZRACEhYKElJlcExldmVsVW5mcmllbmRseRADEhMKD1JlcExldmVsTmV1dHJhbBAEEhQKEFJlcExldmVsRnJpZW5kbHkQBRITCg9SZXBMZXZlbEhvbm9yZWQQBhITCg9SZXBMZXZlbFJldmVyZWQQBxITCg9SZXBMZXZlbEV4YWx0ZWQQCCq6AgoKUmVwRmFjdGlvbhIVChFSZXBGYWN0aW9uVW5rbm93bhAAEhwKF1JlcEZhY3Rpb25UaGVDb25zb3J0aXVtEKUHEhgKE1JlcEZhY3Rpb25UaGVNYWdIYXIQrQcSIQocUmVwRmFjdGlvbkNlbmFyaW9uRXhwZWRpdGlvbhCuBxIYChNSZXBGYWN0aW9uSG9ub3JIb2xkELIHEhgKE1JlcEZhY3Rpb25UaHJhbGxtYXIQswcSGAoTUmVwRmFjdGlvblNwb3JlZ2dhchDKBxIWChFSZXBGYWN0aW9uS3VyZW5haRDSBxIiCh1SZXBGYWN0aW9uQXNodG9uZ3VlRGVhdGhzd29ybhD0BxIZChRSZXBGYWN0aW9uTmV0aGVyd2luZxD3BxIVChBSZXBGYWN0aW9uT2dyaUxhEI4IKvEBChJTb3VyY2VGaWx0ZXJPcHRpb24SEQoNU291cmNlVW5rbm93bhAAEhIKDlNvdXJjZUNyYWZ0aW5nEAESDwoLU291cmNlUXVlc3QQAhIUChBTb3VyY2VSZXB1dGF0aW9uEAMSEAoMU291cmNlU29sZEJ5EAsSDQoJU291cmNlUHZwEAQSEQoNU291cmNlRHVuZ2VvbhAFEhIKDlNvdXJjZUR1bmdlb25IEAYSDgoKU291cmNlUmFpZBAHEg8KC1NvdXJjZVJhaWRIEAgSEAoMU291cmNlUmFpZFJGEAkSEgoOU291cmNlUmFpZEZsZXgQCiqXAQoQUmFpZEZpbHRlck9wdGlvbhIPCgtSYWlkVW5rbm93bhAAEgwKCFJhaWRLYXJhEAESDQoJUmFpZEdydXVsEAISCwoHUmFpZE1hZxADEgoKBlJhaWRUSxAEEgsKB1JhaWRTU0MQBRIKCgZSYWlkTUgQBhIKCgZSYWlkQlQQBxIKCgZSYWlkWkEQCBILCgdSYWlkU1dQEAkqUwoLU3RhdENhcFR5cGUSDwoLVHlwZVVua25vd24QABIPCgtUeXBlSGFyZENhcBABEg8KC1R5cGVTb2Z0Q2FwEAISEQoNVHlwZVRocmVzaG9sZBADQglaBy4vcHJvdG9iBnByb3RvMw", [file_api, file_apl, file_common, file_db, file_spell, file_paladin]);
+  fileDesc("Cgh1aS5wcm90bxIFcHJvdG8i5wMKClVJRGF0YWJhc2USHAoFaXRlbXMYASADKAsyDS5wcm90by5VSUl0ZW0SMAoPcmFuZG9tX3N1ZmZpeGVzGAsgAygLMhcucHJvdG8uSXRlbVJhbmRvbVN1ZmZpeBIiCghlbmNoYW50cxgCIAMoCzIQLnByb3RvLlVJRW5jaGFudBIaCgRnZW1zGAMgAygLMgwucHJvdG8uVUlHZW0SKgoKZW5jb3VudGVycxgGIAMoCzIWLnByb3RvLlByZXNldEVuY291bnRlchIcCgV6b25lcxgIIAMoCzINLnByb3RvLlVJWm9uZRIaCgRucGNzGAkgAygLMgwucHJvdG8uVUlOUEMSIwoKaXRlbV9pY29ucxgEIAMoCzIPLnByb3RvLkljb25EYXRhEiQKC3NwZWxsX2ljb25zGAUgAygLMg8ucHJvdG8uSWNvbkRhdGESRQocaXRlbV9lZmZlY3RfcmFuZF9wcm9wX3BvaW50cxgPIAMoCzIfLnByb3RvLkl0ZW1FZmZlY3RSYW5kUHJvcFBvaW50cxImCgtjb25zdW1hYmxlcxgNIAMoCzIRLnByb3RvLkNvbnN1bWFibGUSKQoNc3BlbGxfZWZmZWN0cxgOIAMoCzISLnByb3RvLlNwZWxsRWZmZWN0IkcKBlVJWm9uZRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEiMKCWV4cGFuc2lvbhgDIAEoDjIQLnByb3RvLkV4cGFuc2lvbiIyCgVVSU5QQxIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEg8KB3pvbmVfaWQYAyABKAUipwkKBlVJSXRlbRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEgwKBGljb24YAyABKAkSHQoEdHlwZRgEIAEoDjIPLnByb3RvLkl0ZW1UeXBlEiQKCmFybW9yX3R5cGUYBSABKA4yEC5wcm90by5Bcm1vclR5cGUSJgoLd2VhcG9uX3R5cGUYBiABKA4yES5wcm90by5XZWFwb25UeXBlEiIKCWhhbmRfdHlwZRgHIAEoDjIPLnByb3RvLkhhbmRUeXBlEjMKEnJhbmdlZF93ZWFwb25fdHlwZRgIIAEoDjIXLnByb3RvLlJhbmdlZFdlYXBvblR5cGUSDQoFc3RhdHMYCSADKAESJAoLZ2VtX3NvY2tldHMYCiADKA4yDy5wcm90by5HZW1Db2xvchITCgtzb2NrZXRCb251cxgLIAMoARIdChVyYW5kb21fc3VmZml4X29wdGlvbnMYGiADKAUSGAoQcmFuZF9wcm9wX3BvaW50cxgbIAEoBRIZChF3ZWFwb25fZGFtYWdlX21pbhgMIAEoARIZChF3ZWFwb25fZGFtYWdlX21heBgNIAEoARIUCgx3ZWFwb25fc3BlZWQYDiABKAESDAoEaWx2bBgPIAEoBRINCgVwaGFzZRgQIAEoBRIjCgdxdWFsaXR5GBEgASgOMhIucHJvdG8uSXRlbVF1YWxpdHkSGAoQcXVhbGl0eV9tb2RpZmllchghIAEoARIOCgZ1bmlxdWUYEiABKAgSFgoObGltaXRfY2F0ZWdvcnkYICABKAUSGAoQbmFtZV9kZXNjcmlwdGlvbhgTIAEoCRIlCg9jbGFzc19hbGxvd2xpc3QYFCADKA4yDC5wcm90by5DbGFzcxIuChNyZXF1aXJlZF9wcm9mZXNzaW9uGBUgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIQCghzZXRfbmFtZRgWIAEoCRIOCgZzZXRfaWQYHCABKAUSIwoJZXhwYW5zaW9uGBggASgOMhAucHJvdG8uRXhwYW5zaW9uEiQKB3NvdXJjZXMYFyADKAsyEy5wcm90by5VSUl0ZW1Tb3VyY2USPQoTZmFjdGlvbl9yZXN0cmljdGlvbhgZIAEoDjIgLnByb3RvLlVJSXRlbS5GYWN0aW9uUmVzdHJpY3Rpb24SOgoPc2NhbGluZ19vcHRpb25zGB0gAygLMiEucHJvdG8uVUlJdGVtLlNjYWxpbmdPcHRpb25zRW50cnkSJwoMaXRlbV9lZmZlY3RzGB4gAygLMhEucHJvdG8uSXRlbUVmZmVjdBpTChNTY2FsaW5nT3B0aW9uc0VudHJ5EgsKA2tleRgBIAEoBRIrCgV2YWx1ZRgCIAEoCzIcLnByb3RvLlNjYWxpbmdJdGVtUHJvcGVydGllczoCOAEihAEKEkZhY3Rpb25SZXN0cmljdGlvbhIjCh9GQUNUSU9OX1JFU1RSSUNUSU9OX1VOU1BFQ0lGSUVEEAASJQohRkFDVElPTl9SRVNUUklDVElPTl9BTExJQU5DRV9PTkxZEAESIgoeRkFDVElPTl9SRVNUUklDVElPTl9IT1JERV9PTkxZEAIi0gEKDFVJSXRlbVNvdXJjZRInCgdjcmFmdGVkGAEgASgLMhQucHJvdG8uQ3JhZnRlZFNvdXJjZUgAEiEKBGRyb3AYAiABKAsyES5wcm90by5Ecm9wU291cmNlSAASIwoFcXVlc3QYAyABKAsyEi5wcm90by5RdWVzdFNvdXJjZUgAEiYKB3NvbGRfYnkYBCABKAsyEy5wcm90by5Tb2xkQnlTb3VyY2VIABIfCgNyZXAYBSABKAsyEC5wcm90by5SZXBTb3VyY2VIAEIICgZzb3VyY2UiSAoNQ3JhZnRlZFNvdXJjZRIlCgpwcm9mZXNzaW9uGAEgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIQCghzcGVsbF9pZBgCIAEoBSKBAQoKRHJvcFNvdXJjZRIsCgpkaWZmaWN1bHR5GAEgASgOMhgucHJvdG8uRHVuZ2VvbkRpZmZpY3VsdHkSDgoGbnBjX2lkGAIgASgFEg8KB3pvbmVfaWQYAyABKAUSEgoKb3RoZXJfbmFtZRgEIAEoCRIQCghjYXRlZ29yeRgFIAEoCSInCgtRdWVzdFNvdXJjZRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJIkEKDFNvbGRCeVNvdXJjZRIOCgZucGNfaWQYASABKAUSEAoIbnBjX25hbWUYAiABKAkSDwoHem9uZV9pZBgDIAEoBSJ+CglSZXBTb3VyY2USKQoOcmVwX2ZhY3Rpb25faWQYASABKA4yES5wcm90by5SZXBGYWN0aW9uEiIKCXJlcF9sZXZlbBgCIAEoDjIPLnByb3RvLlJlcExldmVsEiIKCmZhY3Rpb25faWQYAyABKA4yDi5wcm90by5GYWN0aW9uIpIDCglVSUVuY2hhbnQSEQoJZWZmZWN0X2lkGAEgASgFEg8KB2l0ZW1faWQYAiABKAUSEAoIc3BlbGxfaWQYAyABKAUSDAoEbmFtZRgEIAEoCRIMCgRpY29uGAUgASgJEh0KBHR5cGUYBiABKA4yDy5wcm90by5JdGVtVHlwZRIkCgtleHRyYV90eXBlcxgNIAMoDjIPLnByb3RvLkl0ZW1UeXBlEigKDGVuY2hhbnRfdHlwZRgHIAEoDjISLnByb3RvLkVuY2hhbnRUeXBlEg0KBXN0YXRzGAggAygBEiMKB3F1YWxpdHkYCSABKA4yEi5wcm90by5JdGVtUXVhbGl0eRINCgVwaGFzZRgKIAEoBRIlCg9jbGFzc19hbGxvd2xpc3QYCyADKA4yDC5wcm90by5DbGFzcxIuChNyZXF1aXJlZF9wcm9mZXNzaW9uGAwgASgOMhEucHJvdG8uUHJvZmVzc2lvbhIqCg9lbmNoYW50X2VmZmVjdHMYDiADKAsyES5wcm90by5JdGVtRWZmZWN0ItIBCgVVSUdlbRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEgwKBGljb24YAyABKAkSHgoFY29sb3IYBCABKA4yDy5wcm90by5HZW1Db2xvchINCgVzdGF0cxgFIAMoARINCgVwaGFzZRgGIAEoBRIjCgdxdWFsaXR5GAcgASgOMhIucHJvdG8uSXRlbVF1YWxpdHkSDgoGdW5pcXVlGAggASgIEi4KE3JlcXVpcmVkX3Byb2Zlc3Npb24YCSABKA4yES5wcm90by5Qcm9mZXNzaW9uIlIKCEljb25EYXRhEgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSDAoEaWNvbhgDIAEoCRIMCgRyYW5rGAQgASgFEhAKCGhhc19idWZmGAUgASgIIt8FCg9EYXRhYmFzZUZpbHRlcnMSJQoLYXJtb3JfdHlwZXMYASADKA4yEC5wcm90by5Bcm1vclR5cGUSJwoMd2VhcG9uX3R5cGVzGAIgAygOMhEucHJvdG8uV2VhcG9uVHlwZRI0ChNyYW5nZWRfd2VhcG9uX3R5cGVzGBAgAygOMhcucHJvdG8uUmFuZ2VkV2VhcG9uVHlwZRIqCgdzb3VyY2VzGBEgAygOMhkucHJvdG8uU291cmNlRmlsdGVyT3B0aW9uEiYKBXJhaWRzGBIgAygOMhcucHJvdG8uUmFpZEZpbHRlck9wdGlvbhI9ChNmYWN0aW9uX3Jlc3RyaWN0aW9uGBMgASgOMiAucHJvdG8uVUlJdGVtLkZhY3Rpb25SZXN0cmljdGlvbhIQCghtaW5faWx2bBgUIAEoBRIQCghtYXhfaWx2bBgVIAEoBRIbChNtaW5fbWhfd2VhcG9uX3NwZWVkGAQgASgBEhsKE21heF9taF93ZWFwb25fc3BlZWQYBSABKAESGwoTbWluX29oX3dlYXBvbl9zcGVlZBgJIAEoARIbChNtYXhfb2hfd2VhcG9uX3NwZWVkGAogASgBEh8KF21pbl9yYW5nZWRfd2VhcG9uX3NwZWVkGA4gASgBEh8KF21heF9yYW5nZWRfd2VhcG9uX3NwZWVkGA8gASgBEhoKEm9uZV9oYW5kZWRfd2VhcG9ucxgGIAEoCBIaChJ0d29faGFuZGVkX3dlYXBvbnMYByABKAgSGgoSbWF0Y2hpbmdfZ2Vtc19vbmx5GAggASgIEhYKDmZhdm9yaXRlX2l0ZW1zGAsgAygFEhUKDWZhdm9yaXRlX2dlbXMYDCADKAUSIAoYZmF2b3JpdGVfcmFuZG9tX3N1ZmZpeGVzGBYgAygFEhkKEWZhdm9yaXRlX3JlZm9yZ2VzGBcgAygFEhkKEWZhdm9yaXRlX2VuY2hhbnRzGA0gAygJIpADCgtTaW1TZXR0aW5ncxISCgppdGVyYXRpb25zGAEgASgFEg0KBXBoYXNlGAIgASgFEhYKDmZpeGVkX3JuZ19zZWVkGAMgASgDEhsKE3Nob3dfZGFtYWdlX21ldHJpY3MYCCABKAgSGwoTc2hvd190aHJlYXRfbWV0cmljcxgEIAEoCBIcChRzaG93X2hlYWxpbmdfbWV0cmljcxgHIAEoCBIZChFzaG93X2V4cGVyaW1lbnRhbBgFIAEoCBIXCg9zaG93X3F1aWNrX3N3YXAYDCABKAgSFgoOc2hvd19lcF92YWx1ZXMYCyABKAgSIAoUdXNlX2N1c3RvbV9lcF92YWx1ZXMYDSABKAhCAhgBEiQKGHVzZV9zb2Z0X2NhcF9icmVha3BvaW50cxgOIAEoCEICGAESEAoIbGFuZ3VhZ2UYCSABKAkSHwoHZmFjdGlvbhgGIAEoDjIOLnByb3RvLkZhY3Rpb24SJwoHZmlsdGVycxgKIAEoCzIWLnByb3RvLkRhdGFiYXNlRmlsdGVycyL4BAoVSW5kaXZpZHVhbFNpbVNldHRpbmdzEhMKC2FwaV92ZXJzaW9uGA8gASgFEiQKCHNldHRpbmdzGAUgASgLMhIucHJvdG8uU2ltU2V0dGluZ3MSJAoKcmFpZF9idWZmcxgBIAEoCzIQLnByb3RvLlJhaWRCdWZmcxIfCgdkZWJ1ZmZzGAggASgLMg4ucHJvdG8uRGVidWZmcxIjCgV0YW5rcxgHIAMoCzIULnByb3RvLlVuaXRSZWZlcmVuY2USJgoLcGFydHlfYnVmZnMYAiABKAsyES5wcm90by5QYXJ0eUJ1ZmZzEh0KBnBsYXllchgDIAEoCzINLnByb3RvLlBsYXllchIjCgllbmNvdW50ZXIYBCABKAsyEC5wcm90by5FbmNvdW50ZXISFgoOdGFyZ2V0X2R1bW1pZXMYCSABKAUSKgoQZXBfd2VpZ2h0c19zdGF0cxgKIAEoCzIQLnByb3RvLlVuaXRTdGF0cxIRCgllcF9yYXRpb3MYCyADKAESIQoMZHBzX3JlZl9zdGF0GAwgASgOMgsucHJvdG8uU3RhdBIiCg1oZWFsX3JlZl9zdGF0GA0gASgOMgsucHJvdG8uU3RhdBIiCg10YW5rX3JlZl9zdGF0GA4gASgOMgsucHJvdG8uU3RhdBInCglzdGF0X2NhcHMYECABKAsyEC5wcm90by5Vbml0U3RhdHNCAhgBEi8KEWJyZWFrcG9pbnRfbGltaXRzGBEgASgLMhAucHJvdG8uVW5pdFN0YXRzQgIYARIwChByZWZvcmdlX3NldHRpbmdzGBIgASgLMhYucHJvdG8uUmVmb3JnZVNldHRpbmdzIl8KDFNhdmVkR2VhclNldBIiCgRnZWFyGAEgASgLMhQucHJvdG8uRXF1aXBtZW50U3BlYxIrChFib251c19zdGF0c19zdGF0cxgDIAEoCzIQLnByb3RvLlVuaXRTdGF0cyKFAQoXU2F2ZWRTdGF0V2VpZ2h0U2V0dGluZ3MSIwoOZXhjbHVkZWRfc3RhdHMYASADKA4yCy5wcm90by5TdGF0EjAKFWV4Y2x1ZGVkX3BzZXVkb19zdGF0cxgCIAMoDjIRLnByb3RvLlBzZXVkb1N0YXQSEwoLYXBpX3ZlcnNpb24YAyABKAUiqgQKDVNhdmVkU2V0dGluZ3MSJAoKcmFpZF9idWZmcxgBIAEoCzIQLnByb3RvLlJhaWRCdWZmcxImCgtwYXJ0eV9idWZmcxgCIAEoCzIRLnByb3RvLlBhcnR5QnVmZnMSHwoHZGVidWZmcxgHIAEoCzIOLnByb3RvLkRlYnVmZnMSLAoMcGxheWVyX2J1ZmZzGAMgASgLMhYucHJvdG8uSW5kaXZpZHVhbEJ1ZmZzEigKC2NvbnN1bWFibGVzGAQgASgLMhMucHJvdG8uQ29uc3VtZXNTcGVjEhkKBHJhY2UYBSABKA4yCy5wcm90by5SYWNlEiYKC3Byb2Zlc3Npb25zGAkgAygOMhEucHJvdG8uUHJvZmVzc2lvbhIYChBlbmFibGVfaXRlbV9zd2FwGBIgASgIEiIKCWl0ZW1fc3dhcBgRIAEoCzIPLnByb3RvLkl0ZW1Td2FwEhgKEHJlYWN0aW9uX3RpbWVfbXMYCiABKAUSHQoVY2hhbm5lbF9jbGlwX2RlbGF5X21zGA4gASgFEhoKEmluX2Zyb250X29mX3RhcmdldBgLIAEoCBIcChRkaXN0YW5jZV9mcm9tX3RhcmdldBgMIAEoARIqCg1oZWFsaW5nX21vZGVsGA0gASgLMhMucHJvdG8uSGVhbGluZ01vZGVsEhoKEmRhcmtfaW50ZW50X3VwdGltZRgTIAEoARIWCg5jaGFsbGVuZ2VfbW9kZRgUIAEoCCImCgxTYXZlZFRhbGVudHMSFgoOdGFsZW50c19zdHJpbmcYASABKAkiNQoNU2F2ZWRSb3RhdGlvbhIkCghyb3RhdGlvbhgBIAEoCzISLnByb3RvLkFQTFJvdGF0aW9uIjYKDlNhdmVkRVBXZWlnaHRzEiQKCmVwX3dlaWdodHMYASABKAsyEC5wcm90by5Vbml0U3RhdHMiOgoTQmxlc3NpbmdzQXNzaWdubWVudBIjCglibGVzc2luZ3MYASADKA4yEC5wcm90by5CbGVzc2luZ3MiRAoUQmxlc3NpbmdzQXNzaWdubWVudHMSLAoIcGFsYWRpbnMYASADKAsyGi5wcm90by5CbGVzc2luZ3NBc3NpZ25tZW50IjUKDlNhdmVkRW5jb3VudGVyEiMKCWVuY291bnRlchgBIAEoCzIQLnByb3RvLkVuY291bnRlciKGAQoJU2F2ZWRSYWlkEhkKBHJhaWQYASABKAsyCy5wcm90by5SYWlkEi4KCWJsZXNzaW5ncxgDIAEoCzIbLnByb3RvLkJsZXNzaW5nc0Fzc2lnbm1lbnRzEh8KB2ZhY3Rpb24YBCABKA4yDi5wcm90by5GYWN0aW9uEg0KBXBoYXNlGAUgASgFIqcBCg9SYWlkU2ltU2V0dGluZ3MSJAoIc2V0dGluZ3MYBSABKAsyEi5wcm90by5TaW1TZXR0aW5ncxIZCgRyYWlkGAEgASgLMgsucHJvdG8uUmFpZBIuCglibGVzc2luZ3MYAyABKAsyGy5wcm90by5CbGVzc2luZ3NBc3NpZ25tZW50cxIjCgllbmNvdW50ZXIYBCABKAsyEC5wcm90by5FbmNvdW50ZXIiVgoGU2ltUnVuEiYKB3JlcXVlc3QYASABKAsyFS5wcm90by5SYWlkU2ltUmVxdWVzdBIkCgZyZXN1bHQYAiABKAsyFC5wcm90by5SYWlkU2ltUmVzdWx0Ik4KClNpbVJ1bkRhdGESGgoDcnVuGAEgASgLMg0ucHJvdG8uU2ltUnVuEiQKDXJlZmVyZW5jZV9ydW4YAiABKAsyDS5wcm90by5TaW1SdW4ibgoVRGV0YWlsZWRSZXN1bHRzVXBkYXRlEiUKCHJ1bl9kYXRhGAEgASgLMhEucHJvdG8uU2ltUnVuRGF0YUgAEiYKCHNldHRpbmdzGAIgASgLMhIucHJvdG8uU2ltU2V0dGluZ3NIAEIGCgRkYXRhKoIBCglFeHBhbnNpb24SFAoQRXhwYW5zaW9uVW5rbm93bhAAEhQKEEV4cGFuc2lvblZhbmlsbGEQARIQCgxFeHBhbnNpb25UYmMQAhISCg5FeHBhbnNpb25Xb3RsaxADEhEKDUV4cGFuc2lvbkNhdGEQBBIQCgxFeHBhbnNpb25Nb3AQBSrKAgoRRHVuZ2VvbkRpZmZpY3VsdHkSFQoRRGlmZmljdWx0eVVua25vd24QABIUChBEaWZmaWN1bHR5Tm9ybWFsEAESFAoQRGlmZmljdWx0eUhlcm9pYxACEhwKGERpZmZpY3VsdHlUaXRhblJ1bmVBbHBoYRAHEhsKF0RpZmZpY3VsdHlUaXRhblJ1bmVCZXRhEAgSFwoTRGlmZmljdWx0eUNlbGVzdGlhbBAKEhQKEERpZmZpY3VsdHlSYWlkMTAQAxIVChFEaWZmaWN1bHR5UmFpZDEwSBAEEhQKEERpZmZpY3VsdHlSYWlkMjUQBRIVChFEaWZmaWN1bHR5UmFpZDI1SBAGEhYKEkRpZmZpY3VsdHlSYWlkMjVSRhAJEhYKEkRpZmZpY3VsdHlSYWlkRmxleBALEhQKEERpZmZpY3VsdHlWZW5kb3IQDCrJAQoIUmVwTGV2ZWwSEwoPUmVwTGV2ZWxVbmtub3duEAASEQoNUmVwTGV2ZWxIYXRlZBABEhMKD1JlcExldmVsSG9zdGlsZRACEhYKElJlcExldmVsVW5mcmllbmRseRADEhMKD1JlcExldmVsTmV1dHJhbBAEEhQKEFJlcExldmVsRnJpZW5kbHkQBRITCg9SZXBMZXZlbEhvbm9yZWQQBhITCg9SZXBMZXZlbFJldmVyZWQQBxITCg9SZXBMZXZlbEV4YWx0ZWQQCCq6AgoKUmVwRmFjdGlvbhIVChFSZXBGYWN0aW9uVW5rbm93bhAAEhwKF1JlcEZhY3Rpb25UaGVDb25zb3J0aXVtEKUHEhgKE1JlcEZhY3Rpb25UaGVNYWdIYXIQrQcSIQocUmVwRmFjdGlvbkNlbmFyaW9uRXhwZWRpdGlvbhCuBxIYChNSZXBGYWN0aW9uSG9ub3JIb2xkELIHEhgKE1JlcEZhY3Rpb25UaHJhbGxtYXIQswcSGAoTUmVwRmFjdGlvblNwb3JlZ2dhchDKBxIWChFSZXBGYWN0aW9uS3VyZW5haRDSBxIiCh1SZXBGYWN0aW9uQXNodG9uZ3VlRGVhdGhzd29ybhD0BxIZChRSZXBGYWN0aW9uTmV0aGVyd2luZxD3BxIVChBSZXBGYWN0aW9uT2dyaUxhEI4IKvEBChJTb3VyY2VGaWx0ZXJPcHRpb24SEQoNU291cmNlVW5rbm93bhAAEhIKDlNvdXJjZUNyYWZ0aW5nEAESDwoLU291cmNlUXVlc3QQAhIUChBTb3VyY2VSZXB1dGF0aW9uEAMSEAoMU291cmNlU29sZEJ5EAsSDQoJU291cmNlUHZwEAQSEQoNU291cmNlRHVuZ2VvbhAFEhIKDlNvdXJjZUR1bmdlb25IEAYSDgoKU291cmNlUmFpZBAHEg8KC1NvdXJjZVJhaWRIEAgSEAoMU291cmNlUmFpZFJGEAkSEgoOU291cmNlUmFpZEZsZXgQCiqXAQoQUmFpZEZpbHRlck9wdGlvbhIPCgtSYWlkVW5rbm93bhAAEgwKCFJhaWRLYXJhEAESDQoJUmFpZEdydXVsEAISCwoHUmFpZE1hZxADEgoKBlJhaWRUSxAEEgsKB1JhaWRTU0MQBRIKCgZSYWlkTUgQBhIKCgZSYWlkQlQQBxIKCgZSYWlkWkEQCBILCgdSYWlkU1dQEAlCCVoHLi9wcm90b2IGcHJvdG8z", [file_api, file_apl, file_common, file_db, file_spell, file_paladin]);
 
 /**
  * Holds all WoW data for the UI.
@@ -704,11 +704,6 @@ export type UIGem = Message<"proto.UIGem"> & {
    * @generated from field: proto.Profession required_profession = 9;
    */
   requiredProfession: Profession;
-
-  /**
-   * @generated from field: bool disabled_in_challenge_mode = 10;
-   */
-  disabledInChallengeMode: boolean;
 };
 
 /**
@@ -1075,154 +1070,6 @@ export const IndividualSimSettingsSchema: GenMessage<IndividualSimSettings> = /*
   messageDesc(file_ui, 15);
 
 /**
- * @generated from message proto.ReforgeSettings
- */
-export type ReforgeSettings = Message<"proto.ReforgeSettings"> & {
-  /**
-   * @generated from field: bool use_custom_ep_values = 1;
-   */
-  useCustomEpValues: boolean;
-
-  /**
-   * @generated from field: bool use_soft_cap_breakpoints = 2;
-   */
-  useSoftCapBreakpoints: boolean;
-
-  /**
-   * @generated from field: bool freeze_item_slots = 3;
-   */
-  freezeItemSlots: boolean;
-
-  /**
-   * @generated from field: repeated proto.ItemSlot frozen_item_slots = 4;
-   */
-  frozenItemSlots: ItemSlot[];
-
-  /**
-   * @generated from field: proto.UnitStats stat_caps = 5;
-   */
-  statCaps?: UnitStats | undefined;
-
-  /**
-   * @generated from field: proto.UnitStats breakpoint_limits = 6;
-   */
-  breakpointLimits?: UnitStats | undefined;
-
-  /**
-   * @generated from field: int32 max_gem_phase = 7;
-   */
-  maxGemPhase: number;
-
-  /**
-   * @generated from field: proto.ItemQuality max_gem_quality = 8;
-   */
-  maxGemQuality: ItemQuality;
-
-  /**
-   * @generated from field: bool disable_unique_gems = 9;
-   */
-  disableUniqueGems: boolean;
-};
-
-/**
- * Describes the message proto.ReforgeSettings.
- * Use `create(ReforgeSettingsSchema)` to create a new message.
- */
-export const ReforgeSettingsSchema: GenMessage<ReforgeSettings> = /*@__PURE__*/
-  messageDesc(file_ui, 16);
-
-/**
- * @generated from message proto.StatCapConfig
- */
-export type StatCapConfig = Message<"proto.StatCapConfig"> & {
-  /**
-   * @generated from field: proto.UIStat unit_stat = 1;
-   */
-  unitStat?: UIStat | undefined;
-
-  /**
-   * Breakpoint values in ascending order
-   *
-   * @generated from field: repeated double breakpoints = 2;
-   */
-  breakpoints: number[];
-
-  /**
-   * Should be either TypeSoftCap or TypeThreshold currently
-   *
-   * @generated from field: proto.StatCapType cap_type = 3;
-   */
-  capType: StatCapType;
-
-  /**
-   * postCapEPs[i] is the stat weight value when between breakpoints[i]
-   * and breakpoints[i+1]. Used only for TypeSoftCap and ignored for
-   * TypeThreshold.
-   *
-   * @generated from field: repeated double post_cap_EPs = 4;
-   */
-  postCapEPs: number[];
-};
-
-/**
- * Describes the message proto.StatCapConfig.
- * Use `create(StatCapConfigSchema)` to create a new message.
- */
-export const StatCapConfigSchema: GenMessage<StatCapConfig> = /*@__PURE__*/
-  messageDesc(file_ui, 17);
-
-/**
- * Represents a single attribute that is either a Stat or a PseudoStat.
- * Currently used only within the StatCapConfig UI message for configuring Haste
- * caps, and is therefore not versioned, since this message is not imported or
- * exported from local storage or links.
- *
- * @generated from message proto.UIStat
- */
-export type UIStat = Message<"proto.UIStat"> & {
-  /**
-   * Proto version at the time these stats were saved. If you make any
-   * breaking changes to the size, ordering, or interpretation of the
-   * stats or pseudoStats arrays, then make sure to increment the
-   * current_version_number option in the ProtoVersion message at the top
-   * of this file.
-   * A "breaking change" here is defined as anything that will break saved
-   * browser data or old sim links; the version need not be incremented if
-   * you simply append a new rarely-used PseudoStat to the end of the
-   * array, for example.
-   *
-   * @generated from field: int32 api_version = 3;
-   */
-  apiVersion: number;
-
-  /**
-   * Uniquely identifies the attribute
-   *
-   * @generated from oneof proto.UIStat.unit_stat
-   */
-  unitStat: {
-    /**
-     * @generated from field: proto.Stat stat = 1;
-     */
-    value: Stat;
-    case: "stat";
-  } | {
-    /**
-     * @generated from field: proto.PseudoStat pseudo_stat = 2;
-     */
-    value: PseudoStat;
-    case: "pseudoStat";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message proto.UIStat.
- * Use `create(UIStatSchema)` to create a new message.
- */
-export const UIStatSchema: GenMessage<UIStat> = /*@__PURE__*/
-  messageDesc(file_ui, 18);
-
-/**
  * Local storage data for gear settings.
  *
  * @generated from message proto.SavedGearSet
@@ -1244,7 +1091,7 @@ export type SavedGearSet = Message<"proto.SavedGearSet"> & {
  * Use `create(SavedGearSetSchema)` to create a new message.
  */
 export const SavedGearSetSchema: GenMessage<SavedGearSet> = /*@__PURE__*/
-  messageDesc(file_ui, 19);
+  messageDesc(file_ui, 16);
 
 /**
  * @generated from message proto.SavedStatWeightSettings
@@ -1273,7 +1120,7 @@ export type SavedStatWeightSettings = Message<"proto.SavedStatWeightSettings"> &
  * Use `create(SavedStatWeightSettingsSchema)` to create a new message.
  */
 export const SavedStatWeightSettingsSchema: GenMessage<SavedStatWeightSettings> = /*@__PURE__*/
-  messageDesc(file_ui, 20);
+  messageDesc(file_ui, 17);
 
 /**
  * Local storage data for other settings.
@@ -1367,7 +1214,7 @@ export type SavedSettings = Message<"proto.SavedSettings"> & {
  * Use `create(SavedSettingsSchema)` to create a new message.
  */
 export const SavedSettingsSchema: GenMessage<SavedSettings> = /*@__PURE__*/
-  messageDesc(file_ui, 21);
+  messageDesc(file_ui, 18);
 
 /**
  * @generated from message proto.SavedTalents
@@ -1384,7 +1231,7 @@ export type SavedTalents = Message<"proto.SavedTalents"> & {
  * Use `create(SavedTalentsSchema)` to create a new message.
  */
 export const SavedTalentsSchema: GenMessage<SavedTalents> = /*@__PURE__*/
-  messageDesc(file_ui, 22);
+  messageDesc(file_ui, 19);
 
 /**
  * @generated from message proto.SavedRotation
@@ -1401,7 +1248,7 @@ export type SavedRotation = Message<"proto.SavedRotation"> & {
  * Use `create(SavedRotationSchema)` to create a new message.
  */
 export const SavedRotationSchema: GenMessage<SavedRotation> = /*@__PURE__*/
-  messageDesc(file_ui, 23);
+  messageDesc(file_ui, 20);
 
 /**
  * @generated from message proto.SavedEPWeights
@@ -1418,7 +1265,7 @@ export type SavedEPWeights = Message<"proto.SavedEPWeights"> & {
  * Use `create(SavedEPWeightsSchema)` to create a new message.
  */
 export const SavedEPWeightsSchema: GenMessage<SavedEPWeights> = /*@__PURE__*/
-  messageDesc(file_ui, 24);
+  messageDesc(file_ui, 21);
 
 /**
  * @generated from message proto.BlessingsAssignment
@@ -1437,7 +1284,7 @@ export type BlessingsAssignment = Message<"proto.BlessingsAssignment"> & {
  * Use `create(BlessingsAssignmentSchema)` to create a new message.
  */
 export const BlessingsAssignmentSchema: GenMessage<BlessingsAssignment> = /*@__PURE__*/
-  messageDesc(file_ui, 25);
+  messageDesc(file_ui, 22);
 
 /**
  * @generated from message proto.BlessingsAssignments
@@ -1456,7 +1303,7 @@ export type BlessingsAssignments = Message<"proto.BlessingsAssignments"> & {
  * Use `create(BlessingsAssignmentsSchema)` to create a new message.
  */
 export const BlessingsAssignmentsSchema: GenMessage<BlessingsAssignments> = /*@__PURE__*/
-  messageDesc(file_ui, 26);
+  messageDesc(file_ui, 23);
 
 /**
  * Local storage data for a saved encounter.
@@ -1475,7 +1322,7 @@ export type SavedEncounter = Message<"proto.SavedEncounter"> & {
  * Use `create(SavedEncounterSchema)` to create a new message.
  */
 export const SavedEncounterSchema: GenMessage<SavedEncounter> = /*@__PURE__*/
-  messageDesc(file_ui, 27);
+  messageDesc(file_ui, 24);
 
 /**
  * Local storage data for raid sim settings.
@@ -1509,7 +1356,7 @@ export type SavedRaid = Message<"proto.SavedRaid"> & {
  * Use `create(SavedRaidSchema)` to create a new message.
  */
 export const SavedRaidSchema: GenMessage<SavedRaid> = /*@__PURE__*/
-  messageDesc(file_ui, 28);
+  messageDesc(file_ui, 25);
 
 /**
  * Contains all information that is imported/exported from a raid sim.
@@ -1543,7 +1390,7 @@ export type RaidSimSettings = Message<"proto.RaidSimSettings"> & {
  * Use `create(RaidSimSettingsSchema)` to create a new message.
  */
 export const RaidSimSettingsSchema: GenMessage<RaidSimSettings> = /*@__PURE__*/
-  messageDesc(file_ui, 29);
+  messageDesc(file_ui, 26);
 
 /**
  * All the data related to running the sim once.
@@ -1567,7 +1414,7 @@ export type SimRun = Message<"proto.SimRun"> & {
  * Use `create(SimRunSchema)` to create a new message.
  */
 export const SimRunSchema: GenMessage<SimRun> = /*@__PURE__*/
-  messageDesc(file_ui, 30);
+  messageDesc(file_ui, 27);
 
 /**
  * Contains a sim run and also other context data.
@@ -1593,7 +1440,7 @@ export type SimRunData = Message<"proto.SimRunData"> & {
  * Use `create(SimRunDataSchema)` to create a new message.
  */
 export const SimRunDataSchema: GenMessage<SimRunData> = /*@__PURE__*/
-  messageDesc(file_ui, 31);
+  messageDesc(file_ui, 28);
 
 /**
  * Sent by the sim to the detailed results page.
@@ -1628,7 +1475,7 @@ export type DetailedResultsUpdate = Message<"proto.DetailedResultsUpdate"> & {
  * Use `create(DetailedResultsUpdateSchema)` to create a new message.
  */
 export const DetailedResultsUpdateSchema: GenMessage<DetailedResultsUpdate> = /*@__PURE__*/
-  messageDesc(file_ui, 32);
+  messageDesc(file_ui, 29);
 
 /**
  * @generated from enum proto.Expansion
@@ -2002,50 +1849,4 @@ export enum RaidFilterOption {
  */
 export const RaidFilterOptionSchema: GenEnum<RaidFilterOption> = /*@__PURE__*/
   enumDesc(file_ui, 5);
-
-/**
- * @generated from enum proto.StatCapType
- */
-export enum StatCapType {
-  /**
-   * @generated from enum value: TypeUnknown = 0;
-   */
-  TypeUnknown = 0,
-
-  /**
-   * Unused currently, but may be able to combine hard cap + soft cap
-   * configuration in the future.
-   *
-   * @generated from enum value: TypeHardCap = 1;
-   */
-  TypeHardCap = 1,
-
-  /**
-   * Used for stats that exhibit significant EP changes after particular
-   * breakpoint values, but where the post-cap EP remains non-zero.
-   * Examples include Spell Haste for Demonology Warlocks and Expertise
-   * for tanks.
-   *
-   * @generated from enum value: TypeSoftCap = 2;
-   */
-  TypeSoftCap = 2,
-
-  /**
-   * Used for stats that exhibit discontinuities in value at discrete
-   * thresholds due to in-game rounding effects etc., but where the
-   * average value of the stat from one breakpoint to the next does not
-   * vary significantly. The most relevant example in early Cata Classic
-   * is Mastery Rating for Demonology Warlock, which gets floored in-game
-   * to the nearest integer % damage threshold.
-   *
-   * @generated from enum value: TypeThreshold = 3;
-   */
-  TypeThreshold = 3,
-}
-
-/**
- * Describes the enum proto.StatCapType.
- */
-export const StatCapTypeSchema: GenEnum<StatCapType> = /*@__PURE__*/
-  enumDesc(file_ui, 6);
 

@@ -2,9 +2,9 @@
   "repo": "dangreenberggit/tbc-new",
   "upstream": "wowsims/tbc-new",
   "branch": "feat/upgrades-tab",
-  "commit": "6d0edd69d237e725de8ec5d034c28aa10171bd21",
-  "branchedFrom": "cbf6b75a889e52c4106351976db66efd914ea349",
+  "commit": "6ef5679888430118895d59043e81e542d61c7527",
+  "branchedFrom": "ec5c5f205e61049d730e460967f8488774a7fe2a",
   "clonePath": "vendor/tbc-new-fork",
   "pushed": false,
-  "_comment": "Which fork commit pairs with this repo's state. Same pattern as wowsims.lock.json (plan decision D1). branchedFrom is the upstream commit this fork branch actually sits on -- read it as a fact about the clone, not as a restatement of wowsims.lock.json. Decision D2 intended the two to be the same, and as of 2026-08-21 they are not: the fork is on cbf6b75 (feature/backend-reforge) while the engine pin moved to v0.0.119. See ticket 251 for the open decision; do not reconcile them by editing this field. The clone at clonePath is gitignored (vendor/) and has its own .git pushing to the personal fork. pushed:false records that nothing has left this machine -- plan section 1 keeps any push behind a separate explicit ask, so flipping this flag is a deliberate act, not a side effect."
+  "_comment": "Which fork commit pairs with this repo's state. Same pattern as wowsims.lock.json (plan decision D1). branchedFrom is the upstream commit this fork branch actually sits on -- read it as a fact about the clone, not as a restatement of wowsims.lock.json. As of 2026-09-10 both this file and data/wowsims.lock.json name ec5c5f205e61049d730e460967f8488774a7fe2a on feature/backend-reforge (ADR-0030); ticket 251 is closed with a shape-changed note, since the engine pin moving onto the branch was a fourth option that ticket never contemplated. commit is the fork HEAD this repo's state pairs with, on feat/upgrades-tab at or above the merge commit that brought that upstream commit in, so branchedFrom remains its merge-base with upstream (verified with `git merge-base <commit> <branchedFrom>` in the clone). As of 6ef56798 it is one commit past that merge: a layout-gate fix to test-layout.mjs, which is our own tooling living in the fork tree, not upstream source. The clone at clonePath is gitignored (vendor/) and has its own .git pushing to the personal fork. pushed:false records that nothing has left this machine -- plan section 1 keeps any push behind a separate explicit ask, so flipping this flag is a deliberate act, not a side effect."
 }

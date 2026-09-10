@@ -100,8 +100,8 @@ absorbs it silently.
 
 ## Source inventory
 
-- `vendor/wowsims/db.json` — 8257 items, sha256 `f95b94d8d140cb8d2b4cd1e4b5c87e60f0ad2e5eb8719b65813f8687d31b6ec7` per `data/wowsims.lock.json`
-- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `v0.0.119`, commit `3267f8dfa4a20746d4982c1522fdec1d4eb77f4c`
+- `vendor/wowsims/db.json` — 8257 items, sha256 `c28866ef09807fa18e3c38a926c1348dac57accc7f3865871031798a6db80dc1` per `data/wowsims.lock.json`
+- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `ec5c5f205e61049d730e460967f8488774a7fe2a`, commit `ec5c5f205e61049d730e460967f8488774a7fe2a`
 - `data/universes/feral-p3.json` — 364 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
