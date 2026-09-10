@@ -48,6 +48,11 @@ FORK = ROOT / "vendor/tbc-new-fork"
 UPSTREAM_URL = "https://github.com/wowsims/tbc-new.git"
 
 RELEASE_TAG_RE = re.compile(r"^v\d+\.\d+\.\d+$")
+# A --ref pin writes the resolved sha into lock["tag"] (sync_wowsims.py), so the
+# tag and the commit name the same object. Any other tag shape does not, and
+# building from lock["commit"] under that name would stamp a binary with a
+# version it does not have -- refuse instead of guessing (ticket 356).
+FULL_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 # platform → (GitHub release zip name, binary name inside that zip, GOOS, GOARCH)
 ASSETS = {
@@ -227,6 +232,27 @@ def main() -> int:
             f"lock tag `{tag}` contains `/`; pin a commit sha "
             "(`sync_wowsims.py --update --ref <sha>`) — a slash nests the vendor "
             "directory (docs/reviews/feat-engine-pin-backend-reforge.md)",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.commit is None and not FULL_SHA_RE.match(tag):
+        print(
+            f"lock tag `{tag}` is neither a release tag (vX.Y.Z) nor a 40-character "
+            f"commit sha, so it does not name the commit the build would use "
+            f"(`{lock['commit'][:12]}`). Building anyway would stamp the binary with "
+            "a version it does not have. Re-pin with "
+            "`sync_wowsims.py --update --ref <sha>` or `--tag <vX.Y.Z>`, or pass "
+            "--commit to build from source deliberately.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.commit is None and tag != lock["commit"]:
+        print(
+            f"lock tag `{tag[:12]}` and lock commit `{lock['commit'][:12]}` are both "
+            "shas but disagree; the lockfile is inconsistent. Re-run "
+            "`sync_wowsims.py --update --ref <sha>`.",
             file=sys.stderr,
         )
         return 2
