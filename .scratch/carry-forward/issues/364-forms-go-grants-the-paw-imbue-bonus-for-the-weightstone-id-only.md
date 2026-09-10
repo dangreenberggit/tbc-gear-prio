@@ -34,7 +34,7 @@ difference is the sharpstone's ranged-crit compensation at :732
 Since the melee bonuses are equal in TBC, granting the paw bonus for one id and
 not the other is a defect. `29453` appears zero times under `sim/druid/`.
 
-## Provenance: upstream (measured)
+## provenance: upstream (measured)
 
 Stated as measured because an earlier reading of this could not distinguish
 upstream commits from fork-native ones: the `upstream` remote

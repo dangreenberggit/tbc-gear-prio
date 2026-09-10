@@ -261,7 +261,7 @@ section above.
       compose paths agree, and fixtures are re-recorded.
 - [x] The `disclosure.ts` temporary-enchant note no longer asserts deltas
       survive in the pinned-imbue case.
-- [ ] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
+- [x] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
       Node 20 — `node:sqlite` is missing).
 
 ## Notes
