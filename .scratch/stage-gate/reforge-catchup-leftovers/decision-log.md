@@ -32,6 +32,34 @@ One dated line per gate: gate, outcome, reason, round count.
 | 2026-09-10 | Plan (respawn) | plan returned | `SendMessage` is **disabled in this session**, so the skill's normal recovery — resume the cut-off seat, which retains its context — was unavailable. The four reports were captured to `research-notes.md` and the seat respawned against brief + notes so the research is not re-paid for. | 2 |
 | 2026-09-10 | Gate A (mechanical) | pass, with one flag | Every template section present; Claims register has 26 rows; Paths manifest present; all three brief questions answered with candidate/win-condition/measurement. `git status --porcelain` **empty** — the read-only planner wrote nothing. Flag: the branch tip moved from `595c997` to `33babf0` during the stage, not by any seat — see below. | 2 |
 
+## Gate B (judgment) — 2026-09-10, round 2 → revision round 1
+
+**Outcome: loop back to the planner.** Three blocking findings; I verified all
+three myself rather than taking the reviewer's word, per the skill's rule that
+a seat contradiction is settled by re-running the command.
+
+| Finding | Verdict | What I ran |
+| --- | --- | --- |
+| F1 — probe measures a spec with no off hand | **holds, decisively** | `pool.ts:369-378` comment reads "Ret and feral are absent deliberately: neither can put anything in the off hand"; `DUAL_WIELD_SPECS` = `rogue, enh, warrior, hunter`. Fixture player key is `feralCatDruid`. The probe cannot be repaired by swapping the item — the spec is wrong. |
+| F2 — exact-equality test unsound | **holds on effect size; its quotation is wrong** | See correction below. `stdev` confirmed at `127.9659250680645` on `avg 2152.0765440146747`, so the 3σ/√3000 floor is ~7.01 DPS and a +8 Agility off-hand cannot clear it. |
+| F3 — C17's provenance conclusion unsupported | **holds** | Fork has an `upstream` remote for `wowsims/tbc-new`, but `refs/remotes/` holds only `origin/*` — no `upstream/*` was ever fetched. `db05fed93` is authored by `Bisonpasfuté`, a fork contributor. Ancestry in the pin's history says nothing about provenance. |
+
+### Correction to F2, carried into the revision
+
+The reviewer quoted `compute-topology.md:177` as "Reproducible across different
+core counts? **No, bit-identical**", which is not what the file says and reads
+as self-contradictory. The actual line is:
+
+> **No, bit-identical — but equal to ~1e-12 DPS.**
+
+So cross-core-count runs agree to about 1e-12 DPS, not arbitrarily. This does
+**not** rescue the plan — an exact-equality test still breaks across core
+counts, and the effect-size half of F2 is untouched and is the half that
+blocks. But the revision must restate the claim with the real number rather
+than inheriting the reviewer's garbled version.
+
+Material findings F4–F6 and minor F7–F9 ride along to the revision as written.
+
 ## Flag — a parallel writer on this branch
 
 `33babf0` ("Write the leftovers handoff, sourced and failure-pathed", author
