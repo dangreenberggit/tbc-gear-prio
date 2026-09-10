@@ -74,12 +74,120 @@ this repo now produces are correct is an SME question that nobody has answered.
 
 ## Acceptance
 
-- [ ] Re-record the feral recordings against `ec5c5f2`, or decide deliberately
-      not to and say why in this ticket.
-- [ ] Regenerate or correct the `apiVersion` 13 preset fixture (distinct fix
-      from the recordings).
-- [ ] `pnpm verify` green on the test gate, with each previously-failing test
-      named and accounted for.
+- [x] Re-record the feral recordings against `ec5c5f2`, or decide deliberately
+      not to and say why in this ticket. — **re-recorded**, `fda1126`
+- [x] Regenerate or correct the `apiVersion` 13 preset fixture (distinct fix
+      from the recordings). — **corrected the assertion**, `c135b0b`
+- [x] `pnpm verify` green on the test gate, with each previously-failing test
+      named and accounted for. — all 11 named below
 - [ ] SME verdict on the feral rotation change and the above-cutoff row count
-      (`sme-rank-review`), audience the engineering team.
-- [ ] Confirm `docs/verification-log.md` quotes no stale engine figure.
+      (`sme-rank-review`), audience the engineering team. — **still open**,
+      deliberately left for a review-lane seat
+- [x] Confirm `docs/verification-log.md` quotes no stale engine figure. — read,
+      no edit needed
+
+## What was done (2026-09-10)
+
+### Re-recorded, not deferred
+
+`npx tsx scripts/record_synthetic_fixtures.mjs` over all three rows (~984 sims,
+3000 iterations, seed 42, ~10 min). Recording every row starts a fresh header
+rather than merging, which is the path that script reserves for an engine pin
+move (ticket 244). `git diff --numstat` moved exactly one tracked path,
+`packages/core/test/fixtures/synthetic-roster-recordings.json`, as predicted
+before the run; nothing under `data/`.
+
+Deferring further was the wrong call once the pin had landed in `bec0014`: the
+ticket's reason for deferring — not putting the engine change and its own
+detector in one diff — is satisfied by this being a separate commit, and 1210 is
+now the *correct* value, being what upstream's `defaultExposeWeaknessSettings()`
+yields at `CURRENT_PHASE` 3. The old recordings answered a question nobody will
+ask again.
+
+| row | poolSize | aboveCutoff | baselineDps |
+| --- | --- | --- | --- |
+| ret | 240 -> 288 | 38 -> 38 | 1834.33 -> 1834.33 |
+| feral | 228 -> 227 | 20 -> 20 | 2145.59 -> 2153.12 |
+| feral-p3 | 366 -> 364 | 43 -> 43 | 2145.59 -> 2153.12 |
+
+`aboveCutoffItemIds` is unchanged on all three rows — the exact item sets, not
+merely the counts. **The new engine moved no shortlist membership.**
+
+The ret row isolates engine drift from request drift, which sharpens §4's
+question: all 267 of ret's old request bodies survive into the new file and all
+267 return bit-identical DPS under the new binary. Feral shares **zero** bodies
+with the old file, so its +7.53 DPS is attributable to the changed Expose
+Weakness agility in the request, not to engine drift.
+
+Two corrections to this ticket's own §1. The value does not reach the request
+from `buff-defaults.json` at runtime — `packages/core` never reads that file; it
+flows through the committed, regenerated `p2.raid-sim-skeleton.json`. And the
+committed `poolSize` values were stale *before* this branch: `data/universes/*`
+already held 288/227/364 and did not move here.
+
+### The `apiVersion` fixture — the ticket's premise was wrong
+
+§1 calls `data/presets/ret/p2.individual-sim-settings.json` "hand-authored,
+never-regenerated" and offers "regenerate or correct". It is neither
+hand-authored nor regenerable:
+
+- It is a **capture** — `wowsimcli decodelink` on a Phase-0 ret P2 share link.
+- Re-decoding that same link with the newly pinned `ec5c5f2` binary reproduces
+  the committed file byte-identically and still reports `apiVersion: 13`.
+  `decodelink` is a plain protobuf unmarshal that runs no migrations, so the
+  stamp is a fact about the browser session that exported the link. **No
+  regeneration moves it to 15.**
+
+`apiVersion` was load-bearing to exactly one assertion. `share-link.test.ts`
+round-trips the preset against itself; `compose.test.ts` and
+`check_raid_sim_skeleton.py` read only raidBuffs/debuffs/partyBuffs/encounter;
+no `src/` code loads the fixture. So `expect(CURRENT_API_VERSION).toBe(
+preset.apiVersion)` coupled a historical capture to a live constant and would
+break on every future pin bump while proving nothing. Replaced with the
+relationship that must hold: the capture carries a real, non-default version and
+does not claim to exceed the engine's. The invariant the equality was reaching
+for — that an export of *ours* stamps the current version — was already covered
+by the neighbouring test.
+
+Importing the 13-stamped capture is content-stable regardless:
+`individual_sim_ui.tsx`'s `conversionMap` holds one key, 7, so migrating 13 -> 15
+runs zero conversion functions.
+
+### The 11 previously-failing tests
+
+| File | Test | Disposition |
+| --- | --- | --- |
+| `full-sweep-recall.test.ts` | feral: sims every eligible candidate, and at no other iteration count | green, re-recorded |
+| `full-sweep-recall.test.ts` | feral: leaves no row unsimmed | green, re-recorded |
+| `full-sweep-recall.test.ts` | feral: reproduces the recorded above-cutoff set | green, re-recorded |
+| `full-sweep-recall.test.ts` | feral: ranks every above-cutoff row | green, re-recorded |
+| `full-sweep-recall.test.ts` | feral-p3: same four | green, re-recorded |
+| `synthetic-fixtures.test.ts` | feral: replays the recorded full-sweep ranking | green, re-recorded |
+| `synthetic-fixtures.test.ts` | feral-p3: replays the recorded full-sweep ranking | green, re-recorded |
+| `individual-settings.test.ts` | matches the apiVersion the committed preset carries | **assertion replaced**, see above |
+
+Measured: 25 passed across the three files, exit 0 read outside the pipe.
+
+### `docs/verification-log.md` — read, no edit
+
+No stale engine figure in a load-bearing position. Every DPS number sits inside
+a dated entry or is explicitly scoped to its binary, and no PLAN.md §14 phase
+gate names a DPS threshold. The "ret baseline is unreconciled" passage (ticket
+274) disarms itself with a sentence saying its numbers are internal comparisons,
+not values to check against the fixture; "C11 superseded" is a retraction, where
+the stale 2145.6 appears only as the thing withdrawn. Flagged, not edited:
+`PLAN.md:826` still carries `v0.0.101` / `2042.85 DPS` in the Stage 0 gate table
+— correctly pinned to its binary, so not stale by this ticket's definition.
+
+### Why the SME box stays open
+
+These tests replay against whatever is recorded and compare to the recorded row,
+so a fresh recording makes them green **by construction**. Passing tests are not
+evidence the new feral numbers are right. §4's question is untouched by this
+work and still needs a review-lane seat.
+
+What the re-record hands that seat, which it did not have before: the feral move
+is +7.53 DPS on both rows, it comes from the request rather than the engine (ret
+proves the engine is bit-identical on unchanged requests), and no above-cutoff
+item set moved on any row. So the "15 -> 27 above-cutoff rows" jump §4 mentions
+is **not** reproduced here — feral-p3 sits at 43 both before and after.
