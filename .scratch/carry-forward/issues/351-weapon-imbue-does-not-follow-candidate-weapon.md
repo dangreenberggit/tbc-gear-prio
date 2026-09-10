@@ -55,6 +55,96 @@ Every other spec is unaffected **only because its skeleton carries no imbue
 field** — an accident of which two presets exist, not a property of the pipeline.
 Adding an imbue to any future skeleton arms this for that spec.
 
+## What the engine actually does with the stone — read this before acting
+
+The counts above say which candidates carry a stone that does not match their
+weapon. They do **not** say those candidates are mispriced, and for feral the
+naive fix would make things worse. Established by reading the fork's engine:
+
+- **The generic path treats the two stones as near-identical and ignores weapon
+  type.** `registerStaticImbue` (`sim/core/consumes.go:683`) gives 29453 (694)
+  and 34340 (720) the same `MeleeCritRating +14` and `+12` auto-attack base
+  damage. The only in-switch difference is the sharpstone's ranged-crit
+  correction at line 718 (`-(14 / PhysicalCritRatingPerCritPercent)`, about
+  −0.63% ranged crit), which is inert for a melee-only character. Neither branch
+  inspects the equipped weapon's type.
+
+- **That generic path does not run for the feral preset's main hand.**
+  `consumes.go:81` reaches `registerStaticImbue` for the MH only when
+  `partyBuffs.WindfuryTotem == TristateEffectMissing`, and the feral p2 skeleton
+  pins `"windfuryTotem": "TristateEffectImproved"`.
+
+- **The druid sim has a SECOND stone implementation that hardcodes one id.**
+  `sim/druid/forms.go:51-56`:
+
+  ```go
+  func (druid *Druid) weaponImbueFlatDamage() float64 {
+      if druid.Consumables.MhImbueId == 34340 { // Adamantite Weightstone
+          return 12
+      }
+      return 0
+  }
+  ```
+
+  `GetCatWeapon` (58) and `GetBearWeapon` (72) fold that into the unscaled
+  main-hand damage *before* the divide by swing speed, so it arrives as roughly
+  `12 / swingSpeed` per paw swing rather than a flat 12. Verified: `34340`
+  appears exactly once in `sim/druid/` and `29453` appears **zero** times. Added
+  by fork commit `db05fed93` — "fix adamantite weightstone not giving paw
+  damage". Nothing in that commit explains why the sharpstone was left out.
+
+### What that means for this ticket
+
+1. **Today, all feral weapon candidates share one stone id and therefore one
+   damage model.** The stone is pinned at 34340 for every candidate, so sharp
+   and blunt candidates are currently priced alike. There is no live sharp-vs-
+   blunt asymmetry from this.
+2. **Adopting upstream's rule would create one.** Rewriting a dagger candidate's
+   stone to 29453 makes `weaponImbueFlatDamage` return 0, so sharp candidates
+   would lose a paw bonus that blunt candidates keep — two candidates in the same
+   slot ranked under different damage models. That is a worse failure than the
+   mismatch it fixes.
+3. **So the fork-engine omission is the thing to settle first.** If a sharpstone
+   and a weightstone give the same melee bonus in TBC, `forms.go` omitting 29453
+   is a fork bug; fix that and upstream's rule becomes safe to adopt. If they
+   genuinely differ for a feral, then the pinned stone is a preset question, not
+   a candidate-adjustment question.
+
+What survives unconditionally: our composed request never adjusts the stone
+where upstream's does, and off-hand candidates keep a stone upstream would zero.
+Whether we should mirror that depends on the answers above.
+
+### Two incidental findings from the same reading
+
+Both are separate from this ticket's question. File them separately if they
+matter; they are recorded here so the reading is not lost.
+
+- **Possible double application on the feral path.** `AutoAttacks.MH()` returns a
+  pointer to the live weapon (`sim/core/attack.go:205-207`), and
+  `applyConsumeEffects` runs after the form aura is registered, so the core
+  switch's `+= 12` may mutate a paw weapon that `GetCatWeapon` had already folded
+  the bonus into — once scaled, once flat. **Code-reading inference, not
+  measured.**
+- **Upstream adjusts at the source of truth; we bypass that seam.** This is the
+  clearest statement of why we diverge. `Gear.adjustImbues`
+  (`ui/core/proto_utils/gear.ts:398`) has three callers in the fork:
+  `Player.setGear` (`ui/core/player.tsx:713`), the WASM bulk path
+  (`ui/core/wasm/bulk_sim/batch.ts:34`), and `Sim.runRaidSimLightweight`
+  (`ui/core/sim.ts:727`, reached from `sim_ui.tsx:358`). The first is the
+  important one — its own comment says it corrects the stone "before emitting, so
+  that any gearChangeEmitter listener ... sees the corrected value", i.e. every
+  gear change through the normal UI re-derives the stone. That is the "frontend
+  auto-switch" upstream's Go comment refers to.
+
+  Our engine never goes through `Player.setGear`: it composes a request from a
+  pinned skeleton plus a swapped equipment array
+  (`packages/core/src/compose.ts`), and `upgrades/adapters/wasm_sim_runner.ts`
+  dispatches `raidSimAsync` with no `adjustImbues` call. So the divergence is not
+  that upstream added a rule we lack; it is that we bypass the seam where
+  upstream applies it. Worth weighing when choosing where our fix belongs — an
+  adjustment at the adapter boundary would mirror upstream's placement more
+  closely than one inside the engine's swap logic.
+
 ## Where it came from
 
 Ticket 342's upstream comparison. Upstream has the rule we lack:
@@ -63,9 +153,16 @@ Ticket 342's upstream comparison. Upstream has the rule we lack:
 stone (29453) / weightstone (34340) pair to match the equipped weapon —
 sharpening for Axe/Dagger/Polearm/Sword, weightstone for Fist/Mace/Staff, and
 **0** when neither family fits (no weapon, a shield, or an off-hand-only item).
-`adjustCandidateImbues` applies it per candidate to both hands. Upstream's own
-comment gives the reason: "mirroring the frontend auto-switch so bulk sim combos
-use the correct stone." Any other imbue id passes through untouched.
+`adjustCandidateImbues` applies it per candidate to both hands. Any other imbue
+id passes through untouched.
+
+Upstream's own comment gives the reason: "mirroring the frontend auto-switch so
+bulk sim combos use the correct stone." That phrase matters — the Go function is
+mirroring behaviour that already exists in the TypeScript frontend, where
+`Player.setGear` (`ui/core/player.tsx:713`) re-derives the stone on every gear
+change. So this is not a bulk-sim-specific rule; it is upstream keeping one
+invariant in two places. See the second incidental finding below for why that
+reframes where our fix would belong.
 
 ## The existing disclosure does not cover this
 
@@ -101,43 +198,69 @@ ticket rather than into that branch.
 
 ## What is NOT claimed
 
-- **Not measured in DPS.** Confirmed: the wrong stone is pinned, the field
-  reaches the sim, and the counts above are real. **Not** confirmed: that the
-  sharpening/weightstone difference reorders any row. The two stones are
-  different items, so a difference is expected, but its size is unmeasured.
-- **No ranking is known to be wrong.** Directionally, the error is shared by all
-  sharp candidates and absent from blunt ones, so it biases sharp against blunt
-  within the weapon slot rather than shifting the whole slot uniformly — which is
-  exactly the pattern a same-run delta does *not* cancel. Still unmeasured.
+- **Not measured in DPS.** Confirmed by reading: the stone does not follow the
+  candidate, the field reaches the sim, the counts above are real, and the two
+  engine paths behave as described in "What the engine actually does". **Not**
+  confirmed: any DPS number, on either side of a change.
+- **No ranking is known to be wrong, and the naive fix would make feral worse.**
+  On the feral path both stones currently produce the same +12
+  (`forms.go:51-56` grants it for the weightstone id, and the generic path is
+  windfury-suppressed), so sharp and blunt candidates are priced alike today.
+  Applying upstream's rule would zero the bonus for daggers. So this is not a
+  "we are underpricing sharp candidates" ticket; it is a "our request does not
+  match what upstream's request would say, and the engine's own handling is
+  itself suspect" ticket.
+- **Not established: that upstream's rule is the right rule for us.** Upstream
+  adjusts the stone because its frontend auto-switches. Whether we should mirror
+  that, or instead treat `forms.go`'s id-equality check as the defect, is the
+  open question this ticket carries.
 
 ## What to do
 
-1. **Measure first, cheaply**: sim one feral weapon-slot dagger candidate twice,
-   once with `mhImbueId: 34340` and once with 29453, and record the DPS gap. That
-   sizes the whole ticket, and a gap below the row cutoff would justify recording
-   a bound instead of building the plumbing.
-2. If it matters, add the pure predicates in `packages/core/src/` with their own
-   unit tests (the intricate-pure-function case in AGENTS.md), covering the
-   zero-when-neither-family-fits branch and the pass-through for any other imbue
-   id.
-3. Decide where the override enters the composed request — swap-returns-a-patch
+1. **Settle the TBC rule first — it is a reading task, not a sim run.** Do a
+   weightstone and a sharpstone give the same melee bonus in TBC? Upstream's own
+   `registerStaticImbue` models them identically apart from a ranged-crit
+   correction, which says yes for melee. If they are the same for a feral, then
+   `forms.go:51-56` granting +12 only for the weightstone id is a **fork-engine
+   bug**, and our missing adjustment is cosmetic by comparison. Decide which of
+   the two is the real defect before writing any code.
+2. **Then decide whether we mirror upstream at all.** Two coherent positions:
+   mirror `adjustWeaponImbueID` so our request says what upstream's would (and
+   accept that feral daggers lose the +12 until `forms.go` is fixed), or leave
+   our request alone and file the `forms.go` id-equality check upstream-side.
+   Record the choice and the reason; do not do both silently.
+3. **Only if step 2 chooses to mirror**: add the pure predicates in
+   `packages/core/src/` with their own unit tests (the intricate-pure-function
+   case in AGENTS.md), covering the zero-when-neither-family-fits branch and the
+   pass-through for any other imbue id.
+4. Decide where the override enters the composed request — swap-returns-a-patch
    or `composeFor` override — and make the loop, `composeForBulk` and the package
    path share one answer.
-4. Re-record the affected fixtures and add one for the sharp-weapon candidate.
-5. Update the `disclosure.ts` temporary-enchant note so it no longer asserts
-   deltas survive in the pinned-imbue case.
-6. Port to the fork copy with the full cycle in `docs/agents/known-traps.md`
-   ("Before editing a ported engine file").
+5. Re-record the affected fixtures and add one for the sharp-weapon candidate.
+6. Update the `disclosure.ts` temporary-enchant note so it no longer asserts
+   deltas survive in the pinned-imbue case. **Do this regardless of step 2** —
+   the note over-asserts either way.
+7. If any fork engine file is edited, run the full cycle in
+   `docs/agents/known-traps.md` ("Before editing a ported engine file").
+
+If a DPS measurement is wanted for sizing, sim one feral weapon-slot dagger
+candidate at `mhImbueId: 34340` versus 29453 — but read the result as "what the
+proposed change would cost", not as "how wrong we are today", per the engine
+section above.
 
 ## Acceptance
 
-- [ ] The DPS gap between the two Adamantite stones on one feral dagger
-      candidate is measured and recorded.
-- [ ] Either the imbue follows the candidate weapon's type family (including the
-      zero case for off-hand-only items and shields), or the gap is shown
-      immaterial and a bound is recorded instead.
-- [ ] If implemented: all three compose paths agree, fixtures re-recorded, and
-      the `disclosure.ts` note corrected.
+- [ ] The TBC question is answered and written down: do the two stones give the
+      same melee bonus, and is `forms.go`'s id-equality check therefore a
+      fork-engine bug?
+- [ ] A recorded decision on whether to mirror `adjustWeaponImbueID` at all,
+      with its reason — including the consequence for feral dagger candidates if
+      we do.
+- [ ] If we mirror: the imbue follows the candidate weapon's type family
+      (including the zero case for off-hand-only items and shields), all three
+      compose paths agree, and fixtures are re-recorded.
+- [ ] The `disclosure.ts` temporary-enchant note no longer asserts deltas
+      survive in the pinned-imbue case.
 - [ ] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
       Node 20 — `node:sqlite` is missing).
 

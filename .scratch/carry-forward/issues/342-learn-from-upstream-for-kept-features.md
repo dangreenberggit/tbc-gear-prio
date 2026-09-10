@@ -76,9 +76,14 @@ item in the composed request. → **ticket 350**.
 deliberately richer than upstream's (we migrate and repair where `replaceItem`
 discards, and `candidate-gems.ts` warns against drifting toward their re-gem
 button), and our enchant validation calls upstream's own predicate. The note:
-`adjustWeaponImbueID` keeps the Adamantite stone matched to the weapon's type
-family and we never touch consumables, so feral's pinned weightstone rides onto
-sharp and off-hand candidates. → **ticket 351**.
+upstream keeps the Adamantite stone matched to the weapon's type family both on
+the bulk path (`adjustWeaponImbueID`) and in `Player.setGear` on every gear
+change, and our engine passes through neither because it composes from a pinned
+skeleton and never touches consumables. → **ticket 351**, which deliberately
+does *not* prescribe the mirror: `sim/druid/forms.go:51-56` grants the feral
+paw-damage bonus for id 34340 only, so adopting upstream's rule as-is would rank
+sharp and blunt feral candidates under different damage models. Settling that
+fork-engine omission comes first.
 
 **F3 per-request item-database injection — keep-as-is** (§ "F3"). Nothing
 adopted. Our adapter is not a reimplementation: it routes through
@@ -111,9 +116,17 @@ our guarantees are pinned by name in `packages/core/test/promise-pool.test.ts`.
 
 Neither finding was measured in DPS. For 350, what the engine does with a
 2H + off-hand request is unestablished, so how wrong today's two-hander rows are
-is unknown. For 351, the wrong stone and the affected candidate counts are
-confirmed from committed data, but whether the two stones reorder any row is
-unmeasured. Each ticket names its own cheap measurement as step 1.
+is unknown; reachability *is* established — enh, warrior and hunter carry
+two-handers in every committed universe, rogue carries none. For 351, the
+mismatched stone and the candidate counts are confirmed from committed data and
+the engine's two handling paths were read, but no DPS figure was taken on either
+side of a change, and the ticket is explicit that the naive mirror would make
+feral worse before it makes it better.
+
+Both tickets were amended during this branch's own pre-merge review, which
+caught two errors in their first drafts: a claim that `packages/core` exposes
+`attemptEligibility` (it inlines the guard instead), and a directional claim
+about the weapon stone that the fork's `sim/druid/forms.go` reverses.
 
 ### Commits
 

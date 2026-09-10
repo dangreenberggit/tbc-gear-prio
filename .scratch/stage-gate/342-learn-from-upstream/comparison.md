@@ -67,7 +67,7 @@ if (slotName === "offhand" && !mainHandIsOneHanded) return { kind: "skip" };
 
 with `mainHandIsOneHanded` (`rank.ts:588`) reading the worn main hand once off the immutable baseline. That guard fires only when the *candidate* targets the off hand. The mirror case is unguarded: for a dual-wield spec currently wearing 1H + off-hand, a two-handed candidate passes `itemFitsSimSlot("mainhand")` (main hand excludes only `HandTypeOffHand`), passes `attemptEligibility` (the slot name is `mainhand`, so line 791 never fires), and `swapItemAt` writes the two-hander into the main-hand index **while leaving the worn off-hand item in place**. The composed request then describes 2H + off-hand — the illegal gear upstream's clear now defends against.
 
-The same shape is in core: `packages/core/src/rank.ts` has `mainHandIsOneHanded` at 728, the single `offhand`-only guard at 920, and the one-index `swapItemAt` at 2089. So this is an engine-wide gap, not a port artifact.
+The same shape is in core, though **spelled differently**: `packages/core/src/rank.ts` has no `attemptEligibility` function at all (grep returns zero hits) — it has `mainHandIsOneHanded` at 728, the same guard inlined in the `runCandidate` slot loop as `if (slotName === "offhand" && !mainHandIsOneHanded) continue;` at 920, and the one-index `swapItemAt` at 2089. So the gap is engine-wide rather than a port artifact, but anyone fixing it should grep for the condition, not the function name.
 
 Whether the fork's equip logic silently drops the off hand, counts both, or rejects the set is not measured here. Either way the request is not the gear the row claims to price, so two-hander rows for a dual-wielding character are unsound.
 
@@ -108,13 +108,34 @@ And a skeleton does pin a stone. Of the two skeletons in `data/presets/`, feral 
 | feral-p4 | 66 | 16 | 39 | 11 |
 | feral-p5 | 86 | 23 | 50 | 13 |
 
-So on the feral path a dagger candidate is priced holding a weightstone it cannot use, and an off-hand candidate keeps a stone upstream would zero. The other specs are safe only because their skeleton carries no imbue field — an accident of which two presets exist, not a property of the pipeline.
+So on the feral path a dagger candidate is priced holding a weightstone that does not match its weapon family, and an off-hand candidate keeps a stone upstream would zero. The other specs are safe only because their skeleton carries no imbue field — an accident of which two presets exist, not a property of the pipeline.
+
+**The engine's handling makes this concrete, and not in the direction a first reading suggests.** Established by reading the fork's engine after the first draft of this section (the domain review of this branch forced the check):
+
+- The **generic** path treats the two stones as near-identical and never inspects weapon type. `registerStaticImbue` (`sim/core/consumes.go:683`) gives 29453 (694) and 34340 (720) the same `MeleeCritRating +14` and `+12` auto-attack base damage; the only in-switch difference is the sharpstone's ranged-crit correction at 718, which is inert for a melee-only character.
+- That generic path does not even run for the feral preset's main hand: `consumes.go:81` gates it on `partyBuffs.WindfuryTotem == TristateEffectMissing`, and the feral p2 skeleton pins `"windfuryTotem": "TristateEffectImproved"`.
+- **The druid sim has its own second stone implementation, and it hardcodes one id.** `sim/druid/forms.go:51-56`:
+
+  ```go
+  func (druid *Druid) weaponImbueFlatDamage() float64 {
+      if druid.Consumables.MhImbueId == 34340 { // Adamantite Weightstone
+          return 12
+      }
+      return 0
+  }
+  ```
+
+  `GetCatWeapon` (58) and `GetBearWeapon` (72) fold that into the unscaled main-hand damage *before* dividing by swing speed, so it lands as roughly `12 / swingSpeed` per paw swing. Verified: `34340` occurs exactly once in `sim/druid/` and `29453` occurs **zero** times, added by fork commit `db05fed93` — "fix adamantite weightstone not giving paw damage".
+
+The consequence is the ranking-relevant one, and it exists **today, without any fix**: for a feral, a blunt candidate (weightstone-eligible) and a sharp candidate are not merely priced with a mismatched stone — with the stone pinned at 34340 they are priced under the *same* id and so the same model, but the moment anything makes the stone follow the weapon, sharp candidates lose the paw bonus that blunt candidates keep. So the two possible states are "all candidates share one stone and one model" (today) and "sharp and blunt candidates use different damage models" (after adopting upstream's rule). Neither is obviously right, and the choice is not ours alone to make: if a sharpstone and a weightstone give the same melee bonus in TBC, then `forms.go` omitting 29453 is a fork-engine bug and fixing *that* is what makes upstream's rule safe to adopt.
+
+Ticket 351 carries both questions and deliberately puts the TBC rule and the `forms.go` omission ahead of any plumbing on our side.
 
 Note that `disclosure.ts:54-58` already reasons about this class of thing and its reasoning does **not** cover this case: it argues a *missing* temporary enchant is harmless because it is "constant across baseline and candidates, so deltas survive". Here the imbue is present and pinned while the weapon under it changes family — constant-across-candidates is the bug, not the mitigation. That disclosure text should be revisited alongside the fix.
 
 Not re-compared: `socketBonusActive` and the meta/socket-bonus predicates against `reforge_optimizer/gear.go` — ADR-0025 covers those.
 
-**Verdict: adopt + note** — the gem and enchant handling stays as it is (ours carries and repairs more than upstream, deliberately, and shares upstream's own enchant predicate). The note is `adjustWeaponImbueID` (`weapons.go:36`): upstream keeps the weapon stone in sync with the candidate weapon's type family and we never touch consumables, so the feral skeleton's pinned weightstone rides along onto sharp and off-hand candidates. Ticketed as 351 rather than implemented, because making the imbue follow the candidate means either `candidateSwapWithRepairs` returns a consumables patch or `composeFor` grows a per-candidate override — the composed-request contract that the loop, `composeForBulk` and the package path all share — plus fixture churn on `test/fixtures/shredzepelin-cat.raid-sim-request.json`, which pins `mhImbueId: 34340`. That is control flow and a new fixture, which the size rule sends to a ticket. Whether the stone swap reorders any row is **unmeasured**; ticket 351 names the cheap measurement.
+**Verdict: adopt + note** — the gem and enchant handling stays as it is (ours carries and repairs more than upstream, deliberately, and shares upstream's own enchant predicate). The note is the weapon stone: upstream keeps it matched to the equipped weapon's type family in two places — `adjustWeaponImbueID` (`weapons.go:36`) on the bulk path, and `Player.setGear` (`ui/core/player.tsx:713`) on every gear change through the UI, which is the "frontend auto-switch" the Go comment says it mirrors — and our engine passes through neither, because it composes from a pinned skeleton and never touches consumables. Ticketed as 351 rather than implemented, on two grounds. First the size rule: a per-candidate consumables override changes the composed-request contract that the loop, `composeForBulk` and the package path all share, and moves `test/fixtures/shredzepelin-cat.raid-sim-request.json`, so it is control flow plus a new fixture. Second, and more important, **the fix is not yet known to be an improvement** — `sim/druid/forms.go:51-56` grants the paw-damage bonus for id 34340 only (`29453` appears nowhere in `sim/druid/`), so making the stone follow the weapon would rank sharp and blunt feral candidates under different damage models. Whether that fork-engine omission or our missing adjustment is the real defect is the question ticket 351 puts first. No DPS figure was measured on either side.
 
 ## F3 — Per-request item-database injection
 
