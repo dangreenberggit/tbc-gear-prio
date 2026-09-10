@@ -1,6 +1,6 @@
 # 353 — Re-baseline committed sim numbers and recorded fixtures against engine `ec5c5f2`
 
-Status: open
+Status: closed
 Opened: 2026-09-10
 Blocks: none
 Blocked by: none
@@ -63,14 +63,42 @@ fixed by re-recording.
 - `docs/verification-log.md` — confirm no phase-gate figure quotes a DPS number
   produced by the old engine before closing this ticket.
 
-### 4. The domain question, unanswered
+### 4. The domain question — answered 2026-09-10
 
-The prior pin review recorded a **−18 DPS feral rotation regression** and a
-15 → 27 jump in above-cutoff rows, with no domain look. Upstream has since
-rewritten the feral APL (104 lines). `build_feral_skeleton.py:64-66` takes the
-rotation from the owner's own export rather than the vendored APL, so that
-rewrite does **not** enter this repo's skeleton — but whether the feral numbers
-this repo now produces are correct is an SME question that nobody has answered.
+**Correction.** This section previously revived a "−18 DPS feral rotation
+regression" as an open question. That figure was superseded **and reversed in
+sign** on 2026-08-21: ticket 250 is closed, and `docs/verification-log.md:1654-1669`
+records a three-arm, 20k-iteration experiment measuring the rotation main
+effect at **+42.91 DPS in favour of the new rotation**, against a pre-registered
+bound of 1.38. Arm 2 reproduces the old 740.67 to the cent, identifying 722.55
+as the stale half. Propagating −18 again was its third appearance; it is wrong
+and is struck here so it stops resurfacing.
+
+The "15 → 27 above-cutoff rows" pair is likewise **two uncontrolled
+measurements**, not a regression — the cutoff is measured against each
+character's own baseline. This re-record does not reproduce it: feral-p3 sits
+at 43 above cutoff both before and after.
+
+Upstream rewrote the feral APL (104 lines), but `build_feral_skeleton.py:64-66`
+takes the rotation from the owner's own export rather than the vendored APL, so
+that rewrite provably does not enter this repo's skeleton (the committed
+skeleton still measures prepull 1 / priority 22).
+
+**SME verdict: `trust-with-caveats`, nothing blocking** —
+`.scratch/handoffs/wowsims-reforge-catchup/SME-353-feral-verdict.md` (seat
+`gate-sme`, 2026-09-10). Feral's whole +7.53 DPS move is request-driven, not
+engine drift: `exposeWeaknessHunterAgility` 1080 → 1210 is exactly Phase1 →
+Phase3 in upstream's own map (`vendor/wowsims/proto_utils.ts:1280-1283`), a buff
+*increase*. Ret is the control — all 267 of its old request bodies survive and
+return bit-identical DPS on the new binary, while feral shares zero bodies.
+`aboveCutoffItemIds` is unchanged on all three rows.
+
+Two caveats the SME raised, carried forward as ticket 358 rather than fixed
+here: the scope note in `data/presets/feral/p1.ep-weights.json` claiming "EP
+only chooses gems here" is false (`candidate-order.ts:36-67` plus `rank.ts:1100`
+mean stale EP weights decide what is never simmed on a capped run — both
+defaults are safe), and `scripts/build_feral_skeleton.py:19` still documents the
+rotation as coming from the vendored APL, contradicting line 64.
 
 ## Acceptance
 
@@ -80,7 +108,9 @@ this repo now produces are correct is an SME question that nobody has answered.
       from the recordings). — **corrected the assertion**, `c135b0b`
 - [x] `pnpm verify` green on the test gate, with each previously-failing test
       named and accounted for. — all 11 named below
-- [ ] SME verdict on the feral rotation change and the above-cutoff row count
+- [x] SME verdict on the feral rotation change and the above-cutoff row count
+      — **`trust-with-caveats`, nothing blocking**, see §4 and
+      `.scratch/handoffs/wowsims-reforge-catchup/SME-353-feral-verdict.md`
       (`sme-rank-review`), audience the engineering team. — **still open**,
       deliberately left for a review-lane seat
 - [x] Confirm `docs/verification-log.md` quotes no stale engine figure. — read,

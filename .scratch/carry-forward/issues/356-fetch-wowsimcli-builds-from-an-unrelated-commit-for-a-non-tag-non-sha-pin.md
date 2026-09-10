@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Adversarial axis, A2)
 Blocks: none
@@ -52,6 +52,32 @@ identically.
 
 ## Acceptance
 
-- [ ] A `tag` that is neither `vX.Y.Z` nor a 40-hex sha exits non-zero with a
-      message naming both legal forms, instead of building.
+- [x] A `tag` that is neither `vX.Y.Z` nor a 40-hex sha exits non-zero with a
+      message naming both legal forms, instead of building. — `06a5ef7`
 - [ ] A test covers the rejection, alongside the existing slash case.
+      — **not done**, carried forward to ticket 361. `scripts/` has no Python
+      test harness at all (no `scripts/test_*.py`, nothing in
+      `packages/core/test/` referencing this script), so covering it means
+      standing one up rather than adding a case.
+
+## Closed 2026-09-10
+
+Fixed by `06a5ef7` ("Refuse to build when the lock tag does not name the
+commit") on `feat/wowsims-reforge-catchup`, merged to `dev` in `16f8fba`.
+
+The dispatch is now total. A tag is one of exactly three things: `vX.Y.Z`
+(download the release), a 40-hex sha equal to `lock["commit"]` (build from
+source), or refused with exit 2. Two distinct refusals, because the causes and
+the fixes differ — a tag of the wrong shape, and two shas that disagree (an
+inconsistent lockfile).
+
+Measured before committing, with the lockfile restored from `HEAD` afterwards:
+
+| lock tag | result |
+| --- | --- |
+| `master` | exit 2, "neither a release tag ... nor a sha" |
+| `v0.0.119-rc1` | exit 2, same |
+| 40 × `a` | exit 2, "both shas but disagree" |
+| the real pin | exit 0, sha256 `fb4b9769e397dd18…` unchanged |
+
+Closed on the first box only. The test box is real and unmet — see ticket 361.
