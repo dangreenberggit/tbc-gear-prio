@@ -24,11 +24,28 @@ function retSkeleton(): RaidSimRequest {
 }
 
 describe("CURRENT_API_VERSION", () => {
-  it("matches the apiVersion the committed preset carries", () => {
+  /**
+   * The committed preset is a *capture*, not a generated artifact: it is the
+   * output of `wowsimcli decodelink` on a ret P2 share link exported from the
+   * site in Phase 0, and its `apiVersion` is a fact about the browser session
+   * that produced the link. `decodelink` is a plain protobuf unmarshal and runs
+   * no migrations, so re-decoding the same link on any newer binary reproduces
+   * the same stamp — there is no regeneration that moves it forward.
+   *
+   * So this asserts the relationship that has to hold rather than equality,
+   * which was only ever true until the next engine pin: the capture must carry
+   * a real version (0 is the proto default, which sends the whole message down
+   * wowsims' migration chain) and it cannot claim to be newer than the engine
+   * we build against. That an *export of ours* stamps the current version — the
+   * invariant the equality was reaching for — is covered below by "stamps the
+   * current api version so the site does not migrate the import".
+   */
+  it("is a real version the committed capture does not claim to exceed", () => {
     const preset = loadJson(
       "data/presets/ret/p2.individual-sim-settings.json"
     ) as { apiVersion: number };
-    expect(CURRENT_API_VERSION).toBe(preset.apiVersion);
+    expect(preset.apiVersion).toBeGreaterThan(0);
+    expect(CURRENT_API_VERSION).toBeGreaterThanOrEqual(preset.apiVersion);
   });
 
   it("is not the proto default, which would trigger wowsims' migrations", () => {
