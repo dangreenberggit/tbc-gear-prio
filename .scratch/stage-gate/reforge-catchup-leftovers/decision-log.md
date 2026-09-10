@@ -60,6 +60,39 @@ than inheriting the reviewer's garbled version.
 
 Material findings F4–F6 and minor F7–F9 ride along to the revision as written.
 
+## Gate B round 2 — 2026-09-10, revision 1 → proceed
+
+**Outcome: proceed to execution.** One revision round, which the skill calls
+the norm. No blocking finding still stands, so there is no second loop-back.
+
+How each blocker was answered:
+
+- **F1** → the feral probe is **withdrawn, not repaired**. Q1 is recorded as
+  unmeasurable from committed inputs, with ticket 365 filing the missing
+  dual-wield fixture. This is the honest answer: C13 and the new C27 (only
+  `data/presets/feral/` has a loadable skeleton) mean any dual-wield request
+  would be hand-authored, which is the very thing `direct-sim-support.ts` warns
+  does not describe our path. The plan kept one real observation — the live
+  enhancement page in Step 2.3 — and labelled its reach precisely
+  (separates rejects from not-rejects; cannot separate drops from counts).
+- **F2** → C12 restated with the repo's own numbers, and the reviewer's garbled
+  quotation corrected: cross-core-count runs agree to ~1e-12 DPS. No
+  exact-equality test survives. The 7.01 DPS noise floor is carried into ticket
+  365 as a sizing constraint on the future measurement.
+- **F3** → C17's conclusion dropped. Provenance became a *measured* step with
+  three pre-written outcomes (`upstream` / `fork` / `unestablished`), and
+  ticket 364 must carry whichever word the fetch yields. No claim of upstream
+  provenance without a fetched `upstream/*` ref.
+
+Material findings: F4 (Step 4 now records the delta-column finding and selects
+no option), F5 (Step 2 restored the 467-item and header checks), F6 (ticket 362
+reframed as "run but never recorded") — all fixed in the plan, none accepted
+with a reason. Minor F7–F9 ride along; F9 confirmed the no-fan-out claim.
+
+**Net effect on scope:** this branch now lands almost no code — one
+`disclosure.ts` sentence and its test — and four tickets. That is the correct
+outcome for a job whose two headline bugs both turned out to be unmeasured.
+
 ## Flag — a parallel writer on this branch
 
 `33babf0` ("Write the leftovers handoff, sourced and failure-pathed", author
