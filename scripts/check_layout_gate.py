@@ -58,6 +58,14 @@ layout is broken -- returns nonzero and blocks the merge. A rotted browser path
 or a stale `dist/` must never wall off a merge; those are "skipped, prereq
 absent", reported as such and distinguished from "ran and failed".
 
+That distinction cannot be drawn from the exit code: `test-layout.mjs` exits 1
+both when it measured the geometry and found it wrong AND when it crashed on a
+prereq before measuring anything. So the test prints a machine-readable verdict
+line (`LAYOUT_GATE_VERDICT {...}`, outcome `measured` or `unmeasured`) and this
+script reads it. `unmeasured` is reported as a skip -- and the baseline is left
+alone, because recording a digest the gate never actually tested would skip the
+gate forever, which is the "report success by skipping" failure mode again.
+
 Node 22 note
 ------------
 `test-layout.mjs` uses Node 22's global `WebSocket` and `node:*` modules. This
@@ -319,8 +327,57 @@ def _layout_command() -> tuple[list[str], str] | None:
     return None
 
 
+# The tagged verdict line `test-layout.mjs` prints just before it exits. The
+# gate exits 1 for two unrelated things -- geometry it measured and found
+# wrong, and a crash before it measured anything -- so the exit code alone
+# cannot tell "the tab is broken" from "a prereq is missing". Reporting the
+# second as the first is a false accusation and contradicts this script's own
+# rule that a prereq absence never vetoes a merge. The verdict line is the
+# discrimination: outcome "measured" (with a failure count) or "unmeasured"
+# (with a reason). Preferred over matching an error string because it is a
+# contract the test states deliberately, not an incidental phrasing.
+VERDICT_TAG = "LAYOUT_GATE_VERDICT"
+
+
+def _parse_verdict(stdout: str) -> dict | None:
+    """The last tagged verdict line in `stdout`, parsed, or None if absent.
+
+    None means the gate predates the verdict contract (an older fork clone) --
+    the caller falls back to the exit code, which is the pre-existing
+    behaviour.
+    """
+    found = None
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line.startswith(VERDICT_TAG):
+            continue
+        try:
+            parsed = json.loads(line[len(VERDICT_TAG) :].strip())
+        except ValueError:
+            continue
+        if isinstance(parsed, dict):
+            found = parsed
+    return found
+
+
+# run_gate's third outcome, distinct from both 0 (green) and 1 (broken): the
+# gate did not measure anything, so the merge is not blocked BUT the baseline
+# must not advance either. Advancing it would record an untested digest as
+# tested and permanently skip the gate -- the same "report success by skipping"
+# failure the lib.wasm.gz bug caused. Not an exit code; `run()` maps it to 0.
+GATE_UNMEASURED = -1
+
+
 def run_gate() -> int:
-    """Run test:layout in the fork. 0 green, 1 broken. Caller has checked prereqs."""
+    """Run test:layout in the fork.
+
+    Returns 0 (the gate ran green), 1 (the gate MEASURED the layout and it is
+    broken), or GATE_UNMEASURED (it never measured a width, so it learned
+    nothing about the tab and nothing may be blamed on it -- and nothing may be
+    recorded as tested either).
+
+    Caller has checked prereqs.
+    """
     cmd = _layout_command()
     if cmd is None:
         print(
@@ -328,12 +385,58 @@ def run_gate() -> int:
             "test-layout.mjs needs Node 22 (global WebSocket); refusing to run "
             "it on an older Node rather than fail for the wrong reason.",
         )
-        return 0
+        return GATE_UNMEASURED
     argv, how = cmd
     print(f"layout gate: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
     print("(this renders the Upgrades tab headless at 4 widths; ~2-3 min)")
-    proc = subprocess.run(argv, cwd=str(FORK_ROOT))
-    return proc.returncode
+    # stdout is teed rather than buffered: each line is echoed as it arrives so
+    # a ~2-3 minute run still shows progress live, while the verdict line is
+    # kept for the run/skip decision below. stderr stays attached to the
+    # terminal untouched.
+    stdout_lines: list[str] = []
+    with subprocess.Popen(
+        argv,
+        cwd=str(FORK_ROOT),
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        bufsize=1,
+    ) as proc:
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            stdout_lines.append(line)
+            print(line, end="", flush=True)
+    captured = "".join(stdout_lines)
+
+    if proc.returncode == 0:
+        return 0
+
+    v = _parse_verdict(captured)
+    if v is None:
+        # An older fork clone with no verdict contract. Fall back to the exit
+        # code and say that the verdict is inferred, not read.
+        print(
+            "layout gate: test-layout.mjs printed no "
+            f"{VERDICT_TAG} line (a fork clone predating the verdict contract) "
+            "-- treating the nonzero exit as a layout failure, which is the "
+            "old behaviour and may instead be a crash. Read the output above.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if v.get("outcome") == "unmeasured":
+        reason = v.get("reason") or "no reason reported"
+        print(
+            f"layout gate: SKIPPED -- test-layout.mjs exited {proc.returncode} "
+            "without measuring any width, so it learned nothing about the tab's "
+            f"layout. Reason: {reason}. This is a prereq/environment problem, "
+            "not a layout failure, and does not block the merge. The baseline "
+            "is left where it is, so the gate stays armed for the next attempt."
+        )
+        return GATE_UNMEASURED
+
+    return 1
 
 
 def _skip(msg: str) -> int:
@@ -437,6 +540,10 @@ def run(
         )
 
     rc = run_gate()
+    if rc == GATE_UNMEASURED:
+        # Nothing was measured. Do not block, and do NOT advance the baseline:
+        # recording an untested digest as tested would skip the gate forever.
+        return 0
     if rc == 0:
         write_baseline(digest)
         print(
