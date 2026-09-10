@@ -9,7 +9,8 @@ gate fires on the one path where a finished feature is folded into `dev`.
 
 Why here and not `pnpm verify`: the test takes ~2m19s and needs three things
 that exist only on the main checkout -- the fork clone, a prior `make host`
-build (`dist/tbc/lib.wasm` + `dist/tbc/assets`), and a Playwright Chromium.
+build (`dist/tbc/lib.wasm.gz` -- or the uncompressed `dist/tbc/lib.wasm` --
+plus `dist/tbc/assets`), and a Playwright Chromium.
 `pnpm verify` runs on every push and inside CI, where none of those is present
 and where the cost would be paid every time. `pnpm merge-to-dev` runs on the
 main checkout, at the moment a feature ships, only when the developer asks --
@@ -94,7 +95,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 LAYOUT_TEST = FORK_ROOT / "test-layout.mjs"
-DIST_WASM = FORK_ROOT / "dist/tbc/lib.wasm"
+# The build-completed sentinel, in both the shapes `make host` can leave behind.
+# The makefile's wasm recipe (vendor/tbc-new-fork/makefile:112) ends with
+# `gzip -9 -f -n $(OUT_DIR)/lib.wasm`, which REPLACES the uncompressed file --
+# so after the very `make host` this gate's own skip message tells you to run,
+# only `lib.wasm.gz` is on disk. Checking solely for `lib.wasm` made the gate
+# skip permanently and report success by skipping. The gzipped form is also the
+# one the app actually fetches (`SIM_WASM_URL` in ui/core/worker_pool.ts), so it
+# is the normal post-build state, not a degraded one. Either file present means
+# the WASM build completed; nothing here reads the bytes.
+DIST_WASM_CANDIDATES = (
+    FORK_ROOT / "dist/tbc/lib.wasm.gz",
+    FORK_ROOT / "dist/tbc/lib.wasm",
+)
 DIST_ASSETS = FORK_ROOT / "dist/tbc/assets"
 LOCK_PATH = ROOT / "data/wowsims-fork-layout.lock.json"
 
@@ -392,10 +405,13 @@ def run(
             "fork -- the clone is present but predates the layout gate "
             "(ticket 322). Nothing to run."
         )
-    if not DIST_WASM.is_file() or not DIST_ASSETS.is_dir():
+    if not any(p.is_file() for p in DIST_WASM_CANDIDATES) or not DIST_ASSETS.is_dir():
+        wanted = " or ".join(
+            p.relative_to(FORK_ROOT).as_posix() for p in DIST_WASM_CANDIDATES
+        )
         return _skip(
-            "the fork's built dist/ is absent (no prior `make host`: "
-            f"{DIST_WASM.relative_to(FORK_ROOT).as_posix()} / "
+            "the fork's built dist/ is absent (no prior `make host`: needs "
+            f"{wanted}, plus "
             f"{DIST_ASSETS.relative_to(FORK_ROOT).as_posix()}). The gate builds "
             "the bundle on top of it and cannot run without it. Run `make host` "
             "in the fork once to arm the gate."
