@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/stage-gate/reforge-catchup-leftovers/brief.md
 Blocks: none
@@ -127,9 +127,67 @@ separates none of the three candidate answers. Recorded in 350's Decision and in
 
 ## Acceptance
 
-- [ ] The enhancement page's Upgrades tab completes a run without panicking.
-- [ ] The chosen option is recorded with its reason.
-- [ ] A test covers the item-swap id at the `rankUpgrades` interface.
+- [x] The enhancement page's Upgrades tab completes a run without panicking.
+- [x] The chosen option is recorded with its reason.
+- [x] A test covers the item-swap id at the `rankUpgrades` interface.
+
+## Resolution
+
+**Chosen: include the item-swap items in the per-request item data.** Owner's
+call, 2026-09-10. It restores an invariant upstream already holds rather than
+inventing a rule, and it leaves every number the tab reports unchanged.
+
+**Why the alternative lost.** Stripping item swap out of the captured skeleton
+was rejected because a configured swap is not inert: unequipped item effects,
+stat offsets and set bonuses all apply at character construction, so dropping
+it would silently move the baseline and every candidate's delta, and would make
+the tab disagree with the same page's Simulate button with nothing on screen
+explaining why.
+
+**Route: adapter only, no ported engine file touched.** The engine hands
+`simDatabaseFor` the equipment array and writes whatever comes back into the
+request verbatim, so a resolver returning `(worn ∪ candidate) ∪ swap` satisfies
+every call site through the existing signature. `sim_database.ts`'s bare
+function became `simDatabaseResolverFor(player)`, closing over the page's
+`Player` and merging `player.itemSwapSettings.getGear().toDatabase(db)` into
+every result — which is literally upstream's `Player.toDatabase`
+(`ui/core/player.tsx:1431-1435`), likewise unconditional on
+`getEnableItemSwap()`. Widening the engine's `Deps` signature would have armed
+E-W3 + PROVENANCE across both engine copies for no gain.
+`scripts/check_engine_port_drift.py` passes: 33 ported files unmoved.
+
+**Fork commit:** `0b50f402630e0300a83023b299c5ff3733f2cfe4` on
+`feat/upgrades-tab`; `data/wowsims-fork.lock.json` re-pinned to it.
+
+**Test:** `packages/core/test/rank.test.ts` — "carries item-swap rows from the
+resolver into every request (ticket 362)", in the ticket-212 describe block. It
+pins the two engine contracts the fork adapter depends on (compose preserves
+the skeleton's `itemSwap`; the resolver's rows reach every request including
+the baseline). It passes on first run and cannot go red on the adapter itself:
+the adapter is fork code and the fork ships no JS test runner. The product-code
+proof is the browser run below. A comment above the test says so, so a later
+reader does not "fix" it into a red.
+
+**Browser evidence**, built with GNU Make 4.4.1 (`✓ built in 4.11s`, zero
+errors, `index.html` restamped), served from `vendor/tbc-new-fork/dist`:
+
+| Page | Pre-registered | Seen |
+| --- | --- | --- |
+| shaman/enhancement | run completes, rows land, 954 eligible | **passes** — 954 eligible, `Simming 3/991… (2 rows landed)`, rank 1 *Soul Cleaver* Main Hand +165.0 DPS, rank 2 *Torch of the Damned* Main Hand +158.9 DPS; no "Ranking failed", no "No item with id" (the panel's alert element is empty) |
+| paladin/retribution | `Phase 3 (2.2 - T6) - Alpha`, 467 eligible, rows land | **unchanged** — header exact match, **467** eligible, `Simming 2/504… (1 rows landed)`, *Legguards of Endless Rage* Legs −20.9 DPS |
+
+The only console error on either page is an unrelated wowhead tooltip fetch
+raised from a Chrome extension (`installHook.js`), not from the tab.
+
+Eligible counts held on both pages, which is the check that the fix did not
+move pool composition.
+
+## Comments
+
+The fork-half of this ticket — `NewItem` panicking rather than returning an
+error on an unknown id — is split out as **366**. It is upstream's code
+(`sim/core/database.go`), its owner is the fork/upstream rather than this tab,
+and fixing it would only turn the crash into a tidy failure. Not fixed here.
 
 ## Notes
 
