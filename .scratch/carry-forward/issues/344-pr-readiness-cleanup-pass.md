@@ -39,7 +39,10 @@ density and cite artifacts that do not exist in wowsims' repo.
    review — IF we can re-establish our two guarantees (result-at-index
    determinism, lowest-index-error) on top. Decide: fold (and re-point the
    determinism tests) or keep `promise-pool.ts` with a comment pointing at their
-   `batch.ts` as the sibling. Coordinate with ticket 342 (overlaps).
+   `batch.ts` as the sibling. Coordinate with ticket 342 (overlaps). Ticket 342
+   measured both guarantees against their `batch.ts` — see
+   `.scratch/stage-gate/342-learn-from-upstream/comparison.md` § "Concurrency
+   (hand-off to 344)"; the decision is still this ticket's.
 4. **Request-ID note** — we generate request IDs with randomness where wowsims
    builds structurally-unique ones (`requestId-index-seed`, `batch.ts:67`). Tiny
    collision risk today, but the abort path keys on request ID. Add structural
