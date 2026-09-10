@@ -240,19 +240,19 @@ TRACKED = {
 # correct" when this override was added; see PLAN.md D2 and
 # .scratch/handoffs/wowsims-tab/slice-6/HANDOFF.md, slice 6b).
 #
-# ret_p3.gear.json does not exist at the pin: upstream shipped it in
-# 5c7491899 ("missed jsons", 2026-08-13T18:41:45Z), three weeks after
-# 8aa378b3. Everything else in TRACKED keeps fetching from the main pin.
-#
 # do_update() fetches each file at PER_FILE_PIN.get(local, sha) and records
 # the override in that file's own lock entry as "commit" only when it differs
 # from the top-level pin, so a plain `--update --tag <pin>` (no PER_FILE_PIN
 # entry touched) leaves this file's provenance exactly where it is. do_restore
 # reads the same per-entry "commit" back. Promote a file out of this dict once
 # its ref reaches the main pin -- the override then becomes a no-op diff.
-PER_FILE_PIN = {
-    "ret_p3.gear.json": "5c7491899b5d71adecdc8de28d4fb2f77f0571b8",
-}
+#
+# ret_p3.gear.json promoted out 2026-09-10 (ADR-0030 re-pin): its override
+# commit 5c7491899b5d71adecdc8de28d4fb2f77f0571b8 is an ancestor of the new
+# main pin ec5c5f205e61049d730e460967f8488774a7fe2a (`gh api
+# repos/wowsims/tbc-new/compare/5c7491899...ec5c5f205e61 --jq .status` ->
+# "ahead"), so the main pin now reaches the same content.
+PER_FILE_PIN = {}
 
 def gh(*args):
     """Call gh api. Kept as a subprocess so this stays stdlib-only and reuses

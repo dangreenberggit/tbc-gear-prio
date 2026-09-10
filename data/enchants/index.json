@@ -1166,5 +1166,19 @@
       "name": "Enchant Gloves - Major Strength",
       "type": 7
     }
+  ],
+  "963": [
+    {
+      "enchantType": 1,
+      "extraTypes": [],
+      "name": "Enchant 2H Weapon - Greater Impact",
+      "type": 13
+    },
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Weapon - Major Striking",
+      "type": 13
+    }
   ]
 }

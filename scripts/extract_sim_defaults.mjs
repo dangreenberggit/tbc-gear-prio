@@ -13,6 +13,9 @@
  * that file the same way, rather than being hardcoded here:
  *   ...defaultRaidBuffMajorDamageCooldowns()      -> a flat object literal
  *   ...defaultExposeWeaknessSettings(Phase.PhaseN) -> a Map keyed by phase
+ *   ...defaultExposeWeaknessSettings()             -> same map, keyed by
+ *     CURRENT_PHASE from ui/core/constants/other.ts (also read statically,
+ *     never assumed)
  *
  * Enum members (TristateEffect.X, Drums.X) are emitted as the bare member name,
  * which is what proto JSON uses and what the skeleton carries.
@@ -41,6 +44,7 @@ const SPECS = {
 };
 
 const UTILS = "vendor/wowsims/proto_utils.ts";
+const CONSTANTS = "vendor/wowsims/constants_other.ts";
 const WANTED = ["raidBuffs", "partyBuffs", "individualBuffs", "debuffs"];
 
 class Unresolved extends Error {}
@@ -127,20 +131,29 @@ function findConst(source, name) {
  * Both are arrow functions. `defaultRaidBuffMajorDamageCooldowns` returns a
  * constructor call directly; `defaultExposeWeaknessSettings` indexes a
  * `new Map([[Phase.PhaseN, {...}], ...])` by its argument, defaulting to
- * CURRENT_PHASE — but every call site we parse passes an explicit phase, and we
- * refuse to invent one if that ever stops being true.
+ * CURRENT_PHASE when called with no argument (`ui/core/constants/other.ts`,
+ * itself a TRACKED vendored file, so this stays a static read rather than an
+ * assumption).
  */
 function callHelper(name, args, ctx) {
   const decl = findConst(ctx.utils, name);
   if (!decl) throw new Unresolved(`helper ${name}() not found in ${UTILS}`);
 
   if (name === "defaultExposeWeaknessSettings") {
-    if (args.length !== 1) {
-      throw new Unresolved(
-        `${name}() called with no explicit phase; refusing to assume CURRENT_PHASE`
-      );
+    let phase;
+    if (args.length === 1) {
+      phase = evaluate(args[0], ctx); // e.g. "Phase1"
+    } else if (args.length === 0) {
+      const currentPhase = findConst(ctx.constants, "CURRENT_PHASE");
+      if (!currentPhase) {
+        throw new Unresolved(
+          `${name}() called with no explicit phase, and CURRENT_PHASE not found in ${CONSTANTS}`
+        );
+      }
+      phase = evaluate(currentPhase, ctx); // e.g. "Phase3"
+    } else {
+      throw new Unresolved(`${name}() called with unexpected arg count`);
     }
-    const phase = evaluate(args[0], ctx); // e.g. "Phase1"
     const mapName = decl.body?.expression?.getText?.() ?? "";
     const table = findConst(ctx.utils, mapName.split(".")[0]);
     if (!table) throw new Unresolved(`phase map for ${name}() not found`);
@@ -210,7 +223,8 @@ function main() {
 
   const simPath = path.join(ROOT, spec.sim);
   const utilsPath = path.join(ROOT, UTILS);
-  for (const p of [simPath, utilsPath]) {
+  const constantsPath = path.join(ROOT, CONSTANTS);
+  for (const p of [simPath, utilsPath, constantsPath]) {
     if (!existsSync(p)) {
       console.error(`missing ${path.relative(ROOT, p)}`);
       console.error("  run: pnpm sync:wowsims:restore");
@@ -220,7 +234,7 @@ function main() {
 
   let extracted;
   try {
-    const ctx = { utils: parse(utilsPath) };
+    const ctx = { utils: parse(utilsPath), constants: parse(constantsPath) };
     extracted = extract(parse(simPath), ctx);
   } catch (e) {
     if (e instanceof Unresolved) {
