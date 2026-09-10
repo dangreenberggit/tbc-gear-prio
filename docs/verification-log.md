@@ -2515,3 +2515,56 @@ cannot finish in this state was a function of default iterations, not of the
 278 closed (measured, and the mid-run path fixed). 275 closed (toggle fold).
 Filed: 279 (the rank/view tie-order disagreement), 280 (sortable headers),
 281 (progress bar), 282 (content-filter option grouping).
+
+## 2026-09-10 — reforge-catchup-leftovers: two questions, one answerable
+
+### Q1: what does the fork engine do with a 2H + off-hand equipment spec?
+
+**Unmeasurable from committed inputs.** Full record with every command and its
+output: `.scratch/stage-gate/reforge-catchup-leftovers/probe/results.md`.
+
+Ticket 350 is reachable only for `DUAL_WIELD_SPECS` — rogue, enh, warrior,
+hunter (`packages/core/src/pool.ts:373-378`). The only committed request
+fixtures are `feralCatDruid` and `retributionPaladin`, and the only skeletons
+`cli-wiring.ts` can load are `data/presets/{feral,ret}/p2.raid-sim-skeleton.json`.
+Ret and feral are excluded from the set deliberately — neither can put anything
+in the off hand — so no committed input can express the 2H+OH set the question
+is about. A request for a dual-wield spec would have to be hand-authored, which
+`packages/core/test/direct-sim-support.ts:15` warns differs from what `rank.ts`
+actually sends. Ticket 365 files the missing fixture.
+
+Reading only (not a measurement): no hand-type check gates the off-hand weapon
+on this path. `IsDualWielding` is `options.OffHand.SwingSpeed != 0`
+(`sim/core/attack.go:441`), and `GetOHWeapon` (`sim/core/character.go:560-568`)
+returns nil only for id 0, a shield, or a dedicated `WeaponTypeOffHand` item —
+never because the main hand is two-handed. The defensive clear exists only in
+the bulk generator (`sim/core/bulk/generator.go:335`), which the `raidsim` path
+does not use.
+
+The planned live observation on the enhancement page did not happen: the run
+aborts in the item-swap path before any candidate is priced (ticket 362). It is
+evidence neither for nor against any of the three candidate answers.
+
+### Q2: do a weightstone and a sharpstone give the same melee bonus in TBC?
+
+**Yes — answered by reading, as the ticket said it should be.**
+`registerStaticImbue` (`vendor/tbc-new-fork/sim/core/consumes.go:697`) gives
+Adamantite Sharpstone (29453, case :708) and Adamantite Weightstone (34340,
+case :734) the same `stats.MeleeCritRating +14` and the same `+12` to MH/OH
+BaseDamageMin/Max. The only difference is the sharpstone's ranged-crit
+compensation at :732, inert for a melee-only character.
+
+So `sim/druid/forms.go:52`, which grants the paw bonus only when
+`MhImbueId == 34340`, is the defect — filed as ticket 364.
+
+**provenance: upstream, measured.** The `upstream` remote had never been
+fetched, so ancestry within the pin's own history proved nothing about where a
+commit came from. After `git -C vendor/tbc-new-fork fetch upstream
+feature/backend-reforge`, `merge-base --is-ancestor db05fed93
+upstream/feature/backend-reforge` exits 0 — the commit is on upstream's branch.
+
+Decision recorded in ticket 351: do **not** mirror `adjustWeaponImbueID` here,
+because with `forms.go:52` unchanged a dagger candidate rewritten to 29453 loses
+a paw bonus blunt candidates keep. The `disclosure.ts` note that over-asserted
+"deltas survive" is corrected in both engine copies regardless, with a test that
+pins the new wording.

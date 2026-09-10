@@ -250,16 +250,16 @@ section above.
 
 ## Acceptance
 
-- [ ] The TBC question is answered and written down: do the two stones give the
+- [x] The TBC question is answered and written down: do the two stones give the
       same melee bonus, and is `forms.go`'s id-equality check therefore a
       fork-engine bug?
-- [ ] A recorded decision on whether to mirror `adjustWeaponImbueID` at all,
+- [x] A recorded decision on whether to mirror `adjustWeaponImbueID` at all,
       with its reason — including the consequence for feral dagger candidates if
       we do.
 - [ ] If we mirror: the imbue follows the candidate weapon's type family
       (including the zero case for off-hand-only items and shields), all three
       compose paths agree, and fixtures are re-recorded.
-- [ ] The `disclosure.ts` temporary-enchant note no longer asserts deltas
+- [x] The `disclosure.ts` temporary-enchant note no longer asserts deltas
       survive in the pinned-imbue case.
 - [ ] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
       Node 20 — `node:sqlite` is missing).
@@ -270,3 +270,55 @@ Found by reading, not by a failing test or a bad row. Related: 342 (the
 comparison that surfaced this), 350 (the other finding from the same pass), 343
 (gem optimizer for candidates — the adjacent "re-tune consumables/gems per
 candidate" question, deliberately separate).
+
+## Decision (2026-09-10)
+
+**Q2 answered: the two stones give identical melee bonuses.** In
+`vendor/tbc-new-fork/sim/core/consumes.go`, `registerStaticImbue` gives
+Adamantite Sharpstone (29453, case at :708) and Adamantite Weightstone (34340,
+case at :734) the same `stats.MeleeCritRating +14` and the same `+12` to MH/OH
+BaseDamageMin/Max. The only difference is the sharpstone's ranged-crit
+compensation at :732, which is inert for a melee-only character.
+
+```
+$ grep -n "34340\|29453" vendor/tbc-new-fork/sim/druid/forms.go
+52:	if druid.Consumables.MhImbueId == 34340 { // Adamantite Weightstone
+```
+
+**Therefore `sim/druid/forms.go:52`'s id-equality check is the defect**, by this
+ticket's own step-1 rule: equal melee bonuses in TBC mean granting the paw
+bonus for one stone id only is wrong. Filed as **ticket 364**.
+
+**provenance: upstream.** Measured, not inferred. The `upstream` remote
+(`https://github.com/wowsims/tbc-new.git`) had never been fetched, so earlier
+ancestry checks against the pin's own history could not distinguish upstream
+commits from fork-native ones. Fetched and re-measured:
+
+```
+$ git -C vendor/tbc-new-fork fetch upstream feature/backend-reforge
+ * [new branch]          feature/backend-reforge -> upstream/feature/backend-reforge
+$ git -C vendor/tbc-new-fork merge-base --is-ancestor db05fed93 upstream/feature/backend-reforge; echo $?
+0
+```
+
+`db05fed93` ("fix adamantite weightstone not giving paw damage", Bisonpasfuté,
+2026-05-23) is an ancestor of upstream's own branch, so the check reaches us
+from upstream rather than being fork-native.
+
+**Decision: do not mirror `adjustWeaponImbueID` on this branch.** With
+`forms.go:52` unchanged, rewriting a dagger candidate's stone to 29453 makes
+`weaponImbueFlatDamage` return 0, so sharp candidates would lose a paw bonus
+that blunt candidates keep — two candidates in the same slot ranked under
+different damage models. That is the failure this ticket's "What that means"
+item 2 already names, and it is worse than the mismatch it would fix. Steps 3–5
+of this ticket stay untaken.
+
+**Done here:** the `disclosure.ts` temporary-enchant note no longer asserts that
+deltas survive; it now states that a skeleton-pinned `mhImbueId` is carried
+unchanged into every candidate, including weapon candidates of the other stone
+family and off-hand items. Corrected in both engine copies with the
+ported-engine cycle, and `packages/core/test/disclosure.test.ts` now asserts the
+detail names the pinned imbue so the copies cannot drift back.
+
+`Status:` stays `open`: acceptance box 3 is conditional on a future decision to
+mirror, which this decision defers rather than settles.

@@ -2,7 +2,7 @@ Status: open
 Type: bug
 Origin: .scratch/stage-gate/342-learn-from-upstream/comparison.md
 Blocks: none
-Blocked by: none
+Blocked by: 365
 
 # A two-hander swapped into the main hand leaves the worn off-hand item
 
@@ -146,3 +146,47 @@ Whichever is chosen, note that option 1 removes rows that exist today and option
 Found by reading, not by a failing test or a bad row. Related: 308 and 309
 (second-copy rows, the other side of `attemptEligibility`), 342 (the comparison
 that surfaced this), 351 (the other finding from the same pass).
+
+## Decision (2026-09-10)
+
+**Step 1 of this ticket could not be run.** There is no committed dual-wield
+skeleton or request fixture. The only request fixtures are `feralCatDruid` and
+`retributionPaladin`; the only skeletons `packages/core/src/cli-wiring.ts` can
+load are `data/presets/{feral,ret}/p2.raid-sim-skeleton.json`; and both of those
+specs are excluded from `DUAL_WIELD_SPECS` (`packages/core/src/pool.ts:373-378`)
+precisely because neither can put anything in the off hand. A request for enh,
+warrior or hunter would have to be hand-authored, which
+`packages/core/test/direct-sim-support.ts:15` warns can differ from what
+`rank.ts` actually sends. Commands and output:
+`.scratch/stage-gate/reforge-catchup-leftovers/probe/results.md`. The missing
+fixture is filed as **ticket 365**.
+
+**Reading only — not a measurement.** No hand-type check gates the off-hand
+weapon on the `raidsim` path. `IsDualWielding` is `options.OffHand.SwingSpeed
+!= 0` (`sim/core/attack.go:441`), and `GetOHWeapon`
+(`sim/core/character.go:560-568`) returns nil only when the off-hand item is
+absent, a shield, or a dedicated `WeaponTypeOffHand` item — never because the
+main hand is `HandTypeTwoHand`. So the reading splits by what is worn: a
+dedicated off-hand item contributes no swing but **its stats still apply**,
+while a real one-hander left in the off hand appears to swing alongside the
+two-hander. Upstream's defensive clear lives only in the bulk generator
+(`sim/core/bulk/generator.go:335`), which this path does not reach.
+
+**Live observation: unavailable.** The enhancement page was expected to show a
+*rejects* outcome as a run error or missing two-hander rows. It aborts earlier
+than that, in the item-swap path (`No item with id: 30832`, ticket 362), before
+any candidate is priced. It separates none of the three candidate answers.
+
+**One finding that holds regardless of what the engine does.**
+`statDeltaBetween(equipment, swapped)` (core `rank.ts:1011`, fork
+`engine/rank.ts:1070`) diffs a set that still contains the worn off-hand item,
+because `swapItemAt` rewrites exactly one index. So a two-hander row's **stat
+delta column** never debits the off-hand stats it claims to replace — true
+whether the engine drops the off hand, counts it, or rejects the set. This is an
+argument about the delta column only. It is **not** a selection between Option 1
+and Option 2, and not a reason to prefer either.
+
+**No option is chosen, and no code lands on this branch.** The choice between
+skipping the attempt and clearing the slot waits on the measurement that ticket
+365 unblocks. The acceptance boxes above stay unticked: recording "unmeasurable
+from committed inputs" satisfies none of them.
