@@ -487,10 +487,15 @@ def do_update(tag, ref=None):
 
     if prev and prev.get("currentPhase") != current_phase:
         print(f"\n  *** CONTENT TIER CHANGED: {prev.get('currentPhase')} -> {current_phase} ***")
-        print("  This is the P3 launch signal. Required follow-up (PLAN.md 14, Stage 5+):")
-        print("    1. regenerate data/items/index.json and data/gems/palette.json")
-        print("    2. curate the new tier's items into data/pools/<spec>.json, with `source`")
-        print("    3. bump engineVersion to invalidate cached rankings")
+        print("  The default max phase moves with it. Required follow-up:")
+        print("    1. regenerate the db-derived artifacts: pnpm data:items:generate,")
+        print("       python scripts/list_phase_pool.py, pnpm sim-defaults:build")
+        print("    2. regenerate data/universes/<spec>-p<N>.json for every spec and")
+        print("       phase (scripts/assemble_universe.py) -- these replaced the old")
+        print("       hand-curated data/pools/<spec>.json (ADR-0028)")
+        print("    3. bump ENGINE_VERSION in packages/core/src/content-hash.ts to")
+        print("       invalidate cached rankings")
+        print("    4. update PLAN.md's content-tier row (line 29) to the new tier")
     return 0
 
 

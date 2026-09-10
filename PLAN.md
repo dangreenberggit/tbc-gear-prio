@@ -26,7 +26,7 @@ Where the drafts agreed, this document states the decision once and moves on. Wh
 |---|---|
 | Product question | "What should I want to drop tonight?" — ranked single-item swaps against real logged gear |
 | First spec | **Retribution paladin**. No content tier is baked in — see the next row |
-| Content tier | **A user input, never a build target** (review R2). `maxPhase: 1–5`, filtered **inclusively**. The default is **not hand-maintained and not inferred from the player's log** — it is wowsims' own `CURRENT_PHASE`, synced and pinned (§8.5). Currently **2** |
+| Content tier | **A user input, never a build target** (review R2). `maxPhase: 1–5`, filtered **inclusively**. The default is **not hand-maintained and not inferred from the player's log** — it is wowsims' own `CURRENT_PHASE`, synced and pinned (§8.5). Currently **3** |
 | Second spec | Feral cat — and it is a **gate**, not a backlog item (§14, Stage 2) |
 | Delivery | Stages with recorded exit gates; no stage N+1 before N's gate is written down |
 | Repo | **this one** (`tbc-gear-prio`); rename later if the product name sticks |
@@ -271,7 +271,7 @@ Three consequences, all of which are easy to get backwards:
 - **The pinned group is still ordered by `deltaDps`.** wowsims' curated sets are 17 entries in fixed *slot* order and carry no ranking information whatsoever. Slot order is membership data, not priority data, and must never leak into display order. `sortKey = [pinBis && bisTags.includes('BiS') ? 0 : 1, -deltaDps]`.
 - **Pinned rows will sometimes show negative deltas, and that is correct.** An item is BiS *as a member of a whole optimized set*. Dropped singly onto this player's gear it can genuinely lose DPS — most often by breaking a tier 2-set or 4-set bonus, or by being hit-light for a player under the cap. Keep the signed delta visible on pinned rows; never let the pin imply "upgrade". `setBonusNote` explains the common case.
 
-**The toggle degrades to disabled, it does not silently do nothing.** Ret has three curated sets in `tbc-new` and they stop at P2, so above `maxPhase: 2` there is nothing to pin. Hide or disable the control when no set data exists for (spec, maxPhase) — a toggle that visibly does nothing reads as a bug.
+**The toggle degrades to disabled, it does not silently do nothing.** Curated set coverage varies by spec and phase: as of the `ec5c5f2` pin, ret ships `p1`, `p2`, `p3` (plus `preraid`) and feral ships `p2` and `p3` in 6p/9p variants (plus `preraid`), so some (spec, maxPhase) pairs have set data and others do not. Hide or disable the control when no set data exists for the pair — a toggle that visibly does nothing reads as a bug. Tickets 121/153.
 
 `BiS` is pinned by default; `Alt` and `Realistic` exist precisely to describe *attainable* alternatives and pinning them would swamp the group. The tags are already per-item, so a three-way selector is a later UI change with no data change.
 
@@ -322,7 +322,9 @@ tbc-gear-prio/
                                 members (§9 [S0])
     gems/palette.json           GENERATED from db.json — id, colour, stats, phase,
                                 unique, requiredProfession (§9, R4)
-    wowsims.lock.json           COMMITTED — pinned upstream tag, commit, per-file
+    wowsims.lock.json           COMMITTED — pinned upstream ref (a release tag,
+                                or since ADR-0030 a commit sha on
+                                feature/backend-reforge), commit, per-file
                                 sha256, and CURRENT_PHASE. The source of
                                 DEFAULT_MAX_PHASE (§8.5)
   scripts/
@@ -503,7 +505,7 @@ The three moves in this section are where most of the per-spec work disappears. 
 
 The worst available bug is a `RaidSimRequest` the Go sim silently misreads — valid JSON, wrong field, plausible-looking DPS, wrong answer, no error anywhere. Hand-written types cannot prevent this class; generated ones eliminate it.
 
-Pin the `.proto` files from the same wowsims release as the binary into `data/proto/`, generate with `protobuf-es` into `packages/core/src/proto/`, commit the output, and check in CI that regenerating produces no diff. A sim-version bump becomes: swap binary, swap protos, regenerate, and let the compiler show you every field that moved.
+Pin the `.proto` files from the same pinned commit as the binary into `data/proto/`, generate with `protobuf-es` into `packages/core/src/proto/`, commit the output, and check in CI that regenerating produces no diff. A sim-version bump becomes: swap binary, swap protos, regenerate, and let the compiler show you every field that moved.
 
 ### 8.2 Get spec presets by decoding a share link
 
@@ -539,7 +541,7 @@ Generate-then-curate:
 
 **[R11] Equippability cannot come from `classAllowlist`** — it is empty on essentially all items in the database. Step 1's "every equippable item" must derive equippability from **armor type + weapon type**. For ret specifically: plate, and paladins cannot use staves. While paladins can train polearms, ret polearms are excluded from the pool as a deliberate *product* choice — there are no ret-itemized polearms worth ranking in TBC; the ones that exist are hunter/druid stat sticks. A naive "two-handed weapon" filter happily includes both and puts a hunter polearm at the top of the shortlist.
 
-BiS tags are imported from **wowsims' own curated gear sets** (`ui/<class>/<spec>/gear_sets/*.gear.json`, which carry `BiS` / `Alt` / `Realistic` variants), spot-checked against current community lists before they're allowed on screen (2021–22 lists go stale), and used only for display and tiebreaks. **They must degrade to empty rather than block a ranking:** ret's curated sets in `tbc-new` stop at P2, so there is no tag source above `maxPhase: 2` yet. (The older `wowsims/tbc` repo has complete P1–P5 sets for all sixteen specs, but they are four years old and encode 2021-era understanding — a starting point, not truth. And see R14/§17 on its enchant ID scheme before borrowing anything from it.)
+BiS tags are imported from **wowsims' own curated gear sets** (`ui/<class>/<spec>/gear_sets/*.gear.json`, which carry `BiS` / `Alt` / `Realistic` variants), spot-checked against current community lists before they're allowed on screen (2021–22 lists go stale), and used only for display and tiebreaks. **They must degrade to empty rather than block a ranking:** coverage in `tbc-new` is uneven — at the `ec5c5f2` pin ret reaches `p3` and feral reaches `p3`, and neither reaches `p4`/`p5` — so some (spec, maxPhase) pairs have no tag source. (The older `wowsims/tbc` repo has complete P1–P5 sets for all sixteen specs, but they are four years old and encode 2021-era understanding — a starting point, not truth. And see R14/§17 on its enchant ID scheme before borrowing anything from it.)
 
 #### 8.3.1 Why `source` is the one field we cannot derive
 
@@ -647,7 +649,7 @@ Currently pinned: **v0.0.101** (`8aa378b3`), `currentPhase: 2`.
 
 ## 9. Gem and enchant policy
 
-The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. Upstream *does* have a gem/socket optimizer (`suggest_reforges` — the name is inherited; TBC has no reforging), but its active development lives on `feature/backend-reforge`, not the pinned tag, so our repair pass remains ours; upstream's `socketBonusActive` is reference material, not a dependency (ADR-0025, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`).
+The Go sim does **not** enforce meta gem activation. Drive it naively and you get impossible stats and a confidently wrong ranking. Upstream *does* have a gem/socket optimizer (`suggest_reforges` — the name is inherited; TBC has no reforging), but our repair pass remains ours (ADR-0025 decisions 2–4); upstream's `socketBonusActive` is reference material, not a dependency (ADR-0025, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`; the pin has since moved to that branch, ADR-0030).
 
 **[S0] Gems and enchants are present in TBC Anniversary logs, and the apparent sparsity is not a data gap.** This was the plan's single largest risk (§15) and it is now retired. Both probe characters returned populated `permanentEnchant` / `temporaryEnchant` / `gems` keys — 10/19 and 9/19 enchanted slots, 7/19 and 6/19 gemmed. Cross-referencing every item ID against wowsims' `db.json` showed **exact agreement** between what a slot *can* carry and what WCL reported: items with 2 sockets reported 2 gems, items with none reported none, and neck/waist/trinket correctly showed no enchant because those slots aren't enchantable in TBC. Held across two classes and two characters.
 >
