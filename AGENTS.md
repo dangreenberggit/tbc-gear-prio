@@ -66,7 +66,7 @@ When changing committed **generated** artifacts: regenerate from the committed s
 
 Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd persists across commands. Bound scaling command output (`--stat`, `head`/`tail`, exit codes) before dumping unbounded diffs or logs — but to test whether one thing exists, name it (`ls <path>`, `grep -c <pattern>`); a truncated listing cannot show absence.
 
-**An exit code is not evidence that work happened.** A stopped background task reports exit 0, and a command that ran in the wrong directory succeeds at nothing. Confirm the artifact — `ls node_modules`, read the file, check the row count — before reporting an install, build or regen as done.
+**An exit code is not evidence that work happened.** A stopped background task reports exit 0, and a command that ran in the wrong directory succeeds at nothing. A pipe is worse — it reports the **last** command's status, so `make ... 2>&1 | tail` returns `tail`'s 0 and hides `make: command not found`. To bound output and keep the status, append `; echo "rc=${PIPESTATUS[0]}"` to the same command (a later tool call is a new shell and has lost it), or redirect to a file and `tail` it separately. Confirm the artifact — `ls node_modules`, read the file, check the row count — before reporting an install, build or regen as done.
 
 **A property measured against one option is not a comparison.** Before ruling an option in or out — a version, a branch, a library, an approach — name the alternatives and say what the same measurement gives for each. "Our pin is an ancestor of that branch" and "we do not have that feature" are both claims about one ref; neither is evidence until the other candidates are measured the same way. When the claim is that something is _absent_, resolve the refs that could contain it — `watchedRefs` in `data/wowsims.lock.json` is tracked precisely because a feature was twice called missing while live on a branch this repo already watched.
 
@@ -84,7 +84,7 @@ Windows-native binaries — `node`, `python` — read `C:/Users/...`, not Git Ba
 
 Read a command's error text before forming a theory about it. Tool-manager errors in particular usually name their own fix, and pattern-matching past them costs more than reading them.
 
-**Before** a ported-engine-file edit, a scripted/generated file edit, filing a ticket, writing a review Disposition table, or starting the dev servers — or when a node/pnpm command fails strangely — read [`docs/agents/known-traps.md`](docs/agents/known-traps.md): the trap each of those actions arms, and the move that disarms it.
+**Before** a ported-engine-file edit, a scripted/generated file edit, moving the wowsims engine pin, filing a ticket, writing a review Disposition table, or starting the dev servers — or when a node/pnpm command fails strangely — read [`docs/agents/known-traps.md`](docs/agents/known-traps.md): the trap each of those actions arms, and the move that disarms it.
 
 ### Types from JSON
 
