@@ -65,6 +65,7 @@ vendor/
 !.scratch/stage-gate/upgrades-ui-quality/
 !.scratch/stage-gate/tickets-306-308/
 !.scratch/stage-gate/upgrades-ui-rebuild/
+!.scratch/stage-gate/342-learn-from-upstream/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
