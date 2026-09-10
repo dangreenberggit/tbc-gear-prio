@@ -53,9 +53,34 @@ that grows a standing risk should leave a ticket behind, which is this one.
 Option 1 or 2 is a decision for the owner; this ticket exists so it is a
 decision rather than an oversight.
 
+## The risk grew again on 2026-09-10 (branch `feat/reforge-catchup-leftovers`)
+
+Recorded by that branch's pre-merge review, adversarial axis. The lock no longer
+pins `ab59127d9faa`: correcting the `disclosure.ts` over-assertion required a
+ported-engine cycle, which put a **new** fork commit on the same unpushed branch
+and moved the pin onto it.
+
+```
+$ git -C vendor/tbc-new-fork branch -r --contains 3829c66f
+                                     # empty — on no remote
+$ python -c "import json;d=json.load(open('data/wowsims-fork.lock.json'));print(d['commit'],d['pushed'])"
+3829c66f672cdaeaba347920f59db0795a01e2c9 False
+```
+
+So the single-disk dependency now covers a second commit, and this repo's
+committed `data/sim-implemented-effects.json` embeds `3829c66f` as its
+`forkCommit` — an artifact whose provenance cannot be resolved from any other
+machine. Every ported-engine fix from here will do the same thing again: the
+cycle *requires* a fork commit, so the gap between what is pinned and what is
+recoverable widens with each one.
+
+This changes the urgency, not the options — 1 or 2 below still resolve it.
+
 ## Acceptance
 
 - [ ] One of the three options above is chosen and recorded.
 - [ ] If pushed: `pushed` flipped to `true` in `data/wowsims-fork.lock.json`,
-      and the remote branch verified to contain `ab59127d9faa`.
+      and the remote branch verified to contain **the lock's current `commit`**
+      (`3829c66f` as of 2026-09-10, previously `ab59127d9faa` — check the lock
+      rather than trusting either sha here).
 - [ ] If archived: the bundle's location and creation command recorded here.

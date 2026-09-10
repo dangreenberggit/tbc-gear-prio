@@ -2557,11 +2557,19 @@ compensation at :732, inert for a melee-only character.
 So `sim/druid/forms.go:52`, which grants the paw bonus only when
 `MhImbueId == 34340`, is the defect — filed as ticket 364.
 
-**provenance: upstream, measured.** The `upstream` remote had never been
-fetched, so ancestry within the pin's own history proved nothing about where a
-commit came from. After `git -C vendor/tbc-new-fork fetch upstream
-feature/backend-reforge`, `merge-base --is-ancestor db05fed93
-upstream/feature/backend-reforge` exits 0 — the commit is on upstream's branch.
+**provenance: upstream, measured — on the second measurement, not the first.**
+The original citation here was circular and was corrected during the pre-merge
+review of `feat/reforge-catchup-leftovers`. Fetching
+`upstream/feature/backend-reforge` and testing `merge-base --is-ancestor
+db05fed93 upstream/feature/backend-reforge` → 0 proves nothing, because that
+ref resolves to `ec5c5f2` — the lock's own `branchedFrom` — so the test
+compared the pin against itself and would have passed before the fetch.
+
+The discriminating check is containment in the upstream mainline mirror:
+`merge-base --is-ancestor db05fed93 origin/master` exits 0, where
+`origin/HEAD -> origin/master` is the fork's mirror of wowsims master
+(`d7d89da2`), and `origin/feature/backend-reforge` is a distinct commit
+(`cbf6b75a8`). A fork-native commit would not be on the mirror's mainline.
 
 Decision recorded in ticket 351: do **not** mirror `adjustWeaponImbueID` here,
 because with `forms.go:52` unchanged a dagger candidate rewritten to 29453 loses

@@ -153,8 +153,14 @@ that surfaced this), 351 (the other finding from the same pass).
 skeleton or request fixture. The only request fixtures are `feralCatDruid` and
 `retributionPaladin`; the only skeletons `packages/core/src/cli-wiring.ts` can
 load are `data/presets/{feral,ret}/p2.raid-sim-skeleton.json`; and both of those
-specs are excluded from `DUAL_WIELD_SPECS` (`packages/core/src/pool.ts:373-378`)
-precisely because neither can put anything in the off hand. A request for enh,
+specs are excluded from `DUAL_WIELD_SPECS` (`packages/core/src/pool.ts:373-378`),
+so `simSlotsForPoolSlot` never offers either an off-hand **placement** and the
+ranker cannot compose a 1H+OH set for them. (`pool.ts`'s own comment there says
+"neither can put anything in the off hand"; read as a statement about TBC that
+is too strong — feral-p3 carries 11 `HandTypeOffHand` held items a druid can
+wear. It is the ranker's placement rule, not the game's equip rule, that makes
+these skeletons unable to express the set. Corrected at the pre-merge review,
+finding D2; the comment itself is left as upstream-of-us prose.) A request for enh,
 warrior or hunter would have to be hand-authored, which
 `packages/core/test/direct-sim-support.ts:15` warns can differ from what
 `rank.ts` actually sends. Commands and output:

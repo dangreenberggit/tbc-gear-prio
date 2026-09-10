@@ -32,8 +32,16 @@ data/presets/ret/p2.raid-sim-skeleton.json
 
 **Correction to the plan's C27.** The plan states the only skeleton
 `cli-wiring.ts` can load is feral. There are two — feral and ret. The
-conclusion is unaffected: neither spec can hold an off-hand item (see the next
-section), so neither can express the 2H+OH set Q1 is about.
+conclusion is unaffected, though the reason needs stating carefully (corrected
+at the pre-merge review, finding D2): it is **not** that a druid or paladin
+cannot physically equip an off-hand item — feral-p3 carries 11
+`HandTypeOffHand` held items (*Talisman of Nightbane*, *Fathomstone*,
+*Blind-Seers Icon* and others), and a druid can wear them in TBC. It is that
+`DUAL_WIELD_SPECS` (`packages/core/src/pool.ts`) omits feral and ret, so
+`simSlotsForPoolSlot` never offers either spec an off-hand **placement**. The
+ranker therefore cannot compose a 1H+OH set for them, which is what Q1 needs —
+so neither loadable skeleton can express the set, whatever the specs could wear
+in the game.
 
 `packages/core/src/cli-wiring.ts:126-128` loads
 `data/presets/${spec}/p2.raid-sim-skeleton.json`, so only those two specs are
@@ -205,5 +213,14 @@ Recorded so the future fixture (ticket 365) is not built to the wrong shape.
   rule at `:207-209` is that live-binary float assertions use `toBeCloseTo`.
 - **Raise iterations** until the 3σ floor is well under the expected effect.
 - Runner: the pinned CLI, `R/vendor/wowsimcli-ec5c5f205e61049d730e460967f8488774a7fe2a-win32-x64`.
+
+**Scope of that word, added at the pre-merge review (finding A4).**
+"Unmeasurable" here means *not without hand-authoring a request* — it is not a
+claim that the question is unanswerable in principle. Two things would reverse
+it: fixing ticket 362, which would restore the live enhancement observation
+this run lost, or building the recorded dual-wield fixture ticket 365 asks for.
+The barrier is that a hand-built request is not what `rank.ts` sends
+(`packages/core/test/direct-sim-support.ts`), which is a reason to distrust a
+hand-built measurement, not a proof that none can exist.
 
 OUTCOME: unmeasurable-from-committed-inputs

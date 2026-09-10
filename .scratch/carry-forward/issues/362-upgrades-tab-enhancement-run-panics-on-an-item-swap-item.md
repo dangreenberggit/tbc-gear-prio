@@ -6,9 +6,16 @@ Blocked by: none
 
 # The Upgrades tab aborts on any page whose defaults enable item swap
 
+**This ticket carries two things under one number:** the open defect in its
+title, and the build/run evidence for the merged tab that had never been
+recorded anywhere (§ "Build and run evidence" below). They are filed together
+because one investigation produced both — the panic was found *while* recording
+the evidence — and splitting them would scatter a single run's observations
+across two numbers. The defect is what keeps this ticket `open`; the evidence
+half is complete and needs nothing further.
+
 **What is NOT claimed: this is not a merge regression, and the ret page is
-unaffected.** The merged tab builds and runs. What follows is one live defect
-found while recording that, plus the build/run evidence that was missing.
+unaffected.** The merged tab builds and runs.
 
 ## The defect
 

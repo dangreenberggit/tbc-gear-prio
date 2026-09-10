@@ -262,7 +262,12 @@ section above.
 - [x] The `disclosure.ts` temporary-enchant note no longer asserts deltas
       survive in the pinned-imbue case.
 - [x] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
-      Node 20 — `node:sqlite` is missing).
+      Node 20 — `node:sqlite` is missing). Command and result:
+      `pnpm -C "<repo>" verify > verify.log 2>&1; echo "rc=$?"` → **rc=0** on
+      `ce07f6b`, re-run at the pre-merge review on `0d339c2`; E-W3 is
+      `npx vitest run packages/core/test/wowsims-fork-parity.test.ts`, green
+      before and after the port. Only `upstream-drift:warn` speaks up, which is
+      warning-only and owned by ticket 244.
 
 ## Notes
 
@@ -289,17 +294,33 @@ $ grep -n "34340\|29453" vendor/tbc-new-fork/sim/druid/forms.go
 ticket's own step-1 rule: equal melee bonuses in TBC mean granting the paw
 bonus for one stone id only is wrong. Filed as **ticket 364**.
 
-**provenance: upstream.** Measured, not inferred. The `upstream` remote
-(`https://github.com/wowsims/tbc-new.git`) had never been fetched, so earlier
-ancestry checks against the pin's own history could not distinguish upstream
-commits from fork-native ones. Fetched and re-measured:
+**provenance: upstream**, on the evidence below — **not** on the ancestry check
+this ticket first cited, which was circular. Corrected during the pre-merge
+review of `feat/reforge-catchup-leftovers`.
+
+The first attempt fetched `upstream/feature/backend-reforge` and ran
+`merge-base --is-ancestor db05fed93 upstream/feature/backend-reforge` → 0. That
+proves nothing: the fetched ref resolves to `ec5c5f2`, which is the lock's own
+`branchedFrom`, so the test compared the pin against itself and would have
+exited 0 before the fetch. A property measured against one option is not a
+comparison (`AGENTS.md` § Durable claims).
+
+The discriminating measurement is containment in the upstream mainline mirror,
+which a fork-native commit would fail:
 
 ```
-$ git -C vendor/tbc-new-fork fetch upstream feature/backend-reforge
- * [new branch]          feature/backend-reforge -> upstream/feature/backend-reforge
-$ git -C vendor/tbc-new-fork merge-base --is-ancestor db05fed93 upstream/feature/backend-reforge; echo $?
+$ git -C vendor/tbc-new-fork merge-base --is-ancestor db05fed93 origin/master; echo $?
 0
+$ git -C vendor/tbc-new-fork rev-parse upstream/feature/backend-reforge origin/feature/backend-reforge origin/master
+ec5c5f205e61049d730e460967f8488774a7fe2a   # == lock branchedFrom, hence circular
+cbf6b75a889e52c4106351976db66efd914ea349
+d7d89da2a2f473f2c9848856f77edb18b2a86025
 ```
+
+`db05fed93` is on `origin/master` — the fork's mirror of wowsims master
+(`origin/HEAD -> origin/master`) — and its content is an upstream-shaped change
+(`assets/database/db.bin`, `proto/common.proto`, both druid test-results
+files), not a local edit.
 
 `db05fed93` ("fix adamantite weightstone not giving paw damage", Bisonpasfuté,
 2026-05-23) is an ancestor of upstream's own branch, so the check reaches us

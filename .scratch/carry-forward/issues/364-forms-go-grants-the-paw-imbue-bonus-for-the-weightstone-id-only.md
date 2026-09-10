@@ -36,23 +36,40 @@ not the other is a defect. `29453` appears zero times under `sim/druid/`.
 
 ## provenance: upstream (measured)
 
-Stated as measured because an earlier reading of this could not distinguish
-upstream commits from fork-native ones: the `upstream` remote
-(`https://github.com/wowsims/tbc-new.git`) had never been fetched, so no
-`refs/remotes/upstream/*` existed and ancestry inside the pin's own history
-proved nothing. Fetched and re-measured:
+The word is right; the **first citation for it was circular** and is corrected
+here (pre-merge review of `feat/reforge-catchup-leftovers`).
+
+That first attempt fetched `upstream/feature/backend-reforge` and ran
+`merge-base --is-ancestor db05fed93 upstream/feature/backend-reforge` → 0. But
+the fetched ref resolves to `ec5c5f2`, which is exactly the lock's
+`branchedFrom` — so the test asked "is this commit an ancestor of the commit we
+already merged", which was true before the fetch and says nothing about who
+wrote it. A property measured against one option is not a comparison
+(`AGENTS.md` § Durable claims).
+
+The discriminating measurement is containment in the upstream mainline mirror —
+a fork-native commit would not be on it:
 
 ```
-$ git -C vendor/tbc-new-fork fetch upstream feature/backend-reforge
- * [new branch]          feature/backend-reforge -> upstream/feature/backend-reforge
-$ git -C vendor/tbc-new-fork merge-base --is-ancestor db05fed93 upstream/feature/backend-reforge; echo $?
+$ git -C vendor/tbc-new-fork merge-base --is-ancestor db05fed93 origin/master; echo $?
 0
+$ git -C vendor/tbc-new-fork rev-parse upstream/feature/backend-reforge origin/feature/backend-reforge origin/master
+ec5c5f205e61049d730e460967f8488774a7fe2a   # == lock branchedFrom, hence circular
+cbf6b75a889e52c4106351976db66efd914ea349
+d7d89da2a2f473f2c9848856f77edb18b2a86025
 ```
 
 `db05fed93` — "feat(balance+feral): add Starfire Rank 6 + add new Balance APL +
 fix adamantite weightstone not giving paw damage", Bisonpasfuté, 2026-05-23 — is
-an ancestor of upstream's own branch. So the check reaches us from upstream
-rather than being introduced in the fork.
+an ancestor of `origin/master` (`origin/HEAD -> origin/master`, the fork's
+mirror of wowsims master), and touches `assets/database/db.bin`,
+`proto/common.proto` and both druid test-results files: an upstream-shaped
+change, not a local edit. So the defect reaches us from upstream rather than
+being introduced in the fork.
+
+**What is NOT claimed:** the author's affiliation. `Bisonpasfuté` is a
+contributor name, not evidence of upstream membership — the containment in
+`origin/master` is what carries the claim.
 
 ## The fix, and why it is not this branch
 
