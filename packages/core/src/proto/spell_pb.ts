@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file spell.proto.
  */
 export const file_spell: GenFile = /*@__PURE__*/
-  fileDesc("CgtzcGVsbC5wcm90bxIFcHJvdG8iiQEKG1NjYWxpbmdJdGVtRWZmZWN0UHJvcGVydGllcxI8CgVzdGF0cxgBIAMoCzItLnByb3RvLlNjYWxpbmdJdGVtRWZmZWN0UHJvcGVydGllcy5TdGF0c0VudHJ5GiwKClN0YXRzRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgBOgI4ASLZAgoKSXRlbUVmZmVjdBIPCgdidWZmX2lkGAEgASgFEhEKCWJ1ZmZfbmFtZRgGIAEoCRIaChJlZmZlY3RfZHVyYXRpb25fbXMYAiABKAUSHQoVbWF4X2N1bXVsYXRpdmVfc3RhY2tzGAcgASgFEj4KD3NjYWxpbmdfb3B0aW9ucxgDIAMoCzIlLnByb3RvLkl0ZW1FZmZlY3QuU2NhbGluZ09wdGlvbnNFbnRyeRIhCgRwcm9jGAQgASgLMhEucHJvdG8uUHJvY0VmZmVjdEgAEiQKBm9uX3VzZRgFIAEoCzISLnByb3RvLk9uVXNlRWZmZWN0SAAaWQoTU2NhbGluZ09wdGlvbnNFbnRyeRILCgNrZXkYASABKAUSMQoFdmFsdWUYAiABKAsyIi5wcm90by5TY2FsaW5nSXRlbUVmZmVjdFByb3BlcnRpZXM6AjgBQggKBmVmZmVjdCJOCgpQcm9jRWZmZWN0Eg4KBmljZF9tcxgBIAEoBRIVCgtwcm9jX2NoYW5jZRgCIAEoAUgAEg0KA3BwbRgDIAEoAUgAQgoKCHByb2NSYXRlIlUKC09uVXNlRWZmZWN0EhMKC2Nvb2xkb3duX21zGAEgASgFEhMKC2NhdGVnb3J5X2lkGAsgASgFEhwKFGNhdGVnb3J5X2Nvb2xkb3duX21zGAggASgFIosCCgtTcGVsbEVmZmVjdBIKCgJpZBgBIAEoBRIQCghzcGVsbF9pZBgCIAEoBRINCgVpbmRleBgDIAEoBRIfCgR0eXBlGAQgASgOMhEucHJvdG8uRWZmZWN0VHlwZRIXCg9taW5fZWZmZWN0X3NpemUYBSABKAESFQoNZWZmZWN0X3NwcmVhZBgGIAEoARIsCg1yZXNvdXJjZV90eXBlGAcgASgOMhMucHJvdG8uUmVzb3VyY2VUeXBlSAASJAoGc2Nob29sGAggASgOMhIucHJvdG8uU3BlbGxTY2hvb2xIABIbCgRzdGF0GAkgASgOMgsucHJvdG8uU3RhdEgAQg0KC21pc2NfdmFsdWUwKlMKCkVmZmVjdFR5cGUSFQoRRWZmZWN0VHlwZVVua25vd24QABISCg5FZmZlY3RUeXBlSGVhbBAKEhoKFkVmZmVjdFR5cGVSZXNvdXJjZUdhaW4QHirVAQoMUmVzb3VyY2VUeXBlEhQKEFJlc291cmNlVHlwZU5vbmUQABIUChBSZXNvdXJjZVR5cGVNYW5hEAESFgoSUmVzb3VyY2VUeXBlRW5lcmd5EAISFAoQUmVzb3VyY2VUeXBlUmFnZRADEhUKEVJlc291cmNlVHlwZUZvY3VzEAQSGwoXUmVzb3VyY2VUeXBlQ29tYm9Qb2ludHMQBRIWChJSZXNvdXJjZVR5cGVIZWFsdGgQBhIfChtSZXNvdXJjZVR5cGVHZW5lcmljUmVzb3VyY2UQB0IJWgcuL3Byb3RvYgZwcm90bzM", [file_common]);
+  fileDesc("CgtzcGVsbC5wcm90bxIFcHJvdG8iiQEKG1NjYWxpbmdJdGVtRWZmZWN0UHJvcGVydGllcxI8CgVzdGF0cxgBIAMoCzItLnByb3RvLlNjYWxpbmdJdGVtRWZmZWN0UHJvcGVydGllcy5TdGF0c0VudHJ5GiwKClN0YXRzRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgBOgI4ASLuAwoKSXRlbUVmZmVjdBIPCgdidWZmX2lkGAEgASgFEhEKCWJ1ZmZfbmFtZRgGIAEoCRIaChJlZmZlY3RfZHVyYXRpb25fbXMYAiABKAUSHQoVbWF4X2N1bXVsYXRpdmVfc3RhY2tzGAcgASgFEj4KD3NjYWxpbmdfb3B0aW9ucxgDIAMoCzIlLnByb3RvLkl0ZW1FZmZlY3QuU2NhbGluZ09wdGlvbnNFbnRyeRIhCgRwcm9jGAQgASgLMhEucHJvdG8uUHJvY0VmZmVjdEgAEiQKBm9uX3VzZRgFIAEoCzISLnByb3RvLk9uVXNlRWZmZWN0SAASKAoNc3RhY2tpbmdfYXVyYRgIIAEoCzIRLnByb3RvLkl0ZW1FZmZlY3QSGQoPc3RhY2tfcGVyaW9kX21zGAkgASgFSAESJwoKc3RhY2tfcHJvYxgKIAEoCzIRLnByb3RvLlByb2NFZmZlY3RIARIUCgxzdGFja3NfZGVjYXkYCyABKAgaWQoTU2NhbGluZ09wdGlvbnNFbnRyeRILCgNrZXkYASABKAUSMQoFdmFsdWUYAiABKAsyIi5wcm90by5TY2FsaW5nSXRlbUVmZmVjdFByb3BlcnRpZXM6AjgBQggKBmVmZmVjdEIPCg1zdGFja190cmlnZ2VyIk4KClByb2NFZmZlY3QSDgoGaWNkX21zGAEgASgFEhUKC3Byb2NfY2hhbmNlGAIgASgBSAASDQoDcHBtGAMgASgBSABCCgoIcHJvY1JhdGUiVQoLT25Vc2VFZmZlY3QSEwoLY29vbGRvd25fbXMYASABKAUSEwoLY2F0ZWdvcnlfaWQYCyABKAUSHAoUY2F0ZWdvcnlfY29vbGRvd25fbXMYCCABKAUixwIKC1NwZWxsRWZmZWN0EgoKAmlkGAEgASgFEhAKCHNwZWxsX2lkGAIgASgFEg0KBWluZGV4GAMgASgFEh8KBHR5cGUYBCABKA4yES5wcm90by5FZmZlY3RUeXBlEhcKD21pbl9lZmZlY3Rfc2l6ZRgFIAEoARIVCg1lZmZlY3Rfc3ByZWFkGAYgASgBEiwKDXJlc291cmNlX3R5cGUYByABKA4yEy5wcm90by5SZXNvdXJjZVR5cGVIABIkCgZzY2hvb2wYCCABKA4yEi5wcm90by5TcGVsbFNjaG9vbEgAEhsKBHN0YXQYCSABKA4yCy5wcm90by5TdGF0SAASFgoOYXVyYV9wZXJpb2RfbXMYCiABKAUSDQoFc3RhdHMYCyADKAESEwoLZHVyYXRpb25fbXMYDCABKAVCDQoLbWlzY192YWx1ZTAqUwoKRWZmZWN0VHlwZRIVChFFZmZlY3RUeXBlVW5rbm93bhAAEhIKDkVmZmVjdFR5cGVIZWFsEAoSGgoWRWZmZWN0VHlwZVJlc291cmNlR2FpbhAeKtUBCgxSZXNvdXJjZVR5cGUSFAoQUmVzb3VyY2VUeXBlTm9uZRAAEhQKEFJlc291cmNlVHlwZU1hbmEQARIWChJSZXNvdXJjZVR5cGVFbmVyZ3kQAhIUChBSZXNvdXJjZVR5cGVSYWdlEAMSFQoRUmVzb3VyY2VUeXBlRm9jdXMQBBIbChdSZXNvdXJjZVR5cGVDb21ib1BvaW50cxAFEhYKElJlc291cmNlVHlwZUhlYWx0aBAGEh8KG1Jlc291cmNlVHlwZUdlbmVyaWNSZXNvdXJjZRAHQglaBy4vcHJvdG9iBnByb3RvMw", [file_common]);
 
 /**
  * @generated from message proto.ScalingItemEffectProperties
@@ -82,6 +82,55 @@ export type ItemEffect = Message<"proto.ItemEffect"> & {
     value: OnUseEffect;
     case: "onUse";
   } | { case: undefined; value?: undefined };
+
+  /**
+   * A second aura this effect accumulates rather than applies, set only when the stats live
+   * there instead of in scaling_options above. Absent on the ordinary case.
+   *
+   * The aura named by buff_id lasts effect_duration_ms and grants nothing itself; it adds one
+   * stack of this one at a time, up to its own max_cumulative_stacks, and its scaling_options
+   * are the stats granted *per stack*. Gaining a stack does not refresh the window, which is
+   * why the two cannot be flattened into a single stacking aura: that lets every stack restart
+   * the duration and inflates both uptime and average stacks.
+   *
+   * @generated from field: proto.ItemEffect stacking_aura = 8;
+   */
+  stackingAura?: ItemEffect | undefined;
+
+  /**
+   * What makes the stacking aura gain a stack. Exactly one case is set whenever stacking_aura
+   * is, and they are not interchangeable: a timer keeps stacking while the player does
+   * nothing, an event does not.
+   *
+   * @generated from oneof proto.ItemEffect.stack_trigger
+   */
+  stackTrigger: {
+    /**
+     * A timer on the container aura: one stack every N milliseconds while the window is up.
+     *
+     * @generated from field: int32 stack_period_ms = 9;
+     */
+    value: number;
+    case: "stackPeriodMs";
+  } | {
+    /**
+     * An event: one stack per qualifying proc while the window is up.
+     * Which procs qualify is derived from the container spell.
+     *
+     * @generated from field: proto.ProcEffect stack_proc = 10;
+     */
+    value: ProcEffect;
+    case: "stackProc";
+  } | { case: undefined; value?: undefined };
+
+  /**
+   * Set when the stacking aura starts at max_cumulative_stacks
+   * and loses one per event rather than building up from zero.
+   * Read from the tooltip, because the decrement is server script with no effect or flag behind it.
+   *
+   * @generated from field: bool stacks_decay = 11;
+   */
+  stacksDecay: boolean;
 };
 
 /**
@@ -216,6 +265,27 @@ export type SpellEffect = Message<"proto.SpellEffect"> & {
     value: Stat;
     case: "stat";
   } | { case: undefined; value?: undefined };
+
+  /**
+   * Milliseconds between periodic aura ticks; 0 for non-periodic effects
+   *
+   * @generated from field: int32 aura_period_ms = 10;
+   */
+  auraPeriodMs: number;
+
+  /**
+   * Stats the effect grants
+   *
+   * @generated from field: repeated double stats = 11;
+   */
+  stats: number[];
+
+  /**
+   * Duration of the effect's aura in milliseconds; 0 for instant effects
+   *
+   * @generated from field: int32 duration_ms = 12;
+   */
+  durationMs: number;
 };
 
 /**

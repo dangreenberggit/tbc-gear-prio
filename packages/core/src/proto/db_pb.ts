@@ -4,7 +4,7 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { ArmorType, ConsumableType, GemColor, HandType, ItemRandomSuffix, ItemType, RangedWeaponType, ScalingItemProperties, WeaponType } from "./common_pb.js";
+import type { ArmorType, ConsumableType, EnchantType, GemColor, HandType, ItemRandomSuffix, ItemType, RangedWeaponType, ScalingItemProperties, WeaponType } from "./common_pb.js";
 import { file_common } from "./common_pb.js";
 import type { ItemEffect, SpellEffect } from "./spell_pb.js";
 import { file_spell } from "./spell_pb.js";
@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file db.proto.
  */
 export const file_db: GenFile = /*@__PURE__*/
-  fileDesc("CghkYi5wcm90bxIFcHJvdG8iugIKC1NpbURhdGFiYXNlEh0KBWl0ZW1zGAEgAygLMg4ucHJvdG8uU2ltSXRlbRIwCg9yYW5kb21fc3VmZml4ZXMYBSADKAsyFy5wcm90by5JdGVtUmFuZG9tU3VmZml4EiMKCGVuY2hhbnRzGAIgAygLMhEucHJvdG8uU2ltRW5jaGFudBIbCgRnZW1zGAMgAygLMg0ucHJvdG8uU2ltR2VtEkUKHGl0ZW1fZWZmZWN0X3JhbmRfcHJvcF9wb2ludHMYCSADKAsyHy5wcm90by5JdGVtRWZmZWN0UmFuZFByb3BQb2ludHMSJgoLY29uc3VtYWJsZXMYByADKAsyES5wcm90by5Db25zdW1hYmxlEikKDXNwZWxsX2VmZmVjdHMYCCADKAsyEi5wcm90by5TcGVsbEVmZmVjdCKHAQoKU2ltRW5jaGFudBIRCgllZmZlY3RfaWQYASABKAUSDAoEbmFtZRgCIAEoCRIdCgR0eXBlGAMgASgOMg8ucHJvdG8uSXRlbVR5cGUSDQoFc3RhdHMYBCADKAESKgoPZW5jaGFudF9lZmZlY3RzGAUgAygLMhEucHJvdG8uSXRlbUVmZmVjdCKxBAoHU2ltSXRlbRIKCgJpZBgBIAEoBRIMCgRuYW1lGAIgASgJEh0KBHR5cGUYAyABKA4yDy5wcm90by5JdGVtVHlwZRIkCgphcm1vcl90eXBlGAQgASgOMhAucHJvdG8uQXJtb3JUeXBlEiYKC3dlYXBvbl90eXBlGAUgASgOMhEucHJvdG8uV2VhcG9uVHlwZRIiCgloYW5kX3R5cGUYBiABKA4yDy5wcm90by5IYW5kVHlwZRIzChJyYW5nZWRfd2VhcG9uX3R5cGUYByABKA4yFy5wcm90by5SYW5nZWRXZWFwb25UeXBlEiQKC2dlbV9zb2NrZXRzGAggAygOMg8ucHJvdG8uR2VtQ29sb3ISEwoLc29ja2V0Qm9udXMYCSADKAESGAoQcXVhbGl0eV9tb2RpZmllchgPIAEoARIUCgx3ZWFwb25fc3BlZWQYCiABKAESEAoIc2V0X25hbWUYCyABKAkSDgoGc2V0X2lkGAwgASgFEjsKD3NjYWxpbmdfb3B0aW9ucxgNIAMoCzIiLnByb3RvLlNpbUl0ZW0uU2NhbGluZ09wdGlvbnNFbnRyeRInCgxpdGVtX2VmZmVjdHMYDiADKAsyES5wcm90by5JdGVtRWZmZWN0GlMKE1NjYWxpbmdPcHRpb25zRW50cnkSCwoDa2V5GAEgASgFEisKBXZhbHVlGAIgASgLMhwucHJvdG8uU2NhbGluZ0l0ZW1Qcm9wZXJ0aWVzOgI4ASKAAgoKQ29uc3VtYWJsZRIKCgJpZBgBIAEoBRIjCgR0eXBlGAIgASgOMhUucHJvdG8uQ29uc3VtYWJsZVR5cGUSDQoFc3RhdHMYAyADKAESFwoPYnVmZnNfbWFpbl9zdGF0GAQgASgIEgwKBG5hbWUYBSABKAkSDAoEaWNvbhgGIAEoCRIVCg1idWZmX2R1cmF0aW9uGAcgASgFEhkKEWNvb2xkb3duX2R1cmF0aW9uGAkgASgFEiIKGmNhdGVnb3J5X2Nvb2xkb3duX2R1cmF0aW9uGAogASgFEhMKC2NhdGVnb3J5X2lkGAsgASgFEhIKCmVmZmVjdF9pZHMYCCADKAUiQgoYSXRlbUVmZmVjdFJhbmRQcm9wUG9pbnRzEgwKBGlsdmwYASABKAUSGAoQcmFuZF9wcm9wX3BvaW50cxgCIAEoBSJ1CgZTaW1HZW0SCgoCaWQYASABKAUSDAoEbmFtZRgCIAEoCRIeCgVjb2xvchgDIAEoDjIPLnByb3RvLkdlbUNvbG9yEg0KBXN0YXRzGAQgAygBEiIKGmRpc2FibGVkX2luX2NoYWxsZW5nZV9tb2RlGAUgASgIQglaBy4vcHJvdG9iBnByb3RvMw", [file_common, file_spell]);
+  fileDesc("CghkYi5wcm90bxIFcHJvdG8iugIKC1NpbURhdGFiYXNlEh0KBWl0ZW1zGAEgAygLMg4ucHJvdG8uU2ltSXRlbRIwCg9yYW5kb21fc3VmZml4ZXMYBSADKAsyFy5wcm90by5JdGVtUmFuZG9tU3VmZml4EiMKCGVuY2hhbnRzGAIgAygLMhEucHJvdG8uU2ltRW5jaGFudBIbCgRnZW1zGAMgAygLMg0ucHJvdG8uU2ltR2VtEkUKHGl0ZW1fZWZmZWN0X3JhbmRfcHJvcF9wb2ludHMYCSADKAsyHy5wcm90by5JdGVtRWZmZWN0UmFuZFByb3BQb2ludHMSJgoLY29uc3VtYWJsZXMYByADKAsyES5wcm90by5Db25zdW1hYmxlEikKDXNwZWxsX2VmZmVjdHMYCCADKAsyEi5wcm90by5TcGVsbEVmZmVjdCLXAQoKU2ltRW5jaGFudBIRCgllZmZlY3RfaWQYASABKAUSDAoEbmFtZRgCIAEoCRIdCgR0eXBlGAMgASgOMg8ucHJvdG8uSXRlbVR5cGUSDQoFc3RhdHMYBCADKAESKgoPZW5jaGFudF9lZmZlY3RzGAUgAygLMhEucHJvdG8uSXRlbUVmZmVjdBIoCgxlbmNoYW50X3R5cGUYBiABKA4yEi5wcm90by5FbmNoYW50VHlwZRIkCgtleHRyYV90eXBlcxgHIAMoDjIPLnByb3RvLkl0ZW1UeXBlItkECgdTaW1JdGVtEgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSHQoEdHlwZRgDIAEoDjIPLnByb3RvLkl0ZW1UeXBlEiQKCmFybW9yX3R5cGUYBCABKA4yEC5wcm90by5Bcm1vclR5cGUSJgoLd2VhcG9uX3R5cGUYBSABKA4yES5wcm90by5XZWFwb25UeXBlEiIKCWhhbmRfdHlwZRgGIAEoDjIPLnByb3RvLkhhbmRUeXBlEjMKEnJhbmdlZF93ZWFwb25fdHlwZRgHIAEoDjIXLnByb3RvLlJhbmdlZFdlYXBvblR5cGUSJAoLZ2VtX3NvY2tldHMYCCADKA4yDy5wcm90by5HZW1Db2xvchITCgtzb2NrZXRCb251cxgJIAMoARIYChBxdWFsaXR5X21vZGlmaWVyGA8gASgBEhQKDHdlYXBvbl9zcGVlZBgKIAEoARIQCghzZXRfbmFtZRgLIAEoCRIOCgZzZXRfaWQYDCABKAUSOwoPc2NhbGluZ19vcHRpb25zGA0gAygLMiIucHJvdG8uU2ltSXRlbS5TY2FsaW5nT3B0aW9uc0VudHJ5EicKDGl0ZW1fZWZmZWN0cxgOIAMoCzIRLnByb3RvLkl0ZW1FZmZlY3QSFgoObGltaXRfY2F0ZWdvcnkYECABKAUSDgoGdW5pcXVlGBEgASgIGlMKE1NjYWxpbmdPcHRpb25zRW50cnkSCwoDa2V5GAEgASgFEisKBXZhbHVlGAIgASgLMhwucHJvdG8uU2NhbGluZ0l0ZW1Qcm9wZXJ0aWVzOgI4ASKAAgoKQ29uc3VtYWJsZRIKCgJpZBgBIAEoBRIjCgR0eXBlGAIgASgOMhUucHJvdG8uQ29uc3VtYWJsZVR5cGUSDQoFc3RhdHMYAyADKAESFwoPYnVmZnNfbWFpbl9zdGF0GAQgASgIEgwKBG5hbWUYBSABKAkSDAoEaWNvbhgGIAEoCRIVCg1idWZmX2R1cmF0aW9uGAcgASgFEhkKEWNvb2xkb3duX2R1cmF0aW9uGAkgASgFEiIKGmNhdGVnb3J5X2Nvb2xkb3duX2R1cmF0aW9uGAogASgFEhMKC2NhdGVnb3J5X2lkGAsgASgFEhIKCmVmZmVjdF9pZHMYCCADKAUiQgoYSXRlbUVmZmVjdFJhbmRQcm9wUG9pbnRzEgwKBGlsdmwYASABKAUSGAoQcmFuZF9wcm9wX3BvaW50cxgCIAEoBSJRCgZTaW1HZW0SCgoCaWQYASABKAUSDAoEbmFtZRgCIAEoCRIeCgVjb2xvchgDIAEoDjIPLnByb3RvLkdlbUNvbG9yEg0KBXN0YXRzGAQgAygBQglaBy4vcHJvdG9iBnByb3RvMw", [file_common, file_spell]);
 
 /**
  * @generated from message proto.SimDatabase
@@ -97,6 +97,16 @@ export type SimEnchant = Message<"proto.SimEnchant"> & {
    * @generated from field: repeated proto.ItemEffect enchant_effects = 5;
    */
   enchantEffects: ItemEffect[];
+
+  /**
+   * @generated from field: proto.EnchantType enchant_type = 6;
+   */
+  enchantType: EnchantType;
+
+  /**
+   * @generated from field: repeated proto.ItemType extra_types = 7;
+   */
+  extraTypes: ItemType[];
 };
 
 /**
@@ -190,6 +200,16 @@ export type SimItem = Message<"proto.SimItem"> & {
    * @generated from field: repeated proto.ItemEffect item_effects = 14;
    */
   itemEffects: ItemEffect[];
+
+  /**
+   * @generated from field: int32 limit_category = 16;
+   */
+  limitCategory: number;
+
+  /**
+   * @generated from field: bool unique = 17;
+   */
+  unique: boolean;
 };
 
 /**
@@ -319,11 +339,6 @@ export type SimGem = Message<"proto.SimGem"> & {
    * @generated from field: repeated double stats = 4;
    */
   stats: number[];
-
-  /**
-   * @generated from field: bool disabled_in_challenge_mode = 5;
-   */
-  disabledInChallengeMode: boolean;
 };
 
 /**
