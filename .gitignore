@@ -67,6 +67,8 @@ vendor/
 !.scratch/stage-gate/upgrades-ui-rebuild/
 !.scratch/stage-gate/342-learn-from-upstream/
 !.scratch/stage-gate/reforge-catchup-leftovers/
+!.scratch/stage-gate/ticket-365-dual-wield-fixture/
+!.scratch/stage-gate/ticket-362-item-swap-database/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
