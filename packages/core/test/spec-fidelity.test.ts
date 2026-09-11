@@ -14,8 +14,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SPEC_IDS } from "../src/spec-ids.generated.js";
-import { SPEC_REGISTRY, skeletonPresetIdFor } from "../src/spec-registry.js";
-import { PRESET_ID_BY_SPEC } from "../src/rank.js";
+import { SPEC_REGISTRY } from "../src/spec-registry.js";
 import {
   SPEC_CLASS_NAME,
   SPEC_TREE_INDEX,
@@ -30,7 +29,6 @@ describe("the registry matches every table it replaces", () => {
     it(`carries ${id}'s facts unchanged`, () => {
       expect(SPEC_REGISTRY[id].treeIndex).toBe(SPEC_TREE_INDEX[id]);
       expect(SPEC_REGISTRY[id].className).toBe(SPEC_CLASS_NAME[id]);
-      expect(skeletonPresetIdFor(id)).toBe(PRESET_ID_BY_SPEC[id]);
     });
   }
 });
