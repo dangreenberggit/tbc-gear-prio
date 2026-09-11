@@ -1,5 +1,5 @@
 Status: closed
-Closed: <pending commit>
+Closed: e8234a9db549463efdcf7e81c016620b05ff4741
 Type: task
 Origin: docs/reviews/feat-two-hander-clears-offhand.md (adversarial axis)
 Blocks: none
