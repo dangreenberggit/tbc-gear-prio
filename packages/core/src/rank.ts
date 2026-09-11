@@ -569,7 +569,8 @@ function defaultSeedsFor(iterations: number): number[] {
  * so a spec added here reaches the content hash and the assumptions drawer
  * together or not at all.
  */
-const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
+// Exported for the spec-registry fidelity test only; deleted with the table.
+export const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
   ret: "ret/p2.raid-sim-skeleton",
   feral: "feral/p2.raid-sim-skeleton",
   balance: "balance/p2.raid-sim-skeleton",

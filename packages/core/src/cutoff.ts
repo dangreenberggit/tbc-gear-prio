@@ -83,7 +83,8 @@ export const CUTOFF_FERAL: Cutoff = { absDps: 3.6, pct: 0.15 };
  * give it — but it must now say so at the point of definition, so the debt is
  * visible in a diff rather than hiding in a fallback operator.
  */
-const CUTOFF_BY_SPEC: Readonly<Record<SpecId, Cutoff>> = {
+// Exported for the spec-registry fidelity test only; deleted with the table.
+export const CUTOFF_BY_SPEC: Readonly<Record<SpecId, Cutoff>> = {
   ret: CUTOFF,
   feral: CUTOFF_FERAL,
 

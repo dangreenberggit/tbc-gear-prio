@@ -39,7 +39,8 @@ export type PresetGearFile = {
  * lands on the right tree without needing a real talent string parsed.
  * Paladin tree 2 is Retribution, Druid tree 1 is Feral Combat (spec.ts:35-46).
  */
-const SPEC_TREE_INDEX: Record<SpecId, 0 | 1 | 2> = {
+// Exported for the spec-registry fidelity test only; deleted with the table.
+export const SPEC_TREE_INDEX: Record<SpecId, 0 | 1 | 2> = {
   ret: 2,
   feral: 1,
   balance: 0,
@@ -53,7 +54,8 @@ const SPEC_TREE_INDEX: Record<SpecId, 0 | 1 | 2> = {
   warrior: 1, // Fury, the fork's default warrior variant
 };
 
-const SPEC_CLASS_NAME: Record<SpecId, string> = {
+// Exported for the spec-registry fidelity test only; deleted with the table.
+export const SPEC_CLASS_NAME: Record<SpecId, string> = {
   ret: "Paladin",
   feral: "Druid",
   balance: "Druid",

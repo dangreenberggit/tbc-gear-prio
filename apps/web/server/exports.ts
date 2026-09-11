@@ -48,7 +48,7 @@ import type { JobManager } from "./jobs.js";
  * what the site routes on — note `druid/feral` for cat and `priest/shadow` for
  * the DPS priest, neither of which matches this repo's `SpecId` spelling.
  */
-export const SPEC_PAGE: Readonly<Record<SpecId, string>> = {
+const SPEC_PAGE: Readonly<Record<SpecId, string>> = {
   ret: "https://www.wowsims.com/tbc/paladin/retribution/",
   feral: "https://www.wowsims.com/tbc/druid/feral/",
   balance: "https://www.wowsims.com/tbc/druid/balance/",
@@ -61,6 +61,11 @@ export const SPEC_PAGE: Readonly<Record<SpecId, string>> = {
   warlock: "https://www.wowsims.com/tbc/warlock/",
   warrior: "https://www.wowsims.com/tbc/warrior/",
 };
+
+/** Where a share link opens, for one spec. */
+export function specPageFor(spec: SpecId): string {
+  return SPEC_PAGE[spec];
+}
 
 /**
  * Protojson in, the two shapes an export needs out: the generated
@@ -105,7 +110,7 @@ export function createExporters(input: CreateExportersInput): Exporters {
       return {
         status: 200,
         json: {
-          url: encodeShareLink(message, SPEC_PAGE[built.spec], deflateSync),
+          url: encodeShareLink(message, specPageFor(built.spec), deflateSync),
           apiVersion: CURRENT_API_VERSION,
         },
       };

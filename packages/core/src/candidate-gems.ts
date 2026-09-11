@@ -239,6 +239,19 @@ export const SPEC_PREFERRED_METAS: Readonly<
 };
 
 /**
+ * The preferred meta ids for a detected spec, or `undefined` where none is
+ * recorded.
+ *
+ * One reader for the table, so the three call sites below cannot disagree about
+ * what "no preference recorded" looks like.
+ */
+export function preferredMetasFor(
+  spec: DetectedSpecId
+): readonly number[] | undefined {
+  return SPEC_PREFERRED_METAS[spec];
+}
+
+/**
  * The disclosure for a spec whose meta preference is not recorded, or
  * `undefined` when there is nothing to disclose.
  *
@@ -249,7 +262,7 @@ export const SPEC_PREFERRED_METAS: Readonly<
 export function missingMetaPreferenceNote(
   spec: DetectedSpecId | undefined
 ): string | undefined {
-  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return undefined;
+  if (spec === undefined || preferredMetasFor(spec)) return undefined;
   return `no meta preference recorded for ${spec} — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect`;
 }
 
@@ -271,7 +284,7 @@ export function metaSocketUnpriced(
   gems: readonly number[],
   spec: DetectedSpecId | undefined
 ): boolean {
-  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return false;
+  if (spec === undefined || preferredMetasFor(spec)) return false;
   const metaIdx = socketsFor(itemId).indexOf(GemColor.GemColorMeta);
   if (metaIdx < 0) return false;
   return !gems[metaIdx];
@@ -418,7 +431,7 @@ function bestGemForSocket(
 
   if (socket === GemColor.GemColorMeta) {
     const preferredIds =
-      spec === undefined ? PREFERRED_META_IDS : SPEC_PREFERRED_METAS[spec];
+      spec === undefined ? PREFERRED_META_IDS : preferredMetasFor(spec);
     // No recorded preference: leave the socket empty rather than fall through
     // to the EP pick below. EP cannot rank metas — nine of eighteen score
     // 0.00 — so "best by EP" would be an arbitrary gem wearing the authority
