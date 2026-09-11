@@ -1,0 +1,16 @@
+{
+  "note": "The spec ids this engine can rank, and each one's fork proto Spec name. Shared because two languages need it: scripts/generate_json_literal_types.py emits the SpecId union from these keys (a JSON import would widen to string and prove nothing), and assemble_universe.py reads forkSpec to look items up in data/equip-eligibility.json. check_equip_eligibility.py gates that map as total and injective on every verify. The rest of each spec's facts -- cap profile, cutoff, preferred metas, class, tree, site path -- live in the typed sibling spec-registry.ts, which must stay total over these keys.",
+  "specs": {
+    "balance": { "forkSpec": "BalanceDruid" },
+    "feral": { "forkSpec": "FeralCatDruid" },
+    "hunter": { "forkSpec": "Hunter" },
+    "mage": { "forkSpec": "Mage" },
+    "ret": { "forkSpec": "RetributionPaladin" },
+    "shadow": { "forkSpec": "Priest" },
+    "rogue": { "forkSpec": "Rogue" },
+    "ele": { "forkSpec": "ElementalShaman" },
+    "enh": { "forkSpec": "EnhancementShaman" },
+    "warlock": { "forkSpec": "Warlock" },
+    "warrior": { "forkSpec": "DpsWarrior" }
+  }
+}
