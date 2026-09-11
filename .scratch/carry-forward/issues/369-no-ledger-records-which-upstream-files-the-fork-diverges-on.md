@@ -1,5 +1,5 @@
 Status: closed
-Closed: <PENDING_COMMIT_SHA>
+Closed: 21d0b37
 Type: chore
 Origin: owner question, 2026-09-10 — "we should not be fucking with their code"
 Blocks: none
