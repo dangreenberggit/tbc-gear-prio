@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/stage-gate/342-learn-from-upstream/comparison.md
 Blocks: none
@@ -135,14 +135,21 @@ Whichever is chosen, note that option 1 removes rows that exist today and option
 
 - [ ] ~~The engine's behaviour on a 2H + off-hand request is established and
       written down.~~ Struck: declined by owner 2026-09-10.
-- [ ] Option 1 or 2 chosen, with the reason recorded against the existing
+- [x] Option 1 or 2 chosen, with the reason recorded against the existing
       two-item-swap position in `rank.ts`. **Option 2 is chosen** — see the
-      decision below. The box stays unticked because the implementation half
-      is still open.
-- [ ] Fixed in `packages/core/src/rank.ts` with a unit test that fails before
+      decision below. `clearOffHandForTwoHander`'s comment in both engine
+      copies records why clearing is honest here and how this case differs
+      from the guard's own.
+- [x] Fixed in `packages/core/src/rank.ts` with a unit test that fails before
       the fix, and ported to the fork copy with the known-traps cycle done.
-- [ ] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
-      Node 20 — `node:sqlite` is missing).
+      Tests: `packages/core/test/two-hander-clears-offhand.test.ts` (T1, T2
+      and T4 failed before the fix, pass after; T3a/T3b green throughout).
+      Fork commit `812db29d37614cdde01873d24f4868ddf79038b7`, pushed to
+      `feat/upgrades-tab` and verified with `ls-remote`.
+- [x] `pnpm verify` green, E-W3 green on Node >= 22.5.0 (it cannot collect on
+      Node 20 — `node:sqlite` is missing). Run on Node v22.17.1: `pnpm verify`
+      exits 0, and E-W3 was green before the fork hash moved and again after
+      the port.
 
 ## Notes
 
