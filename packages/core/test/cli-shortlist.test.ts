@@ -21,6 +21,7 @@ import {
   formatSetBonusLine,
   GEM_POLICY_QUALIFIER,
   formatSetPotentialLine,
+  formatRemovedItemsLines,
 } from "../src/rank-report-rules.js";
 import type { RankedItem, Ranking } from "../src/rank.js";
 import { applyView } from "../src/view.js";
@@ -220,5 +221,28 @@ describe("--with-set-potential output", () => {
   it("prints nothing for a row with no setContext, even under the flag", () => {
     const plain = item({ itemId: 1, deltaDps: 12 });
     expect(formatSetPotentialLine(plain)).toBeUndefined();
+  });
+});
+
+/**
+ * Ticket 350: a two-handed candidate clears the worn off hand, so its row is a
+ * two-item change and must say which item it takes off. Exercised through the
+ * pure formatter the CLI prints, the same way `formatSetPotentialLine` is
+ * above — `main()` cannot be driven here (see the file header).
+ */
+describe("removed-items line", () => {
+  it("names the worn item a two-hander takes off", () => {
+    const row = item({
+      itemId: 28773,
+      deltaDps: 40,
+      removedItems: [{ itemId: 30082, slot: "offhand" }],
+    });
+    expect(formatRemovedItemsLines(row)).toEqual([
+      "removes worn: Talon of Azshara (offhand)",
+    ]);
+  });
+
+  it("says nothing for a row that removes nothing else", () => {
+    expect(formatRemovedItemsLines(item({ itemId: 1 }))).toEqual([]);
   });
 });

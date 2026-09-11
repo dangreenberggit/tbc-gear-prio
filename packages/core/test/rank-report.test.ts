@@ -213,6 +213,28 @@ describe("rank-report", () => {
     expect(html).toContain("Gorehowl");
   });
 
+  it("names the worn off-hand item a two-hander takes off", () => {
+    // Ticket 350: the row is a two-item change, so the rendered row must say
+    // which worn item it removes rather than reading as a one-for-one swap.
+    const html = renderRankHtml(
+      ranking([
+        item({
+          rank: 1,
+          itemId: 28773,
+          name: "Gorehowl",
+          slot: "weapon",
+          deltaDps: 40,
+          belowCutoff: false,
+          source: realPoolEntry(28773).source,
+          removedItems: [{ itemId: 30082, slot: "offhand" }],
+        }),
+      ]),
+      meta()
+    );
+    expect(html).toContain('class="removed-items"');
+    expect(html).toContain("Talon of Azshara");
+  });
+
   it("excludes magnitude-flagged weapons from the curated ranked list", () => {
     const html = renderRankHtml(
       ranking([
@@ -652,10 +674,19 @@ describe("rank-report", () => {
     // working copy on comment lines alone, at a 174-byte delta, and this
     // fixture carries no `plausibilityWarnings` so no retraction markup can
     // render on it either way.
+    // Repinned for ticket 350's removed-off-hand row note. The delta is
+    // exactly the new `${removedItems}` slot interpolating empty on this
+    // fixture's two rows: +10 chars = 2 × ("\n" + 4-space indent), the same
+    // arithmetic the `${gemSubs}` and `${emptyMeta}` repins above record. No
+    // CSS was added (the note is its own `.removed-items` div with no rule
+    // yet), and neither fixture row carries `removedItems` --
+    // `rankingWithPvpWeaponAboveCutoff` builds one head row and one pvp weapon
+    // row, so the formatter returns `[]`, `.map().join("")` is `""`, and no
+    // `removed-items` markup can render here.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "48c776db6372e3b917deefa024581e0249920b7578acde36c69f6af765dbc37d",
-      length: 32565,
+        "fef43fd6189eebcc05ea549c99a3599eae9c2dd08e6d4da48085da433b98b44b",
+      length: 32575,
     });
   });
 });
