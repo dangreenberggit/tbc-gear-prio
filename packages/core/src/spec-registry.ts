@@ -159,10 +159,11 @@ export type SpecEntry = {
    */
   readonly treeIndex: 0 | 1 | 2;
   /**
-   * Path segment of the spec's page on wowsims' TBC site, following the fork's
-   * own `ui/<class>/<spec>/` layout, which is what the site routes on — note
+   * Path segment of the spec's page on the public wowsims.com TBC site — note
    * `druid/feral` for cat and `priest/shadow` for the DPS priest, neither of
-   * which matches this repo's `SpecId` spelling.
+   * which matches this repo's `SpecId` spelling. These are the public routes,
+   * not the fork's `ui/` directory names: the fork ships `ui/druid/feralcat`,
+   * so deriving a path from the source tree would be wrong for cat.
    */
   readonly sitePath: string;
   /** What the cap computation needs: which hit school, and its numbers. */

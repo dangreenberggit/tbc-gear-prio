@@ -228,8 +228,8 @@ proof is mechanical and lives in one commit.
 `STEP5_SHA = f79e46d35bfda9c08b1b76f2d3329baf315cb5f4` is the both-shapes-alive
 commit: the registry reached its final form while every old table still existed,
 and two temporary tests asserted `SPEC_REGISTRY[id].<field>` against
-`<OLD_TABLE>[id]` for **every** id across **every** moved table — 23 assertions,
-no expected value typed by hand.
+`<OLD_TABLE>[id]` for **every** id across **every** moved table — 23 test cases
+(78 executed `expect`s), no expected value typed by hand.
 
 The consumer flips that followed are each gated on the registry not moving:
 
