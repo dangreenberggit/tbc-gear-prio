@@ -272,8 +272,9 @@ describe("a two-handed candidate clears the worn off hand (ticket 350)", () => {
     // palette (34831) socketed in it, main hand empty, every other slot
     // bare. Twinblade of the Phoenix (29993) has a colour-3 (blue) socket
     // of its own among its [red, yellow, blue] sockets — the one this test
-    // watches. 34831's only stat is stamina, unweighted by every real preset,
-    // so the weights here are a synthetic single-stat set (stamina only) that
+    // watches. 34831's only stat is stamina, which 19 of the 20 committed
+    // presets omit entirely and the twentieth (rogue/fallback) weights at
+    // 0.01 — so the weights here are a synthetic single-stat set (stamina only) that
     // makes it unambiguously the best gem for that socket when it is
     // available — real preset weights would leave it scoring 0 and any
     // ordering bug invisible.
@@ -285,9 +286,12 @@ describe("a two-handed candidate clears the worn off hand (ticket 350)", () => {
     expect(getGem(UNIQUE_BLUE_GEM)?.colour).toBe(3);
     expect(getGem(UNIQUE_BLUE_GEM)?.unique).toBe(true);
     expect(getItem(TWINBLADE)?.handType).toBe(HandType.HandTypeTwoHand);
-    // [red, yellow, blue] — the blue socket this test watches is array
-    // index 0, not index 2; the fill writes one gem per array position, not
-    // per socket colour value.
+    // [red, yellow, blue] by GemColor (Red=2, Blue=3, Yellow=4), so the blue
+    // socket is array index 2. The assertion below reads index 0 anyway:
+    // under a stamina-only weight set the solver's colour-free fill outscores
+    // its colour-matched one, so 34831 lands in the first array position
+    // rather than in the matching socket. What this test watches is whether
+    // 34831 is available at all, not which socket receives it.
     expect(getItem(TWINBLADE)?.sockets).toEqual([2, 4, 3]);
 
     const equipment: SimItemSpec[] = SIM_ORDER.map((name) =>

@@ -29,15 +29,15 @@ commit this fork branch sits on. Everything under `upgrades/**`,
 it is ours outright, new files with zero upstream lines touched. Re-run the
 diff to re-verify; both shas can move.
 
-Run against the lock-pinned `f90b12a7b`, before the `sim.ts` revert below was
-committed to the fork clone, the command returns **fifteen** paths. The
-revert landed as a separate fork commit (`bbad1b8a4`, not yet pushed and not
-yet the lock file's pin — moving that pin is its own deliberate act per
-`docs/agents/known-traps.md`, out of scope here) on top of `f90b12a7b`, so
-re-running the command above against today's actual fork HEAD returns
-`ui/core/sim.ts` with a diff-stat of 0 rather than 20. The table below
-reflects that post-revert state; anyone re-running the command against the
-lock-pinned sha will still see `sim.ts` listed until the pin moves.
+Run against `f90b12a7b` — the pin as this note was first written, before the
+`sim.ts` revert below — the command returns **fifteen** paths, `ui/core/sim.ts`
+among them with a diff-stat of 20. The revert landed as a separate fork commit
+`bbad1b8a4` on top of `f90b12a7b`, and the pin has since moved onto it
+(`data/wowsims-fork.lock.json`, whose `_comment` records the push and the
+`ls-remote` that verified it). So the command as written above, against the
+current pin, returns `ui/core/sim.ts` with a diff-stat of 0 — which is the
+state the table below reflects. Substitute `f90b12a7b` for the pinned sha to
+reproduce the pre-revert fifteen.
 
 The ticket that opened this work
 counted thirteen from the same command run against a now-stale SHA
@@ -49,11 +49,14 @@ divergence: it is our own tooling living in the fork tree (the fork's copy of
 `packages/core`'s layout gate), not a changed upstream file, and the pathspec
 above does not catch it because `test-layout.mjs` matches neither `*upgrades*`
 nor `*_upgrades*`. It is listed below for completeness, marked local-only,
-same as the ticket's own prose already said. The other fourteen paths match
-the ticket's table exactly in shape (same line-change counts), so nothing
-upstream moved between `0b50f402` and `f90b12a7b` — the five intervening fork
-commits are documented in `data/wowsims-fork.lock.json`'s `_comment` and none
-touch these paths.
+same as the ticket's own prose already said. The other fourteen paths are the same set the ticket names. Two of them did
+move between `0b50f402` and `f90b12a7b`, both additive and both ours:
+`assets/locales/en/translation.json` (+91 → +92) and
+`schemas/translation.schema.json` (+306 → +310), the i18n key and schema entry
+ticket 350 added. No **upstream-authored** file changed across those five
+commits, which is the property this ledger cares about — they are documented in
+`data/wowsims-fork.lock.json`'s `_comment`. Re-derive with the command above at
+each sha rather than trusting this sentence.
 
 ## The paths
 
