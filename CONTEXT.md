@@ -90,6 +90,17 @@ competitive at T5.
 
 It appears in `contentHash`, in `assumptions`, and on the CLI surface.
 
+### raid-sim skeleton
+
+The committed `data/presets/<spec>/p2.raid-sim-skeleton.json` that
+`packages/core` — the CLI harness — loads and patches per candidate.
+
+**The Upgrades tab never reads one.** It takes the user's live page state, or
+wowsims' defaults before the user touches anything, via upstream's own
+`sim.makeRaidSimRequest(false)`. So "only two of eleven skeletons exist" is a
+CLI test-coverage fact, not a product gap, and it never blocked the tab.
+See [`ADR-0031`](docs/adr/0031-the-raid-sim-skeleton-is-a-cli-harness-input-not-a-product-input.md).
+
 ---
 
 ## Banned words
