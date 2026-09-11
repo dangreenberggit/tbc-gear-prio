@@ -24,6 +24,7 @@ import { renderRankHtml } from "./rank-report.js";
 import {
   formatSetBonusLine,
   formatSetPotentialLine,
+  formatRemovedItemsLines,
 } from "./rank-report-rules.js";
 import { RankError, rankUpgrades, type RankInput } from "./rank.js";
 import {
@@ -422,6 +423,9 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
       }
       if (item.setBonusNote) {
         console.log(`${indent}    set: ${item.setBonusNote}`);
+      }
+      for (const line of formatRemovedItemsLines(item)) {
+        console.log(`${indent}    ${line}`);
       }
       if (item.emptyMetaSocket) {
         console.log(

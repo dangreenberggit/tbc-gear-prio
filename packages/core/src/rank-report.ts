@@ -21,6 +21,7 @@ import {
   curatedSetPhase,
   setBonusEntry,
   formatSetPotentialLine,
+  formatRemovedItemsLines,
   groupBySlot,
   formatCuratedPackagePointer,
   GEM_POLICY_QUALIFIER,
@@ -441,6 +442,15 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
                   .join(", ")
               )}</div>`
             : "";
+          // Ticket 350: a two-hander leaves no off hand, so this row is a
+          // two-item change. Saying which item it takes off keeps the heading
+          // from reading as a one-for-one swap.
+          const removedItems = formatRemovedItemsLines(item)
+            .map(
+              (line) =>
+                `<div class="removed-items">${esc(line)} — a two-hander leaves no off hand</div>`
+            )
+            .join("");
           // The run-level no-meta-preference note cannot say which rows it
           // moved; this is the row saying it about itself.
           const emptyMeta = item.emptyMetaSocket
@@ -520,6 +530,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     ${hitLoss}
     ${gemSubs}
     ${emptyMeta}
+    ${removedItems}
   </div>
   <div class="nums">
     <div class="${deltaCls} delta-plain">${fmtDelta(item.deltaDps)} <span class="unit">DPS</span></div>

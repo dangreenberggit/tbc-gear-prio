@@ -804,3 +804,26 @@ export function formatSetPotentialLine(
   const names = breaks.map((b) => `${b.setName} ${b.threshold}pc`).join("; ");
   return `${base} — inflated by breaking ${names}, not counted in ranking`;
 }
+
+/**
+ * One line per worn item this swap takes off beyond the one it replaces —
+ * today only the off-hand item a two-handed main-hand candidate leaves no room
+ * for (ticket 350).
+ *
+ * A row that removes an item the player is wearing must say so: a two-item
+ * change presented under a one-item heading is the exact objection the
+ * off-hand guard's comment raises about the mirror case. The item is named
+ * rather than counted, because "removes worn: Talon of Azshara" tells a reader
+ * what they are giving up and "removes 1 item" does not.
+ *
+ * Returns `[]` when the row removes nothing else, so a caller can spread the
+ * result unconditionally.
+ */
+export function formatRemovedItemsLines(
+  item: Pick<RankedItem, "removedItems">
+): string[] {
+  return (item.removedItems ?? []).map(
+    (r) =>
+      `removes worn: ${getItem(r.itemId)?.name ?? String(r.itemId)} (${r.slot})`
+  );
+}
