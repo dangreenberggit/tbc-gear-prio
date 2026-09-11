@@ -52,11 +52,9 @@ $ grep -rl 'raid-sim-skeleton' \
 .../upgrades/engine/rank.ts
 ```
 
-That single hit is a comment, not a read: "`ret/p2.raid-sim-skeleton`
-file-path style, since there is no such file here".
-
-The full comment reads "since there is no such file here — the skeleton comes
-from the page, not from disk."
+That single hit is a comment, not a read. It reads: kept as a stable label
+rather than packages/core's "`ret/p2.raid-sim-skeleton` file-path style, since
+there is no such file here — the skeleton comes from the page, not from disk."
 
 `PRESET_ID_BY_SPEC` in `packages/core/src/rank.ts` names a skeleton id for all
 eleven specs while only two files exist:
