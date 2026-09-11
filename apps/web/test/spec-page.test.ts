@@ -2,7 +2,7 @@
  * A smoke test for the share-link URL template, not the fidelity proof.
  *
  * What proved the registry's `sitePath` rebuilds every one of the eleven URLs
- * the old `SPEC_PAGE` table held is `spec-page-fidelity.test.ts`, which ran
+ * the old per-spec page table held was a temporary fidelity test that ran
  * against both shapes at once and was deleted with the table. These two cases
  * cover the template's shape: a nested path and a bare one.
  */
