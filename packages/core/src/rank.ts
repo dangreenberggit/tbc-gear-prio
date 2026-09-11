@@ -2133,7 +2133,7 @@ export function candidateSwapWithRepairs(
 }
 
 /**
- * Takes the worn off-hand item off when a two-handed candidate lands in the
+ * Takes the worn off-hand item off when a two-handed candidate fills the
  * main hand, and names what it took (ticket 350).
  *
  * A two-hander occupies both hands, so pricing one beside a worn off-hand item

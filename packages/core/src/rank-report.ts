@@ -445,11 +445,18 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           // Ticket 350: a two-hander leaves no off hand, so this row is a
           // two-item change. Saying which item it takes off keeps the heading
           // from reading as a one-for-one swap.
-          const removedItems = formatRemovedItemsLines(item)
-            .map(
-              (line) =>
-                `<div class="removed-items">${esc(line)} — a two-hander leaves no off hand</div>`
-            )
+          const removedItems = (item.removedItems ?? [])
+            .map((r, i) => {
+              const line = formatRemovedItemsLines(item)[i] ?? "";
+              // The reason is specific to the off hand, so it rides only on
+              // off-hand rows. `removedItems` is typed to carry any slot, and
+              // the first non-off-hand removal would make this sentence false.
+              const why =
+                r.slot === "offhand"
+                  ? " — a two-hander leaves no off hand"
+                  : "";
+              return `<div class="removed-items">${esc(line)}${why}</div>`;
+            })
             .join("");
           // The run-level no-meta-preference note cannot say which rows it
           // moved; this is the row saying it about itself.

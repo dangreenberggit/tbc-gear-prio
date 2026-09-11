@@ -5,7 +5,7 @@ The Upgrades tab and our ported ranking engine live in
 `vendor/tbc-new-fork`, not in this repo's own source tree. Nothing in
 `pnpm verify` reached them: `pnpm lint` runs eslint over this repo, and
 `pnpm typecheck` runs `tsc --build` over this repo's projects. Neither
-one has ever opened `upgrades_tab.tsx`. A defect could land in our fork
+one has ever opened `upgrades_tab.tsx`. A defect could reach our fork
 code -- a type error, a duplicate import, an unused binding -- and no
 gate would notice. The ticket-350 executor flagged exactly that hole.
 
@@ -35,7 +35,7 @@ rather than a scoped subset, because a type error in our tab usually
 supported way to check one file with its dependencies. That whole-project
 run passes today, measured at 21 seconds, which is why it sits in the
 verify chain rather than in a separate opt-in script. If upstream ever
-lands a type error of their own, this gate goes red for a reason that is
+introduces a type error of their own, this gate goes red for a reason that is
 not ours -- that is the one place the narrow-scope promise does not
 hold, and the fix then is to pin the check to our files, not to edit
 upstream.
