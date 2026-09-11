@@ -1,11 +1,11 @@
 # Plan — ticket-365-dual-wield-fixture
 
-> **Status: awaiting owner decision on scale.** Written by `gate-planner`
-> (Fable) 2026-09-10 against `brief.md` and ticket 365. Not yet reviewed, not
-> yet executed. The question put to the owner is whether the skeleton-building
-> machinery in Steps 1–4 is worth buying to unblock ticket 350, or whether a
-> narrower route is wanted. Steps 5–9 are the measurement itself and are not in
-> question.
+> **Status: SUPERSEDED, 2026-09-10 — do not execute.** The owner decided the
+> skeleton-building machinery in Steps 1–4 is not being bought to unblock ticket
+> 350, and the engine measurement in Steps 5–9 is not wanted. Ticket 350 now
+> records option 2; ticket 365 is a CLI-only test-coverage gap; the reasoning is
+> `ADR-0031` and ticket 367. Kept for its claims register (C1–C25), which
+> remains a correct reading of the code at base `43052fb`.
 
 ## Goal
 
