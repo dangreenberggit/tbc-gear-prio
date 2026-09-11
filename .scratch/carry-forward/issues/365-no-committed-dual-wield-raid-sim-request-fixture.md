@@ -23,8 +23,17 @@ through the ranker's own composition path rather than typed by hand.
 
 The case is reachable only for the four specs in `DUAL_WIELD_SPECS` in
 `packages/core/src/pool.ts` (grep for it) — `rogue`, `enh`, `warrior`,
-`hunter`. Ret and feral are excluded there deliberately, in the comment's own
-words, because "neither can put anything in the off hand".
+`hunter`. Ret and feral are excluded there deliberately. That comment's own
+reason — "neither can put anything in the off hand" — is **too strong read as
+a statement about TBC**: druids equip off-hand held items, and `feral-p3`
+carries 11 off-hand items a druid can wear — `grep -c '"handType": 3'
+data/universes/feral-p3.json` returns 11, and `HandTypeOffHand = 3` comes from
+the generated `packages/core/src/proto/common_pb.ts` (grep for the enum
+member). What actually makes the set unreachable for these two is the
+ranker's placement rule —
+`simSlotsForPoolSlot` never offers them an off-hand placement — not the
+game's equip rule. Corrected at the pre-merge review, finding D2; ticket 350
+carries the same correction.
 
 The committed inputs cover only the two excluded specs:
 
