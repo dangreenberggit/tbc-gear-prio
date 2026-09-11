@@ -306,7 +306,7 @@ export type RankedItem = {
   removedItems?: Array<{ itemId: number; slot: SimSlotName }>;
   /**
    * This row's delta was measured with the candidate's meta socket empty —
-   * the ranked spec has no recorded meta preference (`SPEC_PREFERRED_METAS`),
+   * the ranked spec has no recorded meta preference (`preferredMetasFor`),
    * so no gem was seated and the price omits a meta's stats and effect. The
    * per-row half of `missingMetaPreferenceNote`'s run-level disclosure.
    */

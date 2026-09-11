@@ -1,9 +1,10 @@
-import { CUTOFF, CUTOFF_FERAL } from "./spec-registry.js";
+import { CUTOFF, SPEC_REGISTRY, isSpecId } from "./spec-registry.js";
 import type { SpecId } from "./types.js";
 
 // The two cutoffs live with the per-spec entries that reference them, in
-// `spec-registry.js`. Re-exported here so this module's importers are
-// unchanged; imported above because the table below reads them as values.
+// `spec-registry.js`. Re-exported here because this module is where callers
+// have always read them from; `CUTOFF` is also imported above as the value
+// `cutoffForSpec` degrades to at the untyped boundary.
 export { CUTOFF, CUTOFF_FERAL } from "./spec-registry.js";
 
 /**
@@ -57,7 +58,7 @@ export type Cutoff = { readonly absDps: number; readonly pct: number };
  * observed row's tier today (ticket 335, re-runnable via the band scan in that
  * ticket over the six `.scratch/**` fixtures with `prospectiveBonusDps`).
  *
- * The nine untested specs inherit ret's floor via `CUTOFF_BY_SPEC`
+ * The nine untested specs inherit ret's floor through their registry entries
  * (see `cutoffForSpec`), so the untested-spec debt stays annotated in one place.
  * See tickets 331, 332, and 335, and
  * .scratch/stage-gate/ticket-332-per-spec-ranking-floor/plan.md.
@@ -67,50 +68,22 @@ export function setBonusNoiseFloorDps(cutoff: Cutoff): number {
 }
 
 /**
- * Per-spec cutoff lookup, **total** over `SpecId`.
+ * The guard here covers the untyped boundary only, and deliberately not the
+ * typed one.
  *
- * Totality is the point: the previous `Partial` + `?? CUTOFF` shape meant a
- * newly added spec silently inherited ret's noise floor, and nothing in the
- * type system or the output said so. A spec that has not had its own five-seed
- * spread run still gets the ret-derived numbers — there is no better value to
- * give it — but it must now say so at the point of definition, so the debt is
- * visible in a diff rather than hiding in a fallback operator.
- */
-// Exported for the spec-registry fidelity test only; deleted with the table.
-export const CUTOFF_BY_SPEC: Readonly<Record<SpecId, Cutoff>> = {
-  ret: CUTOFF,
-  feral: CUTOFF_FERAL,
-
-  // untested: no five-seed spread has been run for any spec below, so each
-  // carries ret's derived numbers. That is the same value they would have got
-  // from the old `?? CUTOFF` fallback — the difference is that the debt is
-  // written down here instead of hiding in an operator. Feral's spread came
-  // out 6% higher than ret's on the same method, so a noisier rotation than
-  // ret's is expected to be under-filtered until measured.
-  // Carry-forward: .scratch/carry-forward/issues — per-spec cutoff spreads.
-  balance: CUTOFF,
-  hunter: CUTOFF,
-  mage: CUTOFF,
-  shadow: CUTOFF,
-  rogue: CUTOFF,
-  ele: CUTOFF,
-  enh: CUTOFF,
-  warlock: CUTOFF,
-  warrior: CUTOFF,
-};
-
-/**
- * The `?? CUTOFF` here is not the fallback this change set out to delete.
- * That one hid *unfilled rows in a `Partial`* — a new `SpecId` type-checked
- * while silently inheriting ret's noise floor. The Record is now total, so a
- * typed `SpecId` always hits a row and the compiler forces every new spec to
- * choose. This coalesce covers only the untyped boundary: `DetectedSpecId`
- * values like `feral-tank` that are identifiable but not rankable, which
- * `cutoff.test.ts` passes through a cast. Throwing there would turn a
- * detection edge case into a crash.
+ * `DetectedSpecId` values like `feral-tank` are identifiable but not rankable,
+ * and `cutoff.test.ts` passes one through a cast; throwing there would turn a
+ * detection edge case into a crash, so an id outside `SPEC_IDS` degrades to
+ * ret's derived cutoff exactly as it always has.
+ *
+ * A *registered* spec whose entry is missing is the opposite case and must
+ * throw. That is why the registry is indexed directly rather than through `?.`
+ * — an optional chain would hand back ret's noise floor for a spec nobody
+ * measured, which is the silent inheritance this registry exists to prevent.
  */
 export function cutoffForSpec(spec: SpecId): Cutoff {
-  return CUTOFF_BY_SPEC[spec] ?? CUTOFF;
+  if (!isSpecId(spec)) return CUTOFF;
+  return SPEC_REGISTRY[spec].cutoff;
 }
 
 /**

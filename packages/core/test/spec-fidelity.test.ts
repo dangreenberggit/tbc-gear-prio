@@ -15,9 +15,6 @@
 import { describe, expect, it } from "vitest";
 import { SPEC_IDS } from "../src/spec-ids.generated.js";
 import { SPEC_REGISTRY, skeletonPresetIdFor } from "../src/spec-registry.js";
-import { CAP_PROFILE_BY_SPEC } from "../src/cap-profile.js";
-import { CUTOFF_BY_SPEC } from "../src/cutoff.js";
-import { SPEC_PREFERRED_METAS } from "../src/candidate-gems.js";
 import { PRESET_ID_BY_SPEC } from "../src/rank.js";
 import {
   SPEC_CLASS_NAME,
@@ -31,11 +28,6 @@ describe("the registry matches every table it replaces", () => {
 
   for (const id of SPEC_IDS) {
     it(`carries ${id}'s facts unchanged`, () => {
-      expect(SPEC_REGISTRY[id].capProfile).toEqual(CAP_PROFILE_BY_SPEC[id]);
-      expect(SPEC_REGISTRY[id].cutoff).toBe(CUTOFF_BY_SPEC[id]);
-      expect(SPEC_REGISTRY[id].preferredMetas).toEqual(
-        SPEC_PREFERRED_METAS[id]
-      );
       expect(SPEC_REGISTRY[id].treeIndex).toBe(SPEC_TREE_INDEX[id]);
       expect(SPEC_REGISTRY[id].className).toBe(SPEC_CLASS_NAME[id]);
       expect(skeletonPresetIdFor(id)).toBe(PRESET_ID_BY_SPEC[id]);

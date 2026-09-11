@@ -31,7 +31,7 @@ import type {
   SimRunOpts,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import { CAP_PROFILE_BY_SPEC } from "../src/cap-profile.js";
+import { capProfileFor } from "../src/cap-profile.js";
 import { Stat } from "../src/stats.js";
 import { SIM_ORDER } from "../src/slots.js";
 import type { ContentPhase, SpecId } from "../src/types.js";
@@ -166,7 +166,7 @@ describe("shadow — a caster archetype", () => {
   it("reads spell hit, not melee hit, and tracks no expertise", () => {
     // The descriptor is what the cap computation reads; asserting it here
     // keeps the archetype's defining fact next to the run that depends on it.
-    const p = CAP_PROFILE_BY_SPEC.shadow;
+    const p = capProfileFor("shadow");
     expect(p.hitStat).toBe(Stat.StatSpellHitRating);
     expect(p.trackExpertise).toBe(false);
     expect(p.hitCapPercent).toBe(16);
@@ -202,7 +202,7 @@ describe("shadow — a caster archetype", () => {
 
 describe("rogue — a dual-wield melee archetype", () => {
   it("reads melee hit and tracks expertise", () => {
-    const p = CAP_PROFILE_BY_SPEC.rogue;
+    const p = capProfileFor("rogue");
     expect(p.hitStat).toBe(Stat.StatMeleeHitRating);
     expect(p.trackExpertise).toBe(true);
     expect(p.hitCapPercent).toBe(9);
@@ -283,7 +283,7 @@ describe("hunter — a ranged physical archetype", () => {
     // MeleeHitRating -> PhysicalHitPercent and SpellHitRating ->
     // SpellHitPercent. Nothing a hunter fires can be dodged or parried, so
     // expertise is not a cap this spec has.
-    const p = CAP_PROFILE_BY_SPEC.hunter;
+    const p = capProfileFor("hunter");
     expect(p.hitStat).toBe(Stat.StatMeleeHitRating);
     expect(p.trackExpertise).toBe(false);
     expect(p.hitCapPercent).toBe(9);
