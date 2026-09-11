@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: chore
 Origin: owner question, 2026-09-10 — "we should not be fucking with their code"
 Blocks: none
@@ -102,6 +102,40 @@ and only the merge commit body records that.
 - **366** — proposes editing `sim/core/database.go`, and names the concern
   unprompted: "This is upstream's code, not ours." Declines to fix. The real fix
   was on our side and is already done.
+
+## Resolution (2026-09-11)
+
+Closed by [`docs/fork-upstream-touchpoints.md`](../../../docs/fork-upstream-touchpoints.md),
+written on `docs/fork-upstream-touchpoints`. All four acceptance boxes are met:
+
+- [x] A tracked file lists every diverging upstream path with its reason — 13
+      files, each with what changed, why, load-bearing lines, avoidability
+      (labelled as judgement) and per-file `+/−` from `git diff --numstat`.
+- [x] Load-bearing lines are called out, `sim_header.tsx`'s wrapper included —
+      and the audit found it is **worse** than this ticket recorded: there are
+      three non-null assertions, and the one targeting the wrapper div throws
+      during header construction rather than merely losing the fade.
+- [x] Each entry says upstream-candidate or local-only — four qualify
+      (`item_sets.go`, `test-locales.mjs`, and `sim_header.tsx` + `_header.scss`
+      as one paired change).
+- [x] The `sim.ts` `iterations` parameter is wired up or reverted — **reverted**,
+      in fork commit `bbad1b8a4`. Confirmed byte-identical to base:
+      `git -C vendor/tbc-new-fork diff --stat ec5c5f20..bbad1b8a -- ui/core/sim.ts`
+      returns empty.
+
+Two corrections to this ticket's own table, both now superseded by the document:
+`ui/core/sim.ts` is no longer a diverging path (reverted), and `test-layout.mjs`
+is an **added** file rather than a modification, so it is judged on placement
+instead of diff size. The count is still 13, but not the same 13.
+
+The document also goes past this ticket's scope, because the owner sharpened the
+requirement after it was filed: it adds per-file avoidability recommendations, a
+three-PR split proposal, a Category A placement judgement for new files landing
+in upstream directories, and a complete private-tracker-reference sweep. It was
+adversarially reviewed (Opus) against the specific failure mode of an
+undercounted modified-file list; the reviewer independently re-derived the set
+and confirmed no renames, deletions, mode changes or submodule pointers hide
+additional upstream touchpoints.
 
 ## What is NOT claimed
 
