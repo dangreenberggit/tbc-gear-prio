@@ -61,21 +61,25 @@ The counts above say which candidates carry a stone that does not match their
 weapon. They do **not** say those candidates are mispriced, and for feral the
 naive fix would make things worse. Established by reading the fork's engine:
 
+Citations here are grep anchors, not line numbers, because line numbers rot
+(ticket 368). Fork paths are in `vendor/tbc-new-fork`, which is gitignored.
+
 - **The generic path treats the two stones as near-identical and ignores weapon
-  type.** `registerStaticImbue` (`sim/core/consumes.go:683`) gives 29453 (694)
-  and 34340 (720) the same `MeleeCritRating +14` and `+12` auto-attack base
-  damage. The only in-switch difference is the sharpstone's ranged-crit
-  correction at line 718 (`-(14 / PhysicalCritRatingPerCritPercent)`, about
-  −0.63% ranged crit), which is inert for a melee-only character. Neither branch
-  inspects the equipped weapon's type.
+  type.** `registerStaticImbue` (grep it in `sim/core/consumes.go`) gives 29453
+  (grep `case 29453:`) and 34340 (grep `case 34340:`) the same
+  `MeleeCritRating +14` and `+12` auto-attack base damage. The only in-switch
+  difference is the sharpstone's ranged-crit correction (grep
+  `PhysicalCritRatingPerCritPercent` within the 29453 case, about −0.63% ranged
+  crit), which is inert for a melee-only character. Neither branch inspects the
+  equipped weapon's type.
 
 - **That generic path does not run for the feral preset's main hand.**
-  `consumes.go:81` reaches `registerStaticImbue` for the MH only when
+  `sim/core/consumes.go` reaches `registerStaticImbue` for the MH only when
   `partyBuffs.WindfuryTotem == TristateEffectMissing`, and the feral p2 skeleton
   pins `"windfuryTotem": "TristateEffectImproved"`.
 
 - **The druid sim has a SECOND stone implementation that hardcodes one id.**
-  `sim/druid/forms.go:51-56`:
+  `sim/druid/forms.go` (grep `MhImbueId == 34340`):
 
   ```go
   func (druid *Druid) weaponImbueFlatDamage() float64 {
@@ -120,17 +124,21 @@ Both are separate from this ticket's question. File them separately if they
 matter; they are recorded here so the reading is not lost.
 
 - **Possible double application on the feral path.** `AutoAttacks.MH()` returns a
-  pointer to the live weapon (`sim/core/attack.go:205-207`), and
+  pointer to the live weapon (grep `func (aa *AutoAttacks) MH()` in
+  `sim/core/attack.go`), and
   `applyConsumeEffects` runs after the form aura is registered, so the core
   switch's `+= 12` may mutate a paw weapon that `GetCatWeapon` had already folded
   the bonus into — once scaled, once flat. **Code-reading inference, not
   measured.**
 - **Upstream adjusts at the source of truth; we bypass that seam.** This is the
   clearest statement of why we diverge. `Gear.adjustImbues`
-  (`ui/core/proto_utils/gear.ts:398`) has three callers in the fork:
-  `Player.setGear` (`ui/core/player.tsx:713`), the WASM bulk path
-  (`ui/core/wasm/bulk_sim/batch.ts:34`), and `Sim.runRaidSimLightweight`
-  (`ui/core/sim.ts:727`, reached from `sim_ui.tsx:358`). The first is the
+  (grep `adjustImbues(` in `ui/core/proto_utils/gear.ts`) has three callers in
+  the fork: `Player.setGear` (grep `setGear(eventID` in
+  `ui/core/player.tsx`), the WASM bulk path (grep `adjustImbues` in
+  `ui/core/wasm/bulk_sim/batch.ts`), and `Sim.runRaidSimLightweight` (grep
+  `runRaidSimLightweight` in `ui/core/sim.ts`, reached from the same symbol in
+  `ui/core/sim_ui.tsx` — note the path is `ui/core/`, not
+  `ui/core/components/`). The first is the
   important one — its own comment says it corrects the stone "before emitting, so
   that any gearChangeEmitter listener ... sees the corrected value", i.e. every
   gear change through the normal UI re-derives the stone. That is the "frontend
@@ -159,7 +167,7 @@ id passes through untouched.
 Upstream's own comment gives the reason: "mirroring the frontend auto-switch so
 bulk sim combos use the correct stone." That phrase matters — the Go function is
 mirroring behaviour that already exists in the TypeScript frontend, where
-`Player.setGear` (`ui/core/player.tsx:713`) re-derives the stone on every gear
+`Player.setGear` (grep `setGear(eventID` in `ui/core/player.tsx`) re-derives the stone on every gear
 change. So this is not a bulk-sim-specific rule; it is upstream keeping one
 invariant in two places. See the second incidental finding below for why that
 reframes where our fix would belong.
@@ -204,7 +212,7 @@ ticket rather than into that branch.
   confirmed: any DPS number, on either side of a change.
 - **No ranking is known to be wrong, and the naive fix would make feral worse.**
   On the feral path both stones currently produce the same +12
-  (`forms.go:51-56` grants it for the weightstone id, and the generic path is
+  (`forms.go`'s `MhImbueId == 34340` check grants it for the weightstone id, and the generic path is
   windfury-suppressed), so sharp and blunt candidates are priced alike today.
   Applying upstream's rule would zero the bonus for daggers. So this is not a
   "we are underpricing sharp candidates" ticket; it is a "our request does not
@@ -221,7 +229,7 @@ ticket rather than into that branch.
    weightstone and a sharpstone give the same melee bonus in TBC? Upstream's own
    `registerStaticImbue` models them identically apart from a ranged-crit
    correction, which says yes for melee. If they are the same for a feral, then
-   `forms.go:51-56` granting +12 only for the weightstone id is a **fork-engine
+   `forms.go`'s `MhImbueId == 34340` check granting +12 only for the weightstone id is a **fork-engine
    bug**, and our missing adjustment is cosmetic by comparison. Decide which of
    the two is the real defect before writing any code.
 2. **Then decide whether we mirror upstream at all.** Two coherent positions:
@@ -290,7 +298,7 @@ $ grep -n "34340\|29453" vendor/tbc-new-fork/sim/druid/forms.go
 52:	if druid.Consumables.MhImbueId == 34340 { // Adamantite Weightstone
 ```
 
-**Therefore `sim/druid/forms.go:52`'s id-equality check is the defect**, by this
+**Therefore `sim/druid/forms.go`'s `MhImbueId == 34340` id-equality check is the defect**, by this
 ticket's own step-1 rule: equal melee bonuses in TBC mean granting the paw
 bonus for one stone id only is wrong. Filed as **ticket 364**.
 
@@ -327,7 +335,7 @@ files), not a local edit.
 from upstream rather than being fork-native.
 
 **Decision: do not mirror `adjustWeaponImbueID` on this branch.** With
-`forms.go:52` unchanged, rewriting a dagger candidate's stone to 29453 makes
+`forms.go`'s id check unchanged, rewriting a dagger candidate's stone to 29453 makes
 `weaponImbueFlatDamage` return 0, so sharp candidates would lose a paw bonus
 that blunt candidates keep — two candidates in the same slot ranked under
 different damage models. That is the failure this ticket's "What that means"

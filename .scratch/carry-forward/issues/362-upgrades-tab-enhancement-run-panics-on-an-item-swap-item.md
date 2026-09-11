@@ -29,15 +29,23 @@ Ranking failed: sim error (0): No item with id: 30832 Stack Trace: goroutine 10 
   ... core.(*Character).enableItemSwap  sim/core/item_swaps.go:57
 ```
 
+The line numbers in the trace above are the panic's own output and are left
+verbatim — rewriting captured tool output would falsify the record. Every
+citation below is a grep anchor instead, because line numbers rot (ticket 368).
+All fork paths are in `vendor/tbc-new-fork`, which is gitignored.
+
 Mechanism, read from source:
 
-- `ui/shaman/enhancement/sim.ts:96` sets the page default
-  `itemSwap: Presets.P1_TRUNCHEON_ITEMSWAP_PRESET.itemSwap`.
-- That preset references item 30832 (*Gavel of Unearthed Secrets*) —
-  `ui/shaman/enhancement/gear_sets/p1.truncheon.itemswap.json:17`.
-- `enableItemSwap` (`sim/core/item_swaps.go:50-57`) calls `toItem` on every swap
-  entry unconditionally, and `NewItem` (`sim/core/database.go:485-490`) **panics**
-  rather than erroring when the id is absent from `itemsByID`.
+- `ui/shaman/enhancement/sim.ts` sets the page default
+  `itemSwap: Presets.P1_TRUNCHEON_ITEMSWAP_PRESET.itemSwap` (grep
+  `itemSwap:` in that file).
+- That preset references item 30832 (*Gavel of Unearthed Secrets*) — grep
+  `30832` in `ui/shaman/enhancement/gear_sets/p1.truncheon.itemswap.json`.
+- `enableItemSwap` (grep `func (character *Character) enableItemSwap` in
+  `sim/core/item_swaps.go`) calls `toItem` (grep `func toItem` in the same
+  file) on every swap entry unconditionally, and `NewItem` (grep
+  `func NewItem` in `sim/core/database.go`) **panics** rather than erroring
+  when the id is absent from `itemsByID`.
 - The request's embedded `SimDatabase` is built by ticket 212's `simDatabaseFor`
   from the **composed equipment** only — worn gear plus the candidate. Item-swap
   items are neither, so 30832 never enters the request.
@@ -151,7 +159,7 @@ every call site through the existing signature. `sim_database.ts`'s bare
 function became `simDatabaseResolverFor(player)`, closing over the page's
 `Player` and merging `player.itemSwapSettings.getGear().toDatabase(db)` into
 every result — which is literally upstream's `Player.toDatabase`
-(`ui/core/player.tsx:1431-1435`), likewise unconditional on
+(grep `private toDatabase(` in `ui/core/player.tsx`), likewise unconditional on
 `getEnableItemSwap()`. Widening the engine's `Deps` signature would have armed
 E-W3 + PROVENANCE across both engine copies for no gain.
 `scripts/check_engine_port_drift.py` passes: 33 ported files unmoved.

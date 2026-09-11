@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-09-10 — converted before the merge ask, same session it was filed
 Type: chore
 Origin: docs/reviews/feat-reforge-catchup-leftovers.md (round 2, Standards axis)
 Blocks: none
@@ -64,12 +65,58 @@ uneven.
 
 ## Acceptance
 
-- [ ] `grep -c '\.\(ts\|go\|py\|mjs\):[0-9]'` returns 0 for tickets 351 and 362.
-- [ ] Every converted citation names a symbol or string that a grep finds at
-      the current pin, or is marked as unresolvable with the reason.
-- [ ] Fork-tree paths say they are fork-tree paths.
+- [x] `grep -c '\.\(ts\|tsx\|go\|py\|mjs\|json\):[0-9]'` returns **0** for
+      ticket 351 and **3** for ticket 362 — those three are the captured panic
+      stack trace, left verbatim on purpose (see the carve-out below).
+- [x] Every converted citation names a symbol or string that a grep finds at
+      the current pin. Verified, each returning ≥ 1:
+      `adjustImbues(` in `ui/core/proto_utils/gear.ts`; `setGear(eventID` in
+      `ui/core/player.tsx`; `private toDatabase(` in the same file;
+      `adjustImbues` in `ui/core/wasm/bulk_sim/batch.ts`;
+      `runRaidSimLightweight` in `ui/core/sim_ui.tsx`; `MhImbueId == 34340` in
+      `sim/druid/forms.go`; `func (aa *AutoAttacks) MH()` in
+      `sim/core/attack.go`; `registerStaticImbue`, `case 29453:` and
+      `case 34340:` in `sim/core/consumes.go`; `func NewItem` in
+      `sim/core/database.go`; `func (character *Character) enableItemSwap` and
+      `func toItem` in `sim/core/item_swaps.go`.
+- [x] Fork-tree paths say they are fork-tree paths. Both tickets now carry a
+      line stating the paths are in `vendor/tbc-new-fork`, which is gitignored.
+
+## The one deliberate carve-out
+
+Ticket 362's lines 27–29 are the panic's own stack trace, pasted verbatim:
+
+```
+  ... core.NewItem                      sim/core/database.go:489
+  ... core.toItem                       sim/core/item_swaps.go:500
+  ... core.(*Character).enableItemSwap  sim/core/item_swaps.go:57
+```
+
+Those line numbers are **captured tool output, not citations**. Rewriting them
+would falsify a record of what the program printed. The ticket now says so
+immediately below the block, and every prose citation around it was converted.
+A future grep-count on 362 should expect 3 and read the note rather than
+treating it as unfinished work.
+
+## Two things the conversion turned up
+
+**A wrong path.** Ticket 351 cited `sim_ui.tsx:358`, implying
+`ui/core/components/sim_ui.tsx`. The file is at `ui/core/sim_ui.tsx`; there is
+no `components/` copy. Exactly the rot this ticket was filed about — the line
+number was stale *and* the directory was wrong.
+
+**A symbol that had moved.** `gear.ts:398` was cited as `Gear.adjustImbues`.
+That method exists, but a grep for the names the citation implied found
+nothing until the surrounding code was read; the real anchor is `adjustImbues(`
+on the gear class, sitting beside `hasSharpMHWeapon` / `hasBluntMHWeapon`.
+
+Neither changed a conclusion. Both would have cost the next reader time.
 
 ## What is NOT claimed
 
 Nothing here says any finding in 351 or 362 is wrong. Both tickets' conclusions
 were reviewed and held; this is about whether a future reader can re-check them.
+The weightstone/sharpening-stone ids were re-checked while converting and
+reconcile cleanly: 34340 is the Adamantite Weightstone (blunt), 29453 the
+Adamantite Sharpening Stone (sharp), and `forms.go` gates on 34340 only, which
+is what 351 says.
