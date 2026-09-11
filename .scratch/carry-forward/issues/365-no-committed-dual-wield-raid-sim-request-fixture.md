@@ -4,18 +4,27 @@ Origin: .scratch/stage-gate/reforge-catchup-leftovers/brief.md
 Blocks: none
 Blocked by: none
 
-# No committed dual-wield RaidSimRequest fixture, so ticket 350 step 1 cannot run
+# No committed dual-wield RaidSimRequest fixture (CLI test-coverage gap, CLI-only)
 
 **What is NOT claimed: nothing here says what the engine does with a 2H +
 off-hand set.** That is exactly the question that cannot be asked from committed
 inputs today. What was confirmed by reading is the inventory below.
 
-## Why 350 is stuck
+## What this is and is not
 
-Ticket 350 is reachable only for the four specs in `DUAL_WIELD_SPECS` —
-`rogue`, `enh`, `warrior`, `hunter` (`packages/core/src/pool.ts:373-378`). Ret
-and feral are excluded there deliberately, in the comment's own words, because
-"neither can put anything in the off hand".
+**This does not block ticket 350.** The Upgrades tab reaches 350's
+two-hander-over-a-worn-off-hand case from live page state, with no fixture and
+no skeleton — see `ADR-0031`. Ticket 362, which this ticket used to cite as the
+reason the enhancement page could not substitute, is closed.
+
+**This is CLI-only.** The value that remains is CLI-side reproducibility: a
+recorded enh, warrior or hunter request that a test can assert against, built
+through the ranker's own composition path rather than typed by hand.
+
+The case is reachable only for the four specs in `DUAL_WIELD_SPECS` in
+`packages/core/src/pool.ts` (grep for it) — `rogue`, `enh`, `warrior`,
+`hunter`. Ret and feral are excluded there deliberately, in the comment's own
+words, because "neither can put anything in the off hand".
 
 The committed inputs cover only the two excluded specs:
 
@@ -29,17 +38,17 @@ data/presets/feral/p2.raid-sim-skeleton.json
 data/presets/ret/p2.raid-sim-skeleton.json
 ```
 
-`packages/core/src/cli-wiring.ts:126-128` loads
+`loadOfflineInputs` in `packages/core/src/cli-wiring.ts` loads
 `data/presets/${spec}/p2.raid-sim-skeleton.json`, so those two are the only
 loadable skeletons. `data/presets/{enh,warrior,hunter}` hold `*.ep-weights.json`
 and nothing else.
 
-Hand-authoring a request instead is the thing
-`packages/core/test/direct-sim-support.ts:15` warns against: "hand-built
-character JSON (the ticket 106 style) can differ from what `rank.ts` actually
-sends in gems and buffs".
+Hand-authoring a request instead is the thing the `hand-built` warning in
+`packages/core/test/direct-sim-support.ts` (grep for it) warns against:
+"hand-built character JSON (the ticket 106 style) can differ from what
+`rank.ts` actually sends in gems and buffs".
 
-## What to build
+## If built: how
 
 A recorded dual-wield fixture, captured through the real composition path rather
 than written by hand.
@@ -78,12 +87,23 @@ Sized here so the fixture is not built to the wrong shape.
 
 - [ ] A dual-wield `RaidSimRequest` fixture exists, captured through the
       ranker's own composition path, with its player key recorded.
-- [ ] Ticket 350 step 1 is run against it and its result written down.
+- [ ] ~~Ticket 350 step 1 is run against it and its result written down.~~
+      Struck: the owner declined that engine measurement on 2026-09-10
+      ("sounds like a waste of processing"). Replaced by — a CLI test can
+      compose a dual-wield request through the ranker's own path.
 - [ ] The iteration count used is justified against the noise floor above.
 
 ## Notes
 
 Filed from the reforge-catchup-leftovers investigation; full record in
-`.scratch/stage-gate/reforge-catchup-leftovers/probe/results.md`. Ticket 350 is
-`Blocked by: 365`. Note the enhancement page cannot substitute for this today —
-its Upgrades run aborts on an item-swap item (ticket 362).
+`.scratch/stage-gate/reforge-catchup-leftovers/probe/results.md`.
+
+## Comments
+
+**2026-09-10 — rescoped to a CLI-only test-coverage gap.** This ticket no
+longer blocks 350, and the two claims that made it look blocking are gone: the
+tab reaches 350's case from live page state with no fixture, and ticket 362 (the
+item-swap panic that stopped the enhancement page substituting) is closed. The
+reasoning and its measurements are in `ADR-0031`; the related question of
+whether to generate skeletons for the other nine specs is ticket 367, which
+found no consumer for them today.
