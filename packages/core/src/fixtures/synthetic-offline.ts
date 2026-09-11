@@ -24,6 +24,7 @@ import {
   type RecordedGearSourceData,
 } from "../seams/gear-source.js";
 import { SIM_ORDER } from "../slots.js";
+import { SPEC_REGISTRY } from "../spec-registry.js";
 import type { CharacterRef, ContentPhase, SpecId } from "../types.js";
 
 export type PresetGearFile = {
@@ -35,41 +36,6 @@ export type PresetGearFile = {
 };
 
 /**
- * Tree index carrying the spec's points, so `classifySpec` (packages/core/src/spec.ts)
- * lands on the right tree without needing a real talent string parsed.
- * Paladin tree 2 is Retribution, Druid tree 1 is Feral Combat (spec.ts:35-46).
- */
-// Exported for the spec-registry fidelity test only; deleted with the table.
-export const SPEC_TREE_INDEX: Record<SpecId, 0 | 1 | 2> = {
-  ret: 2,
-  feral: 1,
-  balance: 0,
-  hunter: 2, // Survival — the tree a hunter's talent-string plurality lands in
-  mage: 0, // Arcane, matching the Arcane-only gear sets this repo vendors
-  shadow: 2,
-  rogue: 1, // Combat
-  ele: 0,
-  enh: 1,
-  warlock: 0, // Affliction, matching the fork's default Affli/Demo/Destro EP
-  warrior: 1, // Fury, the fork's default warrior variant
-};
-
-// Exported for the spec-registry fidelity test only; deleted with the table.
-export const SPEC_CLASS_NAME: Record<SpecId, string> = {
-  ret: "Paladin",
-  feral: "Druid",
-  balance: "Druid",
-  hunter: "Hunter",
-  mage: "Mage",
-  shadow: "Priest",
-  rogue: "Rogue",
-  ele: "Shaman",
-  enh: "Shaman",
-  warlock: "Warlock",
-  warrior: "Warrior",
-};
-
-/**
  * A round number safely above any real talent build's point total (max
  * spendable in one TBC tree is 51) — the exact value is never read, only its
  * position as the tree maximum, so classifySpec's plurality check picks it
@@ -77,9 +43,14 @@ export const SPEC_CLASS_NAME: Record<SpecId, string> = {
  */
 const SYNTHETIC_TREE_POINTS = 51;
 
+/**
+ * The spec's points land in the tree its registry entry names, so
+ * `classifySpec` (packages/core/src/spec.ts) resolves the spec without a real
+ * talent string to parse.
+ */
 function talentPointsFor(spec: SpecId): [number, number, number] {
   const points: [number, number, number] = [0, 0, 0];
-  points[SPEC_TREE_INDEX[spec]] = SYNTHETIC_TREE_POINTS;
+  points[SPEC_REGISTRY[spec].treeIndex] = SYNTHETIC_TREE_POINTS;
   return points;
 }
 
@@ -114,7 +85,7 @@ export function syntheticOfflineRecordings(args: {
       return item;
     }),
     talentPointsByTree: talentPointsFor(spec),
-    className: SPEC_CLASS_NAME[spec],
+    className: SPEC_REGISTRY[spec].className,
     provenance: {
       reportCode: fight.reportCode,
       fightId: fight.fightId,

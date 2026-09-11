@@ -31,6 +31,7 @@ import {
   equipmentForCandidateSwap,
   simSlotsForPoolSlot,
   SIM_ORDER,
+  SPEC_REGISTRY,
   type GemContext,
   type RaidSimRequest,
   type RankedItem,
@@ -46,25 +47,11 @@ import type { JobManager } from "./jobs.js";
  *
  * The path segments follow the fork's own `ui/<class>/<spec>/` layout, which is
  * what the site routes on — note `druid/feral` for cat and `priest/shadow` for
- * the DPS priest, neither of which matches this repo's `SpecId` spelling.
+ * the DPS priest, neither of which matches this repo's `SpecId` spelling. Each
+ * segment lives on that spec's registry entry.
  */
-const SPEC_PAGE: Readonly<Record<SpecId, string>> = {
-  ret: "https://www.wowsims.com/tbc/paladin/retribution/",
-  feral: "https://www.wowsims.com/tbc/druid/feral/",
-  balance: "https://www.wowsims.com/tbc/druid/balance/",
-  hunter: "https://www.wowsims.com/tbc/hunter/",
-  mage: "https://www.wowsims.com/tbc/mage/",
-  shadow: "https://www.wowsims.com/tbc/priest/shadow/",
-  rogue: "https://www.wowsims.com/tbc/rogue/",
-  ele: "https://www.wowsims.com/tbc/shaman/elemental/",
-  enh: "https://www.wowsims.com/tbc/shaman/enhancement/",
-  warlock: "https://www.wowsims.com/tbc/warlock/",
-  warrior: "https://www.wowsims.com/tbc/warrior/",
-};
-
-/** Where a share link opens, for one spec. */
 export function specPageFor(spec: SpecId): string {
-  return SPEC_PAGE[spec];
+  return `https://www.wowsims.com/tbc/${SPEC_REGISTRY[spec].sitePath}/`;
 }
 
 /**
