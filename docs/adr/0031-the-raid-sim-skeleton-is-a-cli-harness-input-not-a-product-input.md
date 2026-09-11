@@ -25,8 +25,12 @@ mechanisms:
 
   ```
   $ grep 'raid-sim-skeleton.json' packages/core/src/cli-wiring.ts
-      join(root, "data", "presets", spec, "p2.raid-sim-skeleton.json")
+      `data/presets/${spec}/p2.raid-sim-skeleton.json`
   ```
+
+  The `join(root, ...)` happens inside `loadJson`; what this line holds is the
+  template literal, which is the point — the path is composed from `spec`, so
+  no literal per-spec path appears anywhere to grep for.
 
 - **The tab builds one from the live page.** `currentPageSkeleton` in the
   fork's `upgrades/adapters/skeleton.ts` calls upstream's own request builder
@@ -145,12 +149,15 @@ census of call sites:
 ```
 $ grep -rl 'loadOfflineInputs(' packages apps scripts --include=*.ts \
     | grep -v /dist/
+packages/core/src/cli-wiring.ts
 packages/core/src/cli.ts
 apps/web/server/wiring.ts
 apps/web/test/recordings.ts
 ```
 
-Exactly three, and each is independently gated to ret/feral: `cli.ts` by
+Four paths, of which the first is the definition itself — `cli-wiring.ts` is
+where `loadOfflineInputs` is declared, not a caller. So there are exactly
+three callers, and each is independently gated to ret/feral: `cli.ts` by
 `parseArgs` above; `apps/web/server/wiring.ts` upstream by
 `const SPECS: readonly SpecId[] = ["ret", "feral"];` in `apps/web/server/routes.ts`;
 and `apps/web/test/recordings.ts` by an `input.spec !== "ret"` guard that returns 404. Full output and the per-caller greps are in
