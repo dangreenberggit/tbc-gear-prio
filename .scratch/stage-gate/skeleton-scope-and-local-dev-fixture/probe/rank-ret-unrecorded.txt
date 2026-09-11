@@ -1,0 +1,7 @@
+$ tsx packages/core/src/cli.ts "--region" "US" "--realm" "Testrealm" "--character" "Nobody" "--offline" "--spec" "ret" "--max-phase" "2"
+(node:38668) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+rank Nobody@Testrealm-US (offline) maxPhase=2 universe=288 cutoff=3.4 DPS / 0.15%
+no-qualifying-fight: no qualifying fights for Nobody
+[ELIFECYCLE] Command failed with exit code 1.
+rc=1

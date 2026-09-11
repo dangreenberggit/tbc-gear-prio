@@ -1,7 +1,8 @@
 # 355 — Push or archive the fork branch `feat/upgrades-tab`
 
-Status: open
+Status: closed
 Opened: 2026-09-10
+Closed: 2026-09-10 — option 1, pushed to the personal fork
 Blocks: none
 Blocked by: none
 Relates to: ADR-0030 (Consequence 4), tickets 251, 353; branch `feat/wowsims-reforge-catchup`
@@ -53,9 +54,69 @@ that grows a standing risk should leave a ticket behind, which is this one.
 Option 1 or 2 is a decision for the owner; this ticket exists so it is a
 decision rather than an oversight.
 
+## The risk grew again on 2026-09-10 (branch `feat/reforge-catchup-leftovers`)
+
+Recorded by that branch's pre-merge review, adversarial axis. The lock no longer
+pins `ab59127d9faa`: correcting the `disclosure.ts` over-assertion required a
+ported-engine cycle, which put a **new** fork commit on the same unpushed branch
+and moved the pin onto it.
+
+```
+$ git -C vendor/tbc-new-fork branch -r --contains 3829c66f
+                                     # empty — on no remote
+$ python -c "import json;d=json.load(open('data/wowsims-fork.lock.json'));print(d['commit'],d['pushed'])"
+3829c66f672cdaeaba347920f59db0795a01e2c9 False
+```
+
+So the single-disk dependency now covers a second commit, and this repo's
+committed `data/sim-implemented-effects.json` embeds `3829c66f` as its
+`forkCommit` — an artifact whose provenance cannot be resolved from any other
+machine. Every ported-engine fix from here will do the same thing again: the
+cycle *requires* a fork commit, so the gap between what is pinned and what is
+recoverable widens with each one.
+
+This changes the urgency, not the options — 1 or 2 below still resolve it.
+
+## Resolution — option 1, 2026-09-10
+
+The owner chose option 1 and authorised the push. It was a **fast-forward**, not
+a force: the remote already carried the branch at `d49096e9`, an ancestor of the
+pin, 211 commits behind it.
+
+```
+$ git -C vendor/tbc-new-fork push origin feat/upgrades-tab
+To https://github.com/dangreenberggit/tbc-new.git
+   d49096e90..0b50f4026  feat/upgrades-tab -> feat/upgrades-tab
+$ git -C vendor/tbc-new-fork ls-remote origin refs/heads/feat/upgrades-tab
+0b50f402630e0300a83023b299c5ff3733f2cfe4	refs/heads/feat/upgrades-tab
+```
+
+One correction to this ticket's own framing, measured during the same session:
+the branch was **not** absent from the remote. `pushed: false` in the lock is a
+hand-maintained flag, and both this ticket and a session handoff repeated it as
+"exists on exactly one machine". The remote held `d49096e9` throughout. What was
+genuinely on no remote was the *pinned commit* and the 211 commits leading to
+it — which is the part that mattered, since
+`data/sim-implemented-effects.json` embeds the pin. Read the flag as a claim to
+verify with `ls-remote`, never as a measurement.
+
+The pin has also moved since this ticket was written: it names `3829c66f` above,
+but the lock now reads `0b50f402` (the ticket-362 item-swap fix moved it). The
+acceptance below is checked against the lock's current value, as the ticket
+itself instructed.
+
 ## Acceptance
 
-- [ ] One of the three options above is chosen and recorded.
-- [ ] If pushed: `pushed` flipped to `true` in `data/wowsims-fork.lock.json`,
-      and the remote branch verified to contain `ab59127d9faa`.
-- [ ] If archived: the bundle's location and creation command recorded here.
+- [x] One of the three options above is chosen and recorded. — option 1.
+- [x] If pushed: `pushed` flipped to `true` in `data/wowsims-fork.lock.json`,
+      and the remote branch verified to contain **the lock's current `commit`**
+      — `ls-remote` returns `0b50f402`, byte-identical to the lock's `commit`.
+- [ ] If archived: not applicable; option 1 was taken.
+
+## What is NOT claimed
+
+Pushing makes the branch recoverable; it does not make it reviewed, merged, or
+upstream-ready. The single-disk risk is closed. The standing consequence
+recorded above still holds in a weaker form: each future ported-engine fix adds
+a fork commit, so `commit` moves ahead of the remote until the next push.
+Re-verify with `ls-remote` rather than trusting `pushed: true`.

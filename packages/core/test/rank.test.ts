@@ -4313,6 +4313,162 @@ describe("rankUpgrades — simDatabaseFor (ticket 212)", () => {
     expect(baselineReqDb).toBeDefined();
   });
 
+  // Ticket 362: a page whose defaults enable item swap (enhancement ships one)
+  // names swap items the character does not wear. `enableItemSwap`
+  // (sim/core/item_swaps.go) resolves every swap entry at character
+  // construction, so a swap id absent from the request's database panics the
+  // run before any iteration. The fix lives in the fork's sim_database
+  // adapter, which merges the player's swap gear into every resolver result.
+  //
+  // This test cannot go red on that adapter: the adapter is fork code and the
+  // fork ships no JS test runner, so it is unreachable from here. What it pins
+  // are the two engine contracts the adapter's fix depends on -- that compose
+  // leaves the skeleton's `itemSwap` alone, and that whatever the resolver
+  // returns reaches every request including the baseline. Do not "fix" this
+  // into a failing test; if it ever goes red, the engine contract moved and
+  // the fork adapter is silently broken.
+  it("carries item-swap rows from the resolver into every request (ticket 362)", async () => {
+    const logged = slamaltmanLoggedGear();
+    const equipment = equipmentFromLoggedGear(logged);
+    const opts = { seed: 42, iterations: 3000 };
+
+    const CANDIDATE = 29381; // neck; not worn by the fixture character
+    const SWAP_ITEM = 30832; // the enhancement page's default swap mace
+
+    // Vacuity guards: the claim is that a row reaches the request for an item
+    // that is neither worn nor the candidate. If it were either, the row would
+    // arrive by the ticket-212 path and this test would prove nothing.
+    expect(equipment.some((s) => s.id === SWAP_ITEM)).toBe(false);
+    expect(SWAP_ITEM).not.toBe(CANDIDATE);
+
+    // The ret skeleton ships an itemSwap block with every slot empty; arm it
+    // the way the enhancement page's defaults do.
+    const swapSkeleton = structuredClone(skeleton) as RaidSimRequest;
+    const swapPlayer = (
+      swapSkeleton as unknown as {
+        raid: { parties: Array<{ players: Array<Record<string, unknown>> }> };
+      }
+    ).raid.parties[0]!.players[0]!;
+    swapPlayer.itemSwap = { items: [{ id: SWAP_ITEM, enchant: 2669 }] };
+    swapPlayer.enableItemSwap = true;
+
+    const upgraded = equipment.map((spec, i) =>
+      SIM_ORDER[i] === "neck" ? { id: CANDIDATE, gems: [] as number[] } : spec
+    );
+
+    // Models the fork adapter: worn/candidate rows, plus the swap row on every
+    // call regardless of which equipment set is being composed.
+    const swapAwareDatabase = (equipment: readonly { id?: number }[]) => ({
+      items: [
+        ...equipment
+          .filter((s) => s.id)
+          .map((s) => ({ id: s.id, marker: `db-${s.id}` })),
+        { id: SWAP_ITEM, marker: `db-${SWAP_ITEM}` },
+      ],
+    });
+
+    const keyFor = (eq: readonly { id?: number; gems: number[] }[]) =>
+      simCacheKey(
+        compose(swapSkeleton, {
+          name: "slamaltman",
+          race: "RaceHuman",
+          equipment: eq,
+          database: swapAwareDatabase(eq),
+        }),
+        "v0.0.101",
+        opts
+      );
+
+    const sample = (dps: number) => ({
+      dps,
+      stdev: 90,
+      iterationsDone: 3000,
+      simVersion: "v0.0.101",
+    });
+
+    const sent: unknown[] = [];
+    const recorded = new RecordedSimRunner(
+      "v0.0.101",
+      new Map([
+        [keyFor(equipment), sample(2000)],
+        [keyFor(upgraded), sample(2100)],
+      ])
+    );
+    type RunFn = (...args: never[]) => unknown;
+    const capturing = {
+      version: () => recorded.version(),
+      run: (...args: never[]) => {
+        sent.push(args[0]);
+        return (recorded.run as RunFn)(...args);
+      },
+    } as unknown as typeof recorded;
+
+    const ranking = await rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 2,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", logged]]),
+        }),
+        sim: capturing,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: swapSkeleton,
+        epWeights,
+        pool: [realPoolEntry(CANDIDATE)],
+        simDatabaseFor: swapAwareDatabase,
+      }
+    );
+
+    const row = ranking.items.find((i) => i.itemId === CANDIDATE);
+    expect(row).toBeDefined();
+    expect(row!.deltaDps).toBeCloseTo(100, 5);
+
+    const players = sent.map(
+      (req) =>
+        (
+          req as {
+            raid: {
+              parties: Array<{ players: Array<Record<string, unknown>> }>;
+            };
+          }
+        ).raid.parties[0]!.players[0]!
+    );
+    expect(players.length).toBeGreaterThanOrEqual(2);
+
+    for (const player of players) {
+      // Contract 1: compose patches name/race/equipment/database and leaves
+      // the skeleton's itemSwap block untouched, so the swap the user
+      // configured still reaches the sim.
+      const itemSwap = player.itemSwap as { items: Array<{ id: number }> };
+      expect(itemSwap.items[0]!.id).toBe(SWAP_ITEM);
+
+      // Contract 2: the resolver's rows reach every request -- the baseline as
+      // well as each candidate's. This is what keeps the swap item's stats in
+      // front of the sim before enableItemSwap resolves it.
+      const database = player.database as { items: Array<{ id: number }> };
+      expect(database.items.some((it) => it.id === SWAP_ITEM)).toBe(true);
+    }
+
+    // The ticket-212 assertion still holds: the baseline names no candidate.
+    const databases = players.map(
+      (p) => p.database as { items: Array<{ id: number }> }
+    );
+    expect(
+      databases.find((db) => db.items.some((it) => it.id === CANDIDATE))
+    ).toBeDefined();
+    expect(
+      databases.find((db) => !db.items.some((it) => it.id === CANDIDATE))
+    ).toBeDefined();
+  });
+
   it("composes byte-identical requests when no resolver is given", () => {
     const logged = slamaltmanLoggedGear();
     const equipment = equipmentFromLoggedGear(logged);

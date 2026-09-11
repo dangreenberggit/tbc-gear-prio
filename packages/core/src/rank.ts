@@ -917,6 +917,15 @@ export async function rankUpgrades(
         // the two-hander, which is not what the row claims. A player holding a
         // two-hander who wants to dual-wield gets that answer from the
         // main-hand rows, which are ranked normally.
+        //
+        // Scope: this covers a two-hander already WORN with a one-hander
+        // offered for the off hand. The mirror case — a two-hander as the
+        // CANDIDATE for the main hand while a one-hander plus an off-hand item
+        // is worn — never reaches this test, because the guard keys on the
+        // candidate's target slot. That case is ticket 350 and is handled
+        // separately: clearing the worn off-hand item leaves a legal two-hander
+        // build and an honest one-for-one swap, which is not the trade rejected
+        // above.
         if (slotName === "offhand" && !mainHandIsOneHanded) continue;
         const slotIndex = SIM_ORDER.indexOf(slotName);
         // `continue` here would drop the candidate from the ranking silently —

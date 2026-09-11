@@ -15,6 +15,27 @@ describe("disclosure", () => {
     expect(standing.map((s) => s.id)).toContain("weapon-imbue-omitted");
   });
 
+  it("does not promise weapon-slot deltas survive a pinned imbue (ticket 351)", () => {
+    // The note used to say the omitted enchant is "constant across baseline
+    // and candidates, so deltas survive". That is sound for a *missing* imbue
+    // and false for a skeleton-pinned one: the stone stays fixed while the
+    // weapon under it changes family, which is the bug rather than the
+    // mitigation.
+    //
+    // Scope: this pins the wording in THIS copy only. The fork's ported copy
+    // is held by the PROVENANCE sha gate (`scripts/check_engine_port_drift.py`),
+    // not by this test — E-W3 compares standing assumptions by id, not by
+    // detail text, so fork-side drift in this sentence would pass both. Do not
+    // read this assertion as covering both engine copies.
+    const detail = buildStandingAssumptions("RaceHuman").find(
+      (s) => s.id === "weapon-imbue-omitted"
+    )?.detail;
+
+    expect(detail).toBeDefined();
+    expect(detail).not.toContain("deltas survive");
+    expect(detail).toContain("mhImbueId");
+  });
+
   it("records meta repair swaps as a run substitution", () => {
     expect(
       substitutionsFromMetaRepair([

@@ -1,0 +1,6 @@
+$ tsx packages/core/src/cli.ts "--region" "US" "--realm" "Testrealm" "--character" "Nobody" "--offline" "--spec" "enh" "--max-phase" "2"
+(node:40984) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+unknown spec: enh (known: ret, feral)
+[ELIFECYCLE] Command failed with exit code 2.
+rc=2

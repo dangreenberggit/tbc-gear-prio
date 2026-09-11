@@ -1,0 +1,40 @@
+C:/Users/dgree/Code/lulz/tbc-gear-prio/packages/core/src/cli.ts:256:  const inputs = loadOfflineInputs(root, args.spec, args.maxPhase);
+C:/Users/dgree/Code/lulz/tbc-gear-prio/apps/web/server/wiring.ts:58:  const inputs = loadOfflineInputs(root, spec, maxPhase);
+C:/Users/dgree/Code/lulz/tbc-gear-prio/apps/web/test/recordings.ts:215:    const inputs = loadOfflineInputs(root, input.spec, input.maxPhase);
+
+--- Why this census and not a literal-path grep ---
+
+loadOfflineInputs builds its skeleton path by template, not as a literal:
+
+    $ grep -n 'raid-sim-skeleton.json' packages/core/src/cli-wiring.ts
+    128:    join(root, "data", "presets", spec, "p2.raid-sim-skeleton.json")
+
+A grep for literal paths like presets/enh/p2.raid-sim-skeleton returns 0
+whether or not a reader exists, so it cannot show absence. The caller
+census above is the measurement that can. Command:
+
+    $ grep -rn 'loadOfflineInputs(' packages apps scripts --include=*.ts \
+        | grep -v /dist/ | grep -v 'export function'
+    rc=0, exactly 3 lines (above)
+
+--- Each of the three callers is independently gated to ret/feral ---
+
+1. packages/core/src/cli.ts — parseArgs rejects any other spec before any
+   file is loaded:
+
+    $ grep -n 'known: ret, feral' packages/core/src/cli.ts
+    168:        console.error(`unknown spec: ${next} (known: ret, feral)`);
+
+2. apps/web/server/wiring.ts — gated upstream by routes.ts:
+
+    $ grep -n 'const SPECS' apps/web/server/routes.ts
+    35:const SPECS: readonly SpecId[] = ["ret", "feral"];
+
+3. apps/web/test/recordings.ts — a spec !== "ret" guard returns 404:
+
+    $ grep -n '"ret"' apps/web/test/recordings.ts
+    115:  const data = offlineGearRecordings(repoRoot(), "ret", SLAMALTMAN);
+    206:      input.spec !== "ret" ||
+    239:      spec === "ret" && ref.name.toLowerCase() === SLAMALTMAN.name
+
+Measured 2026-09-10 from Bash at base 43052fb.
