@@ -26,7 +26,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { gemContext } from "../src/candidate-gems.js";
 import { statDeltaBetween } from "../src/caps.js";
-import { gemsForPhase } from "../src/gems.js";
+import { gemsForPhase, getGem } from "../src/gems.js";
 import { getItem } from "../src/items.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
@@ -48,7 +48,7 @@ import type {
   SimRunOpts,
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
-import { SIM_ORDER } from "../src/slots.js";
+import { SIM_ORDER, type SimItemSpec } from "../src/slots.js";
 import type { ContentPhase, SpecId } from "../src/types.js";
 import {
   syntheticOfflineRecordings,
@@ -262,6 +262,62 @@ describe("a two-handed candidate clears the worn off hand (ticket 350)", () => {
     expect(outcome.removed).toEqual([
       { slotIndex: OFFHAND, itemId: TALON_OF_AZSHARA },
     ]);
+  });
+
+  it("T5 — the removed off hand's unique gem is free for the candidate's own socket (ticket 370)", () => {
+    // Neither preset fixture carries a socketed off-hand item (see ticket
+    // 370's fixture survey), so this is the one hand-built equipment array
+    // in the file: Aldori Legacy Defender (28825, colour-3 socket) worn in
+    // the off hand with the only unique colour-3 gem in the phase <= 2
+    // palette (34831) socketed in it, main hand empty, every other slot
+    // bare. Twinblade of the Phoenix (29993) has a colour-3 (blue) socket
+    // of its own among its [red, yellow, blue] sockets — the one this test
+    // watches. 34831's only stat is stamina, unweighted by every real preset,
+    // so the weights here are a synthetic single-stat set (stamina only) that
+    // makes it unambiguously the best gem for that socket when it is
+    // available — real preset weights would leave it scoring 0 and any
+    // ordering bug invisible.
+    const ALDORI_LEGACY_DEFENDER = 28825;
+    const UNIQUE_BLUE_GEM = 34831;
+    const NEXT_BEST_BLUE_GEM = 24033;
+    const TWINBLADE = 29993;
+    expect(getItem(ALDORI_LEGACY_DEFENDER)?.sockets).toEqual([3]);
+    expect(getGem(UNIQUE_BLUE_GEM)?.colour).toBe(3);
+    expect(getGem(UNIQUE_BLUE_GEM)?.unique).toBe(true);
+    expect(getItem(TWINBLADE)?.handType).toBe(HandType.HandTypeTwoHand);
+    // [red, yellow, blue] — the blue socket this test watches is array
+    // index 0, not index 2; the fill writes one gem per array position, not
+    // per socket colour value.
+    expect(getItem(TWINBLADE)?.sockets).toEqual([2, 4, 3]);
+
+    const equipment: SimItemSpec[] = SIM_ORDER.map((name) =>
+      name === "offhand"
+        ? { id: ALDORI_LEGACY_DEFENDER, gems: [UNIQUE_BLUE_GEM] }
+        : { gems: [] }
+    );
+    // Stamina only (stat index 2): the one stat 34831 carries, so it is the
+    // highest-EP gem in the whole phase <= 2 palette under this weight set
+    // and every other socket's fill is a tiebreak this test does not depend
+    // on.
+    const epWeights: Record<string, number> = { "2": 1 };
+    const gems = gemContext(gemsForPhase(2), epWeights, "warrior");
+
+    const outcome = candidateSwapWithRepairs(
+      equipment,
+      MAINHAND,
+      TWINBLADE,
+      gems
+    );
+
+    // Correct ordering clears the off hand before the swap, so
+    // `fillOptsForSwap` never sees 34831 on a still-worn slot and the
+    // candidate's own blue socket is free to take it. If the two
+    // statements in `candidateSwapWithRepairs` are reversed, `usedUnique`
+    // still carries 34831 from the not-yet-cleared off hand and this
+    // socket falls back to the next-best blue gem instead — never 34831,
+    // since that gem is unique and already (spuriously) "worn".
+    expect(outcome.equipment[MAINHAND]?.gems[0]).toBe(UNIQUE_BLUE_GEM);
+    expect(outcome.equipment[MAINHAND]?.gems[0]).not.toBe(NEXT_BEST_BLUE_GEM);
   });
 
   it("T3a — a one-handed candidate leaves the off hand alone", async () => {

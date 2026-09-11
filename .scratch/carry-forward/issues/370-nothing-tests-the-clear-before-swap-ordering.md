@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: <pending commit>
 Type: task
 Origin: docs/reviews/feat-two-hander-clears-offhand.md (adversarial axis)
 Blocks: none
@@ -82,10 +83,59 @@ whether colour 3 satisfies the solver's matching rules for one of Twinblade's
 
 ## Acceptance
 
-- [ ] A test exists that fails when `clearOffHandForTwoHander` runs after
+- [x] A test exists that fails when `clearOffHandForTwoHander` runs after
       `swapItemAt` instead of before.
-- [ ] The red was observed, with the command and output recorded.
-- [ ] `pnpm verify` green.
+- [x] The red was observed, with the command and output recorded.
+- [x] `pnpm verify` green.
+
+## Resolution
+
+Added T5 to `packages/core/test/two-hander-clears-offhand.test.ts`: a direct
+unit test of the exported `candidateSwapWithRepairs`, following T2's own
+pattern, rather than exporting `fillOptsForSwap` for test purposes — the
+existing file already has a precedent (T2) for calling the composition
+function directly with a hand-built equipment array, and `usedUnique`'s
+effect is observable through the gems `candidateSwapWithRepairs` returns
+without touching a second private function.
+
+Hand-built equipment: off hand wears Aldori Legacy Defender (28825, the one
+socketed off-hand-capable item in warrior-p2, colour-3 socket) socketed with
+the phase <= 2 palette's only unique colour-3 gem (34831, stats: +15 stamina
+only). The candidate two-hander is Twinblade of the Phoenix (29993, sockets
+`[red, yellow, blue]` — array index 0 is the blue socket). EP weights are a
+synthetic single-stat set (`{"2": 1}`, stamina only): every real preset in
+this repo leaves stamina unweighted, which would score 34831 at EP 0 and make
+the ordering bug invisible (measured directly — see below).
+
+Red observed by reversing the two statements in `candidateSwapWithRepairs`
+(swap first on the original array, clear after) and running:
+
+```
+$ npx vitest run packages/core/test/two-hander-clears-offhand.test.ts
+ × T5 — the removed off hand's unique gem is free for the candidate's own socket (ticket 370)
+   → expected 24033 to be 34831
+ ✓ T1, T2, T3a, T3b, T4
+Test Files  1 failed (1)
+     Tests  1 failed | 5 passed (6)
+```
+
+Only T5 failed — T1-T4 stayed green under the reversed ordering, confirming
+T5 is what closes the gap the ticket described (the other five do not).
+Ordering restored; the same command then passed 6/6.
+
+Fork copy (`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts`):
+`candidateSwapWithRepairs` there is byte-identical to this file's version
+(`scripts/check_engine_port_drift.py`, part of `pnpm verify`, confirms this on
+every run) — same ordering, same comment. Not portable: the fork checkout
+carries no test runner at all. `vendor/tbc-new-fork/package.json` has no
+`vitest`/`jest` dependency and no test script, and
+`find vendor/tbc-new-fork -iname "*.test.ts"` returns zero files anywhere in
+the checkout, not just under `upgrades/`. There is no test file to add this
+one to and no runner that would execute it. The drift gate is what stands in
+for a fork-side test today (PROVENANCE.md's own words: "A hash match proves
+the file's bytes have not changed since this table was written — nothing
+about behaviour"), which is a real gap but a pre-existing, repo-wide one, not
+specific to this ticket.
 
 ## What is NOT claimed
 
