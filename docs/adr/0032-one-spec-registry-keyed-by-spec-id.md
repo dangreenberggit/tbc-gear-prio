@@ -276,8 +276,15 @@ is `bbad1b8` while `data/wowsims-fork.lock.json` pins `f90b12a`. That is ticket
 pre-existing by running the gate at the base commit with all of this work
 stashed, where it fails with byte-identical text.
 
-Every other gate was run individually and is green: `codegen:json-types:check`,
-`typecheck`, `lint`, `test` (65 files, 1289 passing), `engine-port-drift:check`,
-`skeleton:check`, `pool-listings:check`, `fork-universes:check`,
-`fork-lint:check`, `meta-conditions:check`, `policy-notes:check`, and the
-slug-map half of the equip-eligibility gate, which runs without the fork.
+Two further gates refuse for the identical reason and are equally pre-existing:
+`fork-lint:check` and `meta-conditions:check`, both rc 2 with the same clone-vs-
+pin message. All three are the fork-gate contract doing its job — they compare a
+committed artifact against the pinned commit and decline to compare it against a
+different one.
+
+Every gate that does not need the fork clone was run individually at the tip and
+is green: `codegen:json-types:check`, `typecheck`, `lint`, `test` (65 files,
+1289 passing), `engine-port-drift:check`, `skeleton:check`,
+`pool-listings:check`, `fork-universes:check`, `policy-notes:check`,
+`upstream-drift:warn`, and the slug-map half of the equip-eligibility gate,
+which is split out precisely so it runs without the fork.
