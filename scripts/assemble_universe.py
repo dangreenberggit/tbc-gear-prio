@@ -47,6 +47,10 @@ UI_PROTO = ROOT / "data/proto/ui.proto"
 # shared with packages/core/src/ep-weights.ts (ticket 159 -- do not hand-copy
 # this map into either language again; see the file's own "_comment").
 EP_WEIGHTS_BY_PHASE = ROOT / "data/presets/ep-weights-by-phase.json"
+# The spec ids and their fork proto Spec names, shared with TypeScript: the
+# same file generates packages/core/src/spec-ids.generated.ts. Read rather than
+# retyped, for the reason the slug map's own comment gives below.
+SPEC_REGISTRY_JSON = ROOT / "packages/core/src/spec-registry.json"
 
 
 def load_json(path: Path) -> object:
@@ -689,27 +693,26 @@ ARENA_GEAR_IDS = _arena_gear_ids()
 #
 # Two vocabularies exist because this repo predates the fork, so eleven rows of
 # correspondence are unavoidable. They get exactly ONE hand-written home --
-# here -- and no logic: anything that needs the fork's name for a slug reads
-# this dict rather than deriving it from a slug's spelling.
+# packages/core/src/spec-registry.json, whose `forkSpec` field this reads --
+# and no logic: anything that needs the fork's name for a slug reads this dict
+# rather than deriving it from a slug's spelling. The JSON is the home rather
+# than this file because TypeScript needs the same eleven ids, and a list
+# written in both languages is the drift this removes.
 #
 # What makes a hand map safe is the gate, not care. check_equip_eligibility.py
 # asserts on every `pnpm verify` that this map is **total** (every SPEC_PROFILES
 # slug appears) and **injective** (no two slugs claim one fork spec), and that
 # every name it uses exists in data/equip-eligibility.json. A rename on either
 # side fails there rather than silently mis-filtering a pool.
-SLUG_TO_FORK_SPEC: dict[str, str] = {
-    "ret": "RetributionPaladin",
-    "feral": "FeralCatDruid",
-    "balance": "BalanceDruid",
-    "hunter": "Hunter",
-    "mage": "Mage",
-    "shadow": "Priest",
-    "rogue": "Rogue",
-    "ele": "ElementalShaman",
-    "enh": "EnhancementShaman",
-    "warlock": "Warlock",
-    "warrior": "DpsWarrior",
-}
+def _slug_to_fork_spec() -> dict[str, str]:
+    raw = load_json(SPEC_REGISTRY_JSON)
+    assert isinstance(raw, dict)
+    specs = raw["specs"]
+    assert isinstance(specs, dict)
+    return {slug: entry["forkSpec"] for slug, entry in specs.items()}
+
+
+SLUG_TO_FORK_SPEC: dict[str, str] = _slug_to_fork_spec()
 
 
 def _equip_eligibility() -> dict[str, frozenset[int]]:

@@ -15,11 +15,13 @@ to `canEquipItem`, to `capabilities_auto_gen.ts`, or to `db.json` shows up here
 as a diff on the next `pnpm verify` rather than as a wrong pool listing.
 
 It also checks the one hand-written thing this mechanism still needs: the
-slug -> fork-spec-name map in assemble_universe.py. The outer repo predates the
-fork and speaks its own slugs (`ret`, `feral`), so eleven rows of correspondence
-are unavoidable. What makes them safe is that the map must be **total** (every
-profile slug names a spec the JSON actually has) and **injective** (no two slugs
-claim the same fork spec). A rename or a typo in either vocabulary fails here.
+slug -> fork-spec-name map, written in packages/core/src/spec-registry.json and
+bound as SLUG_TO_FORK_SPEC by assemble_universe.py, which is what this reads.
+The outer repo predates the fork and speaks its own slugs (`ret`, `feral`), so
+eleven rows of correspondence are unavoidable. What makes them safe is that the
+map must be **total** (every profile slug names a spec the JSON actually has)
+and **injective** (no two slugs claim the same fork spec). A rename or a typo in
+either vocabulary fails here.
 
 Skips cleanly (exit 0, explaining why) when vendor/tbc-new-fork is absent --
 it is gitignored, so a fresh clone has no fork -- matching the contract
@@ -138,10 +140,12 @@ def compare(committed: dict, fresh: dict) -> list[str]:
 
 
 def check_slug_map(spec_keys: set[str]) -> list[str]:
-    """SLUG_TO_FORK_SPEC in assemble_universe.py must be total and injective.
+    """SLUG_TO_FORK_SPEC must be total and injective.
 
-    Imported rather than re-parsed: the dict is the artifact under test, and a
-    regex over it could disagree with what Python actually binds.
+    Written in packages/core/src/spec-registry.json and bound by
+    assemble_universe.py, which is where this reads it from. Imported rather
+    than re-parsed: the bound dict is the artifact under test, and a regex over
+    either file could disagree with what Python actually binds.
     """
     sys.path.insert(0, str(ROOT / "scripts"))
     try:
@@ -198,11 +202,11 @@ def check_slug_map(spec_keys: set[str]) -> list[str]:
 def slug_map_only() -> int:
     """The half that needs no fork: the slug map against the committed JSON.
 
-    Split out because it must run everywhere. Both inputs -- SLUG_TO_FORK_SPEC
-    in assemble_universe.py and data/equip-eligibility.json -- are committed, so
-    skipping this when vendor/ is absent left a broken map passing verify on
-    every fresh clone and every CI run, which is where verify runs unattended.
-    Only the fork-diff half genuinely needs the clone.
+    Split out because it must run everywhere. Both inputs -- the slug map in
+    packages/core/src/spec-registry.json and data/equip-eligibility.json -- are
+    committed, so skipping this when vendor/ is absent left a broken map passing
+    verify on every fresh clone and every CI run, which is where verify runs
+    unattended. Only the fork-diff half genuinely needs the clone.
     """
     if not COMMITTED.is_file():
         print(
