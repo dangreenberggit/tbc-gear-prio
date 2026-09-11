@@ -136,3 +136,136 @@ fixed here rather than deferred.
 | S1  | Standards   | fixed       | Ticket 351's ticked `pnpm verify` box now carries the command and rc, plus the E-W3 invocation and the known warning-only `upstream-drift:warn`.                                                                                                                                                                                                                                                                                                                                                                                                      |
 | S2  | Standards   | wontfix     | Two byte-identical copies of the disclosure sentence kept in sync by the PROVENANCE ritual. The repo has deliberately chosen porting over sharing for the fork engine files; the documented standard overrides the Duplicated Code smell.                                                                                                                                                                                                                                                                                                             |
 | P1  | Spec        | fixed       | Ticket 362 opens by saying plainly that it carries two things under one number and why they were not split, so a reader greps into the right half.                                                                                                                                                                                                                                                                                                                                                                                                    |
+
+---
+
+# Round 2
+
+Reviewed range: `0d339c2f88baf61f9fe7c25ae1a47d810c109e9f..16f14718558554aca44c51078ee7aec52800bee8`
+
+Four axes this round — the three above plus Standards and Spec run separately
+through the `code-review` skill — fresh context, Opus at effort `medium`, two
+parallel batches. `codex` is still not on `PATH`, so the cross-vendor route was
+unavailable; this is the harness's review lane, not a downgrade.
+
+Round 1 reviewed through `0d339c2`. The 17 commits after it — the ticket-362
+item-swap fix, the engine-contract test, and the whole
+`skeleton-scope-and-local-dev-fixture` stage (ADR-0031, the `CONTEXT.md`
+glossary entry, tickets 350/365/366/367, the `rank.ts` scope comment) — were
+written after that review and appear in no round-1 Disposition table. This
+round covers them. Both the Domain and Adversarial axes independently flagged
+that gap, which is the check working.
+
+## Adversarial
+
+**No blocking or material findings.** The axis mutation-tested the new tests in
+throwaway `git archive` copies rather than arguing about them, and all three
+mutations went red on the exact assertion each contract claims to hold:
+
+| Mutation                                                                    | Result                                        |
+| --------------------------------------------------------------------------- | --------------------------------------------- |
+| `compose.ts` drops `slot.itemSwap`                                          | `rank.test.ts` fails at Contract 1            |
+| resolver omits the swap row for the baseline only (the real fork-bug shape) | `rank.test.ts` fails at Contract 2            |
+| `disclosure.ts` reverted to "deltas survive"                                | `disclosure.test.ts` fails at `not.toContain` |
+
+So the +156 block is not theatre. It asserts through `rankUpgrades` on the
+composed request — the module's observable output — and touches no stage
+internal, which is what `AGENTS.md` § Testing requires. It carries its own
+vacuity guards (`SWAP_ITEM` neither worn nor candidate).
+
+Three minor findings, all citation fidelity in documents whose stated purpose is
+being citable: ADR-0031 printed a `join(root, ...)` call where the source holds
+a template literal; its caller census showed three paths where `grep -rl`
+returns four (the fourth being the definition); and the round-1 review file
+covers a shorter range than the branch. The first two are fixed below; the
+third is what this round is.
+
+Attacked and survived: `rank.ts` is genuinely comment-only (stripping comments
+from both revisions and diffing yields zero difference); the item-swap merge has
+no silent-failure mode (`Gear.toDatabase` filters `ei != null`, so an empty swap
+set contributes zero rows, and `mergeSimDatabases` dedupes by id);
+`Database.getSync()` is deliberately unguarded, because a guard returning
+`undefined` would hand the sim a database-less request — ticket 212's bug;
+ticket 366's panic is not reachable from this path.
+
+## Domain
+
+Two material findings, one fixed here and one already correct.
+
+The TBC facts hold. No Wrath-isms: a grep for `titan|wrath|lich king` across
+tickets 350 and 362–367, ADR-0031 and `CONTEXT.md` returns zero. Two-handers
+occupying both hand slots, the guard's direction, the mirror case, and "clearing
+the worn off-hand leaves a legal two-hander build" are all correct for TBC.
+`DUAL_WIELD_SPECS` = rogue/enh/warrior/hunter is right, and **hunter is not a
+retail-ism** — the fork ships `2h_6p`/`2h_9p` presets alongside `dw_*` for
+hunter bm/sv in every phase on disk, so a 2H hunter build is a first-class
+upstream preset. The melee weapon being a stat stick is exactly why a big
+two-hander is a real hunter upgrade. Rogues carrying zero two-handers is correct.
+
+Ticket 367's inventory is accurate and does **not** commit the T4-is-phase-2
+error: a grep across 367, ADR-0031 and the stage artifacts finds no prose
+mapping any tier to a phase number — the table reproduces filenames only.
+
+Item 30832 verified as _Gavel of Unearthed Secrets_, `weaponType: 4` (Mace),
+phase 1 — so the test comment's "the enhancement page's default swap mace" is
+exact.
+
+One inaccuracy, minor: ADR-0031 says hunter p2 is split "bm/sv × 2h/dw ×
+6p/9p", true for `bm`, but `phase_2/sv` holds only `2h_6p` and `dw_6p`. It does
+not change the conclusion.
+
+## Standards + Spec
+
+**Spec: clean.** Both owner rulings survived execution — ticket 367 is
+`Status: open` with its "Why `open` and not `wontfix`" section, and ticket 350
+says "override" exactly once, in the sentence denying it. Step 6 is genuinely
+comment-only: zero lines removed, guard condition untouched, the forbidden fork
+copy clean. No scope creep: the stage's ten commits touch only Paths-manifest
+files plus the one dispositioned `.gitignore` line. Every per-step acceptance
+grep re-run and passing.
+
+**Standards: one pass, three claimed hard violations that do not survive
+checking.** The axis reported a broken ADR link in `CONTEXT.md`; the link reads
+`0031-the-raid-sim-skeleton-...` and the committed file is exactly that. Its own
+probe hand-typed the path without `-the-`, got `rc=128`, and read that as proof
+the link was dead. The other two — a banned word and line-number citations —
+point at `docs/reviews/`, `docs/verification-log.md` and tickets 351/362, all
+last touched by `dc72da1` and `14d1109`, which predate this stage. They fall in
+the range because the range runs from the merge-base, not because this work
+introduced them.
+
+Where it passed is the part that matters: `rank.ts`'s +9 lines are pure _why_
+with no restatement of the condition, and `rank.test.ts` sits at the module
+interface rather than on stage internals.
+
+## Summary
+
+Adversarial 3 (all minor). Domain 2 material, 2 minor. Standards 3 claimed hard
+violations, 0 upheld. Spec 0.
+
+**No blockers.** The one genuine defect in work this branch produced was D-2:
+ticket 365 reproduced an uncorrected claim that ticket 350 already carried the
+correction for, leaving the repo holding both versions. Fixed.
+
+Worth recording how the fix nearly repeated the failure it was fixing. The first
+draft cited `grep -c '"HandTypeOffHand"' data/universes/feral-p3.json`, taken
+from the reviewer's report. That command returns **0** — the universe stores
+`handType` numerically and pretty-printed with a space. The count was right and
+the command was not. Caught by running it before moving on; the working form is
+`grep -c '"handType": 3'`, which returns 11.
+
+## Disposition
+
+| ID    | Axis        | Disposition     | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----- | ----------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-A1 | Adversarial | fixed           | ADR-0031's `cli-wiring.ts` grep printed a `join(root, ...)` call; the line holds a template literal. Corrected, and the ADR now states why the distinction matters — the path is composed from `spec`, which is exactly why no literal per-spec path exists to grep for.                                                                                                                            |
+| R2-A2 | Adversarial | fixed           | ADR-0031's caller census showed three paths where `grep -rl` returns four. The census now shows all four and names the first as the definition, not a caller. The count of callers, and the argument, are unchanged.                                                                                                                                                                                |
+| R2-A3 | Adversarial | fixed           | Round 1's review file covered only through `0d339c2`, leaving 17 commits unreviewed. This round is that coverage. Also raised independently by Domain as D-4.                                                                                                                                                                                                                                       |
+| R2-D1 | Domain      | wontfix         | The axis reported `docs/verification-log.md` carrying the uncorrected "neither can put anything in the off hand". Checked: the string does not appear in that file. Not a defect.                                                                                                                                                                                                                   |
+| R2-D2 | Domain      | fixed           | Ticket 365 reproduced the uncorrected claim that ret and feral "cannot put anything in the off hand". Corrected to the accurate reason — druids equip off-hand held items (`grep -c '"handType": 3' data/universes/feral-p3.json` → 11, `HandTypeOffHand = 3` per the generated proto); what makes the set unreachable is the ranker's placement rule, not the game's equip rule. Commit `b6d84c5`. |
+| R2-D3 | Domain      | wontfix         | `.scratch/carry-forward/map.md` records 350 as "now `Blocked by: 365`", which this branch later reversed. The map is a chronological log and the entry was accurate when written; rewriting history there would be worse than the staleness.                                                                                                                                                        |
+| R2-D4 | Domain      | minor, accepted | ADR-0031 says hunter p2 is split bm/sv × 2h/dw × 6p/9p; `phase_2/sv` has only the 6p pair. Does not change the conclusion, and the ADR's point is the shape of the split, not its cardinality.                                                                                                                                                                                                      |
+| R2-S1 | Standards   | wontfix         | Claimed broken ADR link in `CONTEXT.md`. The link resolves; the probe that "found" it hand-typed the path. Verified with `ls docs/adr/ \| grep '^0031'` against `grep -n '0031' CONTEXT.md`.                                                                                                                                                                                                        |
+| R2-S2 | Standards   | wontfix         | Banned word "lands" in `docs/reviews/` and `docs/verification-log.md`. Both files were last touched by `dc72da1`/`14d1109`, predating this stage; `git log 43052fb..HEAD -- docs/reviews/ docs/verification-log.md` is empty. Not this work's to fix, and rewriting a committed review's prose would falsify the record.                                                                            |
+| R2-S3 | Standards   | defer           | `.scratch/carry-forward/issues/368-ticket-line-number-citations-point-into-a-gitignored-fork.md` — tickets 351 and 362 carry 11 and 6 line-number citations, the worst pointing into the gitignored fork at a commit on no remote. Real problem, not this branch's, mechanical to fix.                                                                                                              |
+| R2-P1 | Spec        | no finding      | Both owner rulings intact, Step 6 comment-only, zero scope creep, every acceptance grep passing.                                                                                                                                                                                                                                                                                                    |
