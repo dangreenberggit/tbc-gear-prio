@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: <PENDING_COMMIT_SHA>
 Type: chore
 Origin: owner question, 2026-09-10 — "we should not be fucking with their code"
 Blocks: none
@@ -84,10 +85,23 @@ and only the merge commit body records that.
 
 ## Acceptance
 
-- [ ] A tracked file lists every diverging upstream path with its reason.
-- [ ] Load-bearing lines are called out, `sim_header.tsx`'s wrapper included.
-- [ ] Each entry says upstream-candidate or local-only.
-- [ ] The `sim.ts` `iterations` parameter is wired up or reverted.
+- [x] A tracked file lists every diverging upstream path with its reason —
+  `docs/fork-upstream-divergence.md`, fifteen paths at fork HEAD `f90b12a7b`
+  (the ticket's own table undercounted at fourteen rows, missing
+  `test-layout.mjs`; see that doc's "How this was produced" for the
+  reconciliation).
+- [x] Load-bearing lines are called out, `sim_header.tsx`'s wrapper
+  included — with the `ab59127d9` merge commit's reasoning quoted.
+- [x] Each entry says upstream-candidate or local-only.
+- [x] The `sim.ts` `iterations` parameter is wired up or reverted — reverted;
+  `sim.ts` now has zero diff against upstream `ec5c5f205`.
+
+## Resolution note
+
+The stale-SHA correction and the revert decision for item 3 were settled
+before this pass started (see the worker prompt that dispatched this
+close-out); this session verified both against the current fork HEAD rather
+than re-deriving them. Full detail is in `docs/fork-upstream-divergence.md`.
 
 ## Related tickets, both already handling this correctly
 
