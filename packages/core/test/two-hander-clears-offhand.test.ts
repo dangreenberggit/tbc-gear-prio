@@ -338,7 +338,14 @@ describe("a two-handed candidate clears the worn off hand (ticket 350)", () => {
         expect(differing).toEqual(new Set([MAINHAND, OFFHAND]));
         expect(items[OFFHAND]).toEqual({});
       } else {
-        expect(differing.size).toBe(1);
+        // 0 or 1, never more. Sixteen of this fixture's seventeen worn items
+        // are themselves members of `warrior-p2`, and `runCandidate` keeps
+        // every owned row regardless of the cap, so a worn candidate is priced
+        // as an identity swap whose request differs from baseline nowhere.
+        // What the containment property forbids is a candidate moving a slot
+        // it never claimed — a second or third index — not an identity swap
+        // moving none.
+        expect(differing.size).toBeLessThanOrEqual(1);
       }
     }
     // Guards the branch above against passing vacuously.
