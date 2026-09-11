@@ -615,35 +615,15 @@ def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
     return fallback, by_phase
 
 
-_RET_EP_FALLBACK, _RET_EP_BY_PHASE = _ep_weights_map("ret")
-_FERAL_EP_FALLBACK, _FERAL_EP_BY_PHASE = _ep_weights_map("feral")
-_BALANCE_EP_FALLBACK, _BALANCE_EP_BY_PHASE = _ep_weights_map(
-    "balance"
-)
-_HUNTER_EP_FALLBACK, _HUNTER_EP_BY_PHASE = _ep_weights_map(
-    "hunter"
-)
-_MAGE_EP_FALLBACK, _MAGE_EP_BY_PHASE = _ep_weights_map(
-    "mage"
-)
-_SHADOW_EP_FALLBACK, _SHADOW_EP_BY_PHASE = _ep_weights_map(
-    "shadow"
-)
-_ROGUE_EP_FALLBACK, _ROGUE_EP_BY_PHASE = _ep_weights_map(
-    "rogue"
-)
-_ELE_EP_FALLBACK, _ELE_EP_BY_PHASE = _ep_weights_map(
-    "ele"
-)
-_ENH_EP_FALLBACK, _ENH_EP_BY_PHASE = _ep_weights_map(
-    "enh"
-)
-_WARLOCK_EP_FALLBACK, _WARLOCK_EP_BY_PHASE = _ep_weights_map(
-    "warlock"
-)
-_WARRIOR_EP_FALLBACK, _WARRIOR_EP_BY_PHASE = _ep_weights_map(
-    "warrior"
-)
+def _ep_fields(spec: str) -> dict:
+    """`spec`'s EP-weights arguments, ready to splat into SpecProfile.
+
+    Twenty-two module constants used to hold these, two per spec, each named
+    after the spec it served. Reading them at the call site instead keeps the
+    spec's EP wiring in the one place that already names the spec.
+    """
+    fallback, by_phase = _ep_weights_map(spec)
+    return {"ep_weights": fallback, "ep_weights_by_phase": by_phase}
 
 
 def _arena_gear_ids() -> frozenset[int]:
@@ -751,8 +731,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # below). ep_weights_by_phase adds p3's real transcribed weights
         # without touching what p1/p2 universes resolve to. Both come from
         # data/presets/ep-weights-by-phase.json -- see _ep_weights_map.
-        ep_weights=_RET_EP_FALLBACK,
-        ep_weights_by_phase=_RET_EP_BY_PHASE,
+        **_ep_fields("ret"),
         # Upstream tbc-new ships one curated set per phase for retribution --
         # no BiS/Alt/Realistic split -- so any id appearing here is "BiS".
         # Feral cat does have that split; see its own entry below.
@@ -799,7 +778,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         "feral",
         # Stage 1, because upstream ships no P2 EP preset for feral cat.
         # From data/presets/ep-weights-by-phase.json -- see _ep_weights_map.
-        ep_weights=_FERAL_EP_FALLBACK,
+        # `ep_weights_by_phase` arrives as `{}` here, which is what omitting it
+        # bound before: feral's byPhase in the shared JSON is empty.
+        **_ep_fields("feral"),
         # Upstream ships sixteen curated cat sets against ret's three, split
         # BiS/Alt/Realistic and again by 6-piece against 9-piece hit variant
         # (carry-forward 88 — the suffix is a hit percentage, not a piece
@@ -843,8 +824,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         "balance",
         # Upstream ships a full preraid-p5 ladder, so every shipped phase's
         # bisTags come from that phase's own curated set.
-        ep_weights=_BALANCE_EP_FALLBACK,
-        ep_weights_by_phase=_BALANCE_EP_BY_PHASE,
+        **_ep_fields("balance"),
         gear_sets=[
             ROOT / "vendor/wowsims/balance_preraid.gear.json",
             ROOT / "vendor/wowsims/balance_p1.gear.json",
@@ -871,8 +851,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # Both builds (bm/sv) and both weapon layouts (2h/dw) are vendored and
         # union-tagged. Upstream stops at phase_4, so p5 bisTags trace to <=p4.
         # The EP weights are BM's alone -- see data/presets/hunter/.
-        ep_weights=_HUNTER_EP_FALLBACK,
-        ep_weights_by_phase=_HUNTER_EP_BY_PHASE,
+        **_ep_fields("hunter"),
         gear_sets=[
             ROOT / "vendor/wowsims/hunter_p1_bm_2h_6p.gear.json",
             ROOT / "vendor/wowsims/hunter_p1_bm_2h_9p.gear.json",
@@ -925,8 +904,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # frost sets at all -- and the p3 pair differs only by weapon layout.
         # Upstream stops at p3, so p4-p5 bisTags trace to <=p3. Mage carries the
         # most stacked degradations of the nine; all of them go to the SME gate.
-        ep_weights=_MAGE_EP_FALLBACK,
-        ep_weights_by_phase=_MAGE_EP_BY_PHASE,
+        **_ep_fields("mage"),
         gear_sets=[
             ROOT / "vendor/wowsims/mage_prebis.gear.json",
             ROOT / "vendor/wowsims/mage_p1.gear.json",
@@ -950,8 +928,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     "shadow": SpecProfile(
         "shadow",
         # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
-        ep_weights=_SHADOW_EP_FALLBACK,
-        ep_weights_by_phase=_SHADOW_EP_BY_PHASE,
+        **_ep_fields("shadow"),
         gear_sets=[
             ROOT / "vendor/wowsims/shadow_preraid.gear.json",
             ROOT / "vendor/wowsims/shadow_p1.gear.json",
@@ -974,8 +951,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
     "rogue": SpecProfile(
         "rogue",
         # Upstream stops at p3, so p4-p5 bisTags trace to <=p3.
-        ep_weights=_ROGUE_EP_FALLBACK,
-        ep_weights_by_phase=_ROGUE_EP_BY_PHASE,
+        **_ep_fields("rogue"),
         gear_sets=[
             ROOT / "vendor/wowsims/rogue_preraid.gear.json",
             ROOT / "vendor/wowsims/rogue_p1.gear.json",
@@ -1000,8 +976,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # p1 ships an alliance/horde pair; both are vendored and union-tagged.
         # Elemental and enhancement share shaman TOKEN ids but no piece ids --
         # Cyclone Regalia against Cyclone Harness, distinct setIds.
-        ep_weights=_ELE_EP_FALLBACK,
-        ep_weights_by_phase=_ELE_EP_BY_PHASE,
+        **_ep_fields("ele"),
         gear_sets=[
             ROOT / "vendor/wowsims/ele_preraid.gear.json",
             ROOT / "vendor/wowsims/ele_p1_a.gear.json",
@@ -1028,8 +1003,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         "enh",
         # The *.itemswap.json files upstream ships beside these describe a weapon
         # swap rather than a gear set and are deliberately not vendored.
-        ep_weights=_ENH_EP_FALLBACK,
-        ep_weights_by_phase=_ENH_EP_BY_PHASE,
+        **_ep_fields("enh"),
         gear_sets=[
             ROOT / "vendor/wowsims/enh_preraid.gear.json",
             ROOT / "vendor/wowsims/enh_p1.gear.json",
@@ -1059,8 +1033,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # the last two (Zul'Aman p4, Sunwell p5); the first three are the SME's
         # to confirm. The destro_fire family is vendored and union-tagged, but
         # the EP weights are the Affli/Demo/Destro default's alone.
-        ep_weights=_WARLOCK_EP_FALLBACK,
-        ep_weights_by_phase=_WARLOCK_EP_BY_PHASE,
+        **_ep_fields("warlock"),
         gear_sets=[
             ROOT / "vendor/wowsims/warlock_preraid.gear.json",
             ROOT / "vendor/wowsims/warlock_t4.gear.json",
@@ -1089,8 +1062,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # Every phase ships as an arms/fury pair; both are vendored and
         # union-tagged, the way feral's 6p/9p pair is. The EP weights are
         # Fury's alone, per the fork's own default.
-        ep_weights=_WARRIOR_EP_FALLBACK,
-        ep_weights_by_phase=_WARRIOR_EP_BY_PHASE,
+        **_ep_fields("warrior"),
         gear_sets=[
             ROOT / "vendor/wowsims/warrior_preraid_arms.gear.json",
             ROOT / "vendor/wowsims/warrior_preraid_fury.gear.json",
