@@ -7,6 +7,13 @@ export {
   type Cutoff,
 } from "./cutoff.js";
 export {
+  SPEC_IDS,
+  SPEC_REGISTRY,
+  isSpecId,
+  skeletonPresetIdFor,
+  type SpecEntry,
+} from "./spec-registry.js";
+export {
   DegenerateSeedsError,
   PAIRED_REPLICATE_TOP_N,
   assertDistinctSeeds,

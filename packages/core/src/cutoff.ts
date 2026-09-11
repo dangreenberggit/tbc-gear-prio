@@ -1,4 +1,10 @@
+import { CUTOFF, CUTOFF_FERAL } from "./spec-registry.js";
 import type { SpecId } from "./types.js";
+
+// The two cutoffs live with the per-spec entries that reference them, in
+// `spec-registry.js`. Re-exported here so this module's importers are
+// unchanged; imported above because the table below reads them as values.
+export { CUTOFF, CUTOFF_FERAL } from "./spec-registry.js";
 
 /**
  * Cutoff derived from the Stage 1 five-seed spread experiment
@@ -12,8 +18,6 @@ import type { SpecId } from "./types.js";
  * whole pool was ranked at, which is the independent one.
  */
 export type Cutoff = { readonly absDps: number; readonly pct: number };
-
-export const CUTOFF: Cutoff = { absDps: 3.4, pct: 0.15 };
 
 /**
  * Per-spec noise floor for a prospective set bonus, in DPS, derived from the
@@ -61,17 +65,6 @@ export const CUTOFF: Cutoff = { absDps: 3.4, pct: 0.15 };
 export function setBonusNoiseFloorDps(cutoff: Cutoff): number {
   return Math.SQRT2 * cutoff.absDps;
 }
-
-/**
- * Feral cutoff derived from its own five-seed spread
- * (docs/five-seed-spread-feral.json, issue #1 README step 0), following the
- * same method as ret's above: max(3.0, 2× mean reported SE 1.774) → 3.6.
- * Feral's rotation is noisier than ret's (mean reported SE 1.774 vs ret's
- * 1.678 at the same 5000 iterations, same fixture-derivation method), so
- * applying ret's 3.4 cutoff to feral would under-count noise as a real
- * upgrade. `CUTOFF` above is intentionally left unchanged; this is additive.
- */
-export const CUTOFF_FERAL: Cutoff = { absDps: 3.6, pct: 0.15 };
 
 /**
  * Per-spec cutoff lookup, **total** over `SpecId`.

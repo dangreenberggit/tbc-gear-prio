@@ -24,7 +24,23 @@
  */
 
 import { Stat } from "./stats.js";
+import {
+  PHYSICAL_HIT_CAP_PERCENT,
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  SPELL_HIT_CAP_PERCENT,
+  SPELL_HIT_RATING_PER_HIT_PERCENT,
+} from "./spec-registry.js";
 import type { SpecId } from "./types.js";
+
+// The hit constants live with the per-spec entries that reference them, in
+// `spec-registry.js`. Re-exported here so this module's importers are
+// unchanged; imported above because the table below reads them as values.
+export {
+  PHYSICAL_HIT_CAP_PERCENT,
+  PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
+  SPELL_HIT_CAP_PERCENT,
+  SPELL_HIT_RATING_PER_HIT_PERCENT,
+} from "./spec-registry.js";
 
 /**
  * Talent-string position of a hit-granting talent, plus what it grants.
@@ -69,40 +85,6 @@ export type CapProfile = {
   /** Absent when the spec's trees carry no hit talent at all. */
   readonly talentHit?: TalentHitDescriptor;
 };
-
-/**
- * ui/core/constants/mechanics.ts @ wowsims/tbc-new
- * 8aa378b3671a0923fd11fb34b4b3753e53f20c9b (data/wowsims.lock.json), and
- * sim/core/base_stats_auto_gen.go. Copied rather than imported: the vendor tree
- * is a build input, never a runtime dependency (PLAN.md §8.3 [S0]).
- */
-export const PHYSICAL_HIT_RATING_PER_HIT_PERCENT = 15.769233;
-export const SPELL_HIT_RATING_PER_HIT_PERCENT = 12.615385;
-
-/**
- * Yellow-attack hit cap vs a level-73 boss: 9% missing. A special (yellow)
- * attack against a target three levels above the attacker misses 9% of the
- * time before hit rating.
- */
-export const PHYSICAL_HIT_CAP_PERCENT = 9;
-
-/**
- * Spell hit cap vs a level-73 boss: 16%.
- *
- * The sim models 17% base spell miss against a +3-level target
- * (`sim/core/target.go:393`, `BaseSpellMissChance` = 0.17 for level 73+ via
- * `UnitLevelFloat64`), but clamps the result to a 1% floor —
- * `math.Max(0.01, 1-hitChance)` at `sim/core/spell_result.go:246-258`. So the
- * 17th percent buys nothing and the reachable cap is 16, which is why 16 is the
- * number quoted for TBC casters. Unlike physical, there is no `HitSuppression`
- * term on spells; the 0.01 at `target.go:401` is physical-only.
- *
- * One exception the descriptor deliberately does not model: for
- * `SpellFlagBinary` spells, hit past the cap still counteracts partial resists
- * (`spell_result.go:253-255`). That is a per-spell property, not a per-spec one,
- * and this table is per-spec.
- */
-export const SPELL_HIT_CAP_PERCENT = 16;
 
 /**
  * Per-spec cap descriptors. Total over `SpecId` by construction — see the file
