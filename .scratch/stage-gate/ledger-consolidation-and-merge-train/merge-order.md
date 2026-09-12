@@ -34,17 +34,22 @@ already used.
 ## Why the order is what it is
 
 Order is **free with respect to the fork pin** — the thing the brief assumed
-would force it. `feat/spec-registry`'s lockfile reads `f90b12a7b`, which is
-older than `dev`'s pin, but the branch **does not modify the lockfile at all**:
+would force it. `feat/spec-registry` **does not modify the lockfile at all**:
 
 ```
 git diff --stat dev...feat/spec-registry -- data/wowsims-fork.lock.json data/sim-implemented-effects.json
 # -> empty
 ```
 
-Its lockfile reads `f90b12a7b` only because the branch forked before `dev`
-moved the pin; merging it changes nothing about the pin. So there is no
-transient red to avoid and no lockfile conflict to resolve for that branch.
+So there is no transient red to avoid and no lockfile conflict to resolve for
+that branch; merging it changes nothing about the pin.
+
+**Corrected 2026-09-12** (independent process review, finding 2). This section
+previously said the branch's lockfile "reads `f90b12a7b`, which is older than
+`dev`'s pin". That went stale: `dev` was merged into the branch at `a17b418`,
+so its merge-base with `dev` is `a2a4295` and its lockfile now reads
+`bbad1b8a4` — the same pin `dev` carries. The conclusion above was re-measured
+and stands; only the evidence cited for it was out of date.
 
 The order is chosen for **ticket dependencies** instead:
 
