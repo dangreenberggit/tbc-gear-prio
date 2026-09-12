@@ -253,3 +253,80 @@ pnpm merge-to-dev --check-only     -> rc 0, last line 'check-only: ok (not mergi
   It reported 'working tree dirty -- allowed for --check-only': that is ONLY the untracked
   plan-rev1.md.bak noted above.
 Branch tip after A5: 085036230c416b24c68cd2ac911403357ac87165
+
+## A7 — feat/spec-registry prepared
+
+git merge dev -> rc 1, conflicts exactly NEXT + map.md as C7 predicted.
+  map.md: kept BOTH sides in number order (373-line, then 374/375 from dev) by
+    dropping only the three marker lines. NEXT: resolved to 376 (rewritten to 379
+    below). The branch-side NEXT carried a UTF-8 BOM; the rewrite drops it.
+  git add both -> diff-filter=U empty, no UU/AA/DU/UD. Commit a17b418.
+Renumber commit ce74605:
+  git mv 371->376, 372->377, 373->378. Formerly: line added under each header.
+  377 CLOSED with a Resolution section: ancestry f90b12a7b -> bbad1b8a4 -> 5e9013b78
+    (both merge-base --is-ancestor rc 0) shows the clone was AHEAD of the pin, so
+    the ticket's "reset the clone to the pin" would have moved a gitignored
+    checkout backwards and destroyed work while verify stayed green. Resolved on
+    dev by moving the pin forward (3398f7d). Also records that _fork_gate.py:109
+    offers two options with no direction and this ticket picked the destructive
+    one -- recorded, NOT changed (out of scope).
+  Cross-refs updated: review file 7 defer paths 373->378 + prose 371->376, 372->377,
+    row E1 extended; ADR-0032 related-tickets line, "ticket 371"->376, and the
+    "372 and is not fixed here" sentence rewritten; map.md "- 373" -> "- 378".
+  NEXT -> 379.
+CHECKS: (i) git grep /371- /372- /373- HEAD -- docs .scratch -> NO OUTPUT.
+        (ii) every defer path in the review Test-Path -> True (one path, 378).
+        (iii) check_merge_ready.py -> 7 "ok ...: defer -> .../378-... (open)" + merge-ready: ok, rc 0.
+             (Advisory WARN: 29 open tickets name files this branch changed. Pre-existing,
+              explicitly "advisory only -- does not block the merge".)
+pnpm merge-to-dev --check-only -> rc 0, "check-only: ok (not merging)", verify green,
+  layout gate SKIPPED. Clone stayed at bbad1b8a4 (this branch pins it after the merge).
+TIP: ce746050eb41aed75a86a7c16bc41b9b77c8002b   NEXT=379
+
+## A8 — fix/sim-header-null-assertion prepared
+
+git merge dev -> rc 1, conflicts exactly NEXT + sim-implemented-effects.json +
+  wowsims-fork.lock.json as C8 predicted.
+  LOCKFILE resolved by script (not by hand -- the _comment is ~4KB): took dev's
+    object wholesale for key order and every field, then set commit=5e9013b78,
+    pushed=false, and _comment = dev's full comment + the branch's "As of 5e9013b78"
+    sentence with the stale clause removed. The removed clause was
+    "bbad1b8a4 reverted the dead iterations parameter ... (it was already in the
+    clone when this branch started, one commit ahead of the f90b12a7b pin -- the
+    condition ticket 372 filed), and" -- stale as news because dev's comment now
+    explains bbad1b8a4 in full. Result: valid JSON, 10 lines, LF, 0 markers,
+    "As of bbad1b8a4" x1 and "As of 5e9013b78" x1.
+  sim-implemented-effects.json: git checkout --ours (branch copy), forkCommit
+    5e9013b78, consistent with the lockfile.
+  NEXT -> 376 then 381. git add all three -> diff-filter=U empty. Commit 4f9591b.
+Renumber commit f90fe88:
+  git mv 371->379 (renamed to 379-ticket-377-...), 373->380. Formerly: lines added.
+  379: title and body 372->377; the "numbered 371, not 372" paragraph replaced with a
+    pointer to merge-order.md's allocation table; the "correct the stage-gate plan and
+    execution report" instruction DROPPED because C32 re-verified -- .scratch/stage-gate/
+    spec-registry is untracked on ALL FOUR branches (measured, not carried), so there is
+    no tracked file to correct. Also records that feat/spec-registry has since closed 377.
+  380: records that the edits it asks for are ALREADY MADE on docs/fork-upstream-touchpoints
+    by A4; stays open because merge-ready requires a defer row's ticket open.
+  Review file: A4 and D1 defer paths -> 379/380, prose 371/373 -> 379/380, 372 -> 377,
+    row A4 updated. map.md gained one line each for 379 and 380 (C31 confirmed the
+    branch had none: grep -c -> 0).
+CHECKS: (i) NO OUTPUT. (ii) both defer paths Test-Path -> True.
+        (iii) check_merge_ready.py -> "ok A4: defer -> .../379-... (open)",
+              "ok D1: defer -> .../380-... (open)", merge-ready: ok, rc 0.
+CLONE MOVED FORWARD: git -C F checkout feat/upgrades-tab -> 5e9013b78.
+  pnpm sim-implemented-effects:generate -> rc 0, "218 implemented, 451 stub-only
+    (fork commit 5e9013b78...)". git diff --exit-code -> rc 0, so the conflict
+    resolution was RIGHT and no third commit was needed.
+  pnpm merge-to-dev --check-only -> rc 0, "check-only: ok (not merging)", verify green.
+  CRLF TRAP: the generator rewrites the artifact with CRLF (2033 CR bytes), so
+    git status showed it modified after --check-only. git diff --ignore-cr-at-eol
+    -> empty, i.e. content identical, endings only. Restored with git checkout --
+    rather than committing a whole-file ending flip. Known-traps ss generated files.
+CLONE MOVED BACK: git -C F checkout --detach bbad1b8a4 -> detached, clean.
+  check_equip_eligibility.py on fix/sim-header-null-assertion -> rc 2, DOCUMENTED
+    RED BY DESIGN (clone bbad1b8a4 vs this branch's pin 5e9013b78). Same message
+    that misled ticket 377.
+  check_equip_eligibility.py on docs/fork-upstream-touchpoints -> rc 0,
+    "17 specs match the fork at bbad1b8a4325".
+TIP: f90fe8878e00ea55d1cb5ff0b9dc0d9d20e2d2a7 (see final report)   NEXT=381
