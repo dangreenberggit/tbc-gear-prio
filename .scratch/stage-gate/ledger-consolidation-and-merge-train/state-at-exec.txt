@@ -220,3 +220,36 @@ S4 judgement: divergent change, one 669-line doc with two audiences. Deliberate 
 S5 judgement: 'the superseded document' backward reference used ~12 times after one naming.
      -> REAL and cheap to fix.
 Commit messages, durable claims, line endings: all reported clean.
+
+## A6 — stage tracked, merge-order.md written (commit 992de56)
+.gitignore: inserted '!.scratch/stage-gate/ledger-consolidation-and-merge-train/' between
+  line 73 (two-hander-clears-offhand, last stage whitelist) and line 74 (!.scratch/rank-reports/).
+  C25 re-verified before editing: the line numbers were exactly as claimed.
+check-ignore -q merge-order.md -> rc 1 (not ignored)  ACCEPTANCE PASS
+grep '## Ticket renumber map' -> 1; grep '## Residual risk until the first merge' -> 1  PASS
+13 files committed. plan-rev1.md.bak deliberately NOT committed (a planner's backup of
+  revision 1; plan-review.md already reviews rev 1 and rev 2 is committed, so it carries
+  no unique content). Left untracked and flagged rather than deleted - not my file.
+
+### CRLF trap fired (recovered before commit)
+state-at-exec.txt and reconciliation.txt were written with PowerShell Set-Content -Encoding
+  utf8, which emits CRLF. git warned 'CRLF will be replaced by LF' on add. Normalised both
+  to LF with a python rewrite, re-added, warning gone. Known-traps ss scripted edits.
+
+## A5 — review and proof
+Four axes, review lane (Opus), one parallel batch. Results in
+  docs/reviews/docs-fork-upstream-touchpoints.md with a 15-row Disposition table.
+10 fixed (commit 7e1378e), 3 wontfix with reasons, 0 DEFER -> no ticket filed, k=0, NEXT stays 381.
+Notable: A2/A3/S1 were TIMING ARTIFACTS - the axes were dispatched at c2bfa00, before A6
+  tracked the stage dir and wrote merge-order.md. Verified resolved at HEAD after A6.
+D1 I re-derived MYSELF before acting: 3031/3031 match (doc said 3030), and the space/tab-only
+  normalisation gives 3163/3163 and MATCHES (doc promised 3504 vs 3503 mismatch). Conclusion
+  (pure move) survives; the stated rule did not.
+
+python scripts/check_merge_ready.py -> 'merge-ready: ok', rc 0, 15 rows, no defer rows.
+pnpm merge-to-dev --check-only     -> rc 0, last line 'check-only: ok (not merging)'.
+  Its === verify === stage ran pnpm run verify and passed (no standalone verify run, per the
+  orchestrator amendment). Layout gate SKIPPED (tab layout source unchanged, digest 18d674a1).
+  It reported 'working tree dirty -- allowed for --check-only': that is ONLY the untracked
+  plan-rev1.md.bak noted above.
+Branch tip after A5: 085036230c416b24c68cd2ac911403357ac87165
