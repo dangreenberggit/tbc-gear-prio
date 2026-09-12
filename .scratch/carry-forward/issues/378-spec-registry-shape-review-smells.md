@@ -1,8 +1,13 @@
-# 373 — Shape smells in the spec registry, deferred from its pre-merge review
+# 378 — Shape smells in the spec registry, deferred from its pre-merge review
 
 Status: open
 Filed: 2026-09-11
 Origin: pre-merge review of `feat/spec-registry`, Standards axis
+Formerly: 373 on feat/spec-registry, renumbered 2026-09-12 to clear a
+collision with `fix/sim-header-null-assertion`'s own 373. Commit messages
+on this branch still name the old number; see
+`.scratch/stage-gate/ledger-consolidation-and-merge-train/merge-order.md`
+§ Ticket renumber map.
 See: `docs/reviews/feat-spec-registry.md`
 
 ## What

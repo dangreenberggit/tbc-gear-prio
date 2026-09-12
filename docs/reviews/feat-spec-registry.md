@@ -132,7 +132,7 @@ ADR-0032's causal claims each citing a re-runnable command (§ Durable claims).
   code from the generator, gated by `codegen:json-types:check`.
 - **No scope creep.** Nothing under `vendor/`, no `items.ts` /
   `item-source-kinds.json` / `slots-table.json`, no `wowsims-fork.lock.json`,
-  no ticket-371 files, no `AGENTS.md` / `CLAUDE.md` / `workflow.md` / skills.
+  no ticket-376 files, no `AGENTS.md` / `CLAUDE.md` / `workflow.md` / skills.
   `spec-registry.json` holds exactly the 11 existing ids.
 - **SP1 (nit)** — ADR-0032 said the fidelity tests carried "23 assertions". 23
   is the test-_case_ count; the executed `expect` count is 78. ADRs are durable
@@ -149,7 +149,7 @@ fact changed value across eleven specs.
 Two findings were fixed here because both are defects in **durable claims**
 rather than in code: a doc comment that stated a rule contradicted by the
 fork's own directory layout (D1), and an ADR miscounting its own evidence
-(SP1). Four shape smells are deferred to ticket 373 — they are judgement calls
+(SP1). Four shape smells are deferred to ticket 378 — they are judgement calls
 against a file shape three plan-review rounds deliberately settled, and acting
 on them now would re-open a closed design question at the worst moment.
 
@@ -159,22 +159,22 @@ ret's numbers.
 
 `pnpm verify` exits 2 at `equip-eligibility:check`, and `fork-lint:check` and
 `meta-conditions:check` refuse the same way — all three the fork-clone-vs-pin
-mismatch of **ticket 372**, proved pre-existing by stashing the work and
+mismatch of **ticket 377**, proved pre-existing by stashing the work and
 re-running at base for a byte-identical message. Everything the branch can move
 is green.
 
 ## Disposition
 
-| ID  | Axis             | Disposition | Ticket / note                                                                                                                                                                                         |
-| --- | ---------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial      | wontfix     | No findings — totality, the untyped boundary, the fidelity chain, codegen sync and the Python half each proven by execution                                                                           |
-| D1  | Domain           | fixed       | `sitePath` doc comment claimed the fork's `ui/` layout; the fork ships `ui/druid/feralcat`. Value was already correct and unchanged; comment rewritten to say these are the public wowsims.com routes |
-| D2  | Domain           | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — nine of eleven `sitePath` values are gated by no test; recorded in ADR-0032 and carried with the shape work                |
-| S1  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — file header restates ADR-0032 instead of pointing at it                                                                    |
-| S2  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — re-export shim with no expiry note                                                                                         |
-| S3  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — Middle Man: `presetIdFor` is pure delegation                                                                               |
-| S4  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — Divergent Change: registry also defines the leaf constants                                                                 |
-| S5  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — Feature Envy: `preferredMetasFor`                                                                                          |
-| S6  | Standards + Spec | defer       | `.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md` — Repeated Switches: the untyped-boundary cascade appears three times                                                        |
-| SP1 | Standards + Spec | fixed       | ADR-0032 said "23 assertions" for what is 23 test cases / 78 executed `expect`s; corrected, since ADRs are durable claims                                                                             |
-| E1  | Environment      | wontfix     | `equip-eligibility` / `fork-lint` / `meta-conditions` refuse on the fork clone-vs-pin mismatch — pre-existing, ticket 372, out of scope by the brief                                                  |
+| ID  | Axis             | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                             |
+| --- | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial      | wontfix     | No findings — totality, the untyped boundary, the fidelity chain, codegen sync and the Python half each proven by execution                                                                                                                                                                                                                                               |
+| D1  | Domain           | fixed       | `sitePath` doc comment claimed the fork's `ui/` layout; the fork ships `ui/druid/feralcat`. Value was already correct and unchanged; comment rewritten to say these are the public wowsims.com routes                                                                                                                                                                     |
+| D2  | Domain           | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — nine of eleven `sitePath` values are gated by no test; recorded in ADR-0032 and carried with the shape work                                                                                                                                                                                    |
+| S1  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — file header restates ADR-0032 instead of pointing at it                                                                                                                                                                                                                                        |
+| S2  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — re-export shim with no expiry note                                                                                                                                                                                                                                                             |
+| S3  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — Middle Man: `presetIdFor` is pure delegation                                                                                                                                                                                                                                                   |
+| S4  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — Divergent Change: registry also defines the leaf constants                                                                                                                                                                                                                                     |
+| S5  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — Feature Envy: `preferredMetasFor`                                                                                                                                                                                                                                                              |
+| S6  | Standards + Spec | defer       | `.scratch/carry-forward/issues/378-spec-registry-shape-review-smells.md` — Repeated Switches: the untyped-boundary cascade appears three times                                                                                                                                                                                                                            |
+| SP1 | Standards + Spec | fixed       | ADR-0032 said "23 assertions" for what is 23 test cases / 78 executed `expect`s; corrected, since ADRs are durable claims                                                                                                                                                                                                                                                 |
+| E1  | Environment      | wontfix     | `equip-eligibility` / `fork-lint` / `meta-conditions` refuse on the fork clone-vs-pin mismatch — pre-existing, ticket 377 (filed as 372, renumbered), out of scope by the brief. 377 is now **closed as an inverted diagnosis**: the clone was ahead of the pin, not behind it, and `dev` resolved the mismatch by moving the pin forward to `bbad1b8a4`. See the ticket. |

@@ -1,8 +1,13 @@
-# 371 — Two stale ret/feral allow-lists still gate specs
+# 376 — Two stale ret/feral allow-lists still gate specs
 
 Status: open
 Filed: 2026-09-11
 Found by: read-only investigation during the `spec-registry` stage-gate
+Formerly: 371 on feat/spec-registry, renumbered 2026-09-12 to clear a
+collision with `fix/sim-header-null-assertion`'s own 371. Commit messages
+on this branch still name the old number; see
+`.scratch/stage-gate/ledger-consolidation-and-merge-train/merge-order.md`
+§ Ticket renumber map.
 
 ## What
 

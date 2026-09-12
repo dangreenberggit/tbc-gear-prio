@@ -2,7 +2,7 @@
 
 **Status:** accepted
 **Date:** 2026-09-11
-**Related:** [`ADR-0029`](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [`ADR-0031`](0031-the-raid-sim-skeleton-is-a-cli-harness-input-not-a-product-input.md), `AGENTS.md` § Types from JSON; tickets `.scratch/carry-forward/issues/372-fork-clone-head-is-behind-the-lockfile-pin.md`, `367-generated-local-dev-skeleton-set-has-no-consumer.md`, `371-*` (ret/feral allow-lists), `159` (EP-weights map)
+**Related:** [`ADR-0029`](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [`ADR-0031`](0031-the-raid-sim-skeleton-is-a-cli-harness-input-not-a-product-input.md), `AGENTS.md` § Types from JSON; tickets `.scratch/carry-forward/issues/377-fork-clone-head-is-behind-the-lockfile-pin.md`, `367-generated-local-dev-skeleton-set-has-no-consumer.md`, `376-*` (ret/feral allow-lists), `159` (EP-weights map)
 
 ## Context
 
@@ -258,7 +258,7 @@ smoke test remains for the share-link URL template, and
   18
   ```
 
-- `SPEC_IDS` and `isSpecId` are exported so ticket 371 can replace the stale
+- `SPEC_IDS` and `isSpecId` are exported so ticket 376 can replace the stale
   ret/feral allow-lists without re-deriving the list.
 - The fork's six touch points are unchanged and stay a separate edit, for the
   reasons in Q1.
@@ -272,9 +272,11 @@ smoke test remains for the share-link URL template, and
 `pnpm verify` fails at `equip-eligibility:check` with rc 2 on this checkout,
 before and after this work, for an environmental reason: the fork clone's HEAD
 is `bbad1b8` while `data/wowsims-fork.lock.json` pins `f90b12a`. That is ticket
-372 and is not fixed here — the pin was deliberately not bumped. Confirmed
-pre-existing by running the gate at the base commit with all of this work
-stashed, where it fails with byte-identical text.
+377, **closed: its diagnosis was inverted** — the clone was ahead of the pin,
+not behind it, and `dev` moved the pin forward to `bbad1b8a4` at `3398f7d`,
+after which clone and pin agree. Confirmed pre-existing at the time by running
+the gate at the base commit with all of this work stashed, where it fails with
+byte-identical text.
 
 Two further gates refuse for the identical reason and are equally pre-existing:
 `fork-lint:check` and `meta-conditions:check`, both rc 2 with the same clone-vs-
