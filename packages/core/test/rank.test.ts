@@ -2039,8 +2039,8 @@ describe("equipmentForCandidateSwap gem quality (ticket 117)", () => {
  * which upstream's own presets say is the normal feral case) had every
  * meta-socket head candidate priced with an empty meta socket, against a
  * baseline that was missing nothing — the worn head has no socket to be
- * missing anything from. `SPEC_PREFERRED_METAS` must carry a feral row so the
- * candidate is priced with the gem the player would actually seat.
+ * missing anything from. Feral's registry entry must carry a preferred meta so
+ * the candidate is priced with the gem the player would actually seat.
  */
 describe("equipmentForCandidateSwap feral meta preference (ticket 257)", () => {
   const feralWeights = (
@@ -3488,7 +3488,7 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
  * from upstream's presets — ret's own, and bear's for feral-tank, bear being
  * a separate upstream spec. Only the feral (cat) row rests on the ruling,
  * because all five vendored cat presets wear Wolfshead Helm 8345 and socket
- * no meta at all — see the block comment on `SPEC_PREFERRED_METAS` in
+ * no meta at all — see the block comment on `preferredMetasFor` in
  * `candidate-gems.ts` for the full reasoning. All three now carry the same
  * Relentless Earthstorm Diamond 32409 entry.
  *

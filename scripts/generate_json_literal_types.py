@@ -44,7 +44,30 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "packages" / "core" / "src"
 
 # source JSON -> (key holding the string list, generated .ts, exported names)
+#
+# `mode` picks what the value at `key` is:
+#   "list" (default) -- a JSON array of strings, emitted in array order.
+#   "keys"           -- a JSON object, emitted in its key order. Used where the
+#                       JSON carries a per-member record and the member names
+#                       are the list TypeScript needs as a union, so the names
+#                       cannot drift from the records they key.
 TARGETS = [
+    {
+        "json": SRC / "spec-registry.json",
+        "key": "specs",
+        "mode": "keys",
+        "out": SRC / "spec-ids.generated.ts",
+        "const": "SPEC_IDS",
+        "type": "SpecId",
+        "doc": (
+            "Every spec this engine can rank.\n"
+            " * The ids are the keys of `spec-registry.json`, which also carries\n"
+            " * each spec's fork proto name for `assemble_universe.py`. Adding an\n"
+            " * id here without completing its `SPEC_REGISTRY` entry in\n"
+            " * `spec-registry.ts` is a compile error, which is the point: every\n"
+            " * per-spec field is a game fact with no safe default."
+        ),
+    },
     {
         "json": SRC / "item-source-kinds.json",
         "key": "kinds",
@@ -155,14 +178,33 @@ def main() -> int:
             print(f"missing {target['json'].relative_to(ROOT)}", file=sys.stderr)
             return 2
         doc = json.loads(target["json"].read_text(encoding="utf-8"))
-        values = doc.get(target["key"])
-        if not isinstance(values, list) or not all(isinstance(v, str) for v in values):
-            print(
-                f"{target['json'].relative_to(ROOT)}: {target['key']!r} is not a "
-                "list of strings",
-                file=sys.stderr,
-            )
-            return 2
+        raw = doc.get(target["key"])
+        mode = target.get("mode", "list")
+        if mode == "keys":
+            # Object keys, in file order: Python dicts preserve insertion order
+            # and json.loads builds them in document order, so the emitted union
+            # reads in the same order as the JSON a human edits.
+            if not isinstance(raw, dict) or not all(
+                isinstance(k, str) for k in raw
+            ):
+                print(
+                    f"{target['json'].relative_to(ROOT)}: {target['key']!r} is not "
+                    "an object with string keys",
+                    file=sys.stderr,
+                )
+                return 2
+            values = list(raw)
+        else:
+            values = raw
+            if not isinstance(values, list) or not all(
+                isinstance(v, str) for v in values
+            ):
+                print(
+                    f"{target['json'].relative_to(ROOT)}: {target['key']!r} is not a "
+                    "list of strings",
+                    file=sys.stderr,
+                )
+                return 2
         if len(set(values)) != len(values):
             dupes = sorted({v for v in values if values.count(v) > 1})
             print(
