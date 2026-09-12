@@ -102,7 +102,7 @@ describe("socketsMatch", () => {
     expect(socketBonusActive([], [])).toBe(true);
 
     // Wolfshead Helm: socketless, and the item every vendored feral preset
-    // wears — the same fact `SPEC_PREFERRED_METAS` rests on.
+    // wears — the same fact the feral meta preference rests on.
     const wolfshead = getItem(8345)!;
     expect(wolfshead.sockets).toHaveLength(0);
     expect(socketBonusActive(wolfshead.sockets, [])).toBe(true);

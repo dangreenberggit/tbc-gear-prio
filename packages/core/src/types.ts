@@ -11,25 +11,19 @@ export type CharacterRef = {
 /**
  * A spec this engine can rank — i.e. one with a preset and a universe.
  *
- * Every per-spec engine table is a **total** `Record<SpecId, …>`, so adding a
- * member here without filling each of them is a compile error rather than a
- * silent inheritance of ret's numbers. That is the point of the totality: the
- * tables that matter (`CAP_PROFILE_BY_SPEC`, `CUTOFF_BY_SPEC`,
- * `SPEC_PREFERRED_METAS`, `PRESET_ID_BY_SPEC`) each encode a per-spec game fact
- * that has no safe default.
+ * The id list is not written here: it is generated from the keys of
+ * `spec-registry.json`, so the ids and the per-spec facts keyed by them cannot
+ * drift apart. `SPEC_REGISTRY` (`spec-registry.ts`) is the one total table over
+ * this union, and every field of a `SpecEntry` is required — so a spec added to
+ * the JSON compiles only once its entry is complete, rather than silently
+ * inheriting ret's numbers. Each of those fields is a per-spec game fact with
+ * no safe default, which is why the totality is worth enforcing.
  */
-export type SpecId =
-  | "balance"
-  | "feral"
-  | "hunter"
-  | "mage"
-  | "ret"
-  | "shadow"
-  | "rogue"
-  | "ele"
-  | "enh"
-  | "warlock"
-  | "warrior";
+export type { SpecId } from "./spec-ids.generated.js";
+
+// Imported as well as re-exported: the line above is a pure re-export and does
+// not bind `SpecId` in this module, which `DetectedSpecId` below needs.
+import type { SpecId } from "./spec-ids.generated.js";
 
 /**
  * A spec this engine can *identify*, which is a wider set than it can rank.

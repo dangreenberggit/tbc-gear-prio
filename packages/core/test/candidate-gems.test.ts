@@ -7,7 +7,7 @@ import {
   gemContext,
   metaSocketUnpriced,
   missingMetaPreferenceNote,
-  SPEC_PREFERRED_METAS,
+  preferredMetasFor,
 } from "../src/candidate-gems.js";
 import { gemsForPhase, getGem } from "../src/gems.js";
 import { socketsFor } from "../src/items.js";
@@ -183,11 +183,11 @@ describe("fillEmptyCandidateGems rarity cap (ticket 111)", () => {
  * for feral — it is the same id ret's row already carries, and it is the meta
  * wowsims' own vendored ret presets socket.
  */
-describe("SPEC_PREFERRED_METAS", () => {
+describe("preferred metas", () => {
   it("records the same Relentless entry for ret, feral and feral-tank", () => {
-    expect(SPEC_PREFERRED_METAS.ret).toEqual([32409]);
-    expect(SPEC_PREFERRED_METAS.feral).toEqual([32409]);
-    expect(SPEC_PREFERRED_METAS["feral-tank"]).toEqual([32409]);
+    expect(preferredMetasFor("ret")).toEqual([32409]);
+    expect(preferredMetasFor("feral")).toEqual([32409]);
+    expect(preferredMetasFor("feral-tank")).toEqual([32409]);
   });
 
   it("seats ret's preferred meta when the spec is known", () => {

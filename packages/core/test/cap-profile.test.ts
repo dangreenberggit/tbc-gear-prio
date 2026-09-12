@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  CAP_PROFILE_BY_SPEC,
   PHYSICAL_HIT_CAP_PERCENT,
   PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
   SPELL_HIT_CAP_PERCENT,
@@ -34,7 +33,7 @@ describe("capProfileFor", () => {
     // Every call site predating the table passed no spec and read ret's melee
     // cap. Changing that default would silently move numbers on call sites
     // nobody touched.
-    expect(capProfileFor(undefined)).toEqual(CAP_PROFILE_BY_SPEC.ret);
+    expect(capProfileFor(undefined)).toEqual(capProfileFor("ret"));
     expect(hitCapRatingFor(capProfileFor(undefined))).toBeCloseTo(
       HIT_CAP_RATING,
       6
@@ -50,7 +49,7 @@ describe("capProfileFor", () => {
     const unlisted = "unlisted-future-spec" as unknown as Parameters<
       typeof capProfileFor
     >[0];
-    expect(capProfileFor(unlisted)).toEqual(CAP_PROFILE_BY_SPEC.ret);
+    expect(capProfileFor(unlisted)).toEqual(capProfileFor("ret"));
   });
 
   it("derives the cap in rating from the profile's own two numbers", () => {
@@ -68,8 +67,8 @@ describe("capStateFrom reads the profile rather than hardcoding melee", () => {
   });
 
   it("tracks expertise only where the profile says the spec has that cap", () => {
-    expect(CAP_PROFILE_BY_SPEC.ret.trackExpertise).toBe(true);
-    expect(CAP_PROFILE_BY_SPEC.feral.trackExpertise).toBe(true);
+    expect(capProfileFor("ret").trackExpertise).toBe(true);
+    expect(capProfileFor("feral").trackExpertise).toBe(true);
     const caps = capStateFrom([{ id: 30129, gems: [] }], [], { spec: "feral" });
     // Still null-capped: whether expertise is *tracked* is a different question
     // from whether an honest cap value exists for it (see CapEntry).

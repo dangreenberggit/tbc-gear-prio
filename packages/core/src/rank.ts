@@ -28,6 +28,7 @@ import {
   type CapState,
 } from "./caps.js";
 import { cutoffForSpec, meetsCutoff, type Cutoff } from "./cutoff.js";
+import { skeletonPresetIdFor } from "./spec-registry.js";
 import {
   buildStandingAssumptions,
   substitutionsFromMetaRepair,
@@ -306,7 +307,7 @@ export type RankedItem = {
   removedItems?: Array<{ itemId: number; slot: SimSlotName }>;
   /**
    * This row's delta was measured with the candidate's meta socket empty —
-   * the ranked spec has no recorded meta preference (`SPEC_PREFERRED_METAS`),
+   * the ranked spec has no recorded meta preference (`preferredMetasFor`),
    * so no gem was seated and the price omits a meta's stats and effect. The
    * per-row half of `missingMetaPreferenceNote`'s run-level disclosure.
    */
@@ -564,27 +565,12 @@ function defaultSeedsFor(iterations: number): number[] {
   return replicateSeeds(DEFAULT_SEED_BASE, DEFAULT_SEED_COUNT, iterations);
 }
 /**
- * Hashed and disclosed from one place, so the two cannot drift apart. Now
- * per-spec, which keeps that property: both call sites read this one function,
- * so a spec added here reaches the content hash and the assumptions drawer
- * together or not at all.
+ * Hashed and disclosed from one place, so the two cannot drift apart. Both call
+ * sites read this one function, so a spec reaches the content hash and the
+ * assumptions drawer together or not at all.
  */
-const PRESET_ID_BY_SPEC: Record<SpecId, string> = {
-  ret: "ret/p2.raid-sim-skeleton",
-  feral: "feral/p2.raid-sim-skeleton",
-  balance: "balance/p2.raid-sim-skeleton",
-  hunter: "hunter/p2.raid-sim-skeleton",
-  mage: "mage/p2.raid-sim-skeleton",
-  shadow: "shadow/p2.raid-sim-skeleton",
-  rogue: "rogue/p2.raid-sim-skeleton",
-  ele: "ele/p2.raid-sim-skeleton",
-  enh: "enh/p2.raid-sim-skeleton",
-  warlock: "warlock/p2.raid-sim-skeleton",
-  warrior: "warrior/p2.raid-sim-skeleton",
-};
-
 function presetIdFor(spec: SpecId): string {
-  return PRESET_ID_BY_SPEC[spec];
+  return skeletonPresetIdFor(spec);
 }
 
 export async function rankUpgrades(

@@ -20,13 +20,18 @@ import {
 import { GemColor } from "./proto/common_pb.js";
 import { epScore, Stat, type EpWeights } from "./stats.js";
 import { capProfileFor } from "./cap-profile.js";
+import {
+  PREFERRED_META_IDS,
+  SPEC_REGISTRY,
+  isSpecId,
+} from "./spec-registry.js";
 import type { DetectedSpecId, SpecId } from "./types.js";
 
 /**
  * Narrow a detected spec to one the cap table knows.
  *
  * `feral-tank` is detectable but not rankable, so it has no cap profile. It
- * reaches gem code only via `SPEC_PREFERRED_METAS`, and dropping it here yields
+ * reaches gem code only via `preferredMetasFor`, and dropping it here yields
  * the undefined-spec default — the melee profile, which is the right school for
  * a bear regardless.
  */
@@ -69,7 +74,7 @@ export type GemContext = {
   /**
    * Which spec's preferred meta applies. Absent means "unspecified", which
    * keeps the pre-table behaviour — ret's entry — so every existing caller
-   * reads exactly as it did before `SPEC_PREFERRED_METAS` existed.
+   * reads exactly as it did before per-spec metas were recorded.
    */
   readonly spec?: DetectedSpecId;
 };
@@ -100,143 +105,79 @@ function toWeightRecord(weights: EpWeights): EpWeightRecord {
 const META_NEAR_EP = 1.0;
 
 /**
- * Stat EP cannot rank meta gems: their headline effects are not stats. Nine of
- * the eighteen TBC metas score exactly 0.00 against ret weights, and the two
- * that matter here invert — Swift Skyfire's flat +24 AP scores 9.84 while
- * Relentless scores 9.00 on +12 Agi alone, because its +3% critical damage is
- * a multiplier (`CritDamageMultiplier *= 1.03` in wowsims
- * `sim/core/item_effects.go`) and additive EP cannot see it.
+ * The preferred meta ids for a detected spec.
  *
- * The effect enters average damage as `crit * (critDmgMult - 1)`
- * (`sim/core/spell_outcome.go`), so its absolute value scales with crit and is
- * **not** a constant — roughly 0.6% of damage at 10% crit up to 2.4% at 40%.
- * The *ordering* is what is durable: against Swift Skyfire's +24 AP,
- * Relentless leads by ~7x at 10% crit and ~28x at 40%, so it never flips in
- * any realistic ret range.
+ * Each rankable spec's ids are read from that spec's **highest-phase** vendored
+ * gear set, by gem colour rather than array position — the meta is not reliably
+ * `gems[0]`, since the array follows the head item's own socket order (Cowl of
+ * Gul'dan, id 34332, sockets `[4,1]`, carries its meta second). This is not an
+ * EP ranking, because stat EP cannot rank metas at all: nine of the eighteen
+ * score exactly 0.00 against ret weights, so the ordering EP produces is the
+ * wrong one. Each entry cites its source set in `spec-registry.ts`.
  *
- * Ret's meta is Relentless Earthstorm Diamond in all three upstream wowsims
- * ret gear presets (preraid, p1, p2 under
- * `ui/paladin/retribution/gear_sets/`), which carry no other meta.
- *
- * Activation is deliberately not checked. Relentless requires 2 red / 2 yellow
- * / 2 blue elsewhere, and a player who slots a meta arranges their other gems
- * to switch it on. Gating on the colours they happen to wear today would
- * understate a genuine upgrade.
- */
-const PREFERRED_META_IDS: readonly number[] = [32409];
-
-/**
- * Preferred meta gem per detected spec.
- *
- * The ret row is read from upstream's gear presets, per the evidence
- * procedure the ret comment above describes, extended per spec
- * (step6-meta-choice-spike.md option 1): read the meta socketed in that
- * spec's presets, as of `wowsims/tbc-new` @ v0.0.101 (`8aa378b3`). It is not
- * an EP ranking, because stat EP cannot rank metas at all — the ordering it
- * produces is the wrong one.
- *
- * **The `feral` row is an owner ruling — 2026-08-22, ticket 257.** It is the
- * one row here not read from a preset. All five vendored feral (cat) presets
+ * **The `feral` entry is an owner ruling — 2026-08-22, ticket 257.** It is the
+ * one entry not read from a preset. All five vendored feral (cat) presets
  * (`preraid`, `p2_6p`, `p2_9p`, `p3_6p`, `p3_9p`) wear socketless Wolfshead
  * Helm 8345, so upstream socketed no cat meta to copy. Ticket 257 found that
- * leaving the row out was not the neutral "disclose and skip" it looked like:
- * for a feral who wears no meta (every Wolfshead wearer — the upstream-normal
- * case), the worn head has no socket to be missing anything from, so the
- * baseline prices at full value while every meta-socket candidate head prices
- * with an empty socket against it. A real under-pricing, not a symmetric gap.
- * The owner's ruling closes that gap rather than opening a general policy for
+ * leaving it out was not the neutral "disclose and skip" it looked like: for a
+ * feral who wears no meta (every Wolfshead wearer — the upstream-normal case),
+ * the worn head has no socket to be missing anything from, so the baseline
+ * prices at full value while every meta-socket candidate head prices with an
+ * empty socket against it. A real under-pricing, not a symmetric gap. The
+ * owner's ruling closes that gap rather than opening a general policy for
  * inventing metas: *"if theyre based on wowsims code, leave it i guess... but
  * if it is just for feral dps then you can just assume relentless earthstorm
  * would be the chosen meta gem, ezpz, done."* 32409 is not invented for the
- * occasion — every other row here reads it out of a wowsims preset.
+ * occasion — every other entry reads it out of a wowsims preset.
  *
- * **The `feral-tank` row is read from upstream, like ret's.** It is sourced
- * from wowsims' bear presets, which are a separate spec upstream
- * (`SpecFeralBearDruid`, `ui/druid/feralbear/gear_sets/` in the fork clone)
- * and were missed when this table was first written — hence the earlier claim
- * here that upstream recorded no feral meta at all, which was wrong for bear.
- * Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
+ * **`feral-tank` is read from upstream, like ret's**, and is the one value
+ * here that is not a registry entry: it is identifiable but not rankable, so it
+ * has no entry to carry. It is sourced from wowsims' bear presets, a separate
+ * spec upstream (`SpecFeralBearDruid`, `ui/druid/feralbear/gear_sets/` in the
+ * fork clone). Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
  * `p2_offensive`, `p2_survival`, `p3`, `p4`, `preraid`); of the rest, three
  * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896.
  * That last one is a genuine disagreement, not a scoping artefact: 25896 is
  * phase 1 in `data/gems/palette.json`, so it is in range for every phase this
- * project supports. The row follows the majority of the sets that socket a
+ * project supports. The value follows the majority of the sets that socket a
  * meta at all, and this is the judgment call — 7 of 11 — that a derived table
  * would have to make explicit (ticket 263). Re-check with:
  *
  *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
  *
- * Note what the `feral-tank` row does and does not reach today. It is read —
- * `missingMetaPreferenceNote` and `metaSocketUnpriced` below both consult the
- * table for any spec, and its presence is what keeps them quiet for
- * feral-tank. What it never reaches is a ranking: `feral-tank` is identified
- * but never ranked (it is not a member of `SpecId`, `types.ts`), so no candidate
- * is ever gemmed from it. It is recorded because the evidence exists, not
- * because a ranking needs it.
+ * `feral-tank` is read but never ranked — it is not a member of `SpecId`, so no
+ * candidate is ever gemmed from it. It is recorded because the evidence exists,
+ * not because a ranking needs it.
  *
- * Only `DetectedSpecId`s can appear: a spec the pipeline cannot detect cannot
- * reach this code, so a row for one would be untestable decoration.
+ * `undefined` means no preference is recorded, which is a real answer rather
+ * than a missing one: the caller discloses it and leaves the socket empty,
+ * because seating another spec's meta would be worse than seating none. Every
+ * spec this engine can name has one today — the eleven rankable ones on their
+ * registry entry, and `feral-tank`, identifiable but not rankable, from its
+ * bear presets. The `undefined` path is reached only by a spec string cast
+ * through a module boundary, which `candidate-gems.test.ts` exercises
+ * deliberately.
  *
- * **When the detectable-spec list grows, this table must grow with it**
- * (ticket 142, review row 5-D4). A newly detectable spec — a caster one
- * especially — falls into the "no preference recorded" branch by default, and
- * unlike feral's now-settled case that outcome is a quiet quality regression
- * (an empty meta socket where a real preference exists upstream) rather than
- * a fact about the game. So on adding a `DetectedSpecId`: find that spec's
- * meta in the vendored presets and add a row, or, if upstream genuinely
- * records none, get an owner ruling the way ticket 257 got one for feral — do
- * not leave it to the fallback and do not inherit another spec's row without
- * that ruling.
+ * `isSpecId` is what separates that case from a broken registry: an id outside
+ * `SPEC_IDS` has no preference to give, while a registered id is indexed
+ * directly, so a missing entry throws rather than reading as "no preference".
+ * Do not soften that index with `?.` — the two outcomes must stay distinct.
  *
- * The type below enforces exactly that rule for the *rankable* specs: it is
- * total over `SpecId` and optional only for the identify-but-not-rank
- * remainder of `DetectedSpecId`. A new rankable spec cannot reach the
- * empty-socket branch by omission any more — the compiler asks first.
- *
- * The nine rows added for the all-DPS-specs pass were each read out of that
- * spec's **highest-phase** vendored gear set, by gem colour rather than array
- * position: the meta is not reliably `gems[0]`, since the array follows the
- * head item's own socket order (Cowl of Gul'dan, id 34332, sockets `[4,1]`,
- * carries its meta second). Every one of the nine is stable across every phase
- * of that spec that seats a meta at all — no spec changes meta between phases.
- * Two carry a wrinkle worth knowing rather than a disagreement: priest's
- * pre-raid and p1 sets wear the socketless Spellstrike Hood (24266), and only
- * p2/p3 seat 25893; feral's 15 lower sets wear socketless Wolfshead (8345) and
- * only p5 seats 32409.
+ * **When the detectable-spec list grows, this must grow with it** (ticket 142,
+ * review row 5-D4). A rankable spec cannot be forgotten — its registry entry
+ * requires the field — but `DetectedSpecId` is the wider set, and a newly
+ * detectable spec would arrive here first. On adding one: find that spec's meta
+ * in the vendored presets, or, if upstream genuinely records none, get an owner
+ * ruling the way ticket 257 got one for feral. Do not leave it to a fallback
+ * and do not inherit another spec's meta without that ruling.
  */
-export const SPEC_PREFERRED_METAS: Readonly<
-  Record<SpecId, readonly number[]> &
-    Partial<Record<DetectedSpecId, readonly number[]>>
-> = {
-  ret: PREFERRED_META_IDS,
-  feral: PREFERRED_META_IDS,
-  "feral-tank": PREFERRED_META_IDS,
-
-  // Chaotic Skyfire Diamond — the caster crit meta.
-  // ui/druid/balance/gear_sets/p5.gear.json, head 34403.
-  balance: [34220],
-  // ui/mage/dps/gear_sets/p2Arcane.gear.json, head 30206.
-  mage: [34220],
-  // ui/shaman/elemental/gear_sets/p5.gear.json, head 34332 (meta second).
-  ele: [34220],
-  // ui/warlock/dps/gear_sets/swp.gear.json, head 34340.
-  warlock: [34220],
-
-  // Mystical Skyfire Diamond. Shadow is the one caster here not on 34220:
-  // ui/priest/dps/gear_sets/p3.gear.json, head 31064, seats 25893.
-  shadow: [25893],
-
-  // Relentless Earthstorm Diamond — the same melee meta ret and feral use.
-  // ui/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json, head 32235.
-  hunter: PREFERRED_META_IDS,
-  // ui/rogue/dps/gear_sets/p3.gear.json, head 32235.
-  rogue: PREFERRED_META_IDS,
-  // ui/shaman/enhancement/gear_sets/p5.gear.json, head 34333 (meta second).
-  enh: PREFERRED_META_IDS,
-  // ui/warrior/dps/gear_sets/p5_fury.gear.json, head 34333 (meta second);
-  // p5_arms.gear.json seats the same one.
-  warrior: PREFERRED_META_IDS,
-};
+export function preferredMetasFor(
+  spec: DetectedSpecId
+): readonly number[] | undefined {
+  if (spec === "feral-tank") return PREFERRED_META_IDS;
+  if (!isSpecId(spec)) return undefined;
+  return SPEC_REGISTRY[spec].preferredMetas;
+}
 
 /**
  * The disclosure for a spec whose meta preference is not recorded, or
@@ -249,7 +190,7 @@ export const SPEC_PREFERRED_METAS: Readonly<
 export function missingMetaPreferenceNote(
   spec: DetectedSpecId | undefined
 ): string | undefined {
-  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return undefined;
+  if (spec === undefined || preferredMetasFor(spec)) return undefined;
   return `no meta preference recorded for ${spec} — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect`;
 }
 
@@ -271,7 +212,7 @@ export function metaSocketUnpriced(
   gems: readonly number[],
   spec: DetectedSpecId | undefined
 ): boolean {
-  if (spec === undefined || SPEC_PREFERRED_METAS[spec]) return false;
+  if (spec === undefined || preferredMetasFor(spec)) return false;
   const metaIdx = socketsFor(itemId).indexOf(GemColor.GemColorMeta);
   if (metaIdx < 0) return false;
   return !gems[metaIdx];
@@ -288,8 +229,8 @@ export type FillEmptyOpts = {
   meta?: { metaId: number; otherGemIds: readonly number[] };
   /**
    * Whose preferred meta to seat. Absent keeps the pre-table behaviour (ret's
-   * entry); a spec with no entry in `SPEC_PREFERRED_METAS` leaves the meta
-   * socket empty rather than inheriting another spec's gem.
+   * ids); a spec with no recorded preference leaves the meta socket empty
+   * rather than inheriting another spec's gem.
    */
   spec?: DetectedSpecId;
 };
@@ -418,7 +359,7 @@ function bestGemForSocket(
 
   if (socket === GemColor.GemColorMeta) {
     const preferredIds =
-      spec === undefined ? PREFERRED_META_IDS : SPEC_PREFERRED_METAS[spec];
+      spec === undefined ? PREFERRED_META_IDS : preferredMetasFor(spec);
     // No recorded preference: leave the socket empty rather than fall through
     // to the EP pick below. EP cannot rank metas — nine of eighteen score
     // 0.00 — so "best by EP" would be an arbitrary gem wearing the authority
