@@ -22,6 +22,14 @@ So there are two categories, and they are not equally serious:
 This file is the durable record that requirement asks for. Read it before the
 next upstream merge and before opening any PR.
 
+This is the single ledger for ticket 369. It supersedes
+`docs/fork-upstream-divergence.md`, which answered the same ticket from a second
+session and framed the same files by merge-conflict risk rather than by
+upstream-PR impact. That document was deleted in the commit that added this
+paragraph, "Fold the divergence ledger into the touchpoints ledger"; its framing
+now lives in the "Merge-conflict view" section below, and its per-file "What
+changed / Why / Risk on next merge" table is reproduced there in full.
+
 ## How to reproduce every number here
 
 All commands run against the fork clone at `vendor/tbc-new-fork` (gitignored;
@@ -35,11 +43,54 @@ git -C vendor/tbc-new-fork diff --name-status -M \
 # per-file line counts
 git -C vendor/tbc-new-fork diff --numstat \
   ec5c5f205e61049d730e460967f8488774a7fe2a..bbad1b8a4325d8168758a909a520cf4dced875f6
+
+# the superseded document's command: a pathspec excluding our tab's own trees
+git -C vendor/tbc-new-fork diff --name-only \
+  ec5c5f205e61049d730e460967f8488774a7fe2a..bbad1b8a4325d8168758a909a520cf4dced875f6 \
+  -- ':!*upgrades*' ':!*_upgrades*'
 ```
 
 Measured 2026-09-11. Totals: 135 files changed, 630520 insertions, 480
 deletions — the insertion count is dominated by our bundled universe JSON, not
 by upstream-file edits.
+
+### Reconciling the counts: 13, 14 and 15
+
+Three different numbers are in circulation for "how many files do we touch",
+and they are all correct — they answer different questions. Re-derived
+2026-09-12 and recorded with full output in
+`.scratch/stage-gate/ledger-consolidation-and-merge-train/reconciliation.txt`.
+
+| Command                                                              | At `f90b12a7b` | At `bbad1b8a4` | At `5e9013b78` |
+| -------------------------------------------------------------------- | -------------- | -------------- | -------------- |
+| `--name-status -M`, `M` rows only (this document)                    | —              | **13**         | **13**         |
+| `--name-only` with the `:!*upgrades*` pathspec (superseded document) | **15**         | **14**         | **14**         |
+
+The two extra paths in the pathspec count are:
+
+- **`test-layout.mjs`** — an **added** file of ours, not a modification of a
+  file upstream already had. It is judged in Category A below, on placement.
+- **`ui/core/sim.ts`** — modified at `f90b12a7b`, then **reverted** at
+  `bbad1b8a4` to byte-identical with upstream. `git diff --name-only` does not
+  list a file whose diff is empty, which is why the pathspec count drops from
+  15 to 14 at `bbad1b8a4` while the `M`-row count stays 13.
+
+15 − {`test-layout.mjs`, `ui/core/sim.ts`} = 13, verified as a set comparison,
+path for path, not merely as a count.
+
+**13 is a scope choice, not an undercount.** The superseded document read the
+gap the other way and claimed ticket 369's list "undercounted by two". That
+reading was wrong: it compared a **pathspec count** — which includes one added
+file and one since-reverted file — against a count of **modified upstream
+files**. Its own table already marked both extra rows as not divergence
+(`test-layout.mjs` "not upstream divergence … listed here only because the diff
+command above returns it"; `ui/core/sim.ts` "None remaining … zero diff"). The
+two documents never disagreed about the facts, only about what to count.
+
+One sentence from the superseded document must not be carried forward: it said
+the pathspec command "returns `ui/core/sim.ts` with a diff-stat of 0". It does
+not. At `bbad1b8a4` the command returns 14 paths and `ui/core/sim.ts` is not
+among them, because `--name-only` omits zero-diff files entirely.
 
 ### Why `ec5c5f2` is the right base, and the verification that it is
 
@@ -64,34 +115,44 @@ dated 2026-09-03.
 
 ### Which fork commit this describes
 
-This inventory is measured at fork HEAD **`bbad1b8a4`**, which is **one commit
-ahead** of the `commit` pin in `data/wowsims-fork.lock.json` (`f90b12a7b`).
-`f90b12a7b` is an ancestor of `bbad1b8a4`
-(`git -C vendor/tbc-new-fork merge-base --is-ancestor f90b12a7b bbad1b8a4`
-returns 0). The extra commit is "Revert the dead iterations parameter on
-makeRaidSimRequest", which **removes** a file from this inventory — see the
-reconciliation note below. The lockfile was deliberately not moved by this work.
+This inventory is measured at fork commit **`bbad1b8a4`**, which is the `commit`
+pin in `data/wowsims-fork.lock.json` on `dev` as of `a2a4295`. The commit that
+took the pin there is "Revert the dead iterations parameter on
+makeRaidSimRequest", which **removes** `ui/core/sim.ts` from this inventory —
+see the reconciliation subsection above.
+
+The next fork commit, **`5e9013b78`**, is pinned by the branch
+`fix/sim-header-null-assertion` and is not yet on `dev`. It is `pushed: false`
+in that branch's lockfile until the owner pushes it to the fork remote. It
+changes exactly one file, `ui/core/components/sim_header.tsx`, by +4/−3, and
+the row count of this inventory stays 13 there. The pin ancestry is strictly
+linear and verified:
+
+```
+git -C vendor/tbc-new-fork merge-base --is-ancestor f90b12a7b bbad1b8a4   # rc 0
+git -C vendor/tbc-new-fork merge-base --is-ancestor bbad1b8a4 5e9013b78   # rc 0
+```
 
 ## Category B — the 13 modified upstream files
 
 Counts are added/removed from `--numstat` over the range above.
 **Avoidability is our judgement, not a measurement**, and is labelled as such.
 
-| #   | File                                                   | +/−      | Upstream candidate? | Avoidable? (judgement)         |
-| --- | ------------------------------------------------------ | -------- | ------------------- | ------------------------------ |
-| 1   | `.gitignore`                                           | 3/0      | local-only          | yes — nest it in our tree      |
-| 2   | `assets/locales/en/translation.json`                   | 92/0     | local-only          | yes — runtime resource bundle  |
-| 3   | `package-lock.json`                                    | 2247/337 | local-only          | yes — drop from the PR         |
-| 4   | `package.json`                                         | 2/1      | local-only          | yes — if the layout gate moves |
-| 5   | `schemas/translation.schema.json`                      | 309/1    | local-only          | yes — goes with #2             |
-| 6   | `sim/hunter/item_sets.go`                              | 55/10    | **yes**             | no — and should not be         |
-| 7   | `test-locales.mjs`                                     | 32/2     | **yes**             | no — shared gate               |
-| 8   | `tsconfig.json`                                        | 1/0      | local-only          | **yes — measured dead**        |
-| 9   | `ui/core/components/gear_picker/item_list.tsx`         | 125/114  | local-only          | yes — reducible to ~1 line     |
-| 10  | `ui/core/components/sim_header.tsx`                    | 50/15    | **yes**             | no — from our tree             |
-| 11  | `ui/core/individual_sim_ui.tsx`                        | 6/0      | local-only          | **no — irreducible**           |
-| 12  | `ui/scss/core/components/individual_sim_ui/index.scss` | 1/0      | local-only          | **no — irreducible**           |
-| 13  | `ui/scss/core/sim_ui/_header.scss`                     | 28/0     | **yes** (with #10)  | no — pairs with #10            |
+| #   | File                                                   | +/−                                        | Upstream candidate? | Avoidable? (judgement)         |
+| --- | ------------------------------------------------------ | ------------------------------------------ | ------------------- | ------------------------------ |
+| 1   | `.gitignore`                                           | 3/0                                        | local-only          | yes — nest it in our tree      |
+| 2   | `assets/locales/en/translation.json`                   | 92/0                                       | local-only          | yes — runtime resource bundle  |
+| 3   | `package-lock.json`                                    | 2247/337                                   | local-only          | yes — drop from the PR         |
+| 4   | `package.json`                                         | 2/1                                        | local-only          | yes — if the layout gate moves |
+| 5   | `schemas/translation.schema.json`                      | 309/1                                      | local-only          | yes — goes with #2             |
+| 6   | `sim/hunter/item_sets.go`                              | 55/10                                      | **yes**             | no — and should not be         |
+| 7   | `test-locales.mjs`                                     | 32/2                                       | **yes**             | no — shared gate               |
+| 8   | `tsconfig.json`                                        | 1/0                                        | local-only          | **yes — measured dead**        |
+| 9   | `ui/core/components/gear_picker/item_list.tsx`         | 125/114                                    | local-only          | yes — reducible to ~1 line     |
+| 10  | `ui/core/components/sim_header.tsx`                    | 50/15 at `bbad1b8a4`; 51/15 at `5e9013b78` | **yes**             | no — from our tree             |
+| 11  | `ui/core/individual_sim_ui.tsx`                        | 6/0                                        | local-only          | **no — irreducible**           |
+| 12  | `ui/scss/core/components/individual_sim_ui/index.scss` | 1/0                                        | local-only          | **no — irreducible**           |
+| 13  | `ui/scss/core/sim_ui/_header.scss`                     | 28/0                                       | **yes** (with #10)  | no — pairs with #10            |
 
 Three are genuine upstream fixes that can leave our PR entirely (#6, #7,
 #10+#13). Of what remains, the irreducible core is **8 lines across three
@@ -287,17 +348,28 @@ edge signals more scrollable tabs.
 **Why.** Adding a seventh tab overflowed the strip on narrow screens with no
 visual cue.
 
-**Load-bearing — the worked example, and it is worse than previously recorded.**
+**Load-bearing — the worked example, and the behaviour differs by fork commit.**
 `wireTabStripScrollAffordance` uses **three** non-null assertions, not one. Two
 target elements that already exist upstream and are safe. The third targets
 `.sim-header-container-wrap` — the div **this same diff introduces**, about 200
 lines away in `customRootElement()`. A merge that keeps the method but resolves
 away the JSX wrapper is entirely plausible, because that hunk looks like pure
-re-indentation. The result is not a degraded fade: the assertion yields `null`
-and the first `update()` throws during header construction —
-**(inferred from source, untested)**; the three `!` assertions at lines 65–67
-and the div's introduction at line 268 are both read directly from the blob at
-`bbad1b8a`, but no run reproduces the throw.
+re-indentation.
+
+**At `bbad1b8a4`** the result is not a degraded fade: the assertion yields
+`null` and the first `update()` throws during header construction. This was
+reproduced during the `fix/sim-header-null-assertion` review — see finding A3 in
+`docs/reviews/fix-sim-header-null-assertion.md`, and carry its caveat: the
+negative half of that reproduction ran a hand-copied method body rather than the
+shipped constructor, so it proved a hand-copied closure throws; the positive
+half is real end-to-end evidence, and the conclusion also stands on source
+reading (`wrap` is null, `update()` runs unconditionally, `null.classList`
+throws).
+
+**At `5e9013b78`** the lookups are guarded with an early return, so a missing
+wrapper **degrades to a lost scroll-fade and no longer throws.** That commit is
+pinned by `fix/sim-header-null-assertion` and is not on `dev` yet; until it
+lands, the crash behaviour above is the live one.
 
 A second load-bearing choice, documented in the code comment at lines 57–61 and
 worth preserving: the observer must be a `MutationObserver` on `.sim-tabs`
@@ -373,6 +445,13 @@ being "new" does not by itself make its location uncontroversial.
 
 ### `test-layout.mjs` — repo root, 809 lines — **placement is intrusive**
 
+The superseded document's pathspec command returns this file, because
+`test-layout.mjs` matches neither `*upgrades*` nor `*_upgrades*`. That is why
+that document counted 15 where this one counts 13. **It is not upstream
+divergence** — it is a new file of ours, so it is judged here on placement
+rather than on diff size. Row 4 (`package.json`) depends on it: that
+modification's avoidability note holds only if this file moves.
+
 It sits at the repo root beside upstream's own `test-locales.mjs`, so it reads
 as a peer of the project's test infrastructure rather than as feature code.
 Three specific frictions:
@@ -403,6 +482,112 @@ registered in the same barrel (`git -C vendor/tbc-new-fork ls-tree --name-only
 ec5c5f20 ui/scss/core/components/individual_sim_ui/`). A leading-underscore
 partial here is precisely where a tab's styles belong; anywhere else would be
 the surprising choice.
+
+## Merge-conflict view (folded from fork-upstream-divergence.md)
+
+The sections above judge these files by **upstream-PR impact**. This section
+judges the same files by **risk on the next merge from upstream** — the
+superseded document's framing, carried across whole so that framing is not
+lost. Read it before any merge from upstream.
+
+### Files by risk on the next upstream merge
+
+| Path                                                   | What changed                                                                                                                                                         | Why                                                                                                                                                              | Risk on next merge                                                          |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `sim/hunter/item_sets.go`                              | Ten `agent.(HunterAgent)` assertions → comma-ok guards returning no-op                                                                                               | `applyItemEffects` dispatches by item id with no class check, so a mail item a paladin can wear runs hunter code and panics — a real upstream bug, not our tab's | Low                                                                         |
+| `ui/core/components/gear_picker/item_list.tsx`         | `getSourceInfo` extracted from a private method to an exported free function; body moved verbatim, 239 lines                                                         | Our tab needs the source-info formatting outside the gear picker's own class                                                                                     | **Highest** — 239 moved lines; git cannot reason about a relocated function |
+| `ui/core/components/sim_header.tsx`                    | Adds a `.sim-header-container-wrap` div and a scroll-fade affordance                                                                                                 | Local UI fix (Upgrades tab mobile layout)                                                                                                                        | **High — already conflicted once**                                          |
+| `ui/core/sim.ts`                                       | None remaining                                                                                                                                                       | The optional `iterations` parameter was reverted                                                                                                                 | **Resolved — reverted, zero diff**                                          |
+| `ui/core/individual_sim_ui.tsx`                        | +6 lines, registers the Upgrades tab                                                                                                                                 | Wiring for our added tab                                                                                                                                         | Low                                                                         |
+| `ui/scss/core/sim_ui/_header.scss`                     | +28 lines, fade mask pairing with `sim_header.tsx`                                                                                                                   | Styles the wrapper div above                                                                                                                                     | Low                                                                         |
+| `ui/scss/core/components/individual_sim_ui/index.scss` | +1 import                                                                                                                                                            | Pulls in our tab's scss                                                                                                                                          | Nil                                                                         |
+| `test-locales.mjs`                                     | Fixes a Windows `path.join`/glob bug that made the gate exit 0 having validated nothing; adds a `validatedCount` guard so a silently-empty glob fails loudly instead | Genuine upstream bug — the gate was passing on Windows while validating zero files                                                                               | Low                                                                         |
+| `assets/locales/en/translation.json`                   | +92 lines                                                                                                                                                            | Our tab's own strings, under an `upgrades_tab` key                                                                                                               | Low                                                                         |
+| `schemas/translation.schema.json`                      | +310 lines                                                                                                                                                           | Schema entry the locale gate requires for the additive strings above                                                                                             | Low                                                                         |
+| `package.json`                                         | +1 line, `test:layout` script                                                                                                                                        | Registers our layout-gate tooling                                                                                                                                | Nil                                                                         |
+| `tsconfig.json`                                        | +1 line, `allowImportingTsExtensions`                                                                                                                                | Needed by our tab's own module layout                                                                                                                            | Low                                                                         |
+| `.gitignore`                                           | +3 lines                                                                                                                                                             | Ignores a local WCL-credentials file our tab's importer reads                                                                                                    | Nil                                                                         |
+| `package-lock.json`                                    | Full regen, ~2,584 changed lines                                                                                                                                     | Regenerated so native deps record all platforms; not a dependency version change                                                                                 | Low-medium                                                                  |
+| `test-layout.mjs`                                      | +809 lines (new file, not an upstream file at all)                                                                                                                   | Our own layout gate, ported to run inside the fork tree                                                                                                          | **Not divergence** — listed only because the pathspec command returns it    |
+
+### `sim_header.tsx` already conflicted once: merge `ab59127d9`
+
+The risk on that file is not theoretical. The last merge from upstream
+(`ab59127d9`, "Merge upstream feature/backend-reforge at ec5c5f2") produced
+exactly one conflict, and it was this file. Its commit body is the only place
+the resolution reasoning was written down before this document existed:
+
+> The wrapper is load-bearing for our own code. sim_header.tsx:67 does
+> `querySelector<HTMLElement>('.sim-header-container-wrap')!` -- a
+> non-null assertion that would throw at runtime without it -- and
+> ui/scss/core/sim_ui/_header.scss:42 styles it. It came from our
+> commit d7ea63197 "Unbreak the Upgrades tab on mobile".
+>
+> "within-raid-sim-hide" is gone from upstream entirely (0 hits at
+> ec5c5f2, 8 at our pre-merge tip) along with raid-sim. The merge had
+> already auto-resolved the other 7 away; keeping this one would leave
+> an orphan class with no SCSS definition anywhere in the merged tree.
+
+Read the full body with:
+
+```
+git -C vendor/tbc-new-fork show ab59127d9 --no-patch --format=%B
+```
+
+The resolution kept our wrapper div and took upstream's unrelated class removal
+in the same hunk — a single JSX conflict, not two independent edits, which is
+why "keep both" was not the answer. Any future merge that touches this file's
+`customRootElement()` should re-read that commit before resolving.
+
+That body's phrase "would throw at runtime without it" was true at
+`ab59127d9` and remains true at `bbad1b8a4`. It is **no longer true at
+`5e9013b78`**, where the lookups are guarded and a missing wrapper degrades to a
+lost scroll-fade — see item 10 above.
+
+### Highest merge risk: `item_list.tsx`
+
+`getSourceInfo`'s extraction moved 239 lines from a private method to an
+exported free function, body unchanged. Git diffs a moved function as a large
+deletion plus a large addition — it cannot represent "this logic moved and
+nothing else changed", so a future merge-tree simulation is more likely to show
+a real conflict here than a resolvable rename. Read the extraction's diff
+directly rather than trusting a merge preview's conflict count for this file.
+
+### `ui/core/sim.ts` — resolved: the `iterations` parameter, reverted
+
+Ticket 369 asked to wire up or revert the dead `iterations?: number` parameter
+on `makeRaidSimRequest`. It was **reverted** to upstream's exact shape, in fork
+commit `bbad1b8a4`:
+
+```
+git -C vendor/tbc-new-fork diff --stat \
+  ec5c5f205e61049d730e460967f8488774a7fe2a..bbad1b8a4 -- ui/core/sim.ts
+```
+
+now returns **no output** — `sim.ts` has zero diff against upstream.
+
+The parameter existed for a per-request iteration override that
+`docs/plans/wowsims-tab/candidate-pool.md` §6.3 argued for, then corrected
+(dated 2026-08-15, same section) once the screening pass turned out not to need
+it: the upgrades tab's `WasmSimRunner.run` builds its own request from
+`SimRunOpts.iterations` (`upgrades/engine/seams/sim-runner.ts:23-26`) and never
+calls `makeRaidSimRequest` at all. All seven call sites — five in `sim.ts`, one
+in `exporters/individual_cli_exporter.tsx:13`, one in
+`upgrades/adapters/skeleton.ts:28` — passed exactly one argument, confirming the
+second parameter had no live caller. Reverting it removed an upstream-file
+divergence that bought nothing and would have conflicted for no benefit, which
+is exactly what the ticket named as the risk.
+
+### What is not claimed
+
+Neither this section nor the inventory above claims sim output is unchanged as
+measured fact. The `item_sets.go` guard and the `sim.ts` revert were **read, not
+run** through the sim before and after — reading the diff shows no arithmetic,
+coefficient, or aura change, which is a claim about the diff's content, not
+about simulated DPS. Ticket 311's blast-radius claim (one confirmed item, other
+specs `hypothesis, untested`) is that ticket's own and was not re-measured here.
+Where a re-run would settle a question, this document says so rather than
+asserting the untested case as verified.
 
 ## Before opening any PR: strip private-tracker references
 
@@ -456,6 +641,13 @@ ec5c5f20..bbad1b8a -- ui/core/sim.ts` produces **empty output**, so the file
 - **`test-layout.mjs` is added in its place** — but as an _added_ file, not a
   modification. The ticket's table folded it in; this document separates it into
   Category A, where its placement is judged rather than its diff.
+
+Ticket 369 was closed on `dev` at `21d0b37`, citing the now-superseded
+`docs/fork-upstream-divergence.md`. **This document now closes it.** The
+ticket's acceptance note spoke of "fifteen paths at fork HEAD `f90b12a7b`" and
+of its own table having "undercounted at fourteen rows"; that wording came from
+the superseded document's pathspec count, and it is reconciled against this
+document's 13 in "Reconciling the counts: 13, 14 and 15" above.
 
 ## Recommended sequence, if we act on this
 

@@ -86,35 +86,35 @@ and only the merge commit body records that.
 ## Acceptance
 
 - [x] A tracked file lists every diverging upstream path with its reason —
-  `docs/fork-upstream-divergence.md`, fifteen paths at fork HEAD `f90b12a7b`
-  (the ticket's own table undercounted at fourteen rows, missing
-  `test-layout.mjs`; see that doc's "How this was produced" for the
-  reconciliation).
+  `docs/fork-upstream-touchpoints.md`, **13 modified upstream files** measured
+  at fork commit `bbad1b8a4`. For why that is 13 and not the 14 or 15 other
+  commands return, see that document's "Reconciling the counts: 13, 14 and 15".
 - [x] Load-bearing lines are called out, `sim_header.tsx`'s wrapper
   included — with the `ab59127d9` merge commit's reasoning quoted.
 - [x] Each entry says upstream-candidate or local-only.
 - [x] The `sim.ts` `iterations` parameter is wired up or reverted — reverted;
   `sim.ts` now has zero diff against upstream `ec5c5f205`.
 
-## Resolution note
+## Resolution
 
-The stale-SHA correction and the revert decision for item 3 were settled
-before this pass started (see the worker prompt that dispatched this
-close-out); this session verified both against the current fork HEAD rather
-than re-deriving them. Full detail is in `docs/fork-upstream-divergence.md`.
+Closed at `21d0b37` with `docs/fork-upstream-divergence.md`, written by a
+second session that answered this ticket concurrently. That document has since
+been **superseded** by
+[`docs/fork-upstream-touchpoints.md`](../../../docs/fork-upstream-touchpoints.md)
+and deleted, in the commit that folded its merge-conflict framing into the
+surviving ledger. One ticket, one document.
 
-## Resolution (2026-09-11)
-
-Closed by [`docs/fork-upstream-touchpoints.md`](../../../docs/fork-upstream-touchpoints.md),
-written on `docs/fork-upstream-touchpoints`. All four acceptance boxes are met:
+All four acceptance boxes are met:
 
 - [x] A tracked file lists every diverging upstream path with its reason — 13
       files, each with what changed, why, load-bearing lines, avoidability
       (labelled as judgement) and per-file `+/−` from `git diff --numstat`.
 - [x] Load-bearing lines are called out, `sim_header.tsx`'s wrapper included —
       and the audit found it is **worse** than this ticket recorded: there are
-      three non-null assertions, and the one targeting the wrapper div throws
-      during header construction rather than merely losing the fade.
+      three non-null assertions, and at `bbad1b8a4` the one targeting the
+      wrapper div throws during header construction rather than merely losing
+      the fade. At `5e9013b78` (pinned by `fix/sim-header-null-assertion`) it is
+      guarded and degrades to a lost fade instead.
 - [x] Each entry says upstream-candidate or local-only — four qualify
       (`item_sets.go`, `test-locales.mjs`, and `sim_header.tsx` + `_header.scss`
       as one paired change).
@@ -127,6 +127,10 @@ Two corrections to this ticket's own table, both now superseded by the document:
 `ui/core/sim.ts` is no longer a diverging path (reverted), and `test-layout.mjs`
 is an **added** file rather than a modification, so it is judged on placement
 instead of diff size. The count is still 13, but not the same 13.
+
+A third number in this ticket's table has moved since: `sim_header.tsx` measures
+50/15 at `bbad1b8a4` and **51/15** at `5e9013b78`, the commit that guards the
+null assertion. The surviving document records both.
 
 The document also goes past this ticket's scope, because the owner sharpened the
 requirement after it was filed: it adds per-file avoidability recommendations, a
