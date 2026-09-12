@@ -1,4 +1,5 @@
 Status: closed
+Closed: 21d0b37
 Type: chore
 Origin: owner question, 2026-09-10 — "we should not be fucking with their code"
 Blocks: none
@@ -84,24 +85,23 @@ and only the merge commit body records that.
 
 ## Acceptance
 
-- [ ] A tracked file lists every diverging upstream path with its reason.
-- [ ] Load-bearing lines are called out, `sim_header.tsx`'s wrapper included.
-- [ ] Each entry says upstream-candidate or local-only.
-- [ ] The `sim.ts` `iterations` parameter is wired up or reverted.
+- [x] A tracked file lists every diverging upstream path with its reason —
+  `docs/fork-upstream-divergence.md`, fifteen paths at fork HEAD `f90b12a7b`
+  (the ticket's own table undercounted at fourteen rows, missing
+  `test-layout.mjs`; see that doc's "How this was produced" for the
+  reconciliation).
+- [x] Load-bearing lines are called out, `sim_header.tsx`'s wrapper
+  included — with the `ab59127d9` merge commit's reasoning quoted.
+- [x] Each entry says upstream-candidate or local-only.
+- [x] The `sim.ts` `iterations` parameter is wired up or reverted — reverted;
+  `sim.ts` now has zero diff against upstream `ec5c5f205`.
 
-## Related tickets, both already handling this correctly
+## Resolution note
 
-- **311** — the hunter guard's origin. The audit confirms its
-  "upstream-candidate" claim holds: `applyItemEffects` dispatches by item id
-  with no class check, so a mail item a paladin can wear runs hunter code and
-  panics. Real upstream bug, minimal fix, encodes nothing about our tab. Note it
-  fixes one of eight class packages carrying the same unguarded pattern.
-- **364** — proposes editing `sim/druid/forms.go`, and is **the one that would
-  move sim numbers**. The ticket says so and refuses to act for that reason,
-  requiring a feral re-baseline first. Correctly filed rather than fixed.
-- **366** — proposes editing `sim/core/database.go`, and names the concern
-  unprompted: "This is upstream's code, not ours." Declines to fix. The real fix
-  was on our side and is already done.
+The stale-SHA correction and the revert decision for item 3 were settled
+before this pass started (see the worker prompt that dispatched this
+close-out); this session verified both against the current fork HEAD rather
+than re-deriving them. Full detail is in `docs/fork-upstream-divergence.md`.
 
 ## Resolution (2026-09-11)
 
@@ -136,6 +136,20 @@ adversarially reviewed (Opus) against the specific failure mode of an
 undercounted modified-file list; the reviewer independently re-derived the set
 and confirmed no renames, deletions, mode changes or submodule pointers hide
 additional upstream touchpoints.
+
+## Related tickets, both already handling this correctly
+
+- **311** — the hunter guard's origin. The audit confirms its
+  "upstream-candidate" claim holds: `applyItemEffects` dispatches by item id
+  with no class check, so a mail item a paladin can wear runs hunter code and
+  panics. Real upstream bug, minimal fix, encodes nothing about our tab. Note it
+  fixes one of eight class packages carrying the same unguarded pattern.
+- **364** — proposes editing `sim/druid/forms.go`, and is **the one that would
+  move sim numbers**. The ticket says so and refuses to act for that reason,
+  requiring a feral re-baseline first. Correctly filed rather than fixed.
+- **366** — proposes editing `sim/core/database.go`, and names the concern
+  unprompted: "This is upstream's code, not ours." Declines to fix. The real fix
+  was on our side and is already done.
 
 ## What is NOT claimed
 
