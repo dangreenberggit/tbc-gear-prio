@@ -1,0 +1,87 @@
+﻿# reconciliation.txt — A3, re-derived 2026-09-12 by the Phase A executor
+
+Clone F = C:\Users\dgree\Code\lulz\tbc-gear-prio\vendor\tbc-new-fork, HEAD at run time = bbad1b8a4 (detached, clean).
+Upstream base EC = ec5c5f205e61049d730e460967f8488774a7fe2a
+Pins: f90b12a7b = f90b12a7bee9268426f3a36a9d6c7c718a6cf5e1 ; bbad1b8a4 = bbad1b8a4325d8168758a909a520cf4dced875f6 ; 5e9013b78 = 5e9013b78b720b32a5cf340f5f2fbda741665be5
+
+## 1. Session A's set — modified upstream files (M rows), at bbad1b8a4
+git -C F diff --name-status -M ec5c5f205e61049d730e460967f8488774a7fe2a..bbad1b8a4325d8168758a909a520cf4dced875f6 | Where-Object { \ -match '^M' }
+M	.gitignore
+M	assets/locales/en/translation.json
+M	package-lock.json
+M	package.json
+M	schemas/translation.schema.json
+M	sim/hunter/item_sets.go
+M	test-locales.mjs
+M	tsconfig.json
+M	ui/core/components/gear_picker/item_list.tsx
+M	ui/core/components/sim_header.tsx
+M	ui/core/individual_sim_ui.tsx
+M	ui/scss/core/components/individual_sim_ui/index.scss
+M	ui/scss/core/sim_ui/_header.scss
+COUNT = 13   (expected 13)
+
+## 2. Same command at 5e9013b78
+COUNT = 13   (expected 13 — the row count does not move with the sim_header commit)
+
+## 3. Session B's pathspec command at f90b12a7b (B15)
+git -C F diff --name-only ec5c5f205e61049d730e460967f8488774a7fe2a..f90b12a7bee9268426f3a36a9d6c7c718a6cf5e1 -- ':!*upgrades*' ':!*_upgrades*'
+.gitignore
+assets/locales/en/translation.json
+package-lock.json
+package.json
+schemas/translation.schema.json
+sim/hunter/item_sets.go
+test-layout.mjs
+test-locales.mjs
+tsconfig.json
+ui/core/components/gear_picker/item_list.tsx
+ui/core/components/sim_header.tsx
+ui/core/individual_sim_ui.tsx
+ui/core/sim.ts
+ui/scss/core/components/individual_sim_ui/index.scss
+ui/scss/core/sim_ui/_header.scss
+COUNT = 15   (expected 15)
+
+## 4. Same pathspec command at bbad1b8a4 (B14) and 5e9013b78
+COUNT at bbad1b8a4 = 14   (expected 14)
+COUNT at 5e9013b78 = 14   (expected 14)
+ui/core/sim.ts is absent from both: it was reverted at bbad1b8a4 and git diff --name-only
+does not list a file whose diff is empty.
+
+## 5. ui/core/sim.ts has zero diff at bbad1b8a4
+git -C F diff --stat ec5c5f205e61049d730e460967f8488774a7fe2a..bbad1b8a4325d8168758a909a520cf4dced875f6 -- ui/core/sim.ts
+OUTPUT: (empty)
+
+## 6. sim_header.tsx numstat
+at bbad1b8a4: 50	15	ui/core/components/sim_header.tsx
+at 5e9013b78: 51	15	ui/core/components/sim_header.tsx
+
+## 7. Set comparison 1 — A vs (B15 minus {test-layout.mjs, ui/core/sim.ts})
+Compare-Object -ReferenceObject A -DifferenceObject B15minus
+OUTPUT: (no output) — the two sorted 13-path lists are IDENTICAL.
+A count = 13 ; B15minus count = 13
+
+## 8. Set comparison 2 — B14 vs (A plus test-layout.mjs)
+OUTPUT: (no output) — B14 is exactly A plus test-layout.mjs.
+
+## Conclusion
+RECONCILED: 15 - {test-layout.mjs, ui/core/sim.ts} == 13
+
+Why the two extra paths are not upstream divergence:
+  test-layout.mjs  — an ADDED file (ours), not a modification of a file upstream had.
+                     Session B's pathspec returns it because it matches neither
+                     '*upgrades*' nor '*_upgrades*'. B's own table marked it as not
+                     divergence.
+  ui/core/sim.ts   — modified at f90b12a7b, then REVERTED at bbad1b8a4 to byte-identical
+                     with upstream. Zero diff, so --name-only stops listing it (section 5).
+
+Session B's 'the ticket undercounted by two' reading was WRONG. It compared a pathspec
+count (which includes one added file and one since-reverted file) against a count of
+MODIFIED UPSTREAM FILES. They answer different questions. 13 is a deliberate scope, not
+a miscount, and B's own table already marked both extra rows as not divergence.
+
+Note on 'returns ui/core/sim.ts with a diff-stat of 0': session B's document says this.
+It is inaccurate — at bbad1b8a4 the pathspec command does NOT return ui/core/sim.ts at
+all (14 paths, section 4), because git diff --name-only omits zero-diff files entirely.
+The fold must not carry that sentence (C17).
