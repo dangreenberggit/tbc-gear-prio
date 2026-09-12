@@ -1,0 +1,222 @@
+﻿# state-at-exec — A0 re-verification, 2026-09-12 (executor, Phase A)
+
+All commands from PowerShell. R = C:\Users\dgree\Code\lulz\tbc-gear-prio ; F = C:\Users\dgree\Code\lulz\tbc-gear-prio\vendor\tbc-new-fork
+
+## C1 — dev position, branch, clean tree
+git -C R branch --show-current     -> dev
+git -C R rev-parse --short dev     -> a2a4295
+git -C R rev-parse dev             -> a2a42954311e08b252070cad4a667d3da9c15355
+git -C R status --porcelain        -> (empty)
+MATCHES C1 (checkout is dev, a2a4295, clean).
+
+## C2 — ahead/behind vs dev (braced ranges)
+fix/sim-header-null-assertion      ahead=3   behind=8   merge-base=624eb3c7302f8b72dfe9aae5a580c6e16cce520e
+feat/spec-registry                 ahead=14  behind=8   merge-base=624eb3c7302f8b72dfe9aae5a580c6e16cce520e
+docs/fork-upstream-touchpoints     ahead=1   behind=8   merge-base=624eb3c7302f8b72dfe9aae5a580c6e16cce520e
+docs/reconciliation-design         ahead=0   behind=8   merge-base=624eb3c7302f8b72dfe9aae5a580c6e16cce520e
+feat/reforge-catchup-leftovers     ahead=0   behind=23  merge-base=85cbe9cd59675405ead4760eba86172bd14bf533
+MATCHES the C2 table as written in revision 2: 3/8, 14/8, 1/8, 0/8, 0/23.
+Both 0-ahead branches appear in 'git branch --merged dev' (verified; full list not reproduced here).
+
+## C3 — dev lockfile pin and NEXT
+  "commit": "bbad1b8a4325d8168758a909a520cf4dced875f6",
+  "pushed": true,
+dev NEXT -> 376
+MATCHES C3 (bbad1b8a4..., pushed true, NEXT 376).
+
+## C4 — fork clone
+git -C F rev-parse --short HEAD -> bbad1b8a4
+git -C F symbolic-ref -q HEAD   -> rc 1 (1 = detached)
+git -C F status --porcelain     -> (empty)
+MATCHES C4.
+
+## C5 — pin ancestry
+f90b12a7b is-ancestor bbad1b8a4 -> rc 0
+bbad1b8a4 is-ancestor 5e9013b78 -> rc 0
+git -C F diff --stat bbad..5e90 ->
+ ui/core/components/sim_header.tsx | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+MATCHES C5 (linear, sim_header.tsx only, +4/-3).
+
+## C7 — merge-tree dev x feat/spec-registry (conflict paths)
+bdc2c4f153e83d0aeb6310d2afd2a8eab77fec4d
+.scratch/carry-forward/issues/NEXT
+.scratch/carry-forward/map.md
+
+Auto-merging .scratch/carry-forward/issues/NEXT
+CONFLICT (content): Merge conflict in .scratch/carry-forward/issues/NEXT
+Auto-merging .scratch/carry-forward/map.md
+CONFLICT (content): Merge conflict in .scratch/carry-forward/map.md
+Auto-merging packages/core/src/rank.ts
+MATCHES C7: conflicts on NEXT and map.md only.
+
+## C8 — merge-tree dev x fix/sim-header-null-assertion
+fc35b527a89dcfa946b60a6ee42189237101696e
+.scratch/carry-forward/issues/NEXT
+data/sim-implemented-effects.json
+data/wowsims-fork.lock.json
+
+Auto-merging .scratch/carry-forward/issues/NEXT
+CONFLICT (content): Merge conflict in .scratch/carry-forward/issues/NEXT
+Auto-merging data/sim-implemented-effects.json
+CONFLICT (content): Merge conflict in data/sim-implemented-effects.json
+Auto-merging data/wowsims-fork.lock.json
+CONFLICT (content): Merge conflict in data/wowsims-fork.lock.json
+MATCHES C8: NEXT, sim-implemented-effects.json, wowsims-fork.lock.json.
+
+## C22 — merge-tree dev x docs/fork-upstream-touchpoints
+b3d6f7dd989d49f12b49929f01404241fea5113a
+.scratch/carry-forward/issues/369-no-ledger-records-which-upstream-files-the-fork-diverges-on.md
+
+Auto-merging .scratch/carry-forward/issues/369-no-ledger-records-which-upstream-files-the-fork-diverges-on.md
+CONFLICT (content): Merge conflict in .scratch/carry-forward/issues/369-no-ledger-records-which-upstream-files-the-fork-diverges-on.md
+MATCHES C22: ticket 369 only.
+
+## C20 — ticket files and NEXT per branch
+--- feat/spec-registry ---
+.scratch/carry-forward/issues/370-nothing-tests-the-clear-before-swap-ordering.md
+.scratch/carry-forward/issues/371-two-stale-ret-feral-spec-allow-lists.md
+.scratch/carry-forward/issues/372-fork-clone-head-is-behind-the-lockfile-pin.md
+.scratch/carry-forward/issues/373-spec-registry-shape-review-smells.md
+NEXT = 374
+--- fix/sim-header-null-assertion ---
+.scratch/carry-forward/issues/370-nothing-tests-the-clear-before-swap-ordering.md
+.scratch/carry-forward/issues/371-ticket-372-diagnosis-is-inverted.md
+.scratch/carry-forward/issues/373-fork-upstream-touchpoints-sim-header-entry-stale.md
+NEXT = 374
+--- dev ---
+.scratch/carry-forward/issues/370-nothing-tests-the-clear-before-swap-ordering.md
+.scratch/carry-forward/issues/374-t5-pins-statement-order-not-the-cleared-argument.md
+.scratch/carry-forward/issues/375-bulk-wasm-tests-time-out-under-full-suite-load.md
+NEXT = 376
+--- docs/fork-upstream-touchpoints ---
+.scratch/carry-forward/issues/370-nothing-tests-the-clear-before-swap-ordering.md
+NEXT = 371
+merge-base 624eb3c NEXT = 371
+MATCHES C20 exactly (spec 371/372/373 NEXT 374; sim-header 371/373 NEXT 374; dev 374/375 NEXT 376; touchpoints NEXT 371 = merge-base).
+
+## A0 verdict
+Every stop condition passes. No deviation. Proceeding to A1.
+
+## A1 — branch deletions and the C26 grep
+git -C R checkout docs/fork-upstream-touchpoints -> current branch docs/fork-upstream-touchpoints (guard: neither deletion target)
+rev-list --count dev..docs/reconciliation-design      -> 0
+rev-list --count dev..feat/reforge-catchup-leftovers  -> 0
+git branch -d docs/reconciliation-design       -> rc 0, 'Deleted branch docs/reconciliation-design (was 624eb3c).'
+git branch -d feat/reforge-catchup-leftovers   -> rc 0, 'Deleted branch feat/reforge-catchup-leftovers (was 85cbe9c).'
+git branch --list <both>                       -> empty
+
+### C26 RESULT: REFUTED (deviation, flagged — not acted on)
+git grep -n reforge-catchup-leftovers dev -- . ':!vendor'  -> 49 hits.
+48 are historical (ticket origins, stage artifacts, reviews, verification log) as C26 predicted.
+ONE is a live false claim: dev:.scratch/carry-forward/map.md line 181, the pre-merge-review
+record for feat/reforge-catchup-leftovers @ 0d339c2, ends with the sentence 'NOT merged.'
+That is now false and measurably so:
+  git -C R rev-list --count 'dev..0d339c2'                       -> 0
+  git -C R merge-base --is-ancestor 0d339c2 dev                  -> rc 0
+  git -C R merge-base --is-ancestor 85cbe9c dev                  -> rc 0   (the branch tip A1 deleted)
+So C26's 'none says unmerged' is wrong; the plan's Out-of-scope rationale for not touching
+historical mentions rests on that refuted claim.
+ACTION TAKEN: none. Flagged, not adapted. dev:.scratch/carry-forward/map.md is not in the
+Paths manifest (map.md is listed only for edits on the three feature branches), and fixing a
+line on dev is impossible from here anyway — dev cannot be written to by this seat. The fix
+belongs on a branch the owner merges; it is one word ('NOT merged.' -> a merged-at note).
+A future reader of map.md would otherwise believe a merged branch is still outstanding.
+
+## A2 — merge dev into docs/fork-upstream-touchpoints
+git -C R merge dev -> rc 1, exactly one conflict as C22 predicted:
+  CONFLICT (content): .scratch/carry-forward/issues/369-...md
+Resolution: git checkout --theirs -- <369 path>  (theirs = dev, C36 confirmed:
+  the resulting file starts 'Status: closed / Closed: 21d0b37', which is dev's copy;
+  the branch copy has no Closed: line). Zero conflict markers left in the file.
+Then the branch's '## Resolution (2026-09-11)' section (34 lines, extracted verbatim from
+  git show HEAD:<path>) was re-appended with the Edit tool below dev's '## Resolution note'.
+  File endings are LF; the Edit tool preserves them (known-traps ss scripted edits).
+git -C R add -- <path>; git diff --name-only --diff-filter=U -> empty; no UU/AA/DU/UD.
+git -C R commit --no-edit -> d5b1b1c 'Merge branch ''dev'' into docs/fork-upstream-touchpoints'
+ACCEPTANCE (all pass):
+  diff-filter=U before commit          -> empty
+  merge-tree --write-tree dev HEAD     -> tree 818c07b6..., rc 0, no CONFLICT line
+  show HEAD:docs/fork-upstream-divergence.md  -> 139 lines (exists)
+  show HEAD:docs/fork-upstream-touchpoints.md -> 361 lines (exists)
+  show HEAD:.scratch/carry-forward/issues/NEXT -> 376
+  status --porcelain -> empty
+
+## A3 — reconciliation re-derived (STOP GATE: PASSED)
+Full output in S\reconciliation.txt. Summary:
+  A (M rows) at bbad1b8a4  = 13   (C14 expected 13)  MATCH
+  A (M rows) at 5e9013b78  = 13   (C14 expected 13)  MATCH
+  B pathspec at f90b12a7b  = 15   (C15 expected 15)  MATCH
+  B pathspec at bbad1b8a4  = 14   (C15 expected 14)  MATCH
+  B pathspec at 5e9013b78  = 14   (C15 expected 14)  MATCH
+  sim.ts diff --stat at bbad -> empty  (C17)          MATCH
+  sim_header numstat 50/15 at bbad, 51/15 at 5e90 (C18) MATCH
+  Compare-Object A vs B15minus      -> no output (identical)  C16 MATCH
+  Compare-Object B14 vs A+test-layout -> no output            MATCH
+RECONCILED: 15 - {test-layout.mjs, ui/core/sim.ts} == 13. Proceeding to A4.
+
+## A4 — fold, delete, repoint (commit 9c5a019)
+Eight document edits per the plan's item list, all applied with the Edit tool (LF preserved;
+CR byte count verified 0 in all three edited files before commit).
+Anchor slug script (python, Bash, no cd chain) -> printed OK:
+  HEADING: '### ui/core/sim.ts - resolved: the iterations parameter, reverted'
+  SLUG:    uicoresimts--resolved-the-iterations-parameter-reverted  == C13 expected
+docs/fork-phase-seams.md:22 and :51 both repointed; grep 'iterations' -> exactly 1 line, :51,
+  now naming fork-upstream-touchpoints.md#uicoresimts--resolved-the-iterations-parameter-reverted.
+git rm docs/fork-upstream-divergence.md -> rc 0.
+
+### DEAD END (cost one reset — do not repeat)
+'git add -A -- <4 explicit paths>' FAILED with
+  fatal: pathspec 'docs/fork-upstream-divergence.md' did not match any files
+because git rm had already removed it from the worktree AND staged the deletion, so naming
+the path explicitly in a later add matches nothing. git aborts the WHOLE add on that error,
+so the other three paths were never staged -- and the commit that followed captured only the
+already-staged deletion: '38913df ... 1 file changed, 163 deletions'. A partial commit that
+LOOKED successful (rc 0, plausible message).
+Recovery: confirmed 38913df was mine and the tip and on no remote (git branch -r --contains
+  -> empty), then 'git reset --soft HEAD~1' back to d5b1b1c, re-read git log -1 per AGENTS.md,
+  then 'git add -A -- docs .scratch/carry-forward/issues' (DIRECTORIES, not the deleted path).
+LESSON: after git rm, stage by directory with -A, never by the removed path.
+Re-committed as 9c5a019, 4 files changed, 241 insertions, 208 deletions, delete mode on the
+  divergence doc. status --porcelain empty afterwards.
+
+### A4 acceptance
+  stale 'throws at runtime if the div is ever merged away' in docs -> 0 hits   PASS
+  '### ui/core/sim.ts - resolved' heading count -> 1                          PASS
+  'What changed' in touchpoints.md -> present                                   PASS
+  grep iterations in fork-phase-seams.md -> exactly 1 line (:51)                PASS
+  git show HEAD --stat -> exactly the 4 named files                             PASS
+  slug script -> OK                                                             PASS
+  DEVIATION: 'fork-upstream-divergence' mention count is 5, plan expected 3 (see ledger).
+  markdown LINKS to the deleted file -> 0 (the substantive requirement)         PASS
+
+## A5a — reserve 376-380 (commit c2bfa00)
+NEXT 376 -> 381 (byte-checked: '381\\n', single-line diff).
+map.md gained one reservation line, appended via Bash printf (LF, no CR introduced).
+git show HEAD --stat -> exactly NEXT + map.md. show HEAD:.../NEXT -> 381. ACCEPTANCE PASS.
+
+## A5 — pre-merge review dispatched
+Pinned range: from-sha a2a42954311e08b252070cad4a667d3da9c15355 (merge-base dev...HEAD)
+              through-sha c2bfa00b954a19eee6de0d3480cc196c94e8ecde
+Diff non-empty: 957 lines, 6 files. Commits in range: c2bfa00, 9c5a019, d5b1b1c.
+codex NOT on PATH (Get-Command codex -> null), so option 1 of the skill's dispatch ladder
+  is unavailable; used option 2: fresh subagents on the review lane, Opus, four in parallel
+  (adversarial, domain, standards, spec). All four told explicitly to write nothing.
+Awaiting results.
+
+### Standards axis returned (first of four)
+S1 hard: docs cite reconciliation.txt and merge-order.md, neither tracked at c2bfa00.
+  -> TIMING ARTIFACT of the review's pinned range. A6 is the step that adds the .gitignore
+     allowlist line AND writes merge-order.md; it had not run when the axis was dispatched.
+     A6's commit resolves both halves. Will be verified after A6 lands and recorded as fixed.
+S2 hard: NEXT 376->381 with no ticket files, vs issue-tracker.md's 'increment in the same
+     commit as the new ticket'. This is DELIBERATE and is the plan's A5a step (F7 in the
+     plan review): a reservation, not an allocation. Disposition wontfix with reasoning.
+S3 judgement: the 13 files are tabulated twice in one document and the two tables already
+     DISAGREE - schemas/translation.schema.json 309/1 vs '+310 lines'; sim_header 50/15 in
+     the item-10 heading vs '50/15 at bbad; 51/15 at 5e90' in the count table.
+     -> REAL FINDING, introduced by my fold. Worth fixing now, cheap.
+S4 judgement: divergent change, one 669-line doc with two audiences. Deliberate per brief.
+S5 judgement: 'the superseded document' backward reference used ~12 times after one naming.
+     -> REAL and cheap to fix.
+Commit messages, durable claims, line endings: all reported clean.
