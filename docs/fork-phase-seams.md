@@ -16,6 +16,11 @@ For a different fork-vs-engine seam — how the tab dispatches sims, and the
 native bulk-sim + reforge path it does not use — see
 [`fork-tab-batch-sim-architecture.md`](fork-tab-batch-sim-architecture.md).
 
+For which upstream files this branch diverges on (a different question from
+phase seams: files with a changed upstream line, not tab code that behaves
+differently by tier), see
+[`fork-upstream-divergence.md`](fork-upstream-divergence.md).
+
 ## How this was produced
 
 Two read-only audits (2026-08-30, Opus review lane) over our fork diff
@@ -41,8 +46,9 @@ live phase moves — i.e. what to check when upgrading, not defects to fix now.
   code follows automatically — that is the whole reason nothing here is
   hardcoded. Do **not** bump this in our fork; let the target branch own it.
 - `ui/core/sim.ts` `getPhase()` (base `sim.ts:944`, default at `:105`) — returns
-  the sim's live phase, defaulting to `CURRENT_PHASE`. Upstream. Our `sim.ts`
-  change adds an optional `iterations?` param only — phase-neutral.
+  the sim's live phase, defaulting to `CURRENT_PHASE`. Upstream. `sim.ts` no
+  longer diverges from upstream at all — see
+  [`fork-upstream-divergence.md`](fork-upstream-divergence.md#item-3-the-simts-iterations-parameter--reverted).
 
 ### 2. Where our tab reads the live phase (the selection entry points)
 
