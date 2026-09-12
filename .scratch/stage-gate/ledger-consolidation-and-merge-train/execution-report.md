@@ -12,11 +12,17 @@ owner merge happened during this stage.
 
 | Branch | Tip | `NEXT` | `check_merge_ready.py` | `--check-only` |
 | --- | --- | --- | --- | --- |
-| `docs/fork-upstream-touchpoints` | `09891d3bf924e8e150a801f9face08aac0f5cc9e` | 381 | `merge-ready: ok` | rc 0, `check-only: ok (not merging)` |
+| `docs/fork-upstream-touchpoints` | `3fd616621fe1997d5aede246dd6f544c457535c7` | 381 | `merge-ready: ok` | rc 0, `check-only: ok (not merging)` |
 | `feat/spec-registry` | `ce746050eb41aed75a86a7c16bc41b9b77c8002b` | 379 | `merge-ready: ok` | rc 0, `check-only: ok (not merging)` |
 | `fix/sim-header-null-assertion` | `f90fe88e2cb8e346de5d80043c54427fab74158f` | 381 | `merge-ready: ok` | rc 0, `check-only: ok (not merging)` |
 
 `dev` is unmoved at `a2a42954311e08b252070cad4a667d3da9c15355`.
+
+The touchpoints tip above is the commit that added this report. The gate results
+in its row were measured at `0850362`, its parent-but-one; the two commits since
+add only this stage's own artifacts under `.scratch/stage-gate/`, and the gates
+were re-run on the final tip to confirm they still pass — see the last line of
+this section.
 
 Each `--check-only` runs `pnpm run verify` internally (`merge_to_dev.py:137-141`)
 and each one's `=== verify ===` stage passed, so verify is green on all three
@@ -25,6 +31,10 @@ tips. No standalone `pnpm verify` was run — it would have been a duplicate.
 `fix/sim-header-null-assertion` was proven with the clone at `5e9013b78`, the
 commit its lockfile pins. The other two were proven with the clone at
 `bbad1b8a4`.
+
+Re-run on the touchpoints tip `3fd6166` after this report was committed:
+`python scripts/check_merge_ready.py` → `merge-ready: ok`, rc 0; and
+`pnpm merge-to-dev --check-only` → rc 0, `check-only: ok (not merging)`.
 
 ### Fork clone
 
