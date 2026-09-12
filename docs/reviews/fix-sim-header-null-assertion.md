@@ -62,7 +62,7 @@ The positive half of the evidence _is_ real end-to-end: the built bundle
 constructs, seven tabs render through Upgrades, and the fade toggles on both the
 scroll and mutation paths.
 
-**A4 (major, now context rather than action) — ticket 372's diagnosis is
+**A4 (major, now context rather than action) — ticket 377's diagnosis is
 inverted.** It claims the pin moved ahead of the clone and warns "Do not bump
 the pin to `bbad1b8` — that is backwards." Ancestry proves the opposite:
 `f90b12a7b` → `bbad1b8a4` → `5e9013b78` is linear, both
@@ -129,16 +129,22 @@ lockfile comment asserting the opposite of what its own cited command returns.
 Domain: D1, a touchpoints entry left stale, unreachable from this branch.
 Standards: S1, ten over-length lines in the commit body.
 
-Two findings point at artifacts this review could not reach. Ticket 372 (A4) is
+Two findings point at artifacts this review could not reach. Ticket 377 (A4) is
 wrong in a way that would mislead the next person to read it, and it lives on
 `feat/spec-registry`; the touchpoints entry (D1) lives on
 `docs/fork-upstream-touchpoints`. Both are deferred rather than fixed, because
 editing another branch from this one would either lose the edit at merge or
 create a conflict nobody asked for. Each is filed as a carry-forward ticket —
-371 for the inverted diagnosis, 373 for the stale touchpoints entry — so the
-correction survives this branch. 372 is deliberately skipped: it is the number
-of the ticket 371 corrects, already allocated on `feat/spec-registry`, and
-reusing it here is exactly the collision the tracker warns about.
+379 for the inverted diagnosis, 380 for the stale touchpoints entry — so the
+correction survives this branch.
+
+These two were filed as 371 and 373, the same numbers `feat/spec-registry`
+had independently allocated for different tickets, because neither branch could
+see the other's `NEXT`. They were renumbered to 379 and 380 on 2026-09-12, and
+the ticket this one corrects was renumbered 372 → 377. Commit messages in this
+range still name the old numbers; the old→new map is in
+`.scratch/stage-gate/ledger-consolidation-and-merge-train/merge-order.md`
+§ Ticket renumber map.
 
 A note on how this file came to be written late. The review itself was not
 skipped or shortened — four axes ran with fresh context and reported in full.
@@ -149,16 +155,16 @@ claimed plus what was directly re-measured.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                     |
-| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | The lockfile `_comment` now names `bbad1b8a4` as the remote tip and `5e9013b78` as the one unpushed commit, with the `ls-remote` that shows it. `pushed: false` unchanged — it is still correct. Raised by all four axes.                                                                                                                                                                         |
-| A2  | Adversarial | fixed       | The commit body now names `ab59127d9` and gives `git rev-list --count ab59127d9..5e9013b78`, so the seven is re-runnable.                                                                                                                                                                                                                                                                         |
-| A3  | Adversarial | wontfix     | Evidence-quality note, no code change. The negative half of the reproduction proved a hand-copied closure throws, not the shipped constructor. The conclusion stands on source reading — `wrap` is null, `update()` runs unconditionally, `null.classList` throws. The positive half is real end-to-end.                                                                                          |
-| A4  | Adversarial | defer       | Ticket 372's diagnosis is inverted; ancestry is linear `f90b12a7b` → `bbad1b8a4` → `5e9013b78`, so bumping the pin forward was right. 372 lives only on `feat/spec-registry`, which this review must not touch. The owner merges that branch separately and corrects 372 on `dev` afterwards. `.scratch/carry-forward/issues/371-ticket-372-diagnosis-is-inverted.md`                             |
-| D1  | Domain      | defer       | `docs/fork-upstream-touchpoints.md` §10 still says 50/15 and "inferred from source, untested"; the file measures 51/15 and the crash was reproduced. The document exists only on branch `docs/fork-upstream-touchpoints` (`66b6d1c`), unreachable and out of bounds here. Fold in when that branch lands. `.scratch/carry-forward/issues/373-fork-upstream-touchpoints-sim-header-entry-stale.md` |
-| D2  | Domain      | wontfix     | Pre-existing upstream comment whose `ResizeObserver` reasoning reads as contradicting the observer two lines below it. Both are correct; only the wording is confusing. Not introduced by this fix — worth folding into any upstream PR that carries this guard.                                                                                                                                  |
-| S1  | Standards   | fixed       | Commit body re-wrapped to 72 columns; the ten over-length lines are gone.                                                                                                                                                                                                                                                                                                                         |
-| S2  | Standards   | fixed       | The "which commits are on the remote" sentence was **deleted** from the commit message rather than corrected — that bookkeeping belongs in the lockfile `_comment`, which now carries it (A1).                                                                                                                                                                                                    |
-| Sp1 | Spec        | wontfix     | Same substance as A3. Branch scope matches its stated intent exactly: two files, no `packages/` changes.                                                                                                                                                                                                                                                                                          |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | The lockfile `_comment` now names `bbad1b8a4` as the remote tip and `5e9013b78` as the one unpushed commit, with the `ls-remote` that shows it. `pushed: false` unchanged — it is still correct. Raised by all four axes.                                                                                                                                                                                            |
+| A2  | Adversarial | fixed       | The commit body now names `ab59127d9` and gives `git rev-list --count ab59127d9..5e9013b78`, so the seven is re-runnable.                                                                                                                                                                                                                                                                                            |
+| A3  | Adversarial | wontfix     | Evidence-quality note, no code change. The negative half of the reproduction proved a hand-copied closure throws, not the shipped constructor. The conclusion stands on source reading — `wrap` is null, `update()` runs unconditionally, `null.classList` throws. The positive half is real end-to-end.                                                                                                             |
+| A4  | Adversarial | defer       | Ticket 377's diagnosis is inverted; ancestry is linear `f90b12a7b` → `bbad1b8a4` → `5e9013b78`, so bumping the pin forward was right. 377 lives only on `feat/spec-registry`, which this review must not touch. That branch has since closed 377 itself with the same measurement, so the correction reaches `dev` when the owner merges it. `.scratch/carry-forward/issues/379-ticket-377-diagnosis-is-inverted.md` |
+| D1  | Domain      | defer       | `docs/fork-upstream-touchpoints.md` §10 still says 50/15 and "inferred from source, untested"; the file measures 51/15 and the crash was reproduced. The document exists only on branch `docs/fork-upstream-touchpoints` (`66b6d1c`), unreachable and out of bounds here. Fold in when that branch lands. `.scratch/carry-forward/issues/380-fork-upstream-touchpoints-sim-header-entry-stale.md`                    |
+| D2  | Domain      | wontfix     | Pre-existing upstream comment whose `ResizeObserver` reasoning reads as contradicting the observer two lines below it. Both are correct; only the wording is confusing. Not introduced by this fix — worth folding into any upstream PR that carries this guard.                                                                                                                                                     |
+| S1  | Standards   | fixed       | Commit body re-wrapped to 72 columns; the ten over-length lines are gone.                                                                                                                                                                                                                                                                                                                                            |
+| S2  | Standards   | fixed       | The "which commits are on the remote" sentence was **deleted** from the commit message rather than corrected — that bookkeeping belongs in the lockfile `_comment`, which now carries it (A1).                                                                                                                                                                                                                       |
+| Sp1 | Spec        | wontfix     | Same substance as A3. Branch scope matches its stated intent exactly: two files, no `packages/` changes.                                                                                                                                                                                                                                                                                                             |
 
 No finding blocks the merge.
