@@ -2104,9 +2104,10 @@ export function candidateSwapWithRepairs(
   // computes `fillOptsForSwap` from whatever array it is handed, so clearing
   // afterwards would leave a unique gem on the removed off-hand item still
   // counted in `usedUnique` and still blocking the candidate's own socket.
-  // Guarded by `two-hander-clears-offhand.test.ts` T5 (ticket 370): reversing
-  // these two statements fails only that test, leaving T1-T4 green — proof
-  // that this ordering, not any other part of the fix, is what T5 watches.
+  // Guarded by `two-hander-clears-offhand.test.ts` T5 (ticket 370), which
+  // goes red on either way of breaking this: reversing the two statements,
+  // or passing `equipment` below where `cleared` belongs (ticket 374
+  // measured both).
   const { equipment: cleared, removed } = clearOffHandForTwoHander(
     equipment,
     slotIndex,

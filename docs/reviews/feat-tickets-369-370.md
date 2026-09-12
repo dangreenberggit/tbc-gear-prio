@@ -15,13 +15,16 @@ parameter in the fork's `ui/core/sim.ts`).
 
 ## Adversarial
 
-**A1 — the guard is narrower than its comment claims.** `swapItemAt` takes the
-equipment array as a _parameter_ and computes `fillOptsForSwap` from whatever it
-is handed. So there are two ways to break the same behaviour: reverse the two
-statements (T5 catches it), or leave the order alone and pass `equipment`
-instead of `cleared` (T5 stays green — the removed off-hand's unique gem reaches
-`usedUnique` either way). The comment's "reversing these two statements fails
-only that test" is true but is not "this ordering is guarded". Filed as ticket 371.
+**A1 — the guard is narrower than its comment claims. FALSE, measured.** The
+axis argued that passing `equipment` where `cleared` belongs, statement order
+untouched, would slip past T5 because the unique gem reaches `usedUnique`
+either way. That was reasoned, not run. Applying exactly that mutation at
+`rank.ts:2116` turns T5 red (`expected 24033 to be 34831`) and the full file
+red on T1, T2, T4 and T5. The `usedUnique` argument is true of
+`fillOptsForSwap` in isolation and irrelevant to T5, which asserts on the gems
+the candidate ends up wearing — both mutations hand `swapItemAt` an array whose
+off hand is still worn. Ticket 374 is closed invalid; the `rank.ts` comment now
+records that T5 covers both.
 
 **A2 — the T5 red was unverified by that axis, and it said so.** Its read-only
 brief forbade mutating the tree, and its attempt to route around that with a
@@ -140,13 +143,13 @@ array passed), ran the file, and observed
 then restored from backup (`git status` clean of it afterwards). That mutation
 is broader than ticket 370's, which reversed statement order only and turned
 **T5 alone** red — the discrimination the ticket demanded. Both observations
-stand; neither is variant 2 of ticket 371, which nothing has yet run.
+stand; and variant 2 of ticket 374 was run afterwards, turning T5 red as well.
 
 ## Disposition
 
 | ID  | Axis        | Disposition      | Ticket / note                                                                                                 |
 | --- | ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer            | `.scratch/carry-forward/issues/371-t5-pins-statement-order-not-the-cleared-argument.md`                       |
+| A1  | Adversarial | wontfix          | Premise falsified by measurement — T5 catches both mutations; ticket 374 closed invalid                       |
 | A2  | Adversarial | fixed            | Mutation run directly by the orchestrator; red observed and recorded above                                    |
 | A3  | Adversarial | no change needed | Fixture and synthetic weights judged sound                                                                    |
 | A4  | Adversarial | no change needed | Pin bump self-consistent                                                                                      |
@@ -155,8 +158,8 @@ stand; neither is variant 2 of ticket 371, which nothing has yet run.
 | D2  | Domain      | wontfix          | Test is unharmed — no blue-capable unique competes on stamina. Narrowness noted here rather than reworded     |
 | D3  | Domain      | fixed            | Comment now says 19 of 20 presets omit stamina and `rogue/fallback` weights it 0.01                           |
 | S1  | Standards   | fixed            | "How this was produced" rewritten to state the current pin and keep the `f90b12a7b` substitution              |
-| S2  | Standards   | wontfix          | The T5 pointer is load-bearing for a future editor; ticket 371 will revisit the comment's claim               |
+| S2  | Standards   | wontfix          | The T5 pointer is load-bearing for a future editor; the comment now states what the measurement showed        |
 | S3  | Standards   | wontfix          | Kept: it names the intended failure mode and gives `NEXT_BEST_BLUE_GEM` its purpose                           |
 | S4  | Spec        | fixed            | Sentence now names both moved files and confines the claim to upstream-authored ones                          |
-| S5  | Spec        | defer            | `.scratch/carry-forward/issues/372-bulk-wasm-tests-time-out-under-full-suite-load.md`                         |
+| S5  | Spec        | defer            | `.scratch/carry-forward/issues/375-bulk-wasm-tests-time-out-under-full-suite-load.md`                         |
 | S6  | Standards   | wontfix          | Reviewer claim inverted — source side, not ported side; drift gate green                                      |
