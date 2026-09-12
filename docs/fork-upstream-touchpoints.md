@@ -22,6 +22,11 @@ So there are two categories, and they are not equally serious:
 This file is the durable record that requirement asks for. Read it before the
 next upstream merge and before opening any PR.
 
+**If you are here to merge from upstream, not to open a PR**, the section you
+need is "Merge-conflict view" below: it ranks the same files by conflict risk,
+records the one file that has already conflicted and how that was resolved, and
+names the two changes that must be treated as atomic.
+
 This is the single ledger for ticket 369. It supersedes
 `docs/fork-upstream-divergence.md`, which answered the same ticket from a second
 session and framed the same files by merge-conflict risk rather than by
@@ -324,12 +329,11 @@ sim);` inside the method at line 648, and `export function getSourceInfo(...)`
 at line 663. The near-symmetric +125/−114 is the tell: this is **moved text, not
 changed logic.** Verified mechanically rather than by eye: brace-matching both
 bodies from their declarations and removing **all** whitespace (`re.sub(r'\s+',
-'', body)`) gives **3030 characters on each side and an exact match**, so the
-move altered nothing. The normalisation rule matters and is stated here
-deliberately — collapsing only spaces and tabs instead gives 3504 vs 3503 and
-does _not_ match, because the move changed indentation depth. A merge resolving the move away
-while keeping our import breaks the tab's Source column at build time (loud, not
-silent).
+'', body)`) gives **3031 characters on each side and an exact match**, so the
+move altered nothing. Re-measured 2026-09-12; collapsing only spaces and tabs
+(`re.sub(r'[ \t]+', '', body)`) gives 3163 on each side and also matches, so
+either normalisation settles it. A merge resolving the move away while keeping
+our import breaks the tab's Source column at build time (loud, not silent).
 
 **Avoidability (judgement).** Reducible from 239 changed lines to about one. The
 original method is still present and still `private` at line 647. The extracted
@@ -339,7 +343,7 @@ diff — should let our tab call `ItemList.getSourceInfo(...)` with no extractio
 at all **(inferred; the `public static` variant has not been compiled)**. This
 is the second-biggest reduction after #2/#5.
 
-### 10. `ui/core/components/sim_header.tsx` — 50/15 — **upstream candidate**
+### 10. `ui/core/components/sim_header.tsx` — 50/15 at `bbad1b8a4` — **upstream candidate**
 
 **What.** Wraps the header's tab strip in a new `.sim-header-container-wrap` div
 and adds JavaScript toggling a `scrolled-to-end` class, so a fade at the right
@@ -359,7 +363,10 @@ re-indentation.
 **At `bbad1b8a4`** the result is not a degraded fade: the assertion yields
 `null` and the first `update()` throws during header construction. This was
 reproduced during the `fix/sim-header-null-assertion` review — see finding A3 in
-`docs/reviews/fix-sim-header-null-assertion.md`, and carry its caveat: the
+`docs/reviews/fix-sim-header-null-assertion.md`, which lands on `dev` only when
+that branch merges; until then read it with
+`git show fix/sim-header-null-assertion:docs/reviews/fix-sim-header-null-assertion.md`.
+Carry its caveat: the
 negative half of that reproduction ran a hand-copied method body rather than the
 shipped constructor, so it proved a hand-copied closure throws; the positive
 half is real end-to-end evidence, and the conclusion also stands on source
@@ -371,12 +378,17 @@ wrapper **degrades to a lost scroll-fade and no longer throws.** That commit is
 pinned by `fix/sim-header-null-assertion` and is not on `dev` yet; until it
 lands, the crash behaviour above is the live one.
 
-A second load-bearing choice, documented in the code comment at lines 57–61 and
-worth preserving: the observer must be a `MutationObserver` on `.sim-tabs`
-childList, **not** a `ResizeObserver`. `.sim-tabs` has `flex-wrap: nowrap`
-inside a flex row, so its border-box is fixed by the flex layout and only its
-_content_ overflows — which ResizeObserver does not report. "Simplifying" it to
-a ResizeObserver yields a fade that never updates
+A second load-bearing choice, documented in the code comment at lines 55–63 and
+worth preserving: **all three** triggers are needed, and they cover different
+events. The method wires a scroll listener, a `ResizeObserver` on
+`.sim-header-container`, and a `MutationObserver` on `.sim-tabs` childList
+(lines 74–76). The comment's point is not that ResizeObserver is wrong — it is
+that ResizeObserver alone **never fires from `addTab()`**: `.sim-tabs` has
+`flex-wrap: nowrap` inside a flex row, so its own border-box is fixed by the
+flex layout and only its _content_ overflows, which ResizeObserver does not
+report. The MutationObserver is what catches a tab being added or removed; the
+scroll listener separately covers the user scrolling to the end. Dropping any
+one of the three yields a fade that is stale for that trigger
 **(the rationale is quoted from the code comment; the failure is inferred,
 untested)**.
 
@@ -445,7 +457,8 @@ being "new" does not by itself make its location uncontroversial.
 
 ### `test-layout.mjs` — repo root, 809 lines — **placement is intrusive**
 
-The superseded document's pathspec command returns this file, because
+The pathspec command from the superseded `docs/fork-upstream-divergence.md`
+returns this file, because
 `test-layout.mjs` matches neither `*upgrades*` nor `*_upgrades*`. That is why
 that document counted 15 where this one counts 13. **It is not upstream
 divergence** — it is a new file of ours, so it is judged here on placement
@@ -486,11 +499,26 @@ the surprising choice.
 ## Merge-conflict view (folded from fork-upstream-divergence.md)
 
 The sections above judge these files by **upstream-PR impact**. This section
-judges the same files by **risk on the next merge from upstream** — the
-superseded document's framing, carried across whole so that framing is not
-lost. Read it before any merge from upstream.
+judges the same files by **risk on the next merge from upstream** — the framing
+of the superseded `docs/fork-upstream-divergence.md`, carried across whole so
+that framing is not lost. Read it before any merge from upstream.
 
 ### Files by risk on the next upstream merge
+
+Same 13 files as Category B above, plus `test-layout.mjs` marked as not
+divergence. Line counts here are measured at `bbad1b8a4`, the same base as the
+Category B table — where the superseded document quoted counts from the older
+pin `f90b12a7b`, they have been re-measured rather than copied.
+
+This table keeps the superseded document's fourth column as **risk on the next
+merge**. Its upstream-candidate/local-only judgement is **not** carried here,
+because Category B above re-judged three of those files against the owner's
+PR-impact requirement and reached the opposite answer: `item_list.tsx` from
+upstream-candidate to local-only (it is reducible to about one line, so there is
+little to send), and `sim_header.tsx` and `_header.scss` from local-only to
+upstream candidates (an overflowing tab strip with no scroll cue is an existing
+upstream defect our seventh tab exposed). Category B's column is the current
+one.
 
 | Path                                                   | What changed                                                                                                                                                         | Why                                                                                                                                                              | Risk on next merge                                                          |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -502,8 +530,8 @@ lost. Read it before any merge from upstream.
 | `ui/scss/core/sim_ui/_header.scss`                     | +28 lines, fade mask pairing with `sim_header.tsx`                                                                                                                   | Styles the wrapper div above                                                                                                                                     | Low                                                                         |
 | `ui/scss/core/components/individual_sim_ui/index.scss` | +1 import                                                                                                                                                            | Pulls in our tab's scss                                                                                                                                          | Nil                                                                         |
 | `test-locales.mjs`                                     | Fixes a Windows `path.join`/glob bug that made the gate exit 0 having validated nothing; adds a `validatedCount` guard so a silently-empty glob fails loudly instead | Genuine upstream bug — the gate was passing on Windows while validating zero files                                                                               | Low                                                                         |
-| `assets/locales/en/translation.json`                   | +92 lines                                                                                                                                                            | Our tab's own strings, under an `upgrades_tab` key                                                                                                               | Low                                                                         |
-| `schemas/translation.schema.json`                      | +310 lines                                                                                                                                                           | Schema entry the locale gate requires for the additive strings above                                                                                             | Low                                                                         |
+| `assets/locales/en/translation.json`                   | 92/0                                                                                                                                                                 | Our tab's own strings, under an `upgrades_tab` key                                                                                                               | Low                                                                         |
+| `schemas/translation.schema.json`                      | 309/1 — and the `required` array gains a member, so this is not purely additive; see item 5 above                                                                    | Schema entry the locale gate requires for the additive strings above                                                                                             | Low                                                                         |
 | `package.json`                                         | +1 line, `test:layout` script                                                                                                                                        | Registers our layout-gate tooling                                                                                                                                | Nil                                                                         |
 | `tsconfig.json`                                        | +1 line, `allowImportingTsExtensions`                                                                                                                                | Needed by our tab's own module layout                                                                                                                            | Low                                                                         |
 | `.gitignore`                                           | +3 lines                                                                                                                                                             | Ignores a local WCL-credentials file our tab's importer reads                                                                                                    | Nil                                                                         |
@@ -599,7 +627,10 @@ the **complete** sweep at fork HEAD, not a sample:
 git -C vendor/tbc-new-fork grep -c -iE "ticket [0-9]+|WP[0-9] defect|\(this repo\)" bbad1b8a -- .
 ```
 
-25 files, 173 references. Ranked:
+25 files. The command above counts matching **lines** and sums to 171;
+re-running it with `-o` counts matching **references** and gives 178, because
+some lines carry more than one. Both re-measured 2026-09-12. Ranked by matching
+lines per file:
 
 | File                                        | Refs   |
 | ------------------------------------------- | ------ |
