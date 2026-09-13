@@ -68,7 +68,7 @@ never ran". No vocabulary could have — the gate reads a word in a cell.
 
 ## The open items, in the order I would take them
 
-### 1. Push — the real exposure, and the owner is undecided
+### 1. Push (highest risk, owner undecided)
 
 **`dev` is 535 commits ahead of `origin/dev`, which last moved 2026-08-21. The
 feature branch has never been pushed at all.** So **CI has never run on any of
