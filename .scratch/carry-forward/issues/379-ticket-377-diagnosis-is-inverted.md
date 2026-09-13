@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-09-12 — 377's correction reached `dev`; see Resolution below
 Type: task
 Origin: docs/reviews/fix-sim-header-null-assertion.md
 Formerly: 371 on fix/sim-header-null-assertion, renumbered 2026-09-12 to clear
@@ -7,7 +8,29 @@ still name the old number; see
 `.scratch/stage-gate/ledger-consolidation-and-merge-train/merge-order.md`
 § Ticket renumber map.
 Blocks: none
-Blocked by: branch `feat/spec-registry` landing on dev
+Blocked by: branch `feat/spec-registry` landing on dev — met 2026-09-12
+
+## Resolution — 2026-09-12
+
+`feat/spec-registry` merged into `dev` at `8a54484`, carrying 377's own closure
+with it. Confirmed on `dev` rather than assumed from the merge:
+
+```
+git show dev:.scratch/carry-forward/issues/377-fork-clone-head-is-behind-the-lockfile-pin.md
+  Status: closed
+```
+
+The ancestry this ticket rests on was re-measured independently before the
+merge train ran, in the clone:
+
+```
+git -C vendor/tbc-new-fork merge-base --is-ancestor bbad1b8a4 5e9013b78   # rc 0
+```
+
+So the chain `f90b12a7b` → `bbad1b8a4` → `5e9013b78` is linear, the clone held
+the newer commit, and bumping the pin forward was right — which is what 377 had
+backwards. Nothing in this ticket needed an edit; it was waiting on the
+correction reaching `dev`, and it has.
 
 # Ticket 377 (filed as 372 on `feat/spec-registry`, renumbered) is inverted
 

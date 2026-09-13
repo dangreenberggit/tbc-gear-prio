@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-09-12 — condition met, verified on `dev`; see Resolution below
 Type: task
 Origin: docs/reviews/fix-sim-header-null-assertion.md
 Formerly: 373 on fix/sim-header-null-assertion, renumbered 2026-09-12 to clear
@@ -56,3 +57,31 @@ this file.
 
 When `docs/fork-upstream-touchpoints` lands on `dev`, confirm §10 reads as
 described above and close this ticket. No edit should be needed.
+
+## Resolution — 2026-09-12
+
+`docs/fork-upstream-touchpoints` merged into `dev` at `0072f03`. §10 was then
+confirmed on `dev` itself, by counting the strings rather than reading around
+them, since three of the four claims are about text being absent or present:
+
+```
+git show dev:docs/fork-upstream-touchpoints.md
+  table row 10        -> 50/15 at `bbad1b8a4`; 51/15 at `5e9013b78`
+  "inferred from source" -> 0 occurrences
+  "hand-copied"          -> 2 occurrences
+  behaviour split        -> "At `bbad1b8a4` ... the first `update()` throws
+                            during header construction"
+```
+
+All four claims hold: both pins recorded, the untested tag gone, the behaviour
+split by fork commit, and finding A3's caveat about the hand-copied method body
+carried across.
+
+**One discrepancy, recorded rather than smoothed over.** This ticket said both
+the table row *and* the item heading would carry both pins. The table row does;
+the heading still reads ``### 10. `ui/core/components/sim_header.tsx` — 50/15 at
+`bbad1b8a4` — **upstream candidate**``, naming only the older pin. Not worth a
+ticket — the heading is a section label, the row beneath it is the inventory
+entry, and no claim in the document is wrong as a result — but it is a real
+difference from what this ticket predicted, so it is written down instead of
+being read as a match.
