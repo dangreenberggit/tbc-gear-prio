@@ -38,6 +38,7 @@ import argparse
 import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +49,23 @@ DISPOSITION_RE = re.compile(
     r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
     re.IGNORECASE | re.MULTILINE,
 )
+
+# Every `## Disposition` section, not just the first, and headings carrying
+# trailing text (`## Disposition (round 3)`) included. `re.search` on an
+# anchor demanding a bare heading read one section and skipped the rest --
+# tickets 85 and 381. A reviewer who appended a second table got a green gate
+# over rows nobody checked, which is the dangerous direction to be wrong in.
+SECTION_RE = re.compile(r"(?ms)^## Disposition\b[^\n]*\n(.*?)(?=^## |\Z)")
+
+# A heading at any level whose text starts with `Disposition`. `SECTION_RE`
+# only sees level 2, so this is the census that makes a `### Disposition` or a
+# `## Dispositions` visible instead of silently contributing no rows. All 68
+# such headings in `docs/reviews/` are level 2 today, so this fires on nothing
+# now and catches the shape that would otherwise vanish.
+DISPOSITION_HEADING_RE = re.compile(r"(?im)^\s{0,3}#{1,6}\s+Disposition\b")
+
+# A line a human reads as a table row: starts and ends with a pipe.
+ROW_SHAPED_RE = re.compile(r"(?m)^\s*\|.*\|\s*$")
 # Bold (`**Status:** open`) and plain (`Status: open`) both parse: tickets 88
 # and 89 used the bold form and the anchored pattern missed them, so both
 # reported as having no status and vanished from the open count and from
@@ -152,19 +170,96 @@ def review_path(branch: str) -> Path:
     return REVIEWS / f"{branch.replace('/', '-')}.md"
 
 
+@dataclass
+class DispositionScan:
+    """What every `## Disposition` section in a review file contains.
+
+    `rows` is what the gate validates. The rest is what makes an under-read
+    *visible*: `disposition rows: 9` reads identically whether it is 9 of 9 or
+    9 of 61, and that ambiguity is how tickets 85 and 381 stayed open. A
+    denominator plus the lines that did not parse turns a silent skip into a
+    failure naming a line number.
+    """
+
+    rows: list[dict] = field(default_factory=list)
+    sections: int = 0
+    header_rows: int = 0
+    candidates: int = 0
+    unparsed: list[tuple[int, str]] = field(default_factory=list)
+    disposition_headings: int = 0
+
+
+def _row_cells(line: str) -> list[str]:
+    """Cells of a pipe line, split on unescaped `|` only.
+
+    A `\\|` inside a cell is content -- `feat-drift-warner-proven.md:209`
+    writes `pnpm verify 2>&1 \\| wc -l` in a note -- so splitting on every
+    pipe would miscount the columns and misread the row.
+    """
+    return [p.strip() for p in re.split(r"(?<!\\)\|", line.strip())[1:-1]]
+
+
+def _is_header_or_separator(cells: list[str]) -> bool:
+    """A header (`| ID | Axis | ... |`) or a `| --- | --- |` separator.
+
+    Neither is a finding, so neither counts toward the denominator.
+    """
+    if not cells:
+        return True
+    if cells[0].lower() in ("id", "---"):
+        return True
+    return all(c and set(c) <= {"-", ":"} for c in cells)
+
+
+def scan_disposition(text: str) -> DispositionScan:
+    """Every Disposition section's rows, plus what did not parse.
+
+    Rows are concatenated across sections: a second `## Disposition (round 3)`
+    table is part of the same review and its `defer` rows bind the same way.
+
+    A row-shaped line the row pattern cannot read becomes an `unparsed` entry
+    with its 1-based line number rather than disappearing. That is the whole
+    point -- a 3- or 5-column table is exactly what a human reads as rows and
+    what the parser cannot, so it must fail loudly instead of counting zero.
+    """
+    text = text.replace("\r\n", "\n")
+    scan = DispositionScan()
+    scan.disposition_headings = len(DISPOSITION_HEADING_RE.findall(text))
+
+    for m in SECTION_RE.finditer(text):
+        scan.sections += 1
+        body = m.group(1)
+        line_offset = text[: m.start(1)].count("\n")
+
+        for match in DISPOSITION_RE.finditer(body):
+            fid, axis, disp, note = (g.strip() for g in match.groups())
+            if fid.lower() in ("id", "---") or set(fid) <= {"-"}:
+                continue
+            scan.rows.append(
+                {"id": fid, "axis": axis, "disposition": disp.lower(), "note": note}
+            )
+
+        # Walk the body by line rather than searching for each matched line's
+        # text: two identical rows in one section (a repeated separator, or a
+        # row duplicated across rounds) both resolve to the first occurrence
+        # under `str.index`, so a FAIL would name the wrong line -- the exact
+        # "message names the wrong cause" defect this reporting exists to end.
+        for offset, raw in enumerate(body.split("\n")):
+            if not ROW_SHAPED_RE.match(raw):
+                continue
+            line_no = line_offset + offset + 1
+            cells = _row_cells(raw)
+            if _is_header_or_separator(cells):
+                if cells and cells[0].lower() == "id":
+                    scan.header_rows += 1
+                continue
+            scan.candidates += 1
+
+    return scan
+
+
 def parse_disposition(text: str) -> list[dict]:
-    m = re.search(r"(?ms)^## Disposition\s*\n(.*?)(?=^## |\Z)", text)
-    if not m:
-        return []
-    rows = []
-    for match in DISPOSITION_RE.finditer(m.group(1)):
-        fid, axis, disp, note = (g.strip() for g in match.groups())
-        if fid.lower() in ("id", "---") or set(fid) <= {"-"}:
-            continue
-        rows.append(
-            {"id": fid, "axis": axis, "disposition": disp.lower(), "note": note}
-        )
-    return rows
+    return scan_disposition(text).rows
 
 
 def ticket_path_from_note(note: str) -> Path | None:
