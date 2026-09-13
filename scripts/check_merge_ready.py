@@ -58,8 +58,14 @@ _CELL = r"(?:\\\||[^|])"
 # one mistyped row among good ones was invisible, and `deferred` -- the
 # natural English spelling -- is exactly that mistake. Parse permissively,
 # then validate against DISPOSITIONS so the word is named in a failure.
+# Leading and trailing whitespace are tolerated because Markdown renders an
+# indented table as a normal one. The row pattern used to demand `^\|` while
+# the candidate scan allowed `^\s*\|`, so an indented row counted toward the
+# denominator, matched neither list, and slipped through the all-clean branch
+# as `merge-ready: ok` -- the silent drop this file exists to end, reintroduced
+# by the fix for it.
 DISPOSITION_RE = re.compile(
-    rf"^\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}*?)\s*\|$",
+    rf"^[ \t]*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}*?)\s*\|[ \t]*$",
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -256,7 +262,11 @@ def scan_disposition(text: str) -> DispositionScan:
 
         for match in DISPOSITION_RE.finditer(body):
             fid, axis, disp, note = (g.strip() for g in match.groups())
-            if fid.lower() in ("id", "---") or set(fid) <= {"-"}:
+            # One classifier, shared with the candidate walk below. These were
+            # two separately-worded rules and they disagreed: a row this loop
+            # skipped could be a line the walk thought parseable, so it landed
+            # in neither list and disappeared.
+            if _is_header_or_separator([fid, axis, disp, note]):
                 continue
             scan.rows.append(
                 {"id": fid, "axis": axis, "disposition": disp.lower(), "note": note}
@@ -594,6 +604,17 @@ def check(
             f"but only {scan.sections} '## Disposition' section(s) were parsed"
         )
 
+    # A candidate that reached neither list is a row nobody checked. The
+    # denominator would show it (`0 parsed of 1`) and every other branch would
+    # still pass, so say it outright rather than trusting a reader to notice.
+    leaked = scan.candidates - len(rows) - len(scan.unparsed)
+    if leaked > 0:
+        errors.append(
+            f"{leaked} row-shaped line(s) were neither parsed nor reported — "
+            f"{scan.candidates} candidate(s), {len(rows)} parsed, "
+            f"{len(scan.unparsed)} reported unparsed"
+        )
+
     if scan.sections == 0:
         errors.append(
             "review has no ## Disposition section "
@@ -609,7 +630,7 @@ def check(
             "(`| ID | Axis | Disposition | Ticket / note |`) and its separator "
             "even when there are no findings"
         )
-    elif not rows and not scan.unparsed:
+    elif not rows and not scan.unparsed and scan.candidates == 0:
         # Every axis clean. A row disposes of a finding, so no findings means
         # no rows -- that is a pass, not an empty table to complain about.
         print(f"{denominator} (no findings)")
@@ -1134,6 +1155,68 @@ def check_all_clean_review_is_distinguishable_from_no_table() -> list[str]:
     return []
 
 
+def check_indented_row_is_not_silently_dropped() -> list[str]:
+    """Markdown renders an indented table normally, so the gate must too.
+
+    The row pattern demanded `^|` while the candidate walk allowed `^\\s*|`,
+    so an indented row counted toward the denominator and reached neither
+    `rows` nor `unparsed` — a `defer` with no ticket passed as `ok`. Found by
+    the adversarial axis of this branch's own review.
+    """
+    problems = []
+    for label, raw in (
+        ("indented", "   | A1 | Adversarial | defer | no ticket |"),
+        ("trailing", "| A1 | Adversarial | defer | no ticket |   "),
+    ):
+        scan = scan_disposition("## Disposition\n\n" + _HEADER + raw + "\n")
+        if len(scan.rows) != 1:
+            problems.append(
+                f"{label}: got {len(scan.rows)} rows and "
+                f"{len(scan.unparsed)} unparsed, want the row parsed"
+            )
+    return problems
+
+
+def check_every_candidate_reaches_one_list() -> list[str]:
+    """No row-shaped line may fall between `rows` and `unparsed`.
+
+    The invariant that makes the denominator trustworthy: a line counted as a
+    candidate is either parsed or reported. A line in neither is invisible
+    while the count still claims to have seen it.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER
+        + "| A1 | Adversarial | fixed | fine |\n"
+        "   | A2 | Adversarial | defer | indented |\n"
+        "| - | - | - | - | - |\n"
+        "| A3 | Domain | nope | bad word |\n"
+        "| B1 | Spec | x | y | five columns |\n"
+    )
+    scan = scan_disposition(text)
+    leaked = scan.candidates - len(scan.rows) - len(scan.unparsed)
+    if leaked:
+        return [
+            f"leak: {scan.candidates} candidates, {len(scan.rows)} parsed, "
+            f"{len(scan.unparsed)} unparsed — {leaked} unaccounted"
+        ]
+    return []
+
+
+def check_duplicate_unparsed_lines_get_distinct_numbers() -> list[str]:
+    """Two identical unreadable rows must not both report the first one.
+
+    `str.index` on the matched text collapses them; the walk is positional to
+    avoid exactly this. Nothing covered it until the adversarial axis said so.
+    """
+    dup = "| Z1 | Adv | sev | bad | extra |"
+    text = (
+        "## Disposition\n\n" + _HEADER + dup + "\n"
+        "| A1 | Adversarial | fixed | pad |\n" + dup + "\n"
+    )
+    lines = [n for n, _ in scan_disposition(text).unparsed]
+    return [] if lines == [5, 7] else [f"duplicate unparsed: lines {lines}, want [5, 7]"]
+
+
 CHECKS = (
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
@@ -1165,6 +1248,9 @@ CHECKS = (
     check_empty_disposition_cell_is_invalid,
     check_no_finding_spellings_are_rejected,
     check_all_clean_review_is_distinguishable_from_no_table,
+    check_indented_row_is_not_silently_dropped,
+    check_every_candidate_reaches_one_list,
+    check_duplicate_unparsed_lines_get_distinct_numbers,
 )
 
 
