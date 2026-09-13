@@ -38,16 +38,52 @@ import argparse
 import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEWS = ROOT / "docs" / "reviews"
 CARRY = ROOT / ".scratch" / "carry-forward" / "issues"
 
+# A cell is anything but an unescaped pipe. `\|` inside a cell is content --
+# `feat-drift-warner-proven.md:209` writes `pnpm verify 2>&1 \| wc -l` in a
+# note, and `fix-worn-item-pool-coverage.md:203` is a `defer` whose escaped
+# pipe sits before its ticket path. Under a `[^|]`-only cell both rows failed
+# the pattern outright and vanished, taking the ticket path with them.
+_CELL = r"(?:\\\||[^|])"
+
+# The disposition cell carries no word list. A row whose third cell is
+# anything else used to fail the whole pattern and disappear silently, which
+# made the `unknown disposition` branch unreachable from a table (ticket 381):
+# one mistyped row among good ones was invisible, and `deferred` -- the
+# natural English spelling -- is exactly that mistake. Parse permissively,
+# then validate against DISPOSITIONS so the word is named in a failure.
+# Leading and trailing whitespace are tolerated because Markdown renders an
+# indented table as a normal one. The row pattern used to demand `^\|` while
+# the candidate scan allowed `^\s*\|`, so an indented row counted toward the
+# denominator, matched neither list, and slipped through the all-clean branch
+# as `merge-ready: ok` -- the silent drop this file exists to end, reintroduced
+# by the fix for it.
 DISPOSITION_RE = re.compile(
-    r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
+    rf"^[ \t]*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}*?)\s*\|[ \t]*$",
     re.IGNORECASE | re.MULTILINE,
 )
+
+# Every `## Disposition` section, not just the first, and headings carrying
+# trailing text (`## Disposition (round 3)`) included. `re.search` on an
+# anchor demanding a bare heading read one section and skipped the rest --
+# tickets 85 and 381. A reviewer who appended a second table got a green gate
+# over rows nobody checked, which is the dangerous direction to be wrong in.
+SECTION_RE = re.compile(r"(?ms)^## Disposition\b[^\n]*\n(.*?)(?=^## |\Z)")
+
+# A heading at any level whose text starts with `Disposition`. `SECTION_RE`
+# only sees level 2, so this is the census that makes a `### Disposition` or a
+# `## Dispositions` visible instead of silently contributing no rows. All 68
+# such headings in `docs/reviews/` are level 2 today, so this fires on nothing
+# now and catches the shape that would otherwise vanish.
+DISPOSITION_HEADING_RE = re.compile(r"(?im)^\s{0,3}#{1,6}\s+Disposition\b")
+
+ROW_SHAPED_RE = re.compile(r"(?m)^\s*\|.*\|\s*$")
 # Bold (`**Status:** open`) and plain (`Status: open`) both parse: tickets 88
 # and 89 used the bold form and the anchored pattern missed them, so both
 # reported as having no status and vanished from the open count and from
@@ -60,6 +96,16 @@ STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
 # merge-veto power lives in `Blocks:`, not in the status word.
 OPEN_STATUSES = ("open", "claimed", "blocked")
 KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
+
+# The whole accepted disposition vocabulary. Three words, and there is no
+# fourth: a Disposition row disposes of a *finding* -- fixed it, ticketed it,
+# or waived it. "This axis found nothing" disposes of nothing, because there
+# was no finding; it is the absence of an input, not a fourth outcome. An axis
+# with no findings contributes no row and says so in its own prose.
+#
+# A concern that was raised and then checked and found not to be a defect IS a
+# finding: it is `wontfix` with the reason.
+DISPOSITIONS = ("fixed", "defer", "wontfix")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
 BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
@@ -152,19 +198,104 @@ def review_path(branch: str) -> Path:
     return REVIEWS / f"{branch.replace('/', '-')}.md"
 
 
+@dataclass
+class DispositionScan:
+    """What every `## Disposition` section in a review file contains.
+
+    `rows` is what the gate validates. The rest is what makes an under-read
+    *visible*: `disposition rows: 9` reads identically whether it is 9 of 9 or
+    9 of 61, and that ambiguity is how tickets 85 and 381 stayed open. A
+    denominator plus the lines that did not parse turns a silent skip into a
+    failure naming a line number.
+    """
+
+    rows: list[dict] = field(default_factory=list)
+    sections: int = 0
+    header_rows: int = 0
+    candidates: int = 0
+    unparsed: list[tuple[int, str]] = field(default_factory=list)
+    disposition_headings: int = 0
+
+
+def _row_cells(line: str) -> list[str]:
+    """Cells of a pipe line, split on unescaped `|` only. See `_CELL`."""
+    return [p.strip() for p in re.split(r"(?<!\\)\|", line.strip())[1:-1]]
+
+
+def _is_header_or_separator(cells: list[str]) -> bool:
+    """Neither is a finding, so neither counts toward the denominator."""
+    if not cells:
+        return True
+    if cells[0].lower() in ("id", "---"):
+        return True
+    return all(c and set(c) <= {"-", ":"} for c in cells)
+
+
+def scan_disposition(text: str) -> DispositionScan:
+    """Every Disposition section's rows, plus what did not parse.
+
+    Rows are concatenated across sections: a second `## Disposition (round 3)`
+    table is part of the same review and its `defer` rows bind the same way.
+
+    A row-shaped line the row pattern cannot read becomes an `unparsed` entry
+    with its 1-based line number rather than disappearing. That is the whole
+    point -- a 3- or 5-column table is exactly what a human reads as rows and
+    what the parser cannot, so it must fail loudly instead of counting zero.
+    """
+    text = text.replace("\r\n", "\n")
+    scan = DispositionScan()
+    scan.disposition_headings = len(DISPOSITION_HEADING_RE.findall(text))
+
+    for m in SECTION_RE.finditer(text):
+        scan.sections += 1
+        body = m.group(1)
+        line_offset = text[: m.start(1)].count("\n")
+
+        for match in DISPOSITION_RE.finditer(body):
+            fid, axis, disp, note = (g.strip() for g in match.groups())
+            # One classifier, shared with the candidate walk below. These were
+            # two separately-worded rules and they disagreed: a row this loop
+            # skipped could be a line the walk thought parseable, so it landed
+            # in neither list and disappeared.
+            if _is_header_or_separator([fid, axis, disp, note]):
+                continue
+            scan.rows.append(
+                {"id": fid, "axis": axis, "disposition": disp.lower(), "note": note}
+            )
+
+        # Walk the body by line rather than searching for each matched line's
+        # text: two identical rows in one section (a repeated separator, or a
+        # row duplicated across rounds) both resolve to the first occurrence
+        # under `str.index`, so a FAIL would name the wrong line -- the exact
+        # "message names the wrong cause" defect this reporting exists to end.
+        for offset, raw in enumerate(body.split("\n")):
+            if not ROW_SHAPED_RE.match(raw):
+                continue
+            line_no = line_offset + offset + 1
+            cells = _row_cells(raw)
+            if _is_header_or_separator(cells):
+                if cells and cells[0].lower() == "id":
+                    scan.header_rows += 1
+                continue
+            scan.candidates += 1
+            if not DISPOSITION_RE.match(raw.strip()):
+                scan.unparsed.append((line_no, raw.strip()))
+
+    return scan
+
+
 def parse_disposition(text: str) -> list[dict]:
-    m = re.search(r"(?ms)^## Disposition\s*\n(.*?)(?=^## |\Z)", text)
-    if not m:
-        return []
-    rows = []
-    for match in DISPOSITION_RE.finditer(m.group(1)):
-        fid, axis, disp, note = (g.strip() for g in match.groups())
-        if fid.lower() in ("id", "---") or set(fid) <= {"-"}:
-            continue
-        rows.append(
-            {"id": fid, "axis": axis, "disposition": disp.lower(), "note": note}
-        )
-    return rows
+    return scan_disposition(text).rows
+
+
+def invalid_disposition_rows(rows: list[dict]) -> list[dict]:
+    """Rows whose disposition is not one of the three accepted words.
+
+    Pure -- no git, no IO. An empty or whitespace-only cell counts as invalid
+    rather than as a quiet pass: the row pattern accepts a whitespace-only
+    cell, so stripping it to nothing must not read as "no objection".
+    """
+    return [r for r in rows if r["disposition"].strip() not in DISPOSITIONS]
 
 
 def ticket_path_from_note(note: str) -> Path | None:
@@ -441,14 +572,58 @@ def check(
         return 1
 
     text = review.read_text(encoding="utf-8")
-    rows = parse_disposition(text)
-    if not rows:
+    scan = scan_disposition(text)
+    rows = scan.rows
+
+    denominator = (
+        f"disposition rows: {len(rows)} parsed of {scan.candidates} "
+        f"row-shaped lines in {scan.sections} section(s)"
+    )
+
+    # See scan_disposition's docstring on why an unparsed row is reported by
+    # line number rather than counted as zero.
+    for line_no, raw in scan.unparsed:
+        errors.append(f"line {line_no}: disposition row not parsed — {raw!r}")
+
+    # See DISPOSITION_HEADING_RE.
+    if scan.disposition_headings > scan.sections:
         errors.append(
-            "review has no parseable ## Disposition table "
-            "(fixed|defer|wontfix; defer must link a ticket path)"
+            f"{scan.disposition_headings} heading(s) start with 'Disposition' "
+            f"but only {scan.sections} '## Disposition' section(s) were parsed"
         )
+
+    # A candidate that reached neither list is a row nobody checked. The
+    # denominator would show it (`0 parsed of 1`) and every other branch would
+    # still pass, so say it outright rather than trusting a reader to notice.
+    leaked = scan.candidates - len(rows) - len(scan.unparsed)
+    if leaked > 0:
+        errors.append(
+            f"{leaked} row-shaped line(s) were neither parsed nor reported — "
+            f"{scan.candidates} candidate(s), {len(rows)} parsed, "
+            f"{len(scan.unparsed)} reported unparsed"
+        )
+
+    if scan.sections == 0:
+        errors.append(
+            "review has no ## Disposition section "
+            f"(rows: {'|'.join(DISPOSITIONS)}; defer must link a ticket path)"
+        )
+    elif scan.header_rows == 0:
+        # The header row is the only signal separating "the author had nothing
+        # to report" from "the author forgot the table". Keeping it mandatory
+        # is what preserves the missing-table check; the template always writes
+        # it, so an all-clean review costs its author nothing.
+        errors.append(
+            "## Disposition section has no table — write the header row "
+            "(`| ID | Axis | Disposition | Ticket / note |`) and its separator "
+            "even when there are no findings"
+        )
+    elif not rows and not scan.unparsed and scan.candidates == 0:
+        # Every axis clean. A row disposes of a finding, so no findings means
+        # no rows -- that is a pass, not an empty table to complain about.
+        print(f"{denominator} (no findings)")
     else:
-        print(f"disposition rows: {len(rows)}")
+        print(denominator)
         for row in rows:
             disp = row["disposition"]
             if disp == "defer":
@@ -470,10 +645,13 @@ def check(
                     )
                 else:
                     print(f"  ok  {row['id']}: defer -> {rel} ({status})")
-            elif disp in ("fixed", "wontfix"):
+            elif disp in DISPOSITIONS:
                 print(f"  ok  {row['id']}: {disp}")
             else:
-                errors.append(f"{row['id']}: unknown disposition {disp!r}")
+                errors.append(
+                    f"{row['id']}: unknown disposition {disp!r} "
+                    f"(accepted: {', '.join(DISPOSITIONS)})"
+                )
 
     unparseable = unparseable_status_tickets()
     if unparseable:
@@ -782,6 +960,240 @@ def check_bold_status_value_strips_to_a_known_word() -> list[str]:
         return ["a bold status value must survive the phase-gate test"]
     return []
 
+_HEADER = "| ID | Axis | Disposition | Ticket / note |\n| --- | --- | --- | --- |\n"
+
+
+def check_disposition_reads_every_section() -> list[str]:
+    """Rows live in every `## Disposition` section, not just the first.
+
+    Ticket 85: `re.search` read one section and skipped the rest, so a
+    reviewer who appended a second table got a green gate over rows nobody
+    checked.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | one |\n"
+        "\n## Notes\n\n"
+        "## Disposition\n\n" + _HEADER + "| A2 | Adversarial | wontfix | two |\n"
+    )
+    scan = scan_disposition(text)
+    if scan.sections != 2:
+        return [f"sections: got {scan.sections}, want 2"]
+    ids = [r["id"] for r in scan.rows]
+    return [] if ids == ["A1", "A2"] else [f"sections: got rows {ids}"]
+
+
+def check_disposition_heading_with_trailing_text() -> list[str]:
+    """`## Disposition (round 3)` is a Disposition section.
+
+    The old anchor demanded a bare heading, so a round-numbered one matched
+    nothing at all -- the whole table was invisible rather than merely
+    unparsed.
+    """
+    text = "## Disposition (round 3)\n\n" + _HEADER + "| R3 | Domain | defer | t |\n"
+    scan = scan_disposition(text)
+    if scan.sections != 1:
+        return [f"trailing heading: got {scan.sections} section(s), want 1"]
+    ids = [r["id"] for r in scan.rows]
+    return [] if ids == ["R3"] else [f"trailing heading: got rows {ids}"]
+
+
+def check_single_typo_row_is_reported() -> list[str]:
+    """One mistyped word among good rows is the silent case (ticket 381).
+
+    `deferred` is the natural English spelling and does not match `defer`. It
+    must parse as a row and then be named invalid -- not vanish.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | a |\n"
+        "| A2 | Adversarial | deferred | b |\n"
+        "| A3 | Domain | wontfix | c |\n"
+    )
+    scan = scan_disposition(text)
+    if len(scan.rows) != 3:
+        return [f"typo row: got {len(scan.rows)} rows, want all 3 parsed"]
+    bad = [r["id"] for r in invalid_disposition_rows(scan.rows)]
+    return [] if bad == ["A2"] else [f"typo row: invalid ids {bad}, want ['A2']"]
+
+
+def check_all_typo_table_stays_loud() -> list[str]:
+    """A wholly-broken table already failed loudly; it must keep doing so."""
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | nope | a |\n"
+        "| A2 | Domain | nah | b |\n"
+    )
+    bad = [r["id"] for r in invalid_disposition_rows(scan_disposition(text).rows)]
+    return [] if bad == ["A1", "A2"] else [f"all-typo: invalid ids {bad}"]
+
+
+def check_five_column_table_is_counted_not_dropped() -> list[str]:
+    """See scan_disposition's docstring."""
+    text = (
+        "## Disposition\n\n"
+        "| ID | Axis | Sev | Finding | Disposition |\n"
+        "| --- | --- | --- | --- | --- |\n"
+        "| A1 | Adversarial | low | a thing | fixed |\n"
+        "| A2 | Domain | minor | another | wontfix |\n"
+    )
+    scan = scan_disposition(text)
+    if scan.rows:
+        return [f"5-column: got {len(scan.rows)} rows, want 0"]
+    if scan.candidates != 2:
+        return [f"5-column: got {scan.candidates} candidates, want 2"]
+    lines = [n for n, _ in scan.unparsed]
+    return [] if lines == [5, 6] else [f"5-column: unparsed lines {lines}, want [5, 6]"]
+
+
+def check_escaped_pipe_in_note_parses() -> list[str]:
+    """`\\|` inside a cell is content, not a column break. See `_CELL`."""
+    text = (
+        "## Disposition\n\n" + _HEADER
+        + "| A1 | Adversarial | defer | `a \\| b` — .scratch/x/issues/1-z.md |\n"
+    )
+    rows = scan_disposition(text).rows
+    if len(rows) != 1:
+        return [f"escaped pipe: got {len(rows)} rows, want 1"]
+    row = rows[0]
+    if row["id"] != "A1" or row["disposition"] != "defer":
+        return [f"escaped pipe: got {row['id']}/{row['disposition']}"]
+    return [] if "\\|" in row["note"] else [f"escaped pipe: note lost it: {row['note']!r}"]
+
+
+def check_header_and_separator_are_not_candidates() -> list[str]:
+    """See `_is_header_or_separator`."""
+    scan = scan_disposition("## Disposition\n\n" + _HEADER)
+    if scan.candidates != 0:
+        return [f"header/separator: got {scan.candidates} candidates, want 0"]
+    if scan.header_rows != 1:
+        return [f"header/separator: got {scan.header_rows} header rows, want 1"]
+    return []
+
+
+def check_crlf_input_parses() -> list[str]:
+    """A review file with Windows endings must read identically.
+
+    No tracked review file has CRLF today, but nothing stops one arriving,
+    and `$` would otherwise strand a `\\r` in the last cell.
+    """
+    text = "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | note |\n"
+    if scan_disposition(text).rows != scan_disposition(text.replace("\n", "\r\n")).rows:
+        return ["crlf: rows differ between LF and CRLF input"]
+    return []
+
+
+def check_empty_disposition_cell_is_invalid() -> list[str]:
+    """A whitespace-only cell must never read as "no objection".
+
+    The row pattern accepts whitespace, so stripping it to nothing has to
+    land as invalid rather than as a quiet pass.
+    """
+    text = "## Disposition\n\n" + _HEADER + "| X1 | Axis |   | note |\n"
+    scan = scan_disposition(text)
+    if not scan.rows:
+        return [] if scan.unparsed else ["empty cell: neither parsed nor reported"]
+    bad = [r["id"] for r in invalid_disposition_rows(scan.rows)]
+    return [] if bad == ["X1"] else [f"empty cell: accepted it; invalid ids {bad}"]
+
+
+def check_no_finding_spellings_are_rejected() -> list[str]:
+    """There is no fourth word.
+
+    A Disposition row disposes of a finding; "this axis found nothing"
+    disposes of nothing. All four spellings the corpus reached for must fail,
+    so the row is not written at all.
+    """
+    problems = []
+    for spelling in ("n/a", "—", "no finding", "no change needed"):
+        text = "## Disposition\n\n" + _HEADER + f"| S1 | Spec | {spelling} | x |\n"
+        rows = scan_disposition(text).rows
+        if not rows:
+            problems.append(f"no-finding: {spelling!r} did not parse as a row")
+            continue
+        if not invalid_disposition_rows(rows):
+            problems.append(f"no-finding: {spelling!r} was accepted")
+    return problems
+
+
+def check_all_clean_review_is_distinguishable_from_no_table() -> list[str]:
+    """"Every axis clean" and "the author forgot the table" are different.
+
+    A header with no body rows is a legitimate all-clean review and must
+    pass; a heading with no table at all must still fail. The header row is
+    the only signal in the file separating the two.
+    """
+    clean = scan_disposition("## Disposition\n\n" + _HEADER)
+    if (clean.sections, clean.header_rows, clean.rows, clean.unparsed) != (1, 1, [], []):
+        return [
+            f"all-clean: sections={clean.sections} header_rows={clean.header_rows} "
+            f"rows={len(clean.rows)} unparsed={len(clean.unparsed)}"
+        ]
+    bare = scan_disposition("## Disposition\n\nsome prose, no table.\n")
+    if bare.sections != 1 or bare.header_rows != 0:
+        return [f"no-table: sections={bare.sections} header_rows={bare.header_rows}"]
+    return []
+
+
+def check_indented_row_is_not_silently_dropped() -> list[str]:
+    """Markdown renders an indented table normally, so the gate must too.
+
+    The row pattern demanded `^|` while the candidate walk allowed `^\\s*|`,
+    so an indented row counted toward the denominator and reached neither
+    `rows` nor `unparsed` — a `defer` with no ticket passed as `ok`. Found by
+    the adversarial axis of this branch's own review.
+    """
+    problems = []
+    for label, raw in (
+        ("indented", "   | A1 | Adversarial | defer | no ticket |"),
+        ("trailing", "| A1 | Adversarial | defer | no ticket |   "),
+    ):
+        scan = scan_disposition("## Disposition\n\n" + _HEADER + raw + "\n")
+        if len(scan.rows) != 1:
+            problems.append(
+                f"{label}: got {len(scan.rows)} rows and "
+                f"{len(scan.unparsed)} unparsed, want the row parsed"
+            )
+    return problems
+
+
+def check_every_candidate_reaches_one_list() -> list[str]:
+    """No row-shaped line may fall between `rows` and `unparsed`.
+
+    The invariant that makes the denominator trustworthy: a line counted as a
+    candidate is either parsed or reported. A line in neither is invisible
+    while the count still claims to have seen it.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER
+        + "| A1 | Adversarial | fixed | fine |\n"
+        "   | A2 | Adversarial | defer | indented |\n"
+        "| - | - | - | - | - |\n"
+        "| A3 | Domain | nope | bad word |\n"
+        "| B1 | Spec | x | y | five columns |\n"
+    )
+    scan = scan_disposition(text)
+    leaked = scan.candidates - len(scan.rows) - len(scan.unparsed)
+    if leaked:
+        return [
+            f"leak: {scan.candidates} candidates, {len(scan.rows)} parsed, "
+            f"{len(scan.unparsed)} unparsed — {leaked} unaccounted"
+        ]
+    return []
+
+
+def check_duplicate_unparsed_lines_get_distinct_numbers() -> list[str]:
+    """Two identical unreadable rows must not both report the first one.
+
+    `str.index` on the matched text collapses them; the walk is positional to
+    avoid exactly this. Nothing covered it until the adversarial axis said so.
+    """
+    dup = "| Z1 | Adv | sev | bad | extra |"
+    text = (
+        "## Disposition\n\n" + _HEADER + dup + "\n"
+        "| A1 | Adversarial | fixed | pad |\n" + dup + "\n"
+    )
+    lines = [n for n, _ in scan_disposition(text).unparsed]
+    return [] if lines == [5, 7] else [f"duplicate unparsed: lines {lines}, want [5, 7]"]
+
+
 CHECKS = (
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
@@ -802,13 +1214,27 @@ CHECKS = (
     check_status_reads_from_text,
     check_blocked_is_a_known_open_status,
     check_bold_status_value_strips_to_a_known_word,
+    check_disposition_reads_every_section,
+    check_disposition_heading_with_trailing_text,
+    check_single_typo_row_is_reported,
+    check_all_typo_table_stays_loud,
+    check_five_column_table_is_counted_not_dropped,
+    check_escaped_pipe_in_note_parses,
+    check_header_and_separator_are_not_candidates,
+    check_crlf_input_parses,
+    check_empty_disposition_cell_is_invalid,
+    check_no_finding_spellings_are_rejected,
+    check_all_clean_review_is_distinguishable_from_no_table,
+    check_indented_row_is_not_silently_dropped,
+    check_every_candidate_reaches_one_list,
+    check_duplicate_unparsed_lines_get_distinct_numbers,
 )
 
 
 def self_test() -> int:
     problems = [p for check in CHECKS for p in check()]
     if not problems:
-        print(f"check_merge_ready.py relevance logic ok ({len(CHECKS)} checks)")
+        print(f"check_merge_ready.py pure logic ok ({len(CHECKS)} checks)")
         return 0
     for p in problems:
         print(f"  FAIL: {p}", file=sys.stderr)

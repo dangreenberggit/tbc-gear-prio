@@ -128,7 +128,11 @@ Both are resolved shas, never `HEAD` — a moved `HEAD` cannot be resolved
 retroactively. One `Reviewed range:` line per round in exactly this form, so
 coverage is checkable mechanically.
 
-`Disposition` is exactly `fixed`, `defer`, or `wontfix`. Append a one-liner
+`Disposition` is exactly `fixed`, `defer`, or `wontfix`. A row disposes of a
+finding. An axis with no findings writes no row — say so in that axis's prose
+(`**Spec: clean.**`) and leave the table to the findings. A concern that was
+raised and then checked and found not to be a defect is a finding: dispose of
+it as `wontfix` with the reason. Append a one-liner
 to `.scratch/carry-forward/map.md` when filing tickets.
 
 ### 4. Prove the check (do not merge here)

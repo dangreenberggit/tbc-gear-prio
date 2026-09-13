@@ -124,18 +124,37 @@ ticket must be open. When a later round closes a deferred ticket, edit the
 earlier round's row to `fixed` (with a "superseded in round N" note) in the
 same commit that closes the ticket.
 
-**`merge-ready` does NOT parse all rounds — corrected 2026-09-12.** This
-section used to say it parsed every Disposition row across all rounds. That
-is false, and it is the more dangerous direction to be wrong in: a reviewer
-who appends a second table gets a green gate over rows nobody checked. The
-parser reads only the **first** `## Disposition` section (tickets 85, 381),
-and a heading with trailing text like `## Disposition (round 3)` matches
-nothing at all. Measured worst case in this repo: 9 rows parsed of 61.
+**`merge-ready` parses every round — since 2026-09-13 (tickets 85, 381).**
+Every `## Disposition` section is read, including headings carrying trailing
+text like `## Disposition (round 3)`. Before that fix it read only the first
+bare-headed section, so a reviewer who appended a second table got a green
+gate over rows nobody checked — worst case in this repo, 9 rows parsed of 61. Appending a later round as its own section is now safe.
 
-**Until 85 and 381 land, keep every Disposition row in one table** under a
-bare `## Disposition` heading — merge later rounds into it rather than
-appending a second section. `fix-75-82-review-tickets.md` already does this
-by hand, which is why its second heading says the rows were merged upward.
+The gate prints `N parsed of M row-shaped lines in S section(s)`, so an
+under-read is visible rather than silent: `disposition rows: 9` used to read
+identically whether it was 9 of 9 or 9 of 61. Two things now fail loudly and
+name what to look at. A row-shaped line the parser cannot read — a 3- or
+5-column table, which a human reads as rows — fails with its line number and
+text. A disposition word outside `fixed`, `defer` and `wontfix` fails naming
+the row id, so a single mistyped `deferred` among good rows can no longer
+pass unnoticed.
+
+**An axis with no findings writes no row.** A Disposition row disposes of a
+finding; "this axis found nothing" disposes of nothing. Say it in that
+axis's prose (`**Spec: clean.**`) and leave the table to the findings. A
+concern that was raised and then checked and found not to be a defect _is_ a
+finding: dispose of it as `wontfix` with the reason.
+
+Still write the header row and its separator even when there are no
+findings. A section with a header and zero body rows passes and prints
+`(no findings)`; a heading with no table at all fails, because the header is
+the only signal separating "nothing to report" from "forgot the table".
+
+Not handled, and zero instances in `docs/reviews/` today: a pipe-containing
+line inside a fenced code block within a Disposition section (it would be
+counted as a row-shaped candidate and fail), and a `###` subheading inside
+one (the section runs to the next `## `, so a subsection's tables are
+swallowed into it).
 
 ## Before starting the dev servers
 
