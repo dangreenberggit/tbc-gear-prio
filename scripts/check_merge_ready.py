@@ -951,6 +951,189 @@ def check_bold_status_value_strips_to_a_known_word() -> list[str]:
         return ["a bold status value must survive the phase-gate test"]
     return []
 
+_HEADER = "| ID | Axis | Disposition | Ticket / note |\n| --- | --- | --- | --- |\n"
+
+
+def check_disposition_reads_every_section() -> list[str]:
+    """Rows live in every `## Disposition` section, not just the first.
+
+    Ticket 85: `re.search` read one section and skipped the rest, so a
+    reviewer who appended a second table got a green gate over rows nobody
+    checked.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | one |\n"
+        "\n## Notes\n\n"
+        "## Disposition\n\n" + _HEADER + "| A2 | Adversarial | wontfix | two |\n"
+    )
+    scan = scan_disposition(text)
+    if scan.sections != 2:
+        return [f"sections: got {scan.sections}, want 2"]
+    ids = [r["id"] for r in scan.rows]
+    return [] if ids == ["A1", "A2"] else [f"sections: got rows {ids}"]
+
+
+def check_disposition_heading_with_trailing_text() -> list[str]:
+    """`## Disposition (round 3)` is a Disposition section.
+
+    The old anchor demanded a bare heading, so a round-numbered one matched
+    nothing at all -- the whole table was invisible rather than merely
+    unparsed.
+    """
+    text = "## Disposition (round 3)\n\n" + _HEADER + "| R3 | Domain | defer | t |\n"
+    scan = scan_disposition(text)
+    if scan.sections != 1:
+        return [f"trailing heading: got {scan.sections} section(s), want 1"]
+    ids = [r["id"] for r in scan.rows]
+    return [] if ids == ["R3"] else [f"trailing heading: got rows {ids}"]
+
+
+def check_single_typo_row_is_reported() -> list[str]:
+    """One mistyped word among good rows is the silent case (ticket 381).
+
+    `deferred` is the natural English spelling and does not match `defer`. It
+    must parse as a row and then be named invalid -- not vanish.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | a |\n"
+        "| A2 | Adversarial | deferred | b |\n"
+        "| A3 | Domain | wontfix | c |\n"
+    )
+    scan = scan_disposition(text)
+    if len(scan.rows) != 3:
+        return [f"typo row: got {len(scan.rows)} rows, want all 3 parsed"]
+    bad = [r["id"] for r in invalid_disposition_rows(scan.rows)]
+    return [] if bad == ["A2"] else [f"typo row: invalid ids {bad}, want ['A2']"]
+
+
+def check_all_typo_table_stays_loud() -> list[str]:
+    """A wholly-broken table already failed loudly; it must keep doing so."""
+    text = (
+        "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | nope | a |\n"
+        "| A2 | Domain | nah | b |\n"
+    )
+    bad = [r["id"] for r in invalid_disposition_rows(scan_disposition(text).rows)]
+    return [] if bad == ["A1", "A2"] else [f"all-typo: invalid ids {bad}"]
+
+
+def check_five_column_table_is_counted_not_dropped() -> list[str]:
+    """A 5-column table is row-shaped to a human and unreadable to the parser.
+
+    It must be reported by line number rather than counted as zero rows --
+    the header-driven alternative would have ignored it silently.
+    """
+    text = (
+        "## Disposition\n\n"
+        "| ID | Axis | Sev | Finding | Disposition |\n"
+        "| --- | --- | --- | --- | --- |\n"
+        "| A1 | Adversarial | low | a thing | fixed |\n"
+        "| A2 | Domain | minor | another | wontfix |\n"
+    )
+    scan = scan_disposition(text)
+    if scan.rows:
+        return [f"5-column: got {len(scan.rows)} rows, want 0"]
+    if scan.candidates != 2:
+        return [f"5-column: got {scan.candidates} candidates, want 2"]
+    # Lines 1-2 are the heading and its blank, 3-4 the header and separator,
+    # so the two body rows are 5 and 6.
+    lines = [n for n, _ in scan.unparsed]
+    return [] if lines == [5, 6] else [f"5-column: unparsed lines {lines}, want [5, 6]"]
+
+
+def check_escaped_pipe_in_note_parses() -> list[str]:
+    """`\\|` inside a cell is content, not a column break.
+
+    `fix-worn-item-pool-coverage.md:203` is a `defer` whose escaped pipe sits
+    before its ticket path, so the old pattern dropped the row and the path
+    with it.
+    """
+    text = (
+        "## Disposition\n\n" + _HEADER
+        + "| A1 | Adversarial | defer | `a \\| b` — .scratch/x/issues/1-z.md |\n"
+    )
+    rows = scan_disposition(text).rows
+    if len(rows) != 1:
+        return [f"escaped pipe: got {len(rows)} rows, want 1"]
+    row = rows[0]
+    if row["id"] != "A1" or row["disposition"] != "defer":
+        return [f"escaped pipe: got {row['id']}/{row['disposition']}"]
+    return [] if "\\|" in row["note"] else [f"escaped pipe: note lost it: {row['note']!r}"]
+
+
+def check_header_and_separator_are_not_candidates() -> list[str]:
+    """Neither is a finding, so neither counts toward the denominator."""
+    scan = scan_disposition("## Disposition\n\n" + _HEADER)
+    if scan.candidates != 0:
+        return [f"header/separator: got {scan.candidates} candidates, want 0"]
+    if scan.header_rows != 1:
+        return [f"header/separator: got {scan.header_rows} header rows, want 1"]
+    return []
+
+
+def check_crlf_input_parses() -> list[str]:
+    """A review file with Windows endings must read identically.
+
+    No tracked review file has CRLF today, but nothing stops one arriving,
+    and `$` would otherwise strand a `\\r` in the last cell.
+    """
+    text = "## Disposition\n\n" + _HEADER + "| A1 | Adversarial | fixed | note |\n"
+    if scan_disposition(text).rows != scan_disposition(text.replace("\n", "\r\n")).rows:
+        return ["crlf: rows differ between LF and CRLF input"]
+    return []
+
+
+def check_empty_disposition_cell_is_invalid() -> list[str]:
+    """A whitespace-only cell must never read as "no objection".
+
+    The row pattern accepts whitespace, so stripping it to nothing has to
+    land as invalid rather than as a quiet pass.
+    """
+    text = "## Disposition\n\n" + _HEADER + "| X1 | Axis |   | note |\n"
+    scan = scan_disposition(text)
+    if not scan.rows:
+        return [] if scan.unparsed else ["empty cell: neither parsed nor reported"]
+    bad = [r["id"] for r in invalid_disposition_rows(scan.rows)]
+    return [] if bad == ["X1"] else [f"empty cell: accepted it; invalid ids {bad}"]
+
+
+def check_no_finding_spellings_are_rejected() -> list[str]:
+    """There is no fourth word.
+
+    A Disposition row disposes of a finding; "this axis found nothing"
+    disposes of nothing. All four spellings the corpus reached for must fail,
+    so the row is not written at all.
+    """
+    problems = []
+    for spelling in ("n/a", "—", "no finding", "no change needed"):
+        text = "## Disposition\n\n" + _HEADER + f"| S1 | Spec | {spelling} | x |\n"
+        rows = scan_disposition(text).rows
+        if not rows:
+            problems.append(f"no-finding: {spelling!r} did not parse as a row")
+            continue
+        if not invalid_disposition_rows(rows):
+            problems.append(f"no-finding: {spelling!r} was accepted")
+    return problems
+
+
+def check_all_clean_review_is_distinguishable_from_no_table() -> list[str]:
+    """"Every axis clean" and "the author forgot the table" are different.
+
+    A header with no body rows is a legitimate all-clean review and must
+    pass; a heading with no table at all must still fail. The header row is
+    the only signal in the file separating the two.
+    """
+    clean = scan_disposition("## Disposition\n\n" + _HEADER)
+    if (clean.sections, clean.header_rows, clean.rows, clean.unparsed) != (1, 1, [], []):
+        return [
+            f"all-clean: sections={clean.sections} header_rows={clean.header_rows} "
+            f"rows={len(clean.rows)} unparsed={len(clean.unparsed)}"
+        ]
+    bare = scan_disposition("## Disposition\n\nsome prose, no table.\n")
+    if bare.sections != 1 or bare.header_rows != 0:
+        return [f"no-table: sections={bare.sections} header_rows={bare.header_rows}"]
+    return []
+
+
 CHECKS = (
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
@@ -971,13 +1154,24 @@ CHECKS = (
     check_status_reads_from_text,
     check_blocked_is_a_known_open_status,
     check_bold_status_value_strips_to_a_known_word,
+    check_disposition_reads_every_section,
+    check_disposition_heading_with_trailing_text,
+    check_single_typo_row_is_reported,
+    check_all_typo_table_stays_loud,
+    check_five_column_table_is_counted_not_dropped,
+    check_escaped_pipe_in_note_parses,
+    check_header_and_separator_are_not_candidates,
+    check_crlf_input_parses,
+    check_empty_disposition_cell_is_invalid,
+    check_no_finding_spellings_are_rejected,
+    check_all_clean_review_is_distinguishable_from_no_table,
 )
 
 
 def self_test() -> int:
     problems = [p for check in CHECKS for p in check()]
     if not problems:
-        print(f"check_merge_ready.py relevance logic ok ({len(CHECKS)} checks)")
+        print(f"check_merge_ready.py pure logic ok ({len(CHECKS)} checks)")
         return 0
     for p in problems:
         print(f"  FAIL: {p}", file=sys.stderr)
