@@ -45,8 +45,21 @@ ROOT = Path(__file__).resolve().parents[1]
 REVIEWS = ROOT / "docs" / "reviews"
 CARRY = ROOT / ".scratch" / "carry-forward" / "issues"
 
+# A cell is anything but an unescaped pipe. `\|` inside a cell is content --
+# `feat-drift-warner-proven.md:209` writes `pnpm verify 2>&1 \| wc -l` in a
+# note, and `fix-worn-item-pool-coverage.md:203` is a `defer` whose escaped
+# pipe sits before its ticket path. Under a `[^|]`-only cell both rows failed
+# the pattern outright and vanished, taking the ticket path with them.
+_CELL = r"(?:\\\||[^|])"
+
+# The disposition cell carries no word list. A row whose third cell is
+# anything else used to fail the whole pattern and disappear silently, which
+# made the `unknown disposition` branch unreachable from a table (ticket 381):
+# one mistyped row among good ones was invisible, and `deferred` -- the
+# natural English spelling -- is exactly that mistake. Parse permissively,
+# then validate against DISPOSITIONS so the word is named in a failure.
 DISPOSITION_RE = re.compile(
-    r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(fixed|defer|wontfix)\s*\|\s*([^|]*?)\s*\|$",
+    rf"^\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}+?)\s*\|\s*({_CELL}*?)\s*\|$",
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -78,6 +91,16 @@ STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
 # merge-veto power lives in `Blocks:`, not in the status word.
 OPEN_STATUSES = ("open", "claimed", "blocked")
 KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
+
+# The whole accepted disposition vocabulary. Three words, and there is no
+# fourth: a Disposition row disposes of a *finding* -- fixed it, ticketed it,
+# or waived it. "This axis found nothing" disposes of nothing, because there
+# was no finding; it is the absence of an input, not a fourth outcome. An axis
+# with no findings contributes no row and says so in its own prose.
+#
+# A concern that was raised and then checked and found not to be a defect IS a
+# finding: it is `wontfix` with the reason.
+DISPOSITIONS = ("fixed", "defer", "wontfix")
 BLOCKS_RE = re.compile(r"(?im)^\s*Blocks:\s*(.+)$")
 BLOCKED_BY_RE = re.compile(r"(?im)^\s*Blocked by:\s*(.+)$")
 PHASE_BRANCH_RE = re.compile(r"^(phase-\d+)", re.IGNORECASE)
@@ -260,6 +283,16 @@ def scan_disposition(text: str) -> DispositionScan:
 
 def parse_disposition(text: str) -> list[dict]:
     return scan_disposition(text).rows
+
+
+def invalid_disposition_rows(rows: list[dict]) -> list[dict]:
+    """Rows whose disposition is not one of the three accepted words.
+
+    Pure -- no git, no IO. An empty or whitespace-only cell counts as invalid
+    rather than as a quiet pass: the row pattern accepts a whitespace-only
+    cell, so stripping it to nothing must not read as "no objection".
+    """
+    return [r for r in rows if r["disposition"].strip() not in DISPOSITIONS]
 
 
 def ticket_path_from_note(note: str) -> Path | None:
@@ -540,7 +573,7 @@ def check(
     if not rows:
         errors.append(
             "review has no parseable ## Disposition table "
-            "(fixed|defer|wontfix; defer must link a ticket path)"
+            f"(rows: {'|'.join(DISPOSITIONS)}; defer must link a ticket path)"
         )
     else:
         print(f"disposition rows: {len(rows)}")
@@ -565,10 +598,13 @@ def check(
                     )
                 else:
                     print(f"  ok  {row['id']}: defer -> {rel} ({status})")
-            elif disp in ("fixed", "wontfix"):
+            elif disp in DISPOSITIONS:
                 print(f"  ok  {row['id']}: {disp}")
             else:
-                errors.append(f"{row['id']}: unknown disposition {disp!r}")
+                errors.append(
+                    f"{row['id']}: unknown disposition {disp!r} "
+                    f"(accepted: {', '.join(DISPOSITIONS)})"
+                )
 
     unparseable = unparseable_status_tickets()
     if unparseable:
