@@ -116,3 +116,35 @@ One dated line per gate: gate, outcome, reason, round count.
   118 is an example table row, confirming F2 and refuting revision 1's anchor;
   `parallel-phase/SKILL.md` carries a single `wontfix` mention, consistent with
   C25's "no edit needed". All three stand.
+- 2026-09-13 — **Gate B: PROCEED (round 2).** Focused re-review of the changed
+  claims only, against a confirmed revision 2 (the reviewer's prompt required it
+  to verify the `## Revision 2` section existed before reviewing, and it did —
+  the guard is kept because an earlier round of this pipeline launched a reviewer
+  before the write landed and it read the wrong document). **No blocking
+  finding.** All four material round-1 findings judged fixed **by re-running the
+  measurement, not by reading the planner's account**: F1's criterion now asserts
+  56/59/836 and can fail; F2's anchor is a unique `-SimpleMatch` hit at :131 and
+  `parallel-phase` is correctly dropped from the manifest; F3's trade was judged
+  rather than accepted (a short `Reviewed range:` is a silent gap, the coupling
+  is loud — so the ordering stands, with the standalone green `pnpm verify` as
+  the real baseline); F6/F7/F8's expected-failure table was compared row-for-row
+  against an independent sweep and is complete with nothing spurious. All eight
+  new claims C19–C26 executed; none refuted.
+- 2026-09-13 — **The reviewer withdrew its own round-1 position rather than
+  deferring to the owner.** It had argued (F4/F5) that the nine no-finding rows
+  were load-bearing and needed a fourth word. C19 spot-checked five of the nine
+  against the prose above them and every one proved a strict echo — `**D3
+  (clean).**` in the prose, `— | Clean.` in the row. Its words: "withdrawn, not
+  merely overruled … evidence I did not have when I argued they were
+  load-bearing." Recorded because a seat conceding on evidence is the outcome
+  the adversarial round exists to produce, and because it means the owner's
+  decision is now supported by measurement rather than only by authority.
+- 2026-09-13 — **Two minor findings ride to the executor as advisories** (G1,
+  G2), per the rule that a non-blocking residue does not justify a third round.
+  G1: the `section has no table` message names the wrong cause for an author who
+  deleted the header row along with the body rows — the behaviour is right, the
+  wording misleads. G2: Step 10 oversells how easily a self-test failure is told
+  from a review-file failure, since both print a bare `FAIL:` prefix —
+  orchestrator confirmed directly (`check_merge_ready.py` prints `FAIL:` at 437,
+  542 and 814). The mitigation Step 10 actually rests on — the standalone green
+  verify one commit earlier — is sound, so the overstatement costs nothing.

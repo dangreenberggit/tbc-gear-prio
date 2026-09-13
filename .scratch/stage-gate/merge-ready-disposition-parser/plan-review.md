@@ -65,3 +65,71 @@ The plan's measurements are all correct — I re-derived every number myself and
 Four things need fixing first, none of them large. Two are wrong line numbers and a too-loose success check that would let the executor ship a half-working step without noticing. One is an ordering problem: as written, the branch wires its own gate into the command that checks the branch, so if the parser has a bug there is no clean baseline to see it against — move that step to last. The fourth is your decision to make.
 
 On Q1, the plan recommends accepting `n/a` as a fourth word meaning "we reviewed this and found nothing". I agree with adding the concept — nine such rows already exist across five files, so reviewers clearly need it. But the plan rejects `n/a` on one page for being the rarest spelling (1 of 9) and then adopts it on the next, and it proposes the gate print it identically to `wontfix`, which means a reader of the gate's output still cannot tell "no finding" from "finding declined". If you want the concept named, name it visibly: pick the spelling your reviewers actually use (`no finding` is the plainest of the measured ones) and have the gate say so in its output. If you would rather keep three words, the fallback costs one cell edit in a file that will never be gated again.
+
+
+---
+
+# Round 2 — focused re-review of revision 2
+
+Appended 2026-09-13. Reviewed at HEAD `67e058a91b7bd76ae0e70be880697ff90b234f08`.
+Scope was deliberately narrow: only what revision 2 changed. C1-C18 were
+re-derived in round 1 and stand; the approach was not re-opened.
+
+VERDICT: PROCEED
+
+Revision-2 guard passed: `## Revision 2` present at plan.md:7. Tree clean, HEAD `67e058a9…` unchanged at return (`git status --porcelain` empty).
+
+I re-derived every figure with my own probe (`rv2.py`, scratchpad only, never in the repo), not the plan's appendix script. All four material findings from round 1 are fixed. Two new minor findings, neither blocking.
+
+## Findings
+
+| ID | Severity | Where | What breaks | Evidence |
+| --- | --- | --- | --- | --- |
+| G1 | minor | Step 4 / Q1 part 3 | The empty-table fix rests on "the template always writes the header", and that is true of the template but is **not** enforced anywhere the gate can see. The skill's template does write the header row, but `scan_disposition` recognises a header only by first cell `id` (case-insensitive). A reviewer who writes a clean review by deleting the body rows *and* the now-pointless header gets `header_rows == 0` and so `FAIL: ## Disposition section has no table` — a correct review failing the gate. The plan calls this out as intended behaviour, and I agree it is the right trade (it preserves "table missing" detection), but the failure message names the wrong cause: an author in that position is told the section has no table when what it lacks is a header row. Suggest the message say so. | CONFIRMED, then judgment. The template block is at `pre-merge-review/SKILL.md:118-122`; the vocabulary sentence at :131 says nothing about the header. Advisory only — the behaviour is correct, the wording is not. |
+| G2 | minor | Step 10 acceptance | The claimed distinguishability is weaker than stated. The plan says a self-test failure prints check names while a review failure prints `FAIL: <id>`, so the two are distinguishable. Both are true, but both print a bare `FAIL:` prefix to stderr inside one `pnpm merge-to-dev --check-only` run: `self_test()` at `scripts/check_merge_ready.py:814` prints `  FAIL: {p}`, and `check()` at :476 prints `FAIL: <id>: unknown disposition …`. The real mitigation is not the output shape — it is the standalone green `pnpm verify` one commit earlier, which the step also requires and which genuinely does give the baseline round 1 asked for. | CONFIRMED. Line 811 prints the ok summary; line 814 prints the failure line to stderr. |
+
+### Round-1 findings — disposition
+
+| ID | Now | Evidence |
+| --- | --- | --- |
+| F1 | **fixed** | Step 1 asserts exactly 56 / 59 / 836 and the "until Step 4" clause is gone. My probe: candidate-pool `(cur 36, s1 56, s2 56, cand 66)`, dedup `(9, 59, 59, 59)`, `TOTALS {'cur': 749, 's1': 836, 's2': 854, 'cand': 867}`. 836 is right. The criterion can now fail: 46 no longer passes it. |
+| F2 | **fixed, both halves** | The quoted sentence is unique — a `-SimpleMatch` search returns exactly one hit, at line 131. And `parallel-phase/SKILL.md` genuinely needs no edit: its only `wontfix` mention is line 64, which already reads "Every **actionable** worker concern … becomes a row … Soft observations need not." Three words, finding-driven. Dropping it from the manifest is correct. |
+| F3 | **resolved, trade judged sound** | I judged the trade rather than accepting it. Landing Step 10 after Step 11 would leave `Reviewed range:` one commit short, and that is a worse defect than the coupling, because a short review range is a silent gap in what was reviewed while the coupling is loud. The standalone green `pnpm verify` before Step 11 exists is a real baseline and meets my actual round-1 concern. The step's secondary claim about output shape is overstated — see G2 — but the mitigation does not depend on it. |
+| F6 | **fixed** | C6's `Verified by` is now a corpus-wide search returning 6 hits, which does reach the count it asserts. |
+| F7/F8 | **fixed and complete** | The § Expected failures table lists all 8 out-of-vocabulary files and both new worn rows. I compared it row-for-row against my probe's 15 rows in 8 files: every one covered, none missing, none spurious. `fix-worn-item-pool-coverage.md` 15 to 17 with `A4` and `D1` confirmed; `D1` at line 206 is the decorated disposition. The later-step rows are correctly staged. Nothing here will surprise the executor. |
+| F9 | accepted as written, unchanged | — |
+
+## Register verdicts — C19 to C26
+
+All eight executed. None refuted.
+
+| Claim | Verdict | Evidence |
+| --- | --- | --- |
+| C19 | **stands** | Spot-checked five of nine, not three. `feat-finish-the-tab.md` rows 159/160/163 carry an em-dash and the note "Clean."; prose at 59/63/79 says `**D3 (clean).**`, `**D4 (clean).**`, `**D7 (clean).**` — the row is strictly less informative than the prose. `feat-tickets-369-370.md` rows 154-156 say "no change needed"; prose at 36/41/45 carries the same sentences at greater length. `feat-two-hander-clears-offhand.md:142` against prose :85 `**Spec: clean.**`. `feat-reforge-catchup-leftovers.md:271` against prose :219. `docs-fork-upstream-touchpoints.md:158` against prose :117 `**Spec.** Clean.` No row carries information its prose does not. The owner's decision loses nothing. |
+| C20 | **stands** | The `pre-merge-review` template rows at :118-122 are `A1` fixed, `A2` defer, `D1` wontfix — findings, not one per axis; the only rule is at :131. `parallel-phase/SKILL.md:64` says only actionable concerns become rows. Neither forces a row per axis. |
+| C21 | **stands, both halves** | First half read directly: `scripts/check_merge_ready.py:444-449` calls `parse_disposition` then `if not rows:` and reports "review has no parseable Disposition table", with no reference to sections. A legitimately all-clean review would indeed fail. Second half: my probe swept all 58 files — no file lacks a section, and none has a section with zero rows. The defect is real and latent exactly as claimed. **On the fix shape:** header-present-and-zero-body-rows passing, heading-with-no-table failing, is the right discrimination — it is the only signal in the file separating "author had nothing to report" from "author forgot the table". See G1 on the one rough edge. |
+| C22 | **stands** | `TOTALS {'cur': 749, 's1': 836, 's2': 854, 'cand': 867}`; candidate-pool s1 = 56, dedup s1 = 59. The +18 from s1 to s2 touches neither of those two files. |
+| C23 | **settled independently at 3 and 16** | I counted without reference to either prior figure. The em-dash as the disposition cell of a parsed four-column row inside a Disposition section: exactly 3, in `feat-finish-the-tab.md` at 159, 160, 163. The em-dash between pipes anywhere in any line of any file: 16, across 7 files. I could not construct a counting rule yielding 10 either. **3 is the figure for ticket 381**, and the no-finding total is 9. |
+| C24 | **stands** | 15 out-of-vocabulary rows in 8 files, matching the § Expected failures table file-for-file; worn goes 15 to 17, gaining `A4` and `D1`. |
+| C25 | **stands** | One `-SimpleMatch` hit at :131 for the vocabulary sentence (:118 is the template header row, as round 1 found). `parallel-phase/SKILL.md` has exactly one `wontfix` line, :64, already correct. No edit needed. |
+| C26 | **stands** | Confirmed in round 1 and unchanged: `scripts/merge_to_dev.py:139` runs `pnpm run verify`, and :146 calls `check_merge_ready.check(...)` in the same process. The `verify` chain contains no self-test entry today, so the coupling Step 10 adds is new — which makes the standalone-green-first ordering load-bearing rather than decorative. |
+
+### Carried forward by reference
+
+C1 to C18 were all re-derived in round 1 and stand; revision 2 changes none of their substance. C6's evidence column improved (F6). C15's anchors are superseded by C25. C17 remains `hypothesis, untested` and is correctly labelled — Step 10's acceptance is its test, which is the right place for it.
+
+## On the owner's decision
+
+Noted once, briefly, as instructed: I argued in round 1 for a fourth word. The owner's reasoning — a Disposition row disposes of a finding, and "found nothing" disposes of nothing — is coherent and I do not re-open it. My round-1 F4/F5 are **withdrawn, not merely overruled**: C19 shows the nine rows are pure echo of prose, which is evidence I did not have when I argued they were load-bearing.
+
+The implementation is complete against the decision. The one gap the decision introduced — the all-clean case — the planner found and fixed before I got to it, which is the honest stress-test the prompt asked for. The plan's own account of its stress-test is accurate: I checked each of the three tests it claims to have run and each holds. The skill sentence in Step 7c draws the right line (raised-then-refuted is `wontfix`; never-raised gets no row), and that distinction is already how the corpus behaves.
+
+## Summary for the owner
+
+The plan is ready to execute. All four things I flagged last round are genuinely fixed, and I checked each by re-running the measurement rather than reading the planner's account of it.
+
+Your Q1 decision is implemented correctly and completely. I checked five of the nine "no finding" rows against the prose above them — every one just repeats a sentence the prose already says, so deleting them loses nothing, and my round-1 objection was wrong. The planner found the one real hole the decision opened (a review where every axis is clean would have failed the gate) and fixed it in the plan before I found it.
+
+The em-dash dispute is settled at **3** — counted independently without looking at either previous figure. Neither agent's 10 is reproducible under any rule I could construct. 3 is what should go in ticket 381.
+
+Two small things ride to the executor as advisories, neither worth another round: the "section has no table" failure message would be clearer if it told the author to write the header row even when there are no findings, and Step 10 slightly oversells how easy it is to tell a self-test failure from a review-file failure in the combined output — though the standalone green `pnpm verify` it also requires is a real fix for that.
