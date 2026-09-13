@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: found while running `pnpm land --check-only` on fix/75-82-review-tickets (second-pass review of 6fb9f1c)
 Blocks: none
@@ -111,11 +111,44 @@ separate hole in the same parser — ticket 381.
 
 ## Acceptance
 
-- [ ] Every `## Disposition` section in a review file is parsed, including
+- [x] Every `## Disposition` section in a review file is parsed, including
       headings carrying trailing text
-- [ ] The gate prints a denominator, so an under-read is visible rather than
+- [x] The gate prints a denominator, so an under-read is visible rather than
       silent (`disposition rows: 9` reads identically whether it is 9 of 9 or
       9 of 61)
-- [ ] Self-tests cover: two plain sections; a `(round 3)`-style heading; a
+- [x] Self-tests cover: two plain sections; a `(round 3)`-style heading; a
       5-column table
-- [ ] `docs/agents/known-traps.md` matches the code's real behaviour
+- [x] `docs/agents/known-traps.md` matches the code's real behaviour
+
+## Resolution 2026-09-13 — `fix/merge-ready-disposition-parser`
+
+`scan_disposition` reads every `## Disposition` section via `re.finditer` on
+an anchor that tolerates trailing heading text, so `## Disposition (round 3)`
+is a section rather than invisible. Rows concatenate across sections.
+
+The gate prints `N parsed of M row-shaped lines in S section(s)`. The
+denominator counts every row-shaped line inside a Disposition section, minus
+header and separator rows, so a line the parser cannot read is reported with
+its line number instead of vanishing. Measured on `docs/reviews/`: 749 rows
+before, 854 after, against 867 candidate lines — the 13 unparsed lines are
+the 3- and 5-column tables in `feat-candidate-pool.md` and
+`feat-upgrades-ui-fit.md`, which now fail loudly.
+
+Per-file, worst first: `feat-upgrades-dedup-wowsims.md` 9 → 59,
+`feat-candidate-pool.md` 36 → 56, `fix-75-82-review-tickets.md` 23 → 32,
+`feat-reforge-catchup-leftovers.md` 9 → 20.
+
+No duplicate-id check was added. Multi-round files reuse `A1`/`D1` by design,
+as this ticket's own correction notes, so failing on a shared id would fail
+nearly every existing review file.
+
+Re-run: `python scripts/check_merge_ready.py --self-test` (30 checks).
+
+**Q3 — `Sp3` in the dedup review.** Sp3 (`docs/reviews/feat-upgrades-dedup-wowsims.md:428`)
+audited 2026-09-12: the deferred concern is satisfied per ticket 315's
+Execution D section and `.scratch/stage-gate/wowsims-tab-tickets/d-cdp-proof.json`;
+313/315 stay open on owner sign-off
+(`.scratch/carry-forward/human-inspection-checklist.md:44-59`). No new ticket.
+The `Sp3` row is not rewritten, so that file reports `defer with no ticket
+path` whenever it is parsed — expected and permanent; the branch is merged
+and will not be gated again.

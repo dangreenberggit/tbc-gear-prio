@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: independent review of the ledger-consolidation-and-merge-train stage, then a
 dedicated parser investigation — `.scratch/stage-gate/ledger-consolidation-and-merge-train/logs/merge-ready-parser-review.md`
@@ -88,8 +88,52 @@ touching that review file fails on a row that was never wrong.
 
 ## Acceptance
 
-- [ ] A disposition word outside the accepted set fails the gate with a named
+- [x] A disposition word outside the accepted set fails the gate with a named
       row id, rather than being skipped
-- [ ] The `n/a` question is decided and recorded, and `docs/reviews/` is
+- [x] The `n/a` question is decided and recorded, and `docs/reviews/` is
       consistent with the decision
-- [ ] A self-test covers the single-typo case, which is the silent one
+- [x] A self-test covers the single-typo case, which is the silent one
+
+## Resolution 2026-09-13 — `fix/merge-ready-disposition-parser`
+
+The row pattern's third cell no longer carries a word list. A row parses
+whatever its disposition says, and `invalid_disposition_rows` then fails it
+naming the id, the word, and the accepted set. The `unknown disposition`
+branch is reachable from a table for the first time. Cells also accept an
+escaped pipe (`\|`) as content, which was separately dropping three rows —
+one of them a `defer` whose ticket path sat after the escape.
+
+**The exposure census above is wrong and is corrected here.** This ticket says
+"The single out-of-vocabulary value is `n/a`". Measured across
+`docs/reviews/`: **15 out-of-vocabulary rows in 8 files**, 9 of them "no
+findings" in four spellings — `n/a` 1, `—` 3, `no finding` 2, `no change
+needed` 3 — and six decorated real dispositions (`fixed (proven, round
+2)` 3, `fixed (follow-up)` 1, `fixed, then **superseded by measurement**` 1,
+`minor, accepted` 1). The census that produced "1" could only see rows the
+old pattern already matched, which is the defect measuring itself.
+
+**The decision (owner).** The vocabulary stays at exactly three words:
+`fixed`, `defer`, `wontfix`. There is no fourth. A Disposition row disposes
+of a finding — fixed it, ticketed it, waived it. "This axis found nothing"
+disposes of nothing, because there was no finding; it is the absence of an
+input, not a fourth outcome. So an axis with no findings contributes zero
+rows and says so in that axis's prose. The consequence is accepted: nothing
+distinguishes "this axis ran clean" from "this axis never ran", and no
+vocabulary could have — the gate reads a word in a cell.
+
+Recorded in `.claude/skills/pre-merge-review/SKILL.md` (and its `.agents/`
+mirror) as one sentence after the vocabulary line, and in
+`docs/agents/known-traps.md`.
+
+**Historical review files are not rewritten.** Every one of the eight is on a
+merged branch that will not be gated again, and relabelling a no-finding row
+`wontfix` would record a finding that never existed. They report their
+out-of-vocabulary word whenever parsed; that is expected and permanent.
+
+One consequence of the decision needed a code change: `check()` failed any
+review with zero parsed rows, so a legitimately all-clean review would have
+been rejected. A section with a header row and no body rows now passes and
+prints `(no findings)`; a heading with no table at all still fails, and says
+to write the header row even when there are nothing to report.
+
+Re-run: `python scripts/check_merge_ready.py --self-test` (30 checks).
