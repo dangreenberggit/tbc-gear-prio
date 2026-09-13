@@ -119,11 +119,23 @@ are about to use, then file, then write the next free number back to
 **Symptom when armed:** `pnpm merge-to-dev --check-only` fails with
 `defer with no ticket path` or `defer tickets must be open|claimed`.
 
-`merge-ready` parses every Disposition row in `docs/reviews/<branch>.md`,
-across **all** rounds in the file. Write defer rows as `path — note`,
-never prose alone, and the named ticket must be open. When a later round
-closes a deferred ticket, edit the earlier round's row to `fixed` (with a
-"superseded in round N" note) in the same commit that closes the ticket.
+Write defer rows as `path — note`, never prose alone, and the named
+ticket must be open. When a later round closes a deferred ticket, edit the
+earlier round's row to `fixed` (with a "superseded in round N" note) in the
+same commit that closes the ticket.
+
+**`merge-ready` does NOT parse all rounds — corrected 2026-09-12.** This
+section used to say it parsed every Disposition row across all rounds. That
+is false, and it is the more dangerous direction to be wrong in: a reviewer
+who appends a second table gets a green gate over rows nobody checked. The
+parser reads only the **first** `## Disposition` section (tickets 85, 381),
+and a heading with trailing text like `## Disposition (round 3)` matches
+nothing at all. Measured worst case in this repo: 9 rows parsed of 61.
+
+**Until 85 and 381 land, keep every Disposition row in one table** under a
+bare `## Disposition` heading — merge later rounds into it rather than
+appending a second section. `fix-75-82-review-tickets.md` already does this
+by hand, which is why its second heading says the rows were merged upward.
 
 ## Before starting the dev servers
 
