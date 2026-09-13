@@ -1039,8 +1039,6 @@ def check_five_column_table_is_counted_not_dropped() -> list[str]:
         return [f"5-column: got {len(scan.rows)} rows, want 0"]
     if scan.candidates != 2:
         return [f"5-column: got {scan.candidates} candidates, want 2"]
-    # Lines 1-2 are the heading and its blank, 3-4 the header and separator,
-    # so the two body rows are 5 and 6.
     lines = [n for n, _ in scan.unparsed]
     return [] if lines == [5, 6] else [f"5-column: unparsed lines {lines}, want [5, 6]"]
 

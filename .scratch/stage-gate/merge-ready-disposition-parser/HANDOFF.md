@@ -18,8 +18,8 @@ Node 20, and `pnpm` needs >= 22.13):
 $env:PATH = "C:\Users\dgree\AppData\Roaming\fnm\node-versions\v22.16.0\installation;" + $env:PATH
 cd C:\Users\dgree\Code\lulz\tbc-gear-prio
 git rev-parse --abbrev-ref HEAD              # fix/merge-ready-disposition-parser
-git rev-parse --short HEAD                   # 32e92e6
-git rev-parse --short dev                    # bb647e8
+git rev-parse --short HEAD                   # 07efe1e or later
+git rev-parse --short dev                    # fc98fdc
 git status --porcelain                       # clean (logs/ may be untracked)
 git rev-list --left-right --count origin/dev...dev   # 0  535
 python scripts\check_merge_ready.py --self-test      # 33 checks, rc 0
@@ -91,26 +91,31 @@ git push origin dev                                     # 535 commits, three wee
 
 ### 2. Merge ask for this branch
 
-`pnpm merge-to-dev --check-only` is rc 0. **Do not merge without a separate
+Re-run `pnpm merge-to-dev --check-only` before trusting it. Round 3 found it
+failing from `dd03c8e` onward: closing ticket 382 left this branch's own
+`defer` row pointing at a closed ticket. Fixed by moving row S2 to `fixed`.
+**Do not merge without a separate
 explicit ask** — a combined "review and merge" does not count (`AGENTS.md` § The
 loop, step 6). `pnpm merge-to-dev` is the only supported door.
 
-### 3. Ticket 382
+### 3. Ticket 383
 
-Open, minor: comments in `check_merge_ready.py` that restate their code.
-Deferred from this branch's own review, standards axis.
+Open: the six-line commit body maximum added by `07efe1e` has no exemption for
+record-keeping commits. Ticket 382 is closed, fixed by `dd03c8e` on this
+branch.
 
 ## Carried forward — not defects in this work
 
-- **Commit bodies in this repo are long and nobody has fixed it.** Measured:
-  1436 commits, median body 12 non-blank lines, 269 at 21+, longest 152. The
-  repo is 49 days old with one author, so every commit is agent-written and the
-  pattern is present in the first week — systemic, not one session's habit.
-  A proposed `AGENTS.md` clarification was **drafted and rejected** by a
-  `writing-for-agents` review; see below. The reviewer's alternative, untried:
-  if body length should be checked at all, it belongs in `pre-merge-review`'s
-  Standards axis, at review time when the body is finished and countable — not
-  as a write-time number in a steering file.
+- **Commit bodies in this repo are long. A rule now exists.** Re-measured
+  2026-09-13: 1466 non-merge commits, median body 12 non-blank lines, 279 at
+  21+, longest 152. The repo is 49 days old with one author, so every commit is
+  agent-written and the pattern is present in the first week. `07efe1e` adds a
+  commit-message section to `docs/agents/home/AGENTS.md` that defaults to
+  subject-only with a six-line soft maximum. An earlier draft of that rule was
+  rejected by a `writing-for-agents` review for citing five wrong numbers and
+  for setting a write-time threshold; the accepted version states a trigger
+  rather than a count. The rule takes effect only after the owner copies the
+  staged file to `~/.claude/AGENTS.md`, which was done this session.
 - **Do not rewrite the long messages.** `docs/reviews/feat-upgrades-tab-batch-sim.md:208`
   already dispositioned this **wontfix**: ledgers and tickets cite those SHAs,
   and rebasing to reword breaks the evidence chain.
