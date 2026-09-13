@@ -75,3 +75,44 @@ One dated line per gate: gate, outcome, reason, round count.
   should be, which is the owner's call by the plan's own construction and by
   `AGENTS.md` § Editing skills. Held at Gate B: the revision round fixes F1-F3
   and leaves Q1's landing parameterised until the owner answers.
+- 2026-09-13 — **Q1 answered by the owner, and the answer reverses both seats.**
+  Neither the planner's recommendation (accept `n/a`) nor the reviewer's counter
+  (accept `no finding`, printed distinctly) survives. The owner's reasoning is
+  better than either: a Disposition row **disposes of a finding** — fixed it,
+  ticketed it, waived it. "This axis found nothing" disposes of nothing, because
+  no finding existed. It is not a fourth outcome; it is the absence of an input.
+  So an axis with no findings contributes **zero rows** and says so in its prose.
+  Vocabulary stays at three words. The owner explicitly accepted the consequence
+  that nothing then separates "ran clean" from "never ran" — the gate reads a
+  word in a cell and could never tell those apart under any vocabulary, so a
+  fourth word bought nothing there either. Recorded at length because the
+  orchestrator argued the wrong side of this twice before the owner's framing
+  landed.
+- 2026-09-13 — **Revision 2 delivered; the seat was told to attack the owner's
+  decision, not implement it, and did.** Three tests, all measured: (1) none of
+  the nine no-finding rows is load-bearing — each merely repeats a sentence the
+  axis prose already carries (`**Spec: clean.**`, `**D3 (clean).**`), so deleting
+  the row loses nothing; (2) neither skill forces a row per axis —
+  `parallel-phase` already says only actionable concerns become rows, so the
+  decision contradicts no existing instruction; (3) **it found a real defect the
+  decision introduces**: `check()` treats zero rows as "no table"
+  (`if not rows:` at `check_merge_ready.py:445`), so a legitimately all-clean
+  review would fail the gate. Latent today (no corpus file is all-clean) but a
+  direct consequence, and now fixed in-plan — a header row with no body rows
+  passes as `(no findings)`; a heading with no table still fails. This is the
+  value of sending a decision out to be attacked rather than built on.
+- 2026-09-13 — **The em-dash dispute is settled against the orchestrator's
+  number.** Revision 2 shows commands for both readings: the em-dash is the
+  disposition cell of exactly **3** parsed rows, and `| — |` appears on **16**
+  lines when counted in any column of any line. The orchestrator's spot-check of
+  10 was neither — its `Group-Object` split on the wrong delimiter, as it
+  suspected at the time. The no-finding total stays **9**, which is the figure
+  Step 9 writes into ticket 381. Recorded because that number lands in a durable
+  artifact and two agents had cited it differently.
+- 2026-09-13 — **Three of revision 2's new claims spot-checked by the
+  orchestrator** rather than taken from the seat, chosen because each would cause
+  a bad edit if wrong: `if not rows:` is at 445 as C21 states (840 is the
+  unrelated `--list-only` path); the skill's vocabulary sentence is at 131 and
+  118 is an example table row, confirming F2 and refuting revision 1's anchor;
+  `parallel-phase/SKILL.md` carries a single `wontfix` mention, consistent with
+  C25's "no edit needed". All three stand.
