@@ -277,6 +277,8 @@ def scan_disposition(text: str) -> DispositionScan:
                     scan.header_rows += 1
                 continue
             scan.candidates += 1
+            if not DISPOSITION_RE.match(raw.strip()):
+                scan.unparsed.append((line_no, raw.strip()))
 
     return scan
 
@@ -569,14 +571,50 @@ def check(
         return 1
 
     text = review.read_text(encoding="utf-8")
-    rows = parse_disposition(text)
-    if not rows:
+    scan = scan_disposition(text)
+    rows = scan.rows
+
+    denominator = (
+        f"disposition rows: {len(rows)} parsed of {scan.candidates} "
+        f"row-shaped lines in {scan.sections} section(s)"
+    )
+
+    # A row-shaped line the pattern could not read is reported by line number
+    # rather than counted as zero. A 3- or 5-column table is exactly what a
+    # human reads as rows and what this parser cannot, so silence there is the
+    # under-read that tickets 85 and 381 are about.
+    for line_no, raw in scan.unparsed:
+        errors.append(f"line {line_no}: disposition row not parsed — {raw!r}")
+
+    # `SECTION_RE` only sees level 2. A `### Disposition` or `## Dispositions`
+    # would contribute no rows and no complaint, so count the headings too.
+    if scan.disposition_headings > scan.sections:
         errors.append(
-            "review has no parseable ## Disposition table "
+            f"{scan.disposition_headings} heading(s) start with 'Disposition' "
+            f"but only {scan.sections} '## Disposition' section(s) were parsed"
+        )
+
+    if scan.sections == 0:
+        errors.append(
+            "review has no ## Disposition section "
             f"(rows: {'|'.join(DISPOSITIONS)}; defer must link a ticket path)"
         )
+    elif scan.header_rows == 0:
+        # The header row is the only signal separating "the author had nothing
+        # to report" from "the author forgot the table". Keeping it mandatory
+        # is what preserves the missing-table check; the template always writes
+        # it, so an all-clean review costs its author nothing.
+        errors.append(
+            "## Disposition section has no table — write the header row "
+            "(`| ID | Axis | Disposition | Ticket / note |`) and its separator "
+            "even when there are no findings"
+        )
+    elif not rows and not scan.unparsed:
+        # Every axis clean. A row disposes of a finding, so no findings means
+        # no rows -- that is a pass, not an empty table to complain about.
+        print(f"{denominator} (no findings)")
     else:
-        print(f"disposition rows: {len(rows)}")
+        print(denominator)
         for row in rows:
             disp = row["disposition"]
             if disp == "defer":
