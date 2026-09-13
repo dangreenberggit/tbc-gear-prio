@@ -148,3 +148,61 @@ One dated line per gate: gate, outcome, reason, round count.
   orchestrator confirmed directly (`check_merge_ready.py` prints `FAIL:` at 437,
   542 and 814). The mitigation Step 10 actually rests on — the standalone green
   verify one commit earlier — is sound, so the overstatement costs nothing.
+- 2026-09-13 — **Gate C: Phase accepted.** All 11 steps ran; nine commits
+  `e5453df`..`f03d2c7`; tree clean; nothing merged. End state **independently
+  re-measured by the orchestrator**, not taken from the executor's report:
+  self-test `pure logic ok (33 checks)` rc=0 at the tip; dedup
+  `59 parsed of 59 row-shaped lines in 6 section(s)` with `FAIL: Sp3: defer with
+  no ticket path`; candidate-pool `56 parsed of 66 … 3 section(s)` with exactly
+  10 `not parsed` lines; this branch's own review `7 parsed of 7 … 1 section(s)`
+  and `merge-ready: ok`; tickets 85 and 381 absent from `--list-only`; `NEXT`
+  383; ticket 382 `Status: open`.
+- 2026-09-13 — **Gate C dispositions — nine ledger rows, all `accepted`.** No row
+  reworked, none escalated. Five are ordinary plan-detail corrections (an
+  `index`-based line walk that would misreport duplicate rows, an off-by-one in
+  the plan's staging of expected failures, two steps commonly committed as one
+  because `lint-staged` cannot scope a commit, a fixture that had to live inside
+  the repo because `check()` calls `relative_to(ROOT)` first, and a self-test
+  whose own line numbers were wrong). That last one is worth naming: the executor
+  **fixed the test rather than the parser** after checking the parser's numbers
+  against the corpus — the opposite choice would have been the silent paper-over
+  this seat exists to prevent.
+- 2026-09-13 — **The self-test count rose 30 → 33 against the plan's "exactly
+  30".** Not a shortfall and not an adjusted assertion: the three extra checks
+  come from the A1 fix below, and the plan's figure was written before that
+  defect existed. Verified at the tip by the orchestrator rather than read from
+  the report. An executor that had quietly loosened a numeric acceptance to match
+  its output would have been a rework row; an increase with a stated cause is not.
+- 2026-09-13 — **The pre-merge review caught a blocking defect in the executor's
+  own fix, and it is the same class this branch exists to close.** `ROW_SHAPED_RE`
+  accepted leading whitespace while `DISPOSITION_RE` demanded `^\|`, so an
+  indented row — legal Markdown — was counted as a candidate, reached neither the
+  parsed list nor the unparsed list, and passed as `merge-ready: ok`. A `defer`
+  with no ticket could have gone straight through. Fixed in `632cd8e` by a single
+  shared classifier plus a conservation check: `check()` now fails whenever
+  `candidates - parsed - unparsed > 0`, which closes the class rather than the
+  instance. Corpus unmoved (`854/867/13`, leaked 0). Two axes found it
+  independently — adversarial by attacking behaviour, standards by spotting the
+  duplicated logic that caused it. Recorded because it is the strongest argument
+  in this stage for running the review even when the executor reports green.
+- 2026-09-13 — **Two out-of-manifest paths, both dispositioned `accepted`.**
+  (1) `.agents/skills/pre-merge-review/SKILL.md` — the owner's approval named
+  only the `.claude/` copy, but `pnpm verify` byte-compares the two trees
+  (`check_skill_mirrors.py`), so editing one alone turns that gate red. The
+  executor flagged this as the one place it acted outside the manifest on a
+  protected file rather than performing it silently, which is the correct
+  behaviour. Orchestrator verified: both copies now hash
+  `53729735A1B61D…` — identical — and `parallel-phase/SKILL.md` is untouched in
+  both trees, exactly as scoped. Accepted: the approval was scoped by *content*
+  (one sentence, no other line), and an identical mirrored insertion honours that
+  scope; the alternative is a red gate. (2) `382-merge-ready-comment-volume.md` —
+  a new ticket from the review's standards axis, which the manifest could not have
+  predicted. Accepted; it is open and linked from the review's Disposition.
+- 2026-09-13 — **Ticket 381's map.md line did not exist.** The plan told the
+  executor to append `CLOSED` to both tickets' lines; 85 had one, 381 had none —
+  per-ticket bullets stop at 245 and later tickets use a different form. The
+  executor searched four ways, confirmed the absence against `fc98fdc`, and wrote
+  a new bullet in the file's current style rather than inventing the old shape or
+  skipping the step. Accepted. Noted because "the file does not contain what the
+  plan assumed" is exactly the case where a seat is most tempted to do nothing and
+  report success.
