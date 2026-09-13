@@ -72,6 +72,7 @@ vendor/
 !.scratch/stage-gate/skeleton-scope-and-local-dev-fixture/
 !.scratch/stage-gate/two-hander-clears-offhand/
 !.scratch/stage-gate/ledger-consolidation-and-merge-train/
+!.scratch/stage-gate/merge-ready-disposition-parser/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
