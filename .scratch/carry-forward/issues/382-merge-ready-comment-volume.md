@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: chore
 Origin: Standards axis of the `fix/merge-ready-disposition-parser` pre-merge review (S2)
 Blocks: none
@@ -48,8 +48,28 @@ not reintroduce the defects.
 
 ## Acceptance
 
-- [ ] The four restating comments are gone
-- [ ] Each of the two rationales is stated once, at one site
-- [ ] `python scripts/check_merge_ready.py --self-test` still passes (33 checks)
-- [ ] No load-bearing comment lost: the escaped-pipe `file:line` citations and
+- [x] The four restating comments are gone
+- [x] Each of the two rationales is stated once, at one site
+- [x] `python scripts/check_merge_ready.py --self-test` still passes (33 checks)
+- [x] No load-bearing comment lost: the escaped-pipe `file:line` citations and
       the positional-walk hazard note survive in some form
+
+## Resolution — 2026-09-13
+
+Deleted the four restating comments: the `ROW_SHAPED_RE` one-liner, the first
+line of `_is_header_or_separator`'s docstring (kept the load-bearing second
+line), `check_header_and_separator_are_not_candidates`'s duplicate docstring,
+and the heading-census comment above the `disposition_headings` check in
+`check()`.
+
+Escaped-pipe rationale now stated once, at `_CELL` (with the `file:line`
+corpus citations). `_row_cells` and `check_escaped_pipe_in_note_parses` point
+at it instead of repeating it.
+
+3-/5-column-table rationale now stated once, in `scan_disposition`'s
+docstring. The comment in `check()` above the unparsed-row loop and
+`check_five_column_table_is_counted_not_dropped`'s docstring point at it
+instead of repeating it.
+
+`python scripts/check_merge_ready.py --self-test` → rc 0, 33 checks, unchanged.
+`git diff --stat`: 1 file changed, 8 insertions(+), 29 deletions(-).

@@ -83,7 +83,6 @@ SECTION_RE = re.compile(r"(?ms)^## Disposition\b[^\n]*\n(.*?)(?=^## |\Z)")
 # now and catches the shape that would otherwise vanish.
 DISPOSITION_HEADING_RE = re.compile(r"(?im)^\s{0,3}#{1,6}\s+Disposition\b")
 
-# A line a human reads as a table row: starts and ends with a pipe.
 ROW_SHAPED_RE = re.compile(r"(?m)^\s*\|.*\|\s*$")
 # Bold (`**Status:** open`) and plain (`Status: open`) both parse: tickets 88
 # and 89 used the bold form and the anchored pattern missed them, so both
@@ -219,20 +218,12 @@ class DispositionScan:
 
 
 def _row_cells(line: str) -> list[str]:
-    """Cells of a pipe line, split on unescaped `|` only.
-
-    A `\\|` inside a cell is content -- `feat-drift-warner-proven.md:209`
-    writes `pnpm verify 2>&1 \\| wc -l` in a note -- so splitting on every
-    pipe would miscount the columns and misread the row.
-    """
+    """Cells of a pipe line, split on unescaped `|` only. See `_CELL`."""
     return [p.strip() for p in re.split(r"(?<!\\)\|", line.strip())[1:-1]]
 
 
 def _is_header_or_separator(cells: list[str]) -> bool:
-    """A header (`| ID | Axis | ... |`) or a `| --- | --- |` separator.
-
-    Neither is a finding, so neither counts toward the denominator.
-    """
+    """Neither is a finding, so neither counts toward the denominator."""
     if not cells:
         return True
     if cells[0].lower() in ("id", "---"):
@@ -589,15 +580,12 @@ def check(
         f"row-shaped lines in {scan.sections} section(s)"
     )
 
-    # A row-shaped line the pattern could not read is reported by line number
-    # rather than counted as zero. A 3- or 5-column table is exactly what a
-    # human reads as rows and what this parser cannot, so silence there is the
-    # under-read that tickets 85 and 381 are about.
+    # See scan_disposition's docstring on why an unparsed row is reported by
+    # line number rather than counted as zero.
     for line_no, raw in scan.unparsed:
         errors.append(f"line {line_no}: disposition row not parsed — {raw!r}")
 
-    # `SECTION_RE` only sees level 2. A `### Disposition` or `## Dispositions`
-    # would contribute no rows and no complaint, so count the headings too.
+    # See DISPOSITION_HEADING_RE.
     if scan.disposition_headings > scan.sections:
         errors.append(
             f"{scan.disposition_headings} heading(s) start with 'Disposition' "
@@ -1038,11 +1026,7 @@ def check_all_typo_table_stays_loud() -> list[str]:
 
 
 def check_five_column_table_is_counted_not_dropped() -> list[str]:
-    """A 5-column table is row-shaped to a human and unreadable to the parser.
-
-    It must be reported by line number rather than counted as zero rows --
-    the header-driven alternative would have ignored it silently.
-    """
+    """See scan_disposition's docstring."""
     text = (
         "## Disposition\n\n"
         "| ID | Axis | Sev | Finding | Disposition |\n"
@@ -1062,12 +1046,7 @@ def check_five_column_table_is_counted_not_dropped() -> list[str]:
 
 
 def check_escaped_pipe_in_note_parses() -> list[str]:
-    """`\\|` inside a cell is content, not a column break.
-
-    `fix-worn-item-pool-coverage.md:203` is a `defer` whose escaped pipe sits
-    before its ticket path, so the old pattern dropped the row and the path
-    with it.
-    """
+    """`\\|` inside a cell is content, not a column break. See `_CELL`."""
     text = (
         "## Disposition\n\n" + _HEADER
         + "| A1 | Adversarial | defer | `a \\| b` — .scratch/x/issues/1-z.md |\n"
@@ -1082,7 +1061,7 @@ def check_escaped_pipe_in_note_parses() -> list[str]:
 
 
 def check_header_and_separator_are_not_candidates() -> list[str]:
-    """Neither is a finding, so neither counts toward the denominator."""
+    """See `_is_header_or_separator`."""
     scan = scan_disposition("## Disposition\n\n" + _HEADER)
     if scan.candidates != 0:
         return [f"header/separator: got {scan.candidates} candidates, want 0"]
