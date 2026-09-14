@@ -16,7 +16,10 @@ equivalent from sources that ARE pinned:
     These used to be copied from ret; ADR 0022 records why that was wrong.
   - player class, talents, options, consumables, race, professions: from
     upstream ui/druid/feralcat/presets.ts at the pinned commit.
-  - rotation: merged from the pinned vendor/wowsims/feral_default.apl.json.
+  - rotation: merged from data/presets/feral/owner-p2.settings-export.json,
+    the owner's own settings export (see FERAL_APL below). NOT from the pinned
+    vendor/wowsims/feral_default.apl.json -- upstream's APL rewrites do not
+    reach this skeleton.
 
 The APL merge is not cosmetic. verification-log 2026-07-27 measured that for
 ret the APL block -- prepullActions especially -- is what the Go sim actually
