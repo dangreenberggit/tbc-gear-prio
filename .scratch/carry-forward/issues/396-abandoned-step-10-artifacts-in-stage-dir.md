@@ -1,10 +1,22 @@
-Status: open
+Status: closed
 Type: chore
 Origin: docs/reviews/feat-upstream-catchup-chunk1.md
 Blocks: none
 Blocked by: none
 
 # Half-finished regression artifacts left in the stage directory
+
+Closed 2026-09-14 by commit `<pending>` on `feat/upstream-catchup-chunk1`. Added
+`.scratch/stage-gate/upstream-catchup-chunk1/README.md`, which records that step
+10 was withdrawn (and why it was a design problem, not a cost problem), tabulates
+the three leftover files including that `baseline-1.json` is run 1 of 5 and feeds
+nothing, marks `ret-p5-run.mjs` as worth keeping for Chunk 2, and points at
+`engine-delta.md` and ADR-0033 Consequence 5 as the replacement. Nothing was
+deleted -- the 32-minute measurement is annotated rather than discarded, as the
+ticket preferred.
+
+Verified with `ls .scratch/stage-gate/upstream-catchup-chunk1/README.md` and
+`grep -c 'withdrawn' .scratch/stage-gate/upstream-catchup-chunk1/README.md`.
 
 Plan step 10 of `upstream-catchup-chunk1` was withdrawn mid-execution after the
 full-tab ranking regression was judged badly designed (ranking is an unstable
