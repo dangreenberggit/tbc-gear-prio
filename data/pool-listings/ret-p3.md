@@ -100,8 +100,8 @@ absorbs it silently.
 
 ## Source inventory
 
-- `vendor/wowsims/db.json` — 8257 items, sha256 `c28866ef09807fa18e3c38a926c1348dac57accc7f3865871031798a6db80dc1` per `data/wowsims.lock.json`
-- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `ec5c5f205e61049d730e460967f8488774a7fe2a`, commit `ec5c5f205e61049d730e460967f8488774a7fe2a`
+- `vendor/wowsims/db.json` — 8257 items, sha256 `0ee6cc3abe86b50bd970e215985aed9fc747a8a7bde923337b1439c73bf0f563` per `data/wowsims.lock.json`
+- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `17a8fb28c5ad14b649acecdaacd488594048f467`, commit `17a8fb28c5ad14b649acecdaacd488594048f467`
 - `data/universes/ret-p3.json` — 467 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 467
-- wowsims-primary membership (W): 1596
+- wowsims-primary membership (W): 1599
 - in both: 456
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 1140
+- wowsims-only (W \ U): 1143
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -1277,6 +1277,9 @@ carry. Each row names the rule that explains the absence.
 | 34074 | Witches Band | 1 | f | no recognized source route | — |
 | 34075 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
 | 34837 | The 2 Ring | 1 | f | no recognized source route | — |
+| 35317 | Vindicator's Pendant of Reprieve | 3 | f | no recognized source route | — |
+| 35319 | Vindicator's Pendant of Subjugation | 3 | f | no recognized source route | — |
+| 35320 | Vindicator's Band of Subjugation | 3 | f | no recognized source route | — |
 | 38287 | Empty Mug of Direbrew | 1 | f | no recognized source route | — |
 | 38288 | Direbrew Hops | 1 | f | no recognized source route | — |
 | 38289 | Coren's Lucky Coin | 1 | f | no recognized source route | — |
@@ -1300,7 +1303,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 82 |
 | e1 — drops only outside this phase's zones | 343 |
 | e2 — sourced, but by a route the local assembly did not admit | 161 |
-| f — no recognized source route | 554 |
+| f — no recognized source route | 557 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
