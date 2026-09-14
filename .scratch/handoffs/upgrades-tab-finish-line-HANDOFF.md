@@ -9,17 +9,44 @@ Plan: `.scratch/plans/upgrades-tab-finish-line.md` (revision 1, post-verificatio
 
 | Thing | Value |
 | --- | --- |
-| Core repo branch | `feat/tab-scope-truth`, 2 commits ahead of `dev` |
-| Core commits | `23c5256` (scope doc), `7411727` (review + tickets 386-388) |
+| Core repo branch | `feat/tab-scope-truth`, 3 commits ahead of `dev` |
+| Core commits | `23c5256` (scope doc), `7411727` (review + tickets 386-388), `e5c2e13` (this handoff) |
 | `dev` tip | `9e86ebc` |
 | Fork clone HEAD | `5e9013b78`, branch `feat/upgrades-tab`, tree clean |
-| Fork remote | `5e9013b78` confirmed present on `origin` (`ls-remote`, 2026-09-13) |
+| Fork remote | matched `5e9013b78` **as measured on 2026-09-13** — re-run `ls-remote` before trusting this row (see below) |
 | `pnpm merge-to-dev --check-only` | **rc=0**, 9/9 disposition rows parsed |
 | Chunk 0 | done, reviewed, **not merged** |
 | Chunks 1-5 | not started |
 
+That fork-remote row is a **measurement with a date, not current state**. Any
+fork commit made after 2026-09-13 moves the clone ahead of the remote and this
+row silently becomes false — the same way `pushed` in the lockfile goes stale.
+Re-run it yourself:
+
+```
+git -C vendor/tbc-new-fork ls-remote origin refs/heads/feat/upgrades-tab
+git -C vendor/tbc-new-fork rev-parse HEAD
+```
+
 **Nothing has been merged to `dev`.** The merge is the owner's call and has not
 been asked for.
+
+### Worktree hazard — 15 of them
+
+`git worktree list` shows **15 registered worktrees**, not one. That is ticket
+149 (worktree sprawl), and it is a live hazard for this plan rather than
+housekeeping, because the plan serialises every fork chunk through a single
+clone. Two that matter:
+
+- `tbc-gear-prio-wt-layout-gate` holds a **symlink** at `vendor/tbc-new-fork`
+  pointing to the one real clone (confirmed: `tbc-new-fork -> /c/Users/dgree/…
+  /vendor/tbc-new-fork/`). Anything run there shares the fork's working tree,
+  index and HEAD with the main checkout.
+- `.scratch/wt-fan-out-retro` sits on `feat/fan-out-retro`, the one branch with
+  real unmerged work (49 commits).
+
+Before any fork chunk starts, confirm no session is live in a worktree that can
+reach the fork. Registration alone does not tell you that — ask the owner.
 
 ## Which repo gets which merge — read this before Chunk 1
 
