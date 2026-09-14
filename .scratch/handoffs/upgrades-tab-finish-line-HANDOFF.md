@@ -9,14 +9,13 @@ Plan: `.scratch/plans/upgrades-tab-finish-line.md` (revision 1, post-verificatio
 
 | Thing | Value |
 | --- | --- |
-| Core repo branch | `feat/tab-scope-truth`, 3 commits ahead of `dev` |
-| Core commits | `23c5256` (scope doc), `7411727` (review + tickets 386-388), `e5c2e13` (this handoff) |
-| `dev` tip | `9e86ebc` |
-| Fork clone HEAD | `5e9013b78`, branch `feat/upgrades-tab`, tree clean |
+| Core repo branch | `feat/tab-scope-truth`, 5 commits, **merged to `dev` 2026-09-13** |
+| Core commits | `23c5256` scope doc · `7411727` review + tickets · `e5c2e13` this handoff · `a53d5c2` rows 314/330 fixed + ticket 389 · `53282f9` handoff corrections |
+| Fork clone HEAD | `5e9013b78`, branch `feat/upgrades-tab`, tree clean — **untouched by Chunk 0** |
 | Fork remote | matched `5e9013b78` **as measured on 2026-09-13** — re-run `ls-remote` before trusting this row (see below) |
 | `pnpm merge-to-dev --check-only` | **rc=0**, 9/9 disposition rows parsed |
-| Chunk 0 | done, reviewed, **not merged** |
-| Chunks 1-5 | not started |
+| Chunk 0 | done, reviewed, merged |
+| Chunks 1-5 | not started. **Chunk 1 is next**, and branches off `dev` |
 
 That fork-remote row is a **measurement with a date, not current state**. Any
 fork commit made after 2026-09-13 moves the clone ahead of the remote and this
@@ -28,25 +27,36 @@ git -C vendor/tbc-new-fork ls-remote origin refs/heads/feat/upgrades-tab
 git -C vendor/tbc-new-fork rev-parse HEAD
 ```
 
-**Nothing has been merged to `dev`.** The merge is the owner's call and has not
-been asked for.
+Chunk 0 is merged. Every merge from here is still the owner's call, asked for
+separately after the review file is written and they have seen the summary.
 
 ### Worktree hazard — 15 of them
 
 `git worktree list` shows **15 registered worktrees**, not one. That is ticket
 149 (worktree sprawl), and it is a live hazard for this plan rather than
 housekeeping, because the plan serialises every fork chunk through a single
-clone. Two that matter:
+clone.
 
-- `tbc-gear-prio-wt-layout-gate` holds a **symlink** at `vendor/tbc-new-fork`
-  pointing to the one real clone (confirmed: `tbc-new-fork -> /c/Users/dgree/…
-  /vendor/tbc-new-fork/`). Anything run there shares the fork's working tree,
-  index and HEAD with the main checkout.
-- `.scratch/wt-fan-out-retro` sits on `feat/fan-out-retro`, the one branch with
-  real unmerged work (49 commits).
+`tbc-gear-prio-wt-layout-gate` holds a **symlink** at `vendor/tbc-new-fork`
+pointing to the one real clone (`tbc-new-fork -> /c/Users/dgree/…
+/vendor/tbc-new-fork/`). Anything run there shares the fork's working tree,
+index and HEAD with the main checkout.
 
-Before any fork chunk starts, confirm no session is live in a worktree that can
-reach the fork. Registration alone does not tell you that — ask the owner.
+**Cleared for Chunk 1 as of 2026-09-13:** the owner confirmed nothing is running
+in any worktree, and that symlinked worktree measured clean and 0 commits ahead
+of `dev`. Re-confirm before a later fork chunk — dormancy is not permanent, and
+registration alone never tells you whether a session is live.
+
+Not all of them are dormant leftovers, so do not bulk-remove them. Five carry
+commits not in `dev` (`claude/dps-naming-audit-d26eb7` 2,
+`claude/ticket-225-orchestration-b2cd20` 4,
+`claude/orchestration-ticket-290-7e899e` 7, `feat/fan-out-retro` 49, plus three
+detached-HEAD worktrees at 5) and four carry uncommitted edits
+(`phase-1/w-salvage-docs`, `claude/dps-naming-audit-d26eb7`,
+`claude/terminology-cleanup-plan-82f471`, `claude/vigilant-chaum-76705a` at 29
+files, `feat/fan-out-retro` at 14). `feat/fan-out-retro` has both and is the one
+to be careful with. A per-worktree safety assessment was commissioned; if its
+findings are not attached below, re-run it before removing anything.
 
 ## Which repo gets which merge — read this before Chunk 1
 
@@ -156,16 +166,38 @@ Environment traps that cost this session time:
 
 ## Chunk 0's residue
 
-Three tickets, all open, all deferred from the review:
+The review filed three tickets. Two were investigated and closed in the same
+session rather than carried — both turned out to describe stale rows, not
+defects — and the investigation turned up one genuinely new item.
+
+**Open:**
 
 - **386** — the scope doc's done-condition 3 is unsatisfiable today. **Chunk 1
   makes it satisfiable as written**; do not reword it to match today's state.
-- **387** — row 314 lost the ticket-126 half of its reason and now calls itself a
-  correctness concern while listing only styling. Settle whether the tab's TMB
-  export emits token/pattern ids or gear ids; if gear ids, that is a live defect.
-- **388** — ticket 330 is filed as awaiting sign-off, but its own text asks what
-  the displayed figure represents. A 4pc-sized number labelled as a 2pc step is a
-  data question, not a sign-off.
+- **389** — the set-bonus string on disk
+  (`{{threshold}}pc bonus ({{worn}}/{{threshold}}) (+{{dps}})`) is not the string
+  ticket 330 records as landed (`toward {{set}} {{threshold}}pc (+{{dps}})`).
+  Found independently twice. Label/number agreement is unaffected, but the owner
+  is being asked to sign off on 330 against wording the product does not use, and
+  the shipped text drops the set name and the "toward" framing. **Needs an owner
+  decision**, not engineering. Also asks whether `package_disclosure` duplicates
+  `prospective`, which would make ticket 336's disclosure indistinguishable from
+  a row's own bonus line.
+
+**Closed, with the measurement that closed them:**
+
+- **387** — not a defect. The tab's TMB export does substitute token ids
+  (`exportIdForRow`, `upgrades_tab.tsx:2160`; 15 `tokenId` fields in the bundled
+  `ret-p3.universe.json`). Craftable/pattern ids remain gear ids by documented
+  deferral. Row 314 rewritten.
+- **388** — the finding was wrong. One `nextThreshold` (`rank.ts:1846`) feeds both
+  the set-bonus label and its figure, so they cannot disagree; ticket 330's own
+  August investigation had already concluded this. Row 330 rewritten, since its
+  title still asserted the disproved mislabelling.
+
+The lesson worth carrying: two of three tickets restated questions the tracker
+had already answered. Check a ticket's own resolution notes before filing against
+it.
 
 Two findings accepted as `wontfix` that later chunks should carry:
 
