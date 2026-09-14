@@ -72,13 +72,35 @@ so nothing becomes unreachable.
 - `claude/dps-naming-audit-d26eb7` (2 commits) — plus an **untracked** review
   file and ticket 338 that exist nowhere else.
 
-**The real hazard is untracked files, not commits.** `git branch --merged`
-cannot see them. Two cases: the `dps-naming-audit` files above, and
-`claude/terminology-cleanup-plan-82f471`, whose branch is fully merged and looks
-disposable but whose worktree holds an untracked, gitignored
-`.scratch/terminology-cleanup/` — a finished plan (spec, five issue files, a
-handoff) that its own note says was never published anywhere. Copy it out before
-that worktree goes.
+**The real hazard was untracked files, not commits** — `git branch --merged`
+cannot see them. That is now handled: everything that lived only in a worktree
+working directory was copied onto `dev` at
+`.scratch/archive/2026-09-worktree-rescue/` (commit `505641b`, 29 files,
+~8,100 lines) with a README recording each item's origin. The three subfolders
+are `fan-out-retro/`, `terminology-cleanup/` and `dps-naming-audit/`.
+
+**Eleven worktrees are now safe to delete** — the nine above plus
+`wt-fan-out-retro` and `terminology-cleanup-plan-82f471`, whose content is
+archived. Deleting a *worktree* removes only a working directory; deleting a
+*branch* destroys commits. Keep that distinction: two branches still hold
+unmerged work and their disposition is a separate, open decision —
+`feat/fan-out-retro` (49 commits) and `claude/dps-naming-audit-d26eb7`.
+
+Relevance, checked against `dev`'s tree rather than each plan's own claims
+(2026-09-13):
+
+- **terminology-cleanup: implemented.** `CONTEXT.md` carries the glossary it
+  specified, `PLAN.md` uses Stage vocabulary throughout with no old markers
+  left. Historical record only.
+- **dps-naming-audit: not merged.** `dev` still has `DpsSample` / `deltaDps`, so
+  the rename never landed and **ticket 338 (mirror it into the fork) is moot as
+  scoped** — there is nothing to mirror yet. Do not action 338 until someone
+  decides whether to merge that branch.
+- **fan-out-retro: partly adopted.** The mechanical items are in place
+  (worktree exclusions, the skill adapter rename, single-writer `pathsAllowed`).
+  Two are not: the `.claude/` ↔ `.agents/` skill-mirror drift check, and the
+  `onlyBuiltDependencies` build-approval lockdown — the latter now exists as a
+  written rule in `AGENTS.md`, so it may have been settled by policy instead.
 
 ## Which repo gets which merge — read this before Chunk 1
 
@@ -159,6 +181,15 @@ run `pnpm merge-to-dev`, do not `git merge` into `dev`, do not set
 `TBC_ALLOW_DEV_MERGE=1`, and do not push the fork. Stop with your branch ready
 and report.
 
+**Chunk 1 runs as a `stage-gate` session, not an ordinary one.** Invoke the
+`stage-gate` skill: planner → adversarial plan review → fresh-context executor,
+with judged gates between. The reason is the blast radius, not the line count —
+Chunk 1 moves both pins, merges ~80 upstream commits into a fork that has
+diverged from them, and regenerates five committed artifacts that every later
+chunk reads. A wrong re-pin is expensive to unwind and the previous re-pin
+produced an ADR and six tickets. Chunks 2 is likewise stage-gate; 0, 3 and 4 are
+ordinary sessions.
+
 **Chunk 1 is next** and it is the risky one. Before you touch anything:
 
 - Both trees clean, fork HEAD equal to the lock, and **ask** whether any worktree
@@ -184,7 +215,8 @@ Environment traps that cost this session time:
 - **`.scratch/carry-forward/issues/NEXT` was stale** — it said 383 while
   `383-body-cap-vs-record-commits.md` already existed. Check for a collision with
   `ls .scratch/carry-forward/issues/ | grep -E '^<n>-'` before writing a ticket,
-  and bump `NEXT` when you finish. It is now 389.
+  and bump `NEXT` when you finish. It is now **390** (389 was filed by Chunk 0's
+  follow-up).
 
 ## Chunk 0's residue
 
