@@ -47,16 +47,38 @@ in any worktree, and that symlinked worktree measured clean and 0 commits ahead
 of `dev`. Re-confirm before a later fork chunk — dormancy is not permanent, and
 registration alone never tells you whether a session is live.
 
-Not all of them are dormant leftovers, so do not bulk-remove them. Five carry
-commits not in `dev` (`claude/dps-naming-audit-d26eb7` 2,
-`claude/ticket-225-orchestration-b2cd20` 4,
-`claude/orchestration-ticket-290-7e899e` 7, `feat/fan-out-retro` 49, plus three
-detached-HEAD worktrees at 5) and four carry uncommitted edits
-(`phase-1/w-salvage-docs`, `claude/dps-naming-audit-d26eb7`,
-`claude/terminology-cleanup-plan-82f471`, `claude/vigilant-chaum-76705a` at 29
-files, `feat/fan-out-retro` at 14). `feat/fan-out-retro` has both and is the one
-to be careful with. A per-worktree safety assessment was commissioned; if its
-findings are not attached below, re-run it before removing anything.
+Not all of them are dormant leftovers, so **do not bulk-remove them**. A
+per-worktree assessment ran on 2026-09-13; its findings:
+
+**Nine are safe to remove** — fully merged, and either clean or carrying only
+line-ending noise (`diff -w` empty): `wt-layout-gate`, `wt-ret-p3-data`,
+`wt-salvage-docs`, `wt-sweep-ret`, `wt-verify-review`, and the four under
+`.claude/worktrees/`: `repo-state-wsl-migration-cdb8bf`,
+`worktree-branch-switching-b46255`,
+`wowhead-collection-integrity-task2-83d6ca`, `wowsims-all-specs-support-30ee63`.
+The three detached HEADs among them sit on commits already reachable from `dev`,
+so nothing becomes unreachable.
+
+**Four hold something worth keeping:**
+
+- `feat/fan-out-retro` (49 commits) — its dirty files are pure whitespace, but
+  `.scratch/retros/**` holds ~7,000 lines of orchestration retro analysis that
+  **exists on no other branch**. Some of its other commits are superseded by
+  `dev`; the retros are not. Do not delete without a decision.
+- `claude/orchestration-ticket-290-7e899e` (7 commits, in the confusingly named
+  `ticket-232-67e7a4` directory) — genuinely unmerged, and tab-relevant.
+- `claude/ticket-225-orchestration-b2cd20` (4 commits, in the equally
+  mis-named `subagent-nesting-check-80e77b` directory).
+- `claude/dps-naming-audit-d26eb7` (2 commits) — plus an **untracked** review
+  file and ticket 338 that exist nowhere else.
+
+**The real hazard is untracked files, not commits.** `git branch --merged`
+cannot see them. Two cases: the `dps-naming-audit` files above, and
+`claude/terminology-cleanup-plan-82f471`, whose branch is fully merged and looks
+disposable but whose worktree holds an untracked, gitignored
+`.scratch/terminology-cleanup/` — a finished plan (spec, five issue files, a
+handoff) that its own note says was never published anywhere. Copy it out before
+that worktree goes.
 
 ## Which repo gets which merge — read this before Chunk 1
 
