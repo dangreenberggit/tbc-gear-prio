@@ -583,17 +583,29 @@ def do_check():
         # A sha pin is never equal to the latest release tag, so comparing it
         # against one reports drift forever and reads CURRENT_PHASE from a
         # commit the pin may never contain (ticket 354). Compare against the
-        # first watched ref instead -- the ref the pin was cut from -- and read
-        # the tier from that tip.
+        # sole watched ref instead -- the ref the pin was cut from -- and read
+        # the tier from that tip. do_watch_ref refuses a second, differing ref,
+        # so "sole" is enforced at write time rather than assumed here; more
+        # than one key means a hand-edited lock, and this reports it (ticket
+        # 392) rather than picking one by JSON order.
         #
         # The release line stays as information rather than drift so the
         # ADR-0030 D2 tag trigger ("move back to a release tag once one
         # contains the reforge merge") is still visible on every run.
         print(f"  latest release: {tag} ({sha[:12]}) -- informational on a sha pin")
-        ref = next(iter(lock.get("watchedRefs") or {}), None)
-        if ref is None:
+        watched_names = list(lock.get("watchedRefs") or {})
+        if not watched_names:
             drift.append("sha pin has no watched ref to compare against")
+        elif len(watched_names) > 1:
+            drift.append(
+                "sha pin comparison cannot be resolved: "
+                f"{len(watched_names)} watched refs ({', '.join(watched_names)}) "
+                "-- a sha pin is cut from exactly one ref. Run --unwatch-ref on "
+                "the refs the pin was not cut from.")
         else:
+            # Unpacked, not indexed: past the two guards above there is exactly
+            # one name, so there is no first-or-last choice left to make wrong.
+            (ref,) = watched_names
             try:
                 tip = ref_sha(ref)
             except SystemExit as e:
@@ -667,11 +679,23 @@ def do_check():
 
 
 def do_watch_ref(ref):
-    """Add or refresh one entry in lock["watchedRefs"]. Does not fetch files or
-    touch vendor/ -- a watched ref is tracked for drift, not built from."""
+    """Add or refresh the single entry in lock["watchedRefs"]. Does not fetch
+    files or touch vendor/ -- a watched ref is tracked for drift, not built from.
+
+    Refuses a second, differing ref. do_check compares a sha pin against the sole
+    watched ref, so a second key makes that comparison ambiguous (ticket 392).
+    Refreshing the same ref stays allowed -- that is how its recorded tip moves.
+    """
     lock = load_lock()
     if not lock:
         print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+    existing = [name for name in (lock.get("watchedRefs") or {}) if name != ref]
+    if existing:
+        print(f"  already watching {', '.join(existing)}; watchedRefs holds one ref",
+              file=sys.stderr)
+        print(f"  run: python scripts/sync_wowsims.py --unwatch-ref {existing[0]}",
+              file=sys.stderr)
         return 2
     sha = ref_sha(ref)
     if not sha:

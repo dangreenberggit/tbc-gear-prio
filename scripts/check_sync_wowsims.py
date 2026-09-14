@@ -779,6 +779,88 @@ def check_unwatch_ref_removes_the_key_and_refuses_an_absent_one() -> list[str]:
     return problems
 
 
+def check_sha_pin_refuses_to_guess_between_two_watched_refs() -> list[str]:
+    """Two watched refs made the comparison depend on JSON key order: whichever
+    key sat first won, silently. Taking the *last* key instead of the first left
+    every check green, which is ticket 392. The pin must now refuse to choose.
+
+    Writes the two-ref dict straight into the lock rather than going through
+    do_watch_ref, which now refuses exactly this state -- the check has to be
+    able to build a lock a hand edit could produce.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        lock["commit"] = h.PIN_SHA
+        lock["tag"] = h.PIN_SHA
+        lock["watchedRefs"] = {
+            "master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
+            "other/ref": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
+        }
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc == 0:
+        problems.append(
+            f"--check must not report success with two watched refs: {body.strip()!r}"
+        )
+    # Naming both is what makes the failure actionable -- the whole defect was
+    # that a choice happened with nothing in the output saying so.
+    for name in ("master", "other/ref"):
+        if name not in body:
+            problems.append(
+                f"--check must name the watched ref {name!r} when it cannot "
+                f"resolve the comparison: {body.strip()!r}"
+            )
+    return problems
+
+
+def check_watch_ref_refuses_a_second_differing_ref() -> list[str]:
+    """do_check compares a sha pin against the sole watched ref, so the single-ref
+    invariant has to hold at write time too -- otherwise --watch-ref builds the
+    ambiguous lock that --check can then only refuse.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="master", commit=h.UPSTREAM_SHA)
+        before = sync_wowsims.load_lock().get("watchedRefs")
+
+        rc = sync_wowsims.do_watch_ref("other/ref")
+        if rc != 2:
+            problems.append(
+                f"--watch-ref on a second differing ref must refuse with 2, got {rc}"
+            )
+        after = sync_wowsims.load_lock().get("watchedRefs")
+        if after != before:
+            problems.append(
+                f"a refused --watch-ref must leave the lock untouched: "
+                f"{before!r} -> {after!r}"
+            )
+    return problems
+
+
+def check_watch_ref_still_refreshes_the_same_ref() -> list[str]:
+    """Re-watching the ref already watched is how its recorded tip moves after an
+    upstream push; the refusal above must not break that path.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="master", commit="c" * 40)
+
+        rc = sync_wowsims.do_watch_ref("master")
+        if rc != 0:
+            problems.append(f"--watch-ref on the ref already watched must return 0, got {rc}")
+        watched = sync_wowsims.load_lock().get("watchedRefs") or {}
+        if list(watched) != ["master"]:
+            problems.append(f"re-watching must leave exactly one ref: {watched!r}")
+        if watched.get("master", {}).get("commit") != h.UPSTREAM_SHA:
+            problems.append(
+                f"re-watching must refresh the recorded tip to the ref's current "
+                f"sha: {watched!r}"
+            )
+    return problems
+
+
 CHECKS = (
     check_vendor_is_empty_missing_dir,
     check_vendor_is_empty_empty_dir,
@@ -804,6 +886,10 @@ CHECKS = (
     check_sha_pin_tier_change_is_read_from_the_watched_ref,
     check_sha_pin_survives_an_unresolvable_watched_ref,
     check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
+    # The single-watched-ref invariant, enforced at both ends (ticket 392).
+    check_sha_pin_refuses_to_guess_between_two_watched_refs,
+    check_watch_ref_refuses_a_second_differing_ref,
+    check_watch_ref_still_refreshes_the_same_ref,
 )
 
 

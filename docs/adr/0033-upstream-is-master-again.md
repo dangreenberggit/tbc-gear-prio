@@ -73,11 +73,17 @@ forever and read `CURRENT_PHASE` from a commit the pin may never contain (ticket
 354). Tags are cut from `master`, and a sha pin's own ref need not be an ancestor
 of any tag.
 
-A sha pin now compares against the first entry in `watchedRefs` and reads the
+A sha pin now compares against the sole entry in `watchedRefs` and reads the
 content tier from **that** tip. The release tag is still printed, as an
 informational line rather than drift, so the Decision 2 trigger above stays
 visible on every run. An unresolvable watched ref appends drift instead of
 raising — the state this repo was in between the branch deletion and this ADR.
+
+"Sole" is enforced rather than assumed (ticket 392). `--watch-ref` refuses a
+second, differing ref and names the `--unwatch-ref` that would free the slot;
+refreshing the ref already watched still works, since that is how its recorded
+tip moves. If a hand-edited lock holds more than one, `--check` reports that the
+comparison cannot be resolved instead of picking a ref by JSON key order.
 
 **`pnpm verify` does not run `sync_wowsims.py --check`.** The verify chain ends
 at `upstream-drift:warn`, which exits 0 on every branch by design. A green
