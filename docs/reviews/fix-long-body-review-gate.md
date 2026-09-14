@@ -1,6 +1,7 @@
 # Pre-merge review — fix/long-body-review-gate
 
-Reviewed range: `dev..e35ce1b` (one commit)
+Reviewed range: `dev..e35ce1b`, the commit the axis read. The findings below
+were fixed in `f677589`, which also carries this file.
 
 One axis: standards and spec, fresh context, Opus at effort medium. The
 adversarial and domain axes were not run and write no Disposition rows. The
