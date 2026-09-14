@@ -1,4 +1,20 @@
-Status: open
+Status: closed
+
+Closed 2026-09-14 by commit `c18e7e04` on `feat/upstream-catchup-chunk1`.
+(a) `obtain_source` now returns `(path, mode)` and `build_from_source`'s `finally`
+branches on that captured mode instead of re-testing
+`(FORK / ".git").exists()`, so entry and cleanup can no longer disagree; a
+defensive `git worktree prune` runs before `worktree add` so an already-leaked
+registration cannot refuse the retry. (b) `--commit` with a directory name that is
+not `lock["tag"]` now prints the proving-only NOTE.
+
+Verified with two consecutive proving builds of the new pin:
+`python scripts/fetch_wowsimcli.py --commit 17a8fb28c5ad14b649acecdaacd488594048f467
+--tag-dir 17a8fb28c5ad14b649acecdaacd488594048f467` → rc 0 both times, identical
+`sha256=9f37d916472d3a2bb49051051f5e9a7a1a74f649ddca129e02aa9bb4c5d363ea`, the
+`NOTE: proving build only` line present in both logs, and
+`git -C vendor/tbc-new-fork worktree list` printing **one line** after each build —
+no leaked registration.
 Type: defect
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Adversarial axis, A1 and A3)
 Blocks: none

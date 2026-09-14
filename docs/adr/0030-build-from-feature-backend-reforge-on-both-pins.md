@@ -1,6 +1,6 @@
 # ADR-0030 — Build from `feature/backend-reforge` on both pins
 
-**Status:** accepted
+**Status:** accepted; Decision 1 Superseded by [ADR-0033](0033-upstream-is-master-again.md) on 2026-09-14, Decision 2 kept
 **Date:** 2026-09-10
 **Related:** [`ADR-0025`](0025-upstream-has-a-gem-optimizer-we-stay-pinned-and-borrow-only-its-rules.md) (Decision 1 superseded here), [`ADR-0027`](0027-the-wowsims-upgrades-tab-is-the-primary-product.md), `PLAN.md` §8, §9; tickets `.scratch/carry-forward/issues/251-fork-base-no-longer-matches-the-engine-pin.md` (closed here), `263-derive-meta-preferences-once-upstream-is-one-repo-one-branch.md` (unblocked here), `337-upstream-content-tier-moved-2-to-3.md` (closed here)
 
