@@ -61,9 +61,18 @@ Verify it is live with
 `git diff --no-index docs/agents/home/AGENTS.md ~/.claude/AGENTS.md`, which
 exits 0 when the staged copy and the live file match.
 
-Nothing enforces this. There is no `commit-msg` hook in this repo, and the
-round-3 review measured that adding one would break `pnpm merge-to-dev`: body
-wrap would reject 66 of the last 100 commits and every conflicted merge, and
-subject length would fail on a generated merge subject already at exactly 72
-characters. The rule holds the way the rest of the steering file holds, by
-being read. Whether it changes what agents write is untested.
+Nothing enforces this. `core.hooksPath` is `.githooks`, which holds only
+`pre-commit` and `pre-push`; there is no `commit-msg` hook, and nothing in
+`scripts/merge_to_dev.py` reads a commit message.
+
+A hook was considered and dropped. Measured 2026-09-13 at `e35ce1b` with
+`git log -100 --format=%H` and a per-commit scan of `%b` for lines over 72
+characters: 62 of the last 100 commits have at least one such line, so a
+body-wrap rule would reject most of them. `git log -200 --merges --format=%s`
+gives a longest merge subject of 83 characters, so a subject-length rule would
+reject generated merge subjects and fail `pnpm merge-to-dev` mid-merge. Both
+figures are from this branch; an earlier draft of this Resolution credited them
+to the round-3 review, which does not contain them.
+
+The rule holds the way the rest of the steering file holds, by being read.
+Whether it changes what agents write is untested.
