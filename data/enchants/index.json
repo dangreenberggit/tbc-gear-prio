@@ -523,10 +523,10 @@
   ],
   "2714": [
     {
-      "enchantType": 0,
+      "enchantType": 2,
       "extraTypes": [],
       "name": "Felsteel Shield Spike",
-      "type": null
+      "type": 13
     }
   ],
   "2715": [
@@ -1165,6 +1165,14 @@
       "extraTypes": [],
       "name": "Enchant Gloves - Major Strength",
       "type": 7
+    }
+  ],
+  "804": [
+    {
+      "enchantType": 0,
+      "extraTypes": [],
+      "name": "Enchant Cloak - Lesser Shadow Resistance",
+      "type": 4
     }
   ],
   "963": [

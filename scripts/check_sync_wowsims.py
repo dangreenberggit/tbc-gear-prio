@@ -357,10 +357,22 @@ class _DoCheckHarness:
     and a grep for "return 2" passes when 1 and 2 have been swapped. Both leave
     the warner broken and the check green, which is the exact rot this ticket
     exists to prevent.
+
+    The three shas must stay distinct, and fetch() must vary CURRENT_PHASE by
+    sha (ticket 391). latest_tag() and ref_sha() used to return one shared
+    value, which made the sha-pin branch untestable in the only way that
+    matters: no assertion could separate "compared against the watched ref"
+    from "compared against the latest release tag" -- ticket 354 symptom (b),
+    the defect these checks exist for. Substituting `tip = sha` for
+    `tip = ref_sha(ref)`, the original bug verbatim, left all 21 checks green.
+    TAG_SHA is what latest_tag() reports, UPSTREAM_SHA what ref_sha() reports,
+    and phase_by_sha gives them different content tiers so a tier line sourced
+    from the wrong commit is visible rather than coincidentally equal.
     """
 
     PIN_SHA = "a" * 40
     UPSTREAM_SHA = "b" * 40
+    TAG_SHA = "d" * 40
 
     def __enter__(self):
         self._td = tempfile.TemporaryDirectory()
@@ -374,11 +386,12 @@ class _DoCheckHarness:
         sync_wowsims.LOCKFILE = os.path.join(td, "wowsims.lock.json")
         sync_wowsims.TRACKED = {"constants_other.ts": "ui/core/constants/other.ts"}
         sync_wowsims.PER_FILE_PIN = {}
+        self.phase_by_sha = {self.PIN_SHA: 2, self.UPSTREAM_SHA: 2, self.TAG_SHA: 3}
         sync_wowsims.tag_sha = lambda tag: self.PIN_SHA
-        sync_wowsims.latest_tag = lambda: ("v9.9.9", self.UPSTREAM_SHA)
+        sync_wowsims.latest_tag = lambda: ("v9.9.9", self.TAG_SHA)
         sync_wowsims.ref_sha = lambda ref: self.UPSTREAM_SHA
         sync_wowsims.fetch = lambda sha, path: (
-            b"export const CURRENT_PHASE: Phase = Phase.Phase2;"
+            f"export const CURRENT_PHASE: Phase = Phase.Phase{self.phase_by_sha[sha]};".encode()
         )
         sync_wowsims.do_update("v0.0.101")
         return self
@@ -483,9 +496,11 @@ def check_check_returns_zero_when_actually_in_sync() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        # Move the pin up to what upstream reports, so there is nothing to report.
+        # Move the pin up to what upstream reports, so there is nothing to
+        # report. This is a tag pin, so the comparison is against latest_tag()'s
+        # sha (sync_wowsims.py:621), not the watched ref's.
         lock = sync_wowsims.load_lock()
-        lock["commit"] = h.UPSTREAM_SHA
+        lock["commit"] = h.TAG_SHA
         h.write_lock(lock)
         rc, body = h.run()
 
@@ -582,6 +597,270 @@ def check_warner_reports_clean_only_on_exit_zero() -> list[str]:
     return problems
 
 
+def check_sha_pin_compares_against_its_watched_ref() -> list[str]:
+    """A sha pin must be compared against the ref it was cut from, not against
+    the latest release tag (ticket 354 symptom (a)). The tag comparison is the
+    wrong question for a pin that will never equal a tag, and asking it forever
+    trains people to ignore the one run that means something.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        # A sha pin whose watched ref has moved past it.
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        # ref_sha returns UPSTREAM_SHA, so the watched ref reads as moved.
+        rc, body = h.run()
+
+    if rc != 1:
+        problems.append(
+            f"a sha pin behind its watched ref must report drift (rc 1), got {rc}. "
+            f"Output was: {body.strip()!r}"
+        )
+    if "master" not in body:
+        problems.append(
+            f"the drift line must name the watched ref it compared against: {body.strip()!r}"
+        )
+    if "new release available" in body:
+        problems.append(
+            "a sha pin must not report release-tag drift -- it will never equal a "
+            f"tag, so that line is permanent noise (ticket 354): {body.strip()!r}"
+        )
+    # The tier must be read from the watched ref's tip (phase 2 here), not from
+    # the release tag (phase 3). Reading the tag would fire a spurious tier
+    # change against a commit the pin may never contain -- ticket 354 symptom
+    # (b). These two assertions are what `tip = sha` fails.
+    if "CONTENT TIER CHANGED" in body:
+        problems.append(
+            "the tier came from the release tag, not the watched ref tip: the ref "
+            "tip and the pin agree on phase 2, so no tier change may be reported "
+            f"(ticket 354 symptom (b)): {body.strip()!r}"
+        )
+    if "master CURRENT_PHASE = 2" not in body:
+        problems.append(
+            "--check must print the watched ref's own CURRENT_PHASE, read from "
+            f"that ref's tip: {body.strip()!r}"
+        )
+    return problems
+
+
+def check_sha_pin_in_sync_with_watched_ref_is_clean() -> list[str]:
+    """A sha pin equal to its watched ref's tip is in sync, even while the
+    latest release tag names some other commit. Without this, the sha-pin branch
+    could report drift forever and still look "correct" to the other checks.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        # Pin and watched ref agree on UPSTREAM_SHA; latest_tag() reports a
+        # different commit, which must not matter.
+        lock["tag"] = h.UPSTREAM_SHA
+        lock["commit"] = h.UPSTREAM_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc != 0:
+        problems.append(
+            f"a sha pin equal to its watched ref tip is in sync; got rc {rc}. "
+            f"Output was: {body.strip()!r}"
+        )
+    if warn_upstream_drift.DRIFT_TOKEN in body:
+        problems.append(
+            f"a sha pin in sync with its watched ref must report no drift: {body.strip()!r}"
+        )
+    if "latest release" not in body:
+        problems.append(
+            "the release tag must still be printed as an informational line so the "
+            f"ADR-0030 tag trigger stays visible: {body.strip()!r}"
+        )
+    return problems
+
+
+def check_sha_pin_tier_change_is_read_from_the_watched_ref() -> list[str]:
+    """Ticket 354's acceptance case: the watched branch and the latest release
+    tag disagree on CURRENT_PHASE, and the tier line must follow the branch.
+
+    Here the ref tip is phase 3 and the tag is phase 2 -- the reverse of the
+    other sha-pin checks -- so a tier line can only appear if it was read from
+    the watched ref. Reading the tag instead would report no change at all.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.phase_by_sha[h.UPSTREAM_SHA] = 3
+        h.phase_by_sha[h.TAG_SHA] = 2
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc != 1:
+        problems.append(
+            f"a tier change on the watched ref tip is drift (rc 1), got {rc}. "
+            f"Output was: {body.strip()!r}"
+        )
+    if "CONTENT TIER CHANGED 2 -> 3" not in body:
+        problems.append(
+            "a tier change on the watched ref tip must fire -- the ref is at phase "
+            "3 while the pin and the release tag are both at phase 2, so a tier "
+            "line can only come from the ref (ticket 354 acceptance): "
+            f"{body.strip()!r}"
+        )
+    return problems
+
+
+def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
+    """When the first watched ref cannot be resolved -- the branch upstream
+    deleted -- --check must report drift, not raise. This is the exact state the
+    repo was in after PR #385 merged and feature/backend-reforge was deleted.
+    """
+    problems = []
+
+    def boom(ref):
+        raise SystemExit("HTTP 422")
+
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"dead/ref": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        orig = sync_wowsims.ref_sha
+        sync_wowsims.ref_sha = boom
+        try:
+            rc, body = h.run()
+        except SystemExit as e:
+            sync_wowsims.ref_sha = orig
+            return [
+                f"an unresolvable watched ref must not propagate out of do_check; "
+                f"it raised SystemExit({e})"
+            ]
+        finally:
+            sync_wowsims.ref_sha = orig
+
+    if rc != 1:
+        problems.append(
+            f"an unresolvable watched ref is drift (rc 1), got {rc}. Output: {body.strip()!r}"
+        )
+    if "could not resolve" not in body:
+        problems.append(
+            f"--check must say the ref could not be resolved: {body.strip()!r}"
+        )
+    return problems
+
+
+def check_unwatch_ref_removes_the_key_and_refuses_an_absent_one() -> list[str]:
+    """--watch-ref is a keyed upsert and nothing removed a key, so a deleted
+    upstream branch stayed in the lock failing every --check forever. A hand
+    edit would work but is invisible to every gate.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="doomed/ref")
+
+        rc = sync_wowsims.do_unwatch_ref("doomed/ref")
+        if rc != 0:
+            problems.append(f"--unwatch-ref on a present ref must return 0, got {rc}")
+        lock = sync_wowsims.load_lock()
+        if "doomed/ref" in (lock.get("watchedRefs") or {}):
+            problems.append(
+                f"--unwatch-ref left the key behind: {lock.get('watchedRefs')!r}"
+            )
+
+        rc_absent = sync_wowsims.do_unwatch_ref("never/there")
+        if rc_absent != 2:
+            problems.append(
+                f"--unwatch-ref on an absent ref must refuse with 2, got {rc_absent}"
+            )
+    return problems
+
+
+def check_sha_pin_refuses_to_guess_between_two_watched_refs() -> list[str]:
+    """Two watched refs made the comparison depend on JSON key order: whichever
+    key sat first won, silently. Taking the *last* key instead of the first left
+    every check green, which is ticket 392. The pin must now refuse to choose.
+
+    Writes the two-ref dict straight into the lock rather than going through
+    do_watch_ref, which now refuses exactly this state -- the check has to be
+    able to build a lock a hand edit could produce.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        lock["commit"] = h.PIN_SHA
+        lock["tag"] = h.PIN_SHA
+        lock["watchedRefs"] = {
+            "master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
+            "other/ref": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
+        }
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc == 0:
+        problems.append(
+            f"--check must not report success with two watched refs: {body.strip()!r}"
+        )
+    # Naming both is what makes the failure actionable -- the whole defect was
+    # that a choice happened with nothing in the output saying so.
+    for name in ("master", "other/ref"):
+        if name not in body:
+            problems.append(
+                f"--check must name the watched ref {name!r} when it cannot "
+                f"resolve the comparison: {body.strip()!r}"
+            )
+    return problems
+
+
+def check_watch_ref_refuses_a_second_differing_ref() -> list[str]:
+    """do_check compares a sha pin against the sole watched ref, so the single-ref
+    invariant has to hold at write time too -- otherwise --watch-ref builds the
+    ambiguous lock that --check can then only refuse.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="master", commit=h.UPSTREAM_SHA)
+        before = sync_wowsims.load_lock().get("watchedRefs")
+
+        rc = sync_wowsims.do_watch_ref("other/ref")
+        if rc != 2:
+            problems.append(
+                f"--watch-ref on a second differing ref must refuse with 2, got {rc}"
+            )
+        after = sync_wowsims.load_lock().get("watchedRefs")
+        if after != before:
+            problems.append(
+                f"a refused --watch-ref must leave the lock untouched: "
+                f"{before!r} -> {after!r}"
+            )
+    return problems
+
+
+def check_watch_ref_still_refreshes_the_same_ref() -> list[str]:
+    """Re-watching the ref already watched is how its recorded tip moves after an
+    upstream push; the refusal above must not break that path.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="master", commit="c" * 40)
+
+        rc = sync_wowsims.do_watch_ref("master")
+        if rc != 0:
+            problems.append(f"--watch-ref on the ref already watched must return 0, got {rc}")
+        watched = sync_wowsims.load_lock().get("watchedRefs") or {}
+        if list(watched) != ["master"]:
+            problems.append(f"re-watching must leave exactly one ref: {watched!r}")
+        if watched.get("master", {}).get("commit") != h.UPSTREAM_SHA:
+            problems.append(
+                f"re-watching must refresh the recorded tip to the ref's current "
+                f"sha: {watched!r}"
+            )
+    return problems
+
+
 CHECKS = (
     check_vendor_is_empty_missing_dir,
     check_vendor_is_empty_empty_dir,
@@ -601,6 +880,16 @@ CHECKS = (
     check_warner_reports_drift_and_stays_green,
     check_warner_skips_on_absent_vendor,
     check_warner_reports_clean_only_on_exit_zero,
+    # The sha-pin comparison path and its removal counterpart (ticket 354).
+    check_sha_pin_compares_against_its_watched_ref,
+    check_sha_pin_in_sync_with_watched_ref_is_clean,
+    check_sha_pin_tier_change_is_read_from_the_watched_ref,
+    check_sha_pin_survives_an_unresolvable_watched_ref,
+    check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
+    # The single-watched-ref invariant, enforced at both ends (ticket 392).
+    check_sha_pin_refuses_to_guess_between_two_watched_refs,
+    check_watch_ref_refuses_a_second_differing_ref,
+    check_watch_ref_still_refreshes_the_same_ref,
 )
 
 

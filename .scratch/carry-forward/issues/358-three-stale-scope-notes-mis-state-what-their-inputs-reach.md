@@ -1,4 +1,26 @@
-Status: open
+Status: closed
+
+Closed 2026-09-14 on `feat/upstream-catchup-chunk1`. Targets 2 and 3 were fixed in
+commit `ef7f4d40`; target 1 needed no edit.
+
+1. **Ticket 353 §4 — already corrected before this branch.** `grep -c '\-18 DPS'`
+   → **0**, `grep -c 'nobody has answered'` → **0**, and
+   `grep -c 'verification-log.md:1654-1669'` → **1**; the "15 → 27" pair is already
+   labelled two uncontrolled measurements. Verified, not re-applied.
+2. **`data/presets/feral/p1.ep-weights.json` `notes[1]`** — rewritten. It no longer
+   claims EP "only chooses gems here"; it records that EP also orders candidates
+   (`packages/core/src/candidate-order.ts:36-67`, capped by `rank.ts:1100`), so on
+   a capped run these phase-1 weights decide which candidates are never simmed,
+   and notes that both defaults are safe today, making it a disclosure point
+   rather than a wrong number. Because this file is a `fork-universes` source, the
+   correction also reached the fork's bundled copy in fork commit `2781486d6`.
+3. **`scripts/build_feral_skeleton.py:19`** — now names
+   `data/presets/feral/owner-p2.settings-export.json`, matching line 64, and says
+   explicitly that the rotation is **not** taken from the vendored
+   `feral_default.apl.json`. Verified: `sed -n 19p` names the owner export.
+
+`python scripts/sync_fork_universes.py --check` → **rc 0**
+(`63 bundled copies byte-match their data/ sources`), and `pnpm verify` → rc 0.
 Type: defect
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Domain axis, D1-D3)
 Blocks: none

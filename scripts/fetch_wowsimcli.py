@@ -107,14 +107,26 @@ def check_protoc_gen_go() -> None:
         raise SystemExit(1)
 
 
-def obtain_source(commit: str, scratch: Path) -> Path:
-    """Return a directory checked out at `commit`, either a worktree off the
-    shared fork clone (fast path, when it exists) or a fresh scratch clone."""
+def obtain_source(commit: str, scratch: Path) -> tuple[Path, str]:
+    """Return (directory checked out at `commit`, mode).
+
+    `mode` is "worktree" when the directory is a worktree off the shared fork
+    clone, or "clone" when it is a standalone scratch clone. The caller must
+    clean up on this value rather than re-testing `(FORK / ".git").exists()`:
+    the two can disagree between entry and cleanup, and a `worktree remove`
+    aimed at a plain clone -- or skipped for a real worktree -- leaves a
+    registration in `.git/worktrees/` pointing at a deleted directory. The
+    worktree path is deterministic per commit, so such a leak blocks every
+    later build of that same commit until someone prunes by hand (ticket 357).
+    """
     if (FORK / ".git").exists():
         run(["git", "-C", str(FORK), "fetch", UPSTREAM_URL, commit])
         wt = scratch / f"wowsims-src-{commit[:12]}"
+        # Defensive: clear any registration an earlier failed build leaked, so
+        # a retry of the same commit is not refused as "already registered".
+        run(["git", "-C", str(FORK), "worktree", "prune"])
         run(["git", "-C", str(FORK), "worktree", "add", "--detach", str(wt), commit])
-        return wt
+        return wt, "worktree"
 
     # Fallback: a blobless partial clone fetches only the default branch's
     # history, and `commit` may live on a non-default branch (e.g.
@@ -136,7 +148,7 @@ def obtain_source(commit: str, scratch: Path) -> Path:
             file=sys.stderr,
         )
         raise SystemExit(1)
-    return src
+    return src, "clone"
 
 
 def build_from_source(commit: str, platform: str, dest_dir: Path) -> Path:
@@ -145,8 +157,9 @@ def build_from_source(commit: str, platform: str, dest_dir: Path) -> Path:
 
     scratch_root = Path(tempfile.mkdtemp(prefix="wowsimcli-build-"))
     src = None
+    mode = None
     try:
-        src = obtain_source(commit, scratch_root)
+        src, mode = obtain_source(commit, scratch_root)
 
         proto_files = sorted(p.name for p in (src / "proto").glob("*.proto"))
         run(
@@ -193,7 +206,9 @@ def build_from_source(commit: str, platform: str, dest_dir: Path) -> Path:
         )
         return dest
     finally:
-        if src is not None and (FORK / ".git").exists():
+        # Branch on the mode obtain_source actually took, never on a re-test of
+        # the filesystem (ticket 357 (a)).
+        if src is not None and mode == "worktree":
             run(["git", "-C", str(FORK), "worktree", "remove", "--force", str(src)])
         shutil.rmtree(scratch_root, ignore_errors=True)
 
@@ -259,6 +274,16 @@ def main() -> int:
 
     commit = args.commit or lock["commit"]
     dir_name = args.tag_dir or (commit if args.commit else tag)
+    # Every consumer resolves the vendor directory from lock["tag"], so a
+    # directory named anything else holds a binary nothing will pick up. That is
+    # what --commit is for (pre-pin proving), but silence here means a developer
+    # can watch this build succeed and then run the OLD binary (ticket 357 (b)).
+    if args.commit is not None and dir_name != tag:
+        print(
+            f"NOTE: proving build only -- vendor/wowsimcli-{dir_name}-{args.platform} "
+            f"is not the directory lock.tag (`{tag[:12]}`) resolves, so pnpm rank and "
+            "the fixtures recorder will keep using the pinned build."
+        )
     dest_dir = VENDOR / f"wowsimcli-{dir_name}-{args.platform}"
     build_from_source(commit, args.platform, dest_dir)
     return 0
