@@ -1,0 +1,221 @@
+# Terminology cleanup — orchestrator brief
+
+**Status:** ready to dispatch
+**Owner:** orchestrator (top agent may direct; see §7 for the dispatch table)
+**Repo:** `tbc-gear-prio`
+**Branch:** `claude/terminology-cleanup-plan-82f471`
+
+Two overloaded terms are being retired. This brief is self-contained — an
+orchestrator should be able to dispatch every issue in `issues/` without
+reading the conversation that produced it.
+
+---
+
+## 1. The two problems
+
+### 1.1 "Phase" is two different things
+
+| Sense | Example | Who owns the word |
+| --- | --- | --- |
+| **Delivery step** — a chunk of our build plan with an exit gate | "Phase 1 — the engine (ret, CLI only)" | us |
+| **Game content tier** — TBC's content releases, P1–P5 | `maxPhase: 2`, "the 39 phase-3 gems" | Blizzard / wowsims / every player |
+
+These collide constantly. `PLAN.md:41` records an earlier attempt to fix this
+(review R2) by ruling that *capitalised* "Phase N" means delivery and lowercase
+means content tier. **That rule failed.** It is stated at line 41 and violated
+roughly fifteen times in the same document. Capitalisation is invisible
+mid-sentence, does not survive being spoken aloud, and cannot be expressed in a
+code identifier.
+
+### 1.2 "Land" is vague jargon for merging
+
+Used as shorthand for merge/ship/build. Ambiguous — many things can "land" —
+and it buys no brevity over saying what is meant.
+
+---
+
+## 2. The decisions (settled — do not relitigate)
+
+**D1. Delivery steps are renamed `Stage N`.** Phase 0→Stage 0 … Phase 5+→Stage 5+.
+Gate structure, ordering and content are unchanged. This is a rename, not a
+re-plan.
+
+*Rejected alternatives:* Milestone (implies a date; `PLAN.md` §8.5 explicitly
+kills dated planning), Step (too granular — these are multi-week chunks),
+Track (implies parallelism; these are strictly sequential).
+
+**D2. "Phase" survives, meaning the game sense only.** After this work, the word
+"phase" in this repo refers exclusively to TBC content tiers. Anyone writing
+"Phase 2" to mean a plan step is then unambiguously wrong. This is the
+invariant the whole effort buys.
+
+**D3. `maxPhase` and friends are NOT renamed.** `maxPhase`, `ContentPhase`,
+`DEFAULT_MAX_PHASE`, `CURRENT_PHASE`, `currentPhase`, `defaultMaxPhase`, and the
+per-item `phase` field all stay exactly as they are. Two reasons:
+
+- `CURRENT_PHASE` and per-item `phase` are **upstream wowsims identifiers**.
+  `scripts/sync_wowsims.py:85` parses `CURRENT_PHASE` out of upstream TypeScript
+  with a regex. Renaming breaks the sync.
+- `maxPhase` is in `contentHash`, in `assumptions`, and on the CLI surface.
+  Renaming churns the public API for no benefit once D1 has removed the collision.
+
+**D4. In prose, the game sense is written "tier" where it reads naturally.**
+"candidates: tier ≤ 2", "the 39 T6 gems". But an identifier referenced *as* an
+identifier stays in backticks as `phase`/`maxPhase`. Judgment call per sentence —
+see issue `04`.
+
+**D5. "Land" is deleted, not replaced.** No single substitute; it is doing three
+distinct jobs. Each site gets the plain verb it means. See issue `03` for the
+per-site mapping.
+
+**D6. Vendored skills are out of scope.** Everything under `.agents/skills/`
+and `.claude/skills/` is third-party (Matt Pocock engineering skills). Their
+"land" usage is generic English, not our jargon, and editing them forfeits clean
+upstream updates. **Never touch these paths.**
+
+---
+
+## 3. Scope
+
+249 tracked files; raw greps are dominated by vendored skills. The real surface:
+
+**Delivery-sense "phase" (rename to Stage):**
+
+- `PLAN.md` — §14 is the spine; ~25 scattered refs elsewhere
+- `docs/verification-log.md`
+- `docs/phase0-findings.md` — content **and the filename**
+- `scripts/verify_fixture.py:3` (comment)
+- `wcl_probe.py:3`, `wcl_probe.py:562` (docstring + argparse description)
+- `packages/core/src/index.ts:1` (comment)
+- `scripts/sync_wowsims.py:160` (a `PLAN.md 14, Phase 5+` cross-reference in
+  printed output — the surrounding file is otherwise all game-sense)
+
+**The `[P0]` marker.** ~14 sections in `PLAN.md` carry `**[P0]**` meaning
+"verified during Phase 0". Under the rename this reads as the game's P0 and
+reintroduces the exact ambiguity being killed. It becomes **`[S0]`**. The
+legend at `PLAN.md:6` must be updated to match. Do not confuse this with
+`[R2]`/`[Rn]` review markers, which are unrelated and stay.
+
+**Game-sense "phase" (identifiers frozen, prose→tier):** `data/wowsims.lock.json`,
+`scripts/sync_wowsims.py`, `scripts/verify_fixture.py:214-221`, and ~15 prose
+sites in `PLAN.md`.
+
+**"Land" (14 sites):** `PLAN.md` ×9, `PLAN-REVIEW.md` ×3, `docs/verification-log.md` ×1,
+`scripts/verify_fixture.py` ×1.
+
+### 3.1 Out of scope
+
+- `.agents/**`, `.claude/**` (D6)
+- `test/fixtures/slamaltman.raw.json` — "Phase Shift" is a warlock ability name
+  in captured API data. Never edit fixtures.
+- `data/wowsims.lock.json` — generated output; regenerated by the sync script
+- **`PLAN-REVIEW.md` — see §6, needs a ruling before dispatch**
+
+---
+
+## 4. Hard constraints
+
+Every agent gets these verbatim in its prompt.
+
+**NEVER modify these tokens:**
+
+```
+CURRENT_PHASE   currentPhase    defaultMaxPhase   maxPhase
+ContentPhase    DEFAULT_MAX_PHASE
+Phase.Phase1 .. Phase.Phase5    export enum Phase
+```
+
+...including inside quoted upstream source blocks (`PLAN.md:602-603`,
+`docs/verification-log.md:129-130`, `scripts/sync_wowsims.py:13-14`) and inside
+regex literals (`scripts/sync_wowsims.py:85`, `:88`).
+
+**NEVER touch these paths:** `.agents/**`, `.claude/**`, `test/fixtures/**`,
+`data/wowsims.lock.json`, `vendor/**`.
+
+**NEVER edit these "land" sites** — literal, correct English about enchant
+names landing on gear slots:
+
+- `PLAN.md:589` — "the names must land on the slots they describe"
+- `docs/verification-log.md:46` — "names have to land on the slots they describe"
+- `scripts/verify_fixture.py:257` — "note the enchant names land on the slots"
+
+**No behaviour changes.** This is a naming pass. No logic, no restructuring, no
+"while I was in here" improvements. If an agent believes a real bug is present,
+it reports it and does not fix it.
+
+---
+
+## 5. Execution order
+
+```
+  01 CONTEXT.md          (blocking — everything depends on it)
+        │
+  02 Stage rename        (3 sub-agents, disjoint files, parallel-safe)
+        │
+  03 "land" pass         (sequential — touches PLAN.md)
+        │
+  04 prose phase→tier    (sequential — touches PLAN.md)
+        │
+  05 verify
+```
+
+**02, 03 and 04 must run sequentially relative to each other** — all three touch
+`PLAN.md`, the largest file in the repo. Parallelising them buys minutes and
+costs merge conflicts. Issue `02`'s three *internal* sub-agents parallelise
+safely because their file sets are disjoint.
+
+**Commit between every issue.** A bad rename must be one `git revert` away.
+
+---
+
+## 6. Open question — needs a human ruling before `03` dispatches
+
+`PLAN-REVIEW.md` is a **historical record** of a review that already happened,
+including a results table headed `| Finding | Landed in |` at line 693. Editing
+it rewrites the past.
+
+Three options:
+
+- **(a) Leave it entirely.** Cleanest historically. Costs: `PLAN.md:41`'s stale
+  R2 capitalisation ruling still has a live referent, and three "land" sites survive.
+- **(b) Leave the prose, fix only the table header** (`Landed in` → `Applied in`).
+- **(c) Full pass, same as PLAN.md.**
+
+**Recommendation: (a).** It is a snapshot, and `PLAN.md` already carries every
+correction forward. Issue `03` is written for (a) and lists the three
+`PLAN-REVIEW.md` sites separately so switching to (b)/(c) is a one-line change.
+
+---
+
+## 7. Dispatch table
+
+| # | Issue | Model | Why that model |
+| --- | --- | --- | --- |
+| 01 | `01-context-md.md` | **human** | Sets the vocabulary everything else follows |
+| 02 | `02-stage-rename.md` | **haiku** ×3 | Find-and-replace with a blocklist; no judgment |
+| 03 | `03-land-removal.md` | **sonnet** ×1 | 14 sites, 3 meanings, 3 false positives |
+| 04 | `04-prose-phase-to-tier.md` | **sonnet** ×1 | Per-sentence judgment; the pass R2 failed |
+| 05 | `05-verify.md` | **haiku** ×1 + human | Mechanical grep sweep, then human review |
+
+Issue `01` is deliberately not delegated. `docs/agents/domain.md:7` already
+instructs every engineering skill to read `CONTEXT.md` before exploring, and
+`:27` already says *"don't drift to synonyms the glossary explicitly avoids."*
+**The enforcement mechanism is already wired up and pointing at a file that does
+not exist.** Writing it is the highest-leverage step here and the only thing that
+stops a third recurrence — R2 failed precisely because the ruling lived buried in
+`PLAN.md:41` instead of in the glossary the tooling reads.
+
+---
+
+## 8. Definition of done
+
+- [ ] `CONTEXT.md` exists at repo root with Stage / tier / phase and a banned-words list
+- [ ] Zero `Phase [0-9]` in a delivery sense outside `.agents/`, `.claude/`, `test/fixtures/`
+- [ ] `docs/stage0-findings.md` exists; no dangling links; `.prettierignore:20` updated
+- [ ] All `[P0]` markers are `[S0]`; the legend at `PLAN.md:6` agrees
+- [ ] Zero jargon "land"; the three literal sites at §4 untouched
+- [ ] `PLAN.md:41`'s R2 capitalisation note replaced by a `CONTEXT.md` pointer
+- [ ] `pnpm verify` passes
+- [ ] `python scripts/sync_wowsims.py --check` passes — **the real test**; if
+      `02` overreached into the `CURRENT_PHASE` regex, this fails loudly
+- [ ] `git log` shows one commit per issue
