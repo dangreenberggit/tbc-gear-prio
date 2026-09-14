@@ -1,6 +1,28 @@
-Status: open
+Status: closed
 Origin: pre-merge review of `feat/tab-scope-truth` (domain axis, finding 3)
 Blocks: none
+Verified by: `grep -n 'exportIdForRow' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx` → :2160; `grep -c '"tokenId"' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/data/ret-p3.universe.json` → 15
+
+## Resolution (2026-09-13)
+
+Not a defect — a stale row, now rewritten. The tab's export **does** emit token
+ids correctly. `exportIdForRow` (`upgrades_tab.tsx:2160`) walks `row.sources`
+and returns a token source's `tokenId` when present; `updateExport`
+(`:2123`) dedupes on that id. The token-flavour toggle defaults on
+(field `:433`, checkbox `:764-767`). The core/CLI path has its own copy,
+`tokenIdForExport` (`packages/core/src/rank-report-rules.ts:480`) — a deliberate
+re-implementation, since importing across the port boundary is impossible.
+
+The data half is real too: `assemble_universe.py` threads `tokenId` onto
+tier-piece token sources, and the universe file the tab actually reads carries
+15 of them.
+
+Craftable/pattern ids still export as gear ids. That is a documented, deliberate
+deferral in ticket 126 — TMB's pattern-tracking behaviour was never confirmed —
+not an oversight.
+
+Row 314 in `docs/upgrades-tab-scope.md` now says this, and its stale line
+references (728 / ~1963) are corrected to the real ones.
 
 # Row 314 calls itself a correctness concern but now lists only styling
 
