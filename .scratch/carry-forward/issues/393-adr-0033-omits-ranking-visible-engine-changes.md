@@ -1,10 +1,28 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upstream-catchup-chunk1.md
 Blocks: none
 Blocked by: none
 
 # ADR-0033 records one engine behaviour change and omits several ranking-visible ones
+
+Closed 2026-09-14 by commit `2c61c723` on `feat/upstream-catchup-chunk1`.
+Consequence 5 now carries a paragraph naming these changes as present but
+unmeasured, with their file paths and the diff command that finds them, and no
+DPS magnitude is claimed for any of them. The limitation clause no longer calls
+the set bonuses talent conversions.
+
+Two corrections to this ticket's own list, from re-reading the diff: The Twin
+Blades of Azzinoth excludes `SpellFlagSuppressEquipProcs`, not
+`SuppressWeaponProcs` like the other seven weapon procs; and the talent
+conversions are five, not two — `applyHealingLight` and
+`applyImprovedHolyShield` also move `DamageDone_Pct` → `Flat`, and
+`applyPurifyingPower` also moves `PowerCost_Pct` → `PowerCost_Pct_Add`. The ADR
+follows the diff.
+
+Verified with
+`grep -c -i 'seal of vengeance\|justicar\|lightbringer\|SuppressEquipProcs' docs/adr/0033-upstream-is-master-again.md`
+→ 6, and `node node_modules/prettier/bin/prettier.cjs --check` on the ADR → rc 0.
 
 `docs/adr/0033-upstream-is-master-again.md` Consequence 5 records the
 Two-Handed Weapon Specialization fix (one-handed weapons no longer receive a

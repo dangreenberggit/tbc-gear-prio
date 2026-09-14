@@ -1,10 +1,26 @@
-Status: open
+Status: closed
 Type: defect
 Origin: docs/reviews/feat-upstream-catchup-chunk1.md
 Blocks: none
 Blocked by: none
 
 # Sha-pin guard rails do not test what the comparison compares against
+
+Closed 2026-09-14 by commit `268fe406` on `feat/upstream-catchup-chunk1`.
+`_DoCheckHarness` now carries a third sha (`TAG_SHA`) so `latest_tag()` and
+`ref_sha()` report different commits, and `fetch` looks its `CURRENT_PHASE` up
+per sha, so the watched ref and the release tag can disagree on the content
+tier. `check_sha_pin_compares_against_its_watched_ref` gained two assertions
+(no tier line may come from the tag; the ref's own `CURRENT_PHASE` must be
+printed) and `check_sha_pin_tier_change_is_read_from_the_watched_ref` was added
+for ticket 354's acceptance case.
+
+Verified with `python -B scripts/check_sync_wowsims.py; echo rc=$?` → **rc 0**,
+`sync_wowsims.py guard rails ok (22 checks)`. Each of the three mutations that
+previously survived now fails (rc 1, no `guard rails ok` line): `tip = sha`
+→ 5 FAIL lines; a tier check that can never fire (`if False:`) → 1 FAIL line,
+the new check; and `fetch(sha, …)` for `fetch(tip, …)` → 3 FAIL lines.
+`git diff --stat -- scripts/sync_wowsims.py` empty after each revert.
 
 The four checks added to `scripts/check_sync_wowsims.py` for ticket 354 pin that
 the sha-pin branch *exists* and that `--unwatch-ref` deletes a key. They do not

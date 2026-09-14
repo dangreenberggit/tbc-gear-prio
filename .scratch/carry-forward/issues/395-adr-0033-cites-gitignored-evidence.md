@@ -1,10 +1,22 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upstream-catchup-chunk1.md
 Blocks: none
 Blocked by: none
 
 # ADR-0033's load-bearing measurement cites a file no future reader can open
+
+Closed 2026-09-14 by commit `2c61c723` on `feat/upstream-catchup-chunk1`, by the
+first of the three options below — the essentials are inlined. Consequence 5 now
+carries the two binary paths, the committed input
+(`data/presets/ret/p2.raid-sim-skeleton.json`, seed 443754031, 25000
+iterations), the six swap item ids, the baseline and one-handed numbers with
+their 3σ bands, and the second one-hander reproducing to within 0.0016. The
+scratch note is still mentioned, marked gitignored, and nothing rests on it.
+
+Verified with
+`grep -c '443754031\|35110\|35101\|wowsimcli-windows.exe' docs/adr/0033-upstream-is-master-again.md`
+→ 4, and `node node_modules/prettier/bin/prettier.cjs --check` on the ADR → rc 0.
 
 `docs/adr/0033-upstream-is-master-again.md:134` sources its one-handed-weapon DPS
 finding to:

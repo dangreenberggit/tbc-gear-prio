@@ -80,5 +80,8 @@ Make both checks respect the pin's own ref:
       prints one that names the watched ref.
 - [ ] The `CURRENT_PHASE` comparison reads a commit that is an ancestor of the
       pin's own ref.
-- [ ] A test covers a ref pin whose watched branch and latest master tag
-      disagree on `CURRENT_PHASE`.
+- [x] A test covers a ref pin whose watched branch and latest master tag
+      disagree on `CURRENT_PHASE`. Satisfied 2026-09-14 by
+      `check_sha_pin_tier_change_is_read_from_the_watched_ref` (ticket 391) —
+      when this ticket closed, the harness stubbed both sources to one sha and
+      could not express the case.

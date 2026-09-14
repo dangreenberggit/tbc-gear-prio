@@ -1,10 +1,23 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upstream-catchup-chunk1.md
 Blocks: none
 Blocked by: none
 
 # Upstream's P3 BiS sets changed for mage and shadow priest, unmentioned in the prose
+
+Closed 2026-09-14 by commit `2c61c723` on `feat/upstream-catchup-chunk1`.
+ADR-0033 Consequence 6 names the three gear-set files, the four item
+substitutions, the connection between `35319` and the phase 4 → 3 Vindicator
+correction, and the universes that follow them, sourced to the `git diff` over
+`ui/mage/dps/gear_sets/` and `ui/priest/dps/gear_sets/`. Measured while writing
+it: those three files are the complete set of gear-set changes in this range —
+no other class's gear sets moved — so the claim is safe to limit to mage and
+shadow priest. The fixture note that was Consequence 6 is now 7.
+
+Verified with
+`grep -c '28783\|32343\|35319' docs/adr/0033-upstream-is-master-again.md` → 3,
+and `node node_modules/prettier/bin/prettier.cjs --check` on the ADR → rc 0.
 
 The engine re-pin moved upstream's own reference gear sets, and this repo's
 committed universes correctly followed. Nothing in the branch's prose says so.
