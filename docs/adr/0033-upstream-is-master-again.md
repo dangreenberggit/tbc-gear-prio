@@ -128,15 +128,70 @@ manual command and belongs in the execution record on its own.
    weapons are unaffected within resolution.
 
    This is recorded as an **accepted upstream fix, not a defect** — no ticket is
-   filed for it. The measurement, every command behind it, and its stated limits
-   (native CLI transport rather than the tab's WASM build; ret only; nothing
-   isolating the other `Pct → Flat` talent conversions) are in
-   `.scratch/stage-gate/upstream-catchup-chunk1/engine-delta.md`. Upstream's own
-   committed `TestRetribution-Average-Default` moves 1937.80314 → 1938.75168
-   (+0.95), inside noise; its `AllItems` rows run at **20 iterations** and cannot
-   separate an engine change from RNG, so they are not per-item evidence.
+   filed for it. Its stated limits: native CLI transport rather than the tab's
+   WASM build; ret only; and nothing isolating the other engine changes listed
+   below, each of which moved in the same range and none of which was simmed.
+   Upstream's own committed `TestRetribution-Average-Default` moves
+   1937.80314 → 1938.75168 (+0.95), inside noise; its `AllItems` rows run at
+   **20 iterations** and cannot separate an engine change from RNG, so they are
+   not per-item evidence.
 
-6. **Open item, not taken here:** `packages/core/test/fixtures/synthetic-roster-recordings.json`
+   The measurement above was made with `wowsimcli-windows.exe` built from each
+   pin — `vendor/wowsimcli-ec5c5f205e61049d730e460967f8488774a7fe2a-win32-x64/`
+   and `vendor/wowsimcli-17a8fb28c5ad14b649acecdaacd488594048f467-win32-x64/` —
+   against the committed input `data/presets/ret/p2.raid-sim-skeleton.json` at
+   **25000 iterations** with seed **443754031**, which makes each pin exactly
+   deterministic. Baseline (2H main hand): 1909.9763 → 1909.3043, a change of
+   −0.672 against a 3σ band of 3.107. One-handed main hand, swapping in 35110
+   (Brutal Gladiator's Waraxe): 1512.9438 → 1432.5899, −80.354 against a band of
+   2.161; the independent second one-hander 35101 (Slicer) gives −80.3555,
+   differing by 0.0016. The in-band single-item swaps were 34247 (Apolyon, 2H),
+   34472 (trinket), 34561 (feet), with 33465 (Staff of Primal Fury, 2H) as the
+   null control. A fuller working note lives at
+   `.scratch/stage-gate/upstream-catchup-chunk1/engine-delta.md`, which is
+   gitignored — everything needed to re-run the measurement is above.
+
+   **Other engine changes in the same range, present but unmeasured.** No DPS
+   magnitude is claimed for any of these; they are recorded so a later reader
+   chasing a ranking shift has the candidate list. Seal of Vengeance goes from 15
+   to 20 PPM (`sim/paladin/seals.go`, `NewStaticLegacyPPMManager`), a 33%
+   proc-rate rise on a seal whose damage scales with weapon speed, so it moves
+   fast-versus-slow weapon value for ret. `ItemSetJusticarArmor` 2pc and
+   `ItemSetLightbringerArmor` 4pc flip `SpellMod_DamageDone_Pct` → `_Flat`
+   (`sim/paladin/item_sets.go`) — these are **set bonuses on ranked items**, not
+   talent bookkeeping. A proc-suppression pass runs across ranked gear: seals and
+   their judgements gain `SpellFlagSuppressEquipProcs` (`sim/paladin/seals.go`),
+   the two Skyfire metagems gain `SpellFlagsExclude: SpellFlagSuppressEquipProcs`
+   and `ClassSpellsOnly` (`sim/common/tbc/metagems.go`), and Mongoose,
+   Executioner, Deathfrost, Despair, Blinkstrike, World Breaker and Syphon of the
+   Nathrezim gain `SpellFlagsExclude: SpellFlagSuppressWeaponProcs` — while The
+   Twin Blades of Azzinoth excludes `SuppressEquipProcs` rather than
+   `SuppressWeaponProcs` (`sim/common/tbc/enchants.go`,
+   `sim/common/tbc/items_weapons.go`; 63 insertions, 31 deletions across the
+   two). In `sim/paladin/talents.go`, `applyImprovedSealOfRighteousness`,
+   `applyHealingLight` and `applyImprovedHolyShield` convert `DamageDone_Pct` →
+   `DamageDone_Flat`, and `applyBenediction` and `applyPurifyingPower` convert
+   `PowerCost_Pct` → `PowerCost_Pct_Add`.
+
+   Source for this list:
+   `git -C vendor/tbc-new-fork diff ec5c5f205e61049d730e460967f8488774a7fe2a 17a8fb28c5ad14b649acecdaacd488594048f467 -- sim/paladin/seals.go sim/paladin/item_sets.go sim/paladin/talents.go sim/common/tbc/metagems.go sim/common/tbc/enchants.go sim/common/tbc/items_weapons.go`
+   (the fork clone is gitignored; the same range is readable from any clone of
+   `wowsims/tbc-new`).
+
+6. **Upstream's own P3 BiS reference sets moved for two specs.** Three gear-set
+   files changed in this range and `data/wowsims.lock.json` carries their new
+   sha256 values. Mage P3 ranged goes `32363` → `28783` in both
+   `mage_p3_staff.gear.json` and `mage_p3_sword.gear.json`; shadow priest P3
+   (`shadow_p3.gear.json`) moves ranged `29982` → `32343` and neck `30666` →
+   `35319` (with gem `32196`). `35319` is one of the three Season 3 Vindicator
+   items upstream reclassified phase 4 → 3 in the same range, so the two data
+   corrections are connected rather than independent. The committed universes
+   follow upstream faithfully: the `bisTags` / `bisSets` entries in
+   `mage-p3/p4/p5` and `shadow-p3/p4/p5` move onto the new ids. No other class's
+   gear sets changed in this range. Source:
+   `git -C vendor/tbc-new-fork diff ec5c5f205e61049d730e460967f8488774a7fe2a 17a8fb28c5ad14b649acecdaacd488594048f467 -- ui/mage/dps/gear_sets/ ui/priest/dps/gear_sets/`.
+
+7. **Open item, not taken here:** `packages/core/test/fixtures/synthetic-roster-recordings.json`
    is still stamped `simVersion ec5c5f2`. A green `pnpm verify` therefore proves
    nothing about engine behaviour at the new pin — the recordings answer for the
    old engine. Re-recording that fixture is a separate decision nobody has taken.
