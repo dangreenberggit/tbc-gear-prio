@@ -47,6 +47,8 @@ Default to subject-only. Most commits need no body: the diff shows what changed.
 
 Write a body when a reader deciding whether to revert would be missing something the diff cannot show — the problem that prompted the change, why this fix over an obvious alternative, an external constraint, or a dead end worth warning them off.
 
-Six lines is a soft maximum, not a target. Most bodies that need to exist are one or two lines. Past six, split the commit.
+Six lines is a soft maximum, not a target. A body that needs to exist is usually one or two lines.
+
+Past six lines, an independent subagent decides whether the length is necessary. Give it the diff and the proposed message. Do not tell it the length is justified, do not explain why you wrote what you wrote, and do not ask it to confirm. Ask which lines record something the diff cannot show, and have it return the ones that fail that test. Cut those. If the reviewer says the body should be shorter, it is shorter. If no reviewer can be reached, cut the body to six lines.
 
 Write the body as prose that stands on its own. Say what a reader needs, once, and stop — no process narration, no "Summary:" or "Changes:" headings, no confidence claims about untested behaviour.

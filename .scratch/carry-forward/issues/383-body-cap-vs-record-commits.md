@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: chore
 Origin: Standards axis of the `fix/merge-ready-disposition-parser` pre-merge review, round 3 (S7)
 Blocks: none
@@ -40,6 +40,39 @@ measurements it is meant to record.
 
 ## Acceptance
 
-- [ ] A decision is recorded in `docs/agents/home/AGENTS.md` or here.
-- [ ] If the rule changes, `~/.claude/AGENTS.md` is re-copied from the staged
+- [x] A decision is recorded in `docs/agents/home/AGENTS.md` or here.
+- [x] If the rule changes, `~/.claude/AGENTS.md` is re-copied from the staged
       file and the two are byte-identical.
+
+## Resolution — 2026-09-13, fix/merge-ready-disposition-parser
+
+None of the three options was taken. The owner chose a fourth: a body past six
+lines goes to an independent subagent, which decides whether the length is
+necessary. No class is exempt, so a record commit is reviewed like any other,
+and the reviewer can approve length when it is warranted.
+
+Two constraints the owner set on how that review is asked for. The prompt must
+not tell the reviewer the length is justified or ask it to confirm, because a
+review that cannot say no is not a review. And the reviewer judges every line,
+not only the lines past the sixth, because the first six are not privileged.
+
+The rule text is in `docs/agents/home/AGENTS.md` under `## Commit messages`.
+Verify it is live with
+`git diff --no-index docs/agents/home/AGENTS.md ~/.claude/AGENTS.md`, which
+exits 0 when the staged copy and the live file match.
+
+Nothing enforces this. `core.hooksPath` is `.githooks`, which holds only
+`pre-commit` and `pre-push`; there is no `commit-msg` hook, and nothing in
+`scripts/merge_to_dev.py` reads a commit message.
+
+A hook was considered and dropped. Measured 2026-09-13 at `e35ce1b` with
+`git log -100 --format=%H` and a per-commit scan of `%b` for lines over 72
+characters: 62 of the last 100 commits have at least one such line, so a
+body-wrap rule would reject most of them. `git log -200 --merges --format=%s`
+gives a longest merge subject of 83 characters, so a subject-length rule would
+reject generated merge subjects and fail `pnpm merge-to-dev` mid-merge. Both
+figures are from this branch; an earlier draft of this Resolution credited them
+to the round-3 review, which does not contain them.
+
+The rule holds the way the rest of the steering file holds, by being read.
+Whether it changes what agents write is untested.
