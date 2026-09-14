@@ -6,7 +6,7 @@ Blocked by: none
 
 # Half-finished regression artifacts left in the stage directory
 
-Closed 2026-09-14 by commit `<pending>` on `feat/upstream-catchup-chunk1`. Added
+Closed 2026-09-14 by commit `2643f33a` on `feat/upstream-catchup-chunk1`. Added
 `.scratch/stage-gate/upstream-catchup-chunk1/README.md`, which records that step
 10 was withdrawn (and why it was a design problem, not a cost problem), tabulates
 the three leftover files including that `baseline-1.json` is run 1 of 5 and feeds
