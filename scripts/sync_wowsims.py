@@ -312,6 +312,18 @@ def load_lock():
         return json.load(fh)
 
 
+def is_sha_pin(lock):
+    """True when lock["tag"] is a commit sha rather than a release tag.
+
+    A --ref pin stores the literal ref in lock["tag"], so a sha pin and a
+    vX.Y.Z pin are distinguished by shape alone. --check compares a tag pin
+    against the latest release; a sha pin has to be compared against the ref it
+    was cut from instead, because tags are cut from master and a sha pin's own
+    ref need not be an ancestor of any tag (ticket 354 symptom (b)).
+    """
+    return bool(re.fullmatch(r"[0-9a-f]{7,40}", str(lock.get("tag", ""))))
+
+
 def vendor_is_empty():
     """True if VENDOR is missing or has no files.
 
@@ -567,7 +579,46 @@ def do_check():
     print(f"  pinned:   {lock['tag']} ({lock['commit'][:12]})  phase {lock['currentPhase']}")
     print(f"  upstream: {tag} ({sha[:12]})")
 
-    if lock["commit"] != sha:
+    if is_sha_pin(lock):
+        # A sha pin is never equal to the latest release tag, so comparing it
+        # against one reports drift forever and reads CURRENT_PHASE from a
+        # commit the pin may never contain (ticket 354). Compare against the
+        # first watched ref instead -- the ref the pin was cut from -- and read
+        # the tier from that tip.
+        #
+        # The release line stays as information rather than drift so the
+        # ADR-0030 D2 tag trigger ("move back to a release tag once one
+        # contains the reforge merge") is still visible on every run.
+        print(f"  latest release: {tag} ({sha[:12]}) -- informational on a sha pin")
+        ref = next(iter(lock.get("watchedRefs") or {}), None)
+        if ref is None:
+            drift.append("sha pin has no watched ref to compare against")
+        else:
+            try:
+                tip = ref_sha(ref)
+            except SystemExit as e:
+                # Do not raise: the watched-ref loop below reports its own
+                # "could not resolve" for this same ref, and a dead ref must
+                # leave --check reporting drift rather than crashing. Two lines
+                # for one dead ref is acceptable; both vanish once the ref is
+                # replaced.
+                drift.append(f"pin comparison ref {ref}: could not resolve: {e}")
+            else:
+                if lock["commit"] != tip:
+                    drift.append(
+                        f"pin is behind {ref}: {lock['commit'][:12]} -> {tip[:12]}")
+                    try:
+                        upstream_phase = parse_current_phase(
+                            fetch(tip, TRACKED["constants_other.ts"]).decode("utf-8"))
+                        print(f"  {ref} CURRENT_PHASE = {upstream_phase}")
+                        if upstream_phase != lock["currentPhase"]:
+                            drift.append(
+                                f"*** CONTENT TIER CHANGED {lock['currentPhase']} -> "
+                                f"{upstream_phase} *** -- new tier launched; pools, gem "
+                                "palette and engineVersion all need work")
+                    except SystemExit as e:
+                        drift.append(f"could not read {ref} CURRENT_PHASE: {e}")
+    elif lock["commit"] != sha:
         drift.append(f"new release available: {lock['tag']} -> {tag}")
         try:
             upstream_phase = parse_current_phase(
@@ -639,6 +690,32 @@ def do_watch_ref(ref):
     return 0
 
 
+def do_unwatch_ref(ref):
+    """Remove one entry from lock["watchedRefs"].
+
+    do_watch_ref is a keyed upsert and nothing else deletes a key, so a ref that
+    upstream deletes (feature/backend-reforge, merged and removed as PR #385)
+    stays in the lock forever, failing every --check with "could not resolve".
+    Hand-editing the lock would work but is invisible to every gate; this is the
+    removal path --watch-ref never had.
+    """
+    lock = load_lock()
+    if not lock:
+        print(f"  no {LOCKFILE} -- run --update first", file=sys.stderr)
+        return 2
+    watched = dict(lock.get("watchedRefs") or {})
+    if ref not in watched:
+        print(f"  ref {ref} is not in watchedRefs", file=sys.stderr)
+        return 2
+    del watched[ref]
+    lock["watchedRefs"] = watched
+    with open(LOCKFILE, "w", encoding="utf-8", newline="") as fh:
+        json.dump(lock, fh, indent=2)
+        fh.write("\n")
+    print(f"  no longer watching {ref}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="report drift, write nothing")
@@ -661,10 +738,19 @@ def main():
         help="add/refresh --ref in lock['watchedRefs'] for drift tracking "
         "(does not fetch files or touch vendor/)",
     )
+    ap.add_argument(
+        "--unwatch-ref",
+        action="store_true",
+        help="remove --ref from lock['watchedRefs'] (for a branch upstream deleted)",
+    )
     args = ap.parse_args()
 
-    if args.tag and args.ref and not args.watch_ref:
+    if args.tag and args.ref and not (args.watch_ref or args.unwatch_ref):
         print("--tag and --ref are mutually exclusive", file=sys.stderr)
+        sys.exit(2)
+
+    if args.watch_ref and args.unwatch_ref:
+        print("--watch-ref and --unwatch-ref are mutually exclusive", file=sys.stderr)
         sys.exit(2)
 
     if args.watch_ref:
@@ -672,6 +758,11 @@ def main():
             print("--watch-ref requires --ref <branch-or-sha>", file=sys.stderr)
             sys.exit(2)
         sys.exit(do_watch_ref(args.ref))
+    elif args.unwatch_ref:
+        if not args.ref:
+            print("--unwatch-ref requires --ref <branch-or-sha>", file=sys.stderr)
+            sys.exit(2)
+        sys.exit(do_unwatch_ref(args.ref))
     elif args.update:
         sys.exit(do_update(args.tag, ref=args.ref))
     elif args.restore:

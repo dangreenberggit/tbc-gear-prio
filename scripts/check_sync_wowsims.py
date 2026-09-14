@@ -582,6 +582,139 @@ def check_warner_reports_clean_only_on_exit_zero() -> list[str]:
     return problems
 
 
+def check_sha_pin_compares_against_its_watched_ref() -> list[str]:
+    """A sha pin must be compared against the ref it was cut from, not against
+    the latest release tag (ticket 354 symptom (a)). The tag comparison is the
+    wrong question for a pin that will never equal a tag, and asking it forever
+    trains people to ignore the one run that means something.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        # A sha pin whose watched ref has moved past it.
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        # ref_sha returns UPSTREAM_SHA, so the watched ref reads as moved.
+        rc, body = h.run()
+
+    if rc != 1:
+        problems.append(
+            f"a sha pin behind its watched ref must report drift (rc 1), got {rc}. "
+            f"Output was: {body.strip()!r}"
+        )
+    if "master" not in body:
+        problems.append(
+            f"the drift line must name the watched ref it compared against: {body.strip()!r}"
+        )
+    if "new release available" in body:
+        problems.append(
+            "a sha pin must not report release-tag drift -- it will never equal a "
+            f"tag, so that line is permanent noise (ticket 354): {body.strip()!r}"
+        )
+    return problems
+
+
+def check_sha_pin_in_sync_with_watched_ref_is_clean() -> list[str]:
+    """A sha pin equal to its watched ref's tip is in sync, even while the
+    latest release tag names some other commit. Without this, the sha-pin branch
+    could report drift forever and still look "correct" to the other checks.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        # Pin and watched ref agree on UPSTREAM_SHA; latest_tag() reports a
+        # different commit, which must not matter.
+        lock["tag"] = h.UPSTREAM_SHA
+        lock["commit"] = h.UPSTREAM_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        rc, body = h.run()
+
+    if rc != 0:
+        problems.append(
+            f"a sha pin equal to its watched ref tip is in sync; got rc {rc}. "
+            f"Output was: {body.strip()!r}"
+        )
+    if warn_upstream_drift.DRIFT_TOKEN in body:
+        problems.append(
+            f"a sha pin in sync with its watched ref must report no drift: {body.strip()!r}"
+        )
+    if "latest release" not in body:
+        problems.append(
+            "the release tag must still be printed as an informational line so the "
+            f"ADR-0030 tag trigger stays visible: {body.strip()!r}"
+        )
+    return problems
+
+
+def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
+    """When the first watched ref cannot be resolved -- the branch upstream
+    deleted -- --check must report drift, not raise. This is the exact state the
+    repo was in after PR #385 merged and feature/backend-reforge was deleted.
+    """
+    problems = []
+
+    def boom(ref):
+        raise SystemExit("HTTP 422")
+
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"dead/ref": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        orig = sync_wowsims.ref_sha
+        sync_wowsims.ref_sha = boom
+        try:
+            rc, body = h.run()
+        except SystemExit as e:
+            sync_wowsims.ref_sha = orig
+            return [
+                f"an unresolvable watched ref must not propagate out of do_check; "
+                f"it raised SystemExit({e})"
+            ]
+        finally:
+            sync_wowsims.ref_sha = orig
+
+    if rc != 1:
+        problems.append(
+            f"an unresolvable watched ref is drift (rc 1), got {rc}. Output: {body.strip()!r}"
+        )
+    if "could not resolve" not in body:
+        problems.append(
+            f"--check must say the ref could not be resolved: {body.strip()!r}"
+        )
+    return problems
+
+
+def check_unwatch_ref_removes_the_key_and_refuses_an_absent_one() -> list[str]:
+    """--watch-ref is a keyed upsert and nothing removed a key, so a deleted
+    upstream branch stayed in the lock failing every --check forever. A hand
+    edit would work but is invisible to every gate.
+    """
+    problems = []
+    with _DoCheckHarness() as h:
+        h.add_watched_ref(name="doomed/ref")
+
+        rc = sync_wowsims.do_unwatch_ref("doomed/ref")
+        if rc != 0:
+            problems.append(f"--unwatch-ref on a present ref must return 0, got {rc}")
+        lock = sync_wowsims.load_lock()
+        if "doomed/ref" in (lock.get("watchedRefs") or {}):
+            problems.append(
+                f"--unwatch-ref left the key behind: {lock.get('watchedRefs')!r}"
+            )
+
+        rc_absent = sync_wowsims.do_unwatch_ref("never/there")
+        if rc_absent != 2:
+            problems.append(
+                f"--unwatch-ref on an absent ref must refuse with 2, got {rc_absent}"
+            )
+    return problems
+
+
 CHECKS = (
     check_vendor_is_empty_missing_dir,
     check_vendor_is_empty_empty_dir,
@@ -601,6 +734,11 @@ CHECKS = (
     check_warner_reports_drift_and_stays_green,
     check_warner_skips_on_absent_vendor,
     check_warner_reports_clean_only_on_exit_zero,
+    # The sha-pin comparison path and its removal counterpart (ticket 354).
+    check_sha_pin_compares_against_its_watched_ref,
+    check_sha_pin_in_sync_with_watched_ref_is_clean,
+    check_sha_pin_survives_an_unresolvable_watched_ref,
+    check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
 )
 
 
