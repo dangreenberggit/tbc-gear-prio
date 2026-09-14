@@ -1,261 +1,148 @@
 # Handoff — upgrades-tab finish line
 
-Written 2026-09-13 by the orchestrating session. For the next overseer, and for
-the orchestrator who hands them their brief.
+Rewritten 2026-09-14 by the orchestrating session, after Chunk 1 merged.
+Supersedes the 2026-09-13 version. Chunk 2 is next.
 
-Plan: `.scratch/plans/upgrades-tab-finish-line.md` (revision 1, post-verification).
+Plan: `.scratch/plans/upgrades-tab-finish-line.md` (revision 1).
 
 ## State right now
 
 | Thing | Value |
 | --- | --- |
-| Core repo branch | `feat/tab-scope-truth`, 5 commits, **merged to `dev` 2026-09-13** |
-| Core commits | `23c5256` scope doc · `7411727` review + tickets · `e5c2e13` this handoff · `a53d5c2` rows 314/330 fixed + ticket 389 · `53282f9` handoff corrections |
-| Fork clone HEAD | `5e9013b78`, branch `feat/upgrades-tab`, tree clean — **untouched by Chunk 0** |
-| Fork remote | matched `5e9013b78` **as measured on 2026-09-13** — re-run `ls-remote` before trusting this row (see below) |
-| `pnpm merge-to-dev --check-only` | **rc=0**, 9/9 disposition rows parsed |
-| Chunk 0 | done, reviewed, merged |
-| Chunks 1-5 | not started. **Chunk 1 is next**, and branches off `dev` |
+| Core branch | `dev` at `7dea165d`, tree clean, **25 commits unpushed to origin** |
+| Chunk 1 | **done, reviewed, merged** (`feat/upstream-catchup-chunk1`, 11 commits) |
+| Engine pin | `17a8fb28c5ad14b649acecdaacd488594048f467` = upstream `master` = tag `v0.0.137` |
+| Watched ref | `master` (the dead `feature/backend-reforge` is gone) |
+| `sync_wowsims.py --check` | **rc 0, `in sync.`** — the failure that motivated Chunk 1 |
+| Fork clone HEAD | `2781486d6b324c3092c0c5dcd51a26bbb7103d78`, branch `feat/upgrades-tab`, clean |
+| Fork remote | `5e9013b78…` — **the merge tip is NOT pushed**, `pushed: false` |
+| `pnpm verify` | rc 0 |
+| Open tickets | 115 |
+| Chunks 2–5 | not started. **Chunk 2 is next** (desktop-transport gate, stage-gate) |
 
-That fork-remote row is a **measurement with a date, not current state**. Any
-fork commit made after 2026-09-13 moves the clone ahead of the remote and this
-row silently becomes false — the same way `pushed` in the lockfile goes stale.
-Re-run it yourself:
+### The one thing to do before anything else
+
+**Ask the owner to push the fork.** `data/sim-implemented-effects.json` embeds
+fork commit `2781486d6…`, which exists on one disk. Nothing in `pnpm verify`
+notices — `git ls-remote` appears in no executable file and the `pushed` flag has
+zero code readers. ADR-0030 Consequence 4 accepts this risk; ticket 355 was filed
+when it bit. A fresh clone cannot reproduce the committed artifacts until that
+push happens.
+
+Pushing is owner-authorised, historically an explicit ask. Afterwards set
+`pushed: true` and verify with the `ls-remote` above — never trust the flag.
+
+## What Chunk 1 changed that later chunks should know
+
+**The engine moved 82 commits.** One behaviour change is user-visible and
+recorded in `docs/adr/0033-upstream-is-master-again.md` Consequence 5: upstream
+fixed a bug where one-handed weapons received Two-Handed Weapon Specialization's
+damage bonus. Measured at −80.35 DPS on a 1H main hand (3σ band 2.16) versus
+−0.67 on the committed 2H skeleton. **Ret rankings now score 1H weapons ~80 DPS
+lower relative to 2H**, and any previously published 1H-vs-2H ranking was
+inflated on the 1H side. The ADR carries the binaries, input, seed and numbers
+inline, so it is re-runnable without the gitignored working note.
+
+**Several other engine changes were not measured**, and Consequence 5 names them
+without claiming magnitudes: Seal of Vengeance 15→20 PPM, Justicar 2pc and
+Lightbringer 4pc `Pct`→`Flat`, a proc-suppression pass across seals, metagems and
+weapon enchants, and five ret talent conversions. If a ranking shifts
+unexpectedly, that list is the candidate set.
+
+**Upstream's own P3 BiS sets moved** for mage and shadow priest (Consequence 6).
+The committed universes track it.
+
+**`pnpm verify` does not prove the pin state.** Its chain ends in
+`upstream-drift:warn`, which returns 0 on every branch. Run
+`python scripts/sync_wowsims.py --check` by hand and read its line.
+
+**The local test fixture is still stamped `simVersion ec5c5f2`** — the old pin.
+So a green verify is not engine evidence at the new pin. Re-recording it is an
+open decision nobody has taken (ADR-0033 Consequence 7).
+
+## Ticket 386 is now closeable — but it is the owner's call
+
+The previous handoff said Chunk 1 would make `docs/upgrades-tab-scope.md`'s
+done-condition 3 satisfiable *as written*, and instructed the next session not to
+reword it. Both halves now hold: both pins name a `master` sha at or after the
+PR-385 merge (`17a8fb28`), and `--check` exits 0. Verify before closing:
 
 ```
-git -C vendor/tbc-new-fork ls-remote origin refs/heads/feat/upgrades-tab
-git -C vendor/tbc-new-fork rev-parse HEAD
+python -c "import json;w=json.load(open('data/wowsims.lock.json'));f=json.load(open('data/wowsims-fork.lock.json'));print(w['commit'][:12], list(w['watchedRefs']), f['branchedFrom'][:12])"
+python scripts/sync_wowsims.py --check; echo rc=$?
 ```
 
-Chunk 0 is merged. Every merge from here is still the owner's call, asked for
-separately after the review file is written and they have seen the summary.
+## Chunk 2 — desktop-transport gate (stage-gate session)
 
-### Worktree hazard — 15 of them
+Read the plan's Chunk 2 section in full. Why stage-gate: the deliverable is a
+gate other work relies on, and the failure mode is a false "works on desktop"
+claim. Two things make a false pass easy — the embedded build has **no precedent
+on this machine**, and the tab silently falls back to the WASM runner when its
+transport probe fails, so a gate that only trusts the tab's own choice can pass
+on the fallback. The plan's step 5 acceptance is built to make that impossible
+(assert the runner class *and* observe `/bulkSimAsync` traffic).
 
-`git worktree list` shows **15 registered worktrees**, not one. That is ticket
-149 (worktree sprawl), and it is a live hazard for this plan rather than
-housekeeping, because the plan serialises every fork chunk through a single
-clone.
+Chunk 2 also owns the durable CDP harness. A working throwaway driver exists at
+`.scratch/stage-gate/upstream-catchup-chunk1/ret-p5-run.mjs` — promote it rather
+than starting over. Read that directory's `README.md` first; it explains what the
+leftover files are.
 
-`tbc-gear-prio-wt-layout-gate` holds a **symlink** at `vendor/tbc-new-fork`
-pointing to the one real clone (`tbc-new-fork -> /c/Users/dgree/…
-/vendor/tbc-new-fork/`). Anything run there shares the fork's working tree,
-index and HEAD with the main checkout.
+**One measurement Chunk 2 should want:** a full ret P5 run on the WASM page takes
+**~32 minutes** (601 candidates × 5000 iterations, priced individually because
+the fork's bulk-screening branch engages only on the HTTP transport). The desktop
+path is where bulk screening actually runs, so the same work may be far faster
+there — untested, and worth measuring early since it shapes what any future
+regression can afford.
 
-**Cleared for Chunk 1 as of 2026-09-13:** the owner confirmed nothing is running
-in any worktree, and that symlinked worktree measured clean and 0 commits ahead
-of `dev`. Re-confirm before a later fork chunk — dormancy is not permanent, and
-registration alone never tells you whether a session is live.
+## Preconditions before touching the fork
 
-Not all of them are dormant leftovers, so **do not bulk-remove them**. A
-per-worktree assessment ran on 2026-09-13; its findings:
+The fork clone is a single shared working tree. One registered worktree
+(`tbc-gear-prio-wt-layout-gate`) reaches it by symlink — same index, same HEAD.
+**Ask** whether any session is live in a worktree; registration does not tell you.
+Ticket 149 tracks the sprawl (eight copies of this repo exist).
 
-**Nine are safe to remove** — fully merged, and either clean or carrying only
-line-ending noise (`diff -w` empty): `wt-layout-gate`, `wt-ret-p3-data`,
-`wt-salvage-docs`, `wt-sweep-ret`, `wt-verify-review`, and the four under
-`.claude/worktrees/`: `repo-state-wsl-migration-cdb8bf`,
-`worktree-branch-switching-b46255`,
-`wowhead-collection-integrity-task2-83d6ca`, `wowsims-all-specs-support-30ee63`.
-The three detached HEADs among them sit on commits already reachable from `dev`,
-so nothing becomes unreachable.
+Both trees clean, fork HEAD equal to the lock, before any fork work.
 
-**Four hold something worth keeping:**
+## Environment traps this session actually paid for
 
-- `feat/fan-out-retro` (49 commits) — its dirty files are pure whitespace, but
-  `.scratch/retros/**` holds ~7,000 lines of orchestration retro analysis that
-  **exists on no other branch**. Some of its other commits are superseded by
-  `dev`; the retros are not. Do not delete without a decision.
-- `claude/orchestration-ticket-290-7e899e` (7 commits, in the confusingly named
-  `ticket-232-67e7a4` directory) — genuinely unmerged, and tab-relevant.
-- `claude/ticket-225-orchestration-b2cd20` (4 commits, in the equally
-  mis-named `subagent-nesting-check-80e77b` directory).
-- `claude/dps-naming-audit-d26eb7` (2 commits) — plus an **untracked** review
-  file and ticket 338 that exist nowhere else.
+- **`cd X && git ...` fails.** fnm emits an error that breaks the chain — also
+  breaks `cd X && grep`. Use `git -C <abs path>`. Bare `pnpm` fails too (Node 20
+  in tool shells): `fnm exec --using=22 -- pnpm.cmd <cmd>`, as its own command.
+- **A pipe reports the last command's status.** Append `; echo "rc=${PIPESTATUS[0]}"`
+  in the *same* call. A later tool call is a new shell and has lost it.
+- **`git add <paths>` does not scope a commit** — lint-staged sweeps everything
+  dirty. `git status` before every commit.
+- **Repo-wide recursive greps match eight worktree copies** and can time out.
+  Scope to a named directory.
+- **Ticket collisions:** use the strict `^39[0-9]-` form. A bare `^39` matches
+  ticket 39 and gives a false positive. `NEXT` is 397.
+- **Prose must pass prettier** (`.scratch/` is ignored; `docs/` is not). This bit
+  twice — both times on a review file.
+- **A same-length edit reverted within the same second** can leave a stale `.pyc`
+  in use, so a "restored" run reports mutated behaviour. Use `python -B`.
 
-**The real hazard was untracked files, not commits** — `git branch --merged`
-cannot see them. That is now handled: everything that lived only in a worktree
-working directory was copied onto `dev` at
-`.scratch/archive/2026-09-worktree-rescue/` (commit `505641b`, 29 files,
-~8,100 lines) with a README recording each item's origin. The three subfolders
-are `fan-out-retro/`, `terminology-cleanup/` and `dps-naming-audit/`.
+## Two lessons worth carrying
 
-**Eleven worktrees are now safe to delete** — the nine above plus
-`wt-fan-out-retro` and `terminology-cleanup-plan-82f471`, whose content is
-archived. Deleting a *worktree* removes only a working directory; deleting a
-*branch* destroys commits. Keep that distinction: two branches still hold
-unmerged work and their disposition is a separate, open decision —
-`feat/fan-out-retro` (49 commits) and `claude/dps-naming-audit-d26eb7`.
+**Don't defer tickets you could close.** The review filed six findings; the owner
+pushed back that the orchestration system already says open issues block the
+merge, and that "the branch's plan didn't ask for it" is not a valid reason to
+defer. Four of six were small, known fixes and should have been done in the same
+session. All six were closed before this merge. The test is not "is it in scope"
+— it is "is it small, do I know the fix, and does leaving it undone weaken
+something this branch claims?"
 
-Relevance, checked against `dev`'s tree rather than each plan's own claims
-(2026-09-13):
+**Design the test from the question.** Chunk 1's plan specified a full-tab
+ranking regression — 5 runs before, 3 after, noise bands, ~3.7 hours — and it was
+withdrawn as wrongly shaped, not merely slow. Ranking is an unstable derived
+observable, so the entire statistical apparatus existed to manage instability a
+better observable never produces. The replacement asked "did the engine's numbers
+change?", simmed one fixed gear set per pin at a fixed seed, and answered it in
+25 seconds *with a cause attached*. Two attempts to shrink the original (fewer
+repeats, fewer iterations) were both the same error in a smaller package.
 
-- **terminology-cleanup: implemented.** `CONTEXT.md` carries the glossary it
-  specified, `PLAN.md` uses Stage vocabulary throughout with no old markers
-  left. Historical record only.
-- **dps-naming-audit: not merged.** `dev` still has `DpsSample` / `deltaDps`, so
-  the rename never landed and **ticket 338 (mirror it into the fork) is moot as
-  scoped** — there is nothing to mirror yet. Do not action 338 until someone
-  decides whether to merge that branch.
-- **fan-out-retro: partly adopted.** The mechanical items are in place
-  (worktree exclusions, the skill adapter rename, single-writer `pathsAllowed`).
-  Two are not: the `.claude/` ↔ `.agents/` skill-mirror drift check, and the
-  `onlyBuiltDependencies` build-approval lockdown — the latter now exists as a
-  written rule in `AGENTS.md`, so it may have been settled by policy instead.
+## Do not
 
-## Which repo gets which merge — read this before Chunk 1
-
-There are **two repos**, and only one of them has a gate.
-
-**Repo A — core (`tbc-gear-prio`, this one).** Feature branch → `dev` via
-`pnpm merge-to-dev`. That door checks: branch is not `dev`/`main`; tree clean;
-`pnpm verify` passes; a review file exists at `docs/reviews/<branch>.md` whose
-Disposition table parses and whose every `defer` row links a carry-forward
-ticket that is still open; then `git merge --no-ff` with `TBC_ALLOW_DEV_MERGE=1`.
-
-**Repo B — the wowsims fork (`vendor/tbc-new-fork/`).** Its own git, branch
-`feat/upgrades-tab`, `origin` = `dangreenberggit/tbc-new`,
-`upstream` = `wowsims/tbc-new`. It is **gitignored** by repo A. Its commits are
-its own; `pnpm merge-to-dev` never touches it and never pushes it.
-
-### How A is bound to B
-
-`data/wowsims-fork.lock.json` field `commit` pins the fork commit that repo A's
-state pairs with. Enforcement is real but narrow — `scripts/_fork_gate.py`
-`require_pinned_fork()` raises when the clone's HEAD differs from the pin, and
-four gates call it, all inside `pnpm verify`:
-
-- `equip-eligibility:check`
-- `fork-lint:check`
-- `ep-presets:check`
-- `meta-conditions:check`
-
-A fifth, `sim-implemented-effects:check`, reads the fork tree *at the pinned sha*
-rather than the working tree, so a clone ahead of the pin is tolerated there by
-design.
-
-Each of those gates **skips with exit 0 when the clone is absent**. So
-`pnpm verify` passes on a fresh clone with no fork, and CI never clones the fork
-at all — the pin is unenforced in CI.
-
-### The gap that matters
-
-**No gate checks whether the fork commit was pushed.** `git ls-remote` appears in
-zero executable files. The lockfile's `pushed` boolean has **no code readers** —
-it is documentation, hand-maintained, and its own `_comment` warns it goes stale
-the moment a later fork commit lands.
-
-Consequence, stated plainly: a core branch **can** merge to `dev` while its pin
-names a fork commit that exists on one disk only. ADR-0030 Consequence 4 records
-this as an accepted, tracked risk. It has bitten before — ticket 355 was filed
-because committed artifacts embedded a pin nobody else could fetch.
-
-### The order to use when a change touches both repos
-
-The re-pin cycle is documented (`docs/agents/known-traps.md:45-66`); the push
-step is **not documented anywhere**. Use this order:
-
-1. Fork commit in `vendor/tbc-new-fork/`.
-2. **Push the fork branch** (owner-authorised; historically an explicit ask).
-3. Verify with
-   `git -C vendor/tbc-new-fork ls-remote origin refs/heads/feat/upgrades-tab`
-   returning the same sha — do not trust `pushed`.
-4. Re-pin `data/wowsims-fork.lock.json` to the new fork tip; set `pushed`.
-5. Regenerate the five pin-derived artifacts:
-   `data/sim-implemented-effects.json`, `data/equip-eligibility.json`,
-   `data/gems/meta-conditions.json`, the EP presets, and the fork universes.
-6. `pnpm verify` in repo A.
-7. Review, then ask the owner before `pnpm merge-to-dev`.
-
-Between step 1 and step 4 the four fork gates are **red by design**. Read the
-message before chasing it.
-
-A fresh clone has no bootstrap script for the fork — unlike `vendor/wowsims/`,
-which `pnpm sync:wowsims:restore` restores at its pin. Getting fork commit X by
-hand means cloning `dangreenberggit/tbc-new` to `vendor/tbc-new-fork` and
-checking out X, and that only works **if X was pushed**.
-
-## Note for the next overseer
-
-You oversee one chunk. The orchestrator handles merges — in both repos. Do not
-run `pnpm merge-to-dev`, do not `git merge` into `dev`, do not set
-`TBC_ALLOW_DEV_MERGE=1`, and do not push the fork. Stop with your branch ready
-and report.
-
-**Chunk 1 runs as a `stage-gate` session, not an ordinary one.** Invoke the
-`stage-gate` skill: planner → adversarial plan review → fresh-context executor,
-with judged gates between. The reason is the blast radius, not the line count —
-Chunk 1 moves both pins, merges ~80 upstream commits into a fork that has
-diverged from them, and regenerates five committed artifacts that every later
-chunk reads. A wrong re-pin is expensive to unwind and the previous re-pin
-produced an ADR and six tickets. Chunks 2 is likewise stage-gate; 0, 3 and 4 are
-ordinary sessions.
-
-**Chunk 1 is next** and it is the risky one. Before you touch anything:
-
-- Both trees clean, fork HEAD equal to the lock, and **ask** whether any worktree
-  session is using the fork symlink. One worktree
-  (`tbc-gear-prio-wt-layout-gate`) reaches the fork through a symlink to the one
-  real clone — same working tree, same index, same HEAD. Two sessions in there at
-  once corrupt each other.
-- Upstream moved on 2026-09-13: `feature/backend-reforge` merged to `master` as
-  PR #385 and the branch was deleted. `sync_wowsims.py --check` exits 1 today on
-  the dead watched ref. That is the condition Chunk 1 fixes, not a fault to
-  diagnose.
-- Re-measure the conflict surface against the sha you actually pick. The plan's
-  file list was measured against a moving target.
-
-Environment traps that cost this session time:
-
-- **`cd X && git ...` fails** (fnm emits an error that breaks the chain). Run git
-  standalone with `git -C <abs path>`. Heredocs into git break the same way — use
-  `commit -F <file>`.
-- `git add <paths>` does **not** scope the commit; lint-staged runs against
-  everything. Check `git status` before each commit.
-- A pipe reports the last command's status. Use `; echo "rc=${PIPESTATUS[0]}"`.
-- **`.scratch/carry-forward/issues/NEXT` was stale** — it said 383 while
-  `383-body-cap-vs-record-commits.md` already existed. Check for a collision with
-  `ls .scratch/carry-forward/issues/ | grep -E '^<n>-'` before writing a ticket,
-  and bump `NEXT` when you finish. It is now **390** (389 was filed by Chunk 0's
-  follow-up).
-
-## Chunk 0's residue
-
-The review filed three tickets. Two were investigated and closed in the same
-session rather than carried — both turned out to describe stale rows, not
-defects — and the investigation turned up one genuinely new item.
-
-**Open:**
-
-- **386** — the scope doc's done-condition 3 is unsatisfiable today. **Chunk 1
-  makes it satisfiable as written**; do not reword it to match today's state.
-- **389** — the set-bonus string on disk
-  (`{{threshold}}pc bonus ({{worn}}/{{threshold}}) (+{{dps}})`) is not the string
-  ticket 330 records as landed (`toward {{set}} {{threshold}}pc (+{{dps}})`).
-  Found independently twice. Label/number agreement is unaffected, but the owner
-  is being asked to sign off on 330 against wording the product does not use, and
-  the shipped text drops the set name and the "toward" framing. **Needs an owner
-  decision**, not engineering. Also asks whether `package_disclosure` duplicates
-  `prospective`, which would make ticket 336's disclosure indistinguishable from
-  a row's own bonus line.
-
-**Closed, with the measurement that closed them:**
-
-- **387** — not a defect. The tab's TMB export does substitute token ids
-  (`exportIdForRow`, `upgrades_tab.tsx:2160`; 15 `tokenId` fields in the bundled
-  `ret-p3.universe.json`). Craftable/pattern ids remain gear ids by documented
-  deferral. Row 314 rewritten.
-- **388** — the finding was wrong. One `nextThreshold` (`rank.ts:1846`) feeds both
-  the set-bonus label and its figure, so they cannot disagree; ticket 330's own
-  August investigation had already concluded this. Row 330 rewritten, since its
-  title still asserted the disproved mislabelling.
-
-The lesson worth carrying: two of three tickets restated questions the tracker
-had already answered. Check a ticket's own resolution notes before filing against
-it.
-
-Two findings accepted as `wontfix` that later chunks should carry:
-
-- The scope doc has **no enforcement**. Its acceptance loop is real and
-  re-runnable, but nothing runs it — not the hooks, not CI, not any of the 30
-  checks in `pnpm verify`. Chunk 4's ticket-close discipline is where that lands.
-- Done-condition 2 names `pnpm desktop-gate:check`, which **Chunk 2 creates**.
+Push the fork or merge to `main` without the owner's explicit ask. `main` only
+receives `dev` when a PLAN.md §14 phase gate is checked off in
+`docs/verification-log.md`. Never `TBC_ALLOW_DEV_MERGE=1`, never a raw
+`git merge` into `dev` — `pnpm merge-to-dev` is the only door.
