@@ -300,3 +300,51 @@ text and the above-cutoff shortlist, not the below-cutoff cells. The
 cross-transport T1/T2 there was already a cross-compilation artifact (D3); I do
 not re-run the two ~1hr full runs to re-parse below-cutoff rows, since the
 load-bearing screened-path check is step 7's same-transport gate re-run here.
+
+## Gate C — disposition (orchestrator, 2026-09-14)
+
+Mechanical cross-check first, all verified by command:
+
+- Branch `feat/desktop-transport-gate`, four core commits `10cfed48` / `c4c91c69`
+  / `8019aa9c` / `44e2aac6`, tree clean.
+- `git diff --stat 654a53b6..HEAD`: core source = `data/sim-implemented-effects.json`
+  (1 line, forkCommit only), `data/wowsims-fork.lock.json` (6), `docs/agents/upstream-catch-up.md`
+  (+8), `package.json` (+1), `scripts/check_desktop_tab.py` (new 549), `scripts/dev-tab.ps1`
+  (+57/−4), `.gitignore` (+1), plus tracked stage evidence. **No path outside the
+  Paths manifest; no engine file; no PROVENANCE row.** No out-of-manifest path
+  needs a new ledger row.
+- Fork commit `eb040855c`, **not pushed** (`ls-remote` still `2781486d6`), lock
+  re-pinned `pushed: false`. Correct per step 8.
+
+Deviation ledger disposition:
+
+| Row | Disposition | Reason |
+| --- | --- | --- |
+| D1 (smoke-A `>=poolSize` → `>=1` + worker-session traffic) | accepted | `hardwareConcurrency` overcounts a memory-capped pool; the plan's intent (S2 not deaf, every pooled worker observed) is met and the gate's (c) uses `>0`. Wording-only, no boundary crossed. |
+| D2 (45-min timeout → 3h; full run completed) | accepted | The 45-min value was a guess; intent was a completed full run, which it got (3419s). |
+| D3 (cross-transport T1/T2 fail = cross-compilation artifact, flag NOT stop) | accepted | The 159.3 DPS gap is on the loop route with no screening — Go-native vs WASM are numerically distinct engines, which the plan anticipated by downgrading cross-transport T3 to recorded-only. T4 median within 3.4 shows no uniform screening offset (C33 absent). The load-bearing screened-path check is step 7's same-transport gate, which is green. Stopping here would have papered the plan's own ambiguity into a hard stop it did not intend. |
+| D4 (C14 false; `--full` branch uses measured 601) | accepted | Correct: 16 eligible candidates do not land as rows; the capped default is unaffected and the `--full` branch now compares against the measured `FULL_ROWS=601`. |
+| D5 (`.dirstamp` skipped in byte check) | accepted | Same class as the C4 strip list; make's own freshness markers, not web assets. |
+| D6 (harness read below-cutoff rows empty → T1 degenerate; parser fixed to expand `<details>`) | accepted | A real harness-correctness bug caught and fixed, not a threshold change. **This is why the gate is re-run under Gate C rather than trusted from the first green** — see below. |
+| D7 (fork-universes CRLF drift, pre-existing) | accepted, out of scope | Independently confirmed: `sync_fork_universes.py --check` reports 29 drifted, every one "0 shared entries differ in content"; `git diff 654a53b6..HEAD -- data/universes/*.json` empty; the fork copies were last touched by Chunk 1's `2781486d6` ("Refresh bundled universes after the master re-pin"), not by this chunk's `eb040855c`. Inherited CRLF-vs-LF, ticket 211's domain; the fix edits 29 fork files outside this chunk's manifest. **Consequence: `pnpm verify` is red on the tip for this one gate alone.** Not this chunk's to fix. |
+| D8 (`-Desktop` prepends Git's usr\bin so make can spawn `uname`/`realpath`) | accepted | Local to the `-Desktop` branch; re-verified (page 200, 0 WebAssembly refs). |
+
+**Gate re-run (D6 verification).** The orchestrator's first re-run of
+`pnpm desktop-gate:check` hit the fnm `cd &&` trap (rc 1 inside a pipe, masked by
+`[exited with code 0]` — an exit code is not evidence). Re-running without the
+`cd` chain to confirm the D6-fixed gate is genuinely green before closing Gate C.
+Disposition of D6 and the chunk's green status is **pending that re-run**.
+
+Two items carried to the hand-off, not dispositioned here because they are the
+owner's call, not accept/rework:
+
+1. **D7 red `verify`.** The tip's `pnpm verify` fails on `fork-universes:check`
+   alone (all other gates green, 1290 tests pass). It is pre-existing CRLF drift,
+   ticket 211's domain. `pre-merge-review` runs regardless; the merge ask must
+   weigh a `verify` that is red for an inherited reason this chunk did not cause
+   and is out of scope to fix.
+2. **Q2 finding.** The desktop full run is **2.05× slower** than WASM (3419s vs
+   1668s), the opposite of the plan's hypothesis that bulk screening would speed
+   the desktop path. Screening engages (bulkSimAsync observed) but is not a speed
+   win. Candidate ticket from `NEXT` (397); the Executor filed none pending this
+   call.

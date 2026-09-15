@@ -202,7 +202,14 @@ def run_harness(out_path: Path, candidates: int, force_fallback: bool) -> dict:
     ]
     if force_fallback:
         args.append("--force-fallback")
-    subprocess.run(args, check=False)  # harness measures; we judge the JSON
+    # Delete any prior readback first: the harness writes --out only on a clean
+    # finish, so a crash before that write would otherwise leave a stale passing
+    # JSON on these two fixed gitignored paths and we would judge the old run.
+    out_path.unlink(missing_ok=True)
+    proc = subprocess.run(args, check=False)  # harness measures; we judge the JSON
+    if proc.returncode != 0:
+        eprint(f"{CHECK_NAME}: harness exited {proc.returncode} (no clean run to judge).")
+        raise SystemExit(2)
     if not out_path.is_file():
         eprint(f"{CHECK_NAME}: harness wrote no JSON at {out_path}.")
         raise SystemExit(2)
