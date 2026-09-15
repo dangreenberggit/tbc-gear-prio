@@ -1,0 +1,4969 @@
+{
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Lightbringer Boots",
+      "slot": "Feet",
+      "dps": 62.8,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
+      "item": "Felfury Legplates",
+      "slot": "Legs",
+      "dps": 45.4,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "3",
+      "item": "Lightbringer Bands",
+      "slot": "Wrist",
+      "dps": 40.4,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "4",
+      "item": "Lightbringer Girdle",
+      "slot": "Waist",
+      "dps": 35.7,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "5",
+      "item": "Apolyon, the Soul-Render",
+      "slot": "Main Hand",
+      "dps": 34.2,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "6",
+      "item": "Cloak of Unforgivable Sin",
+      "slot": "Back",
+      "dps": 34.1,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "7",
+      "item": "Shard of Contempt",
+      "slot": "Trinket 1",
+      "dps": 33.4,
+      "source": "Magisters' Terrace (H)\nPriestess Delrissa",
+      "belowCutoff": false
+    },
+    {
+      "rank": "8",
+      "item": "Carapace of Sun and Shadow",
+      "slot": "Chest",
+      "dps": 30.4,
+      "source": "Leatherworking",
+      "belowCutoff": false
+    },
+    {
+      "rank": "9",
+      "item": "Blackened Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": 28.1,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": false
+    },
+    {
+      "rank": "10",
+      "item": "Bladed Chaos Tunic",
+      "slot": "Chest",
+      "dps": 27.6,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "11",
+      "item": "Shivering Felspine",
+      "slot": "Main Hand",
+      "dps": 27,
+      "source": "Sunwell Plateau\nTrash",
+      "belowCutoff": false
+    },
+    {
+      "rank": "12",
+      "item": "Hard Khorium Choker",
+      "slot": "Neck",
+      "dps": 23.7,
+      "source": "Jewelcrafting",
+      "belowCutoff": false
+    },
+    {
+      "rank": "13",
+      "item": "Clutch of Demise",
+      "slot": "Neck",
+      "dps": 22.4,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "14",
+      "item": "Coif of Alleria",
+      "slot": "Head",
+      "dps": 22,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "15",
+      "item": "Thalassian Ranger Gauntlets",
+      "slot": "Hands",
+      "dps": 20.9,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "16",
+      "item": "Gloves of Immortal Dusk",
+      "slot": "Hands",
+      "dps": 20.8,
+      "source": "Leatherworking",
+      "belowCutoff": false
+    },
+    {
+      "rank": "17",
+      "item": "Berserker's Call",
+      "slot": "Trinket 1",
+      "dps": 17,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": false
+    },
+    {
+      "rank": "18",
+      "item": "Warharness of Reckless Fury",
+      "slot": "Chest",
+      "dps": 16.7,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": false
+    },
+    {
+      "rank": "19",
+      "item": "Leggings of the Immortal Night",
+      "slot": "Legs",
+      "dps": 15.6,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": false
+    },
+    {
+      "rank": "20",
+      "item": "Borderland Paingrips",
+      "slot": "Hands",
+      "dps": 14.2,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "21",
+      "item": "Hard Khorium Band",
+      "slot": "Finger 2",
+      "dps": 13.4,
+      "source": "Jewelcrafting",
+      "belowCutoff": false
+    },
+    {
+      "rank": "22",
+      "item": "Pauldrons of Berserking",
+      "slot": "Shoulder",
+      "dps": 13.3,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "23",
+      "item": "Shadowed Gauntlets of Paroxysm",
+      "slot": "Hands",
+      "dps": 13.3,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": false
+    },
+    {
+      "rank": "24",
+      "item": "Duplicitous Guise",
+      "slot": "Head",
+      "dps": 12.8,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "25",
+      "item": "Bulwark of the Ancient Kings",
+      "slot": "Chest",
+      "dps": 11.5,
+      "source": "Blacksmithing",
+      "belowCutoff": false
+    },
+    {
+      "rank": "26",
+      "item": "Demontooth Shoulderpads",
+      "slot": "Shoulder",
+      "dps": 10.6,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "27",
+      "item": "Crown of Anasterian",
+      "slot": "Head",
+      "dps": 9.3,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "28",
+      "item": "Collar of the Pit Lord",
+      "slot": "Neck",
+      "dps": 8.6,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "29",
+      "item": "Band of Ruinous Delight",
+      "slot": "Finger 1",
+      "dps": 6.3,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": false
+    },
+    {
+      "rank": "30",
+      "item": "Crimson Paragon's Cover",
+      "slot": "Back",
+      "dps": 6.3,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": false
+    },
+    {
+      "rank": "31",
+      "item": "Cloak of Fiends",
+      "slot": "Back",
+      "dps": 4.9,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": false
+    },
+    {
+      "rank": "32",
+      "item": "Sin'dorei Pendant of Triumph",
+      "slot": "Neck",
+      "dps": 3.6,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": false
+    },
+    {
+      "rank": "33",
+      "item": "Mantle of the Golden Forest",
+      "slot": "Shoulder",
+      "dps": 3.4,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": false
+    },
+    {
+      "rank": "1",
+      "item": "Choker of Endless Nightmares",
+      "slot": "Neck",
+      "dps": 1.3,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "2",
+      "item": "Starstalker Legguards",
+      "slot": "Legs",
+      "dps": 0.7,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "3",
+      "item": "Steely Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": -0.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "4",
+      "item": "Telonicus's Pendant of Mayhem",
+      "slot": "Neck",
+      "dps": -0.4,
+      "source": "Tempest Keep",
+      "belowCutoff": true
+    },
+    {
+      "rank": "5",
+      "item": "Harness of Carnal Instinct",
+      "slot": "Chest",
+      "dps": -0.5,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "6",
+      "item": "Razor-Scale Battlecloak",
+      "slot": "Back",
+      "dps": -1.4,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
+      "item": "Vengeance Wrap",
+      "slot": "Back",
+      "dps": -1.5,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "8",
+      "item": "Mayhem Projection Goggles",
+      "slot": "Head",
+      "dps": -1.6,
+      "source": "Engineering",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Choker of Serrated Blades",
+      "slot": "Neck",
+      "dps": -2,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Lightbringer Breastplate",
+      "slot": "Chest",
+      "dps": -2.1,
+      "source": "Black Temple",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Unstoppable Aggressor's Ring",
+      "slot": "Finger 1",
+      "dps": -2.2,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Thalassian Wildercloak",
+      "slot": "Back",
+      "dps": -2.9,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Swiftsteel Bracers",
+      "slot": "Wrist",
+      "dps": -2.9,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Shadowmoon Destroyer's Drape",
+      "slot": "Back",
+      "dps": -3.1,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Signet of Primal Wrath",
+      "slot": "Finger 1",
+      "dps": -3.5,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Black-Iron Battlecloak",
+      "slot": "Back",
+      "dps": -3.6,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Choker of Animalistic Fury",
+      "slot": "Neck",
+      "dps": -4.7,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Haramad's Bargain",
+      "slot": "Neck",
+      "dps": -4.9,
+      "source": "The Consortium\nExalted",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "The Savage's Choker",
+      "slot": "Neck",
+      "dps": -5.2,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Mithril Chain of Heroism",
+      "slot": "Neck",
+      "dps": -5.2,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Libram of Righteous Power",
+      "slot": "Ranged",
+      "dps": -5.7,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Band of the Eternal Champion",
+      "slot": "Finger 1",
+      "dps": -6.4,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Leggings of Divine Retribution",
+      "slot": "Legs",
+      "dps": -6.4,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Brooch of Deftness",
+      "slot": "Neck",
+      "dps": -7.1,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Dreadboots of the Legion",
+      "slot": "Feet",
+      "dps": -7.4,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Grips of Damnation",
+      "slot": "Hands",
+      "dps": -8,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Vicious Hawkstrider Hauberk",
+      "slot": "Chest",
+      "dps": -8.5,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "28",
+      "item": "Shoulderpads of Vehemence",
+      "slot": "Shoulder",
+      "dps": -8.6,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "29",
+      "item": "Fists of Mukoa",
+      "slot": "Hands",
+      "dps": -9.2,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "30",
+      "item": "Crystalforge Breastplate",
+      "slot": "Chest",
+      "dps": -9.3,
+      "source": "Tempest Keep",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Cloak of the Pit Stalker",
+      "slot": "Back",
+      "dps": -9.4,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
+      "item": "Vengeful Gladiator's Scaled Chestpiece",
+      "slot": "Chest",
+      "dps": -9.7,
+      "source": "PvP vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "33",
+      "item": "Ring of Hardened Resolve",
+      "slot": "Finger 1",
+      "dps": -10.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "34",
+      "item": "Furious Shackles",
+      "slot": "Wrist",
+      "dps": -10.3,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "35",
+      "item": "Swiftstrike Shoulders",
+      "slot": "Shoulder",
+      "dps": -10.6,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "36",
+      "item": "Bladespire Warbands",
+      "slot": "Wrist",
+      "dps": -12.9,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "37",
+      "item": "Ancestral Ring of Conquest",
+      "slot": "Finger 1",
+      "dps": -13,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "38",
+      "item": "Lightbringer Greaves",
+      "slot": "Legs",
+      "dps": -13.3,
+      "source": "Black Temple",
+      "belowCutoff": true
+    },
+    {
+      "rank": "39",
+      "item": "Grips of Deftness",
+      "slot": "Hands",
+      "dps": -13.5,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "40",
+      "item": "Saberclaw Talisman",
+      "slot": "Neck",
+      "dps": -13.6,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "41",
+      "item": "Netherforce Chestplate",
+      "slot": "Chest",
+      "dps": -13.8,
+      "source": "Magisters' Terrace (H)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "42",
+      "item": "Greaves of the Bloodwarder",
+      "slot": "Legs",
+      "dps": -13.8,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "43",
+      "item": "Deadly Cuffs",
+      "slot": "Wrist",
+      "dps": -13.9,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "44",
+      "item": "The Blade of Harbingers",
+      "slot": "Main Hand",
+      "dps": -14,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "45",
+      "item": "Insidious Bands",
+      "slot": "Wrist",
+      "dps": -14.2,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "46",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -14.2,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "47",
+      "item": "Heartshatter Breastplate",
+      "slot": "Chest",
+      "dps": -14.3,
+      "source": "Black Temple (N)\nMother Shahraz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "48",
+      "item": "Legguards of Endless Rage",
+      "slot": "Legs",
+      "dps": -14.3,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "49",
+      "item": "Libram of Divine Judgement",
+      "slot": "Ranged",
+      "dps": -14.5,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "50",
+      "item": "Libram of Fervor",
+      "slot": "Ranged",
+      "dps": -14.7,
+      "source": "World drop",
+      "belowCutoff": true
+    },
+    {
+      "rank": "51",
+      "item": "Libram of Hope",
+      "slot": "Ranged",
+      "dps": -14.8,
+      "source": "Dire Maul (N)\nIsalien\"]..\" - \"..format(AL[\"Tier %s Sets",
+      "belowCutoff": true
+    },
+    {
+      "rank": "52",
+      "item": "Skullshatter Warboots",
+      "slot": "Feet",
+      "dps": -15.1,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "53",
+      "item": "Sin'dorei Band of Triumph",
+      "slot": "Finger 1",
+      "dps": -15.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "54",
+      "item": "Lightbringer Shoulderbraces",
+      "slot": "Shoulder",
+      "dps": -15.3,
+      "source": "Black Temple",
+      "belowCutoff": true
+    },
+    {
+      "rank": "55",
+      "item": "Tsunami Talisman",
+      "slot": "Trinket 1",
+      "dps": -15.4,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "56",
+      "item": "Necklace of Trophies",
+      "slot": "Neck",
+      "dps": -15.7,
+      "source": "World drop",
+      "belowCutoff": true
+    },
+    {
+      "rank": "57",
+      "item": "Softstep Boots of Tracking",
+      "slot": "Feet",
+      "dps": -15.7,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "58",
+      "item": "Bloodsea Brigand's Vest",
+      "slot": "Chest",
+      "dps": -15.8,
+      "source": "Serpentshrine Cavern (N)\nFathom-Lord Karathress",
+      "belowCutoff": true
+    },
+    {
+      "rank": "59",
+      "item": "Worgen Claw Necklace",
+      "slot": "Neck",
+      "dps": -15.8,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "60",
+      "item": "Choker of Vile Intent",
+      "slot": "Neck",
+      "dps": -15.8,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "61",
+      "item": "Band of the Ranger-General",
+      "slot": "Finger 1",
+      "dps": -16,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "62",
+      "item": "Bracers of Eradication",
+      "slot": "Wrist",
+      "dps": -16,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "63",
+      "item": "Wraps of Precise Flight",
+      "slot": "Wrist",
+      "dps": -16,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "64",
+      "item": "Cobra-Lash Boots",
+      "slot": "Feet",
+      "dps": -16.2,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "65",
+      "item": "Shattrath Leggings",
+      "slot": "Legs",
+      "dps": -16.2,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "66",
+      "item": "Star-Strider Boots",
+      "slot": "Feet",
+      "dps": -16.4,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "67",
+      "item": "Ironstriders of Urgency",
+      "slot": "Feet",
+      "dps": -16.6,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "68",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -17,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "69",
+      "item": "Mithril Band of the Unscarred",
+      "slot": "Finger 1",
+      "dps": -17.2,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "70",
+      "item": "Krakken-Heart Breastplate",
+      "slot": "Chest",
+      "dps": -17.6,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "71",
+      "item": "Helm of the Illidari Shatterer",
+      "slot": "Head",
+      "dps": -18.1,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "72",
+      "item": "Darkmoon Card: Crusade",
+      "slot": "Trinket 1",
+      "dps": -18.5,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "73",
+      "item": "Shoulders of the Hidden Predator",
+      "slot": "Shoulder",
+      "dps": -18.5,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "74",
+      "item": "Vindicator's Scaled Bracers",
+      "slot": "Wrist",
+      "dps": -18.5,
+      "source": "PvP vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "75",
+      "item": "Drape of the Dark Reavers",
+      "slot": "Back",
+      "dps": -18.7,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "76",
+      "item": "Warboots of Obliteration",
+      "slot": "Feet",
+      "dps": -18.9,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "77",
+      "item": "Nether Shadow Tunic",
+      "slot": "Chest",
+      "dps": -19.2,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "78",
+      "item": "Forest Prowler's Helm",
+      "slot": "Head",
+      "dps": -19.2,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "79",
+      "item": "A'dal's Command",
+      "slot": "Finger 1",
+      "dps": -19.2,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "80",
+      "item": "Grips of Silent Justice",
+      "slot": "Hands",
+      "dps": -19.5,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "81",
+      "item": "Lightbringer Gauntlets",
+      "slot": "Hands",
+      "dps": -19.5,
+      "source": "Hyjal Summit",
+      "belowCutoff": true
+    },
+    {
+      "rank": "82",
+      "item": "Pauldrons of the Wardancer",
+      "slot": "Shoulder",
+      "dps": -19.6,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "83",
+      "item": "Madness of the Betrayer",
+      "slot": "Trinket 1",
+      "dps": -19.8,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "84",
+      "item": "Vambraces of Ending",
+      "slot": "Wrist",
+      "dps": -19.8,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "85",
+      "item": "True-Aim Stalker Bands",
+      "slot": "Wrist",
+      "dps": -19.8,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "86",
+      "item": "Leggings of Murderous Intent",
+      "slot": "Legs",
+      "dps": -19.9,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "87",
+      "item": "Ring of Reciprocity",
+      "slot": "Finger 1",
+      "dps": -20.1,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "88",
+      "item": "Stormrage Signet Ring",
+      "slot": "Finger 1",
+      "dps": -20.1,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "89",
+      "item": "Pillager's Gauntlets",
+      "slot": "Hands",
+      "dps": -20.2,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "90",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -20.6,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "91",
+      "item": "Quickstrider Moccasins",
+      "slot": "Feet",
+      "dps": -20.7,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "92",
+      "item": "Bracers of the Pathfinder",
+      "slot": "Wrist",
+      "dps": -20.7,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "93",
+      "item": "Ring of Deceitful Intent",
+      "slot": "Finger 1",
+      "dps": -20.7,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "94",
+      "item": "Farstrider Wildercloak",
+      "slot": "Back",
+      "dps": -21,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "95",
+      "item": "Ring of Lethality",
+      "slot": "Finger 1",
+      "dps": -21.2,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "96",
+      "item": "Terrorweave Tunic",
+      "slot": "Chest",
+      "dps": -22,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "97",
+      "item": "Bands of the Celestial Archer",
+      "slot": "Wrist",
+      "dps": -22,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "98",
+      "item": "Shady Dealer's Pantaloons",
+      "slot": "Legs",
+      "dps": -22.4,
+      "source": "Hyjal Summit (N)\nAzgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "99",
+      "item": "Hourglass of the Unraveller",
+      "slot": "Trinket 1",
+      "dps": -22.4,
+      "source": "The Black Morass (N)\nTemporus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "100",
+      "item": "Void Reaver Greaves",
+      "slot": "Legs",
+      "dps": -22.5,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "101",
+      "item": "Crystalforge Shoulderbraces",
+      "slot": "Shoulder",
+      "dps": -22.9,
+      "source": "Tempest Keep",
+      "belowCutoff": true
+    },
+    {
+      "rank": "102",
+      "item": "Royal Cloak of Arathi Kings",
+      "slot": "Back",
+      "dps": -23.3,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "103",
+      "item": "Gauntlets of Martial Perfection",
+      "slot": "Hands",
+      "dps": -23.6,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "104",
+      "item": "Black Felsteel Bracers",
+      "slot": "Wrist",
+      "dps": -23.6,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "105",
+      "item": "Ripfiend Shoulderplates",
+      "slot": "Shoulder",
+      "dps": -23.9,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "106",
+      "item": "Furious Gizmatic Goggles",
+      "slot": "Head",
+      "dps": -24,
+      "source": "Engineering",
+      "belowCutoff": true
+    },
+    {
+      "rank": "107",
+      "item": "Ring of a Thousand Marks",
+      "slot": "Finger 1",
+      "dps": -24.1,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "108",
+      "item": "Treads of the Den Mother",
+      "slot": "Feet",
+      "dps": -24.3,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "109",
+      "item": "Cataclysm's Edge",
+      "slot": "Main Hand",
+      "dps": -24.4,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "110",
+      "item": "Abacus of Violent Odds",
+      "slot": "Trinket 1",
+      "dps": -24.6,
+      "source": "The Mechanar (N)\nPathaleon the Calculator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "111",
+      "item": "Blood-stained Pauldrons",
+      "slot": "Shoulder",
+      "dps": -25.9,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "112",
+      "item": "Ranger-General's Chestguard",
+      "slot": "Chest",
+      "dps": -26.6,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "113",
+      "item": "Liar's Tongue Gloves",
+      "slot": "Hands",
+      "dps": -26.8,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "114",
+      "item": "Scaled Greaves of the Marksman",
+      "slot": "Legs",
+      "dps": -27.2,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "115",
+      "item": "Lightbringer War-Helm",
+      "slot": "Head",
+      "dps": -27.2,
+      "source": "Hyjal Summit",
+      "belowCutoff": true
+    },
+    {
+      "rank": "116",
+      "item": "Edgewalker Longboots",
+      "slot": "Feet",
+      "dps": -27.3,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "117",
+      "item": "Razorfury Mantle",
+      "slot": "Shoulder",
+      "dps": -27.5,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "118",
+      "item": "Sha'tari Wrought Greaves",
+      "slot": "Feet",
+      "dps": -27.6,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "119",
+      "item": "Garona's Signet Ring",
+      "slot": "Finger 1",
+      "dps": -28.2,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "120",
+      "item": "Crystalforge War-Helm",
+      "slot": "Head",
+      "dps": -28.7,
+      "source": "Serpentshrine Cavern",
+      "belowCutoff": true
+    },
+    {
+      "rank": "121",
+      "item": "Shadowhunter's Treads",
+      "slot": "Feet",
+      "dps": -28.9,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "122",
+      "item": "Figurine - Khorium Boar",
+      "slot": "Trinket 1",
+      "dps": -28.9,
+      "source": "Jewelcrafting",
+      "belowCutoff": true
+    },
+    {
+      "rank": "123",
+      "item": "Bracers of Maliciousness",
+      "slot": "Wrist",
+      "dps": -29,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "124",
+      "item": "Crystalforge Greaves",
+      "slot": "Legs",
+      "dps": -29.1,
+      "source": "Serpentshrine Cavern",
+      "belowCutoff": true
+    },
+    {
+      "rank": "125",
+      "item": "Crystalforge Gauntlets",
+      "slot": "Hands",
+      "dps": -29.3,
+      "source": "Serpentshrine Cavern",
+      "belowCutoff": true
+    },
+    {
+      "rank": "126",
+      "item": "Mail of Fevered Pursuit",
+      "slot": "Chest",
+      "dps": -29.3,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "127",
+      "item": "Mantle of the Tireless Tracker",
+      "slot": "Shoulder",
+      "dps": -29.3,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "128",
+      "item": "Shoulderplates of Everlasting Pain",
+      "slot": "Shoulder",
+      "dps": -29.5,
+      "source": "Magisters' Terrace (H)\nSelin Fireheart",
+      "belowCutoff": true
+    },
+    {
+      "rank": "129",
+      "item": "Figurine - Shadowsong Panther",
+      "slot": "Trinket 1",
+      "dps": -30.5,
+      "source": "Jewelcrafting",
+      "belowCutoff": true
+    },
+    {
+      "rank": "130",
+      "item": "Ferocious Swift-Kickers",
+      "slot": "Feet",
+      "dps": -30.6,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "131",
+      "item": "Boots of Effortless Striking",
+      "slot": "Feet",
+      "dps": -30.7,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "132",
+      "item": "Zierhut's Lost Treads",
+      "slot": "Feet",
+      "dps": -31.3,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "133",
+      "item": "Tattered Cape of Antonidas",
+      "slot": "Back",
+      "dps": -32.2,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "134",
+      "item": "Gloves of Dexterous Manipulation",
+      "slot": "Hands",
+      "dps": -32.4,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "135",
+      "item": "Stalker's War Bands",
+      "slot": "Wrist",
+      "dps": -32.5,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "136",
+      "item": "Mantle of Darkness",
+      "slot": "Shoulder",
+      "dps": -32.9,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "137",
+      "item": "Justicar Shoulderplates",
+      "slot": "Shoulder",
+      "dps": -33,
+      "source": "Gruul's Lair",
+      "belowCutoff": true
+    },
+    {
+      "rank": "138",
+      "item": "Rapscallion Boots",
+      "slot": "Feet",
+      "dps": -33.1,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "139",
+      "item": "Ragesteel Shoulders",
+      "slot": "Shoulder",
+      "dps": -33.7,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "140",
+      "item": "Fiend Slayer Boots",
+      "slot": "Feet",
+      "dps": -33.7,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "141",
+      "item": "Don Alejandro's Money Belt",
+      "slot": "Waist",
+      "dps": -33.7,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "142",
+      "item": "Sin'dorei Pendant of Conquest",
+      "slot": "Neck",
+      "dps": -33.7,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "143",
+      "item": "Pauldrons of Primal Fury",
+      "slot": "Shoulder",
+      "dps": -33.9,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "144",
+      "item": "Shadow-walker's Cord",
+      "slot": "Waist",
+      "dps": -35,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "145",
+      "item": "Valestalker Girdle",
+      "slot": "Waist",
+      "dps": -35.2,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "146",
+      "item": "Beast-tamer's Shoulders",
+      "slot": "Shoulder",
+      "dps": -35.5,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "147",
+      "item": "Justicar Gauntlets",
+      "slot": "Hands",
+      "dps": -35.8,
+      "source": "Karazhan",
+      "belowCutoff": true
+    },
+    {
+      "rank": "148",
+      "item": "Sin'dorei Pendant of Salvation",
+      "slot": "Neck",
+      "dps": -35.8,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "149",
+      "item": "Belt of Seething Fury",
+      "slot": "Waist",
+      "dps": -36.7,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "150",
+      "item": "Gauntlets of the Dragonslayer",
+      "slot": "Hands",
+      "dps": -37.5,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "151",
+      "item": "Skulker's Greaves",
+      "slot": "Legs",
+      "dps": -38.1,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "152",
+      "item": "Band of Vile Aggression",
+      "slot": "Finger 1",
+      "dps": -38.2,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "153",
+      "item": "Bladed Shoulderpads of the Merciless",
+      "slot": "Shoulder",
+      "dps": -38.4,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "154",
+      "item": "Translucent Spellthread Necklace",
+      "slot": "Neck",
+      "dps": -38.9,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "155",
+      "item": "Shadowtooth Trollskin Cuirass",
+      "slot": "Chest",
+      "dps": -39.5,
+      "source": "Zul'Aman (N)\nJan'alai",
+      "belowCutoff": true
+    },
+    {
+      "rank": "156",
+      "item": "Merciless Gladiator's Scaled Helm",
+      "slot": "Head",
+      "dps": -40,
+      "source": "PvP vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "157",
+      "item": "Gloves of Quickening",
+      "slot": "Hands",
+      "dps": -40.4,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "158",
+      "item": "Justicar Crown",
+      "slot": "Head",
+      "dps": -40.6,
+      "source": "Karazhan",
+      "belowCutoff": true
+    },
+    {
+      "rank": "159",
+      "item": "Amulet of Unfettered Magics",
+      "slot": "Neck",
+      "dps": -40.9,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "160",
+      "item": "Red Belt of Battle",
+      "slot": "Waist",
+      "dps": -40.9,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "161",
+      "item": "Justicar Breastplate",
+      "slot": "Chest",
+      "dps": -41,
+      "source": "Magtheridon's Lair",
+      "belowCutoff": true
+    },
+    {
+      "rank": "162",
+      "item": "Vest of Mounting Assault",
+      "slot": "Chest",
+      "dps": -41.2,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "163",
+      "item": "Gauntlets of Enforcement",
+      "slot": "Hands",
+      "dps": -41.4,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "164",
+      "item": "Adornment of Stolen Souls",
+      "slot": "Neck",
+      "dps": -41.5,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "165",
+      "item": "Girdle of the Lightbearer",
+      "slot": "Waist",
+      "dps": -41.6,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "166",
+      "item": "Royal Cloak of the Sunstriders",
+      "slot": "Back",
+      "dps": -41.6,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "167",
+      "item": "Cloak of the Illidari Council",
+      "slot": "Back",
+      "dps": -41.7,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "168",
+      "item": "Brooch of Nature's Mercy",
+      "slot": "Neck",
+      "dps": -41.7,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "169",
+      "item": "Loop of Cursed Bones",
+      "slot": "Neck",
+      "dps": -41.8,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "170",
+      "item": "Drape of the Righteous",
+      "slot": "Back",
+      "dps": -41.9,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "171",
+      "item": "Nadina's Pendant of Purity",
+      "slot": "Neck",
+      "dps": -42,
+      "source": "Black Temple (N)\nMother Shahraz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "172",
+      "item": "Brooch of Unquenchable Fury",
+      "slot": "Neck",
+      "dps": -42.1,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "173",
+      "item": "Arrow-fall Chestguard",
+      "slot": "Chest",
+      "dps": -42.2,
+      "source": "Zul'Aman (N)\nJan'alai",
+      "belowCutoff": true
+    },
+    {
+      "rank": "174",
+      "item": "Archaic Charm of Presence",
+      "slot": "Neck",
+      "dps": -42.2,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "175",
+      "item": "Bloodstained Elven Battlevest",
+      "slot": "Chest",
+      "dps": -42.3,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "176",
+      "item": "Boneweave Girdle",
+      "slot": "Waist",
+      "dps": -42.5,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "177",
+      "item": "Ancient Spellcloak of the Highborne",
+      "slot": "Back",
+      "dps": -42.7,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "178",
+      "item": "Shadow-Cloak of Dalaran",
+      "slot": "Back",
+      "dps": -42.8,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "179",
+      "item": "Emberspur Talisman",
+      "slot": "Neck",
+      "dps": -43.1,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "180",
+      "item": "Shining Chain of the Afterworld",
+      "slot": "Neck",
+      "dps": -43.2,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "181",
+      "item": "Teeth of Gruul",
+      "slot": "Neck",
+      "dps": -43.4,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "182",
+      "item": "Shoulderpads of Dancing Blades",
+      "slot": "Shoulder",
+      "dps": -43.7,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "183",
+      "item": "Ruby Drape of the Mysticant",
+      "slot": "Back",
+      "dps": -43.7,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "184",
+      "item": "Brute Cloak of the Ogre-Magi",
+      "slot": "Back",
+      "dps": -43.8,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "185",
+      "item": "Shroud of Forgiveness",
+      "slot": "Back",
+      "dps": -43.8,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "186",
+      "item": "Rip-Flayer Leggings",
+      "slot": "Legs",
+      "dps": -43.9,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "187",
+      "item": "Sunshower Light Cloak",
+      "slot": "Back",
+      "dps": -44,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "188",
+      "item": "Black Featherlight Boots",
+      "slot": "Feet",
+      "dps": -44.1,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "189",
+      "item": "Hex Shrunken Head",
+      "slot": "Trinket 1",
+      "dps": -44.1,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "190",
+      "item": "Shoulderpads of the Silvermoon Retainer",
+      "slot": "Shoulder",
+      "dps": -44.2,
+      "source": "Magisters' Terrace (H)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "191",
+      "item": "Bladeangel's Money Belt",
+      "slot": "Waist",
+      "dps": -44.3,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "192",
+      "item": "Chestguard of the Conniver",
+      "slot": "Chest",
+      "dps": -44.5,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "193",
+      "item": "Tunic of the Ranger Lord",
+      "slot": "Chest",
+      "dps": -44.8,
+      "source": "Magisters' Terrace (H)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "194",
+      "item": "Brooch of the Highborne",
+      "slot": "Neck",
+      "dps": -44.9,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": true
+    },
+    {
+      "rank": "195",
+      "item": "Signet of Ancient Magics",
+      "slot": "Finger 1",
+      "dps": -44.9,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "196",
+      "item": "Girdle of the Endless Pit",
+      "slot": "Waist",
+      "dps": -44.9,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "197",
+      "item": "Shroud of Redeemed Souls",
+      "slot": "Back",
+      "dps": -45,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "198",
+      "item": "Soul Cleaver",
+      "slot": "Main Hand",
+      "dps": -45.1,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "199",
+      "item": "Shroud of the Final Stand",
+      "slot": "Back",
+      "dps": -45.3,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "200",
+      "item": "Shroud of the Highborne",
+      "slot": "Back",
+      "dps": -45.4,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "201",
+      "item": "Hellfire-Encased Pendant",
+      "slot": "Neck",
+      "dps": -45.5,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "202",
+      "item": "Stainless Cloak of the Pure Hearted",
+      "slot": "Back",
+      "dps": -45.6,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "203",
+      "item": "Red Riding Hood's Cloak",
+      "slot": "Back",
+      "dps": -45.9,
+      "source": "Karazhan (N)\nThe Big Bad Wolf",
+      "belowCutoff": true
+    },
+    {
+      "rank": "204",
+      "item": "Ritssyn's Lost Pendant",
+      "slot": "Neck",
+      "dps": -45.9,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "205",
+      "item": "Barbed Choker of Discipline",
+      "slot": "Neck",
+      "dps": -45.9,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "206",
+      "item": "Frayed Tether of the Drowned",
+      "slot": "Neck",
+      "dps": -45.9,
+      "source": "Serpentshrine Cavern (N)\nFathom-Lord Karathress",
+      "belowCutoff": true
+    },
+    {
+      "rank": "207",
+      "item": "Pendant of Titans",
+      "slot": "Neck",
+      "dps": -45.9,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "208",
+      "item": "Shadowcaster's Drape",
+      "slot": "Back",
+      "dps": -46,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "209",
+      "item": "Justicar Greaves",
+      "slot": "Legs",
+      "dps": -46.4,
+      "source": "Gruul's Lair",
+      "belowCutoff": true
+    },
+    {
+      "rank": "210",
+      "item": "The Skull of Gul'dan",
+      "slot": "Trinket 1",
+      "dps": -46.5,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "211",
+      "item": "Shifting Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": -46.6,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "212",
+      "item": "Battlescar Boots",
+      "slot": "Feet",
+      "dps": -47.5,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "213",
+      "item": "Belt of the Black Eagle",
+      "slot": "Waist",
+      "dps": -47.5,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "214",
+      "item": "Cloak of Ancient Rituals",
+      "slot": "Back",
+      "dps": -47.5,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "215",
+      "item": "Shadowvine Cloak of Infusion",
+      "slot": "Back",
+      "dps": -48,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "216",
+      "item": "Nethervoid Cloak",
+      "slot": "Back",
+      "dps": -48.2,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "217",
+      "item": "Pepe's Shroud of Pacification",
+      "slot": "Back",
+      "dps": -48.2,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "218",
+      "item": "Night's End",
+      "slot": "Back",
+      "dps": -48.2,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "219",
+      "item": "Gilded Thorium Cloak",
+      "slot": "Back",
+      "dps": -48.2,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "220",
+      "item": "Phoenix-Wing Cloak",
+      "slot": "Back",
+      "dps": -48.2,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "221",
+      "item": "Vengeful Gladiator's Greatsword",
+      "slot": "Main Hand",
+      "dps": -48.5,
+      "source": "PvP vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "222",
+      "item": "Belt of Deep Shadow",
+      "slot": "Waist",
+      "dps": -49,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "223",
+      "item": "Mask of the Deceiver",
+      "slot": "Head",
+      "dps": -49.2,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "224",
+      "item": "Tome of Fiery Redemption",
+      "slot": "Trinket 1",
+      "dps": -49.2,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "225",
+      "item": "Ring of Omnipotence",
+      "slot": "Finger 2",
+      "dps": -50,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "226",
+      "item": "Romulo's Poison Vial",
+      "slot": "Trinket 1",
+      "dps": -50.2,
+      "source": "Karazhan (N)\nRomulo and Julianne",
+      "belowCutoff": true
+    },
+    {
+      "rank": "227",
+      "item": "Ring of Ancient Knowledge",
+      "slot": "Finger 2",
+      "dps": -50.3,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "228",
+      "item": "Cuffs of Devastation",
+      "slot": "Wrist",
+      "dps": -50.4,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "229",
+      "item": "Ring of Captured Storms",
+      "slot": "Finger 1",
+      "dps": -50.9,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "230",
+      "item": "Gronn-Stitched Girdle",
+      "slot": "Waist",
+      "dps": -50.9,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "231",
+      "item": "Fury of the Ursine",
+      "slot": "Wrist",
+      "dps": -51.3,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "232",
+      "item": "Mana Attuned Band",
+      "slot": "Finger 2",
+      "dps": -51.3,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "233",
+      "item": "Ring of Endless Coils",
+      "slot": "Finger 1",
+      "dps": -51.6,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "234",
+      "item": "Band of Al'ar",
+      "slot": "Finger 1",
+      "dps": -51.8,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "235",
+      "item": "Sin'dorei Band of Dominance",
+      "slot": "Finger 1",
+      "dps": -52,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "236",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -52,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "237",
+      "item": "Band of the Eternal Sage",
+      "slot": "Finger 1",
+      "dps": -52,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "238",
+      "item": "Rejuvenating Bracers",
+      "slot": "Wrist",
+      "dps": -52.3,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "239",
+      "item": "Bracers of Martyrdom",
+      "slot": "Wrist",
+      "dps": -52.3,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "240",
+      "item": "Ring of Recurrence",
+      "slot": "Finger 1",
+      "dps": -52.3,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "241",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -52.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "242",
+      "item": "Howling Wind Bracers",
+      "slot": "Wrist",
+      "dps": -52.7,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "243",
+      "item": "Blessed Band of Karabor",
+      "slot": "Finger 2",
+      "dps": -52.7,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "244",
+      "item": "Blessed Adamantite Bracers",
+      "slot": "Wrist",
+      "dps": -52.7,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "245",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -52.8,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "246",
+      "item": "Blackfathom Warbands",
+      "slot": "Wrist",
+      "dps": -52.8,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "247",
+      "item": "Spectral Band of Innervation",
+      "slot": "Finger 1",
+      "dps": -52.9,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "248",
+      "item": "Ring of Harmonic Beauty",
+      "slot": "Finger 1",
+      "dps": -53,
+      "source": "Sunwell Plateau\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "249",
+      "item": "Coral Band of the Revived",
+      "slot": "Finger 1",
+      "dps": -53.1,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "250",
+      "item": "Eversong Cuffs",
+      "slot": "Wrist",
+      "dps": -53.2,
+      "source": "Magisters' Terrace (H)\nSelin Fireheart",
+      "belowCutoff": true
+    },
+    {
+      "rank": "251",
+      "item": "Sin'dorei Band of Salvation",
+      "slot": "Finger 1",
+      "dps": -53.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "252",
+      "item": "Jade Ring of the Everliving",
+      "slot": "Finger 1",
+      "dps": -53.2,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "253",
+      "item": "Ring of Flowing Light",
+      "slot": "Finger 1",
+      "dps": -53.3,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "254",
+      "item": "Signet of the Quiet Forest",
+      "slot": "Finger 2",
+      "dps": -53.4,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "255",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -53.5,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "256",
+      "item": "The Seal of Danzalar",
+      "slot": "Finger 1",
+      "dps": -53.6,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "257",
+      "item": "Band of the Eternal Restorer",
+      "slot": "Finger 1",
+      "dps": -53.6,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "258",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -53.6,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "259",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -53.7,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "260",
+      "item": "Eye of Magtheridon",
+      "slot": "Trinket 1",
+      "dps": -53.7,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "261",
+      "item": "Ring of Calming Waves",
+      "slot": "Finger 1",
+      "dps": -53.8,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "262",
+      "item": "Phoenix-Ring of Rebirth",
+      "slot": "Finger 1",
+      "dps": -54,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "263",
+      "item": "Mender's Heart-Ring",
+      "slot": "Finger 1",
+      "dps": -54.7,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "264",
+      "item": "Band of the Vigilant",
+      "slot": "Finger 1",
+      "dps": -54.7,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "265",
+      "item": "Band of Lucent Beams",
+      "slot": "Finger 2",
+      "dps": -55.1,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "266",
+      "item": "Timbal's Focusing Crystal",
+      "slot": "Trinket 1",
+      "dps": -55.2,
+      "source": "Magisters' Terrace (H)\nPriestess Delrissa",
+      "belowCutoff": true
+    },
+    {
+      "rank": "267",
+      "item": "Vambraces of Courage",
+      "slot": "Wrist",
+      "dps": -56,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "268",
+      "item": "Memento of Tyrande",
+      "slot": "Trinket 1",
+      "dps": -56.3,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "269",
+      "item": "Tome of Diabolic Remedy",
+      "slot": "Trinket 1",
+      "dps": -56.3,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "270",
+      "item": "Mantle of Abrahmis",
+      "slot": "Shoulder",
+      "dps": -56.4,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "271",
+      "item": "Lionheart Executioner",
+      "slot": "Main Hand",
+      "dps": -56.6,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "272",
+      "item": "Ring of Unrelenting Storms",
+      "slot": "Finger 1",
+      "dps": -57,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "273",
+      "item": "Beastmaw Pauldrons",
+      "slot": "Shoulder",
+      "dps": -57.2,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "274",
+      "item": "Band of the Abyssal Lord",
+      "slot": "Finger 1",
+      "dps": -57.2,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "275",
+      "item": "Shermanar Great-Ring",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "276",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "277",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "278",
+      "item": "Band of Eternity",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "279",
+      "item": "Band of the Eternal Defender",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "280",
+      "item": "Seventh Ring of the Tirisfalen",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "281",
+      "item": "Ring of Sundered Souls",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "282",
+      "item": "Signet of the Last Defender",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "283",
+      "item": "Signet of Eternal Life",
+      "slot": "Finger 1",
+      "dps": -57.3,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "284",
+      "item": "Slippers of the Seacaller",
+      "slot": "Feet",
+      "dps": -57.3,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "285",
+      "item": "Focused Mana Bindings",
+      "slot": "Wrist",
+      "dps": -57.3,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "286",
+      "item": "Ragesteel Breastplate",
+      "slot": "Chest",
+      "dps": -57.8,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "287",
+      "item": "Naturewarden's Treads",
+      "slot": "Feet",
+      "dps": -57.9,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "288",
+      "item": "Mindstorm Wristbands",
+      "slot": "Wrist",
+      "dps": -58.1,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "289",
+      "item": "Elunite Empowered Bracers",
+      "slot": "Wrist",
+      "dps": -58.3,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "290",
+      "item": "Bands of the Coming Storm",
+      "slot": "Wrist",
+      "dps": -58.3,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "291",
+      "item": "Bands of Nefarious Deeds",
+      "slot": "Wrist",
+      "dps": -58.8,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "292",
+      "item": "Girdle of the Tidal Call",
+      "slot": "Waist",
+      "dps": -59,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "293",
+      "item": "Jin'rohk, The Great Apocalypse",
+      "slot": "Main Hand",
+      "dps": -59.2,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "294",
+      "item": "Bracers of the White Stag",
+      "slot": "Wrist",
+      "dps": -59.4,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "295",
+      "item": "Girdle of Treachery",
+      "slot": "Waist",
+      "dps": -59.5,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "296",
+      "item": "Harbinger Bands",
+      "slot": "Wrist",
+      "dps": -59.5,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "297",
+      "item": "Gold-Leaf Wildboots",
+      "slot": "Feet",
+      "dps": -59.8,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "298",
+      "item": "Grove-Bands of Remulos",
+      "slot": "Wrist",
+      "dps": -59.9,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "299",
+      "item": "Tide-stomper's Greaves",
+      "slot": "Feet",
+      "dps": -59.9,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "300",
+      "item": "Wristbands of Divine Influence",
+      "slot": "Wrist",
+      "dps": -60.1,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "301",
+      "item": "Boots of the Divine Light",
+      "slot": "Feet",
+      "dps": -60.3,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "302",
+      "item": "Boots of Foretelling",
+      "slot": "Feet",
+      "dps": -60.3,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "303",
+      "item": "Orca-Hide Boots",
+      "slot": "Feet",
+      "dps": -60.4,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "304",
+      "item": "The Seeker's Wristguards",
+      "slot": "Wrist",
+      "dps": -60.4,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "305",
+      "item": "Twinblade of the Phoenix",
+      "slot": "Main Hand",
+      "dps": -60.5,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "306",
+      "item": "Soul-Strider Boots",
+      "slot": "Feet",
+      "dps": -60.6,
+      "source": "Serpentshrine Cavern (N)\nFathom-Lord Karathress",
+      "belowCutoff": true
+    },
+    {
+      "rank": "307",
+      "item": "Wraps of Purification",
+      "slot": "Wrist",
+      "dps": -60.7,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "308",
+      "item": "Bands of Indwelling",
+      "slot": "Wrist",
+      "dps": -60.9,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "309",
+      "item": "Whirlwind Bracers",
+      "slot": "Wrist",
+      "dps": -61,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "310",
+      "item": "Bracers of Justice",
+      "slot": "Wrist",
+      "dps": -61.1,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "311",
+      "item": "Forestlord Striders",
+      "slot": "Feet",
+      "dps": -61.3,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "312",
+      "item": "Sextant of Unstable Currents",
+      "slot": "Trinket 1",
+      "dps": -61.4,
+      "source": "Serpentshrine Cavern (N)\nFathom-Lord Karathress",
+      "belowCutoff": true
+    },
+    {
+      "rank": "313",
+      "item": "Two-toed Sandals",
+      "slot": "Feet",
+      "dps": -61.4,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "314",
+      "item": "Pendant of the Violet Eye",
+      "slot": "Trinket 1",
+      "dps": -61.6,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "315",
+      "item": "The Lightning Capacitor",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "316",
+      "item": "Prism of Inner Calm",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "317",
+      "item": "Ancient Aqir Artifact",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "318",
+      "item": "Tiny Voodoo Mask",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "319",
+      "item": "Shadowmoon Insignia",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "320",
+      "item": "Spyglass of the Hidden Fleet",
+      "slot": "Trinket 1",
+      "dps": -61.7,
+      "source": "Serpentshrine Cavern\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "321",
+      "item": "Moroes' Lucky Pocket Watch",
+      "slot": "Trinket 1",
+      "dps": -61.8,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "322",
+      "item": "Figurine - Crimson Serpent",
+      "slot": "Trinket 1",
+      "dps": -61.8,
+      "source": "Jewelcrafting",
+      "belowCutoff": true
+    },
+    {
+      "rank": "323",
+      "item": "Commendation of Kael'thas",
+      "slot": "Trinket 1",
+      "dps": -61.8,
+      "source": "Magisters' Terrace (H)\nPriestess Delrissa",
+      "belowCutoff": true
+    },
+    {
+      "rank": "324",
+      "item": "Figurine - Empyrean Tortoise",
+      "slot": "Trinket 1",
+      "dps": -61.8,
+      "source": "Jewelcrafting",
+      "belowCutoff": true
+    },
+    {
+      "rank": "325",
+      "item": "Greaves of the Penitent Knight",
+      "slot": "Feet",
+      "dps": -61.9,
+      "source": "Magisters' Terrace (H)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "326",
+      "item": "Wrynn Dynasty Greaves",
+      "slot": "Legs",
+      "dps": -62.9,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "327",
+      "item": "Terror Pit Girdle",
+      "slot": "Waist",
+      "dps": -63.4,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "328",
+      "item": "Ravager's Cuffs",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Karazhan (N)\nRokad the Ravager",
+      "belowCutoff": true
+    },
+    {
+      "rank": "329",
+      "item": "Ravager's Wrist-Wraps",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Karazhan (N)\nRokad the Ravager",
+      "belowCutoff": true
+    },
+    {
+      "rank": "330",
+      "item": "Ravager's Bands",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Karazhan (N)\nRokad the Ravager",
+      "belowCutoff": true
+    },
+    {
+      "rank": "331",
+      "item": "Ravager's Bracers",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Karazhan (N)\nRokad the Ravager",
+      "belowCutoff": true
+    },
+    {
+      "rank": "332",
+      "item": "Soulguard Bracers",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "333",
+      "item": "Redeemed Soul Wristguards",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "334",
+      "item": "Bracers of Shackled Souls",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "335",
+      "item": "Shadesteel Bracers",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "336",
+      "item": "Eternium Shell Bracers",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "337",
+      "item": "Wristguards of Determination",
+      "slot": "Wrist",
+      "dps": -63.7,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "338",
+      "item": "Boots of the Resilient",
+      "slot": "Feet",
+      "dps": -64.4,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "339",
+      "item": "Myrmidon's Treads",
+      "slot": "Feet",
+      "dps": -64.4,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "340",
+      "item": "Handguards of Defiled Worlds",
+      "slot": "Hands",
+      "dps": -64.7,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "341",
+      "item": "Tranquil Majesty Wraps",
+      "slot": "Hands",
+      "dps": -66.6,
+      "source": "Sunwell Plateau\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "342",
+      "item": "Amice of the Convoker",
+      "slot": "Shoulder",
+      "dps": -67.1,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "343",
+      "item": "Hatefury Mantle",
+      "slot": "Shoulder",
+      "dps": -67.1,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "344",
+      "item": "Soul-Eater's Handwraps",
+      "slot": "Hands",
+      "dps": -67.2,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "345",
+      "item": "Handwraps of Flowing Thought",
+      "slot": "Hands",
+      "dps": -67.5,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "346",
+      "item": "Botanist's Gloves of Growth",
+      "slot": "Hands",
+      "dps": -67.5,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "347",
+      "item": "Gauntlets of the Soothed Soul",
+      "slot": "Hands",
+      "dps": -67.9,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "348",
+      "item": "Anger-Spark Gloves",
+      "slot": "Hands",
+      "dps": -68,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "349",
+      "item": "Worldstorm Gauntlets",
+      "slot": "Hands",
+      "dps": -68.1,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "350",
+      "item": "Handguards of the Dawn",
+      "slot": "Hands",
+      "dps": -68.2,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "351",
+      "item": "Gauntlets of the Ancient Shadowmoon",
+      "slot": "Hands",
+      "dps": -68.2,
+      "source": "Sunwell Plateau\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "352",
+      "item": "Gloves of Unfailing Faith",
+      "slot": "Hands",
+      "dps": -68.4,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "353",
+      "item": "Glorious Gauntlets of Crestfall",
+      "slot": "Hands",
+      "dps": -68.4,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "354",
+      "item": "Gloves of Centering",
+      "slot": "Hands",
+      "dps": -68.9,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "355",
+      "item": "Gauntlets of Renewed Hope",
+      "slot": "Hands",
+      "dps": -69,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "356",
+      "item": "Mitts of the Treemender",
+      "slot": "Hands",
+      "dps": -69.2,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "357",
+      "item": "Shawl of Wonderment",
+      "slot": "Shoulder",
+      "dps": -69.5,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "358",
+      "item": "Illidari Shoulderpads",
+      "slot": "Shoulder",
+      "dps": -69.6,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "359",
+      "item": "Spaulders of Reclamation",
+      "slot": "Shoulder",
+      "dps": -69.7,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "360",
+      "item": "Spaulders of the Thalassian Savior",
+      "slot": "Shoulder",
+      "dps": -69.9,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "361",
+      "item": "Fel-tinged Mantle",
+      "slot": "Shoulder",
+      "dps": -70.1,
+      "source": "Magisters' Terrace (H)\nVexallus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "362",
+      "item": "Gloves of Saintly Blessings",
+      "slot": "Hands",
+      "dps": -70.2,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "363",
+      "item": "Coif of the Jungle Stalker",
+      "slot": "Head",
+      "dps": -70.6,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "364",
+      "item": "Glimmering Steel Mantle",
+      "slot": "Shoulder",
+      "dps": -71.1,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "365",
+      "item": "Coral-Barbed Shoulderpads",
+      "slot": "Shoulder",
+      "dps": -71.2,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "366",
+      "item": "Equilibrium Epaulets",
+      "slot": "Shoulder",
+      "dps": -71.7,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "367",
+      "item": "World Breaker",
+      "slot": "Main Hand",
+      "dps": -72.1,
+      "source": "Serpentshrine Cavern (N)\nFathom-Lord Karathress",
+      "belowCutoff": true
+    },
+    {
+      "rank": "368",
+      "item": "Grimgrin Faceguard",
+      "slot": "Head",
+      "dps": -72.2,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "369",
+      "item": "Jungle Stompers",
+      "slot": "Feet",
+      "dps": -72.5,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "370",
+      "item": "Iron Gauntlets of the Maiden",
+      "slot": "Hands",
+      "dps": -72.7,
+      "source": "Karazhan (N)\nMaiden of Virtue",
+      "belowCutoff": true
+    },
+    {
+      "rank": "371",
+      "item": "Royal Gauntlets of Silvermoon",
+      "slot": "Hands",
+      "dps": -72.7,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "372",
+      "item": "Topaz-Studded Battlegrips",
+      "slot": "Hands",
+      "dps": -72.7,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "373",
+      "item": "Borderland Fortress Grips",
+      "slot": "Hands",
+      "dps": -72.7,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": true
+    },
+    {
+      "rank": "374",
+      "item": "Boots of Oceanic Fury",
+      "slot": "Feet",
+      "dps": -73.3,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "375",
+      "item": "Blue Suede Shoes",
+      "slot": "Feet",
+      "dps": -73.4,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "376",
+      "item": "Velvet Boots of the Guardian",
+      "slot": "Feet",
+      "dps": -74,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "377",
+      "item": "Breeches of Natural Aggression",
+      "slot": "Legs",
+      "dps": -74,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "378",
+      "item": "Chain Links of the Tumultuous Storm",
+      "slot": "Legs",
+      "dps": -74.8,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": true
+    },
+    {
+      "rank": "379",
+      "item": "Leggings of Calamity",
+      "slot": "Legs",
+      "dps": -74.9,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "380",
+      "item": "Pauldrons of Stone Resolve",
+      "slot": "Shoulder",
+      "dps": -75.4,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "381",
+      "item": "Pauldrons of Perseverance",
+      "slot": "Shoulder",
+      "dps": -75.4,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "382",
+      "item": "Leggings of Channeled Elements",
+      "slot": "Legs",
+      "dps": -75.5,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "383",
+      "item": "Windshear Boots",
+      "slot": "Feet",
+      "dps": -75.9,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "384",
+      "item": "Leggings of Devastation",
+      "slot": "Legs",
+      "dps": -76.1,
+      "source": "Black Temple (N)\nMother Shahraz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "385",
+      "item": "Footpads of Madness",
+      "slot": "Feet",
+      "dps": -76.2,
+      "source": "Zul'Aman (N)\nJan'alai",
+      "belowCutoff": true
+    },
+    {
+      "rank": "386",
+      "item": "Boots of the Infernal Coven",
+      "slot": "Feet",
+      "dps": -76.3,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "387",
+      "item": "Ruby Slippers",
+      "slot": "Feet",
+      "dps": -76.5,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "388",
+      "item": "Trousers of the Astromancer",
+      "slot": "Legs",
+      "dps": -76.6,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "389",
+      "item": "Chestguard of the Warlord",
+      "slot": "Chest",
+      "dps": -76.8,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "390",
+      "item": "Scaled Breastplate of Carnage",
+      "slot": "Chest",
+      "dps": -76.9,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "391",
+      "item": "Boots of Courage Unending",
+      "slot": "Feet",
+      "dps": -77,
+      "source": "Serpentshrine Cavern\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "392",
+      "item": "Archbishop's Slippers",
+      "slot": "Feet",
+      "dps": -77,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "393",
+      "item": "Enchanted Leather Sandals",
+      "slot": "Feet",
+      "dps": -77,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "394",
+      "item": "Avalanche Leggings",
+      "slot": "Legs",
+      "dps": -77.2,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "395",
+      "item": "Pantaloons of Calming Strife",
+      "slot": "Legs",
+      "dps": -77.4,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "396",
+      "item": "Leggings of the Seventh Circle",
+      "slot": "Legs",
+      "dps": -77.5,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "397",
+      "item": "Pearl Inlaid Boots",
+      "slot": "Feet",
+      "dps": -77.7,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "398",
+      "item": "Trial-Fire Trousers",
+      "slot": "Legs",
+      "dps": -77.8,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "399",
+      "item": "Stillwater Boots",
+      "slot": "Feet",
+      "dps": -77.9,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "400",
+      "item": "Elunite Imbued Leggings",
+      "slot": "Legs",
+      "dps": -78.4,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "401",
+      "item": "Girdle of the Prowler",
+      "slot": "Waist",
+      "dps": -78.6,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "402",
+      "item": "Boots of Valiance",
+      "slot": "Feet",
+      "dps": -78.7,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "403",
+      "item": "Boots of the Incorrupt",
+      "slot": "Feet",
+      "dps": -78.9,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "404",
+      "item": "Stormherald",
+      "slot": "Main Hand",
+      "dps": -79,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "405",
+      "item": "Leggings of Eternity",
+      "slot": "Legs",
+      "dps": -79.5,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "406",
+      "item": "Tempest-Strider Boots",
+      "slot": "Feet",
+      "dps": -79.7,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "407",
+      "item": "Kilt of Immortal Nature",
+      "slot": "Legs",
+      "dps": -79.8,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "408",
+      "item": "Sun-touched Chain Leggings",
+      "slot": "Legs",
+      "dps": -80.1,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "409",
+      "item": "Gilded Trousers of Benediction",
+      "slot": "Legs",
+      "dps": -80.1,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "410",
+      "item": "Legplates of the Holy Juggernaut",
+      "slot": "Legs",
+      "dps": -80.2,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "411",
+      "item": "Sunhawk Leggings",
+      "slot": "Legs",
+      "dps": -80.3,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "412",
+      "item": "Crimson Girdle of the Indomitable",
+      "slot": "Waist",
+      "dps": -80.5,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "413",
+      "item": "Heart-Flame Leggings",
+      "slot": "Legs",
+      "dps": -80.6,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "414",
+      "item": "Earthsoul Leggings",
+      "slot": "Legs",
+      "dps": -80.6,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "415",
+      "item": "Gauntlets of the Sun King",
+      "slot": "Hands",
+      "dps": -81.1,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "416",
+      "item": "Pantaloons of Repentance",
+      "slot": "Legs",
+      "dps": -81.1,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "417",
+      "item": "Scarab of Displacement",
+      "slot": "Trinket 1",
+      "dps": -81.2,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "418",
+      "item": "Fel-Steel Warhelm",
+      "slot": "Head",
+      "dps": -81.5,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "419",
+      "item": "Boots of the Shifting Nightmare",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "420",
+      "item": "Glider's Foot-Wraps",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Karazhan (N)\nShadikith the Glider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "421",
+      "item": "Glider's Boots",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Karazhan (N)\nShadikith the Glider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "422",
+      "item": "Glider's Sabatons",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Karazhan (N)\nShadikith the Glider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "423",
+      "item": "Glider's Greaves",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Karazhan (N)\nShadikith the Glider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "424",
+      "item": "Soulguard Slippers",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "425",
+      "item": "Redeemed Soul Moccasins",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "426",
+      "item": "Boots of Shackled Souls",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "427",
+      "item": "Shadesteel Sabots",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "428",
+      "item": "Boots of Elusion",
+      "slot": "Feet",
+      "dps": -81.7,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "429",
+      "item": "Legplates of the Innocent",
+      "slot": "Legs",
+      "dps": -81.8,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "430",
+      "item": "Spiritwalker Gauntlets",
+      "slot": "Hands",
+      "dps": -82.7,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "431",
+      "item": "Bark-Gloves of Ancient Wisdom",
+      "slot": "Hands",
+      "dps": -83.6,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "432",
+      "item": "Blood-cursed Shoulderpads",
+      "slot": "Shoulder",
+      "dps": -83.9,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "433",
+      "item": "Thundering Greathelm",
+      "slot": "Head",
+      "dps": -84.2,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "434",
+      "item": "Praetorian's Legguards",
+      "slot": "Legs",
+      "dps": -85.1,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "435",
+      "item": "Mantle of Ill Intent",
+      "slot": "Shoulder",
+      "dps": -85.4,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "436",
+      "item": "Mantle of the Elven Kings",
+      "slot": "Shoulder",
+      "dps": -86,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "437",
+      "item": "Fel Conquerer Raiments",
+      "slot": "Chest",
+      "dps": -86,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "438",
+      "item": "Runetotem's Mantle",
+      "slot": "Shoulder",
+      "dps": -86.7,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "439",
+      "item": "Mantle of the Mind Flayer",
+      "slot": "Shoulder",
+      "dps": -87,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "440",
+      "item": "Anetheron's Noose",
+      "slot": "Waist",
+      "dps": -87.4,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "441",
+      "item": "Veil of Turning Leaves",
+      "slot": "Shoulder",
+      "dps": -87.4,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "442",
+      "item": "Amice of Brilliant Light",
+      "slot": "Shoulder",
+      "dps": -87.4,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "443",
+      "item": "Grasp of the Dead",
+      "slot": "Hands",
+      "dps": -87.5,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "444",
+      "item": "The Wavemender's Mantle",
+      "slot": "Shoulder",
+      "dps": -87.6,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "445",
+      "item": "Pauldrons of the Argent Sentinel",
+      "slot": "Shoulder",
+      "dps": -88.1,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "446",
+      "item": "Dragon-Quake Shoulderguards",
+      "slot": "Shoulder",
+      "dps": -88.3,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "447",
+      "item": "Spaulders of the Advocate",
+      "slot": "Shoulder",
+      "dps": -88.3,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "448",
+      "item": "Cord of Screaming Terrors",
+      "slot": "Waist",
+      "dps": -88.3,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "449",
+      "item": "Hex Lord's Voodoo Pauldrons",
+      "slot": "Shoulder",
+      "dps": -88.4,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "450",
+      "item": "Pauldrons of the Solace-Giver",
+      "slot": "Shoulder",
+      "dps": -88.5,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "451",
+      "item": "Forest Wind Shoulderpads",
+      "slot": "Shoulder",
+      "dps": -88.5,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "452",
+      "item": "Pauldrons of the Justice-Seeker",
+      "slot": "Shoulder",
+      "dps": -88.7,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "453",
+      "item": "Cowl of Gul'dan",
+      "slot": "Head",
+      "dps": -88.8,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "454",
+      "item": "Dark Conjuror's Collar",
+      "slot": "Head",
+      "dps": -88.8,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "455",
+      "item": "Heroic Judicator's Chestguard",
+      "slot": "Chest",
+      "dps": -88.8,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "456",
+      "item": "Vestments of the Sea-Witch",
+      "slot": "Chest",
+      "dps": -89,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "457",
+      "item": "Halberd of Desolation",
+      "slot": "Main Hand",
+      "dps": -89,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "458",
+      "item": "Belt of Divine Inspiration",
+      "slot": "Waist",
+      "dps": -89.4,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "459",
+      "item": "Scarlet Sin'dorei Robes",
+      "slot": "Chest",
+      "dps": -89.8,
+      "source": "Magisters' Terrace (H)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "460",
+      "item": "Robes of Faltered Light",
+      "slot": "Chest",
+      "dps": -89.9,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "461",
+      "item": "Sunglow Vest",
+      "slot": "Chest",
+      "dps": -90,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "462",
+      "item": "Robe of Hateful Echoes",
+      "slot": "Chest",
+      "dps": -90.1,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "463",
+      "item": "Cowl of the Illidari High Lord",
+      "slot": "Head",
+      "dps": -90.2,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "464",
+      "item": "Garments of Serene Shores",
+      "slot": "Chest",
+      "dps": -90.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "465",
+      "item": "Girdle of Stromgarde's Hope",
+      "slot": "Waist",
+      "dps": -91,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "466",
+      "item": "Life-step Belt",
+      "slot": "Waist",
+      "dps": -91.1,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "467",
+      "item": "Girdle of Mighty Resolve",
+      "slot": "Waist",
+      "dps": -91.3,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "468",
+      "item": "Girdle of Hope",
+      "slot": "Waist",
+      "dps": -91.3,
+      "source": "Hyjal Summit (N)\nAzgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "469",
+      "item": "Cord of Braided Troll Hair",
+      "slot": "Waist",
+      "dps": -91.4,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "470",
+      "item": "Girdle of Fallen Stars",
+      "slot": "Waist",
+      "dps": -91.4,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "471",
+      "item": "Belt of Divine Guidance",
+      "slot": "Waist",
+      "dps": -91.5,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "472",
+      "item": "Girdle of Zaetar",
+      "slot": "Waist",
+      "dps": -91.6,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "473",
+      "item": "Robes of Heavenly Purpose",
+      "slot": "Chest",
+      "dps": -91.9,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "474",
+      "item": "Pauldrons of Abyssal Fury",
+      "slot": "Shoulder",
+      "dps": -92.2,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "475",
+      "item": "Cowl of Light's Purity",
+      "slot": "Head",
+      "dps": -92.7,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "476",
+      "item": "Cover of Ursol the Wise",
+      "slot": "Head",
+      "dps": -92.8,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "477",
+      "item": "Breastplate of Fierce Survival",
+      "slot": "Chest",
+      "dps": -93,
+      "source": "Magisters' Terrace (H)\nVexallus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "478",
+      "item": "Chestguard of Hidden Purpose",
+      "slot": "Chest",
+      "dps": -93.1,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "479",
+      "item": "Helm of Burning Righteousness",
+      "slot": "Head",
+      "dps": -93.2,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": true
+    },
+    {
+      "rank": "480",
+      "item": "Malefic Mask of the Shadows",
+      "slot": "Head",
+      "dps": -93.5,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "481",
+      "item": "Cowl of Defiance",
+      "slot": "Head",
+      "dps": -93.7,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "482",
+      "item": "Cowl of Benevolence",
+      "slot": "Head",
+      "dps": -94,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "483",
+      "item": "Crown of Empowered Fate",
+      "slot": "Head",
+      "dps": -94.2,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "484",
+      "item": "Helm of Soothing Currents",
+      "slot": "Head",
+      "dps": -94.5,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "485",
+      "item": "Guise of the Tidal Lurker",
+      "slot": "Head",
+      "dps": -95.3,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "486",
+      "item": "Girdle of the Invulnerable",
+      "slot": "Waist",
+      "dps": -95.7,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "487",
+      "item": "Girdle of Stability",
+      "slot": "Waist",
+      "dps": -95.7,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "488",
+      "item": "Belt of the Tracker",
+      "slot": "Waist",
+      "dps": -97.3,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "489",
+      "item": "Maulgar's Warhelm",
+      "slot": "Head",
+      "dps": -97.4,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "490",
+      "item": "Panzar'Thar Breastplate",
+      "slot": "Chest",
+      "dps": -97.7,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "491",
+      "item": "Merciless Gladiator's Greatsword",
+      "slot": "Main Hand",
+      "dps": -99.7,
+      "source": "PvP vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "492",
+      "item": "Faceplate of the Impenetrable",
+      "slot": "Head",
+      "dps": -100,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "493",
+      "item": "Lionheart Champion",
+      "slot": "Main Hand",
+      "dps": -100.5,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "494",
+      "item": "Trollbane",
+      "slot": "Main Hand",
+      "dps": -103.2,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "495",
+      "item": "Glory of the Defender",
+      "slot": "Chest",
+      "dps": -104,
+      "source": "Hyjal Summit (N)\nAzgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "496",
+      "item": "Waistwrap of Infinity",
+      "slot": "Waist",
+      "dps": -105.7,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "497",
+      "item": "Belt of the Crescent Moon",
+      "slot": "Waist",
+      "dps": -105.8,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "498",
+      "item": "Eternium Greathelm",
+      "slot": "Head",
+      "dps": -106.1,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "499",
+      "item": "Flashfire Girdle",
+      "slot": "Waist",
+      "dps": -106.1,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "500",
+      "item": "Star-Soul Breeches",
+      "slot": "Legs",
+      "dps": -106.3,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "501",
+      "item": "Malefic Girdle",
+      "slot": "Waist",
+      "dps": -108.2,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "502",
+      "item": "Nethershard Girdle",
+      "slot": "Waist",
+      "dps": -108.3,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "503",
+      "item": "Angelista's Sash",
+      "slot": "Waist",
+      "dps": -108.5,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "504",
+      "item": "Naturalist's Preserving Cinch",
+      "slot": "Waist",
+      "dps": -108.5,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "505",
+      "item": "Belt of Primal Majesty",
+      "slot": "Waist",
+      "dps": -108.5,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "506",
+      "item": "Girdle of Lordaeron's Fallen",
+      "slot": "Waist",
+      "dps": -109.4,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "507",
+      "item": "Girdle of Truth",
+      "slot": "Waist",
+      "dps": -109.7,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "508",
+      "item": "Girdle of the Righteous Path",
+      "slot": "Waist",
+      "dps": -109.7,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "509",
+      "item": "Cord of Nature's Sustenance",
+      "slot": "Waist",
+      "dps": -109.8,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "510",
+      "item": "Belt of Gale Force",
+      "slot": "Waist",
+      "dps": -110.3,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "511",
+      "item": "Cincture of Will",
+      "slot": "Waist",
+      "dps": -110.5,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "512",
+      "item": "Steelspine Faceguard",
+      "slot": "Head",
+      "dps": -111.3,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "513",
+      "item": "Ethereum Nexus-Reaver",
+      "slot": "Main Hand",
+      "dps": -112.1,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "514",
+      "item": "Soulguard Leggings",
+      "slot": "Legs",
+      "dps": -112.2,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "515",
+      "item": "Redeemed Soul Legguards",
+      "slot": "Legs",
+      "dps": -112.2,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "516",
+      "item": "Greaves of Shackled Souls",
+      "slot": "Legs",
+      "dps": -112.2,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "517",
+      "item": "Shadesteel Greaves",
+      "slot": "Legs",
+      "dps": -112.2,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "518",
+      "item": "Robes of Rhonin",
+      "slot": "Chest",
+      "dps": -112.6,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "519",
+      "item": "Robe of the Shadow Council",
+      "slot": "Chest",
+      "dps": -113.3,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "520",
+      "item": "Chestguard of Relentless Storms",
+      "slot": "Chest",
+      "dps": -113.3,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "521",
+      "item": "Fire-Cord of the Magus",
+      "slot": "Waist",
+      "dps": -113.5,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "522",
+      "item": "Inferno Waist Cord",
+      "slot": "Waist",
+      "dps": -113.6,
+      "source": "Karazhan\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "523",
+      "item": "Soulguard Girdle",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "524",
+      "item": "Redeemed Soul Cinch",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "525",
+      "item": "Waistguard of Shackled Souls",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "526",
+      "item": "Shadesteel Girdle",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "527",
+      "item": "Lurker's Cord",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Karazhan (N)\nHyakiss the Lurker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "528",
+      "item": "Lurker's Grasp",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Karazhan (N)\nHyakiss the Lurker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "529",
+      "item": "Lurker's Belt",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Karazhan (N)\nHyakiss the Lurker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "530",
+      "item": "Lurker's Girdle",
+      "slot": "Waist",
+      "dps": -113.9,
+      "source": "Karazhan (N)\nHyakiss the Lurker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "531",
+      "item": "Robe of Departed Spirits",
+      "slot": "Chest",
+      "dps": -114.9,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "532",
+      "item": "Hauberk of the Empire's Champion",
+      "slot": "Chest",
+      "dps": -117.9,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "533",
+      "item": "Don Rodrigo's Poncho",
+      "slot": "Chest",
+      "dps": -118.4,
+      "source": "Hyjal Summit (N)\nAzgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "534",
+      "item": "Golden Links of Restoration",
+      "slot": "Chest",
+      "dps": -118.6,
+      "source": "Hyjal Summit (N)\nAnetheron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "535",
+      "item": "Garments of Temperance",
+      "slot": "Chest",
+      "dps": -118.6,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "536",
+      "item": "Gnarled Chestpiece of the Ancients",
+      "slot": "Chest",
+      "dps": -118.7,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "537",
+      "item": "Savior's Grasp",
+      "slot": "Chest",
+      "dps": -118.9,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "538",
+      "item": "Shimmer-pelt Vest",
+      "slot": "Chest",
+      "dps": -119.1,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "539",
+      "item": "Robe of the Elder Scribes",
+      "slot": "Chest",
+      "dps": -119.4,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "540",
+      "item": "Stonebough Jerkin",
+      "slot": "Chest",
+      "dps": -120,
+      "source": "Karazhan (N)\nNightbane",
+      "belowCutoff": true
+    },
+    {
+      "rank": "541",
+      "item": "Breastplate of the Lightbinder",
+      "slot": "Chest",
+      "dps": -120,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "542",
+      "item": "Fire Crest Breastplate",
+      "slot": "Chest",
+      "dps": -120,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "543",
+      "item": "Masquerade Gown",
+      "slot": "Chest",
+      "dps": -120.2,
+      "source": "Karazhan (N)\nRomulo and Julianne",
+      "belowCutoff": true
+    },
+    {
+      "rank": "544",
+      "item": "Earthblood Chestguard",
+      "slot": "Chest",
+      "dps": -120.3,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "545",
+      "item": "Glowing Breastplate of Truth",
+      "slot": "Chest",
+      "dps": -121.2,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "546",
+      "item": "Hood of Hexing",
+      "slot": "Head",
+      "dps": -125.3,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "547",
+      "item": "Cowl of the Grand Engineer",
+      "slot": "Head",
+      "dps": -125.7,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "548",
+      "item": "Gorehowl",
+      "slot": "Main Hand",
+      "dps": -127.9,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "549",
+      "item": "Fathom-Helm of the Deeps",
+      "slot": "Head",
+      "dps": -128.3,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "550",
+      "item": "Mojo-mender's Mask",
+      "slot": "Head",
+      "dps": -128.7,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "551",
+      "item": "Helm of Natural Regeneration",
+      "slot": "Head",
+      "dps": -128.8,
+      "source": "Zul'Aman (N)\nJan'alai",
+      "belowCutoff": true
+    },
+    {
+      "rank": "552",
+      "item": "Mask of Introspection",
+      "slot": "Head",
+      "dps": -129,
+      "source": "Zul'Aman (N)\nNalorakk",
+      "belowCutoff": true
+    },
+    {
+      "rank": "553",
+      "item": "Hood of the Third Eye",
+      "slot": "Head",
+      "dps": -129.6,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "554",
+      "item": "Faceguard of the Endless Watch",
+      "slot": "Head",
+      "dps": -133.5,
+      "source": "World Bosses",
+      "belowCutoff": true
+    },
+    {
+      "rank": "555",
+      "item": "Battleworn Tuskguard",
+      "slot": "Head",
+      "dps": -133.5,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "556",
+      "item": "Hammer of the Naaru",
+      "slot": "Main Hand",
+      "dps": -138.5,
+      "source": "Gruul's Lair (N)\nHigh King Maulgar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "557",
+      "item": "Despair",
+      "slot": "Main Hand",
+      "dps": -141.6,
+      "source": "Karazhan (N)\nRomulo and Julianne",
+      "belowCutoff": true
+    },
+    {
+      "rank": "558",
+      "item": "Collar of Cho'gall",
+      "slot": "Head",
+      "dps": -147.7,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "559",
+      "item": "Big Bad Wolf's Head",
+      "slot": "Head",
+      "dps": -150.4,
+      "source": "Karazhan (N)\nThe Big Bad Wolf",
+      "belowCutoff": true
+    },
+    {
+      "rank": "560",
+      "item": "Uni-Mind Headdress",
+      "slot": "Head",
+      "dps": -150.5,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "561",
+      "item": "Wicked Witch's Hat",
+      "slot": "Head",
+      "dps": -150.9,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "562",
+      "item": "Crown of the Sun",
+      "slot": "Head",
+      "dps": -151.3,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "563",
+      "item": "Cowl of Nature's Breath",
+      "slot": "Head",
+      "dps": -152.3,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "564",
+      "item": "Brighthelm of Justice",
+      "slot": "Head",
+      "dps": -152.8,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "565",
+      "item": "Headdress of the High Potentate",
+      "slot": "Head",
+      "dps": -152.9,
+      "source": "Karazhan\nChess Event",
+      "belowCutoff": true
+    },
+    {
+      "rank": "566",
+      "item": "Axe of the Gronn Lords",
+      "slot": "Main Hand",
+      "dps": -153.5,
+      "source": "Gruul's Lair (N)\nGruul the Dragonkiller",
+      "belowCutoff": true
+    },
+    {
+      "rank": "567",
+      "item": "Legacy",
+      "slot": "Main Hand",
+      "dps": -183.7,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "568",
+      "item": "Legionfoe",
+      "slot": "Main Hand",
+      "dps": -235.3,
+      "source": "Reputation vendor",
+      "belowCutoff": true
+    }
+  ],
+  "rowCount": 601,
+  "aboveCutoff": 33,
+  "aboveCutoffItems": [
+    "Lightbringer Boots",
+    "Felfury Legplates",
+    "Lightbringer Bands",
+    "Lightbringer Girdle",
+    "Apolyon, the Soul-Render",
+    "Cloak of Unforgivable Sin",
+    "Shard of Contempt",
+    "Carapace of Sun and Shadow",
+    "Blackened Naaru Sliver",
+    "Bladed Chaos Tunic",
+    "Shivering Felspine",
+    "Hard Khorium Choker",
+    "Clutch of Demise",
+    "Coif of Alleria",
+    "Thalassian Ranger Gauntlets",
+    "Gloves of Immortal Dusk",
+    "Berserker's Call",
+    "Warharness of Reckless Fury",
+    "Leggings of the Immortal Night",
+    "Borderland Paingrips",
+    "Hard Khorium Band",
+    "Pauldrons of Berserking",
+    "Shadowed Gauntlets of Paroxysm",
+    "Duplicitous Guise",
+    "Bulwark of the Ancient Kings",
+    "Demontooth Shoulderpads",
+    "Crown of Anasterian",
+    "Collar of the Pit Lord",
+    "Band of Ruinous Delight",
+    "Crimson Paragon's Cover",
+    "Cloak of Fiends",
+    "Sin'dorei Pendant of Triumph",
+    "Mantle of the Golden Forest"
+  ],
+  "baselineDps": 2229.7,
+  "elapsedS": 3551,
+  "panicHit": false,
+  "runner": null,
+  "statusText": "Your current gear: 2229.7 DPS.\nTook 3551s.",
+  "sample": "WoWSims - The Burning Crusade\nRetribution Paladin\nPhase 3 (2.2 - T6) - Alpha\nIterations\nSimulate\nSuggest Gems\nStat Weights\nStats\nHealth\t\n10857\n\nMana\t\n5883\n\nStrength\t\n632\n\nAgility\t\n551\n\nStamina\t\n766\n\nIntellect\t\n214\n\nAttack Power\t\n3895\n\nMelee Hit\t\n66 (10.19%)\n\nMelee Crit\t\n286 (51.65%)\n\nMelee Haste\t\n108 (6.85%)\n\nExpertise\t\n73 (4.50%)\n\nSpell Damage\t\n20\n\nHoly Spell Damage\t\n20 (+0)\n\nSpell Hit\t\n3.00%\n\nSpell Crit\t\n12.01%\n\nSpell Haste\t\n0.00%\n\nArcane Resistance\t\n38\n\nFire Resistance\t\n38\n\nFrost Resistance\t\n38\n\nNature Resistance\t\n38\n\nShadow Resistance\t\n75\n\nMelee Crit Cap\tUnder by 27.28%\n Patreon\nGear\nSettings\nTalents\nRotation\nResults\nBatch (\nNew\n)\nUpgrades\n Import\n Export\nKnown Issues\n Patreon\nFilter res",
+  "origin": "http://localhost:3333",
+  "page": "/tbc/paladin/retribution/",
+  "eligibleCount": 617,
+  "candidatesRequested": 0,
+  "runnerBeforeRun": null,
+  "servedWorker": {
+    "bytes": 4786,
+    "wasmRefs": 0,
+    "asyncProgressRefs": 2,
+    "readyFalse": 1,
+    "firstLine": "//#region ui/worker/types.ts",
+    "httpStatus": 200
+  },
+  "requests": {
+    "bulkSimAsync": 29,
+    "raidSimAsync": 50,
+    "asyncProgress": 6786,
+    "other": 428
+  },
+  "requestsSent": {
+    "bulkSimAsync": 29,
+    "raidSimAsync": 50,
+    "asyncProgress": 6864,
+    "other": 431
+  },
+  "requestsBySession": {
+    "E9C9371B4BA1AD1D6A91B6D2DB643493": {
+      "other": 413
+    },
+    "DD6B56A2DD680861F225E05C181D3C93": {
+      "other": 5
+    },
+    "DD2924338330E17D525850BFD9EAC04D": {
+      "other": 1
+    },
+    "99CE0C7145BE15FBEEDD0BCFE995ABD4": {
+      "other": 1
+    },
+    "B0D87267CDC7CDC439C1F9DC44EFAA0E": {
+      "other": 1
+    },
+    "9A1DACBA32265F1DD6BAE0671C395A57": {
+      "other": 1
+    },
+    "320DF3186AD9F8609C69E34BFA534179": {
+      "other": 1
+    },
+    "46EAD5C26FA81CF1F2CB3A4A51D173B8": {
+      "other": 1,
+      "raidSimAsync": 26,
+      "asyncProgress": 52
+    },
+    "E5D7DAC157EB7E9FC55743A35AC80872": {
+      "other": 1,
+      "raidSimAsync": 21,
+      "asyncProgress": 42
+    },
+    "F11A8C436DD6C7EF18AD4E10674F8539": {
+      "other": 1,
+      "raidSimAsync": 3,
+      "asyncProgress": 6
+    },
+    "37EBA5DCD90F861847857DF912144043": {
+      "other": 1,
+      "bulkSimAsync": 29,
+      "asyncProgress": 6686
+    },
+    "20A9787299C188721F286CB318971E7A": {
+      "other": 1
+    }
+  },
+  "firstUrls": {
+    "bulkSimAsync": [
+      "http://localhost:3333/bulkSimAsync?requestId=bulkSimAsync-dfb927d5673f099",
+      "http://localhost:3333/bulkSimAsync?requestId=bulkSimAsync-fcbb4c298fecbef0",
+      "http://localhost:3333/bulkSimAsync?requestId=bulkSimAsync-777add0fe54293a",
+      "http://localhost:3333/bulkSimAsync?requestId=bulkSimAsync-bb83d908e66e543f",
+      "http://localhost:3333/bulkSimAsync?requestId=bulkSimAsync-ae794361eb3a95b0"
+    ],
+    "raidSimAsync": [
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-99b9a6877ac7c84a",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-23eb9168c857f9cc",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-c2ba26449fed690",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-910b45505638af4c",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-e997f221bb13dd93"
+    ],
+    "asyncProgress": [
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-99b9a6877ac7c84a",
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-99b9a6877ac7c84a",
+      "http://localhost:3333/asyncProgress?requestId=bulkSimAsync-dfb927d5673f099",
+      "http://localhost:3333/asyncProgress?requestId=bulkSimAsync-dfb927d5673f099",
+      "http://localhost:3333/asyncProgress?requestId=bulkSimAsync-dfb927d5673f099"
+    ],
+    "other": [
+      "http://localhost:3333/tbc/paladin/retribution/",
+      "http://localhost:3333/tbc/assets/database/db.json",
+      "http://localhost:3333/tbc/bundle/preset_utils-CBDXKKKP.style.css",
+      "http://localhost:3333/tbc/bundle/index-Cecummfb.style.css",
+      "http://localhost:3333/tbc/bundle/ui/paladin/retribution/index.html-BzcjYj_K.entry.js"
+    ]
+  },
+  "workerSessionsAttached": 11,
+  "poolSize": 20,
+  "poolSizeSource": "navigator.hardwareConcurrency",
+  "screeningFallbackWarnings": 0,
+  "screeningFallbackTexts": [],
+  "forcedFallback": false,
+  "forceFallbackRemaining": null,
+  "phaseSet": "5",
+  "done": true,
+  "runTimedOut": false,
+  "runFailed": false,
+  "wallClockS": 3554.5,
+  "recordedAt": "2026-09-15T03:29:32.840Z"
+}

@@ -1,0 +1,272 @@
+{
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Lightbringer Boots",
+      "slot": "Feet",
+      "dps": 57.3,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
+      "item": "Felfury Legplates",
+      "slot": "Legs",
+      "dps": 41.9,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "3",
+      "item": "Lightbringer Girdle",
+      "slot": "Waist",
+      "dps": 37,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "4",
+      "item": "Carapace of Sun and Shadow",
+      "slot": "Chest",
+      "dps": 33.4,
+      "source": "Leatherworking",
+      "belowCutoff": false
+    },
+    {
+      "rank": "5",
+      "item": "Shard of Contempt",
+      "slot": "Trinket 1",
+      "dps": 31.7,
+      "source": "Magisters' Terrace (H)\nPriestess Delrissa",
+      "belowCutoff": false
+    },
+    {
+      "rank": "6",
+      "item": "Cloak of Unforgivable Sin",
+      "slot": "Back",
+      "dps": 29.3,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "7",
+      "item": "Blackened Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": 29.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": false
+    },
+    {
+      "rank": "8",
+      "item": "Leggings of the Immortal Night",
+      "slot": "Legs",
+      "dps": 15.7,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": false
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    },
+    {
+      "rank": "",
+      "item": "",
+      "slot": "",
+      "dps": null,
+      "source": "",
+      "belowCutoff": true
+    }
+  ],
+  "rowCount": 20,
+  "aboveCutoff": 8,
+  "aboveCutoffItems": [
+    "Lightbringer Boots",
+    "Felfury Legplates",
+    "Lightbringer Girdle",
+    "Carapace of Sun and Shadow",
+    "Shard of Contempt",
+    "Cloak of Unforgivable Sin",
+    "Blackened Naaru Sliver",
+    "Leggings of the Immortal Night"
+  ],
+  "baselineDps": 2231.5,
+  "elapsedS": 13,
+  "panicHit": false,
+  "runner": "WasmSimRunner",
+  "statusText": "Your current gear: 2231.5 DPS.\nTook 13s.",
+  "sample": "WoWSims - The Burning Crusade\nRetribution Paladin\nPhase 3 (2.2 - T6) - Alpha\nIterations\nSimulate\nSuggest Gems\nStat Weights\nStats\nHealth\t\n10857\n\nMana\t\n5883\n\nStrength\t\n632\n\nAgility\t\n551\n\nStamina\t\n766\n\nIntellect\t\n214\n\nAttack Power\t\n3895\n\nMelee Hit\t\n66 (10.19%)\n\nMelee Crit\t\n286 (51.65%)\n\nMelee Haste\t\n108 (6.85%)\n\nExpertise\t\n73 (4.50%)\n\nSpell Damage\t\n20\n\nHoly Spell Damage\t\n20 (+0)\n\nSpell Hit\t\n3.00%\n\nSpell Crit\t\n12.01%\n\nSpell Haste\t\n0.00%\n\nArcane Resistance\t\n38\n\nFire Resistance\t\n38\n\nFrost Resistance\t\n38\n\nNature Resistance\t\n38\n\nShadow Resistance\t\n75\n\nMelee Crit Cap\tUnder by 27.28%\n Patreon\nGear\nSettings\nTalents\nRotation\nResults\nBatch (\nNew\n)\nUpgrades\n Import\n Export\nKnown Issues\n Patreon\nFilter res",
+  "origin": "http://localhost:3333",
+  "page": "/tbc/paladin/retribution/",
+  "eligibleCount": 617,
+  "candidatesRequested": 20,
+  "runnerBeforeRun": null,
+  "servedWorker": {
+    "bytes": 21496,
+    "wasmRefs": 0,
+    "asyncProgressRefs": 2,
+    "readyFalse": 1,
+    "firstLine": "//#region node_modules/@protobuf-ts/runtime/build/es2015/binary-format-contract.js",
+    "httpStatus": 200
+  },
+  "requests": {
+    "bulkSimAsync": 0,
+    "raidSimAsync": 64,
+    "asyncProgress": 371,
+    "other": 125
+  },
+  "requestsSent": {
+    "bulkSimAsync": 0,
+    "raidSimAsync": 64,
+    "asyncProgress": 371,
+    "other": 128
+  },
+  "requestsBySession": {
+    "302641A84E960256CBD31A82496A5444": {
+      "other": 116
+    },
+    "572F546E37A3E2D8AC75E585E26C48CC": {
+      "other": 5
+    },
+    "55FAF49D7052322237E71899D9A8E6A4": {
+      "other": 1,
+      "raidSimAsync": 27,
+      "asyncProgress": 138
+    },
+    "861ADF5E5320C9583AAF485DADDA6E74": {
+      "other": 1,
+      "raidSimAsync": 24,
+      "asyncProgress": 127
+    },
+    "A733D050F74BB2637DF613DD91236531": {
+      "other": 1,
+      "raidSimAsync": 6,
+      "asyncProgress": 52
+    },
+    "A88BAB9B00829F310941A636153B7C55": {
+      "other": 1,
+      "raidSimAsync": 7,
+      "asyncProgress": 54
+    }
+  },
+  "firstUrls": {
+    "bulkSimAsync": [],
+    "raidSimAsync": [
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-a8f5805f35849e1f",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-6564cb4ab55515c3",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-3613eb80c45bda7",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-e6f9684c9d914df6",
+      "http://localhost:3333/raidSimAsync?requestId=raidSimAsync-67f44ea95b52db9"
+    ],
+    "asyncProgress": [
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-a8f5805f35849e1f",
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-a8f5805f35849e1f",
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-a8f5805f35849e1f",
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-a8f5805f35849e1f",
+      "http://localhost:3333/asyncProgress?requestId=raidSimAsync-6564cb4ab55515c3"
+    ],
+    "other": [
+      "http://localhost:3333/tbc/paladin/retribution/",
+      "http://localhost:3333/tbc/assets/database/db.json",
+      "http://localhost:3333/tbc/bundle/preset_utils-By99-kNz.style.css",
+      "http://localhost:3333/tbc/bundle/ui/paladin/retribution/index.html-PnBV6woi.entry.js",
+      "http://localhost:3333/tbc/bundle/index-DkdOl9VW.style.css"
+    ]
+  },
+  "workerSessionsAttached": 5,
+  "poolSize": 20,
+  "poolSizeSource": "navigator.hardwareConcurrency",
+  "screeningFallbackWarnings": 0,
+  "screeningFallbackTexts": [],
+  "forcedFallback": true,
+  "forceFallbackRemaining": 0,
+  "phaseSet": "5",
+  "done": true,
+  "runTimedOut": false,
+  "runFailed": false,
+  "wallClockS": 17.3,
+  "recordedAt": "2026-09-14T23:38:21.136Z"
+}
