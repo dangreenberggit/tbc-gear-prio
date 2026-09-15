@@ -2,145 +2,118 @@
 
 Written 2026-09-15 by the session that ran workstream E from
 `.scratch/handoffs/post-chunk2-five-workstreams-HANDOFF.md`.
+**Revised later the same day**, after ticket 399 was fixed by a subsequent
+session — the original text described a state that no longer exists. See
+"Revision note" at the end for what changed and why.
 
 **E is done. The branch is not merged — that needs the owner's explicit ask.**
 
-Every number here was measured in this session and says how. Nothing is
-inherited prose.
+## State, measured on the current tip
 
-## What changed
-
-| Repo | Commit | Contents |
+| Thing | Value | How established |
 | --- | --- | --- |
-| fork (`vendor/tbc-new-fork`) | `0b3c418e5848d32beebff717bbd8fe86f45ad940` | 29 universe copies refreshed to LF + a PROVENANCE.md refresh entry |
-| core | `40d19e27` | fork pin bump, `sim-implemented-effects.json` regen, ticket 399, the two prior handoffs |
+| Core tip | `933305b1` | `git log --oneline` |
+| Fork HEAD | `e94d927af0ff7c31f071c961d1d7789980c8b8c9` | `git -C <fork> rev-parse HEAD` |
+| Fork remote | same sha — **pushed** | `ls-remote origin refs/heads/feat/upgrades-tab` |
+| Pin coherence | lock `commit`, fork HEAD and `sim-implemented-effects.json`'s `forkCommit` all agree | read all three |
+| `pnpm verify` | **rc=0**, full run | `fork universes check ok: 63 bundled copies byte-match` |
+| Review | `docs/reviews/feat-desktop-transport-gate.md`, round 2, S1 retired | committed |
+| Ticket 399 | **closed** — fixed, options 1 + 2 | its `Status:` line |
 
-Both trees are clean (`git status --porcelain` empty in each).
+Both trees clean.
 
-## The blocker is cleared, measured
+## What E did, and what a later session did on top
 
-`pnpm verify` run to completion after the change:
+E cleared the symptom: 29 of 63 bundled copies were drifted, **all 29 line
+endings only**, refreshed with `sync_fork_universes.py --write`. Verified two
+independent ways before writing anything, agreeing on every file — CR-stripped
+byte compare, and `json.loads` equality. `git diff --ignore-cr-at-eol` empty
+afterwards against a plain diff of 463442 insertions / 463442 deletions. No item
+added, dropped or altered.
 
-- `fork universes check ok: 63 bundled copies byte-match their data/ sources`
-- 65 test files passed
-- `rc=0`
+A later session then fixed the **cause** under ticket 399, applying both of the
+options E had left open. That work is done and verified:
 
-That was a full run, not `--check-only`. The prior run's sole failing gate was
-`fork-universes:check`; it now passes and nothing else broke.
+- Core generators now pass `newline="\n"`; `data/universes/` went from 47 CRLF /
+  41 LF to **88 files, 0 CR**.
+- The fork gained a scoped `.gitattributes` at `upgrades/data/` pinning
+  `* text eol=lf`, with `git add --renormalize` — **15 copies had been committed
+  CRLF**, so the renormalize was load-bearing. Fork copies now **63 files,
+  0 CR**.
 
-## What the drift actually was
+## Why it used to recur — the mechanism, for the record
 
-29 of 63 copies drifted, **all 29 line endings only**. Verified two independent
-ways before writing anything, agreeing on every file:
-
-1. CR-stripped byte compare (`cmp` on both sides with `tr -d '\r'`) — equal on
-   all 29.
-2. `json.loads` equality on both sides — `True` on all 29.
-
-Arithmetic corroborates: `fork_bytes - core_bytes == fork_CR` exactly, on all
-29. After the write, `git diff --ignore-cr-at-eol` over `upgrades/data/` is
-**empty** while the plain `git diff --stat` reports 463442 insertions against
-463442 deletions across 29 files.
-
-No item added, dropped or altered.
-
-## Why it recurs — this is new, and it corrects the inherited story
-
-The prior handoff described the fork's copies drifting to CRLF. The measurement
-says something more specific.
+Worth keeping because it explains the class of bug, not just this instance.
 
 `sync_fork_universes.py:168` compares **working-tree** bytes on both sides, and
-neither side is pinned:
+before 399 neither side was pinned: the core normalised only on commit via
+`.gitattributes` (committed blob always LF, working tree whatever the generator
+last wrote), and the fork had no `.gitattributes` at all. The core tree sat
+split 47 CRLF / 41 LF purely by regeneration batch — every CRLF file stamped
+`2026-09-14 09:59`, every LF file `15:22`, no file crossing batches.
 
-- **Core:** `.gitattributes` ends in `* text=auto eol=lf`, so the committed blob
-  is always LF (`git show HEAD:data/universes/ret-p2.json` → 0 CR). The working
-  tree is whatever the generator last wrote.
-- **Fork:** has **no `.gitattributes` at all**.
+So the gate went green whenever both sides happened to agree, at whichever
+ending, and any later regen writing the other ending re-redded it with no data
+change. That is why clearing it three times had not held.
 
-The core working tree is split by regeneration batch, not by content. Census of
-all 88 files in `data/universes/`:
+## The pin-bump trap — still live, still worth knowing
 
-| Endings | Count | mtime |
-| --- | --- | --- |
-| CRLF | 47 | all `2026-09-14 09:59` |
-| LF | 41 | all `2026-09-14 15:22` |
+This is the one operational lesson here that outlives the ticket.
 
-No file crosses batches. The writer is `scripts/assemble_universe.py`, one of
-**14** scripts under `scripts/` calling `write_text(` with no `newline=`.
-
-**So the gate goes green whenever both sides happen to agree, at whichever
-ending.** This refresh made 29 pairs agree at LF; 15 other pairs agree at CRLF
-on both sides and are equally green (`ret-p2`: both 5603 CR, byte-equal). Any
-later regen writing the other ending re-reds the gate with no data change.
-That is why clearing it three times has not held.
-
-Observable live: running `generate_sim_implemented_effects.py` this session
-produced a working-tree file with 2036 CR against 0 in the committed blob.
-
-## The pin bump — a trap worth knowing
-
-Committing the fork moved its HEAD and **broke five core gates at once**.
+Committing the fork moves its HEAD and **breaks five core gates at once**.
 `scripts/_fork_gate.py:require_pinned_fork` raises when clone HEAD ≠ the pin in
 `data/wowsims-fork.lock.json`, and `sim-implemented-effects`,
-`equip-eligibility`, `fork-lint`, `ep-presets` and `meta-conditions` all call
-it. A fork commit is therefore never complete without the lock bump.
+`equip-eligibility`, `fork-lint`, `ep-presets` and `meta-conditions` all call it.
+**A fork commit is never complete without the lock bump and the
+`sim-implemented-effects` regen.**
 
-Done: pin → `0b3c418e5848d32beebff717bbd8fe86f45ad940`, then
-`python scripts/generate_sim_implemented_effects.py`. The regen changed **only**
-`forkCommit` — `implementedEffectItemIdsCount`, `implementedEffectItemIds` and
-`stubOnlyItemIds` all compare equal to the committed versions, counts 221/451 —
-because the fork commit touches nothing under `sim/`.
+The regen is cheap and self-verifying: it moves only `forkCommit` when the fork
+commit touches nothing under `sim/`, and `equip-eligibility` then prints the new
+sha back at you (`17 specs match the fork at e94d927af0ff`).
 
-`equip-eligibility` then printed `17 specs match the fork at 0b3c418e5848`,
-naming the new sha, which is the pin bump verifying itself.
+## Corrections to claims inherited from the prior handoff
 
-## Ticket 399, filed
-
-`.scratch/carry-forward/issues/399-fork-universes-gate-compares-two-unpinned-working-trees.md`
-
-No open ticket owned this failure. 211 was being cited for it in this branch's
-decision log and review — **211 is `Status: closed`**, it owned the *absence* of
-a comparison mechanism and was closed by building `sync_fork_universes.py`.
-
-399 lays out three options and does not choose: a `.gitattributes` in the fork,
-fixing 283 at the 14 write sites, or normalising inside the gate (least
-preferred — it blinds a check the script's own docstring says it wants). The
-first two are complementary, not alternatives. **This is an owner decision and
-it is still open.**
-
-## Corrections to inherited claims
-
-- The prior handoff said `.scratch/handoffs/` might be gitignored. It is not —
-  `git check-ignore` returns 1 (no match), 131 files already tracked. Both prior
-  handoffs are now committed.
-- It said an unpushed fork commit might block the merge. `pushed` has **no
-  reader** anywhere in `scripts/*.py`, and `merge_to_dev.py` has no push or
-  fork-lock logic in its gate list. The full verify passed with `pushed: false`,
-  which settles it by running rather than by grep.
-- The fork lock's `_comment` claims `sim-implemented-effects.json` counts were
-  "218/451" at `eb040855c`. The artifact says **221/451**, before and after.
-  "218" was wrong when written. Noted in 399, not rewritten.
-
-## Fork push state
-
-The fork remote is now **two commits behind** local: `ls-remote` returns
-`2781486d6b324c3092c0c5dcd51a26bbb7103d78`, while local HEAD is `0b3c418e5`
-(via `eb040855c`). `pushed` is correctly `false`. Both exist on one disk only —
-the ticket-355 exposure ADR-0030 Consequence 4 accepts. **Pushing needs the
-owner's ask.**
+- `.scratch/handoffs/` is **not** gitignored — `git check-ignore` returns 1, 131
+  files already tracked.
+- An unpushed fork commit does **not** block the merge. `pushed` has no reader
+  in any script, and `merge_to_dev.py` has no push or fork-lock logic. Settled by
+  a passing full verify, not by grep. (The fork has since been pushed anyway.)
+- The fork lock's `_comment` says `sim-implemented-effects.json` counts were
+  "218/451". The artifact says **221/451**, before and after. "218" was wrong
+  when written. Noted in 399, not rewritten.
 
 ## What is next
 
-Per the five-workstream plan, E was the only merge blocker and it is cleared.
-The next step in that plan is **the merge ask, which is the owner's to make** —
-`pnpm merge-to-dev` is the only door, and a combined "review and merge" does not
-count.
+E was the only merge blocker and it is cleared. The next step is **the merge
+ask, which is the owner's to make** — `pnpm merge-to-dev` is the only door, and a
+combined "review and merge" does not count.
 
-Then A (+D), B (ticket 398, accuracy), C (ticket 397, speed), unchanged. Those
-three are untouched by this session.
+Then A (+D), B (ticket 398, accuracy), C (ticket 397, speed), unchanged and
+untouched by this session.
+
+One piece of bookkeeping is open: **ticket 283 still reads `Status: open`**
+though 399's fix satisfied most of its "Done when". It wants closing or
+narrowing to what actually remains — 5 `write_text(` calls without `newline=`,
+all of them scratch or probe writes that 399 deliberately skipped (verified by a
+paren-balancing scan, not a line grep). Ticket 167 is the still-open sibling case
+on `check_engine_port_drift.py`.
 
 ## Fork queue
 
-`vendor/tbc-new-fork` is one shared working tree. E's refresh is **done and
-committed**, so the queue is free for B's harness edit or C's fix. Ask whether
-another session is live before touching it.
+`vendor/tbc-new-fork` is one shared working tree. E's work is done, committed and
+pushed, so the queue is free. Ask whether another session is live before
+touching it.
+
+## Revision note
+
+The original version of this file was written before ticket 399 was fixed, and
+seven of its claims went stale within hours: both commit shas, the fork push
+state (`pushed: false` → pushed, remote "two commits behind" → current), the
+CRLF census (47/41 → 88/0), the "14 scripts" figure (a line-based grep; the real
+count was 13 sites in 11 scripts), 399's status (open with three options → closed
+via options 1 + 2), and the framing of the durable fix as an open owner decision.
+
+Rewritten rather than patched, because a handoff whose state table is wrong is
+worse than no handoff — the reader cannot tell which half to trust. The
+measurements E actually made are preserved above; what changed is that they now
+describe history rather than the current tip.
