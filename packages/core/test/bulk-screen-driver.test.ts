@@ -25,13 +25,18 @@ import {
   forkUpgradesDir,
   loadForkEngineEnvironment,
 } from "./fork-engine-harness.js";
+import { CURRENT_API_VERSION } from "../src/individual-settings.js";
 
 const driverModule = join(forkUpgradesDir, "adapters/bulk_screen_driver.ts");
 const seamModule = join(forkUpgradesDir, "engine/seams/sim-runner.ts");
 const signalModule = join(forkRoot, "ui/core/sim_signal_manager.ts");
 const apiModule = join(forkRoot, "ui/core/proto/api.ts");
 
-const SIM_VERSION = "api-v15";
+// Derived from the live proto version rather than repeated as a literal
+// (ticket 390): this file's recordings just need one consistent stamp across
+// runs, but a stale literal here would silently drift from the sibling
+// bulk-screen-http-fixture.test.ts recordings once nothing forced it to move.
+const SIM_VERSION = `api-v${CURRENT_API_VERSION}`;
 const ITERATIONS = 5000;
 
 type Candidate = { index: number; gear: Readonly<Record<string, unknown>> };

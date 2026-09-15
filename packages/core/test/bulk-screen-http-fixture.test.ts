@@ -27,14 +27,19 @@
  *
  * ## simVersion (reconciliation R5)
  *
- * `api-v15`. R5 asked what version a Go-served recording carries, since a
- * different value from a WASM recording would split the fixture story. Measured:
- * it cannot differ. `version()` is inherited from `WasmSimRunner` and returns
+ * R5 asked what version a Go-served recording carries, since a different
+ * value from a WASM recording would split the fixture story. Measured: it
+ * cannot differ. `version()` is inherited from `WasmSimRunner` and returns
  * `` `api-v${CURRENT_API_VERSION}` `` (`adapters/wasm_sim_runner.ts`) - a
  * compile-time constant, not something read off the running engine - so both
  * transports report the same string and the cache key really is transport-blind.
- * This test asserts that value explicitly, so a future change to
- * `CURRENT_API_VERSION` fails here rather than silently invalidating recordings.
+ * `RECORDED_SIM_VERSION` below is derived from the live `CURRENT_API_VERSION`
+ * rather than repeated as a literal, so a future proto version bump fails
+ * this test rather than silently invalidating the recording (ticket 390 -
+ * the literal was `"api-v15"` at proto version 15; a re-pin to `master`
+ * dropped `current_version_number` to 14 and the literal went stale without
+ * anything noticing, because the fixtures key on a commit sha, not this
+ * string).
  *
  * The fork is gitignored (`vendor/`), so the suite skips when it is absent.
  */
@@ -43,6 +48,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
+import { CURRENT_API_VERSION } from "../src/individual-settings.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkEngineDir = join(
@@ -53,7 +59,15 @@ const forkPresent = existsSync(forkEngineDir);
 const seamModule = join(forkEngineDir, "seams/sim-runner.ts");
 
 /** The value the HTTP runner reports; see the R5 note in this file's header. */
-const RECORDED_SIM_VERSION = "api-v15";
+const RECORDED_SIM_VERSION = `api-v${CURRENT_API_VERSION}`;
+
+/**
+ * A cache-miss sentinel that cannot collide with a live API version (ticket
+ * 390): `-1` is not a `current_version_number` any proto will ever declare,
+ * unlike the previous `"api-v14"`, which was a deliberate mismatch only
+ * until the engine re-pinned to proto version 14 and turned it into a match.
+ */
+const IMPOSSIBLE_SIM_VERSION = "api-v-1";
 
 type SimObservation = {
   dps: number;
@@ -164,7 +178,10 @@ describe.skipIf(!forkPresent)("bulk screen recorded from the Go engine", () => {
       RECORDED_SIM_VERSION,
       new Map(),
       new Map([
-        [bulkScreenCacheKey(RECORDED_REQUEST, "api-v14"), RECORDED_RESULT],
+        [
+          bulkScreenCacheKey(RECORDED_REQUEST, IMPOSSIBLE_SIM_VERSION),
+          RECORDED_RESULT,
+        ],
       ])
     );
     await expect(staleRunner.runBulkScreen!(RECORDED_REQUEST)).rejects.toThrow(
