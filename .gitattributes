@@ -16,4 +16,10 @@ package.json text eol=lf
 # during the terminology cleanup, which turned a ~550-line diff into ~12,900 and
 # reassigned blame for every line it touched. Ticket 129 was the same bug on
 # package.json alone; pinning one file at a time did not stop it recurring.
+#
+# This is a backstop, not the mechanism. It normalizes at staging, so a writer
+# that emits CRLF still leaves the working tree not matching HEAD -- which is
+# what the byte-compare gates read, and how ticket 283's generators went
+# unnoticed. Writers own their own bytes: Python passes newline= at every write
+# to a tracked file (docs/agents/known-traps.md, ticket 399).
 * text=auto eol=lf

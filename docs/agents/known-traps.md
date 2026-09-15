@@ -35,12 +35,23 @@ for an edit you know was small (a 4-line schema edit staging as ~18k
 lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
 reports CRLF where HEAD is LF.
 
-`sed -i`, CRLF-writing editors, and the Python generators (ticket 283)
-each flip a whole file's line endings. Edit text files with the harness
-Edit tool, which preserves endings. After any scripted or generated write,
-read `git diff --stat` before committing: a line count near the file's
-length means endings flipped — confirm the real change with
-`git diff --ignore-cr-at-eol`, rewrite the file back to LF, then commit.
+`sed -i` and CRLF-writing editors each flip a whole file's line endings.
+Edit text files with the harness Edit tool, which preserves endings. After
+any scripted or generated write, read `git diff --stat` before committing:
+a line count near the file's length means endings flipped — confirm the
+real change with `git diff --ignore-cr-at-eol`, rewrite the file back to
+LF, then commit.
+
+The Python generators no longer do this (ticket 283, fixed by 399 on
+2026-09-15 across fourteen write sites). **Keep it that way when you add
+one:** a Python write to a tracked file needs an explicit `newline=`. Text
+mode defaults to the platform's endings, and `pnpm fork-universes:check`
+compares bytes on disk, before `.gitattributes` normalizes anything at
+staging — so a CRLF write reds that gate on a file whose content nobody
+changed. Use `newline="\n"` when your code builds the text
+(`generate_item_gem_index.py:281`), `newline=""` when you hand the handle
+to `json.dump` or a `csv` writer (`sync_wowsims.py:493`). Both give LF.
+Scratch and tempdir writes need neither, and `"wb"` cannot take one.
 
 ## Before editing a ported engine file
 
