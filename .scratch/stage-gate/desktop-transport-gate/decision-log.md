@@ -348,3 +348,37 @@ owner's call, not accept/rework:
    the desktop path. Screening engages (bulkSimAsync observed) but is not a speed
    win. Candidate ticket from `NEXT` (397); the Executor filed none pending this
    call.
+
+## Pre-merge review complete — 2026-09-14
+
+Review file: `docs/reviews/feat-desktop-transport-gate.md` (committed on the
+feature branch, `3cfc0b62`). Three axes, all fresh-context on the review lane.
+
+- **Adversarial** found M1 (material): the gate judged a stale readback when the
+  harness crashed before writing. Confirmed by reading `run_harness` (no unlink,
+  no returncode check) and `ls .scratch/desktop-gate/`. **Fixed in-branch** —
+  unlink the stale `--out` first, fail on a non-zero harness exit — and the gate
+  re-verified green (`desktop-gate: PASS.`, all a–h + T1–T4). Two minors wontfix.
+- **Domain**: no blocking. Statistics and baselines sound and sourced (T4=3.4 is
+  the committed ret cutoff bar; WASM baseline corroborated to 0.3 DPS by Chunk 1).
+  One material (D-M1, the 159 DPS Go-vs-WASM gap) → ticket 398; one minor (the
+  2.05× slowdown) → ticket 397.
+- **Standards**: no hard violations; two data-clump smells, both wontfix.
+- **Spec**: deliverable faithful. S1 — red `verify` on the inherited D7 drift,
+  owner's call. S2 — the Q2/C8 ticket the plan's text owed → filed as 397.
+
+Tickets filed: 397 (desktop bulk-screen slowdown), 398 (Go-vs-WASM baseline gap).
+NEXT bumped to 399; map.md appended.
+
+`pnpm merge-to-dev --check-only` run: **rc 1, and the sole failure is
+`fork-universes:check`** — the pre-existing CRLF/LF drift (D7, ticket 211),
+independent of this branch. Every gate that would catch this chunk's own work is
+green: 1290 tests pass, sim-implemented-effects (221/451, matches committed),
+engine-port-drift (33 files match PROVENANCE), equip-eligibility (matches fork at
+eb040855c), fork-lint (clean at eb040855c). Log: `mergecheck.log` (gitignored
+scratch).
+
+**Stopped here per the loop.** Not merged. The merge to `dev` is a separate
+owner ask, and it is a conscious one: `merge-to-dev` checks that the review file
+exists (it does), but the tip's `verify` is red on the inherited D7 drift, so
+merging means either accepting that red or clearing ticket 211 first.
