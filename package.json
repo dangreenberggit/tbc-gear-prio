@@ -66,6 +66,7 @@
     "meta-conditions:check": "python scripts/check_meta_conditions.py",
     "policy-notes:check": "python scripts/check_policy_notes.py",
     "fork-universes:check": "python scripts/sync_fork_universes.py --check",
+    "desktop-gate:check": "python scripts/check_desktop_tab.py",
     "pool-listings:check": "python scripts/list_phase_pool.py --check",
     "sim-implemented-effects:generate": "python scripts/generate_sim_implemented_effects.py",
     "sim-implemented-effects:check": "python scripts/check_sim_implemented_effects.py",
