@@ -1187,8 +1187,13 @@ def write_exclusions_manifest(path: Path = EXCLUSIONS_MANIFEST) -> dict[str, lis
         for name, profile in sorted(SPEC_PROFILES.items())
     }
     path.parent.mkdir(parents=True, exist_ok=True)
+    # newline="\n": the committed artifacts are LF; Windows text mode would
+    # otherwise rewrite them as CRLF, which re-reds fork-universes:check on a
+    # pure line-ending diff. Ticket 399.
     path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     return manifest
 
@@ -3022,13 +3027,20 @@ def main() -> int:
     )
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    # newline="\n" here and on the report below: these are the files
+    # fork-universes:check byte-compares against the fork's bundled copies, and
+    # a CRLF regen reds that gate with no data change. Ticket 399.
+    out_path.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
     report_path = (
         args.report
         or DEFAULT_OUT_DIR / f"{args.spec}-p{args.max_phase}.report.json"
     )
-    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    report_path.write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
     def display(p: Path) -> Path:
         # --out may point outside the repo (diagnostic runs); relative_to raises.

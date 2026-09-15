@@ -1,10 +1,10 @@
 # 399 — `fork-universes:check` compares two working trees whose line endings nothing pins
 
-Status: open
+Status: closed — fixed 2026-09-15 on `feat/desktop-transport-gate` (options 1 + 2; see "Resolution")
 Type: tooling defect
 Origin: workstream E, `feat/desktop-transport-gate`, 2026-09-15
 Blocks: —
-Related: 283 (generators write CRLF), 167 (same class, engine-port-drift gate), 211 (closed — built the gate, does not own this)
+Related: 283 (generators write CRLF — its core-side write sites are fixed here), 167 (same class, engine-port-drift gate — still open), 211 (closed — built the gate, does not own this)
 
 `pnpm fork-universes:check` has gone red on pure line-ending drift at least
 four times, been cleared with `sync_fork_universes.py --write` each time, and
@@ -94,6 +94,70 @@ under which it will eventually be waved through while red for a real reason.
 unpinned, 1 without 2 leaves the core tree alternating under every other
 consumer.
 
+## Resolution, 2026-09-15 — options 1 and 2, both
+
+Option 3 was rejected as filed: it blinds the gate to the encoding changes the
+script's docstring says it exists to catch.
+
+**Option 2, core side.** 13 `write_text(` call sites across 11 scripts omitted
+`newline=`; all now pass `newline="\n"`, matching the existing pattern at
+`scripts/generate_item_gem_index.py:281` and `scripts/list_phase_pool.py:558`.
+The sites: `assemble_universe.py` (exclusions manifest, universe payload,
+report), `generate_sim_implemented_effects.py`, `build_feral_skeleton.py`,
+`generate_json_literal_types.py`, `check_layout_gate.py`, `fetch_protos.py`,
+`capture_fixture.py`, `compose_feral_raid_sim.py` (×2),
+`compose_slamaltman_raid_sim.py` (×2), `five_seed_spread.py`. Deliberately not
+touched: the three probe `infile` writes (`crn_pairing_probe.py:69`,
+`five_seed_spread.py:84`, `seed_overlap_probe.py:68`) and two writes inside
+`TemporaryDirectory` — all scratch, none committed.
+
+Note the "14 scripts" figure in the grep above was wrong; the real count is 13
+sites in 11 scripts, and `list_phase_pool.py` was already correct.
+
+All 44 universes and 44 reports were then regenerated
+(`python scripts/assemble_universe.py --max-phase N --spec S`, 1s each), taking
+`data/universes/` from **47 CRLF / 41 LF to 0 CRLF / 88 LF**.
+`data/sim-implemented-effects.json` went 2036 CR → 0.
+
+**Option 1, fork side.** `.gitattributes` added at
+`ui/core/components/individual_sim_ui/upgrades/data/` pinning `* text eol=lf`,
+with `git add --renormalize` in the same commit. `git check-attr text eol` on
+the copies went from both **unspecified** to `text: set` / `eol: lf`. Scoped to
+that directory, not the fork root, per this ticket's own note — it is a
+fork-local file every future upstream merge carries.
+
+The renormalize was load-bearing: **15 copies were committed as CRLF** in the
+fork (`ret-p2` 5603 CR, `warrior-p2` 15350 CR, and 13 others), so refreshing the
+worktree alone would have left the blobs CRLF.
+
+**Sequence worth knowing.** The core regen flipped `data/universes/` to LF,
+which turned the gate **red at exactly those 15 copies** — that red is the fix
+surfacing, not a new fault. `sync_fork_universes.py --write` refreshed the 15,
+the renormalize pinned them, and the gate returned to
+`63 bundled copies byte-match their data/ sources`, rc=0.
+
+**Nothing but line endings changed**, verified the same two ways this ticket
+used: CR-stripped byte compare and `json.loads` equality, **0 mismatches by
+either method** across every file the regen touched, plus
+`0 local-only; 0 fork-only; 0 shared entries differ in content` from
+`describe_delta` on all 15.
+
+### Left alone, on purpose
+
+Five tracked files are committed CRLF and were not renormalized:
+`docs/five-seed-spread.json` (51 CR), `docs/five-seed-spread-feral.json` (52),
+`test/fixtures/shredzepelin-cat.raid-sim-request.json` (1338),
+`test/fixtures/shredzepelin-cat.raid-sim-result.json` (28), and
+`packages/core/test/candidate-gems.test.ts` (398). No gate compares them, their
+writers are now fixed so they will normalize on their next real regen, and
+regenerating the first four needs `wowsimcli` and live sim runs. The `.ts` file
+is hand-written with no generator. The ~294 CRLF files under `.scratch/` are
+also untouched — tracked, but not build inputs.
+
+**Ticket 167 is not closed by this.** Its sibling gate
+(`check_engine_port_drift.py`) compares the fork's engine `.ts` ports, which
+this `.gitattributes` does not cover and no generator here writes.
+
 ## A stale count in the fork lock's `_comment`, noticed in passing
 
 `data/wowsims-fork.lock.json`'s `_comment` says of the `eb040855c` entry that
@@ -111,4 +175,16 @@ narrative of a lock file to fix a past sentence is worse than a note.
 
 ```bash
 python scripts/sync_fork_universes.py --check
+```
+
+Confirm the fork pin is live (from the fork's data directory):
+
+```bash
+git -C vendor/tbc-new-fork check-attr text eol -- ui/core/components/individual_sim_ui/upgrades/data/ret-p2.universe.json
+```
+
+Confirm a regen no longer writes CRLF:
+
+```bash
+python scripts/assemble_universe.py --max-phase 2 --spec ret && git diff --stat -- data/universes/ret-p2.json
 ```

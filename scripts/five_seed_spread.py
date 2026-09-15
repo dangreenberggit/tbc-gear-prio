@@ -276,7 +276,11 @@ def main() -> int:
         "recommendedCutoff": cutoff,
         spec["reference_key"]: spec["reference"],
     }
-    out_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": docs/five-seed-spread*.json are committed and LF; Windows
+    # text mode would otherwise rewrite them as CRLF. Ticket 399.
+    out_json.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print()
     print(f"wrote {out_json.relative_to(ROOT)}")
     return 0

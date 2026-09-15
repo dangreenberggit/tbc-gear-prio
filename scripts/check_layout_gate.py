@@ -263,7 +263,11 @@ def write_baseline(digest: str) -> None:
         "the merge) or by --update-baseline after a hand-proven layout change. The "
         "fork itself is gitignored, so this record lives here rather than in the fork."
     )
-    LOCK_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the committed lock is LF; Windows text mode would otherwise
+    # rewrite it as CRLF. Ticket 399.
+    LOCK_PATH.write_text(
+        json.dumps(data, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
 
 def _find_chromium() -> Path | None:

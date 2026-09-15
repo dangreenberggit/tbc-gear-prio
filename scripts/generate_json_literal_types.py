@@ -223,7 +223,10 @@ def main() -> int:
         if args.check:
             stale.append(rel)
         else:
-            out.write_text(want, encoding="utf-8")
+            # newline="\n": `have == want` above compares against the file on
+            # disk, so a CRLF write would make --check red on every run after
+            # a regen. Ticket 399.
+            out.write_text(want, encoding="utf-8", newline="\n")
             print(f"wrote {rel}")
 
     if args.check:

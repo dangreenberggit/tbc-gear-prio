@@ -157,7 +157,12 @@ def main() -> int:
     req.pop("requestId", None)
 
     OUT_REQ.parent.mkdir(parents=True, exist_ok=True)
-    OUT_REQ.write_text(json.dumps(req, indent=2) + "\n", encoding="utf-8")
+    # newline="\n" here and on the result below: both are committed fixtures
+    # and LF; Windows text mode would otherwise rewrite them as CRLF.
+    # Ticket 399.
+    OUT_REQ.write_text(
+        json.dumps(req, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"wrote {OUT_REQ.relative_to(ROOT)}")
 
     version = subprocess.check_output([str(cli), "version"], text=True).strip()
@@ -203,7 +208,9 @@ def main() -> int:
     # Validate before writing the committed fixture — don't leave a green-looking
     # file behind a failed run.
     slim = slim_result(result, version)
-    OUT_RES.write_text(json.dumps(slim, indent=2) + "\n", encoding="utf-8")
+    OUT_RES.write_text(
+        json.dumps(slim, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"wrote {OUT_RES.relative_to(ROOT)} (slimmed; full raw at {tmp_out.relative_to(ROOT)})")
     print(f"DPS avg={dps:.2f}  iterations={ITERATIONS}  seed={RANDOM_SEED}")
     print(f"wowsimcli version: {version}")

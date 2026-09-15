@@ -276,7 +276,12 @@ def main() -> int:
         ],
     }
 
-    OUT_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the committed artifact is LF; Windows text mode would
+    # otherwise rewrite it as CRLF and every regen would read as a full-file
+    # diff against HEAD. Ticket 399.
+    OUT_PATH.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(
         f"wrote {OUT_PATH.relative_to(ROOT)} -- "
         f"{len(implemented)} implemented, {len(stub_only)} stub-only "
