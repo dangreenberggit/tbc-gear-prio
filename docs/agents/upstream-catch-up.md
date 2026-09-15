@@ -230,6 +230,14 @@ generator produces.
 A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, not
 a re-record.
 
+Before every fork re-pin, hand-run `pnpm desktop-gate:check` and paste its
+assertion lines (a)–(h) into the commit body or the stage's `desktop-gate.md`. It
+proves the upgrades tab still runs on the packaged desktop binary over the HTTP
+transport and cannot pass on the WASM fallback. It is deliberately **not** in
+`pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so
+nothing else catches a re-pin that breaks the embedded transport. A red gate
+blocks the re-pin.
+
 ## 6. The tag trigger
 
 ADR-0030 D2 keeps `wowsimcli` on build-from-source until a release tag contains
