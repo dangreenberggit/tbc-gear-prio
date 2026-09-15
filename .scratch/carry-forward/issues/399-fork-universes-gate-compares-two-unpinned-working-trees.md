@@ -177,11 +177,23 @@ narrative of a lock file to fix a past sentence is worse than a note.
 python scripts/sync_fork_universes.py --check
 ```
 
-Confirm the fork pin is live (from the fork's data directory):
+Confirm the fork pin is live. **This needs the fork clone on disk**, and
+`vendor/` is gitignored — a fresh checkout has no `vendor/tbc-new-fork` and
+cannot verify the fork half of this ticket at all (`sync_fork_universes.py`
+exits 0 with a skip message by design). Clone it to the pin in
+`data/wowsims-fork.lock.json` first:
 
 ```bash
+git clone https://github.com/dangreenberggit/tbc-new.git vendor/tbc-new-fork
+git -C vendor/tbc-new-fork checkout $(python -c "import json;print(json.load(open('data/wowsims-fork.lock.json'))['commit'])")
 git -C vendor/tbc-new-fork check-attr text eol -- ui/core/components/individual_sim_ui/upgrades/data/ret-p2.universe.json
 ```
+
+The checkout step will fail today: the pinned commit `e94d927af` is
+`pushed: false` and exists on one disk only, three commits ahead of
+`origin/feat/upgrades-tab` (`2781486d6`). Until the fork is pushed, only the
+machine that made it can verify Option 1 — the ticket-355 exposure ADR-0030
+Consequence 4 accepts.
 
 Confirm a regen no longer writes CRLF:
 

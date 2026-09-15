@@ -223,9 +223,10 @@ def main() -> int:
         if args.check:
             stale.append(rel)
         else:
-            # newline="\n": `have == want` above compares against the file on
-            # disk, so a CRLF write would make --check red on every run after
-            # a regen. Ticket 399.
+            # newline="\n": not for --check, which is already CRLF-blind --
+            # `have` comes from read_text, and text mode translates CRLF to \n
+            # on read. This stops the worktree alternating for every *other*
+            # consumer of these generated files. Ticket 399.
             out.write_text(want, encoding="utf-8", newline="\n")
             print(f"wrote {rel}")
 
