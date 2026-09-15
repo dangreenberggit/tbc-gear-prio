@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: .scratch/stage-gate/upstream-catchup-chunk1/plan-review.md F9
 Blocks: none
@@ -57,6 +57,23 @@ The recorded fixtures key on `simVersion` = a **commit sha**, not on the
 
 ## Acceptance
 
-- [ ] The `api-v15` literals either track `CURRENT_API_VERSION` or the header
+- [x] The `api-v15` literals either track `CURRENT_API_VERSION` or the header
       comment no longer claims they do.
-- [ ] The cache-miss case uses a sentinel that is not a live API version.
+- [x] The cache-miss case uses a sentinel that is not a live API version.
+
+## Resolution
+
+Closed 2026-09-15, `feat/desktop-transport-gate` (`df246b38`), fixed in
+passing while building ticket 400's verify summary.
+
+`bulk-screen-http-fixture.test.ts`'s `RECORDED_SIM_VERSION` and
+`bulk-screen-driver.test.ts`'s `SIM_VERSION` are now both
+`` `api-v${CURRENT_API_VERSION}` ``, imported from
+`packages/core/src/individual-settings.ts` (the same constant the header
+comment already described as the compile-time source of truth). The
+cache-miss case in `bulk-screen-http-fixture.test.ts` no longer uses
+`"api-v14"` -- now live and no longer a mismatch -- but a new
+`IMPOSSIBLE_SIM_VERSION = "api-v-1"`, chosen because `current_version_number`
+is a proto int32 field no version will ever populate with `-1`. Both files
+pass (`pnpm exec vitest run packages/core/test/bulk-screen-http-fixture.test.ts
+packages/core/test/bulk-screen-driver.test.ts`, fork present, 8 tests green).
