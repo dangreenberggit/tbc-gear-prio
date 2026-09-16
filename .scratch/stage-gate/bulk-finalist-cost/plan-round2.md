@@ -1,4 +1,4 @@
-# Plan — bulk-finalist-cost (revision 3, Track C, golden readback)
+# Plan — bulk-finalist-cost (revision 2, Track C chosen)
 
 ## Goal
 
@@ -7,21 +7,16 @@ runs the same per-candidate loop it already runs on the web tab, against the
 native server. No Go change, no proto change, no upstream divergence.
 
 When this plan is done: a cap-40 desktop run reports `runner` `WasmSimRunner`
-with `bulkSimAsync` 0 and `raidSimAsync` >= 1; its rows are byte-equal to
-today's screening-off twin; `pnpm desktop-gate:check` compares every run's
-`rows`, `aboveCutoffItems` and `baselineDps` against a committed golden readback
-at `data/desktop-gate/golden-ret-p5-cap40.json` and fails on any difference;
-the golden carries a note that regenerating it is a deliberate act; the cap-150
-loop measurement exists on disk as `<out>/prefix-cap150-loop.json`; and the
-decision is recorded in about four plain comment lines plus ticket 403.
+with `bulkSimAsync` 0, its rows are byte-equal to today's screening-off twin, the
+desktop gate asserts the new runtime shape, and the decision is recorded in four
+plain lines of comment plus ticket 403.
 
-**The owner chose Track C on 2026-09-15 and the choice is settled**
-(`<out>/decision-log.md`). Track A (a `skip_finalist_stage` proto field)
-is dropped; its specification is preserved in `plan-round1.md`. **The owner
-chose the golden-readback gate (option 1) on 2026-09-15**; options 2 and 3 are
-not re-opened here.
+**The owner chose this track on 2026-09-15 and the choice is settled** — see
+`decision-log.md`. Track A (a `skip_finalist_stage` proto field) is **dropped**;
+its full specification is preserved in `plan-round1.md` and in revision 1's
+history if it is ever revived.
 
-### Why the owner chose Track C, in one paragraph
+### Why the owner chose it, in one paragraph
 
 An independent advisor established that bulk screening is a **culling** tool for
 combinatorial searches whose culling we skip at 25 flat candidates, so we pay its
@@ -30,23 +25,20 @@ beaten about 30x by the existing paired replication: measured SE **0.018-0.088
 DPS** on replicated rows against **1.76-2.31** on unreplicated ones
 (`.scratch/rank-reports/shredzepelin-p3.json`, field `ranking.items[].se`, C36).
 Track A would have bought a 6x speedup while *reducing* precision and adding
-upstream divergence; Track C is about 15x faster than today at cap 40 and matches
-the web tab exactly (C28, C30).
+upstream divergence; Track C is about 25x faster than today and matches the web
+tab exactly (C37).
 
 ### Measured expectations
 
-| Run | Today (bulk) | Track C (loop) | Status | Source |
-| --- | --- | --- | --- | --- |
-| cap 20 | 173-264 s | 13 s | measured | `smoke-*-cap20*.json`, C12 |
-| cap 40 | 257 s | 17 s (21.7 s with startup) | measured | `gate-tip.log`, C28 |
-| cap 150 | not run | predicted 30-45 s, ~134 rows | **hypothesis, untested** until Step S3 writes `<out>/prefix-cap150-loop.json` | C37 |
-| full pool (601 rows) | 3419 s | point ~136 s, band **80-195 s** | **hypothesis, untested** (fitted; constraint 5 forbids the measurement) | C37 |
+| Run | Today (bulk) | Track C (loop) | Source |
+| --- | --- | --- | --- |
+| cap 40 | 257 s | 17 s / 21.7 s | `gate-tip.log`, measured |
+| cap 150 (134 rows) | not run | 37 s | measured 2026-09-15, C37 |
+| full pool (601 rows) | 3419 s | **130-160 s, point ~136 s** | fitted, C37 |
 
-A prior cap-150 run (134 rows, 37 s, 201 `raidSimAsync`) was reported to the
-owner but its readback was never written, so the number is withdrawn until S3
-re-measures it. The full-pool figure is a fitted prediction and stays one after
-this plan; see C37 for the model, its band and its uncertainties, and C44 for why
-the only existing 601-row loop readback does not transfer.
+The full-pool figure is a **fitted prediction, not a measurement**, and this plan
+does not run the full pool (constraint 5). See C37 for the model and its two
+stated uncertainties.
 
 ## Approach
 
@@ -62,32 +54,7 @@ The reviewer's three blocking findings all hold, and I re-read the code and the 
 
 4. **The cap-20 timing profile is not 13.7% (F5, disagreement with evidence).** The `Finalists: 13 / Duration 36.11s` the reviewer cited is at `server-3333.log.err:14474-14476`, timestamped 18:22:05 — the last chunk of the 3,419 s full-pool run, not the cap-20 run. The cap-20 first chunk ran 25 finalists for 165.70 s of 264 s (3333 run, 16:33-16:36 window) and 104.70 s of 173 s (release run, `server-release.log.err:140-259`), i.e. 60-63%. I still accept the finding's conclusion: the same run type varied 173 s to 264 s on the same machine, so wall clock is reported, not asserted; the finalist-line count is the assertion (C13, C34).
 
-5. **The fixture question is answered from disk, no new run needed.** `smoke-release-cap20.json` was recorded after the harness parser fix (`run-tab-cdp.mjs:274-279`) and has 20 populated rows: 8 above cutoff, 12 below, rounded to 0.1 DPS; its top 8 are byte-equal to the 3333 pair's (C29, C12). So cap 20 already clears the 8-item band, but every row 9+ at cap 20 is below cutoff and hidden in the collapsed `<details>`. The row class that matters — above cutoff, rank 9+, not replicated — first appears at cap 40 (gate run 257 s screened, 17-22 s loop, T2 over 32 rows, `gate-tip.log`). The plan measures at cap 40. Cost: about 5 minutes of sim time per pair, well inside constraint 5.
-
-### What changed since round 2
-
-The round-2 review (`plan-review-2.md`; findings also in `decision-log.md`) returned two blocking findings and five smaller ones.
-
-1. **G1 — deleting check (h) would remove all automatic ranking coverage.** Confirmed from the script: (a)-(g) read `wasmRefs`, `runner`, request counts, `done`, `rowCount`, `panicHit` and fallback warnings only (C38); every content comparison lives in `compare_readbacks`, reached from (h) or from the hand-run `--compare` (C39). Revision 2's claim that Step C3 "takes over the invariant" was false: C3 is a one-time executor action. **Resolution: the owner's option 1** — Step C4 replaces (h) with a comparison of every run against a committed golden readback; design below.
-2. **G2 — the cap-150 point has no artifact.** New Step S3 re-runs cap 150 on the pre-fix binary with `--force-fallback`, **twice**, and writes both readbacks to `<out>`. C37 is downgraded to hypothesis until then. Running it twice also gives the first loop-path run-to-run variance figure and a direct determinism check on rows 9..N, which the golden design depends on.
-3. **M1 — citations past the end of `decision-log.md`.** Removed; the Approach now cites the primary artifacts (`gate-tip.log`, `run-tab-cdp.mjs:274-279`) directly.
-4. **M2 — Step C1 line numbers and the import.** The `data-runner` line is `:1239`. The only import that becomes unused is `WorkerPool` (`:12`, used solely at `:1162`); `BulkHttpSimRunner` **stays** because `:1239` still tests `instanceof` on it (C43).
-5. **M3 — the band.** Widened to **80-195 s** by applying the only measured variance figure (42% of mean, C13) symmetrically around the 136 s point, and labelled hypothesis. `readback-wasm-tip.json` (601 rows, 1668 s, in-browser WASM) is now cited in C44 with the reason it does not transfer.
-6. **m1** — the C5 ticket names the six vitest files that keep passing while exercising unreachable code (C45). **m2** — the stale Track A manifest rows are gone.
-
-### The desktop gate under Track C: golden readback
-
-**Where it lives.** `data/desktop-gate/golden-ret-p5-cap40.json`, with `data/desktop-gate/README.md` beside it. Reasons: it is a committed input that a `scripts/check_*.py` reads, which is what `data/` already holds (`data/presets/ret/p2.raid-sim-skeleton.json`, `data/equip-eligibility.json`); `data/` is in `.prettierignore` (C42) so lint-staged will not reformat it; and `.scratch/stage-gate/*` is a place for evidence, not for a fixture the gate reads on every run. Filename is keyed by spec, phase and cap (`golden-<spec>-p<phase>-cap<N>.json`) so a second golden can be added later without renaming.
-
-**What is compared, and what is ignored.** Exactly three readback fields are compared: `rows` (the list of `{rank, item, slot, dps, source, belowCutoff}` objects, order included), `aboveCutoffItems` (order included) and `baselineDps`. Everything else varies run to run or is transport bookkeeping and is **ignored**: `elapsedS`, `wallClockS`, `recordedAt`, `statusText` (it embeds "Took Ns"), `requests`, `requestsSent`, `requestsBySession`, `firstUrls`, `workerSessionsAttached`, `poolSize`, `sample`, `origin`, `page`, `servedWorker`, `runner`, `done`, `panicHit`, `forcedFallback`, `screeningFallbackWarnings`, `candidatesRequested`, `eligibleCount`, `rowCount`, `aboveCutoff`, `phaseSet` (C40). Checks (a)-(g) already assert the ones that matter among those. **This is the design's crux: comparing a varying field would make the gate flap red, which trains reflexive regeneration and destroys the coverage.**
-
-**How it compares.** New check (h): exact equality on those three fields, no tolerance. Exactness is justified because the loop path is deterministic on one machine at fixed seeds (C30; `gate-tip.log` `baselineDpsDiff` 0.0 and T3 max 0), and **Step S3 measures that directly** before C4 relies on it. On a mismatch the gate calls the existing `compare_readbacks(rb, golden, cross_transport=False)` and `print_compare` as the diagnostic — no second comparator is written — then prints up to 20 differing rows, then the golden's `forkCommit`/`cpuCount` against the current values. Editing the check in response to a red run is out of scope: a red run is a finding and a ticket.
-
-**Why `cpuCount` is recorded.** Native `raidSimAsync` splits each request over `runtime.NumCPU()` (C41), and a different core count changes results in the last digits. The harness rounds `dps` to 0.1, so the golden is portable across machines except at a rounding boundary — recording `cpuCount` makes such a case explainable instead of mysterious.
-
-**First run, no golden.** The gate exits **2** ("could not run") naming the missing path, `--update-golden` and the README. It never passes silently without a golden and never writes one on its own. `--full` skips (h) — a 601-row golden would cost a full-pool run per regen and is out of scope.
-
-**Regeneration.** `--update-golden` runs the normal build, server, harness and (a)-(g); only if those pass does it write the golden, printing the full diff first when one already exists, then the rider line. The **owner-directed note** lives in two places: as `_note`, the first key of the JSON so it is the first thing anyone opening the file reads, and as `data/desktop-gate/README.md`. Both say plainly that regenerating is a deliberate act — legitimate on a fork re-pin, a universe regen or an intended ranking change — and that the printed diff must be explained in the commit body. Text in Step C4.
+5. **The fixture question is answered from disk, no new run needed.** `smoke-release-cap20.json` was recorded after the harness parser fix (`run-tab-cdp.mjs:274-279`, decision-log D6) and has 20 populated rows: 8 above cutoff, 12 below, rounded to 0.1 DPS; its top 8 are byte-equal to the 3333 pair's (C29, C12). So cap 20 already clears the 8-item band, but every row 9+ at cap 20 is below cutoff and hidden in the collapsed `<details>`. The row class F3 cares about — above cutoff, rank 9+, not replicated — first appears at cap 40 (about 14 above cutoff, `decision-log.md:275`; gate run 257 s screened, 17-22 s loop, T2 over 32 rows, `gate-tip.log`). The plan measures at cap 40. Cost: about 5 minutes of sim time per pair, well inside constraint 5.
 
 ### Why Track A was dropped
 
@@ -193,16 +160,7 @@ Status column: **unchanged** (round 1, stands), **revised** (fact corrected this
 | C34 | `Finalists: 13 / Iterations so far: 15027` is the last chunk of the full-pool run (18:22:05), not a cap-20 chunk; all 53 other finalist starts in that log are `Finalists: 25`. | no | new (F5) | `grep -n -A1 "Finalists: 13" <stage>/server-3333.log.err` (line 14474-14476); `grep "Finalists:" <stage>/server-3333.log.err \| sort \| uniq -c` |
 | C35 | Bulk screening is a **culling** tool: Low/Medium stages cull, High sims survivors, the finalist stage separates the top `topResults` (default 5, `bulk_sim.go:12`). At 25 flat candidates the culling stages are skipped (`bulk_sim.go:131-133`), so we run only the two expensive parts and get none of the culling. | yes | new (rev 2) | `sed -n 12p; sed -n 131,133p` on `<fork>/sim/core/bulk/bulk_sim.go`; `stage.go:241-248` doc comment; 397's note |
 | C36 | Paired replication already delivers what the finalist stage cannot. Measured in a committed report: replicated rows **SE 0.018-0.088 DPS**, unreplicated **1.76-2.31 DPS** — about 30x. `replicateTopItems` runs on both transports regardless of screening, so Track C does not touch it. | yes | new (rev 2) | `python -c "import json;d=json.load(open(r'<core>\.scratch\rank-reports\shredzepelin-p3.json'));[print(x['name'],x['se']) for x in d['ranking']['items'][:14]]"` — orchestrator-verified 2026-09-15 |
-| C37 | Native loop cost is `fixed + per_row * N`, **not** a flat rate. Two measured points (20 rows / 13 s, 40 / 17 s) give fixed ~9 s, slope ~0.2 s/row; the request-count fit (fixed 39.96, slope 1.2018/row) corroborates the shape, consistent with the top-8 x 5-seed replication being pool-size-independent. A third point at cap 150 (previously reported 134 rows / 37 s / 201 `raidSimAsync`) **has no artifact and is withdrawn** until S3 writes `<out>/prefix-cap150-loop.json`. Full pool at 601 rows: point ~136 s, band **80-195 s**. | yes | **downgraded (G2, M3): hypothesis, untested** until S3 | Cap-20: C12; cap-40: `gate-tip.log` line 2; cap-150 after S3: `python -c "import json;d=json.load(open(r'<out>\prefix-cap150-loop.json'));print(d['rowCount'],d['elapsedS'],d['requests']['raidSimAsync'],d['runner'])"`. The review recomputed the arithmetic as exact. Band is 136 s +/- 42%, the only measured run-to-run variance figure (C13), applied because loop variance is unmeasured. Uncertainties: (i) S3's second run gives the first loop-variance figure; (ii) 601 is ~4.5x beyond cap 150 and `poolSize` 20 saturation could bend the slope. A cap-300 run would halve the extrapolation — owner's call, out of scope. |
-| C38 | Gate assertions (a)-(g) inspect only `servedWorker.wasmRefs/readyFalse`, `runner`, `requests.bulkSimAsync`, `workerSessionsAttached`, `done`, `runTimedOut`, `rowCount`, `eligibleCount`, `panicHit`, `screeningFallbackWarnings` — **no DPS value, row order or above-cutoff set**. | yes | new (rev 3, G1) | `sed -n 405,457p <core>/scripts/check_desktop_tab.py` — orchestrator-verified 2026-09-15 |
-| C39 | `compare_readbacks` (T1-T4) is called from exactly two places: check (h) (`:533`) and `--compare` (`:484`); the gate never invokes `--compare`. | yes | new (rev 3, G1) | `grep -n "compare_readbacks(" <core>/scripts/check_desktop_tab.py` (3 hits: def + 2 calls) — orchestrator-verified |
-| C40 | A readback has 33 top-level keys; the ranking content is `rows` (`{rank, item, slot, dps, source, belowCutoff}`), `aboveCutoffItems`, `baselineDps`; `statusText` embeds "Took Ns"; `rowCount`/`aboveCutoff` derive from `rows`. | yes | new (rev 3) | `python -c "import json;d=json.load(open(r'<stage>\smoke-release-cap20.json'));print(sorted(d));print(d['rows'][0]);print(d['statusText'])"`; `sed -n 280,322p <harness>` |
-| C41 | Native `raidSimAsync` splits each request over `runtime.NumCPU()` (`sim_concurrent.go:500`, reached from `sim/web/main.go:133`); a different core count changes results in the last digits (~1e-12 DPS). The harness rounds `dps` to 0.1, so the golden is portable across core counts except at a rounding boundary. | yes | new (rev 3) | `sed -n 500p <fork>/sim/core/sim_concurrent.go`; `sed -n 133p <fork>/sim/web/main.go`; `sed -n 124,137p <core>/docs/plans/compute-topology.md` (measured). Portability at 0.1 DPS: **hypothesis, untested** — the gate records `cpuCount` for this reason |
-| C42 | `data/` is in `.prettierignore`, so a golden JSON there is not reformatted by lint-staged; `.scratch/*` is gitignored with per-stage exceptions, and `.scratch/desktop-gate/` (the gate's run outputs) is not excepted. | yes | new (rev 3) | `grep -n "^data/" <core>/.prettierignore` (line 11) — orchestrator-verified; `sed -n 43,77p <core>/.gitignore` |
-| C43 | In `upgrades_tab.tsx`, `WorkerPool` is imported at `:12` and used **only** at `:1162`; `BulkHttpSimRunner` appears at `:19`, `:449`, `:465`, `:1159`, `:1166` (deleted by C1) and `:1239` (`instanceof`, **stays**). The `data-runner` attribute is `:1239`, not 1234. | yes | new (rev 3, M2) | `grep -n "WorkerPool\|BulkHttpSimRunner" <fork>/ui/core/components/individual_sim_ui/upgrades_tab.tsx` |
-| C44 | `readback-wasm-tip.json` is a 601-row loop run: `runner` `WasmSimRunner`, `elapsedS` 1668, `raidSimAsync` 0, `other` 949, origin `127.0.0.1:60417`. Its sims ran on in-browser WASM workers, so its ~2.8 s/row does **not** transfer to the native HTTP loop (~0.2 s/row, C37); it is evidence for constraint 4 only. | no | new (rev 3, M3) | `python -c "import json;d=json.load(open(r'<stage>\readback-wasm-tip.json'));print(d['runner'],d['rowCount'],d['elapsedS'],d['requests'],d['origin'])"` |
-| C45 | Six vitest files test the bulk screening code the tab will no longer reach, in `<fork>/ui/core/components/individual_sim_ui/upgrades/engine/bulk/`: `bulk-boundary`, `bulk-partition`, `bulk-screen-branch`, `bulk-screen-driver`, `bulk-screen-fallback`, `bulk-screen-http-fixture`. They keep passing — green but dead. | no | new (rev 3, m1) | `ls <fork>/ui/core/components/individual_sim_ui/upgrades/engine/bulk/*.test.ts` (6 files) |
-| C46 | No golden readback exists anywhere tracked; the gate's readbacks go to gitignored `.scratch/desktop-gate/last-run.json` and `last-run-fallback.json`. | yes | new (rev 3) | `git -C <core> ls-files data/desktop-gate` (empty); `sed -n 59p <core>/scripts/check_desktop_tab.py` |
+| C37 | Native loop cost is `fixed + per_row * N`, **not** a flat rate. Three independent pairwise fits over measured points (20 rows / 13 s, 40 / 17 s, 134 / 37 s) agree: fixed **8.5-9.0 s**, slope **0.200-0.213 s/row**. Corroborated independently by request counts (~40 fixed + ~1.2/row, consistent with the top-8 x 5-seed replication being pool-size-independent). Full-pool prediction at 601 rows: **~136 s, range 130-160**. | yes | new (rev 2) | cap-150 run measured 2026-09-15 (`--force-fallback`, 134 rows, 37 s, 201 raidSimAsync, `runner` `WasmSimRunner`, `bulkSimAsync` 0); cap-20 from `smoke-3333-cap20-fallback.json`; cap-40 from `gate-tip.log`. **Prediction, not measurement.** Two stated uncertainties: (i) loop-path run-to-run variance is **unmeasured** — the bulk cap-20 type varied 264 s vs 173 s (42% of mean) and no loop repeat exists; (ii) 601 rows is ~4.5x beyond the largest calibration point, so worker-pool saturation at fixed `poolSize` 20 could bend the slope. A cap-300 run (~70-100 s) would halve the extrapolation. |
 
 ## Steps
 
@@ -214,19 +172,11 @@ Environment rules for every step: no `cd X && cmd`; absolute paths; Node 22 via 
 
 **S1 — Pre-register before any measurement.** Create `<out>\.gitignore` containing `*.log` and `*.log.err`. Create `<out>\predictions.md` with: the core and fork SHAs (`git -C <core> log -1 --format=%H`, `git -C <fork> rev-parse HEAD`); verbatim from this plan's Q3 the "fix is wrong" list; the predicted post-fix cap-40 `elapsedS` (15-25 s, **reported not asserted**); and the expected cap-40 counts (`rowCount` 40, `bulkSimAsync` 3 pre-fix and 0 post-fix, about 14 above cutoff). Acceptance: file exists with those sections and the two SHAs. Depends on C28, C37.
 
-**S2 — Pre-fix baseline pair on the current tip.** Build: `make -C <fork> wowsimtbc` with Node 22 on PATH; record `sha256sum <fork>/wowsimtbc.exe` in `predictions.md` under "binary, pre-fix". Start the server with stderr to `<out>\server-prefix.log.err`. Run the harness twice: `--out <out>\prefix-cap40-screened.json`, then `--force-fallback --out <out>\prefix-cap40-loop.json`. Stop the server. Acceptance (python one-liners, all must hold): screened has `done` true, `runTimedOut` false, `panicHit` false, `rowCount` 40, `runner` `BulkHttpSimRunner`, `requests.bulkSimAsync` 3, `screeningFallbackWarnings` 0, all 40 rows with `dps` not None, `aboveCutoff` >= 9; loop has `runner` `WasmSimRunner`, `bulkSimAsync` 0, `rowCount` 40, 40 populated rows; `grep -c "Stage: finalist - Started" <out>\server-prefix.log.err` between 1 and 3; `python scripts/check_desktop_tab.py --compare <out>\prefix-cap40-screened.json <out>\prefix-cap40-loop.json` exits 0. Record `aboveCutoff`, `elapsedS` of both, the finalist line count and each finalist `Duration:` in `predictions.md` under "Measured, pre-fix". If `aboveCutoff` < 9, stop and report: cap 40 did not produce the un-replicated above-cutoff row class and the cap must be raised (re-run at 60 is allowed; the full pool is not). **Leave the server running for S3.** Depends on C15, C28, C29.
-
-**S3 — Cap-150 loop measurement, twice (G2).** Same server, same pre-fix binary. Harness: `--candidates 150 --force-fallback --out <out>\prefix-cap150-loop.json`, then again to `<out>\prefix-cap150-loop-2.json`. Stop the server. Acceptance: both `done` true, `runTimedOut` false, `panicHit` false, `runner` `WasmSimRunner`, `bulkSimAsync` 0, `raidSimAsync` >= 1, all rows populated; `rowCount` reported (expected about 134; any value 100-150 passes, outside that stop and report); and
-
-`python -c "import json;a=json.load(open(r'<out>\prefix-cap150-loop.json'));b=json.load(open(r'<out>\prefix-cap150-loop-2.json'));print(a['rows']==b['rows'],a['aboveCutoffItems']==b['aboveCutoffItems'],a['baselineDps']==b['baselineDps'],a['elapsedS'],b['elapsedS'],a['rowCount'],a['requests']['raidSimAsync'])"`
-
-must print `True True True ...`. **If any of the three is `False`, stop and report** — the loop path is not deterministic run to run, and the golden design (exact equality, Step C4) needs the owner's decision before proceeding. This step is load-bearing twice over: it supplies the missing G2 artifact **and** it is the direct evidence that C4's exactness is safe. Write under "Measured, cap 150": both `elapsedS`, their ratio (the first loop-variance figure), `rowCount`, `raidSimAsync`, and a refit of C37 over the three points with the full-pool band recomputed and **still labelled hypothesis**. Depends on C30, C37.
+**S2 — Pre-fix baseline pair on the current tip.** Build: `make -C <fork> wowsimtbc` with Node 22 on PATH; record `sha256sum <fork>/wowsimtbc.exe` in `predictions.md` under "binary, pre-fix". Start the server with stderr to `<out>\server-prefix.log.err`. Run the harness twice: `--out <out>\prefix-cap40-screened.json`, then `--force-fallback --out <out>\prefix-cap40-loop.json`. Stop the server. Acceptance (python one-liners, all must hold): screened has `done` true, `runTimedOut` false, `panicHit` false, `rowCount` 40, `runner` `BulkHttpSimRunner`, `requests.bulkSimAsync` 3, `screeningFallbackWarnings` 0, all 40 rows with `dps` not None, `aboveCutoff` >= 9; loop has `runner` `WasmSimRunner`, `bulkSimAsync` 0, `rowCount` 40, 40 populated rows; `grep -c "Stage: finalist - Started" <out>\server-prefix.log.err` between 1 and 3; `python scripts/check_desktop_tab.py --compare <out>\prefix-cap40-screened.json <out>\prefix-cap40-loop.json` exits 0. Record `aboveCutoff`, `elapsedS` of both, the finalist line count and each finalist `Duration:` in `predictions.md` under "Measured, pre-fix". If `aboveCutoff` < 9, stop and report: cap 40 did not produce the un-replicated above-cutoff row class and the cap must be raised (re-run at 60 is allowed; the full pool is not). Depends on C15, C28, C29.
 
 ### Track C — loop runner on the HTTP transport
 
-**C1 — Tab change.** Edit `<fork>\ui\core\components\individual_sim_ui\upgrades_tab.tsx`: make `simRunner()` (`:1159-1168`) resolve to `this.sim` unconditionally (the memoised promise stays); delete the `new WorkerPool(1).isWasm()` probe (`:1162`) and the `new BulkHttpSimRunner(this.sim.concurrency)` return (`:1166`).
-
-**Remove exactly one import: `WorkerPool` (`:12`).** Do **not** remove `BulkHttpSimRunner` (`:19`) — it is still used at `:465` and `:1159` as a type and at `:1239` for `instanceof`. Keep the `data-runner` attribute line, which is **`:1239`**, as it is. (C43; an earlier revision said 1234, which was wrong.)
+**C1 — Tab change.** Edit `<fork>\ui\core\components\individual_sim_ui\upgrades_tab.tsx`: make `simRunner()` (lines 1159-1168) resolve to `this.sim` unconditionally; delete the `WorkerPool(1).isWasm()` probe; remove any import that becomes unused. Keep the `data-runner` attribute line (1234) as is.
 
 **The comment is a deletion, not a rewrite — this is an owner instruction.** The existing ~30-line doc comment (lines ~1130-1158) argues for the bulk runner and would otherwise be replaced by an equally long essay arguing the opposite. Replace the whole block with **about four plain lines**, in the house style (why, not what), along these lines:
 
@@ -250,28 +200,9 @@ Acceptance: `fnm exec --using=22 -- pnpm.cmd fork-lint:check` exits 0; `git -C <
 4. `grep -c "Bulk Sim" <out>\server-c.log.err` = 0.
 Write the outcome table under "Measured, post-fix" in `predictions.md`. Acceptance: every line passes; any failure is the "fix is wrong" result — stop and report which line. Depends on C25, C28, C30.
 
-**C4 — Desktop gate rewrite with golden readback (G1).** Edit `<core>\scripts\check_desktop_tab.py`:
+**C4 — Desktop gate rewrite.** Edit `<core>\scripts\check_desktop_tab.py`: (b) asserts `runner == "WasmSimRunner"` (S1 now means "the tab chose the loop runner on the desktop transport"); (c) asserts `requests.bulkSimAsync == 0` and `requests.raidSimAsync >= 1` (S2 inverted: the desktop binary must send no bulk request); remove the (h) twin run and the `--force-fallback` N2 negative and their docstring lines (`:29-31`, `:203-204`, `:469`, `:514-541`), keeping `--compare` intact (Step C3 uses it); update the module docstring's S1/S2 text. Update `<stage>\desktop-gate.md` and `docs/agents/upstream-catch-up.md:233-234` to describe the new (b)/(c) and the removed (h). Then `fnm exec --using=22 -- pnpm.cmd desktop-gate:check --candidates 40` must exit 0 (its own build, server, (a)-(g)). Acceptance: exit 0; `grep -c "force-fallback" <core>/scripts/check_desktop_tab.py` = 0; `grep -c '"--compare"' <core>/scripts/check_desktop_tab.py` >= 1. Depends on C31.
 
-1. **(b)/(c) invert.** (b) `rb["runner"] == "WasmSimRunner"`; (c) `bulkSimAsync == 0 and raidSimAsync >= 1 and workerSessionsAttached > 0`, message updated (S2 = "the desktop binary must send no bulk request and at least one native raid sim over the worker sessions"). Transport proof is unchanged: (a) still proves the served worker has no WebAssembly reference, so a WASM-origin run still fails (a) and (c) (C44).
-2. **Remove** the twin run, the `--force-fallback` and `--no-screen-check` flags and their docstring lines (`:29-31`, `:203-204`, `:469`, `:514-541`), and `last-run-fallback.json`. **Keep `--compare` and `--cross-transport`** — Step C3 and S2 use them, and (h)'s diagnostic reuses `compare_readbacks` (C39).
-3. **Add** `GOLDEN_DIR = ROOT / "data/desktop-gate"`, `golden_path(spec, phase, candidates)` returning `GOLDEN_DIR / f"golden-{spec}-p{phase}-cap{candidates}.json"`, and an `--update-golden` flag.
-4. **New (h)**, after (a)-(g) pass and not `--full`: load the golden; if absent, print `(h) FAIL: no golden at <path>. Run "pnpm desktop-gate:check --update-golden" once, read data/desktop-gate/README.md, and commit the file.` and return **2**. Otherwise compare exactly three fields — `rows`, `aboveCutoffItems`, `baselineDps` — with `==`, no tolerance. On mismatch: call `print_compare(compare_readbacks(rb, g, cross_transport=False), ...)` as the diagnostic (relabel its "screened"/"loop" strings to "a"/"b" so they read for both callers), then up to 20 differing rows as `rank item slot golden_dps -> run_dps belowCutoff`, then `golden forkCommit=<sha> cpuCount=<n>` against the current fork HEAD and `os.cpu_count()`. `--full` prints `(h) skipped: no golden for an uncapped run` and does not fail.
-5. **`--update-golden`**: same run; only if (a)-(g) pass, and printing the full mismatch diagnostic first when a golden already exists, write the golden with keys in this order — `_note`, `recordedAt`, `forkCommit` (`git -C <fork> rev-parse HEAD`), `cpuCount` (`os.cpu_count()`), `candidatesRequested`, `spec`, `phase`, `elapsedS`, `rows`, `aboveCutoffItems`, `baselineDps`, `rowCount`, `aboveCutoff` — as `json.dumps(..., indent=2, ensure_ascii=False) + "\n"`, UTF-8. Then print: `desktop-gate: golden written to data/desktop-gate/golden-ret-p5-cap40.json — commit it with the reason the output changed in the commit body. A red gate is a finding, not a prompt to regenerate.` Return 0 after writing; return 1 without writing if (a)-(g) fail.
-
-   `_note` text: `Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret P5 cap-40 run on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.`
-6. **Module docstring**: rewrite the S1/S2 and (h) sentences; add `--update-golden` to Modes.
-7. **Create `<core>\data\desktop-gate\README.md`** (about ten lines): what the golden is; the three compared fields and that everything else is ignored; when regenerating is legitimate and that the diff must be explained in the commit body; that the gate exits 2 without a golden; that `cpuCount`/`forkCommit` are recorded so a mismatch after a re-pin or on another machine is explainable (C41).
-8. **Update docs**: `<stage>\desktop-gate.md` (new (b)/(c)/(h), N2 retired) and `docs/agents/upstream-catch-up.md:233-234` (one sentence: "(h) compares against `data/desktop-gate/golden-ret-p5-cap40.json`; a re-pin that changes the tab's output regenerates it with `--update-golden` and explains the diff in the commit body").
-
-Then run, from `<core>` with Node 22, and record all four exit codes:
-- (i) `desktop-gate:check --candidates 40` → exit **2**, message names the missing golden.
-- (ii) `desktop-gate:check --candidates 40 --no-build --update-golden` → exit **0**; the golden exists; `python -c "import json;g=json.load(open(r'<golden>'));a=json.load(open(r'<out>\c-cap40-desktop.json'));print(list(g)[0],g['rows']==a['rows'],g['aboveCutoffItems']==a['aboveCutoffItems'],g['baselineDps']==a['baselineDps'])"` prints `_note True True True`.
-- (iii) `desktop-gate:check --candidates 40 --no-build` → exit **0** with `(h) pass`.
-- (iv) **Tamper negative:** a `python -c` that loads the golden, adds 0.1 to `rows[9]['dps']` and writes it back; re-run (iii) → exit **1** with `(h) FAIL` and the differing row's item name. Restore by re-running (ii) and confirm (iii) exits 0 again (the file is not yet committed, so `git checkout` cannot restore it).
-
-Acceptance: exits **2, 0, 0, 1** in that order; `grep -c "force-fallback\|no-screen-check\|last-run-fallback" <core>/scripts/check_desktop_tab.py` = 0; `grep -c '"--compare"' <same>` >= 1; `grep -c "update-golden" <same>` >= 2; `grep -c "compare_readbacks(" <same>` = **3** (def + `--compare` + (h) diagnostic — proof no second comparator was written). Depends on C31, C38, C39, C40, C41, C42, C46.
-
-**C5 — Records (before the fork commit).** (1) `docs/fork-upstream-touchpoints.md`: no new row (no Go, proto or engine file changed); add one line under the tab's existing entry if the file has one, else nothing. (2) Write `<out>\upstream-report-draft.md` with Q4 Draft 1 and the Track C note, header "Owner's call — not filed". (3) Ticket 403: add a "Fix, <date>" section: Track C chosen, mechanism, measured numbers from `predictions.md`, and what precision changed (C25/C32); `Status: open` until merged. (4) Tickets 397, 400, 401: append a one-paragraph note that the desktop screening path is no longer taken by the tab and that each ticket's remaining scope is either moot or re-scoped — do not close them; say which. (5) File **one** ticket under `.scratch/carry-forward/issues/` (next free number — `NEXT` says **406**, but the directory listing is the authority; known-traps § "Before filing a ticket"), "Bulk screening code is dead at runtime on both transports": what it is, why it stays in the tree, what re-enabling requires (the `high` stage delivers 16,599-19,686 iterations against 3,000 requested, C14, hypothesis; settled by the per-sim `Running N iterations` lines), the adaptive-pass question as one line, **and one line naming the six vitest files in `<fork>/ui/core/components/individual_sim_ui/upgrades/engine/bulk/` that keep passing while testing unreachable code (C45)**. Write the next free number back to `NEXT`.
+**C5 — Records (before the fork commit).** (1) `docs/fork-upstream-touchpoints.md`: no new row (no Go, proto or engine file changed); add one line under the tab's existing entry if the file has one, else nothing. (2) Write `<out>\upstream-report-draft.md` with Q4 Draft 1 and the Track C note, header "Owner's call — not filed". (3) Ticket 403: add a "Fix, <date>" section: Track C chosen, mechanism, measured numbers from `predictions.md`, and what precision changed (C25/C32); `Status: open` until merged. (4) Tickets 397, 400, 401: append a one-paragraph note that the desktop screening path is no longer taken by the tab and that each ticket's remaining scope is either moot or re-scoped — do not close them; say which. (5) File **one** ticket under `.scratch/carry-forward/issues/` (next number from `NEXT`, currently **406**; known-traps § "Before filing a ticket"): "Bulk screening code is dead at runtime on both transports" — what it is, why it stays in the tree, and what re-enabling requires (the `high` stage delivers 16,599-19,686 iterations against 3,000 requested, C14, hypothesis; the measurement that settles it is the per-sim `Running N iterations` lines). Fold the adaptive-pass question into that ticket as one line rather than filing it separately — it only matters if bulk comes back.
 
 **Tickets 404 and 405 are already filed** (2026-09-15, by the orchestrating session): 404 is the per-slot paired-replication gap the owner identified, 405 is the fork comment cleanup pass. Do **not** re-file them and do **not** start their work here. Reference them where relevant. Acceptance: `git -C <core> status --porcelain` lists exactly the files in the Paths manifest (Track C, core) plus `<out>\*`. Depends on C31.
 
@@ -288,18 +219,14 @@ because they are the evidence for *why* A was dropped, not dead weight.
 
 ## Paths manifest
 
-Core (`C:\Users\dgree\Code\lulz\tbc-gear-prio`), created:
-- **`data/desktop-gate/golden-ret-p5-cap40.json`**
-- **`data/desktop-gate/README.md`**
+Shared, core (`C:\Users\dgree\Code\lulz\tbc-gear-prio`), created:
 - `.scratch/stage-gate/bulk-finalist-cost/.gitignore`
 - `.scratch/stage-gate/bulk-finalist-cost/predictions.md`
 - `.scratch/stage-gate/bulk-finalist-cost/prefix-cap40-screened.json`
 - `.scratch/stage-gate/bulk-finalist-cost/prefix-cap40-loop.json`
-- `.scratch/stage-gate/bulk-finalist-cost/prefix-cap150-loop.json`
-- `.scratch/stage-gate/bulk-finalist-cost/prefix-cap150-loop-2.json`
 - `.scratch/stage-gate/bulk-finalist-cost/upstream-report-draft.md`
 - `.scratch/stage-gate/bulk-finalist-cost/server-prefix.log.err` and other `*.log`, `*.log.err` (gitignored)
-- `.scratch/carry-forward/issues/<next, 406 unless the listing says otherwise>-bulk-screening-code-dead-at-runtime.md`
+- `.scratch/carry-forward/issues/<next>-high-stage-adaptive-passes-inflate-desktop-screening.md`
 
 Shared, core, modified:
 - `data/wowsims-fork.lock.json`
@@ -331,10 +258,8 @@ From `C:\Users\dgree\Code\lulz\tbc-gear-prio`, Node 22 via `fnm exec --using=22 
 3. `python scripts/check_desktop_tab.py --compare .scratch/stage-gate/bulk-finalist-cost/prefix-cap40-screened.json .scratch/stage-gate/bulk-finalist-cost/prefix-cap40-loop.json` — exit 0 (the baseline pair is sound).
 4. Track C: `python -c "import json;d='.scratch/stage-gate/bulk-finalist-cost/';a=json.load(open(d+'c-cap40-desktop.json'));b=json.load(open(d+'prefix-cap40-loop.json'));print(a['rows']==b['rows'],a['requests']['bulkSimAsync'],a['runner'],a['elapsedS'])"` — `True 0 WasmSimRunner <n>`; `grep -c "Bulk Sim" .scratch/stage-gate/bulk-finalist-cost/server-c.log.err` — 0 (log is gitignored; present only on the executing machine); `fnm exec --using=22 -- pnpm.cmd desktop-gate:check --candidates 40` — exit 0; `git -C vendor/tbc-new-fork diff --stat upstream/master -- sim/ proto/` — one file (`sim/hunter/item_sets.go`), unchanged from before.
 5. Track A is dropped — no Track A verification applies. The Go tree must be **untouched**: `git -C vendor/tbc-new-fork diff --stat upstream/master -- sim/ proto/` — exactly one file (`sim/hunter/item_sets.go`, the pre-existing divergence), same as before this plan.
-6. `.scratch/stage-gate/bulk-finalist-cost/predictions.md` has "Measured, pre-fix", "Measured, cap 150", "Measured, post-fix" and "Gate" sections; the full-pool figure is labelled **hypothesis** everywhere it appears.
-7. The `simRunner` comment shrank and the probe is gone: `git -C vendor/tbc-new-fork diff -- ui/core/components/individual_sim_ui/upgrades_tab.tsx` shows net-negative comment lines; `grep -c "WorkerPool" <that file>` = 0; `grep -c "BulkHttpSimRunner" <that file>` = 5.
-8. **Golden gate works and can fail.** `python -c "import json;d='.scratch/stage-gate/bulk-finalist-cost/';a=json.load(open(d+'prefix-cap150-loop.json'));b=json.load(open(d+'prefix-cap150-loop-2.json'));print(a['rows']==b['rows'],a['rowCount'],a['elapsedS'],b['elapsedS'])"` — `True ...` (G2 artifact exists **and** the loop is deterministic, which is what licenses exact equality). `fnm exec --using=22 -- pnpm.cmd desktop-gate:check --candidates 40` — exit 0 with `(b) pass: runner=WasmSimRunner`, `(c) pass: bulkSimAsync 200s=0`, `(h) pass`. Then the C4(iv) tamper test — exit 1 with `(h) FAIL` — and restore; `git status --porcelain` empty after.
-9. `grep -c "force-fallback\|no-screen-check" scripts/check_desktop_tab.py` — 0; `grep -c "compare_readbacks(" scripts/check_desktop_tab.py` — 3; `test -f data/desktop-gate/README.md`.
+6. `.scratch/stage-gate/bulk-finalist-cost/predictions.md` has "Measured, pre-fix" and "Measured, post-fix" tables, and the post-fix `elapsedS` is reported beside the pre-fix value.
+7. The `simRunner` comment shrank: `git -C vendor/tbc-new-fork diff -- ui/core/components/individual_sim_ui/upgrades_tab.tsx` shows net-negative comment lines (C1 is a deletion, not a rewrite).
 
 ## Out of scope
 

@@ -97,3 +97,97 @@ Stage opened 2026-09-15 by the orchestrating session.
   owner asked specifically whether a smaller run can be scaled up; the agent is
   fitting `fixed + per_candidate * N` rather than a flat rate, because the top-8
   replication and baseline sims are fixed cost.
+
+- **Gate B round 3 — LOOP BACK** (2026-09-15). Round-2 review written to
+  `plan-review-2.md`. Two blocking findings, both independently re-verified by
+  the orchestrator before acceptance:
+
+  - **G1 — deleting gate check (h) removes ALL automatic ranking coverage.**
+    Confirmed by reading `scripts/check_desktop_tab.py:405-457`: assertions
+    (a)-(g) inspect only counts, flags and strings — `wasmRefs`, `runner`,
+    request counts, `done`, `rowCount`, `panicHit`, fallback warnings. **Not one
+    of them looks at a DPS value, a row order, or the above-cutoff set.** Every
+    content comparison (T1-T4) lives in `compare_readbacks`, reached only from
+    (h) at `:533` or from `--compare` at `:484`, and `--compare` is a hand-run
+    two-file diff the gate never invokes. The plan's claim that Step C3 "takes
+    over the invariant" is false — C3 is a one-time executor action, not a
+    standing check. Deleting (h) demotes `desktop-gate:check` to a shape check.
+  - **G2 — the cap-150 measurement has no artifact.** Orchestrator walked every
+    JSON under `.scratch/**`: **no file has `rowCount` 134 or 150.** The
+    measuring agent ran it, reported 37 s / 201 raidSimAsync, and the readback
+    was never written to `<out>`. That 134-row point is the entire lever for the
+    fitted slope, and therefore for the headline 130-160 s. This is the
+    "an exit code is not evidence work happened" failure in AGENTS.md
+    § Durable claims, and the orchestrator relayed the number to the owner as
+    measured before checking for the artifact. Recorded so the mistake is not
+    repeated.
+
+  Materials: M1 (three citations point past the end of `decision-log.md`, which
+  is **99 lines** — verified), M2 (wrong line number for `data-runner`, and
+  `BulkHttpSimRunner` must STAY while only `WorkerPool` becomes unused),
+  M3 (the 130-160 band is narrower than the only variance figure in evidence
+  supports; and `readback-wasm-tip.json` is an unmentioned 601-row loop run at
+  1668 s that must be cited and explained as non-transferring).
+  Minors: m1 (six vitest files would keep passing while testing unreachable
+  code), m2 (contradictory Paths-manifest rows for the dropped Track A).
+
+  **What the review could NOT break, after trying:** byte-equality (criterion 2)
+  is sound — the force-fallback one-shot arms after page load, so the factory
+  pool builds normally and the probe's throwaway `WorkerPool(1)` touches no
+  shared state; Track C's path is genuinely identical. C37's arithmetic is exact
+  and is corroborated by an independent request-count fit. Step C6 ordering
+  (my round-1 F6) is resolved.
+
+  **G1 is an owner decision, not a planning fix** — see the note below.
+
+- **Owner decision on G1, 2026-09-15: golden readback (option 1).** Keep
+  automatic ranking coverage by committing a known-good cap-40 readback and
+  having the gate compare every run against it.
+
+  The comparison that decided it, from `gate-tip.log`: a cap-40 loop run is
+  **17 s** (`elapsedS`), **21.7 s** including startup ("(h) twin wall clock").
+  Option 2 (invert (h), compare desktop-loop against WASM) pays that ~20 s on
+  **every gate run**; the golden file pays it **only when output legitimately
+  changes**. So option 1 is strictly cheaper than option 2 *and* catches more,
+  because it does not have to tolerate the cross-engine disagreement (398's
+  159 DPS baseline gap) that a cross-transport comparison must allow for.
+  Option 3 (demote to a shape check) was declined — it catches nothing.
+
+  **Owner-directed rider:** the golden file needs a plain note saying what it is
+  and that regenerating it is a deliberate act, not a formality. Without that,
+  the first person to hit a red gate regenerates reflexively and the coverage
+  disappears silently.
+
+- **G2 disposition: re-measure and commit the artifact.** The cap-150 number is
+  withdrawn until a readback JSON exists in `<out>` and is cited by path.
+
+- **Gate A (rev 3) — PASS** (2026-09-15). Revision 3 written; round 2 preserved
+  as `plan-round2.md`. All seven template sections present; claims C38-C46 added
+  (nine new, all orchestrator- or planner-verified); zero stale citations
+  remaining (the `decision-log.md:275`/`:279` and "line (1234)" references are
+  gone); Step S3 added. Core and fork trees clean, fork at `e94d927af`.
+
+  **Orchestrator error corrected this round:** `plan-review-2.md` was never
+  written to disk — the round-2 reviewer's report went into this log instead of
+  its artifact, contrary to the stage-gate skill ("Write its final message to
+  `plan-review.md`"). The planner noticed and worked from the prompt plus this
+  log, so revision 3 is sound, but the artifact was missing. Now written, with a
+  provenance note saying it landed late and why. Recorded rather than quietly
+  backfilled.
+
+  Both blocking findings resolved: **G1** by the owner's golden-readback design,
+  specified down to the three compared fields (`rows`, `aboveCutoffItems`,
+  `baselineDps`) and the ~25 ignored ones — the crux, because comparing a
+  varying field would make the gate flap and train reflexive regeneration,
+  destroying the coverage the owner asked for. **G2** by Step S3, which re-runs
+  cap 150 **twice**: it supplies the missing artifact and independently measures
+  the loop determinism that licenses C4's exact-equality check. If those two runs
+  disagree, S3 stops and the golden design returns to the owner.
+
+  Materials M1 (citations), M2 (line 1239 not 1234; only `WorkerPool` is removed,
+  `BulkHttpSimRunner` stays) and M3 (band widened to 80-195 s; `readback-wasm-tip`
+  cited as non-transferring) all fixed. Minors m1 (six green-but-dead vitest
+  files, now named in the C5 ticket) and m2 (stale manifest rows) fixed.
+
+  **Not proceeding to Step 5.** Execution has never been authorised; the owner
+  asked for planning. Sending rev 3 for a round-3 review first.
