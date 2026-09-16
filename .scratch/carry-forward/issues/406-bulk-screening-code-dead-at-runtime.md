@@ -1,6 +1,6 @@
 # 406 — Bulk screening code is dead at runtime on both transports
 
-Status: open
+Status: closed
 Type: task
 Origin: ticket 403's fix (Track C, 2026-09-16) — deliberately deferred there
 Blocks: —
@@ -66,3 +66,28 @@ The owner has decided delete-or-keep. If delete: the six test files go with the
 code, and `upgrades_tab.tsx`'s `data-runner` attribute needs a different way to
 report the runner. If keep: the six tests get a comment saying what they cover is
 unreachable, so the next reader is not misled by green.
+
+## Resolution
+
+**Keep.** Owner decision, 2026-09-16. Nothing was deleted and nothing was
+re-enabled; the bulk path stays switched off at `makeSimRunner(bulk = false)` and
+the code stays in both trees.
+
+What landed:
+
+- The six test files each gained a "Dead code cover" paragraph in their header
+  comment, same wording in all six so one grep finds them all —
+  tbc-gear-prio commit `68362b01f71b6922002868d6f6f10bd95238c1bb`.
+- `partition.ts`'s comment above `MAX_CANDIDATES_PER_BULK_REQUEST` gained the
+  same caveat as its leading paragraph — fork commit
+  `633169c7f4e835540f3041b7e4bb407218bffc5b` on `feat/upgrades-tab`, not pushed.
+
+**Correction to the What section above.** It says the six test files live in the
+fork's `upgrades/engine/bulk/`. They do not. They are tracked files in
+tbc-gear-prio at `packages/core/test/bulk-*.test.ts`; the fork's `engine/bulk/`
+holds only `partition.ts`. Measured with `git ls-files packages/core/test` and
+`find vendor/tbc-new-fork -name 'bulk-*.test.ts' -not -path '*/node_modules/*'`,
+which returns nothing. The original text is left as written.
+
+Trimming the `partition.ts` comment is ticket 410's job, not this one's. The
+caveat paragraph added here is the part any trim must keep.

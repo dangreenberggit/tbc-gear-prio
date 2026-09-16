@@ -94,6 +94,19 @@ writing the shorter version and checked that nothing needed goes missing.
 - Anything cut should land where a reader will still find it — the ticket, the
   test, or an ADR — not simply be deleted.
 
+## Comments
+
+**2026-09-16.** 406 resolved as keep. The "may be re-enabled" premise under
+"Watch out for" is now settled policy rather than a possibility, so the higher
+bar for cutting stands on a decision instead of a guess.
+
+`partition.ts`'s constant comment gained a leading paragraph in fork commit
+`633169c7f4e835540f3041b7e4bb407218bffc5b` saying the constant is unreachable at
+runtime, with the grep that proves it. Any trim must keep that paragraph; it is
+the only place the dead-at-runtime fact is recorded in the fork. Nothing else in
+the comment was touched — the 406 branch trimmed nothing, so this ticket is
+unblocked and its survey scope is unchanged.
+
 ## Done when
 
 The survey exists with per-file numbers and the outliers classified, and the
