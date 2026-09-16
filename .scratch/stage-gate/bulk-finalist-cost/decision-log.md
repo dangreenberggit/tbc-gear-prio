@@ -191,3 +191,31 @@ Stage opened 2026-09-15 by the orchestrating session.
 
   **Not proceeding to Step 5.** Execution has never been authorised; the owner
   asked for planning. Sending rev 3 for a round-3 review first.
+
+- **Gate B round 3 — PASS. Plan approved** (2026-09-15). `plan-review-3.md`
+  written to disk this time (last round's artifact gap not repeated). Verdict
+  `approve`: no blocking, no material, three minor — all folded into the plan
+  immediately rather than carried to the executor:
+  - **n1**: the 0.1 DPS granularity comes from the **tab's renderer**
+    (`upgrades_tab.tsx:250`, `:1404`), not the harness, which does no rounding.
+    Orchestrator-verified. The portability conclusion was right, the stated
+    mechanism was wrong; corrected in place and C41 now cites the renderer.
+  - **n2**: six readback keys were in neither list. Not a flap (the comparison is
+    a whitelist in code, so unlisted fields are ignored by construction), but the
+    prose claimed to be exhaustive. All 30 non-compared keys now listed, with the
+    whitelist-in-code point made explicit.
+  - **n3**: ticket 400 is already `Status: closed` — orchestrator-verified — so
+    C5(4) no longer tells the executor to treat it as open scope.
+  Added **C47**: the gate has exactly one entry point (`package.json:70`), is not
+  in `verify:steps`, and CI never clones the fork — so an exact-equality golden
+  can only go red on a developer's machine with the diagnostic in front of them.
+  That bounds the cross-machine portability risk the exactness raises.
+  Also added, at the reviewer's suggestion and for honesty rather than safety: a
+  plain statement that `--update-golden`'s (a)-(g) precondition stops only a
+  *broken run* from becoming a golden, and that value-level correctness rests
+  entirely on the developer reading the printed diff.
+
+  **Pipeline status: plan approved, execution NOT started and NOT authorised.**
+  The owner asked for planning; Step 5 needs a separate ask. The review's closing
+  paragraph states the exact scope an executor would be authorised to do, for the
+  owner to sanity-check before any execution ask.
