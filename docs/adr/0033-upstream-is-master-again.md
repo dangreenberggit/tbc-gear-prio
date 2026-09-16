@@ -2,6 +2,10 @@
 
 **Status:** accepted
 **Date:** 2026-09-14
+**Corrected:** 2026-09-15 (ticket 402) — Consequence 5 calls its measurement
+input the "ret P2 skeleton". The file is named `p2.raid-sim-skeleton.json` but
+wears **phase 1** gear. Every number below stands; only that label was wrong.
+See the correction note at the end.
 **Related:** [`ADR-0030`](0030-build-from-feature-backend-reforge-on-both-pins.md) (Decision 1 superseded here, Decision 2 kept), `PLAN.md` §8, §9; tickets `.scratch/carry-forward/issues/354-sync-wowsims-check-misreports-drift-on-a-ref-pin.md` (closed here), `357-build-from-source-can-leak-a-git-worktree-registration.md` (closed here), `390-bulk-screen-fixture-api-v14-is-now-the-live-version.md` (filed here)
 
 ## Context
@@ -201,3 +205,42 @@ manual command and belongs in the execution record on its own.
    is still stamped `simVersion ec5c5f2`. A green `pnpm verify` therefore proves
    nothing about engine behaviour at the new pin — the recordings answer for the
    old engine. Re-recording that fixture is a separate decision nobody has taken.
+
+## Correction, 2026-09-15 — the measurement input is P1 gear, not P2
+
+Consequence 5 describes its baseline as "the committed ret P2 skeleton". The
+file path is right — `data/presets/ret/p2.raid-sim-skeleton.json`, as stated —
+but its `p2.` prefix is the CLI harness's path template, not a description of
+the equipment. The 17 equipment ids in that file are an exact match for the
+fork's **phase 1** ret gear set and do not match its phase 2 set:
+
+```sh
+python -c "import json,functools; \
+  g=lambda p,*k:[i.get('id') if i else None for i in functools.reduce(lambda o,x:o[x],k,json.load(open(p)))['items']]; \
+  V='vendor/tbc-new-fork/ui/paladin/retribution/gear_sets/'; \
+  s=g('data/presets/ret/p2.raid-sim-skeleton.json','raid','parties',0,'players',0,'equipment'); \
+  print(s==g(V+'p1.gear.json'), s==g(V+'p2.gear.json'))"
+# -> True False
+```
+
+**No number in Consequence 5 changes.** Both pins were measured on the same
+committed file, unmodified, at the same seed and iteration count; the finding
+is a difference between two engine builds on one fixed input, and which phase
+that input's gear belongs to does not enter it. The two-handed baseline, the
+one-handed −80.35 DPS result, the swap ids and every band all stand as written.
+
+What does change is how a reader should read the phrase "the gear this project
+actually sims". That baseline character wears P1 gear. The claim it supports —
+that the main hand is two-handed, so the two-handed case is the one this
+project's ret rankings exercise — is unaffected. The main hand is equipment
+index 14, and the P1 set's Lionheart Champion (`28429`) and the P2 set's
+Lionheart Executioner (`28430`) both carry `handType: 4`, which
+`vendor/tbc-new-fork/proto/common.proto:356` defines as `HandTypeTwoHand`. The
+two one-handers swapped in for the −80.35 result carry `handType` 1 and 2, and
+the in-band 2H controls carry 4, so the two-handed/one-handed split the
+measurement turns on is the same under either phase's gear.
+
+The filenames are not being changed: `p2` is composed by template in
+`packages/core/src/cli-wiring.ts` and `spec-registry.ts` and appears in roughly
+sixty places. `data/presets/ret/README.md` documents the contents instead.
+Ticket `.scratch/carry-forward/issues/402-ret-preset-filenames-say-p2-but-the-gear-is-p1.md`.

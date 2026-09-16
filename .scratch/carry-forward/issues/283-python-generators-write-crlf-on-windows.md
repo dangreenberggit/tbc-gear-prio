@@ -1,4 +1,4 @@
-Status: open
+Status: closed — fixed 2026-09-15 by ticket 399 on `feat/desktop-transport-gate` (see "Resolution")
 Type: tooling defect
 Origin: stage-gate `upgrades-ui-pass`, step-8 regen, 2026-08-23
 Blocks: none
@@ -86,3 +86,48 @@ rewrite to `open()` is needed:
 - Consider whether `.gitattributes`'s `* text=auto eol=lf` should carry a
   comment saying it is a backstop, not the mechanism — the two proto-tree
   rules above it already carry that kind of note.
+
+## Resolution, 2026-09-15 — fixed under ticket 399
+
+The write-site sweep landed as ticket 399's option 2. Thirteen `write_text(`
+sites across eleven scripts gained `newline="\n"`; the pre-merge review then
+found a fourteenth, `sync_atlasloot.py:122`, which is an `open()` call that
+sweep's `write_text(` grep could not match (finding A1 in
+`docs/reviews/feat-desktop-transport-gate.md`).
+
+Measured on a clean tree after a fresh regen:
+
+    data/sim-implemented-effects.json: CR 0, LF 2036   (was 2032 CRLF / 0 LF)
+    data/universes: 88 files, 0 containing CR          (was 47 CRLF / 41 LF)
+
+`python scripts/assemble_universe.py --max-phase 2 --spec ret` then leaves
+`git status` clean, which is this ticket's second "Done when". Full
+`pnpm verify` is rc 0.
+
+Nine bare write sites remain in `scripts/`, none writing a committed artifact:
+four are `"wb"` binary writes where `newline=` does not apply
+(`fetch_wowsimcli.py:78`, `sync_atlasloot.py:109`, `sync_wowsims.py:434`,
+`:553`); two are `TemporaryDirectory` writes (`check_build_feral_skeleton.py:95`,
+`check_sim_implemented_effects_classifier.py:100`); three are sim request files
+handed to `wowsimcli` and discarded (`crn_pairing_probe.py:69`,
+`seed_overlap_probe.py:68`, `five_seed_spread.py:84`). Established with a
+paren-balancing scan rather than a line grep — the fixed calls are multi-line,
+so a plain `grep -v newline=` reports false positives.
+
+**The fourth "Done when" is done, and the rule this ticket cited is now
+written.** Line 20 above claims `AGENTS.md`'s data-pipeline section states
+"Python writes need `newline='\n'`". It does not, and never did — a search of
+`AGENTS.md`, `CLAUDE.md`, `docs/**` and `.claude/**` finds it nowhere. The rule
+now lives in `docs/agents/known-traps.md` § "Before any scripted or generated
+file edit", which `AGENTS.md` already routes to for this action; that entry also
+stopped describing the generators as a live hazard, which they no longer are.
+`.gitattributes` carries the backstop note this ticket asked for.
+
+**Line numbers above have drifted.** `generate_sim_implemented_effects.py:279`
+is now the fix's comment, with the write at :282–284; most of the eighteen
+listed numbers moved similarly.
+
+**Sibling case 167 is not closed by this.** `check_engine_port_drift.py` sha256s
+raw bytes of the fork's ported `.ts` files, whose CRLF arrives from a git
+checkout rather than any Python write, and the `.gitattributes` 399 added to the
+fork is scoped to `upgrades/data/`, not `upgrades/engine/`.

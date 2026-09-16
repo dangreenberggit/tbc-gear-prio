@@ -1,0 +1,4 @@
+*.log
+*.log.err
+served-sim_worker.js
+run-tab-cdp.tip.mjs

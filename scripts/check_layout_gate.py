@@ -263,7 +263,11 @@ def write_baseline(digest: str) -> None:
         "the merge) or by --update-baseline after a hand-proven layout change. The "
         "fork itself is gitignored, so this record lives here rather than in the fork."
     )
-    LOCK_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the committed lock is LF; Windows text mode would otherwise
+    # rewrite it as CRLF. Ticket 399.
+    LOCK_PATH.write_text(
+        json.dumps(data, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
 
 def _find_chromium() -> Path | None:
@@ -444,6 +448,65 @@ def _skip(msg: str) -> int:
     return 0
 
 
+def preview_skip_reason() -> str | None:
+    """The reason `run()` would skip right now, or None if it would actually
+    run the gate.
+
+    Mirrors `run()`'s guard sequence up to -- and never including --
+    `run_gate()`, so calling this from `pnpm verify`'s tail summary (ticket
+    400) costs a handful of file reads and a hash over the tab source, never
+    the ~2m19s Playwright run. `run()` itself remains the only caller that can
+    trigger `run_gate()`; this function does not import verdict-only state
+    (baseline advance, on_baseline_advanced) because it never gets that far.
+    """
+    if not FORK_ROOT.is_dir():
+        return (
+            "vendor/tbc-new-fork is absent (the clone is gitignored and is not "
+            "restored in CI). The tab layout lives only on the main checkout."
+        )
+
+    digest, missing = compute_tab_hash()
+    if missing:
+        # Not an ordinary skip -- the fork is present but a tracked layout
+        # source is gone. Let the caller's own run() surface this as the
+        # error it is instead of reporting it as a quiet skip.
+        return None
+
+    baseline = read_baseline()
+    if baseline == digest:
+        return (
+            f"tab layout source unchanged since the last green run "
+            f"(digest {digest[:12]}...). Nothing to re-test."
+        )
+
+    if not LAYOUT_TEST.is_file():
+        return (
+            f"{LAYOUT_TEST.relative_to(FORK_ROOT).as_posix()} is absent from the "
+            "fork -- the clone is present but predates the layout gate "
+            "(ticket 322). Nothing to run."
+        )
+    if not any(p.is_file() for p in DIST_WASM_CANDIDATES) or not DIST_ASSETS.is_dir():
+        wanted = " or ".join(
+            p.relative_to(FORK_ROOT).as_posix() for p in DIST_WASM_CANDIDATES
+        )
+        return (
+            "the fork's built dist/ is absent (no prior `make host`: needs "
+            f"{wanted}, plus "
+            f"{DIST_ASSETS.relative_to(FORK_ROOT).as_posix()}). The gate builds "
+            "the bundle on top of it and cannot run without it. Run `make host` "
+            "in the fork once to arm the gate."
+        )
+    if _find_chromium() is None:
+        return (
+            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
+            "(chromium-*/chrome-win64/chrome.exe). The gate drives a headless "
+            "Chromium and cannot run without one -- a missing/rotted browser "
+            "path skips the gate rather than blocking the merge."
+        )
+
+    return None
+
+
 def run(
     print_hash: bool = False,
     update_baseline: bool = False,
@@ -581,7 +644,23 @@ def main() -> int:
         action="store_true",
         help="write testedTabHash from the current source WITHOUT running the gate",
     )
+    ap.add_argument(
+        "--preview-skip",
+        action="store_true",
+        help=(
+            "print 'layout: skipped -- <reason>' and exit 0 if the gate would "
+            "skip right now, or 'layout: would run' and exit 0 otherwise. Never "
+            "runs the gate itself (ticket 400 / pnpm verify's tail summary)."
+        ),
+    )
     args = ap.parse_args()
+    if args.preview_skip:
+        reason = preview_skip_reason()
+        if reason is None:
+            print("layout: would run (not a verify step; see pnpm merge-to-dev)")
+        else:
+            print(f"layout: skipped -- {reason}")
+        return 0
     return run(print_hash=args.print_hash, update_baseline=args.update_baseline)
 
 

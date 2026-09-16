@@ -18,10 +18,12 @@
   step below runs through `fnm exec --using=22` so the pin is per-command,
   not shell-state-dependent.
 
-  The fork's own `npm start` (`cross-env WATCH=1 make devmode`) requires
-  `make`, which is not installed on this box. The -Backend branch below is
-  a PowerShell port of the equivalent cmd one-liner in .claude/launch.json
-  (build steps only, no cmd-isms: no `&&`, no `copy /y`, no `type nul`).
+  `make` is present on this box (`make --version`), so -Desktop uses it to
+  build and run the packaged embedded binary the way the release does. The
+  -Backend branch stays a PowerShell port of the equivalent cmd one-liner in
+  .claude/launch.json (build steps only, no cmd-isms: no `&&`, no `copy /y`,
+  no `type nul`), because it serves `dist/` live from disk for fast frontend
+  iteration; -Desktop is the mode that proves the embedded HTTP transport.
 
 .PARAMETER Backend
   Build and run the Go sim backend on the given -BackendPort (default 3333).
@@ -34,6 +36,13 @@
   can watch each log and Ctrl+C each independently. (A single window with
   background jobs would merge or hide the logs you actually want to watch
   while iterating — separate windows are the better fit for a solo dev.)
+
+.PARAMETER Desktop
+  Build the packaged embedded binary (`make wowsimtbc`) and run it on
+  -BackendPort with the **embedded** HTTP transport — without the usefs
+  disk-serve flag, so the server serves its embedded net_worker.js rather than
+  dist/ from disk. This is the mode `pnpm desktop-gate:check` verifies; use it
+  to eyeball the tab on the real desktop transport.
 
 .PARAMETER BackendPort
   Port for the Go backend. Must be 3333 unless you know the frontend proxy
@@ -60,6 +69,9 @@ param(
 
     [Parameter(ParameterSetName = 'Both')]
     [switch]$Both,
+
+    [Parameter(ParameterSetName = 'Desktop')]
+    [switch]$Desktop,
 
     [int]$BackendPort = 3333,
     [int]$FrontendPort = 5173
@@ -105,6 +117,42 @@ function Start-Backend {
     }
 }
 
+function Start-Desktop {
+    param([int]$Port)
+
+    Push-Location $ForkDir
+    try {
+        Write-Host "[dev-tab] Building packaged desktop binary (make wowsimtbc)..." -ForegroundColor Cyan
+
+        # The makefile shells out to POSIX tools (`uname -s`, `realpath`) that
+        # live in Git's usr\bin, not on PowerShell's PATH; without them make
+        # dies at the devserver step with "CreateProcess(NULL, uname -s) failed".
+        # Prepend Git's usr\bin for this build only so make can spawn them. (The
+        # -Backend branch hand-rolls the build and sidesteps make, but -Desktop
+        # needs make's full binary_dist target to embed the real dist.)
+        $gitCmd = Get-Command git -ErrorAction SilentlyContinue
+        if ($gitCmd) {
+            $gitUsrBin = Join-Path (Split-Path (Split-Path $gitCmd.Source -Parent) -Parent) 'usr\bin'
+            if (Test-Path (Join-Path $gitUsrBin 'uname.exe')) {
+                $env:PATH = "$gitUsrBin;$env:PATH"
+            }
+        }
+
+        & fnm exec --using=22 -- make wowsimtbc
+        if ($LASTEXITCODE -ne 0) { throw "make wowsimtbc failed with exit code $LASTEXITCODE" }
+
+        # Deliberately without the usefs disk-serve flag: the embedded server
+        # serves its rewritten net_worker.js (the HTTP transport the desktop
+        # gate proves). Serving dist/ live would defeat the gate, so -Desktop
+        # must not copy Start-Backend's flag.
+        Write-Host "[dev-tab] Starting embedded desktop server on :$Port..." -ForegroundColor Cyan
+        & (Join-Path $ForkDir 'wowsimtbc.exe') --launch=false --host=":$Port"
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 function Start-Frontend {
     param([int]$Port)
 
@@ -125,6 +173,7 @@ function Start-Frontend {
 
 switch ($PSCmdlet.ParameterSetName) {
     'Backend' { Start-Backend -Port $BackendPort }
+    'Desktop' { Start-Desktop -Port $BackendPort }
     'Frontend' { Start-Frontend -Port $FrontendPort }
     'Both' {
         Write-Host "[dev-tab] Launching backend and frontend in separate windows..." -ForegroundColor Cyan

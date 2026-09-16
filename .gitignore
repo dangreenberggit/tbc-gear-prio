@@ -73,6 +73,8 @@ vendor/
 !.scratch/stage-gate/two-hander-clears-offhand/
 !.scratch/stage-gate/ledger-consolidation-and-merge-train/
 !.scratch/stage-gate/merge-ready-disposition-parser/
+!.scratch/stage-gate/desktop-transport-gate/
+!.scratch/stage-gate/bulk-finalist-cost/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json

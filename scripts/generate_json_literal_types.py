@@ -223,7 +223,11 @@ def main() -> int:
         if args.check:
             stale.append(rel)
         else:
-            out.write_text(want, encoding="utf-8")
+            # newline="\n": not for --check, which is already CRLF-blind --
+            # `have` comes from read_text, and text mode translates CRLF to \n
+            # on read. This stops the worktree alternating for every *other*
+            # consumer of these generated files. Ticket 399.
+            out.write_text(want, encoding="utf-8", newline="\n")
             print(f"wrote {rel}")
 
     if args.check:

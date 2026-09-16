@@ -99,7 +99,11 @@ def do_fetch(lock: dict) -> int:
     # one key. See OWNED_KEY and the note in sync_wowsims.merge_lock().
     lock = load_lock()
     lock[OWNED_KEY] = {"commit": sha, "files": files}
-    LOCKFILE.write_text(json.dumps(lock, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the committed lockfile is LF; Windows text mode would
+    # otherwise rewrite it as CRLF. Ticket 399.
+    LOCKFILE.write_text(
+        json.dumps(lock, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"\n  wrote {len(PROTO_FILES)} proto files to {DEST.relative_to(ROOT)}")
     print(f"  lockfile updated: {LOCKFILE.relative_to(ROOT)}")
     return 0

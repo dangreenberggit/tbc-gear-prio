@@ -135,7 +135,9 @@ def main():
 
     out = ROOT / args.out
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    # newline="\n": the captured fixture is committed and LF; Windows text mode
+    # would otherwise rewrite it as CRLF. Ticket 399.
+    out.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
 
     mine = [e for e in combatant_info if e.get("sourceID") == me["id"]]
     print(f"  wrote {out}")

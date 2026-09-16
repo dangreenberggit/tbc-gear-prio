@@ -227,7 +227,11 @@ def main() -> int:
     player["equipment"] = {"items": [{} for _ in range(17)]}
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(skeleton, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the committed skeleton is LF; Windows text mode would
+    # otherwise rewrite it as CRLF. Ticket 399.
+    OUT.write_text(
+        json.dumps(skeleton, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
     print(f"wrote {OUT.relative_to(ROOT)}")
     print(f"  class={player['class']} race={player['race']}")
