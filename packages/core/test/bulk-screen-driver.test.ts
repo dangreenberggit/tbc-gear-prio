@@ -2,6 +2,14 @@
  * `runBulkScreenChunks` — the chunk loop both bulk transports drive (ticket
  * 347).
  *
+ * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
+ * Since ticket 403 both transports take the per-candidate loop, and the switch
+ * is `makeSimRunner(bulk = false)` in the fork's
+ * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
+ * works, not that the tab uses it. The code is kept on purpose (ticket 406,
+ * resolved keep) and these tests are its re-enable safety net. Re-check with:
+ * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ *
  * Tested directly rather than through a runner because the runners are now a
  * constructor plus a one-line `dispatch`: everything worth asserting — cancel,
  * per-chunk signal isolation, which failures degrade and which surface — lives

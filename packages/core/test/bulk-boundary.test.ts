@@ -2,6 +2,14 @@
  * The no-culling boundary, measured against upstream's own estimator (ticket
  * 349).
  *
+ * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
+ * Since ticket 403 both transports take the per-candidate loop, and the switch
+ * is `makeSimRunner(bulk = false)` in the fork's
+ * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
+ * works, not that the tab uses it. The code is kept on purpose (ticket 406,
+ * resolved keep) and these tests are its re-enable safety net. Re-check with:
+ * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ *
  * Ticket 349's premise was that a high enough iteration count would push the
  * single-stage boundary below the shared chunk bound of 25, silently culling
  * candidates out of a screening pass. Running `shouldUseLegacyBulkSim` over a
