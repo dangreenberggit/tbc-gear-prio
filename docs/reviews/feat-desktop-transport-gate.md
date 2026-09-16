@@ -333,3 +333,191 @@ it compiles, and that it now matches the convention its twin at
 `python scripts/sync_atlasloot.py --update` run, which nothing in this branch
 performed.
 | S2 | Spec | fixed | Q2/C8 ticket owed by the plan's text — filed as `.scratch/carry-forward/issues/397-desktop-bulk-screen-not-a-speed-win.md`. |
+
+---
+
+# Round 3 — ticket 403, the Track C loop switch
+
+Reviewed range: `eb360229dd68e652e7f3bc43bd81031ac5d1f161..ee31569d1b2ecfc8178e0ccbf9412111e2842476`
+
+20 commits, 67 files, +9697/-226. Fork side: `cfbd7fced7a3c7f94feb68071639eaa09650f94b`
+(2 files), which is not in the core diff and was reviewed separately.
+
+Dispatched 2026-09-16 as three parallel fresh-context axes on the review lane
+(Claude Code, Opus at effort medium). No axis had access to the session that
+wrote the code. Each was told it writes nothing.
+
+## Adversarial
+
+Three material findings, one minor. All three materials are in tooling added or
+changed on this branch, not in the Track C change itself.
+
+**A4 (material) — `--full --update-golden` writes a golden nothing can read.**
+`check_desktop_tab.py:640` sets `candidates = 0` under `--full`; `:657` writes
+`golden_path(...)` which interpolates the cap, producing
+`golden-ret-p5-cap0.json`; but `:660` makes `--full` skip check (h)
+unconditionally, so that file is never read. The flags are not mutually
+exclusive. Failure: after a fork re-pin a developer runs the combination, sees
+"golden written", commits it, and believes the gate is refreshed — while the
+real cap-40 golden stays stale and enforced. That is the reflexive-regeneration
+failure the golden's own `_note` and README warn about, reachable through a flag
+combination nobody blocked.
+
+**A5 (material) — the verify gate counter miscounts in both directions.**
+Sharp because ticket 400 exists to make this count trustworthy. Three defects:
+`run_verify.mjs:139-156` credits a step to `stepsRan` only when no skip line is
+found, but `check_equip_eligibility.py` prints a skip line _alongside real work_,
+so a step that worked scores as a pure skip; `verify_summary.mjs:76` counts skip
+_lines_ not steps, and `sync_fork_universes.py` emits two (verified by
+`grep -c`); and the matcher is substring-based, so the prose sentence
+"nothing was skipped -- all gates ran" is extracted as a skip reason — the
+reviewer reproduced that false positive by running the extractor.
+
+**A6 (material) — a fixture version guard became tautological.**
+`bulk-screen-http-fixture.test.ts:62` derives `RECORDED_SIM_VERSION` from
+`CURRENT_API_VERSION`, `:128` stamps the recordings with it, and `:172` asserts
+the two are equal — a value compared to itself. The header claims the derivation
+makes a proto bump fail the test; the opposite now holds, and the committed DPS
+numbers (measured at proto 15) would silently become numbers from a different
+engine version. The change did correctly kill an older `api-v14` collision, so it
+must not be reverted wholesale.
+
+**A7 (minor) — `run_verify.mjs:132-137` reports success after failing to read
+vitest's report**, carrying on with `{ran: 0, skipped: 0}` and exiting 0. The
+file's own header records that this exact failure already happened once and was
+caught only by grepping a log. The catch block preserves the property rather
+than fixing it.
+
+**Cleared after investigation**, each worth recording because they were the
+things most likely to be wrong: the golden gate is real coverage, not theatre —
+exact `rows` comparison catches rank order, DPS, slot, source and cutoff status,
+and the portability argument holds because the harness reads _rendered_ text at
+0.1 DPS granularity; no dangling `--force-fallback` reference survives in the
+core (it remains a working flag in the fork harness, which is correct); the fork
+change is sound — `simRunnerPromise ??= (async () => this.sim)()` still memoises,
+and the `data-runner` attribute degrades honestly to always `WasmSimRunner`,
+which the gate's own docstring states.
+
+The axis also corrected the dispatch brief: the six bulk vitest files are in
+`packages/core/test/`, not the fork, and they exercise the engine seam, which is
+still live code. Dead at the tab, not dead at the engine — consistent with 406.
+
+## Domain
+
+**Clean. No blocking findings.** All 40 golden rows cross-checked
+programmatically against `data/universes/ret-p5.json`: **40/40 slot assignments
+agree**, and drop sources read correctly for TBC (Shard of Contempt from Heroic
+Magisters' Terrace, Blackened Naaru Sliver from M'uru, Berserker's Call from
+Zul'jin, Madness of the Betrayer from the Illidari Council). The shape is right
+for phase-5 ret: Sunwell tier and Sunwell drops at the top, Karazhan/T4-era
+leftovers deep in the negatives. Nothing absurdly ranked, no known-BiS item
+conspicuously missing.
+
+**D2 (minor, resolved in the reviewer's own analysis) — the 3.3 DPS SE does not
+undermine the 3.4 DPS cutoff.** This looked like the sharp problem and is not.
+`cutoff.ts` records that 3.4 was itself derived as `max(3.0, 2x mean reported SE
+1.678)`, and that 1.678 is an _independent_ SE — so the bar was always calibrated
+against loop-precision values. The branch restores the precision regime the
+cutoff was designed for rather than undercutting it. The pre-fix 0.65 DPS SE was,
+as the plan puts it, a property nobody asked for and the web tab never had.
+
+**D3 (minor) — ticket 404's concern is instantiated in this golden, at Neck.**
+Hard Khorium Choker (20.9) and Clutch of Demise (17.3) are global ranks 9 and 10,
+both outside `PAIRED_REPLICATE_TOP_N = 8`, so both carry the unreplicated
+~1.8-2.3 DPS SE. A 3.6 DPS gap against a combined ~2.6 DPS SE is about 1.4 sigma
+— not a confident ordering. Player stakes are modest (one is crafted, one is a
+Brutallus drop, so they are not competing for the same acquisition effort), and
+the same exposure existed on the web path all along. Not a reason to hold the
+branch; it is 404's scope, now with a concrete instance.
+
+**D4 (material, and the most useful thing this round produced) — the 398
+baseline gap is not a gear, buff or consumable difference.** Both readbacks
+capture the rendered character sheet, and the two runs differing by 159.3 DPS
+report **identical stats**: AP 3895, Melee Crit 286 (51.65%), Melee Hit 66
+(10.19%), Expertise 73 (4.50%), Strength 632, Agility 551, Stamina 766. Character
+stats are downstream of gear, gems, enchants, raid buffs and consumables, so that
+whole family is eliminated at once. What remains must be invisible on the sheet:
+fight length (ret is cooldown- and mana-shaped, so duration moves DPS several
+percent), target count or target armour, or encounter defaults. Seed noise alone
+cannot account for it — 159.3 DPS is far outside a 3000-iteration run's ~3.3 DPS
+SE. Appended to ticket 398; it narrows the search, it does not close it.
+
+## Standards + Spec
+
+**Spec: clean.** Every "Done when" clause of 403 verifies against the committed
+artifacts, re-derived by the reviewer rather than accepted: finalist spend
+removed (`c-cap40-desktop.json` `bulkSimAsync` 0, `elapsedS` 19, against
+`prefix-cap40-screened.json` at 3 and 263); ranking unchanged by byte-equality
+rather than a noise bound; capped runs only; lever 1 taken (fork commit is
+exactly two TypeScript files, no Go, no proto); the cap-150 determinism that
+licenses the zero-tolerance gate holds (134 rows, 40 s, equal twice); and the
+golden's `forkCommit` is the corrected post-fix sha. `ls-remote` confirms the
+fork branch is still at `e94d927af`, so `pushed: false` is accurate.
+
+No scope creep in the Track C change. Deviation #3 (also cutting the
+`makeSimRunner` field comment) is outside the plan's literal instruction but
+required — leaving it would have left a comment describing a probe that no longer
+exists, which is exactly what ticket 405 was filed about.
+
+**Standards: five minor findings, no material or blocking.**
+
+- **S3** — `check_desktop_tab.py:98-106` stacks two near-identical comment
+  paragraphs above `EXPECTED_ELIGIBLE`. A comment restating another comment is
+  worse than one restating code. Keep the second (it carries the date and path).
+- **S4** — `check_desktop_tab.py:110-113` asserts a cause ("16 screened-out
+  candidates do not land as rows") measured on the _screened_ path. Since 403
+  nothing screens, so the stated mechanism no longer applies to the path the gate
+  exercises. Not cheaply re-measurable (constraint 5), so the fix is to label it
+  measured pre-403 and untested since.
+- **S5** — `assert_gate(rb, candidates, spec, phase)` at `:531` never reads
+  `candidates`; (e) derives everything from `rb["candidatesRequested"]`.
+- **S6** — three commit subjects exceed 50 characters (`3cfc0b62` at 63,
+  `d56aaec3` 56, `10cfed48` 55), plus four at 51-54. Not fixable without a
+  rewrite; noted for the next branch.
+- **S7** — four commit bodies wrap at 73-80 rather than 72. Two others wrap
+  correctly, so this is drift, not misunderstanding.
+
+**Cleared:** the fork comment cut is compliant — 29 lines to 4 carrying a why
+(263 s vs 19 s), a constraint (`topResults` must equal the chunk size) and a
+pointer (403), with no replacement essay anywhere in the branch. The long module
+headers on `run_verify.mjs` and `verify_summary.mjs` each state a non-obvious
+why, which the policy explicitly allows. No `cd X && cmd` in any committed
+script. No pipe masking an exit code; output bounded. Durable claims cite
+re-runnable commands, and the full-pool projection is labelled **hypothesis,
+untested** in all three places it appears. Ticket headers on 403-406 are valid.
+No TypeScript type derived from a JSON import.
+
+## Summary
+
+The Track C change itself reviewed clean on all three axes. Its "Done when" is
+met and independently re-derived; the domain output is correct item-by-item; the
+golden gate is genuine coverage rather than theatre.
+
+Every material finding is in **tooling**, not in the shipped behaviour change:
+a flag combination that writes an unreadable golden (A4), a gate counter that is
+neither an upper nor a lower bound (A5), and a version guard that can no longer
+fail (A6). None blocks the merge — each is a defect in a check, and in every case
+the check's _other_ paths still work. But A5 is pointed: ticket 400 exists to
+make the ran/skipped count trustworthy, and it is not yet.
+
+The round's most valuable output is not a defect at all. The domain axis
+eliminated gear, buffs and consumables as explanations for the 398 baseline gap
+by observing that the two disagreeing runs report identical character stats —
+which no prior investigation had checked, and which narrows 398 substantially.
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                         |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/407-full-update-golden-writes-an-unreadable-golden.md`                                                                                                                                 |
+| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/408-verify-gate-counter-miscounts.md` — sharp against ticket 400's purpose                                                                                                             |
+| A6  | Adversarial | defer       | `.scratch/carry-forward/issues/409-fixture-version-guard-tautological.md` — a regression from ticket 390's own fix; do not revert wholesale, and do not "fix" the harmless sibling at `bulk-screen-driver.test.ts:35` |
+| A7  | Adversarial | defer       | Folded into 408 as a fourth defect — same file, same class (reporting success without evidence).                                                                                                                      |
+| D2  | Domain      | wontfix     | Not a defect. `cutoff.ts` records 3.4 as 2x an _independent_ SE of 1.678, so the bar was always calibrated for loop precision. The branch restores that regime rather than undercutting it.                           |
+| D3  | Domain      | defer       | Existing ticket 404. The Neck instance (ranks 9/10, 3.6 DPS gap, ~1.4 sigma) is recorded here as its first concrete case.                                                                                             |
+| D4  | Domain      | fixed       | Appended to `.scratch/carry-forward/issues/398-go-native-vs-wasm-baseline-gap.md` as a dated domain finding. 398 stays open; the cause is narrowed, not found.                                                        |
+| S3  | Standards   | defer       | Folded into 407 (same file, same pass).                                                                                                                                                                               |
+| S4  | Standards   | defer       | Folded into 407 — the fix is a label, not a re-measurement.                                                                                                                                                           |
+| S5  | Standards   | defer       | Folded into 407.                                                                                                                                                                                                      |
+| S6  | Standards   | wontfix     | Historical commits; fixing needs a rewrite of landed history. Noted for the next branch.                                                                                                                              |
+| S7  | Standards   | wontfix     | Same. Drift, not misunderstanding — two bodies on this branch wrap correctly.                                                                                                                                         |

@@ -226,3 +226,35 @@ divergence appearing only above P3 remains possible, though the P3 main hand is
 a two-hander (32332 Apolyon), chosen because ADR-0033 Consequence 5 documents a
 weapon-type-conditional talent change and a two-hander is where such an effect
 would show.
+
+## Domain finding, 2026-09-16 (pre-merge review of feat/desktop-transport-gate)
+
+The domain reviewer eliminated an entire family of hypotheses. Both readbacks
+capture the rendered character sheet in their `sample` field, and the two runs
+that differ by 159.3 DPS report **identical stats**: Attack Power 3895, Melee
+Crit 286 (51.65%), Melee Hit 66 (10.19%), Expertise 73 (4.50%), Strength 632,
+Agility 551, Stamina 766, Shadow Resistance 75, and "Melee Crit Cap: Under by
+27.28%" on both.
+
+Character stats are downstream of gear, gems, enchants, raid buffs and
+consumables, so identical stats rule out that whole family as an explanation
+for a 7.7% gap.
+
+What remains, in the reviewer's order of likelihood — this is domain
+judgment, not measurement:
+
+- Fight length / encounter duration. Ret is cooldown- and mana-shaped, so
+  duration moves DPS several percent and is invisible on the stat sheet. Most
+  plausible single source of a clean 7-8%.
+- Target count, or target armour/level.
+- Iteration count or seed set — but note this **cannot be the whole
+  explanation**: 159.3 DPS is far outside the ~3.3 DPS SE of a 3000-iteration
+  run, so seed noise alone cannot produce it; it could only contribute
+  alongside a different fight configuration.
+
+Also record: both readbacks display the header "Phase 3 (2.2 - T6) - Alpha"
+while `phaseSet` is `5`, so the runs' encounter defaults are worth reading
+directly from the page's Settings tab rather than inferred.
+
+This narrows the ticket's remaining scope; it does not resolve it, and the
+ticket stays open.
