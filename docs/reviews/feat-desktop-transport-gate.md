@@ -62,8 +62,12 @@ fixed-gear, fixed-seed native-vs-WASM sim. Not a blocker; the load-bearing check
 was correctly re-scoped to same-transport (`baselineDpsDiff 0.0`). → ticket 398.
 
 **D-m1 (minor) — the 2.05× desktop slowdown** is a plausible domain outcome
-(the Go bulk path runs multi-stage convergence per chunk), not a red flag; the
+(the Go bulk path runs a costly refinement pass per chunk), not a red flag; the
 DPS numbers are not wrong because the run was slow. Flagged for a ticket. → 397.
+Mechanism corrected 2026-09-15: the driver is the Go **finalist** stage, 72.9% of
+wall clock, which never converges because our client passes the full 25-candidate
+chunk as `topResults`. The culling pipeline named here is skipped at 25. Fix is
+ticket 403.
 
 Out of contact with this diff: WCL-side facts (no gear-reading or spec code
 changed), the feral cutoff (ret-only gate), the D7 CRLF `verify` failure

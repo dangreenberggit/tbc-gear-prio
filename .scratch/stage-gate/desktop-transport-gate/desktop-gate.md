@@ -72,9 +72,12 @@ screening not engaging; (c) between -> engaged but the final pass dominates.
 **Measured: desktop 3419s vs WASM 1668s -> desktop is 2.05x SLOWER.** This is
 worse than all three written candidates anticipated. Screening **is** engaging
 (bulkSimAsync 29 completed bulk chunks over the ~25 chunks of a 617-candidate
-pool at MAX_CANDIDATES_PER_BULK_REQUEST 25), but the multi-stage convergence the
-Go bulk sim runs per chunk plus the 8x5 replication makes the whole desktop
-pipeline ~2x slower than the WASM page's per-candidate loop. This refutes the
+pool at MAX_CANDIDATES_PER_BULK_REQUEST 25), but the per-chunk refinement the
+Go bulk sim runs plus the 8x5 replication makes the whole desktop
+pipeline ~2x slower than the WASM page's per-candidate loop. (Mechanism
+corrected 2026-09-15: the driver is the **finalist** stage at 72.9% of wall
+clock, not the culling pipeline, which is skipped at 25 candidates. See ticket
+397; fix is ticket 403.) This refutes the
 brief's/plan's Q2 hypothesis that bulk screening would make the desktop run
 faster. **Finding for Gate C** (candidate: an engine-side bulk-sim performance
 question, or the desktop path is simply not a speed win for a full pool). No

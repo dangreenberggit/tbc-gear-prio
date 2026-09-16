@@ -82,7 +82,7 @@ replication and baselines even started.
 
 **Root cause / Q2 finding:** the full screened run on the desktop transport is
 **dramatically slower** than the WASM per-candidate run (C19: 1896s), not
-faster. Each 25-candidate bulk chunk runs multi-stage convergence sims on the
+faster. Each 25-candidate bulk chunk runs a costly refinement pass on the
 Go server (~2 min/chunk observed), so ~25 chunks alone ≈ 45+ min before
 replication. Smoke A's cap-20 (one chunk) took 264s; a linear extrapolation to
 617 candidates is ~2+ hours. This refutes the brief's/plan's Q2 hypothesis that
@@ -382,3 +382,25 @@ scratch).
 owner ask, and it is a conscious one: `merge-to-dev` checks that the review file
 exists (it does), but the tip's `verify` is red on the inherited D7 drift, so
 merging means either accepting that red or clearing ticket 211 first.
+
+---
+
+## Correction, 2026-09-15 — D2's "multi-stage convergence" mechanism was wrong
+
+D2 above attributed the per-chunk cost to "multi-stage convergence sims", which
+pointed at the Low/Medium/High **culling** pipeline. That pipeline is **skipped**
+for a 25-candidate chunk (`bulk_sim.go:131-133`), so it was never the cause. The
+wording is corrected in place above; this note records what the mechanism
+actually is.
+
+The measured driver is the **finalist refinement stage**: 72.9% of the 3419 s run
+(2494 s across 29 chunks), exiting at exactly 4.000× its entry iterations in all
+29 chunks — budget exhaustion, never convergence. It cannot converge because our
+client passes the full 25-candidate chunk as `topResults`
+(`bulk_request_builder.ts:115`) and the loop requires every adjacent pair to
+separate at 95% confidence. The client then reads only `candObs.dps`.
+
+D2's *conclusion* is unaffected: the desktop path really is slower, and the Q2
+hypothesis really was refuted. Only the named mechanism changes.
+
+Full investigation in ticket 397; the fix is ticket 403.
