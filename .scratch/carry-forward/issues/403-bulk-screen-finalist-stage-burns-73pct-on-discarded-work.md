@@ -132,3 +132,64 @@ server's stderr. That file is **untracked** (the stage `.gitignore` excludes
 capture from a 57-minute run. The committed readback JSONs corroborate the
 top-line figures (`elapsedS`, `bulkSimAsync` 29, the 264 s/13 s smoke pair and
 their identical rows) but not the per-stage split.
+
+## Fix, 2026-09-16
+
+**Track C chosen** (owner, 2026-09-15): the tab now takes the per-candidate loop
+on the desktop (HTTP) transport, the same path the web tab already ships. No Go
+change, no proto change, no upstream divergence. `simRunner()` in
+`upgrades_tab.tsx` resolves to the WASM-factory runner unconditionally; the
+`WorkerPool(1).isWasm()` transport probe and the `BulkHttpSimRunner` construction
+are gone. Track A (a `skip_finalist_stage` proto field) was specified and dropped
+— it was about 6x slower than the loop and would have *reduced* precision while
+adding a divergence to carry.
+
+**Measured at cap 40 on this machine** (ret P5, fork `e94d927af`, artifacts under
+`.scratch/stage-gate/bulk-finalist-cost/`, re-runnable with
+`node run-tab-cdp.mjs --origin http://localhost:3333 --candidates 40 --out <f>`):
+
+| Run | `elapsedS` | `runner` | `bulkSimAsync` | file |
+| --- | --- | --- | --- | --- |
+| screened (pre-fix) | **263 s** | `BulkHttpSimRunner` | 3 | `prefix-cap40-screened.json` |
+| loop twin (pre-fix, `--force-fallback`) | **19 s** | `WasmSimRunner` | 0 | `prefix-cap40-loop.json` |
+| desktop (post-fix) | **19 s** | `WasmSimRunner` | 0 | `c-cap40-desktop.json` |
+
+**13.8x faster.** The finalist stage accounted for 174.5 s of the screened run's
+263 s (two stage `Duration:` lines, 87.27 s and 87.22 s) — 66%, consistent with
+the 60-63% measured at cap 20.
+
+**No ranking change, proved by byte-equality rather than a noise bound.** The
+post-fix desktop run's `rows` and `aboveCutoffItems` are **exactly equal** to the
+pre-fix loop twin's. Against the pre-fix *screened* run,
+`check_desktop_tab.py --compare` exits 0: T2 max 8.1 over 32 rows (limit 12.0),
+T3 max 0.0 over the top 8, T4 median 0.0, `aboveCutoffSymDiff` 1.
+
+**Cap 150, twice, on the pre-fix binary** (`prefix-cap150-loop.json` and
+`-2.json`): 134 rows, 201 `raidSimAsync`, **40 s both times**, and the two runs
+agree **exactly** on `rows`, `aboveCutoffItems` and `baselineDps`. That
+determinism is what licenses the new golden gate's exact-equality comparison.
+Refitting cost over three points (20/13 s, 40/19 s, 134/40 s) gives 0.233 s/row
+on 8.96 s fixed; the full pool at 601 rows projects to **149 s, band 86-211 s**,
+against today's measured 3419 s — **hypothesis, untested**, since constraint 5
+forbids running the full pool.
+
+**What precision changed.** Rows 9..N that are above cutoff move from screening
+values to 3,000-iteration loop values: an SE upper bound of about 3.3 DPS against
+roughly 0.65 today (C25/C32 in the plan). This is exactly the web tab's own
+precision, on the path it ships by default. The global top 8 are **untouched** —
+`replicateTopItems` re-prices them with 5-seed paired replication on both
+transports regardless of screening, at a measured SE of 0.018-0.088 DPS. The
+per-slot precision gap the owner identified is ticket 404's, unchanged here.
+
+**Gate.** `scripts/check_desktop_tab.py` (b)/(c) inverted to assert
+`WasmSimRunner` with `bulkSimAsync == 0 and raidSimAsync >= 1`; the
+screened-vs-twin check (h) is replaced by a comparison against a committed golden
+readback at `data/desktop-gate/golden-ret-p5-cap40.json`. The N2 negative retires
+(a forced fallback is no longer distinguishable from the normal path).
+
+**`BulkHttpSimRunner` and the bulk screening code stay in the tree** — dead at
+runtime on both transports, removal ticketed as **406**. Read this ticket before
+re-enabling: the cost is not the RPC, it is that `topResults` must equal the
+chunk size, which makes the finalist stage refine every candidate.
+
+Status stays **open** until merged.

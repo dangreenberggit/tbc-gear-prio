@@ -54,3 +54,16 @@ Whether a skip should ever block. Options, undecided:
 
 This ticket exists to record the question and the `--preview-skip` tool that
 now answers "would this skip, and why" cheaply -- not to pick an option.
+
+## Note, 2026-09-16 (ticket 403, Track C)
+
+**Unaffected — re-scoping this ticket was based on a wrong premise.** The 403
+plan grouped 397, 400 and 401 as "tickets concerning the screening path" and
+asked for a re-scoping note on each. That is accurate for 397 and 400 but not for
+this one: 401 is about `scripts/check_layout_gate.py`'s four skip paths being
+invisible to `pnpm merge-to-dev`, which has nothing to do with bulk screening or
+the upgrades tab's transport. 403 changes neither the layout gate nor
+`merge_to_dev.py`.
+
+Recorded here only so the next reader does not go looking for a connection that
+does not exist. Scope unchanged, status unchanged.

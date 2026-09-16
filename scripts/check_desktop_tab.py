@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
 """Desktop-transport gate for the upgrades tab.
 
-Proves the tab runs on the **packaged desktop binary** over the HTTP
-transport, and cannot pass on the WASM fallback. The tab's `simRunner()`
-swallows any transport-probe failure and returns the WASM factory runner
-(`upgrades_tab.tsx`, the brief's C1), so neither "the tab says HTTP" nor "the
-run finished" is proof on its own. This gate rests on four independent signals
-the CDP harness (`run-tab-cdp.mjs`) measures and this script judges:
+Proves the tab runs on the **packaged desktop binary**, served by the embedded
+Go server, and cannot pass on a page served by vite. Since ticket 403 the tab
+takes the per-candidate loop on both transports, so the desktop signature is a
+native-served page whose sims go out as `raidSimAsync` over HTTP — not a bulk
+RPC. This gate rests on four independent signals the CDP harness
+(`run-tab-cdp.mjs`) measures and this script judges:
 
-  S1 runner class          data-runner attribute the tab writes (necessary,
-                           never over-claims: fallback under-claims WasmSimRunner)
-  S2 completed bulk 200s    /bulkSimAsync responses summed over every worker CDP
-                           session (independent of anything the tab reports)
+  S1 runner class          data-runner attribute the tab writes; WasmSimRunner
+                           on both transports since 403, so it is necessary and
+                           never sufficient -- (a) and (c) carry the transport
+  S2 native sim requests    /raidSimAsync responses summed over every worker CDP
+                           session, with zero /bulkSimAsync (independent of
+                           anything the tab reports)
   S3 served worker body     sim_worker.js has zero WebAssembly refs (embedded
-                           server rewrites it to net_worker.js)
+                           server rewrites it to net_worker.js) -- this is what
+                           a vite-served page cannot fake
   S4 fallback warnings      "[upgrades] screening fell back" console count
 
-and, when the screen check is on, a paired screened-vs-unscreened comparison on
-the **same binary and transport** (T1-T4) that isolates the screening procedure.
+and a comparison of the run's ranking output against a committed golden readback
+(h), which is the only automatic check on DPS values, row order and the
+above-cutoff set. See `data/desktop-gate/README.md`.
 
 **Not in `pnpm verify`** (the brief's C23): this needs go, make and Chrome, and
 CI has none. Run it by hand before every fork re-pin
@@ -26,9 +30,13 @@ CI has none. Run it by hand before every fork re-pin
 Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
                     binary on :3333, run the byte check + the harness at
-                    --candidates (default 40), assert (a)-(h). --full uncaps.
+                    --candidates (default 40), assert (a)-(h). --full uncaps and
+                    skips (h) (no golden for an uncapped run).
   --serve-args S    extra flags for the server (e.g. "--usefs=true --wasm=true"
-                    for the N1 negative). --force-fallback induces N2.
+                    for the N1 negative).
+  --update-golden   after (a)-(g) pass, rewrite the committed golden readback for
+                    this spec/phase/cap. A deliberate act -- read
+                    data/desktop-gate/README.md first.
   --bytes-only      just the Q1 byte comparison of dist/tbc against the origin.
   --compare A B     just T1-T4 on two existing readback JSONs (--cross-transport
                     reports T3 without asserting it).
@@ -40,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import socket
 import statistics
 import subprocess
@@ -57,6 +66,30 @@ HARNESS = (
     / "ui/core/components/individual_sim_ui/upgrades/tools/run-tab-cdp.mjs"
 )
 SCRATCH = ROOT / ".scratch/desktop-gate"
+GOLDEN_DIR = ROOT / "data/desktop-gate"
+
+# The three readback fields (h) compares. A whitelist, not a blocklist: every
+# other key a readback carries -- wall clock, request counts, provenance -- is
+# ignored by construction. Comparing a field that varies run to run would make
+# the gate flap red, which trains reflexive regeneration and destroys the
+# coverage this check exists to provide.
+GOLDEN_FIELDS = ("rows", "aboveCutoffItems", "baselineDps")
+
+GOLDEN_NOTE = (
+    "Golden readback for scripts/check_desktop_tab.py check (h): rows, "
+    "aboveCutoffItems and baselineDps of a known-good ret P5 cap-40 run on the "
+    "desktop (HTTP) transport. The gate fails when a run differs from these "
+    "three fields; every other field here is provenance. Regenerate ONLY when a "
+    "change is meant to alter the tab's output (fork re-pin, universe regen, "
+    "intended ranking change) and after the printed diff is explained: pnpm "
+    "desktop-gate:check --update-golden, then commit with the reason in the "
+    "body. A red gate is a finding, not a prompt to regenerate. See README.md "
+    "beside this file."
+)
+
+
+def golden_path(spec: str, phase: int, candidates: int) -> Path:
+    return GOLDEN_DIR / f"golden-{spec}-p{phase}-cap{candidates}.json"
 
 CHECK_NAME = "desktop-gate"
 PORT = 3333
@@ -188,7 +221,7 @@ def start_server(serve_args: list[str]) -> subprocess.Popen:
     raise SystemExit(2)
 
 
-def run_harness(out_path: Path, candidates: int, force_fallback: bool) -> dict:
+def run_harness(out_path: Path, candidates: int) -> dict:
     SCRATCH.mkdir(parents=True, exist_ok=True)
     args = [
         "node",
@@ -200,8 +233,6 @@ def run_harness(out_path: Path, candidates: int, force_fallback: bool) -> dict:
         "--out",
         str(out_path),
     ]
-    if force_fallback:
-        args.append("--force-fallback")
     # Delete any prior readback first: the harness writes --out only on a clean
     # finish, so a crash before that write would otherwise leave a stale passing
     # JSON on these two fixed gitignored paths and we would judge the old run.
@@ -328,8 +359,8 @@ def print_compare(res: dict, cross_transport: bool) -> None:
     if not res["T1"]:
         print(f"     onlyA={res['T1_onlyA']}")
         print(f"     onlyB={res['T1_onlyB']}")
-    print(f"  T2 rows 9..N |d|<=%.1f: %s (max=%s over %d rows; d = screened - "
-          "loop; rows 1..8 are re-priced identically by replicateTopItems and "
+    print(f"  T2 rows 9..N |d|<=%.1f: %s (max=%s over %d rows; d = a - b; "
+          "rows 1..8 are re-priced identically by replicateTopItems and "
           "are covered by T3 only)" % (K_DPS, "pass" if res["T2"] else "FAIL",
                                        res["T2_max"], res["T2_rowsCompared"]))
     t3state = "pass" if res["T3"] else "FAIL"
@@ -344,6 +375,106 @@ def print_compare(res: dict, cross_transport: bool) -> None:
     print(f"  recorded: maxPerRowDiff={res['maxPerRowDiff']} "
           f"aboveCutoffSymDiff={res['aboveCutoffSymDiff']} "
           f"baselineDpsDiff={res['baselineDpsDiff']}")
+
+
+# --- golden readback (h) ----------------------------------------------------
+
+def fork_head() -> str:
+    """The fork clone's HEAD, or "unknown" -- provenance, never an assertion."""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(FORK_ROOT), "rev-parse", "HEAD"],
+            check=False, capture_output=True, text=True, timeout=30,
+        )
+        return out.stdout.strip() or "unknown"
+    except (OSError, subprocess.SubprocessError):
+        return "unknown"
+
+
+def print_golden_diff(rb: dict, golden: dict) -> None:
+    """Diagnostic for a golden mismatch. Reuses compare_readbacks (T1-T4) rather
+    than writing a second comparator, then names the differing rows."""
+    print_compare(compare_readbacks(rb, golden, cross_transport=False),
+                  cross_transport=False)
+
+    def key(row: dict) -> tuple:
+        return (row.get("item"), row.get("slot"))
+
+    g_by_key = {key(r): r for r in golden.get("rows", [])}
+    shown = 0
+    for row in rb.get("rows", []):
+        g = g_by_key.get(key(row))
+        if g is not None and g == row:
+            continue
+        if shown >= 20:
+            print("     ... (further differing rows not shown)")
+            break
+        gd = g.get("dps") if g else "(absent from golden)"
+        print(f"     rank {row.get('rank')} {row.get('item')} "
+              f"[{row.get('slot')}] golden {gd} -> run {row.get('dps')} "
+              f"belowCutoff={row.get('belowCutoff')}")
+        shown += 1
+
+    print(f"     golden forkCommit={golden.get('forkCommit')} "
+          f"cpuCount={golden.get('cpuCount')} vs current "
+          f"forkCommit={fork_head()} cpuCount={os.cpu_count()}")
+
+
+def check_golden(rb: dict, spec: str, phase: int, candidates: int) -> int:
+    """Check (h). Returns 0 pass, 1 mismatch, 2 no golden to compare against."""
+    path = golden_path(spec, phase, candidates)
+    if not path.is_file():
+        rel = path.relative_to(ROOT).as_posix()
+        print(f"  (h) FAIL: no golden at {rel}. Run \"pnpm desktop-gate:check "
+              "--update-golden\" once, read data/desktop-gate/README.md, and "
+              "commit the file.")
+        return 2
+    golden = json.loads(path.read_text(encoding="utf-8"))
+    if all(rb.get(f) == golden.get(f) for f in GOLDEN_FIELDS):
+        print(f"  (h) pass: rows, aboveCutoffItems and baselineDps match "
+              f"{path.relative_to(ROOT).as_posix()}")
+        return 0
+    differing = [f for f in GOLDEN_FIELDS if rb.get(f) != golden.get(f)]
+    print(f"  (h) FAIL: run differs from "
+          f"{path.relative_to(ROOT).as_posix()} on {', '.join(differing)}.")
+    print_golden_diff(rb, golden)
+    return 1
+
+
+def write_golden(rb: dict, spec: str, phase: int, candidates: int) -> None:
+    path = golden_path(spec, phase, candidates)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.is_file():
+        existing = json.loads(path.read_text(encoding="utf-8"))
+        if all(rb.get(f) == existing.get(f) for f in GOLDEN_FIELDS):
+            print(f"{CHECK_NAME}: golden unchanged on the three compared "
+                  "fields; rewriting provenance only.")
+        else:
+            print(f"{CHECK_NAME}: the golden is about to CHANGE. The diff:")
+            print_golden_diff(rb, existing)
+    doc = {
+        "_note": GOLDEN_NOTE,
+        "recordedAt": rb.get("recordedAt"),
+        "forkCommit": fork_head(),
+        "cpuCount": os.cpu_count(),
+        "candidatesRequested": rb.get("candidatesRequested"),
+        "spec": spec,
+        "phase": phase,
+        "elapsedS": rb.get("elapsedS"),
+        "rows": rb.get("rows"),
+        "aboveCutoffItems": rb.get("aboveCutoffItems"),
+        "baselineDps": rb.get("baselineDps"),
+        "rowCount": rb.get("rowCount"),
+        "aboveCutoff": rb.get("aboveCutoff"),
+    }
+    path.write_text(
+        json.dumps(doc, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8", newline="\n",
+    )
+    rel = path.relative_to(ROOT).as_posix()
+    print(f"{CHECK_NAME}: golden written to {rel} — commit it with the reason "
+          "the output changed in the commit body. A red gate is a finding, not "
+          "a prompt to regenerate.")
 
 
 # --- Q1 byte comparison -----------------------------------------------------
@@ -409,16 +540,19 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     mark("a", sw.get("wasmRefs") == 0 and sw.get("readyFalse") == 1,
          f"served worker wasmRefs={sw.get('wasmRefs')} readyFalse="
          f"{sw.get('readyFalse')} (S3)")
-    mark("b", rb.get("runner") == "BulkHttpSimRunner",
+    mark("b", rb.get("runner") == "WasmSimRunner",
          f"runner={rb.get('runner')} (S1)")
     bulk = rb.get("requests", {}).get("bulkSimAsync", 0)
+    raid = rb.get("requests", {}).get("raidSimAsync", 0)
     wsa = rb.get("workerSessionsAttached", 0)
     pool = rb.get("poolSize")
-    c_ok = bulk >= 1 and wsa > 0
+    c_ok = bulk == 0 and raid >= 1 and wsa > 0
     mark("c", c_ok,
-         f"bulkSimAsync 200s={bulk} workerSessionsAttached={wsa} poolSize={pool} "
-         "(S2; workerSessionsAttached==0 would be an observer-not-attached "
-         "harness fault, not a pass)")
+         f"bulkSimAsync 200s={bulk} raidSimAsync 200s={raid} "
+         f"workerSessionsAttached={wsa} poolSize={pool} "
+         "(S2: the desktop binary must send no bulk request and at least one "
+         "native raid sim over the worker sessions; workerSessionsAttached==0 "
+         "would be an observer-not-attached harness fault, not a pass)")
     done = rb.get("done") and not rb.get("runTimedOut")
     mark("d", bool(done),
          f"done={rb.get('done')} runTimedOut={rb.get('runTimedOut')}")
@@ -466,9 +600,9 @@ def main() -> int:
     ap.add_argument("--full", action="store_true", help="uncapped run")
     ap.add_argument("--candidates", type=int, default=40)
     ap.add_argument("--serve-args", default="")
-    ap.add_argument("--force-fallback", action="store_true")
-    ap.add_argument("--no-screen-check", dest="screen_check", action="store_false",
-                    default=True)
+    ap.add_argument("--update-golden", action="store_true",
+                    help="rewrite the committed golden readback (deliberate act "
+                         "-- see data/desktop-gate/README.md)")
     ap.add_argument("--bytes-only", action="store_true")
     ap.add_argument("--origin", default=ORIGIN)
     ap.add_argument("--compare", nargs=2, metavar=("A", "B"))
@@ -482,8 +616,8 @@ def main() -> int:
         a = json.loads(Path(args.compare[0]).read_text(encoding="utf-8"))
         b = json.loads(Path(args.compare[1]).read_text(encoding="utf-8"))
         res = compare_readbacks(a, b, cross_transport=args.cross_transport)
-        print(f"{CHECK_NAME}: compare {Path(args.compare[0]).name} (screened) "
-              f"vs {Path(args.compare[1]).name} (loop):")
+        print(f"{CHECK_NAME}: compare {Path(args.compare[0]).name} (a) "
+              f"vs {Path(args.compare[1]).name} (b):")
         print_compare(res, args.cross_transport)
         ok = _passed(res, args.cross_transport)
         return 0 if ok else 1
@@ -505,43 +639,37 @@ def main() -> int:
             return 2
         candidates = 0 if args.full else args.candidates
         main_json = SCRATCH / "last-run.json"
-        print(f"{CHECK_NAME}: running harness (candidates={candidates}, "
-              f"force_fallback={args.force_fallback})...")
-        rb = run_harness(main_json, candidates, args.force_fallback)
+        print(f"{CHECK_NAME}: running harness (candidates={candidates})...")
+        rb = run_harness(main_json, candidates)
         print(f"{CHECK_NAME}: assertions:")
         gate_ok, checks = assert_gate(rb, candidates, args.spec, args.phase)
 
-        screen_ok = True
-        if args.screen_check and gate_ok and not args.force_fallback:
-            print(f"{CHECK_NAME}: screen check (h) -- twin unscreened run...")
-            twin_json = SCRATCH / "last-run-fallback.json"
-            twin = run_harness(twin_json, candidates, force_fallback=True)
-            partner_ok = (
-                twin.get("runner") == "WasmSimRunner"
-                and twin.get("forceFallbackRemaining") == 0
-                and twin.get("requests", {}).get("bulkSimAsync", 0) == 0
-                and twin.get("requests", {}).get("raidSimAsync", 0) >= 1
-            )
-            if not partner_ok:
-                print(f"  (h) FAIL: partner invalid -- runner="
-                      f"{twin.get('runner')} "
-                      f"remaining={twin.get('forceFallbackRemaining')} "
-                      f"bulk={twin.get('requests', {}).get('bulkSimAsync')} "
-                      f"raid={twin.get('requests', {}).get('raidSimAsync')}")
-                screen_ok = False
-            else:
-                res = compare_readbacks(rb, twin, cross_transport=False)
-                print_compare(res, cross_transport=False)
-                print(f"  (h) twin wall clock: {twin.get('wallClockS')}s")
-                screen_ok = _passed(res, cross_transport=False)
-                print(f"  (h) {'pass' if screen_ok else 'FAIL'}")
-        elif not args.screen_check:
-            print(f"{CHECK_NAME}: screen check (h) skipped (--no-screen-check).")
-        elif args.force_fallback or not gate_ok:
-            print(f"{CHECK_NAME}: screen check (h) skipped -- (a)-(g) did not "
-                  "all pass (forced fallback or a failing assertion).")
+        # --update-golden: (a)-(g) gate the write, which stops a *broken* run
+        # (timeout, panic, wrong worker, wrong row count) from becoming a
+        # golden. It does NOT stop a ranking regression -- that preserves shape
+        # and passes (a)-(g). Value-level correctness rests on the developer
+        # reading the diff printed above.
+        if args.update_golden:
+            if not gate_ok:
+                print(f"{CHECK_NAME}: refusing to write a golden -- (a)-(g) did "
+                      "not all pass.")
+                return 1
+            write_golden(rb, args.spec, args.phase, candidates)
+            return 0
 
-        overall = gate_ok and screen_ok
+        if args.full:
+            print("  (h) skipped: no golden for an uncapped run")
+            golden_rc = 0
+        elif not gate_ok:
+            print("  (h) skipped -- (a)-(g) did not all pass.")
+            golden_rc = 0
+        else:
+            golden_rc = check_golden(rb, args.spec, args.phase, candidates)
+
+        if golden_rc == 2:
+            print(f"{CHECK_NAME}: could not run (h).")
+            return 2
+        overall = gate_ok and golden_rc == 0
         print(f"{CHECK_NAME}: {'PASS' if overall else 'FAIL'}.")
         return 0 if overall else 1
     finally:

@@ -233,10 +233,14 @@ a re-record.
 Before every fork re-pin, hand-run `pnpm desktop-gate:check` and paste its
 assertion lines (a)–(h) into the commit body or the stage's `desktop-gate.md`. It
 proves the upgrades tab still runs on the packaged desktop binary over the HTTP
-transport and cannot pass on the WASM fallback. It is deliberately **not** in
+transport and cannot pass on a page served by vite. It is deliberately **not** in
 `pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so
 nothing else catches a re-pin that breaks the embedded transport. A red gate
 blocks the re-pin.
+
+Check (h) compares the run against `data/desktop-gate/golden-ret-p5-cap40.json`;
+a re-pin that changes the tab's output regenerates it with `--update-golden` and
+explains the diff in the commit body.
 
 ## 6. The tag trigger
 

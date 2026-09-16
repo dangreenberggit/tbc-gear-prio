@@ -258,3 +258,18 @@ only and may not need that; scoping it is the fix owner's call.
   this ticket predicted found the data in the server log instead.
 - Iteration totals are the sum of the logged `Running N iterations on M concurrent
   sims` lines falling inside each stage's time window.
+
+## Note, 2026-09-16 (ticket 403 fixed, Track C)
+
+**Moot for the tab; the code question moves to 406.** The upgrades tab no longer
+takes the desktop screening path at all: since 403 it runs the per-candidate loop
+on both transports, so this ticket's "desktop bulk screening is slower than WASM"
+is no longer a property any user-facing run exercises. Measured at cap 40 on the
+fix: 263 s screened against 19 s loop, with byte-identical rows.
+
+This ticket's remaining scope was the *investigation* half, and that is complete —
+403 carries the answer (the finalist stage burns the time because `topResults`
+must equal the chunk size, so it refines every candidate). The follow-on question
+of whether the now-dead screening code should be deleted is **406**, not this
+ticket. Do not close this on the strength of the fix alone if the wall-clock
+attribution caveat at the end of 403 still matters to anyone.

@@ -1,0 +1,350 @@
+{
+  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret P5 cap-40 run on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
+  "recordedAt": "2026-09-16T14:50:21.088Z",
+  "forkCommit": "e94d927af0ff7c31f071c961d1d7789980c8b8c9",
+  "cpuCount": 20,
+  "candidatesRequested": 40,
+  "spec": "ret",
+  "phase": 5,
+  "elapsedS": 18,
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Lightbringer Boots",
+      "slot": "Feet",
+      "dps": 57.3,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
+      "item": "Felfury Legplates",
+      "slot": "Legs",
+      "dps": 41.9,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "3",
+      "item": "Lightbringer Bands",
+      "slot": "Wrist",
+      "dps": 37.1,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "4",
+      "item": "Lightbringer Girdle",
+      "slot": "Waist",
+      "dps": 37,
+      "source": "Sunwell Plateau",
+      "belowCutoff": false
+    },
+    {
+      "rank": "5",
+      "item": "Carapace of Sun and Shadow",
+      "slot": "Chest",
+      "dps": 33.4,
+      "source": "Leatherworking",
+      "belowCutoff": false
+    },
+    {
+      "rank": "6",
+      "item": "Shard of Contempt",
+      "slot": "Trinket 1",
+      "dps": 31.7,
+      "source": "Magisters' Terrace (H)\nPriestess Delrissa",
+      "belowCutoff": false
+    },
+    {
+      "rank": "7",
+      "item": "Cloak of Unforgivable Sin",
+      "slot": "Back",
+      "dps": 29.3,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "8",
+      "item": "Blackened Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": 29.2,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": false
+    },
+    {
+      "rank": "9",
+      "item": "Hard Khorium Choker",
+      "slot": "Neck",
+      "dps": 20.9,
+      "source": "Jewelcrafting",
+      "belowCutoff": false
+    },
+    {
+      "rank": "10",
+      "item": "Clutch of Demise",
+      "slot": "Neck",
+      "dps": 17.3,
+      "source": "Sunwell Plateau (N)\nBrutallus",
+      "belowCutoff": false
+    },
+    {
+      "rank": "11",
+      "item": "Berserker's Call",
+      "slot": "Trinket 1",
+      "dps": 16.9,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": false
+    },
+    {
+      "rank": "12",
+      "item": "Leggings of the Immortal Night",
+      "slot": "Legs",
+      "dps": 15.7,
+      "source": "Sunwell Plateau (N)\nFelmyst",
+      "belowCutoff": false
+    },
+    {
+      "rank": "13",
+      "item": "Duplicitous Guise",
+      "slot": "Head",
+      "dps": 5.4,
+      "source": "Sunwell Plateau (N)\nKil'jaeden",
+      "belowCutoff": false
+    },
+    {
+      "rank": "1",
+      "item": "Cloak of Fiends",
+      "slot": "Back",
+      "dps": 2,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "2",
+      "item": "Choker of Endless Nightmares",
+      "slot": "Neck",
+      "dps": 1.4,
+      "source": "Black Temple (N)\nSupremus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "3",
+      "item": "Starstalker Legguards",
+      "slot": "Legs",
+      "dps": 0.7,
+      "source": "Sunwell Plateau (N)\nKalecgos",
+      "belowCutoff": true
+    },
+    {
+      "rank": "4",
+      "item": "Shadowmoon Destroyer's Drape",
+      "slot": "Back",
+      "dps": -3.1,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "5",
+      "item": "Steely Naaru Sliver",
+      "slot": "Trinket 1",
+      "dps": -6.1,
+      "source": "Sunwell Plateau (N)\nM'uru",
+      "belowCutoff": true
+    },
+    {
+      "rank": "6",
+      "item": "Leggings of Divine Retribution",
+      "slot": "Legs",
+      "dps": -6.2,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
+      "item": "Dreadboots of the Legion",
+      "slot": "Feet",
+      "dps": -7.3,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "8",
+      "item": "Brooch of Deftness",
+      "slot": "Neck",
+      "dps": -11.3,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Shoulderpads of Vehemence",
+      "slot": "Shoulder",
+      "dps": -13.5,
+      "source": "Sunwell Plateau (N)\nEredar Twins",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Heartshatter Breastplate",
+      "slot": "Chest",
+      "dps": -14.3,
+      "source": "Black Temple (N)\nMother Shahraz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Legguards of Endless Rage",
+      "slot": "Legs",
+      "dps": -14.3,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Softstep Boots of Tracking",
+      "slot": "Feet",
+      "dps": -15.7,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Worgen Claw Necklace",
+      "slot": "Neck",
+      "dps": -15.8,
+      "source": "Karazhan (N)\nAttumen the Huntsman",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Choker of Vile Intent",
+      "slot": "Neck",
+      "dps": -15.8,
+      "source": "Badge vendor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Tsunami Talisman",
+      "slot": "Trinket 1",
+      "dps": -17.2,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Band of the Ranger-General",
+      "slot": "Finger 2",
+      "dps": -17.3,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Drape of the Dark Reavers",
+      "slot": "Back",
+      "dps": -18.8,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Pillager's Gauntlets",
+      "slot": "Hands",
+      "dps": -20.9,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "Stormrage Signet Ring",
+      "slot": "Finger 2",
+      "dps": -20.9,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Madness of the Betrayer",
+      "slot": "Trinket 1",
+      "dps": -22.1,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Crystalforge Greaves",
+      "slot": "Legs",
+      "dps": -28.9,
+      "source": "Serpentshrine Cavern",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Blood-stained Pauldrons",
+      "slot": "Shoulder",
+      "dps": -30,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Mantle of Darkness",
+      "slot": "Shoulder",
+      "dps": -37,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Skulker's Greaves",
+      "slot": "Legs",
+      "dps": -38,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Black Featherlight Boots",
+      "slot": "Feet",
+      "dps": -44,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Justicar Greaves",
+      "slot": "Legs",
+      "dps": -46.2,
+      "source": "Gruul's Lair",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Romulo's Poison Vial",
+      "slot": "Trinket 1",
+      "dps": -55.3,
+      "source": "Karazhan (N)\nRomulo and Julianne",
+      "belowCutoff": true
+    }
+  ],
+  "aboveCutoffItems": [
+    "Lightbringer Boots",
+    "Felfury Legplates",
+    "Lightbringer Bands",
+    "Lightbringer Girdle",
+    "Carapace of Sun and Shadow",
+    "Shard of Contempt",
+    "Cloak of Unforgivable Sin",
+    "Blackened Naaru Sliver",
+    "Hard Khorium Choker",
+    "Clutch of Demise",
+    "Berserker's Call",
+    "Leggings of the Immortal Night",
+    "Duplicitous Guise"
+  ],
+  "baselineDps": 2231.5,
+  "rowCount": 40,
+  "aboveCutoff": 13
+}

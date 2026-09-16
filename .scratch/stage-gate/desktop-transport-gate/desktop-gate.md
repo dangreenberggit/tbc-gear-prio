@@ -114,6 +114,20 @@ runs use the same engine.
 `sim_worker.js` is served with the bytes of `net_worker.js` (rewrite confirmed,
 differs from dist `sim_worker.js`). The embedded bundle is intact.
 
+> **Superseded in part, 2026-09-16 (ticket 403).** Everything below is the
+> record of the runs as they were taken, and it stands as that. But the gate has
+> since changed shape: the tab now takes the per-candidate loop on **both**
+> transports, so (b) asserts `WasmSimRunner`, (c) asserts `bulkSimAsync == 0 and
+> raidSimAsync >= 1`, and the N2 negative is retired (a forced fallback is no
+> longer distinguishable from the normal path, because they are the same path).
+> Check (h) is no longer a screened-vs-loop twin comparison: it compares the run
+> against the committed golden readback
+> `data/desktop-gate/golden-ret-p5-cap40.json` on `rows`, `aboveCutoffItems` and
+> `baselineDps`, exactly. The `--force-fallback` and `--no-screen-check` flags
+> are gone and `--update-golden` is new. See `data/desktop-gate/README.md` and
+> `.scratch/stage-gate/bulk-finalist-cost/predictions.md`. N1 (a vite-served page)
+> still fails, on (a) and (c).
+
 ## Screen check + gate on the tip (step 7)
 
 `pnpm desktop-gate:check` (here `check_desktop_tab.py --no-build`, binary current
