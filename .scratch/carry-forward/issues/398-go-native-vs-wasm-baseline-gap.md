@@ -50,3 +50,126 @@ compilation-level engine difference (and worth understanding which side is
 right); if they agree, the gap came from a config difference in the tab runs and
 that config is the bug. ~25 s of simulation, per the engine-delta pattern in
 `.scratch/stage-gate/upstream-catchup-chunk1/engine-delta.md`.
+
+---
+
+## Pre-registration, written 2026-09-15 before any number was produced
+
+Everything below was written before the measurement ran. The point of writing it
+first is that a result cannot then be rounded toward whichever story is most
+convenient. `desktop-gate.md` § Q2 is the model — its three written candidates
+were all wrong, which is how that finding got caught instead of rationalised.
+
+### Corrections to this ticket's own "What is already known"
+
+Two claims above are weaker than they read, and both were established by opening
+the artifact rather than by argument.
+
+**"Both runs used `DEFAULT_SEEDS`" is not a measurement.** Neither
+`readback-3333-tip.json` nor `readback-wasm-tip.json` records a seed or an
+iteration count; `seed`, `randomSeed` and `iterations` are all absent from both
+files. The claim is an inference from reading `rank.ts:410-411,566-577`, and the
+harness (`run-tab-cdp.mjs`) has no flag to override either value. The inference
+is sound but it is a code-reading argument. A configuration difference between
+the two tab runs is therefore **not** ruled out, and is a live candidate cause of
+the 159.3 DPS gap.
+
+**The engine-difference hypothesis has strong prior evidence against it.**
+Experiment E-W1 (`docs/plans/wowsims-tab/plan.md` §8, run 2026-08-14) compared
+WASM against native and recorded `2042.3926145882178` vs `2042.3926145882197` —
+a delta of **1.8e-12 DPS**, smaller than native's own 20-thread/4-thread spread
+of 6.8e-13. It was reproduced independently with a separately-written harness,
+and §10 of that plan closes the risk "WASM != native numerically" on its
+strength. Two limits keep this from settling the present ticket: E-W1 used the
+**slamaltman fixture**, not ret gear, and ran **before** the `17a8fb28` engine
+pin. So it is evidence about a different input at an earlier pin.
+
+### What is being measured
+
+One `RaidSimRequest`, identical on both sides, run through:
+
+- **native**: `vendor/wowsimcli-17a8fb28c5ad14b649acecdaacd488594048f467-win32-x64/wowsimcli-windows.exe sim --infile <req> --outfile <out>`
+- **WASM**: `globalThis.raidSimJson()` against `vendor/tbc-new-fork/dist/tbc/lib.wasm`
+  under Node, adapting `scripts/ew5_overhead_wasm.mjs`. No browser, no CDP.
+
+Both read the same scalar, `raidMetrics.dps.avg`, with `raidMetrics.dps.stdev`
+alongside. `iterationsDone` is asserted to equal the requested iteration count on
+both sides — a WASM run missing its injected `SimDatabase` returns a
+plausible-looking wrong number rather than an error, so this guard is not
+optional.
+
+**Gear: the P3 ret preset**, `vendor/tbc-new-fork/ui/paladin/retribution/gear_sets/p3.gear.json`,
+ids `32235, 30022, 30055, 33122, 30905, 32574, 29947, 30106, 30900, 32366, 30834,
+32526, 29383, 28830, 32332, (empty), 27484`. P3 is the **highest ret gear preset
+that exists** — the fork defines preraid/P1/P2/P3/P3-Bulwark for ret and nothing
+above (protection paladin does have P4 and P5; ret does not). There is no ret
+"3% hit" variant anywhere in the fork; that naming convention exists only for
+hunter. So this is two phases below the P5 gear on which the 159.3 DPS gap was
+observed, and that limit is stated in the result rather than glossed.
+
+Main hand 32332 (Apolyon) is two-handed. This is deliberate: the largest single
+row delta in the gate evidence was -19.10 on Apolyon, and ADR-0033 Consequence 5
+documents a weapon-type-conditional talent change worth -80.35 DPS on
+one-handers. If a divergence is gear-conditional, a two-hander is where it would
+show.
+
+### Why measure at all, given E-W1
+
+Because E-W1 measured one input at one pin, and a property measured against one
+option is not a comparison (AGENTS.md). This run tests **both** of the things
+E-W1 did not: ret gear rather than a fixture, and the current pin rather than a
+pre-`17a8fb28` engine. The cost is one `go build` plus ~90 s of simulation, which
+is too cheap to justify substituting an argument for a number — especially on a
+branch that has already produced three errors of exactly that kind.
+
+### The decision threshold, and why the 3-sigma band is the wrong one alone
+
+`engine-delta.md` lines 113-118 give the band as
+`3 * sqrt(stdev_a^2 + stdev_b^2) / sqrt(iterations)`, which came to **3.107 DPS**
+at 25000 iterations in ADR-0033's case. It will be recomputed from this run's own
+stdev values rather than reused as a constant.
+
+But that band assumes two independent noise samples, and these two runs are not
+that. `engine-delta.md` lines 103-106 proved the native binary is **exactly
+deterministic** at a fixed seed — three runs produced a bit-identical `dps` dict.
+If the two builds share an RNG stream, as E-W1's 1.8e-12 agreement indicates,
+they are the same computation in two float-evaluation orders, not two samples.
+Judging against 3.107 would then pass a real difference of a few DPS.
+
+So the **raw delta and its order of magnitude are the primary readout**, with the
+band reported alongside as a loose upper bound. Concretely: a delta near 1e-12 is
+float-ordering noise; anything above roughly **1e-9** is a genuine signal worth
+chasing even though it sits far below 3.107.
+
+### Pre-registered outcomes
+
+**A. Delta at ~1e-12 (float-ordering noise).** The two compilations are the same
+computation on ret gear at the current pin. E-W1 extends to this input and this
+pin. The "two numerically distinct engines" hypothesis is then refuted for P3 ret
+gear, and the 159.3 DPS tab gap must come from **configuration**, not
+compilation — most probably the seed or iteration count that neither readback
+records. Next step becomes the harness gap: make the readbacks record seed and
+iterations, so a future disagreement is answerable at all. That is a fork edit
+and joins the fork queue.
+
+**B. Delta near 159 DPS.** A genuine compilation-level engine difference,
+confirmed on the gear that matters. The ticket's hypothesis stands. The follow-up
+is which side is correct — which matters commercially, since the tab ships the
+WASM number to users while the desktop path is advertised as the faster option.
+
+**C. Delta real but neither ~1e-12 nor ~159.** Do not round it toward either
+story. Something differs in the compilation *and* something differs in the tab
+configuration: two effects, not one. Both get chased separately.
+
+**D. The WASM side fails to produce a trustworthy number** (`iterationsDone`
+mismatch, or a DPS far from the native value on a low-iteration smoke run). Then
+nothing is concluded about the engines. Fix the harness first; a wrong number
+here is worse than no number, because it would look plausible.
+
+### Limits stated in advance
+
+A null result on P3 gear does **not** clear P5 gear, and the write-up will say
+so. `engine-delta.md` § "What this test cannot detect" is the model. This
+measurement also says nothing about the tab's own configuration, which remains
+unrecorded and unmeasurable from the committed artifacts regardless of how this
+run comes out.
