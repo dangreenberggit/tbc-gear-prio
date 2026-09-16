@@ -1,6 +1,6 @@
 # 398 — Go-native and WASM builds compute a 159 DPS baseline gap for identical gear
 
-Status: open
+Status: open (re-scoped 2026-09-15 — the engine question is answered; the harness gap is what remains)
 Origin: pre-merge review of feat/desktop-transport-gate (2026-09-14), domain-axis material finding
 Blocks: —
 
@@ -173,3 +173,56 @@ so. `engine-delta.md` § "What this test cannot detect" is the model. This
 measurement also says nothing about the tab's own configuration, which remains
 unrecorded and unmeasurable from the committed artifacts regardless of how this
 run comes out.
+
+---
+
+## Result, 2026-09-15 — outcome A
+
+Full write-up and method:
+`.scratch/stage-gate/desktop-transport-gate/398-engine-delta-p3.md`.
+Reproduce: `398-repro.sh` in the same directory.
+
+| | native | WASM |
+| --- | --- | --- |
+| `dps.avg` | `2224.6201817086526` | `2224.6201817086467` |
+| `dps.stdev` | `128.0634683699089` | `128.06346836999978` |
+| `iterationsDone` | 25000 | 25000 |
+
+**Delta 5.91e-12 DPS** (12 ulps). Recomputed 3-sigma band 3.436 DPS; the delta
+is twelve orders of magnitude under it, and under the 1e-9 line the
+pre-registration set as the genuine signal threshold. The gap this ticket exists
+to explain is 159.3 DPS — 2.7e13 times larger.
+
+**The two builds are the same computation.** The hypothesis that the Go-native
+and WASM compilations disagree numerically is refuted for P3 ret gear at pin
+`17a8fb28`, and this closes both of the limits on experiment E-W1 (different
+input, earlier pin) by measuring ret gear at the current pin.
+
+So the 159.3 DPS tab gap is a **configuration** difference, not a compilation
+one — which lands on the thing this ticket could never check.
+
+### What remains open, and it is the harness
+
+Neither `readback-3333-tip.json` nor `readback-wasm-tip.json` records a seed or
+an iteration count. With compilation ruled out, one of those is the most likely
+cause of the gap, and **neither is recoverable from the committed artifacts**.
+The evidence trail cannot answer the question the evidence raises.
+
+The remaining work is therefore to make the tab harness record `seed` and
+`iterations` in its readback JSON. That is a fork edit (`run-tab-cdp.mjs` and
+whatever writes the readback) and joins the fork queue, which is strictly serial
+on the single shared working tree.
+
+Re-running the two full pool runs to re-measure the gap is **not** proposed here:
+they cost 3419 s and 1668 s, and without the harness fix a repeat would produce
+the same unanswerable pair of numbers.
+
+### Limit on the above
+
+A null on P3 gear does not clear P5 gear, on which the gap was seen. P3 is the
+highest ret gear preset in the fork; there is no P4 or P5 ret set anywhere, and
+no "3% hit" ret variant (that naming exists only for hunter). A gear-conditional
+divergence appearing only above P3 remains possible, though the P3 main hand is
+a two-hander (32332 Apolyon), chosen because ADR-0033 Consequence 5 documents a
+weapon-type-conditional talent change and a two-hander is where such an effect
+would show.
