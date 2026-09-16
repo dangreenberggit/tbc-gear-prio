@@ -102,7 +102,7 @@ note the plan's Q3 asked for. It is **not a Track C failure**: C25 was derived a
 a Track A acceptance criterion (where screening values shift by sampling noise),
 and the plan states explicitly that "Track C does not need it" because Track C's
 acceptance is exact byte-equality against the loop twin, not a noise bound. T2's
-own limit for this comparison is 12.0 and 8.1 passes it. See the deviation ledger.
+own limit for this comparison is 12.0 and 8.1 passes it. See execution-report.md, § "Deviation ledger".
 
 ## Measured, cap 150
 
@@ -212,7 +212,7 @@ refinement is exactly what this plan intends, and the plan states the precision
 consequence for rows 9..N up front (C32).
 
 **This is a plan gate and it is flagged, not adapted.** No constant was changed,
-no threshold loosened, no comparison relaxed. See the deviation ledger.
+no threshold loosened, no comparison relaxed. See execution-report.md, § "Deviation ledger".
 
 ## Gate
 
@@ -266,7 +266,3 @@ limit. So the golden catches a value change that the tolerance-based comparison
 it replaced would have waved through, which is exactly the coverage G1 said was
 missing. Restoring via `--update-golden` printed the full diff before
 overwriting, and (iii) re-run exits 0 with the file back to 0 CR / 350 LF.
-
-## Gate
-
-_(filled in at C4)_

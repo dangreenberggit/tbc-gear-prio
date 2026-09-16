@@ -1,7 +1,7 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret P5 cap-40 run on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
   "recordedAt": "2026-09-16T14:50:21.088Z",
-  "forkCommit": "e94d927af0ff7c31f071c961d1d7789980c8b8c9",
+  "forkCommit": "cfbd7fced7a3c7f94feb68071639eaa09650f94b",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",

@@ -219,3 +219,43 @@ Stage opened 2026-09-15 by the orchestrating session.
   The owner asked for planning; Step 5 needs a separate ask. The review's closing
   paragraph states the exact scope an executor would be authorised to do, for the
   owner to sanity-check before any execution ask.
+
+- **Gate C — PASS** (2026-09-16). Execution complete. Report at
+  `execution-report.md`. Core `182243da` + a Gate C correction commit, fork
+  `cfbd7fce`, both clean; fork **not pushed** (`ls-remote` still returns
+  `e94d927af`, verified), nothing merged.
+
+  **Independently verified before dispositioning.** A separate verifier re-ran
+  all twelve completion claims: SHAs, fork-not-pushed, Go tree untouched (one
+  pre-existing divergence), S3 determinism, C3 line 1, golden contents and key
+  order, gate-script greps, the tab change, tickets, the regen, and the verify
+  evidence. All verified. **Diff vs the plan's Paths manifest: no path changed
+  that is not in the manifest**; the two manifest paths not changed
+  (`fork-upstream-touchpoints.md`, ticket 400) are both inside the plan's own
+  conditional branches.
+
+  **Ten ledger rows, all dispositioned `accepted`** — see the report's table.
+  Rows 3, 5 and 7 are the executor exercising judgment correctly rather than
+  following the plan off a cliff: it refused to leave a comment describing
+  deleted machinery, refused to bake the plan's stale timing figures into a
+  permanent comment when it had fresher measurements, and refused to invent a
+  connection between ticket 401 and screening when the plan's grouping was
+  simply wrong.
+
+  **Two findings the executor missed, caught by verification and fixed here:**
+  the golden's `forkCommit` recorded the pre-commit fork sha — the one field
+  whose entire purpose is explaining a future red gate — now corrected in place
+  without touching the compared fields; and `predictions.md` pointed twice at a
+  deviation ledger that did not exist and carried a duplicate `## Gate` heading
+  with an unfilled placeholder, both now fixed.
+
+  **Row 1 (C3 line 3) accepted as a plan defect, not an execution result.** The
+  verifier ran the cross-transport compare both ways and got byte-identical
+  failing output pre- and post-fix; ticket 398 documents the same 159.3 DPS gap,
+  written before this plan. No threshold was loosened (greps 0, T2 limit still
+  12.0). The plan's Q3 listed that compare as a pass condition without
+  reconciling it against 398 — recorded so the next plan reusing this design
+  does not inherit the expectation.
+
+  **Next per the loop: `pre-merge-review`, then ASK before any merge.** Not
+  started; the owner asked for execution, and merging is a separate ask.
