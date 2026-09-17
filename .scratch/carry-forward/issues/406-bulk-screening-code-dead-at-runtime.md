@@ -238,3 +238,40 @@ build 346's streaming precondition (or otherwise revisit the batch route)?
   after removing the code from two PROVENANCE-tracked files, so removing a
   fork-only addition from a ported file did not disturb the live ret ranking path.
   The remaining keep reason is only 346's streaming intent.
+
+## Owner ruling, 2026-09-17: keep
+
+The owner ruled **keep**. The reason is **not** 346's streaming precondition (the
+plan's Step 7K guessed that and it is wrong). The ratified reason is that
+**desktop bulk-screening wall-clock with the finalist stage fixed has never been
+measured**, and the "bulk is slower" conclusion this ticket leaned on is
+contaminated:
+
+- **397's 2.05x and 403's 13.8x desktop-slower figures are 66-73% the ungated Go
+  finalist stage** refining all 25 candidates and discarding the result (397's
+  own attribution: finalist = 72.9% of the 3419 s run; 403 at cap 40: 174.5 s of
+  263 s, 66%). That is a fixable Go defect (403's lever 1: decouple `topResults`
+  from the finalist-stage size), not a property of the batch route.
+- **346's "cheaper" figure is worker-seconds, not wall-clock** (3,352 vs 12,814
+  worker-seconds), and 346 explicitly scoped its keep-the-loop decision to the
+  **WASM/web transport only** — "The local Go-server default (batch on) is
+  unchanged." So neither 346 nor 397/403 measured desktop bulk wall-clock with the
+  finalist stage fixed. That experiment has never been run.
+
+The code stays because it is the **substrate for that unmeasured experiment**,
+now tracked as **ticket 411**. This is a live investigation, not parked
+streaming work.
+
+**The delete was measured safe-and-clean** on throwaway branches (fork
+`throwaway/406-delete-measure` @ `5c2b1d7f981872f00f90d05a343e2ebca6796ad4`, core
+`throwaway/406-delete-measure` @ `ca5c7040382939936765f84d1f218ba50d09e728`): see
+the Measurement section above — `pnpm verify` rc=0 and E-W3 executed non-vacuously
+and passed after the delete. Those throwaway branches are now discarded, but git
+keeps the commits by sha if the delete is ever wanted (fork diffstat 95/+ 2042/-,
+core 3/+ 2204/-).
+
+Status stays **closed**. The six "Dead code cover" comments in
+`packages/core/test/bulk-*.test.ts` and the `partition.ts` caveat at fork commit
+`633169c7f` are left as they are.
+
+Closed: 2026-09-17
