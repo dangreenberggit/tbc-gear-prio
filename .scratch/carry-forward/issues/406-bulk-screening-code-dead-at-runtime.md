@@ -120,3 +120,34 @@ which returns nothing. The original text is left as written.
 
 Trimming the `partition.ts` comment is ticket 410's job, not this one's. The
 caveat paragraph added here is the part any trim must keep.
+
+**Who wrote what.** The owner asked only that the keep call be recorded as an
+agent's recommendation rather than their decision. The three weakening points
+above — the steered first pass, the shaky merit argument, the untested risk
+question — were chosen and written by the orchestrating session, not by the
+owner. The section below is the second planner's own assessment, pasted
+unedited.
+
+## Planner comment
+
+Written 2026-09-17 by the second planner seat (Fable). This is a planning
+agent's assessment, not an owner ruling. The owner has not decided delete-or-keep.
+
+I recommended keep. The one reason I still stand behind: tickets 346 and 403
+both record a path back to this code, and deleting reverses those two decisions
+with no new evidence (`grep -n 'Precondition for revisiting\|remains constructible' .scratch/carry-forward/issues/346-*.md`; `grep -n 'stay in the tree' .scratch/carry-forward/issues/403-*.md`).
+
+Two of my reasons are weaker than I wrote them, and the reviewer's findings on
+both are fair. First, I called 263 s vs 19 s "a defect, not the route." That
+rests on 403's diagnosis, and 403 is `Status: open` (`sed -n 3p .scratch/carry-forward/issues/403-*.md`): the fix is described, not built or measured. Until it
+is, "the route is fine" is a hypothesis. Second, my headline reason was that
+deleting is engine surgery with live-path regression risk. I asserted that from
+the PROVENANCE rows; I never measured it. Untested. It may be tedious rather
+than risky, and if so my cost argument mostly falls away.
+
+The measurement that settles the cost question: do the delete on a throwaway
+fork branch, then run `pnpm verify; echo "rc=$?"` and the desktop gate
+(`python scripts/check_desktop_tab.py`, compared against
+`data/desktop-gate/golden-ret-p5-cap40.json`). Report `git -C vendor/tbc-new-fork diff --stat`
+and whether both gates stay green. Green with no golden diff means the cost is
+a diff size, not a risk, and delete should be re-weighed on that basis.
