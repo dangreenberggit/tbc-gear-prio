@@ -69,9 +69,38 @@ unreachable, so the next reader is not misled by green.
 
 ## Resolution
 
-**Keep.** Owner decision, 2026-09-16. Nothing was deleted and nothing was
-re-enabled; the bulk path stays switched off at `makeSimRunner(bulk = false)` and
-the code stays in both trees.
+**Keep — recommended by an agent, not ruled on by the owner.** 2026-09-16.
+Nothing was deleted and nothing was re-enabled; the bulk path stays switched off
+at `makeSimRunner(bulk = false)` and the code stays in both trees.
+
+**This recommendation is rebuttable, and three things weaken it.**
+
+1. The first pass at this ticket was told to plan the keep branch only. It never
+   weighed deletion, so its plan is evidence about *how* to keep, not about
+   whether to.
+2. The session argued for a while that the code lost on merit, citing 263 s
+   against 19 s. That figure is ticket 403's finalist-stage defect — the Go
+   engine refining every candidate because our builder sets `topResults` to the
+   chunk size — not a measurement of the batching route. At matched accuracy
+   ticket 346 measured the route cheaper (`grep -n 'R_wall_s' .scratch/carry-forward/issues/346-*.md`).
+   The merit argument on both sides of this ticket has been shaky.
+3. A second pass, briefed with deletion as the live option, still recommended
+   keep — mainly on the cost of deleting, because `screenCandidates` and
+   `composeForBulk` sit in `engine/rank.ts` and `runBulkScreen` in
+   `engine/seams/sim-runner.ts`, both PROVENANCE-tracked
+   (`grep -n 'screenCandidates' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts`).
+   But PROVENANCE describes the bulk parts as "fork-only, no core ancestor," and
+   **nobody established whether removing a fork-only addition from a ported file
+   is actually risky or merely tedious.** Untested. That question decides how
+   much the cost argument is worth.
+
+The case for deleting, stated fairly: this code has produced ten tickets in two
+weeks, ticket 375 is still open, and git keeps every line if it is ever wanted
+back.
+
+**What would settle it:** whether the owner intends to build ticket 346's
+streaming precondition. If yes, this is parked work. If no, it is dead weight and
+deleting is the honest answer.
 
 What landed:
 

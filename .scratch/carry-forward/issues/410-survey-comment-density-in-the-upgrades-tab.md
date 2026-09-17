@@ -96,9 +96,12 @@ writing the shorter version and checked that nothing needed goes missing.
 
 ## Comments
 
-**2026-09-16.** 406 resolved as keep. The "may be re-enabled" premise under
-"Watch out for" is now settled policy rather than a possibility, so the higher
-bar for cutting stands on a decision instead of a guess.
+**2026-09-16.** 406 closed with an agent's recommendation to keep, not an owner
+ruling — see its Resolution, which lists why that recommendation is rebuttable.
+So the "may be re-enabled" premise under "Watch out for" is still a possibility
+rather than settled policy, and the higher bar for cutting rests on an open
+question. If 406 is reopened and the code is deleted, this ticket's trigger case
+goes with it.
 
 `partition.ts`'s constant comment gained a leading paragraph in fork commit
 `633169c7f4e835540f3041b7e4bb407218bffc5b` saying the constant is unreachable at
