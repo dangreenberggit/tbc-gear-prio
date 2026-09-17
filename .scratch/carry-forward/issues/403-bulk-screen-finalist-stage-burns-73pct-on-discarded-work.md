@@ -1,6 +1,7 @@
 # 403 — Bulk screening asks the Go finalist stage to rank 25 candidates; it burns 73% of the run on work we discard
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: task
 Origin: `.scratch/carry-forward/issues/397-desktop-bulk-screen-not-a-speed-win.md` (investigation half, completed 2026-09-15)
 Blocks: —
@@ -192,4 +193,11 @@ runtime on both transports, removal ticketed as **406**. Read this ticket before
 re-enabling: the cost is not the RPC, it is that `topResults` must equal the
 chunk size, which makes the finalist stage refine every candidate.
 
-Status stays **open** until merged.
+Closed 2026-09-17. The Track C fix commits `182243da` and `ee31569d` are on
+`dev`, and `dev` is an ancestor of this feature branch's HEAD, so every 403
+number the rest of the bulk cluster cites is already merged; the golden gate at
+`data/desktop-gate/golden-ret-p5-cap40.json` exists and `check_desktop_tab.py`
+asserts it. The Done-when is met — the desktop path takes the per-candidate loop
+and the fix is proved byte-equal — so the `open` line was merge-tracking residue,
+not remaining work. Removal of the now-dead `BulkHttpSimRunner` / bulk screening
+code is tracked separately as **406**.
