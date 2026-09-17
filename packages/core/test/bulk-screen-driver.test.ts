@@ -25,7 +25,7 @@
 
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import {
   forkPresent,
@@ -108,9 +108,23 @@ const goodResult = (
   });
 
 describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
+  // Loaded once for the whole describe rather than per test: the fork
+  // engine/WASM module import is the expensive part, and six tests each paying
+  // it under heavy CPU contention pushed the first past the 30s budget (ticket
+  // 375, reproduced at 4x CPU oversubscription). The load cost is paid once;
+  // each test's own dispatch work is well under a second.
+  let fork: Awaited<ReturnType<typeof load>>;
+  // 30s, matching `testTimeout`, not the 10s default hookTimeout: the fork
+  // engine/WASM import moved here from per-test bodies, and under heavy CPU
+  // contention the import alone can pass 10s. The old structure gave the load
+  // the test's own 30s budget; this keeps that headroom for the one-time cost
+  // while each test's own work stays in the millisecond range (ticket 375).
+  beforeAll(async () => {
+    fork = await load();
+  }, 30_000);
+
   it("chunks at the shared bound and returns a row per candidate", async () => {
-    const { runBulkScreenChunks, SimSignalManager, BulkSimResult } =
-      await load();
+    const { runBulkScreenChunks, SimSignalManager, BulkSimResult } = fork;
     const seen: { count: number; iterations: number; topResults: number }[] =
       [];
     const result = await runBulkScreenChunks(request(60), {
@@ -140,7 +154,7 @@ describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
 
   it("dispatches nothing when the signal is already aborted", async () => {
     const { runBulkScreenChunks, SimSignalManager, BulkScreenAbortedError } =
-      await load();
+      fork;
     const controller = new AbortController();
     controller.abort();
     let dispatches = 0;
@@ -164,7 +178,7 @@ describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
       SimSignalManager,
       BulkScreenAbortedError,
       BulkSimResult,
-    } = await load();
+    } = fork;
     const controller = new AbortController();
     let dispatches = 0;
     let firstSignals: any;
@@ -193,8 +207,7 @@ describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
   });
 
   it("keeps a chunk's own error-trigger from poisoning later chunks", async () => {
-    const { runBulkScreenChunks, SimSignalManager, BulkSimResult } =
-      await load();
+    const { runBulkScreenChunks, SimSignalManager, BulkSimResult } = fork;
     const triggered: boolean[] = [];
     let call = 0;
 
@@ -238,7 +251,7 @@ describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
       SimSignalManager,
       BulkScreenIntegrityError,
       BulkSimResult,
-    } = await load();
+    } = fork;
     const thrown = new BulkScreenIntegrityError("row shortfall");
     let call = 0;
 
@@ -257,7 +270,7 @@ describe.skipIf(!forkPresent)("runBulkScreenChunks", () => {
   });
 
   it("throws listing every reason when no chunk succeeded", async () => {
-    const { runBulkScreenChunks, SimSignalManager } = await load();
+    const { runBulkScreenChunks, SimSignalManager } = fork;
     let call = 0;
 
     await expect(

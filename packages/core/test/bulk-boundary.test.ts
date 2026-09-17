@@ -15,8 +15,9 @@
  * candidates out of a screening pass. Running `shouldUseLegacyBulkSim` over a
  * wide span of iteration counts shows the premise is false at 25 — the boundary
  * moves down as iterations rise but floors at n = 27 — and that is what the
- * first test here records, so a change in upstream's estimator or stage table
- * shows up as a failing table rather than as a wrong comment.
+ * per-iteration-count cases here record (one `it.each` case per row of
+ * `FIRST_MULTI_STAGE_N`), so a change in upstream's estimator or stage table
+ * shows up as a failing row rather than as a wrong comment.
  *
  * The property that actually protects the ranking is the third test:
  * `assertSingleStageChunk` refuses a chunk the estimator would take multi-stage,
@@ -28,7 +29,7 @@
 
 import { pathToFileURL } from "node:url";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import {
   forkPresent,
@@ -104,26 +105,46 @@ const load = async () => {
 };
 
 describe.skipIf(!forkPresent)("bulk single-stage boundary", () => {
-  it("reproduces the measured first multi-stage n per iteration count", async () => {
-    const { shouldUseLegacyBulkSim, BulkSimRequest } = await load();
-    const measured = FIRST_MULTI_STAGE_N.map(([iterations]) => {
+  // Loaded once for the whole describe rather than per test: the fork
+  // engine/WASM module import is the expensive part, and under heavy CPU
+  // contention it plus a whole-table sweep in one test pushed past the 30s
+  // budget (ticket 375, reproduced at 4x CPU oversubscription). Splitting the
+  // sweep into one it.each case per iteration count bounds each test's own work
+  // to a single row's inner loop while the load cost is paid once.
+  let fork: Awaited<ReturnType<typeof load>>;
+  // 30s, matching `testTimeout`, not the 10s default hookTimeout: the fork
+  // engine/WASM import moved here from per-test bodies, and under heavy CPU
+  // contention the import alone can pass 10s. The old structure gave the load
+  // the test's own 30s budget; this keeps that headroom for the one-time cost
+  // while each test's own work stays in the millisecond range (ticket 375).
+  beforeAll(async () => {
+    fork = await load();
+  }, 30_000);
+
+  it.each(FIRST_MULTI_STAGE_N)(
+    "first multi-stage n at %i iterations is the measured value",
+    (iterations, expectedN) => {
+      const { shouldUseLegacyBulkSim, BulkSimRequest } = fork;
       const request = BulkSimRequest.create({
         highStageIterations: iterations,
       });
+      let firstMultiStage = -1;
       for (let n = 20; n <= 120; n++) {
-        if (!shouldUseLegacyBulkSim(request, n)) return [iterations, n];
+        if (!shouldUseLegacyBulkSim(request, n)) {
+          firstMultiStage = n;
+          break;
+        }
       }
-      return [iterations, -1];
-    });
-    expect(measured).toEqual(FIRST_MULTI_STAGE_N.map(([i, n]) => [i, n]));
-  });
+      expect(firstMultiStage).toBe(expectedN);
+    }
+  );
 
-  it("keeps the shipped chunk bound single-stage at an absurd iteration count", async () => {
+  it("keeps the shipped chunk bound single-stage at an absurd iteration count", () => {
     const {
       shouldUseLegacyBulkSim,
       BulkSimRequest,
       MAX_CANDIDATES_PER_BULK_REQUEST,
-    } = await load();
+    } = fork;
     expect(
       shouldUseLegacyBulkSim(
         BulkSimRequest.create({ highStageIterations: 1_000_000 }),
@@ -132,9 +153,9 @@ describe.skipIf(!forkPresent)("bulk single-stage boundary", () => {
     ).toBe(true);
   });
 
-  it("refuses a chunk the estimator would cull, and passes 25 and 26 at any count", async () => {
+  it("refuses a chunk the estimator would cull, and passes 25 and 26 at any count", () => {
     const { BulkSimRequest, assertSingleStageChunk, BulkScreenIntegrityError } =
-      await load();
+      fork;
     const cullable = () =>
       assertSingleStageChunk(
         BulkSimRequest.create({ highStageIterations: 30_000 }),
