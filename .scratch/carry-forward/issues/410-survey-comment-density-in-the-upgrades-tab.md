@@ -1,6 +1,7 @@
 # 410 — Survey comment density in the upgrades tab, then decide what to cut
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: task
 Origin: noticed 2026-09-16 while answering where to record "why we never let the
 bulk tournament cull" — the answer was "it is already recorded," at 55 lines
@@ -352,3 +353,28 @@ which is the owner's call. Nothing was cut.
 The survey exists with per-file numbers and the outliers classified, and the
 owner has decided whether to act on it. If yes, the cuts land as their own
 commits with the relocated material placed first.
+
+## Resolution — closed 2026-09-17 (Gate G2, owner)
+
+The survey found the upgrades area **overwhelmingly load-bearing**, with **no
+defensible cut** under the higher bar the 406 keep-ruling imposes (the bulk code
+is the substrate for ticket 411). Two housekeeping items were assessed:
+
+- **The ticket-126 comment pair was kept, not cut.** It is not a true duplicate:
+  the shared clause is the load-bearing "why" at each site, and a planner
+  confirmed a third 126 reference (at `:817`) — one fact per site by design. Not
+  edited.
+- **The one fix applied: relocated the orphaned set-bonus doc comment.** In
+  `upgrades_tab.tsx`, the `/** How much of this row's figure is set bonus (ticket
+  313) … */` block (the four (a)-(d) states) had been orphaned above
+  `removedItemsLine` when a removed-items method + doc were inserted between it and
+  `setBonusLine` on 2026-09-10. Moved it (content unchanged) to sit immediately
+  above `private setBonusLine(`; the removed-items doc stays above
+  `removedItemsLine`. Comment-only, pure relocation — fork commit
+  `79066917dc575122c700049b82ddabbfa867281d` on `feat/upgrades-tab` (`git diff`
+  and `git diff --ignore-cr-at-eol` both 25 ins / 25 del, no ending flip; not
+  pushed). Re-pinned `data/wowsims-fork.lock.json` to that tip and regenerated
+  `sim-implemented-effects.json` (only the embedded `forkCommit` field moved,
+  counts unchanged 221/451); `pnpm verify` rc=0.
+
+The `## Survey, 2026-09-17` section above stays as the record.
