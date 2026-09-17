@@ -274,4 +274,14 @@ Status stays **closed**. The six "Dead code cover" comments in
 `packages/core/test/bulk-*.test.ts` and the `partition.ts` caveat at fork commit
 `633169c7f` are left as they are.
 
+**411 measured: DELETE** (2026-09-17). With the finalist stage fixed (not
+bypassed — 16.7% share, refining 5 of 25 per chunk) and accuracy matched, desktop
+bulk lost to the per-candidate loop on both wall-clock numbers a user feels:
+first-row ~104 s vs 6 s (~17× slower), end-to-end ~158 s vs 97 s (~1.6× slower).
+The pre-registered rule (KEEP iff bulk beats the loop on both) yields DELETE, so
+the substrate did not earn its place even with the defect fixed. The delete
+itself is a **follow-up**, not done here — use 406's throwaway shas above (fork
+`5c2b1d7f9`, core `ca5c7040`). See
+`.scratch/stage-gate/411-desktop-bulk-wallclock/measurement.md`.
+
 Closed: 2026-09-17

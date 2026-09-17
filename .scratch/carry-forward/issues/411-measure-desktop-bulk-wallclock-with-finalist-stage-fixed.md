@@ -1,10 +1,38 @@
 # 411 — Measure desktop bulk-screening wall-clock with the finalist stage fixed
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: task
 Origin: 406 keep ruling (2026-09-17) + the 346/397/403 contamination finding surfaced by the owner and verified by an agent
 Blocks: —
 Blocked by: none
+
+## Resolution (2026-09-17)
+
+**Verdict: DELETE** — desktop bulk does not beat the loop on either wall-clock
+number, at matched accuracy, with the finalist stage fixed (not bypassed).
+
+Measured on the Windows dev box, cap 40, ret P5, packaged `wowsimtbc.exe` on
+:3333, fork tip `993320fab` (the finalist-stage fix). `I_match = 20000` (probe
+realised high-stage iterations 19686/19797/15865 → max rounded up to next 500).
+
+- **firstRowS** (Run click → first row): loop median 6.017 s vs bulk median
+  104.227 s. Bulk ~17× slower; `≤ 0.85 × loop` fails.
+- **clickToDoneS** (click → Took): loop median 97.321 s vs bulk median 157.671 s.
+  Bulk ~1.6× slower; `≤ 0.85 × loop` fails.
+- **Finalist share (Q2)** = 16.7 % (Σ finalist duration / Σ elapsedS over the 3 B
+  runs), well below the 40 % bar and the 66–73 % ungated reference — the stage
+  runs and refines 5 of 25 per chunk, fixed not bypassed. The finalist-share
+  signal carried the check.
+- **Accuracy** matched: all nine B×L `check_desktop_tab.py --compare` pairs pass
+  T1–T4; realised high iterations exactly 20000 per chunk.
+
+KEEP required bulk to beat the loop on both metrics; it beats it on neither, so
+the pre-registered rule yields DELETE. 406's measured-clean delete (throwaway
+shas fork `5c2b1d7f9`, core `ca5c7040`) is the honest follow-up — a separate
+task, not done here.
+
+Full record: `.scratch/stage-gate/411-desktop-bulk-wallclock/measurement.md`.
 
 ## What
 
