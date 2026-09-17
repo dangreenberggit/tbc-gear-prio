@@ -151,3 +151,90 @@ fork branch, then run `pnpm verify; echo "rc=$?"` and the desktop gate
 `data/desktop-gate/golden-ret-p5-cap40.json`). Report `git -C vendor/tbc-new-fork diff --stat`
 and whether both gates stay green. Green with no golden diff means the cost is
 a diff size, not a risk, and delete should be re-weighed on that basis.
+
+## Measurement, 2026-09-17
+
+The delete was performed on throwaway branches and measured. **Nothing landed on
+the real branches** — this section records the measurement; the delete-or-keep
+ruling is the owner's (Gate G1). The throwaway branches are left intact for
+inspection.
+
+**Throwaway branches (not merged, kept for inspection):**
+- fork `throwaway/406-delete-measure` @ `5c2b1d7f981872f00f90d05a343e2ebca6796ad4`
+  (one commit on top of `614edd3e1`)
+- core `throwaway/406-delete-measure` @ `ca5c7040382939936765f84d1f218ba50d09e728`
+  (two commits on top of the 403/397-close commit `b1a0d0e1`)
+
+**Prediction, written before measuring:** `pnpm verify` rc=0 and E-W3 executed
+its cases (not skipped), and `python scripts/check_desktop_tab.py` rc=0 with no
+golden diff.
+
+**Fork diffstat** (`git -C vendor/tbc-new-fork diff --stat 614edd3e1..5c2b1d7f9`):
+13 files, **95 insertions, 2042 deletions**. Deletes the 4 bulk adapters,
+`engine/bulk/partition.ts` (and its now-empty directory), the 2 bulk tool scripts
+(`equiv-campaign.mts`, `bulk-spike.mts`); trims `engine/rank.ts` (-411),
+`engine/seams/sim-runner.ts` (-134), `upgrades_tab.tsx`, `ui/core/index.ts`,
+`tools/README.md`; moves `makeSimRunner` + `readWasmConcurrency` +
+`bulkPoolSizeFrom` + `WASM_CONCURRENCY_KEY` into `adapters/wasm_sim_runner.ts`;
+re-hashes two PROVENANCE rows.
+
+**Core diffstat** (`git diff --stat b1a0d0e1..ca5c7040`): 10 files, **3 insertions,
+2204 deletions**. Deletes the six `bulk-*.test.ts` + `bulk-screen-fixture.ts` +
+the now-unused `fork-engine-harness.ts`; moves the fork lock and regenerates
+`sim-implemented-effects.json`'s embedded `forkCommit` only (counts unchanged
+221/451, since no `sim/` file was touched).
+
+**Results (all rc lines):**
+- fork type-check (`tsc --noEmit`): **rc=0**
+- fork lint (`oxlint ./ui`): **rc=0** (only pre-existing warnings, none in edited files)
+- `pnpm verify` on the throwaway tree: **rc=0** — every gate green, including
+  engine-port-drift (33 ported files match PROVENANCE incl. the two moved hashes),
+  equip-eligibility / fork-lint / sim-implemented-effects at fork `5c2b1d7f9818`.
+- **E-W3 parity executed NON-VACUOUSLY and passed.** Standalone
+  `npx vitest run packages/core/test/wowsims-fork-parity.test.ts --reporter=verbose`
+  rc=0: `✓ wowsims-fork-parity (E-W3) > the ported fork engine reproduces this
+  repo's ranked deltas` (2435 ms), 1 passed / 1 skipped — the skip is the inactive
+  `describe.skipIf` twin, the SAME shape as the pre-delete baseline (Step 4(0):
+  1 passed at 3078 ms). Full `npx vitest run` confirms it (`✓ ... 4962ms`, whole
+  suite 1272 passed / 1 skipped). `common.ts` present, so `forkProtosGenerated`
+  is true both before and after. **Caveat on the verify summary line:** `pnpm
+  verify`'s tail prints "wowsims-fork-parity (E-W3) skipped: ...protos not
+  generated" — that is the inactive skipIf twin's `it.skip` message surfaced by
+  its shared describe name, NOT the real parity case. The real case ran (it is one
+  of the "1303 ran"); the "1 skipped" is the twin. Verified because `pnpm run
+  test` is literally `vitest run` (package.json:20), the identical binary that
+  standalone shows the parity case passing.
+- desktop gate (`python scripts/check_desktop_tab.py`): **rc=2 — could not run,
+  build-environment limitation, NOT the delete.** go1.25.4, make and the
+  Playwright chromium are all present, but `make wowsimtbc` fails rc=2 because the
+  fork's upstream (untouched) `makefile` shells to POSIX tools via bare
+  CreateProcess (`uname -s`, `realpath`, `find *.ts`, `env node`) and this
+  Windows `make.exe` has no POSIX shell. This failure reproduces at the base SHA;
+  it is not attributable to the delete. Check (h) golden comparison never ran, so
+  there is no golden diff to report (the golden's `forkCommit cfbd7fced` vs pin
+  `614edd3e1` two-doc-commit gap is moot here).
+
+**Prediction vs result:** `pnpm verify` rc=0 — confirmed. E-W3 executed and passed
+— confirmed. Desktop gate — could not measure on this machine (toolchain), so that
+prong of the prediction is unverified here rather than confirmed or refuted.
+
+**Counter-evidence the delete would reverse (the owner's intent question).** Two
+prior decisions record a path back to this code; deleting reverses both:
+- Ticket 346 (`grep -n 'Precondition for revisiting\|remains constructible' .scratch/carry-forward/issues/346-*.md`):
+  `BulkWasmSimRunner` "remains constructible, so flipping the default stays a
+  one-argument change," and the **Precondition for revisiting** is that "the batch
+  path must render rows as each chunk completes" (streaming), after which 346's
+  keep-the-loop decision "should be re-measured."
+- Ticket 403 (`grep -n 'stay in the tree' .scratch/carry-forward/issues/403-*.md`):
+  "`BulkHttpSimRunner` and the bulk screening code stay in the tree — dead at
+  runtime... removal ticketed as 406."
+
+**So the owner's question is one of intent, not measurement:** do you intend to
+build 346's streaming precondition (or otherwise revisit the batch route)?
+- If **yes**, this is parked work and keep is honest — the delete is reversible
+  from git but reverses two live decisions with no new merit evidence.
+- If **no**, the keep case's cost argument is now answered: the delete is
+  **tedious, not risky** — `pnpm verify` and the non-vacuous E-W3 both stay green
+  after removing the code from two PROVENANCE-tracked files, so removing a
+  fork-only addition from a ported file did not disturb the live ret ranking path.
+  The remaining keep reason is only 346's streaming intent.
