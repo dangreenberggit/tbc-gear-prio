@@ -1,6 +1,7 @@
 # 413 — Human comments in core/src originals and the two fork files 412 missed
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: task
 Origin: 412 follow-up (2026-09-17) — two investigations after 412's execution found
 in-scope files 412 did not touch. Surfaced by the owner.

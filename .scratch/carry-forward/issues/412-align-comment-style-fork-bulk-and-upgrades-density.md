@@ -1,6 +1,7 @@
 # 412 — Align comment style: our fork-side bulk comments, and upgrades/ density
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: task
 Origin: 411 follow-up (2026-09-17) — comment-style contrast between the upstream
 bulk sim code and our upgrades sim code, surfaced by the owner
