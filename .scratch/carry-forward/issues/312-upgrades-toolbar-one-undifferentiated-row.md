@@ -319,3 +319,24 @@ captured in Execution A's `.scratch/.../cdp-reverify.json` (done:true). Closes o
 owner sign-off.
 
 ## Comments
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3)
+
+Re-proven on fork tip `d754ac1b`. The redesigned toolbar structure survives the
+Chunk-1 merge and the runner rename:
+
+- Zero raw checkbox inputs remain: `grep -c '<input type="checkbox"'
+  vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx` → 0
+  (every control is a native picker component).
+- The post-run view controls sit above the results and the run settings sit
+  above them, proven by the layout gate on a real WASM run:
+  `[375] view-controls-host top 1216.5 <= tabs top 1276.0`,
+  `[375] settings panel top 975.3 <= results panel top 1216.5`,
+  with `settings-outer-container position: sticky` keeping Run reachable — all
+  four widths. At 1280 the filter row spans full width
+  (`grid-column 1/-1, width 664.3 == tabs 664.3`). 37/37 assertions green.
+
+Verified by: `grep -c '<input type="checkbox"' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`
+and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
+`.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
+Status unchanged — closes on owner sign-off.

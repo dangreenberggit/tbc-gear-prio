@@ -146,3 +146,33 @@ artifact rather than re-captured. The 126 token/pattern-id sub-concern remains f
 Execution C. State: **styled, owner-checklist-pending.**
 
 ## Comments
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3); [~] box closed by construction
+
+Re-proven on fork tip `d754ac1b`. The functional-export behaviour and the
+styling half are confirmed from source on the current tip, and the one box
+Execution B left as `[~]` (the live before/after payload change on a BiS-only
+toggle) is settled by construction rather than a flaky live capture:
+
+- **Payload shape** `{"items":[{"id":N}]}`, two-space indented:
+  `JSON.stringify({ items }, null, 2)` (`upgrades_tab.tsx:2115`).
+- **Deduped**: a `Set<number> seen` skips repeats — `if (seen.has(id)) continue`
+  (`upgrades_tab.tsx:2104,2111`).
+- **Displayed order, cross-slot (not slot-grouped)**: `updateExport` iterates
+  the rendered `rows` in display order and pushes one item per unique id, with
+  no slot bucketing (`upgrades_tab.tsx:2103-2114`).
+- **[~] filter-reactivity — closed**: the export is built from the displayed
+  rows, and the BiS-only toggle's `onChange: () => this.render()`
+  (`upgrades_tab.tsx:798`) re-runs render, which calls `updateExport(exported)`
+  on the freshly filtered rows (`upgrades_tab.tsx:1738`). Toggling BiS-only
+  therefore recomputes the payload from whatever rows are then displayed — the
+  same render-on-change wiring the flavour toggle uses (`upgrades_tab.tsx:817-824`).
+  This is the by-construction argument the 2026-08-29 note anticipated, now
+  pinned to the current line numbers.
+- **Export box styling** uses the site block idiom (`.upgrades-export.content-block`,
+  native `CopyButton`) — see 328.
+
+Verified by: `sed -n '2103,2123p' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
+`sed -n '793,799p;1738p' .../upgrades_tab.tsx`. Status unchanged — closes on
+owner sign-off (its 126 token-id and 328 copy sub-concerns remain tracked
+separately).

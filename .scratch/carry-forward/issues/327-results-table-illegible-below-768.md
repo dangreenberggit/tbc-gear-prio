@@ -63,3 +63,29 @@ Evidence (CDP, `window.innerWidth` read back at every capture — F3):
   slot labels and "+22.0 DPS"/"-30.8 DPS" figures each on one horizontal line.
 
 Closes on owner sign-off, not by this executor.
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3)
+
+The styling landed by Execution B was re-proven on today's fork tip
+`d754ac1b` (branch `feat/upgrades-tab`), which moved after the 2026-08-29
+evidence was captured — Chunk 1 merged upstream `master` into the fork and the
+tab `.tsx` was later touched by the WasmSimRunner→WorkerPoolSimRunner rename, so
+the old screenshots no longer described the shipped code.
+
+The fork layout gate `vendor/tbc-new-fork/test-layout.mjs` was re-run against a
+fresh vite build with a real 5-row WASM ret run (30.4s) and **37 assertions pass
+at 375 / 653 / 768 / 1280** (`{"outcome":"measured","passed":37,"failed":0}`).
+The 327-specific assertions all pass on the current tip:
+
+- `[375/653/768/1280] one-line cells: all Slot/DPS content heights <= 1.5x
+  line-height (17.5px)` — the char-by-char vertical stacking is refuted.
+- `[375/653/768/1280] no clipped text: no cell overflows its box under an
+  overflow-hidden ancestor`.
+- `[375] scroller ok: table 416 vs wrap 319, overflow-x auto` — the wide table
+  scrolls inside the narrow panel instead of shattering.
+- `[375/653/768/1280] row spacing: all rows <= 7x line-height, consecutive rows
+  adjacent` — no outsized row gaps.
+
+Verified by: `cd vendor/tbc-new-fork && node test-layout.mjs` (durable log at
+`.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
+Status unchanged — closes on owner sign-off (Chunk 4 step 5).

@@ -86,3 +86,21 @@ on native BooleanPicker"):**
   landed. Any further wording change belongs to the held 330 review, not here.
 
 State: **styling landed, owner-checklist-pending.** Closes on owner sign-off.
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3, styling half only)
+
+Re-proven on fork tip `d754ac1b`. The styling half is confirmed from source on
+the current tip (copy is untouched — that stays with the 330 pass):
+
+- **Copy button** is the native filled `CopyButton` with the `fa-copy` icon and
+  `btn-secondary` weighting, not the hand-rolled transparent control
+  (`upgrades_tab.tsx:833-837`).
+- **View toggles** are native `ViewToggle`/`BooleanPicker` instances, not raw
+  checkboxes (`upgrades_tab.tsx:793-799`; the zero-raw-checkbox grep in 312).
+- The redesigned control layout renders correctly at all four widths — 37/37
+  layout-gate assertions green against a real WASM run.
+
+Verified by: `sed -n '793,837p' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`
+and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
+`.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
+Status unchanged — closes on owner sign-off; copy half remains with 330.
