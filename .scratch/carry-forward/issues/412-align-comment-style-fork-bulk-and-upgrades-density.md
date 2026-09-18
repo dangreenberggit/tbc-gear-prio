@@ -79,3 +79,44 @@ policy without throwing away genuinely useful development context prematurely.
   finish, with each trimmed block justified against the WHY-never-WHAT policy and
   each kept block still load-bearing. Development comments kept until the work
   they support is done are noted as such.
+
+## 2026-09-17 — Part A done, Part B vocabulary pass done, density deferred (stage-gate 412-comment-style)
+
+Two comment-only fork commits on `feat/upgrades-tab`, then one core re-pin. Fork
+tip moved 693a3f3c -> f7e4398c (via 5be3a563). `pushed` stays false. Behaviour
+unchanged: `git diff upstream/master -- sim/core/bulk/ | grep -c '^-[^-]'` is
+still 3, desktop gate (a)-(h) pass with no golden update, `pnpm verify` rc 0.
+
+Part A (fork commit 5be3a563): trimmed the four added finalist-stage comments in
+`sim/core/bulk/` (bulk_sim.go:191-193 merge comment, merge.go bulkSimFinalistCount
+and mergeBulkSimFinalists docs, stage.go runBulkSimFinalistStage doc) to upstream
+terse style — ticket/C-id idioms and the "carries" AI-voice phrasing dropped, the
+WHY kept. The culling-interval comment the ticket named (bulk_sim.go ~117-123,
+"measured +17.6%") is upstream-original, not ours (`git log -S'measured +17.6'
+upstream/master` traces it to upstream commit 748434c9a), so it was left alone;
+likewise the three upstream kill-list lines in the dir (bulk_sim.go "lands",
+merge.go "carries", merge.go "surface it"). The ticket's :207-209 pointer is the
+upstream paired-errors comment, also left alone. This ticket's Part A block list
+misattributed the culling comment as ours.
+
+Part B vocabulary pass (fork commit f7e4398c): kill-list pass over 81 comment
+lines in 29 files under `upgrades/` (the C9 grep counted 82 lines in 31 files;
+two of those files, engine/migrate-gems.ts and engine/slots.ts, held only a
+surface-as-noun hit — allowed by the rubric — so they were left unedited, leaving
+29 touched). Six surface-as-noun lines kept: player_gear_source.ts:4/:41,
+rank.ts:6, migrate-gems.ts:10, slots.ts:7, fixtures/report-events-offline.ts:49.
+The two code-line kill-list hits were not touched (report-events-offline.ts:121
+template literal, export_equip_eligibility.mts:83 Error string — editing them
+changes behaviour). 17 engine files are PROVENANCE-tracked; 15 changed bytes and
+their sha256 rows were recomputed; E-W3 green before and after; engine-port-drift
+reds before the row edits (by design) and passes after. The per-block before/after
+record is at `.scratch/stage-gate/412-comment-style/prose-record.md` (4 Part A
+entries + 67 Part B entries).
+
+Part B **density** judgment deferred to branch finish, per this ticket's own
+keep-until-end rule and ticket 410's survey ("overwhelmingly load-bearing",
+"no defensible cut" under the 406 keep-ruling; only `upgrades_tab.tsx` named for
+a harder scan). This pass changed vocabulary and dropped idioms; it did not open
+untouched blocks or trim density. Not touched: `upgrades_tab.tsx` (outside the
+Part B path), `packages/core/src/` mirrors (the core-side originals carry the same
+comments — a possible orchestrator follow-up).
