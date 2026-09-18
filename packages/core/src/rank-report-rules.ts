@@ -65,7 +65,7 @@ export type RankReportMeta = {
   /** Report-time zone filter (CLI `--raid`); not applied during rank. */
   raid?: string;
   /**
-   * Every view control that shaped the rows in this report (§4.1). Recorded
+   * Every view control that filtered the rows in this report (§4.1). Recorded
    * because the rows are a filtered re-render: a report that names only
    * `raid` while `--boss` or `--hide-owned` also cut rows misdescribes itself,
    * and these files outlive the command that made them.
@@ -102,7 +102,7 @@ export function partitionShortlist(items: RankedItem[]): {
  * which keeps only above-cutoff rows, so a piece that is a downgrade as a single
  * swap but positive as part of its package — 31048 at −106.16 inside a +64.07
  * package — had no chip element at all. The client script re-sorts and filters
- * chips; it cannot conjure one, so no toggle state could ever surface these.
+ * chips; it cannot conjure one, so no toggle state could ever reveal these.
  *
  * Render-but-hide, at the owner's direction (ADR-0024 amendment, 2026-08-10):
  * the chips are in every document and only package mode displays them, so the
@@ -175,15 +175,15 @@ const UNMEASURED_REASON_TEXT: Record<
  * ≈0 bonus (e.g. Crystalforge, a mana/heal effect) renders as a number, not
  * as unmeasured — §2.3 draws that line and this function preserves it.
  *
- * This panel is the *only* surface some bonuses reach. At 0 worn pieces every
- * single-swap candidate lands at `piecesAfterSwap === 1`, so
+ * This panel is the *only* place some bonuses reach. At 0 worn pieces every
+ * single-swap candidate sits at `piecesAfterSwap === 1`, so
  * `nextMeasurableThreshold` stops at an implemented 2pc and the 4pc figure is
  * credited to no row in any display mode (ticket 91). Rather than smear a
  * fraction of it across member rows — which would put a break-confounded
  * number into the sort, and the confound is large: the engine reports 193.89
  * for the Thunderheart 4pc where an isolated measurement gives 73.5 ± 6.3 DPS
  * (`.scratch/set-bonus-value/measurements-2026-08-10.md`) — set completion is
- * surfaced here as its own thing, named by the items that would complete it.
+ * shown here as its own thing, named by the items that would complete it.
  */
 export function formatSetBonusLine(b: SetBonusValue): string {
   const sign = b.bonusDps !== undefined && b.bonusDps > 0 ? "+" : "";
@@ -224,7 +224,7 @@ export function formatPackageGemSubstitutions(b: SetBonusValue): string {
  *
  * The wording says the break **inflates** this figure, never that it is netted
  * in. `bonusDps` is derived as `packageDelta − Σ singles`, which is exactly the
- * quantity the `(k−1)·B` inflation lands on — on the shredzepelin P3 artifact it
+ * quantity the `(k−1)·B` inflation falls on — on the shredzepelin P3 artifact it
  * reads 193.89 against a de-confounded ~62.8. The figure that genuinely nets the
  * break in is `packageDeltaDps`, rendered separately by `formatPackageDelta`.
  */
@@ -258,7 +258,7 @@ export function formatSelfConfoundPrefix(b: SetBonusValue): string {
  * its own 2pc term whenever this same set's 2pc entry is present and
  * `unmeasured === "unmeasurable-at-this-worn-count"` — the case where every
  * added single crosses the 2pc on its own (ticket 119 anomaly A). A no-op on
- * an array that already carries `selfConfound`, so it is safe to run on
+ * an array that already holds `selfConfound`, so it is safe to run on
  * fresh data too.
  *
  * The 4pc row must itself be measured (ticket 152). The disclosure says the
@@ -294,7 +294,7 @@ export function withSelfConfoundDisclosed(
 
 /**
  * The one wording for `packageDeltaDps`'s gem-model statement, shared by every
- * surface that states the figure (tickets 103, 111).
+ * place that states the figure (tickets 103, 111).
  *
  * This states the model rather than apologising for it: swapping in an item
  * migrates the worn gems that fit (wowsims equip semantics), and sockets the
@@ -316,7 +316,7 @@ export const GEM_POLICY_QUALIFIER =
  * baseline. This is the figure that answers "what if I equip all of these?",
  * and the only one that is genuinely **net of any break** — the displaced set's
  * loss is inside the measurement rather than derived back out of it, so it
- * carries none of `bonusDps`'s `(k−1)·B` inflation (ADR-0023 decision 3).
+ * has none of `bonusDps`'s `(k−1)·B` inflation (ADR-0023 decision 3).
  *
  * Disclosure only. It is deliberately not credited to any row, not summed into
  * a sort key, and not compared against the cutoff: ADR-0020 keeps the bar
@@ -362,7 +362,7 @@ export type SetBonusEntry = {
  *
  * Loses nothing `formatSetBonusLine` says — the same bonus figure, package
  * figure, package contents, break caveat and gem caveat — and adds no number.
- * The CLI keeps the flat line, which is the right shape for a terminal; only
+ * The CLI keeps the flat line, which is the right form for a terminal; only
  * the HTML panel takes this.
  *
  * The break caveat moves from a *prefix* to a qualifier line, which the flat
@@ -421,7 +421,7 @@ export function setBonusEntry(b: SetBonusValue): SetBonusEntry {
 
 /**
  * Names the items that would complete the package. Without this the panel
- * states a bonus with no way to act on it — and for a threshold no row carries,
+ * states a bonus with no way to act on it — and for a threshold no row holds,
  * "which items" is the whole of the actionable information.
  */
 export function formatPackageContents(b: SetBonusValue): string {
@@ -434,7 +434,7 @@ export function formatPackageContents(b: SetBonusValue): string {
 }
 
 /**
- * The visible upgrade list as wowsims-shaped JSON: `{"items":[{"id":N}, ...]}`,
+ * The visible upgrade list as wowsims-format JSON: `{"items":[{"id":N}, ...]}`,
  * the same envelope as `vendor/wowsims/*.gear.json` and what its importer
  * accepts.
  *
@@ -473,7 +473,7 @@ export function wowsimsItemIdsJson(
  *
  * Reads every source, not just the primary: a row can carry a token source
  * behind a drop source, and the token id is the one this export wants
- * wherever it sits. A Sunmote-exchange token carries no single tradeable
+ * wherever it sits. A Sunmote-exchange token has no single tradeable
  * `tokenId` (its `token` name is synthetic), so those rows fall through to
  * the gear id — exactly the fall-through this returns `undefined` for.
  */
@@ -544,7 +544,7 @@ export function wowsimsTmbItemIdsJson(
  * Warlock is the one spec whose upstream sets are named by raid **tier**
  * rather than phase, which is why `t4`-`swp` appear here. Their mapping is
  * measured rather than assumed: the median item level of each warlock set
- * lands on its phase counterpart in a phase-named spec's ladder (warlock
+ * matches its phase counterpart in a phase-named spec's ladder (warlock
  * preraid/t4/t5/t6/za/swp = 110/115/128/146/146/154; balance
  * preraid/p1/p2/p3/p4/p5 = 110/115/128/143/141/154). `t6` and `za` tie
  * because `za` *is* the t6 set with two Zul'Aman pieces swapped in.
@@ -581,7 +581,7 @@ export function curatedSetPhase(label: string): number | null {
  * this never badges "was BiS two phases ago" as a recommendation
  * (carry-forward 47 §1).
  *
- * Deliberately not `curatedSets`: on feral P2 that field also carries five
+ * Deliberately not `curatedSets`: on feral P2 that field also holds five
  * `preraid` rows, and "in the pre-raid set" is a different claim from "BiS
  * now" — the opposite one, mostly.
  */
@@ -604,7 +604,7 @@ export function isCuratedBis(item: Pick<RankedItem, "bisTags">): boolean {
  * pointer: the numbers are the data, and no advice is added either way.
  *
  * The figures are `packageDeltaDps` — the same measured quantity every other
- * surface shows — never the break-confounded derived `bonusDps`
+ * place shows — never the break-confounded derived `bonusDps`
  * (carry-forward 90), and nothing here reaches a sort key.
  */
 export function formatCuratedPackagePointer(
@@ -635,7 +635,7 @@ export function formatCuratedPackagePointer(
  * so it is discounted less.
  *
  * Flat per threshold, deliberately: the weight does not scale by how many
- * pieces are still missing. A row three pieces short of 4pc therefore carries
+ * pieces are still missing. A row three pieces short of 4pc therefore gets
  * the same 0.25x credit as one that is a single piece away. That was chosen
  * over a pieces-remaining divisor, so the toggle stays the arithmetic the
  * reader can do in their head against `formatSetPotentialLine`'s number.
@@ -669,10 +669,10 @@ export type SetPotentialCredit = "weighted" | "full";
  * The owner's decision of 2026-08-10 (spec §4): under the opt-in view, the
  * question a tier row should answer is not "what does this piece do tonight"
  * but "is starting this set worth it at all" — so every member row of one
- * package carries the same whole-package figure and they sort as a block.
+ * package shows the same whole-package figure and they sort as a block.
  *
  * "Best of the measured values" is the owner's ticket-118 refinement
- * (2026-08-11). A row carries every measured threshold's figure, and the sort
+ * (2026-08-11). A row holds every measured threshold's figure, and the sort
  * takes the highest: on the ret artifact the Lightbringer 2pc measures +11.31
  * while the 4pc measures -6.83, so a Lightbringer row sorts by +11.31 rather
  * than being pinned to the larger threshold's negative number. Plain
@@ -686,7 +686,7 @@ export type SetPotentialCredit = "weighted" | "full";
  * - **Not the confounded quantity.** Ticket 90 suppresses `bonusDps`, the
  *   derived `packageDelta − Σ singles` split that inflates by `(k−1)·B`.
  *   `packageDeltaDps` is a single simmed delta with any broken set's cost
- *   already netted inside it, so the confound never lands on it and
+ *   already netted inside it, so the confound never reaches it and
  *   `setPotentialIsConfounded` is correctly not consulted here.
  * - **Not a maximum against the row's own delta.** A positive package figure
  *   replaces the row's own value rather than being maxed with it, so the
@@ -722,7 +722,7 @@ export function packageSetPotentialDps(
  *
  * The wording says each figure is the **whole package**'s, because every
  * member row shows the same figures and a reader must not take one for this
- * piece's share. And it carries `GEM_POLICY_QUALIFIER`, the same caveat the
+ * piece's share. And it includes `GEM_POLICY_QUALIFIER`, the same caveat the
  * panel states about the same figures.
  */
 export function formatPackageMembershipLine(

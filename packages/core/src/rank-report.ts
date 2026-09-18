@@ -120,7 +120,7 @@ function chipHtml(i: RankedItem, packageOnly: boolean): string {
   const pkg = packageSetPotentialDps(i);
   const absRank = i.rank == null ? "" : `#${i.rank}`;
   // An admitted chip is below cutoff, so the tooltip has to say what it is
-  // doing in a curated list at all — the figure it carries is the package's,
+  // doing in a curated list at all — the figure it shows is the package's,
   // not this swap's.
   const title = packageOnly
     ? `below cutoff as a single swap — shown for its ${fmtDelta(pkg)} DPS package`
@@ -145,7 +145,7 @@ function chipHtml(i: RankedItem, packageOnly: boolean): string {
 }
 
 /**
- * Ticket 123: a substitution caused by a sim crash carries the whole Go stack
+ * Ticket 123: a substitution caused by a sim crash holds the whole Go stack
  * trace in its detail — 2.4KB of goroutine frames on the ret artifact — and
  * the first line of the error already says what went wrong. Only the HTML
  * rendering trims; the JSON artifact keeps the full text as the diagnostic
@@ -226,7 +226,7 @@ function sourceKeyLabel(key: string): string {
 // here with the same wording, so the report and `--group-by raid` name a
 // shared bucket identically, plus `heroic`, which view.ts deliberately lacks.
 //
-// The extra key is not an oversight on either side. `kind: "heroic"` carries a
+// The extra key is not an oversight on either side. `kind: "heroic"` has a
 // `dungeon` and no `zone`, so view.ts's zoneKeyOf falls through to its
 // `?? item.source.kind` escape and buckets the item under the bare string
 // `heroic`. That is tolerable for a filter value, which is matched rather
@@ -402,7 +402,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
             withSetPotential && item.setContext
               ? `<div class="set-potential">${esc(formatSetPotentialLine(item) ?? setPotentialUnmeasuredText(item))}</div>`
               : "";
-          // Ungated like the curated pointer below: it carries the row's own
+          // Ungated like the curated pointer below: it shows the row's own
           // delta beside the package figure, so it explains the package mode
           // rather than asserting a ranking. Rendered whenever any package
           // claims this row, including a negative one — negative figures
@@ -504,7 +504,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
                 : "delta flat";
           // All three values ride on the row so the control is a re-sort and a
           // label swap in the browser, never a re-run of the pipeline. They
-          // differ from `deltaDps` only where a row carries an unrealised
+          // differ from `deltaDps` only where a row has an unrealised
           // prospective bonus.
           const weighted = weightedSetPotentialDps(item);
           const full = weightedSetPotentialDps(item, "full");
@@ -557,7 +557,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
         (bisCount > 0 ? "slot" : "slot no-bis") +
         (isUnmeasuredSlot(deadSlotWarning) ? " unmeasured" : "");
       // Ticket 164: the top-of-page plausibility panel retracts this slot,
-      // but a reader who lands here via the sticky nav has scrolled past
+      // but a reader who arrives here via the sticky nav has scrolled past
       // that panel already. Echoing the same `message` locally (not a
       // shortened rewrite) means the retraction travels with the rows it
       // qualifies instead of depending on the reader's scroll position.
@@ -601,7 +601,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   // Deliberately NOT gated on `withSetPotential`, unlike the per-row
   // annotation above. Spec §4's default-off rule is about keeping the *sort
   // key and cutoff* unchanged; this panel moves no number, and it is the only
-  // surface a 4pc bonus at 0 pieces worn can reach at all (carry-forward 91).
+  // place a 4pc bonus at 0 pieces worn can reach at all (carry-forward 91).
   // Gating disclosure on the ranking toggle hid that figure from every default
   // reader — carry-forward 100.
   // `withSelfConfoundDisclosed` is a no-op on data `rank.ts` already sets

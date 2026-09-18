@@ -185,7 +185,7 @@ export type Progress =
       candidates?: number;
     }
   /**
-   * A single candidate's row finished — fired as each sim lands, ahead of
+   * A single candidate's row finished — fired as each sim completes, before
    * the "ranking" stage, so a caller can fill a skeleton row incrementally
    * rather than waiting for the whole run (candidate-pool.md §5.1.5). No
    * `stage` field: this is a side channel alongside the stage sequence
@@ -248,11 +248,10 @@ export type RankedItem = {
   seMethod: "independent" | "paired-replicate";
   /**
    * `false` only on a row Stop left unsimmed (candidate-pool.md §5.1.4) —
-   * absent otherwise, never `true`, so an ordinary complete run never
-   * carries the field at all and a reader can tell "simmed" from "this
-   * `Ranking` predates Stop" apart from "this row was skipped by Stop".
-   * Such a row's `deltaDps`/`se`/etc. are placeholders, excluded from
-   * cutoff classification and tie groups.
+   * absent otherwise, never `true`. An ordinary complete run omits the
+   * field, so a reader can separate a skipped row from an old `Ranking`
+   * that predates Stop. Such a row's `deltaDps`/`se`/etc. are placeholders,
+   * excluded from cutoff classification and tie groups.
    */
   simmed?: false;
   bisTags: Array<"BiS" | "Alt" | "Realistic">;
@@ -353,15 +352,15 @@ export type SetContext = {
    *
    * Membership is keyed on `packageItemIds` rather than on `nextThreshold`
    * because the two disagree exactly where the feature matters: at 0 pieces
-   * worn every single swap lands at `piecesAfterSwap === 1`, so
+   * worn every single swap sits at `piecesAfterSwap === 1`, so
    * `nextThreshold` pins to an implemented 2pc and a threshold-keyed lookup
    * reaches only the 2pc package's members (ADR-0023's ticket-91 case). The
-   * four-piece package's other members would carry nothing.
+   * four-piece package's other members would get nothing.
    *
    * `deltaDps` is `SetBonusValue.packageDeltaDps` — one sim of the assembled
    * package against the baseline, with any broken set's cost already inside the
    * measurement. It is deliberately **not** `bonusDps`, the derived
-   * `packageDelta − Σ singles` split that carries the `(k−1)·B` inflation
+   * `packageDelta − Σ singles` split that includes the `(k−1)·B` inflation
    * ticket 90 suppresses from ranking.
    */
   packages?: SetPackageContext[];
@@ -405,7 +404,7 @@ export type SetBonusValue = {
    * Gem swaps meta repair had to make on *other* worn items to price this
    * package, accumulated over every piece the package adds (ticket 144).
    *
-   * The same disclosure `RankedItem.gemSubstitutions` carries for single-item
+   * The same disclosure `RankedItem.gemSubstitutions` records for single-item
    * rows. PLAN.md §9 policy item 5 is written over adjustments generally, but
    * the package arm went through `equipmentForCandidateSwap`, which discards
    * the swap list, so these rows stayed silent where the policy says they
@@ -440,7 +439,7 @@ export type ResolvedFight = {
    * Absent when the capture cannot supply one. Optional rather than `""`,
    * because an empty string is indistinguishable from a real value that
    * failed to format, and a UI rendering it would print a blank where it
-   * meant "unknown". A raw report carries fight times as offsets from the
+   * meant "unknown". A raw report gives fight times as offsets from the
    * report's own start, so deriving a wall clock needs a field
    * `wcl_probe.py --raw-out` does not persist — inventing one would put a
    * fabricated date on a fixture whose whole job is being real.
@@ -601,7 +600,7 @@ export async function rankUpgrades(
   // carry-forward 61: this is the check the resolution path was skipping.
   //
   // Refuse only on a *positive* reading that the fight is some other build.
-  // Two shapes qualify, and the second is the one ticket 04 actually hit:
+  // Two cases qualify, and the second is the one ticket 04 actually hit:
   // `matches: false` with a named `detected`, and `unsupported-spec` — where
   // the class is known and the favoured tree is known and simply is not this
   // spec's. A protection paladin classifies as `unsupported-spec`, not as a
@@ -755,7 +754,7 @@ export async function rankUpgrades(
   // eligible set down to what actually gets simmed — hashing here rather
   // than at entry because the logged gear is the largest input to every
   // delta, and it is not known until readGear resolves. The check still
-  // lands before the sim loop, which is the expensive part.
+  // runs before the sim loop, which is the expensive part.
   const contentHash = contentHashOf({
     character: input.character,
     spec: input.spec,
@@ -848,13 +847,13 @@ export async function rankUpgrades(
      */
     const winningRequests = new Map<number, RaidSimRequest>();
     /**
-     * Candidates dropped before they could be ranked. `kind` carries why:
+     * Candidates dropped before they could be ranked. `kind` records why:
      * `sim` means the sim panicked on the composed swap, `repair` means the
      * sim never ran at all because meta repair could not activate the gem
-     * layout. The distinction is load-bearing in the disclosure text —
-     * blaming the sim for a gem problem sends an operator to the wrong
-     * subsystem — but it is one sentence's difference over an identical
-     * shape, which is why these were two parallel arrays (ticket 136 item 3).
+     * layout. The distinction matters in the disclosure text — blaming the
+     * sim for a gem problem sends an operator to the wrong subsystem — but
+     * it is one sentence's difference over an identical set of fields, which
+     * is why these were two parallel arrays (ticket 136 item 3).
      */
     const candidateSkips: {
       kind: "sim" | "repair";
@@ -884,7 +883,7 @@ export async function rankUpgrades(
      * One candidate's full slot-attempt loop, unchanged from the old serial
      * body except that it is now a `promisePool` task rather than one turn
      * of a `for` loop (candidate-pool.md §5.1.2) — every mutation below
-     * still lands on the shared `ranked`/`candidateSkips`/
+     * still writes to the shared `ranked`/`candidateSkips`/
      * `individualDeltasByItemId`/`winningRequests` collections, which is
      * safe because JS interleaves at `await` points only, never inside a
      * synchronous stretch of code. Ordering downstream never depends on
@@ -958,7 +957,7 @@ export async function rankUpgrades(
         // already wear this" into "wear a second one" with nothing in the row
         // saying so. Producing it honestly needs a per-placement row concept
         // through the engine output, the view, and the UI. The item data is
-        // already there when someone builds it: every item entry carries
+        // already there when someone builds it: every item entry has
         // `unique`, currently read only by the gem solver. Ticket 309 holds
         // the redesign map.
         const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
@@ -1185,8 +1184,8 @@ export async function rankUpgrades(
         )
       : [];
     for (const entry of unsimmedCandidates) {
-      // A row Stop never reached — placeholder numbers so the shape stays a
-      // RankedItem, but `simmed: false` pulls it out of cutoff
+      // A row Stop never reached — placeholder numbers so the row stays a
+      // valid RankedItem, but `simmed: false` pulls it out of cutoff
       // classification and tie groups below rather than letting a zeroed
       // deltaDps masquerade as a measured one.
       ranked.push({
@@ -1215,9 +1214,9 @@ export async function rankUpgrades(
     /**
      * Package-level sim failures (Finding 5): a whole completion package has
      * no single item to blame, and its `setId` must never masquerade as an
-     * `itemId` in the per-candidate `candidateSkips` shape — so this is a
+     * `itemId` in the per-candidate `candidateSkips` layout — so this is a
      * distinct collection, named by set + threshold, folded into
-     * `substitutions` alongside it rather than forced into its shape.
+     * `substitutions` alongside it rather than forced into that layout.
      */
     const packageSimSkips: {
       setId: number;
@@ -1395,7 +1394,7 @@ export async function rankUpgrades(
    * - `deltaDps` becomes the replicated mean, because that is what this SE
    *   describes. The caller re-sorts afterwards.
    * - The top N comes from above-cutoff rows, not a positional slice, so the
-   *   5× budget lands on the shortlist rather than on rows the cutoff hides.
+   *   5× budget goes to the shortlist rather than to rows the cutoff hides.
    */
   async function replicateTopItems(
     ranked: RankedItem[],
@@ -1772,9 +1771,9 @@ async function buildSetBonuses(
 }
 
 /**
- * The completion packages a member row carries (ticket 118, owner decision
+ * The completion packages a member row holds (ticket 118, owner decision
  * 2026-08-11). A row is a member when its item id appears in any of its set's
- * measured packages. A member carries EVERY measured threshold's package for
+ * measured packages. A member holds EVERY measured threshold's package for
  * the set, smallest threshold first — both the 2pc and the 4pc figure reach
  * the row as data. The old rule kept only the largest threshold's package, so
  * on the ret artifact every Lightbringer row carried the negative 4pc figure
@@ -2022,7 +2021,7 @@ function raceFromSkeleton(skeleton: RaidSimRequest): Race {
 /**
  * `compose` copies race/name/equipment onto the skeleton's player slot but
  * leaves `talentsString` untouched (compose.ts), so the composed request
- * still carries whatever the pinned preset skeleton set — this reads that
+ * still holds whatever the pinned preset skeleton set — this reads that
  * same field back out for `capStateFrom` (carry-forward 33).
  */
 function talentsStringFromRequest(request: RaidSimRequest): string | undefined {
@@ -2161,7 +2160,7 @@ function clearOffHandForTwoHander(
   if (!wornOffHandId) return { equipment, removed: [] };
 
   const cleared = equipment.map((spec, i) =>
-    // The bare-slot shape `equipmentFromLoggedGear` writes for an empty slot,
+    // The bare-slot value `equipmentFromLoggedGear` writes for an empty slot,
     // so a cleared off hand is indistinguishable from one the player never
     // filled — which is what every downstream gem and stat stage already
     // handles.
