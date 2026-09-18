@@ -37,8 +37,8 @@
  *
  * R5 asked what version a Go-served recording carries, since a different
  * value from a WASM recording would split the fixture story. Measured: it
- * cannot differ. `version()` is inherited from `WasmSimRunner` and returns
- * `` `api-v${CURRENT_API_VERSION}` `` (`adapters/wasm_sim_runner.ts`) - a
+ * cannot differ. `version()` is inherited from `WorkerPoolSimRunner` and returns
+ * `` `api-v${CURRENT_API_VERSION}` `` (`adapters/worker_pool_sim_runner.ts`) - a
  * compile-time constant, not something read off the running engine - so both
  * transports report the same string and the cache key really is transport-blind.
  * `RECORDED_SIM_VERSION` below is derived from the live `CURRENT_API_VERSION`

@@ -63,12 +63,13 @@ server on their own machine. The window they interact with is just a client; eve
 simulation — loop or bulk — is sent as an HTTP request (a message to the server,
 here over the local machine's own network loopback, not the internet) to that
 local server process, which does the actual computation and returns the numbers.
-This matters for the naming below: the loop's runner class is called
+This matters for the naming below: the loop's runner class was once called
 `WasmSimRunner` (WASM = WebAssembly, sim code compiled to run inside the browser
-with no server round-trip), but on the **desktop** build that name is a misnomer.
-The packaged app rewrites the browser's worker script from `sim_worker.js` to
-`net_worker.js`, which turns each per-candidate call into a real HTTP request to
-the local server rather than running in-browser. Both 411 arms therefore used the
+with no server round-trip) — accurate for the web build but a misnomer on the
+**desktop** build, so it is now `WorkerPoolSimRunner`. The packaged app rewrites
+the browser's worker script from `sim_worker.js` to `net_worker.js`, which turns
+each per-candidate call into a real HTTP request to the local server rather than
+running in-browser. Both 411 arms therefore used the
 **same transport** — server-backed HTTP against the same `wowsimtbc.exe` — and
 differ only in the shape of the requests (see §2). The comparison is
 apples-to-apples. (`scripts/check_desktop_tab.py:4-9, 505-512`; the loop arm's
@@ -256,13 +257,13 @@ The loop route sends one HTTP request (one message to the local server) per
 candidate through a pool of 4 workers, so up to 4 candidate sims run on the server
 at the same time, each also split across 20 goroutines:
 
-`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/adapters/wasm_sim_runner.ts:48`
+`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/adapters/worker_pool_sim_runner.ts:48`
 
 ```ts
 export const DEFAULT_WORKER_COUNT = 4;
 ```
 
-`wasm_sim_runner.ts:101-103`
+`worker_pool_sim_runner.ts:101-103`
 
 ```ts
 	constructor(numWorkers: number = DEFAULT_WORKER_COUNT) {
@@ -270,7 +271,7 @@ export const DEFAULT_WORKER_COUNT = 4;
 		this.concurrency = Math.max(1, Math.min(numWorkers, memoryCapFromDeviceMemory()));
 ```
 
-`wasm_sim_runner.ts:131`
+`worker_pool_sim_runner.ts:131`
 
 ```ts
 const result = await this.pool.raidSimAsync(proto, () => {}, signals);

@@ -597,7 +597,7 @@ now returns **no output** — `sim.ts` has zero diff against upstream.
 The parameter existed for a per-request iteration override that
 `docs/plans/wowsims-tab/candidate-pool.md` §6.3 argued for, then corrected
 (dated 2026-08-15, same section) once the screening pass turned out not to need
-it: the upgrades tab's `WasmSimRunner.run` builds its own request from
+it: the upgrades tab's `WorkerPoolSimRunner.run` builds its own request from
 `SimRunOpts.iterations` (`upgrades/engine/seams/sim-runner.ts:23-26`) and never
 calls `makeRaidSimRequest` at all. All seven call sites — five in `sim.ts`, one
 in `exporters/individual_cli_exporter.tsx:13`, one in
