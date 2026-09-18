@@ -95,8 +95,12 @@ the current tip (copy is untouched — that stays with the 330 pass):
 - **Copy button** is the native filled `CopyButton` with the `fa-copy` icon and
   `btn-secondary` weighting, not the hand-rolled transparent control
   (`upgrades_tab.tsx:833-837`).
-- **View toggles** are native `ViewToggle`/`BooleanPicker` instances, not raw
-  checkboxes (`upgrades_tab.tsx:793-799`; the zero-raw-checkbox grep in 312).
+- **View toggles** (set-potential, BiS-only) are native `ViewToggle`/
+  `BooleanPicker` instances (`upgrades_tab.tsx:793-799`). The one raw
+  `<input type="checkbox">` still in the file is the export flavour toggle
+  (`upgrades_tab.tsx:754`), a deliberate plain checkbox for the export format,
+  not a styled-control regression — see the 312 note for why the
+  `<input type="checkbox"` grep reads 0.
 - The redesigned control layout renders correctly at all four widths — 37/37
   layout-gate assertions green against a real WASM run.
 

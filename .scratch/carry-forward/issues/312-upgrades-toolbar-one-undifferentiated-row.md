@@ -325,9 +325,15 @@ owner sign-off.
 Re-proven on fork tip `d754ac1b`. The redesigned toolbar structure survives the
 Chunk-1 merge and the runner rename:
 
-- Zero raw checkbox inputs remain: `grep -c '<input type="checkbox"'
-  vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx` → 0
-  (every control is a native picker component).
+- The run/view controls are native picker components, not the raw-checkbox
+  toolbar the ticket complained about. The one raw `<input type="checkbox">` that
+  remains is the export flavour toggle (`upgrades_tab.tsx:754`), a deliberate
+  plain checkbox that switches the export FORMAT rather than a run/view control —
+  so it is out of this ticket's scope. `grep -c 'type="checkbox"'
+  vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx` → 1
+  (that toggle); `grep -c '<input type="checkbox"' …` → 0 misses it only because
+  `ref=…` sits between `<input` and `type=`, so do not read the 0 as "no raw
+  checkboxes anywhere".
 - The post-run view controls sit above the results and the run settings sit
   above them, proven by the layout gate on a real WASM run:
   `[375] view-controls-host top 1216.5 <= tabs top 1276.0`,
