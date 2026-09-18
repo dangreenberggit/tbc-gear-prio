@@ -60,7 +60,7 @@ export function buildStandingAssumptions(race: Race): StandingAssumption[] {
 /**
  * The hit-cap line (§4, R8).
  *
- * Never states a precise figure: §4's shape is "~20 rating under the cap,
+ * Never states a precise figure: §4's wording is "~20 rating under the cap,
  * assuming no Heroic Presence in your party", not "you are 20 under".
  *
  * `hit.rating`/`hit.gap` already fold in talent-granted hit where

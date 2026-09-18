@@ -4,6 +4,14 @@
  * functions are unit-tested where the logic is independently valuable; the bound
  * this enforces is what keeps both engines inside their no-culling regime).
  *
+ * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
+ * Since ticket 403 both transports take the per-candidate loop, and the switch
+ * is `makeSimRunner(bulk = false)` in the fork's
+ * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
+ * works, not that the tab uses it. The code is kept on purpose (ticket 406,
+ * resolved keep) and these tests are its re-enable safety net. Re-check with:
+ * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ *
  * The module lives in the fork, which is gitignored (`vendor/`), so the suite
  * skips when the clone is absent — same pattern as `wowsims-fork-parity`.
  */

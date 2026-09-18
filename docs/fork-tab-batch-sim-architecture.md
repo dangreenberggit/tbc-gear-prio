@@ -41,14 +41,14 @@ plus `upgrades_tab.tsx` (the diff `cbf6b75...HEAD`). Inside it:
 
 - The ranking engine (`upgrades/engine/`) is a port of this repo's
   `packages/core` — its comments cite `packages/core/src/...` throughout.
-- It constructs its own runner: `new WasmSimRunner()` (`.../upgrades/engine/rank.ts:446`).
+- It constructs its own runner: `new WorkerPoolSimRunner()` (`.../upgrades/engine/rank.ts:446`).
 - It builds one task per candidate and runs them through our own bounded pool:
   `promisePool(tasks, concurrency)` (`rank.ts:858`/`:869`, helper at
   `.../upgrades/engine/promise-pool.ts:24`).
 - Each task calls `deps.sim.run(...)` (`rank.ts:605`, `:727`, `:1126`, `:1290`).
-- `WasmSimRunner.run` builds a single `RaidSimRequest` and calls
-  `this.pool.raidSimAsync(proto, ...)` (`.../upgrades/adapters/wasm_sim_runner.ts:118`)
-  on a `WorkerPool` it owns (`wasm_sim_runner.ts:89`), separate from `Sim`'s pool.
+- `WorkerPoolSimRunner.run` builds a single `RaidSimRequest` and calls
+  `this.pool.raidSimAsync(proto, ...)` (`.../upgrades/adapters/worker_pool_sim_runner.ts:118`)
+  on a `WorkerPool` it owns (`worker_pool_sim_runner.ts:89`), separate from `Sim`'s pool.
 
 So "batch" for the tab is a **caller-side loop over independent single sims**,
 concurrency coming only from the `WorkerPool`'s least-busy-worker balancing.
@@ -85,7 +85,7 @@ pipeline stage, and applies a **cheap-pass / expensive-pass funnel** (`top_resul
 
 ## Why the assumption drifted
 
-The runner's own header comment (`wasm_sim_runner.ts:12-23`) cites plan §2.4:
+The runner's own header comment (`worker_pool_sim_runner.ts:12-23`) cites plan §2.4:
 _"there is no bulk RPC — upstream's own Batch tab loops one ordinary sim per
 combination client-side."_ That statement was **correct** for the engine the
 `packages/core` ranking code was written against (`v0.0.101`), where the browser
@@ -143,5 +143,5 @@ adoption decision, both open:
 - **Settle the deployment** — native bulk _sim_ needs an HTTP worker; a WASM-only
   page can reach only the reforge optimizer and candidate generator.
 
-Correct the stale comment at `wasm_sim_runner.ts:12-23` either way — it asserts
+Correct the stale comment at `worker_pool_sim_runner.ts:12-23` either way — it asserts
 as fact ("there is no bulk RPC") something false for this engine.

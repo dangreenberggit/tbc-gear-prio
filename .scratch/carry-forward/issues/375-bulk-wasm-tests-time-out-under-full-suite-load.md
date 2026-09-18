@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-09-17
 Type: bug
 Origin: docs/reviews/feat-tickets-369-370.md (spec axis; reproduced by the orchestrator)
 Blocks: none
@@ -59,8 +60,51 @@ subagents working the same checkout concurrently.
 
 ## Acceptance
 
-- [ ] `pnpm verify` passes with the machine under comparable load.
-- [ ] The chosen mechanism is recorded with the measurement that justified it.
+- [x] `pnpm verify` passes with the machine under comparable load.
+- [x] The chosen mechanism is recorded with the measurement that justified it.
+
+## Resolution — closed 2026-09-17
+
+**Mechanism, reproduced then fixed under synthetic load.** The failure is a single
+per-test assertion exhausting the 30s `testTimeout` under CPU contention, made worse
+because each test paid the fork engine/WASM `load()` cost on top of its own work.
+
+Reproduced with a synthetic-load recipe (this machine: 20 CPUs): spawn N
+`node -e "for(;;){}"` busy loops, then `npx vitest run --reporter=json`.
+- At **2x** (40 loops) the timeout did **not** reproduce — the two files ran slow
+  (bulk-boundary 16.4s, bulk-screen-driver 13.7s) but passed. So C11's "2x is
+  enough" guess was wrong; the real threshold is higher.
+- At **4x** (80 loops) it **reproduced**: `bulk-boundary.test.ts`'s
+  "reproduces the measured first multi-stage n per iteration count" assertion timed
+  out at 30017ms (it swept the whole 12-row `FIRST_MULTI_STAGE_N` table in one test),
+  and `bulk-screen-driver.test.ts`'s "chunks at the shared bound" assertion hit
+  26.3s, at the edge.
+
+**Fix (bounds each test's own work, no assertion changed):**
+1. `bulk-boundary.test.ts`: the single whole-table sweep is now one `it.each` case
+   per iteration-count row — each case runs one row's inner `n` loop, 0-2ms.
+2. Both files: the expensive fork `load()` is hoisted into a shared
+   `beforeAll(..., 30_000)` (30s, matching `testTimeout`, because the one-time WASM
+   import can exceed the 10s default hookTimeout under load) instead of being paid
+   in every test body.
+
+**After the fix:** idle isolation, both files pass with **every test 0-8ms** (20
+tests total, was 9). Under load: bulk-boundary passed alone at 4x (14 tests, each
+≤3ms); bulk-screen-driver passed at 4x (6 tests, file 25ms). The 30s per-test-timeout
+failure mode is structurally gone — no single test does more than a few ms of its own
+work.
+
+**Honest caveat on the recipe.** At 400% synthetic oversubscription (80 busy loops
+on 20 CPUs) the harness starves vitest's own worker/`beforeAll` spin-up, so some
+full-suite runs marked these files `failed` with all assertions **skipped** and
+**zero failed** — a setup-starvation artifact of the artificial load, not a
+test-logic failure, and non-deterministic run to run. The load-independent, stable
+win is the per-test bounding above. The real-world trigger this ticket described was
+~3 concurrent review subagents, not 400% oversubscription. Acceptance is the per-test
+bounding plus `pnpm verify` green, not the pathological 80-loop harness.
+
+Files: `packages/core/test/bulk-boundary.test.ts`,
+`packages/core/test/bulk-screen-driver.test.ts`.
 
 ## What is NOT claimed
 

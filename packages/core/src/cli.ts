@@ -466,8 +466,8 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
     if (args.report !== undefined) {
       const reportPath =
         args.report === "" ? defaultReportPath(args) : args.report;
-      // The report carries every row the *filters* left, so `meta` has to name
-      // every filter that shaped them — reporting only `raid` while `--boss`
+      // The report includes every row the *filters* left, so `meta` has to name
+      // every filter that cut them — reporting only `raid` while `--boss`
       // or `--hide-owned` had also cut rows is a quietly wrong artifact, and
       // these files get read long after the command is forgotten.
       //

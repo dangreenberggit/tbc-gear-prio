@@ -177,7 +177,7 @@ function thresholdLostByDroppingOnePiece(
 /**
  * Every equipped row in a slot group, not just one.
  *
- * `owned` is the direct signal and is the only one used when any row carries
+ * `owned` is the direct signal and is the only one used when any row has
  * it; `deltaDps === 0` is a *proxy* that stops being reliable the moment a
  * second candidate measures identically to baseline — ordinary at 3000
  * iterations with rounding.
@@ -193,7 +193,7 @@ function thresholdLostByDroppingOnePiece(
 function wornRowsOf(slotRows: readonly DeadSlotRow[]): DeadSlotRow[] {
   const owned = slotRows.filter((r) => r.owned === true);
   if (owned.length > 0) return owned.filter((r) => r.deltaDps === 0);
-  // No row carries ownership: re-rendering a report saved before `rank.ts`
+  // No row records ownership: re-rendering a report saved before `rank.ts`
   // began setting `owned` (ticket 151). Guessing from zero deltas is what
   // ticket 94's round-2 finding removed, so this refuses to classify rather
   // than reviving the guess. The caller turns the refusal into a warning —
@@ -237,7 +237,7 @@ export function classifyDeadSlots(
   //
   // Ticket 253 corrected the reason, not the behaviour: this previously said
   // the slot's numbers were "compromised" because rows were scored against an
-  // empty slot. They are not — the baseline carries full logged equipment and
+  // empty slot. They are not — the baseline holds full logged equipment and
   // the deltas stand. The bypass is still right; the justification was wrong.
   const unrankableSlots = new Set(
     (options.wornUnrankable ?? []).map((w) => w.slot)
@@ -326,7 +326,7 @@ export function classifyDeadSlots(
               options.wornSetCounts.get(wornSetId) ?? 0
             );
 
-      // Order matters: a real toll outranks the pool-shape explanations, because
+      // Order matters: a real toll outranks the pool-composition explanations, because
       // a set-holding slot can also be thin, and the toll is the actionable fact.
       // `unknown-item` comes first of all — with no index entry the toll test
       // never ran, so every cause below it would be asserting more than is known.

@@ -2,6 +2,14 @@
  * The bulk screening branch in the fork's `rankUpgrades` (batch-sim plan Step 8,
  * round-2 condition N1).
  *
+ * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
+ * Since ticket 403 both transports take the per-candidate loop, and the switch
+ * is `makeSimRunner(bulk = false)` in the fork's
+ * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
+ * works, not that the tab uses it. The code is kept on purpose (ticket 406,
+ * resolved keep) and these tests are its re-enable safety net. Re-check with:
+ * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ *
  * Two layers, and the first is the one that matters.
  *
  * **`rankUpgrades` through recorded adapters.** The same fixture is ranked

@@ -11,8 +11,8 @@
  *
  * Preset gear files (`vendor/wowsims/<spec>_*.gear.json`, pinned by
  * `scripts/sync_wowsims.py`) are already a `{items: SimItemSpec[]}` list of
- * 17 entries in `SIM_ORDER` — the same shape `data/presets/<spec>/p2.raid-sim-skeleton.json`
- * carries as its player's `equipment.items`. No WCL 19→17 slot mapping runs
+ * 17 entries in `SIM_ORDER` — the same layout `data/presets/<spec>/p2.raid-sim-skeleton.json`
+ * holds as its player's `equipment.items`. No WCL 19→17 slot mapping runs
  * here because there is no WCL 19-slot array to begin with.
  */
 
@@ -59,7 +59,7 @@ function talentPointsFor(spec: SpecId): [number, number, number] {
  * preset's gear untouched. `presetPhase` and `maxPhase` are not read here —
  * they are the caller's bookkeeping (candidate-pool.md §7.a: "record the
  * triple per row") for which preset file was loaded and what pool it was
- * ranked against; this function only turns gear into the recorded shape.
+ * ranked against; this function only turns gear into the recorded form.
  */
 export function syntheticOfflineRecordings(args: {
   ref: CharacterRef;

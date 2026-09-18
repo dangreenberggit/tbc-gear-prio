@@ -1,0 +1,3 @@
+chunk,finalists,entry_iterations,exit_iterations,ratio,input_gear_sets,survivors,target_error_pct,observed_error_pct,duration_s
+1,5,20000,80000,4.0,5,5,0.0,0.02,19.56
+2,5,20000,40000,2.0,5,5,0.0,0.03,6.73

@@ -100,7 +100,7 @@ export class MemoryStore implements Store {
 /**
  * The two-table schema from PLAN.md §11. Values are JSON text rather than a
  * typed column per field because `kv` holds whole ranking / gear / sim blobs
- * whose shape is owned by the caller, not by this adapter.
+ * whose structure is owned by the caller, not by this adapter.
  *
  * Retention is deliberately absent: §11 makes gear snapshots and sim results
  * immutable and permanent, and keeps job rows. The TTL that does exist (§12,

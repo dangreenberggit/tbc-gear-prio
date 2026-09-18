@@ -83,7 +83,7 @@ export function resolveWowsimcli(root: string): string {
 
 /**
  * The phase a run defaults to, from the wowsims lock — never a second
- * hardcoded tier. Returns `undefined` when the lock carries no usable value,
+ * hardcoded tier. Returns `undefined` when the lock has no usable value,
  * so the caller decides between an exit code and an HTTP status.
  */
 export function defaultMaxPhase(root: string): ContentPhase | undefined {

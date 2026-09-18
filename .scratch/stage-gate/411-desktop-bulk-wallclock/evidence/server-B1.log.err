@@ -1,0 +1,366 @@
+2026/09/17 14:53:42 Embedded file server running.
+2026/09/17 14:53:46 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:48 All 20 sims finished successfully.
+2026/09/17 14:53:48 [Bulk Sim] - Stage: high - Starting
+Sims:
+  Candidates: 25
+  Total runs: 26-27 (baseline probe, optional baseline, candidates)
+Stage config:
+  Concurrency: 1
+  Per-candidate concurrent sim: true
+  Min iterations: 20000
+  Carried iterations: 0
+  Target error: 0.05%
+2026/09/17 14:53:48 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:49 All 20 sims finished successfully.
+2026/09/17 14:53:49 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:50 All 20 sims finished successfully.
+2026/09/17 14:53:50 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:51 All 20 sims finished successfully.
+2026/09/17 14:53:51 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:53 All 20 sims finished successfully.
+2026/09/17 14:53:53 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:54 All 20 sims finished successfully.
+2026/09/17 14:53:54 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:55 All 20 sims finished successfully.
+2026/09/17 14:53:55 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:56 All 20 sims finished successfully.
+2026/09/17 14:53:56 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:57 All 20 sims finished successfully.
+2026/09/17 14:53:57 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:58 All 20 sims finished successfully.
+2026/09/17 14:53:58 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:53:59 All 20 sims finished successfully.
+2026/09/17 14:53:59 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:01 All 20 sims finished successfully.
+2026/09/17 14:54:01 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:02 All 20 sims finished successfully.
+2026/09/17 14:54:02 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:03 All 20 sims finished successfully.
+2026/09/17 14:54:03 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:04 All 20 sims finished successfully.
+2026/09/17 14:54:04 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:05 All 20 sims finished successfully.
+2026/09/17 14:54:05 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:06 All 20 sims finished successfully.
+2026/09/17 14:54:06 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:07 All 20 sims finished successfully.
+2026/09/17 14:54:07 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:08 All 20 sims finished successfully.
+2026/09/17 14:54:08 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:10 All 20 sims finished successfully.
+2026/09/17 14:54:10 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:11 All 20 sims finished successfully.
+2026/09/17 14:54:11 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:12 All 20 sims finished successfully.
+2026/09/17 14:54:12 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:13 All 20 sims finished successfully.
+2026/09/17 14:54:13 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:14 All 20 sims finished successfully.
+2026/09/17 14:54:14 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:15 All 20 sims finished successfully.
+2026/09/17 14:54:15 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:16 All 20 sims finished successfully.
+2026/09/17 14:54:16 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:17 All 20 sims finished successfully.
+2026/09/17 14:54:17 [Bulk Sim] - Stage: high - Finished
+Sims:
+  Input gear sets: 25
+  Completed candidates: 25
+  Survivors: 25
+Results:
+  Iterations: 20000
+  Target error: 0.05%
+  Observed error: 0.05%
+  Best candidate DPS: 2290.79
+  Baseline DPS: 2229.61
+Timing:
+  Duration: 29.28s
+2026/09/17 14:54:17 [Bulk Sim] - Stage: finalist - Started
+  Finalists: 5
+  Iterations so far: 20000
+2026/09/17 14:54:17 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:18 All 20 sims finished successfully.
+2026/09/17 14:54:18 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:19 All 20 sims finished successfully.
+2026/09/17 14:54:19 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:21 All 20 sims finished successfully.
+2026/09/17 14:54:21 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:22 All 20 sims finished successfully.
+2026/09/17 14:54:22 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:23 All 20 sims finished successfully.
+2026/09/17 14:54:23 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:24 All 20 sims finished successfully.
+2026/09/17 14:54:24 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:26 All 20 sims finished successfully.
+2026/09/17 14:54:26 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:28 All 20 sims finished successfully.
+2026/09/17 14:54:28 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:30 All 20 sims finished successfully.
+2026/09/17 14:54:30 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:32 All 20 sims finished successfully.
+2026/09/17 14:54:33 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:35 All 20 sims finished successfully.
+2026/09/17 14:54:35 Running 40000 iterations on 20 concurrent sims.
+2026/09/17 14:54:37 All 20 sims finished successfully.
+2026/09/17 14:54:37 [Bulk Sim] - Stage: finalist - Finished
+Sims:
+  Input gear sets: 5
+  Completed candidates: 5
+  Survivors: 5
+Results:
+  Iterations: 80000
+  Target error: 0.00%
+  Observed error: 0.02%
+  Best candidate DPS: 2289.90
+  Baseline DPS: 2228.13
+Timing:
+  Duration: 19.56s
+2026/09/17 14:54:37 [Bulk Sim] - Stage: high - Starting
+Sims:
+  Candidates: 25
+  Total runs: 26-27 (baseline probe, optional baseline, candidates)
+Stage config:
+  Concurrency: 1
+  Per-candidate concurrent sim: true
+  Min iterations: 20000
+  Carried iterations: 0
+  Target error: 0.05%
+2026/09/17 14:54:37 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:38 All 20 sims finished successfully.
+2026/09/17 14:54:38 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:39 All 20 sims finished successfully.
+2026/09/17 14:54:39 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:40 All 20 sims finished successfully.
+2026/09/17 14:54:40 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:41 All 20 sims finished successfully.
+2026/09/17 14:54:41 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:42 All 20 sims finished successfully.
+2026/09/17 14:54:42 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:44 All 20 sims finished successfully.
+2026/09/17 14:54:44 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:45 All 20 sims finished successfully.
+2026/09/17 14:54:45 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:46 All 20 sims finished successfully.
+2026/09/17 14:54:46 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:47 All 20 sims finished successfully.
+2026/09/17 14:54:47 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:48 All 20 sims finished successfully.
+2026/09/17 14:54:48 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:49 All 20 sims finished successfully.
+2026/09/17 14:54:49 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:50 All 20 sims finished successfully.
+2026/09/17 14:54:50 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:51 All 20 sims finished successfully.
+2026/09/17 14:54:51 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:52 All 20 sims finished successfully.
+2026/09/17 14:54:53 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:54 All 20 sims finished successfully.
+2026/09/17 14:54:54 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:55 All 20 sims finished successfully.
+2026/09/17 14:54:55 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:56 All 20 sims finished successfully.
+2026/09/17 14:54:56 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:57 All 20 sims finished successfully.
+2026/09/17 14:54:57 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:58 All 20 sims finished successfully.
+2026/09/17 14:54:58 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:54:59 All 20 sims finished successfully.
+2026/09/17 14:54:59 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:00 All 20 sims finished successfully.
+2026/09/17 14:55:00 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:01 All 20 sims finished successfully.
+2026/09/17 14:55:01 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:02 All 20 sims finished successfully.
+2026/09/17 14:55:02 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:03 All 20 sims finished successfully.
+2026/09/17 14:55:03 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:05 All 20 sims finished successfully.
+2026/09/17 14:55:05 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:06 All 20 sims finished successfully.
+2026/09/17 14:55:06 [Bulk Sim] - Stage: high - Finished
+Sims:
+  Input gear sets: 25
+  Completed candidates: 25
+  Survivors: 25
+Results:
+  Iterations: 20000
+  Target error: 0.05%
+  Observed error: 0.05%
+  Best candidate DPS: 2272.03
+  Baseline DPS: 2229.61
+Timing:
+  Duration: 28.82s
+2026/09/17 14:55:06 [Bulk Sim] - Stage: finalist - Started
+  Finalists: 5
+  Iterations so far: 20000
+2026/09/17 14:55:06 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:07 All 20 sims finished successfully.
+2026/09/17 14:55:07 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:08 All 20 sims finished successfully.
+2026/09/17 14:55:08 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:09 All 20 sims finished successfully.
+2026/09/17 14:55:09 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:10 All 20 sims finished successfully.
+2026/09/17 14:55:10 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:11 All 20 sims finished successfully.
+2026/09/17 14:55:11 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:12 All 20 sims finished successfully.
+2026/09/17 14:55:12 [Bulk Sim] - Stage: finalist - Finished
+Sims:
+  Input gear sets: 5
+  Completed candidates: 5
+  Survivors: 5
+Results:
+  Iterations: 40000
+  Target error: 0.00%
+  Observed error: 0.03%
+  Best candidate DPS: 2272.00
+  Baseline DPS: 2228.46
+Timing:
+  Duration: 6.73s
+2026/09/17 14:55:13 [Bulk Sim] - Stage: high - Starting
+Sims:
+  Candidates: 15
+  Total runs: 16-17 (baseline probe, optional baseline, candidates)
+Stage config:
+  Concurrency: 1
+  Per-candidate concurrent sim: true
+  Min iterations: 20000
+  Carried iterations: 0
+  Target error: 0.05%
+2026/09/17 14:55:13 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:14 All 20 sims finished successfully.
+2026/09/17 14:55:14 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:15 All 20 sims finished successfully.
+2026/09/17 14:55:15 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:16 All 20 sims finished successfully.
+2026/09/17 14:55:16 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:17 All 20 sims finished successfully.
+2026/09/17 14:55:17 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:18 All 20 sims finished successfully.
+2026/09/17 14:55:18 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:19 All 20 sims finished successfully.
+2026/09/17 14:55:19 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:20 All 20 sims finished successfully.
+2026/09/17 14:55:20 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:21 All 20 sims finished successfully.
+2026/09/17 14:55:21 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:23 All 20 sims finished successfully.
+2026/09/17 14:55:23 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:24 All 20 sims finished successfully.
+2026/09/17 14:55:24 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:25 All 20 sims finished successfully.
+2026/09/17 14:55:25 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:26 All 20 sims finished successfully.
+2026/09/17 14:55:26 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:27 All 20 sims finished successfully.
+2026/09/17 14:55:27 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:28 All 20 sims finished successfully.
+2026/09/17 14:55:28 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:29 All 20 sims finished successfully.
+2026/09/17 14:55:29 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:30 All 20 sims finished successfully.
+2026/09/17 14:55:30 [Bulk Sim] - Stage: high - Finished
+Sims:
+  Input gear sets: 15
+  Completed candidates: 15
+  Survivors: 15
+Results:
+  Iterations: 20000
+  Target error: 0.05%
+  Observed error: 0.04%
+  Best candidate DPS: 2229.61
+  Baseline DPS: 2229.61
+Timing:
+  Duration: 17.66s
+2026/09/17 14:55:31 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:32 All 20 sims finished successfully.
+2026/09/17 14:55:32 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:33 All 20 sims finished successfully.
+2026/09/17 14:55:33 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:34 All 20 sims finished successfully.
+2026/09/17 14:55:34 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:35 All 20 sims finished successfully.
+2026/09/17 14:55:35 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:37 All 20 sims finished successfully.
+2026/09/17 14:55:37 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:38 All 20 sims finished successfully.
+2026/09/17 14:55:38 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:39 All 20 sims finished successfully.
+2026/09/17 14:55:39 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:40 All 20 sims finished successfully.
+2026/09/17 14:55:40 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:41 All 20 sims finished successfully.
+2026/09/17 14:55:41 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:42 All 20 sims finished successfully.
+2026/09/17 14:55:42 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:44 All 20 sims finished successfully.
+2026/09/17 14:55:44 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:45 All 20 sims finished successfully.
+2026/09/17 14:55:45 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:46 All 20 sims finished successfully.
+2026/09/17 14:55:46 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:47 All 20 sims finished successfully.
+2026/09/17 14:55:47 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:48 All 20 sims finished successfully.
+2026/09/17 14:55:48 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:49 All 20 sims finished successfully.
+2026/09/17 14:55:50 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:51 All 20 sims finished successfully.
+2026/09/17 14:55:51 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:52 All 20 sims finished successfully.
+2026/09/17 14:55:52 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:53 All 20 sims finished successfully.
+2026/09/17 14:55:53 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:54 All 20 sims finished successfully.
+2026/09/17 14:55:54 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:55 All 20 sims finished successfully.
+2026/09/17 14:55:55 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:57 All 20 sims finished successfully.
+2026/09/17 14:55:57 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:58 All 20 sims finished successfully.
+2026/09/17 14:55:58 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:55:59 All 20 sims finished successfully.
+2026/09/17 14:55:59 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:00 All 20 sims finished successfully.
+2026/09/17 14:56:00 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:01 All 20 sims finished successfully.
+2026/09/17 14:56:01 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:02 All 20 sims finished successfully.
+2026/09/17 14:56:03 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:04 All 20 sims finished successfully.
+2026/09/17 14:56:04 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:05 All 20 sims finished successfully.
+2026/09/17 14:56:05 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:06 All 20 sims finished successfully.
+2026/09/17 14:56:06 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:07 All 20 sims finished successfully.
+2026/09/17 14:56:07 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:08 All 20 sims finished successfully.
+2026/09/17 14:56:08 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:10 All 20 sims finished successfully.
+2026/09/17 14:56:10 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:11 All 20 sims finished successfully.
+2026/09/17 14:56:11 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:12 All 20 sims finished successfully.
+2026/09/17 14:56:12 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:13 All 20 sims finished successfully.
+2026/09/17 14:56:13 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:14 All 20 sims finished successfully.
+2026/09/17 14:56:14 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:15 All 20 sims finished successfully.
+2026/09/17 14:56:15 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:17 All 20 sims finished successfully.
+2026/09/17 14:56:17 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:18 All 20 sims finished successfully.
+2026/09/17 14:56:18 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:19 All 20 sims finished successfully.
+2026/09/17 14:56:19 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:20 All 20 sims finished successfully.
+2026/09/17 14:56:20 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:22 All 20 sims finished successfully.
+2026/09/17 14:56:22 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:23 All 20 sims finished successfully.
+2026/09/17 14:56:23 Running 20000 iterations on 20 concurrent sims.
+2026/09/17 14:56:24 All 20 sims finished successfully.

@@ -23,12 +23,12 @@
  *
  * A helper that projects this registry into a `Record<SpecId, T>` cannot return
  * that type without a cast: iterating and indexing yields `Partial<Record<…>>`
- * (TS2322). Once laundered through the cast the `Partial` shape overlaps the
+ * (TS2322). Once laundered through the cast the `Partial` type overlaps the
  * target, so a registry **missing a spec entirely** compiled clean — the check
  * read as rigour and proved nothing. A direct `as` on this literal is caught
  * (TS2352, the types do not sufficiently overlap), so the no-`as`/no-`satisfies
  * rule here is defence in depth against the derived-table and double-cast
- * shapes rather than the mechanism itself. The mechanism is the annotation on
+ * patterns rather than the mechanism itself. The mechanism is the annotation on
  * `SPEC_REGISTRY` plus required fields on `SpecEntry`.
  *
  * ## Why accessors index directly
@@ -153,8 +153,8 @@ export type SpecEntry = {
   /** The character class, as the sim and the gear source name it. */
   readonly className: string;
   /**
-   * Tree index carrying the spec's points, so `classifySpec` (spec.ts) lands
-   * on the right tree without needing a real talent string parsed. Paladin
+   * Tree index holding the spec's points, so `classifySpec` (spec.ts) picks
+   * the right tree without needing a real talent string parsed. Paladin
    * tree 2 is Retribution, Druid tree 1 is Feral Combat (spec.ts:35-46).
    */
   readonly treeIndex: 0 | 1 | 2;
@@ -229,7 +229,7 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
 
   hunter: {
     className: "Hunter",
-    // Survival — the tree a hunter's talent-string plurality lands in
+    // Survival — the tree a hunter's talent-string plurality falls in
     treeIndex: 2,
     sitePath: "hunter",
     /**

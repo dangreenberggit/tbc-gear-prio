@@ -34,7 +34,7 @@ export type ItemEntry = {
   /** Socket colours, one entry per socket. Empty when the item has none. */
   sockets: number[];
   /**
-   * Dense stat array indexed by proto.Stat, same shape as a gem's. The item's
+   * Dense stat array indexed by proto.Stat, same layout as a gem's. The item's
    * own stats only — sockets, enchants, talents and buffs are not folded in.
    */
   stats: number[];

@@ -1,6 +1,7 @@
 # 397 — Desktop bulk screening engages but is 2.05× slower than WASM
 
-Status: open
+Status: closed
+Closed: 2026-09-17
 Origin: pre-merge review of feat/desktop-transport-gate (2026-09-14), Q2 finding
 Blocks: —
 
@@ -273,3 +274,21 @@ must equal the chunk size, so it refines every candidate). The follow-on questio
 of whether the now-dead screening code should be deleted is **406**, not this
 ticket. Do not close this on the strength of the fix alone if the wall-clock
 attribution caveat at the end of 403 still matters to anyone.
+
+## Resolution — closed 2026-09-17 as moot
+
+Closed as moot. The tab no longer takes the desktop screening path on either
+transport — `makeSimRunner()` is called with no argument at
+`upgrades_tab.tsx:451`, whose default is `bulk = false`, so the WASM-factory
+per-candidate runner is what ships (verified: `grep makeSimRunner(` returns four
+lines, the tab's being the no-argument call). The "desktop bulk screening is
+2.05x slower than WASM" property this ticket owns is therefore no longer
+exercised by any user-facing run.
+
+The investigation half is complete and 403 (closed 2026-09-17) carries the
+answer: the finalist stage burns the time because `topResults` equals the chunk
+size, so every candidate is refined. The wall-clock attribution caveat this
+ticket flagged — the per-stage split lives only in the untracked, one-time
+`server-3333.log.err` and is **not re-derivable** by any committed command —
+is itself carried by 403's Evidence and Caveats sections, so nothing is lost by
+closing here. The screening-code-deletion question stays with 406.

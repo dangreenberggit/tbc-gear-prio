@@ -105,7 +105,7 @@ function sourcesOf(item: RankedItem): ItemSource[] {
  * Zone reaches a tier piece through `kind: 'token'` as well as `kind: 'raid'`
  * (§8.3.2). That two-hop is the quiet failure in §15's risk table — a
  * "Karazhan" filter that omits every T4 piece — so it is matched over every
- * source the row carries, not just the primary one.
+ * source the row has, not just the primary one.
  */
 function matchesZone(item: RankedItem, zone: string): boolean {
   return sourcesOf(item).some((s) => "zone" in s && s.zone === zone);
@@ -201,7 +201,7 @@ function matchesRaidFilter(item: RankedItem, value: string): boolean {
  * one. On that run rows 8 and 9 sit 0.440 DPS apart: the paired window calls
  * that a real ordering, the independent window calls it a tie, and the honest
  * answer is that **only one of the two rows was ever measured precisely enough
- * to tell**. Row 9 carries a ±2.18 DPS interval; no amount of precision on row 8
+ * to tell**. Row 9 has a ±2.18 DPS interval; no amount of precision on row 8
  * shrinks it.
  *
  * So a mixed pair is judged on the **coarser** SE, which is the only scale both
@@ -287,7 +287,7 @@ function assignTieGroups(
 /**
  * `deltaDps` alone by default; with `withSetPotential` on, add the
  * prospective bonus a below-threshold candidate would unlock (spec §4). A
- * candidate that already crosses its threshold carries no
+ * candidate that already crosses its threshold has no
  * `prospectiveBonusDps` — that value is already inside `deltaDps` (§2.1) —
  * so `?? 0` never double-counts it.
  */
@@ -301,7 +301,7 @@ function assignTieGroups(
  * cutoff** (per-spec since issue #1 step 0, carried on the `Ranking`);
  * what changes is the quantity measured against it, from `deltaDps` to the
  * effective value the toggle exists to display. Carrying the default verdict
- * here would have the shortlist hide exactly the rows the toggle surfaces: a
+ * here would have the shortlist hide exactly the rows the toggle reveals: a
  * first tier piece is normally below cutoff *on its own stats* — V0b's
  * Thunderheart singles are all negative — and its whole point is the bonus it
  * unlocks. That is not a per-view threshold, so ADR-0020's rejected
@@ -335,7 +335,7 @@ function belowCutoffUnderView(
  * so it also contributes nothing: it must not move the sort key or the cutoff
  * verdict. The floor arrives as a parameter — the caller derives it from the
  * frozen per-spec cutoff — so this predicate stays ignorant of the `Cutoff`
- * shape. The comparison is strict (`>`), matching the display gate's strict
+ * type. The comparison is strict (`>`), matching the display gate's strict
  * `> setBonusNoiseFloorDps(cutoff)` on the same frozen cutoff so a boundary
  * value behaves identically in both layers — no row sorts on a bonus the
  * display hides (tickets 331, 332).

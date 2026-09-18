@@ -6,7 +6,7 @@
 
 /**
  * Every spec this engine can rank.
- * The ids are the keys of `spec-registry.json`, which also carries
+ * The ids are the keys of `spec-registry.json`, which also records
  * each spec's fork proto name for `assemble_universe.py`. Adding an
  * id here without completing its `SPEC_REGISTRY` entry in
  * `spec-registry.ts` is a compile error, which is the point: every

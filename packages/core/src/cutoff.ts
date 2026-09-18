@@ -53,7 +53,7 @@ export type Cutoff = { readonly absDps: number; readonly pct: number };
  * than hide: raising it would filter more real bonuses out, and the cutoff runs
  * before replication precisely to be coarse-and-inclusive (ADR-0021). Measured:
  * across every committed fixture carrying `prospectiveBonusDps`, no 4pc bonus
- * (and no bonus of any threshold) lands in the (4.81, 5.89) under-filtered band —
+ * (and no bonus of any threshold) falls in the (4.81, 5.89) under-filtered band —
  * distinct 4pc values are ≤ −3.88 or ≥ 17.14 — so the flat floor changes no
  * observed row's tier today (ticket 335, re-runnable via the band scan in that
  * ticket over the six `.scratch/**` fixtures with `prospectiveBonusDps`).
@@ -89,7 +89,7 @@ export function cutoffForSpec(spec: SpecId): Cutoff {
 /**
  * Lives here rather than in `rank.ts` so that `CUTOFF` and the predicate that
  * reads it stay one definition. `rank.ts` is the only caller: the cutoff is
- * absolute, so the view carries `belowCutoff` rather than re-deriving it
+ * absolute, so the view stores `belowCutoff` rather than re-deriving it
  * (ADR-0020).
  */
 export function meetsCutoff(

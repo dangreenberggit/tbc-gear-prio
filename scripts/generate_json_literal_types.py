@@ -61,7 +61,7 @@ TARGETS = [
         "type": "SpecId",
         "doc": (
             "Every spec this engine can rank.\n"
-            " * The ids are the keys of `spec-registry.json`, which also carries\n"
+            " * The ids are the keys of `spec-registry.json`, which also records\n"
             " * each spec's fork proto name for `assemble_universe.py`. Adding an\n"
             " * id here without completing its `SPEC_REGISTRY` entry in\n"
             " * `spec-registry.ts` is a compile error, which is the point: every\n"

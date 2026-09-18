@@ -8,7 +8,7 @@ native-served page whose sims go out as `raidSimAsync` over HTTP — not a bulk
 RPC. This gate rests on four independent signals the CDP harness
 (`run-tab-cdp.mjs`) measures and this script judges:
 
-  S1 runner class          data-runner attribute the tab writes; WasmSimRunner
+  S1 runner class          data-runner attribute the tab writes; WorkerPoolSimRunner
                            on both transports since 403, so it is necessary and
                            never sufficient -- (a) and (c) carry the transport
   S2 native sim requests    /raidSimAsync responses summed over every worker CDP
@@ -540,7 +540,7 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     mark("a", sw.get("wasmRefs") == 0 and sw.get("readyFalse") == 1,
          f"served worker wasmRefs={sw.get('wasmRefs')} readyFalse="
          f"{sw.get('readyFalse')} (S3)")
-    mark("b", rb.get("runner") == "WasmSimRunner",
+    mark("b", rb.get("runner") == "WorkerPoolSimRunner",
          f"runner={rb.get('runner')} (S1)")
     bulk = rb.get("requests", {}).get("bulkSimAsync", 0)
     raid = rb.get("requests", {}).get("raidSimAsync", 0)
