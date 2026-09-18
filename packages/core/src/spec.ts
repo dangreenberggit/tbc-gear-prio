@@ -4,7 +4,7 @@
  * Anniversary logs seen so far (ticket 01) — talent-tree plurality is the
  * only trusted signal for picking a tree.
  *
- * Plurality is not always enough to pick a *spec*. Druid's feral tree carries
+ * Plurality is not always enough to pick a *spec*. Druid's feral tree covers
  * both cat and tank, so this module classifies in two steps: the tree from
  * talents, then — only where the tree is ambiguous — the spec from form
  * uptime, which is fight-scoped rather than character-scoped.
@@ -194,7 +194,7 @@ export function classifyFeralForm(uptime: FormUptime): FeralFormClassification {
  * and reading only one name would report a salvaged DPS as unsalvaged.
  *
  * Hand of Salvation is a distinct spell, not a rank of the Blessing, and is
- * included because it carries the same meaning for this check: it is threat
+ * included because it has the same meaning for this check: it is threat
  * reduction nobody hands a tank. Reading only the Blessings scored
  * shredzepelin's Void Reaver kill — a clean DPS fight salved end to end — as
  * unsalvaged, which is the exact false off-tank warning ticket 06 exists to

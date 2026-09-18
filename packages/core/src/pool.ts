@@ -97,7 +97,7 @@ export type ItemSource = { origin?: ItemSourceOrigin } & (
    * gear sets, which equip the item on this spec without saying where it comes
    * from — mostly badge and reputation gear that persists across phases.
    *
-   * Deliberately carries no fields: `badge` needs a cost and `rep` needs a
+   * Deliberately has no fields: `badge` needs a cost and `rep` needs a
    * faction, and inventing either would be a false provenance claim. Having no
    * `zone` is what keeps these out of every raid and boss filter (`view.ts`
    * `matchesZone`), which is the behaviour we actually need from them.
@@ -108,7 +108,7 @@ export type ItemSource = { origin?: ItemSourceOrigin } & (
 export type ItemSourceKind = ItemSource["kind"];
 
 /**
- * The union owns the per-kind *shape*; the JSON owns the list that crosses to
+ * The union owns the per-kind *fields*; the JSON owns the list that crosses to
  * `assemble_universe.py`. These two lines are what keep them from drifting,
  * and they are a real check only because `ItemSourceKindName` comes from
  * generated `as const` code rather than the JSON import it replaced — that
@@ -152,7 +152,7 @@ export type PoolEntry = {
   bisSets?: string[];
 };
 
-/** Row shape from `data/universes/ret-p*.json` before normalization. */
+/** Row layout from `data/universes/ret-p*.json` before normalization. */
 export type UniverseEntry = {
   itemId: number;
   name: string;
@@ -330,7 +330,7 @@ export function bossesInPool(
  * `slots-table.json` widens to `string` under `resolveJsonModule` — true of
  * the JSON import, but `SimOrderName` now comes from generated `as const`
  * code, so constraining against it is a real check. This stays a hand-written
- * union because it is a *subset* of `SIM_ORDER`, which also carries slots no
+ * union because it is a *subset* of `SIM_ORDER`, which also includes slots no
  * pool slot maps onto.
  */
 export type SimSlotName = Extract<
@@ -347,7 +347,7 @@ export type SimSlotName = Extract<
 /**
  * `Extract` yields `never` for a member absent from `SIM_ORDER`, which would
  * turn a typo into a quietly-narrower type rather than an error. These pin the
- * three shapes that would go missing first; `pool.test.ts` still checks every
+ * three cases that would go missing first; `pool.test.ts` still checks every
  * value against `SIM_ORDER` at runtime.
  */
 type _SimSlotNameKeepsWeapon = Assert<Extends<"mainhand", SimSlotName>>;

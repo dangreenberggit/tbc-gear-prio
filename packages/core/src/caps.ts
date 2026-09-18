@@ -3,11 +3,11 @@
  *
  * §4 makes `caps` a required field on `Ranking` — "a Ranking you can't audit
  * is not a Ranking". This module is pure: it sums the rating the player's
- * *gear* carries, adds any talent-granted hit it can decode from the
+ * *gear* provides, adds any talent-granted hit it can decode from the
  * composed request's `talentsString`, and compares the total to the cap.
  *
  * What this still does not know: raid buffs, consumes. Nothing the sim
- * returns carries them — `RaidSimResult` (proto/api.proto) has no stats field,
+ * returns includes them — `RaidSimResult` (proto/api.proto) has no stats field,
  * and the pinned wowsimcli exposes only `sim`, not the `ComputeStats` RPC
  * whose `PlayerStats.final_stats` would have been the right number. Talent
  * hit does not need that RPC: `talentsString` is already in the composed
@@ -208,7 +208,7 @@ export function capStateFrom(
       : { rating: 0 };
   const hitRating = gearHitRating + talentHit.rating;
   // A spec that cannot be dodged or parried has no expertise line to sum; the
-  // entry still exists so the shape stays one type, reading a flat zero.
+  // entry still exists so the record stays one type, reading a flat zero.
   const expertiseRating = profile.trackExpertise
     ? sumStat(equipment, socketed, Stat.StatExpertiseRating)
     : 0;
@@ -272,8 +272,8 @@ const STAT_COUNT =
 
 /**
  * Simple majority. Nothing in TBC makes 0.5 special — it is the threshold that
- * needs no defending, and the flag is advisory rather than load-bearing on the
- * ranking, so a sharper number would imply precision this does not have.
+ * needs no defending, and the flag is advisory and never feeds the ranking,
+ * so a sharper number would imply precision this does not have.
  */
 const HIT_DRIVEN_SHARE = 0.5;
 
