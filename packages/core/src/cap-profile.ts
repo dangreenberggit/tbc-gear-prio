@@ -11,8 +11,8 @@
  *
  * The numbers themselves live on each spec's registry entry (`spec-registry.ts`)
  * rather than in this module, so a spec cannot reach a ranking without one. This
- * file owns the shape and the readers. The failure mode that buys is quieter
- * than a wrong number — it is a *right* number for the wrong school.
+ * file owns the type and the readers. The failure it risks is quieter than a
+ * wrong number — it is a *right* number for the wrong school.
  */
 
 import { SPEC_REGISTRY, isSpecId } from "./spec-registry.js";
@@ -57,7 +57,7 @@ export type TalentHitDescriptor = {
  * here.
  */
 export type CapProfile = {
-  /** The rating stat the spec's gear carries for hit. */
+  /** The rating stat the spec's gear uses for hit. */
   readonly hitStat: Stat;
   /** Percent of hit needed against a raid boss (level 73). */
   readonly hitCapPercent: number;

@@ -36,7 +36,7 @@ export type LoggedItem = {
 
 /**
  * talentPointsByTree is spec-detection input only — never a sim input
- * (PLAN.md §5.2 / R7). Derived from WCL's talents[].id points-spent shape.
+ * (PLAN.md §5.2 / R7). Derived from WCL's talents[].id points-spent layout.
  */
 export type LoggedGear = {
   items: LoggedItem[];
@@ -82,7 +82,7 @@ export function fightGearKey(f: FightRef): string {
  * "the gear cache is the primary defence of the WCL point budget").
  *
  * It wraps the *fetching* source — the WCL adapter — rather than sitting inside
- * `rankUpgrades`, and the distinction is load-bearing. A cache above
+ * `rankUpgrades`, and the distinction matters. A cache above
  * `rankUpgrades` would decide the content hash from a previously stored
  * snapshot, so a character whose gear changed between runs would be served the
  * old numbers (ADR-0019). Here the only thing skipped is the HTTP call that

@@ -55,7 +55,7 @@ export const REPORT_EVENTS_REF: CharacterRef = {
  *
  * An earlier version of the report-events builder hardcoded ret's
  * `[5, 11, 45]` on the claim that `--raw-out` does not persist tree points.
- * That claim was false — the raw payload carries `talents` verbatim — and the
+ * That claim was false — the raw payload includes `talents` verbatim — and the
  * first capture it was applied to was a **protection** set (0/44/17, 17k
  * armour, an off-hand shield), so the fixture asserted a ret build the
  * payload contradicted. Reading the real value is what makes that class of
@@ -170,7 +170,7 @@ export function reportEventsOfflineRecordings(
     // One fight holds every raider's gear (stage0-findings §11), so a
     // fixture that does not contain *this* character is a mis-capture rather
     // than a character with no gear — say so instead of returning an empty
-    // recording that would surface later as an unrelated
+    // recording that would show up later as an unrelated
     // `no-qualifying-fight`.
     (c, r) => `${c.name} not found in report-events fixture ${r.report_code}`
   );

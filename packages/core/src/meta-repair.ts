@@ -29,7 +29,7 @@ export type MetaRepairSwap = {
   /**
    * Position in the equipment array, not derivable from `itemId`: the same id
    * can legally appear twice (paired rings/trinkets), and an id-keyed lookup
-   * silently lands on the first copy (round-4 review, A2).
+   * silently picks the first copy (round-4 review, A2).
    */
   itemIndex: number;
   socketIndex: number;

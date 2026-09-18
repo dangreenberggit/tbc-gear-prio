@@ -78,7 +78,7 @@ export type ContentHashInput = {
   epWeights: Readonly<Record<string, number>> | readonly number[];
   presetId: string;
   /**
-   * Hashed by value, not by `presetId`. The skeleton carries raid buffs,
+   * Hashed by value, not by `presetId`. The skeleton holds raid buffs,
    * debuffs, talents, encounter duration and the APL rotation — all live DPS
    * inputs under a `presetId` that never varies. Stripping `prepullActions`
    * measured 789.02 DPS against a 2042.85 baseline

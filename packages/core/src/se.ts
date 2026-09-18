@@ -107,7 +107,7 @@ export function assertUsableSeeds(
  * iterations, seeds spaced by exactly `iterations` measure `sampleSd/SE` 0.895
  * and 20 scattered seeds measure 1.074 — both consistent with independence,
  * against 0.087 for the seeds this fixed. Do not read a single five-seed ratio
- * as a measurement of independence: at n=5 the sample sd carries 34 % relative
+ * as a measurement of independence: at n=5 the sample sd has 34 % relative
  * error, so it cannot separate 0.5 from 1.0. See
  * `.scratch/handoffs/ticket-236-seed-spacing-measurements.md`.
  */

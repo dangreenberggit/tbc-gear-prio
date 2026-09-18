@@ -60,7 +60,7 @@ const CONDITIONS = new Map<number, Condition>(
  * that credits Prismatic with nothing — that looks like upstream's own
  * oversight, not a rule we should match (issue #1 investigation, upheld by
  * independent review). Confirmed against community-documented game rules, not
- * verifiable from either repo's data files — neither db.json carries
+ * verifiable from either repo's data files — neither db.json contains
  * activation prose.
  *
  * Low-impact either way in practice: the only two Prismatic gems in TBC

@@ -27,7 +27,7 @@ export type EpWeightsByPhaseFile = Record<string, EpWeightsByPhaseEntry>;
  *
  * `weightsPhase` is `undefined` when the resolution fell through to
  * `fallback`, because a fallback file is not a claim about any phase — ele's
- * single preset is labelled "Default" and carries no phase at all.
+ * single preset is labelled "Default" and has no phase at all.
  */
 export interface ResolvedEpWeights {
   readonly path: string;
@@ -96,7 +96,7 @@ export function resolveEpWeightsPath(
  *
  * An unphased fallback still discloses: "Default" weights against a p5
  * universe is exactly the case a reader needs told, and saying nothing
- * because the file carries no phase number would be the silent-degradation
+ * because the file has no phase number would be the silent-degradation
  * failure wearing a different hat.
  */
 export function epWeightsPhaseNote(

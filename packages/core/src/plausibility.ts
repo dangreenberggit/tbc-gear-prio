@@ -2,7 +2,7 @@
  * Cheap sanity checks on a finished ranking (ticket 98).
  *
  * The set-bonus confound of tickets 90–96 took a multi-agent investigation to
- * find, and both of the checks here would have surfaced it from the artifact
+ * find, and both of the checks here would have caught it from the artifact
  * alone. They exist to catch the *next* one.
  *
  * Every check is a warning. An unusually strong bonus is possible and a dead

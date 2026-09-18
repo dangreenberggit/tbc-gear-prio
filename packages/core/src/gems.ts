@@ -18,7 +18,7 @@ export type GemColour = number;
 export type GemEntry = {
   id: number;
   colour: GemColour;
-  /** Raw stat-index array, same shape as db.json's gems[].stats. */
+  /** Raw stat-index array, same layout as db.json's gems[].stats. */
   stats: number[];
   phase: number;
   /** db.json item quality: 2 uncommon, 3 rare, 4 epic (ticket 111). */
