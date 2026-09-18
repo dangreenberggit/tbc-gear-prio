@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: owner report, 2026-08-28
 Blocks: none
@@ -108,3 +108,15 @@ Verified by: `sed -n '793,837p' vendor/tbc-new-fork/ui/core/components/individua
 and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
 `.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
 Status unchanged — closes on owner sign-off; copy half remains with 330.
+
+## 2026-09-18 — owner sign-off (resolved, styling half)
+
+Owner viewed the controls and the Copy JSON button on the live tab and approved:
+the checkboxes/dropdown are native-sized, the copy button reads as a real filled
+button. The styling half is resolved. Follow-ups the owner raised — the export
+tooltip should trigger on hover over the checkbox itself (not only the label),
+"use raid-drop ids" → "use tier token ids" with more space from the checkbox,
+and the "JSON export" header/parenthetical rewording — are filed as a separate
+export/controls-polish ticket. The copy-wording half remains with the 330 family.
+
+Verified by: owner observation on the live tab, 2026-09-18.

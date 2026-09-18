@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: feature
 Origin: Owner request, 2026-08-27, during the toolbar redesign review
 Blocks: none
@@ -195,3 +195,16 @@ Verified by: `sed -n '2103,2123p' vendor/tbc-new-fork/ui/core/components/individ
 `git -C vendor/tbc-new-fork log --oneline -S exportTokenFlavour -- ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
 Status unchanged — closes on owner sign-off (its 328 copy sub-concern remains
 tracked with the 330 pass).
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the export box on the live tab and approved: the box exists, the
+JSON lists the displayed items in order, dedupes, and the export works. Cosmetic
+follow-ups the owner raised (text box too wide; "ThatsMyBis export" subheader →
+"JSON export"; move "to import into a loot-priority tool, e.g. ThatsMyBis" into
+the checkbox-label parenthetical; "use raid-drop ids" → "use tier token ids" and
+the label sits too close to the checkbox) are filed as a separate export-polish
+ticket, not defects in 314's core deliverable.
+
+Verified by: owner observation on the live tab, 2026-09-18; payload shape/dedupe/
+order proven from source in the 2026-09-18 re-verification note above.

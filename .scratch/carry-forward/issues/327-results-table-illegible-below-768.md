@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: owner report, 2026-08-28 (third time raised)
 Blocks: none
@@ -89,3 +89,18 @@ The 327-specific assertions all pass on the current tip:
 Verified by: `cd vendor/tbc-new-fork && node test-layout.mjs` (durable log at
 `.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
 Status unchanged — closes on owner sign-off (Chunk 4 step 5).
+
+## 2026-09-18 — owner sign-off (resolved for char-stacking; new mobile ticket filed)
+
+Owner viewed the results table at narrow/mobile width on the live tab: the
+char-by-char vertical letter-stacking this ticket was opened for is gone — slot
+labels and DPS figures read on one line. That defect is resolved and approved.
+
+Two NEW narrow-width issues the owner saw are NOT this ticket and are filed
+separately as a mobile-legibility/alignment ticket: the "BiS" tag sits too close
+to the text above it, and the table columns are not consistently horizontally
+aligned (the table "looks like a mess"). Those are alignment/spacing, distinct
+from the char-stacking legibility this ticket owned.
+
+Verified by: owner observation on the live tab, 2026-09-18; one-line-cell
+assertions green in the 2026-09-18 re-verification note above.

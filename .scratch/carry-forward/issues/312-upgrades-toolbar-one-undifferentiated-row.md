@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: design
 Origin: Owner review of the running tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none
@@ -346,3 +346,15 @@ Verified by: `grep -c '<input type="checkbox"' vendor/tbc-new-fork/ui/core/compo
 and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
 `.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
 Status unchanged — closes on owner sign-off.
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the redesigned run settings + view controls on the live tab and
+approved: Run reads as the primary action, the run knobs are grouped, and the
+filter controls sit above the results. The "one undifferentiated row" complaint
+is resolved. Separate new items the owner raised on the same surface — remove the
+"X above the cutoff" text, and the content filter should become checkboxes
+(ticket 417) — are tracked as their own tickets, not defects in 312.
+
+Verified by: owner observation on the live tab, 2026-09-18; structure proven in
+the 2026-09-18 re-verification note above.

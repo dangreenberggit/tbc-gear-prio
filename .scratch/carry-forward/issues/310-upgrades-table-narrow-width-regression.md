@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: investigation
 Origin: Chrome visual pass of the Upgrades tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none
@@ -193,3 +193,14 @@ crushed fixed columns. 37/37 assertions green at 375/653/768/1280.
 Verified by: `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
 `.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
 Status unchanged — closes on owner sign-off with 327.
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the results table at narrow width on the live tab: the table scrolls
+sideways within its panel rather than overflowing/cutting off. The narrow-width
+overflow regression is resolved. Remaining narrow-width polish (column alignment
+and the BiS-tag crowding the owner saw) is a NEW mobile-legibility ticket, not
+this overflow regression.
+
+Verified by: owner observation on the live tab, 2026-09-18; no-overflow assertions
+green in the 2026-09-18 re-verification note above.
