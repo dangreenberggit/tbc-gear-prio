@@ -8,6 +8,12 @@ at effort medium for adversarial, domain, and the `code-review` skill's two axes
 spec axis was re-dispatched once (a self-check line misfired a false `WRONG_MODEL` on
 the correct model; re-run without that line, same range).
 
+Post-review, two commits landed outside the reviewed range and are not code: `e1822c1c`
+(this review file) and `fd0da58e` (the layout-gate baseline advance `testedTabHash` that
+`pnpm merge-to-dev --check-only` produced from a green 37-assertion run — a generated
+lock `pnpm merge-to-dev` would itself commit during the merge). Neither carries
+reviewable logic; no re-review round was spun for them.
+
 Branch scope (25 commits since dev): the 411 desktop bulk wall-clock measurement +
 DELETE verdict and its finalist-stage fork fix (visible core-side as the lock re-pin +
 `sim-implemented-effects.json` regen); the `WorkerPoolSimRunner` rename (core-side:
