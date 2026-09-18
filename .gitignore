@@ -76,6 +76,7 @@ vendor/
 !.scratch/stage-gate/desktop-transport-gate/
 !.scratch/stage-gate/bulk-finalist-cost/
 !.scratch/stage-gate/411-desktop-bulk-wallclock/
+!.scratch/stage-gate/rename-misleading-sim-runner/
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json
