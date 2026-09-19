@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner review of the built tab-ui-refinements batch, 2026-09-18
 Blocks: none
@@ -73,3 +73,40 @@ pre-merge-review), because it belongs with 424/430 and the tab should reach dev
 complete in one merge. This is the one item in the batch that can legitimately
 move the desktop golden (it changes default pool composition), unlike the
 pure-presentation 427-431.
+
+## Closed
+
+Closed 2026-09-18 by fork commit `587dcfae6` "Default the Sim sets to the
+universe BiS set" (`vendor/tbc-new-fork` `feat/upgrades-tab`), re-pinned into
+this repo by "Re-pin fork after the Sim-sets default".
+
+**The rule implemented** (`upgrades_tab.tsx` `defaultGuaranteedSetKeys` +
+scope-guarded default in `refreshSetChips`): for the current spec/phase,
+pre-select each `presets.gear` entry whose `phase === bisTagPhaseFor(specId,
+maxPhase).tagsFromPhase` AND whose every in-pool item id is `bisTags`-tagged
+("BiS"), with at least one item in the pool. Both conditions are load-bearing:
+the id test alone over-selects the next phase's BiS pair; the phase test alone
+admits same-phase non-BiS presets (feral "Alt", ret "Bulwark"). A
+`specId:maxPhase` scope guard re-applies the default only when spec or phase
+changes, so a user untick survives the gear-change refreshes that also reach
+`refreshSetChips`, while a phase/spec change re-resolves.
+
+**Feral P5 decision (C37):** the default follows the *universe* tag, which
+degrades to P3 (the pipeline vendors no p4/p5 curated feral set), NOT the fork's
+own P5 "BiS" preset (phase 5 != tag phase 3, and 8 of its in-pool items are
+untagged). This matches what the old yellow "BiS" badge marked, which also
+degraded to P3. The P5 "BiS" chip stays hand-tickable. Routed to owner sign-off.
+
+**Live observables verified** (vite HMR, this executor):
+- feral P3 first open: active chips exactly ["P3 - BiS 6%","P3 - BiS 9%"].
+- feral phase->2: ["P2 - BiS 6%","P2 - BiS 9%"]; phase->5: the P3 pair, P5 "BiS"
+  inactive.
+- ret P3/P5: ["P3"] only, "P3 - Bulwark" inactive; ret P2: ["P2"].
+- Untick "BiS 9%" then trigger a same-scope refresh -> stays unticked.
+- A phase change re-resolves to the new phase's default.
+
+**Desktop gate:** re-run at 587dcfae6 (ret P5, all sources, cap 40) passed
+(a)-(h). ret "P3" is already 16/16 in the pool, so the default union is a no-op:
+(e) eligibleCount=617=EXPECTED_ELIGIBLE and (h) rows/aboveCutoffItems/baselineDps
+all match `golden-ret-p5-cap40.json` -- the C38 no-move case, NO --update-golden.
+Layout gate 45/45, locale gate exit 0, `pnpm verify` rc=0.
