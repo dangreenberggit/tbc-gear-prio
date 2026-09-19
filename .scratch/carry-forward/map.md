@@ -239,3 +239,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
 - 432 Fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
 - 433 Sim-sets starts empty; default-select the old 'BiS' set per phase (owner review 2026-09-18; folded into tab-ui-refinements; may move desktop golden)
+- 434 Desktop gate leaves stray wowsimtbc.exe on :3333 blocking next run; executor perm-denied to kill it (recurring 3x); fix gate teardown + document trap
