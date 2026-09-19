@@ -237,3 +237,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 429 Sim-sets group: relabel to 'Sim sets', quieter explainer, chip styling vs gear tab (owner screenshot 2026-09-18, refines 424)
 - 430 Result-row tag redundant (BiS + grey) and mislabeled; unify to one correct short tag — BiS IS set membership (owner screenshot 2026-09-18, refines 424; domain call)
 - 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
+- 432 Fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
