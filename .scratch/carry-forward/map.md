@@ -247,3 +247,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 439 After a run, scrolling over sim settings scrolls the item list instead of the settings panel (owner viewing 2026-09-19)
 - 440 Source column text styling inconsistent, looks bad (owner viewing 2026-09-19)
 - 441 Set-potential toggle hidden when no rankable set bonus in results; pre-existing gating, UX decision (owner viewing 2026-09-19)
+- 444 Result-row item icons have no alt text (image-alt, critical) (a11y seed 2026-09-19)
+- 445 Phase selector <select> has no accessible name (select-name, critical; upstream widget) (a11y seed 2026-09-19)
+- 446 Run progress bar has no accessible name (aria-progressbar-name, serious) (a11y seed 2026-09-19)
