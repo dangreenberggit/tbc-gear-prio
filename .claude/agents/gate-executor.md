@@ -70,6 +70,14 @@ with a silent deviation is the failure.
   workhorse and hoping.
 - Stay inside the Paths manifest. A file you need that is not in it is a
   `flag` ledger row, not an edit.
+- Per unit with a `Visual acceptance:` block: fork edits → write
+  `.scratch/stage-gate/<slug>/visual/<unit>/manifest.json` →
+  `pnpm tab-review <manifest>` → spawn `gate-visual` (`model: "opus"`) →
+  `fail`: fix, re-capture, `SendMessage` the same seat for the failed
+  tickets; `cannot-judge`: fix the manifest and re-capture; `pass`: commit
+  the handoff, then re-pin. Ledger row per ticket:
+  `visual: pass | fail-fixed | contested`. A ticket with a Visual
+  acceptance is not closed on `fail` or `cannot-judge`.
 - `pnpm verify` on your tip before reporting.
 
 ## Report

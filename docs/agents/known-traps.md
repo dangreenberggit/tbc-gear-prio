@@ -179,3 +179,7 @@ another session's vite is serving this same checkout with HMR — use it;
 starting a second copy buys nothing. One HMR side-effect: an engine-file
 edit reloads the page, dropping in-page run state and sometimes the
 browser tab id — re-drive the page rather than debugging the "lost" run.
+
+The layout gate (`pnpm layout-gate:check`) and `pnpm tab-review` need
+neither port — the harness serves its own built `dist/` and runs the WASM
+in the browser, so the dev-server trap above does not apply to them.

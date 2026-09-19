@@ -29,6 +29,12 @@ Numbered. Each step: action, files touched, a checkable acceptance
 criterion (a command or an observable), and the claims it depends on
 (C-ids).
 
+A step that changes what the Upgrades tab renders carries a `Visual
+acceptance:` block — state (`pre-run` / `post-run`), widths, selectors to
+capture, interactions, facts to record, and the one sentence the reviewer
+judges against. See `.scratch/stage-gate/visual-a11y-review-proposal.md`
+§1b for the manifest the executor derives from it.
+
 ## Paths manifest
 
 Every file this plan creates or modifies. If the executor should fan out,
