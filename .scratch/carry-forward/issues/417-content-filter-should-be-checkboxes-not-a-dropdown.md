@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 15b29ac41
 Type: feature
 Origin: owner request, 2026-09-18 (viewing the running tab)
 Blocks: none
@@ -49,3 +50,30 @@ per-profession gate for Bind-on-Pickup crafted items): 418's profession
 dropdown is enabled only when the Crafted checkbox from THIS ticket is ticked.
 Build 417 so that a per-source companion control (like 418's) can attach to a
 checkbox without another restructure.
+
+## Closed
+
+Fork commit 15b29ac41 (re-pinned in data/wowsims-fork.lock.json, Unit B). The
+post-run `raidFilter <select>` is replaced by a checkbox group ("Content") in
+the run settings, one native `BooleanPicker` per source (the `filters_menu.tsx`
+multi-checkbox idiom). The filter narrows the candidate pool BEFORE the sim in
+`effectivePool`, the same place and mechanism as the BiS prune, so a changed
+selection re-runs (the ranking cache keys on the candidate list) rather than
+replaying a stale ranking. Selections are stored as EXCLUSIONS, so the default
+empty set is "all sources on" (= the old "All") and a source appearing after a
+phase change defaults on; stale exclusions for sources absent in the current
+spec/phase are dropped. Each checkbox is in a `.upgrades-source-row[data-source]`
+so ticket 418's per-profession gate can attach a companion control. The source
+key/match logic mirrors engine/view.ts's private sourcesOf/zoneKeyOf/matchesZone/
+matchesRaidFilter over `PoolEntry` (engine dir is byte-gated). Old view.raid_filter*
+i18n keys and `.upgrades-raid-filter-label` SCSS removed; `logAssumptions` gains a
+`sources:` line.
+
+Verified-by (live, ret page): 14 source checkboxes appear under "Content" in the
+run settings, all ticked, zones first then zoneless buckets; the eligible readout
+is 467 with all ticked (= the pre-change baseline). Unticking all but Black
+Temple dropped the count to 95; a cap-15 run then produced rows whose Source
+cells are all Black Temple bosses/trash. Ticking a source after a run marked the
+results stale. The old `<select>` is gone. Desktop gate (h) matches the golden
+with the default all-on selection (no --update-golden), confirming the default
+preserves the pool. `pnpm verify` 0; layout gate 45 assertions green.
