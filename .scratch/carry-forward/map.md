@@ -232,3 +232,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 424 Set selection in sim settings with result tags (owner 2026-09-18, BLOCKING, heavy — likely own stage-gate)
 - 425 BiS-tag gap layout assertion may pass vacuously (premerge adversarial A1, minor, deferred)
 - 426 Content filter: multi-source item survives if any source ticked (premerge adversarial A2, minor, deferred — behaviour choice)
+- 427 Pre-run explanation text repeats empty-state text + placement unclear (owner screenshot 2026-09-18)
+- 428 Content checkboxes not a contained/organized element (owner screenshot 2026-09-18, refines 417)
+- 429 Sim-sets group: relabel to 'Sim sets', quieter explainer, chip styling vs gear tab (owner screenshot 2026-09-18, refines 424)
+- 430 Result-row tag redundant (BiS + grey) and mislabeled; unify to one correct short tag — BiS IS set membership (owner screenshot 2026-09-18, refines 424; domain call)
+- 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
