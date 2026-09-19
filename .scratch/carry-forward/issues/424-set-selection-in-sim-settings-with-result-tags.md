@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: d17587b5a
 Type: feature
 Origin: owner request, 2026-09-18 (viewing the running tab)
 Blocks: none
@@ -72,3 +73,42 @@ it touches candidate assembly (guaranteeing items in), a borrowed gear-tab
 control, and result tagging — so it likely warrants its own stage-gate plan
 rather than being lumped with the light polish tickets (415/416/419/420/421/422/
 423). Sequence after the open questions above are answered.
+
+## Closed
+
+Fork commit d17587b5a (re-pinned in data/wowsims-fork.lock.json, Unit C). A
+run-settings chip control ("Always sim these sets"), beside 417's source
+checkboxes. Chips are the gear tab's `saved-data-set-chip badge rounded-pill`
+class toggled as a multi-select, built from (a) the spec's phase-BiS presets
+(`individualConfig.presets.gear`) and (b) the saved gear sets under
+`getSavedGearStorageKey()` (parsed with `SavedGearSet.fromJson`) — no engine
+boundary crossed, no set list re-implemented. Saved sets are re-read on the
+tab's `shown.bs.tab` (C33) so one saved on the Gear tab after this tab was built
+still appears.
+
+Q1-Q4 resolved from the code: Q1 sets come from presets + saved-gear storage;
+Q2 "guarantee" = the set's in-phase items are unioned into the pool in
+`effectivePool` regardless of prune/source filters (never pinned into the
+baseline), because BiS-prune is itself a prune not an add; Q3 label is
+"P{phase} - {name}" unless the name already leads with its P-token (ret shows
+"P2"/"P3 - Bulwark"), and row membership is an exact itemId test against the
+set's ids (the universe's set tokens are phase strings, not set names, C20/C21);
+Q4 one unit, copy to the owner at sign-off. Two stated limits: an item absent
+from the phase universe cannot be added (each chip shows "n/m in pool" and
+disables at 0), and a non-zero candidate cap still applies engine-side after the
+union (the caption gains a note when a cap is set and a set is selected).
+
+Verified-by (live, ret page phase 3): the chip list shows "P1 - Pre-raid", "P1",
+"P2", "P3", "P3 - Bulwark" with n/m counts. Selecting "P3 - Bulwark" with only
+Karazhan ticked and BiS-prune off raised eligible to 140 (the 16 Bulwark items
+unioned in past the Karazhan-only filter); an uncapped run then produced
+"Bulwark of the Ancient Kings" tagged "P3 - Bulwark". A saved gear set written
+under the page's saved-gear key appeared as a "My Test Set 0/2 in pool" chip
+after a Gear→Upgrades tab switch, and disabled at 0. At phase 1 every ret chip
+reads 0/16 and disables (the phase-1 candidate pool does not contain those item
+ids — a `poolFor` property, and the disabled-at-0 rule applied to it). Desktop
+gate (h) matches the golden with NO set selected (union is a no-op), confirming a
+no-selection run is the exact prior ranking. `grep -c upgrades-set-tag` >= 1 in
+TAB and SCSS. `pnpm verify` 0; layout gate 45 assertions green with tags present.
+Note: the on-row tag was verified; the candidate-cap-after-union limit is a
+documented behaviour (an owner sign-off eyeball item, not a defect).
