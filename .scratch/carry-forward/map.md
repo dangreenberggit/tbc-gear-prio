@@ -242,3 +242,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 434 Desktop gate leaves stray wowsimtbc.exe on :3333 blocking next run; executor perm-denied to kill it (recurring 3x); fix gate teardown + document trap
 - 435 Upgrades tab tippy instances not destroyed on re-render (premerge R2 adversarial, minor, deferred)
 - 436 ContentBlock scaffold hand-written 3x in the tab (premerge R2 standards, minor, deferred)
+- 437 'Ranking failed: Failed to fetch' junky UI error; catch worker/transport failure, show plain msg (owner viewing 2026-09-19)
+- 438 Sources filter + Sim-sets organization need a real design exploration (design-an-interface); 428 was too shallow (owner viewing 2026-09-19)
