@@ -154,3 +154,45 @@ No blocking or material finding on any axis. Two minors deferred to tickets (435
 | R2-D1 | Domain      | wontfix     | feral P5 default follows the degraded universe tag (P3 pair), not the fork's P5 preset — matches the old "BiS" badge; owner-awareness item routed to sign-off, not a code change |
 
 Domain and Spec found no other findings. Copy-review tweaks are tracked in the owner sign-off pack, not as review findings.
+
+---
+
+# Round 3 — tab-finish-arc (fixes 437/439/440/441/442/443 + owner corrections + copy picks)
+
+Reviewed range: `39fc1707..cb7cc6f0` (main); fork `587dcfae6..faaad6908` (the substantive diff reviewed — 10 commits: c122a3012 six copy rewords [carried from prior chunk], then the arc: 442/440 export+source, 437 error message, 441+443 toggles, 439 scroll, and the owner-correction pass 2dc294c66/e01718feb/6c08a6a56/faaad6908 rewriting 437 plain, dropping the 443 hover mode, and the two owner copy picks). The one material finding (A-r3-1) was fixed in-branch after review at fork `ae02df4e9` (main re-pin below); that fix is a comment + one-clause guard change in the error path, re-gated (verify rc=0, layout 45/45, desktop golden unchanged) — a follow-up round on that single commit would find nothing new.
+
+_Dispatch: three axes in parallel on the review lane — adversarial + domain as fresh gate-reviewer subagents (Opus, effort medium), Standards+Spec via the code-review skill. Fresh context, diff-only._
+
+## Adversarial
+
+One material finding, since fixed; rest clean.
+
+- **A-r3-1 (MATERIAL, FIXED)** — `describeRunError` (`upgrades_tab.tsx:277`) matched the whole `TypeError` class, but `run()` wraps the entire ranking pipeline (fetch, sim, result parse, row assembly). A downstream deterministic bug throwing a `TypeError` (a null-deref reading a `RaidSimResult` field or building rows) was relabelled "Something went wrong running the sim. Refresh the page." — advice that re-hits the same bug, with the true cause surviving only in `console.error`. Directly undercuts ticket 437's intent (stop hiding real failures behind friendly text). **Fixed** in fork commit `ae02df4e9`: the guard now keys on `message.startsWith('Failed to fetch')` alone, which covers both genuine load origins (the browser `fetch` `TypeError` message and `worker_pool.ts:49`'s HTTP error); a real pipeline `TypeError` falls through to `Ranking failed: {{message}}`.
+- **A-r3-2 (MINOR)** — a disabled Set-potential checkbox stays visually ticked (`Input.update()` re-applies only `.disabled`/`hide`, never `setInputValue`). Cosmetic only: rows read the internal `value` (forced false), and `refreshViewControlVisibility` runs before rows compute, so DPS figures stay correct. A greyed-but-ticked box, no wrong number.
+- Cleared under scrutiny: 443 dead locale keys (no dangling refs, schema mirrors track the rename), tippy re-enable restore, 439 overflow scoping (no clip below xl), 442 export width additivity.
+
+## Domain
+
+Clean — no blocking or material domain-honesty findings.
+
+- **D-r3-1 (MINOR, wontfix)** — the 441 disabled tooltip "None of these upgrades gain a set bonus." is technically loose: `hasRankableSetPotential` also returns false for a _confounded_ bonus (breaks another set, `(k-1)*B` inflation, ticket 90) and a _sub-noise_ bonus, so a row that "gains" such a bonus still trips the tooltip. Not a domain lie: the confounded exclusion is domain-correct (a set-breaking bonus gets no credit anywhere in the view, so the toggle would change nothing) and a sub-noise figure is "nothing measurable." The tooltip means "no bonus this toggle can rank on," the honest statement for the control it describes. A tighter string ("no upgrade gains a _rankable_ set bonus") would remove the ambiguity but the current one does not mislead about mechanics.
+- Confirmed honest: the inline `"{{threshold}}pc: +{{dps}} DPS"` figure (a sim measurement — `prospectiveBonusDps` / `packages[0].deltaDps`, the same figures the hover tooltip and the sort key use, never the discounted weight); threshold/DPS always paired from one source; confounded/crossing states return early with their own strings, so no double-count.
+
+## Standards + Spec
+
+**Standards:** no hard violations (the comment policy is advisory — `docs/workflow.md`, not tooling-enforced). Judgement calls only: three call-site comments (the `setState` catch and two "already display-ready" echoes) largely restate the code and could trim to their ticket refs; the load-bearing docblocks (`describeRunError`'s external-quirk note, the tippy cast) earn their place. No Mysterious Names, Message Chains, Middle Man, or Speculative Generality; new names all reveal intent. (The `describeRunError` docblock was rewritten by the A-r3-1 fix, tightening the "why".)
+
+**Spec:** clean against all six tickets on resolved intent. No missing/partial requirements, no scope creep, no wrong implementations. 437 maps both load origins and removes the double-wrap; 439 scopes the overflow to xl+ per the ticket's own diagnosis; 440 wraps the fallback to match the native anchor with text unchanged; 442 caps all four export children at one bound; 441 ships keep-visible-disabled-with-tooltip (owner-resolved) with the value forced off; 443 ships inline-only, no toggle (owner-resolved, hover mode dropped in `e01718feb`), the inline figure agreeing with the hover tooltip. The `sources_title`/`sets_caption`/flavour copy rewrites are the owner copy picks named in the endpoint commit, not stray work.
+
+## Summary (round 3)
+
+Four axes, all fresh-context diff-only. **One material finding (adversarial, the over-broad `TypeError` guard), fixed in-branch at `ae02df4e9` and re-gated (verify rc=0, layout 45/45, desktop gate golden unchanged).** Remaining: two minors (a cosmetic greyed-but-ticked checkbox; a domain-loose but honest 441 tooltip) and standards judgement-call comment trims — all non-blocking, none deferred to tickets (the checkbox is cosmetic-only, the tooltip is honest for the control, the comment trims are advisory). The batch faithfully implements the six tickets on resolved intent with no scope creep.
+
+## Disposition (round 3)
+
+| ID     | Axis        | Disposition | Ticket / note                                                                                                                                                      |
+| ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A-r3-1 | Adversarial | fixed       | Guard narrowed to the fetch-load origin; fork commit `ae02df4e9`, re-pinned. Real pipeline `TypeError` now keeps its own message.                                  |
+| A-r3-2 | Adversarial | wontfix     | Cosmetic only (greyed-but-ticked box); rows read the forced-false internal value, DPS stays correct. Not worth a native `Input` change.                            |
+| D-r3-1 | Domain      | wontfix     | 441 tooltip is domain-honest for the control ("no bonus this toggle can rank on"); confounded/sub-noise exclusions are correct. Owner already picked this wording. |
+| S-r3-1 | Standards   | wontfix     | Comment-trim suggestions are advisory judgement calls; the A-r3-1 fix already rewrote the main docblock. No hard violation.                                        |
