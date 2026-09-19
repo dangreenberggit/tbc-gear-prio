@@ -250,3 +250,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 444 Result-row item icons have no alt text (image-alt, critical) (a11y seed 2026-09-19)
 - 445 Phase selector <select> has no accessible name (select-name, critical; upstream widget) (a11y seed 2026-09-19)
 - 446 Run progress bar has no accessible name (aria-progressbar-name, serious) (a11y seed 2026-09-19)
+- 447 Sources filter → native "Sources…" popup (BaseModal) — 438 Part A impl, owner pick 2026-09-19
+- 448 Sim-sets → "Other phases (n)" disclosure — 438 Part B impl, owner pick 2026-09-19
