@@ -1,4 +1,4 @@
-Status: open
+Status: claimed
 Type: design
 Origin: owner viewing session, 2026-09-19 (re-raise of an earlier ask never actually explored)
 Blocks: none
@@ -89,3 +89,14 @@ Net: Part A = "find and match the native wowsims control idiom for the source
 filter" (options weighed against that bar), Part B = the phase-collapsing
 organization, and BOTH are backstopped by finally building the automated visual
 review so this stops recurring.
+
+## Claimed
+
+Design recommendation delivered as a decision document:
+`.scratch/handoffs/438-sources-sim-sets-design-HANDOFF.md` (Q1/Q2 candidate
+tables, native file:line citations, live measurements). This is Session 1 of the
+tab-finish-arc split (see `.scratch/stage-gate/tab-finish-arc/plan.md`):
+- Q2 (Sim-sets): owner chose (b) the "Other phases (n)" disclosure.
+- Q1 (Sources filter): owner chose the native "Sources…" popup idiom.
+No 438 code was written here (that is Session 3, under the `gate-visual` seat
+that Session 2 builds). This ticket is claimed pending that implementation.

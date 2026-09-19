@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-19
 Blocks: none
@@ -44,3 +44,17 @@ copy rule.
 
 New from the owner's 2026-09-19 viewing session. Small, real UI-polish bug —
 distinct from the environmental dev-server cause (which is not a branch defect).
+
+## Closed
+
+Fixed in fork commits `2ef9b1139` (original) + `2dc294c66` (owner-correction),
+re-pinned at repo commit `aaa0e892` (fork tip `6c08a6a56`). A worker/WASM load
+failure (browser `fetch` TypeError, or worker_pool.ts's "Failed to fetch sim
+wasm module" string) now maps to a plain user sentence via `describeRunError`;
+every other error keeps "Ranking failed: {{message}}". `console.error(err)` keeps
+the raw cause. On owner viewing feedback the message was rewritten in plain user
+terms (no "engine"/"worker"/"server") and the key renamed to
+`status.error_sim_unavailable`; final string is owner-pick (placeholder shipped:
+"Couldn't run the sim. Refresh the page and try again."). Note: the sim runs on
+:5173 in this environment, so 437 could not be reproduced live; the fix maps both
+source-pinned error origins. Desktop gate golden unchanged; verify rc=0.

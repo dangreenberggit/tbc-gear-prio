@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-19
 Blocks: none
@@ -40,3 +40,16 @@ New from the owner's 2026-09-19 viewing session. A layout/scroll bug on the tab
 surface — a natural fit for the next tab stage alongside the Sources/Sim-sets
 design work (438) and the error-message fix (437), and exactly the kind of thing
 the approved automated visual review should eventually cover.
+
+## Closed
+
+Fixed in fork commit `ceb157971`, re-pinned at repo commit `aaa0e892` (fork tip
+`6c08a6a56`). Measured post-run (live :3333, desktop width): the sticky settings
+panel is 1128px tall vs ~799px available (viewport innerHeight 871 minus the
+72px header), so its lower part was unreachable and a wheel over it scrolled the
+results. Bounded `.upgrades-settings-outer-container` to
+`max-height: calc(100vh - var(--sim-header-height)); overflow-y: auto` scoped to
+`media-breakpoint-up(xl)` (the sticky-sidebar band; below xl the panel stacks and
+scrolls with the page), mirroring the native `.sim-sidebar-content`. C17
+hypothesis held (not escalated). Layout gate confirms `position: sticky` intact
+(assertion 3) at 768/1280; 45/45; verify rc=0.

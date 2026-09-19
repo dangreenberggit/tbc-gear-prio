@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-19 (screenshot)
 Blocks: none
@@ -49,3 +49,14 @@ See `_upgrades_tab.scss:216-247` and the markup at `upgrades_tab.tsx:865-892`.
 CSS/layout only; no logic change. Cosmetic but owner-visible on every run with a
 shortlist. A natural fit for the same tab stage as 438/439/440/441 and exactly
 the kind of off-brand control the approved automated visual review should catch.
+
+## Closed
+
+Fixed in fork commit `b781d1b58` (re-pinned into `data/wowsims-fork.lock.json`
+at repo commit `aaa0e892`, fork tip `6c08a6a56`). Capped the caveat, flavour
+caption, textarea and actions row all at the textarea's `36rem` in
+`.upgrades-export`, so the count and Copy button align under the textarea instead
+of spanning the full block. Measured pre-fix (live :3333): actions row 879px wide
+with the Copy button right edge at 1272px vs the textarea's 897px; the cap brings
+them into one column. Layout gate 45/45 at 375/653/768/1280 (no horizontal
+overflow); desktop gate golden unchanged.

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-19
 Blocks: none
@@ -39,3 +39,14 @@ Options, owner picks:
 
 New from the owner's 2026-09-19 viewing session. Pre-existing behavior, surfaced
 now; a UX decision, not a broken-code fix. Next tab stage.
+
+## Closed
+
+Fixed in fork commits `e4e1c28b8` (original) + `6c08a6a56` (tooltip reword),
+re-pinned at repo commit `aaa0e892` (fork tip `6c08a6a56`). After a run with no
+rankable set bonus the Set-potential toggle stays visible but disabled (native
+`Input.update()` disabled state via `enableWhen`, with the tippy content swapped
+to a reason), instead of vanishing. Disabling forces the value off so a stale
+"on" cannot hide rows. On owner feedback the disabled tooltip was reworded in
+user terms; final string is owner-pick (placeholder shipped: "No upgrades here
+gain a set bonus."). Desktop gate golden unchanged; verify rc=0.

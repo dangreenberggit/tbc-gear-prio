@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-19
 Blocks: none
@@ -27,3 +27,13 @@ column should read as one consistent treatment.
 
 New from the owner's 2026-09-19 viewing session. Tab-surface cosmetic; next tab
 stage.
+
+## Closed
+
+Fixed in fork commit `b781d1b58`, re-pinned at repo commit `aaa0e892` (fork tip
+`6c08a6a56`). The non-link Source fallback is wrapped in the same
+`<small class="upgrades-source-fallback">` at `--bs-gray-500` as the native
+`<a><small>` anchor. Measured pre-fix (live :3333): anchor cell 12.25px muted vs
+fallback cell 14px link-white; post-fix both are 12.25px muted. The rendered text
+is unchanged, so the desktop-gate golden's Source readback is unaffected (golden
+unchanged). verify rc=0.

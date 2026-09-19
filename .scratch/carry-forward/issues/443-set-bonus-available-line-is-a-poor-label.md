@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: ux
 Origin: owner viewing session, 2026-09-19
 Blocks: none
@@ -63,3 +63,16 @@ ViewToggle wiring near the existing set-potential/BiS-only controls (~910).
 New from the owner's 2026-09-19 viewing session. UX + light domain-wording work;
 the plumbing (tooltip, presentation split) already exists from 431, so this is
 mostly a presentation-mode toggle + copy, not a data change.
+
+## Closed
+
+Fixed in fork commits `e4e1c28b8` + `b9b686530` (original, SME wording) then
+`e01718feb` (owner-correction: hover mode dropped), re-pinned at repo commit
+`aaa0e892` (fork tip `6c08a6a56`). The set-bonus sub-line now ALWAYS shows the
+DPS figure inline: "{{threshold}}pc: +{{dps}} DPS" (the SME-chosen wording), or
+"with {{threshold}}pc bonus (+{{dps}})" when set potential folded the bonus into
+the shown figure. The full breakdown stays on the DPS-cell hover tooltip. On
+owner feedback the originally-built hover/inline toggle was removed entirely
+("hover for 4pc bonus" was as long as showing the number), returning the View
+options row to two toggles. Layout gate 45/45 at 375/653/768/1280 (no clipped
+text, no horizontal overflow); desktop gate golden unchanged; verify rc=0.
