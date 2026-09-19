@@ -47,3 +47,22 @@ The schema half is being fixed opportunistically by the tab-ui-refinements batch
 (its 431 step must edit the schema anyway). The wiring-into-verify half is the
 durable process fix and is the real reason to keep this ticket after the batch
 lands.
+
+## Update — item 1 fixed by tab-ui-refinements (2026-09-18)
+
+The tab-ui-refinements batch made the fork locale gate green at fork commit
+eb83a1583 (re-pinned in main 23d35e94). `node vendor/tbc-new-fork/test-locales.mjs`
+exits 0 (`✅ en/translation.json is valid`); it was rc=1 at d17587b5a. Step 0 of
+that batch reconciled `schemas/translation.schema.json` with the live en locale:
+added the `settings` object (417/424) and `set_bonus.total` (419) that had no
+schema entry, AND dropped five dead required keys the schema still listed —
+`view.raid_filter` / `raid_filter_all` / `raid_filter_group_zone` /
+`raid_filter_group_other` and `results.heading_count` — confirmed dead (0
+references in the locale and 0 in the fork `ui/`, including `upgrades_tab.tsx`).
+Later steps kept the schema in lockstep as they changed keys.
+
+Item 1 (schema/locale agree, gate green) is therefore satisfied. This ticket
+STAYS OPEN for item 2 only: the process decision on whether to wire
+`test-locales.mjs` into `pnpm verify` (or a fork gate it already runs) so a
+future locale/schema drift fails CI rather than sitting latent — the batch
+deliberately did NOT wire it, leaving that call here.

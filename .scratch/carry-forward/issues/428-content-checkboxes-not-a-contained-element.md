@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: design
 Origin: owner screenshot review, 2026-09-18
 Blocks: none
@@ -39,3 +39,15 @@ and unchanged.
 New from the owner's screenshot review. 417 delivered the functional multi-select;
 this is the visual grouping/containment refinement. Likely shares a solution with
 the "Sim sets" group (ticket 429) — both should read as contained sections.
+
+## Closed
+
+Closed by fork commit eb83a1583 (tab-ui-refinements; re-pinned in main 23d35e94).
+The Content source-filter group is now wrapped in the site's own `.content-block`
+markup — `<div class="content-block-header"><h6 class="content-block-title">` over
+a `.content-block-body` — the same structure `resultsBlock` uses. The bare
+`.content-block-header` span had no `.content-block` ancestor, so its bold title
+and bottom-border rule never applied. Observable: the group's
+`.content-block-header` now has a non-zero `borderBottomWidth` (0px before) and
+the title is an `h6.content-block-title`; the checkboxes still change the eligible
+count. Layout gate green (45 assertions).

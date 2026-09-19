@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: design
 Origin: owner screenshot review, 2026-09-18
 Blocks: none
@@ -43,3 +43,19 @@ New from the owner's screenshot review. The chip TEXT length is ticket 430 (same
 root as the result-tag length); this ticket is the group label + explainer + chip
 visual match. Copy strings are owner-facing — the exact "Sim sets" wording is the
 owner's to confirm.
+
+## Closed
+
+Closed by fork commit eb83a1583 (tab-ui-refinements; re-pinned in main 23d35e94).
+The group is titled "Sim sets" in the same `.content-block` wrap as the Content
+filter; the explainer is Bootstrap `form-text` size tinted with this tab's
+AA-passing `--bs-gray-500` (form-text's own gray-600 fails AA). The chips are
+rebuilt as the gear tab's `saved-data-set-chip` markup: the label sits in a
+padded inner `.saved-data-set-name` span (role=button, click there), tippy on the
+button, and the "n/m in pool" count moved off the chip text into that hover
+tooltip. An unavailable set (0 in pool) is muted via `aria-disabled` + a
+`--unavailable` class rather than hidden, and its click bails. Observable: the
+chip's padding/font-size/border match the gear tab's, hover shows "n/m in pool",
+clicking the span toggles `.active`+`aria-pressed`, and the caption resolves to
+gray-500. Owner taste sign-off of the chips beside the gear tab is in the Step 8
+pack.

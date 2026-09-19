@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner screenshot review, 2026-09-18
 Blocks: none
@@ -68,3 +68,21 @@ New from the owner's screenshot review, and the sharpest finding: it is a
 correctness/redundancy issue in 424's tag design, not just cosmetics. The two-tag
 scheme double-encodes "this is a BiS set item". Needs a design decision on the
 unified single tag before implementation.
+
+## Closed
+
+Closed by fork commit eb83a1583 (tab-ui-refinements; re-pinned in main 23d35e94).
+The unified tag rule (plan Q1): a result row in one or more SELECTED sets shows
+one yellow `.upgrades-bis-badge` per selected set containing it, labelled from
+the set's own bare name ("BiS 9%", not the phase-prefixed chip label), and the
+generic `bisTags` badge is suppressed. When two selected sets share a name (e.g.
+P2 and P3 "BiS 9%") the tags disambiguate to "P{phase} {name}". A row in NO
+selected set keeps a single generic "BiS"/"Alt" from `bisTags` (that flag still
+drives the BiS-only filter and prune). The star and the separate grey
+`.upgrades-set-tag` badge are gone; the two vocabularies collapse to one class.
+Observable: with P3 "BiS 9%" selected, a row in that set shows exactly one badge
+"BiS 9%" and no grey tag; with nothing selected a universe-BiS row shows one
+"BiS". MULTIPLICITY note: a row in two selected sets shows TWO tags — a
+deliberate divergence from the owner's literal "one tag", routed to the owner in
+the Step 8 sign-off pack for a ruling (along with the "★" drop and the
+disambiguated "P3 BiS 9%" form).

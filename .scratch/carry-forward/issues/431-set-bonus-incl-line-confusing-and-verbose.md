@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner screenshot review, 2026-09-18
 Blocks: none
@@ -65,3 +65,23 @@ idiom, as in 420). The `set_bonus.total` string in `translation.json`.
 New from the owner's screenshot review. The 419 TOTAL is correct and stays; this
 is the presentation of the breakdown around it. Tooltip is the owner's suggested
 direction for the heavy detail.
+
+## Closed
+
+Closed by fork commit eb83a1583 (tab-ui-refinements; re-pinned in main 23d35e94).
+The cell/tooltip split (plan Q2): the DPS cell shows the ranked figure plus at
+most ONE short `<small>` qualifier — "with {{threshold}}pc bonus" when set
+potential folded a bonus into the shown figure, else "{{threshold}}pc bonus
+possible" at the lowest reachable threshold (confounded/crossing keep their own
+one line). The base delta and per-threshold breakdown move into a tippy tooltip
+on the DPS `<td>`: "Base: {{base}}", 330's prospective/package lines verbatim,
+and "Total with set bonus: {{total}} (the ranked figure)" when the total is
+shown. The `<td>` gets tabindex=0 when a tooltip exists, so keyboard focus opens
+it. The shown total stays exactly `deltaDps + rankableSetPotential` and the sort
+key is untouched (ranking unchanged — desktop gate (h) matches golden). 330's
+four strings are byte-identical; 419's `total` is reworded and
+`available`/`tip_base`/`tip_total` are added, with the schema updated in the same
+commit. Observable: a set-bonus row's DPS cell is <= 2 text lines, hover/focus
+shows the breakdown, headline - Base = the prospective +dps. The layout gate's
+one-line-cell assertion held at all four widths. Owner taste sign-off of the new
+strings is in the Step 8 pack.

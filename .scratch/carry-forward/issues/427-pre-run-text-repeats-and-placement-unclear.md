@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner screenshot review, 2026-09-18
 Blocks: none
@@ -40,3 +40,17 @@ status line vs the empty-state/no-ranking block; `statusContent()` and the
 New from the owner's screenshot review of the built feat/tab-signoff-followups
 batch. Not a defect in 415 (415 correctly hid the empty group headings); this is
 the duplicated explanatory copy that remains.
+
+## Closed
+
+Closed by fork commit eb83a1583 (tab-ui-refinements, on feat/upgrades-tab;
+re-pinned in main commit 23d35e94). The idle and unsupported-spec top status
+line now returns `<></>`, so the pre-run purpose and the Run CTA appear ONCE, in
+the centred "No ranking yet" empty state. The top `.upgrades-status` slot is
+blank pre-run; its min-height reserves the row so nothing shifts when a run
+fills it. `renderAnnouncement` was moved after `renderSubTabs` and now reads the
+idle/unsupported text from the empty state, so the live region still announces
+the purpose. `status.idle` is kept in locale and schema (unrendered) pending
+ticket 432. Observable: pre-run, `.upgrades-status` innerText is empty and there
+is exactly one `.upgrades-empty-state` with a Run button. Owner taste sign-off
+of the pre-run layout is part of the Step 8 pack.
