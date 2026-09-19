@@ -244,3 +244,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 436 ContentBlock scaffold hand-written 3x in the tab (premerge R2 standards, minor, deferred)
 - 437 'Ranking failed: Failed to fetch' junky UI error; catch worker/transport failure, show plain msg (owner viewing 2026-09-19)
 - 438 Sources filter + Sim-sets organization need a real design exploration (design-an-interface); 428 was too shallow (owner viewing 2026-09-19)
+- 439 After a run, scrolling over sim settings scrolls the item list instead of the settings panel (owner viewing 2026-09-19)

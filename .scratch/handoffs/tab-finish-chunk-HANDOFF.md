@@ -92,10 +92,14 @@ before the owner sees them. Frame Part A as "find and match the native wowsims
 control," and land the visual reviewer in the same next tab stage. The literal
 "content dropdown too big" was only sizing and is already fixed (328).
 
-### Real UI bug (ticket 437)
-"Ranking failed: Failed to fetch" is dumped raw into the UI. The tab should catch
-a worker/transport load failure and show a plain message. NOTE: the specific
-failure the owner hit was ENVIRONMENTAL, not a branch defect — see next section.
+### Real UI bugs
+- **Ticket 437** — "Ranking failed: Failed to fetch" is dumped raw into the UI.
+  The tab should catch a worker/transport load failure and show a plain message.
+  NOTE: the specific failure the owner hit was ENVIRONMENTAL, not a branch defect
+  — see the "Running the tab for viewing" section.
+- **Ticket 439** — after a run, scrolling with the cursor over the sim-settings
+  panel scrolls the sim's item/results list instead of the settings panel. A
+  scroll-target / overflow-containment bug in the post-run layout.
 
 ### Deferred minors (not blocking)
 - 425 — BiS-tag gap layout assertion can pass vacuously.
