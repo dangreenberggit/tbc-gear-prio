@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: feature
 Origin: ticket 438 design exploration, owner-confirmed pick 2026-09-19 (Q2 = disclosure)
 Blocks: none
@@ -47,3 +47,54 @@ unchanged; this is a grouping/disclosure wrap.
 
 `upgrades_tab.tsx` (`.upgrades-set-guarantee` chips, ~line 816 + render loop ~1958)
 + the tab scss. Disclosure idiom: the tab's own `button[aria-expanded]` at ~704.
+
+## Closed
+
+Built on stage-gate branch `feat/tab-signoff-followups` (session tab-438-impl,
+Unit 448), fork commit **994fcb9f3fd93cbac2c975698248ad888846dd84** on
+`feat/upgrades-tab`. `refreshSetChips` now sorts each chip into the always-shown
+row (`.upgrades-set-guarantee`) when it is current-phase (`set.phase === maxPhase`),
+a saved set (`set.phase === undefined`), or currently selected
+(`guaranteedSetKeys.has(set.key)`); every other preset chip goes behind an
+"Other phases (n)" `button[aria-expanded]` + `.upgrades-set-more--open` collapse
+class (`.upgrades-set-more`), collapsed by default, using the tab's own
+button-plus-class idiom (not `<details>`). The disclosure open state lives on
+the instance (`otherPhasesOpen`), not the DOM, so it survives the rebuilds
+`refreshSetChips` fires on every tab show and settings change.
+
+New selectors: three — `upgrades-set-more-summary` (the button), `upgrades-set-more`
+(the collapsed mount), `upgrades-set-more--open` (the open modifier) — matching the
+design's "~1 collapse class" plus the button and mount.
+
+Selection logic (`guaranteedSetKeys`, `defaultGuaranteedSetKeys`, stale pruning) is
+byte-unchanged; this is a grouping wrap.
+
+**Both mount points cleared on every rebuild (C28).** `refreshSetChips` calls
+`this.setsMoreElem.replaceChildren()` and re-hides the toggle+mount at the top of
+the function, above the `!specId` early return, right after
+`this.setsGroupElem.replaceChildren()`. Without this the off-phase chips would
+accumulate in `.upgrades-set-more` on each of the many rebuild triggers and the
+"(n)" would inflate. Empirically confirmed by the visual capture 448-d:
+`hiddenChipsAfterToggle` = 3 = the pre-toggle `hiddenChips`, no duplication.
+
+**Ticked-then-collapsed transition (code inspection, not a capture claim).** A chip
+ticked/unticked via its click handler does NOT move between mount points at click
+time — the handler is count-only and deliberately does not call
+`refreshCandidatesPlaceholder` (which rebuilds the group and would drop the button
+mid-click; the existing comment records this). So a newly-ticked off-phase chip
+stays inside `.upgrades-set-more` and a newly-unticked one stays in the main row
+until the next `refreshSetChips` (a `shown.bs.tab` or a spec/phase change), when
+the `visible` rule (`set.phase === undefined || set.phase === maxPhase ||
+this.guaranteedSetKeys.has(set.key)`) re-sorts it and the top-of-rebuild clear
+(`setsMoreElem.replaceChildren()`) prevents any duplicate. The manifest cannot fire
+`shown.bs.tab` (one activate per entry), so this transition is proven by inspection
+of the `visible` rule and the clear line in FORK_448, not captured.
+
+Visual review: **pass** by the `gate-visual` seat, handoff at
+`.scratch/handoffs/visual-review-tab-438-impl-448.md`, judged against forkHead
+994fcb9f3. Harness page is ret paladin at P3: 2 shown (P3 + P3-Bulwark saved), 3
+hidden (P1-Preraid, P1, P2); toggle "Other phases (3)"; activeShown=1,
+activeHidden=0; expand reveals 3, collapse returns to 3 with no duplication.
+
+Copy string shipped as placeholder (owner-taste, to confirm): `sets_other_phases`
+= "Other phases ({{n}})".
