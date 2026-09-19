@@ -230,3 +230,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 422 Export box polish: JSON export header, width, 'use tier token ids' label+spacing, blurb into checkbox parenthetical (owner 2026-09-18)
 - 423 Mobile table alignment + BiS-tag crowding (owner 2026-09-18, spinoff of resolved 327)
 - 424 Set selection in sim settings with result tags (owner 2026-09-18, BLOCKING, heavy — likely own stage-gate)
+- 425 BiS-tag gap layout assertion may pass vacuously (premerge adversarial A1, minor, deferred)
+- 426 Content filter: multi-source item survives if any source ticked (premerge adversarial A2, minor, deferred — behaviour choice)
