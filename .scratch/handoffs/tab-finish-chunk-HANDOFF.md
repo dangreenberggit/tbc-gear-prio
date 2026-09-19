@@ -100,6 +100,14 @@ control," and land the visual reviewer in the same next tab stage. The literal
 - **Ticket 439** — after a run, scrolling with the cursor over the sim-settings
   panel scrolls the sim's item/results list instead of the settings panel. A
   scroll-target / overflow-containment bug in the post-run layout.
+- **Ticket 440** — Source-column text styling is inconsistent (zone+boss vs
+  plain zone render in different styles); looks bad, wants one consistent
+  treatment. Cosmetic.
+- **Ticket 441** — the "Set potential" view toggle disappears when a run has no
+  rankable set bonus (only "BiS only" shows). NOT a regression — pre-existing
+  hide-when-empty gating (`upgrades_tab.tsx:1700`, from commit 44c73690b, outside
+  this batch). UX decision for the owner: keep-visible-but-disabled vs
+  always-on vs keep-hiding. Details in the ticket.
 
 ### Deferred minors (not blocking)
 - 425 — BiS-tag gap layout assertion can pass vacuously.
