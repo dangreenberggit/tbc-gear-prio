@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f546dc0b3
 Type: bug
 Origin: owner report, 2026-09-18 (viewing the running tab, post-run state)
 Blocks: none
@@ -50,3 +51,21 @@ re-verification — a results-ordering issue, same tab-surface family as 312/415
 but not one of the five reviewed Chunk 3 tickets (327/310/312/328/314), so
 tracked here rather than reopening those. Sensible to fix alongside 415 (both
 are post/pre-run heading-and-placement cleanups on the same surface).
+
+## Closed
+
+Fork commit 7ad068cd2 (re-pinned at f546dc0b3, Unit A). The "Your current
+gear: N DPS. Took Ns." summary moved out of the top `.upgrades-status` line
+into a new `.upgrades-baseline-summary` element rendered directly under the
+ranked table (before the export box). The done/stopped branches of
+`statusContent()` now return the empty fragment (except the stale warning,
+which stays in the top slot), and `baselineSummaryContent()` fills the footer;
+`renderAnnouncement` reads the summary element for the done/stopped
+announcement so AT still hears the baseline (C27). One consequence handled: the
+desktop-gate harness (run-tab-cdp.mjs) read the "Took" done signal from
+`.upgrades-status` only, so its `pollDone` was updated to read the baseline
+summary too (fork commit fd4fc76de).
+
+Verified-by (live, feral page post-run): `.upgrades-status` is empty; the
+baseline reads "Your current gear: 2683.3 DPS. Took 56s." with
+`baseline.top > resultsTable.bottom` true (summary below the table).

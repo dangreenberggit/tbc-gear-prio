@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f546dc0b3
 Type: bug
 Origin: owner report, 2026-09-18 (viewing the running tab, post-run)
 Blocks: none
@@ -27,3 +28,16 @@ renders) and any related string in `translation.json`.
 ## Notes
 
 New from the owner's sign-off pass, 2026-09-18. Small, mechanical.
+
+## Closed
+
+Fork commit 7ad068cd2 (re-pinned in data/wowsims-fork.lock.json at
+f546dc0b3, tab-signoff-followups Unit A). Removed the
+`.upgrades-results-count` span and its `heading_count` lookup from
+`resultsBlock`, the `upgrades_tab.results.heading_count` i18n key, and the
+`.upgrades-results-count` SCSS rule. The below-cutoff `<details>` footer is
+untouched (left per the ticket default).
+
+Verified-by: `grep -c 'heading_count\|upgrades-results-count'` returns 0 in
+upgrades_tab.tsx, _upgrades_tab.scss and translation.json; live post-run on
+the feral page the results header reads "Upgrades" alone with no count.

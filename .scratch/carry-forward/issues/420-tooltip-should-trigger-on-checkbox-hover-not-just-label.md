@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f546dc0b3
 Type: bug
 Origin: owner report, 2026-09-18 (viewing the running tab)
 Blocks: none
@@ -39,3 +40,18 @@ idiom (tippy is already a dependency).
 New from the owner's sign-off pass, 2026-09-18. Ties to 328's control-styling
 family; the tooltip wording itself is unchanged here — this is purely the hover
 target.
+
+## Closed
+
+Fork commit 7ad068cd2 (re-pinned at f546dc0b3, Unit A). `ViewToggle` no
+longer passes `labelTooltip` into its `BooleanPicker` (which `Input` would
+attach to the `<label>` alone, input.tsx:91-93); instead it calls
+`tippy(this.picker.rootElem, { content })` after construction, so the whole
+`.form-check` wrapper (checkbox + label) is one hover region. Tooltip text
+unchanged.
+
+Verified-by: `grep -n 'labelTooltip' upgrades_tab.tsx` shows it only inside
+`ViewToggle`'s config type and where the tippy is attached to `rootElem`, not
+passed to the picker. The set-potential control is the one live user (its
+`labelTooltip` string). Owner to eyeball the hover over the checkbox itself at
+sign-off.

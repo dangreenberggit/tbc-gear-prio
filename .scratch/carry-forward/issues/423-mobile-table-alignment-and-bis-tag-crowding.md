@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f546dc0b3
 Type: bug
 Origin: owner report, 2026-09-18 (viewing the running tab, mobile/narrow width)
 Blocks: none
@@ -45,3 +46,24 @@ standing "borrow native styling" direction.
 New from the owner's sign-off pass, 2026-09-18. This is the spinoff from 327: 327's
 char-stacking defect is resolved/approved; these are the residual alignment and
 spacing issues, tracked here so 327 can close cleanly.
+
+## Closed
+
+Fork commit 7ad068cd2, with a follow-up gate-assertion fix f546dc0b3 (Unit A;
+both re-pinned at f546dc0b3). In the `media-breakpoint-down(md)` block: Rank
+column pared and right-aligned (mirrors desktop); `th, td { vertical-align:
+top }` so single-line Rank/Slot/DPS share the top edge with a wrapped item
+cell; the sort-header button de-padded with `text-align: inherit` and the DPS
+header right-aligned to width:100% so headers sit over their columns; and
+`.upgrades-item-cell { row-gap: var(--spacer-1); align-items: center }` for
+BiS/set-tag breathing room. The layout gate (test-layout.mjs) gained two
+per-width-<768 assertions: header/body text-align + shared-edge for Rank/Slot/
+DPS, and BiS-tag >=2px clearance when a badge wraps below the name. The
+gate-assertion fix f546dc0b3 canonicalises start/end vs left/right so the
+unstyled Slot column does not false-fail on the spelling.
+
+Verified-by: `python scripts/check_layout_gate.py` PASSED, 45 assertions, 0
+failures, at 375/653/768/1280 — including "Rank alignment ... right edges within
+0.00px", "Slot alignment ... left edges within 0.00px", "DPS alignment ... right
+edges within 0.00px" at 375 and 653. BiS-tag spacing passed vacuously (no badge
+wrapped in the measured rows). Owner to eyeball 375/653/767 at sign-off.

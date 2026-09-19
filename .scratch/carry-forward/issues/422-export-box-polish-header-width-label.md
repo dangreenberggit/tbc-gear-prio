@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: f546dc0b3
 Type: design
 Origin: owner report, 2026-09-18 (viewing the running tab, export box)
 Blocks: none
@@ -46,3 +47,19 @@ Owner report on the Upgrades tab export box. Four cosmetic/copy fixes, all on th
 New from the owner's sign-off pass, 2026-09-18. 314 (box exists + correct payload)
 and 126 (token ids emitted) are resolved; this is pure presentation/copy on top of
 them. Copy strings are owner-facing — keep plain per the standing copy rule.
+
+## Closed
+
+Fork commit 7ad068cd2 (re-pinned at f546dc0b3, Unit A). All four items:
+(1) `export.title` -> "JSON export"; (2) `.upgrades-export-area` capped at
+`max-width: 36rem` (width:100%); (3) flavour label -> "Use tier token ids
+(for a loot-priority tool, e.g. ThatsMyBis)", and the hand-rolled
+`<label><input>` replaced by a native `BooleanPicker` (inline) so the box and
+its text carry the site's own spacing; (4) `export.caveat` trimmed to "Copy
+the upgrades above as JSON." — the loot-tool/ThatsMyBis naming now lives only
+in the checkbox parenthetical.
+
+Verified-by (live, feral page post-run): header reads "JSON export"; flavour
+label reads as above; `getComputedStyle('.upgrades-export-area').maxWidth` is
+36rem (504px at the app's 14px root — the plan's "576px" assumed a 16px root
+the app does not use). Owner to eyeball the checkbox/label spacing at sign-off.
