@@ -54,3 +54,38 @@ New from the owner's 2026-09-19 viewing session; a re-raise of an ask that the
 tab-ui-refinements batch addressed too shallowly (428). Distinct from the
 already-shipped 428 content-block (which stands as an interim) — this is the
 proper exploration. Design-lane work (Fable / design-an-interface), not workhorse.
+
+## Correction / grounding in the owner's original words (added 2026-09-19)
+
+Pulled from the origin report (earlier session "Orchestration system Opus
+subagents"). The prior summary of this ticket overstated one framing and missed
+the real through-line — recording accurately:
+
+- The literal "content dropdown" complaint in that report was ONLY sizing:
+  "the checkboxes for 'set potential' and 'bis only' and the content dropdown
+  look a bit too big." That was ticket 328 and is fixed (native-sized controls).
+  So "explore N brand-new component options for Sources" was the orchestrator's
+  invention, not a direct owner ask — treat Part A's option list as *candidates
+  to weigh*, not a mandate to reinvent.
+- The REAL recurring desire (this report + ~11 messages across the chunk) is
+  two-fold and is what the exploration should serve:
+  1. **Match wowsims' own styling/components — study how the SITE builds these
+     controls and reuse that, don't roll bespoke UI.** Owner, verbatim: "i
+     question how much we've really tried to make this page match the styling
+     elsewhere on wowsims." So Part A's exploration is "which native wowsims idiom
+     fits this filter" FIRST, before any custom component — the content-block wrap
+     shipped in 428 is exactly the kind of not-quite-native half-measure the owner
+     is tired of.
+  2. **The automated visual review was supposed to catch this.** Owner, verbatim:
+     "there was supposed to be an automated viewing review of the tab... this is
+     now the third time bringing up this specific issue." This is the
+     already-approved visual + a11y reviewer (see
+     `.scratch/stage-gate/visual-a11y-review-proposal.md` /
+     [[project-visual-a11y-reviewer-approved]]) — build it so it FLAGS off-brand /
+     broken-CSS controls before they reach the owner. That reviewer and this
+     exploration should land in the same "next tab stage."
+
+Net: Part A = "find and match the native wowsims control idiom for the source
+filter" (options weighed against that bar), Part B = the phase-collapsing
+organization, and BOTH are backstopped by finally building the automated visual
+review so this stops recurring.

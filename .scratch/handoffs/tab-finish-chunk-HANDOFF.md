@@ -80,6 +80,18 @@ trade-offs, `design-an-interface` skill / design lane), NOT straight-to-code:
 
 Do the exploration, present options to the owner, get a pick, THEN implement.
 
+**IMPORTANT correction (read 438's "grounding" section):** the owner's real,
+repeated ask (verified from the origin transcript) is not "invent N component
+options" — it is (1) **study how wowsims itself builds these controls and match
+that native idiom** ("i question how much we've really tried to match the styling
+elsewhere on wowsims" — the 428 content-block is the kind of not-quite-native
+half-measure they're tired of), and (2) **the automated visual review was
+supposed to catch this** ("third time bringing up this issue") — i.e. finally
+build the approved visual+a11y reviewer so off-brand/broken controls get flagged
+before the owner sees them. Frame Part A as "find and match the native wowsims
+control," and land the visual reviewer in the same next tab stage. The literal
+"content dropdown too big" was only sizing and is already fixed (328).
+
 ### Real UI bug (ticket 437)
 "Ranking failed: Failed to fetch" is dumped raw into the UI. The tab should catch
 a worker/transport load failure and show a plain message. NOTE: the specific
