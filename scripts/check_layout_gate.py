@@ -84,8 +84,15 @@ Usage
         # proven by hand. Prints the new digest; commit the lock file.
 
 Exit codes: 0 = ok (ran green, or skipped for any reason above); 1 = the gate
-ran and the layout is broken; 2 = a real error (could not read a tracked source
-file that the record expects).
+ran and MEASURED a failure -- a broken layout OR an unbaselined critical/serious
+accessibility violation (the fork's test-layout.mjs exits 1 for either, and this
+script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
+here); 2 = a real error (could not read a tracked source file that the record
+expects).
+
+Accessibility: the gate passes TBC_A11Y_BASELINE (data/wowsims-fork-a11y-baseline.json)
+to the fork script when it exists, so seeded/known violations are tracked debt
+and only NEW critical/serious ones block. Absent -> the fork runs strict.
 """
 
 from __future__ import annotations
@@ -97,8 +104,9 @@ import os
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import NamedTuple
 
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -118,6 +126,12 @@ DIST_WASM_CANDIDATES = (
 )
 DIST_ASSETS = FORK_ROOT / "dist/tbc/assets"
 LOCK_PATH = ROOT / "data/wowsims-fork-layout.lock.json"
+# The accepted-a11y-debt baseline the fork's test-layout.mjs reads via
+# TBC_A11Y_BASELINE. Absent -> the fork script runs strict (every
+# critical/serious WCAG violation fails). Seeded once from a real gate run;
+# each entry carries a ticket or a wontfix reason. Lives here, not in the fork,
+# for the same reason the layout lock does: the fork is gitignored.
+A11Y_BASELINE_PATH = ROOT / "data/wowsims-fork-a11y-baseline.json"
 
 ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 
@@ -129,11 +143,18 @@ ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 # result rows a real WASM run lands, and the ranking engine is what produces
 # them. A change to any of these can change what the gate observes, so any of
 # them moving must re-arm the gate.
+#   - assets/locales/en/translation.json -- the accessible names the a11y
+#     probe reads (button labels, aria-labels, the phase-selector option text)
+#     are locale strings, so a copy edit that empties or breaks a label is an
+#     accessibility change the gate must re-run to see. Adding it re-arms the
+#     gate on a copy change at the cost of one gate run per re-pin, which the
+#     re-pin cycle already pays.
 SHELL_FILES = (
     "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
     "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss",
     "ui/scss/core/components/_sim_tab.scss",
     "ui/core/components/sim_tab.ts",
+    "assets/locales/en/translation.json",
 )
 
 # The shared SCSS the tab's asserted geometry resolves THROUGH. The two tab SCSS
@@ -246,7 +267,9 @@ def write_baseline(digest: str) -> None:
         "testedTabHash is the sha256 (over fork-relative path + bytes) of the "
         "Upgrades-tab layout source at the last green run of the layout gate: the "
         "shell files (upgrades_tab.tsx, _upgrades_tab.scss, _sim_tab.scss, "
-        "sim_tab.ts), the ranking engine (upgrades/engine/**/*.ts), AND the shared "
+        "sim_tab.ts, and assets/locales/en/translation.json -- the a11y probe's "
+        "accessible names are locale strings), the ranking engine "
+        "(upgrades/engine/**/*.ts), AND the shared "
         "SCSS the tab's asserted geometry resolves through -- shared/_variables.scss "
         "($grid-breakpoints + the layout tokens the asserted rules read), "
         "shared/_global.scss (root font-size + lg/xxl spacer overrides), and "
@@ -310,25 +333,37 @@ def _node_major(node_exe: str = "node") -> int | None:
         return None
 
 
-def _layout_command() -> tuple[list[str], str] | None:
-    """The argv that runs test:layout under Node >= 22, or None if unavailable.
+def _npm_command(
+    script: str, extra: Sequence[str] = ()
+) -> tuple[list[str], str] | None:
+    """The argv that runs a fork npm script under Node >= 22, or None.
 
     Returns (argv, how) where `how` names the interpreter path chosen, for the
-    log. `npm run test:layout` is the fork's own script (package.json), run with
-    cwd at the fork. Node 22 is required; if the ambient node is already >= 22
-    it is used directly, else `fnm exec --using=22` is preferred when fnm is on
-    PATH. When neither is available the gate is skipped, not run wrong.
+    log. `npm run <script>` is the fork's own script (package.json), run with
+    cwd at the fork. When `extra` is non-empty it is appended after `--` so npm
+    forwards the arguments to the script (e.g. --manifest/--out for test:review).
+    Node 22 is required; if the ambient node is already >= 22 it is used
+    directly, else `fnm exec --using=22` is preferred when fnm is on PATH. When
+    neither is available the gate is skipped, not run wrong.
     """
     npm = "npm.cmd" if os.name == "nt" and shutil.which("npm.cmd") else "npm"
+    tail = ["run", script]
+    if extra:
+        tail += ["--", *extra]
     ambient = _node_major("node")
     if ambient is not None and ambient >= 22:
-        return [npm, "run", "test:layout"], f"ambient node v{ambient}"
+        return [npm, *tail], f"ambient node v{ambient}"
 
     fnm = shutil.which("fnm")
     if fnm:
-        return [fnm, "exec", "--using=22", npm, "run", "test:layout"], "fnm --using=22"
+        return [fnm, "exec", "--using=22", npm, *tail], "fnm --using=22"
 
     return None
+
+
+def _layout_command() -> tuple[list[str], str] | None:
+    """The argv that runs test:layout under Node >= 22, or None if unavailable."""
+    return _npm_command("test:layout")
 
 
 # The tagged verdict line `test-layout.mjs` prints just before it exits. The
@@ -372,13 +407,27 @@ def _parse_verdict(stdout: str) -> dict | None:
 GATE_UNMEASURED = -1
 
 
-def run_gate() -> int:
+class GateResult(NamedTuple):
+    """What `run_gate` learned. `rc` is 0/1/GATE_UNMEASURED as before; the two
+    counts are the parsed verdict fields (None when the verdict was absent or
+    unmeasured) so `run()` can name both in the FAILED message. The a11y block
+    itself does not need a Python branch: the fork's test-layout.mjs exits 1 on
+    any unbaselined critical/serious violation, and a nonzero measured exit is
+    already `rc == 1` below -- the counts here are for the message only."""
+
+    rc: int
+    layout_failed: int | None
+    a11y_failed: int | None
+
+
+def run_gate() -> GateResult:
     """Run test:layout in the fork.
 
-    Returns 0 (the gate ran green), 1 (the gate MEASURED the layout and it is
-    broken), or GATE_UNMEASURED (it never measured a width, so it learned
-    nothing about the tab and nothing may be blamed on it -- and nothing may be
-    recorded as tested either).
+    rc is 0 (the gate ran green), 1 (the gate MEASURED and something is broken
+    -- layout OR a11y; the fork script's own exit 1 covers both), or
+    GATE_UNMEASURED (it never measured a width, so it learned nothing about the
+    tab and nothing may be blamed on it -- and nothing may be recorded as tested
+    either).
 
     Caller has checked prereqs.
     """
@@ -389,10 +438,17 @@ def run_gate() -> int:
             "test-layout.mjs needs Node 22 (global WebSocket); refusing to run "
             "it on an older Node rather than fail for the wrong reason.",
         )
-        return GATE_UNMEASURED
+        return GateResult(GATE_UNMEASURED, None, None)
     argv, how = cmd
     print(f"layout gate: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
     print("(this renders the Upgrades tab headless at 4 widths; ~2-3 min)")
+    # The child inherits the parent environment plus TBC_A11Y_BASELINE when the
+    # baseline file exists (absent -> the fork script runs strict, its own
+    # rule). TBC_A11Y_DUMP is left inherited so a caller that sets it (baseline
+    # seeding) still reaches the child; nothing here sets it.
+    env = dict(os.environ)
+    if A11Y_BASELINE_PATH.is_file():
+        env["TBC_A11Y_BASELINE"] = str(A11Y_BASELINE_PATH)
     # stdout is teed rather than buffered: each line is echoed as it arrives so
     # a ~2-3 minute run still shows progress live, while the verdict line is
     # kept for the run/skip decision below. stderr stays attached to the
@@ -401,6 +457,7 @@ def run_gate() -> int:
     with subprocess.Popen(
         argv,
         cwd=str(FORK_ROOT),
+        env=env,
         stdout=subprocess.PIPE,
         text=True,
         encoding="utf-8",
@@ -413,10 +470,11 @@ def run_gate() -> int:
             print(line, end="", flush=True)
     captured = "".join(stdout_lines)
 
-    if proc.returncode == 0:
-        return 0
-
     v = _parse_verdict(captured)
+
+    if proc.returncode == 0:
+        return GateResult(0, 0, 0)
+
     if v is None:
         # An older fork clone with no verdict contract. Fall back to the exit
         # code and say that the verdict is inferred, not read.
@@ -427,7 +485,7 @@ def run_gate() -> int:
             "old behaviour and may instead be a crash. Read the output above.",
             file=sys.stderr,
         )
-        return 1
+        return GateResult(1, None, None)
 
     if v.get("outcome") == "unmeasured":
         reason = v.get("reason") or "no reason reported"
@@ -438,9 +496,11 @@ def run_gate() -> int:
             "not a layout failure, and does not block the merge. The baseline "
             "is left where it is, so the gate stays armed for the next attempt."
         )
-        return GATE_UNMEASURED
+        return GateResult(GATE_UNMEASURED, None, None)
 
-    return 1
+    layout_failed = v.get("failed") if isinstance(v.get("failed"), int) else None
+    a11y_failed = v.get("a11yFailed") if isinstance(v.get("a11yFailed"), int) else None
+    return GateResult(1, layout_failed, a11y_failed)
 
 
 def _skip(msg: str) -> int:
@@ -602,12 +662,12 @@ def run(
             f"(recorded {baseline[:12]}..., now {digest[:12]}...) -- running the gate."
         )
 
-    rc = run_gate()
-    if rc == GATE_UNMEASURED:
+    result = run_gate()
+    if result.rc == GATE_UNMEASURED:
         # Nothing was measured. Do not block, and do NOT advance the baseline:
         # recording an untested digest as tested would skip the gate forever.
         return 0
-    if rc == 0:
+    if result.rc == 0:
         write_baseline(digest)
         print(
             f"\nlayout gate: PASSED. Advanced the baseline to {digest[:12]}... in "
@@ -622,11 +682,17 @@ def run(
             on_baseline_advanced(LOCK_PATH, digest)
         return 0
 
+    # A measured failure blocks the merge. The fork script exits 1 for a layout
+    # failure OR an unbaselined critical/serious a11y violation, so name both
+    # counts (unknown -> "?") rather than saying "layout is broken" alone.
+    layout = "?" if result.layout_failed is None else result.layout_failed
+    a11y = "?" if result.a11y_failed is None else result.a11y_failed
     print(
-        f"\nlayout gate: FAILED (test:layout exited {rc}). The Upgrades tab "
-        "layout is broken at one or more widths -- see the failures above. The "
-        "merge is blocked. Fix the layout, or if this is an intended change run "
-        "the gate green before merging.",
+        f"\nlayout gate: FAILED. layout failures: {layout}, a11y failures: {a11y} "
+        "(unbaselined critical/serious; see data/wowsims-fork-a11y-baseline.json). "
+        "See the failures above. The merge is blocked. Fix the layout or "
+        "accessibility, or if this is an intended change run the gate green (and "
+        "re-seed the a11y baseline) before merging.",
         file=sys.stderr,
     )
     return 1
