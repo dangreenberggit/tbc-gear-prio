@@ -41,6 +41,7 @@ that one reviews the diff after.
 | Reviewer | `gate-reviewer` | `opus` | `medium` | review |
 | Executor | `gate-executor` | `opus` | `medium` | review |
 | SME | `gate-sme` | `opus` | `medium` | review |
+| Visual | `gate-visual` | `opus` | `medium` | review |
 
 The Executor is on the review lane, not the workhorse lane, because
 plans are underspecified and it decides adapt-vs-flag-vs-stop on every
@@ -161,6 +162,14 @@ not` list below.
    dispositions it like a ledger row, and a second SME runs only when the
    executor's ledger marks the verdict `contested`.
 
+   When a plan step carries a `Visual acceptance:` block, the executor
+   writes the unit's manifest, runs `pnpm tab-review <manifest>`, and spawns
+   `gate-visual` once per unit before that unit's re-pin. The handoff is the
+   tickets' visual verdict: Gate C dispositions it like a ledger row, and a
+   second visual seat runs only when the ledger marks it `contested`. A
+   ticket with a Visual acceptance is not closed on `fail` or
+   `cannot-judge`.
+
 6. **Gate C.** Disposition every Deviation-ledger row in
    `decision-log.md`: `accepted`, `rework` (`SendMessage` the same
    executor — it retains context — or respawn), or `escalate` to the user.
@@ -169,7 +178,9 @@ not` list below.
    now and is dispositioned like the rest.
 
    Done when: every ledger row and every out-of-manifest path is
-   dispositioned, and the report shows `pnpm verify` passed on the tip.
+   dispositioned, the report shows `pnpm verify` passed on the tip, and
+   every ticket with a Visual acceptance has a `pass` row or an accepted /
+   escalated disposition.
 
 7. **Hand off.** The normal loop resumes: `pre-merge-review`, then **ask**
    before `pnpm merge-to-dev`. Stage artifacts stay in
