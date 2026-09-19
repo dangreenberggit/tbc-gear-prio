@@ -40,3 +40,12 @@ Owner/eng call; default recommendation is keep-as-is with a one-line note.
 Minor, deferred from the pre-merge review (not merge-blocking). Behaviour is
 correct-by-one-reading; this ticket is to make the choice explicit rather than
 implicit.
+
+## Also here (pre-merge Standards S2, perf smell, minor)
+
+`guaranteedSetsAvailable()` re-parses `localStorage` (JSON.parse) on every call —
+`effectivePool`, `refreshSetChips`, `logAssumptions`, and `resultRow` (once PER
+result row). Correctness is fine; it is a per-row localStorage read + parse. Cache
+the parsed set list per render (or per settings-change) rather than re-reading it
+per row. Folded here because it lives in the same 417/424 settings family; not
+merge-blocking.

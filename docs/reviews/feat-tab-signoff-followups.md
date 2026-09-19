@@ -102,11 +102,11 @@ export", the token-id label) are the owner's to confirm.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                 |
-| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/425-bis-tag-gap-layout-assertion-may-pass-vacuously.md` — the BiS-gap layout assertion can pass without a wrapped badge to exercise it (never false-fails)     |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/426-multi-source-item-survives-if-any-source-ticked.md` — 417 keeps a multi-source item if any of its sources stays ticked; coherent, make the choice explicit |
-| S1  | Standards   | wontfix     | Single `as any` parsing untrusted localStorage JSON — the same read `loadUserData` does; defensible, no safer typed shape available at that boundary                                          |
-| S2  | Standards   | defer       | Perf smell: `guaranteedSetsAvailable()` re-parses localStorage per call incl. per result row — folded into A2's ticket family as a quality follow-up if it bites; not blocking                |
-| D1  | Domain      | —           | No findings (clean)                                                                                                                                                                           |
-| Sp1 | Spec        | —           | No findings (clean)                                                                                                                                                                           |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                  |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/425-bis-tag-gap-layout-assertion-may-pass-vacuously.md` — the BiS-gap layout assertion can pass without a wrapped badge to exercise it (never false-fails)                                      |
+| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/426-multi-source-item-survives-if-any-source-ticked.md` — 417 keeps a multi-source item if any of its sources stays ticked; coherent, make the choice explicit                                  |
+| S1  | Standards   | wontfix     | Single `as any` parsing untrusted localStorage JSON — the same read `loadUserData` does; defensible, no safer typed shape available at that boundary                                                                           |
+| S2  | Standards   | defer       | `.scratch/carry-forward/issues/426-multi-source-item-survives-if-any-source-ticked.md` — perf smell: `guaranteedSetsAvailable()` re-parses localStorage per call incl. per result row; folded into the 417/424 settings ticket |
+
+Domain and Spec found nothing — no rows (see their sections above).
