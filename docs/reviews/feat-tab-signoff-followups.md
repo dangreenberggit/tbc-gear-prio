@@ -110,3 +110,47 @@ export", the token-id label) are the owner's to confirm.
 | S2  | Standards   | defer       | `.scratch/carry-forward/issues/426-multi-source-item-survives-if-any-source-ticked.md` — perf smell: `guaranteedSetsAvailable()` re-parses localStorage per call incl. per result row; folded into the 417/424 settings ticket |
 
 Domain and Spec found nothing — no rows (see their sections above).
+
+---
+
+# Round 2 — UI refinements (427–431) + default-BiS (433)
+
+Reviewed range: `875e5dc4..39fc1707` (main); fork `d17587b5a..587dcfae6` (the substantive diff — 7 commits: Step 0 schema reconcile, 427/428/429/430/431, 433).
+
+Second-round review of the work added after round 1. All four axes ran fresh-context on the review lane (Opus, effort medium). No blocking or material finding on any axis.
+
+## Adversarial
+
+Nothing blocking or material. Verified against the fork source at `587dcfae6`:
+
+- **433 default-selection**: the `${specId}:${maxPhase}` scope guard replaces `guaranteedSetKeys` wholesale on scope change (no stale prior-phase keys), fires once at construction and once per new scope, and a user untick survives same-scope gear refreshes. `bisTagPhaseFor` undefined and `poolFor` empty are both handled without throwing.
+- **430 tags**: one badge per containing selected set, generic bisLabel fallback when none — no zero-tag hole; name-collision disambiguation fires only when two selected sets sharing a name both contain the row.
+- **431 total**: `deltaLabel` byte-identical to pre-diff; displayed total still equals the sort key. Ranking untouched.
+- **427 announce**: reordered after `renderSubTabs`; the empty-state element is guaranteed present for idle/unsupported, so it cannot announce "".
+- **Step 0 schema**: the 5 dropped keys have zero references in `ui/` and the locale; all added keys are present+required. No new drift.
+
+One minor (deferred): tippy instances are created per render on the DPS cells and chips and never `.destroy()`'d, so re-renders accumulate orphaned tooltips — bounded by GC, and matches the file's pre-existing no-destroy pattern rather than a regression this diff introduced. Ticket 435.
+
+## Domain
+
+Sound — no contradictions of `docs/stage0-findings.md`. The 433 default is domain-correct: feral defaults to BOTH phase BiS presets (the 6pc/9pc hit-cap variants the old "BiS" badge marked); ret defaults to its single per-phase preset; the tag labels read the gear-tab set names, the owner's named source of truth. One nuance for the owner's P5 sign-off (not a defect): feral P4/P5 curated presets **do** exist in the fork tree, but the pipeline's `bisSets` tokens only carry `p3_*`, so the feral P5 default follows the degraded universe tag to the P3 pair rather than the fork's own P5 set. Defensible (matches the old badge; P3 feral BiS carries into P5; the P5 chip stays hand-tickable) but it is fork-preset-vs-pipeline-lag, not absence.
+
+## Standards + Spec
+
+**Standards: conforms.** Comment policy followed well (load-bearing why-not-what throughout); the new helpers (`defaultGuaranteedSetKeys`, `rowTagLabels`, `setBonusPresentation`) compose existing accessors with clear names and no Feature Envy; the tippy idiom matches the existing one; the schema edit is minimal and consistent. One minor (deferred): the `.content-block` header scaffold is hand-written 3× (resultsBlock + the two new wraps) — the persistent-root reason for inlining doesn't apply to the two new static wraps, so a local helper should collapse them; cuts against the batch's own borrow-native theme. Ticket 436.
+
+**Spec: clean.** All six tickets faithfully implemented, no missing requirements, no acceptance violations. The Step 0 schema drop of 5 keys (vs the 2 the plan named) is justified debt-paydown, not creep — the extra 3 were dead `required` entries Ajv never reached; verified unreferenced. Owner-taste items (star drop, tag multiplicity, feral-P5 default, new copy strings) are all left exactly as the plan decided, routed to the Step 8 sign-off pack — none silently changed, none gating merge.
+
+## Round 2 summary
+
+No blocking or material finding on any axis. Two minors deferred to tickets (435 tippy cleanup, 436 content-block duplication). Domain flagged the feral-P5 default as an owner-awareness item, not a defect. `pnpm verify` rc=0 on the tip; layout gate 45/45; desktop gate green with the golden unmoved (C38 no-op); locale gate red→green (ticket 432's schema half fixed). The independent plain-English copy review (separate deliverable) suggested six wording tweaks, all owner-taste, none blocking.
+
+## Round 2 disposition
+
+| ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                    |
+| ----- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-A1 | Adversarial | defer       | `.scratch/carry-forward/issues/435-tab-tippy-instances-not-destroyed-on-rerender.md` — tippy instances not destroyed on re-render; GC-bounded, pre-existing pattern              |
+| R2-S1 | Standards   | defer       | `.scratch/carry-forward/issues/436-content-block-markup-duplicated-three-times.md` — content-block scaffold hand-written 3×; local helper should collapse it                     |
+| R2-D1 | Domain      | wontfix     | feral P5 default follows the degraded universe tag (P3 pair), not the fork's P5 preset — matches the old "BiS" badge; owner-awareness item routed to sign-off, not a code change |
+
+Domain and Spec found no other findings. Copy-review tweaks are tracked in the owner sign-off pack, not as review findings.
