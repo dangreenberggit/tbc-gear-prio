@@ -255,3 +255,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 449 Sources modal has no accessible name (aria-dialog-name); a11y ratchet open-modal blind spot — from 447, 2026-09-19
 - 450 a11y focus-walk passes green when it measures nothing (round 4 adversarial) 2026-09-19
 - 451 test-review.mjs green on entry with empty widths (round 4 adversarial) 2026-09-19
+- 452 EPIC: end ret/feralcat tunnel vision, support all DPS specs (owner directive) 2026-09-19

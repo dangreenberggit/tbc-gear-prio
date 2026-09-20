@@ -1,9 +1,21 @@
 Status: open
 Type: bug
+Severity: blocking (a11y defect on shipped UI; RECLASSIFIED from non-blocking 2026-09-19 by owner)
 Origin: tab-438-impl execution (Unit 447 gate-visual a11y scan), 2026-09-19
-Blocks: none
+Blocks: merge of feat/tab-signoff-followups
 Blocked by: none
-Related: 447 (the Sources popup that surfaced it), base_modal.tsx, data/wowsims-fork-a11y-baseline.json, the visual+a11y reviewer (open-modal blind spot)
+Related: 447 (the Sources popup that surfaced it), base_modal.tsx, data/wowsims-fork-a11y-baseline.json, 450 (the ratchet open-modal blind spot that let it merge-green)
+
+> RECLASSIFICATION (2026-09-19): originally filed non-blocking. The owner
+> corrected this: an a11y review that finds a serious axe violation
+> (`aria-dialog-name`) on UI this branch ships is exactly what should block the
+> merge — the "gate can't see closed modals" framing explains why the automated
+> ratchet missed it (that is ticket 450), it does NOT make the shipped defect
+> acceptable. This finding BLOCKS the merge of feat/tab-signoff-followups. Not
+> being fixed this session by owner instruction ("fix nothing; reclassify and
+> list"); it must be fixed (and re-tested through gate-visual) before the branch
+> merges.
+
 
 # Sources modal has no accessible name (aria-dialog-name, serious)
 
