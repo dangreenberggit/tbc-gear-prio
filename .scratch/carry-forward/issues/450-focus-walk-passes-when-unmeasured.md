@@ -1,6 +1,15 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review round 4 adversarial axis (feat/tab-signoff-followups), 2026-09-19
+Resolution: fixed in fork commit baf02292d (2026-09-19), re-pinned in
+  data/wowsims-fork.lock.json. Contract chosen: option (a) — an unmeasured
+  focus-walk is a FAIL. a11yClassify (test-tab-harness.mjs) now pushes a FAIL
+  when the walk is unmeasured, so a regression of the focus emulation to a no-op
+  blocks the gate instead of degrading to a silent WARN. Safe because this repo's
+  Playwright Chromium moves focus: a direct `node test-layout.mjs` run at
+  baf02292d reported 0 focus miss at every width and a11yFailed:0. A genuinely
+  focus-incapable env crashes before geometry and is a whole-gate SKIP on a
+  separate path, so the hard FAIL does not red unrelated merges. Review round 6.
 Blocks: none
 Blocked by: none
 Related: 449 (the modal-scan blind spot; same "ratchet promises more than it enforces" theme), the visual+a11y reviewer infra (test-tab-harness.mjs focusWalk / a11yClassify)

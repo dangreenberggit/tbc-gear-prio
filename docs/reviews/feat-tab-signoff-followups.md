@@ -296,3 +296,49 @@ controls remain the owner's call.
 | ID     | Axis        | Disposition | Ticket / note                                                                                                                                                      |
 | ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A-r4-1 | Adversarial | fixed       | Fork `27363b925`: BaseModal names the dialog via `aria-labelledby`. `pnpm tab-review` 447-c/447-e a11y.json has no `aria-dialog-name`. The round-4 blocker clears. |
+
+---
+
+# Round 6 — the two gate-honesty gaps (450, 451)
+
+Main range: this session; fork `27363b925..baf02292d` (one commit). Both were
+round-4 deferrals: the gates reported green while measuring nothing. Not a fresh
+review pass — the record of two fixes and their proof.
+
+**450 — focus-walk unmeasured now FAILs.** The keyboard focus-walk returns
+`unmeasured` when a synthetic Tab leaves focus on `body` (headless C23);
+`a11yClassify` previously synthesised focus-miss FAILs only when the walk _was_
+measured, so an environment (or a regression) that stops moving focus dropped the
+operability guarantee to a silent WARN. `a11yClassify` (`test-tab-harness.mjs`)
+now pushes a FAIL on `unmeasured`. **Contract chosen: (a) fail**, not (c)
+document-as-best-effort — the 449 lesson is that a gate must not advertise a
+guarantee it silently drops. Safe here because this repo's Playwright Chromium
+does move focus: a direct `node test-layout.mjs` at `baf02292d` reported **0
+focus miss at every width** (375/653/768/1280), `LAYOUT_GATE_VERDICT`
+measured/a11yFailed:0, 53 assertions. A genuinely focus-incapable env crashes
+before geometry and is a whole-gate SKIP on a separate path, so the hard FAIL
+does not red unrelated merges. Unit-proven: `a11yClassify` returns 1 fail on
+unmeasured, 0 on a clean measured walk, 1 on a real focus miss (unchanged), 0 on
+the post-run no-walk call.
+
+**451 — widthless manifest entry now errors.** `test-review.mjs` iterated
+`entry.widths || []`, so an entry with no `widths` produced no capture, no error
+row, `errorCount` 0, exit 0 — a green run with zero evidence for that ticket. It
+now pushes an error row (exit 1) for any entry with empty effective widths.
+Proven with a two-entry manifest (one valid at 1280, one widthless): `pnpm
+tab-review` exits 1 and names the widthless entry in `index.json`, the valid
+entry still capturing cleanly.
+
+**Scope/gates.** Both edited files are gate tooling (`.mjs`), never imported by
+the served bundle, not ported engine files (no PROVENANCE row moved), nothing
+under `sim/`/`proto/` — sim-implemented-effects moved only its forkCommit (counts
+221/451). The desktop gate was not re-run (the served ranking is byte-identical
+to `27363b925`, where (h) matched golden with no `--update-golden`); the direct
+layout-gate run above is the live gate exercise at this tip. `pnpm verify` rc=0.
+
+## Round 6 disposition
+
+| ID     | Axis        | Disposition | Ticket / note                                                                                                            |
+| ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| A-r4-2 | Adversarial | fixed       | Fork `baf02292d`: `a11yClassify` FAILs on an unmeasured focus-walk. Ticket 450 closed; env confirmed to measure focus.   |
+| A-r4-3 | Adversarial | fixed       | Fork `baf02292d`: `test-review.mjs` errors (exit 1) on a widthless manifest entry. Ticket 451 closed; proven end-to-end. |
