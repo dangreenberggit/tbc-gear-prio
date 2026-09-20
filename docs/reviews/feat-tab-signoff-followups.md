@@ -236,12 +236,63 @@ Owner-taste items still open (not review findings): the copy strings for the 447
 
 ## Round 4 disposition
 
-| ID      | Axis        | Disposition  | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------- | ----------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A-r4-1  | Adversarial | **blocking** | `.scratch/carry-forward/issues/449-sources-modal-missing-accessible-name.md` — new serious `aria-dialog-name` on the open Sources modal, a real a11y defect on shipped UI. **RECLASSIFIED 2026-09-19 (owner): BLOCKS the merge.** An a11y review that finds a serious violation on shipped UI must gate; the "ratchet can't see closed modals" point (→450) explains the miss, it is not an excuse. Not fixed this session (owner: "fix nothing; reclassify and list"); must be fixed + re-tested through gate-visual before this branch merges. |
-| A-r4-2  | Adversarial | defer        | `.scratch/carry-forward/issues/450-focus-walk-passes-when-unmeasured.md` — focus-walk passes green when it measures nothing; pick + enforce a contract                                                                                                                                                                                                                                                                                                                                                                                           |
-| A-r4-3  | Adversarial | defer        | `.scratch/carry-forward/issues/451-tab-review-green-on-empty-widths.md` — test-review.mjs reports captured/exit 0 on an entry with no widths                                                                                                                                                                                                                                                                                                                                                                                                     |
-| S-r4-1  | Standards   | wontfix      | `cssPath` inlined twice in `focusWalk` — both are page-eval string templates that can't share a JS helper across the boundary; contained to one function                                                                                                                                                                                                                                                                                                                                                                                         |
-| Sp-r4-1 | Spec        | wontfix      | Spec axis flagged item 14 (known-traps line) missing — VERIFIED PRESENT (known-traps.md:183-184, commit b004ab60); false positive, item 14 is faithful                                                                                                                                                                                                                                                                                                                                                                                           |
+| ID      | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A-r4-1  | Adversarial | **fixed**   | `.scratch/carry-forward/issues/449-sources-modal-missing-accessible-name.md` — new serious `aria-dialog-name` on the open Sources modal, a real a11y defect on shipped UI. Owner-reclassified BLOCKING 2026-09-19. **FIXED** in fork commit `27363b925` (BaseModal now wires the title `h5`'s id into the root's `aria-labelledby`, clearing every titled BaseModal), re-pinned here. Proven by `pnpm tab-review` on the 447 manifest: the modal-open captures (447-c/447-e) no longer report `aria-dialog-name`. See round 5. |
+| A-r4-2  | Adversarial | defer       | `.scratch/carry-forward/issues/450-focus-walk-passes-when-unmeasured.md` — focus-walk passes green when it measures nothing; pick + enforce a contract                                                                                                                                                                                                                                                                                                                                                                         |
+| A-r4-3  | Adversarial | defer       | `.scratch/carry-forward/issues/451-tab-review-green-on-empty-widths.md` — test-review.mjs reports captured/exit 0 on an entry with no widths                                                                                                                                                                                                                                                                                                                                                                                   |
+| S-r4-1  | Standards   | wontfix     | `cssPath` inlined twice in `focusWalk` — both are page-eval string templates that can't share a JS helper across the boundary; contained to one function                                                                                                                                                                                                                                                                                                                                                                       |
+| Sp-r4-1 | Spec        | wontfix     | Spec axis flagged item 14 (known-traps line) missing — VERIFIED PRESENT (known-traps.md:183-184, commit b004ab60); false positive, item 14 is faithful                                                                                                                                                                                                                                                                                                                                                                         |
 
 Domain found no findings (see its section). Spec found no real gap (the one flagged item was a false positive, dispositioned above).
+
+---
+
+# Round 5 — the 449 merge-blocker fix
+
+Main range: `04608efe..` (this session); fork `994fcb9f3..27363b925` (one commit).
+
+Round 4's sole blocking finding (A-r4-1) is fixed. This round is not a fresh
+four-axis pass — it is the record of that one fix and its proof.
+
+**The defect.** Bootstrap marks the modal root `role="dialog" aria-modal="true"`
+on show but never names it, so axe fired `aria-dialog-name` (serious) on the open
+447 Sources popup. A visible `.modal-title` is not a programmatic name.
+
+**The fix** (`vendor/tbc-new-fork/ui/core/components/base_modal.tsx`, fork
+`27363b925`): when a modal carries a title, the title `h5` gets a unique id and
+the root gets `aria-labelledby` pointing at it. This clears the violation for
+every BaseModal with a title — the borrow-native fix ticket 449 preferred, not a
+tab-local patch — so the gear picker's own FiltersMenu is covered too. Diff is
+one file, +12/−1, no line-ending flip. Not a ported engine file (no PROVENANCE
+row moved); nothing under `sim/`/`proto/` touched (sim-implemented-effects counts
+unchanged at 221/451, only the embedded forkCommit moved).
+
+**Proof — the ticket's own acceptance route.** `pnpm tab-review` on the same 447
+manifest that surfaced the finding (states 447-c and 447-e open the modal): the
+captured `a11y.json` for the modal-open states has **no `aria-dialog-name`**
+(only the pre-existing baselined `select-name` on `#phase-selector`, ticket 445,
+remains). The pre-fix capture had `aria-dialog-name:serious` on
+`.upgrades-sources-modal` in exactly those states. `aria-dialog-name` is absent
+from `data/wowsims-fork-a11y-baseline.json`, so it counted as a real violation,
+not a masked one. `TAB_REVIEW_VERDICT` = captured, errors 0.
+
+**Gates.** Desktop gate at `27363b925` (ret P5, all sources, cap 40): (a)–(h)
+all pass, rowCount=40, eligibleCount=617, (h) matches `golden-ret-p5-cap40.json`
+with no `--update-golden` — the a11y attribute moves no ranking. Layout gate
+**SKIPPED** (digest `c5ada6377d6b` unchanged): its content digest covers the
+tab's own layout source, not `base_modal.tsx`, so a shared-component edit does
+not move `testedTabHash`; and it would not have exercised the modal's a11y anyway
+(that closed-shell blind spot is ticket 450 — the modal-open proof is the
+tab-review above, not the layout gate). `pnpm verify` rc=0 on the tip.
+
+**Still open, not this fix (unchanged):** 450 (ratchet open-modal blind spot),
+451 (tab-review green on empty widths), and the pre-existing a11y baseline debt
+444/445/446. The owner-taste copy strings and the visual look of the two 438
+controls remain the owner's call.
+
+## Round 5 disposition
+
+| ID     | Axis        | Disposition | Ticket / note                                                                                                                                                      |
+| ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A-r4-1 | Adversarial | fixed       | Fork `27363b925`: BaseModal names the dialog via `aria-labelledby`. `pnpm tab-review` 447-c/447-e a11y.json has no `aria-dialog-name`. The round-4 blocker clears. |

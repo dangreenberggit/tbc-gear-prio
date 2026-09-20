@@ -1,6 +1,12 @@
-Status: open
+Status: closed
 Type: bug
 Severity: blocking (a11y defect on shipped UI; RECLASSIFIED from non-blocking 2026-09-19 by owner)
+Resolution: fixed in fork commit 27363b925 (2026-09-19), re-pinned in
+  data/wowsims-fork.lock.json. BaseModal now gives a titled modal an
+  aria-labelledby pointing at the title h5, clearing aria-dialog-name for every
+  titled BaseModal. Proven by `pnpm tab-review` on the 447 manifest: the
+  modal-open captures (447-c/447-e) no longer report aria-dialog-name. Review
+  round 5 in docs/reviews/feat-tab-signoff-followups.md.
 Origin: tab-438-impl execution (Unit 447 gate-visual a11y scan), 2026-09-19
 Blocks: merge of feat/tab-signoff-followups
 Blocked by: none
