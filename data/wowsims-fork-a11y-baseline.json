@@ -1,50 +1,10 @@
 {
-  "_comment": "Accepted/known accessibility debt for the Upgrades tab, seeded from a real layout-gate run at fork 9b407a5f3 on 2026-09-19 (stage visual-a11y-reviewer). Each entry is a (ruleId, selector) axe reports; scripts/check_layout_gate.py passes this file to the fork test-layout.mjs via TBC_A11Y_BASELINE, so these are tracked debt and only NEW critical/serious WCAG violations block pnpm merge-to-dev. Every entry carries EITHER a ticket (a fix is owed) OR a wontfix reason. An entry that no longer fires prints a stale-baseline WARN and should be removed. Re-seed after a fix or a tab change with TBC_A11Y_DUMP=<path> pnpm layout-gate:check, then rebuild this file from the dump (dedupe on ruleId+selector, sort, assign ticket/reason).",
+  "_comment": "Accepted/known accessibility debt for the Upgrades tab, seeded from a real layout-gate run at fork 9b407a5f3 on 2026-09-19 (stage visual-a11y-reviewer), and re-seeded at fork baf02292d on 2026-09-19 after tickets 444/445/446 were fixed (their entries removed; they no longer fire). Each entry is a (ruleId, selector) axe reports; scripts/check_layout_gate.py passes this file to the fork test-layout.mjs via TBC_A11Y_BASELINE, so these are tracked debt and only NEW critical/serious WCAG violations block pnpm merge-to-dev. Every entry carries EITHER a ticket (a fix is owed) OR a wontfix reason. An entry that no longer fires prints a stale-baseline WARN and should be removed. Re-seed after a fix or a tab change with TBC_A11Y_DUMP=<path> pnpm layout-gate:check, then rebuild this file from the dump (dedupe on ruleId+selector, sort, assign ticket/reason).",
   "entries": [
-    {
-      "ruleId": "aria-progressbar-name",
-      "selector": "div[aria-valuemin=\"0\"]",
-      "ticket": "446"
-    },
     {
       "ruleId": "color-contrast",
       "selector": ".btn-outline-danger",
       "reason": "wontfix: inherited site theme (Bootstrap .btn-outline-danger, #dc3545 on the dark theme background); the borrow-native-styling rule keeps upstream theme colours"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(1) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(2) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(3) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(4) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(5) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "image-alt",
-      "selector": "tr:nth-child(6) > td:nth-child(2) > .upgrades-item-cell > .upgrades-item-link[data-whtticon=\"false\"] > .upgrades-item-icon",
-      "ticket": "444"
-    },
-    {
-      "ruleId": "select-name",
-      "selector": "#phase-selector",
-      "ticket": "445"
     }
   ]
 }

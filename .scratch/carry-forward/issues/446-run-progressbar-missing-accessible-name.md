@@ -1,6 +1,11 @@
-Status: open
+Status: closed
 Type: bug
 Origin: a11y baseline seed run, 2026-09-19 (stage visual-a11y-reviewer)
+Resolution: fixed in fork commit 93f402bce (2026-09-19), re-pinned. The run
+  progress bar gets aria-label from a new upgrades_tab.progress.aria_label
+  ("Ranking progress"); the stage text beside it changes each tick, so the bar
+  needs a stable name of its own. axe aria-progressbar-name no longer fires; the
+  layout gate passed 53 assertions with 0 stale-baseline WARNs. Review round 7.
 Blocks: none
 Blocked by: none
 Related: data/wowsims-fork-a11y-baseline.json

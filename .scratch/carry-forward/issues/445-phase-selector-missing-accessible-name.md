@@ -1,6 +1,12 @@
-Status: open
+Status: closed
 Type: bug
 Origin: a11y baseline seed run, 2026-09-19 (stage visual-a11y-reviewer)
+Resolution: fixed in fork commit 93f402bce (2026-09-19), re-pinned. The nameless
+  <select> is rendered by the shared upstream EnumPicker, which this repo does not
+  edit; the tab sets aria-label on it (from a new upgrades_tab.settings.phase_label
+  = "Phase") after makePhaseSelector mounts it into the tab's own container — a
+  tab-side workaround, no upstream change. axe select-name no longer fires; the
+  layout gate passed 53 assertions with 0 stale-baseline WARNs. Review round 7.
 Blocks: none
 Blocked by: none
 Related: data/wowsims-fork-a11y-baseline.json

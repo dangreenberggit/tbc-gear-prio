@@ -1,6 +1,11 @@
-Status: open
+Status: closed
 Type: bug
 Origin: a11y baseline seed run, 2026-09-19 (stage visual-a11y-reviewer)
+Resolution: fixed in fork commit 93f402bce (2026-09-19), re-pinned. The
+  result-row item icon takes alt="" — decorative, since the item name follows as
+  text in the same link — so axe image-alt no longer fires. Baseline entries
+  removed (re-seeded from a dump run); the layout gate passed 53 assertions with
+  0 stale-baseline WARNs. Review round 7.
 Blocks: none
 Blocked by: none
 Related: data/wowsims-fork-a11y-baseline.json

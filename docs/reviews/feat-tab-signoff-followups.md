@@ -342,3 +342,54 @@ layout-gate run above is the live gate exercise at this tip. `pnpm verify` rc=0.
 | ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
 | A-r4-2 | Adversarial | fixed       | Fork `baf02292d`: `a11yClassify` FAILs on an unmeasured focus-walk. Ticket 450 closed; env confirmed to measure focus.   |
 | A-r4-3 | Adversarial | fixed       | Fork `baf02292d`: `test-review.mjs` errors (exit 1) on a widthless manifest entry. Ticket 451 closed; proven end-to-end. |
+
+---
+
+# Round 7 — the seeded a11y-baseline debt (444, 445, 446)
+
+Main range: this session; fork `baf02292d..93f402bce` (one commit). These three
+were pre-existing a11y violations seeded into the baseline at the start of the
+arc (not new to 438), tracked as debt. Fixed now at the owner's ask, all
+tab-side — no upstream widget edited.
+
+- **444 (image-alt, was critical).** The result-row item icon takes `alt=""`.
+  The item name follows as text in the same link, so the icon is decorative; an
+  empty alt lets a screen reader skip it rather than read the icon URL.
+- **446 (aria-progressbar-name, was serious).** The run progress bar gets an
+  `aria-label` from a new `upgrades_tab.progress.aria_label` ("Ranking
+  progress"). The stage text beside it changes each tick, so the bar needs a
+  stable name of its own, not the changing label.
+- **445 (select-name, was critical).** The phase `<select>` is rendered nameless
+  by the shared upstream `EnumPicker`. This repo does not edit upstream widgets,
+  so the tab sets `aria-label` on the select (from a new
+  `upgrades_tab.settings.phase_label` = "Phase") after `makePhaseSelector` mounts
+  it into the tab's own container. A tab-side workaround, not a widget change.
+
+Two new locale keys, each mirrored in `schemas/translation.schema.json`
+(properties + required); the fork's `test-locales.mjs` exits 0. Edited files are
+the fork's own renderer + locale + schema — no ported engine file, no PROVENANCE
+row moved, nothing under `sim/`/`proto/` (sim-implemented-effects moved only its
+forkCommit, 221/451).
+
+**Proof.** `check_layout_gate.py` ran (the digest moved — `upgrades_tab.tsx` and
+`translation.json` are in it) and **passed 53 assertions, a11yFailed:0**,
+advancing `testedTabHash` to `8384833d6672`. A dump run confirmed the three fixed
+rules stopped firing (each printed a stale-baseline WARN under the old baseline);
+their entries were removed from `data/wowsims-fork-a11y-baseline.json`, leaving
+only the `color-contrast .btn-outline-danger` wontfix. A re-run against the
+trimmed baseline reports **0 stale-baseline WARNs**, `a11yWarned:4` (the wontfix
+at four widths). The desktop gate was not re-run — an aria attribute plus one new
+locale string moves no ranking; the served output is byte-identical to
+`27363b925`, where (h) matched golden. `pnpm verify` rc=0.
+
+The a11y baseline now carries a single entry, the `color-contrast` wontfix
+(inherited Bootstrap `.btn-outline-danger` theme colour on the dark background,
+kept by the borrow-native-styling rule).
+
+## Round 7 disposition
+
+| ID    | Axis | Disposition | Ticket / note                                                                                              |
+| ----- | ---- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| B-444 | a11y | fixed       | Fork `93f402bce`: item icon `alt=""` (decorative). Ticket 444 closed; baseline entry removed, gate clean.  |
+| B-445 | a11y | fixed       | Fork `93f402bce`: phase `<select>` labelled tab-side after mount (no upstream edit). Ticket 445 closed.    |
+| B-446 | a11y | fixed       | Fork `93f402bce`: progress bar `aria-label` "Ranking progress". Ticket 446 closed; baseline entry removed. |
