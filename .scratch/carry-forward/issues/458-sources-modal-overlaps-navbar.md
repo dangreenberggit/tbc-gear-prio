@@ -1,9 +1,17 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 447 (the Sources modal), 449 (its a11y name), base_modal.tsx
+Resolution: Fixed in fork commit af421fa53 chain (parent change in 85f0a545e /
+  re-pin 80fc19f9, first attempted in 7cc65f572). The sources modal is parented
+  to simUI.rootElem (.sim-ui), the parent the Batch tab uses, not #upgrades-tab.
+  Live measurement showed #upgrades-tab is a .tab-pane fade whose opacity
+  establishes a stacking context, trapping the dialog's z-index 1055 below the
+  sticky header (100); .sim-ui is not a stacking context. Verified live at 1280:
+  elementFromPoint at the header nav returns the modal, and every header-y overlap
+  point is inside the dialog — the header no longer paints over it (live-verify 5b).
 
 # Sources modal is too high, overlaps the navbar, and z-fights with navbar items
 

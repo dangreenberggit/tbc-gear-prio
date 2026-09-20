@@ -1,9 +1,14 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 456 (Sim-sets behavior change — this label ties into it)
+Resolution: Fixed in fork commit 8bc15cad9 (re-pin 09caef2b). prune.only_bis now
+  reads "Sim only selected set items" (the {{phase}} token dropped), and the
+  prune toggle is available only while a set is selected — its visibility is
+  recomputed on chip toggle so unticking the last set hides it. Verified live
+  (live-verify 5d/5e; tab-review pruneLabel fact).
 
 # "Sim only Phase 3 (2.2 - T6) BiS-list items" is too long
 

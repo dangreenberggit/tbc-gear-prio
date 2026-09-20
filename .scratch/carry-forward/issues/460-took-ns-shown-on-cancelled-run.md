@@ -1,9 +1,13 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 416 (baseline/elapsed line moved), status.stopped / status.elapsed
+Resolution: Fixed in fork commit 7cc65f572 (re-pin da82e4c4). baselineSummaryContent
+  no longer appends elapsedContent() in the stopped case; a completed run still
+  shows "Took Ns". Verified live: a stopped run reads "Stopped early. Your current
+  gear: N DPS. No candidate rows to show…" with no "Took" text (live-verify 5c).
 
 # "Took N s" next to the "stopped early" message looks wacky on a cancelled run
 

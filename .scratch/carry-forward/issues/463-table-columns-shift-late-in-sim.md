@@ -1,9 +1,20 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: layout gate (test-layout.mjs asserts column geometry post-run, not mid-run)
+Resolution: Reproduced live (feral, prune off, 1280): the mid-run provisional
+  table used table-layout:auto, so a late row with a longer item name widened the
+  Item column and shoved the columns after it ~65px between 11 and 98 landed rows
+  (did not reproduce on ret in one attempt; reproduced on feral). Fixed in fork
+  commit 85f0a545e (re-pin 80fc19f9), column widths + overflow tuned in af421fa53
+  (re-pin 348a380c): the provisional table only is pinned to table-layout:fixed
+  with a <colgroup> and width:100%, and long cell content wraps
+  (overflow-wrap:anywhere). Re-measured live: 0px column movement across 12/131/244
+  rows, no overflow. The settled table stays table-layout:auto, so the layout gate
+  (which measures the settled table) is unaffected — it passes 53 assertions
+  (live-verify Step 9).
 
 # Table layout breaks late in a sim — columns shift horizontally
 

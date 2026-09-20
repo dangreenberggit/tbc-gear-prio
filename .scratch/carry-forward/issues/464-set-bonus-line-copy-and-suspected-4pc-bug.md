@@ -1,9 +1,21 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 419/431 (set-bonus total on the DPS cell), 443 (inline set-bonus line), 90 (confounded/(k-1)*B bonus), 441 (rankable-set-potential toggle)
+Resolution: Copy fixed in fork commit 7cc65f572 (re-pin da82e4c4): both
+  set_bonus.inline and set_bonus.total_inline read "{{threshold}}pc bonus: +{{dps}}".
+  The suspected 4pc bug is by design, not a defect — the inline figure is the
+  per-row nearest implemented threshold above worn (engine rank.ts
+  nextMeasurableThreshold, out of scope), and a reachable higher threshold is
+  disclosed in the tooltip (the 336/443 decision: disclosure, never inline credit).
+  Verified live on feral (Thunderheart 676, both thresholds implemented):
+  worn-0 rows show "2pc bonus: +81.7" inline with "4pc bonus (0/4) (+114.8)" in the
+  tooltip; wearing exactly 2 pieces, a third-piece row shows "4pc bonus: +75.6"
+  inline with "4pc bonus (2/4) …" (the worn count is correct, so the engine does
+  not miscount — Step 6 outcome (i)). No engine defect; no new ticket filed; engine
+  files untouched (live-verify Step 6).
 
 # Set-bonus line: copy is off, and a 4pc bonus may not show when it should
 

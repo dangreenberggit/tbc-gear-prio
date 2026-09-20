@@ -1,9 +1,17 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 455 (prune label), 448 (Other-phases disclosure), 457 (sources button), 424/433 (Sim-sets + default selection)
+Resolution: Fixed in fork commit 8bc15cad9 (re-pin 09caef2b). effectivePool no
+  longer unions selected-set items back past the Sources filter (the union only
+  ever overrode Sources); the pool is now
+  pool.filter(sourceKept && (!pruned || inSelectedSets)). Selected sets still tag
+  result rows. The "always-included" caption and cap note are removed. The
+  existing Phase picker is the "select phase" control (no new control added).
+  Verified live: with prune on, excluding a source drops that source's items even
+  when they are in a selected set (16→12→0 eligible; live-verify 5e).
 
 # Sim-sets: drop the "always include" behavior, make it a "select phase" picker
 

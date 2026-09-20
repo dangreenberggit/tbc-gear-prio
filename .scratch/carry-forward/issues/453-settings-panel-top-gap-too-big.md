@@ -1,9 +1,15 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: tab-signoff-followups layout cluster (454)
+Resolution: Fixed in fork commit 7cc65f572 (re-pin da82e4c4). #upgrades-tab
+  now cancels the shared .tab-pane top padding the way #bulk-tab does, so the
+  settings card no longer stacked the pane padding on its own; the left panel
+  re-adds the top padding. Verified live at 1280 and 1536 on the Go backend:
+  the Upgrades settings card top sits 21px below the header bottom, matching
+  the Batch card's 21px (live-verify.md 5a; tab-review facts).
 
 # Vertical gap between the sim-settings panel and the top navbar is too big
 

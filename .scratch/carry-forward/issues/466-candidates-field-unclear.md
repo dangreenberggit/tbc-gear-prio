@@ -1,9 +1,18 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: candidate cap (rank.ts:1194, referenced in 424's cap note)
+Resolution: Hidden from the user surface, kept harness-scriptable, in fork commit
+  8bc15cad9 (re-pin 09caef2b). The cap is a pre-sim cut of the EP order that
+  silently drops real upgrades the sim exists to find and the user cannot audit,
+  so the Candidates row is d-none unless the page URL carries ?upgrades-dev; the
+  input, its .upgrades-candidates-picker class and the NumberPicker id are
+  unchanged so the desktop-gate harness still sets it by selector on a hidden
+  element, and the default cap stays 0 (no cap). Verified live: the row is
+  display:none and its input still exists in the DOM (tab-review candidatesDisplay /
+  candidatesInputExists facts).
 
 # The "Candidates" field is unclear — what does picking fewer candidates do?
 

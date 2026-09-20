@@ -1,9 +1,11 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner viewing session, 2026-09-20
 Blocks: none
 Blocked by: none
 Related: 447 (the Sources popup), 458 (Sources modal overlap)
+Resolution: Fixed in fork commit 7cc65f572 (re-pin da82e4c4). settings.sources_button
+  now reads "Select item sources" (value-only). Verified live in the tab-review capture.
 
 # "Sources…" button text looks redundant
 
