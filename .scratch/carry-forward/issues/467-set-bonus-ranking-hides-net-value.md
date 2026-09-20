@@ -18,13 +18,11 @@ their 4pc value does not exist. The owner's verdict: this is misleading and hide
 sets and set bonuses.
 
 The earlier design (336/443/91) deliberately kept the higher threshold OUT of the
-inline number and the sort — disclosure in the tooltip only, "never inline
-credit" — to avoid two problems: the 4pc figure is a WHOLE-SET value (crediting
-each of four pieces the full 4pc quadruple-counts it, ticket 91's "smearing"), and
-on a real character the measured 4pc is inflated because completing it BREAKS
-another worn set's bonus (ticket 90's (k-1)*B confound). This ticket OVERTURNS
-that decision: the owner wants the net value shown and ranked, WITH the broken-set
-loss handled as part of the math, not suppressed.
+inline number and the sort — disclosure in the tooltip only. This ticket OVERTURNS
+that decision: the owner wants the net value (gains and the currently-hidden
+losses) shown and ranked. Tickets 90/91 are context for WHY the old design was
+cautious, not a mandate to re-import their estimation machinery — see the
+corrected framing below.
 
 ## What the owner wants (the model to build)
 
@@ -44,23 +42,34 @@ Display:
 - The tooltip breaks the total down, and MUST include set-bonus value LOST when a
   set is broken (currently hidden). Gains and losses both itemised.
 
-Constraints the plan must resolve (not assume away):
-- **Broken-set handling is load-bearing.** The (k-1)*B / confound math from
-  ticket 90 is part of the answer here, not something to suppress. The net total
-  must subtract the value of any bonus broken to reach the shown state. Read
-  ticket 90 before touching the synergy math.
-- **Attribution when "Set potential" ON.** The 4pc value the engine measures today
-  is a whole-package figure (`setContext.packages[]`, `rank.ts:1754-1771`), not a
-  per-item value. "Full value of committing to the set" needs a defined rule for
-  what a single row represents when the set isn't yet complete (e.g. the item's
-  own delta plus the set bonuses that the piece's set — at the state the mode
-  implies — would activate net of breaks). The planner must state the rule
-  explicitly and why it is not the rejected per-item "smearing" of 91. Whether the
-  engine already has the numbers or needs new sims (leave-one-out per 92) is an
-  open question for the plan to answer from the code, not guess.
-- **Logical in both modes.** The two modes are different questions; the plan must
-  define each precisely and keep them from contradicting (e.g. the ON total is
-  never less honest than the OFF total for the same piece).
+Framing (do NOT over-engineer this — corrected 2026-09-20 after a prior plan
+mis-scoped it into new sim machinery):
+- **"Set potential" is a VIEW toggle, not a sim mode.** Its `onChange` is
+  `() => this.render()` (`upgrades_tab.tsx:1024`) — it re-ranks and re-displays,
+  it does not re-sim. This ticket is a DISPLAY + RANKING change over numbers the
+  tab already computes, NOT new sim infrastructure. The owner did not ask to
+  change simming and there is no evidence simming is wrong.
+- **Start from what is already simmed.** The tab already sims candidate
+  configurations (including set-completion packages, `setContext.packages[]`).
+  The plan's FIRST job is to establish, from the code, which numbers the two
+  modes need and which are already present. Only if a genuinely required number
+  is provably absent from existing sim output does new simming enter scope — and
+  then it is flagged for the owner, not assumed. Do NOT build an event-measurement
+  / de-confound apparatus by default.
+- **Broken-set loss, plainly.** The net total must subtract the value of any set
+  bonus broken to reach the shown state. If the completed-set state is already
+  simmed, that loss is already inside that sim's number — differencing the right
+  states captures it without special "(k-1)*B" bookkeeping. Ticket 90's confound
+  was an artifact of estimating a whole-package figure; check whether the
+  net-total approach even has that problem before importing its machinery.
+- **Attribution when ON.** Each set member row shows: this item's own net delta +
+  the set bonuses committing to the set would activate − any bonus broken, and
+  NOT other items' stats. The owner has ruled: full credit on each contributing
+  row by default, with a secondary "split share" view = the shared set-bonus
+  credit divided evenly by piece count (plain arithmetic, no sims). State the
+  per-row rule and why it isn't ticket 91's rejected smearing.
+- **Logical in both modes.** Define each precisely; the ON total is never less
+  honest than the OFF total for the same piece.
 
 ## Where the logic lives (from the investigation)
 
