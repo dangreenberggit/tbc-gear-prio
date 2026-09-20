@@ -393,3 +393,101 @@ kept by the borrow-native-styling rule).
 | B-444 | a11y | fixed       | Fork `93f402bce`: item icon `alt=""` (decorative). Ticket 444 closed; baseline entry removed, gate clean.  |
 | B-445 | a11y | fixed       | Fork `93f402bce`: phase `<select>` labelled tab-side after mount (no upstream edit). Ticket 445 closed.    |
 | B-446 | a11y | fixed       | Fork `93f402bce`: progress bar `aria-label` "Ranking progress". Ticket 446 closed; baseline entry removed. |
+
+# Round 8 — owner-walkthrough tickets 453–466 (via stage-gate)
+
+Reviewed range: `4723294d..0eccb290` (main); fork `93f402bce..af421fa5` (the
+substantive diff — 4 fork commits: 7cc65f5 Batch-tab chrome + modal stacking,
+8bc15cad Sim-sets-define-the-prune reshape, 85f0a545 mid-run table + live fixes,
+af421fa5 layout-gate regressions). Landed through the `stage-gate` pipeline
+(brief → plan → adversarial plan-review → fresh-context executor → Gate C);
+artifacts in `.scratch/stage-gate/upgrades-tab-walkthrough-453-466/`. Four review
+axes ran fresh (adversarial, domain, standards, spec), Opus, in parallel.
+
+## Adversarial
+
+**Sound to merge — no correctness bug, no silent-failure mode, no test theatre.**
+The two most-scrutinised changes both hold under a concrete trace:
+
+- `effectivePool` reshape (`upgrades_tab.tsx:1462`) — new filter
+  `pool.filter(sourceKept ∧ (¬pruned ∨ selected.has(itemId)))`. `selected` is
+  `guaranteedItemIds()` (a `Set<number>`); `itemId` is a number everywhere, so no
+  vacuous match. The empty-set branch is unreachable (`pruneEffective()` is false
+  when the toggle is `d-none`, and the toggle is hidden when the selection is
+  empty). Default run (no source excluded, prune off) is byte-identical to before.
+  Row-tagging survives the union removal.
+- Disable gate `done && !stale` (`:1658`) can't get stuck — `setState` always
+  `render()`s; the iterations/candidates pickers `emit(settingsChangedEmitter)`
+  and the new stale listener flips `done→stale` and re-renders. `stopped`/`error`
+  are never `done && !stale`, so re-run stays live. No lock-out.
+- Stopped-run elapsed removal correct; hidden Candidates changes no read path;
+  colgroup/`table-layout:fixed` scoped to the provisional table only; no dangling
+  reference to the removed `sets_caption`/`sets_cap_note`/`refreshSetsCaption`.
+
+All six findings wontfix (checked, not defects).
+
+## Domain
+
+**Domain-sound to merge — no game-fact contradictions.**
+
+- Phase-3 default (`CURRENT_PHASE = Phase.Phase3`) matches `data/wowsims.lock.json`
+  `currentPhase: 3` / `defaultMaxPhase: 3` — the tab reads the pinned content
+  tier, does not re-derive it.
+- The set-bonus inline shows only thresholds with a real DPS effect body in the
+  pinned sim (`nextMeasurableThreshold` filters against `IMPLEMENTED_IN_SIM`), so
+  it never misattributes an unimplemented bonus; the higher reachable threshold is
+  disclosed in the tooltip. Domain-honest.
+- Removing the old force-include union drops nothing the ranker should see by
+  default (prune applies only with a set selected and the toggle ticked).
+- Description copy accurately describes single-swap-vs-current ranking in TBC terms.
+
+All findings wontfix (checked, fine); one minor with no domain risk (remaining
+strings assert no game fact).
+
+## Standards + Spec
+
+**Standards: no hard violations.** No fork coding-standards doc; applied project
+AGENTS.md/CLAUDE.md + the Fowler smell baseline. Every new comment checked is
+load-bearing (WHY, not WHAT). One writing-style judgement call: the
+`upgrades_tab.description` string used "Rows land as each sim finishes" — "land"
+is on the AGENTS.md banned-vocabulary list, and the rule covers user-facing
+strings. One latent-duplication note (the inline `?upgrades-dev` URL-param gate;
+extract only on a second occurrence — not actionable now).
+
+**Spec: clean.** All 14 tickets close with code matching their Resolution lines —
+no missing acceptance, no wrong implementation, no unauthorized scope. Notes: 464
+also reworded `set_bonus.total_inline` (a harmless consistency fix beyond the
+ticket's named `inline` key); 456's "phase picker" is delivered as the existing
+Phase picker + the always-include-union removal (feature reshape, not new picking
+UI) — the owner decision explicitly endorsed that reading.
+
+## Summary
+
+Adversarial 6 findings (all wontfix), Domain ~5 (all wontfix/minor), Standards 1
+writing-style judgement call + 1 latent-dup note, Spec clean. Worst within each
+axis: Adversarial — the `effectivePool` reshape (traced, sound); Standards — the
+"Rows land" banned verb. Nothing blocking. The one actionable item (the banned
+verb) was fixed in-branch (see Disposition).
+
+The stage's one honest residual is carried from Gate C, not a review finding: the
+desktop-gate byte-compare (plan Step 7) could not run on this Windows host (Unix
+`make wowsimtbc` tooling; the recurring stray-binary trap is ticket 434). The
+"golden unmoved" conclusion is source+live reasoning (with prune off and no source
+excluded, old and new `effectivePool` both reduce to `pool.filter(sourceKept)`),
+independently corroborated by the plan-reviewer — but it is reasoning, not the
+gate's own measurement.
+
+## Round 8 disposition
+
+| ID      | Axis            | Disposition | Ticket / note                                                                                                                                                                                                                   |
+| ------- | --------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A8-1    | Adversarial     | wontfix     | `effectivePool` reshape — traced sound; empty-set branch unreachable, default run byte-identical.                                                                                                                               |
+| A8-2    | Adversarial     | wontfix     | `done && !stale` disable gate — stale listener re-enables; stopped/error never match, no lock-out.                                                                                                                              |
+| A8-3..6 | Adversarial     | wontfix     | Stopped elapsed / hidden Candidates / colgroup scope / removed-locale refs — all checked clean.                                                                                                                                 |
+| D8-1    | Domain          | wontfix     | Phase-3 default matches the pinned content tier; not re-derived.                                                                                                                                                                |
+| D8-2    | Domain          | wontfix     | Set-bonus inline shows only sim-implemented thresholds; higher disclosed in tooltip. Honest.                                                                                                                                    |
+| D8-3    | Domain          | wontfix     | Union removal drops no default-visible BiS; description copy domain-accurate.                                                                                                                                                   |
+| S8-1    | Standards       | fixed       | `upgrades_tab.description` "Rows land" → "Each row appears as its sim finishes" (banned "land" verb). Fork `e30bed8fa`, re-pinned. Value-only locale, no schema/ranking change.                                                 |
+| S8-2    | Standards       | wontfix     | Inline `?upgrades-dev` URL-param gate — single occurrence; extract only on a second. Not actionable.                                                                                                                            |
+| SP8-1   | Spec            | wontfix     | 464 also reworded `total_inline` (consistency); 456 "phase picker" = existing picker + union removal (owner-endorsed). Acceptance met.                                                                                          |
+| G-1     | Gate C residual | defer       | Desktop-gate byte-compare (Step 7) unverified on this Windows host — ticket 434 (stray binary) + Unix build tooling. "Golden unmoved" is source+live reasoning, not the gate's measurement. Needs a Unix-capable host to close. |
