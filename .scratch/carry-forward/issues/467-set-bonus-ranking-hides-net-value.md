@@ -71,6 +71,21 @@ mis-scoped it into new sim machinery):
 - **Logical in both modes.** Define each precisely; the ON total is never less
   honest than the OFF total for the same piece.
 
+## Owner decision (2026-09-20): measure the broken-bonus value
+
+Investigation established every number the model needs is already in the tab's sim
+output EXCEPT the standalone DPS value (B) of a worn set bonus that gets broken
+when completing another set. No differencing of existing sims isolates B, and the
+owner's own acceptance case (Thunderheart candidates over worn Malorne 2pc) needs
+it on the non-breaking rows and in the OFF tooltip. Owner chose to MEASURE it: add
+one contained sim per broken worn set (ticket 92's secondary method — vacate the
+worn pieces to non-set candidates, difference against the measured singles) to get
+B in context. This is not fixing broken simming; it is measuring a number that was
+never measured. It also fixes ticket 90's (k−1)·B inflation, so the correction is
+just `bonusDps − (k−1)·B` — NO de-confound recursion, NO per-event primitive, NO
+new set-effects module. Everything else is the display/ranking/division change over
+numbers already present.
+
 ## Where the logic lives (from the investigation)
 
 - Display / inline vs tooltip: `upgrades_tab.tsx` `setBonusPresentation`
