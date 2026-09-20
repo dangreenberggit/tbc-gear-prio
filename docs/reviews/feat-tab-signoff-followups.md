@@ -491,3 +491,31 @@ gate's own measurement.
 | S8-2    | Standards       | wontfix     | Inline `?upgrades-dev` URL-param gate — single occurrence; extract only on a second. Not actionable.                                                                                                                            |
 | SP8-1   | Spec            | wontfix     | 464 also reworded `total_inline` (consistency); 456 "phase picker" = existing picker + union removal (owner-endorsed). Acceptance met.                                                                                          |
 | G-1     | Gate C residual | defer       | Desktop-gate byte-compare (Step 7) unverified on this Windows host — ticket 434 (stray binary) + Unix build tooling. "Golden unmoved" is source+live reasoning, not the gate's measurement. Needs a Unix-capable host to close. |
+
+## Round 8 follow-up — description placement + copy (owner walkthrough)
+
+Owner reported the pre-run description sat in the wrong spot vs the Batch tab and
+wanted Batch's simpler copy with a "please report" line. Fixed on
+`feat/tab-signoff-followups` (fork `e30bed8f..6b811de3`, three re-pins
+`8fd631fb`→`2adf2547`→`b7d4443a`):
+
+- **Copy** now mirrors `bulk_tab.description`'s shape — bold name, one sentence of
+  what the tab does, then the Alpha/"please report it!" line.
+- **Placement**: `.upgrades-description` spans `grid-column: 1 / -1` so it fills the
+  panel width across the native multi-track grid, matching Batch's description
+  position (live: full 634px panel width, two-track grid intact).
+
+**Caught regression (process note).** The first attempt collapsed the panel grid
+to one track (`grid-template-columns: auto`) to fix the sliver. That passed
+`pnpm verify` (rc=0) but broke the layout gate, which `pnpm verify` does not run —
+the gate only runs under `pnpm merge-to-dev`. The orchestrator ran
+`pnpm merge-to-dev --check-only` independently and caught 1 layout failure
+(view-controls-host span dropped — the escape hatch ticket 326 hardened) plus 4
+keyboard focus-walk a11y failures, both from the single-track collapse +
+`grid-column: 1` reshuffle. The fix reverted the collapse and spanned the
+description instead. Final verdict:
+`LAYOUT_GATE_VERDICT {"outcome":"measured","passed":53,"failed":0,"a11yFailed":0,"a11yWarned":4}`
+(the 4 warns are the pre-existing `.btn-outline-danger` contrast wontfix). The
+focus-walk failures were present only in the broken single-track state and are
+gone with its reversion. Lesson reinforced: for a gated visual change, the
+acceptance is the gate, not `pnpm verify`.
