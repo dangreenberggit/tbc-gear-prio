@@ -177,6 +177,10 @@ SHELL_FILES = (
 #   - core/sim_ui/_shared.scss  -- `--sim-header-height` (assert 3's sticky
 #     `top:`) with its `lg` override, and the `.sim-container` / `.sim-content`
 #     flex host the tab renders inside.
+#   - core/components/_item_row.scss  -- the `item-row-icon` mixin, which is
+#     where the results row's icon size now comes from (ticket 472). The
+#     asserted row heights and the all-cell clip check resolve through it, so
+#     changing 3rem there re-lays the rows with the tab's own SCSS untouched.
 #
 # Boundary this digest does NOT cover (stated, not hidden): the Bootstrap
 # `media-breakpoint-*` mixins themselves live in `node_modules`
@@ -187,6 +191,7 @@ SHARED_LAYOUT_FILES = (
     "ui/scss/shared/_variables.scss",
     "ui/scss/shared/_global.scss",
     "ui/scss/core/sim_ui/_shared.scss",
+    "ui/scss/core/components/_item_row.scss",
 )
 
 
@@ -272,8 +277,10 @@ def write_baseline(digest: str) -> None:
         "(upgrades/engine/**/*.ts), AND the shared "
         "SCSS the tab's asserted geometry resolves through -- shared/_variables.scss "
         "($grid-breakpoints + the layout tokens the asserted rules read), "
-        "shared/_global.scss (root font-size + lg/xxl spacer overrides), and "
-        "core/sim_ui/_shared.scss (--sim-header-height + the sim-content host). The "
+        "shared/_global.scss (root font-size + lg/xxl spacer overrides), "
+        "core/sim_ui/_shared.scss (--sim-header-height + the sim-content host), and "
+        "core/components/_item_row.scss (the item-row-icon mixin the results row's "
+        "icon size comes from, ticket 472). The "
         "shared files are hashed because the two tab SCSS files import nothing and "
         "consume globally-injected variables, so a breakpoint or token edit re-lays "
         "the tab at the asserted widths without touching a shell file (review "

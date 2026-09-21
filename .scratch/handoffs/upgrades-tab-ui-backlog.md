@@ -67,3 +67,71 @@ Line up the results-table row styling to model the Gear tab's item-select table
 rows, AND add that table's "add to favorites" and "add to batch sim" affordances
 to the Upgrades results rows. Requires subagents to visually compare both tables.
 Expect this to be the hard one.
+
+### 6. Restyle rows after the Gear tab's item-select table — BUILT, NOT CLOSED
+Built via `stage-gate` slug `upgrades-rowstyle` (plan rev 2, reviewer verdict
+proceed). Fork `162a907df`, main pin below, `pnpm verify` rc=0.
+
+What landed. The favorite star and add-to-Batch-Sim button moved out of
+`item_list.tsx`'s two private closures into a shared
+`gear_picker/item_toggles.tsx` both tables build from — class names, tippy copy
+and the single `trackEvent` preserved, plus an `aria-label` on each button. The
+row look (3rem icon, 1.125rem name, zebra, hover) moved into a shared
+`scss/core/components/_item_row.scss` both tables include, retiring that file's
+line-78 TODO. Each results row gained two trailing action cells, appended after
+Source one `<td>` each because `upgrades/tools/run-tab-cdp.mjs` reads a row
+positionally (`tds[0..4]`). No engine edit, no schema change, rank order
+untouched.
+
+Measured at 1280, Upgrades row vs Gear row, same script: icon 42px = 42px, name
+15.75px = 15.75px, odd row rgb(34,35,40) = rgb(34,35,40), hovered row
+rgb(52,58,64) = rgb(52,58,64). The Gear list's own capture is byte-identical
+before and after (sha256 `ec418f7112337d3f`). `gate-visual` verdict: **pass** on
+all three acceptance sentences (round 2), handoff at
+`.scratch/stage-gate/upgrades-rowstyle/gate-visual-472.md`.
+
+TWO CLAIMS IN THE PLAN MEASURED FALSE, both fixed in place:
+- The rows were to drive `--bs-table-bg` so Bootstrap's cell paint would pick
+  the colour up. This app does not import `bootstrap/scss/tables` at all
+  (`ui/scss/index.scss` enumerates the partials it takes), so `table table-sm`
+  are inert names, a cell's `box-shadow` reads `none`, and nothing paints over
+  the row. The mixin uses plain `background`.
+- The layout gate was predicted green. The two new columns push the settled
+  table past its panel at desktop too (624px of table in a 613px host at 1280),
+  and assertion 7b requires a table wider than `.upgrades-results` to scroll
+  rather than clip. `overflow-x: auto` moved out of the `<md` block to every
+  width. Layout gate now: 49 passed, **0 layout failures**.
+
+WHY THIS IS NOT CLOSED — two owner decisions:
+1. **New a11y failures block the layout gate.** Giving the rows a background
+   makes axe measure the epic-quality name colour (`#a335ee`) against it: 6
+   serious `color-contrast` nodes per width at 2.35-3.59, 24 in total, where the
+   pre-change transparent row offered no pair. The Gear list being copied reports
+   the identical failures at the identical ratios (13 nodes, plus 31 critical
+   `image-alt` on its icons), so this is inherited theme debt of the kind
+   `data/wowsims-fork-a11y-baseline.json` already records as `wontfix: inherited
+   site theme`. `gate-visual` judged the render acceptable and advisory. The
+   choice — baseline the debt, file a ticket, or give up the larger name — is the
+   owner's, and axe names these per item (`span[title="Choker of Endless
+   Nightmares"]`) so there is no stable `(ruleId, selector)` to baseline anyway.
+   `data/wowsims-fork-a11y-baseline.json` is untouched.
+2. **The ticket's own closing condition is an owner side-by-side acceptance.**
+
+DESKTOP GATE NOT RUN — blocked, not passed. `make wowsimtbc` needs a POSIX
+shell: it fails under PowerShell ("build was unexpected at this time") and
+succeeds under Git Bash without `cd` (`python scripts/check_desktop_tab.py`).
+The build then succeeded but the gate refused because port 3333 was held by a
+stray `wowsimtbc.exe` (pid 17212, started 09:20, predating this work), and
+`Stop-Process -Id 17212 -Force` was denied by the permission system. So check
+(h)'s golden readback is UNMEASURED here. It is predicted unchanged because the
+readback reads `tds[0..4]` and the new cells are 5 and 6, but that is a
+prediction, not a result. `data/desktop-gate/golden-ret-p5-cap40.json` is
+untouched.
+
+VERIFY NOTE, adding to the one above: `pnpm tab-review` cannot photograph the
+Gear list at 375 (the gear tab's nav button measures 0x0 at that width, so the
+coordinate click never activates it) and cannot hover a row at a re-emulated
+width (the pointer coordinate is computed before the width changes). Measure a
+narrow-width overflow arithmetically instead — `rect:` on the table and on its
+scroll host plus `style:...:overflow-x` — rather than asking a clipped PNG to
+show it.
