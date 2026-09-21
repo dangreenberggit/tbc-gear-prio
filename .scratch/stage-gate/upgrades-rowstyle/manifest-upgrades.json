@@ -1,0 +1,87 @@
+{
+  "ticket": "472",
+  "note": "Ticket 472: the Upgrades results rows adopt the Gear item list's row idioms (3rem icon, 1.125rem quality-coloured name, zebra, hover) and gain two trailing action cells (favorite star, add-to-Batch-Sim). The post-run entry's facts are the Gear-side facts of manifest-gear.json measured on the Upgrades table, so the two facts.json files can be compared pair by pair at 1280. The harness captures a RUNNING state at >=5 landed rows (MIN_ROWS), driven at RUN_WIDTH 653 and then re-emulated per width, so the post-run capture proves the row look and the two action cells on real rows, not a completed run. Round 2 (after the gate-visual cannot-judge on the 375 clause): the 375 case is split into its own entry 472-narrow with no hover interaction, capturing the .upgrades-results scroll host as well as the table, and measuring the overflow arithmetically (tableRect vs scrollHostRect vs overflow-x) rather than asking a clipped PNG to show it. The harness computes an interaction's coordinate before the width is re-emulated, so a hover at 375 lands on the wrong row; the hover pair stays on the 1280 entry, where it is measured correctly.",
+  "entries": [
+    {
+      "ticket": "472-pre",
+      "state": "pre-run",
+      "widths": [
+        1280,
+        375
+      ],
+      "interactions": [],
+      "capture": [
+        "#upgrades-tab"
+      ],
+      "facts": {
+        "tableCount": "count:.upgrades-results-table",
+        "thCount": "count:.upgrades-results-table thead th"
+      },
+      "acceptance": "Pre-run the tab is unchanged: no results table and no empty action headings on screen."
+    },
+    {
+      "ticket": "472",
+      "state": "post-run",
+      "widths": [
+        1280
+      ],
+      "interactions": [
+        {
+          "hover": ".upgrades-results-table tbody tr:nth-child(2)"
+        }
+      ],
+      "capture": [
+        ".upgrades-results-table"
+      ],
+      "facts": {
+        "iconW": "style:.upgrades-results-table tbody tr:nth-child(2) .upgrades-item-icon:width",
+        "nameFs": "style:.upgrades-results-table tbody tr:nth-child(2) .upgrades-item-name:font-size",
+        "rowBg1": "style:.upgrades-results-table tbody tr:nth-child(1):background-color",
+        "hoverBg": "style:.upgrades-results-table tbody tr:nth-child(2):background-color",
+        "thCount": "count:.upgrades-results-table thead th",
+        "thFav": "text:.upgrades-results-table thead th:nth-child(6)",
+        "thBatch": "text:.upgrades-results-table thead th:nth-child(7)",
+        "rowCount": "count:.upgrades-results-table tbody tr",
+        "toggleCount": "count:#upgrades-tab .tab-pane-content-container [data-item-toggle]",
+        "favCount": "count:.upgrades-results-table tbody .selector-modal-list-item-favorite",
+        "cmpCount": "count:.upgrades-results-table tbody .selector-modal-list-item-compare-container:not(.hide)",
+        "rank1": "text:.upgrades-results-table tbody tr:nth-child(1) td:first-child",
+        "tdBg1": "style:.upgrades-results-table tbody tr:nth-child(1) td:first-child:background-color",
+        "lastCellIsBatch": "exists:.upgrades-results-table tbody tr:nth-child(1) td:last-child .selector-modal-list-item-compare"
+      },
+      "acceptance": "At 1280 an Upgrades row reads as a Gear-list row - same icon size, name size, zebra and hover colours (facts equal the 472-gear entry's) - with a star and a batch button as the last two cells."
+    },
+    {
+      "ticket": "472-narrow",
+      "state": "post-run",
+      "widths": [
+        375
+      ],
+      "interactions": [],
+      "capture": [
+        ".upgrades-results",
+        ".upgrades-results-table"
+      ],
+      "facts": {
+        "iconW": "style:.upgrades-results-table tbody tr:nth-child(2) .upgrades-item-icon:width",
+        "nameFs": "style:.upgrades-results-table tbody tr:nth-child(2) .upgrades-item-name:font-size",
+        "rowBg1": "style:.upgrades-results-table tbody tr:nth-child(1):background-color",
+        "thCount": "count:.upgrades-results-table thead th",
+        "thFav": "text:.upgrades-results-table thead th:nth-child(6)",
+        "thBatch": "text:.upgrades-results-table thead th:nth-child(7)",
+        "rowCount": "count:.upgrades-results-table tbody tr",
+        "toggleCount": "count:#upgrades-tab .tab-pane-content-container [data-item-toggle]",
+        "favCount": "count:.upgrades-results-table tbody .selector-modal-list-item-favorite",
+        "cmpCount": "count:.upgrades-results-table tbody .selector-modal-list-item-compare-container:not(.hide)",
+        "rank1": "text:.upgrades-results-table tbody tr:nth-child(1) td:first-child",
+        "tdBg1": "style:.upgrades-results-table tbody tr:nth-child(1) td:first-child:background-color",
+        "lastCellIsBatch": "exists:.upgrades-results-table tbody tr:nth-child(1) td:last-child .selector-modal-list-item-compare",
+        "rowBg2": "style:.upgrades-results-table tbody tr:nth-child(2):background-color",
+        "tableRect": "rect:.upgrades-results-table",
+        "scrollHostRect": "rect:.upgrades-results",
+        "scrollHostOverflowX": "style:.upgrades-results:overflow-x"
+      },
+      "acceptance": "At 375 the row is the pre-change mobile row plus the two buttons: the 1.125rem icon and 14px name are unchanged, zebra rows 1 and 2 differ, both buttons are present as the last two cells, and the table is wider than its host (tableRect.width > scrollHostRect.width with overflow-x auto) so it scrolls horizontally rather than shattering. Hover is not measured at this width: the harness computes the pointer coordinate before re-emulating the width, so a hover interaction lands on the wrong row -- 1280 carries the hover evidence."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "ticket": "472-gear",
+  "note": "Ticket 472 asks the Upgrades rows to adopt the Gear item list's row idioms. This manifest photographs the Gear list itself, as the reference the Upgrades captures are compared against and as the 'unchanged' control for the toggle extraction (Step 2) and the SCSS move (Step 3). It uses the pane:false opt-out added to test-review.mjs in Step 1: the Gear tab is active, so the usual #upgrades-tab clip would be zero-size and fail the run. Three corrections were made against the live DOM (executor deviation ledger, Step 1): (a) the gear list is a VirtualList with keepParity, so its <ul> children are spacer <li>s plus the windowed rows -- :nth-child(n) does NOT address the nth row, and row 1 / row 2 are addressed as '.selector-modal-list-item' and '.selector-modal-list-item ~ .selector-modal-list-item'; (b) the { id: 'gear-picker-selector-modal' } option names the modal's TAB PANES via sanitizeId, which lower-cases, so the DOM id is '#gear-picker-selector-modal-items' and there is no '#gear-picker-selector-modal' element at all; (c) 375 is dropped from this entry. The harness dispatches clicks at viewport coordinates without scrolling, and at 375 the gear tab's nav button measures 0x0 (diagnostic: gearTabActive false, gearTabRect all zeros, .item-picker-icon rect all zeros while 50 of them exist), so the Gear tab never activates and the item list never renders -- the same below-fold/collapsed-chrome harness limit recorded for ticket 447. The plan's win condition compares the two tables at 1280, which this entry still serves; the Upgrades manifest keeps its own 375 capture.",
+  "entries": [
+    {
+      "ticket": "472-gear",
+      "state": "pre-run",
+      "pane": false,
+      "widths": [1280],
+      "interactions": [
+        { "click": ".gear-tab .nav-link" },
+        { "click": ".item-picker-icon" },
+        { "hover": ".selector-modal-list-item ~ .selector-modal-list-item" }
+      ],
+      "capture": [".selector-modal-list"],
+      "facts": {
+        "modalPaneId": "exists:#gear-picker-selector-modal-items",
+        "iconW": "style:.selector-modal-list-item ~ .selector-modal-list-item .selector-modal-list-item-icon:width",
+        "nameFs": "style:.selector-modal-list-item ~ .selector-modal-list-item .selector-modal-list-item-name:font-size",
+        "rowBg1": "style:.selector-modal-list-item:background-color",
+        "hoverBg": "style:.selector-modal-list-item ~ .selector-modal-list-item:background-color",
+        "favCount": "count:.selector-modal-list-item-favorite",
+        "cmpCount": "count:.selector-modal-list-item-compare-container:not(.hide)",
+        "listRect": "rect:.selector-modal-list"
+      },
+      "acceptance": "The Gear item list renders as it did at aa9657e5a: star and compare buttons on every row, zebra rows, hovered row darker."
+    }
+  ]
+}
