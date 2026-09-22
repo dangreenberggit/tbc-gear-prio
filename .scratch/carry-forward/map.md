@@ -263,3 +263,9 @@ file contention, worker prompt. This file stays the chronological log.
 - 480 a11y baseline covers only epic-quality names, hypothesis (round 6 S6, minor) 2026-09-22
 - 481 Results table overflows its container at 1280px, wide Source column (owner review of 472 render) 2026-09-22
 - 482 Favorite click wrongly marks the ranking stale via sim.changeEmitter (owner review of 472 render) 2026-09-22
+- 483 Per-table scroll host + shared column widths, supersedes 481 (owner review of 472 render) 2026-09-22
+- 484 Item name to tag spacing too tight (owner review of 472 render) 2026-09-22
+- 485 Drop "Upgrades" heading, rename "Shopping List" tab to "Upgrades" (owner review of 472 render) 2026-09-22
+- 486 Results area typography inconsistent, sloppy (owner review of 472 render) 2026-09-22
+- 487 View options heading clipped at ~1070px (owner review of 472 render) 2026-09-22
+- 488 EPIC: upgrades tab polish arc, umbrella for 483-487 (owner review of 472 render) 2026-09-22
