@@ -135,3 +135,19 @@ width (the pointer coordinate is computed before the width changes). Measure a
 narrow-width overflow arithmetically instead — `rect:` on the table and on its
 scroll host plus `style:...:overflow-x` — rather than asking a clipped PNG to
 show it.
+
+### 6 (continued). Tied follow-ups, 2026-09-22 — ALL DONE, 472 CLOSED
+- 473 contrast: harness `match: css` baseline entries (fork 72eebdee), baseline
+  entry for `.upgrades-item-name.text-epic`, main 79599670; layout gate
+  passed:53 failed:0 a11yFailed:0.
+- 474 item cell: stacked name-over-tags beside the icon, slot 0.875rem (fork
+  2f103d8f, main 398380f2).
+- 475: Set credit control removed, credit pinned to 'full', "This piece alone"
+  tooltip line dropped, 8 i18n keys removed (fork 2db3e0e3, main ccdaa4f5).
+- Locale schema for the favorite/batch labels (fork 7965a7d8, main 3b9979a2).
+- Desktop gate rc=0 with golden unchanged (port 3333 had to be freed first).
+- Live-verified on :5173 with the Go backend on :3333 (see 472's Comments).
+VERIFY NOTE: plain vite on :5173 uses `local_worker.js` unless WASM_WORKER is
+set, so a run needs the `wowsims-backend` preview entry up on :3333 or every
+sim request fails with "Failed to fetch" / "Something went wrong running the
+sim". With the backend up a feralcat run takes ~3 min, not ~9.

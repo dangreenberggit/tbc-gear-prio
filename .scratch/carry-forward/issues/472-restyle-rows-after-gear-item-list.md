@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner walkthrough, Upgrades-tab UI pass, 2026-09-20
 Blocks: none
@@ -102,3 +102,27 @@ which is why they are appended rather than inserted — but that is a prediction
 2026-09-22 — Owner: closes when the change is done INCLUDING tied tickets
 473, 474, 475. Desktop gate passed 2026-09-22 (all (a)-(h), golden
 unchanged). Stage artifacts: .scratch/stage-gate/upgrades-rowstyle/.
+
+2026-09-22: CLOSED. Tied tickets 473/474/475 closed; locale schema follow-up
+re-pinned (fork 7965a7d8, main 3b9979a2). Live verification on :5173 (vite
+live tree + Go backend on :3333; the feralcat run took 165 s, 401
+candidates, 338 settled rows):
+- View options row reads "Set potential / BiS only / Phase" — no "Set credit",
+  "Full set" or "Split share" text anywhere on the page (475).
+- Tagged row (Tsunami Talisman, "BiS 6% BiS 9% (Owned)"): icon 382-424 px,
+  name left 431 (right of the icon), name bottom 755, tags top 758 (below the
+  name) (474). Slot font-size 12.25 px, name 15.75 px at the 1280 emulation.
+- Header: Rank, Item, Slot, DPS, Source, Favorite, Batch sim; every settled
+  row has a star and a visible batch button (2 + 336 rows) (472).
+- Set-bonus tooltip first line: "breaks Thunderheart Harness 4pc: -76.9"; no
+  "This piece alone" anywhere (475). Inline hint "hover for set detail" intact.
+- Favorite cross-over: star on Everbloom Idol lit from the Upgrades row, still
+  lit after the stale re-render, lit in the Gear tab's Idol picker (sorted
+  first), cleared afterwards (472).
+- Simulate disabled after the run until a setting changes: by design (465).
+Two observations for the owner, not defects of the tickets: (a) at the 1280
+emulation the results host is ~606 px wide, so the seven-column table
+(642/753 px) scrolls horizontally and long item names wrap to three lines in
+the shortlist; (b) favoriting an item marks the ranking stale ("settings
+changed since this ranking") because favorites live in sim filters —
+pre-existing Gear-modal behaviour, listed out of scope in the plan.
