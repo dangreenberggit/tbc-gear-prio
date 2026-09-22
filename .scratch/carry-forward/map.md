@@ -261,3 +261,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 478 Net set-bonus minor follow-ups bundle (round 6 A3/A4/D3/A5/D2, minor) 2026-09-22
 - 479 Set-bonus tooltip piece count excludes hovered piece (round 6 D4/D5, minor/copy) 2026-09-22
 - 480 a11y baseline covers only epic-quality names, hypothesis (round 6 S6, minor) 2026-09-22
+- 481 Results table overflows its container at 1280px, wide Source column (owner review of 472 render) 2026-09-22
+- 482 Favorite click wrongly marks the ranking stale via sim.changeEmitter (owner review of 472 render) 2026-09-22
