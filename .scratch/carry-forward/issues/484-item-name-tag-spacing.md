@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner review of the 472 render (screenshot .scratch/handoffs/owner-screens/2026-09-22-upgrades-header-glitch.png), 2026-09-22
 Blocks: none
@@ -23,3 +23,7 @@ each other".
 
 Pointers: `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
 `vendor/tbc-new-fork/ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss`.
+
+## Comments
+
+2026-09-22: closed. Fork a263260ba: `.upgrades-item-tags` margin-top 3px (own margin, not the shared row-gap), 0.25rem gap between badges and (Owned), explicit Bootstrap badge padding. Main re-pin 2ec3ff8b; verify rc=0; layout gate passed:53 failed:0 a11yFailed:0 (its BiS-tag spacing assertion passed). Captures under captures/484-485/ had no tagged rows; owner eyeballs at the arc's end.
