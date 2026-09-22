@@ -3,7 +3,7 @@ Type: task
 Origin: owner walkthrough, Upgrades-tab UI pass, 2026-09-20
 Blocks: none
 Blocked by: none
-Related: 468, 469, 470, 471
+Related: 468, 469, 470, 471, 473, 474, 475
 
 # Restyle Upgrades results rows after the Gear tab's item-select list
 
@@ -96,3 +96,9 @@ system. Check (h)'s golden readback is therefore unmeasured. It is predicted
 unchanged — the readback parses `tds[0..4]` and the two new cells are 5 and 6,
 which is why they are appended rather than inserted — but that is a prediction.
 `data/desktop-gate/golden-ret-p5-cap40.json` is untouched.
+
+## Comments
+
+2026-09-22 — Owner: closes when the change is done INCLUDING tied tickets
+473, 474, 475. Desktop gate passed 2026-09-22 (all (a)-(h), golden
+unchanged). Stage artifacts: .scratch/stage-gate/upgrades-rowstyle/.
