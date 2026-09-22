@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner review of the 472 render, 2026-09-22
 Blocks: none
@@ -48,3 +48,5 @@ Longest Source ("Serpentshrine Cavern (N) Fathom-Lord Karathress") goes from
 5 to 6 lines under V2/V3. Recommendation: V3 for the shortlist; the
 below-cutoff table still needs ~70 px more, most plausibly `white-space:
 normal` on Slot or a narrower Item column. Shortlist sample was 2 rows.
+
+2026-09-22: closed as superseded by 483 (per-table scroll hosts + one shared fixed column scheme; first cut fork 9b7a57036 / main e8666023, rebalance in progress). The measurements above informed 483's widths.
