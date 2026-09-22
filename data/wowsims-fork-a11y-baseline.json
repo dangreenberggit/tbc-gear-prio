@@ -5,6 +5,13 @@
       "ruleId": "color-contrast",
       "selector": ".btn-outline-danger",
       "reason": "wontfix: inherited site theme (Bootstrap .btn-outline-danger, #dc3545 on the dark theme background); the borrow-native-styling rule keeps upstream theme colours"
+    },
+    {
+      "ruleId": "color-contrast",
+      "selector": ".upgrades-item-name.text-epic",
+      "match": "css",
+      "ticket": "473",
+      "reason": "inherited item-quality colour (#a335ee epic) on the 472 zebra rows; identical pair on the Gear-tab item list; owner-accepted debt 2026-09-22"
     }
   ]
 }
