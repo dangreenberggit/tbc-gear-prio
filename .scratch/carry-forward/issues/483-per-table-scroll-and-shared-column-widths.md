@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner review of the 472 render (screenshot .scratch/handoffs/owner-screens/2026-09-22-upgrades-header-glitch.png), 2026-09-22
 Blocks: none
@@ -39,3 +39,7 @@ when this lands.
 
 Pointers: `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
 `vendor/tbc-new-fork/ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss`.
+
+## Comments
+
+2026-09-22: closed. Fork 9b7a57036 (per-table `.upgrades-table-scroll` hosts; one shared `resultsColgroup()` for provisional/shortlist/below-cutoff; test-layout.mjs 7b probe now finds the per-table host) + 86981ed30 (rebalance: Rank 2.5rem, Slot 5.5rem, DPS 5.5rem, Source 7rem wrapping at spaces, action cells 2rem, Item = remainder = 306 px at 1280; the 40 px right gap was the tab pane's flex gap, narrowed to `--gap-width` at xl; table ends 21 px before the settings card). Main re-pins e8666023, 853281f5; verify rc=0; layout gate passed:53 failed:0 a11yFailed:0. Capture: .scratch/stage-gate/upgrades-rowstyle/captures/483b/472-post-run-1280-0.png (mid-run table; settled tables share the colgroup by construction, not re-measured). Known tight spots: Rank header ~3 px wider than its column; Slot-to-DPS spacing ~5 px.
