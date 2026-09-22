@@ -519,3 +519,100 @@ description instead. Final verdict:
 focus-walk failures were present only in the broken single-track state and are
 gone with its reversion. Lesson reinforced: for a gated visual change, the
 acceptance is the gate, not `pnpm verify`.
+
+# Round 9 — 467 net set-bonus engine + owner UI pass 468–475 (tickets and commits call this "round 6")
+
+Reviewed range: `0eccb290..7c54848f` (main); fork `af421fa5..7965a7d8` (the
+substantive diff — 21 fork commits: 467 net set-bonus value in the engine
+(a30920410, 994d5a7b9) with `packages/core/test/fork-set-net.test.ts`; the
+Upgrades description rewrites; UI fixes 468–471; 472 rows restyled after the
+Gear-tab item list via the `upgrades-rowstyle` stage-gate (six commits,
+shared `item_toggles.tsx` + `_item_row.scss`); 473 a11y baseline `match: css`;
+474 name-over-tags; 475 Set credit control removed; locale schema fix).
+Fixes for this round landed after dispatch at fork `7c001b365` / main
+`bd51853d` and belong to the next round's window.
+
+Dispatch: four fresh Opus (effort medium) subagents — adversarial and domain
+on the `.agents/reviews/` briefs, standards and spec via the `code-review`
+skill. No `codex` binary on PATH. Every axis wrote nothing; both trees were
+clean at dispatch.
+
+## Adversarial
+
+Nothing blocking. Two material engine findings in the 467 net-value math:
+A1 — a `commitBreaks` entry with no measured `dps` is skipped while the
+fallback checks only `futureBonuses`, so the row keeps the gain and loses
+nothing; A2 — `brokenSetBonuses` reports only the highest lost threshold per
+set, so a tier swap that breaks a worn 4pc _and_ its 2pc never subtracts the
+2pc (the full T4-4pc → T5-4pc case). Minor: A3 divergent-slot 2pc/4pc
+correction and first-pool-slot-per-item; A4 the removed `advancesPieceCount`
+guard; A5 the new test is `describe.skipIf(!forkPresent)` and the fork is
+gitignored, so CI never runs it. Clean: vacate-sim `B` algebra, toggle module
+(WeakMap keyed on buttons, one tab-level subscription, fresh `getFilters`),
+Gear-list parity (only `aria-label` + `data-item-toggle` added), css-match
+baseline cannot hide other elements, i18n removals unreferenced, positional
+`td[0..4]` readback intact, 7-column colgroup sums to 100%, pinned `'full'`
+credit equals the old default.
+
+## Domain
+
+D1 = A2 (same root cause, independently derived: at worn=4 the measured 2pc
+`B` comes out as B2 − 2·B4, at worn=5 as B2 + B4). D2 with `'full'` credit
+row values are not additive across a shortlist (each piece carries the whole
+2pc+4pc) — acceptable as a sort key, must be documented. D3 = A4. D4 tooltip
+"{pc} ({have}/{pc})" counts pieces worn _before_ the hovered piece, which a
+TBC player will misread. D5 `tip_activates_included` passes
+`piecesAfterSwap` as the threshold number (equal only for the +1 step).
+Clean: inflation correction signs, no double subtraction of a row's own
+break, crossing pieces not credited twice, noise floor, cutoff.ts
+comment-only, no WCL facts touched.
+
+## Standards + Spec
+
+**Standards:** hard — the banned verb "carries" in three `rank.ts` comments
+and one SCSS comment; a comment on `createFavoriteToggle` describing an
+`initial` parameter the function never reads; one comment restating the
+`candidateSlotIndex` doc comment. Judgement — unused `_sim`/`_bt` params on
+`refreshToggles`; the `subscribe` boolean flag; duplicated repaint sequence
+in the two `refresh` closures; `FavoriteKey.method` widened through
+`as never`. No untested causal claims found in comments.
+
+**Spec:** nothing blocking. S1 three dead locale keys (`tip_total_full`,
+`tip_total_split`, `ranked_marker`) survived 475's cleanup. S2 ticket 467 is
+still open with its engine work shipped and no closing check recorded. S3
+horizontal scroll now at every width (not asked). S4 Gear list gained
+`aria-label`s. S5 dead `void setCredit;` and the unused `initial`. S6 the 473
+baseline covers `.text-epic` only (hypothesis). Passed: keep rank order,
+aria-labels, batch hidden when `bt` absent, 475 ranking math unchanged, 474
+stacked layout in both tables.
+
+## Summary
+
+The UI pass (468–475) is sound: the Gear list is byte-identical in capture
+and behaviourally unchanged, the shared toggle and row-style code holds, and
+every gate is green (verify rc=0, layout 53/0/0, desktop gate golden
+unchanged, live-verified on :5173). The material findings are all in the 467
+net set-bonus engine math that landed earlier in this window and had not
+been reviewed: a multi-threshold break undercounts the loss (476) and an
+unmeasured commit break credits gain only (477). Both change the sort key
+for the tier-swap case and need the PROVENANCE cycle plus test fixtures, so
+they are tickets, not in-branch fixes. Tidy items were fixed in-branch.
+
+## Disposition
+
+| ID                  | Axis                | Disposition | Ticket / note                                                                                                                                                                                                                        |
+| ------------------- | ------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1                  | Adversarial         | defer       | `.scratch/carry-forward/issues/477-commit-break-without-measured-b-credits-gain-only.md`                                                                                                                                             |
+| A2 / D1             | Adversarial, Domain | defer       | `.scratch/carry-forward/issues/476-net-set-bonus-misses-lower-threshold-on-tier-swap.md`                                                                                                                                             |
+| A3, A4 / D3, A5, D2 | Adversarial, Domain | defer       | `.scratch/carry-forward/issues/478-net-set-bonus-minor-followups.md`                                                                                                                                                                 |
+| D4, D5              | Domain              | defer       | `.scratch/carry-forward/issues/479-set-bonus-tooltip-count-excludes-hovered-piece.md`                                                                                                                                                |
+| S1                  | Spec                | fixed       | Fork `7c001b365`: the three dead keys removed from translation.json and its schema; `test-locales.mjs` rc=0.                                                                                                                         |
+| S2                  | Spec                | defer       | `.scratch/carry-forward/issues/467-set-bonus-ranking-hides-net-value.md` (left open; round-9 comment points at 476–479; owner's live check still unrecorded)                                                                         |
+| S3                  | Spec                | wontfix     | The 7-column table is wider than its ~606 px host at 1280; the layout gate's own assertion 7b requires scroll, not clip. Owner told in 472's Comments.                                                                               |
+| S4                  | Spec                | wontfix     | `aria-label` on the Gear list's two buttons is the 472 brief's a11y constraint applied to the shared module; capture byte-identical.                                                                                                 |
+| S5                  | Spec                | fixed       | Fork `7c001b365`: `void setCredit;` removed, `initial` option removed from `createFavoriteToggle` and both callers.                                                                                                                  |
+| S6                  | Spec                | defer       | `.scratch/carry-forward/issues/480-a11y-baseline-covers-only-epic-names.md`                                                                                                                                                          |
+| ST1                 | Standards           | fixed       | Fork `7c001b365`: "carries" → "includes"/"has" in rank.ts (PROVENANCE row updated, E-W3 green) and `_upgrades_tab.scss`.                                                                                                             |
+| ST2                 | Standards           | fixed       | Fork `7c001b365`: the `initial` comment/parameter and the duplicate `candidateSlotIndex` comment removed; unused `_sim`/`_bt` params dropped from `refreshToggles`.                                                                  |
+| ST3                 | Standards           | wontfix     | `subscribe` flag and the two `refresh` closures stay: the Gear list subscribes per row by design (parity) and the Upgrades tab must not; a shared `paint()` helper is a judgement call not worth a PROVENANCE-free churn commit now. |
+| ST4                 | Standards           | wontfix     | `FavoriteKey.method: keyof DatabaseFilters` mirrors the Gear picker's five favourite arrays; narrowing it would fork the two callers' types.                                                                                         |
