@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner walkthrough of the 472 render, 2026-09-22
 Blocks: none
@@ -26,3 +26,7 @@ Pointers: `itemCell` in `upgrades_tab.tsx` (~:3375), provisional item-cell
 rules `_upgrades_tab.scss` ~:1027-1110, slot column `td:nth-child(3)` rules.
 
 Preserve 468 (name wrap during simming) and 469 (header alignment).
+
+## Comments
+
+2026-09-22: closed. Fork 2f103d8f (icon is a sibling of a stacked `.upgrades-item-text` block: name link over a `.upgrades-item-tags` line holding BiS/set badges and (Owned); slot column 0.875rem at both breakpoints); main re-pin 398380f2; `pnpm verify` rc=0; layout gate `passed:53 failed:0 a11yFailed:0`. Caveat: the tab-review captures under .scratch/stage-gate/upgrades-rowstyle/captures/474/ landed on untagged rows, so the tag line is proven by markup and the gate's clip/height assertions, not yet by a screenshot; a tagged row is to be eyeballed in the arc's final live run.
