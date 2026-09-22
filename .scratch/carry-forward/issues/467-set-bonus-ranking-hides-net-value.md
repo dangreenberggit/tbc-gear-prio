@@ -106,3 +106,12 @@ directory), so it goes through the PROVENANCE re-pin cycle and the desktop gate,
 not just a locale change. Verify live on the Go backend with a set that has both
 2pc and 4pc implemented (Thunderheart 676 / Lightbringer 680), across worn counts
 0/1/2/3 and across a broken-set case, in both toggle states.
+
+## Comments
+
+2026-09-22 (review round 6): the engine/display work shipped on
+feat/tab-signoff-followups (fork a30920410, 994d5a7b9; main 1543971c,
+ef23b82f) but this ticket has no closing check recorded. Round 6 found two
+material gaps in that math, filed as 476 and 477, plus 478/479. Leave open
+until those are dispositioned; the owner's live check (Thunderheart 676 /
+Lightbringer 680 across worn counts) is still unrecorded.

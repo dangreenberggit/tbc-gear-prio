@@ -256,3 +256,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 450 a11y focus-walk passes green when it measures nothing (round 4 adversarial) 2026-09-19
 - 451 test-review.mjs green on entry with empty widths (round 4 adversarial) 2026-09-19
 - 452 EPIC: end ret/feralcat tunnel vision, support all DPS specs (owner directive) 2026-09-19
+- 476 Net set-bonus misses lower threshold on a tier-set swap (round 6 A2/D1, material) 2026-09-22
+- 477 Commit-time break with no measured B credits gain, drops loss (round 6 A1, material) 2026-09-22
+- 478 Net set-bonus minor follow-ups bundle (round 6 A3/A4/D3/A5/D2, minor) 2026-09-22
+- 479 Set-bonus tooltip piece count excludes hovered piece (round 6 D4/D5, minor/copy) 2026-09-22
+- 480 a11y baseline covers only epic-quality names, hypothesis (round 6 S6, minor) 2026-09-22
