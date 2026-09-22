@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner walkthrough of the 472 render, 2026-09-22
 Blocks: none
@@ -29,3 +29,7 @@ because it repeats the DPS column. Remove the now-dead i18n keys
 
 Control gone from the View options row, tooltip starts at the set-context
 line, i18n keys cleaned, layout gate + verify green, re-pin.
+
+## Comments
+
+2026-09-22: closed. Fork 2db3e0e3: SetCreditControl and its SCSS removed; credit mode pinned to module constant `SET_CREDIT = 'full'` (the control's own default and its forced value when disabled; 467 gate-visual OFF state read Full set); `tip_item_alone` line dropped so the tooltip starts at the set-context line; eight dead i18n keys removed from translation.json and translation.schema.json. Main re-pin ccdaa4f5; `pnpm verify` rc=0; layout gate `passed:53 failed:0 a11yFailed:0`. Live tooltip text confirmed in the arc's final :5173 run (see 472 comments).
