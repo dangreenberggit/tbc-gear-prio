@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner review of the 472 render (screenshot .scratch/handoffs/owner-screens/2026-09-22-upgrades-header-glitch.png), 2026-09-22
 Blocks: none
@@ -22,3 +22,7 @@ the screenshot).
 
 Pointers: `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
 `vendor/tbc-new-fork/ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss`.
+
+## Comments
+
+2026-09-22: closed. Root cause: `.sim-header` is sticky (z-index 100) inside the `.sim-ui` scroller; below xl the run-settings card is reordered above the results and once it scrolls past, the View options row sits under the header, whose background/border painted over the heading. Fix (fork d7d55f35a): `scroll-margin-top: var(--sim-header-height)` on `.upgrades-view-controls-host`; settings card stays sticky (gate assertion). Verified by manual scroll sweep at 1070 and tab-review at 1070/1024/1280. Main re-pin ef5c84ac.
