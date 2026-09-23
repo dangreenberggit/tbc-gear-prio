@@ -269,4 +269,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 486 Results area typography inconsistent, sloppy (owner review of 472 render) 2026-09-22
 - 487 View options heading clipped at ~1070px (owner review of 472 render) 2026-09-22
 - 488 EPIC: upgrades tab polish arc, umbrella for 483-487 (owner review of 472 render) 2026-09-22
-- 489 — widen Source column cap (owner: four-line Source rows are pointless) — `.scratch/carry-forward/issues/489-widen-source-column-cap.md`
+- 489 Widen Source column cap so rows are not four lines tall (owner live look) 2026-09-22
