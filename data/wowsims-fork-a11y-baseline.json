@@ -12,6 +12,13 @@
       "match": "css",
       "ticket": "473",
       "reason": "inherited item-quality colour (#a335ee epic) on the 472 zebra rows; identical pair on the Gear-tab item list; owner-accepted debt 2026-09-22"
+    },
+    {
+      "ruleId": "color-contrast",
+      "selector": ".upgrades-item-name.text-rare",
+      "match": "css",
+      "ticket": "480",
+      "reason": "inherited item-quality colour (#0070dd rare: 3.26:1 on #222328, 3.65:1 on #18191e) on the 472 zebra rows; same pair as the Gear-tab item list; measured under ticket 480, sibling of the 473 epic entry. The gate's mid-run ret capture may hold no rare-quality name, so a 'stale-baseline ... never fired' warning for this entry is expected: do not remove it for that reason"
     }
   ]
 }
