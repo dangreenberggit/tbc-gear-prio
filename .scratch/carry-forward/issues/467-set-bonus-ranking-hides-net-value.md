@@ -141,3 +141,26 @@ is Thunderheart 2pc, so `brokenSetValues` has exactly one possible key
 (676:2), measured (−108.6 shown); by the case-8 invariant the flag adds one
 sim. The tab does not expose the `Ranking` object, so the count is derived
 from the worn state, not read.
+
+2026-09-24 — Round-2 captures for the owner's live check (Step 7; this ticket
+stays open until the owner answers). 38 PNGs at 1280px in
+`.scratch/stage-gate/upgrades-tab-closeout/round-2/` (gitignored), one sentence
+each in its `index.json`, full row lists per state in `feral-worn{0..4}.json`
+and `ret-default.json`. Fork `371da7dce`, backend :3333, 3000 iterations, each
+state a fresh settled run (159–185s). Feral Thunderheart at worn 4 (default),
+3, 2, 1, 0, each OFF and ON with the top Thunderheart row's tooltip (worn 4
+has no Thunderheart set line). Broken-set case: Malorne and Nordrassil rows at
+worn 2, 3 and 4. Ret: default gear wears 0 Lightbringer; Lightbringer,
+Justicar and Crystalforge tooltips. Gear was set with the picker in the
+browser pane; the captures load the pane's Export -> Link URL in a headless
+Chrome, because the pane cannot write PNG files. Visual verdict: **pass** on
+all six states (handoff `.scratch/handoffs/visual-review-467-round-2.md`); all
+86 set rows satisfy ON = OFF + shown futures − shown commit breaks within
+±0.2, and the tooltip is the same in both states. Findings for the owner /
+Gate C, not fixed here: (1) the "hover for set detail" sub-line prints over
+the Source column (`feral-worn1-table-on.png` rows 1–10 and 12); (2) no
+capture shows the "set bonus not counted" line; (3) at worn 1 the
+Thunderheart 4pc future is not shown and ON equals OFF — its net is at or
+below the floor (hypothesis, untested: the 2pc is unmeasurable at worn 1, so
+each single in the 4pc package carries the 2pc and the raw 4pc comes out near
+B4 − 2·B2); (4) the SME's do-not-trust finding above.
