@@ -43,14 +43,21 @@ const THUNDERHEART = {
   chest: 31042, // Thunderheart Chestguard
   hands: 31034, // Thunderheart Gauntlets
   legs: 31044, // Thunderheart Leggings
+  wrist: 34444, // Thunderheart Wristguards
+  waist: 34556, // Thunderheart Waistguard
+  feet: 34573, // Thunderheart Treads
 } as const;
 const MALORNE = {
+  head: 29098, // Stag-Helm of Malorne
+  shoulder: 29100, // Mantle of Malorne
   hands: 29097, // Gauntlets of Malorne
   legs: 29099, // Greaves of Malorne
   chest: 29096, // Breastplate of Malorne
 } as const;
-// Non-set leather items for the neutral vacate replacements, per slot.
+// Non-set items for the neutral vacate replacements, per slot.
 const NEUTRAL = {
+  head: [10150],
+  shoulder: [10153],
   hands: [10140, 10149],
   legs: [8289, 8300],
   chest: [8283, 8290],
@@ -62,10 +69,15 @@ const B2_TH = 50; // Thunderheart 2pc bonus
 const B4_TH = 80; // Thunderheart 4pc bonus
 const V_NEUTRAL = 120; // each neutral candidate's own value
 const B2_MAL = 40; // Malorne 2pc bonus == the broken-bonus value B under test
+// Malorne 4pc. The eight original cases wear at most 3 Malorne, so it never
+// fires there; the 476 cases wear 4 and 5.
+const B4_MAL = 70;
 
-const SET_BONUSES: Record<number, { b2: number; b4: number }> = {
+type SetBonusTable = Record<number, { b2: number; b4: number }>;
+
+const SET_BONUSES: SetBonusTable = {
   676: { b2: B2_TH, b4: B4_TH },
-  640: { b2: B2_MAL, b4: 0 },
+  640: { b2: B2_MAL, b4: B4_MAL },
 };
 const ITEM_VALUE = new Map<number, number>([
   ...Object.values(THUNDERHEART).map((id) => [id, V_TH] as const),
@@ -128,18 +140,20 @@ function equippedIds(req: RaidSimRequest): number[] {
 /** The controlled DPS: base + own values + active implemented set bonuses. */
 function modelDps(
   ids: readonly number[],
-  getSetId: (id: number) => number | undefined
+  getSetId: (id: number) => number | undefined,
+  itemValue: ReadonlyMap<number, number> = ITEM_VALUE,
+  setBonuses: SetBonusTable = SET_BONUSES
 ): number {
   let dps = BASE_DPS;
   const setCounts = new Map<number, number>();
   for (const id of ids) {
     if (!id) continue;
-    dps += ITEM_VALUE.get(id) ?? 0;
+    dps += itemValue.get(id) ?? 0;
     const setId = getSetId(id);
     if (setId != null) setCounts.set(setId, (setCounts.get(setId) ?? 0) + 1);
   }
   for (const [setId, count] of setCounts) {
-    const bonus = SET_BONUSES[setId];
+    const bonus = setBonuses[setId];
     if (!bonus) continue;
     if (count >= 2) dps += bonus.b2;
     if (count >= 4) dps += bonus.b4;
@@ -160,19 +174,32 @@ const FERAL_SUMMARY = {
 type WornSpec = { id: number; slot: SimOrderName };
 type PoolSpec = {
   itemId: number;
-  slot: "head" | "shoulder" | "chest" | "hands" | "legs";
+  slot:
+    | "head"
+    | "shoulder"
+    | "chest"
+    | "wrist"
+    | "hands"
+    | "waist"
+    | "legs"
+    | "feet";
 };
 
 type Scenario = {
   worn: WornSpec[];
   pool: PoolSpec[];
   measureBrokenSetValue?: boolean;
+  /** Overrides the module's per-item values for this scenario only. */
+  itemValue?: ReadonlyMap<number, number>;
+  /** Overrides the module's per-set bonuses for this scenario only. */
+  setBonuses?: SetBonusTable;
 };
 
 type ForkRanking = {
   items: Array<{
     itemId: number;
     deltaDps: number;
+    owned?: boolean;
     setContext?: {
       setId: number;
       piecesWornBefore: number;
@@ -273,7 +300,12 @@ async function runScenario(
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
       runCount += 1;
       return Promise.resolve({
-        dps: modelDps(equippedIds(req), getSetId),
+        dps: modelDps(
+          equippedIds(req),
+          getSetId,
+          scenario.itemValue,
+          scenario.setBonuses
+        ),
         stdev: 30,
         iterationsDone: opts.iterations,
         simVersion: SIM_VERSION,
@@ -614,5 +646,329 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
       },
     };
     expect(rankableSetPotential(tiny, floor, "full")).toBe(0);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Tickets 476, 477, 478: every lost threshold, the solved B, the
+ * inflation sign, the commit-break fallback and the owned-row guard.
+ * Every literal is derived by hand from the controlled model in
+ * .scratch/stage-gate/upgrades-tab-closeout/round-2/plan.md § Derivations.
+ * ------------------------------------------------------------------ */
+
+const FLOOR = 5;
+
+type ViewMod = {
+  rankableSetPotential: (
+    item: { setContext?: unknown },
+    noiseFloorDps: number,
+    setCredit?: "full" | "split"
+  ) => number;
+};
+
+async function viewModule(): Promise<ViewMod> {
+  return importForkUpgrades<ViewMod>("engine/view.ts");
+}
+
+/** Runs a scenario with the B flag off and on, for the sim-count invariant. */
+async function runOffOn(scenario: Omit<Scenario, "measureBrokenSetValue">) {
+  const off = await runScenario(scenario);
+  const on = await runScenario({ ...scenario, measureBrokenSetValue: true });
+  return { off, on };
+}
+
+function bsvDps(
+  ranking: ForkRanking,
+  setId: number,
+  threshold: number
+): number | undefined {
+  return (ranking.brokenSetValues ?? []).find(
+    (b) => b.setId === setId && b.threshold === threshold
+  )?.dps;
+}
+
+function netOf(
+  ranking: ForkRanking,
+  setId: number,
+  threshold: number
+): number | undefined {
+  return (ranking.setBonuses ?? []).find(
+    (b) => b.setId === setId && b.threshold === threshold
+  )?.bonusDpsNet;
+}
+
+const brk = (b: { setId: number; threshold: number; dps?: number }) => ({
+  setId: b.setId,
+  threshold: b.threshold,
+  dps: b.dps === undefined ? undefined : Math.round(b.dps),
+});
+
+const fut = (f: { threshold: number; piecesNeeded: number; dps?: number }) => ({
+  threshold: f.threshold,
+  piecesNeeded: f.piecesNeeded,
+  dps: f.dps === undefined ? undefined : Math.round(f.dps),
+});
+
+// Worn Malorne head, shoulder, chest, hands; Thunderheart and neutral
+// candidates in exactly those four slots (D1, D2).
+const MALORNE_4 = {
+  head: MALORNE.head,
+  shoulder: MALORNE.shoulder,
+  chest: MALORNE.chest,
+  hands: MALORNE.hands,
+} as const;
+const TH_OVER_MALORNE_POOL: PoolSpec[] = [
+  { itemId: THUNDERHEART.head, slot: "head" },
+  { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+  { itemId: THUNDERHEART.chest, slot: "chest" },
+  { itemId: THUNDERHEART.hands, slot: "hands" },
+  { itemId: NEUTRAL.head[0], slot: "head" },
+  { itemId: NEUTRAL.shoulder[0], slot: "shoulder" },
+  { itemId: NEUTRAL.chest[0], slot: "chest" },
+  { itemId: NEUTRAL.hands[0], slot: "hands" },
+];
+const TH_FOUR_IDS = [
+  THUNDERHEART.head,
+  THUNDERHEART.shoulder,
+  THUNDERHEART.chest,
+  THUNDERHEART.hands,
+];
+
+describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
+  it("476-A: worn Malorne 4 — both thresholds measured, B_2 solved exactly", async () => {
+    const view = await viewModule();
+    const { off, on } = await runOffOn({
+      worn: wornGear(MALORNE_4),
+      pool: TH_OVER_MALORNE_POOL,
+    });
+    const r = on.ranking;
+    // B_4 from the worn = t vacate; B_2 solved from the 3-slot vacate, where
+    // the naive Σs − Δ is B_2 − 2·B_4 = −100.
+    expect(near(bsvDps(r, 640, 4)!, 70, 0.5)).toBe(true);
+    expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
+    expect(near(netOf(r, 676, 2)!, 50, 0.5)).toBe(true);
+    expect(near(netOf(r, 676, 4)!, 80, 0.5)).toBe(true);
+    for (const id of TH_FOUR_IDS) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, 30, 0.5)).toBe(true);
+      const ctx = row.setContext!;
+      expect((ctx.singleBreaks ?? []).map(brk)).toEqual([
+        { setId: 640, threshold: 4, dps: 70 },
+      ]);
+      expect((ctx.commitBreaks ?? []).map(brk)).toEqual([
+        { setId: 640, threshold: 2, dps: 40 },
+      ]);
+      expect((ctx.futureBonuses ?? []).map(fut)).toEqual([
+        { threshold: 2, piecesNeeded: 2, dps: 50 },
+        { threshold: 4, piecesNeeded: 4, dps: 80 },
+      ]);
+      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 90, 0.5)).toBe(
+        true
+      );
+      expect(near(view.rankableSetPotential(row, FLOOR, "split"), 5, 0.5)).toBe(
+        true
+      );
+    }
+    // One vacate sim per target, (640,4) and (640,2).
+    expect(on.runCount - off.runCount).toBe(2);
+    // C31 / ADR-0034: rows are not additive in either credit view. The package
+    // net is 90; four rows sum to 360 under full and 20 under split.
+    const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
+    const fullSum = rows.reduce(
+      (s, row) => s + view.rankableSetPotential(row, FLOOR, "full"),
+      0
+    );
+    const splitSum = rows.reduce(
+      (s, row) => s + view.rankableSetPotential(row, FLOOR, "split"),
+      0
+    );
+    expect(near(fullSum, 360, 2)).toBe(true);
+    expect(near(splitSum, 20, 2)).toBe(true);
+  });
+
+  it("476-B: worn Malorne 5 — both thresholds lost by the package, net4 sign fixed", async () => {
+    const view = await viewModule();
+    const { ranking: r } = await runScenario({
+      worn: wornGear({ ...MALORNE_4, legs: MALORNE.legs }),
+      pool: TH_OVER_MALORNE_POOL,
+      measureBrokenSetValue: true,
+    });
+    // Naive Σs − Δ for (640,2) is B_2 + B_4 = 110.
+    expect(near(bsvDps(r, 640, 4)!, 70, 0.5)).toBe(true);
+    expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
+    expect(near(netOf(r, 676, 2)!, 50, 0.5)).toBe(true);
+    // Today's sign gives 180; every-threshold with the old sign gives 220.
+    expect(near(netOf(r, 676, 4)!, 80, 0.5)).toBe(true);
+    const row = thRow(r, THUNDERHEART.head);
+    expect(near(row.deltaDps, 100, 0.5)).toBe(true);
+    expect(row.setContext?.singleBreaks ?? []).toEqual([]);
+    expect((row.setContext?.commitBreaks ?? []).map(brk)).toEqual([
+      { setId: 640, threshold: 4, dps: 70 },
+      { setId: 640, threshold: 2, dps: 40 },
+    ]);
+    expect(near(view.rankableSetPotential(row, FLOOR, "full"), 20, 0.5)).toBe(
+      true
+    );
+  });
+
+  it("477-P: a commit break without a measured B zeroes the credit", async () => {
+    const view = await viewModule();
+    const item = {
+      setContext: {
+        futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
+        commitBreaks: [{ setId: 640, threshold: 2 }],
+      },
+    };
+    expect(view.rankableSetPotential(item, FLOOR, "full")).toBe(0);
+    expect(view.rankableSetPotential(item, FLOOR, "split")).toBe(0);
+  });
+
+  it("477-T: the legs row's substituted package breaks Malorne 2pc — measured, net shown", async () => {
+    // D3: Malorne chest, hands, legs worn (2pc active). Thunderheart wrist,
+    // waist, feet at 150 let the 4pc package avoid all but one Malorne slot, so
+    // only the legs row's substituted package breaks the 2pc.
+    const view = await viewModule();
+    const itemValue = new Map(ITEM_VALUE);
+    for (const id of [
+      THUNDERHEART.wrist,
+      THUNDERHEART.waist,
+      THUNDERHEART.feet,
+    ])
+      itemValue.set(id, 150);
+    const { off, on } = await runOffOn({
+      worn: wornGear({
+        chest: MALORNE.chest,
+        hands: MALORNE.hands,
+        legs: MALORNE.legs,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.wrist, slot: "wrist" },
+        { itemId: THUNDERHEART.waist, slot: "waist" },
+        { itemId: THUNDERHEART.feet, slot: "feet" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: NEUTRAL.chest[0], slot: "chest" },
+        { itemId: NEUTRAL.hands[0], slot: "hands" },
+      ],
+      itemValue,
+    });
+    const r = on.ranking;
+    const legs = thRow(r, THUNDERHEART.legs);
+    expect(near(legs.deltaDps, 100, 0.5)).toBe(true);
+    expect(legs.setContext?.singleBreaks ?? []).toEqual([]);
+    expect((legs.setContext?.futureBonuses ?? []).map(fut)).toEqual([
+      { threshold: 2, piecesNeeded: 2, dps: 50 },
+      { threshold: 4, piecesNeeded: 4, dps: 80 },
+    ]);
+    // Q2 branch (b): the break is a measurement target, so the row nets it.
+    expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
+    expect((legs.setContext?.commitBreaks ?? []).map(brk)).toEqual([
+      { setId: 640, threshold: 2, dps: 40 },
+    ]);
+    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 90, 0.5)).toBe(
+      true
+    );
+    // Discovery is bounded by distinct keys, not rows (the case-8 invariant).
+    const measured = (r.brokenSetValues ?? []).filter(
+      (b) => b.dps !== undefined
+    ).length;
+    expect(on.runCount - off.runCount).toBe(measured);
+    expect(measured).toBe(1);
+    // The package's own members break nothing and keep the full 50 + 80.
+    for (const id of [
+      THUNDERHEART.wrist,
+      THUNDERHEART.waist,
+      THUNDERHEART.feet,
+      THUNDERHEART.hands,
+    ]) {
+      const row = thRow(r, id);
+      expect(row.setContext?.commitBreaks ?? []).toEqual([]);
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "full"), 130, 0.5)
+      ).toBe(true);
+    }
+  });
+
+  it("A3-U: netInflation adds back a break only the 2pc package's end state has", async () => {
+    const setValue = await importForkUpgrades<{
+      netInflation: (
+        keys: ReadonlyArray<{
+          setId: number;
+          threshold: number;
+          membersPkg: number;
+          members2pc: number;
+          pkgEnd: number;
+          twoPcEnd: number;
+          B: number;
+        }>
+      ) => number;
+    }>("engine/set-value.ts");
+    // I = (membersPkg − members2pc − pkgEnd + twoPcEnd)·B = (0 − 0 − 0 + 1)·40.
+    const raw = 100;
+    const inflation = setValue.netInflation([
+      {
+        setId: 999,
+        threshold: 2,
+        membersPkg: 0,
+        members2pc: 0,
+        pkgEnd: 0,
+        twoPcEnd: 1,
+        B: 40,
+      },
+    ]);
+    expect(raw - inflation).toBe(60);
+  });
+
+  it("A3-R: no implemented-set member is a ring or trinket (478 wontfix pin)", () => {
+    // 478 A3's ring/trinket half is wontfix because no member of an
+    // IMPLEMENTED_IN_SIM set sits in a two-slot item type (11 finger, 12
+    // trinket), so a set piece never has two candidate slots. This pins it.
+    const db = JSON.parse(
+      readFileSync(
+        join(root, "vendor/tbc-new-fork/assets/database/db.json"),
+        "utf8"
+      )
+    ) as { items: Array<{ id: number; type: number; setId?: number }> };
+    const implemented = new Set([626, 629, 640, 641, 676, 680]);
+    const twoSlot = db.items.filter(
+      (i) =>
+        i.setId !== undefined &&
+        implemented.has(i.setId) &&
+        (i.type === 11 || i.type === 12)
+    );
+    expect(twoSlot).toEqual([]);
+  });
+
+  it("A4: an owned row's swap adds no piece, so it gets no future credit", async () => {
+    // D4: Thunderheart hands + legs worn; the pool holds the worn hands (owned).
+    const view = await viewModule();
+    const { ranking: r } = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands, legs: THUNDERHEART.legs }),
+      pool: [
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: THUNDERHEART.head, slot: "head" },
+        { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+      ],
+      measureBrokenSetValue: true,
+    });
+    // At worn 2 the 2pc package loop skips threshold 2 before pushing anything.
+    expect(
+      (r.setBonuses ?? []).filter((b) => b.setId === 676 && b.threshold === 2)
+    ).toEqual([]);
+    const owned = thRow(r, THUNDERHEART.hands);
+    expect(owned.owned).toBe(true);
+    expect(owned.setContext?.piecesWornBefore).toBe(2);
+    expect(owned.setContext?.piecesAfterSwap).toBe(2);
+    expect(owned.setContext?.futureBonuses).toBeUndefined();
+    expect(view.rankableSetPotential(owned, FLOOR, "full")).toBe(0);
+    expect(view.rankableSetPotential(owned, FLOOR, "split")).toBe(0);
+    const head = thRow(r, THUNDERHEART.head);
+    expect((head.setContext?.futureBonuses ?? []).map(fut)).toEqual([
+      { threshold: 4, piecesNeeded: 2, dps: 80 },
+    ]);
+    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 80, 0.5)).toBe(
+      true
+    );
   });
 });
