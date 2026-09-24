@@ -61,3 +61,19 @@ This needs an owner or orchestrator decision before any code. The rest of
    layout gate run.
 4. A new SME verdict on the same worn-Thunderheart-2 state that is not
    `do-not-trust` for the ON view.
+
+## Comments
+
+- 2026-09-24 (round 2b, Step 0): the owner has not chosen the stopping
+  rule, so **best-stop** ships provisionally. Full-path is one constant
+  (`RULE_490` in `packages/core/test/fork-set-net.test.ts`) and one
+  function (`view.ts` `setPotentialCredit`) away.
+- 2026-09-24 (round 2b, Step 1): red fixtures committed. Observed on fork
+  `371da7dce`, matching the plan's "today" column: 490-A chest/head/shoulder
+  full −10, split −30, futures carry no `breaks`, `packageItemIds` 640:2
+  {29096, 29098} and 640:4 {29096, 29097, 29098, 29100}, runs 10 → 11 with the
+  flag, B(676,2) = 50; 490-B chest full 20, split −22.5; 490-C Nordrassil
+  chest/head/shoulder full −50. Command:
+  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
+  → rc=1, 8 failed (490-A/B/C, 491-P/L, 492-F, 477-T, credit-view), parity
+  green.

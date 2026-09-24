@@ -54,6 +54,14 @@ const MALORNE = {
   legs: 29099, // Greaves of Malorne
   chest: 29096, // Breastplate of Malorne
 } as const;
+// Nordrassil Harness 641: only its 4pc is implemented in the sim.
+const NORDRASSIL = {
+  chest: 30222, // Nordrassil Chestplate
+  hands: 30223, // Nordrassil Handgrips
+  head: 30228, // Nordrassil Headdress
+  legs: 30229, // Nordrassil Feral-Kilt
+  shoulder: 30230, // Nordrassil Feral-Mantle
+} as const;
 // Non-set items for the neutral vacate replacements, per slot.
 const NEUTRAL = {
   head: [10150],
@@ -210,6 +218,7 @@ type ForkRanking = {
         threshold: number;
         piecesNeeded: number;
         dps?: number;
+        breaks?: Array<{ setId: number; threshold: number; dps?: number }>;
       }>;
       commitBreaks?: Array<{ setId: number; threshold: number; dps?: number }>;
       commitPackageDeltaDps?: number;
@@ -219,9 +228,11 @@ type ForkRanking = {
   setBonuses?: Array<{
     setId: number;
     threshold: number;
+    packageItemIds?: number[];
     bonusDps?: number;
     bonusDpsNet?: number;
     unmeasured?: string;
+    selfConfound?: { threshold: number; dps?: number };
   }>;
   brokenSetValues?: Array<{
     setId: number;
@@ -621,14 +632,29 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
     // Default is full.
     expect(rankableSetPotential(ctx, floor)).toBe(130);
 
-    // commit break subtracts.
+    // A break on the future's own path subtracts (490).
     const withBreak = {
+      setContext: {
+        futureBonuses: [
+          {
+            threshold: 4,
+            piecesNeeded: 4,
+            dps: 80,
+            breaks: [{ setId: 640, threshold: 2, dps: 40 }],
+          },
+        ],
+      },
+    };
+    expect(rankableSetPotential(withBreak, floor, "full")).toBe(40);
+    // A measured break on the top package alone is disclosure, not charged:
+    // the row's own path may not need it (490).
+    const topPackageOnly = {
       setContext: {
         futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
         commitBreaks: [{ setId: 640, threshold: 2, dps: 40 }],
       },
     };
-    expect(rankableSetPotential(withBreak, floor, "full")).toBe(40);
+    expect(rankableSetPotential(topPackageOnly, floor, "full")).toBe(80);
 
     // Fallback: any future bonus lacking dps -> whole credit 0.
     const unmeasured = {
@@ -860,12 +886,18 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       { threshold: 2, piecesNeeded: 2, dps: 50 },
       { threshold: 4, piecesNeeded: 4, dps: 80 },
     ]);
-    // Q2 branch (b): the break is a measurement target, so the row nets it.
+    // The top package with legs substituted breaks Malorne 2pc, so it is a
+    // measurement target and disclosed. The legs row's own path to each future
+    // (legs plus the best remaining package pieces) keeps Malorne chest and
+    // hands, so it breaks nothing and the row keeps 50 + 80 = 130 (490, C27).
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect((legs.setContext?.commitBreaks ?? []).map(brk)).toEqual([
       { setId: 640, threshold: 2, dps: 40 },
     ]);
-    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 90, 0.5)).toBe(
+    for (const f of legs.setContext?.futureBonuses ?? []) {
+      expect(f.breaks ?? []).toEqual([]);
+    }
+    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 130, 0.5)).toBe(
       true
     );
     // Discovery is bounded by distinct keys, not rows (the case-8 invariant).
@@ -970,5 +1002,257 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     expect(near(view.rankableSetPotential(head, FLOOR, "full"), 80, 0.5)).toBe(
       true
     );
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Tickets 490-493: breaks charged along each future's own path, one
+ * stopping point chosen on full values, the "not counted" rule, and the
+ * worn-1 4pc recovered with one pair sim. Every literal is derived by hand
+ * from the controlled model in
+ * .scratch/stage-gate/upgrades-tab-closeout/round-2b/plan.md § Derivations.
+ * ------------------------------------------------------------------ */
+
+/**
+ * The 490 stopping rule this suite pins. "best-stop": stop at the threshold
+ * where committing pays best on full values, or not at all. "full-path":
+ * charge every break on the path to every credited future. An owner
+ * preference, not a game fact; only 490-B separates them.
+ */
+const RULE_490: "best-stop" | "full-path" = "best-stop";
+
+/** Item values with the given set pieces at the Thunderheart value (100). */
+function withSetValues(ids: readonly number[]): Map<number, number> {
+  const values = new Map(ITEM_VALUE);
+  for (const id of ids) values.set(id, V_TH);
+  return values;
+}
+
+const futB = (f: {
+  threshold: number;
+  piecesNeeded: number;
+  dps?: number;
+  breaks?: Array<{ setId: number; threshold: number; dps?: number }>;
+}) => ({ ...fut(f), breaks: (f.breaks ?? []).map(brk) });
+
+const sortedIds = (ids: readonly number[] | undefined) =>
+  [...(ids ?? [])].sort((a, b) => a - b);
+
+function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
+  return (ranking.setBonuses ?? []).find(
+    (b) => b.setId === setId && b.threshold === threshold
+  );
+}
+
+type SubLineMod = ViewMod & {
+  setCreditUnmeasured: (ctx: unknown) => boolean;
+  setBonusSubLine: (
+    ctx: unknown,
+    on: boolean
+  ) => "not_counted" | "hover_hint" | null;
+  applyView: (
+    r: unknown,
+    v: { withSetPotential?: boolean; setCredit?: "full" | "split" }
+  ) => { rows: Array<{ itemId: number }> };
+};
+
+// D-490: Thunderheart hands + legs worn (676 at 2); neutral hands and legs so
+// B(676,2) can be measured.
+const TH_HANDS_LEGS = wornGear({
+  hands: THUNDERHEART.hands,
+  legs: THUNDERHEART.legs,
+});
+const NEUTRAL_HANDS_LEGS: PoolSpec[] = [
+  { itemId: NEUTRAL.hands[0], slot: "hands" },
+  { itemId: NEUTRAL.legs[0], slot: "legs" },
+];
+const setPool = (set: Readonly<Partial<Record<PoolSpec["slot"], number>>>) =>
+  (Object.entries(set) as Array<[PoolSpec["slot"], number]>).map(
+    ([slot, itemId]) => ({ itemId, slot })
+  );
+
+async function run490(setBonuses?: SetBonusTable) {
+  return runOffOn({
+    worn: TH_HANDS_LEGS,
+    pool: [...setPool(MALORNE), ...NEUTRAL_HANDS_LEGS],
+    itemValue: withSetValues(Object.values(MALORNE)),
+    ...(setBonuses ? { setBonuses } : {}),
+  });
+}
+
+const TH2_BREAK = { setId: 676, threshold: 2, dps: 50 };
+
+describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
+  it("490-A: a Malorne head/shoulder/chest row is not charged the Thunderheart 2pc its 2pc does not need", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { off, on } = await run490({
+      676: { b2: B2_TH, b4: B4_TH },
+      640: { b2: 40, b4: 0 },
+    });
+    const r = on.ranking;
+    expect(near(r.baseline.dps, 3250, 0.5)).toBe(true);
+    expect(near(bsvDps(r, 676, 2)!, 50, 0.5)).toBe(true);
+    expect(on.runCount - off.runCount).toBe(1);
+    expect(sortedIds(bonusOf(r, 640, 2)?.packageItemIds)).toEqual([
+      29096, 29098,
+    ]);
+    expect(sortedIds(bonusOf(r, 640, 4)?.packageItemIds)).toEqual([
+      29096, 29097, 29098, 29100,
+    ]);
+    for (const id of [MALORNE.chest, MALORNE.head, MALORNE.shoulder]) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, 100, 0.5)).toBe(true);
+      expect(row.setContext?.singleBreaks ?? []).toEqual([]);
+      expect((row.setContext?.futureBonuses ?? []).map(futB)).toEqual([
+        { threshold: 2, piecesNeeded: 2, dps: 40, breaks: [] },
+        { threshold: 4, piecesNeeded: 4, dps: 0, breaks: [TH2_BREAK] },
+      ]);
+      expect((row.setContext?.commitBreaks ?? []).map(brk)).toEqual([
+        TH2_BREAK,
+      ]);
+      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
+        true
+      );
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "split"), 20, 0.5)
+      ).toBe(true);
+    }
+    for (const id of [MALORNE.hands, MALORNE.legs]) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, -50, 0.5)).toBe(true);
+      expect((row.setContext?.singleBreaks ?? []).map(brk)).toEqual([
+        TH2_BREAK,
+      ]);
+      for (const f of row.setContext?.futureBonuses ?? []) {
+        expect(f.breaks ?? []).toEqual([]);
+      }
+      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
+        true
+      );
+    }
+    const top3 = view
+      .applyView(r, { withSetPotential: true })
+      .rows.slice(0, 3)
+      .map((row) => row.itemId);
+    expect(sortedIds(top3)).toEqual([29096, 29098, 29100]);
+  });
+
+  it("490-B: a real 4pc worth less than the break it needs (rule discriminator)", async () => {
+    const view = await viewModule();
+    const { on } = await run490({
+      676: { b2: B2_TH, b4: B4_TH },
+      640: { b2: 40, b4: 30 },
+    });
+    const chest = thRow(on.ranking, MALORNE.chest);
+    expect((chest.setContext?.futureBonuses ?? []).map(futB)).toEqual([
+      { threshold: 2, piecesNeeded: 2, dps: 40, breaks: [] },
+      { threshold: 4, piecesNeeded: 4, dps: 30, breaks: [TH2_BREAK] },
+    ]);
+    const full = view.rankableSetPotential(chest, FLOOR, "full");
+    const split = view.rankableSetPotential(chest, FLOOR, "split");
+    if (RULE_490 === "best-stop") {
+      // R_2 = 40, R_4 = 40 + 30 − 50 = 20: stop at the 2pc.
+      expect(near(full, 40, 0.5)).toBe(true);
+      expect(near(split, 20, 0.5)).toBe(true);
+    } else {
+      expect(near(full, 20, 0.5)).toBe(true);
+      expect(near(split, -22.5, 0.5)).toBe(true);
+    }
+  });
+
+  it("490-C: a Nordrassil row whose only bonus needs the Thunderheart 2pc break gets ON = OFF", async () => {
+    const view = await viewModule();
+    const { ranking: r } = await runScenario({
+      worn: TH_HANDS_LEGS,
+      pool: [...setPool(NORDRASSIL), ...NEUTRAL_HANDS_LEGS],
+      itemValue: withSetValues(Object.values(NORDRASSIL)),
+      measureBrokenSetValue: true,
+    });
+    for (const id of [NORDRASSIL.chest, NORDRASSIL.head, NORDRASSIL.shoulder]) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, 100, 0.5)).toBe(true);
+      expect((row.setContext?.futureBonuses ?? []).map(futB)).toEqual([
+        { threshold: 4, piecesNeeded: 4, dps: 0, breaks: [TH2_BREAK] },
+      ]);
+      expect(near(row.setContext!.commitPackageDeltaDps!, 250, 0.5)).toBe(true);
+      expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
+      expect(view.rankableSetPotential(row, FLOOR, "split")).toBe(0);
+    }
+  });
+
+  it("491-P: setCreditUnmeasured covers future breaks and commit breaks", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const first = {
+      futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
+      commitBreaks: [{ setId: 640, threshold: 2 }],
+    };
+    expect(view.setCreditUnmeasured(first)).toBe(true);
+    expect(
+      view.setCreditUnmeasured({
+        ...first,
+        commitBreaks: [{ setId: 640, threshold: 2, dps: 40 }],
+      })
+    ).toBe(false);
+    expect(
+      view.setCreditUnmeasured({
+        futureBonuses: [
+          {
+            threshold: 4,
+            piecesNeeded: 4,
+            dps: 80,
+            breaks: [{ setId: 640, threshold: 2 }],
+          },
+        ],
+      })
+    ).toBe(true);
+    // No futures: nothing is credited, so nothing is "not counted".
+    expect(
+      view.setCreditUnmeasured({ commitBreaks: [{ setId: 640, threshold: 2 }] })
+    ).toBe(false);
+    expect(view.rankableSetPotential({ setContext: first }, FLOOR)).toBe(0);
+  });
+
+  it("491-L: the tab's sub-line choice follows the view's zero rule", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const first = {
+      futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
+      commitBreaks: [{ setId: 640, threshold: 2 }],
+    };
+    expect(view.setBonusSubLine(first, true)).toBe("not_counted");
+    expect(view.setBonusSubLine(first, false)).toBe("hover_hint");
+    expect(view.setBonusSubLine({}, true)).toBeNull();
+    expect(view.setBonusSubLine({ crossesThreshold: true }, true)).toBe(
+      "hover_hint"
+    );
+  });
+
+  it("492-F: at worn 1 the 4pc value is recovered with one pair sim", async () => {
+    // Run count before the fix, recorded from the red run (plan D4: 6).
+    const TODAY_492_RUNS = 6;
+    const view = await viewModule();
+    const { ranking: r, runCount } = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: TH_POOL.filter((p) => p.slot !== "hands"),
+    });
+    expect(near(r.baseline.dps, 3100, 0.5)).toBe(true);
+    const th4 = bonusOf(r, 676, 4);
+    // raw4 = B4 − (n−1)·B2 = 80 − 2·50 = −20; the pair sim recovers B2 = 50.
+    expect(near(th4!.bonusDps!, 80, 0.5)).toBe(true);
+    expect(near(th4!.bonusDpsNet!, 80, 0.5)).toBe(true);
+    expect(th4!.selfConfound?.threshold).toBe(2);
+    expect(near(th4!.selfConfound?.dps ?? NaN, 50, 0.5)).toBe(true);
+    const head = thRow(r, THUNDERHEART.head);
+    expect(near(head.deltaDps, 150, 0.5)).toBe(true);
+    expect(head.setContext?.crossesThreshold).toBe(true);
+    expect((head.setContext?.futureBonuses ?? []).map(fut)).toEqual([
+      { threshold: 4, piecesNeeded: 3, dps: 80 },
+    ]);
+    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 80, 0.5)).toBe(
+      true
+    );
+    expect(near(view.rankableSetPotential(head, FLOOR, "split"), 20, 0.5)).toBe(
+      true
+    );
+    expect(runCount).toBe(TODAY_492_RUNS + 1);
   });
 });
