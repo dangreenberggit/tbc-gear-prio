@@ -42,3 +42,13 @@ floor. This has not been checked against the engine's output.
    settles whether the missing 4pc line is correct.
 2. If it is wrong: the fix, re-pin, `pnpm verify` rc=0. If it is right: a
    comment here with the numbers, then close.
+
+## Comments
+
+- 2026-09-24 (round 2b, Step 7): live worn-1 check (feralcat, phase 3,
+  constructed: Thunderheart Gauntlets only, 3000 iterations, baseline
+  2501.5 DPS, "Took 171s", fork f6355d529): the 1→2 Thunderheart rows now
+  show "4pc (1/4): +108.1" and ON = OFF + 108.1 (Pauldrons +112.3 →
+  +220.3). Before the fix the line was hidden. The SME judged +108.1
+  plausible (high side) against round 2's worn-0 4pc of +93.8, and far from
+  the confounded 2·92.9 + 93.8 = 279.6. One run at 3000 iterations.

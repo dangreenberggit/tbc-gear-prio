@@ -77,3 +77,14 @@ This needs an owner or orchestrator decision before any code. The rest of
   `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
   → rc=1, 8 failed (490-A/B/C, 491-P/L, 492-F, 477-T, credit-view), parity
   green.
+- 2026-09-24 (round 2b, Step 7): SME verdict: **trust-with-caveats** for
+  "Set potential" ON, **trust** for OFF, at worn Thunderheart 2 (feralcat,
+  phase 3, constructed state: Thunderheart hands + legs, 3000 iterations,
+  baseline 2603.6 DPS, fork f6355d529). Handoff:
+  `.scratch/handoffs/sme-rank-judgment-490-per-future-breaks.md`. No Malorne
+  or Nordrassil head, shoulder or chest row is charged the Thunderheart 2pc:
+  Breastplate of Malorne +8.6 OFF → +70.9 ON (its 2pc, +62.3); Nordrassil
+  Chestplate +15.1 in both. Every ON figure matches the best-stop rule from
+  its own tooltip. Caveats filed as 497 (4pc values vary with the worn
+  Thunderheart count) and 498 (a head piece is credited a 4pc a cat reaches
+  without it).

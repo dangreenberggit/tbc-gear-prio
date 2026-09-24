@@ -164,3 +164,9 @@ Thunderheart 4pc future is not shown and ON equals OFF — its net is at or
 below the floor (hypothesis, untested: the 2pc is unmeasurable at worn 1, so
 each single in the 4pc package carries the 2pc and the raw 4pc comes out near
 B4 − 2·B2); (4) the SME's do-not-trust finding above.
+- 2026-09-24 (round 2b, Step 7): SME verdict after the 490 fix:
+  **trust-with-caveats** for ON, **trust** for OFF, at worn Thunderheart 2
+  (handoff `.scratch/handoffs/sme-rank-judgment-490-per-future-breaks.md`).
+  The round-2 do-not-trust finding (Malorne and Nordrassil head, shoulder
+  and chest charged the Thunderheart 2pc) is gone. Item (3) above is fixed
+  by 492: at worn 1 the Thunderheart 4pc line now shows +108.1.
