@@ -115,3 +115,5 @@ ef23b82f) but this ticket has no closing check recorded. Round 6 found two
 material gaps in that math, filed as 476 and 477, plus 478/479. Leave open
 until those are dispositioned; the owner's live check (Thunderheart 676 /
 Lightbringer 680 across worn counts) is still unrecorded.
+
+2026-09-24 — Owner answer (Phase 2): "fix now. I see no reason to defer."
