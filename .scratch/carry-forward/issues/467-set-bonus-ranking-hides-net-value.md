@@ -117,3 +117,27 @@ until those are dispositioned; the owner's live check (Thunderheart 676 /
 Lightbringer 680 across worn counts) is still unrecorded.
 
 2026-09-24 — Owner answer (Phase 2): "fix now. I see no reason to defer."
+
+2026-09-24 — SME verdict (round 2, Step 5): **do-not-trust** for the "Set
+potential" ON view; the OFF view is trusted. Handoff:
+`.scratch/handoffs/sme-rank-judgment-467-net-set-bonus.md`. Input: live
+feralcat run on fork `371da7dce` (main re-pin `7f4b98af`), worn Thunderheart
+2 (hands + legs; shoulders swapped to Shoulderpads of the Stranger and chest to
+Bloodsea Brigand's Vest with the gear picker), 3000 iterations, backend, "Took
+165s" (the pane run of the same state took 185s), baseline 2603.6 DPS, both
+toggle states from one run. Every ON figure equals OFF plus the shown future
+lines minus the shown commit-break lines. The SME's major finding (F1–F3): a
+Malorne or Nordrassil piece for head, shoulder or chest gets the Thunderheart
+2pc loss (−108.6) subtracted in ON, although the Malorne 2pc can be completed
+in the free slots with the Thunderheart 2pc kept. The loss comes from
+`commitBreaks`, which completes the TOP implemented package (the Malorne 4pc,
+or the Nordrassil 4pc), and that 4pc's net is at or below the noise floor, so
+the row pays for a break its credited gain does not need. This is the 467
+top-package commit rule, not a 476–478 change, and the SME notes this run does
+not trigger the 476, 477 or 478 A4 cases (F5). Needs an orchestrator/owner
+decision; not changed in this round (the plan puts 467's design out of scope).
+Measured price for 477 (b) (N2): the only worn implemented bonus in this state
+is Thunderheart 2pc, so `brokenSetValues` has exactly one possible key
+(676:2), measured (−108.6 shown); by the case-8 invariant the flag adds one
+sim. The tab does not expose the `Ranking` object, so the count is derived
+from the worn state, not read.
