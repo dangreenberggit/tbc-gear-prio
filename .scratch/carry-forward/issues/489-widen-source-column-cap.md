@@ -112,3 +112,23 @@ gate real run on that source `passed:53 failed:0 a11yFailed:0`.
   and at 11rem. At 1280 on today's feralcat pool, 166 of 338 item names are
   cut short at 11rem. Table:
   `.scratch/stage-gate/upgrades-tab-closeout/round-2b/493-measurements.md`.
+- 2026-09-24 (round 2b, owner request): Source width table at 1280px,
+  feralcat phase 3, all 338 rows of the settled run (shortlist and
+  below-cutoff opened), Source width forced by an injected rule. Fork
+  `5e0093175` on :5173, default phase-3 gear (worn Thunderheart 4), run
+  "Took 180s"; row heights measured with "Set potential" OFF. Source lines =
+  distinct line tops of the Source cell's text.
+
+  | Source | Names cut short (of 338) | Tallest row | Median row | Tallest Source (lines) |
+  | --- | --- | --- | --- | --- |
+  | 7rem (98px) | 20 | 119px (Pendant of Titans) | 84px | 6 ("Black Temple (N) / Reliquary of the Lost") |
+  | 8rem (112px) | 34 | 101.5px | 66.5px | 5 |
+  | 9rem (126px) | 67 | 101.5px | 66.5px | 5 |
+  | 10rem (140px) | 98 | 101.5px | 56px | 5 |
+  | 11rem (154px, today) | 144 | 84px (Razor-Scale Battlecloak) | 56px | 4 |
+
+  A second run on the phase-2 "BiS 6%" preset gave the same row heights
+  and 20 / 36 / 68 / 99 / 147 names cut short. The width is unchanged this
+  round (owner: about 8rem only if it helps row height, 10rem only if the
+  cost is small). At 8rem the tallest row falls from 119px to 101.5px and
+  the median from 84px to 66.5px, for 14 more names cut short than at 7rem.

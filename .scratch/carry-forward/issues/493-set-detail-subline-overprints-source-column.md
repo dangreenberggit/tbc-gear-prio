@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2, Gate C (visual seat finding, 2026-09-24)
 Blocks: none
@@ -62,3 +62,26 @@ fork `371da7dce972ea8bf6267daadf9f20627f7e58bb`, width 1280:
     detail", `not_counted` = "uncounted", awaiting owner copy confirmation.
   - Widen price at 1280: item names cut short go from 166/338 today to
     315/338 (DPS at 127.1px) or 334/338 (151.5px).
+- 2026-09-24 (round 2b, Step 8): **closed.** Fork
+  `7b7f2da281dd9ddc00faa4c216ff539ca40b2fe6`, re-pinned in main `f72f1a6b`
+  (tip pin `cf51f4f4`, fork `5e0093175`). Shipped strings, awaiting owner
+  copy confirmation: `hover_hint` "set detail" (63.6px), `not_counted`
+  "uncounted" (72.7px; "not counted" was 82.4px and failed the rule), in a
+  77px DPS cell. The DPS column width is unchanged, so the fix holds at 10
+  and 11rem Source alike: the cell is fixed at ≥ md whatever Source gets.
+  Widening DPS instead would cut short 315–334 of 338 item names at 1280
+  (166 today).
+  - No-overlap evidence (Step 4 probe, headless Chrome on :5173, fork
+    `f6355d529`, feralcat worn Thunderheart 2, "Set potential" ON): 15
+    rendered sub-lines per capture, at 1280/768/653/375 × Source 7/10/11rem.
+    Largest text overflow past the cell: 0px at 1280 and 768, −3.5px at 653
+    and 375; largest `scrollWidth − clientWidth`: 0 / −7. Data:
+    `.scratch/stage-gate/upgrades-tab-closeout/round-2b/feral-worn2.json`
+    (`probe493`, gitignored).
+  - `test-layout.mjs` assertion (11) checks every rendered sub-line. In both
+    real gate runs this round (on `f6355d529` and `5e0093175`,
+    `{"outcome":"measured","passed":57,"failed":0,"a11yFailed":0,"a11yWarned":29}`)
+    it found **0 sub-lines** at every width: the gate measures the ret page
+    after 6 rows land, before any set row. It passed vacuously there, so
+    493's evidence is the probe above alone (amendment N6); Gate C accepts
+    or reopens.
