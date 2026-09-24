@@ -104,3 +104,8 @@ This needs an owner or orchestrator decision before any code. The rest of
   credit-view break-on-future 80 → 40. `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?` → rc=0 (22 passed, 1 skipped);
   `pnpm verify` rc=0; layout gate `{"outcome":"measured","passed":57,"failed":0,"a11yFailed":0,"a11yWarned":29}`.
   ADR-0034 updated (`f1150137`).
+- 2026-09-24: **owner confirmed 2026-09-24** the best-stop rule (assume
+  the player collects a set only while each step pays) as final. It
+  supersedes "provisional" in the comments above. No code change; the
+  "provisional" wording left in the fork's `view.ts` comment and PROVENANCE
+  row is to be corrected with the next fork edit.

@@ -51,10 +51,11 @@ credit keeps the running total's largest value, or 0 when no total is
 positive. The split figure follows the same stopping point and may be
 negative there. In 476-A every row's path to the 4pc breaks the Malorne 2pc
 (40), and the running totals are 50 then 90, so the figures above stand.
-Fixtures 490-A and 490-B pin the rule (`view.ts` `setPotentialCredit`). This
-"best-stop" rule is provisional until the owner chooses between it and
-"full-path" (charge every break on the path to every credited future); the
-choice is one constant, `RULE_490`.
+Fixtures 490-A and 490-B pin the rule (`view.ts` `setPotentialCredit`). The
+owner confirmed this "best-stop" rule on 2026-09-24 (assume the player
+collects a set only while each step pays) over "full-path" (charge every
+break on the path to every credited future). The other rule is one
+constant, `RULE_490`, away.
 
 ## Consequences
 
