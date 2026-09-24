@@ -105,3 +105,10 @@ was corrected in a comment-only fork commit
 `c84f7ffab29fb7e2ab214a6bae60a62621fb1043`, re-pinned in main
 `0fbbd2aefce5cbcba36518748bdd3b32fed6551e`; `pnpm verify` rc=0; layout
 gate real run on that source `passed:53 failed:0 a11yFailed:0`.
+- 2026-09-24 (round 2b, 493 Step 3): the DPS sub-line overprint is not
+  caused by this width. The sub-line text is 127.1px at Source 7, 10 and
+  11rem alike and overflows the fixed 77px DPS cell at 768 and 1280 in all
+  three. Round 2b's fix (shorter strings, gate assertion 11) holds at 10rem
+  and at 11rem. At 1280 on today's feralcat pool, 166 of 338 item names are
+  cut short at 11rem. Table:
+  `.scratch/stage-gate/upgrades-tab-closeout/round-2b/493-measurements.md`.
