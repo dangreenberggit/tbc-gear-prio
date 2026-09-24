@@ -36,3 +36,36 @@ Seen again on round 2b's captures,
 2. The tab change, fork commit, re-pin, `pnpm verify` rc=0, a real layout
    gate run.
 3. A gate-visual pass on re-captured tooltips.
+
+## Comments
+
+### 2026-09-24, set-rule-scenarios run
+
+More self-explanation gaps found while running the nine set-rule scenarios
+(`.scratch/stage-gate/upgrades-tab-closeout/set-rule-scenarios/report.md`):
+
+1. **A "to reach 4pc" line with no 4pc line above it**, because the 4pc
+   value is at or below the rankable floor (hidden as noise). Scenario E,
+   Stag-Helm of Malorne: the hover reads only "to reach 4pc: breaks
+   Thunderheart Harness 2pc: -71.6 / Full set end state: -247.7" — no "4pc
+   (…): +…" line precedes it, so the "to reach 4pc" has nothing to reach
+   toward on screen. Capture: `E-tip-StagHelmofMalorne-off.png` /
+   `-on.png` (report.md scenario E, `analysis-E.md`).
+2. **Rows marked "set detail" whose hover holds only an unexplained
+   total.** Scenario I, Lightbringer Breastplate: the row shows "+3.9 DPS
+   / set detail" in both OFF and ON, but the hover's entire content is
+   "Full set end state: -29.7" — no 2pc or 4pc line at all, because both
+   Lightbringer bonuses are below the floor. A reader has no way to tell
+   from the hover why this row is flagged "set detail" when nothing in it
+   names a set. Capture: `I-tip-LightbringerBreastplate-off.png` /
+   `-on.png` (report.md scenario I, `analysis-I.md`).
+3. **"Full set end state" often disagrees with the row's credit**, which
+   this ticket's finding 3 above already names, but the set-rule scenarios
+   give a second, larger example: scenario D, the four Malorne rows each
+   credit ON−OFF = +108.0 (rule (best) = 108.0, confirmed), but "Full set
+   end state" on Breastplate of Malorne reads +8.5 — nowhere near the
+   +108.0 the row's own DPS delta shows. (report.md scenario D,
+   `D-tip-BreastplateofMalorne-off.png` / `-on.png`, `analysis-D.md`.)
+
+These are additional instances of the same "lines lack meaning" problem
+this ticket already tracks, not a new defect.

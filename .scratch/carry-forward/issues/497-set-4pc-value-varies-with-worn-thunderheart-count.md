@@ -34,3 +34,31 @@ Evidence: SME handoff
 1. A controlled fixture in `packages/core/test/fork-set-net.test.ts` that
    reproduces the variation, or shows it is sim noise.
 2. The engine fix if it is a bug, with the PROVENANCE cycle and re-pin.
+
+## Comments
+
+### 2026-09-24, set-rule-scenarios run
+
+The nine-scenario set-rule run
+(`.scratch/stage-gate/upgrades-tab-closeout/set-rule-scenarios/report.md`)
+measured the same Nordrassil 4pc bonus (Shred +75) at three different
+worn-gear states, confirming this ticket's variation with independent
+figures:
+
+- Scenario A (feral in Phase 2 BiS gear at phase 3): N4 = +60.5. Printed
+  on Nordrassil Chestplate/Feral-Mantle, "4pc (0/4): +60.5" /
+  "4pc (0/4): +60.5" (`analysis-A.md`).
+- Scenario E (Phase 2 gear plus Thunderheart hands and legs, same base
+  gear as A but two Thunderheart pieces worn, at phase 3): N4 = +19.9, on
+  the same Nordrassil rows (`analysis-E.md`,
+  `E-tip-NordrassilChestplate-off.png`).
+- Scenario F (Thunderheart hands and legs only, phase 3): N4 does not
+  appear at all — no 4pc line on any Nordrassil row, and ON−OFF = 0.0 on
+  Nordrassil Handgrips and Kilt where scenario A (same base gear) measured
+  N4 = +60.5 (`analysis-F.md`, contradicted-prediction 3 in report.md).
+
+So on close to the same base gear, N4 reads +60.5, +19.9, and hidden
+(effectively ≤ the rankable floor), moving only with how much Thunderheart
+is worn — the same shape as this ticket's existing worn-0-to-4 table, and
+consistent with the ticket's hypothesis that a Thunderheart-set break is
+leaking into the measurement.
