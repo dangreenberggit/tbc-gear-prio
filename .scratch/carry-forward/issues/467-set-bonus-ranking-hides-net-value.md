@@ -170,3 +170,19 @@ B4 − 2·B2); (4) the SME's do-not-trust finding above.
   The round-2 do-not-trust finding (Malorne and Nordrassil head, shoulder
   and chest charged the Thunderheart 2pc) is gone. Item (3) above is fixed
   by 492: at worn 1 the Thunderheart 4pc line now shows +108.1.
+- 2026-09-24 (round 2b, Step 9): 467 capture set re-taken on fork
+  `5e00931759b3ff1b30495f705a81e77381fb95f3` (main pin `cf51f4f4`), 50 PNGs
+  at 1280 with `index.json` in
+  `.scratch/stage-gate/upgrades-tab-closeout/round-2b/` (gitignored).
+  Primary states load the previous phase's preset gear with the page at
+  phase 3 (owner rule): feralcat Phase 2 "BiS 6%" and retribution Phase 2
+  "P2", each checked item by item against its gear file (16/16).
+  Constructed states: feralcat worn Thunderheart 4 (phase-3 default), 3, 2,
+  1, 0. gate-visual: **pass on all 7 states**, 101 set rows checked against
+  the best-stop sentence, none failing (handoff
+  `.scratch/handoffs/visual-review-467-round-2b.md`). Round 2's three
+  findings: the sub-line overprint is fixed (493); the DPS figure touching
+  Slot is still present (ticket 495); the not-counted case still never
+  appears (no row in any state uses "uncounted"). New advisories: 499 (DPS
+  figures of 100+ and the focus outline overrun the DPS cell). 467 stays
+  open for the owner.
