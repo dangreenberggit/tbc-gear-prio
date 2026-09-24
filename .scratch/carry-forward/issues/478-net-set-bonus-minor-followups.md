@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-signoff-followups.md (round 6, 2026-09-22)
 Blocks: none
@@ -30,3 +30,42 @@ own.
 
 Each item fixed or explicitly wontfixed with reason recorded in a comment
 on this ticket.
+
+## Comments
+
+2026-09-24 (round 2, closed): every item fixed or wontfixed. Fork `371da7dce972ea8bf6267daadf9f20627f7e58bb` (engine: set-value.ts,
+rank.ts, view.ts, PROVENANCE rows); main red fixtures `43634fb9`, re-pin
+`7f4b98af`. Checks: `npx vitest run packages/core/test/fork-set-net.test.ts
+packages/core/test/wowsims-fork-parity.test.ts` rc=1 before the engine edit
+(exactly 476-A, 476-B, 477-P, 477-T, A3-U, A4 red) and rc=0 after; fork
+`node node_modules/typescript/bin/tsc --noEmit` rc=0, `npx oxlint ./ui` rc=0;
+`pnpm verify` rc=0; layout gate `{"outcome":"measured","passed":53,"failed":0,"a11yFailed":0}`.
+These suites skip in CI (fork gitignored), so the local rc above is the evidence.
+
+- **A3, sign:** fixed. The correction is now `set-value.ts` `netInflation`,
+  `Σ (membersPkg − members2pc − pkgEnd + twoPcEnd)·B`; the old code
+  subtracted `twoPcEnd`. It was hidden at worn 4, where
+  `members2pc − twoPcEnd = 1 = twoPcEnd`. Pinned by 476-B (net4 80; red 180).
+- **A3, key union:** unreachable today, not fixed as a live bug. rank.ts now
+  passes the union of package breaks, 2pc-package breaks and member-single
+  breaks, but the 2pc package is a prefix of the 4pc package and a member
+  single never breaks what its package keeps, so the union equals the
+  package's own breaks. Unit-tested only (A3-U: raw 100, twoPcEnd-only key,
+  B 40, net 60).
+- **A3, ring/trinket slot:** wontfix. No member of an implemented set
+  (626/629/640/641/676/680) is type 11 or 12, so `candidateSlotIndex` keeping
+  the first pool slot cannot miscount a set piece. Pinned by A3-R.
+- **A4/D3:** fixed. Fixture A4 (worn Thunderheart hands + legs, the pool holds
+  the worn hands) showed the owned row with futures `[{4, piecesNeeded 2,
+  dps 80}]` and credit 80 for a swap that changes nothing. `applySetContext`
+  builds `futureBonuses` only when `piecesAfterSwap > piecesWornBefore`; the
+  owned row now has none and credit 0, the head row keeps 80. Because each
+  implemented set has at most one piece per slot, the only same-set piece that
+  replaces a worn same-set piece is the worn item itself (owned), so the
+  guard covers the "piecesNeeded low by one" case too.
+- **A5:** fixed. `docs/agents/known-traps.md` § Before running node / pnpm /
+  test commands now says the fork-gated suites never run in CI and asks for
+  the local command and rc (main `9d0a8575`).
+- **D2:** fixed. `docs/adr/0034-set-bonus-row-values-are-not-additive.md`
+  (main `9d0a8575`): full 4 × 90 = 360, split 4 × 5 = 20, package net 90;
+  pinned by 476-A.
