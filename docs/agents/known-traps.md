@@ -28,6 +28,14 @@ $env:PATH = "C:\Users\dgree\AppData\Roaming\fnm\node-versions\v22.17.1\installat
 Bash's `eval "$(fnm env)"` can fail with the same error the commands do;
 the PATH pin works in either shell.
 
+**Fork-gated suites never run in CI.** `fork-set-net.test.ts` and
+`wowsims-fork-parity.test.ts` are wrapped in `describe.skipIf(!forkPresent)`,
+and `vendor/` is gitignored, so CI collects them and skips them. A green CI
+run is no evidence for them. Run them locally with the fork present —
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
+— and record the command and its rc in the commit or ticket (ticket 478,
+item A5).
+
 ## Before any scripted or generated file edit
 
 **Symptom when armed:** `git diff --stat` shows hundreds of changed lines
