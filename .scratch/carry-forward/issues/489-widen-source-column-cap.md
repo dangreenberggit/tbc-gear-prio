@@ -79,3 +79,29 @@ injected style.
 `489-manifest.json` in the round folder): `sourceWidth` = 154px; first
 row 56px tall; Source cell 154 × 56; table width 649.3 = host width
 649.3, so the mid-run table fits its host.
+
+**2026-09-24 — correction, same round: item names are cut, not
+wrapped.** The capture for the owner sitting showed names with an
+ellipsis. `.upgrades-item-name` computes to `white-space: nowrap;
+text-overflow: ellipsis`, so the "1 line" item-name count above is
+true only because long names are cut short; it does not show that
+they fit. Measured on a second settled feralcat phase-3 run (headless
+Chrome on :5173, 1280×1400, "Took 159s"), counting names whose
+`scrollWidth > clientWidth`:
+
+| Source width | Item names cut short (of 338) | Examples |
+| --- | --- | --- |
+| 7rem (before) | 20 | Telonicus's Pendant of Mayhem, Ashtongue Talisman of Equilibrium |
+| 10rem | 98 | Ancestral Ring of Conquest, Hourglass of the Unraveller |
+| 11rem (shipped) | 144 | Razor-Scale Battlecloak, Madness of the Betrayer |
+
+So the 11rem cap trades 124 more truncated item names for rows no
+taller than 84px. This ticket's first close condition ("item names
+still fit on one or two lines") holds only if a truncated one-line name
+counts as fitting. The width is unchanged; the owner decides at the
+sitting whether the trade stands, and this ticket reopens if not.
+The fork comment that said "every item name still fits on one line"
+was corrected in a comment-only fork commit
+`c84f7ffab29fb7e2ab214a6bae60a62621fb1043`, re-pinned in main
+`0fbbd2aefce5cbcba36518748bdd3b32fed6551e`; `pnpm verify` rc=0; layout
+gate real run on that source `passed:53 failed:0 a11yFailed:0`.
