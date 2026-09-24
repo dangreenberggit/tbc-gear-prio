@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2, Gate C (SME verdict, 2026-09-24)
 Blocks: none
@@ -88,3 +88,19 @@ This needs an owner or orchestrator decision before any code. The rest of
   its own tooltip. Caveats filed as 497 (4pc values vary with the worn
   Thunderheart count) and 498 (a head piece is credited a 4pc a cat reaches
   without it).
+- 2026-09-24 (round 2b, Step 8): **closed.** Fork `7b7f2da281dd9ddc00faa4c216ff539ca40b2fe6`
+  (engine + tab), re-pinned with the follow-up fork commits
+  `f6355d529742cb13575e7329d0f3b9e86bdaef7a` (479) and
+  `5e00931759b3ff1b30495f705a81e77381fb95f3` (tooltip width) in main
+  `f72f1a6b` and `cf51f4f4`. Rule in force: **best-stop, provisional**; the
+  owner question is open, and full-path is `RULE_490` plus
+  `view.ts` `setPotentialCredit` away. Path rule: each future's breaks are
+  those of the candidate plus the best remaining pieces of that threshold's
+  measured package (the whole package when the candidate is in it), minus
+  the row's single breaks; the view charges each key once and stops at the
+  largest full-value running total. Fixtures (red on 371da7dce → green):
+  490-A chest full −10 → 40, split −30 → 20; 490-B chest full 20 → 40,
+  split −22.5 → 20; 490-C Nordrassil chest −50 → 0; 477-T legs 90 → 130;
+  credit-view break-on-future 80 → 40. `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?` → rc=0 (22 passed, 1 skipped);
+  `pnpm verify` rc=0; layout gate `{"outcome":"measured","passed":57,"failed":0,"a11yFailed":0,"a11yWarned":29}`.
+  ADR-0034 updated (`f1150137`).

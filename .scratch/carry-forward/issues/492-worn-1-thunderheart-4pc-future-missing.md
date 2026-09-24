@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2, Gate C (executor flag, 2026-09-24)
 Blocks: none
@@ -52,3 +52,16 @@ floor. This has not been checked against the engine's output.
   +220.3). Before the fix the line was hidden. The SME judged +108.1
   plausible (high side) against round 2's worn-0 4pc of +93.8, and far from
   the confounded 2·92.9 + 93.8 = 279.6. One run at 3000 iterations.
+- 2026-09-24 (round 2b, Step 8): **closed.** It was a bug, not a correct
+  absence: at worn 1 the 2pc package is one piece and never measured, and
+  every single of the 4pc package crosses the 2pc, so raw4 = B4 − (n−1)·B2.
+  Fixture 492-F (worn Thunderheart hands; model B2 50, B4 80) read
+  `bonusDps` −20, `selfConfound {threshold 2}` without `dps`, credit 0 and
+  6 sims on 371da7dce. Fix (fork `7b7f2da281dd9ddc00faa4c216ff539ca40b2fe6`,
+  re-pinned in main `f72f1a6b`, tip pin `cf51f4f4`): the first two
+  break-free added pieces in slot order (head 31039 + chest 31042) are simmed
+  together, B2 = Σ singles − pair delta = 300 − 250 = 50, the 4pc gains
+  (n−1)·B2 = 100 → 80, `selfConfound.dps` = 50, full 80, split 20, 7 sims
+  (one extra). Parity: the E-W3 pool never reaches a measured 4pc at worn 1.
+  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?` → rc=0; `pnpm verify` rc=0; layout gate measured, failed 0,
+  a11yFailed 0. Live worn-1 value +108.1 (Step 7 comment above).

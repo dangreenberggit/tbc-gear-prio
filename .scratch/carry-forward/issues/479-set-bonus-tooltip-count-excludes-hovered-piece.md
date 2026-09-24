@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-signoff-followups.md (round 6, 2026-09-22)
 Blocks: none
@@ -71,3 +71,16 @@ hovering a second reading "4pc (2/4)", was not reproduced because the
 default gear already wears four.
 
 Awaiting owner copy confirmation (Step 7); D4/D5 rows rewritten then.
+
+**2026-09-24 — owner answer; closed (stage-gate upgrades-tab-closeout
+round 2b).** The owner rejected "(1/2)": "this should be an indication of
+how much progress a player has with their current gear". The `tip_future`
+count is now `ctx.piecesWornBefore`, the pieces worn before the swap
+(fork `f6355d529742cb13575e7329d0f3b9e86bdaef7a`, re-pinned in main
+`f72f1a6b`, tip pin `cf51f4f4`). The activates line keeps the
+`nextMeasurableThreshold` expression; its output is unchanged. Live, worn
+Thunderheart 2: Breastplate of Malorne reads "2pc (0/2): +62.3" and
+Thunderheart Chestguard "4pc (2/4): +78.0"
+(`.scratch/stage-gate/upgrades-tab-closeout/round-2b/feral-worn2.json`,
+gitignored). `pnpm verify` rc=0; layout gate measured, failed 0,
+a11yFailed 0. Review round-9 rows D4/D5 rewritten to `fixed`.

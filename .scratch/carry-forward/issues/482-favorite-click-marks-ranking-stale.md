@@ -97,3 +97,7 @@ capped at 20 candidates ("Took 13s"), fork d6fd2f685 through Vite HMR:
 - (c) Tab phase picker 3 → 4: the stale line appears ("settings changed
   since this ranking — results may be out of date") and Simulate
   enables (disabled = false). Phase set back to 3 afterwards.
+- 2026-09-24 (round 2b): the owner approved the behaviour: Gear-picker
+  filters must not affect the Upgrades ranking. A later, low-priority idea
+  to offer more of those filters on the Upgrades tab's own source filters,
+  kept independent, is ticket 496.
