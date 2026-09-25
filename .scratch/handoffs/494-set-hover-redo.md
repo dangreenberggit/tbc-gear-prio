@@ -40,10 +40,20 @@ charged.
 The disabled toggle (501) follows from the same rule. Set potential is greyed
 out when no row has a credit above zero. That can happen for three different
 reasons: no row has a future bonus above the floor; rows have one but it never
-outweighs what it gives up; or a figure could not be measured. Only the first
-matches the owner's preferred message, "None of these upgrades gain a set
-bonus." The owner leans toward that message if it is accurate, and it is
-accurate only in the first case.
+outweighs what it gives up; or a figure could not be measured. The owner
+leans toward the message "None of these upgrades gain a set bonus." if it is
+accurate. It is accurate only in the first case, and only when no row
+completes a set bonus the moment it is equipped. A bonus completed that way is
+already inside the row's DPS figure, so Set potential never counts it, and the
+toggle can be greyed out while that row does gain a set bonus.
+
+Correction, 2026-09-25: this paragraph first said the message is accurate in
+the whole first case. It left out rows that complete a bonus on equip. The
+plan review for the redo found the gap (`.scratch/stage-gate/494-set-hover-redo/plan-review.md`,
+finding F6). None of the five recorded fixtures shows it: `ret-p3-p2` has four
+rows that complete a bonus
+(`node -e "const f=require('./data/tab-fixtures/ret-p3-p2.json');console.log(f.ranking.items.filter(i=>i.setContext&&i.setContext.crossesThreshold).length)"`
+prints 4), but its toggle is enabled.
 
 ## 2. What exists today (fork `bcbb5e741514701e9229b8e671d5b1736d310901`)
 
