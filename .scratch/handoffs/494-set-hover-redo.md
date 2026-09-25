@@ -200,8 +200,8 @@ These are about the data, not the wording, and none was rejected:
 These are settled and built in round 2c, independent of the hover's content.
 The hover opens to the right of the DPS figure when it fits, and above it
 otherwise (495). The DPS figure drops " DPS" (499). The Slot column keeps
-"Main Hand" on one line (499). Row focus outline (499). The Source width and
-item-name wrapping (489) are still open.
+"Main Hand" on one line (499). Row focus outline (499). Source is 8rem and
+item names wrap to two lines (489). All shipped at fork `7ed8c9941`.
 
 ## Files in `494-set-hover-redo/`
 

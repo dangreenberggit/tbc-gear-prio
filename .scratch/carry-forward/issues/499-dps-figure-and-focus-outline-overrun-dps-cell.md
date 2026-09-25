@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: gate-visual seat, stage-gate upgrades-tab-closeout round 2b Step 9 (2026-09-24)
 Blocks: none
@@ -44,3 +44,22 @@ no room for a longer string either.
   new fixture pass exposed it because the live ret sample never had a
   Main Hand row. It is tied to 499's DPS-column fix: dropping " DPS" from
   the figure frees width that could go to Slot.
+
+**2026-09-25, round 2c: closed.** Owner answers (checkpoints 1 and 2): drop
+" DPS" from the figure; Slot just wide enough for "Main Hand"; a moderate
+width set that keeps the Slot gaps at or above the first version's; the rest
+to Item; row focus outline. Built, at >= md: Slot 5.75rem with a 0.5rem left
+padding, DPS 5rem with a 0.5rem left padding (was 5.5rem + 5.5rem, so Item
+gains 0.25rem), `delta_dps_value` = "{{delta}}", and the focus ring on the
+row (`tr:has(> td[tabindex]:focus-visible)`), not the cell. Measured on all
+five fixtures at 768 and 1280 (`round-2c/final-layout.json`): no figure leaves
+its cell (was 12.9px over), "Main Hand" on one line (was two), Slot text to
+figure >= 19.0px, to "set detail" >= 19.9px. Candidates compared are in
+`round-2c/widths499.json`. Gate assertions (12) figure in cell (338 checked
+per width), (13) gap, and (14) row ring clear of text (15 checked at every
+width) all pass in the fixture pass; (6) "Main Hand" now passes.
+Fork `7ed8c99410ac836443c2e07ede9790f5439467d5`, re-pinned in main
+`f6bc9087`. `pnpm verify` rc=0. Layout gate (real run on this source):
+`{"outcome":"measured","passed":121,"failed":0,"a11yFailed":0,"a11yWarned":26}`.
+Visual pass: gate-visual, pass, handoff
+`.scratch/handoffs/visual-review-round-2c.md`.

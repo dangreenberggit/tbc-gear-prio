@@ -132,3 +132,20 @@ gate real run on that source `passed:53 failed:0 a11yFailed:0`.
   round (owner: about 8rem only if it helps row height, 10rem only if the
   cost is small). At 8rem the tallest row falls from 119px to 101.5px and
   the median from 84px to 66.5px, for 14 more names cut short than at 7rem.
+
+**2026-09-25, round 2c (owner answer, checkpoint 2).** Source is now 8rem
+(was 11rem), and item names wrap to at most two lines, with the tags below,
+instead of ending in "…". Measured on the five fixtures
+(`round-2c/final-layout.json`): 0 names cut off at 768 and 1280 on every
+fixture (was 142 on feral-p3-p2bis at 1280/11rem); median row 66.5px on every
+fixture; tallest row 101.5px on the feral fixtures and 119px on ret-p3-p2.
+Before the change, on feral-p3-p2bis at 1280, wrapping at 8rem made 3 of 338
+rows taller and none shorter (`round-2c/mockups-2/results.json`). Gate
+assertion (8), rows <= 7x line-height (122.5px), passes. At 375 the table is
+`table-layout: auto`, so these widths do not apply there (gate-visual advisory
+A1). Status stays closed.
+Fork `7ed8c99410ac836443c2e07ede9790f5439467d5`, re-pinned in main
+`f6bc9087`. `pnpm verify` rc=0. Layout gate (real run on this source):
+`{"outcome":"measured","passed":121,"failed":0,"a11yFailed":0,"a11yWarned":26}`.
+Visual pass: gate-visual, pass, handoff
+`.scratch/handoffs/visual-review-round-2c.md`.

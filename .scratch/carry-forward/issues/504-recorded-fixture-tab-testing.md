@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: chat (owner request, 2026-09-24)
 Blocks: 494, 495, 499, 501
@@ -102,3 +102,27 @@ first run with a fixture is red (see below).
   selector "Phase 2 (2.1 - T5)", the gear tab lists Mantle, Breastplate,
   Gauntlets and Greaves of Malorne, no stale banner, baseline summary "Your
   current gear: 2316.2 DPS." with no "Took", Set potential disabled.
+
+**2026-09-25, round 2c: closed.** The red gate noted above ("Main Hand"
+wrapping in Slot, assertion (6)) is fixed by ticket 499's Slot width. The
+real gate run on fork `7ed8c9941` (main `f6bc9087`) is
+`{"outcome":"measured","passed":121,"failed":0,"a11yFailed":0,"a11yWarned":26}`,
+with `[fixture feral-p3-p2bis] (11) set-bonus sub-lines inside their cell: 16
+checked` at 375, 653, 768 and 1280, and the new (12)–(15) each checking at
+least one row in the fixture pass. Every close condition above is met.
+
+Staleness check after the re-pin (`pnpm tab-fixtures:check`):
+
+```
+fixture feral-p2-malorne4: recorded at bcbb5e741514; inputs changed since: ui/core/components/individual_sim_ui/upgrades_tab.tsx
+fixture feral-p3-nordrassil4: recorded at bcbb5e741514; inputs changed since: ui/core/components/individual_sim_ui/upgrades_tab.tsx
+fixture feral-p3-p2bis: recorded at bcbb5e741514; inputs changed since: ui/core/components/individual_sim_ui/upgrades_tab.tsx
+fixture feral-p3-th-hands-legs: recorded at bcbb5e741514; inputs changed since: ui/core/components/individual_sim_ui/upgrades_tab.tsx
+fixture ret-p3-p2: recorded at bcbb5e741514; inputs changed since: ui/core/components/individual_sim_ui/upgrades_tab.tsx
+```
+
+Re-record decision: **none**. `git -C vendor/tbc-new-fork diff bcbb5e741 7ed8c9941
+-- ui/core/components/individual_sim_ui/upgrades_tab.tsx` has two hunks: the
+`formatDelta` doc comment (line 347) and the set-bonus tippy's placement
+options in the result row (line 3039). Neither touches `run()` or the
+`RankInput` it builds, so no recorded Ranking would change (amendment N1).
