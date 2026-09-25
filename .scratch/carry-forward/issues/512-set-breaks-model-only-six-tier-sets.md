@@ -38,3 +38,20 @@ From the domain axis of the targeted engine review
    Thunderheart or Malorne package breaks a worn Wastewalker 2pc, with the
    break measured and charged. Literals derived by hand in
    `docs/set-bonus-fixture-derivations.md`.
+
+## Comments
+
+2026-09-25 (round 2e-1 measurements): both proposed designs for this
+ticket were rejected in plan review, and the measurements found that the
+set-bonus figure itself has a gear-dependent error (ticket 514), so the
+redesign is handed to a future session:
+`.scratch/handoffs/511-512-set-credit-redesign.md`, with all sources in
+`.scratch/handoffs/511-512-set-credit-redesign/`. Measured break values
+(10000 iterations): Wastewalker 2pc about 26 to 28 DPS at 2, 3 and 4
+pieces worn, Wastewalker 4pc 21.41 ± 1.48 at 4 worn, Burning Rage 2pc
+0.34 ± 2.23 on the ret pre-raid gear (ticket 516). Fel Skin 573,
+Gladiator's Vindication 583 and Gladiator's Sanctuary 584 could not be
+measured. The evidence above says a phase-1 run starts from the pre-raid
+gear, but no phase-1 universe exists (ticket 515), so the round measured
+the pre-raid gear at phase 2. The owner decided on
+2026-09-25 that this ticket is fixed before the merge. It stays open.

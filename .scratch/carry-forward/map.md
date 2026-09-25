@@ -273,3 +273,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 511 Ret set credit counts bonuses that cannot add ret DPS (targeted engine review D1) 2026-09-25
 - 512 Set breaks model only six tier sets, only at 2pc and 4pc (targeted engine review D3) 2026-09-25
 - 513 Optional cleanup in the set-bonus engine and its tests (targeted engine review S6) 2026-09-25
+- 514 Set bonus value carries a gear-dependent residue (round 2e-1 measurements, systematic verdict) 2026-09-25
+- 515 No phase-1 universe; a phase-1 ret run ranks no candidates (round 2e-1 measurements) 2026-09-25
+- 516 Burning Rage 2pc break reads about 0 below the hit cap, hypothesis (round 2e-1 measurements) 2026-09-25

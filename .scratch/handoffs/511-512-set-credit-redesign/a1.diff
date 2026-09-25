@@ -1,0 +1,329 @@
+diff --git a/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts b/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts
+index c4a1082a5..3ae7ec34e 100644
+--- a/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts
++++ b/ui/core/components/individual_sim_ui/upgrades/engine/rank.ts
+@@ -1242,6 +1242,8 @@ export async function rankUpgrades(
+         slotIndex: best.slotIndex,
+         deltaDps: best.deltaDps,
+         se: best.stdev / Math.sqrt(iterations),
++        rawDps: best.deltaDps + best.baselineDps,
++        baseKey: best.baselineDps === baselineDps ? "base" : "screenBase",
+       });
+ 
+       const deltaPct =
+@@ -1695,6 +1697,7 @@ async function buildSetBonuses(
+   };
+ 
+   const results: SetBonusValue[] = [];
++  const diagTermsByKey = new Map<string, DiagTerms>();
+   for (const setId of setIdsWithCandidates) {
+     const piecesWorn = wornCounts.get(setId) ?? 0;
+     const label = setLabel(
+@@ -1703,6 +1706,7 @@ async function buildSetBonuses(
+       candidates.map((entry) => entry.itemId)
+     );
+     let twoPieceBonus: number | undefined;
++    let twoPieceTerms: DiagTerms | undefined;
+     let twoPieceUnmeasurableAtThisWornCount = false;
+ 
+     for (const threshold of SET_THRESHOLDS) {
+@@ -1849,6 +1853,18 @@ async function buildSetBonuses(
+           : {}),
+       });
+       if (threshold === 2) twoPieceBonus = synergy.bonusDps;
++      const seCombineSe = synergy.se;
++      const terms: DiagTerms = new Map();
++      diagAdd(terms, `pkg:${setId}:${threshold}`, 1, packageSample.dps, packageSample.se);
++      diagAdd(terms, "base", -1, baseline.dps, baseline.se);
++      for (const p of addedPieces) {
++        diagSingle(terms, individualDeltasByItemId, baseline, p.itemId, -1);
++      }
++      if (threshold === 4 && twoPieceBonus !== undefined && twoPieceTerms) {
++        diagAddAll(terms, twoPieceTerms, -1);
++      }
++      if (threshold === 2) twoPieceTerms = terms;
++      synergy.se = diagSe(terms);
+ 
+       const breaks = brokenSetBonuses(equipment, addedPieces, setId);
+       let selfConfound: SelfSetConfound | undefined =
+@@ -1890,10 +1906,17 @@ async function buildSetBonuses(
+         if (pairB2) {
+           const extra = addedPieces.length - 1;
+           synergy.bonusDps += extra * pairB2.dps;
+-          synergy.se = Math.sqrt(synergy.se ** 2 + (extra * pairB2.se) ** 2);
++          diagAddAll(terms, pairB2.terms, extra);
++          synergy.se = diagSe(terms);
+           selfConfound = { threshold: 2, dps: pairB2.dps };
+         }
+       }
++      const diag = {
++        terms: diagOut(terms),
++        valCheck: diagVal(terms),
++        seCombineSe,
++      };
++      diagTermsByKey.set(`${setId}:${threshold}`, terms);
+       results.push({
+         setId,
+         setName: label,
+@@ -1905,6 +1928,7 @@ async function buildSetBonuses(
+         se: synergy.se,
+         ...(breaks.length > 0 ? { breaks } : {}),
+         ...(selfConfound ? { selfConfound } : {}),
++        ...({ _diag: diag } as {}),
+         ...(packageRepairSwaps.length > 0
+           ? {
+               gemSubstitutions: packageRepairSwaps.map((s) => ({
+@@ -2085,6 +2109,24 @@ async function buildSetBonuses(
+       });
+     }
+     if (allMeasured) b.bonusDpsNet = b.bonusDps - netInflation(keys);
++    const own = diagTermsByKey.get(`${b.setId}:${b.threshold}`);
++    const d = (b as { _diag?: Record<string, unknown> })._diag;
++    if (allMeasured && own && d) {
++      const net: DiagTerms = new Map();
++      diagAddAll(net, own, 1);
++      for (const k of keys) {
++        const factor = k.membersPkg - k.members2pc - k.pkgEnd + k.twoPcEnd;
++        const bv = brokenSetValues.find(
++          (v) => v.setId === k.setId && v.threshold === k.threshold
++        ) as { _terms?: DiagTerms } | undefined;
++        if (bv?._terms) diagAddAll(net, bv._terms, -factor);
++        else d.netTermsIncomplete = true;
++      }
++      d.inflationKeys = keys;
++      d.netTerms = diagOut(net);
++      d.netValCheck = diagVal(net);
++      d.netSe = diagSe(net);
++    }
+   }
+ 
+   return { bonuses: results, brokenSetValues, candidateSlotIndex };
+@@ -2129,6 +2171,60 @@ function substitutedPackageBreaks(
+   return brokenSetBonuses(equipment, substituted, setId);
+ }
+ 
++// ROUND 2E-1 TEMPORARY: every set figure as a linear combination of raw sims,
++// so its se counts each shared sim (baseline, prefix singles) once with its
++// net coefficient. Independent-sims assumption; all sims share seeds[0].
++type DiagTerms = Map<string, { coef: number; dps: number; se: number }>;
++function diagAdd(
++  t: DiagTerms,
++  key: string,
++  coef: number,
++  dps: number,
++  se: number
++): void {
++  const cur = t.get(key);
++  if (cur) cur.coef += coef;
++  else t.set(key, { coef, dps, se });
++}
++function diagAddAll(t: DiagTerms, other: DiagTerms, factor: number): void {
++  for (const [k, v] of other) diagAdd(t, k, factor * v.coef, v.dps, v.se);
++}
++function diagSingle(
++  t: DiagTerms,
++  individualDeltasByItemId: ReadonlyMap<number, IndividualDelta>,
++  baseline: DpsSample,
++  itemId: number,
++  coef: number
++): void {
++  const ind = individualDeltasByItemId.get(itemId);
++  if (!ind) return;
++  const baseKey = ind.baseKey ?? "base";
++  const raw = ind.rawDps ?? ind.deltaDps + baseline.dps;
++  diagAdd(t, `s:${itemId}`, coef, raw, ind.se);
++  diagAdd(
++    t,
++    baseKey,
++    -coef,
++    raw - ind.deltaDps,
++    baseKey === "base" ? baseline.se : Number.NaN
++  );
++}
++function diagSe(t: DiagTerms): number {
++  let sum = 0;
++  for (const v of t.values()) sum += (v.coef * v.se) ** 2;
++  return Math.sqrt(sum);
++}
++function diagVal(t: DiagTerms): number {
++  let sum = 0;
++  for (const v of t.values()) sum += v.coef * v.dps;
++  return sum;
++}
++function diagOut(t: DiagTerms): { key: string; coef: number; dps: number; se: number }[] {
++  return [...t]
++    .filter(([, v]) => Math.abs(v.coef) > 1e-9)
++    .map(([key, v]) => ({ key, ...v }));
++}
++
+ /**
+  * One sim of two break-free set pieces added together at worn 1, giving the
+  * 2pc value `B2 = Σ singles − pair delta` (ticket 492). Undefined when the gem
+@@ -2145,7 +2241,7 @@ async function measurePairTwoPiece(
+   baseline: DpsSample,
+   simVersion: string,
+   runOpts: SimRunOpts
+-): Promise<{ dps: number; se: number } | undefined> {
++): Promise<{ dps: number; se: number; terms: DiagTerms } | undefined> {
+   let pairEquipment: SimItemSpec[] = [...equipment];
+   try {
+     for (const piece of pair) {
+@@ -2175,15 +2271,18 @@ async function measurePairTwoPiece(
+     dps: obs.dps,
+     se: obs.stdev / Math.sqrt(runOpts.iterations),
+   };
++  const terms: DiagTerms = new Map();
++  for (const p of pair) {
++    diagSingle(terms, individualDeltasByItemId, baseline, p.itemId, 1);
++  }
++  diagAdd(terms, `pair:${pair.map((p) => p.itemId).join("+")}`, -1, pairSample.dps, pairSample.se);
++  diagAdd(terms, "base", 1, baseline.dps, baseline.se);
+   return {
+     dps:
+       singles.reduce((sum, s) => sum + s.deltaDps, 0) -
+       (pairSample.dps - baseline.dps),
+-    se: combineSe([
+-      baseline,
+-      pairSample,
+-      ...singles.map((s) => ({ dps: 0, se: s.se })),
+-    ]),
++    se: diagSe(terms),
++    terms,
+   };
+ }
+ 
+@@ -2416,12 +2515,26 @@ async function measureBrokenSetValueFor(
+     otherSe.push({ dps: 0, se: weight * (known.se ?? 0) });
+   }
+   const B = rhs / coefficient;
+-  const se = combineSe([
++  const seCombineSe = combineSe([
+     baseline,
+     { dps: obs.dps, se: obs.stdev / Math.sqrt(runOpts.iterations) },
+     ...ownSamples.map((s) => ({ dps: 0, se: s.se })),
+     ...otherSe,
+   ]);
++  const terms: DiagTerms = new Map();
++  for (const r of replacements) {
++    diagSingle(terms, individualDeltasByItemId, baseline, r.itemId, 1 / coefficient);
++  }
++  diagAdd(terms, `vac:${target.setId}:${t}`, -1 / coefficient, obs.dps, obs.stdev / Math.sqrt(runOpts.iterations));
++  diagAdd(terms, "base", 1 / coefficient, baseline.dps, baseline.se);
++  for (const [other, known] of others) {
++    const weight =
++      (lostBySingle.includes(other) ? n : 0) -
++      (lostByVacate.includes(other) ? 1 : 0);
++    const kt = (known as { _terms?: DiagTerms })._terms;
++    if (kt) diagAddAll(terms, kt, weight / coefficient);
++  }
++  const se = diagSe(terms);
+   return {
+     setId: target.setId,
+     setName: target.setName,
+@@ -2430,6 +2543,21 @@ async function measureBrokenSetValueFor(
+     se,
+     vacatedItemIds: vacateSlots.map((i) => equipment[i]?.id ?? 0),
+     replacementItemIds: replacements.map((r) => r.itemId),
++    ...({
++      _terms: terms,
++      _diag: {
++        terms: diagOut(terms),
++        valCheck: diagVal(terms),
++        seCombineSe,
++        coefficient,
++        n,
++        wornX,
++        lostByVacate,
++        lostBySingle,
++        replacementSetIds: replacements.map((r) => getItem(r.itemId)?.setId ?? null),
++        vacatedSetIds: vacateSlots.map((i) => getItem(equipment[i]?.id ?? 0)?.setId ?? null),
++      },
++    } as {}),
+   };
+ }
+ 
+diff --git a/ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts b/ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts
+index 914ce26ed..5aa3d5bf2 100644
+--- a/ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts
++++ b/ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts
+@@ -37,17 +37,63 @@ const IMPLEMENTED_IN_SIM: Record<
+   number,
+   Partial<Record<SetThreshold, boolean>>
+ > = {
+-  // Justicar 2pc is `false` although it has an effect body: its item_sets.go
+-  // closure is empty, but sim/paladin/seals.go:553 (also at 8aa378b3) scales
+-  // the Judgement of the Crusader bonus by 1.15. The default ret APL judges
+-  // Crusader only in its prepull actions, so the effect is expected near 0
+-  // DPS (hypothesis, not measured).
++  // ROUND 2E-1 TEMPORARY: every literal NewItemSet registration at 2/4 with a non-empty closure; 626:2 kept false (N8).
++  530: { 2: true, 4: true }, // Cryptstalker Armor
++  555: { 2: true, 4: true }, // Netherweave Vestments
++  559: { 2: true }, // Spellstrike Infusion
++  566: { 2: true }, // Burning Rage
++  571: { 2: true }, // Whitemend Wisdom
++  572: { 2: true }, // Battlecast Garb
++  577: { 2: true, 4: true }, // Gladiator's Vestments
++  611: { 2: true, 4: true }, // Felscale Armor
++  613: { 2: true, 4: true }, // Thick Draenic Armor
++  620: { 4: true }, // Assassination Armor
++  621: { 2: true, 4: true }, // Netherblade
++  622: { 2: true, 4: true }, // Deathmantle
++  625: { 2: true, 4: true }, // Justicar Armor
+   626: { 2: false, 4: true }, // Justicar Battlegear
++  628: { 2: true, 4: true }, // Crystalforge Armor
+   629: { 2: true, 4: true }, // Crystalforge Battlegear
+-  680: { 2: true, 4: true }, // Lightbringer Battlegear
++  632: { 4: true }, // Cyclone Regalia
++  633: { 4: true }, // Cyclone Harness
++  635: { 4: true }, // Cataclysm Regalia
++  637: { 4: true }, // Moonglade Raiment
++  639: { 2: true, 4: true }, // Malorne Regalia
+   640: { 2: true, 4: true }, // Malorne Harness
+-  641: { 2: false, 4: true }, // Nordrassil Harness
++  641: { 4: true }, // Nordrassil Harness
++  643: { 4: true }, // Nordrassil Regalia
++  644: { 2: true, 4: true }, // Oblivion Raiment
++  645: { 2: true, 4: true }, // Voidheart Raiment
++  646: { 2: true, 4: true }, // Corruptor Raiment
++  648: { 4: true }, // Aldor Regalia
++  649: { 2: true, 4: true }, // Tirisfal Regalia
++  650: { 4: true }, // Beast Lord Armor
++  651: { 4: true }, // Demon Stalker Armor
++  652: { 2: true, 4: true }, // Rift Stalker Armor
++  653: { 2: true, 4: true }, // Bold Armor
++  654: { 2: true, 4: true }, // Warbringer Armor
++  655: { 2: true, 4: true }, // Warbringer Battlegear
++  656: { 2: true, 4: true }, // Destroyer Armor
++  657: { 2: true, 4: true }, // Destroyer Battlegear
++  658: { 2: true, 4: true }, // Mana-Etched Regalia
++  659: { 2: true, 4: true }, // Wastewalker Armor
++  661: { 2: true, 4: true }, // Doomplate Battlegear
++  664: { 2: true, 4: true }, // Incarnate Regalia
++  666: { 2: true, 4: true }, // Avatar Regalia
++  668: { 2: true, 4: true }, // Slayer's Armor
++  669: { 2: true, 4: true }, // Gronnstalker's Armor
++  670: { 2: true, 4: true }, // Malefic Raiment
++  671: { 2: true, 4: true }, // Tempest Regalia
++  672: { 2: true, 4: true }, // Onslaught Battlegear
++  673: { 2: true, 4: true }, // Onslaught Armor
++  674: { 2: true, 4: true }, // Absolution Regalia
+   676: { 2: true, 4: true }, // Thunderheart Harness
++  677: { 2: true, 4: true }, // Thunderheart Regalia
++  679: { 2: true, 4: true }, // Lightbringer Armor
++  680: { 2: true, 4: true }, // Lightbringer Battlegear
++  682: { 2: true, 4: true }, // Skyshatter Harness
++  684: { 2: true, 4: true }, // Skyshatter Regalia
++  699: { 2: true }, // The Twin Blades of Azzinoth
+ };
+ 
+ /** The set ids the table above covers, for tests that pin facts per set. */
+@@ -134,6 +180,9 @@ export type IndividualDelta = {
+   slotIndex: number;
+   deltaDps: number;
+   se: number;
++  // ROUND 2E-1 TEMPORARY diag: the single's raw sim dps and the baseline it was differenced against.
++  rawDps?: number;
++  baseKey?: string;
+ };
+ 
+ export function selectPackage(
