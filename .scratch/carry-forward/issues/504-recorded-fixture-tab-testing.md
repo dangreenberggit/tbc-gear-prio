@@ -61,3 +61,44 @@ Each of these is a checkable item:
 - The layout gate and `pnpm tab-review` can run against a fixture that
   contains set rows, so assertion (11) checks at least one real sub-line.
 - There is a documented command to re-record the fixtures.
+
+## Comments
+
+**2026-09-24, round 2c executor (Steps 1–5).** Status left open: the
+orchestrator confirms the shas before this closes, and the layout gate's
+first run with a fixture is red (see below).
+
+- Loader: fork `bcbb5e741514701e9229b8e671d5b1736d310901`
+  (`upgrades/adapters/fixture.ts`, compiled in only when the
+  `__TBC_TAB_FIXTURES__` define is true). Re-pin: main `4ce44113`.
+  Recorder, check and README: main `87dae630`. Fixtures: main `d1fd9039`.
+- A plain `vite build --outDir <scratch>` has 0 of 23 JS files naming
+  `__upgradesFixture`; the gate harness's build has 1.
+- Five fixtures, all at fork `bcbb5e741`, recorded from the previous
+  phase's preset gear:
+
+  | Fixture | Size | Items | Set rows | Run |
+  | --- | --- | --- | --- | --- |
+  | feral-p3-p2bis | 345,804 B | 353 | 23 | 402s |
+  | feral-p3-nordrassil4 | 348,461 B | 353 | 18 | 186s |
+  | feral-p3-th-hands-legs | 348,384 B | 353 | 23 | 192s |
+  | ret-p3-p2 | 409,234 B | 467 | 19 | 215s |
+  | feral-p2-malorne4 | 231,205 B | 220 | 8 | 106s |
+
+- `python scripts/check_tab_fixtures.py` rc=0, all five "inputs changed
+  since: none".
+- Layout gate with the fixture pass (`python scripts/check_layout_gate.py`):
+  `[fixture feral-p3-p2bis] (11) set-bonus sub-lines inside their cell: 16
+  checked` at 375, 653, 768 and 1280, and (6b) 16 checked at each. But the
+  run is `{"outcome":"measured","passed":91,"failed":2,"a11yFailed":0}`:
+  (6) fails at 768 and 1280 on the Slot cell "Main Hand", which wraps to two
+  lines in the 5.5rem Slot column (31.3px against a 15.3px line). The live
+  ret rows never had a Main Hand row in the sampled five; the feral fixture
+  does. Not caused by the loader; reported to the orchestrator as a gate
+  decision.
+- Runtime check (`pnpm tab-review` on a manifest entry with
+  `"fixture": "feral-p2-malorne4"`): rc=0, 48.9s end to end including the
+  bundle build; the fixture settled with 417 rows in 2.0s. Facts: phase
+  selector "Phase 2 (2.1 - T5)", the gear tab lists Mantle, Breastplate,
+  Gauntlets and Greaves of Malorne, no stale banner, baseline summary "Your
+  current gear: 2316.2 DPS." with no "Took", Set potential disabled.
