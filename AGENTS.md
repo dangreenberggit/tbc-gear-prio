@@ -112,7 +112,7 @@ the eight stages must stay reorganisable without touching a test.
 
 ### Parallel agents
 
-When you will have **two writers running at once** (independent slices — different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). The Delegator then tears down worktrees and runs `pnpm verify` on the integrated tip. The session then has `pre-merge-review` run and **asks before** `pnpm merge-to-dev`. The session spawns a subagent to act as Delegator (§ The session delegates); on Claude Code that is a `general-task` agent — never merge each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
+When you will have **two writers running at once** (independent slices — different kinds of work, mostly disjoint files), fan out with the `parallel-phase` skill: one isolated worktree/clone per slice, structured handoffs, merge back onto the **feature branch** (delegator merges editorial fan-ins; a merger worker is fine for mechanical ones). The session spawns a subagent to act as Delegator (§ The session delegates); on Claude Code that is a `general-task` agent. The Delegator tears down worktrees and runs `pnpm verify` on the integrated tip. The session then has `pre-merge-review` run and **asks before** `pnpm merge-to-dev`. Never merge each worker into `dev`. Harness-agnostic (git contract + Claude Code/Codex/Cursor adapters).
 
 "Mostly disjoint" is a claim to verify, not eyeball: list each slice's files and confirm none appears twice **before** spawning — two slices editing one file is a sequencing problem, and without isolation they share one index, so one worker's `git add` sweeps in the other's work. Readers share that index too: a read-only agent sees your uncommitted edits and cannot tell them from a stray worker's.
 
@@ -143,14 +143,15 @@ The session makes only these tool calls itself:
 - loading a skill
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied verbatim from a seat's final message
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`, `git diff --stat`
+- reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/` and `.claude/skills/stage-gate/plan-template.md`
 
-Everything else goes to a subagent: reading code or docs, running `pnpm` or any other `git` command, editing files, and committing. To run `pre-merge-review`, spawn one subagent to run the whole skill and return the review file's path and its summary.
+Everything else goes to a subagent: reading code or docs, running `pnpm` or any other `git` command, editing files, and committing. To run `pre-merge-review`, spawn one subagent to run the whole skill. Allow it to write `docs/reviews/` and `.scratch/carry-forward/` and to commit them, and have it return the review file's path and its summary.
 
 Pick each subagent's model from your harness section of [`docs/agents/model-policy.md`](docs/agents/model-policy.md), and name the model on every spawn:
 
 - **Claude Code:** pick `simple-task`, `general-task` or `design-task` from the agent-type table in model-policy § Claude Code, and run `pre-merge-review` on a `general-task`. If the harness does not recognize one of these types, restart the session rather than falling back to a built-in type.
-- **Codex:** everything that is not review or design goes to subagents at the workhorse fill, mid tier at a lower reasoning effort. Lower-reasoning agents do this work well, so use them freely.
-- **Cursor:** everything that is not review or design goes to subagents on the workhorse pin, Composer.
+- **Codex:** everything that is not review or design goes to subagents at the workhorse fill, mid tier at a lower reasoning effort. The owner wants these used freely. Review and design jobs go to subagents at the review and design fills.
+- **Cursor:** everything that is not review or design goes to subagents on the workhorse pin, Composer. Review and design jobs go to subagents at the review and design fills.
 
 This rule binds the interactive session only. A subagent that orchestrates — the stage-gate Executor, or a subagent spawned to run `parallel-phase` as Delegator — does its own work, merge and fan-in.
 
