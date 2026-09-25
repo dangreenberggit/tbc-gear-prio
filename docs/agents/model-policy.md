@@ -121,8 +121,8 @@ under `.scratch/handoffs/` the user can run elsewhere.
   around **3–5** workers. Every worker gets the workhorse fill named in your
   harness section, stated explicitly on the spawn. Review and design **jobs**
   are never fanned out: one spawn per review axis, and one design call at a
-  time. When the workhorse fill is a top-tier model — on Claude Code it is
-  Opus, the same model as review — size the round with § Budget the round
+  time. When the workhorse fill is the same model as review — on Claude Code
+  both are Opus — size the round with § Budget the round
   before spawning. A fan-out that exceeds the budget burns the usage limit
   before fan-in finishes, and the swarm dies half-merged.
 
@@ -171,11 +171,11 @@ Three peers. Read only the one you are running on.
 
 ### Claude Code
 
-| Lane          | Fill it with                                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Workhorse** | **Opus at effort `high`**; an extremely simple job runs **Sonnet at effort `high`** (see the agent-type table)                                   |
-| **Review**    | **Opus at effort `high`**                                                                                                                        |
-| **Design**    | **Opus at effort `xhigh`** (`xhigh`: the CLI accepts it; model-side behavior untested on this install) — used only for planning and architecture |
+| Lane          | Fill it with                                                                                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workhorse** | **Opus at effort `high`**; an extremely simple job runs **Sonnet at effort `high`** (see the agent-type table)                                                                |
+| **Review**    | **Opus at effort `high`**                                                                                                                                                     |
+| **Design**    | **Opus at effort `xhigh`** (`xhigh`: `claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) — used only for planning and architecture |
 
 The **model** and the **effort level** are separate controls
 ([model config](https://code.claude.com/docs/en/model-config#adjust-effort-level),
@@ -191,12 +191,12 @@ the session when the definition sets none
 ([sub-agents](https://code.claude.com/docs/en/sub-agents)). So spawn
 through an agent type that pins both:
 
-| Agent type     | Model    | Effort                                                                     | Use for                                                                                                                |
-| -------------- | -------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `simple-task`  | `sonnet` | `high`                                                                     | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
-| `general-task` | `opus`   | `high`                                                                     | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
-| `design-task`  | `opus`   | `xhigh` (the CLI accepts it; model-side behavior untested on this install) | Planning and architecture outside stage-gate                                                                           |
-| `gate-*` seats | `opus`   | `high`; `gate-planner` `xhigh`                                             | Stage-gate only — see § Stage-gate seats                                                                               |
+| Agent type     | Model    | Effort                                                                                                  | Use for                                                                                                                |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `simple-task`  | `sonnet` | `high`                                                                                                  | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
+| `general-task` | `opus`   | `high`                                                                                                  | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
+| `design-task`  | `opus`   | `xhigh` (`claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) | Planning and architecture outside stage-gate                                                                           |
+| `gate-*` seats | `opus`   | `high`; `gate-planner` `xhigh`                                                                          | Stage-gate only — see § Stage-gate seats                                                                               |
 
 The spawning agent decides which type to use. If you are unsure whether a
 job is extremely simple, spawn `general-task`. A `simple-task` that returns
@@ -247,15 +247,16 @@ the call site, and each seat self-checks
 
 ### Codex
 
-| Lane          | Fill it with                              |
-| ------------- | ----------------------------------------- |
-| **Workhorse** | Mid tier for workers and mechanical edits |
-| **Review**    | Top tier; `codex exec` runs               |
-| **Design**    | Top tier, extended reasoning              |
+| Lane          | Fill it with                                                           |
+| ------------- | ---------------------------------------------------------------------- |
+| **Workhorse** | Mid tier at a lower reasoning effort, for workers and mechanical edits |
+| **Review**    | Top tier; `codex exec` runs                                            |
+| **Design**    | Top tier, extended reasoning                                           |
 
 The interactive session delegates every task (AGENTS.md § The session
 delegates). Work that is not review or design goes to a subagent at the
-workhorse fill.
+workhorse fill, and the owner wants these used freely. Review and design
+jobs go to subagents at the review and design fills.
 
 `codex exec` is the cross-vendor review-lane reviewer `pre-merge-review` reaches
 for **first** when the binary is on `PATH` (see
@@ -282,11 +283,12 @@ Cursor bills **two pools**:
 | **Workhorse** (workers, implement)  | **Composer** (`composer-2.5-fast` on Task if that’s the only Composer slug; non-fast via custom agent / parent inherit when available) | Same first-party pool as Grok; much cheaper per token than Grok; avoids the Other-pool spawn death |
 | **Review** (pre-merge axes)         | **Grok high** (prefer non-fast; else `cursor-grok-4.5-high-fast`)                                                                      | The judgment tier Cursor will actually run                                                         |
 | **Design** (planning, architecture) | **Grok high**; hand off externally for a big design call                                                                               | Cursor has no distinct design tier that reliably spawns — one lane fills both                      |
-| **Parent / orchestrator**           | Either; Grok is fine                                                                                                                   | Planning and merge coordination                                                                    |
+| **Parent / orchestrator**           | Either; Grok is fine                                                                                                                   | Routes and judges; it delegates planning and merges (AGENTS.md § The session delegates)            |
 
 The interactive session delegates every task (AGENTS.md § The session
 delegates). Work that is not review or design goes to a subagent on the
-workhorse pin, Composer.
+workhorse pin, Composer. Review and design jobs go to subagents on the
+review and design pins.
 
 **Why Composer is pinned rather than merely preferred.** On Pro, Other Models
 are often a **paper limit**: Task / `best-of-n-runner` workers requested as
