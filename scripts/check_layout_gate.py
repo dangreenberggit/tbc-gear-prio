@@ -108,6 +108,8 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import NamedTuple
 
+from check_tab_fixtures import check_fixture
+
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 LAYOUT_TEST = FORK_ROOT / "test-layout.mjs"
@@ -195,6 +197,28 @@ SHARED_LAYOUT_FILES = (
 )
 
 
+# Files outside the fork source that decide what the gate measures, hashed by
+# ROOT-relative name (never through `_rel`, which is fork-relative). The
+# recorded tab fixtures (ticket 504) are what the fixture pass renders, and the
+# two harness files are the assertions themselves: editing either changes the
+# gate's verdict without touching a line of tab source.
+ROOT_GATE_FILES = (
+    "vendor/tbc-new-fork/test-layout.mjs",
+    "vendor/tbc-new-fork/test-tab-harness.mjs",
+)
+FIXTURE_DIR = ROOT / "data/tab-fixtures"
+# The fixture the fixture pass renders unless `--fixture` names another: feral
+# on the Phase 2 BiS preset at page phase 3, which has set rows.
+DEFAULT_FIXTURE = FIXTURE_DIR / "feral-p3-p2bis.json"
+
+
+def _iter_root_gate_files() -> list[Path]:
+    files = [ROOT / rel for rel in ROOT_GATE_FILES]
+    if FIXTURE_DIR.is_dir():
+        files.extend(sorted(FIXTURE_DIR.glob("*.json")))
+    return files
+
+
 def _iter_layout_files() -> list[Path]:
     """Every fork source file whose content the gate depends on, sorted.
 
@@ -243,6 +267,13 @@ def compute_tab_hash() -> tuple[str, list[str]]:
         h.update(b"\0")
         h.update(path.read_bytes())
         h.update(b"\0")
+    # An absent harness file is not reported as missing: a clone that predates
+    # the gate must keep its "nothing to run" skip below, not become an error.
+    for path in sorted(_iter_root_gate_files(), key=_rel_root):
+        h.update(_rel_root(path).encode("utf-8"))
+        h.update(b"\0")
+        h.update(path.read_bytes() if path.is_file() else b"<absent>")
+        h.update(b"\0")
     return h.hexdigest(), missing
 
 
@@ -280,7 +311,10 @@ def write_baseline(digest: str) -> None:
         "shared/_global.scss (root font-size + lg/xxl spacer overrides), "
         "core/sim_ui/_shared.scss (--sim-header-height + the sim-content host), and "
         "core/components/_item_row.scss (the item-row-icon mixin the results row's "
-        "icon size comes from, ticket 472). The "
+        "icon size comes from, ticket 472). It also covers, by repo-relative "
+        "name, the gate's own harness (vendor/tbc-new-fork/test-layout.mjs and "
+        "test-tab-harness.mjs) and the recorded tab fixtures the fixture pass "
+        "renders (data/tab-fixtures/*.json, ticket 504). The "
         "shared files are hashed because the two tab SCSS files import nothing and "
         "consume globally-injected variables, so a breakpoint or token edit re-lays "
         "the tab at the asserted widths without touching a shell file (review "
@@ -427,7 +461,7 @@ class GateResult(NamedTuple):
     a11y_failed: int | None
 
 
-def run_gate() -> GateResult:
+def run_gate(fixture: Path | None = None) -> GateResult:
     """Run test:layout in the fork.
 
     rc is 0 (the gate ran green), 1 (the gate MEASURED and something is broken
@@ -456,6 +490,9 @@ def run_gate() -> GateResult:
     env = dict(os.environ)
     if A11Y_BASELINE_PATH.is_file():
         env["TBC_A11Y_BASELINE"] = str(A11Y_BASELINE_PATH)
+    # The fixture pass (ticket 504) runs only when a fixture is handed down.
+    if fixture is not None:
+        env["TBC_TAB_FIXTURE"] = str(fixture)
     # stdout is teed rather than buffered: each line is echoed as it arrives so
     # a ~2-3 minute run still shows progress live, while the verdict line is
     # kept for the run/skip decision below. stderr stays attached to the
@@ -578,6 +615,7 @@ def run(
     print_hash: bool = False,
     update_baseline: bool = False,
     on_baseline_advanced: Callable[[Path, str], None] | None = None,
+    fixture: Path | None = None,
 ) -> int:
     """The gate. `merge_to_dev.py` calls this directly, argv-free.
 
@@ -669,7 +707,16 @@ def run(
             f"(recorded {baseline[:12]}..., now {digest[:12]}...) -- running the gate."
         )
 
-    result = run_gate()
+    # Defaulted here, not in main(), so `merge_to_dev.py`'s direct call gets the
+    # fixture pass too.
+    if fixture is None and DEFAULT_FIXTURE.is_file():
+        fixture = DEFAULT_FIXTURE
+    if fixture is None:
+        print("layout gate: no tab fixture on disk -- the fixture pass is skipped.")
+    else:
+        print(f"layout gate: {check_fixture(fixture)[1]}")
+
+    result = run_gate(fixture)
     if result.rc == GATE_UNMEASURED:
         # Nothing was measured. Do not block, and do NOT advance the baseline:
         # recording an untested digest as tested would skip the gate forever.
@@ -726,6 +773,15 @@ def main() -> int:
             "runs the gate itself (ticket 400 / pnpm verify's tail summary)."
         ),
     )
+    ap.add_argument(
+        "--fixture",
+        type=Path,
+        default=None,
+        help=(
+            "the recorded tab fixture the fixture pass renders (default: "
+            "data/tab-fixtures/feral-p3-p2bis.json when it exists)"
+        ),
+    )
     args = ap.parse_args()
     if args.preview_skip:
         reason = preview_skip_reason()
@@ -734,7 +790,12 @@ def main() -> int:
         else:
             print(f"layout: skipped -- {reason}")
         return 0
-    return run(print_hash=args.print_hash, update_baseline=args.update_baseline)
+    fixture = args.fixture.resolve() if args.fixture else None
+    return run(
+        print_hash=args.print_hash,
+        update_baseline=args.update_baseline,
+        fixture=fixture,
+    )
 
 
 if __name__ == "__main__":

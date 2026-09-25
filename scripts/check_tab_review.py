@@ -40,6 +40,7 @@ from check_layout_gate import (  # noqa: E402
     A11Y_BASELINE_PATH,
     DIST_ASSETS,
     DIST_WASM_CANDIDATES,
+    FIXTURE_DIR,
     FORK_ROOT,
     _find_chromium,
     _npm_command,
@@ -117,6 +118,8 @@ def run(manifest: str, out: str | None) -> int:
     env = dict(os.environ)
     if A11Y_BASELINE_PATH.is_file():
         env["TBC_A11Y_BASELINE"] = str(A11Y_BASELINE_PATH)
+    # Where a manifest entry's `"fixture": "<name>"` resolves (ticket 504).
+    env["TBC_TAB_FIXTURE_DIR"] = str(FIXTURE_DIR)
 
     print(f"tab-review: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
     print("(builds the bundle, runs the manifest headless; ~2-3 min)")
