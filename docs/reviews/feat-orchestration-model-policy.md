@@ -201,3 +201,27 @@ Tickets 517 to 521 were deleted on 2026-09-25; the owner judged them too much ov
 | SP5 | Spec        | fixed       | fixed in 4698c74b: same defect as A4                                                                                                                                                                                          |
 | SP6 | Spec        | fixed       | fixed in 4698c74b: "Never merge each worker into `dev`." is its own sentence                                                                                                                                                  |
 | N1  | Standards   | wontfix     | Moot: this branch no longer changes `NEXT`                                                                                                                                                                                    |
+
+## Reply-format commit
+
+Commit `237c58a4` applies the owner's reply-format decisions of
+2026-09-25. It rewrites global "Chat responses" in the staged copy
+`docs/agents/home/AGENTS.md` and trims the project `AGENTS.md` to point
+at it. One independent reviewer (Opus, general-purpose) checked the diff
+against `writing-for-agents` and the owner's eight decisions. It found
+all eight implemented faithfully and no banned words in the new text.
+Fixes are in `c4ec8737`.
+
+## Disposition (reply-format commit)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                        |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| RF1 | Adversarial | fixed       | c4ec8737: a one-or-two-sentence reply "asks for nothing" and "needs no title or section names"                                       |
+| RF2 | Adversarial | fixed       | c4ec8737: the caller corrects a summary that disagrees with the report and puts every request in its reply's one Needed from you     |
+| RF3 | Adversarial | fixed       | c4ec8737: a mid-task answer is text between tool calls, so the final reply repeats it in its first section                           |
+| RF4 | Standards   | fixed       | c4ec8737: Status names "the agent" instead of "you", which in "Needed from you" means the user                                       |
+| RF5 | Standards   | wontfix     | The owner approved the project pointer as proposed (decision 7)                                                                      |
+| RF6 | Standards   | wontfix     | The no-acknowledgment line is a guardrail kept from the deleted "Lead with substance", and the title rule states the positive target |
+| RF7 | Standards   | wontfix     | The between-tool-calls line repeats the opening principle; the owner asked to keep it (decision 4)                                   |
+| RF8 | Adversarial | wontfix     | The rule has no waiver for the Summary for the user section; adding one would give callers a way to skip it                          |
+| RF9 | Standards   | wontfix     | Banned words in older project `AGENTS.md` text that this commit did not touch                                                        |
