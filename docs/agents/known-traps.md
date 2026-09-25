@@ -191,3 +191,9 @@ browser tab id — re-drive the page rather than debugging the "lost" run.
 The layout gate (`pnpm layout-gate:check`) and `pnpm tab-review` need
 neither port — the harness serves its own built `dist/` and runs the WASM
 in the browser, so the dev-server trap above does not apply to them.
+
+Rendering a recorded tab fixture (`data/tab-fixtures/`, ticket 504) needs
+neither port in the gates, and only `:5173` by hand. Recording one needs both,
+because it is a real run. A fixture load never shows "Took": no run happened,
+so wait for result rows and no stale banner instead. See
+`data/tab-fixtures/README.md`.
