@@ -1,0 +1,507 @@
+[
+  {
+    "job": "494-F-breastplate",
+    "fixture": "feral-p3-th-hands-legs",
+    "row": "Breastplate of Malorne",
+    "width": 1280,
+    "files": [
+      "494-F-breastplate-grouped-1280.png",
+      "494-F-breastplate-grouped-768.png",
+      "494-F-breastplate-flat-1280.png",
+      "494-F-breastplate-flat-768.png"
+    ],
+    "setContext": {
+      "setId": 640,
+      "setName": "Malorne Harness",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 2,
+      "crossesThreshold": false,
+      "futureBonuses": [
+        {
+          "threshold": 2,
+          "piecesNeeded": 2,
+          "dps": 55.76944836783514
+        },
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": -31.835349694978504,
+          "breaks": [
+            {
+              "setId": 676,
+              "setName": "Thunderheart Harness",
+              "threshold": 2,
+              "dps": 106.24370861387797
+            }
+          ]
+        }
+      ],
+      "commitBreaks": [
+        {
+          "setId": 676,
+          "setName": "Thunderheart Harness",
+          "threshold": 2,
+          "dps": 106.24370861387797
+        }
+      ],
+      "commitPackageDeltaDps": -195.2455900341347,
+      "packages": [
+        {
+          "threshold": 2,
+          "deltaDps": 49.74835171013319,
+          "itemIds": [
+            29100,
+            29096
+          ],
+          "piecesNeeded": 2
+        },
+        {
+          "threshold": 4,
+          "deltaDps": -195.2455900341347,
+          "itemIds": [
+            29098,
+            29100,
+            29096,
+            29099
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": 9.453784648271721,
+    "floor": 5.091168824543143,
+    "groupedText": "In this DPS now\n  Breastplate of Malorne itself: +9.5\nSet potential adds +55.8\n  Malorne Harness 2pc: +55.8\nNot counted\n  Malorne Harness 4pc: too small to count\n   needs breaking Thunderheart Harness 2pc: −106.2",
+    "flatText": "Malorne Harness 2pc (0/2 worn): +55.8\nMalorne Harness 4pc: too small to count\n needs breaking Thunderheart Harness 2pc: −106.2\nCounted with Set potential: +55.8 (stops at Malorne Harness 2pc)",
+    "credit": 55.76944836783514,
+    "dpsCell": "+65.2 DPS\nset detail"
+  },
+  {
+    "job": "494-D-th-chestguard",
+    "fixture": "feral-p3-nordrassil4",
+    "row": "Thunderheart Chestguard",
+    "width": 1280,
+    "files": [
+      "494-D-th-chestguard-grouped-1280.png",
+      "494-D-th-chestguard-grouped-768.png",
+      "494-D-th-chestguard-flat-1280.png",
+      "494-D-th-chestguard-flat-768.png"
+    ],
+    "setContext": {
+      "setId": 676,
+      "setName": "Thunderheart Harness",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 2,
+      "crossesThreshold": false,
+      "singleBreaks": [
+        {
+          "setId": 641,
+          "setName": "Nordrassil Harness",
+          "threshold": 4,
+          "dps": 47.187881439068406
+        }
+      ],
+      "futureBonuses": [
+        {
+          "threshold": 2,
+          "piecesNeeded": 2,
+          "dps": 103.1285374662184
+        },
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": 79.4277084181308
+        }
+      ],
+      "commitPackageDeltaDps": 179.1493890900333,
+      "packages": [
+        {
+          "threshold": 2,
+          "deltaDps": 87.31925378997039,
+          "itemIds": [
+            31042,
+            31034
+          ],
+          "piecesNeeded": 2
+        },
+        {
+          "threshold": 4,
+          "deltaDps": 179.1493890900333,
+          "itemIds": [
+            31048,
+            31042,
+            31034,
+            31044
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": -34.45656585230381,
+    "floor": 5.091168824543143,
+    "groupedText": "In this DPS now\n  Thunderheart Chestguard itself: +12.7\n  breaks Nordrassil Harness 4pc: −47.2\nSet potential adds +182.6\n  Thunderheart Harness 2pc: +103.1\n  Thunderheart Harness 4pc: +79.4",
+    "flatText": "Breaks Nordrassil Harness 4pc: −47.2 — included in this DPS\nThunderheart Harness 2pc (0/2 worn): +103.1\nThunderheart Harness 4pc (0/4 worn): +79.4\nCounted with Set potential: +182.6 (stops at Thunderheart Harness 4pc)",
+    "credit": 182.5562458843492,
+    "dpsCell": "+148.1 DPS\nset detail"
+  },
+  {
+    "job": "494-I-lightbringer",
+    "fixture": "ret-p3-p2",
+    "row": "Lightbringer Breastplate",
+    "width": 1280,
+    "files": [
+      "494-I-lightbringer-1280.png",
+      "494-I-lightbringer-768.png"
+    ],
+    "setContext": {
+      "setId": 680,
+      "setName": "Lightbringer Battlegear",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 2,
+      "crossesThreshold": false,
+      "futureBonuses": [
+        {
+          "threshold": 2,
+          "piecesNeeded": 2,
+          "dps": -3.1395415254401087
+        },
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": -4.216874888146776
+        }
+      ],
+      "commitPackageDeltaDps": -29.70266300438516,
+      "packages": [
+        {
+          "threshold": 2,
+          "deltaDps": 3.705555574740629,
+          "itemIds": [
+            30990,
+            30993
+          ],
+          "piecesNeeded": 2
+        },
+        {
+          "threshold": 4,
+          "deltaDps": -29.70266300438516,
+          "itemIds": [
+            30989,
+            30997,
+            30990,
+            30993
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": 3.947966739203366,
+    "floor": 4.8083261120685235,
+    "groupedText": "(no lines)",
+    "groupsEmpty": true
+  },
+  {
+    "job": "494-E-nordrassil-chest-F",
+    "fixture": "feral-p3-th-hands-legs",
+    "row": "Nordrassil Chestplate",
+    "width": 1280,
+    "files": [
+      "494-E-nordrassil-chest-F-grouped-1280.png",
+      "494-E-nordrassil-chest-F-grouped-768.png",
+      "494-E-nordrassil-chest-F-flat-1280.png",
+      "494-E-nordrassil-chest-F-flat-768.png"
+    ],
+    "setContext": {
+      "setId": 641,
+      "setName": "Nordrassil Harness",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 4,
+      "crossesThreshold": false,
+      "futureBonuses": [
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": -60.45729943014521,
+          "breaks": [
+            {
+              "setId": 676,
+              "setName": "Thunderheart Harness",
+              "threshold": 2,
+              "dps": 106.24370861387797
+            }
+          ]
+        }
+      ],
+      "commitBreaks": [
+        {
+          "setId": 676,
+          "setName": "Thunderheart Harness",
+          "threshold": 2,
+          "dps": 106.24370861387797
+        }
+      ],
+      "commitPackageDeltaDps": -252.52668813879563,
+      "packages": [
+        {
+          "threshold": 4,
+          "deltaDps": -252.52668813879563,
+          "itemIds": [
+            30228,
+            30230,
+            30222,
+            30229
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": 16.776270683614985,
+    "floor": 5.091168824543143,
+    "groupedText": "In this DPS now\n  Nordrassil Chestplate itself: +16.8\nNot counted\n  Nordrassil Harness 4pc: too small to count\n   needs breaking Thunderheart Harness 2pc: −106.2\n   (costs more than it gains)",
+    "flatText": "Nordrassil Harness 4pc: too small to count\n needs breaking Thunderheart Harness 2pc: −106.2\nNot counted: no Nordrassil Harness bonus outweighs what it breaks.",
+    "credit": 0,
+    "dpsCell": "+16.8 DPS\nset detail"
+  },
+  {
+    "job": "494-C-nordrassil-chest",
+    "fixture": "feral-p2-malorne4",
+    "row": "Nordrassil Chestplate",
+    "width": 1280,
+    "files": [
+      "494-C-nordrassil-chest-grouped-1280.png",
+      "494-C-nordrassil-chest-grouped-768.png",
+      "494-C-nordrassil-chest-flat-1280.png",
+      "494-C-nordrassil-chest-flat-768.png"
+    ],
+    "setContext": {
+      "setId": 641,
+      "setName": "Nordrassil Harness",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 4,
+      "crossesThreshold": false,
+      "singleBreaks": [
+        {
+          "setId": 640,
+          "setName": "Malorne Harness",
+          "threshold": 4,
+          "dps": 22.857401253672833
+        }
+      ],
+      "futureBonuses": [
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": 50.89141511488151,
+          "breaks": [
+            {
+              "setId": 640,
+              "setName": "Malorne Harness",
+              "threshold": 2,
+              "dps": 84.2835690558677
+            }
+          ]
+        }
+      ],
+      "commitBreaks": [
+        {
+          "setId": 640,
+          "setName": "Malorne Harness",
+          "threshold": 2,
+          "dps": 84.2835690558677
+        }
+      ],
+      "commitPackageDeltaDps": -17.799267438721472,
+      "packages": [
+        {
+          "threshold": 4,
+          "deltaDps": -17.799267438721472,
+          "itemIds": [
+            30230,
+            30222,
+            30223,
+            30229
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": -17.421577489680658,
+    "floor": 5.091168824543143,
+    "groupedText": "In this DPS now\n  Nordrassil Chestplate itself: +5.4\n  breaks Malorne Harness 4pc: −22.9\nNot counted\n  Nordrassil Harness 4pc: +50.9\n   needs breaking Malorne Harness 2pc: −84.3\n   (costs more than it gains)",
+    "flatText": "Breaks Malorne Harness 4pc: −22.9 — included in this DPS\nNordrassil Harness 4pc (0/4 worn): +50.9\n needs breaking Malorne Harness 2pc: −84.3\nNot counted: no Nordrassil Harness bonus outweighs what it breaks.",
+    "credit": 0,
+    "dpsCell": "-17.4 DPS\nset detail"
+  },
+  {
+    "job": "501-toggle",
+    "fixture": "feral-p2-malorne4",
+    "width": 1280,
+    "files": [
+      "501-toggle-none_listed.png",
+      "501-toggle-none_clears.png",
+      "501-toggle-unmeasured.png"
+    ],
+    "toggle": {
+      "disabled": true,
+      "checked": false
+    },
+    "reasons": {
+      "none_listed": "None of these upgrades lead toward a set bonus big enough to count.",
+      "none_clears": "Some upgrades lead toward a set bonus, but none is worth more than the bonus it breaks. Hover a row's set detail to see the figures.",
+      "unmeasured": "Set bonuses could not be counted: a bonus these upgrades break could not be measured."
+    }
+  },
+  {
+    "job": "495-placement",
+    "fixture": "feral-p3-nordrassil4",
+    "row": "Thunderheart Chestguard",
+    "width": 1280,
+    "files": [
+      "495-placement-top-1280.png",
+      "495-placement-left-1280.png",
+      "495-placement-detailrow-1280.png",
+      "495-placement-top-768.png",
+      "495-placement-left-768.png",
+      "495-placement-detailrow-768.png",
+      "495-placement-top-375.png",
+      "495-placement-left-375.png",
+      "495-placement-detailrow-375.png"
+    ],
+    "setContext": {
+      "setId": 676,
+      "setName": "Thunderheart Harness",
+      "piecesWornBefore": 0,
+      "piecesAfterSwap": 1,
+      "nextThreshold": 2,
+      "crossesThreshold": false,
+      "singleBreaks": [
+        {
+          "setId": 641,
+          "setName": "Nordrassil Harness",
+          "threshold": 4,
+          "dps": 47.187881439068406
+        }
+      ],
+      "futureBonuses": [
+        {
+          "threshold": 2,
+          "piecesNeeded": 2,
+          "dps": 103.1285374662184
+        },
+        {
+          "threshold": 4,
+          "piecesNeeded": 4,
+          "dps": 79.4277084181308
+        }
+      ],
+      "commitPackageDeltaDps": 179.1493890900333,
+      "packages": [
+        {
+          "threshold": 2,
+          "deltaDps": 87.31925378997039,
+          "itemIds": [
+            31042,
+            31034
+          ],
+          "piecesNeeded": 2
+        },
+        {
+          "threshold": 4,
+          "deltaDps": 179.1493890900333,
+          "itemIds": [
+            31048,
+            31042,
+            31034,
+            31044
+          ],
+          "piecesNeeded": 4
+        }
+      ]
+    },
+    "deltaDps": -34.45656585230381,
+    "floor": 5.091168824543143,
+    "groupedText": "In this DPS now\n  Thunderheart Chestguard itself: +12.7\n  breaks Nordrassil Harness 4pc: −47.2\nSet potential adds +182.6\n  Thunderheart Harness 2pc: +103.1\n  Thunderheart Harness 4pc: +79.4",
+    "placements": [
+      {
+        "width": 1280,
+        "placement": "top",
+        "used": "top",
+        "hits": [
+          "above Item",
+          "above Slot",
+          "above DPS",
+          "above Source"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      },
+      {
+        "width": 1280,
+        "placement": "left",
+        "used": "left",
+        "hits": [
+          "above Item",
+          "above Slot",
+          "below Item",
+          "below Slot"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      },
+      {
+        "width": 768,
+        "placement": "top",
+        "used": "top",
+        "hits": [
+          "above Item",
+          "above Slot",
+          "above DPS",
+          "above Source"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      },
+      {
+        "width": 768,
+        "placement": "left",
+        "used": "left",
+        "hits": [
+          "above Item",
+          "above Slot",
+          "below Item",
+          "below Slot"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      },
+      {
+        "width": 375,
+        "placement": "top",
+        "used": "top",
+        "hits": [
+          "above Item",
+          "above Slot",
+          "above DPS"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      },
+      {
+        "width": 375,
+        "placement": "left",
+        "used": "bottom",
+        "hits": [
+          "below Item",
+          "below Slot",
+          "below DPS"
+        ],
+        "tipHeight": 128.625,
+        "onScreen": true
+      }
+    ]
+  }
+]

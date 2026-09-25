@@ -39,3 +39,14 @@ exists but never clears its break."
 1. Reason copy that covers the case where a future bonus is listed but
    never net-positive (owner-confirmed wording, as with 494/479).
 2. The tab change, fork commit, re-pin, `pnpm verify` rc=0.
+
+## Comments
+
+**2026-09-25, round 2c (owner decision).** The three reason messages drafted
+in round 2c were rejected because they describe different mechanisms from
+each other. The owner leans toward "None of these upgrades gain a set
+bonus." if it is accurate, which it is only when no row has a future bonus
+above the noise floor. This ticket moves to the 494 redo session, which
+starts from `.scratch/handoffs/494-set-hover-redo.md` (§1 states the rule the
+message must follow). No reason string changed in round 2c. Status stays
+open.

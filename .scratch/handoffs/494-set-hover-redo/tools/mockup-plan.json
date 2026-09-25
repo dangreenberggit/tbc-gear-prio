@@ -1,0 +1,14 @@
+{ "jobs": [
+  { "id": "494-F-breastplate", "kind": "hover", "fixture": "feral-p3-th-hands-legs", "row": "Breastplate of Malorne" },
+  { "id": "494-D-th-chestguard", "kind": "hover", "fixture": "feral-p3-nordrassil4", "row": "Thunderheart Chestguard" },
+  { "id": "494-I-lightbringer", "kind": "no-hover", "fixture": "ret-p3-p2", "row": "Lightbringer Breastplate" },
+  { "id": "494-E-nordrassil-chest-F", "kind": "hover", "fixture": "feral-p3-th-hands-legs", "row": "Nordrassil Chestplate" },
+  { "id": "494-C-nordrassil-chest", "kind": "hover", "fixture": "feral-p2-malorne4", "row": "Nordrassil Chestplate" },
+  { "id": "501-toggle", "kind": "toggle", "fixture": "feral-p2-malorne4", "reasons": {
+      "none_listed": "None of these upgrades lead toward a set bonus big enough to count.",
+      "none_clears": "Some upgrades lead toward a set bonus, but none is worth more than the bonus it breaks. Hover a row's set detail to see the figures.",
+      "unmeasured": "Set bonuses could not be counted: a bonus these upgrades break could not be measured." } },
+  { "id": "495-placement", "kind": "placement", "fixture": "feral-p3-nordrassil4", "row": "Thunderheart Chestguard" },
+  { "id": "499-dps-cell", "kind": "dps-cell", "fixture": "feral-p3-nordrassil4" },
+  { "id": "499-focus", "kind": "focus", "fixture": "feral-p3-nordrassil4" }
+] }

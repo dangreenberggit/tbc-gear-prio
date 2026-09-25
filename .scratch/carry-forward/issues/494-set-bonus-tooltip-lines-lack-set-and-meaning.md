@@ -69,3 +69,14 @@ More self-explanation gaps found while running the nine set-rule scenarios
 
 These are additional instances of the same "lines lack meaning" problem
 this ticket already tracks, not a new defect.
+
+**2026-09-25, round 2c (owner decision).** Every wording drafted in round
+2c was rejected: v1 grouped and flat, v2 wording A and wording B. This ticket
+moves to its own session. Everything that session needs is in
+`.scratch/handoffs/494-set-hover-redo.md` and the folder
+`.scratch/handoffs/494-set-hover-redo/`: the mechanism to agree first, each
+approach tried with the owner's reason for rejecting it, the findings that
+still hold, the mistakes made, and copies of the draft code and pictures.
+Round 2c changed no hover content. It did build the hover's placement (right
+of the figure when it fits, else above, ticket 495) and the DPS cell changes
+(ticket 499). Status stays open.
