@@ -616,3 +616,110 @@ they are tickets, not in-branch fixes. Tidy items were fixed in-branch.
 | ST2                 | Standards           | fixed       | Fork `7c001b365`: the `initial` comment/parameter and the duplicate `candidateSlotIndex` comment removed; unused `_sim`/`_bt` params dropped from `refreshToggles`.                                                                                                                                 |
 | ST3                 | Standards           | wontfix     | `subscribe` flag and the two `refresh` closures stay: the Gear list subscribes per row by design (parity) and the Upgrades tab must not; a shared `paint()` helper is a judgement call not worth a PROVENANCE-free churn commit now.                                                                |
 | ST4                 | Standards           | wontfix     | `FavoriteKey.method: keyof DatabaseFilters` mirrors the Gear picker's five favourite arrays; narrowing it would fork the two callers' types.                                                                                                                                                        |
+
+# Targeted engine review (2026-09-25) — not a full round
+
+Reviewed range: `5d84ffff9..7ed8c9941` (fork, engine/** only); main `a40588ae..7c2f84ff` (fork-set-net.test.ts, ADR-0034 only)
+
+Round 10's full window (main `7c54848f..`, fork `7965a7d8..`) is still owed;
+this section covers only the set-bonus engine files, their test and ADR-0034.
+
+The fork range holds three engine commits: `371da7dce` (tickets 476–478),
+`7b7f2da28` (490–492) and `7ed8c9941` (comment-only). The three axis reports
+are in `.scratch/stage-gate/upgrades-tab-closeout/engine-review/`
+(`adversarial.md`, `domain.md`, `standards-spec.md`). That folder is
+gitignored, so each section below states the findings in full enough to
+act on.
+
+## Adversarial
+
+One blocking finding and one material. **A1:** the ticket-492 pair sim
+checked that each piece was break-free alone but not that the two were
+break-free together. With a worn Malorne 3, two pieces that each leave it at
+2 take it to 1 as a pair. That break then lands in `B2`, and every
+Thunderheart row was credited 120 where the model gives 40. **A2:** when no
+usable pair existed, or the pair sim or its gem repair failed, the
+confounded `raw4 = B4 − (n−1)·B2` became `bonusDpsNet` and was credited, with
+nothing to show it. Minor: **A3**, two `rank.ts` doc comments no longer
+matched the code. **A4**, no test reached `dependent-unmeasured`, the
+`full-path` branch never ran, the test copied `RULE_490`, and A3-U works out
+its expected value with the code's own formula. **A5**, ADR-0034 called
+`commitPackageDeltaDps` the package total and said the other rule was "one
+constant" away. Checked by hand and correct: the `B_t` solve, the
+`netInflation` sign, and fixtures 476-A, 476-B and 492-F.
+
+## Domain
+
+Three material findings and two minor. **D1:** the ret set credit counts
+bonuses that cannot add ret DPS: the Crystalforge 4pc is a party heal, and
+the Justicar 4pc affects only Judgement of Command, which the default ret
+rotation never casts. Scenarios H and I still credit them +9.5 to +21.1. The
+likely cause (hypothesis) is that the floor is a single-sim cutoff while a
+net is a difference of five or more sims. **D2:** "stop where it pays" leaves
+out the other path pieces' own stat cost: scenario D credits +108 per
+Malorne row against a +8.5 end state. **D3:** breaks model only six tier
+sets at 2pc and 4pc. Pre-raid feral Wastewalker 4pc and ret Burning Rage 2pc
+are never charged, and `SetThreshold = 2 | 4` cannot hold a 3pc. **D4:** the
+Justicar 2pc does have an effect body (`sim/paladin/seals.go:553`, also at
+pin `8aa378b3`), which the table comments denied. **D5:** test A3-R hard-coded
+the implemented-set list.
+
+## Standards + Spec
+
+**Standards:** seven findings. **S1** (material): the committed test cited
+derivations in gitignored `round-2*/plan.md`. **S2:** ADR-0034 did not say
+that CI skips the fixture suite. **S3:** the `full-path` branch never ran.
+**S4:** stale "today" wording in the tests. **S5:** the `7ed8c9941` commit
+body was unwrapped, and no fork-gated run was recorded for it. **S6:**
+optional cleanup (a duplicated derivation and comparator, inline keys,
+unused `InflationKey` fields, the ticket-named `RULE_490`, a dangling
+header line). **S7:** A3-R hard-coded the set list, the same point as D5.
+PROVENANCE hashes and labels were clean at `7ed8c9941`.
+
+**Spec:** six findings. **P1** is A1, found independently as a hypothesis.
+**P2:** 477's closing comment still gave the legs credit as 90 and did not
+link 491. **P3:** 491 item 2 is met only at the key level. **P4:**
+ADR-0034 did not say that an unmeasured commit break still zeroes the
+credit. **P5:** 490 did not record the wording fix. **P6:** 478's
+one-piece-per-slot claim had no re-runnable command. All six tickets'
+close items were otherwise delivered.
+
+## Summary
+
+A1/P1 and A2 are fixed in fork `2cf4ec46e`, re-pinned in main `5c4b8002`,
+with red-first fixtures 492-J and 492-N. The derivations are now tracked in
+`docs/set-bonus-fixture-derivations.md`. D1, D3 and S6 are new tickets 511,
+512 and 513. D2 and P3 are comments on open tickets 502 and 494. Checks at
+main `5c4b8002`: `npx vitest run packages/core/test/fork-set-net.test.ts
+packages/core/test/wowsims-fork-parity.test.ts` rc=0 (25 passed, 1 skipped);
+`pnpm verify` rc=0; layout gate
+`{"outcome":"measured","passed":121,"failed":0,"a11yFailed":0}`. CI skips the
+fork-gated suites, so the local rc is the evidence.
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                    |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | Fork `2cf4ec46e`, main `5c4b8002`: the 492 pair must be break-free alone and together. Fixture 492-J: red `selfConfound` 90, net 160, row credit 120; green 50, 80, 40.                                                                                                                                          |
+| A2  | Adversarial | fixed       | Fork `2cf4ec46e`, main `5c4b8002`: with no usable pair, or a failed pair sim or repair, `bonusDpsNet` stays unset and the row shows `not_counted`. Fixture 492-N: red net −20. No `packageSimSkips` note: its text says the package sim failed, which is false here; `selfConfound` without `dps` is the record. |
+| A3  | Adversarial | fixed       | Fork `2cf4ec46e`: the `bonusDps` and `bonusDpsNet` doc comments, plus `measurePairTwoPiece` and `SelfSetConfound.dps`, now match the code.                                                                                                                                                                       |
+| A4  | Adversarial | fixed       | Main `5c4b8002`: fixture 476-D reaches `dependent-unmeasured`; 490-B reads `RULE_490` from `view.ts` and calls `setPotentialCredit` under both rules. The A3-U tautology is listed in `.scratch/carry-forward/issues/513-set-engine-optional-cleanup.md`.                                                        |
+| A5  | Adversarial | fixed       | Main `5c4b8002`: ADR-0034 calls `commitPackageDeltaDps` the gross package delta (420 in 476-A, not the net 90) and says `setPotentialCredit` implements both rules, selected by `RULE_490`.                                                                                                                      |
+| D1  | Domain      | defer       | `.scratch/carry-forward/issues/511-ret-set-credit-counts-bonuses-with-no-ret-dps.md` — needs a rule choice and an SME check on ret.                                                                                                                                                                              |
+| D2  | Domain      | defer       | `.scratch/carry-forward/issues/502-scenario-d-tier4-outranks-new-tier-staff.md` — comment added (main `8807b620`); the owner approved the rule, so this is input to 502's ruling.                                                                                                                                |
+| D3  | Domain      | defer       | `.scratch/carry-forward/issues/512-set-breaks-model-only-six-tier-sets.md` — extends the break model beyond six tier sets and to 3pc.                                                                                                                                                                            |
+| D4  | Domain      | fixed       | Fork `2cf4ec46e` (fork table comment), main `5c4b8002` (core table comment and a `verification.md` V1 note): the effect body at `seals.go:553` is named; the value stays `false`.                                                                                                                                |
+| D5  | Domain      | fixed       | Fork `2cf4ec46e` exports `IMPLEMENTED_SET_IDS`; main `5c4b8002` A3-R reads it and asserts the list is not empty.                                                                                                                                                                                                 |
+| S1  | Standards   | fixed       | Main `5c4b8002`: derivations moved to `docs/set-bonus-fixture-derivations.md`; the test comments point there.                                                                                                                                                                                                    |
+| S2  | Standards   | fixed       | Main `5c4b8002`: ADR-0034 says CI skips the suite, gives the local command, and corrects "one constant away".                                                                                                                                                                                                    |
+| S3  | Standards   | fixed       | Main `5c4b8002`: 490-B asserts `setPotentialCredit` under `"full-path"` (20, −22.5) and `"best-stop"` (40, 20), with `RULE_490` imported.                                                                                                                                                                        |
+| S4  | Standards   | fixed       | Main `5c4b8002`: "Today's sign" became "the pre-476 correction", `TODAY_492_RUNS` became `PRE_FIX_492_RUNS`, and case 8's title lost "today's".                                                                                                                                                                  |
+| S5  | Standards   | fixed       | Main `8807b620`: ticket 490 records the fork-gated run at `7ed8c9941` (rc=0, 22 passed, 1 skipped). The unwrapped commit body stays; commits are not amended.                                                                                                                                                    |
+| S6  | Standards   | defer       | `.scratch/carry-forward/issues/513-set-engine-optional-cleanup.md` — optional cleanup.                                                                                                                                                                                                                           |
+| S7  | Standards   | fixed       | Same change as D5: fork `2cf4ec46e`, main `5c4b8002`.                                                                                                                                                                                                                                                            |
+| P1  | Spec        | fixed       | Same fix as A1: fork `2cf4ec46e`, main `5c4b8002`, fixture 492-J.                                                                                                                                                                                                                                                |
+| P2  | Spec        | fixed       | Main `8807b620`: comment on 477 (legs credit 130 since 490; 491 closed the display gap).                                                                                                                                                                                                                         |
+| P3  | Spec        | defer       | `.scratch/carry-forward/issues/494-set-bonus-tooltip-lines-lack-set-and-meaning.md` — comment added (main `8807b620`); the 494 redo revisits the rendered-text test.                                                                                                                                             |
+| P4  | Spec        | fixed       | Main `5c4b8002`: ADR-0034 says an unmeasured commit break still zeroes the credit.                                                                                                                                                                                                                               |
+| P5  | Spec        | fixed       | Main `8807b620`: comment on 490 recording the `7ed8c9941` wording fix.                                                                                                                                                                                                                                           |
+| P6  | Spec        | fixed       | Main `8807b620`: comment on 478 with a `node -e` check over `db.json` (`pairs 36 dups 0`, rc=0).                                                                                                                                                                                                                 |
