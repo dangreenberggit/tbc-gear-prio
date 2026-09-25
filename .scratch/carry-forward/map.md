@@ -220,3 +220,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 407 `--full --update-golden` writes a cap-0 golden that check (h) never reads, plus three minor cleanups in the same file (adversarial+standards axes, pre-merge review round 3, feat/desktop-transport-gate)
 - 408 the verify gate counter miscounts in both directions — sharp against ticket 400's own purpose of making the ran/skipped count trustworthy (adversarial axis, round 3)
 - 409 `bulk-screen-http-fixture.test.ts` version guard is tautological; a regression introduced by ticket 390's own fix, so do not revert it wholesale (adversarial axis, round 3)
+- 518 confirm an Opus subagent actually runs at effort `xhigh`; the committed label now cites `claude --help` for the CLI side only (spec axis, pre-merge review, feat/orchestration-model-policy)
+- 519 five AGENTS.md § The session delegates / § Parallel agents wording defects, held for owner approval of AGENTS.md edits (spec, standards, adversarial axes, same review)
+- 520 `code-review`, `qa` and `improve-codebase-architecture` still spawn built-in agent types the new policy replaces; owner decides whether to pin them (standards+adversarial axes, same review)
+- 521 `gate-visual.md` keeps `effort: medium` after feat/tab-signoff-followups merges; bring it and the stage-gate Visual row to Opus at `high` (adversarial axis, same review)
