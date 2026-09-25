@@ -32,7 +32,9 @@ instead.
 Estimate: implementation workers on this repo have run roughly 100k–240k
 tokens each (five measured workers, 2026-08-11, fix-round worker table in
 `.scratch/set-bonus-value/orchestration-observations-2026-08-12.html`).
-Multiply by slice count, add fan-in.
+Multiply by slice count, add fan-in. Those five workers ran Fable
+(§ Lane is per job, not per parent). No Opus-at-`high` worker has been
+measured, so on Claude Code the estimate is a hypothesis, untested.
 
 If the round does not fit, **stop at the partition**. The fan-in brief is a
 complete, resumable artifact: a fresh window spawns from it at full
@@ -49,7 +51,7 @@ lane it does not belong to.
 
 | Lane          | Jobs                                                                          | Model bar                                                                                                                  | Speed                                                                         |
 | ------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Workhorse** | Implement plans, TDD slices, parallel-phase workers, merges, mechanical edits | Strong mid tier the harness will **actually run** — see the per-harness sections for who that is here                      | Prefer parallel when slices are independent                                   |
+| **Workhorse** | Implement plans, TDD slices, parallel-phase workers, merges, mechanical edits | The model your harness section names for **workhorse** — a model the harness will **actually run**                         | Prefer parallel when slices are independent                                   |
 | **Review**    | Pre-merge review axes, adversarial and domain judgment, SME rank review       | The model your harness section names for **review** — critique against a fixed standard, not the tallest model             | **Slow is fine**: sequential axes, wait/retry, or hand off to a fresh session |
 | **Design**    | Planning, architecture, hard open-ended design calls                          | The model your harness section names for **design** — reserved for open-ended work with no fixed standard to check against | One at a time; never fanned out                                               |
 
@@ -76,9 +78,10 @@ judgment — which is why the delay is cheaper than it looks. Substituting a
 _taller_ model is not a fix either: it spends the top price tier on work that
 did not ask for it.
 
-Workhorse jobs **may** retry on a peer workhorse if one mid-tier is
-exhausted; they still must not jump to a toy model for implementation
-correctness without the user saying so.
+Workhorse jobs **may** retry on the peer fill your harness section names
+for workhorse, when it names one. Claude Code names none: on a wall, an
+Opus job waits or serialises and stays on Opus. A job never moves to a
+cheaper model for implementation correctness unless the user says so.
 
 > **Retired term.** This policy used to run two lanes, with review and design
 > merged into one called **sharp**, whose bar was "the top reasoning tier
@@ -93,7 +96,9 @@ correctness without the user saying so.
 A worker’s lane follows the **worker’s** job. A mechanical implementation
 slice is workhorse whether its manager is workhorse, review, or design.
 
-Name the model and effort on every spawn. The harness default is
+Name the model on every spawn, and give it an effort: on a harness where
+effort is not a spawn argument, pick an agent type whose definition sets
+it (Claude Code: see its section). The harness default is
 **inherit**: an unnamed worker runs its parent’s model at its parent’s
 price, so a design-lane manager fanning out unnamed workers buys a fan-out of
 design-lane workers. Observed 2026-08-11: a Fable-low director fanned out five
@@ -113,10 +118,13 @@ under `.scratch/handoffs/` the user can run elsewhere.
 
 - **Implementation (`parallel-phase`):** parallel worktrees with **workhorse**
   models is the point — often faster _and_ better than one long chain. Cap
-  around **3–5** workers. Every worker gets the workhorse model named in your
-  harness section, stated explicitly on the spawn. Review and design models are
-  for review axes and design calls, never for a fan-out: a fan-out on either
-  burns the usage limit before fan-in finishes, so the swarm dies half-merged.
+  around **3–5** workers. Every worker gets the workhorse fill named in your
+  harness section, stated explicitly on the spawn. Review and design **jobs**
+  are never fanned out: one spawn per review axis, and one design call at a
+  time. When the workhorse fill is a top-tier model — on Claude Code it is
+  Opus, the same model as review — size the round with § Budget the round
+  before spawning. A fan-out that exceeds the budget burns the usage limit
+  before fan-in finishes, and the swarm dies half-merged.
 
   **Price tier is not inferable — never guess it.** Do not rank a model by
   its name, its reputation, or which lane you assume it fills: this repo
@@ -163,32 +171,55 @@ Three peers. Read only the one you are running on.
 
 ### Claude Code
 
-| Lane          | Fill it with                                                                    |
-| ------------- | ------------------------------------------------------------------------------- |
-| **Workhorse** | Sonnet-class / mid tier                                                         |
-| **Review**    | **Opus at effort `medium`** (see below)                                         |
-| **Design**    | **Fable** — planning and architecture only; anything else needs a stated reason |
+| Lane          | Fill it with                                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Workhorse** | **Opus at effort `high`**; an extremely simple job runs **Sonnet at effort `high`** (see the agent-type table)                                   |
+| **Review**    | **Opus at effort `high`**                                                                                                                        |
+| **Design**    | **Opus at effort `xhigh`** (`xhigh`: the CLI accepts it; model-side behavior untested on this install) — used only for planning and architecture |
 
-The Opus **model** and the **effort level** are separate controls
+The **model** and the **effort level** are separate controls
 ([model config](https://code.claude.com/docs/en/model-config#adjust-effort-level),
 [effort API](https://platform.claude.com/docs/en/build-with-claude/effort)).
 Effort is `low` | `medium` | `high` | `xhigh` | `max` via `/effort`,
-`--effort`, `effortLevel`, or API `output_config.effort`. There is no
-`claude-opus-*-medium` model slug — set Opus **and** the effort.
+`--effort`, `effortLevel`, API `output_config.effort`, or `effort:` in an
+agent definition's frontmatter. There is no `claude-opus-*-high` model
+slug — set the model **and** the effort.
 
-**This repo’s preference** (not Anthropic’s marketing default): for tough
-Claude / Opus work, default to **effort `medium`**. Reserve effort `high`
-(and above: `xhigh` / `max`) for niche cases — e.g. a **single** narrow
-adversarial pre-merge review axis — where overthinking is worth the spend.
-At high effort Opus here tends to trip on wording and wander; medium stays
-tighter for this repo’s tasks (untested as a controlled comparison — this is
-accumulated session judgment, not a benchmark).
+The Agent tool takes a `model` argument but no effort argument. A
+subagent's effort comes from its agent definition's frontmatter, or from
+the session when the definition sets none
+([sub-agents](https://code.claude.com/docs/en/sub-agents)). So spawn
+through an agent type that pins both:
 
-**Fable is the design lane and nothing else.** It is the top price tier on this
-harness, above Opus — so an unnamed subagent spawned from a Fable session
-inherits Fable and bills at that tier. Name the model on every spawn. Review
-axes run **Opus**, not Fable: a taller model is not a better reviewer, and
-review is not the kind of work Fable is reserved for.
+| Agent type     | Model    | Effort                                                                     | Use for                                                                                                                |
+| -------------- | -------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `simple-task`  | `sonnet` | `high`                                                                     | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
+| `general-task` | `opus`   | `high`                                                                     | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
+| `design-task`  | `opus`   | `xhigh` (the CLI accepts it; model-side behavior untested on this install) | Planning and architecture outside stage-gate                                                                           |
+| `gate-*` seats | `opus`   | `high`; `gate-planner` `xhigh`                                             | Stage-gate only — see § Stage-gate seats                                                                               |
+
+The spawning agent decides which type to use. If you are unsure whether a
+job is extremely simple, spawn `general-task`. A `simple-task` that returns
+`NEEDS_JUDGMENT` is respawned on `general-task` with the same prompt. Spawn
+these types in place of the built-in `Explore`, `general-purpose` and
+`Plan` types. You cannot set the built-ins' effort at the call site, and
+whether they pin an effort of their own is unverified. If the harness does
+not recognize one of these types, restart the session rather than falling
+back to a built-in.
+
+> **Changed 2026-09-25.** Before this date the repo preferred Opus at effort
+> `medium`, reserved `high` and above for a single narrow adversarial review
+> axis, filled the workhorse lane with Sonnet and the design lane with Fable,
+> and recommended Opus at `medium` for the orchestrator. The owner replaced
+> all of that with the tables above. Plans and review notes written before
+> this date that say "Opus at effort `medium`" or "Fable (design lane)"
+> record what ran then and are left as written.
+
+**Fable fills no lane.** It is the top price tier on this harness, above
+Opus. The owner may run the interactive session on Fable, and a subagent
+whose agent type names no model inherits the session's model and bills at
+that tier. Name the model on every spawn, including for agent types whose
+frontmatter already names one.
 
 Prefer this harness when a review-lane reviewer from a different vendor than the
 authoring session is wanted, and sequential axes on a rate limit.
@@ -196,28 +227,22 @@ authoring session is wanted, and sequential axes on a rate limit.
 #### Stage-gate seats
 
 The `stage-gate` skill fills its seats from these lanes: Planner = design
-(Fable, frontmatter `effort: low` — the capability is what is bought, not
-the tokens), Reviewer = review (Opus at effort `medium`; its optional
-single judgment-claim refuter is the one narrow adversarial axis this
-policy reserves `high`+ for, when used at all), Executor = review (Opus
-at effort `medium`).
+(Opus at effort `xhigh`), Reviewer, Executor and SME = review
+(Opus at effort `high`). Each seat's agent definition sets `model: opus`
+and its effort in frontmatter.
 
-The Executor is the one seat that departs from the workhorse rule, and
-the reason is the shape of its work rather than its volume: it decides
-adapt-vs-flag-vs-stop wherever the plan and reality disagree, and a
-plan is underspecified by construction. The failure mode there is a
-silent paper-over — a judgment failure, not a throughput one. The
-workhorse rule still governs its `parallel-phase` workers, whose model
-is picked per slice from that slice's difficulty; a mechanical slice
-goes workhorse, a slice carrying design judgment does not, and neither
-licenses a wide swarm of sharp models.
+The Executor is on the review lane, not the workhorse lane, because of the
+kind of work it does. It decides adapt-vs-flag-vs-stop wherever the plan
+and reality disagree, and a plan is underspecified by construction. The
+failure mode there is a silent paper-over, which is a judgment failure and
+not a throughput one. The Executor's `parallel-phase` workers run
+`simple-task` for an extremely simple slice and `general-task` for every
+other slice.
 
-The orchestrator is the interactive session; Opus at
-effort `medium` is the recommended seat, and a Fable session may
-orchestrate with the stated reason that between-stage adjudication is
-planning-adjacent — a deliberate one-job extension of the design lane.
-Agent-definition frontmatter cannot name Fable, so the skill names every
-seat's model at the call site and each seat self-checks
+The orchestrator is the interactive session. The owner picks its model and
+effort per session. Whatever it runs on, it delegates every task
+(AGENTS.md § The session delegates). The skill names every seat's model at
+the call site, and each seat self-checks
 (`WRONG_MODEL: <name>` → respawn with the model named, never continue).
 
 ### Codex
@@ -227,6 +252,10 @@ seat's model at the call site and each seat self-checks
 | **Workhorse** | Mid tier for workers and mechanical edits |
 | **Review**    | Top tier; `codex exec` runs               |
 | **Design**    | Top tier, extended reasoning              |
+
+The interactive session delegates every task (AGENTS.md § The session
+delegates). Work that is not review or design goes to a subagent at the
+workhorse fill.
 
 `codex exec` is the cross-vendor review-lane reviewer `pre-merge-review` reaches
 for **first** when the binary is on `PATH` (see
@@ -255,6 +284,10 @@ Cursor bills **two pools**:
 | **Design** (planning, architecture) | **Grok high**; hand off externally for a big design call                                                                               | Cursor has no distinct design tier that reliably spawns — one lane fills both                      |
 | **Parent / orchestrator**           | Either; Grok is fine                                                                                                                   | Planning and merge coordination                                                                    |
 
+The interactive session delegates every task (AGENTS.md § The session
+delegates). Work that is not review or design goes to a subagent on the
+workhorse pin, Composer.
+
 **Why Composer is pinned rather than merely preferred.** On Pro, Other Models
 are often a **paper limit**: Task / `best-of-n-runner` workers requested as
 Terra (or similar) die at spawn with
@@ -266,8 +299,8 @@ advertises mid-tier models the plan does not actually let you use for
 parallel fan-out.
 
 This is a **Cursor packaging quirk**, not a universal “always Composer” rule.
-On Claude Code, Codex, or a Cursor plan with real Other-pool headroom,
-Sonnet- or Terra-class workhorses remain fine.
+On Codex, or a Cursor plan with real Other-pool headroom, mid-tier
+workhorses remain fine. Claude Code's fill is in its own section.
 
 - **Composer is allowed and preferred for simple work** — it is not a silent
   downgrade from Grok; it _is_ the workhorse lane on Cursor. Do not burn

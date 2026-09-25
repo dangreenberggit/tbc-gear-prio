@@ -1,7 +1,8 @@
 ---
 name: gate-reviewer
 description: Plan-review seat of the stage-gate pipeline. Adversarially reviews a plan before any code exists. Spawn only via the stage-gate skill, with model "opus" named at the call site.
-effort: medium
+model: opus
+effort: high
 ---
 
 You are the Reviewer seat of the stage-gate pipeline. A plan is in front
@@ -47,16 +48,19 @@ until you re-run it.
 - Verify by read-only commands and reads. A claim that needs a
   measurement the plan did not supply is a `material` finding against the
   planner ("unmeasured"), not a probe for you to run.
-- Mechanical claim checks (run a command, read a file, confirm an API
-  shape) go to `Explore` subagents, model `sonnet` at the call site,
-  cap 4, each returning at most 40 lines. Prompt each one to refute:
+- Claim checks go to `general-task` subagents, model `opus` at the call
+  site, cap 4, each told to change no files and to return at most 40
+  lines. Prompt each one to refute:
   "Find the input, state, or file that breaks this claim: <claim>.
   Return `REFUTED:` with the evidence, or `NOT REFUTED:` with the list of
   checks that failed to break it." A bare confirmation without the checks
-  list is a non-answer — redo it or record the row `untestable`.
-- At most **one** judgment claim — the single most load-bearing one — may
-  go to a `general-purpose` subagent on model `opus`. Hold every other
-  judgment call yourself.
+  list is a non-answer — redo it or record the row `untestable`. An
+  extremely simple fetch (see `simple-task`), such as returning one
+  file's contents or one read-only command's output, may go to
+  `simple-task`, model `sonnet`.
+- At most **one** judgment claim — the one the plan most depends on — may
+  go to a `general-task` subagent, model `opus` at the call site, told to
+  change no files. Hold every other judgment call yourself.
 
 ## Report
 

@@ -11,7 +11,7 @@ Fan out independent slices to isolated workers, merge them back onto the **featu
 
 Fan out only when slices are **mostly independent**: different kinds of work, and mostly different files or clear regions of a file. If two slices would thrash the same module, keep them sequential.
 
-Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers run the **workhorse** lane — review models are for review axes, design models for design calls, and neither is ever fanned out. Which model fills workhorse is per-harness: your [adapter](adapters/) names it, and [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) § Parallelism vs serial is the authority on lane and price tier — read it before naming worker models, and never infer a model's tier from its name. On a rate-limit wall, serialise or wait.
+Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving the tree. Prefer fewer, broader workers over many tiny ones. Workers run the **workhorse** lane. Review and design **jobs** are never fanned out: one spawn per review axis, one design call at a time. Which model fills workhorse is per-harness: your [adapter](adapters/) names it, and [`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md) § Parallelism vs serial is the authority on lane and price tier — read it before naming worker models, and never infer a model's tier from its name. On a rate-limit wall, serialise or wait.
 
 **If you are a manager spawning workers and then running fan-in,** do not background the workers and end your turn "waiting" — background completions notify the parent session, not a finished manager, and fan-in is simply lost. Either hold ownership through fan-in, or write a `PROCESS.md` handoff naming the exact next spawn before you end. This is not harness-specific.
 
@@ -37,7 +37,7 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 
 3. **Spawn workers** — One isolated worktree or clone per slice. Give each worker the handoff template and its path scope.
 
-   **Done when:** delegator tree is clean; every worker prompt carries the same base SHA from `git rev-parse HEAD` (never hand-typed); every worker's first action asserts that SHA; `git worktree list` shows each worktree at that SHA; every worker prompt names its model and effort explicitly.
+   **Done when:** delegator tree is clean; every worker prompt carries the same base SHA from `git rev-parse HEAD` (never hand-typed); every worker's first action asserts that SHA; `git worktree list` shows each worktree at that SHA; every worker spawn names its model explicitly, and its effort is set the way the active [adapter](adapters/) says.
 
    **Isolation is load-bearing, not bookkeeping.** Workers sharing one checkout share one index: any worker's `git add` stages every other worker's dirty files, its `git commit` captures them, and lint-staged's `git stash`/`pop` clears staged files mid-command. Spawning without the isolation flag turns a merge into a silent sweep.
 
