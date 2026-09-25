@@ -250,7 +250,7 @@ Each check names the section it comes from.
 - The hover describes only the toggle state on screen now; it never shows the "Set potential" off and on totals together. (Section 4, Apple context-sensitive rule)
 - The hover has no links or buttons; if it needs them, it becomes a click-opened toggletip or dialog. (Section 1)
 - The hover opens on keyboard focus, closes on Escape, and stays open while the pointer is over it. (Section 1, WCAG 1.4.13)
-- Each hover line fits in about 60 to 75 characters; if the content needs full sentences, the design is too complex for a tooltip. (Section 1)
+- The hover is short. Apple's limit of about 60 to 75 characters applies to the whole tooltip, so a hover with several lines is already past it and each line needs a reason to be there. If the content needs full sentences, the design is too complex for a tooltip. (Section 1)
 - If the row has nothing the figure does not already say, there is no hover and no sub-line. (Section 2)
 - Anything the user needs to judge the row is on the row, not only in the hover. (Section 2)
 - Every figure in the hover has a label that names what it measures; the unit is stated once if all figures share it. (Section 3)
