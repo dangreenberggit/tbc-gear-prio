@@ -37,20 +37,21 @@ that one reviews the diff after.
 
 | Seat | subagent_type | Call-site model | Frontmatter effort | Lane |
 | --- | --- | --- | --- | --- |
-| Planner | `gate-planner` | `fable` | `low` | design |
-| Reviewer | `gate-reviewer` | `opus` | `medium` | review |
-| Executor | `gate-executor` | `opus` | `medium` | review |
-| SME | `gate-sme` | `opus` | `medium` | review |
+| Planner | `gate-planner` | `opus` | `xhigh` | design |
+| Reviewer | `gate-reviewer` | `opus` | `high` | review |
+| Executor | `gate-executor` | `opus` | `high` | review |
+| SME | `gate-sme` | `opus` | `high` | review |
 
 The Executor is on the review lane, not the workhorse lane, because
 plans are underspecified and it decides adapt-vs-flag-vs-stop on every
 step where reality disagrees with the plan — the failure mode is a silent
 paper-over, which is a judgment failure, not a throughput one. Its
-`parallel-phase` workers are a separate call: pick each worker's model
-from the difficulty of its slice.
+`parallel-phase` workers are a separate call: `simple-task` for an
+extremely simple slice, `general-task` for every other slice.
 
-Name the model on every spawn — frontmatter cannot name Fable, and an
-unnamed seat inherits the session's model at the session's price. Every
+Name the model on every spawn, even though each seat's frontmatter sets
+`model: opus`. A call-site name outranks frontmatter, so a wrong name
+there is the one way a seat runs on the wrong model. Every
 seat self-checks and returns `WRONG_MODEL: <name>` on a mismatch: respawn
 with the model named. A `subagent_type` the harness does not recognize
 means `.claude/agents/` changed after session start — agent files register
@@ -72,12 +73,11 @@ not` list below.
    you get a fresh go-ahead, the earlier stop is spent. Track what each
    instruction attaches to, and let it expire when its turn ends.
 3. **Route detail outward; keep the judgment.** Track what's done, what's
-   next, and what's blocked. Do not carry every string, constant, or wording
-   choice in your own context — delegate the detail and keep the
-   one-paragraph conclusion. You judge the result; you don't author it. This
-   is the orchestrator-conduct application of AGENTS.md § Durable claims
-   ("A bounded question is a subagent, not a detour") and this skill's own
-   "the session routes, judges, and implements nothing."
+   next, and what's blocked. Delegate the detail and keep the one-paragraph
+   conclusion. You judge the result; you don't author it. A question
+   between gates goes to a seat, or to a `general-task` / `simple-task`
+   agent. The only commands you run are the gate checks that AGENTS.md
+   § The session delegates lists.
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
    feature — the honest next step is to close that work. "No blocking review
@@ -113,7 +113,7 @@ not` list below.
    open question carries those three items, the tree is clean, and the SHA
    is logged.
 
-2. **Plan.** Spawn `gate-planner` (`model: "fable"`) with the absolute
+2. **Plan.** Spawn `gate-planner` (`model: "opus"`) with the absolute
    paths of `brief.md` and
    `.claude/skills/stage-gate/plan-template.md`. Write its final message
    to `plan.md` verbatim.
@@ -144,8 +144,8 @@ not` list below.
    - Proceed when: no blocking finding stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
      `minor` findings ride along to the executor as advisories.
-   - A seat contradiction you cannot settle by re-running a command is the
-     user's call. Log every gate outcome.
+   - A seat contradiction you cannot settle by having a subagent re-run a
+     command is the user's call. Log every gate outcome.
 
 5. **Execute.** Resolve the base SHA fresh (`git rev-parse HEAD` — paste
    command output, never hand-typed). Spawn `gate-executor`
@@ -188,5 +188,6 @@ gate is where you are.
   stage artifacts.
 - Spawn any seat without naming its model at the call site.
 - Resolve a judgment-level contradiction between seats by silently picking
-  a side — re-run the command that settles it, or hand it to the user.
+  a side — have a subagent re-run the command that settles it, or hand it
+  to the user.
 - Carry a `blocking` finding into step 5 under any wording.
