@@ -40,3 +40,19 @@ of why the generator or its source data dropped these five items.
 3. Re-run scenario G (or an equivalent capture) to confirm the tool can
    now show the phase-5 Thunderheart wrist/waist/feet swap the owner
    asked about.
+
+## Comments
+
+**2026-09-24, owner:** The owner did not approve this ticket for the
+current Upgrades-tab closeout round, and it was removed from Round 2c.
+The owner said: "making an item database is not the job of this fork."
+The ticket's premise is in question. It proposes adding more hand-built
+admission routes (token maps, a Sunmote map, a force-include) so that the
+repo's own candidate universe grows. The owner's view is that the tool
+should not maintain its own item database. Before anyone acts on this
+ticket, it needs a decision on where the Upgrades candidate pool should
+come from: this repo's assembled universes, or the item data wowsims
+already ships. The lesson from ticket 301 applies: borrow upstream, don't
+re-mirror. The investigation notes are at
+`.scratch/stage-gate/upgrades-tab-closeout/round-2c/investigation-500.md`
+(gitignored).
