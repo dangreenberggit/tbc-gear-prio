@@ -40,8 +40,11 @@ export type UnmeasuredReason =
  * A bonus that IS implemented but happens to measure ≈0 DPS on some spec's
  * APL (e.g. Crystalforge, which is mana/heal) is still `true` — the sim
  * genuinely runs an effect, and Slice B reports the measured number, not an
- * unmeasured reason. Only Justicar (626) 2pc and Nordrassil (641) 2pc lack
- * any effect body at all.
+ * unmeasured reason. Justicar (626) 2pc and Nordrassil (641) 2pc are
+ * `false`. Justicar 2pc's item_sets.go closure is empty, but
+ * sim/paladin/seals.go:553 at the pin scales the Judgement of the Crusader
+ * bonus by 1.15; the default ret APL judges Crusader only in its prepull
+ * actions, so its DPS effect is expected near 0 (hypothesis, not measured).
  */
 const IMPLEMENTED_IN_SIM: Record<
   number,

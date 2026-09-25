@@ -22,8 +22,11 @@ be written down.
 ## Decision
 
 Neither credit view's row figures sum to the package's net value, and no view
-is defined as the one to add up. A reader who wants a package total reads
-`commitPackageDeltaDps` in the row's tooltip.
+is defined as the one to add up. No field states the package net as a total.
+The row's tooltip shows `commitPackageDeltaDps`, but that is the top
+package's gross DPS change against the baseline: it includes each piece's
+own stats and every bonus the package breaks. In 476-A it is `420`, not the
+net `90`.
 
 What each view does, as fixture 476-A measures it (worn Malorne 4; four
 Thunderheart candidates, each own delta 30; package net 90, which is the 2pc
@@ -37,8 +40,13 @@ net 50 plus the 4pc net 80 minus the broken Malorne 2pc value 40):
   row gives `50/2 + 80/4 − 40 = 5`. The four rows sum to `20`.
 
 The package net is `90` in both cases, and neither `360` nor `20` equals it.
-Fixture 476-A asserts both sums, so a change to either view's arithmetic shows
-up as a test failure.
+Fixture 476-A asserts both sums, so a change to either view's arithmetic
+fails that fixture. The suite is fork-gated: CI skips it because the fork
+clone under `vendor/` is gitignored, so it fails only when run locally with
+the fork present:
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`.
+The hand derivations of its literals are in
+`docs/set-bonus-fixture-derivations.md`.
 
 **Which breaks a row pays, and where it stops (ticket 490, 2026-09-24).** The
 credit is the best stopping point along the set's thresholds, chosen on full
@@ -46,16 +54,21 @@ values. Each future bonus is worth its value minus the breaks its own path
 needs: the candidate plus the best remaining pieces of that threshold's
 package (the whole package when the candidate is in it). A break two futures
 share is charged once. The top package's breaks (`commitBreaks`) are not
-charged; they stay in the data as disclosure and as measurement targets. The
-credit keeps the running total's largest value, or 0 when no total is
+charged; they stay in the data as disclosure and as measurement targets. One
+exception: a commit break whose value was not measured still sets the whole
+credit to 0 (ticket 477, `setCreditUnmeasured`), and the tab marks the row
+as not counted. The credit keeps the running total's largest value, or 0 when no total is
 positive. The split figure follows the same stopping point and may be
 negative there. In 476-A every row's path to the 4pc breaks the Malorne 2pc
 (40), and the running totals are 50 then 90, so the figures above stand.
 Fixtures 490-A and 490-B pin the rule (`view.ts` `setPotentialCredit`). The
 owner confirmed this "best-stop" rule on 2026-09-24 (assume the player
 collects a set only while each step pays) over "full-path" (charge every
-break on the path to every credited future). The other rule is one
-constant, `RULE_490`, away.
+break on the path to every credited future). `setPotentialCredit` implements
+both rules; the exported `RULE_490` in `view.ts` selects the one
+`rankableSetPotential` uses. Fixture 490-B reads that constant from the
+engine and also asserts each rule's figures by calling `setPotentialCredit`
+directly.
 
 ## Consequences
 

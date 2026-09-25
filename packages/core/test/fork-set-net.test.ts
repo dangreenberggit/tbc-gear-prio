@@ -526,7 +526,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     expect(viewMod.rankableSetPotential(breakingRow!, 5, "split")).toBe(0);
   });
 
-  it("case 8: flag absent — no brokenSetValues, run count equals today's", async () => {
+  it("case 8: flag absent — no brokenSetValues, only the B sims are added", async () => {
     const worn = wornGear({ hands: MALORNE.hands, legs: MALORNE.legs });
     const pool = [
       ...TH_POOL,
@@ -679,7 +679,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
  * Tickets 476, 477, 478: every lost threshold, the solved B, the
  * inflation sign, the commit-break fallback and the owned-row guard.
  * Every literal is derived by hand from the controlled model in
- * .scratch/stage-gate/upgrades-tab-closeout/round-2/plan.md § Derivations.
+ * docs/set-bonus-fixture-derivations.md.
  * ------------------------------------------------------------------ */
 
 const FLOOR = 5;
@@ -823,7 +823,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     expect(near(bsvDps(r, 640, 4)!, 70, 0.5)).toBe(true);
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect(near(netOf(r, 676, 2)!, 50, 0.5)).toBe(true);
-    // Today's sign gives 180; every-threshold with the old sign gives 220.
+    // The pre-476 correction gives 180; every-threshold with the old sign
+    // gives 220.
     expect(near(netOf(r, 676, 4)!, 80, 0.5)).toBe(true);
     const row = thRow(r, THUNDERHEART.head);
     expect(near(row.deltaDps, 100, 0.5)).toBe(true);
@@ -951,17 +952,23 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     expect(raw - inflation).toBe(60);
   });
 
-  it("A3-R: no implemented-set member is a ring or trinket (478 wontfix pin)", () => {
+  it("A3-R: no implemented-set member is a ring or trinket (478 wontfix pin)", async () => {
     // 478 A3's ring/trinket half is wontfix because no member of an
     // IMPLEMENTED_IN_SIM set sits in a two-slot item type (11 finger, 12
     // trinket), so a set piece never has two candidate slots. This pins it.
+    const setValue = await importForkUpgrades<{
+      IMPLEMENTED_SET_IDS: readonly number[];
+    }>("engine/set-value.ts");
     const db = JSON.parse(
       readFileSync(
         join(root, "vendor/tbc-new-fork/assets/database/db.json"),
         "utf8"
       )
     ) as { items: Array<{ id: number; type: number; setId?: number }> };
-    const implemented = new Set([626, 629, 640, 641, 676, 680]);
+    // Read from the engine so a set added to the table is covered too; an
+    // empty list would make the check below pass vacuously.
+    const implemented = new Set(setValue.IMPLEMENTED_SET_IDS);
+    expect(implemented.size).toBeGreaterThan(0);
     const twoSlot = db.items.filter(
       (i) =>
         i.setId !== undefined &&
@@ -1009,17 +1016,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
  * Tickets 490-493: breaks charged along each future's own path, one
  * stopping point chosen on full values, the "not counted" rule, and the
  * worn-1 4pc recovered with one pair sim. Every literal is derived by hand
- * from the controlled model in
- * .scratch/stage-gate/upgrades-tab-closeout/round-2b/plan.md § Derivations.
+ * from the controlled model in docs/set-bonus-fixture-derivations.md.
  * ------------------------------------------------------------------ */
-
-/**
- * The 490 stopping rule this suite pins. "best-stop": stop at the threshold
- * where committing pays best on full values, or not at all. "full-path":
- * charge every break on the path to every credited future. An owner
- * preference, not a game fact; only 490-B separates them.
- */
-const RULE_490: "best-stop" | "full-path" = "best-stop";
 
 /** Item values with the given set pieces at the Thunderheart value (100). */
 function withSetValues(ids: readonly number[]): Map<number, number> {
@@ -1044,7 +1042,22 @@ function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
   );
 }
 
+type SetCreditRule = "best-stop" | "full-path";
+
 type SubLineMod = ViewMod & {
+  /**
+   * The 490 stopping rule the engine applies. "best-stop": stop at the
+   * threshold where committing pays best on full values, or not at all.
+   * "full-path": charge every break on the path to every credited future.
+   * An owner preference, not a game fact; only 490-B separates them.
+   */
+  RULE_490: SetCreditRule;
+  setPotentialCredit: (
+    ctx: unknown,
+    noiseFloorDps: number,
+    setCredit?: "full" | "split",
+    rule?: SetCreditRule
+  ) => number;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setBonusSubLine: (
     ctx: unknown,
@@ -1138,7 +1151,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("490-B: a real 4pc worth less than the break it needs (rule discriminator)", async () => {
-    const view = await viewModule();
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const { on } = await run490({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -1148,9 +1161,28 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       { threshold: 2, piecesNeeded: 2, dps: 40, breaks: [] },
       { threshold: 4, piecesNeeded: 4, dps: 30, breaks: [TH2_BREAK] },
     ]);
+    // Each rule on this row directly, so the rule the engine does not ship
+    // still runs: full-path is 40 + 30 − 50 = 20 and 20 + 7.5 − 50 = −22.5.
+    const ctx = chest.setContext;
+    expect(
+      near(view.setPotentialCredit(ctx, FLOOR, "full", "full-path"), 20, 0.5)
+    ).toBe(true);
+    expect(
+      near(
+        view.setPotentialCredit(ctx, FLOOR, "split", "full-path"),
+        -22.5,
+        0.5
+      )
+    ).toBe(true);
+    expect(
+      near(view.setPotentialCredit(ctx, FLOOR, "full", "best-stop"), 40, 0.5)
+    ).toBe(true);
+    expect(
+      near(view.setPotentialCredit(ctx, FLOOR, "split", "best-stop"), 20, 0.5)
+    ).toBe(true);
     const full = view.rankableSetPotential(chest, FLOOR, "full");
     const split = view.rankableSetPotential(chest, FLOOR, "split");
-    if (RULE_490 === "best-stop") {
+    if (view.RULE_490 === "best-stop") {
       // R_2 = 40, R_4 = 40 + 30 − 50 = 20: stop at the 2pc.
       expect(near(full, 40, 0.5)).toBe(true);
       expect(near(split, 20, 0.5)).toBe(true);
@@ -1227,8 +1259,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("492-F: at worn 1 the 4pc value is recovered with one pair sim", async () => {
-    // Run count before the fix, recorded from the red run (plan D4: 6).
-    const TODAY_492_RUNS = 6;
+    // Run count before the 492 fix, recorded from the red run
+    // (docs/set-bonus-fixture-derivations.md, 492-F: 6).
+    const PRE_FIX_492_RUNS = 6;
     const view = await viewModule();
     const { ranking: r, runCount } = await runScenario({
       worn: wornGear({ hands: THUNDERHEART.hands }),
@@ -1253,6 +1286,150 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     expect(near(view.rankableSetPotential(head, FLOOR, "split"), 20, 0.5)).toBe(
       true
     );
-    expect(runCount).toBe(TODAY_492_RUNS + 1);
+    expect(runCount).toBe(PRE_FIX_492_RUNS + 1);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Targeted engine review of 2026-09-25 (findings A1, A2, A4): a 492 pair
+ * that breaks another worn set only together, the worn-1 4pc with no
+ * usable pair, and a lower B that needs an unmeasured higher B. Every
+ * literal is derived by hand in docs/set-bonus-fixture-derivations.md.
+ * ------------------------------------------------------------------ */
+
+describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
+  it("492-J: a pair that breaks a worn set only together is not used for B2", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { off, on } = await runOffOn({
+      worn: wornGear({
+        hands: THUNDERHEART.hands,
+        head: MALORNE.head,
+        shoulder: MALORNE.shoulder,
+        chest: MALORNE.chest,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.head, slot: "head" },
+        { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: NEUTRAL.head[0], slot: "head" },
+        { itemId: NEUTRAL.shoulder[0], slot: "shoulder" },
+        { itemId: NEUTRAL.chest[0], slot: "chest" },
+      ],
+    });
+    const r = on.ranking;
+    expect(near(r.baseline.dps, 3140, 0.5)).toBe(true);
+    const th4 = bonusOf(r, 676, 4);
+    expect(sortedIds(th4?.packageItemIds)).toEqual([31039, 31042, 31044]);
+    // Head + chest together take Malorne 3 -> 1; head + legs keep it at 2.
+    expect(th4!.selfConfound?.threshold).toBe(2);
+    expect(near(th4!.selfConfound?.dps ?? NaN, 50, 0.5)).toBe(true);
+    expect(near(th4!.bonusDps!, 40, 0.5)).toBe(true);
+    expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
+    expect(near(th4!.bonusDpsNet!, 80, 0.5)).toBe(true);
+    expect(on.runCount - off.runCount).toBe(1);
+    for (const id of [
+      THUNDERHEART.head,
+      THUNDERHEART.shoulder,
+      THUNDERHEART.chest,
+      THUNDERHEART.legs,
+    ]) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, 150, 0.5)).toBe(true);
+      expect((row.setContext?.futureBonuses ?? []).map(futB)).toEqual([
+        {
+          threshold: 4,
+          piecesNeeded: 3,
+          dps: 80,
+          breaks: [{ setId: 640, threshold: 2, dps: 40 }],
+        },
+      ]);
+      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
+        true
+      );
+    }
+  });
+
+  it("492-N: with no break-free pair the worn-1 4pc net stays unset and the row says not counted", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { ranking: r } = await runScenario({
+      worn: wornGear({
+        hands: THUNDERHEART.hands,
+        head: MALORNE.head,
+        chest: MALORNE.chest,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.head, slot: "head" },
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: NEUTRAL.head[0], slot: "head" },
+        { itemId: NEUTRAL.chest[0], slot: "chest" },
+      ],
+      measureBrokenSetValue: true,
+    });
+    expect(near(r.baseline.dps, 3140, 0.5)).toBe(true);
+    const th4 = bonusOf(r, 676, 4);
+    // Head and chest each break Malorne 2pc alone, so only legs is
+    // break-free and no pair sim runs. The raw value keeps its confound.
+    expect(th4!.selfConfound).toEqual({ threshold: 2 });
+    expect(near(th4!.bonusDps!, 20, 0.5)).toBe(true);
+    expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
+    // The confounded net would be 20 − (2 − 0 − 1 + 0)·40 = −20; true is 80.
+    expect(th4!.bonusDpsNet).toBeUndefined();
+    for (const id of [
+      THUNDERHEART.head,
+      THUNDERHEART.chest,
+      THUNDERHEART.legs,
+    ]) {
+      const row = thRow(r, id);
+      const future = row.setContext?.futureBonuses ?? [];
+      expect(future.map((f) => f.threshold)).toEqual([4]);
+      expect(future[0]!.dps).toBeUndefined();
+      expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
+      expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
+    }
+  });
+
+  it("476-D: a lower B that needs an unmeasured higher B is dependent-unmeasured", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    // 476-A without the neutral head and shoulder: the (640,4) vacate of head
+    // + shoulder finds no replacement that crosses no threshold.
+    const { off, on } = await runOffOn({
+      worn: wornGear(MALORNE_4),
+      pool: [
+        { itemId: THUNDERHEART.head, slot: "head" },
+        { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: NEUTRAL.chest[0], slot: "chest" },
+        { itemId: NEUTRAL.hands[0], slot: "hands" },
+      ],
+    });
+    const r = on.ranking;
+    const bsv = (threshold: number) =>
+      (r.brokenSetValues ?? []).find(
+        (b) => b.setId === 640 && b.threshold === threshold
+      );
+    expect(bsv(4)?.unmeasured).toBe("no-neutral-candidates");
+    expect(bsv(2)?.unmeasured).toBe("dependent-unmeasured");
+    expect(bsv(4)?.dps).toBeUndefined();
+    expect(bsv(2)?.dps).toBeUndefined();
+    // Both failures are found before any sim.
+    expect(on.runCount - off.runCount).toBe(0);
+    expect(netOf(r, 676, 2)).toBeUndefined();
+    expect(netOf(r, 676, 4)).toBeUndefined();
+    for (const id of TH_FOUR_IDS) {
+      const row = thRow(r, id);
+      expect(near(row.deltaDps, 30, 0.5)).toBe(true);
+      expect((row.setContext?.singleBreaks ?? []).map(brk)).toEqual([
+        { setId: 640, threshold: 4, dps: undefined },
+      ]);
+      expect((row.setContext?.futureBonuses ?? []).map(fut)).toEqual([
+        { threshold: 2, piecesNeeded: 2, dps: undefined },
+        { threshold: 4, piecesNeeded: 4, dps: undefined },
+      ]);
+      expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
+      expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
+    }
   });
 });

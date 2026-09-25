@@ -157,6 +157,13 @@ the pin shows the `2:` closure has **no** `AttachSpellMod` / `AttachProcTrigger`
 at all; it is a bare `ExposeToAPL(37186)` call. **Justicar 2pc is therefore `not-implemented-in-sim`**,
 in the same class as Nordrassil 2pc. Implementations must treat both that way.
 
+**Correction (engine review, 2026-09-25, finding D4):** the empty closure is not the whole
+story. `sim/paladin/seals.go:553` at the pin (`git -C vendor/tbc-new-fork show
+8aa378b3:sim/paladin/seals.go | grep -n "ItemSetJusticarBattlegear, 2"`) multiplies the
+Judgement of the Crusader bonus by 1.15 when the 2pc could be active, so the 2pc does have an effect
+body. The table keeps it `false`: the default ret APL judges Crusader only in its prepull actions, so
+its DPS effect is expected near 0 (hypothesis, not measured).
+
 **research.md's open `ExposeToAPL` question is resolved: `ExposeToAPL` does not gate the bonus.**
 Everywhere a bonus has a real effect, that effect is installed by `AttachSpellMod(...)` /
 `AttachProcTrigger(...)` / `AttachStatBuff(...)` on the set bonus aura, and `ExposeToAPL(id)` is chained
