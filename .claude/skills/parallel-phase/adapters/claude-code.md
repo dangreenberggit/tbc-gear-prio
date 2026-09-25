@@ -4,11 +4,13 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 
 ## Models (subagents)
 
-Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md) § Claude Code, which defines each agent type):
 
-- **Workhorse / simple:** Sonnet-class — parallel implement workers, mechanical edits.
-- **Review:** Opus at **effort `medium`** — pre-merge axes, adversarial and domain judgment. Effort is a separate control from the model, not a slug; reserve `high`+ for a single narrow adversarial axis, and never fan out N review workers.
-- **Design:** Fable — planning and architecture only. It is the top price tier here, so an unnamed subagent inherits it; name the model on every spawn. Never a worker model, never a review model.
+- **Workhorse:** Opus at effort `high` — parallel implement workers. Spawn each as `general-task` with `model: "opus"`. An extremely simple slice (see `simple-task`) may go to `simple-task` with `model: "sonnet"`.
+- **Review:** Opus at effort `high` — pre-merge axes, adversarial and domain judgment. One spawn per review axis; never split one axis across N workers.
+- **Design:** Opus at effort `xhigh` — planning and architecture. Never a worker.
+
+The agent type's frontmatter sets effort. The spawn and the prompt cannot. Workers are Opus, so size the round with model-policy § Budget the round before spawning. Name the model on every spawn: a session on Fable, the top price tier, makes an unnamed built-in subagent inherit Fable.
 
 ## Isolate
 

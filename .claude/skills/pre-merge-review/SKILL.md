@@ -62,8 +62,8 @@ Try in order:
 
 1. **`codex exec`**, if the binary is on `PATH` — cross-vendor review-lane review.
    Pipe the brief + diff to it directly.
-2. **Fresh subagents on a review-lane model** (explicit id) — Claude Code: Opus at
-   effort `medium` (**not** Fable — that is the design lane); Codex: top tier;
+2. **Fresh subagents on a review-lane model** (explicit id) — Claude Code:
+   `general-task` agents, `model: "opus"` (Opus at effort `high`); Codex: top tier;
    Cursor: Grok high (prefer non-fast; else the current `…-high-fast` slug);
    anywhere else: the model your harness section names for review. Prefer all
    three axes in one parallel batch when the harness is healthy.
