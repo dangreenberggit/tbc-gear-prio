@@ -56,3 +56,9 @@ already ships. The lesson from ticket 301 applies: borrow upstream, don't
 re-mirror. The investigation notes are at
 `.scratch/stage-gate/upgrades-tab-closeout/round-2c/investigation-500.md`
 (gitignored).
+
+**Owner decision 2026-09-24:** "items come from wherever wowsims gets
+items from as far as this fork is concerned." The fork's candidate pool
+should use wowsims' own item source, not this repo's assembled universes.
+500 and 298 are superseded by that direction; see
+`.scratch/carry-forward/issues/505-fork-candidate-pool-should-use-wowsims-item-source.md`.
