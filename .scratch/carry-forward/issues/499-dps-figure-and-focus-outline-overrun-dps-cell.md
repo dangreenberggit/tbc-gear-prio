@@ -34,3 +34,13 @@ no room for a longer string either.
    price, ticket 489).
 2. A focus style that does not draw over the cell's text.
 3. A layout-gate assertion over every DPS cell, like (11) for sub-lines.
+
+## Comments
+
+- 2026-09-24: Round 2c's first real fixture gate run (fork bcbb5e741,
+  fixture feral-p3-p2bis) failed assertion (6) at 768 and 1280. The Slot
+  label "Main Hand" wraps to two lines in the 5.5rem Slot column (content
+  height 31.3 > 1.5× line-height 15.3). This is an existing defect; the
+  new fixture pass exposed it because the live ret sample never had a
+  Main Hand row. It is tied to 499's DPS-column fix: dropping " DPS" from
+  the figure frees width that could go to Slot.
