@@ -270,3 +270,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 487 View options heading clipped at ~1070px (owner review of 472 render) 2026-09-22
 - 488 EPIC: upgrades tab polish arc, umbrella for 483-487 (owner review of 472 render) 2026-09-22
 - 489 Widen Source column cap so rows are not four lines tall (owner live look) 2026-09-22
+- 511 Ret set credit counts bonuses that cannot add ret DPS (targeted engine review D1) 2026-09-25
+- 512 Set breaks model only six tier sets, only at 2pc and 4pc (targeted engine review D3) 2026-09-25
+- 513 Optional cleanup in the set-bonus engine and its tests (targeted engine review S6) 2026-09-25

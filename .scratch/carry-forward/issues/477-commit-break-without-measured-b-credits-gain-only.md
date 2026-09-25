@@ -52,3 +52,14 @@ not fixed here: the tab's `not_counted` line (`upgrades_tab.tsx`
 commit break says "hover for set detail". Under (b) that needs a B that could
 not be measured (no neutral candidate, sim failure, dependent-unmeasured).
 `upgrades_tab.tsx` was outside this round's manifest; flagged for Gate C.
+
+2026-09-25 (targeted engine review, finding P2;
+`docs/reviews/feat-tab-signoff-followups.md`): two statements above are out
+of date. The 477-T legs row's full credit is no longer 90. Since ticket 490
+(fork `7b7f2da28`) the credit charges only the row's own path, which keeps
+Malorne chest and hands, so fixture 477-T now asserts 130
+(`packages/core/test/fork-set-net.test.ts`; derivation in
+`docs/set-bonus-fixture-derivations.md`). The display gap "flagged for Gate
+C" was closed by ticket 491: fork `view.ts` `setCreditUnmeasured` counts
+unmeasured commit breaks, and the tab picks its sub-line through
+`setBonusSubLine`, which reads it.

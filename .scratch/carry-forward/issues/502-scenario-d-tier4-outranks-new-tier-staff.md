@@ -41,3 +41,14 @@ weigh against downgrading to an earlier tier.
    swapping out already-owned higher-tier pieces?
 2. If the owner wants a change, a follow-up ticket with the ruling as its
    `Origin`.
+
+## Comments
+
+2026-09-25 (targeted engine review, finding D2;
+`docs/reviews/feat-tab-signoff-followups.md`): one cause to weigh in the
+ruling. "Stop where it pays" (fork `view.ts` `setPotentialCredit`) adds
+bonus values and subtracts breaks, but it never counts the stat cost of the
+other pieces on the path. In scenario D each Malorne row gets +108 of
+credit (ON ranks 5–10), while the whole Malorne set's end state is only
++8.5. A player decides on the end state. The owner approved the rule, so
+this does not block anything; it is recorded here as input to the ruling.

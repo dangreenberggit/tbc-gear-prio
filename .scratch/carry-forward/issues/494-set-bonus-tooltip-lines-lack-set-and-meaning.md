@@ -80,3 +80,13 @@ still hold, the mistakes made, and copies of the draft code and pictures.
 Round 2c changed no hover content. It did build the hover's placement (right
 of the figure when it fits, else above, ticket 495) and the DPS cell changes
 (ticket 499). Status stays open.
+
+### 2026-09-25, targeted engine review (finding P3)
+
+`docs/reviews/feat-tab-signoff-followups.md`: ticket 491's item 2 asked for
+a test that shows the `not_counted` line. Test 491-L in
+`packages/core/test/fork-set-net.test.ts` asserts only the key that
+`setBonusSubLine` returns, not the rendered text, because no DOM test
+runner exists for the tab. The 494 redo changes what the hover and the
+sub-line say, so it should look at this again: either add a rendered-text
+check or state why the key-level test is enough.

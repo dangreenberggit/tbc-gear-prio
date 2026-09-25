@@ -69,3 +69,18 @@ These suites skip in CI (fork gitignored), so the local rc above is the evidence
 - **D2:** fixed. `docs/adr/0034-set-bonus-row-values-are-not-additive.md`
   (main `9d0a8575`): full 4 × 90 = 360, split 4 × 5 = 20, package net 90;
   pinned by 476-A.
+
+2026-09-25 (targeted engine review, finding P6;
+`docs/reviews/feat-tab-signoff-followups.md`): the A4/D3 item above says
+each implemented set has at most one piece per slot. A re-runnable check,
+from the repo root with the fork clone present:
+
+```sh
+node -e "const d=require('./vendor/tbc-new-fork/assets/database/db.json');const ids=new Set([626,629,640,641,676,680]);const n=new Map();for(const i of d.items){if(ids.has(i.setId)===false)continue;const k=i.setId+':'+i.type;n.set(k,(n.get(k)||0)+1)}const dup=[...n].filter(([,v])=>v>1);console.log('pairs',n.size,'dups',dup.length);process.exit(dup.length?1:0)"; echo rc=$?
+```
+
+Run 2026-09-25 at fork `2cf4ec46e`: `pairs 36 dups 0`, rc=0. The set list
+in the command is the table as of that date. Test A3-R now reads the list
+from the engine's exported `IMPLEMENTED_SET_IDS` (finding S7), so a set
+added to the table is covered there. The second unsourced claim, "a member
+single never breaks what its package keeps", still has no command.

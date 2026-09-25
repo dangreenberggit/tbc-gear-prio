@@ -109,3 +109,13 @@ This needs an owner or orchestrator decision before any code. The rest of
   supersedes "provisional" in the comments above. No code change; the
   "provisional" wording left in the fork's `view.ts` comment and PROVENANCE
   row is to be corrected with the next fork edit.
+- 2026-09-25 (targeted engine review, findings P5 and S5;
+  `docs/reviews/feat-tab-signoff-followups.md`): the "provisional" wording
+  was corrected in fork `7ed8c9941` (comment-only edit of `view.ts` and its
+  PROVENANCE row). `git -C vendor/tbc-new-fork grep -n -i provisional
+  7ed8c9941 -- ui/core/components/individual_sim_ui/upgrades/engine` finds
+  no hit (rc=1). That commit and its main re-pin `f6bc9087` did not
+  record the fork-gated run. The run at `7ed8c9941`, before this review's
+  edits: `npx vitest run packages/core/test/fork-set-net.test.ts
+  packages/core/test/wowsims-fork-parity.test.ts` → rc=0 (22 passed, 1
+  skipped).
