@@ -1,5 +1,7 @@
 # Handoff: redesign set credit and set breaks (tickets 511 and 512)
 
+> **Read first:** `.scratch/handoffs/owner-quotes-upgrades-tab-closeout.md` has the owner's own words, quoted exactly. Where this handoff and those quotes differ, the quotes are the owner's intent and this handoff is an agent's reading.
+
 Written 2026-09-25 on branch `feat/tab-signoff-followups`. Main was at `76724ab3` and the fork at `2cf4ec46e` when the measurements ran. The fork working tree is clean again (`git -C vendor/tbc-new-fork status --porcelain` printed nothing after the round).
 
 ## Where things stand

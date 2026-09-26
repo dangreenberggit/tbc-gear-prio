@@ -1,5 +1,7 @@
 # Handoff: redo the set-bonus hover (494) and the disabled-toggle reason (501)
 
+> **Read first:** `.scratch/handoffs/owner-quotes-upgrades-tab-closeout.md` has the owner's own words, quoted exactly. Where this handoff and those quotes differ, the quotes are the owner's intent and this handoff is an agent's reading.
+
 Written 2026-09-25 at the end of stage-gate round 2c, after the owner rejected
 every hover wording drafted in that round. Tickets 494 and 501 stay open and
 move to their own session. This file and the folder beside it,
