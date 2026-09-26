@@ -42,6 +42,15 @@ add a **Partition** subsection: slices with `pathsAllowed` /
 `pathsForbidden` per the parallel-phase rules — no path in two slices,
 shared manifests get exactly one owner.
 
+## Execution chunks
+
+Group the numbered steps into chunks that one executor can finish in one
+sitting: one ticket, or up to about five steps that share files. List each
+chunk as `K1: steps 1–4` and so on. A step whose result later steps must
+reason about goes in the same chunk as those steps; when this conflicts
+with the size limit, keep the steps together and name the dependency on
+the chunk line. One chunk is fine for a small plan.
+
 ## Verify recipe
 
 The exact commands that prove the whole plan landed (at minimum
