@@ -96,11 +96,12 @@ reader what the sources are for.
 
 ## Disposition (round 2)
 
-| ID  | Axis    | Disposition | Ticket / note                                                                                                 |
-| --- | ------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| R1  | Round 2 | fixed       | `b6afd1b8`: scoped to the root files, the audit named as uncommitted, and the 2026-09-26 observations stated. |
-| R2  | Round 2 | fixed       | `b6afd1b8`: cites 1d86fd48 and the coordinator session's harness notices.                                     |
-| R3  | Round 2 | fixed       | `b6afd1b8`: checks `name:` first, then restart; both mirrors.                                                 |
-| R4  | Round 2 | wontfix     | Editing ticket 252 is outside this branch's scope; the owner asked for no ticket work.                        |
-| R5  | Round 2 | fixed       | `b6afd1b8`: moved to Writing for agents.                                                                      |
-| R6  | Round 2 | fixed       | `b6afd1b8`: "They come from these two sources:".                                                              |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                            |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Round 2     | fixed       | `b6afd1b8`: scoped to the root files, the audit named as uncommitted, and the 2026-09-26 observations stated.                            |
+| R2  | Round 2     | fixed       | `b6afd1b8`: cites 1d86fd48 and the coordinator session's harness notices.                                                                |
+| R3  | Round 2     | fixed       | `b6afd1b8`: checks `name:` first, then restart; both mirrors.                                                                            |
+| R4  | Round 2     | wontfix     | Editing ticket 252 is outside this branch's scope; the owner asked for no ticket work.                                                   |
+| R5  | Round 2     | fixed       | `b6afd1b8`: moved to Writing for agents.                                                                                                 |
+| R6  | Round 2     | fixed       | `b6afd1b8`: "They come from these two sources:".                                                                                         |
+| A1  | Adversarial | fixed       | `5a29900c`: the owner's hand edit adds `policy: allow_implicit_invocation: false` to both skills' `agents/openai.yaml`, in both mirrors. |
