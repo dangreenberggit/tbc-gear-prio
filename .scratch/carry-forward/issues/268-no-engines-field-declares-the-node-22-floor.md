@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: Stage 3 web shell execution, 2026-08-22 (docs/verification-log.md, "What the harness could not show")
 Blocks: none
@@ -82,3 +82,10 @@ so this is purely local-dev legibility.
 ticket floats — a code change with test implications, out of scope for a
 config-only fix. Close 268 on merge; open a separate ticket if the lazy import
 is still wanted.
+
+## 2026-09-25 — closed
+
+Closed per the note above ("Close 268 on merge"). `fix/node-22-engines-floor`
+(`5c01b5aa`) is in dev through merge `dc83b554`:
+`git merge-base --is-ancestor fix/node-22-engines-floor dev` exits 0. The
+lazy-`SqliteStore` import stays out of scope; no ticket is filed for it.

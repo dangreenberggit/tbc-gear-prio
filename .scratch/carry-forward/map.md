@@ -277,3 +277,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 515 No phase-1 universe; a phase-1 ret run ranks no candidates (round 2e-1 measurements) 2026-09-25
 - 516 Burning Rage 2pc break reads about 0 below the hit cap, hypothesis (round 2e-1 measurements) 2026-09-25
 - 517 Hide the popover "Item stats" line when it equals the DPS figure, after 494 (owner feedback on 494 proposal) 2026-09-25
+- 518 Delete the dead bulk-screening code, blocked until feat/tab-signoff-followups merges to dev (owner decision, follow-up to 406/411) 2026-09-25
+- 268 CLOSED 2026-09-25, feat/tab-signoff-followups — `fix/node-22-engines-floor` is in dev via merge `dc83b554` (`git merge-base --is-ancestor fix/node-22-engines-floor dev` exits 0), which is the close condition the ticket named
