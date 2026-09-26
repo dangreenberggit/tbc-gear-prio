@@ -121,9 +121,13 @@ effort high — it holds the adapt-vs-flag-vs-stop call on every
 underspecified step), with judged gates between stages and a bounded
 loop-back.
 The plan is reviewed before any code exists; `pre-merge-review` still runs
-after, unchanged. Seats are agent definitions under `.claude/agents/` —
-files added there register at session start only, so a new or edited seat
-needs a fresh session.
+after, unchanged. Seats are agent definitions under `.claude/agents/`.
+New agent files can register mid-session: on 2026-09-25 `simple-task`,
+`general-task` and `design-task` became available without a restart.
+Whether an edit to an existing seat is picked up the same way is untested.
+Subagents receive the `CLAUDE.md` / `AGENTS.md` text from when the parent
+session started (found by the September 2026 token audit, not re-checked
+here), so an instruction-file edit reaches subagents only in a new session.
 
 ### Parking WIP
 
