@@ -147,14 +147,30 @@ not` list below.
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
 
-5. **Execute.** Resolve the base SHA fresh (`git rev-parse HEAD` — paste
-   command output, never hand-typed). Spawn `gate-executor`
-   (`model: "opus"`) with the paths of `plan.md` and `plan-review.md`,
-   the base SHA, the current branch name, and its checkout mode: shared
+5. **Execute.** Run one `gate-executor` (`model: "opus"`) per execution
+   chunk, in order. A plan with no `Execution chunks` section is one
+   chunk. For each chunk: resolve the base SHA fresh (`git rev-parse HEAD`
+   — paste command output, never hand-typed), then spawn the executor
+   with the paths of `plan.md`, `plan-review.md` and
+   `execution-report.md` (the earlier chunks' reports), the chunk id, the
+   base SHA, the current branch name, and its checkout mode: shared
    checkout (default — you write nothing while it runs) or
    `isolation: worktree` when the tree must stay free (the seat's
    base-SHA assertion is what makes worktree mode safe on a feature
-   branch). Write its final message to `execution-report.md`.
+   branch). Append its final message to `execution-report.md` under the
+   chunk id, and log the chunk id and the executor's agent id in
+   `decision-log.md`. A fresh executor per chunk keeps each context
+   small; one executor across a whole plan re-reads its growing history
+   on every call. A chunk that ends `blocked` or `error` goes to Gate C
+   before the next chunk starts.
+
+   An executor that returns `NEEDS_PRIOR_CONTEXT: <question>` has hit a
+   gap that `progress.md` and the earlier reports do not answer. Find in
+   `decision-log.md` which executor ran the chunk the question is about,
+   `SendMessage` that executor the question (it keeps its context), and
+   log the question and answer. Then give the answer to the asking
+   executor: `SendMessage` it, or respawn it for the same chunk with a
+   fresh base SHA and the answer in its prompt.
 
    When the plan has an SME step, the executor spawns `gate-sme` once and
    commits its handoff. That handoff is the ticket's SME verdict: Gate C
@@ -162,11 +178,14 @@ not` list below.
    executor's ledger marks the verdict `contested`.
 
 6. **Gate C.** Disposition every Deviation-ledger row in
-   `decision-log.md`: `accepted`, `rework` (`SendMessage` the same
-   executor — it retains context — or respawn), or `escalate` to the user.
-   Then cross-check `git diff --stat <base SHA>..HEAD` against the plan's
-   Paths manifest: any out-of-manifest path with no ledger row becomes one
-   now and is dispositioned like the rest.
+   `decision-log.md`: `accepted`, `rework` (respawn a `gate-executor` for
+   the affected chunk with the ledger row; `SendMessage` the same executor
+   only when it made few tool calls), or `escalate` to the user.
+   Then cross-check `git diff --stat <base SHA>..HEAD`, using the first
+   chunk's base SHA, against the plan's Paths manifest: any
+   out-of-manifest path with no ledger row becomes one now and is
+   dispositioned like the rest. `progress.md` is a stage artifact, not an
+   out-of-manifest path.
 
    Done when: every ledger row and every out-of-manifest path is
    dispositioned, and the report shows `pnpm verify` passed on the tip.

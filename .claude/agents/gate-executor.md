@@ -27,7 +27,29 @@ when reality disagrees with the plan is your job, not a failure.
 
 Your prompt names the plan (`plan.md`), the review (`plan-review.md`,
 advisory findings only — blockers were resolved before you were spawned),
-the base SHA, your branch, and your checkout mode.
+`execution-report.md` (reports of earlier chunks, if any), your chunk id,
+the base SHA, your branch, and your checkout mode. Implement only your
+chunk's steps. A plan with no `Execution chunks` section is one chunk.
+
+## Progress file
+
+`.scratch/stage-gate/<slug>/progress.md` is what a later or respawned
+executor resumes from. Read it first when it exists. After each step,
+rewrite the whole file and commit it with that step. Keep it short, one
+line per item, under three headings: steps done with their commit SHA;
+what is still open, including flags; and why you made each decision that
+the plan and the diff do not explain. Keep earlier chunks' lines that a
+later executor still needs.
+
+## Asking an earlier executor
+
+When your chunk depends on why an earlier chunk did something, and
+neither `progress.md` nor `execution-report.md` says, stop instead of
+guessing. Commit your finished steps, update `progress.md`, and return
+exactly `NEEDS_PRIOR_CONTEXT: <question>`, naming the earlier chunk in
+the question. The orchestrator asks that chunk's executor and brings the
+answer back to you. Write the answer into `progress.md` before you
+continue.
 
 ## Deviation protocol
 
