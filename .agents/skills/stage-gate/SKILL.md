@@ -184,26 +184,25 @@ not` list below.
    dispositions it like a ledger row, and a second SME runs only when the
    executor's ledger marks the verdict `contested`.
 
-6. **Gate C.** Disposition every Deviation-ledger row in
-   `decision-log.md`: `accepted`, `rework` (respawn a `gate-executor` for
-   the affected chunk with a fresh base SHA and the ledger row;
-   `SendMessage` the same executor only when it made fewer than about 25
-   tool calls), or `escalate` to the user.
+6. **Gate C.** Disposition every Deviation-ledger row, and every chunk
+   `Status` that is not `success`, in `decision-log.md`: `accepted`,
+   `rework` (respawn a `gate-executor` for the affected chunk with a fresh
+   base SHA and the ledger row; `SendMessage` the same executor only when
+   it made fewer than about 25 tool calls), or `escalate` to the user.
    Then cross-check `git diff --stat <base SHA>..HEAD`, using the first
    chunk's base SHA, against the plan's Paths manifest: any
    out-of-manifest path with no ledger row becomes one now and is
    dispositioned like the rest. `progress.md`, the executor's resume
    file, is not an out-of-manifest path.
 
-   A Gate C between chunks dispositions that chunk's rows and, when its
-   `Status` is not `success`, the status itself (`accepted`, `rework` or
-   `escalate`). Step 5 goes on to the next chunk only when all of these
-   are `accepted`. The final Gate C covers the remaining rows and runs
-   the diff check.
+   A Gate C between chunks covers that chunk's rows and status. Step 5
+   goes on to the next chunk only when all of them are `accepted`. The
+   final Gate C covers the remaining rows and statuses and runs the diff
+   check.
 
-   Done when (final Gate C): every ledger row and every out-of-manifest
-   path is dispositioned, and the report shows `pnpm verify` passed on
-   the tip.
+   Done when (final Gate C): every ledger row, every non-`success`
+   status and every out-of-manifest path is dispositioned, and the report
+   shows `pnpm verify` passed on the tip.
 
 7. **Hand off.** The normal loop resumes: `pre-merge-review`, then **ask**
    before `pnpm merge-to-dev`. Stage artifacts stay in
