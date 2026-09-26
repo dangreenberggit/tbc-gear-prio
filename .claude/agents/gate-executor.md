@@ -30,17 +30,20 @@ advisory findings only — blockers were resolved before you were spawned),
 `execution-report.md` (reports of earlier chunks, if any), the absolute
 path of `progress.md`, your chunk id, the base SHA, your branch, and your
 checkout mode. Implement only your chunk's steps. If your prompt names no
-chunk id, the whole plan is yours.
+chunk id, the whole plan is yours. If it names dirty paths, examine each
+before your first commit, because that commit takes in every dirty file:
+finish the work they hold, or stop with `Status: blocked` naming them.
 
 ## Progress file
 
 `progress.md`, at the absolute path your prompt names, is what a later or
-respawned executor resumes from. Read it first when it exists. After each step,
-rewrite the whole file. Keep it short, one line per item, under three
-headings: steps done with their commit SHA; what is still open, including
-flags; and why you made each decision that the plan and the diff do not
-explain. Keep earlier chunks' lines that a later executor still needs.
-It is not a Paths-manifest path and needs no ledger row.
+respawned executor resumes from. Read it first when it exists. After
+each step, rewrite the whole file. Keep it short, one line per item,
+under three headings: steps done with their commit SHA; what is still
+open, including flags; and why you made each decision that the plan and
+the diff do not explain. Keep earlier chunks' lines that a later
+executor still needs. It is not a Paths-manifest path and needs no
+ledger row.
 
 ## Asking an earlier executor
 

@@ -155,18 +155,18 @@ not` list below.
    output, never hand-typed), then spawn the executor with the paths of
    `plan.md`, `plan-review.md` and `execution-report.md` (the earlier
    chunks' reports), the absolute path of `progress.md` in the stage
-   folder of this checkout, the chunk id, the base SHA, the current
-   branch name,
-   and its checkout mode: shared checkout (default — you write nothing
-   while it runs) or `isolation: worktree` when the tree must stay free
-   (the seat's base-SHA assertion is what makes worktree mode safe on a
-   feature branch). A plan with more than one chunk uses the shared
+   folder of this checkout, the chunk id, the base SHA, the current branch
+   name, and its checkout mode: shared checkout (default — you write
+   nothing while it runs) or `isolation: worktree` when the tree must stay
+   free (the seat's base-SHA assertion is what makes worktree mode safe on
+   a feature branch). A plan with more than one chunk uses the shared
    checkout, so each chunk starts from the commits of the one before.
    Append its final message to `execution-report.md` under the chunk id,
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.
-   A chunk whose final report does not end `success`, or whose ledger has
-   a `flag` or `stop` row, goes to Gate C before the next chunk starts.
+   A chunk whose handoff `Status` is not `success`, or whose ledger has a
+   `flag` or `stop` row, goes to Gate C before the next chunk starts. A
+   `NEEDS_PRIOR_CONTEXT` return is not a handoff.
 
    An executor that returns `NEEDS_PRIOR_CONTEXT: <question>` has hit a
    gap that `progress.md` and the earlier reports do not answer. Append
@@ -193,12 +193,17 @@ not` list below.
    chunk's base SHA, against the plan's Paths manifest: any
    out-of-manifest path with no ledger row becomes one now and is
    dispositioned like the rest. `progress.md`, the executor's resume
-   file, is not an out-of-manifest path. A Gate C between chunks
-   dispositions that chunk's rows, then step 5 goes on to the next chunk;
-   the final Gate C covers the remaining rows and runs the diff check.
+   file, is not an out-of-manifest path.
 
-   Done when: every ledger row and every out-of-manifest path is
-   dispositioned, and the report shows `pnpm verify` passed on the tip.
+   A Gate C between chunks dispositions that chunk's rows and, when its
+   `Status` is not `success`, the status itself (`accepted`, `rework` or
+   `escalate`). Step 5 goes on to the next chunk only when all of these
+   are `accepted`. The final Gate C covers the remaining rows and runs
+   the diff check.
+
+   Done when (final Gate C): every ledger row and every out-of-manifest
+   path is dispositioned, and the report shows `pnpm verify` passed on
+   the tip.
 
 7. **Hand off.** The normal loop resumes: `pre-merge-review`, then **ask**
    before `pnpm merge-to-dev`. Stage artifacts stay in
@@ -208,12 +213,12 @@ not` list below.
 
 A dead or cut-off seat retains its context — `SendMessage` it to resume
 before respawning. An executor past about 25 tool calls is respawned for
-its chunk instead, and resumes from `progress.md`. Before any respawn,
-run `git status --porcelain` and `git rev-parse HEAD`: pass the fresh
-SHA, and name any dirty paths in the prompt as the earlier executor's
-unfinished work, so they are not committed unexamined. Every stage
-artifact is on disk the moment its stage ends, so a fresh session resumes from `decision-log.md`: the last logged
-gate is where you are.
+its chunk instead, and resumes from `progress.md`. Before any executor
+respawn, run `git status --porcelain` and `git rev-parse HEAD`: pass the
+fresh SHA, and name any dirty paths in the prompt as probably the
+earlier executor's unfinished work. Every stage artifact is on disk the
+moment its stage ends, so a fresh session resumes from
+`decision-log.md`: the last logged gate is where you are.
 
 ## Do not
 
