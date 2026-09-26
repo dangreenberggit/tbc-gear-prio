@@ -54,10 +54,11 @@ Name the model on every spawn, even though each seat's frontmatter sets
 there is the one way a seat runs on the wrong model. Every
 seat self-checks and returns `WRONG_MODEL: <name>` on a mismatch: respawn
 with the model named. A `subagent_type` the harness does not recognize
-means its file under `.claude/agents/` is missing or has not registered.
-New agent files have registered mid-session (2026-09-25), so check the
-file exists first; if it does and the type is still unknown, restart the
-session.
+has no registered agent definition. First check that a file under
+`.claude/agents/` sets that exact value as its `name:`. If it does and the
+type is still unknown, restart the session. New agent files have
+registered without a restart (seen in harness notices on 2026-09-25), so
+check before restarting.
 
 ## Orchestrator conduct
 

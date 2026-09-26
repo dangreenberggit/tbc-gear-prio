@@ -34,6 +34,8 @@ Review means a second pass over your finished draft, revising it against the ski
 
 Propose changes to `AGENTS.md`, `CLAUDE.md`, and skill files in chat and wait for approval before editing them. These files steer every future session, so a bad line costs more than a bad commit and nothing catches it.
 
+Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the parent session started, so an edit to those files reaches subagents only in a new session. An uncommitted token audit reported this, and on 2026-09-26 a review subagent received an `AGENTS.md` older than the file on disk. A `CLAUDE.md` in another directory, such as a worktree, was loaded from disk when a subagent read a file there; this was seen once.
+
 ## Interacting with the user
 
 How to hand work back — applies to every session, not only orchestration. Message format: global "Chat responses" (staged in `docs/agents/home/AGENTS.md`). When overseeing the plan-review-execute pipeline, the `stage-gate` skill's `## Orchestrator conduct` adds pipeline-specific rules (standing instructions, scoped stops, routing detail outward, gating on open tickets).
@@ -122,12 +124,10 @@ underspecified step), with judged gates between stages and a bounded
 loop-back.
 The plan is reviewed before any code exists; `pre-merge-review` still runs
 after, unchanged. Seats are agent definitions under `.claude/agents/`.
-New agent files can register mid-session: on 2026-09-25 `simple-task`,
-`general-task` and `design-task` became available without a restart.
-Whether an edit to an existing seat is picked up the same way is untested.
-Subagents receive the `CLAUDE.md` / `AGENTS.md` text from when the parent
-session started (found by the September 2026 token audit, not re-checked
-here), so an instruction-file edit reaches subagents only in a new session.
+New agent files can register mid-session: `simple-task`, `general-task` and
+`design-task` (added in 1d86fd48 on 2026-09-25) appeared in the coordinator
+session's harness notices without a restart. Whether an edit to an existing
+seat is picked up the same way is untested.
 
 ### Parking WIP
 
