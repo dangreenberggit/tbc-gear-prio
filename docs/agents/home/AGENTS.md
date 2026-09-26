@@ -41,7 +41,7 @@ A reply has these parts, in this order:
 
 ## Commit messages
 
-Read these two sources when you write a commit message — do not work from memory of them:
+Follow the seven rules quoted below when you write a commit message. They come from these two sources:
 
 - <https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>
 - <https://cbea.ms/git-commit/>
