@@ -50,8 +50,57 @@ branch keeps the Claude Code change only and A1 waits for an owner decision.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                            |
-| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | wontfix     | Outside the approved scope ("change nothing else"); the edit to add `policy: allow_implicit_invocation: false` to both skills' `agents/openai.yaml` was refused by the permission classifier. Owner decides whether to extend the scope. |
-| A2  | Adversarial | wontfix     | Every locally adjusted vendored skill carries the same risk; nothing reads `computedHash`.                                                                                                                                               |
-| S1  | Standards   | wontfix     | Trigger wording in the descriptions and `request-refactor-plan` line 7 matches the `triage` convention, and the spec forbade other edits.                                                                                                |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                           |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | wontfix     | Outside the approved scope ("change nothing else"); the edit to add `policy: allow_implicit_invocation: false` to both skills' `agents/openai.yaml` was refused by the permission classifier. The owner later approved the edit (relayed by the coordinator, 2026-09-26); it is left for the owner to make by hand, not on this branch. |
+| A2  | Adversarial | wontfix     | Every locally adjusted vendored skill carries the same risk; nothing reads `computedHash`.                                                                                                                                                                                                                                              |
+| S1  | Standards   | wontfix     | Trigger wording in the descriptions and `request-refactor-plan` line 7 matches the `triage` convention, and the spec forbade other edits.                                                                                                                                                                                               |
+
+# Round 2 — owner-approved doc edits
+
+Reviewed range: `6764c74bb8f2a65bf51fe13d7907ba0c9ff8f621..c6ea605f35c27644a6f94a1a153971703de7968e`
+
+Dispatch: one fresh `general-task` subagent on Opus, in the foreground,
+covering all axes for three doc commits: `8eb0e195` (round-1 review file),
+`cf75ec24` (global commit-message rule in `docs/agents/home/AGENTS.md`) and
+`c6ea605f` (agent-file registration wording in `AGENTS.md` and the
+`stage-gate` skill). The fixes landed in `b6afd1b8`, which applies the
+reviewer's proposed text; no later round reviewed that commit.
+
+The owner also asked to fix the "footguns in CLI environment above" pointer
+in `AGENTS.md` § The forked tab repo. That section is not on `dev` or on this
+branch (`git show dev:AGENTS.md | grep -n footgun` prints nothing); it exists
+only on `feat/tab-signoff-followups` (commit `089acee8`), so the fix belongs
+there.
+
+## Findings
+
+R1 (medium): the claim that an instruction-file edit reaches subagents only in
+a new session was too broad, and its source (a token audit) is not in the
+repo. The reviewer saw a spawn-time root `AGENTS.md` older than the file on
+disk, and a worktree `CLAUDE.md` loaded from disk mid-run.
+
+R2 (low): the mid-session registration observation named no source.
+
+R3 (low): the stage-gate diagnosis for an unknown `subagent_type` left out a
+mismatched `name:` and gave no source.
+
+R4 (low): open ticket 252 line 83 still says `.claude/agents/` registers at
+session start only.
+
+R5 (nit): the instruction-file rule sat under Stage-gate features; it belongs
+under Writing for agents.
+
+R6 (nit): "The two sources they come from are references" did not tell the
+reader what the sources are for.
+
+## Disposition (round 2)
+
+| ID  | Axis    | Disposition | Ticket / note                                                                                                 |
+| --- | ------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| R1  | Round 2 | fixed       | `b6afd1b8`: scoped to the root files, the audit named as uncommitted, and the 2026-09-26 observations stated. |
+| R2  | Round 2 | fixed       | `b6afd1b8`: cites 1d86fd48 and the coordinator session's harness notices.                                     |
+| R3  | Round 2 | fixed       | `b6afd1b8`: checks `name:` first, then restart; both mirrors.                                                 |
+| R4  | Round 2 | wontfix     | Editing ticket 252 is outside this branch's scope; the owner asked for no ticket work.                        |
+| R5  | Round 2 | fixed       | `b6afd1b8`: moved to Writing for agents.                                                                      |
+| R6  | Round 2 | fixed       | `b6afd1b8`: "They come from these two sources:".                                                              |
