@@ -154,7 +154,9 @@ not` list below.
    resolve the base SHA fresh (`git rev-parse HEAD` — paste command
    output, never hand-typed), then spawn the executor with the paths of
    `plan.md`, `plan-review.md` and `execution-report.md` (the earlier
-   chunks' reports), the chunk id, the base SHA, the current branch name,
+   chunks' reports), the absolute path of `progress.md` in the stage
+   folder of this checkout, the chunk id, the base SHA, the current
+   branch name,
    and its checkout mode: shared checkout (default — you write nothing
    while it runs) or `isolation: worktree` when the tree must stay free
    (the seat's base-SHA assertion is what makes worktree mode safe on a
@@ -163,8 +165,8 @@ not` list below.
    Append its final message to `execution-report.md` under the chunk id,
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.
-   A chunk that does not end `success`, or whose ledger has a `flag` or
-   `stop` row, goes to Gate C before the next chunk starts.
+   A chunk whose final report does not end `success`, or whose ledger has
+   a `flag` or `stop` row, goes to Gate C before the next chunk starts.
 
    An executor that returns `NEEDS_PRIOR_CONTEXT: <question>` has hit a
    gap that `progress.md` and the earlier reports do not answer. Append
@@ -173,9 +175,9 @@ not` list below.
    the most recent executor that ran the chunk the question is about,
    `SendMessage` it the question (it keeps its context) and ask it to
    answer only, with no edits or commits, and log the question and
-   answer. Then give the answer to the asking executor: `SendMessage` it,
-   or respawn it for the same chunk with a fresh base SHA and the answer
-   in its prompt.
+   answer. Then give the answer to the asking executor: `SendMessage` it
+   when it made fewer than about 25 tool calls, or else respawn it for the
+   same chunk with a fresh base SHA and the answer in its prompt.
 
    When the plan has an SME step, the executor spawns `gate-sme` once and
    commits its handoff. That handoff is the ticket's SME verdict: Gate C
@@ -191,7 +193,9 @@ not` list below.
    chunk's base SHA, against the plan's Paths manifest: any
    out-of-manifest path with no ledger row becomes one now and is
    dispositioned like the rest. `progress.md`, the executor's resume
-   file, is not an out-of-manifest path.
+   file, is not an out-of-manifest path. A Gate C between chunks
+   dispositions that chunk's rows, then step 5 goes on to the next chunk;
+   the final Gate C covers the remaining rows and runs the diff check.
 
    Done when: every ledger row and every out-of-manifest path is
    dispositioned, and the report shows `pnpm verify` passed on the tip.
@@ -204,8 +208,11 @@ not` list below.
 
 A dead or cut-off seat retains its context — `SendMessage` it to resume
 before respawning. An executor past about 25 tool calls is respawned for
-its chunk instead, and resumes from `progress.md`. Every stage artifact is on disk the moment its stage
-ends, so a fresh session resumes from `decision-log.md`: the last logged
+its chunk instead, and resumes from `progress.md`. Before any respawn,
+run `git status --porcelain` and `git rev-parse HEAD`: pass the fresh
+SHA, and name any dirty paths in the prompt as the earlier executor's
+unfinished work, so they are not committed unexamined. Every stage
+artifact is on disk the moment its stage ends, so a fresh session resumes from `decision-log.md`: the last logged
 gate is where you are.
 
 ## Do not
