@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/stage-gate/upgrades-tab-closeout/set-rule-scenarios/report.md (scenario C, 2026-09-24)
 Blocks: none
@@ -50,3 +50,37 @@ above the noise floor. This ticket moves to the 494 redo session, which
 starts from `.scratch/handoffs/494-set-hover-redo.md` (§1 states the rule the
 message must follow). No reason string changed in round 2c. Status stays
 open.
+
+**Correction to the round 2c comment above.** It says the owner leans toward
+"None of these upgrades gain a set bonus." That is wrong. The owner wrote
+"I''m leaning towards 1 if its accurate", and draft 1 was "None of these
+upgrades lead toward a set bonus big enough to count."
+(`.scratch/handoffs/owner-quotes-upgrades-tab-closeout.md`, Part 1,
+2026-09-25 15:28). "None of these upgrades gain a set bonus." was the
+message already on the page, not one of the drafts.
+
+## 2026-09-27 — closed
+
+The owner chose option A of Q-501-toggle, "never grey out the toggle":
+
+> 501: A.
+
+(`.scratch/stage-gate/501-502-467-lineup/owner-answers-1.md`; the options
+are in `owner-decisions-checked.md` in the same folder.)
+
+Landed in fork `cd2ca288a` ("Never grey out the Set potential toggle"),
+re-pinned in main `3a9b617e` ("Re-pin fork to stop greying out Set
+potential"). The Set potential toggle is now always enabled after a run.
+The greying code and the message "None of these upgrades gain a set bonus."
+are removed. When no row gets anything from Set potential, turning the
+toggle on changes no DPS figure and no rank, and rows with an unmeasured
+figure show their "couldn't measure" lines.
+
+The case this ticket reported was already gone before this change. Since
+fork `c2cb48f81` (the 494 popover), the popover lines for bonuses a row
+leads toward show only while the toggle is on, and a greyed toggle was
+always off.
+
+Checks: `corepack pnpm verify` exited 0, and
+`python scripts/check_layout_gate.py` measured 129 passed, 0 failed, 0
+a11y failures.
