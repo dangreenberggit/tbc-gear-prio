@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2b (owner review of the round-1 Mantle of Malorne capture, 2026-09-24)
 Blocks: none
@@ -90,3 +90,30 @@ a test that shows the `not_counted` line. Test 491-L in
 runner exists for the tab. The 494 redo changes what the hover and the
 sub-line say, so it should look at this again: either add a rendered-text
 check or state why the key-level test is enough.
+
+## 2026-09-27 — closed
+
+The owner approved revision 3 of the popover ("Otherwise commit sounds
+fine", `owner-feedback-4.md`). It landed in fork `c2cb48f81` ("Lay out the
+set-bonus popover as a receipt", on `feat/upgrades-tab` in
+`vendor/tbc-new-fork`), re-pinned in main `3b44bc21` ("Re-pin fork for the
+494 popover and logging"). Each line now names its set, a break reads
+"Breaks {set} {n}pc", the Set potential lines sit under their own heading,
+and "Full set end state" is gone. The lines add up to the row's figure.
+
+The design record, the owner's verbatim answers and the approved pictures
+are in `.scratch/handoffs/494-set-hover-redo/final/`.
+
+Against "What would close this": (1) the owner confirmed the copy in
+`owner-feedback-2.md` to `owner-feedback-4.md`; (2) `corepack pnpm verify`
+exited 0 and `python scripts/check_layout_gate.py` measured 129 passed,
+0 failed, 0 a11y failures; (3) the owner reviewed the rendered captures
+directly instead of a gate-visual pass.
+
+Not done here: finding P3 above. Test 491-L still asserts only the
+sub-line key. The key's text changed with this work (`not_counted` is now
+"set detail"), and no rendered-text check was added.
+
+Fork `94fa93cd3` ("Log set-value measurement failures to the console")
+also landed in the same re-pin, from the owner's answer on logging in
+`owner-feedback-4.md`.
