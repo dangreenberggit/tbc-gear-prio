@@ -52,3 +52,11 @@ other pieces on the path. In scenario D each Malorne row gets +108 of
 credit (ON ranks 5–10), while the whole Malorne set's end state is only
 +8.5. A player decides on the end state. The owner approved the rule, so
 this does not block anything; it is recorded here as input to the ruling.
+
+### 2026-09-27 — owner direction (replaces options A and B)
+
+The owner, answering Q-502-cap after reading an explanation of option B (limit a set piece's row to the simulated gain from wearing the whole set), verbatim:
+
+> This sounds like there needs to be a way to include measure of the other set items own stats. That's ok but it's work that needs to be logical and consistent. It can be included (amount gained or lost on net) in the ranking with the set bonus toggle on
+
+This changes the 2026-09-20 rule ("... NOT OTHER ITEMS"): with Set potential on, a set piece's figure should also include the net DPS gained or lost from the stats of the other set pieces the counted bonuses need. The rule still needs a design (which pieces count, how it fits the stop-where-it-pays rule, the popover line) before any build. Source: `.scratch/stage-gate/501-502-467-lineup/owner-answers-2.md` (gitignored).
