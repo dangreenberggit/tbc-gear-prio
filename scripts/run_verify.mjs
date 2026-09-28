@@ -21,7 +21,7 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,6 +30,7 @@ import {
   extractPythonSkips,
   extractVitestSkips,
   formatSummary,
+  formatVitestFailures,
 } from "./verify_summary.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -109,6 +110,7 @@ async function main() {
 
   const tmpDir = mkdtempSync(join(tmpdir(), "tbc-verify-"));
   const vitestJsonPath = join(tmpDir, "vitest-report.json");
+  let keepReport = false;
 
   try {
     for (const step of steps) {
@@ -132,6 +134,10 @@ async function main() {
       if (code !== 0) {
         // Matches the `&&` chain's own semantics: stop on first failure.
         // No summary on a failed run -- the failure itself is the report.
+        // The test step's only reporter is JSON, so its failure is printed
+        // from the report, and the report is kept for the full messages.
+        if (isTest) reportVitestFailure(vitestJsonPath);
+        keepReport = isTest && existsSync(vitestJsonPath);
         process.exitCode = code;
         return;
       }
@@ -185,8 +191,25 @@ async function main() {
         })
     );
   } finally {
-    rmSync(tmpDir, { recursive: true, force: true });
+    if (!keepReport) rmSync(tmpDir, { recursive: true, force: true });
   }
+}
+
+/** Prints the failed tests from vitest's JSON report, and where it is. */
+function reportVitestFailure(jsonPath) {
+  let failures = "";
+  try {
+    const report = JSON.parse(readFileSync(jsonPath, "utf8"));
+    failures = formatVitestFailures(report, ROOT);
+  } catch (err) {
+    console.error(
+      `\nrun_verify.mjs: vitest failed and its JSON report at ${jsonPath} could not be read: ${err}`
+    );
+    return;
+  }
+  console.error(
+    `\n${failures || "vitest exited nonzero, but its JSON report lists no failed test or file."}\nFull JSON report: ${jsonPath}`
+  );
 }
 
 main();

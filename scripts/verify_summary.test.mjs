@@ -3,6 +3,7 @@ import {
   extractPythonSkips,
   extractVitestSkips,
   formatSummary,
+  formatVitestFailures,
 } from "./verify_summary.mjs";
 
 describe("extractPythonSkips", () => {
@@ -155,5 +156,88 @@ describe("formatSummary", () => {
       layout: "layout: skipped -- vendor/tbc-new-fork is absent",
     });
     expect(text).toContain("layout: skipped -- vendor/tbc-new-fork is absent");
+  });
+});
+
+describe("formatVitestFailures", () => {
+  it("returns an empty string when nothing failed", () => {
+    const report = {
+      testResults: [
+        {
+          name: "/repo/a.test.ts",
+          status: "passed",
+          assertionResults: [{ fullName: "a works", status: "passed" }],
+        },
+      ],
+    };
+    expect(formatVitestFailures(report, "/repo")).toBe("");
+  });
+
+  it("names each failed test with its file and the start of its message", () => {
+    const report = {
+      testResults: [
+        {
+          name: "/repo/packages/core/test/rank.test.ts",
+          status: "failed",
+          assertionResults: [
+            { fullName: "rank keeps order", status: "passed" },
+            {
+              fullName: "rank drops heroic items",
+              status: "failed",
+              failureMessages: [
+                "AssertionError: expected 3 to be 2\n    at rank.test.ts:40:5",
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(formatVitestFailures(report, "/repo")).toBe(
+      [
+        "vitest failures (1):",
+        "  FAIL packages/core/test/rank.test.ts > rank drops heroic items",
+        "    AssertionError: expected 3 to be 2",
+        "        at rank.test.ts:40:5",
+      ].join("\n")
+    );
+  });
+
+  it("reports a file that failed without any failed test, such as an import error", () => {
+    const report = {
+      testResults: [
+        {
+          name: "/repo/b.test.ts",
+          status: "failed",
+          message: "Failed to load url ./missing.mjs",
+          assertionResults: [],
+        },
+      ],
+    };
+    expect(formatVitestFailures(report, "/repo")).toBe(
+      [
+        "vitest failures (1):",
+        "  FAIL b.test.ts",
+        "    Failed to load url ./missing.mjs",
+      ].join("\n")
+    );
+  });
+
+  it("keeps only the first lines of a long message", () => {
+    const long = Array.from({ length: 30 }, (_, i) => `line ${i}`).join("\n");
+    const report = {
+      testResults: [
+        {
+          name: "/repo/c.test.ts",
+          status: "failed",
+          assertionResults: [
+            { fullName: "c", status: "failed", failureMessages: [long] },
+          ],
+        },
+      ],
+    };
+    const text = formatVitestFailures(report, "/repo");
+    expect(text).toContain("    line 3");
+    expect(text).not.toContain("line 4\n");
+    expect(text).toContain("    ... (26 more lines in the JSON report)");
   });
 });
