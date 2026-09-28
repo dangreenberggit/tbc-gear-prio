@@ -13,7 +13,7 @@ with `"fixture": "<name>"`.
 | --- | --- |
 | `schemaVersion` | `1` |
 | `forkSha` | `vendor/tbc-new-fork` commit the run was made on |
-| `forkDirty` | always `false`; the recorder refuses an uncommitted fork tree |
+| `forkDirty` | always `false` here; the recorder refuses an uncommitted fork tree unless `--allow-dirty` is given (see below) |
 | `spec`, `phase` | engine spec id (`feral`, `ret`) and the page phase during the run |
 | `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or the page link |
 | `gear` | the worn gear as protojson `EquipmentSpec` |
@@ -54,6 +54,25 @@ pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Ph
 
 Test gear is the previous phase's preset at the next page phase, as for every
 live run and capture in this repo.
+
+### Recording uncommitted fork code for review
+
+Two flags record a fork change before it is committed, for example so the owner
+can judge renders of it first:
+
+- `--out <dir>` writes the file to `<dir>` instead of this folder.
+- `--allow-dirty` records from an uncommitted fork tree. It is accepted only
+  with an `--out` folder other than `data/tab-fixtures`. The file gets
+  `forkDirty: true` and `forkDiffSha256`, the sha256 of the fork's
+  `git diff --binary HEAD` at the start of the run. The recorder refuses to
+  write if that diff, the fork's `git status` listing, or its HEAD changed
+  during the run.
+
+`pnpm tab-review` renders such a file when a manifest entry names it by its
+`.json` path. **Never copy one into `data/tab-fixtures/`**:
+`pnpm tab-fixtures:check` fails any fixture whose `forkDirty` is not `false`,
+because it names no commit that produced its figures. After the fork change is
+committed, re-record with the commands above.
 
 ## Staleness: a warning, never a block
 

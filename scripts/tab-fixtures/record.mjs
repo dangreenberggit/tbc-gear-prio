@@ -10,8 +10,13 @@
 //
 // Refuses to record from an uncommitted fork tree: a fixture names the fork
 // commit its figures came from, and a dirty tree has no such commit.
+// `--allow-dirty` (only with an `--out` folder outside data/tab-fixtures)
+// records an uncommitted fork for review before it is committed, as the
+// ticket 502 owner render gate needs; the file then names the diff by hash
+// instead, and tab-fixtures:check would reject it (`forkDirty: true`).
 
 import { execFileSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
@@ -33,15 +38,20 @@ const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret --ph
          (--preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
           | --gear-url <page link> --expect-item-ids 1,2,3)
          [--iterations 3000] [--base http://localhost:5173]
+         [--out <dir> [--allow-dirty]]
 
-Writes data/tab-fixtures/<spec>-p<phase>-<name>.json. Needs the fork dev
-server on :5173 and the backend on :3333, and a committed fork tree.
---preset loads a chip from the page's "Gear Sets" presets under the named
-phase tab; --gear-url opens a gear link. Either way the worn gear is checked
-item by item before the run, and the run is refused on a mismatch.`;
+Writes data/tab-fixtures/<spec>-p<phase>-<name>.json, or the same name under
+--out. Needs the fork dev server on :5173 and the backend on :3333, and a
+committed fork tree. --allow-dirty records an uncommitted fork tree; it needs
+an --out folder other than data/tab-fixtures, stamps forkDirty: true and the
+sha256 of the fork's diff, and refuses to write if that diff changed during
+the run. --preset loads a chip from the page's "Gear Sets" presets under the
+named phase tab; --gear-url opens a gear link. Either way the worn gear is
+checked item by item before the run, and the run is refused on a mismatch.`;
 
 function parseArgs(argv) {
   const out = { iterations: 3000, base: "http://localhost:5173" };
+  const flags = { "--allow-dirty": "allowDirty" };
   const keys = {
     "--spec": "spec",
     "--phase": "phase",
@@ -53,9 +63,11 @@ function parseArgs(argv) {
     "--expect-item-ids": "expectItemIds",
     "--iterations": "iterations",
     "--base": "base",
+    "--out": "out",
   };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--help" || argv[i] === "-h") out.help = true;
+    else if (flags[argv[i]]) out[flags[argv[i]]] = true;
     else if (keys[argv[i]]) out[keys[argv[i]]] = argv[++i];
     else throw new Error(`unknown argument ${argv[i]}`);
   }
@@ -79,6 +91,16 @@ function validate(args) {
     return "--preset needs --preset-tab and --expect-gear-file";
   if (viaUrl && !args.expectItemIds)
     return "--gear-url needs --expect-item-ids";
+  args.outDir = args.out === undefined ? OUT_DIR : path.resolve(args.out);
+  const samePath = (a, b) =>
+    process.platform === "win32"
+      ? a.toLowerCase() === b.toLowerCase()
+      : a === b;
+  if (
+    args.allowDirty &&
+    (args.out === undefined || samePath(args.outDir, OUT_DIR))
+  )
+    return "--allow-dirty needs an --out folder other than data/tab-fixtures: a fixture there must name a real fork commit";
   return null;
 }
 
@@ -86,6 +108,13 @@ function git(...args) {
   return execFileSync("git", ["-C", FORK, ...args], {
     encoding: "utf8",
   }).trim();
+}
+
+function forkDiffSha256() {
+  const diff = execFileSync("git", ["-C", FORK, "diff", "--binary", "HEAD"], {
+    maxBuffer: 256 * 1024 * 1024,
+  });
+  return crypto.createHash("sha256").update(diff).digest("hex");
 }
 
 function expectedItemIds(args) {
@@ -108,13 +137,15 @@ async function main() {
     console.error(`record: ${bad}\n\n${USAGE}`);
     return 2;
   }
-  if (git("status", "--porcelain")) {
+  const statusBefore = git("status", "--porcelain");
+  if (statusBefore && !args.allowDirty) {
     console.error(
       "record: vendor/tbc-new-fork has uncommitted changes; commit them first so the fixture names a real commit."
     );
     return 2;
   }
   const forkSha = git("rev-parse", "HEAD");
+  const diffShaBefore = args.allowDirty ? forkDiffSha256() : undefined;
   const expectIds = expectedItemIds(args);
   const db = new Map(
     JSON.parse(
@@ -274,7 +305,13 @@ async function main() {
         `worn gear lacks expected item ids ${missingIds.join(", ")}`
       );
 
-    if (git("status", "--porcelain"))
+    // `git diff` does not see untracked files, so the dirty mode also
+    // requires the status listing itself to be unchanged.
+    const changed = args.allowDirty
+      ? forkDiffSha256() !== diffShaBefore ||
+        git("status", "--porcelain") !== statusBefore
+      : Boolean(git("status", "--porcelain"));
+    if (changed)
       throw new Error(
         "vendor/tbc-new-fork changed during the run; not writing a fixture"
       );
@@ -284,7 +321,10 @@ async function main() {
     const fixture = {
       schemaVersion: 1,
       forkSha,
-      forkDirty: false,
+      forkDirty: Boolean(args.allowDirty && statusBefore),
+      ...(args.allowDirty && statusBefore
+        ? { forkDiffSha256: diffShaBefore }
+        : {}),
       spec: args.spec,
       phase: args.phase,
       ...(args.preset !== undefined
@@ -295,9 +335,9 @@ async function main() {
       iterations: args.iterations,
       ranking,
     };
-    fs.mkdirSync(OUT_DIR, { recursive: true });
+    fs.mkdirSync(args.outDir, { recursive: true });
     const out = path.join(
-      OUT_DIR,
+      args.outDir,
       `${args.spec}-p${args.phase}-${args.name}.json`
     );
     fs.writeFileSync(out, JSON.stringify(fixture, null, 2) + "\n");

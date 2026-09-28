@@ -36,6 +36,19 @@ The fixture sim returns
 twoPcEnd)·B` over every lost worn threshold (`netInflation`).
 - `FLOOR = 5`. A credit component at or below it counts as 0.
 
+Since ticket 502 the ON credit follows rule R1 (ADR-0034). The futures are
+walked in threshold order. Each step adds its floored bonus, plus the own
+stats of each path piece that no earlier step counted, minus each path
+break that no earlier step charged, at its measured value with no floor. A
+step can be the stop only if its floored bonus is above 0. The credit is the
+largest running total at such a step, or 0. A piece's own stats are
+`own(p) = single(p) + Σ B of the worn bonuses p breaks alone − B2` (the last
+term only when p alone crosses the 2pc at worn 1, valued by the 4pc
+`selfConfound`). The `split` view keeps `bonus ÷ threshold − floored
+breaks` with no pieces, taken at R1's full stop. `full-path` counts every
+step whose floored bonus is above 0, and the credit is the running total
+after the last one.
+
 Item ids used below: Thunderheart head 31039, shoulder 31048, chest 31042,
 hands 31034, legs 31044, wrist 34444, waist 34556, feet 34573. Malorne head
 29098, shoulder 29100, chest 29096, hands 29097, legs 29099. Nordrassil
@@ -68,6 +81,12 @@ Thunderheart and neutral pieces in those four slots. The baseline is
   breaks (640,2): full credit `50 + 80 − 40 = 90`, split
   `25 + 20 − 40 = 5`. Four rows sum to 360 (full) and 20 (split) against a
   package net of 90 (ADR-0034). The flag adds 2 sims.
+- Since 502: each other Thunderheart piece owns `30 + 70 = 100` (its single
+  plus the (640,4) it breaks alone). `P_2` is hands and head; the shoulder
+  and chest rows take hands as their 2pc partner (tie on 30, lower id). Every
+  row: `R_2 = 50 + 100 = 150`, `R_4 = 150 + 80 + 200 − 40 = 390`, stop 4,
+  full credit 390, and `30 + 390 = 420 = pkgΔ4`. Split at the same stop is
+  still 5. Four rows sum to 1560 (full) and 20 (split).
 
 **476-B: worn Malorne 5 (476-A plus legs).** The baseline is `3000 + 110`.
 Singles take Malorne 5→4 and lose nothing: Thunderheart `100`, neutral
@@ -86,6 +105,11 @@ Singles take Malorne 5→4 and lose nothing: Thunderheart `100`, neutral
 - Head row: `deltaDps 100`, no single break, `commitBreaks
 [(640,4) 70, (640,2) 40]`. Best-stop: `R_2 = 50 − 70 = −20`,
   `R_4 = −20 + 80 − 40 = 20`, so full credit 20.
+- Since 502: the head row's path to 2 is `P_2` (hands and head), which
+  breaks (640,4); its path to 4 breaks (640,4) and (640,2). The other
+  pieces own 100 each and break nothing alone. `R_2 = 50 + 100 − 70 = 80`,
+  `R_4 = 80 + 80 + 200 − 40 = 320`, stop 4, full credit 320, and
+  `100 + 320 = 420 = pkgΔ4`.
 
 **477-T: worn Malorne chest, hands and legs (3, 2pc active).** The pool
 holds Thunderheart wrist, waist and feet at own value 150, Thunderheart
@@ -105,6 +129,16 @@ hands and legs at 100, and neutral chest and hands. The baseline is
   (to 2) and legs plus wrist, waist and feet (to 4) keep Malorne at 2, so
   nothing is charged: full credit `50 + 80 = 130`. From 477 until 490 it
   was 90. The four package rows also get 130.
+- Since 502: the legs row's path to 2 adds wrist (150, lowest id of the
+  150s) and its path to 4 adds waist and feet; none breaks anything alone.
+  `R_2 = 50 + 150 = 200`, `R_4 = 200 + 80 + 150 + 150 = 580`, full credit
+  580, and `100 + 580 = 680`, the value of legs with wrist, waist and feet.
+- Since 502, package rows: wrist and waist are in `P_2`:
+  `R_2 = 50 + 150 = 200`, then `P_4` adds feet (150) and hands (100):
+  `R_4 = 200 + 80 + 250 = 530`, credit 530, `150 + 530 = 680 = pkgΔ4`.
+  Feet takes wrist as its 2pc
+  partner, then waist and hands: credit 530. Hands takes wrist, then waist
+  and feet: `R_4 = 200 + 80 + 300 = 580`, credit 580, `100 + 580 = 680`.
 
 **A4: worn Thunderheart hands and legs (2); the pool holds the worn hands
 (owned), head, shoulder and chest.** The baseline is `3000 + 50`.
@@ -116,6 +150,9 @@ hands and legs at 100, and neutral chest and hands. The baseline is
 - The owned row adds no piece, so it has no futures and credit 0. Before
   the 478 guard it got 80. The head row: futures
   `[{4, piecesNeeded 2, 80}]`, credit 80.
+- Since 502: the head row's path to 4 is `P_4` (head and chest), and the
+  chest owns 100: credit `80 + 100 = 180`, and `100 + 180 = 280 = pkgΔ4`.
+  The owned row still gets 0.
 
 ## Tickets 490–492
 
@@ -147,6 +184,15 @@ head, shoulder (100), then hands, legs (−50).
 - Hands and legs rows: `deltaDps −50`, single break (676,2), which is
   filtered out of every path. Credit 40.
 - Top three under set potential: {29096, 29098, 29100}.
+- Since 502: chest, head and shoulder own 100 each. Hands owns
+  `−50 + 50 = 0` (its single plus the (676,2) it breaks alone). The chest
+  and head rows' path to 2 is `P_2`; the shoulder row takes chest (tie on
+  100, lower id). `R_2 = 40 + 100 = 140`. The 4pc floors to 0, so it is
+  never a stop. Full credit 140, split `40 / 2 = 20`, and
+  `100 + 140 = 240 = pkgΔ2`. The hands and legs rows take chest as their
+  2pc partner, with no break (their own (676,2) is filtered): credit 140.
+  Under set potential the chest, head and shoulder rows show 240, and the
+  hands and legs rows 90, so the top three are unchanged.
 
 **490-B: as 490-A with Malorne 4pc 30.** `pkgΔ4 = 320`,
 `raw4 = 320 − 250 − 40 = 30`. Chest futures `[{2, 2, 40, []}, {4, 4, 30,
@@ -154,6 +200,17 @@ head, shoulder (100), then hands, legs (−50).
 
 - Full-path: full `40 + 30 − 50 = 20`, split `20 + 7.5 − 50 = −22.5`.
 - Best-stop (shipped): `R_2 = 40`, `R_4 = 20`, stop at 2: full 40, split 20.
+- Since 502 (own stats as in 490-A): the chest row's
+  `R_2 = 40 + 100 = 140` and `R_4 = 140 + 30 + 100 + 0 − 50 = 220`. Both
+  rules stop at 4: full 220 and split `20 + 7.5 − 50 = −22.5`, and
+  `100 + 220 = 320 = pkgΔ4`. This geometry no longer separates the rules;
+  the pure test 502-B does.
+- 502-A (identity): every `P_4` member shows `pkgΔ4 = 320`. The head row is
+  the chest row's twin. Shoulder: `R_2 = 40 + 100` (chest),
+  `R_4 = 140 + 30 + 100 + 0 − 50 = 220`, and `100 + 220 = 320`. Hands
+  (`deltaDps −50`, its (676,2) is its own single break): `R_2 = 40 + 100`
+  (chest), `R_4 = 140 + 30 + 200 = 370` (head and shoulder, no break left
+  to charge), and `−50 + 370 = 320`.
 
 **490-C: Nordrassil, whose 2pc is not implemented.** `P_4` is chest, head,
 shoulder and hands: `pkgΔ4 = 300 + 0 + 0 − 50 = 250`, `Σsingles 250`,
@@ -170,6 +227,10 @@ chest and legs.** The baseline is `3100`. Each single crosses the 2pc:
 - The pair is head and chest: `pkgΔpair = 200 + 50 = 250`,
   `Σsingles(pair) = 300`, `B2 = 50`, `bonusDps4 = −20 + 2·50 = 80`, net 80.
 - Head row: futures `[{4, 3, 80}]`, full 80, split 20.
+- Since 502: each other piece crosses the 2pc alone, so it owns
+  `150 − 50 = 100`. The head row's 4pc pieces are chest and legs, each
+  `dps 100`: full credit `80 + 200 = 280`, split still 20, and
+  `150 + 280 = 430 = pkgΔ4`.
 - Run count: `1 + 4 + 1 = 6` before 492 (baseline, four singles, the 4pc
   package), plus 1 for the pair sim.
 
@@ -203,6 +264,11 @@ and neutral head, shoulder and chest.** The baseline is
 - Every Thunderheart row: `deltaDps 150`, futures
   `[{4, 3, 80, [(640,2) 40]}]` (each row's path takes Malorne to 1 or 0),
   full credit `80 − 40 = 40`.
+- Since 502: each Thunderheart piece owns `150 − 50 = 100` (no piece breaks
+  Malorne alone). Head, chest and legs rows: `P_4` adds two pieces, credit
+  `80 + 200 − 40 = 240`, and `150 + 240 = 390 = pkgΔ4`. The shoulder row
+  takes head and chest (150 each, lowest ids), which break (640,2) with it:
+  credit 240.
 - Before the fix the pair was head + chest: pair delta 210, `B2 = 90`,
   `bonusDps4 = 120`, net4 160, row credit 120.
 
@@ -231,3 +297,65 @@ B_4 and is `dependent-unmeasured`. Both are found before any sim, so the
 flag adds 0 sims. Neither 676 net is set. Every Thunderheart row keeps
 `deltaDps 30` and `singleBreaks [(640,4)]` without `dps`, has futures
 `[2, 4]` without `dps`, credit 0, and sub-line `not_counted`.
+
+## Ticket 502
+
+These cases pin R1 (see the model section). The pure cases build a
+`setContext` by hand; a future's `pieces` lists the path members other
+than the row, each with its own stats as `dps`.
+
+**502-A (identity):** see 490-B. Every `P_4` member's `deltaDps + credit`
+is `pkgΔ4 = 320`.
+
+**502-B (stop condition, pure).**
+
+- Both bonuses below the floor (2pc 4, 4pc 3), pieces A 30, B 20, C 10:
+  no step can be the stop, so the credit is 0, not 60.
+- 2pc 4, 4pc 80; the 2pc path adds A (10), the 4pc path adds B (20) and
+  C (−5): `R_2 = 0 + 10 = 10` is not a stop,
+  `R_4 = 10 + 80 + 20 − 5 = 105`. Credit 105 at stop 4; A is counted at
+  the 2pc step.
+- Rule discriminator: 2pc 40 with A (100); 4pc 30 with B (0), C (0) and a
+  break of 200. `R_2 = 140`, `R_4 = 140 + 30 − 200 = −30`. Best-stop: full
+  140, split `40 / 2 = 20`. Full-path: full −30, split
+  `20 + 7.5 − 200 = −172.5`.
+
+**502-C (own stats, engine).**
+
+- 492-F head row: the 4pc pieces are chest (31042) and legs (31044), each
+  `150 − 50 = 100`.
+- 476-A hands row: the 2pc piece is head (31039); the 4pc pieces are head,
+  shoulder (31048) and chest (31042), in slot order. Each is
+  `30 + 70 = 100`.
+
+**502-D (terms, pure).** Set "Thunderheart Harness", worn 0. The 2pc (50)
+adds A (100) and breaks Malorne Harness 4pc (70); the 4pc (80) adds B (20)
+and C (−10) and also breaks Malorne Harness 2pc (40). `R_2 = 50 + 100 −
+70 = 80`, `R_4 = 80 + 80 + 20 − 10 − 40 = 130`. The terms are bonus 2pc
++50, A +100, Breaks 4pc −70, bonus 4pc +80, B +20, C −10, Breaks 2pc −40,
+summing to 130. With B at −100 instead, `R_4 = 10`, the stop is 2 and the
+terms end after Breaks 4pc −70 (credit 80). The second 502-B context has no
+2pc bonus term: its terms are A +10, bonus 4pc +80, B +20, C −5.
+
+**502-E (unmeasured, pure).** A 4pc of 80 whose piece has no `dps` is
+unmeasured: credit 0. A 2pc of 50 with a 20 break and no `pieces` field is
+credited as before 502: `50 − 20 = 30`, and it is not unmeasured.
+
+**502-F (OFF):** the 490-B ranking with Set potential off sorts on
+`deltaDps`: chest, head, shoulder (100), neutral legs 8289 and hands 10140
+(`120 − 100 − 50 = −30`), then Malorne hands and legs (−50).
+
+**502-G (a path break below the floor):** the 490 geometry with the
+Thunderheart 2pc worth 4 and Malorne 2pc 40, 4pc 30.
+
+- Singles: chest, head, shoulder 100; Malorne hands or legs
+  `100 − 100 − 4 = −4`; neutral hands or legs `120 − 100 − 4 = 16`.
+- B(676,2): vacate hands and legs, `Δ = 240 − 200 − 4 = 36`, `Σs = 32`,
+  coefficient −1, so `B = 4`.
+- `P_2` is chest and head, net2 40. `P_4` is chest, head, shoulder and
+  hands: `pkgΔ4 = 300 + 40 + 30 − 4 = 366`, `raw4 = 366 − 296 − 40 = 30`,
+  inflation `(1 − 0 − 1 + 0)·4 = 0`, net4 30.
+- Chest row: head owns 100, shoulder 100, hands `−4 + 4 = 0`.
+  `R_2 = 40 + 100 = 140`, `R_4 = 140 + 30 + 100 + 0 − 4 = 266`. The
+  break term is −4, the credit 266, and `100 + 266 = 366 = pkgΔ4`. A
+  floored break would give 270 and 370.

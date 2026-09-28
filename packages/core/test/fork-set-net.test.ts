@@ -219,6 +219,7 @@ type ForkRanking = {
         piecesNeeded: number;
         dps?: number;
         breaks?: Array<{ setId: number; threshold: number; dps?: number }>;
+        pieces?: Array<{ itemId: number; name: string; dps?: number }>;
       }>;
       commitBreaks?: Array<{ setId: number; threshold: number; dps?: number }>;
       commitPackageDeltaDps?: number;
@@ -229,6 +230,7 @@ type ForkRanking = {
     setId: number;
     threshold: number;
     packageItemIds?: number[];
+    packageDeltaDps?: number;
     bonusDps?: number;
     bonusDpsNet?: number;
     unmeasured?: string;
@@ -788,17 +790,18 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         { threshold: 2, piecesNeeded: 2, dps: 50 },
         { threshold: 4, piecesNeeded: 4, dps: 80 },
       ]);
-      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 90, 0.5)).toBe(
-        true
-      );
+      // 502: each row shows the whole 4pc swap, 30 + 390 = pkgΔ4 420.
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "full"), 390, 0.5)
+      ).toBe(true);
       expect(near(view.rankableSetPotential(row, FLOOR, "split"), 5, 0.5)).toBe(
         true
       );
     }
     // One vacate sim per target, (640,4) and (640,2).
     expect(on.runCount - off.runCount).toBe(2);
-    // C31 / ADR-0034: rows are not additive in either credit view. The package
-    // net is 90; four rows sum to 360 under full and 20 under split.
+    // C31 / ADR-0034: rows are not additive in either credit view. Each row
+    // shows the whole swap; four rows sum to 1560 under full and 20 under split.
     const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
     const fullSum = rows.reduce(
       (s, row) => s + view.rankableSetPotential(row, FLOOR, "full"),
@@ -808,7 +811,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       (s, row) => s + view.rankableSetPotential(row, FLOOR, "split"),
       0
     );
-    expect(near(fullSum, 360, 2)).toBe(true);
+    expect(near(fullSum, 1560, 2)).toBe(true);
     expect(near(splitSum, 20, 2)).toBe(true);
   });
 
@@ -833,7 +836,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       { setId: 640, threshold: 4, dps: 70 },
       { setId: 640, threshold: 2, dps: 40 },
     ]);
-    expect(near(view.rankableSetPotential(row, FLOOR, "full"), 20, 0.5)).toBe(
+    // 502: 50 + 100 − 70, then + 80 + 200 − 40.
+    expect(near(view.rankableSetPotential(row, FLOOR, "full"), 320, 0.5)).toBe(
       true
     );
   });
@@ -890,7 +894,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // The top package with legs substituted breaks Malorne 2pc, so it is a
     // measurement target and disclosed. The legs row's own path to each future
     // (legs plus the best remaining package pieces) keeps Malorne chest and
-    // hands, so it breaks nothing and the row keeps 50 + 80 = 130 (490, C27).
+    // hands, so it breaks nothing (490, C27). Since 502 the path pieces'
+    // own stats count too: 50 + 150 (wrist), then + 80 + 150 + 150 = 580.
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect((legs.setContext?.commitBreaks ?? []).map(brk)).toEqual([
       { setId: 640, threshold: 2, dps: 40 },
@@ -898,7 +903,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     for (const f of legs.setContext?.futureBonuses ?? []) {
       expect(f.breaks ?? []).toEqual([]);
     }
-    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 130, 0.5)).toBe(
+    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 580, 0.5)).toBe(
       true
     );
     // Discovery is bounded by distinct keys, not rows (the case-8 invariant).
@@ -907,17 +912,18 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     ).length;
     expect(on.runCount - off.runCount).toBe(measured);
     expect(measured).toBe(1);
-    // The package's own members break nothing and keep the full 50 + 80.
-    for (const id of [
-      THUNDERHEART.wrist,
-      THUNDERHEART.waist,
-      THUNDERHEART.feet,
-      THUNDERHEART.hands,
-    ]) {
+    // The package's own members break nothing. Since 502 each shows the
+    // package delta 680: wrist, waist and feet 150 + 530, hands 100 + 580.
+    for (const [id, credit] of [
+      [THUNDERHEART.wrist, 530],
+      [THUNDERHEART.waist, 530],
+      [THUNDERHEART.feet, 530],
+      [THUNDERHEART.hands, 580],
+    ] as const) {
       const row = thRow(r, id);
       expect(row.setContext?.commitBreaks ?? []).toEqual([]);
       expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), 130, 0.5)
+        near(view.rankableSetPotential(row, FLOOR, "full"), credit, 0.5)
       ).toBe(true);
     }
   });
@@ -1006,7 +1012,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     expect((head.setContext?.futureBonuses ?? []).map(fut)).toEqual([
       { threshold: 4, piecesNeeded: 2, dps: 80 },
     ]);
-    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 80, 0.5)).toBe(
+    // 502: 80 + the chest's own 100.
+    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 180, 0.5)).toBe(
       true
     );
   });
@@ -1059,6 +1066,25 @@ type SubLineMod = ViewMod & {
     rule?: SetCreditRule
   ) => number;
   setCreditUnmeasured: (ctx: unknown) => boolean;
+  setPotentialTerms: (
+    ctx: unknown,
+    noiseFloorDps: number,
+    rule?: SetCreditRule
+  ) => {
+    credit: number;
+    stopThreshold: number;
+    terms: Array<
+      | {
+          kind: "bonus";
+          setName: string;
+          threshold: number;
+          have: number;
+          dps: number;
+        }
+      | { kind: "piece"; itemId: number; name: string; dps: number }
+      | { kind: "break"; setName: string; threshold: number; dps: number }
+    >;
+  };
   setBonusSubLine: (
     ctx: unknown,
     on: boolean
@@ -1123,9 +1149,10 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       expect((row.setContext?.commitBreaks ?? []).map(brk)).toEqual([
         TH2_BREAK,
       ]);
-      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
-        true
-      );
+      // 502: 40 + the 2pc partner's own 100; the 4pc floors to 0.
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "full"), 140, 0.5)
+      ).toBe(true);
       expect(
         near(view.rankableSetPotential(row, FLOOR, "split"), 20, 0.5)
       ).toBe(true);
@@ -1139,9 +1166,10 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       for (const f of row.setContext?.futureBonuses ?? []) {
         expect(f.breaks ?? []).toEqual([]);
       }
-      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
-        true
-      );
+      // 502: 40 + the chest's own 100.
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "full"), 140, 0.5)
+      ).toBe(true);
     }
     const top3 = view
       .applyView(r, { withSetPotential: true })
@@ -1150,7 +1178,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     expect(sortedIds(top3)).toEqual([29096, 29098, 29100]);
   });
 
-  it("490-B: a real 4pc worth less than the break it needs (rule discriminator)", async () => {
+  it("490-B: a real 4pc worth less than the break it needs", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const { on } = await run490({
       676: { b2: B2_TH, b4: B4_TH },
@@ -1162,10 +1190,12 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       { threshold: 4, piecesNeeded: 4, dps: 30, breaks: [TH2_BREAK] },
     ]);
     // Each rule on this row directly, so the rule the engine does not ship
-    // still runs: full-path is 40 + 30 − 50 = 20 and 20 + 7.5 − 50 = −22.5.
+    // still runs. Since 502 the path pieces' own stats count: R_2 = 40 + 100,
+    // R_4 = 140 + 30 + 100 + 0 − 50 = 220, so both rules stop at the 4pc
+    // (full 220, split 20 + 7.5 − 50 = −22.5). 502-B separates the rules.
     const ctx = chest.setContext;
     expect(
-      near(view.setPotentialCredit(ctx, FLOOR, "full", "full-path"), 20, 0.5)
+      near(view.setPotentialCredit(ctx, FLOOR, "full", "full-path"), 220, 0.5)
     ).toBe(true);
     expect(
       near(
@@ -1175,21 +1205,19 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       )
     ).toBe(true);
     expect(
-      near(view.setPotentialCredit(ctx, FLOOR, "full", "best-stop"), 40, 0.5)
+      near(view.setPotentialCredit(ctx, FLOOR, "full", "best-stop"), 220, 0.5)
     ).toBe(true);
     expect(
-      near(view.setPotentialCredit(ctx, FLOOR, "split", "best-stop"), 20, 0.5)
+      near(
+        view.setPotentialCredit(ctx, FLOOR, "split", "best-stop"),
+        -22.5,
+        0.5
+      )
     ).toBe(true);
     const full = view.rankableSetPotential(chest, FLOOR, "full");
     const split = view.rankableSetPotential(chest, FLOOR, "split");
-    if (view.RULE_490 === "best-stop") {
-      // R_2 = 40, R_4 = 40 + 30 − 50 = 20: stop at the 2pc.
-      expect(near(full, 40, 0.5)).toBe(true);
-      expect(near(split, 20, 0.5)).toBe(true);
-    } else {
-      expect(near(full, 20, 0.5)).toBe(true);
-      expect(near(split, -22.5, 0.5)).toBe(true);
-    }
+    expect(near(full, 220, 0.5)).toBe(true);
+    expect(near(split, -22.5, 0.5)).toBe(true);
   });
 
   it("490-C: a Nordrassil row whose only bonus needs the Thunderheart 2pc break gets ON = OFF", async () => {
@@ -1280,7 +1308,8 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     expect((head.setContext?.futureBonuses ?? []).map(fut)).toEqual([
       { threshold: 4, piecesNeeded: 3, dps: 80 },
     ]);
-    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 80, 0.5)).toBe(
+    // 502: 80 + chest and legs, each 150 − 50 = 100 of own stats.
+    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 280, 0.5)).toBe(
       true
     );
     expect(near(view.rankableSetPotential(head, FLOOR, "split"), 20, 0.5)).toBe(
@@ -1344,9 +1373,10 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
           breaks: [{ setId: 640, threshold: 2, dps: 40 }],
         },
       ]);
-      expect(near(view.rankableSetPotential(row, FLOOR, "full"), 40, 0.5)).toBe(
-        true
-      );
+      // 502: 80 + two other pieces at 150 − 50 = 100 each − 40.
+      expect(
+        near(view.rankableSetPotential(row, FLOOR, "full"), 240, 0.5)
+      ).toBe(true);
     }
   });
 
@@ -1431,5 +1461,295 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
       expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
     }
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Ticket 502: the ON credit counts the other path pieces' own stats
+ * (rule R1, ADR-0034). Every literal is derived by hand in
+ * docs/set-bonus-fixture-derivations.md, "Ticket 502".
+ * ------------------------------------------------------------------ */
+
+const piece = (itemId: number, name: string, dps?: number) => ({
+  itemId,
+  name,
+  ...(dps !== undefined ? { dps } : {}),
+});
+
+describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
+  it("502-A: a package member's ON figure equals the measured package delta", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { on } = await run490({
+      676: { b2: B2_TH, b4: B4_TH },
+      640: { b2: 40, b4: 30 },
+    });
+    const r = on.ranking;
+    const p4 = bonusOf(r, 640, 4);
+    expect(sortedIds(p4?.packageItemIds)).toEqual([29096, 29097, 29098, 29100]);
+    expect(p4!.packageDeltaDps!).toBeCloseTo(320, 9);
+    for (const id of p4!.packageItemIds!) {
+      const row = thRow(r, id);
+      expect(
+        row.deltaDps + view.rankableSetPotential(row, FLOOR, "full")
+      ).toBeCloseTo(p4!.packageDeltaDps!, 9);
+    }
+  });
+
+  it("502-B: a step whose bonus floors to 0 is never the stop, but its pieces still count", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const allFloored = {
+      setContext: {
+        futureBonuses: [
+          {
+            threshold: 2,
+            piecesNeeded: 2,
+            dps: 4,
+            pieces: [piece(1, "A", 30)],
+          },
+          {
+            threshold: 4,
+            piecesNeeded: 4,
+            dps: 3,
+            pieces: [piece(1, "A", 30), piece(2, "B", 20), piece(3, "C", 10)],
+          },
+        ],
+      },
+    };
+    expect(view.rankableSetPotential(allFloored, FLOOR, "full")).toBe(0);
+
+    const twoFloored = {
+      futureBonuses: [
+        { threshold: 2, piecesNeeded: 2, dps: 4, pieces: [piece(1, "A", 10)] },
+        {
+          threshold: 4,
+          piecesNeeded: 4,
+          dps: 80,
+          pieces: [piece(1, "A", 10), piece(2, "B", 20), piece(3, "C", -5)],
+        },
+      ],
+    };
+    expect(
+      view.rankableSetPotential({ setContext: twoFloored }, FLOOR, "full")
+    ).toBeCloseTo(105, 9);
+    expect(view.setPotentialTerms(twoFloored, FLOOR).stopThreshold).toBe(4);
+
+    // The rules differ when a later eligible step lowers the total.
+    const discriminator = {
+      futureBonuses: [
+        {
+          threshold: 2,
+          piecesNeeded: 2,
+          dps: 40,
+          pieces: [piece(1, "A", 100)],
+        },
+        {
+          threshold: 4,
+          piecesNeeded: 4,
+          dps: 30,
+          pieces: [piece(1, "A", 100), piece(2, "B", 0), piece(3, "C", 0)],
+          breaks: [{ setId: 640, setName: "M", threshold: 2, dps: 200 }],
+        },
+      ],
+    };
+    expect(
+      view.setPotentialCredit(discriminator, FLOOR, "full", "best-stop")
+    ).toBeCloseTo(140, 9);
+    expect(
+      view.setPotentialCredit(discriminator, FLOOR, "split", "best-stop")
+    ).toBeCloseTo(20, 9);
+    expect(
+      view.setPotentialCredit(discriminator, FLOOR, "full", "full-path")
+    ).toBeCloseTo(-30, 9);
+    expect(
+      view.setPotentialCredit(discriminator, FLOOR, "split", "full-path")
+    ).toBeCloseTo(-172.5, 9);
+  });
+
+  it("502-C: a path piece's own stats are its single plus what it breaks alone, less a 2pc it crosses alone", async () => {
+    // Worn 1: each other piece crosses the Thunderheart 2pc alone.
+    const worn1 = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: TH_POOL.filter((p) => p.slot !== "hands"),
+    });
+    const head1 = thRow(worn1.ranking, THUNDERHEART.head);
+    const f4 = head1.setContext?.futureBonuses ?? [];
+    expect(f4.map((f) => f.threshold)).toEqual([4]);
+    expect((f4[0]?.pieces ?? []).map((p) => p.itemId)).toEqual([
+      THUNDERHEART.chest,
+      THUNDERHEART.legs,
+    ]);
+    expect((f4[0]?.pieces ?? []).map((p) => p.name)).toEqual([
+      `item ${THUNDERHEART.chest}`,
+      `item ${THUNDERHEART.legs}`,
+    ]);
+    for (const p of f4[0]?.pieces ?? [])
+      expect(near(p.dps ?? NaN, 100, 0.5)).toBe(true);
+
+    // Worn break: each other Thunderheart piece breaks Malorne 4pc alone.
+    const { ranking: r } = await runScenario({
+      worn: wornGear(MALORNE_4),
+      pool: TH_OVER_MALORNE_POOL,
+      measureBrokenSetValue: true,
+    });
+    const hands = thRow(r, THUNDERHEART.hands);
+    const future = hands.setContext?.futureBonuses ?? [];
+    expect(future.map((f) => f.threshold)).toEqual([2, 4]);
+    expect((future[0]?.pieces ?? []).map((p) => p.itemId)).toEqual([
+      THUNDERHEART.head,
+    ]);
+    expect((future[1]?.pieces ?? []).map((p) => p.itemId)).toEqual([
+      THUNDERHEART.head,
+      THUNDERHEART.shoulder,
+      THUNDERHEART.chest,
+    ]);
+    for (const f of future)
+      for (const p of f.pieces ?? [])
+        expect(near(p.dps ?? NaN, 100, 0.5)).toBe(true);
+  });
+
+  it("502-D: the terms are itemised by step, add up to the credit and end at the stop", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const M = "Malorne Harness";
+    const ctx = (bDps: number) => ({
+      setName: "Thunderheart Harness",
+      piecesWornBefore: 0,
+      futureBonuses: [
+        {
+          threshold: 2,
+          piecesNeeded: 2,
+          dps: 50,
+          pieces: [piece(1, "A", 100)],
+          breaks: [{ setId: 640, setName: M, threshold: 4, dps: 70 }],
+        },
+        {
+          threshold: 4,
+          piecesNeeded: 4,
+          dps: 80,
+          pieces: [piece(1, "A", 100), piece(2, "B", bDps), piece(3, "C", -10)],
+          breaks: [
+            { setId: 640, setName: M, threshold: 4, dps: 70 },
+            { setId: 640, setName: M, threshold: 2, dps: 40 },
+          ],
+        },
+      ],
+    });
+    const full = view.setPotentialTerms(ctx(20), FLOOR);
+    expect(full.credit).toBeCloseTo(130, 9);
+    expect(full.stopThreshold).toBe(4);
+    expect(full.terms).toEqual([
+      {
+        kind: "bonus",
+        setName: "Thunderheart Harness",
+        threshold: 2,
+        have: 0,
+        dps: 50,
+      },
+      { kind: "piece", itemId: 1, name: "A", dps: 100 },
+      { kind: "break", setName: M, threshold: 4, dps: -70 },
+      {
+        kind: "bonus",
+        setName: "Thunderheart Harness",
+        threshold: 4,
+        have: 0,
+        dps: 80,
+      },
+      { kind: "piece", itemId: 2, name: "B", dps: 20 },
+      { kind: "piece", itemId: 3, name: "C", dps: -10 },
+      { kind: "break", setName: M, threshold: 2, dps: -40 },
+    ]);
+    const sum = full.terms.reduce((s, t) => s + t.dps, 0);
+    expect(Math.abs(sum - full.credit)).toBeLessThan(1e-9);
+
+    const early = view.setPotentialTerms(ctx(-100), FLOOR);
+    expect(early.credit).toBeCloseTo(80, 9);
+    expect(early.stopThreshold).toBe(2);
+    expect(early.terms.map((t) => t.kind)).toEqual(["bonus", "piece", "break"]);
+
+    const floored = view.setPotentialTerms(
+      {
+        setName: "S",
+        piecesWornBefore: 0,
+        futureBonuses: [
+          {
+            threshold: 2,
+            piecesNeeded: 2,
+            dps: 4,
+            pieces: [piece(1, "A", 10)],
+          },
+          {
+            threshold: 4,
+            piecesNeeded: 4,
+            dps: 80,
+            pieces: [piece(1, "A", 10), piece(2, "B", 20), piece(3, "C", -5)],
+          },
+        ],
+      },
+      FLOOR
+    );
+    expect(floored.terms.map((t) => [t.kind, t.dps])).toEqual([
+      ["piece", 10],
+      ["bonus", 80],
+      ["piece", 20],
+      ["piece", -5],
+    ]);
+  });
+
+  it("502-E: a piece without a figure zeroes the credit; a future with no pieces field is credited as before", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const noFigure = {
+      futureBonuses: [
+        { threshold: 4, piecesNeeded: 4, dps: 80, pieces: [piece(1, "A")] },
+      ],
+    };
+    expect(view.setCreditUnmeasured(noFigure)).toBe(true);
+    expect(view.rankableSetPotential({ setContext: noFigure }, FLOOR)).toBe(0);
+
+    const noPieces = {
+      futureBonuses: [
+        {
+          threshold: 2,
+          piecesNeeded: 2,
+          dps: 50,
+          breaks: [{ setId: 640, setName: "M", threshold: 2, dps: 20 }],
+        },
+      ],
+    };
+    expect(view.setCreditUnmeasured(noPieces)).toBe(false);
+    expect(
+      view.rankableSetPotential({ setContext: noPieces }, FLOOR)
+    ).toBeCloseTo(30, 9);
+  });
+
+  it("502-F: with Set potential off, set rows sort on deltaDps alone", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { on } = await run490({
+      676: { b2: B2_TH, b4: B4_TH },
+      640: { b2: 40, b4: 30 },
+    });
+    const off = view.applyView(on.ranking, { withSetPotential: false });
+    expect(off.rows.map((row) => row.itemId)).toEqual([
+      29096, 29098, 29100, 8289, 10140, 29097, 29099,
+    ]);
+  });
+
+  it("502-G: a path break below the floor is charged at its measured value", async () => {
+    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const { on } = await run490({
+      676: { b2: 4, b4: B4_TH },
+      640: { b2: 40, b4: 30 },
+    });
+    const r = on.ranking;
+    expect(near(bsvDps(r, 676, 2)!, 4, 0.5)).toBe(true);
+    const p4 = bonusOf(r, 640, 4);
+    expect(p4!.packageDeltaDps!).toBeCloseTo(366, 9);
+    const chest = thRow(r, MALORNE.chest);
+    const res = view.setPotentialTerms(chest.setContext, FLOOR);
+    expect(res.stopThreshold).toBe(4);
+    const breaks = res.terms.filter((t) => t.kind === "break");
+    expect(breaks.map((t) => [t.threshold, t.dps])).toEqual([[2, -4]]);
+    expect(view.rankableSetPotential(chest, FLOOR, "full")).toBeCloseTo(266, 9);
+    expect(
+      chest.deltaDps + view.rankableSetPotential(chest, FLOOR, "full")
+    ).toBeCloseTo(p4!.packageDeltaDps!, 9);
   });
 });

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "forkSha": "bcbb5e741514701e9229b8e671d5b1736d310901",
+  "forkSha": "2117d52710add1344d9264d2357deff2755e5a95",
   "forkDirty": false,
   "spec": "ret",
   "phase": 3,
@@ -91,7 +91,7 @@
       }
     ]
   },
-  "recordedAt": "2026-09-25T03:13:05.956Z",
+  "recordedAt": "2026-09-28T01:07:12.849Z",
   "iterations": 3000,
   "ranking": {
     "contentHash": "{\"candidateCap\":467,\"candidates\":[{\"itemId\":22401,\"slot\":\"ranged\"},{\"itemId\":23203,\"slot\":\"ranged\"},{\"itemId\":23522,\"slot\":\"chest\"},{\"itemId\":23537,\"slot\":\"wrist\"},{\"itemId\":24259,\"slot\":\"back\"},{\"itemId\":27484,\"slot\":\"ranged\"},{\"itemId\":28034,\"slot\":\"trinket\"},{\"itemId\":28176,\"slot\":\"feet\"},{\"itemId\":28288,\"slot\":\"trinket\"},{\"itemId\":28429,\"slot\":\"weapon\"},{\"itemId\":28430,\"slot\":\"weapon\"},{\"itemId\":28442,\"slot\":\"weapon\"},{\"itemId\":28453,\"slot\":\"wrist\"},{\"itemId\":28454,\"slot\":\"wrist\"},{\"itemId\":28477,\"slot\":\"wrist\"},{\"itemId\":28485,\"slot\":\"chest\"},{\"itemId\":28502,\"slot\":\"wrist\"},{\"itemId\":28503,\"slot\":\"wrist\"},{\"itemId\":28505,\"slot\":\"hands\"},{\"itemId\":28506,\"slot\":\"hands\"},{\"itemId\":28507,\"slot\":\"hands\"},{\"itemId\":28508,\"slot\":\"hands\"},{\"itemId\":28509,\"slot\":\"neck\"},{\"itemId\":28510,\"slot\":\"finger\"},{\"itemId\":28511,\"slot\":\"wrist\"},{\"itemId\":28512,\"slot\":\"wrist\"},{\"itemId\":28514,\"slot\":\"wrist\"},{\"itemId\":28515,\"slot\":\"wrist\"},{\"itemId\":28516,\"slot\":\"neck\"},{\"itemId\":28517,\"slot\":\"feet\"},{\"itemId\":28518,\"slot\":\"hands\"},{\"itemId\":28519,\"slot\":\"hands\"},{\"itemId\":28520,\"slot\":\"hands\"},{\"itemId\":28521,\"slot\":\"hands\"},{\"itemId\":28528,\"slot\":\"trinket\"},{\"itemId\":28529,\"slot\":\"back\"},{\"itemId\":28530,\"slot\":\"neck\"},{\"itemId\":28545,\"slot\":\"feet\"},{\"itemId\":28565,\"slot\":\"waist\"},{\"itemId\":28566,\"slot\":\"waist\"},{\"itemId\":28567,\"slot\":\"waist\"},{\"itemId\":28569,\"slot\":\"feet\"},{\"itemId\":28570,\"slot\":\"back\"},{\"itemId\":28573,\"slot\":\"weapon\"},{\"itemId\":28578,\"slot\":\"chest\"},{\"itemId\":28579,\"slot\":\"trinket\"},{\"itemId\":28582,\"slot\":\"back\"},{\"itemId\":28583,\"slot\":\"head\"},{\"itemId\":28585,\"slot\":\"feet\"},{\"itemId\":28586,\"slot\":\"head\"},{\"itemId\":28587,\"slot\":\"weapon\"},{\"itemId\":28589,\"slot\":\"shoulder\"},{\"itemId\":28591,\"slot\":\"legs\"},{\"itemId\":28593,\"slot\":\"head\"},{\"itemId\":28594,\"slot\":\"legs\"},{\"itemId\":28597,\"slot\":\"chest\"},{\"itemId\":28599,\"slot\":\"chest\"},{\"itemId\":28600,\"slot\":\"chest\"},{\"itemId\":28601,\"slot\":\"chest\"},{\"itemId\":28602,\"slot\":\"chest\"},{\"itemId\":28608,\"slot\":\"feet\"},{\"itemId\":28609,\"slot\":\"neck\"},{\"itemId\":28610,\"slot\":\"feet\"},{\"itemId\":28612,\"slot\":\"shoulder\"},{\"itemId\":28621,\"slot\":\"legs\"},{\"itemId\":28631,\"slot\":\"shoulder\"},{\"itemId\":28647,\"slot\":\"shoulder\"},{\"itemId\":28649,\"slot\":\"finger\"},{\"itemId\":28652,\"slot\":\"waist\"},{\"itemId\":28653,\"slot\":\"back\"},{\"itemId\":28654,\"slot\":\"waist\"},{\"itemId\":28655,\"slot\":\"waist\"},{\"itemId\":28656,\"slot\":\"waist\"},{\"itemId\":28660,\"slot\":\"back\"},{\"itemId\":28661,\"slot\":\"finger\"},{\"itemId\":28662,\"slot\":\"chest\"},{\"itemId\":28663,\"slot\":\"feet\"},{\"itemId\":28666,\"slot\":\"shoulder\"},{\"itemId\":28669,\"slot\":\"feet\"},{\"itemId\":28670,\"slot\":\"feet\"},{\"itemId\":28671,\"slot\":\"head\"},{\"itemId\":28672,\"slot\":\"back\"},{\"itemId\":28674,\"slot\":\"neck\"},{\"itemId\":28675,\"slot\":\"finger\"},{\"itemId\":28726,\"slot\":\"shoulder\"},{\"itemId\":28727,\"slot\":\"trinket\"},{\"itemId\":28730,\"slot\":\"finger\"},{\"itemId\":28731,\"slot\":\"neck\"},{\"itemId\":28732,\"slot\":\"head\"},{\"itemId\":28733,\"slot\":\"waist\"},{\"itemId\":28735,\"slot\":\"chest\"},{\"itemId\":28740,\"slot\":\"legs\"},{\"itemId\":28741,\"slot\":\"legs\"},{\"itemId\":28742,\"slot\":\"legs\"},{\"itemId\":28743,\"slot\":\"shoulder\"},{\"itemId\":28744,\"slot\":\"head\"},{\"itemId\":28745,\"slot\":\"neck\"},{\"itemId\":28746,\"slot\":\"feet\"},{\"itemId\":28747,\"slot\":\"feet\"},{\"itemId\":28748,\"slot\":\"legs\"},{\"itemId\":28750,\"slot\":\"waist\"},{\"itemId\":28751,\"slot\":\"legs\"},{\"itemId\":28752,\"slot\":\"feet\"},{\"itemId\":28753,\"slot\":\"finger\"},{\"itemId\":28755,\"slot\":\"shoulder\"},{\"itemId\":28756,\"slot\":\"head\"},{\"itemId\":28757,\"slot\":\"finger\"},{\"itemId\":28762,\"slot\":\"neck\"},{\"itemId\":28763,\"slot\":\"finger\"},{\"itemId\":28764,\"slot\":\"back\"},{\"itemId\":28765,\"slot\":\"back\"},{\"itemId\":28766,\"slot\":\"back\"},{\"itemId\":28773,\"slot\":\"weapon\"},{\"itemId\":28775,\"slot\":\"head\"},{\"itemId\":28776,\"slot\":\"hands\"},{\"itemId\":28777,\"slot\":\"back\"},{\"itemId\":28778,\"slot\":\"waist\"},{\"itemId\":28779,\"slot\":\"waist\"},{\"itemId\":28780,\"slot\":\"hands\"},{\"itemId\":28785,\"slot\":\"trinket\"},{\"itemId\":28789,\"slot\":\"trinket\"},{\"itemId\":28794,\"slot\":\"weapon\"},{\"itemId\":28795,\"slot\":\"wrist\"},{\"itemId\":28796,\"slot\":\"head\"},{\"itemId\":28797,\"slot\":\"back\"},{\"itemId\":28799,\"slot\":\"waist\"},{\"itemId\":28800,\"slot\":\"weapon\"},{\"itemId\":28801,\"slot\":\"head\"},{\"itemId\":28803,\"slot\":\"head\"},{\"itemId\":28804,\"slot\":\"head\"},{\"itemId\":28810,\"slot\":\"feet\"},{\"itemId\":28822,\"slot\":\"neck\"},{\"itemId\":28824,\"slot\":\"hands\"},{\"itemId\":28827,\"slot\":\"hands\"},{\"itemId\":28828,\"slot\":\"waist\"},{\"itemId\":28830,\"slot\":\"trinket\"},{\"itemId\":29071,\"slot\":\"chest\"},{\"itemId\":29072,\"slot\":\"hands\"},{\"itemId\":29073,\"slot\":\"head\"},{\"itemId\":29074,\"slot\":\"legs\"},{\"itemId\":29075,\"slot\":\"shoulder\"},{\"itemId\":29119,\"slot\":\"neck\"},{\"itemId\":29177,\"slot\":\"finger\"},{\"itemId\":29294,\"slot\":\"finger\"},{\"itemId\":29295,\"slot\":\"finger\"},{\"itemId\":29296,\"slot\":\"finger\"},{\"itemId\":29297,\"slot\":\"finger\"},{\"itemId\":29298,\"slot\":\"finger\"},{\"itemId\":29299,\"slot\":\"finger\"},{\"itemId\":29300,\"slot\":\"finger\"},{\"itemId\":29301,\"slot\":\"finger\"},{\"itemId\":29302,\"slot\":\"finger\"},{\"itemId\":29303,\"slot\":\"finger\"},{\"itemId\":29304,\"slot\":\"finger\"},{\"itemId\":29305,\"slot\":\"finger\"},{\"itemId\":29306,\"slot\":\"finger\"},{\"itemId\":29307,\"slot\":\"finger\"},{\"itemId\":29308,\"slot\":\"finger\"},{\"itemId\":29309,\"slot\":\"finger\"},{\"itemId\":29381,\"slot\":\"neck\"},{\"itemId\":29383,\"slot\":\"trinket\"},{\"itemId\":29918,\"slot\":\"wrist\"},{\"itemId\":29920,\"slot\":\"finger\"},{\"itemId\":29921,\"slot\":\"chest\"},{\"itemId\":29922,\"slot\":\"finger\"},{\"itemId\":29925,\"slot\":\"back\"},{\"itemId\":29947,\"slot\":\"hands\"},{\"itemId\":29950,\"slot\":\"legs\"},{\"itemId\":29951,\"slot\":\"feet\"},{\"itemId\":29965,\"slot\":\"waist\"},{\"itemId\":29966,\"slot\":\"wrist\"},{\"itemId\":29972,\"slot\":\"legs\"},{\"itemId\":29976,\"slot\":\"hands\"},{\"itemId\":29977,\"slot\":\"legs\"},{\"itemId\":29983,\"slot\":\"head\"},{\"itemId\":29984,\"slot\":\"waist\"},{\"itemId\":29985,\"slot\":\"legs\"},{\"itemId\":29986,\"slot\":\"head\"},{\"itemId\":29987,\"slot\":\"hands\"},{\"itemId\":29989,\"slot\":\"back\"},{\"itemId\":29990,\"slot\":\"head\"},{\"itemId\":29991,\"slot\":\"legs\"},{\"itemId\":29992,\"slot\":\"back\"},{\"itemId\":29993,\"slot\":\"weapon\"},{\"itemId\":29994,\"slot\":\"back\"},{\"itemId\":29995,\"slot\":\"legs\"},{\"itemId\":29997,\"slot\":\"finger\"},{\"itemId\":29998,\"slot\":\"hands\"},{\"itemId\":30017,\"slot\":\"neck\"},{\"itemId\":30020,\"slot\":\"waist\"},{\"itemId\":30022,\"slot\":\"neck\"},{\"itemId\":30024,\"slot\":\"shoulder\"},{\"itemId\":30026,\"slot\":\"wrist\"},{\"itemId\":30027,\"slot\":\"feet\"},{\"itemId\":30028,\"slot\":\"finger\"},{\"itemId\":30029,\"slot\":\"hands\"},{\"itemId\":30030,\"slot\":\"waist\"},{\"itemId\":30032,\"slot\":\"waist\"},{\"itemId\":30040,\"slot\":\"waist\"},{\"itemId\":30046,\"slot\":\"waist\"},{\"itemId\":30047,\"slot\":\"wrist\"},{\"itemId\":30048,\"slot\":\"head\"},{\"itemId\":30050,\"slot\":\"feet\"},{\"itemId\":30052,\"slot\":\"finger\"},{\"itemId\":30053,\"slot\":\"shoulder\"},{\"itemId\":30054,\"slot\":\"chest\"},{\"itemId\":30055,\"slot\":\"shoulder\"},{\"itemId\":30056,\"slot\":\"chest\"},{\"itemId\":30057,\"slot\":\"wrist\"},{\"itemId\":30059,\"slot\":\"neck\"},{\"itemId\":30060,\"slot\":\"feet\"},{\"itemId\":30061,\"slot\":\"finger\"},{\"itemId\":30062,\"slot\":\"wrist\"},{\"itemId\":30064,\"slot\":\"waist\"},{\"itemId\":30065,\"slot\":\"chest\"},{\"itemId\":30066,\"slot\":\"feet\"},{\"itemId\":30067,\"slot\":\"feet\"},{\"itemId\":30068,\"slot\":\"waist\"},{\"itemId\":30075,\"slot\":\"chest\"},{\"itemId\":30079,\"slot\":\"shoulder\"},{\"itemId\":30081,\"slot\":\"feet\"},{\"itemId\":30083,\"slot\":\"finger\"},{\"itemId\":30084,\"slot\":\"shoulder\"},{\"itemId\":30085,\"slot\":\"shoulder\"},{\"itemId\":30090,\"slot\":\"weapon\"},{\"itemId\":30091,\"slot\":\"wrist\"},{\"itemId\":30092,\"slot\":\"feet\"},{\"itemId\":30096,\"slot\":\"waist\"},{\"itemId\":30097,\"slot\":\"shoulder\"},{\"itemId\":30098,\"slot\":\"back\"},{\"itemId\":30099,\"slot\":\"neck\"},{\"itemId\":30100,\"slot\":\"feet\"},{\"itemId\":30101,\"slot\":\"chest\"},{\"itemId\":30102,\"slot\":\"chest\"},{\"itemId\":30104,\"slot\":\"feet\"},{\"itemId\":30106,\"slot\":\"waist\"},{\"itemId\":30107,\"slot\":\"chest\"},{\"itemId\":30109,\"slot\":\"finger\"},{\"itemId\":30110,\"slot\":\"finger\"},{\"itemId\":30111,\"slot\":\"shoulder\"},{\"itemId\":30112,\"slot\":\"hands\"},{\"itemId\":30129,\"slot\":\"chest\"},{\"itemId\":30130,\"slot\":\"hands\"},{\"itemId\":30131,\"slot\":\"head\"},{\"itemId\":30132,\"slot\":\"legs\"},{\"itemId\":30133,\"slot\":\"shoulder\"},{\"itemId\":30257,\"slot\":\"legs\"},{\"itemId\":30447,\"slot\":\"trinket\"},{\"itemId\":30620,\"slot\":\"trinket\"},{\"itemId\":30621,\"slot\":\"trinket\"},{\"itemId\":30626,\"slot\":\"trinket\"},{\"itemId\":30627,\"slot\":\"trinket\"},{\"itemId\":30629,\"slot\":\"trinket\"},{\"itemId\":30641,\"slot\":\"feet\"},{\"itemId\":30642,\"slot\":\"back\"},{\"itemId\":30643,\"slot\":\"waist\"},{\"itemId\":30644,\"slot\":\"hands\"},{\"itemId\":30666,\"slot\":\"neck\"},{\"itemId\":30667,\"slot\":\"finger\"},{\"itemId\":30668,\"slot\":\"hands\"},{\"itemId\":30673,\"slot\":\"waist\"},{\"itemId\":30674,\"slot\":\"feet\"},{\"itemId\":30675,\"slot\":\"waist\"},{\"itemId\":30676,\"slot\":\"waist\"},{\"itemId\":30677,\"slot\":\"waist\"},{\"itemId\":30678,\"slot\":\"waist\"},{\"itemId\":30680,\"slot\":\"feet\"},{\"itemId\":30681,\"slot\":\"feet\"},{\"itemId\":30682,\"slot\":\"feet\"},{\"itemId\":30683,\"slot\":\"feet\"},{\"itemId\":30684,\"slot\":\"wrist\"},{\"itemId\":30685,\"slot\":\"wrist\"},{\"itemId\":30686,\"slot\":\"wrist\"},{\"itemId\":30687,\"slot\":\"wrist\"},{\"itemId\":30722,\"slot\":\"weapon\"},{\"itemId\":30725,\"slot\":\"hands\"},{\"itemId\":30726,\"slot\":\"neck\"},{\"itemId\":30727,\"slot\":\"legs\"},{\"itemId\":30728,\"slot\":\"head\"},{\"itemId\":30729,\"slot\":\"back\"},{\"itemId\":30730,\"slot\":\"chest\"},{\"itemId\":30731,\"slot\":\"head\"},{\"itemId\":30734,\"slot\":\"legs\"},{\"itemId\":30735,\"slot\":\"back\"},{\"itemId\":30736,\"slot\":\"finger\"},{\"itemId\":30737,\"slot\":\"feet\"},{\"itemId\":30738,\"slot\":\"finger\"},{\"itemId\":30739,\"slot\":\"legs\"},{\"itemId\":30740,\"slot\":\"shoulder\"},{\"itemId\":30741,\"slot\":\"hands\"},{\"itemId\":30834,\"slot\":\"finger\"},{\"itemId\":30861,\"slot\":\"wrist\"},{\"itemId\":30862,\"slot\":\"wrist\"},{\"itemId\":30863,\"slot\":\"wrist\"},{\"itemId\":30864,\"slot\":\"wrist\"},{\"itemId\":30866,\"slot\":\"shoulder\"},{\"itemId\":30868,\"slot\":\"wrist\"},{\"itemId\":30869,\"slot\":\"wrist\"},{\"itemId\":30870,\"slot\":\"wrist\"},{\"itemId\":30871,\"slot\":\"wrist\"},{\"itemId\":30873,\"slot\":\"feet\"},{\"itemId\":30878,\"slot\":\"shoulder\"},{\"itemId\":30879,\"slot\":\"waist\"},{\"itemId\":30880,\"slot\":\"feet\"},{\"itemId\":30884,\"slot\":\"shoulder\"},{\"itemId\":30885,\"slot\":\"feet\"},{\"itemId\":30886,\"slot\":\"feet\"},{\"itemId\":30887,\"slot\":\"chest\"},{\"itemId\":30888,\"slot\":\"waist\"},{\"itemId\":30891,\"slot\":\"feet\"},{\"itemId\":30892,\"slot\":\"shoulder\"},{\"itemId\":30893,\"slot\":\"legs\"},{\"itemId\":30894,\"slot\":\"feet\"},{\"itemId\":30895,\"slot\":\"waist\"},{\"itemId\":30896,\"slot\":\"chest\"},{\"itemId\":30897,\"slot\":\"waist\"},{\"itemId\":30898,\"slot\":\"legs\"},{\"itemId\":30899,\"slot\":\"chest\"},{\"itemId\":30900,\"slot\":\"legs\"},{\"itemId\":30902,\"slot\":\"weapon\"},{\"itemId\":30903,\"slot\":\"legs\"},{\"itemId\":30904,\"slot\":\"chest\"},{\"itemId\":30905,\"slot\":\"chest\"},{\"itemId\":30907,\"slot\":\"chest\"},{\"itemId\":30912,\"slot\":\"legs\"},{\"itemId\":30913,\"slot\":\"chest\"},{\"itemId\":30914,\"slot\":\"waist\"},{\"itemId\":30915,\"slot\":\"waist\"},{\"itemId\":30916,\"slot\":\"legs\"},{\"itemId\":30917,\"slot\":\"shoulder\"},{\"itemId\":30919,\"slot\":\"waist\"},{\"itemId\":30982,\"slot\":\"hands\"},{\"itemId\":30989,\"slot\":\"head\"},{\"itemId\":30990,\"slot\":\"chest\"},{\"itemId\":30993,\"slot\":\"legs\"},{\"itemId\":30997,\"slot\":\"shoulder\"},{\"itemId\":31033,\"slot\":\"ranged\"},{\"itemId\":31275,\"slot\":\"neck\"},{\"itemId\":31856,\"slot\":\"trinket\"},{\"itemId\":31984,\"slot\":\"weapon\"},{\"itemId\":32041,\"slot\":\"head\"},{\"itemId\":32087,\"slot\":\"head\"},{\"itemId\":32232,\"slot\":\"wrist\"},{\"itemId\":32234,\"slot\":\"hands\"},{\"itemId\":32235,\"slot\":\"head\"},{\"itemId\":32238,\"slot\":\"finger\"},{\"itemId\":32239,\"slot\":\"feet\"},{\"itemId\":32240,\"slot\":\"head\"},{\"itemId\":32241,\"slot\":\"head\"},{\"itemId\":32242,\"slot\":\"feet\"},{\"itemId\":32243,\"slot\":\"feet\"},{\"itemId\":32245,\"slot\":\"feet\"},{\"itemId\":32247,\"slot\":\"finger\"},{\"itemId\":32248,\"slot\":\"weapon\"},{\"itemId\":32250,\"slot\":\"shoulder\"},{\"itemId\":32251,\"slot\":\"wrist\"},{\"itemId\":32252,\"slot\":\"chest\"},{\"itemId\":32256,\"slot\":\"waist\"},{\"itemId\":32258,\"slot\":\"waist\"},{\"itemId\":32259,\"slot\":\"wrist\"},{\"itemId\":32260,\"slot\":\"neck\"},{\"itemId\":32261,\"slot\":\"finger\"},{\"itemId\":32263,\"slot\":\"legs\"},{\"itemId\":32264,\"slot\":\"shoulder\"},{\"itemId\":32265,\"slot\":\"waist\"},{\"itemId\":32266,\"slot\":\"finger\"},{\"itemId\":32267,\"slot\":\"feet\"},{\"itemId\":32268,\"slot\":\"feet\"},{\"itemId\":32270,\"slot\":\"wrist\"},{\"itemId\":32271,\"slot\":\"legs\"},{\"itemId\":32273,\"slot\":\"shoulder\"},{\"itemId\":32275,\"slot\":\"hands\"},{\"itemId\":32276,\"slot\":\"waist\"},{\"itemId\":32278,\"slot\":\"hands\"},{\"itemId\":32279,\"slot\":\"wrist\"},{\"itemId\":32280,\"slot\":\"hands\"},{\"itemId\":32323,\"slot\":\"back\"},{\"itemId\":32324,\"slot\":\"wrist\"},{\"itemId\":32327,\"slot\":\"chest\"},{\"itemId\":32328,\"slot\":\"hands\"},{\"itemId\":32329,\"slot\":\"head\"},{\"itemId\":32331,\"slot\":\"back\"},{\"itemId\":32332,\"slot\":\"weapon\"},{\"itemId\":32333,\"slot\":\"waist\"},{\"itemId\":32334,\"slot\":\"chest\"},{\"itemId\":32335,\"slot\":\"finger\"},{\"itemId\":32337,\"slot\":\"back\"},{\"itemId\":32338,\"slot\":\"shoulder\"},{\"itemId\":32339,\"slot\":\"waist\"},{\"itemId\":32340,\"slot\":\"chest\"},{\"itemId\":32341,\"slot\":\"legs\"},{\"itemId\":32342,\"slot\":\"waist\"},{\"itemId\":32345,\"slot\":\"feet\"},{\"itemId\":32346,\"slot\":\"waist\"},{\"itemId\":32347,\"slot\":\"hands\"},{\"itemId\":32348,\"slot\":\"weapon\"},{\"itemId\":32349,\"slot\":\"neck\"},{\"itemId\":32351,\"slot\":\"wrist\"},{\"itemId\":32352,\"slot\":\"feet\"},{\"itemId\":32353,\"slot\":\"hands\"},{\"itemId\":32354,\"slot\":\"head\"},{\"itemId\":32362,\"slot\":\"neck\"},{\"itemId\":32365,\"slot\":\"chest\"},{\"itemId\":32366,\"slot\":\"feet\"},{\"itemId\":32367,\"slot\":\"legs\"},{\"itemId\":32370,\"slot\":\"neck\"},{\"itemId\":32373,\"slot\":\"head\"},{\"itemId\":32376,\"slot\":\"head\"},{\"itemId\":32377,\"slot\":\"shoulder\"},{\"itemId\":32389,\"slot\":\"legs\"},{\"itemId\":32390,\"slot\":\"waist\"},{\"itemId\":32391,\"slot\":\"feet\"},{\"itemId\":32392,\"slot\":\"wrist\"},{\"itemId\":32393,\"slot\":\"waist\"},{\"itemId\":32394,\"slot\":\"feet\"},{\"itemId\":32395,\"slot\":\"wrist\"},{\"itemId\":32396,\"slot\":\"legs\"},{\"itemId\":32397,\"slot\":\"waist\"},{\"itemId\":32398,\"slot\":\"feet\"},{\"itemId\":32399,\"slot\":\"wrist\"},{\"itemId\":32400,\"slot\":\"legs\"},{\"itemId\":32401,\"slot\":\"waist\"},{\"itemId\":32402,\"slot\":\"feet\"},{\"itemId\":32403,\"slot\":\"wrist\"},{\"itemId\":32404,\"slot\":\"legs\"},{\"itemId\":32420,\"slot\":\"back\"},{\"itemId\":32461,\"slot\":\"head\"},{\"itemId\":32483,\"slot\":\"trinket\"},{\"itemId\":32496,\"slot\":\"trinket\"},{\"itemId\":32497,\"slot\":\"finger\"},{\"itemId\":32501,\"slot\":\"trinket\"},{\"itemId\":32505,\"slot\":\"trinket\"},{\"itemId\":32510,\"slot\":\"feet\"},{\"itemId\":32512,\"slot\":\"waist\"},{\"itemId\":32513,\"slot\":\"wrist\"},{\"itemId\":32515,\"slot\":\"wrist\"},{\"itemId\":32516,\"slot\":\"wrist\"},{\"itemId\":32517,\"slot\":\"shoulder\"},{\"itemId\":32518,\"slot\":\"shoulder\"},{\"itemId\":32519,\"slot\":\"waist\"},{\"itemId\":32521,\"slot\":\"head\"},{\"itemId\":32524,\"slot\":\"back\"},{\"itemId\":32525,\"slot\":\"head\"},{\"itemId\":32526,\"slot\":\"finger\"},{\"itemId\":32527,\"slot\":\"finger\"},{\"itemId\":32528,\"slot\":\"finger\"},{\"itemId\":32568,\"slot\":\"wrist\"},{\"itemId\":32574,\"slot\":\"wrist\"},{\"itemId\":32581,\"slot\":\"shoulder\"},{\"itemId\":32589,\"slot\":\"neck\"},{\"itemId\":32590,\"slot\":\"back\"},{\"itemId\":32591,\"slot\":\"neck\"},{\"itemId\":32592,\"slot\":\"chest\"},{\"itemId\":32593,\"slot\":\"feet\"},{\"itemId\":32606,\"slot\":\"waist\"},{\"itemId\":32608,\"slot\":\"hands\"},{\"itemId\":32609,\"slot\":\"feet\"},{\"itemId\":33054,\"slot\":\"finger\"},{\"itemId\":33055,\"slot\":\"finger\"},{\"itemId\":33058,\"slot\":\"finger\"},{\"itemId\":33122,\"slot\":\"back\"},{\"itemId\":33173,\"slot\":\"shoulder\"},{\"itemId\":33688,\"slot\":\"weapon\"},{\"itemId\":33749,\"slot\":\"chest\"},{\"itemId\":33910,\"slot\":\"wrist\"},{\"itemId\":34010,\"slot\":\"back\"},{\"itemId\":34012,\"slot\":\"back\"}],\"character\":{\"name\":\"player\",\"realm\":\"current-page\",\"region\":\"us\"},\"engineVersion\":6,\"epWeights\":{\"0\":1,\"1\":0.75,\"5\":0.17,\"17\":0.41,\"20\":2.15,\"21\":0.77,\"22\":1.17,\"23\":0.1,\"24\":2.14},\"fight\":{\"fightId\":0,\"reportCode\":\"current-page\"},\"fullPool\":true,\"gear\":[{\"enchant\":368,\"gems\":[],\"id\":30098,\"slot\":\"back\"},{\"enchant\":2661,\"gems\":[24027,30584,28363],\"id\":30129,\"slot\":\"chest\"},{\"enchant\":2657,\"gems\":[24027,24027],\"id\":30104,\"slot\":\"feet\"},{\"enchant\":0,\"gems\":[],\"id\":30061,\"slot\":\"finger1\"},{\"enchant\":0,\"gems\":[],\"id\":30834,\"slot\":\"finger2\"},{\"enchant\":684,\"gems\":[],\"id\":29947,\"slot\":\"hands\"},{\"enchant\":3003,\"gems\":[32409,30546],\"id\":32461,\"slot\":\"head\"},{\"enchant\":3012,\"gems\":[],\"id\":30257,\"slot\":\"legs\"},{\"enchant\":2673,\"gems\":[],\"id\":28430,\"slot\":\"mainhand\"},{\"enchant\":0,\"gems\":[],\"id\":30022,\"slot\":\"neck\"},{\"enchant\":0,\"gems\":[],\"id\":0,\"slot\":\"offhand\"},{\"enchant\":0,\"gems\":[],\"id\":27484,\"slot\":\"ranged\"},{\"enchant\":2986,\"gems\":[24027],\"id\":30055,\"slot\":\"shoulder\"},{\"enchant\":0,\"gems\":[],\"id\":29383,\"slot\":\"trinket1\"},{\"enchant\":0,\"gems\":[],\"id\":28830,\"slot\":\"trinket2\"},{\"enchant\":0,\"gems\":[24027,24027],\"id\":30106,\"slot\":\"waist\"},{\"enchant\":2647,\"gems\":[31118,28362],\"id\":28795,\"slot\":\"wrist\"}],\"gemPaletteIds\":[22459,22460,23094,23095,23096,23097,23098,23099,23100,23101,23103,23104,23105,23106,23108,23109,23110,23111,23113,23114,23115,23116,23118,23119,23120,23121,24027,24028,24029,24030,24031,24032,24033,24035,24036,24037,24039,24047,24048,24050,24051,24052,24053,24054,24055,24056,24057,24058,24059,24060,24061,24062,24065,24066,24067,25890,25893,25894,25895,25896,25897,25898,25899,25901,27679,27777,27785,27786,27809,27812,27820,28118,28119,28120,28123,28290,28360,28361,28362,28363,28556,28557,28595,30546,30547,30548,30549,30550,30551,30552,30553,30554,30555,30556,30558,30559,30560,30563,30564,30565,30566,30571,30572,30573,30574,30575,30581,30582,30583,30584,30585,30586,30587,30588,30589,30590,30591,30592,30593,30594,30598,30600,30601,30602,30603,30604,30605,30606,30607,30608,31116,31117,31118,31860,31861,31862,31863,31864,31865,31866,31867,31868,31869,32193,32194,32195,32196,32197,32198,32199,32200,32201,32202,32203,32204,32205,32206,32207,32208,32209,32210,32211,32212,32213,32214,32215,32216,32217,32218,32219,32220,32221,32222,32223,32224,32225,32226,32409,32410,32634,32635,32636,32637,32638,32639,32640,32641,32833,32836,33131,33133,33134,33135,33140,33143,33144,33782,34220,34256,34627,34831,35487,35488,35501,35503,35707,35758,37503],\"iterations\":3000,\"maxPhase\":3,\"presetId\":\"ret/current-page-settings\",\"promoteTopK\":null,\"race\":\"RaceBloodElf\",\"screenIterations\":null,\"seeds\":[11,22,33,44,55],\"simVersion\":\"api-v14\",\"skeleton\":{\"encounter\":{\"apiVersion\":14,\"duration\":180,\"durationVariation\":5,\"executeProportion20\":0.2,\"executeProportion25\":0.25,\"executeProportion35\":0.35,\"executeProportion45\":0.45,\"executeProportion90\":0.9,\"targets\":[{\"canCrush\":true,\"damageSpread\":0.5,\"id\":31146,\"level\":73,\"minBaseDamage\":15113,\"mobType\":\"MobTypeMechanical\",\"name\":\"Raid Target\",\"parryHaste\":true,\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,320,0,0,0,0,0,0,0,0,0,54,0,0,0,7685,0,6070400,0,0,0,0,0,0,0,0],\"swingSpeed\":2}]},\"raid\":{\"buffs\":{\"arcaneBrilliance\":true,\"bloodlust\":true,\"divineSpirit\":\"TristateEffectImproved\",\"giftOfTheWild\":\"TristateEffectImproved\",\"powerWordFortitude\":\"TristateEffectImproved\",\"shadowProtection\":true,\"thorns\":\"TristateEffectImproved\"},\"debuffs\":{\"bloodFrenzy\":true,\"curseOfElements\":\"TristateEffectImproved\",\"curseOfRecklessness\":true,\"exposeArmor\":\"TristateEffectImproved\",\"exposeWeaknessHunterAgility\":1210,\"exposeWeaknessUptime\":0.9,\"faerieFire\":\"TristateEffectImproved\",\"huntersMark\":\"TristateEffectImproved\",\"improvedSealOfTheCrusader\":\"TristateEffectImproved\",\"jocRetribution2pt4\":true,\"judgementOfWisdom\":true,\"misery\":true,\"sunderArmor\":true},\"numActiveParties\":5,\"parties\":[{\"buffs\":{\"battleShout\":\"TristateEffectImproved\",\"drums\":\"LesserDrumsOfBattle\",\"graceOfAirTotem\":\"TristateEffectImproved\",\"leaderOfThePack\":\"TristateEffectImproved\",\"manaSpringTotem\":\"TristateEffectRegular\",\"strengthOfEarthTotem\":\"TristateEffectImproved\",\"totemTwisting\":true,\"windfuryTotem\":\"TristateEffectImproved\"},\"players\":[{\"apiVersion\":14,\"bonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},\"buffs\":{\"blessingOfKings\":true,\"blessingOfMight\":\"TristateEffectImproved\",\"blessingOfWisdom\":\"TristateEffectImproved\",\"unleashedRage\":true},\"class\":\"ClassPaladin\",\"consumables\":{\"conjuredId\":12662,\"conjuredItems\":[22105,12662,22788,23334,23381],\"explosiveId\":30217,\"flaskId\":22854,\"foodId\":27658,\"goblinSapper\":true,\"potId\":22838,\"potions\":[13442,18253,20002,22828,22832,22836,22837,22838,22839,22850,28101,31677,32948,33935,34440],\"scrollAgi\":true,\"scrollStr\":true,\"superSapper\":true},\"cooldowns\":{},\"database\":{\"consumables\":[{\"buffDuration\":20,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[696085],\"id\":13442,\"name\":\"Mighty Rage Potion\",\"stats\":[60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[699637,699638],\"id\":18253,\"name\":\"Major Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[701180,701181],\"id\":20002,\"name\":\"Greater Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22828,\"name\":\"Insane Strength Potion\",\"stats\":[120,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-75,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":22832,\"name\":\"Super Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847239,847240],\"id\":22836,\"name\":\"Major Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22837,\"name\":\"Heroic Potion\",\"stats\":[70,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,700,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22838,\"name\":\"Haste Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22839,\"name\":\"Destruction Potion\",\"stats\":[0,0,0,0,0,120,0,0,0,0,0,0,0,44.153846,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847514,847515],\"id\":22850,\"name\":\"Super Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[695996],\"id\":28101,\"name\":\"Unstable Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":24,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[858752,858753,858755],\"id\":31677,\"name\":\"Fel Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":32948,\"name\":\"Auchenai Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":33935,\"name\":\"Crystal Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[864802,864803],\"id\":34440,\"name\":\"Mad Alchemist's Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[846788],\"id\":22105,\"name\":\"Master Healthstone\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeOther\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[694074],\"id\":12662,\"name\":\"Demonic Rune\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"buffDuration\":60,\"categoryCooldownDuration\":180,\"categoryId\":1153,\"id\":22788,\"name\":\"Flame Cap\",\"stats\":[0,0,0,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeHerb\"},{\"buffDuration\":30,\"categoryCooldownDuration\":120,\"categoryId\":1153,\"cooldownDuration\":3600,\"id\":23334,\"name\":\"Cracked Power Core\",\"stats\":[0,0,0,0,0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeOther\"},{\"buffDuration\":30,\"categoryCooldownDuration\":120,\"categoryId\":1153,\"cooldownDuration\":3600,\"id\":23381,\"name\":\"Chipped Power Core\",\"stats\":[0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeOther\"},{\"buffDuration\":7200,\"categoryCooldownDuration\":3,\"categoryId\":79,\"id\":22854,\"name\":\"Flask of Relentless Assault\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,120,120,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeFlask\"},{\"buffDuration\":30,\"categoryCooldownDuration\":1,\"categoryId\":11,\"id\":27658,\"name\":\"Roasted Clefthoof\",\"stats\":[20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeFood\"}],\"enchants\":[{\"effectId\":3003,\"name\":\"Glyph of Ferocity\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,34,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHead\"},{\"effectId\":2986,\"name\":\"Greater Inscription of Vengeance\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,30,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"effectId\":368,\"name\":\"Enchant Cloak - Greater Agility\",\"stats\":[0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeBack\"},{\"effectId\":2661,\"name\":\"Enchant Chest - Exceptional Stats\",\"stats\":[6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"effectId\":2647,\"name\":\"Enchant Bracer - Brawn\",\"stats\":[12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"effectId\":684,\"name\":\"Enchant Gloves - Major Strength\",\"stats\":[15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHands\"},{\"effectId\":3012,\"name\":\"Nethercobra Leg Armor\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,50,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeLegs\"},{\"effectId\":2657,\"name\":\"Enchant Boots - Dexterity\",\"stats\":[0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"effectId\":2673,\"name\":\"Enchant Weapon - Mongoose\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWeapon\"}],\"gems\":[{\"color\":\"GemColorMeta\",\"id\":32409,\"name\":\"Relentless Earthstorm Diamond\",\"stats\":[0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorPurple\",\"id\":30546,\"name\":\"Sovereign Tanzanite\",\"stats\":[5,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorRed\",\"id\":24027,\"name\":\"Bold Living Ruby\",\"stats\":[8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorOrange\",\"id\":30584,\"name\":\"Enscribed Fire Opal\",\"stats\":[5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorOrange\",\"id\":28363,\"name\":\"Inscribed Ornate Topaz\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,10,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorPurple\",\"id\":31118,\"name\":\"Pulsing Amethyst\",\"stats\":[0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorRed\",\"id\":28362,\"name\":\"Bold Ornate Ruby\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],\"itemEffectRandPropPoints\":[{\"ilvl\":127,\"randPropPoints\":78},{\"ilvl\":128,\"randPropPoints\":78},{\"ilvl\":133,\"randPropPoints\":82},{\"ilvl\":125,\"randPropPoints\":77},{\"ilvl\":138,\"randPropPoints\":85},{\"ilvl\":109,\"randPropPoints\":71},{\"ilvl\":100,\"randPropPoints\":68},{\"ilvl\":110,\"randPropPoints\":72},{\"ilvl\":136,\"randPropPoints\":83},{\"ilvl\":115,\"randPropPoints\":73}],\"items\":[{\"armorType\":\"ArmorTypePlate\",\"gemSockets\":[\"GemColorMeta\",\"GemColorBlue\"],\"id\":32461,\"itemEffects\":[{\"buffId\":30645,\"buffName\":\"Gas Cloud Tracking (30645)\"},{\"buffId\":40273,\"buffName\":\"Stealth Detection (40273)\",\"effectDurationMs\":-1},{\"buffId\":12883,\"buffName\":\"Longsight (12883)\",\"effectDurationMs\":-1,\"onUse\":{\"categoryCooldownMs\":-1,\"cooldownMs\":3000}}],\"name\":\"Furious Gizmatic Goggles\",\"scalingOptions\":{\"0\":{\"ilvl\":127,\"randPropPoints\":78,\"stats\":{\"0\":48,\"2\":28,\"20\":13,\"21\":38,\"31\":1296}}},\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHead\"},{\"id\":30022,\"name\":\"Pendant of the Perilous\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"0\":32,\"2\":24,\"21\":23}}},\"type\":\"ItemTypeNeck\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\"],\"id\":30055,\"name\":\"Shoulderpads of the Stranger\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"1\":33,\"2\":28,\"17\":60,\"18\":60,\"21\":16,\"24\":10,\"31\":303}}},\"socketBonus\":[0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"armorType\":\"ArmorTypeCloth\",\"id\":30098,\"name\":\"Razor-Scale Battlecloak\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"0\":33,\"1\":23,\"2\":22,\"31\":108}}},\"type\":\"ItemTypeBack\"},{\"armorType\":\"ArmorTypePlate\",\"gemSockets\":[\"GemColorRed\",\"GemColorYellow\",\"GemColorYellow\"],\"id\":30129,\"name\":\"Crystalforge Breastplate\",\"scalingOptions\":{\"0\":{\"ilvl\":133,\"randPropPoints\":82,\"stats\":{\"0\":56,\"2\":40,\"3\":20,\"20\":23,\"21\":21,\"31\":1668}}},\"setId\":629,\"setName\":\"Crystalforge Battlegear\",\"socketBonus\":[4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"armorType\":\"ArmorTypePlate\",\"gemSockets\":[\"GemColorBlue\",\"GemColorRed\"],\"id\":28795,\"name\":\"Bladespire Warbands\",\"scalingOptions\":{\"0\":{\"ilvl\":125,\"randPropPoints\":43,\"stats\":{\"0\":20,\"2\":16,\"21\":24,\"31\":687}}},\"socketBonus\":[3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":29947,\"name\":\"Gloves of the Searing Grip\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"1\":33,\"2\":37,\"17\":66,\"18\":66,\"24\":18,\"31\":252}}},\"type\":\"ItemTypeHands\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\",\"GemColorBlue\"],\"id\":30106,\"name\":\"Belt of One-Hundred Deaths\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":64,\"stats\":{\"1\":29,\"2\":25,\"17\":74,\"18\":74,\"24\":25,\"31\":244}}},\"socketBonus\":[0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWaist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":30257,\"name\":\"Shattrath Leggings\",\"scalingOptions\":{\"0\":{\"ilvl\":109,\"randPropPoints\":60,\"stats\":{\"0\":35,\"1\":25,\"2\":27,\"24\":22,\"31\":243}}},\"type\":\"ItemTypeLegs\"},{\"armorType\":\"ArmorTypeMail\",\"gemSockets\":[\"GemColorBlue\",\"GemColorRed\"],\"id\":30104,\"name\":\"Cobra-Lash Boots\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":64,\"stats\":{\"1\":33,\"2\":25,\"3\":25,\"17\":66,\"18\":66,\"31\":665}}},\"socketBonus\":[0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"id\":30061,\"name\":\"Ancestral Ring of Conquest\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"0\":32,\"1\":21,\"2\":30}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":30834,\"name\":\"Shapeshifter's Signet\",\"scalingOptions\":{\"0\":{\"ilvl\":100,\"randPropPoints\":38,\"stats\":{\"1\":25,\"2\":18,\"24\":20}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":29383,\"itemEffects\":[{\"buffId\":35166,\"buffName\":\"Lust for Battle (35166)\",\"effectDurationMs\":20000,\"onUse\":{\"categoryCooldownMs\":20000,\"categoryId\":1141,\"cooldownMs\":120000},\"scalingOptions\":{\"0\":{\"stats\":{\"17\":278,\"18\":278}}}}],\"name\":\"Bloodlust Brooch\",\"scalingOptions\":{\"0\":{\"ilvl\":110,\"randPropPoints\":54,\"stats\":{\"17\":72,\"18\":72}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"id\":28830,\"itemEffects\":[{\"buffId\":34775,\"buffName\":\"Haste (34774)\",\"effectDurationMs\":10000,\"proc\":{\"icdMs\":20000,\"ppm\":1},\"scalingOptions\":{\"0\":{\"stats\":{\"22\":325}}}}],\"name\":\"Dragonspine Trophy\",\"scalingOptions\":{\"0\":{\"ilvl\":125,\"randPropPoints\":57,\"stats\":{\"17\":40,\"18\":40}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"handType\":\"HandTypeTwoHand\",\"id\":28430,\"itemEffects\":[{\"buffId\":34515,\"buffName\":\"Fear Resistance 8 (34515)\",\"effectDurationMs\":-1},{\"buffId\":34513,\"buffName\":\"Lionheart (34513)\",\"effectDurationMs\":10000,\"proc\":{\"ppm\":1},\"scalingOptions\":{\"0\":{\"stats\":{\"0\":100}}}}],\"name\":\"Lionheart Executioner\",\"scalingOptions\":{\"0\":{\"ilvl\":136,\"randPropPoints\":83,\"stats\":{\"0\":52,\"1\":44},\"weaponDamageMax\":549,\"weaponDamageMin\":365}},\"type\":\"ItemTypeWeapon\",\"unique\":true,\"weaponSpeed\":3.6,\"weaponType\":\"WeaponTypeSword\"},{\"id\":27484,\"itemEffects\":[{\"buffId\":34260,\"buffName\":\"Justice (34258)\",\"effectDurationMs\":5000,\"proc\":{\"procChance\":1},\"scalingOptions\":{\"0\":{\"stats\":{\"13\":53,\"21\":53}}}}],\"name\":\"Libram of Avengement\",\"rangedWeaponType\":\"RangedWeaponTypeLibram\",\"scalingOptions\":{\"0\":{\"ilvl\":115,\"randPropPoints\":35}},\"type\":\"ItemTypeRanged\",\"unique\":true}],\"spellEffects\":[{\"durationMs\":20000,\"effectSpread\":301,\"id\":696085,\"minEffectSize\":449,\"resourceType\":\"ResourceTypeRage\",\"spellId\":17528,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699637,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeMana\",\"spellId\":22729,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699638,\"index\":1,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":22729,\"type\":\"EffectTypeHeal\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701180,\"index\":1,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":24360,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701181,\"index\":2,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeMana\",\"spellId\":24360,\"type\":6},{\"effectSpread\":1201,\"id\":847151,\"minEffectSize\":1799,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28499,\"type\":\"EffectTypeResourceGain\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847239,\"index\":1,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28504,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847240,\"index\":2,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28504,\"type\":6},{\"effectSpread\":1101,\"id\":847514,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28517,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":847515,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28517,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":901,\"id\":695996,\"minEffectSize\":1349,\"resourceType\":\"ResourceTypeMana\",\"spellId\":17531,\"type\":\"EffectTypeResourceGain\"},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858752,\"minEffectSize\":-26,\"spellId\":38927,\"stats\":[0,0,0,0,0,-25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858753,\"index\":1,\"minEffectSize\":-51,\"spellId\":38927,\"stats\":[0,0,0,0,-50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":24000,\"effectSpread\":1,\"id\":858755,\"minEffectSize\":399,\"resourceType\":\"ResourceTypeMana\",\"spellId\":38929,\"type\":6},{\"effectSpread\":1101,\"id\":864802,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":45051,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":864803,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":45051,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":1,\"id\":846788,\"minEffectSize\":2495,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":27237,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":601,\"id\":694074,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":16666,\"type\":\"EffectTypeResourceGain\"}]},\"distanceFromTarget\":5,\"equipment\":{\"items\":[{\"enchant\":3003,\"gems\":[32409,30546],\"id\":32461},{\"id\":30022},{\"enchant\":2986,\"gems\":[24027],\"id\":30055},{\"enchant\":368,\"id\":30098},{\"enchant\":2661,\"gems\":[24027,30584,28363],\"id\":30129},{\"enchant\":2647,\"gems\":[31118,28362],\"id\":28795},{\"enchant\":684,\"id\":29947},{\"gems\":[24027,24027],\"id\":30106},{\"enchant\":3012,\"id\":30257},{\"enchant\":2657,\"gems\":[24027,24027],\"id\":30104},{\"id\":30061},{\"id\":30834},{\"id\":29383},{\"id\":28830},{\"enchant\":2673,\"id\":28430},{},{\"id\":27484}]},\"healingModel\":{},\"itemSwap\":{\"items\":[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}],\"prepullBonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},\"name\":\"Player\",\"profession1\":\"Engineering\",\"profession2\":\"Blacksmithing\",\"race\":\"RaceBloodElf\",\"reactionTimeMs\":100,\"retributionPaladin\":{\"options\":{\"classOptions\":{}}},\"rotation\":{\"groups\":[{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27138}},\"condition\":{\"variableRef\":{\"name\":\"Use Exorcism\"}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":6,\"spellId\":27173}},\"condition\":{\"variableRef\":{\"name\":\"Use Consecrate\"}}}}],\"name\":\"ExoOrConsec\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27158}},\"condition\":{\"variableRef\":{\"name\":\"Prepull Seal Of the Crusader\"}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":20375}},\"condition\":{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Prepull Seal Of the Crusader\"}}}}}}],\"name\":\"PrepullSeal\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":20271}},\"condition\":{\"variableRef\":{\"name\":\"Prepull Seal Of the Crusader\"}}}}],\"name\":\"PrepullJudge\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":31892}},\"condition\":{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Prepull Seal Of the Crusader\"}}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":20375}},\"condition\":{\"variableRef\":{\"name\":\"Prepull Seal Of the Crusader\"}}}}],\"name\":\"PullSeal\"}],\"prepullActions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":20218}}},\"doAtValue\":{\"const\":{\"val\":\"-18.5s\"}}},{\"action\":{\"groupReference\":{\"groupName\":\"PrepullSeal\"}},\"doAtValue\":{\"const\":{\"val\":\"-1.5s\"}}},{\"action\":{\"groupReference\":{\"groupName\":\"PrepullJudge\"}},\"doAtValue\":{\"const\":{\"val\":\"0s\"}}},{\"action\":{\"groupReference\":{\"groupName\":\"PullSeal\"}},\"doAtValue\":{\"const\":{\"val\":\"0s\"}}}],\"priorityList\":[{\"action\":{\"autocastOtherCooldowns\":{},\"condition\":{\"cmp\":{\"lhs\":{\"currentTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Delay Major CDs\"}}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":31892}},\"condition\":{\"and\":{\"vals\":[{\"auraIsActive\":{\"auraId\":{\"rank\":1,\"spellId\":20375}}},{\"cmp\":{\"lhs\":{\"autoTimeToNext\":{\"autoType\":\"MeleeAuto\"}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\".4s\"}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":35395}},\"condition\":{\"auraIsActive\":{\"auraId\":{\"rank\":1,\"spellId\":31892}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":20271}},\"condition\":{\"and\":{\"vals\":[{\"auraIsActive\":{\"auraId\":{\"rank\":1,\"spellId\":31892}}},{\"gcdIsReady\":{}},{\"cmp\":{\"lhs\":{\"autoTimeSinceLast\":{\"autoType\":\"AnyAuto\"}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\".8s\"}}}}]}}}},{\"action\":{\"condition\":{\"auraIsActive\":{\"auraId\":{\"rank\":1,\"spellId\":31892}}},\"groupReference\":{\"groupName\":\"ExoOrConsec\",\"variables\":[{\"name\":\"TargetDemonOrUndead\",\"value\":{\"variableRef\":{\"name\":\"No\"}}}]}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":20375}},\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"rank\":1,\"spellId\":20375}}},{\"not\":{\"val\":{\"spellIsReady\":{\"spellId\":{\"spellId\":20271}}}}},{\"cmp\":{\"lhs\":{\"spellGcdHastedDuration\":{\"spellId\":{\"rank\":1,\"spellId\":20375}}},\"op\":\"OpLe\",\"rhs\":{\"math\":{\"lhs\":{\"const\":{\"val\":\".4s\"}},\"op\":\"OpAdd\",\"rhs\":{\"autoTimeToNext\":{\"autoType\":\"MeleeAuto\"}}}}}},{\"cmp\":{\"lhs\":{\"autoTimeSinceLast\":{\"autoType\":\"MeleeAuto\"}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\".5s\"}}}}]}}}}],\"simple\":{\"specRotationJson\":\"{\\\"delayMajorCDs\\\":11,\\\"prepullSotC\\\":true,\\\"aura\\\":\\\"SanctityAura\\\"}\"},\"type\":\"TypeSimple\",\"valueVariables\":[{\"name\":\"Yes\",\"value\":{\"const\":{\"val\":\"true\"}}},{\"name\":\"No\",\"value\":{\"const\":{\"val\":\"false\"}}},{\"name\":\"Use Exorcism\",\"value\":{\"const\":{\"val\":\"false\"}}},{\"name\":\"Use Consecrate\",\"value\":{\"const\":{\"val\":\"false\"}}},{\"name\":\"Delay Major CDs\",\"value\":{\"const\":{\"val\":\"11s\"}}},{\"name\":\"Prepull Seal Of the Crusader\",\"value\":{\"const\":{\"val\":\"true\"}}}]},\"talentsString\":\"5-053201-0523005120033125331051\"},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]}]},\"type\":\"SimTypeIndividual\"},\"spec\":\"ret\"}",
@@ -670,12 +670,36 @@
             {
               "threshold": 2,
               "piecesNeeded": 2,
-              "dps": -3.1395415254401087
+              "dps": -3.1395415254401087,
+              "pieces": [
+                {
+                  "itemId": 30993,
+                  "name": "Lightbringer Greaves",
+                  "dps": 2.8971303609773713
+                }
+              ]
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": -4.216874888146776
+              "dps": -4.216874888146776,
+              "pieces": [
+                {
+                  "itemId": 30989,
+                  "name": "Lightbringer War-Helm",
+                  "dps": -15.23908769176387
+                },
+                {
+                  "itemId": 30997,
+                  "name": "Lightbringer Shoulderbraces",
+                  "dps": -13.95225599921514
+                },
+                {
+                  "itemId": 30993,
+                  "name": "Lightbringer Greaves",
+                  "dps": 2.8971303609773713
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -29.70266300438516,
@@ -830,12 +854,36 @@
             {
               "threshold": 2,
               "piecesNeeded": 2,
-              "dps": -3.1395415254401087
+              "dps": -3.1395415254401087,
+              "pieces": [
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                }
+              ]
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": -4.216874888146776
+              "dps": -4.216874888146776,
+              "pieces": [
+                {
+                  "itemId": 30989,
+                  "name": "Lightbringer War-Helm",
+                  "dps": -15.23908769176387
+                },
+                {
+                  "itemId": 30997,
+                  "name": "Lightbringer Shoulderbraces",
+                  "dps": -13.95225599921514
+                },
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -29.70266300438516,
@@ -3166,7 +3214,19 @@
             {
               "threshold": 4,
               "piecesNeeded": 3,
-              "dps": 21.070002102449962
+              "dps": 21.070002102449962,
+              "pieces": [
+                {
+                  "itemId": 30131,
+                  "name": "Crystalforge War-Helm",
+                  "dps": -20.81767312574175
+                },
+                {
+                  "itemId": 30133,
+                  "name": "Crystalforge Shoulderbraces",
+                  "dps": -22.80516272776731
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -35.797889017768284,
@@ -3317,12 +3377,36 @@
             {
               "threshold": 2,
               "piecesNeeded": 2,
-              "dps": -3.1395415254401087
+              "dps": -3.1395415254401087,
+              "pieces": [
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                }
+              ]
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": -4.216874888146776
+              "dps": -4.216874888146776,
+              "pieces": [
+                {
+                  "itemId": 30989,
+                  "name": "Lightbringer War-Helm",
+                  "dps": -15.23908769176387
+                },
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                },
+                {
+                  "itemId": 30993,
+                  "name": "Lightbringer Greaves",
+                  "dps": 2.8971303609773713
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -29.70266300438516,
@@ -3542,12 +3626,36 @@
             {
               "threshold": 2,
               "piecesNeeded": 2,
-              "dps": -3.1395415254401087
+              "dps": -3.1395415254401087,
+              "pieces": [
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                }
+              ]
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": -4.216874888146776
+              "dps": -4.216874888146776,
+              "pieces": [
+                {
+                  "itemId": 30997,
+                  "name": "Lightbringer Shoulderbraces",
+                  "dps": -13.95225599921514
+                },
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                },
+                {
+                  "itemId": 30993,
+                  "name": "Lightbringer Greaves",
+                  "dps": 2.8971303609773713
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -29.70266300438516,
@@ -3615,7 +3723,19 @@
             {
               "threshold": 4,
               "piecesNeeded": 3,
-              "dps": 21.070002102449962
+              "dps": 21.070002102449962,
+              "pieces": [
+                {
+                  "itemId": 30133,
+                  "name": "Crystalforge Shoulderbraces",
+                  "dps": -22.80516272776731
+                },
+                {
+                  "itemId": 30132,
+                  "name": "Crystalforge Greaves",
+                  "dps": -18.049121282111628
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -35.797889017768284,
@@ -3928,12 +4048,36 @@
             {
               "threshold": 2,
               "piecesNeeded": 2,
-              "dps": -3.1395415254401087
+              "dps": -3.1395415254401087,
+              "pieces": [
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                }
+              ]
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": -4.216874888146776
+              "dps": -4.216874888146776,
+              "pieces": [
+                {
+                  "itemId": 30990,
+                  "name": "Lightbringer Breastplate",
+                  "dps": 3.947966739203366
+                },
+                {
+                  "itemId": 30993,
+                  "name": "Lightbringer Greaves",
+                  "dps": 2.8971303609773713
+                },
+                {
+                  "itemId": 30997,
+                  "name": "Lightbringer Shoulderbraces",
+                  "dps": -13.95225599921514
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -29.70266300438516
@@ -4005,7 +4149,19 @@
             {
               "threshold": 4,
               "piecesNeeded": 3,
-              "dps": 21.070002102449962
+              "dps": 21.070002102449962,
+              "pieces": [
+                {
+                  "itemId": 30131,
+                  "name": "Crystalforge War-Helm",
+                  "dps": -20.81767312574175
+                },
+                {
+                  "itemId": 30132,
+                  "name": "Crystalforge Greaves",
+                  "dps": -18.049121282111628
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -35.797889017768284,
@@ -4479,7 +4635,24 @@
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 15.316160017911216
+              "dps": 15.316160017911216,
+              "pieces": [
+                {
+                  "itemId": 29075,
+                  "name": "Justicar Shoulderplates",
+                  "dps": -30.64207897088272
+                },
+                {
+                  "itemId": 29072,
+                  "name": "Justicar Gauntlets",
+                  "dps": -32.79683906605942
+                },
+                {
+                  "itemId": 29074,
+                  "name": "Justicar Greaves",
+                  "dps": -31.048622998476276
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -104.95159501932835,
@@ -4538,7 +4711,19 @@
             {
               "threshold": 4,
               "piecesNeeded": 3,
-              "dps": 21.070002102449962
+              "dps": 21.070002102449962,
+              "pieces": [
+                {
+                  "itemId": 30132,
+                  "name": "Crystalforge Greaves",
+                  "dps": -18.049121282111628
+                },
+                {
+                  "itemId": 30131,
+                  "name": "Crystalforge War-Helm",
+                  "dps": -20.81767312574175
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -35.797889017768284
@@ -4846,7 +5031,24 @@
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 15.316160017911216
+              "dps": 15.316160017911216,
+              "pieces": [
+                {
+                  "itemId": 29073,
+                  "name": "Justicar Crown",
+                  "dps": -25.78021400182115
+                },
+                {
+                  "itemId": 29072,
+                  "name": "Justicar Gauntlets",
+                  "dps": -32.79683906605942
+                },
+                {
+                  "itemId": 29074,
+                  "name": "Justicar Greaves",
+                  "dps": -31.048622998476276
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -104.95159501932835,
@@ -4931,7 +5133,24 @@
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 15.316160017911216
+              "dps": 15.316160017911216,
+              "pieces": [
+                {
+                  "itemId": 29073,
+                  "name": "Justicar Crown",
+                  "dps": -25.78021400182115
+                },
+                {
+                  "itemId": 29075,
+                  "name": "Justicar Shoulderplates",
+                  "dps": -30.64207897088272
+                },
+                {
+                  "itemId": 29072,
+                  "name": "Justicar Gauntlets",
+                  "dps": -32.79683906605942
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -104.95159501932835,
@@ -5080,7 +5299,24 @@
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 15.316160017911216
+              "dps": 15.316160017911216,
+              "pieces": [
+                {
+                  "itemId": 29073,
+                  "name": "Justicar Crown",
+                  "dps": -25.78021400182115
+                },
+                {
+                  "itemId": 29075,
+                  "name": "Justicar Shoulderplates",
+                  "dps": -30.64207897088272
+                },
+                {
+                  "itemId": 29074,
+                  "name": "Justicar Greaves",
+                  "dps": -31.048622998476276
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -104.95159501932835,
@@ -8228,7 +8464,24 @@
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 15.316160017911216
+              "dps": 15.316160017911216,
+              "pieces": [
+                {
+                  "itemId": 29073,
+                  "name": "Justicar Crown",
+                  "dps": -25.78021400182115
+                },
+                {
+                  "itemId": 29075,
+                  "name": "Justicar Shoulderplates",
+                  "dps": -30.64207897088272
+                },
+                {
+                  "itemId": 29074,
+                  "name": "Justicar Greaves",
+                  "dps": -31.048622998476276
+                }
+              ]
             }
           ],
           "commitPackageDeltaDps": -104.95159501932835
