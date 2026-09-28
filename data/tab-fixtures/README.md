@@ -3,8 +3,8 @@
 Each `*.json` file here is a finished Upgrades-tab result, recorded from a real
 run, that the tab can render again in seconds with no backend and no sim run
 (ticket 504). The layout gate (`pnpm layout-gate:check`) renders
-`feral-p3-p2bis.json` after its live run, so its set-bonus assertions have set
-rows to measure. `pnpm tab-review` renders any fixture a manifest entry names
+`feral-p3-p2bis.json` for all of its post-run checks and runs no live sim
+(ticket 520). `pnpm tab-review` renders any fixture a manifest entry names
 with `"fixture": "<name>"`.
 
 ## Schema (`schemaVersion` 1)
@@ -25,13 +25,15 @@ a finished, current run. The page must be on the fixture's spec. "Took" never
 appears for a fixture load, because no run happened; a load is settled when the
 results table has rows and there is no stale banner.
 
-## Loading one by hand
+## Looking at one (the storybook)
 
-On the dev server (`:5173`, no backend needed), open the spec page with
-`?upgrades-dev`, for example `http://localhost:5173/tbc/druid/feralcat/?upgrades-dev`.
-The tab's run settings then show a **Load fixture** file input. From a script,
-call `await window.__upgradesFixture(<parsed JSON>)`, which returns
-`{ ok: true, rows }` or `{ ok: false, reason }`.
+- **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
+- **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1.
+- **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520).
+- **What it proves:** the fork's working tree, uncommitted edits included, renders the recorded result.
+- **What it does not prove:** that a run would give these figures today, fixed-width layout, or accessibility. Use `pnpm layout-gate:check` and `pnpm tab-review` for those.
+- **Without a backend** the `:3333` calls are refused and the left Stats panel shows zeros. The results table is not affected.
+- **Other ways.** `?upgrades-dev` still shows a **Load fixture** file input, for a fixture kept outside this folder. A script can call `await window.__upgradesFixture(<parsed JSON>)`, which returns `{ ok: true, rows }` or `{ ok: false, reason }`.
 
 The loader exists only in builds where the `__TBC_TAB_FIXTURES__` define is
 true: the dev server, and the gate harness's own build (it sets
