@@ -22,6 +22,7 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { holdKeepAwake } from "./keep-awake.mjs";
 import { armRunDeadline, guardPage, withTimeout } from "./run-guard.mjs";
 
 const ROOT = path.resolve(
@@ -167,6 +168,9 @@ async function main() {
   const url = args.gearUrl ?? `${args.base}${PAGE_BY_SPEC[args.spec]}`;
   const log = (...a) =>
     console.log(`[record ${args.spec}-p${args.phase}-${args.name}]`, ...a);
+  const releaseKeepAwake = await holdKeepAwake(
+    `record ${args.spec}-p${args.phase}-${args.name}`
+  );
   const chrome = await launchChrome();
   const client = cdp(chrome.wsUrl);
   let disarmDeadline = () => {};
@@ -369,6 +373,7 @@ async function main() {
     disarmDeadline();
     client.close();
     chrome.kill();
+    releaseKeepAwake();
   }
 }
 
