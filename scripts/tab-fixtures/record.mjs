@@ -22,6 +22,8 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { armRunDeadline, guardPage, withTimeout } from "./run-guard.mjs";
+
 const ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../.."
@@ -33,6 +35,8 @@ const PAGE_BY_SPEC = {
   ret: "/tbc/paladin/retribution/",
 };
 const RUN_LIMIT_MS = 25 * 60 * 1000;
+// Above the longest single call: activateTabExpression polls for up to 45 s.
+const CALL_TIMEOUT_MS = 90 * 1000;
 
 const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret --phase N --name NAME
          (--preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
@@ -165,16 +169,26 @@ async function main() {
     console.log(`[record ${args.spec}-p${args.phase}-${args.name}]`, ...a);
   const chrome = await launchChrome();
   const client = cdp(chrome.wsUrl);
-  await client.ready;
+  let disarmDeadline = () => {};
   try {
-    const { send, targetId } = await attachPage(client);
+    await withTimeout(client.ready, CALL_TIMEOUT_MS, "the CDP connection");
+    const guard = guardPage(client, { callTimeoutMs: CALL_TIMEOUT_MS });
+    const page = await withTimeout(
+      attachPage(client),
+      CALL_TIMEOUT_MS,
+      "attaching to the page"
+    );
+    const { targetId } = page;
+    const send = guard.wrap(page.send);
+    const browserSend = guard.wrap(client.send);
+    await send("Inspector.enable", {});
     await send("Emulation.setDeviceMetricsOverride", {
       width: 1280,
       height: 900,
       deviceScaleFactor: 1,
       mobile: false,
     });
-    await client.send("Target.activateTarget", { targetId });
+    await browserSend("Target.activateTarget", { targetId });
     await send("Emulation.setFocusEmulationEnabled", { enabled: true });
     log("opening", url);
     await send("Page.navigate", { url });
@@ -254,6 +268,12 @@ async function main() {
       throw new Error(`iterations field reads ${iterations}`);
 
     const started = Date.now();
+    guard.armNavigation();
+    disarmDeadline = armRunDeadline(
+      RUN_LIMIT_MS,
+      chrome.proc,
+      `record ${args.spec}-p${args.phase}-${args.name}`
+    );
     const clicked = await evaluate(
       send,
       `(() => { const b = document.querySelector('.upgrades-run-button'); if (!b) return false; b.click(); return true; })()`
@@ -346,6 +366,7 @@ async function main() {
     );
     return 0;
   } finally {
+    disarmDeadline();
     client.close();
     chrome.proc.kill();
   }
