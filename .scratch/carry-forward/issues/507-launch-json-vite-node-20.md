@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2c, Step 4 STOP 1 (2026-09-24)
 Blocks: none
@@ -32,3 +32,14 @@ The `wowsims-fork` preview entry starts vite on Node 22 on this machine,
 so `preview_start` with name `wowsims-fork` works without a manual PATH
 pin. `.claude/launch.json` may be a tracked settings file — if so, the fix
 needs the owner's approval before editing it.
+
+## Resolution
+
+2026-09-28: closed by the commit "Start the tab dev server on Node 22"
+(the same commit that closes this ticket). The owner approved the edit.
+`.claude/launch.json`'s `wowsims-fork` entry now starts vite with
+`fnm exec --using=22 -- node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`.
+Checked by running that command from `vendor/tbc-new-fork`: the child
+process was `fnm\node-versions\v22.17.1\installation\node.exe`, vite
+printed `VITE v8.2.1 ready` with no "requires Node 20.19+" warning, and
+`Invoke-WebRequest http://localhost:5173/tbc/` returned 200.
