@@ -96,6 +96,12 @@ with a silent deviation is the failure.
   3–5 workers at once.
 - Stay inside the Paths manifest. A file you need that is not in it is a
   `flag` ledger row, not an edit.
+- Per unit with a `Visual check:` line: run `pnpm tab-fixtures:smoke` (it
+  starts `:5173` if the port is free) and Read the named fixtures' PNGs in
+  `.scratch/tab-fixtures-smoke/`, or open their links from
+  `http://localhost:5173/tbc/tab-fixtures/` in the Browser pane → judge
+  against the sentence → record the smoke line and what you saw in the
+  ledger → re-pin.
 - Per unit with a `Visual acceptance:` block: fork edits → write
   `.scratch/stage-gate/<slug>/visual/<unit>/manifest.json` →
   `pnpm tab-review <manifest>` → spawn `gate-visual` (`model: "opus"`) →

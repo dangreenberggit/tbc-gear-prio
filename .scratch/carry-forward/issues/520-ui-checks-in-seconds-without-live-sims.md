@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner, 2026-09-27, answering the reliability-batch questions (`.scratch/stage-gate/reliability-batch/owner-words.md`, gitignored)
 Blocks: none
@@ -155,7 +155,7 @@ the smoke the owner asked for. The a11y baseline lost its stale
 - A replacement run smoke test for the dropped `[run]` check.
 - Smoke extras (arguments, widths, axe, adding it to `pnpm verify` or CI).
 
-## Proposed process text (owner approval pending; not applied)
+## Process text (approved by the owner and applied on 2026-09-28)
 
 **Draft 1:** `.claude/skills/stage-gate/plan-template.md`, replacing the
 paragraph at lines 32–36:

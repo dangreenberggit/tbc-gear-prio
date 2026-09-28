@@ -7,7 +7,7 @@ facts at four widths. It works and it bites -- but ticket 325 found nothing runs
 it. This script is that wiring, invoked from `scripts/merge_to_dev.py` so the
 gate fires on the one path where a finished feature is folded into `dev`.
 
-Why here and not `pnpm verify`: the test takes ~2m19s and needs three things
+Why here and not `pnpm verify`: the test is slow and needs three things
 that exist only on the main checkout -- the fork clone, a prior `make host`
 build (`dist/tbc/lib.wasm.gz` -- or the uncompressed `dist/tbc/lib.wasm` --
 plus `dist/tbc/assets`), and a Playwright Chromium.
@@ -324,7 +324,7 @@ def write_baseline(digest: str) -> None:
         "live in node_modules and are pinned by the fork's lockfile, not the fork's "
         "source. scripts/check_layout_gate.py compares the live digest to this on "
         "`pnpm merge-to-dev`; equal means the layout source that last passed is "
-        "still on disk, so the ~2m19s gate is skipped. Advanced only by a green gate "
+        "still on disk, so the gate is skipped. Advanced only by a green gate "
         "run (merge_to_dev commits the advance onto the feature branch so it enters "
         "the merge) or by --update-baseline after a hand-proven layout change. The "
         "fork itself is gitignored, so this record lives here rather than in the fork."
@@ -484,7 +484,7 @@ def run_gate(fixture: Path | None = None) -> GateResult:
         return GateResult(GATE_UNMEASURED, None, None)
     argv, how = cmd
     print(f"layout gate: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
-    print("(this renders the Upgrades tab headless at 4 widths; ~2-3 min)")
+    print("(this renders the Upgrades tab headless at 4 widths)")
     # The child inherits the parent environment plus TBC_A11Y_BASELINE when the
     # baseline file exists (absent -> the fork script runs strict, its own
     # rule). TBC_A11Y_DUMP is left inherited so a caller that sets it (baseline
@@ -496,7 +496,7 @@ def run_gate(fixture: Path | None = None) -> GateResult:
     if fixture is not None:
         env["TBC_TAB_FIXTURE"] = str(fixture)
     # stdout is teed rather than buffered: each line is echoed as it arrives so
-    # a ~2-3 minute run still shows progress live, while the verdict line is
+    # a run still shows progress live, while the verdict line is
     # kept for the run/skip decision below. stderr stays attached to the
     # terminal untouched.
     stdout_lines: list[str] = []
@@ -561,7 +561,7 @@ def preview_skip_reason() -> str | None:
     Mirrors `run()`'s guard sequence up to -- and never including --
     `run_gate()`, so calling this from `pnpm verify`'s tail summary (ticket
     400) costs a handful of file reads and a hash over the tab source, never
-    the ~2m19s Playwright run. `run()` itself remains the only caller that can
+    the Playwright run. `run()` itself remains the only caller that can
     trigger `run_gate()`; this function does not import verdict-only state
     (baseline advance, on_baseline_advanced) because it never gets that far.
     """

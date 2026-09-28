@@ -185,6 +185,13 @@ not` list below.
    dispositions it like a ledger row, and a second SME runs only when the
    executor's ledger marks the verdict `contested`.
 
+   When a plan step carries a `Visual check:` line, the executor looks at
+   each named fixture before that unit's re-pin (`pnpm tab-fixtures:smoke`
+   and its PNGs, or the fixture's link in the Browser pane), judges it
+   against the sentence, and records the smoke line and what it saw in its
+   ledger. That is the whole check: no `tab-review` run and no
+   `gate-visual` seat.
+
    When a plan step carries a `Visual acceptance:` block, the executor
    writes the unit's manifest, runs `pnpm tab-review <manifest>`, and spawns
    `gate-visual` once per unit before that unit's re-pin. The handoff is the
