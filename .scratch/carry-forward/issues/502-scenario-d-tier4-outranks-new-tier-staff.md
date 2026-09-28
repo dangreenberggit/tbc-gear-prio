@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: question
 Origin: .scratch/stage-gate/upgrades-tab-closeout/set-rule-scenarios/report.md (scenario D, 2026-09-24)
 Blocks: none
@@ -60,3 +60,64 @@ The owner, answering Q-502-cap after reading an explanation of option B (limit a
 > This sounds like there needs to be a way to include measure of the other set items own stats. That's ok but it's work that needs to be logical and consistent. It can be included (amount gained or lost on net) in the ranking with the set bonus toggle on
 
 This changes the 2026-09-20 rule ("... NOT OTHER ITEMS"): with Set potential on, a set piece's figure should also include the net DPS gained or lost from the stats of the other set pieces the counted bonuses need. The rule still needs a design (which pieces count, how it fits the stop-where-it-pays rule, the popover line) before any build. Source: `.scratch/stage-gate/501-502-467-lineup/owner-answers-2.md` (gitignored).
+
+## 2026-09-27 — closed
+
+The owner's direction (Q-502-cap), verbatim from
+`.scratch/stage-gate/501-502-467-lineup/owner-answers-2.md`:
+
+> This sounds like there needs to be a way to include measure of the other set items own stats. That's ok but it's work that needs to be logical and consistent. It can be included (amount gained or lost on net) in the ranking with the set bonus toggle on
+
+The owner agreed to the designed rule (R1) and to building it before
+tickets 511 and 512, verbatim from
+`.scratch/stage-gate/501-502-467-lineup/owner-answers-3.md`:
+
+> Agreed on 502 rule and it's order
+
+The owner approved the renders at the render gate, verbatim from
+`.scratch/stage-gate/502-other-pieces-rule/owner-answers-renders.md`:
+
+> It looks good except for the cover issue.  It seems weird that one helm would be -200 DPS but this one would only be -81. And if I understand correctly, that's without adding a set bonus. I wonder if it's a sign of some other issue with the system for determining these numbers. If it was closer to -200 then we wouldn't see it as a contender.
+>
+> There is the other possible issue of being able to get a set bonus via a better method. (4 pieces other than the helm).
+>
+> We can file this as a separate ticket since it doesn't seem to be the tooltip.
+
+The Thunderheart Cover point is ticket 519.
+
+For the Set potential toggle's help text, the owner first wrote, verbatim
+from the same file:
+
+> I think there could be simpler wording that basically says a set pieces gain includes the gain of equipping other set pieces
+
+The orchestrator proposed "When on, a set piece's DPS gain includes the gain
+of equipping the other set pieces its set bonus needs, if that adds to the
+total." The owner answered:
+
+> Yes
+
+What landed. With Set potential on, a set-piece row the player does not
+wear shows `deltaDps + credit`, where the credit also counts the own stats
+of the other set pieces the counted bonuses need (rule R1, ADR-0034's
+ticket 502 paragraph). A row inside a measured package now shows that
+package's measured delta, so each Malorne row in scenario D that is in a
+measured swap shows that swap's figure. The popover lists one
+"{item name} stats" line per counted piece.
+
+- Fork `ebd38a6ae` ("Count path pieces' own stats in set futures"): each
+  set future carries its path pieces and their own stats.
+- Fork `2117d5271` ("Show other set pieces' stats in Set potential"): R1 in
+  `view.ts` and the popover lines.
+- Fork `a5cd0d357` ("Simplify the Set potential toggle help text"): the
+  approved toggle text.
+- Main `6e291ed8` ("Re-pin fork for the other-pieces set rule"): re-pin,
+  the five tab fixtures re-recorded at `2117d5271`, the test changes and the
+  new `packages/core/test/fork-set-fixtures.test.ts`.
+- Main `709aa950` ("Advance the layout gate baseline") and `4bc20961`
+  ("Re-pin fork for the Set potential help text").
+
+Checks: `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts packages/core/test/fork-set-fixtures.test.ts`
+exited 0 (fork-gated; skipped in CI). `corepack pnpm verify` exited 0 on the tree
+of each main commit above, and `corepack pnpm layout-gate:check` printed
+`layout gate: PASSED` (129 passed, 0 failed) at `2117d5271` and again at
+`a5cd0d357`.

@@ -122,6 +122,8 @@ Measured wall times were 3 to 4 times the plan's estimate (ret at 3000 iteration
 
 **Which phase the pre-raid runs use.** 512's evidence and revision 2's plan expect a phase-1 run from the pre-raid preset, and no phase-1 universe exists (ticket 515). Either that is fixed first, or the fixtures use phase 2, as round 2e-1 did.
 
+**A requirement from ticket 502 (added 2026-09-27).** Since ticket 502, with Set potential on, a set row inside a measured package shows exactly that package's measured swap, when every bonus on its path is above the floor and paired replication rewrote none of the deltas involved (ADR-0034, ticket 502 paragraph). That equality holds because a bonus value is defined as the package's leftover after the singles. If 511/512 measures bonuses directly instead, for example with the sim switch above, the equality stops holding. 511/512 must then choose one of two options: show the measured swap and put the leftover on a popover line, or accept rows that differ from the measured swap. Source: `.scratch/stage-gate/502-other-pieces-rule/design.md`, "Sequencing with 511/512".
+
 ## Recommended start
 
 Agree the measurement method with the owner before any design. Present the options above in prose, with what each costs and what it hides, and a recommendation. The owner decides whether a fork Go sim change is in scope, and whether a hand stop-gap for the two ret bonuses is acceptable. Only then plan the table and break changes. Use the stage-gate pipeline, because a wrong plan here has already cost two review rounds.

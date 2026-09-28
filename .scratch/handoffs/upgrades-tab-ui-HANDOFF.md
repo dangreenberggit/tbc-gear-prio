@@ -36,7 +36,7 @@ live for width checks.
    set-bonus value* (never other pieces' stats); Split = bonus ÷ full piece count
    (4pc÷4). Full floats badly-itemised set pieces up the list — SME says **don't
    show Full as a standalone per-item ranking without the Split control adjacent**.
-   Any layout tweak should keep them together.
+   Any layout tweak should keep them together. 2026-09-27: "never other pieces' stats" is superseded by ticket 502 — Full now also counts the other path pieces' own stats (ADR-0034, ticket 502 paragraph).
 2. Broken-set-loss tooltip line ("breaks X 2pc: −N") works (seen in live malorne2
    captures) but the gate-visual fixture didn't exercise a breaking case.
 3. No `a11y.json` in the last visual capture set — a11y counts unavailable there.

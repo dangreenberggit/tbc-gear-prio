@@ -186,3 +186,12 @@ B4 − 2·B2); (4) the SME's do-not-trust finding above.
   appears (no row in any state uses "uncounted"). New advisories: 499 (DPS
   figures of 100+ and the focus outline overrun the DPS cell). 467 stays
   open for the owner.
+- 2026-09-27 (ticket 502): ticket 502 replaced the "NOT other items' stats"
+  part of the attribution ruling above (the "Attribution when ON" bullet
+  under "What the owner wants"). With Set potential on, a set-piece row now
+  also counts the own stats of the other set pieces the counted bonuses
+  need (rule R1, ADR-0034's ticket 502 paragraph; fork `ebd38a6ae` and
+  `2117d5271`, main `6e291ed8`). The owner's direction and approvals are
+  quoted in ticket 502's closing section. The final check for this ticket
+  still waits for tickets 511 and 512 and the fixtures re-recorded after
+  them. Status stays open.
