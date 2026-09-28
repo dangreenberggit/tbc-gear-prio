@@ -63,6 +63,7 @@
     "layout-gate:check": "python scripts/check_layout_gate.py",
     "tab-review": "python scripts/check_tab_review.py",
     "tab-fixtures:record": "node scripts/tab-fixtures/record.mjs",
+    "tab-fixtures:smoke": "node scripts/tab-fixtures/smoke.mjs",
     "tab-fixtures:check": "python scripts/check_tab_fixtures.py",
     "equip-eligibility:check": "python scripts/check_equip_eligibility.py",
     "fork-lint:check": "python scripts/check_fork_lint.py",
