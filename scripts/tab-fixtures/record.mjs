@@ -271,7 +271,7 @@ async function main() {
     guard.armNavigation();
     disarmDeadline = armRunDeadline(
       RUN_LIMIT_MS,
-      chrome.proc,
+      chrome.kill,
       `record ${args.spec}-p${args.phase}-${args.name}`
     );
     const clicked = await evaluate(
@@ -368,7 +368,7 @@ async function main() {
   } finally {
     disarmDeadline();
     client.close();
-    chrome.proc.kill();
+    chrome.kill();
   }
 }
 

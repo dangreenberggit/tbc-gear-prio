@@ -82,12 +82,12 @@ export function guardPage(client, { callTimeoutMs }) {
  * The backstop for a hang no per-call timeout covers. Returns a disarm
  * function.
  */
-export function armRunDeadline(ms, chromeProc, label) {
+export function armRunDeadline(ms, killChrome, label) {
   const timer = setTimeout(() => {
     console.error(
       `${label}: watchdog: the run passed its ${ms / 60000} min limit; killing Chrome and exiting`
     );
-    chromeProc.kill();
+    killChrome();
     process.exit(1);
   }, ms);
   return () => clearTimeout(timer);
