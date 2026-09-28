@@ -28,8 +28,8 @@ because the fork's files are not tracked here at all. So the merge diff is the
 wrong instrument.
 
 Instead this compares CONTENT. It hashes the fork's layout source -- the tab
-component, its SCSS, the sim-tab shell, the ranking engine that produces the
-result rows assertions 6-8 measure, AND the shared SCSS the tab's asserted
+component, its SCSS, the sim-tab shell, the ranking engine whose view code
+renders the recorded result rows assertions 6-8 measure, AND the shared SCSS the tab's asserted
 geometry resolves through (the breakpoint map and layout tokens in
 `shared/_variables.scss`, the root font-size and spacer overrides in
 `shared/_global.scss`, and `--sim-header-height` in `core/sim_ui/_shared.scss`
@@ -141,9 +141,11 @@ ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 #
 # The shell files drive assertions 1-5 (the pre-run layout): the tab component
 # builds the DOM, the two SCSS files style it, and the sim-tab shell hosts it.
-# The engine directory drives assertions 6-8 (row legibility): those measure the
-# result rows a real WASM run lands, and the ranking engine is what produces
-# them. A change to any of these can change what the gate observes, so any of
+# The engine directory drives assertions 6-8 (row legibility): since ticket 520
+# those measure a recorded fixture's rows, not a live run's, but the tab still
+# renders them through the engine's view code (`grep -n "engine/view"
+# upgrades_tab.tsx`), so the engine stays hashed. Narrowing the digest is out
+# of scope for ticket 520. A change to any of these can change what the gate observes, so any of
 # them moving must re-arm the gate.
 #   - assets/locales/en/translation.json -- the accessible names the a11y
 #     probe reads (button labels, aria-labels, the phase-selector option text)
@@ -712,7 +714,7 @@ def run(
     if fixture is None and DEFAULT_FIXTURE.is_file():
         fixture = DEFAULT_FIXTURE
     if fixture is None:
-        print("layout gate: no tab fixture on disk -- the fixture pass is skipped.")
+        print("layout gate: no tab fixture on disk -- the post-run checks are skipped.")
     else:
         print(f"layout gate: {check_fixture(fixture)[1]}")
 

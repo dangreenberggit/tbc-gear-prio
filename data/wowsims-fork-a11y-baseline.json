@@ -3,11 +3,6 @@
   "entries": [
     {
       "ruleId": "color-contrast",
-      "selector": ".btn-outline-danger",
-      "reason": "wontfix: inherited site theme (Bootstrap .btn-outline-danger, #dc3545 on the dark theme background); the borrow-native-styling rule keeps upstream theme colours"
-    },
-    {
-      "ruleId": "color-contrast",
       "selector": ".upgrades-item-name.text-epic",
       "match": "css",
       "ticket": "473",
