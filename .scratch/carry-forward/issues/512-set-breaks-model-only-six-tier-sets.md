@@ -37,8 +37,28 @@ present:
 
 `npx vitest run packages/core/test/fork-set-net.test.ts --reporter=verbose; echo rc=$?`
 
-It must print `rc=0` and a passing line for each case named below. A run
-that skips the file also prints `rc=0`, so the case lines are the check.
+Run it under the Node version in `.node-version` (22.17.1; `node -v` to
+confirm). It must print `rc=0` and, for each case named below, a passing
+(`✓`) line whose test title contains the case id. A run that skips the
+file also prints `rc=0`, so the case lines are the check.
+
+Two more checks, outside the test file:
+
+- The fork clone is at the commit the tab ships:
+  `git -C vendor/tbc-new-fork rev-parse HEAD` prints the `commit` value in
+  `data/wowsims-fork.lock.json`. Otherwise the run above tests code the
+  lock does not name.
+- No list of sets came back.
+  `git -C vendor/tbc-new-fork diff 063600a3 HEAD -- ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts`
+  adds no entry to `IMPLEMENTED_IN_SIM`. Case 512-W fails if the flag path
+  reads that table, but it would pass a new list that includes
+  Wastewalker. So the reviewer also reads the fork diff since `063600a3`
+  and confirms it adds no other table of set ids or bonus piece counts.
+  That part is a reading check, not a command.
+
+The cases run the break model against the test's controlled DPS model, not
+a sim. They show which bonuses the model charges. They do not show that a
+real bonus clears the noise gate in a sim run.
 
 Each case stands for a kind of situation that recurs across the DPS
 specs, classes and sets the tool supports. The set a case uses is the
@@ -46,7 +66,7 @@ test's example of its kind, and the kind is what the case checks. Go
 source paths below are in the fork clone `vendor/tbc-new-fork`, read at
 the pinned commit `063600a3` (`data/wowsims-fork.lock.json`).
 
-**The rule every case checks.** The break model reads no list of
+**The rule behind every case.** The break model reads no list of
 implemented set bonuses. For each worn set, it measures every piece count
 that a swap takes the set below, with set-less copies on the player's own
 gear. It charges a break only when that measurement clears the same noise
@@ -87,9 +107,10 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
    - The situation: the player wears more pieces of a set than its highest
      bonus needs, or a count between two bonuses. A swap removes one piece
      and the set keeps every bonus it had.
-   - Why it matters: Go grants a bonus only when the running piece count
-     equals that bonus's count (`sim/core/item_sets.go:141-152`), so the
-     extra pieces add nothing. A tier set has 5 pieces with bonuses at 2
+   - Why it matters: Go counts a set's worn pieces one at a time and
+     grants each bonus once, when the count reaches that bonus's number
+     (`sim/core/item_sets.go:141-152`). Pieces above the highest bonus's
+     number add nothing. A tier set has 5 pieces with bonuses at 2
      and 4, and players often trade the fifth piece for a better item from
      another source. A break model that charges for each piece lost,
      instead of each bonus lost, penalizes every such swap.
@@ -107,7 +128,8 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
    - Why it matters: the break model measures with set-less copies, and a
      copy has a new item id. An effect that Go attaches to the original id
      is missing from the copy, so the measurement counts that effect as
-     part of the set bonus. Hunter and warrior PvP gloves are set pieces
+     part of the set bonus (code reading; hypothesis, untested in a sim).
+     Hunter and warrior PvP gloves are set pieces
      with id-keyed effects. The hunter set Gladiator's Pursuit 586 holds
      four of them (28335, 31961, 33665, 34991) and the warrior set
      Gladiator's Battlegear 567 holds four (24549, 30487, 33729, 35067),
@@ -123,10 +145,15 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
 
 **Not covered by a case.** One set in the pinned sim has bonuses above 4
 pieces: Cryptstalker Armor 530, at 2, 4, 6 and 8
-(`sim/hunter/item_sets.go:11-100`). Its pieces are in the hunter,
-enhancement, elemental and warrior pools under `data/universes/`. A
-piece-count type that stops at 4 cannot record a 6pc or 8pc break, and
-none of the four cases would catch that.
+(`sim/hunter/item_sets.go:11-100`). Its bonuses act only for a hunter:
+the 4pc and 6pc check for a hunter agent, and the 2pc and 8pc change
+hunter spells. Eight of its nine pieces are in the hunter pools
+`data/universes/hunter-p2.json` to `hunter-p5.json`. A piece-count type
+that stops at 4 cannot record a 6pc or 8pc break, and none of the four
+cases would catch that. Before this ticket closes, the plan does one of
+two things and records which in Comments: it adds a case where a swap
+takes a worn Cryptstalker set from 6 or 8 pieces to fewer, or it states
+that 6pc and 8pc breaks are out of scope, with the reason.
 
 ## Comments
 
@@ -189,3 +216,12 @@ no bonus in Go
 outcome 512-N checks (code reading; hypothesis, untested in a sim). Bonuses
 above 4 pieces are real but come from one set, so they are recorded under
 "Not covered by a case" for the plan to decide.
+
+2026-09-28 (independent review of the closing items): the run criterion
+now names the Node version and needs each case id in a passing test
+title. Two checks were added: the fork clone must be at the lock's
+commit, and the fork diff must add no list of sets, because no case
+catches a new list that includes Wastewalker. A scope sentence says the
+cases use a controlled DPS model, not a sim. 512-H's Go claim is marked
+as code reading. The Cryptstalker note now says its bonuses act only for
+a hunter and asks the plan to add a case or record why not.
