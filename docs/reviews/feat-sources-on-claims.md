@@ -88,18 +88,17 @@ Commit c3f2121b applied those rulings. One fresh `general-task` subagent on Opus
 
 ## Disposition (round 2)
 
-| ID  | Axis    | Disposition | Ticket / note                                                                                                                                    |
-| --- | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| W1  | Writing | fixed       | Trigger now reads "one narrow lookup or one narrow investigation"; "research task" kept as the owner's term                                      |
-| W2  | Writing | wontfix     | Excluding review axes and adding a budget pointer go beyond the A1 ruling; passed to the owner                                                   |
-| W3  | Writing | wontfix     | Owner ruled round-1 A5 and S4 stay as they are                                                                                                   |
-| W4  | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                                       |
-| W5  | Writing | wontfix     | Owner ruled round-1 S5 and A7 stay as they are                                                                                                   |
-| W6  | Writing | wontfix     | Owner ruled round-1 A6 stays; the sentence now opens "The agent keeps" so it no longer hangs on an ambiguous "It"                                |
-| W7  | Writing | wontfix     | Owner ruled round-1 S2 stays                                                                                                                     |
-| W8  | Writing | fixed       | Now "names no source or whose source the report does not show", verified "directly or through a subagent"                                        |
-| W9  | Writing | fixed       | Sentence now opens "The caller also"; the forward reference stays because the ruling puts the check in the subagent paragraph                    |
-| W10 | Writing | fixed       | Now "adds only its verdict, and the verdict names its source like any other important claim"                                                     |
-| W11 | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                                       |
-| W12 | Writing | fixed       | Now "Do the job with your own tool calls; spawn no subagents."                                                                                   |
-| W2  | Writing | fixed       | 0d8dc289: owner ruling 2026-09-29; the research paragraph now excludes a review axis. Replaces the wontfix W2 row above; no budget pointer added |
+| ID  | Axis    | Disposition | Ticket / note                                                                                                                 |
+| --- | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| W1  | Writing | fixed       | Trigger now reads "one narrow lookup or one narrow investigation"; "research task" kept as the owner's term                   |
+| W2  | Writing | fixed       | 0d8dc289: owner ruling 2026-09-29; the research paragraph now excludes a review axis. No budget pointer added                 |
+| W3  | Writing | wontfix     | Owner ruled round-1 A5 and S4 stay as they are                                                                                |
+| W4  | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                    |
+| W5  | Writing | wontfix     | Owner ruled round-1 S5 and A7 stay as they are                                                                                |
+| W6  | Writing | wontfix     | Owner ruled round-1 A6 stays; the sentence now opens "The agent keeps" so it no longer hangs on an ambiguous "It"             |
+| W7  | Writing | wontfix     | Owner ruled round-1 S2 stays                                                                                                  |
+| W8  | Writing | fixed       | Now "names no source or whose source the report does not show", verified "directly or through a subagent"                     |
+| W9  | Writing | fixed       | Sentence now opens "The caller also"; the forward reference stays because the ruling puts the check in the subagent paragraph |
+| W10 | Writing | fixed       | Now "adds only its verdict, and the verdict names its source like any other important claim"                                  |
+| W11 | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                    |
+| W12 | Writing | fixed       | Now "Do the job with your own tool calls; spawn no subagents."                                                                |
