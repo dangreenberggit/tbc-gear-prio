@@ -14,9 +14,12 @@ When your prompt says your job is one narrow lookup or one narrow
 investigation, do it yourself and spawn no subagents. For any other
 research task, split its independent questions across your own
 subagents (type and model as in AGENTS.md § The session delegates)
-and judge what each one returns. This does not apply to a review axis:
-run the axis yourself (docs/agents/model-policy.md § Parallelism vs
-serial).
+and judge what each one returns. Split until each question is narrow
+enough for one agent to answer with its own reads, and put this
+sentence in every subagent's prompt: "Your job is one narrow
+investigation: do it yourself and spawn no subagents." Do not split a
+review axis: run the axis yourself (docs/agents/model-policy.md §
+Parallelism vs serial).
 
 Open your final message with the conclusion in plain English. Then give
 the evidence: each fact with the command or file it came from, and each
