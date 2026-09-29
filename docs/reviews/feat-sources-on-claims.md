@@ -102,3 +102,29 @@ Commit c3f2121b applied those rulings. One fresh `general-task` subagent on Opus
 | W10 | Writing | fixed       | Now "adds only its verdict, and the verdict names its source like any other important claim"                                  |
 | W11 | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                    |
 | W12 | Writing | fixed       | Now "Do the job with your own tool calls; spawn no subagents."                                                                |
+
+# Round 3 — research depth
+
+Owner ruling (2026-09-29), their words: "research depth: option 1, although of course it has to be worded carefully and effectively. the sort of managing agent (even a subagent itself) should estimate and tell its subagents in this case that they dont need their own subagents, perhaps? rather than merely implying through wording that more subagents arent needed". Option 1: a research agent that splits its questions tells each subagent its job is one narrow question, so splitting stops after one level.
+
+Commit f02f2296 applies the ruling to `.claude/agents/general-task.md` and adds one sentence to `AGENTS.md` § The session delegates. One fresh `general-task` subagent on Opus, told to spawn no subagents and waited for in the foreground, reviewed a first draft against `.claude/skills/writing-for-agents/SKILL.md` and the global Writing style section. The commit contains the draft with the fixes below.
+
+## Writing review (round 3)
+
+- **W13 (must-fix).** The draft gave the no-subagents sentence only to subagents judged narrow, so a subagent judged not narrow could split again.
+- **W14 (must-fix).** The `AGENTS.md` line paraphrased the sentence and pointed the session at `general-task.md`, a file the same section says the session does not read.
+- **W15 (must-fix).** After the insertion, "This does not apply to a review axis" no longer referred clearly to splitting.
+- **W16 (must-fix).** `design-task`, `gate-planner` and `gate-reviewer` spawn research subagents and were not covered.
+- **W17 (optional).** "narrow" had no test.
+- **W18 (optional).** "helper" and "subagent" named the same thing.
+
+## Disposition (round 3)
+
+| ID  | Axis    | Disposition | Ticket / note                                                                                           |
+| --- | ------- | ----------- | ------------------------------------------------------------------------------------------------------- |
+| W13 | Writing | fixed       | Split until each question is narrow; every subagent's prompt gets the sentence                          |
+| W14 | Writing | fixed       | `AGENTS.md` now quotes the exact sentence and names no file                                             |
+| W15 | Writing | fixed       | Now "Do not split a review axis: run the axis yourself"                                                 |
+| W16 | Writing | fixed       | The `AGENTS.md` sentence now binds any agent that splits a research question, the session or a subagent |
+| W17 | Writing | fixed       | Test is "narrow enough for one agent to answer with its own reads"                                      |
+| W18 | Writing | fixed       | "subagent" throughout                                                                                   |
