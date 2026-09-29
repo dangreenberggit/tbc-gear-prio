@@ -60,8 +60,8 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
    - Why it matters: test and review runs start from the previous
      phase's preset gear, and pre-raid presets wear dungeon and crafted
      sets. The feral pre-raid preset wears Wastewalker 4pc and the ret one
-     wears Ragesteel 2pc (see Evidence). A break model that reads the six-set table charges
-     these breaks nothing and fails this case.
+     wears Ragesteel 2pc (see Evidence). A break model that reads the
+     six-set table charges these breaks nothing and fails this case.
    - The check: a Thunderheart or Malorne package breaks a worn Wastewalker
      set. Each bonus the package takes away is measured and charged. A
      bonus the package leaves in place is not charged.
@@ -108,10 +108,10 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
      copy has a new item id. An effect that Go attaches to the original id
      is missing from the copy, so the measurement counts that effect as
      part of the set bonus. Hunter and warrior PvP gloves are set pieces
-     with id-keyed effects. The hunter
-     set Gladiator's Pursuit 586 holds four of them (28335, 31961, 33665,
-     34991) and the warrior set Gladiator's Battlegear 567 holds four
-     (24549, 30487, 33729, 35067), per `data/items/index.json`.
+     with id-keyed effects. The hunter set Gladiator's Pursuit 586 holds
+     four of them (28335, 31961, 33665, 34991) and the warrior set
+     Gladiator's Battlegear 567 holds four (24549, 30487, 33729, 35067),
+     per `data/items/index.json`.
    - The check: a worn set includes gloves whose Go effect is keyed by item
      id. The test's model gives the gloves an effect that their set-less
      copy lacks. The charged break equals the model's set bonus and does
@@ -174,13 +174,17 @@ field)". The closing items were reorganized by scenario kind. Each case now
 states the situation in player terms, why it recurs across specs, the
 check, and its set as an example, with a same-kind set from another armor
 type where the Go source has one. The case ids 512-W, 512-P, 512-N and
-512-H and their checks are unchanged. Three candidate kinds got no case of
+512-H are unchanged. The checks of 512-P, 512-N and 512-H are unchanged.
+512-W's check now covers every bonus the package takes away, not only
+the 2pc, to match the plan's 512-W assertions
+(`.scratch/stage-gate/511-512-set-credit/plan.md:1044-1050`). Three candidate kinds got no case of
 their own. PvP pieces from different seasons share one set id and one set
 name (`data/items/index.json`), and Go counts them by id first
 (`sim/core/item_sets.go:119-131`). Grouping by set id, as the test's
 model does (`getSetId`, `fork-set-net.test.ts:185`), counts them the same
-way, so they add no behaviour a case must check. A profession set worn without its profession, such as Burning
-Rage without Blacksmithing, gets no bonus in Go
+way, so they add no behaviour a case must check. A profession set worn
+without its profession, such as Burning Rage without Blacksmithing, gets
+no bonus in Go
 (`sim/core/item_sets.go:209-213`), so its break measures zero, the same
 outcome 512-N checks (code reading; hypothesis, untested in a sim). Bonuses
 above 4 pieces are real but come from one set, so they are recorded under
