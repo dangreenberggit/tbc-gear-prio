@@ -46,19 +46,59 @@ The commit inserts the approved text exactly (Spec clean, Domain clean). Adversa
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                 |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------- |
-| A1  | Adversarial | wontfix     | Needs a change to owner-approved wording; passed to the owner for a decision  |
-| A2  | Adversarial | wontfix     | Needs a change to owner-approved wording; passed to the owner with S1         |
-| A3  | Adversarial | wontfix     | Gap in general-task.md format predates this branch; outside the approved edit |
-| A4  | Adversarial | wontfix     | Duplicate of S2                                                               |
-| A5  | Adversarial | wontfix     | Duplicate of S4                                                               |
-| A6  | Adversarial | wontfix     | Needs a change to owner-approved wording; passed to the owner                 |
-| A7  | Adversarial | wontfix     | Duplicate of S5                                                               |
-| S1  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner with A2         |
-| S2  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner                 |
-| S3  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner                 |
-| S4  | Standards   | wontfix     | Reference resolves in this repo; changing it changes approved wording         |
-| S5  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner                 |
-| S6  | Standards   | wontfix     | Formatting of owner-approved text; passed to the owner                        |
-| S7  | Standards   | wontfix     | Rewording would mean rewriting a commit; the subject names the main rule      |
+| ID  | Axis        | Disposition | Ticket / note                                                                                  |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | Superseded in round 2: owner ruling, no numeric cap; narrow jobs spawn no subagents            |
+| A2  | Adversarial | fixed       | Superseded in round 2: owner ruling, the verdict is the one allowed addition                   |
+| A3  | Adversarial | wontfix     | Gap in general-task.md format predates this branch; outside the approved edit                  |
+| A4  | Adversarial | wontfix     | Duplicate of S2                                                                                |
+| A5  | Adversarial | wontfix     | Duplicate of S4                                                                                |
+| A6  | Adversarial | wontfix     | Needs a change to owner-approved wording; passed to the owner                                  |
+| A7  | Adversarial | wontfix     | Duplicate of S5                                                                                |
+| S1  | Standards   | fixed       | Superseded in round 2: owner ruling, the caller check now lives only in the subagent paragraph |
+| S2  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner                                  |
+| S3  | Standards   | fixed       | Superseded in round 2: the in-sentence contrast was removed in the A1 rewrite                  |
+| S4  | Standards   | wontfix     | Reference resolves in this repo; changing it changes approved wording                          |
+| S5  | Standards   | wontfix     | Needs a change to owner-approved wording; passed to the owner                                  |
+| S6  | Standards   | wontfix     | Formatting of owner-approved text; passed to the owner                                         |
+| S7  | Standards   | wontfix     | Rewording would mean rewriting a commit; the subject names the main rule                       |
+
+# Round 2 — owner rulings and writing review
+
+Reviewed range: `4459fcf04473da7c4bcfc791b1715641d3b59545..c3f2121bff4e4db1c558abb2a27b802862367f01`
+
+Owner rulings (2026-09-29, relayed by the coordinator): A1 — no numeric cap; an agent spawned for one narrow lookup or investigation (for example `simple-task`) spawns no subagents, and a `general-task` research agent may still split its questions. A2 + S1 — approved: the verdict is the relaying agent's one allowed addition and names its source, and the caller check lives in one place, the subagent paragraph. S3 — fix if it falls out of the rewrite. Other round-1 findings stay `wontfix`.
+
+Commit c3f2121b applied those rulings. One fresh `general-task` subagent on Opus, read-only and waited for in the foreground, then reviewed every added or changed line on the branch against `.claude/skills/writing-for-agents/SKILL.md` and the Writing style section of `docs/agents/home/AGENTS.md`. The fixes below were made after that review, in the commit that adds this round; they apply the reviewer's own replacement text where it stays within the rulings.
+
+## Writing review
+
+- **W1 (should-fix).** `general-task.md`: "one narrow lookup or investigation" reads two ways, and "research task" is a second term for the same branch.
+- **W2 (should-fix).** `general-task.md`: the fan-out sentence does not exclude review axes, which `docs/agents/model-policy.md` says are never fanned out, and does not point at model-policy § Budget the round.
+- **W3 (nit).** The "AGENTS.md § The session delegates" pointer takes two hops and names an ambiguous file. Same as round-1 A5 and S4.
+- **W4 (nit).** "judge what each one returns" gives no completion criterion.
+- **W5 (should-fix).** Home :42 sentence 1 is 41 words. Same as round-1 S5 and A7.
+- **W6 (should-fix).** Home :42 "things on screen" and "a relation that no source shows" allude to something the reader cannot see, the contrast "never by …" sits inside the sentence, and the sentence binds only relaying agents. Same family as round-1 A6.
+- **W7 (should-fix).** "unverified" differs from `hypothesis, untested` used elsewhere. Same as round-1 S2 and A4.
+- **W8 (should-fix).** Home :40: "verifies" read literally has the interactive session read files itself, and "whose source is missing or does not appear in the report" reads two ways.
+- **W9 (nit).** Home :40: "It also" can refer to the summary; the forward reference "(defined in the next paragraph)" splits one idea over two paragraphs.
+- **W10 (nit).** Home :42: "adds no factual claim of its own except its verdict" repeats line 40's "adds only its own verdict" and is phrased as a negation.
+- **W11 (nit).** Home :42: "a substantial decision" defines "important" with another vague adjective.
+- **W12 (nit).** `simple-task.md`: "Spawn no subagents." is a bare prohibition with no positive target.
+
+## Disposition (round 2)
+
+| ID  | Axis    | Disposition | Ticket / note                                                                                                                 |
+| --- | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| W1  | Writing | fixed       | Trigger now reads "one narrow lookup or one narrow investigation"; "research task" kept as the owner's term                   |
+| W2  | Writing | wontfix     | Excluding review axes and adding a budget pointer go beyond the A1 ruling; passed to the owner                                |
+| W3  | Writing | wontfix     | Owner ruled round-1 A5 and S4 stay as they are                                                                                |
+| W4  | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                    |
+| W5  | Writing | wontfix     | Owner ruled round-1 S5 and A7 stay as they are                                                                                |
+| W6  | Writing | wontfix     | Owner ruled round-1 A6 stays; the sentence now opens "The agent keeps" so it no longer hangs on an ambiguous "It"             |
+| W7  | Writing | wontfix     | Owner ruled round-1 S2 stays                                                                                                  |
+| W8  | Writing | fixed       | Now "names no source or whose source the report does not show", verified "directly or through a subagent"                     |
+| W9  | Writing | fixed       | Sentence now opens "The caller also"; the forward reference stays because the ruling puts the check in the subagent paragraph |
+| W10 | Writing | fixed       | Now "adds only its verdict, and the verdict names its source like any other important claim"                                  |
+| W11 | Writing | wontfix     | Owner-approved wording outside the rulings                                                                                    |
+| W12 | Writing | fixed       | Now "Do the job with your own tool calls; spawn no subagents."                                                                |
