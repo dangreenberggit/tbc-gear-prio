@@ -111,9 +111,12 @@ for f in sorted(glob.glob('data/universes/*-p[2-5].json')):
 "
 ```
 
-That count is only an upper bound on the scenario. A five-slot set with a
-4-piece bonus already allows the move (the Thunderheart helm case in
-ticket 519). Not measured, each a hypothesis:
+That count measures only how many sets have pieces in more than four
+slots. It is not a bound on the scenario. A five-slot set with a 4-piece
+bonus already allows the move (the Thunderheart helm case in ticket 519).
+A smaller set can also allow it when its bonus needs fewer pieces than it
+has slots, for example a set with pieces in 3 or 4 slots and a 2-piece
+bonus. Not measured, each a hypothesis:
 
 - how many of those sets have a bonus the sim implements and that changes
   the spec's DPS;
