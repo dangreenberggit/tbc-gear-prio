@@ -35,6 +35,10 @@ they then wear one piece more than the bonus needs, and the non-set row no
 longer breaks it. The gap is the first move, when neither swap reads well
 on its own.
 
+The scenario is not only a phase-5 case. Four of the five committed tab
+fixtures, at phases 2 and 3, have a worn set at exactly a bonus count and
+unworn pieces of that set for other slots. See the 2026-09-28 comment.
+
 ## Example: feral in phase 5
 
 - Upstream's feral "P4 6P" preset wears four Thunderheart pieces (set 676):
@@ -114,8 +118,10 @@ ticket 519). Not measured, each a hypothesis:
 - how many of those sets have a bonus the sim implements and that changes
   the spec's DPS;
 - how often a player worn at a bonus has a better non-set item for a set
-  slot and a usable set piece for another slot;
-- how much DPS the move is worth when it exists.
+  slot and a usable set piece for another slot (the 2026-09-28 comment
+  counts it only in the five committed tab fixtures);
+- how much DPS the move is worth when it exists (the 2026-09-28 comment
+  gives an additive estimate for two fixtures, not a sim).
 
 ## What to investigate
 
@@ -153,10 +159,98 @@ plain sim of the swap. Ticket 512's ladder (plan revision 7, step 12)
 measures every worn bonus on the player's own gear each run, which is the
 value a move would restore. Ticket 511's step sims (step 15.2) sim a
 group of swaps as one gear. A fix for this gap could reuse both
-(hypothesis, untested).
+(hypothesis, untested). The 2026-09-28 comment adds that a set row can
+also be too low from phase 5, and says which fix designs would change a
+511 or 512 figure.
 
 ## What would close this
 
 A written finding, linked here, that answers items 1 to 4 with a
 re-runnable command for each figure, and either a follow-up ticket for a
 fix or a recorded decision not to show the move.
+
+## Comments
+
+### 2026-09-28 — independent verifier's findings
+
+An independent verifier (agent a093f89f3cb255db3) checked this ticket
+against the committed data and the fork. These are its findings. They
+answer part of items 1 and 3 above; they do not close the ticket.
+
+**1. The scenario is not only a phase-5 case.** In 4 of the 5 committed
+tab fixtures (`data/tab-fixtures/`), the player wears a set at exactly a
+bonus count, and the ranking has unworn pieces of that set for other
+slots:
+
+- `feral-p2-malorne4` (phase 2): Malorne worn at 4; unworn helm.
+- `feral-p3-nordrassil4` (phase 3): Nordrassil worn at 4; unworn helm.
+- `feral-p3-p2bis` (phase 3): Malorne worn at 2; unworn hands, legs and
+  helm.
+- `feral-p3-th-hands-legs` (phase 3): Thunderheart worn at 2 (hands and
+  legs); unworn chest, shoulders and helm.
+
+`ret-p3-p2` wears one Crystalforge piece, which is below the set's first
+bonus, so it does not have the scenario. To re-run the check, save this
+script and run it with `python` from the repo root. For each fixture it
+prints the worn sets and the unworn pieces of each set in the ranking,
+with each piece's `deltaDps`:
+
+```python
+import json,collections as C,sys
+I=json.load(open('data/items/index.json',encoding='utf8'))
+for fn in ['feral-p3-p2bis','feral-p3-th-hands-legs','feral-p3-nordrassil4','feral-p2-malorne4','ret-p3-p2']:
+  d=json.load(open('data/tab-fixtures/%s.json'%fn,encoding='utf8'))
+  print('==',fn,'phase',d['phase'])
+  worn=C.defaultdict(list)
+  for i,it in enumerate(d['gear']['items']):
+    x=I.get(str(it.get('id')),{})
+    if x.get('setId'): worn[x['setId']].append((i,it['id'],x.get('name'),x.get('slot')))
+  items=d['ranking']['items']
+  for s,v in worn.items():
+    print('  worn set',s,I.get(str(v[0][1]),{}).get('setName'),len(v),[(a[2]) for a in v])
+    pool=[(r['slot'],r['itemId'],r.get('name'),round(r['deltaDps'],1)) for r in items if I.get(str(r['itemId']),{}).get('setId')==s and not r.get('owned')]
+    print('    unworn pool pieces:',pool)
+```
+
+**2. A worked example.** In `feral-p3-th-hands-legs`, the fixture records
+the Thunderheart 2-piece break as 106.24 DPS. Shady Dealer's Pantaloons
+(30898, legs, not a set piece) reads −81.8 and is 235th in the ranking's
+item list; that figure includes the lost 2-piece bonus. The Thunderheart
+Chestguard (31042) reads +28.7 on its own. Worn together, the chest keeps
+the 2-piece bonus, so the pair is worth about −81.8 + 106.24 + 28.7 =
++53.1 DPS. This is an estimate that adds recorded figures, not a sim
+(hypothesis, untested). In `feral-p3-p2bis` no move looks worth making:
+the best estimate by the same method is about +3.6 DPS, under the 5.09
+DPS gate the verifier used (hypothesis, untested).
+
+**3. A set row's gear path can charge a break that a move would avoid.**
+This happens when the path takes the slots of a worn set and that set has
+pieces for other free slots. It cannot happen at phase 3, where the sets
+use the same five slots (head, shoulders, chest, hands, legs). It becomes
+possible in phase 5, with the Sunwell Thunderheart wrist, waist and feet
+pieces. This is the verifier's reasoning; no run has shown it (untested).
+
+**4. The dead-slot warning is incomplete in a move scenario.** Ticket 512
+widened the engine's "set-break toll" dead-slot warning to every worn set
+(`rank.ts` `countedLadderBreaks` feeding `plausibilityWarnings`, and
+`dead-slots.ts` `thresholdLostByDroppingOnePiece`). `countedLadderBreaks`
+exists at fork commit 02d0ea2a (the lock's `commit` today) and not at
+0f499576:
+`git -C vendor/tbc-new-fork show 02d0ea2a:ui/core/components/individual_sim_ui/upgrades/engine/rank.ts | grep -n countedLadderBreaks`.
+As the body says, the warning does not point at the set piece that would
+keep the bonus. No tab file outside `engine/` reads
+`plausibilityWarnings`:
+`git -C vendor/tbc-new-fork grep -n plausibilityWarnings 02d0ea2a -- ui ':!ui/core/components/individual_sim_ui/upgrades/engine'`
+prints nothing.
+
+**5. What this means for tickets 511 and 512.** Every 511 or 512 figure
+is either a sim of gear the player can wear or a value measured on the
+player's current gear. So this gap can only leave a row too low, never
+too high, and those rows read the same before and after 511 and 512
+(the verifier's reasoning, untested). Whether a later fix for this ticket
+changes any 511 or 512 figure depends on its design (hypothesis,
+untested):
+
+- a fix that only adds a figure to non-set rows changes none of them;
+- a fix that credits set pieces for making a move possible would change
+  set-row figures in every phase.
