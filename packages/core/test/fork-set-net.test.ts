@@ -83,7 +83,14 @@ const B2_MAL = 40; // Malorne 2pc bonus == the broken-bonus value B under test
 // fires there; the 476 cases wear 4 and 5.
 const B4_MAL = 70;
 
-type SetBonusTable = Record<number, { b2: number; b4: number }>;
+/**
+ * A set's model bonuses by piece count. `b3`, `b6` and `b8` are for the
+ * ticket 512 cases (3-piece sets, and a set with bonuses above 4 pieces).
+ */
+type SetBonusTable = Record<
+  number,
+  { b2: number; b3?: number; b4: number; b6?: number; b8?: number }
+>;
 
 const SET_BONUSES: SetBonusTable = {
   676: { b2: B2_TH, b4: B4_TH },
@@ -155,6 +162,13 @@ function equippedIds(req: RaidSimRequest): number[] {
 const COPY_OFFSET = 1_000_000;
 
 /**
+ * The fork's set-kept copy id offset (`SET_KEPT_ID_OFFSET`, ticket 512): a copy
+ * that keeps its set. A literal for the same reason as `COPY_OFFSET`; 511-C
+ * checks that the two agree.
+ */
+const SET_KEPT_OFFSET = 2_000_000;
+
+/**
  * A term the model adds when every listed item is worn, standing in for stats
  * that are worth more together than apart. Keyed by original ids: a set-less
  * copy counts as its original here.
@@ -162,34 +176,48 @@ const COPY_OFFSET = 1_000_000;
 type Interaction = { ids: readonly number[]; dps: number };
 
 /**
- * The controlled DPS: base + own values + active implemented set bonuses +
- * interaction terms. A set-less copy (id at or above `COPY_OFFSET`) has its
- * original's value and belongs to no set.
+ * The controlled DPS: base + own values + active set bonuses + interaction
+ * terms + id effects. A set-less copy (id in [`COPY_OFFSET`,
+ * `SET_KEPT_OFFSET`)) has its original's value and belongs to no set. A
+ * set-kept copy (id at or above `SET_KEPT_OFFSET`) has its original's value
+ * and set. An id effect stands in for a Go effect keyed by item id
+ * (`itemEffects[eq.ID]`, `RegisterPvPGloveMod`): only the real id gets it,
+ * never a copy.
  */
 function modelDps(
   ids: readonly number[],
   getSetId: (id: number) => number | undefined,
   itemValue: ReadonlyMap<number, number> = ITEM_VALUE,
   setBonuses: SetBonusTable = SET_BONUSES,
-  interactions: readonly Interaction[] = []
+  interactions: readonly Interaction[] = [],
+  idEffects: ReadonlyMap<number, number> = new Map()
 ): number {
   let dps = BASE_DPS;
   const setCounts = new Map<number, number>();
   const worn = new Set<number>();
   for (const id of ids) {
     if (!id) continue;
-    const isCopy = id >= COPY_OFFSET;
-    const original = isCopy ? id - COPY_OFFSET : id;
+    const setKept = id >= SET_KEPT_OFFSET;
+    const setLess = !setKept && id >= COPY_OFFSET;
+    const original = setKept
+      ? id - SET_KEPT_OFFSET
+      : setLess
+        ? id - COPY_OFFSET
+        : id;
     worn.add(original);
     dps += itemValue.get(original) ?? 0;
-    const setId = isCopy ? undefined : getSetId(id);
+    if (!setKept && !setLess) dps += idEffects.get(id) ?? 0;
+    const setId = setLess ? undefined : getSetId(original);
     if (setId != null) setCounts.set(setId, (setCounts.get(setId) ?? 0) + 1);
   }
   for (const [setId, count] of setCounts) {
     const bonus = setBonuses[setId];
     if (!bonus) continue;
     if (count >= 2) dps += bonus.b2;
+    if (count >= 3) dps += bonus.b3 ?? 0;
     if (count >= 4) dps += bonus.b4;
+    if (count >= 6) dps += bonus.b6 ?? 0;
+    if (count >= 8) dps += bonus.b8 ?? 0;
   }
   for (const term of interactions) {
     if (term.ids.every((id) => worn.has(id))) dps += term.dps;
@@ -231,6 +259,10 @@ type Scenario = {
   setBonuses?: SetBonusTable;
   /** Interaction terms for this scenario only (ticket 511). */
   interactions?: readonly Interaction[];
+  /** Id effects for this scenario only (tickets 511 and 512, G2). */
+  idEffects?: ReadonlyMap<number, number>;
+  /** The fake sim throws for a request whose equipped ids match. */
+  failWhen?: (ids: readonly number[]) => boolean;
 };
 
 type ForkRanking = {
@@ -350,14 +382,19 @@ async function runScenario(scenario: Scenario): Promise<{
     version: () => Promise.resolve(SIM_VERSION),
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
       runCount += 1;
-      calls.push(equippedIds(req));
+      const ids = equippedIds(req);
+      calls.push(ids);
+      if (scenario.failWhen?.(ids)) {
+        return Promise.reject(new Error("the model sim failed on purpose"));
+      }
       return Promise.resolve({
         dps: modelDps(
-          equippedIds(req),
+          ids,
           getSetId,
           scenario.itemValue,
           scenario.setBonuses,
-          scenario.interactions
+          scenario.interactions,
+          scenario.idEffects
         ),
         stdev: 30,
         iterationsDone: opts.iterations,
@@ -578,14 +615,14 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const off = await runScenario({ worn, pool });
     const on = await runScenario({ worn, pool, measureBrokenSetValue: true });
     expect(off.ranking.brokenSetValues ?? []).toHaveLength(0);
-    // The flag adds the B sims and, since ticket 511, one set-less gate sim
-    // per measured package (Thunderheart 2pc and 4pc here), and nothing else.
+    // The flag adds the B sims and, since ticket 511, two gate sims per
+    // measured package (Thunderheart 2pc and 4pc here), and nothing else.
     expect(on.runCount).toBeGreaterThan(off.runCount);
     const bCount = (on.ranking.brokenSetValues ?? []).filter(
       (b) => b.dps !== undefined
     ).length;
     expect(bCount).toBe(1);
-    expect(on.runCount - off.runCount).toBe(bCount + 2);
+    expect(on.runCount - off.runCount).toBe(bCount + 4);
   });
 
   it("case 9: split credit reorders via applyView", async () => {
@@ -840,9 +877,9 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         true
       );
     }
-    // One vacate sim per target, (640,4) and (640,2), and one gate sim per
+    // One vacate sim per target, (640,4) and (640,2), and two gate sims per
     // measured package, Thunderheart 2pc and 4pc (ticket 511).
-    expect(on.runCount - off.runCount).toBe(4);
+    expect(on.runCount - off.runCount).toBe(6);
     // C31 / ADR-0034: rows are not additive in either credit view. Each row
     // shows the whole swap; four rows sum to 1560 under full and 20 under split.
     const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
@@ -950,11 +987,11 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       true
     );
     // Discovery is bounded by distinct keys, not rows (the case-8 invariant).
-    // The other 2 sims are the Thunderheart 2pc and 4pc gates (ticket 511).
+    // The other 4 sims are the Thunderheart 2pc and 4pc gates (ticket 511).
     const measured = (r.brokenSetValues ?? []).filter(
       (b) => b.dps !== undefined
     ).length;
-    expect(on.runCount - off.runCount).toBe(measured + 2);
+    expect(on.runCount - off.runCount).toBe(measured + 4);
     expect(measured).toBe(1);
     // The package's own members break nothing. Since 502 each shows the
     // package delta 680: wrist, waist and feet 150 + 530, hands 100 + 580.
@@ -1175,8 +1212,8 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     const r = on.ranking;
     expect(near(r.baseline.dps, 3250, 0.5)).toBe(true);
     expect(near(bsvDps(r, 676, 2)!, 50, 0.5)).toBe(true);
-    // One B sim, plus the Malorne 2pc and 4pc gate sims (ticket 511).
-    expect(on.runCount - off.runCount).toBe(3);
+    // One B sim, plus two gate sims each for Malorne 2pc and 4pc (ticket 511).
+    expect(on.runCount - off.runCount).toBe(5);
     expect(sortedIds(bonusOf(r, 640, 2)?.packageItemIds)).toEqual([
       29096, 29098,
     ]);
@@ -1401,9 +1438,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(near(th4!.bonusDps!, 40, 0.5)).toBe(true);
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect(near(th4!.bonusDpsNet!, 80, 0.5)).toBe(true);
-    // One B sim, plus the 4pc gate sim. The 2pc is one piece at worn 1, so it
-    // is not measured and has no gate (ticket 511).
-    expect(on.runCount - off.runCount).toBe(2);
+    // One B sim, plus the 4pc gate's two sims. The 2pc is one piece at worn
+    // 1, so it is not measured and has no gate (ticket 511).
+    expect(on.runCount - off.runCount).toBe(3);
     for (const id of [
       THUNDERHEART.head,
       THUNDERHEART.shoulder,
@@ -1491,9 +1528,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(bsv(2)?.unmeasured).toBe("dependent-unmeasured");
     expect(bsv(4)?.dps).toBeUndefined();
     expect(bsv(2)?.dps).toBeUndefined();
-    // Both failures are found before any sim. The 2 added sims are the
-    // Thunderheart 2pc and 4pc gates (ticket 511).
-    expect(on.runCount - off.runCount).toBe(2);
+    // Both failures are found before any sim. The 4 added sims are the
+    // Thunderheart 2pc and 4pc gates, two each (ticket 511).
+    expect(on.runCount - off.runCount).toBe(4);
     expect(netOf(r, 676, 2)).toBeUndefined();
     expect(netOf(r, 676, 4)).toBeUndefined();
     for (const id of TH_FOUR_IDS) {
@@ -1808,9 +1845,14 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
 
 type CopiesMod = {
   SET_LESS_ID_OFFSET: number;
+  SET_KEPT_ID_OFFSET: number;
   applySetLessCopies: (
     request: RaidSimRequest,
     slots: readonly number[]
+  ) => RaidSimRequest;
+  applyCopies: (
+    request: RaidSimRequest,
+    copies: { setLess?: readonly number[]; setKept?: readonly number[] }
   ) => RaidSimRequest;
 };
 
@@ -1921,6 +1963,30 @@ describe.skipIf(!forkPresent)(
         },
       ]);
       expect(playerDatabase(withDb)?.items).toEqual([realRow]);
+
+      // A set-kept copy (ticket 512, G2): the real row with only `id`
+      // changed, so the copy still counts toward its set.
+      expect(copies.SET_KEPT_ID_OFFSET).toBe(SET_KEPT_OFFSET);
+      const keptDb = copies.applyCopies(withDb, { setKept: [HANDS_SLOT] });
+      expect(equippedIds(keptDb)[HANDS_SLOT]).toBe(
+        SET_KEPT_OFFSET + THUNDERHEART.hands
+      );
+      expect(playerDatabase(keptDb)?.items).toEqual([
+        realRow,
+        { ...realRow, id: SET_KEPT_OFFSET + THUNDERHEART.hands },
+      ]);
+      // Without a database only the ids swap; both kinds in one request.
+      const both = copies.applyCopies(plain, {
+        setLess: [LEGS_SLOT],
+        setKept: [HANDS_SLOT],
+      });
+      expect(equippedIds(both)[HANDS_SLOT]).toBe(
+        SET_KEPT_OFFSET + THUNDERHEART.hands
+      );
+      expect(equippedIds(both)[LEGS_SLOT]).toBe(COPY_OFFSET + NEUTRAL.legs[0]);
+      expect(playerDatabase(both)).toBeUndefined();
+      // The model counts a set-kept copy toward its set: 3000 + 100 + 120.
+      expect(modelDps(equippedIds(both), getSetId)).toBe(3220);
     });
 
     it("511-I: an interaction term needs every listed id worn; a copy counts as its original", () => {
@@ -1939,7 +2005,7 @@ describe.skipIf(!forkPresent)(
       );
     });
 
-    it("511-G: the 2pc same-gear bonus is the bonus alone, for one new sim", async () => {
+    it("511-G: the 2pc same-gear bonus is the bonus alone, for two new sims", async () => {
       const off = await runScenario({
         worn: wornGear({}),
         pool: TH_HANDS_LEGS_POOL,
@@ -1950,18 +2016,23 @@ describe.skipIf(!forkPresent)(
         measureBrokenSetValue: true,
       });
       // Only the 2pc package is measured (two pieces cannot reach the 4pc),
-      // and nothing worn is broken, so the flag adds the gate's set-less sim
-      // and nothing else.
-      expect(on.runCount - off.runCount).toBe(1);
+      // and nothing worn is broken, so the flag adds the gate's two sims and
+      // nothing else.
+      expect(on.runCount - off.runCount).toBe(2);
       const copyCalls = on.calls.filter((ids) =>
         ids.some((id) => id >= COPY_OFFSET)
       );
-      expect(copyCalls).toHaveLength(1);
-      // The first set piece in slot order, the hands, is the copy.
-      expect(copyCalls[0]?.[HANDS_SLOT]).toBe(COPY_OFFSET + THUNDERHEART.hands);
-      expect(copyCalls[0]?.[LEGS_SLOT]).toBe(THUNDERHEART.legs);
-      // The "on" sim is the package request, simmed once and then served
-      // from the store.
+      expect(copyCalls).toHaveLength(2);
+      // The first set piece in slot order, the hands, is the copy, in both
+      // requests: set kept in the "on" sim, set-less in the "off" sim (G2).
+      expect(copyCalls.map((ids) => ids[HANDS_SLOT])).toEqual([
+        SET_KEPT_OFFSET + THUNDERHEART.hands,
+        COPY_OFFSET + THUNDERHEART.hands,
+      ]);
+      for (const ids of copyCalls) {
+        expect(ids[LEGS_SLOT]).toBe(THUNDERHEART.legs);
+      }
+      // The package request is simmed once.
       const packageCalls = on.calls.filter(
         (ids) =>
           ids[HANDS_SLOT] === THUNDERHEART.hands &&
@@ -1969,7 +2040,8 @@ describe.skipIf(!forkPresent)(
       );
       expect(packageCalls).toHaveLength(1);
 
-      // on 3000 + 200 + 50, off 3000 + 200: 50. se = √2 · 30 / √5000 = 0.6.
+      // on 3000 + 200 + 50 (the set-kept copy counts toward the set), off
+      // 3000 + 200: 50. se = √2 · 30 / √5000 = 0.6.
       const b2 = bonusOf(on.ranking, 676, 2);
       expect(b2?.sameGearDps).toBeCloseTo(50, 9);
       expect(b2?.sameGearSe).toBeCloseTo(0.6, 9);
@@ -1999,8 +2071,46 @@ describe.skipIf(!forkPresent)(
       const b2 = bonusOf(ranking, 676, 2);
       // Package 3000 + 200 + 50 + 9, singles +100 each: 259 − 200 = 59.
       expect(b2?.bonusDps).toBeCloseTo(59, 9);
-      // The copy keeps the term: 3259 − (3000 + 200 + 9) = 50.
+      // Both copies keep the term: 3259 − (3000 + 200 + 9) = 50.
       expect(b2?.sameGearDps).toBeCloseTo(50, 9);
+    });
+
+    it("511-H: a set piece with an id-keyed effect changes no same-gear bonus", async () => {
+      // Scenario kind: a set package in which a piece with a Go effect keyed
+      // by its item id (hunter and warrior PvP gloves, `RegisterPvPGloveMod`;
+      // any `itemEffects[eq.ID]` entry) is among the pieces the gate changes.
+      // Until ticket 511's gain side leaves the six-set table, only a set in
+      // that table has a package to gate, so the example is a druid set
+      // piece given a model id effect: Thunderheart Gauntlets 31034, effect
+      // 15, Thunderheart 2pc 50. 512-H covers the PvP gloves on the break
+      // side.
+      const scenario = (pool: PoolSpec[]) =>
+        runScenario({
+          worn: wornGear({}),
+          pool,
+          measureBrokenSetValue: true,
+          idEffects: new Map([[THUNDERHEART.hands, 15]]),
+        });
+      // (i) chest and gloves: the gloves are last in slot order.
+      const first = await scenario([
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+      ]);
+      // (ii) gloves and legs: the gloves are first in slot order, so they are
+      // the piece the gate copies. Copied on one side only they would add 15.
+      const second = await scenario([
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+      ]);
+      expect(sortedIds(bonusOf(first.ranking, 676, 2)?.packageItemIds)).toEqual(
+        [THUNDERHEART.hands, THUNDERHEART.chest]
+      );
+      expect(
+        sortedIds(bonusOf(second.ranking, 676, 2)?.packageItemIds)
+      ).toEqual([THUNDERHEART.hands, THUNDERHEART.legs]);
+      for (const { ranking } of [first, second]) {
+        expect(bonusOf(ranking, 676, 2)?.sameGearDps).toBeCloseTo(50, 9);
+      }
     });
   }
 );

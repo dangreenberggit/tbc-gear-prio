@@ -28,9 +28,15 @@ The fixture sim returns
   scenario overrides them.
 - Set bonuses: Thunderheart 2pc `50` and 4pc `80`; Malorne 2pc `40` and 4pc
   `70`. A 2pc and 4pc of the same set stack.
-- Set-less copies (ticket 511): an id at or above `1,000,000` is the copy of
-  the item `id − 1,000,000`. It has that item's own value and belongs to no
-  set.
+- Set-less copies (ticket 511): an id from `1,000,000` up to `2,000,000` is
+  the set-less copy of the item `id − 1,000,000`. It has that item's own
+  value and belongs to no set.
+- Set-kept copies (ticket 512): an id at or above `2,000,000` is the
+  set-kept copy of the item `id − 2,000,000`. It has that item's own value
+  and counts toward that item's set.
+- Id effects (ticket 512): a case can give an item id a DPS the model adds
+  only when that real id is worn, never for a copy. It stands in for an
+  effect Go keys by item id, such as the PvP glove mods.
 - Interaction terms (ticket 511): a case can add `{ids, dps}` terms. A term
   adds its `dps` when every listed id is worn, and a copy counts as its
   original. No case before 511 uses one.
@@ -87,7 +93,7 @@ Thunderheart and neutral pieces in those four slots. The baseline is
   breaks (640,2): full credit `50 + 80 − 40 = 90`, split
   `25 + 20 − 40 = 5`. Four rows sum to 360 (full) and 20 (split) against a
   package net of 90 (ADR-0034). The flag adds 2 B sims, and since 511 the
-  Thunderheart 2pc and 4pc gate sims: 4 in all.
+  Thunderheart 2pc and 4pc gate sims, two each since 512: 6 in all.
 - Since 502: each other Thunderheart piece owns `30 + 70 = 100` (its single
   plus the (640,4) it breaks alone). `P_2` is hands and head; the shoulder
   and chest rows take hands as their 2pc partner (tie on 30, lower id). Every
@@ -132,7 +138,8 @@ hands and legs at 100, and neutral chest and hands. The baseline is
   top package with legs substituted overwrites Malorne hands and legs, 3→1,
   so `commitBreaks [(640,2)]`. B(640,2): `n = 2`, vacate chest and hands:
   `Δ = 240 − 40 = 200`, `Σs = 240`, `L_1 = ∅`, so `B_2 = 40`. One extra B
-  sim, and since 511 the Thunderheart 2pc and 4pc gate sims: 3 in all.
+  sim, and since 511 the Thunderheart 2pc and 4pc gate sims, two each since
+  512: 5 in all.
 - Since 490 the credit charges only the row's own path. Legs plus wrist
   (to 2) and legs plus wrist, waist and feet (to 4) keep Malorne at 2, so
   nothing is charged: full credit `50 + 80 = 130`. From 477 until 490 it
@@ -176,8 +183,9 @@ chest `+100`; hands or legs replaces a 100-value piece and loses the
 Thunderheart 2pc: `100 − 100 − 50 = −50`; neutral hands or legs
 `120 − 100 − 50 = −30`. B(676,2): `n = 2`, vacate hands and legs:
 `Δ = 240 − 200 − 50 = −10`, `Σs = −60`, coefficient −1, so `B = 50`. The
-flag adds exactly 1 B sim. Since 511 it also adds one gate sim per measured
-package; in 490-A that is the Malorne 2pc and 4pc, 3 sims in all.
+flag adds exactly 1 B sim. Since 511 it also adds the gate sims of each
+measured package, two per package since 512; in 490-A that is the Malorne
+2pc and 4pc, 5 sims in all.
 
 **490-A: Malorne with bonuses 2pc 40, 4pc 0.** Sorted singles: chest,
 head, shoulder (100), then hands, legs (−50).
@@ -269,8 +277,8 @@ and neutral head, shoulder and chest.** The baseline is
 - B(640,2): `n = 3 − 2 + 1 = 2`, vacate head and shoulder to neutrals:
   `DPS = 3000 + 100 + 240 = 3340`, `Δ = 200`, `Σs = 240`, `L_1 = ∅`,
   coefficient 1, so `B = 40`. The flag adds 1 B sim, and since 511 the 4pc
-  gate sim: 2 in all. The 2pc is one piece at worn 1, so it is not measured
-  and has no gate.
+  gate sims, two since 512: 3 in all. The 2pc is one piece at worn 1, so it
+  is not measured and has no gate.
 - net4 `= 40 − (0 − 0 − 1 + 0)·40 = 80`, the model's true 4pc.
 - Every Thunderheart row: `deltaDps 150`, futures
   `[{4, 3, 80, [(640,2) 40]}]` (each row's path takes Malorne to 1 or 0),
@@ -306,7 +314,7 @@ Thunderheart shoulder, which would take Thunderheart 1→2 and cross its
 2pc, so it is refused: (640,4) is `no-neutral-candidates`. (640,2) needs
 B_4 and is `dependent-unmeasured`. Both are found before any sim, so the
 flag adds 0 B sims. Since 511 it adds the Thunderheart 2pc and 4pc gate
-sims: 2 in all. Neither 676 net is set. Every Thunderheart row keeps
+sims, two each since 512: 4 in all. Neither 676 net is set. Every Thunderheart row keeps
 `deltaDps 30` and `singleBreaks [(640,4)]` without `dps`, has futures
 `[2, 4]` without `dps`, credit 0, and sub-line `not_counted`.
 
@@ -374,11 +382,13 @@ Thunderheart 2pc worth 4 and Malorne 2pc 40, 4pc 30.
 
 ## Ticket 511: set-less copies and the same-gear gate
 
-Under the flag, each measured package also gets `sameGearDps`: the package
-sim minus the same gear with the first set pieces, in slot order, made
-set-less until `threshold − 1` of the set remain. The package sim is
-already in the store, so only the set-less sim is new. Every flag-on case
-above therefore adds one sim per measured package, as its own section says.
+Under the flag, each measured package also gets `sameGearDps`: the same
+gear simmed twice with the first set pieces, in slot order, sent as copies
+until `threshold − 1` of the set remain without them. The copies are
+set-kept in the "on" sim and set-less in the "off" sim (ticket 512), so a
+piece with an id effect lacks it in both. Neither request is the package
+request, so both sims are new. Every flag-on case above therefore adds two
+sims per measured package, as its own section says.
 
 **511-C (the copy transform).** A request with Thunderheart hands and
 neutral legs 8289 and no database, both made set-less: the ids become
@@ -386,23 +396,44 @@ neutral legs 8289 and no database, both made set-less: the ids become
 no database, and the cache key differs. Neutral legs alone sim at
 `3000 + 120 = 3120`, and so does their copy. With a database holding the
 hands' row, the copy adds one row: the same fields with `id 1,031,034`,
-`setName ""` and `setId 0`, `scalingOptions` kept.
+`setName ""` and `setId 0`, `scalingOptions` kept. A set-kept copy of the
+hands adds the real row with only `id` changed, to `2,031,034`. With no
+database, set-kept hands and set-less neutral legs swap ids only and sim at
+`3000 + 100 + 120 = 3220` (one Thunderheart piece, no bonus).
 
 **511-I (the interaction hook, pure).** Thunderheart hands and legs with a
 term `{[hands, legs], 9}`: both worn `3000 + 200 + 50 + 9 = 3259`; hands
 alone `3100`; the hands' copy with the legs `3000 + 200 + 9 = 3209` (the
 term stays, the 2pc goes).
 
-**511-G (the gate, one new sim).** Worn nothing; the pool holds only
+**511-G (the gate, two new sims).** Worn nothing; the pool holds only
 Thunderheart hands and legs. Singles `+100` each. The 2pc package is both
 pieces, `3000 + 200 + 50 = 3250`; the 4pc is `insufficient-pieces`. The
-gate makes the hands (the first in slot order) set-less: `3000 + 200`, so
+gate copies the hands (the first in slot order) in both sims: set-kept,
+`3000 + 200 + 50 = 3250`, and set-less, `3000 + 200`, so
 `sameGearDps = 50`, and `sameGearSe = √(2 · (30/√5000)²) = 0.6`. Nothing
-worn is broken, so the flag adds exactly this one sim. The package request
-is simmed once. The hands row's 2pc future carries 50 and 0.6; its 4pc
-future carries neither.
+worn is broken, so the flag adds exactly these two sims. The package
+request is simmed once. The hands row's 2pc future carries 50 and 0.6; its
+4pc future carries neither.
 
 **511-G2 (the gate leaves out interactions).** 511-G with the term
 `{[hands, legs], 9}`. The package sims at `3259`, so today's
-`bonusDps = 259 − 200 = 59`. The copy keeps the term:
+`bonusDps = 259 − 200 = 59`. Both copies keep the term:
 `sameGearDps = 3259 − 3209 = 50`, the bonus alone.
+
+**511-H (an id effect among the pieces the gate changes).** Scenario kind:
+a set package in which a piece with a Go effect keyed by its item id is
+among the pieces the gate copies, as the hunter and warrior PvP gloves
+are (`RegisterPvPGloveMod`). Until ticket 511's gain side leaves the
+six-set table, only a table set has a package to gate, so the example is
+Thunderheart Gauntlets 31034 with a model id effect of 15, and the
+Thunderheart 2pc of 50. Worn nothing.
+
+- Run (i): the pool holds the chest and the gauntlets. The package is both,
+  and the gate copies the chest (first in slot order). On:
+  `3000 + 200 + 15 + 50 = 3265`; off: `3000 + 200 + 15 = 3215`;
+  `sameGearDps = 50`.
+- Run (ii): the pool holds the gauntlets and the legs. The gate copies the
+  gauntlets. On: `3000 + 200 + 50 = 3250`; off: `3000 + 200 = 3200`;
+  `sameGearDps = 50`. With the gauntlets copied on the "off" side only
+  (K3's gate), on is the package `3265` and the value is 65.
