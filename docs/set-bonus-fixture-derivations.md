@@ -2,7 +2,8 @@
 
 This file holds the hand derivations behind the literals in
 `packages/core/test/fork-set-net.test.ts`, for the fixtures of tickets
-476–478, 490–492, 502 and 511 and the targeted engine review of 2026-09-25. The fixture
+476–478, 490–492, 502, 511 and 512 and the targeted engine review of
+2026-09-25. The fixture
 sim is an exact model, so each expected value comes from the arithmetic
 below. None is recomputed the way the engine computes it.
 
@@ -27,7 +28,9 @@ The fixture sim returns
   pieces `V_NEUTRAL = 120`, and worn Malorne (640) pieces 0 unless a
   scenario overrides them.
 - Set bonuses: Thunderheart 2pc `50` and 4pc `80`; Malorne 2pc `40` and 4pc
-  `70`. A 2pc and 4pc of the same set stack.
+  `70`. A 2pc and 4pc of the same set stack. Since ticket 512 a case can
+  also give a set a 3pc, 6pc or 8pc bonus; every bonus at or below the worn
+  count stacks.
 - Set-less copies (ticket 511): an id from `1,000,000` up to `2,000,000` is
   the set-less copy of the item `id − 1,000,000`. It has that item's own
   value and belongs to no set.
@@ -47,6 +50,17 @@ The fixture sim returns
 - The corrected net is `bonusDps − Σ (membersPkg − members2pc − pkgEnd +
 twoPcEnd)·B` over every lost worn threshold (`netInflation`).
 - `FLOOR = 5`. A credit component at or below it counts as 0.
+- Break values (ticket 512, flag on). For each set worn at 2 or more
+  pieces, at slots s_1 < … < s_w, the ladder sims rung R(c) for c = 1 … w:
+  s_1 real, s_2 … s_c set-kept copies, s_(c+1) … s_w set-less copies. The
+  value at count c is `R(c) − R(c − 1)`, which in the model is the bonus at
+  exactly c pieces (0 where the set has none). A count is a break when its
+  value is above the engine gate `max(√2 · 3.6, 2 · se) = 5.09` (feral
+  cutoff 3.6; se `√2 · 30/√5000 = 0.6`), or when a rung's sim failed.
+  `brokenSetValues` holds one entry per such count. The ladder costs one
+  sim per worn piece of each set worn at 2 or more. Before 512 the break
+  value came from a vacate sim per broken bonus, solved against
+  replacement singles; the derivations below give the ladder instead.
 
 Since ticket 502 the ON credit follows rule R1 (ADR-0034). The futures are
 walked in threshold order. Each step adds its floored bonus, plus the own
@@ -79,21 +93,18 @@ Thunderheart and neutral pieces in those four slots. The baseline is
   only the 4pc: `pkgΔ2 = 200 + 50 − 70 = 180`, `raw2 = 180 − 60 = 120`.
 - The 4pc package is all four. Malorne goes 4→0 and loses both:
   `pkgΔ4 = 400 + 50 + 80 − 70 − 40 = 420`, `raw4 = 420 − 120 − 120 = 180`.
-- B(640,4): worn equals t, so `n = 2`. The vacate replaces head and
-  shoulder with neutrals: `Δ = 240 − 70 = 170`, `Σs = 100`, coefficient −1,
-  so `B_4 = 70`.
-- B(640,2): `n = 3`, vacating head, shoulder and chest:
-  `Δ = 360 − 70 − 40 = 250`, `Σs = 150`, `L_1 = {4}`, `L_vac = {2, 4}`,
-  coefficient 1: `B_2 = (150 − 250) + 3·70 − 70 = 40`. The naive `Σs − Δ`
-  gives −100.
+- Ladder (since 512), slots head, shoulder, chest, hands: R(1) to R(4) are
+  `3000`, `3040`, `3040`, `3110`, so B(640,2) = 40, (640,3) = 0 (not
+  counted) and B(640,4) = 70. Before 512 the vacate solved the same 70 and
+  40 from replacement singles (the naive `Σs − Δ` for the 2pc gave −100).
 - net2 `= 120 − (2 − 0 − 1 + 0)·70 = 50`; net4
   `= 180 − [(4 − 2 − 1 + 1)·70 + (0 − 0 − 1 + 0)·40] = 80`.
 - Every Thunderheart row: `deltaDps 30`, `singleBreaks [(640,4) 70]`,
   futures `[2: 50, 4: 80]`, `commitBreaks [(640,2) 40]`. The path to the 4pc
   breaks (640,2): full credit `50 + 80 − 40 = 90`, split
   `25 + 20 − 40 = 5`. Four rows sum to 360 (full) and 20 (split) against a
-  package net of 90 (ADR-0034). The flag adds 2 B sims, and since 511 the
-  Thunderheart 2pc and 4pc gate sims, two each since 512: 6 in all.
+  package net of 90 (ADR-0034). The flag adds 4 ladder rungs, and since
+  511 the Thunderheart 2pc and 4pc gate sims, two each since 512: 8 in all.
 - Since 502: each other Thunderheart piece owns `30 + 70 = 100` (its single
   plus the (640,4) it breaks alone). `P_2` is hands and head; the shoulder
   and chest rows take hands as their 2pc partner (tie on 30, lower id). Every
@@ -109,9 +120,10 @@ Singles take Malorne 5→4 and lose nothing: Thunderheart `100`, neutral
   `raw2 = 180 − 200 = −20`.
 - 4pc: 5→1 loses both: `pkgΔ4 = 400 + 130 − 110 = 420`,
   `raw4 = 420 − 400 + 20 = 40`.
-- B(640,4) `= 70` (`n = 2`, `L_1 = ∅`, `Δ = 170`, `Σs = 240`). B(640,2):
-  `n = 4`, `Δ = 480 − 110 = 370`, `Σs = 480`, `L_vac = {2, 4}`:
-  `B_2 = (480 − 370) − 70 = 40`. The naive value is 110.
+- Ladder (since 512), slots head, shoulder, chest, hands, legs: R(1) to
+  R(5) are `3000`, `3040`, `3040`, `3110`, `3110`, so B(640,2) = 40,
+  B(640,4) = 70, and (640,3) and (640,5) read 0 and are not counted. The
+  vacate's naive value for the 2pc was 110.
 - net2 `= −20 − (0 − 0 − 1 + 0)·70 = 50`; net4
   `= 40 − [(0 − 0 − 1 + 1)·70 + (0 − 0 − 1 + 0)·40] = 80`. The pre-476
   correction gave 180; every threshold with the old sign gives 220.
@@ -136,10 +148,10 @@ hands and legs at 100, and neutral chest and hands. The baseline is
   loss. `pkgΔ4 = 550 + 130 = 680`, `raw4 = 680 − 550 − 50 = 80`, net4 80.
 - Legs row: `deltaDps 100`, no single break, futures `[2: 50, 4: 80]`. The
   top package with legs substituted overwrites Malorne hands and legs, 3→1,
-  so `commitBreaks [(640,2)]`. B(640,2): `n = 2`, vacate chest and hands:
-  `Δ = 240 − 40 = 200`, `Σs = 240`, `L_1 = ∅`, so `B_2 = 40`. One extra B
-  sim, and since 511 the Thunderheart 2pc and 4pc gate sims, two each since
-  512: 5 in all.
+  so `commitBreaks [(640,2)]`. Ladder (since 512), slots chest, hands,
+  legs: `3000`, `3040`, `3040`, so B(640,2) = 40 and (640,3) = 0 (not
+  counted). The flag adds 3 ladder rungs, and since 511 the Thunderheart 2pc
+  and 4pc gate sims, two each since 512: 7 in all.
 - Since 490 the credit charges only the row's own path. Legs plus wrist
   (to 2) and legs plus wrist, waist and feet (to 4) keep Malorne at 2, so
   nothing is charged: full credit `50 + 80 = 130`. From 477 until 490 it
@@ -181,11 +193,11 @@ outside c's slot.
 2).** The baseline is `3000 + 200 + 50 = 3250`. Singles: head, shoulder or
 chest `+100`; hands or legs replaces a 100-value piece and loses the
 Thunderheart 2pc: `100 − 100 − 50 = −50`; neutral hands or legs
-`120 − 100 − 50 = −30`. B(676,2): `n = 2`, vacate hands and legs:
-`Δ = 240 − 200 − 50 = −10`, `Σs = −60`, coefficient −1, so `B = 50`. The
-flag adds exactly 1 B sim. Since 511 it also adds the gate sims of each
-measured package, two per package since 512; in 490-A that is the Malorne
-2pc and 4pc, 5 sims in all.
+`120 − 100 − 50 = −30`. Ladder (since 512), slots hands and legs:
+R(1) `3000 + 200 = 3200`, R(2) `3250`, so B(676,2) = 50. The flag adds 2
+ladder rungs. Since 511 it also adds the gate sims of each measured
+package, two per package since 512; in 490-A that is the Malorne 2pc and
+4pc, 6 sims in all.
 
 **490-A: Malorne with bonuses 2pc 40, 4pc 0.** Sorted singles: chest,
 head, shoulder (100), then hands, legs (−50).
@@ -274,11 +286,11 @@ and neutral head, shoulder and chest.** The baseline is
   3→1 together, so it is rejected. Head + legs keeps Malorne at 2:
   `DPS = 3000 + 300 + 50 + 40 = 3390`, pair delta 250,
   `B2 = 300 − 250 = 50`. `bonusDps4 = −60 + 2·50 = 40`.
-- B(640,2): `n = 3 − 2 + 1 = 2`, vacate head and shoulder to neutrals:
-  `DPS = 3000 + 100 + 240 = 3340`, `Δ = 200`, `Σs = 240`, `L_1 = ∅`,
-  coefficient 1, so `B = 40`. The flag adds 1 B sim, and since 511 the 4pc
-  gate sims, two since 512: 3 in all. The 2pc is one piece at worn 1, so it
-  is not measured and has no gate.
+- Ladder (since 512), Malorne head, shoulder and chest: R(1) to R(3) are
+  `3100`, `3140`, `3140`, so B(640,2) = 40 and (640,3) = 0 (not counted).
+  Thunderheart, worn 1, has no ladder. The flag adds 3 ladder rungs, and
+  since 511 the 4pc gate sims, two since 512: 5 in all. The 2pc is one
+  piece at worn 1, so it is not measured and has no gate.
 - net4 `= 40 − (0 − 0 − 1 + 0)·40 = 80`, the model's true 4pc.
 - Every Thunderheart row: `deltaDps 150`, futures
   `[{4, 3, 80, [(640,2) 40]}]` (each row's path takes Malorne to 1 or 0),
@@ -301,22 +313,27 @@ chest.** The baseline is `3140`.
   `Σsingles = 370`, `raw4 = 20`. Breaks: (640,2).
 - Only legs is break-free, so no pair sim runs and `selfConfound` has no
   `dps`.
-- B(640,2): worn equals t, `n = 2`, vacate head and chest:
-  `Δ = 3340 − 3140 = 200`, `Σs = 160`, coefficient −1, so `B = 40`.
+- Ladder (since 512), Malorne head and chest: R(1) `3100`, R(2) `3140`,
+  so B(640,2) = 40.
 - The confounded net would be `20 − (2 − 0 − 1 + 0)·40 = −20`; the true
   4pc is 80. After the fix `bonusDpsNet` is unset, every row's future has
   no `dps`, the credit is 0 and the sub-line is `not_counted`.
 
-**476-D (finding A4): 476-A without the neutral head and shoulder.** The
-(640,4) vacate needs head and shoulder replacements. Head can only take
-Thunderheart head (0→1 crosses nothing). Shoulder can only take
-Thunderheart shoulder, which would take Thunderheart 1→2 and cross its
-2pc, so it is refused: (640,4) is `no-neutral-candidates`. (640,2) needs
-B_4 and is `dependent-unmeasured`. Both are found before any sim, so the
-flag adds 0 B sims. Since 511 it adds the Thunderheart 2pc and 4pc gate
-sims, two each since 512: 4 in all. Neither 676 net is set. Every Thunderheart row keeps
-`deltaDps 30` and `singleBreaks [(640,4)]` without `dps`, has futures
-`[2, 4]` without `dps`, credit 0, and sub-line `not_counted`.
+**476-D: a failed ladder sim (rewritten for ticket 512).** Until 512 this
+case pinned finding A4: 476-A without the neutral head and shoulder, where
+the (640,4) vacate found no replacement (`no-neutral-candidates`) and
+(640,2) was `dependent-unmeasured`. The ladder needs no replacement and has
+no dependency between counts, so that branch is gone. The case now keeps
+476-A's worn Malorne 4 and that pool, and makes the model sim fail on any
+request with the Malorne hands as a set-kept copy (id `2,029,097`). Only
+R(4) sends it (hands is the last slot), so (640,4) is `sim-failed`,
+counted and without `dps`; R(1) to R(3) give B(640,2) = 40 and (640,3) = 0
+(not counted). The flag adds 4 ladder rungs (one fails) and the
+Thunderheart 2pc and 4pc gate sims, two each: 8 in all. Both packages
+break (640,4), whose B is missing, so neither 676 net is set. Every
+Thunderheart row keeps `deltaDps 30` and `singleBreaks [(640,4)]` without
+`dps`, has futures `[2, 4]` without `dps`, credit 0, and sub-line
+`not_counted`.
 
 ## Ticket 502
 
@@ -365,20 +382,27 @@ credited as before 502: `50 − 20 = 30`, and it is not unmeasured.
 `deltaDps`: chest, head, shoulder (100), neutral legs 8289 and hands 10140
 (`120 − 100 − 50 = −30`), then Malorne hands and legs (−50).
 
-**502-G (a path break below the floor):** the 490 geometry with the
-Thunderheart 2pc worth 4 and Malorne 2pc 40, 4pc 30.
+**502-G (a worn bonus below the gate; rewritten for ticket 512):** the
+490 geometry with the Thunderheart 2pc worth 4 and Malorne 2pc 40, 4pc 30.
 
 - Singles: chest, head, shoulder 100; Malorne hands or legs
   `100 − 100 − 4 = −4`; neutral hands or legs `120 − 100 − 4 = 16`.
-- B(676,2): vacate hands and legs, `Δ = 240 − 200 − 4 = 36`, `Σs = 32`,
-  coefficient −1, so `B = 4`.
+- Ladder: R(1) `3200`, R(2) `3204`, so (676,2) reads 4. That is below the
+  gate of 5.09, so it is not counted: no `brokenSetValues` entry, no
+  package or row break, and no add-back in any piece's own stats.
 - `P_2` is chest and head, net2 40. `P_4` is chest, head, shoulder and
-  hands: `pkgΔ4 = 300 + 40 + 30 − 4 = 366`, `raw4 = 366 − 296 − 40 = 30`,
-  inflation `(1 − 0 − 1 + 0)·4 = 0`, net4 30.
-- Chest row: head owns 100, shoulder 100, hands `−4 + 4 = 0`.
-  `R_2 = 40 + 100 = 140`, `R_4 = 140 + 30 + 100 + 0 − 4 = 266`. The
-  break term is −4, the credit 266, and `100 + 266 = 366 = pkgΔ4`. A
-  floored break would give 270 and 370.
+  hands: `pkgΔ4 = 300 + 40 + 30 − 4 = 366` (the sim still loses the 4),
+  `raw4 = 366 − 296 − 40 = 30`, no counted breaks, net4 30.
+- Chest row: head owns 100, shoulder 100, hands `−4` (its single, with
+  nothing added back). `R_2 = 40 + 100 = 140`,
+  `R_4 = 140 + 30 + 100 − 4 = 266`, no break term, credit 266, and
+  `100 + 266 = 366 = pkgΔ4`.
+- Before 512 the case was "a path break below the floor is charged at its
+  measured value": the break term was −4 and hands owned `−4 + 4 = 0`, which
+  gives the same 266. The Gate B ruling for plan revision 7 (R1) expected
+  270 and 370, from dropping the −4 charge while keeping the add-back; the
+  ladder drops both, because the same predicate decides the charge and the
+  add-back, so the figure stays 266 and 366.
 
 ## Ticket 511: set-less copies and the same-gear gate
 
@@ -437,3 +461,119 @@ Thunderheart 2pc of 50. Worn nothing.
   gauntlets. On: `3000 + 200 + 50 = 3250`; off: `3000 + 200 = 3200`;
   `sameGearDps = 50`. With the gauntlets copied on the "off" side only
   (K3's gate), on is the package `3265` and the value is 65.
+
+## Ticket 512: set breaks with no list
+
+Under the flag the break side reads no table: every count of every worn set
+comes from the ladder (see the model section), and a count is charged only
+when it clears the gate. Each case below states the kind of situation it
+stands for, then its example set, then the literals. The cases test the
+controlled model, not a sim. A neutral (non-set) candidate's row has no
+`setContext`, so a row's own break is read on a set-piece candidate in the
+same slot.
+
+Item ids: Wastewalker Armor (659) shoulder 27797, chest 28264, hands 27531,
+legs 27837. Primal Intent (619) chest 29525, wrist 29527, waist 29526.
+Gladiator's Pursuit (586) chest 28334, gloves 28335. Cryptstalker Armor
+(530) head 22438, shoulder 22439, chest 22436, wrist 22443, hands 22441,
+waist 22442, legs 22437, feet 22440. Their own values are 0.
+
+**Cases 7 and 8, rewritten.** Case 7 (worn Malorne hands and legs, a
+Thunderheart-only pool) pinned "no neutral replacement, so B is
+unmeasured". The ladder needs no replacement: R(1) `3000`, R(2) `3040`,
+B(640,2) = 40, nets 50 and 80 as in case 4. The Thunderheart hands row:
+`deltaDps 100 − 40 = 60`, `singleBreaks [(640,2) 40]`; its path to 2 adds
+head (100), its path to 4 adds chest and shoulder (100 each), and its own
+(640,2) is filtered from both, so `R_2 = 50 + 100 = 150`,
+`R_4 = 150 + 80 + 200 = 430`, and `60 + 430 = 490 = pkgΔ4`
+(`400 + 50 + 80 − 40`). Case 8 (the same worn gear with neutrals): the flag
+adds the 2 ladder rungs and 2 gate sims for each of the Thunderheart 2pc
+and 4pc, 6 in all.
+
+**512-W — a worn bonus from a set that no hand-kept table lists.** Kind: a
+non-tier set with bonuses at 2 and 4 (dungeon, crafted, other classes'
+sets) that an upgrade package takes pieces from. Example: Wastewalker 659
+worn 4/4, model 2pc 30 and 4pc 20; the pool holds Malorne shoulder, chest,
+hands and legs at own value 100. The baseline is `3000 + 30 + 20 = 3050`.
+
+- Ladder, slots shoulder, chest, hands, legs: R(1) to R(4) are `3000`,
+  `3030`, `3030`, `3050`: (659,2) 30 counted, (659,3) 0 not counted,
+  (659,4) 20 counted.
+- Singles take Wastewalker 4→3 and lose the 4pc: `100 − 20 = 80`.
+- `P_2` is chest and hands (lowest ids): Wastewalker 4→2, breaks (659,4)
+  only. `pkgΔ2 = 200 + 40 − 20 = 220`, `raw2 = 60`, inflation
+  `(2 − 0 − 1 + 0)·20 = 20`, net2 40.
+- `P_4` is all four: Wastewalker 4→0, breaks (659,4) and (659,2).
+  `pkgΔ4 = 400 + 40 + 70 − 20 − 30 = 460`, `raw4 = 460 − 320 − 60 = 80`,
+  inflation `(4 − 2 − 1 + 1)·20 + (0 − 0 − 1 + 0)·30 = 10`, net4 70.
+- Mantle row: `deltaDps 80`, `singleBreaks [(659,4) 20]`. Its path to 2 is
+  mantle and chest (lowest id among the tied 80s): its only break is its
+  own (659,4), filtered. Its path to 4 is all four and breaks (659,2) 30.
+  Each other piece owns `80 + 20 = 100`. `R_2 = 40 + 100 = 140`,
+  `R_4 = 140 + 70 + 200 − 30 = 380`, and `80 + 380 = 460 = pkgΔ4`: the
+  4pc is charged once (inside the row's delta) and the 2pc once (on the
+  path).
+
+**512-P — a set whose only bonus needs 3 pieces.** Kind: the three-piece
+crafted sets in cloth, leather and mail, which a `2 | 4` count type could
+not hold. Example: Primal Intent 619 worn 3/3, model 3pc 25; the pool holds
+a Thunderheart chest and the neutral chest 8283. The baseline is `3025`.
+
+- Ladder, slots chest, wrist, waist: `3000`, `3000`, `3025`: (619,2) 0 not
+  counted, (619,3) 25 counted.
+- Thunderheart chest: `100 − 25 = 75`, `singleBreaks [(619,3) 25]`. The
+  neutral chest: `120 − 25 = 95`, inside its own sim.
+
+**512-N — a swap that removes a piece but no bonus.** Kind: a worn count
+past the highest bonus, a count between two bonuses, or a set with no bonus
+at all. Three runs.
+
+- (a) Past the highest bonus, w = 5 → 4: 476-B's worn Malorne 5 and pool.
+  Ladder (476-B): (640,2) 40, (640,3) 0, (640,4) 70, (640,5) 0; counts 3
+  and 5 are not counted and have no `brokenSetValues` entry. The
+  Thunderheart head row takes Malorne 5→4: no single break, and every break
+  it lists is at 2 or 4.
+- (b) Between bonuses, w = 3 → 2: Wastewalker worn 3 of 4 (shoulder,
+  chest, hands), model 2pc 30 and 4pc 20; the pool holds the Malorne chest
+  (own value 100) and the neutral chest. Ladder: `3000`, `3030`, `3030`:
+  (659,2) 30 counted, (659,3) 0 not counted. The Malorne chest takes the
+  set 3→2 and keeps its 2pc: `deltaDps 100`, and the row lists no
+  Wastewalker break.
+- (c) No bonus at all: Primal Intent worn 3/3 with no model bonus; the pool
+  holds a Thunderheart chest. Ladder `3000`, `3000`, `3000`: (619,2) and
+  (619,3) read 0 and are not counted, `brokenSetValues` is empty, and the
+  chest row lists no Primal Intent break.
+
+**512-H — a worn set piece with its own id-keyed effect.** Kind: a set
+piece that the sim also gives an effect by its item id, such as the hunter
+and warrior PvP gloves (`RegisterPvPGloveMod`). Example: Gladiator's
+Pursuit 586 worn as chest 28334 and gloves 28335, model 2pc 40 and a model
+id effect of 15 on the gloves; the pool holds a Thunderheart chest and the
+neutral chest. The baseline is `3000 + 40 + 15 = 3055`.
+
+- Ladder, slots chest, hands: R(1) sends the gloves set-less, `3000`; R(2)
+  sends them set-kept, `3040`. Both rungs lack the 15, so (586,2) = 40. A
+  rung with the real gloves would read `3055 − 3000 = 55`.
+- Thunderheart chest: takes the set 2→1 with the real gloves still on:
+  `100 − 40 = 60`, `singleBreaks [(586,2) 40]`.
+
+**512-C — a set with bonuses above 4 pieces.** Kind: a set with bonuses at
+6 or 8 pieces, which a count type or ladder that stops at 4 would drop.
+Example: Cryptstalker 530 worn 8/8, model 2pc 10, 4pc 20, 6pc 30, 8pc 40;
+the pool holds Thunderheart shoulder, chest, hands and legs. (The
+Thunderheart head is left out: the engine drops it because its meta socket
+cannot be activated over this gemless gear.) The baseline is
+`3000 + 100 = 3100`.
+
+- Ladder, eight slots: R(1) to R(8) are `3000`, `3010`, `3010`, `3030`,
+  `3030`, `3060`, `3060`, `3100`, so counts 2 to 8 read 10, 0, 20, 0, 30,
+  0, 40; the non-zero counts are counted.
+- Each single takes the set 8→7 and is charged the 8pc only:
+  `100 − 40 = 60`, `singleBreaks [(530,8) 40]`.
+- `P_2` is hands and chest (lowest ids), 8→6: breaks (530,8).
+  `pkgΔ2 = 200 + 50 − 40 = 210`, `raw2 = 90`, inflation
+  `(2 − 0 − 1 + 0)·40 = 40`, net2 50.
+- `P_4` is all four, 8→4: counts 8, 7, 6 and 5 are lost; breaks (530,8)
+  and (530,6), nothing for 7 and 5. `pkgΔ4 = 400 + 130 − 70 = 460`,
+  `raw4 = 460 − 240 − 90 = 130`, inflation
+  `(4 − 2 − 1 + 1)·40 + (0 − 0 − 1 + 0)·30 = 50`, net4 80.

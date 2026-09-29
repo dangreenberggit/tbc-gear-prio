@@ -142,6 +142,18 @@ may keep the six-set table `IMPLEMENTED_IN_SIM` (`engine/set-value.ts:36`).
      (`sim/hunter/item_sets.go:396-407`) and 8 warrior gloves
      (`sim/warrior/items.go:361-371`), which `RegisterPvPGloveMod` checks
      (`sim/core/item_sets.go:275-292`).
+5. **Case 512-C: a set with bonuses above 4 pieces.**
+   - The situation: the player wears a set with bonuses at 6 or 8 pieces,
+     and a swap takes it below one of them.
+   - Why it matters: a piece-count type or a measurement that stops at 4
+     cannot record a 6pc or 8pc break, and none of the four cases above
+     would catch that.
+   - The check: a swap takes a worn Cryptstalker set from 8 pieces to
+     fewer. Each bonus it takes away is measured and charged: the 8pc, and
+     the 6pc when the set goes below 6. A lost count with no bonus (7 or 5)
+     is not charged.
+   - Example set: Cryptstalker Armor 530, mail, bonuses at 2, 4, 6 and 8
+     (`sim/hunter/item_sets.go:11-100`). Its bonuses act only for a hunter.
 
 **Not covered by a case.** One set in the pinned sim has bonuses above 4
 pieces: Cryptstalker Armor 530, at 2, 4, 6 and 8
@@ -153,7 +165,8 @@ that stops at 4 cannot record a 6pc or 8pc break, and none of the four
 cases would catch that. Before this ticket closes, the plan does one of
 two things and records which in Comments: it adds a case where a swap
 takes a worn Cryptstalker set from 6 or 8 pieces to fewer, or it states
-that 6pc and 8pc breaks are out of scope, with the reason.
+that 6pc and 8pc breaks are out of scope, with the reason. Case 512-C
+(item 5) now covers it; see Comments, 2026-09-28 (K4).
 
 ## Comments
 
@@ -225,3 +238,10 @@ catches a new list that includes Wastewalker. A scope sentence says the
 cases use a controlled DPS model, not a sim. 512-H's Go claim is marked
 as code reading. The Cryptstalker note now says its bonuses act only for
 a hunter and asks the plan to add a case or record why not.
+
+2026-09-28 (stage-gate 511-512-set-credit, chunk K4): the plan chose to add
+a case, 512-C (item 5), in the same style as the others. Gate B for plan
+revision 7 ruled that the break side has no fixed count cap: it measures
+every count from 2 up to the worn count
+(`.scratch/stage-gate/511-512-set-credit/decision-log.md`, ruling R2).
+The ticket stays open.
