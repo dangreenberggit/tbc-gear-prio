@@ -10,10 +10,10 @@ final message. Do the task the prompt names, inside the paths and limits
 it sets. Edit only the paths the prompt allows; a prompt that allows no
 path is read-only.
 
-When the task is research, split its independent questions across your
-own subagents (type and model as in AGENTS.md § The session delegates)
-and judge what each one returns, rather than doing all the reading
-yourself.
+When your prompt gives you one narrow lookup or investigation, do it
+yourself and spawn no subagents. For any other research task, split its
+independent questions across your own subagents (type and model as in
+AGENTS.md § The session delegates) and judge what each one returns.
 
 Open your final message with the conclusion in plain English. Then give
 the evidence: each fact with the command or file it came from, and each
