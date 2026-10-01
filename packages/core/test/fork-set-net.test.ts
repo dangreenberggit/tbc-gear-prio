@@ -130,8 +130,9 @@ type SimObservation = {
   stdev: number;
   iterationsDone: number;
   simVersion: string;
+  allValues?: readonly number[];
 };
-type SimRunOpts = { seed: number; iterations: number };
+type SimRunOpts = { seed: number; iterations: number; saveAllValues?: boolean };
 
 const feralSkeleton = JSON.parse(
   readFileSync(
@@ -262,10 +263,12 @@ type Scenario = {
   interactions?: readonly Interaction[];
   /** Id effects for this scenario only (tickets 511 and 512, G2). */
   idEffects?: ReadonlyMap<number, number>;
-  /** The fake sim throws for a request whose equipped ids match. */
-  failWhen?: (ids: readonly number[]) => boolean;
+  /** The fake sim throws for a request whose equipped ids (and options) match. */
+  failWhen?: (ids: readonly number[], opts: SimRunOpts) => boolean;
   /** `Deps.partnerRule` (ticket 511); absent means the engine's default. */
   partnerRule?: string;
+  /** `Deps.setScreen` (ticket 511, K5R); absent means off. */
+  setScreen?: string;
   /** A store shared between runs, to see what the ranking cache serves. */
   store?: Record<string, unknown>;
 };
@@ -361,6 +364,28 @@ type ForkRanking = {
     unmeasured?: string;
     counted: boolean;
   }>;
+  setScreen?: {
+    mode: string;
+    seed: number;
+    pairIterations: number[];
+    ladderIterations: number[];
+    sets: Array<{
+      setId: number;
+      worn: number;
+      reach: number;
+      packageItemIds: number[];
+      pairs: Array<{ iterations: number; dps?: number; pairedSe?: number }>;
+      rungs: Array<{
+        iterations: number;
+        count: number;
+        dps?: number;
+        se?: number;
+        pairedSeToPrev?: number;
+      }>;
+    }>;
+    simmed: number;
+    fromStore: number;
+  };
 };
 
 async function runScenario(scenario: Scenario): Promise<{
@@ -368,6 +393,8 @@ async function runScenario(scenario: Scenario): Promise<{
   runCount: number;
   /** The equipped ids of each request the fake sim ran, in call order. */
   calls: number[][];
+  /** The options of each of those requests, in the same order. */
+  callOpts: SimRunOpts[];
 }> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
@@ -430,6 +457,7 @@ async function runScenario(scenario: Scenario): Promise<{
 
   let runCount = 0;
   const calls: number[][] = [];
+  const callOpts: SimRunOpts[] = [];
   const { simCacheKey } = seamMod;
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
@@ -437,21 +465,28 @@ async function runScenario(scenario: Scenario): Promise<{
       runCount += 1;
       const ids = equippedIds(req);
       calls.push(ids);
-      if (scenario.failWhen?.(ids)) {
+      callOpts.push({ ...opts });
+      if (scenario.failWhen?.(ids, opts)) {
         return Promise.reject(new Error("the model sim failed on purpose"));
       }
+      const dps = modelDps(
+        ids,
+        getSetId,
+        scenario.itemValue,
+        scenario.setBonuses,
+        scenario.interactions,
+        scenario.idEffects
+      );
+      // Per-iteration values only when asked, as the worker runner does: the
+      // model is exact, so every iteration reads the model DPS.
       return Promise.resolve({
-        dps: modelDps(
-          ids,
-          getSetId,
-          scenario.itemValue,
-          scenario.setBonuses,
-          scenario.interactions,
-          scenario.idEffects
-        ),
+        dps,
         stdev: 30,
         iterationsDone: opts.iterations,
         simVersion: SIM_VERSION,
+        ...(opts.saveAllValues === true
+          ? { allValues: new Array<number>(opts.iterations).fill(dps) }
+          : {}),
       });
     },
   };
@@ -477,9 +512,10 @@ async function runScenario(scenario: Scenario): Promise<{
     pool,
     ...(scenario.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
+    ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
   });
 
-  return { ranking, runCount, calls };
+  return { ranking, runCount, calls, callOpts };
 }
 
 /** A full 17-slot worn set, some slots filled by the given specs. */
@@ -3375,6 +3411,224 @@ describe.skipIf(!forkPresent)(
         (r.setBonuses ?? []).map((b) => [b.setId, b.threshold, b.unmeasured])
       ).toEqual([[462, 2, "insufficient-pieces"]]);
       expect(r.setStepSims?.gears).toBe(0);
+    });
+  }
+);
+
+/* ------------------------------------------------------------------ *
+ * The set screen in record mode (ticket 511, stage K5R). Literals are
+ * derived in docs/set-bonus-fixture-derivations.md, "The set screen in
+ * record mode".
+ * ------------------------------------------------------------------ */
+
+// Worn: Thunderheart Gauntlets (Thunderheart at 1) and Malorne shoulder and
+// chest (Malorne 2pc, so the worn-set ladder runs). Pool: the Thunderheart
+// Pauldrons, Chestguard and Leggings, so Thunderheart reaches 4 and has a
+// crossing gate (the Leggings fill a slot Thunderheart does not).
+const SR_SCENARIO: Scenario = {
+  worn: wornGear({
+    hands: THUNDERHEART.hands,
+    shoulder: MALORNE.shoulder,
+    chest: MALORNE.chest,
+  }),
+  pool: [
+    { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+    { itemId: THUNDERHEART.chest, slot: "chest" },
+    { itemId: THUNDERHEART.legs, slot: "legs" },
+  ],
+  measureBrokenSetValue: true,
+};
+
+const SCREEN_PAIR_N = [10, 100, 300, 1000];
+const SCREEN_LADDER_N = [100, 300, 1000];
+
+/** Everything the screen must leave alone, from one run. */
+async function screenFreeParts(ranking: ForkRanking) {
+  const view = await stepView();
+  return {
+    setBonuses: ranking.setBonuses,
+    brokenSetValues: ranking.brokenSetValues,
+    wornSetLadder: ranking.wornSetLadder,
+    crossingGates: ranking.crossingGates,
+    setStepSims: ranking.setStepSims,
+    rows: ranking.items.map((row) => ({
+      itemId: row.itemId,
+      deltaDps: row.deltaDps,
+      setContext: row.setContext,
+      on: row.deltaDps + view.rankableSetPotential(row, FLOOR, "full"),
+    })),
+  };
+}
+
+describe.skipIf(!forkPresent)(
+  "the set screen in record mode (511, K5R)",
+  () => {
+    it("511-SR: record mode filters nothing, and records each reading with its paired error", async () => {
+      // Scenario kind: a check run with the screen in record mode, on gear
+      // that has a worn-set ladder, a crossing gate and a set to collect.
+      const off = await runScenario(SR_SCENARIO);
+      const on = await runScenario({ ...SR_SCENARIO, setScreen: "record" });
+      expect(off.ranking.setScreen).toBeUndefined();
+      expect(off.ranking.wornSetLadder?.length).toBeGreaterThan(0);
+      expect(off.ranking.crossingGates?.length).toBeGreaterThan(0);
+      // W-SR1: the screen changes nothing else in the ranking.
+      expect(await screenFreeParts(on.ranking)).toEqual(
+        await screenFreeParts(off.ranking)
+      );
+      // Only screen sims ask for per-iteration values, and every other
+      // request, with its options, is the run without the screen.
+      expect(off.callOpts.some((o) => "saveAllValues" in o)).toBe(false);
+      const screenCalls = on.callOpts.filter((o) => o.saveAllValues === true);
+      expect(
+        on.calls.filter((_, i) => on.callOpts[i]!.saveAllValues !== true)
+      ).toEqual(off.calls);
+      expect(on.callOpts.filter((o) => o.saveAllValues !== true)).toEqual(
+        off.callOpts
+      );
+      // W-H1: the two runs have different hashes.
+      expect(off.ranking.contentHash).not.toContain('"setScreen"');
+      expect(on.ranking.contentHash).toContain('"setScreen":"record"');
+      // W-SR4, store keys: only a run that asks for per-iteration values gets
+      // a new key; every other key is as before.
+      const { simCacheKey } = await importForkUpgrades<{
+        simCacheKey: (
+          req: RaidSimRequest,
+          simVersion: string,
+          opts: SimRunOpts
+        ) => string;
+      }>("engine/seams/sim-runner.ts");
+      const req = { raid: {} };
+      const plainKey = `${JSON.stringify(req)}:${SIM_VERSION}:11:300`;
+      expect(simCacheKey(req, SIM_VERSION, { seed: 11, iterations: 300 })).toBe(
+        plainKey
+      );
+      expect(
+        simCacheKey(req, SIM_VERSION, {
+          seed: 11,
+          iterations: 300,
+          saveAllValues: false,
+        })
+      ).toBe(plainKey);
+      expect(
+        simCacheKey(req, SIM_VERSION, {
+          seed: 11,
+          iterations: 300,
+          saveAllValues: true,
+        })
+      ).toBe(`${plainKey}:all`);
+
+      const screen = on.ranking.setScreen!;
+      expect(screen.mode).toBe("record");
+      expect(screen.seed).toBe(11);
+      expect(screen.pairIterations).toEqual(SCREEN_PAIR_N);
+      expect(screen.ladderIterations).toEqual(SCREEN_LADDER_N);
+      expect(
+        screen.sets.map((s) => [s.setId, s.worn, s.reach, s.packageItemIds])
+      ).toEqual([
+        [
+          676,
+          1,
+          4,
+          [THUNDERHEART.shoulder, THUNDERHEART.chest, THUNDERHEART.legs],
+        ],
+      ]);
+      const set = screen.sets[0]!;
+      // The pair: count 4 against count 1 on the 4-piece gear, 50 + 80.
+      expect(set.pairs).toEqual(
+        SCREEN_PAIR_N.map((n) => ({ iterations: n, dps: 130, pairedSe: 0 }))
+      );
+      // Rungs at counts 1 … 4: 3000 + four pieces' 400, plus the bonuses on.
+      expect(
+        set.rungs.map((r) => [r.iterations, r.count, r.dps, r.pairedSeToPrev])
+      ).toEqual(
+        SCREEN_LADDER_N.flatMap((n) => [
+          [n, 1, 3400, undefined],
+          [n, 2, 3450, 0],
+          [n, 3, 3450, 0],
+          [n, 4, 3530, 0],
+        ])
+      );
+      for (const rung of set.rungs) {
+        expect(rung.se).toBeCloseTo(30 / Math.sqrt(rung.iterations), 9);
+      }
+      // 8 + 3·(R − w − 1) sims; the ladder's rungs 1 and 4 at each of its
+      // three counts come from the store.
+      expect(screen.simmed).toBe(8 + 3 * (4 - 1 - 1));
+      expect(screen.fromStore).toBe(6);
+      expect(screenCalls).toHaveLength(screen.simmed);
+      for (const o of screenCalls) {
+        expect(o.seed).toBe(11);
+        expect(SCREEN_PAIR_N).toContain(o.iterations);
+      }
+    });
+
+    it("511-SZ: a set with no bonus in reach reads exactly 0 at every N", async () => {
+      // Scenario kind: a set whose bonuses do nothing for this spec, whose
+      // pieces' stats are worth more worn together (511-M's Justicar: model
+      // bonuses 0, +17 when all four are worn).
+      const { ranking: r } = await runScenario({
+        worn: wornGear({}),
+        pool: setPool(JUSTICAR),
+        itemValue: withValues(
+          Object.values(JUSTICAR).map((id) => [id, -30] as const)
+        ),
+        setBonuses: { ...SET_BONUSES, 626: { b2: 0, b4: 0 } },
+        interactions: [{ ids: Object.values(JUSTICAR), dps: 17 }],
+        measureBrokenSetValue: true,
+        setScreen: "record",
+      });
+      const screen = r.setScreen!;
+      expect(screen.sets.map((s) => [s.setId, s.worn, s.reach])).toEqual([
+        [626, 0, 4],
+      ]);
+      const set = screen.sets[0]!;
+      // W-SR2: every rung wears the same four stats (copies count as their
+      // originals in the interaction): 3000 − 120 + 17.
+      expect(set.pairs.map((p) => [p.iterations, p.dps])).toEqual(
+        SCREEN_PAIR_N.map((n) => [n, 0])
+      );
+      expect(new Set(set.rungs.map((rung) => rung.dps))).toEqual(
+        new Set([2897])
+      );
+      expect(screen.simmed).toBe(8 + 3 * (4 - 0 - 1));
+    });
+
+    it("511-SF: a failed screen sim loses only that one reading", async () => {
+      // Scenario kind: a sim that fails mid-screen. Example: 511-SR's gear;
+      // the rung at count 2 (Pauldrons set-kept, Chestguard and Leggings
+      // set-less) fails at N = 300.
+      const off = await runScenario(SR_SCENARIO);
+      const on = await runScenario({
+        ...SR_SCENARIO,
+        setScreen: "record",
+        failWhen: (ids, opts) =>
+          opts.saveAllValues === true &&
+          opts.iterations === 300 &&
+          ids[SHOULDER_SLOT] === SET_KEPT_OFFSET + THUNDERHEART.shoulder &&
+          ids[CHEST_SLOT] === COPY_OFFSET + THUNDERHEART.chest,
+      });
+      expect(await screenFreeParts(on.ranking)).toEqual(
+        await screenFreeParts(off.ranking)
+      );
+      const set = on.ranking.setScreen!.sets[0]!;
+      // W-SR3: only that rung's reading is lost; its two paired errors need it.
+      expect(
+        set.rungs
+          .filter((r) => r.dps === undefined)
+          .map((r) => [r.iterations, r.count, r.se])
+      ).toEqual([[300, 2, undefined]]);
+      expect(
+        set.rungs
+          .filter((r) => r.count > 1 && r.pairedSeToPrev === undefined)
+          .map((r) => [r.iterations, r.count])
+      ).toEqual([
+        [300, 2],
+        [300, 3],
+      ]);
+      expect(set.pairs.map((p) => p.dps)).toEqual([130, 130, 130, 130]);
+      // The failed sim was sent, so it counts as simmed.
+      expect(on.ranking.setScreen!.simmed).toBe(14);
+      expect(on.ranking.setScreen!.fromStore).toBe(6);
     });
   }
 );

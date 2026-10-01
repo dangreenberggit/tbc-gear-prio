@@ -860,3 +860,60 @@ stop, naming no break (W-CB1).
 Concentration 462 rings 19893 and 19905, own value 100, model 2pc 40.
 `selectPackage` keys both to finger1, so the set reaches 1 piece: one
 `insufficient-pieces` entry at 2, no step gear.
+
+## The set screen in record mode
+
+These are the K5R cases of the same plan. With the flag and
+`Deps.setScreen` "record", the engine runs the screen after the worn-set
+ladder and before the package loop, records `Ranking.setScreen`, and
+filters nothing.
+
+- **Per set.** For each gain-side set S worn at `w` whose reach `R` (the
+  highest count `selectPackage` can fill) has `R − w ≥ 2`: on the gear of
+  S's package at `R`, rung `k` (`k = 0 … R − w`) sends the first `k` added
+  pieces, in slot order, as set-kept copies and the rest as set-less
+  copies, so Go counts `w + k`. The pair is rungs 0 and `R − w`.
+- **Sims.** The pair at N = 10, 100, 300 and 1000; every rung at N = 100,
+  300 and 1000; seed `seeds[0]`; every screen sim asks for per-iteration
+  values. The ladder's rungs 0 and `R − w` at its three N come from the
+  store, so a set costs `8 + 3 · (R − w − 1)` sims, with 6 from the store.
+- **Readings.** A pair's `dps` is rung `R − w` minus rung 0. A rung's `dps`
+  is its own reading, with `se = stdev/√N`. `pairedSe` and
+  `pairedSeToPrev` are `sd(a_i − b_i)/√N` over the per-iteration values.
+  The model returns N copies of its DPS, so every paired error is 0.
+- **Store keys.** A sim that asks for per-iteration values has its own key,
+  the old key plus `:all`; every other key is unchanged.
+
+**511-SR — record mode filters nothing.** Worn Thunderheart Gauntlets
+(Thunderheart at 1) and Malorne shoulder and chest (Malorne 2pc, so the
+worn-set ladder runs); pool Thunderheart Pauldrons, Chestguard and
+Leggings (the Leggings give Thunderheart a crossing gate). Thunderheart
+reaches 4: `w = 1`, `R = 4`, added pieces Pauldrons, Chestguard and
+Leggings in slot order. Every rung wears four Thunderheart stat sets and
+no Malorne piece: `3000 + 400`, plus 50 from count 2 and 80 more from
+count 4.
+
+- Rungs at counts 1, 2, 3, 4: 3400, 3450, 3450, 3530 at each of N = 100,
+  300 and 1000; `se = 30/√N`; `pairedSeToPrev` 0 above count 1.
+- The pair: `3530 − 3400 = 130` at each N, `pairedSe` 0.
+- Sims: `8 + 3 · (4 − 1 − 1) = 14` simmed, 6 from the store; exactly the
+  14 screen sims ask for per-iteration values, all at seed 11.
+- With the screen's sims taken out, the run's requests and options are the
+  run without the screen, in order. `setBonuses`, `brokenSetValues`,
+  `wornSetLadder`, `crossingGates`, `setStepSims`, every row's `deltaDps`
+  and `setContext`, and every ON figure are equal. The content hash gains
+  `"setScreen":"record"` (W-H1).
+
+**511-SZ — no bonus in reach.** 511-M's Justicar 626 (own value −30 each,
+model bonuses 0, +17 when all four are worn), nothing worn: `w = 0`,
+`R = 4`. Every rung wears the four stat sets (copies count as their
+originals in the interaction): `3000 − 120 + 17 = 2897`. Every pair reads
+exactly 0 at every N (W-SR2). Sims `8 + 3 · 3 = 17`.
+
+**511-SF — a failed screen sim.** 511-SR's gear; the fake sim fails the
+rung at count 2 (Pauldrons set-kept, Chestguard and Leggings set-less) at
+N = 300. That rung has no `dps` or `se`; its `pairedSeToPrev` and the
+count-3 rung's at N = 300 are absent, since each needs its values. Every
+other rung and every pair keep their readings (W-SR3). The failed sim was
+sent, so `simmed` is still 14. The rest of the ranking equals the run
+without the screen.
