@@ -577,3 +577,286 @@ cannot be activated over this gemless gear.) The baseline is
   and (530,6), nothing for 7 and 5. `pkgΔ4 = 400 + 130 − 70 = 460`,
   `raw4 = 460 − 240 − 90 = 130`, inflation
   `(4 − 2 − 1 + 1)·40 + (0 − 0 − 1 + 0)·30 = 50`, net4 80.
+
+## Ticket 511: set rows valued by simmed gear
+
+These are the K5 cases of plan `511-512-set-credit` (stage folder
+`.scratch/stage-gate/511-512-set-credit/`, gitignored). Under the flag a
+ranking is a step ranking: every set row carries `setContext.stepRanking`.
+
+- **Counts.** The gain side tries every count from `max(2, w + 1)` up to
+  the count `selectPackage` can fill, with no list. At `w + 1` the entry is
+  `unmeasurable-at-this-worn-count` as before.
+- **Gate first.** Each count's same-gear gate runs before its package sim.
+  A count whose gate does not clear `max(5.09, 2 · 0.6)` is `belowGate`:
+  `packageDeltaDps 0`, no `bonusDps`, and no package, pair or step sim. In
+  the model a count with no bonus reads exactly 0. A gate costs 2 sims.
+- **Futures.** Every entry above the row's count after the swap is a
+  future. A below-gate future is never a stop and never zeroes the row.
+- **Crossing.** For each set worn at `w ≥ 1` with a candidate in a slot it
+  does not fill, one gate (2 sims) on that set's best such candidate's own
+  swap measures the bonus at `w + 1`. A row crosses only when it cleared.
+- **Partner choice.** For each eligible future, rule Z picks the partner
+  pieces: the set of `t − (w + 1)` pool pieces with the highest
+  `d_r + Σ d_p + Σ_b v_b · (m_b − L_b)`, ties to the lowest sorted ids.
+  The pool is the set's simmed candidates outside the row's slot and the
+  set's worn slots, best per slot.
+- **Step gear.** The current gear plus the row plus the partners, folded
+  in slot order. `stepGearDps` is its sim minus the baseline. A step gear
+  identical to a request already simmed (a package, another row's step
+  gear) comes from the store, so `setStepSims` counts it as `fromStore`.
+- **Credit.** `c = stepGearDps − d_r` per eligible future; the stop is a
+  future whose `c` beats the best so far (which starts at 0); the credit is
+  that `c`. So `deltaDps + credit` is the stop gear's sim.
+- **Breaks and pieces.** An eligible future's `pieces` are its partners in
+  slot order, with no own-stat figure. Its `breaks` are every counted worn
+  bonus its step gear loses against the current gear, the row's own break
+  included.
+
+In several gears below the engine drops the Thunderheart Cover, as in
+512-C, because its meta socket cannot be activated over the gemless gear;
+the sim counts below assume the rows the ranking actually has.
+
+### Existing cases under the step rule
+
+The flag-on literals that K5 moves, with the arithmetic that moves them.
+
+- **Cases 2/3 (worn 1).** The pool reaches 5, so the futures are 3, 4 and 5;
+  3 and 5 have no model bonus and are below the gate. The 4pc future still
+  needs 3.
+- **Case 8.** Thunderheart shoulder and chest `+100`, hands and legs
+  `100 − 40 = 60`; the pool reaches 4, so counts 2, 3 and 4: 6 gate sims.
+  Step gears: the chest and shoulder rows' 2pc gear is the 2pc package
+  (chest + shoulder); the hands row's 2pc ests tie at 160 (shoulder 160,
+  chest 160, legs `60 + 60 + 40` back for the shared Malorne loss), so it
+  takes the chest, a new gear; the legs row likewise takes the hands, a new
+  gear; every 4pc gear is the 4-piece package. So `2 + 6 + 2 = 10`.
+- **476-A.** Counts 2, 3 and 4: 6 gate sims; 3 is below the gate. Each row's
+  2pc ests tie (`30 + 30 + 70`), so each takes the lowest id: hands + head
+  is the 2pc package; chest + hands and shoulder + hands are new. The 4pc
+  gear is the package. So `4 + 6 + 2 = 12`. The 2pc total is `3290 − 3110 =
+180` and the 4pc's `420`, so the credit stays `420 − 30 = 390`.
+- **477-T.** Counts 2 to 5: 8 gate sims. The 2pc package is wrist + waist,
+  the 4pc package wrist, waist, feet and hands. New step gears: feet +
+  wrist, hands + wrist, legs + wrist, and legs + wrist + waist + feet (the
+  legs row's 4pc keeps both other Malorne pieces). So `3 + 8 + 4 = 15`. The
+  credits are unchanged: the wrist row's stop gear is the 4-piece package
+  (`680 − 150 = 530`); the legs row's is legs, wrist, waist and feet with
+  two Malorne pieces kept, `3000 + 550 + 130 + 40 = 3720`, over 3040: 680,
+  less its 100 (580).
+- **A4.** The head row's futures are 4 (needs 2) and 5 (needs 3, below the
+  gate). Its 4pc partner is the chest (ests tie, lower id): `280 − 100 =
+180`, unchanged.
+- **490-A.** The Malorne 4pc is 0, so counts 3, 4 and 5 are below the gate
+  and the top measured package is the 2pc (head + chest), which breaks
+  nothing: `commitBreaks` is empty. Gates for 2 to 5: 8 sims; the 4pc
+  package sim no longer runs (−1). Step gears: chest and head rows take
+  each other (the 2pc package); the shoulder, hands and legs rows take the
+  chest, three new gears. So `2 + 8 + 3 − 1 = 12`. Credits stay 140: the
+  chest row's stop is the 2pc package `240 − 100`; the hands row's gear
+  hands + chest is `3340 − 3250 = 90`, less `−50`.
+- **490-A, the hands and legs rows.** Their 2pc step gear loses the
+  Thunderheart 2pc (the row's own break), so that future names it.
+- **490-B.** Counts 3 and 5 are below the gate; the chest row's 4pc gear
+  (chest, head, shoulder, hands) loses the Thunderheart 2pc: `3570 − 3250 =
+320`, `c = 220`, as before.
+- **490-C.** The model gives Nordrassil no bonus: counts 2 to 5 are all
+  below the gate, there is no measured package, so
+  `commitPackageDeltaDps` is absent; the credit stays 0.
+- **492-J.** Thunderheart worn 1 reaches 5: count 2 is one piece, counts
+  3, 4 and 5 are gated (6 sims), and the crossing gate at 2 is 2 sims. Every
+  4pc partner set of the head, chest and legs rows ties at 410 and the
+  lowest ids give the 4-piece package (head, chest, legs); the shoulder
+  row's lowest-id set is head + chest, one new gear. So
+  `3 + 2 + 6 + 1 = 12`. The stop gear is `3530 − 3140 = 390`, less 150:
+  240, unchanged.
+- **492-N.** A step ranking reads no `bonusDpsNet`. The 4pc gate cleared,
+  and every row's only partner set is the other two pieces, the 4-piece
+  package: `3530 − 3140 = 390`. The head and chest rows break the Malorne
+  2pc alone: `100 + 50 − 40 = 110`, credit 280; the legs row `150`, credit 240. The sub-line is the hover hint, not "not counted".
+- **476-D.** Counts 2, 3 and 4 are gated (6 sims). Every partner set of
+  every Thunderheart row needs the unmeasured (640, 4): a row and one
+  partner lose it twice alone and once together (`m = 2`, `L = 1`). So each
+  eligible future is `partnerUnmeasured`, no step gear is simmed, and the
+  credit pins stay. `4 + 6 = 10`.
+- **502-C (worn break half).** The hands row's 2pc partner is the head, its
+  4pc partners head, shoulder and chest in slot order, with no own-stat
+  figure; count 3 is below the gate.
+- **502-G.** The chest row's 4pc partners are head, shoulder and hands; the
+  stop gear is `400 + 70 + 100 = 3570`, over `3204`: 366, so the credit is
+  still 266.
+- **512-W.** The Mantle row's 2pc partner is the chest (ests tie at 180),
+  whose gear takes Wastewalker 4→2: `3270 − 3050 = 220`, naming (659,4).
+  The 4pc gear takes it to 0: `460`, naming (659,4) and (659,2). The stop is
+  the 4pc: `80 + 380 = 460`, the model's four Malorne pieces
+  `400 + 40 + 70` over 3050.
+
+### New cases
+
+**511-M — a bonus that measures 0 on identical gear although its pieces
+combine.** Kind: a set whose bonuses do nothing for this spec's rotation (a
+ret set's Judgement and healing bonuses), while its pieces' stats are worth
+more together. Example: Justicar 626 Breastplate 29071, Shoulderplates
+29075, Gauntlets 29072 and Greaves 29074 (the Breastplate replaces the
+plan's Crown 29073, whose meta socket the engine cannot fill), own value
+−30 each, model bonuses 0, `+17` when all four are worn.
+
+- Without the flag the table measures the 4pc package: `−120 + 17 = −103`
+  against singles `−120`: `bonusDps 17`.
+- With it, counts 2, 3 and 4 each read exactly 0 (the term is in both sims
+  of the 4pc gate, and in neither at 2 or 3): all below the gate. Runs:
+  base, four singles, three gates, `1 + 4 + 6 = 11`. No request wears two
+  real Justicar pieces without a copy, no step gear, credit 0 on every row.
+
+**511-R — a row inside the 4-piece group, with an interaction.** Kind: a
+tier set whose pieces' stats interact, with a count that has no bonus
+between two that do. Example: Thunderheart shoulder, chest, hands and legs,
+model 2pc 50 and 4pc 80, `−40` when all four are worn.
+
+- Gates: 2pc package hands + chest, `3250 − 3200 = 50`; 4pc package all
+  four, on `400 + 130 − 40 = 3490`, off (shoulder set-less) `400 + 50 − 40 =
+3410`: 80; count 3 reads 0, below the gate.
+- Hands row (`d 100`): 2pc partner the chest (ests tie, lowest id): the 2pc
+  package, 250, `c 150`; 4pc partners shoulder, chest and legs: 490,
+  `c 390`. Credit 390; ON `490 = pkgΔ4`, the stop gear's sim (W-S1). The
+  below-gate count 3 does not zero it (G10-4).
+- Step gears: hands + chest (the 2pc package), shoulder + hands, legs +
+  hands, and all four (the 4pc package): `gears 4, simmed 2, fromStore 2`.
+  Every row stops at 490.
+
+**511-S2 — a row that stops at the 2pc.** Kind: a 4pc worth less than what
+its extra pieces cost. Example: 511-R with model 4pc 10 and own value −40
+for the shoulder and legs. The 4pc gate reads `3140 − 3130 = 10`, above the
+gate. Hands row: 2pc partner the chest, `250`, `c 150`; 4pc gear
+`120 + 60 − 40 = 140`, `c 40`. The stop is the 2pc and ON is
+`model(G + hands + chest) − model(G) = 250`.
+
+**511-P4 — a row in the 4-piece group only.** Kind: a set piece outside
+the best 2-piece package whose own swap breaks a worn bonus. Example: worn
+Malorne hands and legs (2pc 40); Thunderheart shoulder, chest, hands and
+legs. The 2pc package is chest + shoulder. Hands row: `100 − 40 = 60`,
+`singleBreaks [(640,2) 40]`; 2pc partner the chest (ests tie at 160), gear
+`3250 − 3040 = 210`, `c 150`; 4pc gear four Thunderheart and no Malorne,
+`3530 − 3040 = 490`, `c 430`. ON 490.
+
+**511-O — a row outside the groups.** Kind: a set piece weaker than every
+package piece. Example: 511-R plus the Thunderheart Wristguards at own
+value v. Wrist row: 2pc partner the hands (lowest id), `c 150`; 4pc
+partners hands, chest and legs (the lowest ids of four tied sets), gear
+`v + 300 + 50 + 80` (the interaction needs the shoulder), `c 430`. ON
+`v + 430`: 440 at `v = 10` and 465 at `v = 35`, a difference of 25 (W-S4).
+
+**511-U — a failed sim.** Kind: a sim that fails mid-run. Example: 511-R's
+pool, no interaction.
+
+- The (676, 4) gate's "off" sim is the only request with a set-less
+  Pauldrons (the 2pc and 3pc packages copy the chest). It fails, so (676, 4)
+  is `sim-failed` with no `sameGearDps`, and every row's 4pc future makes
+  it unmeasured: credit 0, "not counted".
+- The Pauldrons row's 2pc step gear, shoulder + hands, is the only request
+  with exactly those two Thunderheart pieces. It fails: that row is
+  unmeasured, and the others stop at `530 − 100 = 430` (W-S7).
+
+**511-K — a count with no bonus.** Kind: a count between two bonuses (every
+tier set at 3). Example: worn Malorne hands and legs; Thunderheart shoulder,
+chest, hands, legs and wrist, model b2 and b4 only. Singles: shoulder,
+chest and wrist 100, hands and legs 60. Packages: 2 chest + shoulder; 3
+plus the wrist; 4 plus the hands; 5 all.
+
+- (676, 3) reads exactly 0 and is below the gate. Its gate copies the
+  shoulder, so two requests wear the 3-piece gear with a shoulder copy
+  (set-kept and set-less), and none with the real shoulder (W-G1).
+- The top measured package is the 4pc, `400 + 130` with one Malorne left,
+  `3530 − 3040 = 490`; every row's `commitPackageDeltaDps` is 490 and its
+  `packages` are 2 and 4. Neither below-gate entry (3, 5) is used (W-K1).
+
+**511-T — a 3-piece bonus becomes a step.** Kind: the three-piece crafted
+sets. Example: Primal Intent 619 chest, wrist and waist, own value 100, model
+3pc 25 only. Count 2 is below the gate; count 3 reads 25 and is eligible.
+Chest row: partners wrist and waist, the 3-piece package, `300 + 25 = 325`,
+credit 225, stop at 3.
+
+**511-X — one added piece reaches a bonus.** Kind: a set worn one short of
+a bonus with a candidate in a free slot.
+
+- Crystalforge 629 worn at 1 (chest), pool hands and legs, own value 100,
+  model 2pc 30: the crossing gate at 2 on the hands (tied, lower id) reads
+  `30` and clears; the hands row crosses, and its label count is 2.
+- The same with model 2pc 0: the gate reads 0, the row does not cross, no
+  label.
+- Primal Intent worn at 2 (chest, wrist), pool waist, model 3pc 25: the
+  gate at 3 reads 25; the waist row crosses, label count 3 (W-X1).
+
+**511-E — bonuses above 4 pieces.** Kind: a set with bonuses at 6 or 8.
+Example: Cryptstalker 530, all eight pieces, own value 100, model 2pc 10,
+4pc 20, 6pc 30, 8pc 40, nothing worn. Entries 2 to 8: 3, 5 and 7 read 0 and
+are below the gate; 2, 4, 6, 8 read 10, 20, 30, 40. Hands row: `c_t =
+(t − 1) · 100 + Σ bonuses to t`: 110, 330, 560, 800. The stop is 8, credit
+800 (W-E1).
+
+**511-PS — two partners that share a worn-bonus loss pair best with each
+other.** Kind: two set pieces that each break the same worn bonus alone.
+Example: worn Malorne shoulder and chest, model 2pc 90; Thunderheart
+Pauldrons own 8, Chestguard 12, Gauntlets 6, Leggings −12, so the singles
+are `8 − 90 = −82`, `12 − 90 = −78`, `+6` and `−12` (feral P2 BiS).
+
+- Pauldrons row, 2pc: Z's estimates are chest `−82 − 78 + 90 = −70`, hands
+  `−82 + 6 = −76`, legs `−94`: the chest. Gear `8 + 12 + 50 = 3070` over
+  3090: `stepGearDps −20`.
+- Under "single-swap" the 2pc package is hands + legs (the two best
+  singles), and the Pauldrons row adds the better, the hands: gear
+  `8 + 6 + 50` with the Malorne chest kept, `3064 − 3090 = −26`.
+
+**511-PB — a partner set that loses a worn bonus no single swap loses.**
+Kind: a worn set one piece above its bonus; any one swap keeps the bonus,
+two lose it. Example: Wastewalker worn shoulder, chest and hands, model 2pc
+30 (`G = 3030`); Thunderheart Leggings row (100); 4pc partners from the
+Pauldrons and Chestguard (110, each replaces Wastewalker) and the
+Wristguards and Waistguard (100).
+
+- Z: two replacers together lose the 2pc (`m 0`, `L 1`): `320 − 30 = 290`
+  against `310` with one; ties go to chest, wrist, waist. Gear
+  `100 + 310 + 130` with Wastewalker at 2, `3570 − 3030 = 540`, no break.
+- Z0 drops that term: 320 wins, shoulder, chest and wrist. Gear
+  `100 + 320 + 130`, Wastewalker at 1, `3550 − 3030 = 520`, naming
+  (659,2) 30.
+
+**511-PR — the rule is swapped in one place, with a cache key per rule.**
+On PS_SCENARIO with one shared store:
+
+- Unset: `setStepSims.partnerRule` is "sum-of-singles" and the hashed
+  object has no `partnerRule` key. A second unset run is served from the
+  cache: 0 sims, the same hash.
+- "single-swap": the hash holds `"partnerRule":"single-swap"`, the ranking
+  is a new one, and the Pauldrons row's 2pc pieces are pathToThreshold's,
+  the hands.
+- "every-combination": 8 audit entries (four rows, counts 2 and 4), each
+  with every partner set (3 for the 2pc, 1 for the 4pc) and a total. The
+  Pauldrons row's 2pc totals are chest −20, hands −26 and legs
+  `8 − 12 + 50 = 3046 − 3090 = −44`; Z's estimates −70, −76, −94; the choice
+  is the chest. Each of the three gears is simmed exactly once.
+
+**511-PN — partner sets that do not nest.** Kind: the best 2pc partner is
+not in the best 4pc partner set. Example: worn Primal Intent 3/3, model
+2pc 50 and 3pc 30 (`G = 3080`); Thunderheart Leggings row (100); Gauntlets
+110 (replace nothing); Chestguard, Wristguards, Waistguard 120 (each replaces
+a Primal Intent piece, losing the 3pc alone: single 90).
+
+- 2pc: the hands (est 210) beat a replacer (190). Gear `100 + 110 + 50`
+  with Primal Intent kept: `3340 − 3080 = 260`.
+- 4pc: chest, wrist, waist: `100 + 270 + 2 · 30 − 50 = 380` against
+  `100 + 290 + 30 − 50 = 370` for any set with the hands. Gear
+  `100 + 360 + 130`, Primal Intent at 0: `3590 − 3080 = 510`.
+- Credit `510 − 100 = 410`, stop 4; each stop term names its own set.
+
+**511-CB — the top package breaks a worn bonus the stop gear keeps.** A
+step context with `singleDeltaDps 30`, one eligible 2pc future at
+`stepGearDps 170`, and a `commitBreaks` entry with no value: credit
+`170 − 30 = 140` with or without it; not unmeasured; the hover hint; a step
+context with only that commit break shows no sub-line; the only term is the
+stop, naming no break (W-CB1).
+
+**511-A3R — two set rings key to one slot (known limit d).** Zanzil's
+Concentration 462 rings 19893 and 19905, own value 100, model 2pc 40.
+`selectPackage` keys both to finger1, so the set reaches 1 piece: one
+`insufficient-pieces` entry at 2, no step gear.

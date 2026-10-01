@@ -6,7 +6,9 @@
  * fixtures, so a wrong figure on a row no render captured, or one below the
  * popover's 0.1 DPS resolution, still fails. The reference walk below is
  * written from the rule's statement (design.md §1 of the 502 stage, ADR-0034),
- * not from `view.ts`.
+ * not from `view.ts`. A step ranking (ticket 511: rows carry
+ * `setContext.stepRanking`) is checked against `referenceStep`, written from
+ * plan 511-512-set-credit's rule for one row, instead.
  *
  * `TAB_FIXTURE_DIR` points the suite at another folder with the same file
  * names, such as uncommitted stage recordings; the default is the committed
@@ -39,6 +41,11 @@ type Future = {
   dps?: number;
   breaks?: Break[];
   pieces?: Piece[];
+  sameGearDps?: number;
+  sameGearSe?: number;
+  belowGate?: true;
+  stepGearDps?: number;
+  partnerUnmeasured?: string;
 };
 type SetContext = {
   setId: number;
@@ -46,6 +53,8 @@ type SetContext = {
   piecesWornBefore: number;
   piecesAfterSwap: number;
   crossesThreshold: boolean;
+  stepRanking?: true;
+  singleDeltaDps?: number;
   singleBreaks?: Break[];
   futureBonuses?: Future[];
   commitBreaks?: Break[];
@@ -75,7 +84,9 @@ type Ranking = {
   setBonuses?: SetBonus[];
 };
 
-type Term = { kind: "bonus" | "piece" | "break"; dps: number };
+type Term =
+  | { kind: "bonus" | "piece" | "break"; dps: number }
+  | { kind: "stop"; threshold: number; totalDps: number; isStop: boolean };
 type ViewMod = {
   applyView: (
     r: Ranking,
@@ -148,6 +159,44 @@ function referenceR1(
     }
     if (bonus > 0 && running > best.credit)
       best = { credit: running, stop: f.threshold };
+  }
+  return best;
+}
+
+/**
+ * The step rule for one row (ticket 511), from the plan's statement: a
+ * future is eligible when its same-gear value clears the gate,
+ * B' > max(floor, 2·se). The row is unmeasured, and credited 0, exactly when
+ * a future lacks its same-gear value and is not below the gate, or an
+ * eligible future lacks its step gear's sim or its partner choice. Otherwise
+ * walk the eligible futures in count order with c = stepGearDps − d_r; the
+ * stop is a future whose c is strictly greater than the best so far, which
+ * starts at 0, and the credit is the best c.
+ */
+function referenceStep(
+  ctx: SetContext,
+  floor: number
+): { credit: number; stop: number; stopTotal: number } {
+  const none = { credit: 0, stop: 0, stopTotal: 0 };
+  const futures = [...(ctx.futureBonuses ?? [])].sort(
+    (a, b) => a.threshold - b.threshold
+  );
+  const eligible = (f: Future) =>
+    !f.belowGate &&
+    f.sameGearDps !== undefined &&
+    f.sameGearDps > Math.max(floor, 2 * (f.sameGearSe ?? 0));
+  const unmeasured = futures.some(
+    (f) =>
+      (f.sameGearDps === undefined && !f.belowGate) ||
+      (eligible(f) &&
+        (f.stepGearDps === undefined || f.partnerUnmeasured !== undefined))
+  );
+  if (unmeasured || ctx.singleDeltaDps === undefined) return none;
+  let best = none;
+  for (const f of futures.filter(eligible)) {
+    const c = f.stepGearDps! - ctx.singleDeltaDps;
+    if (c > best.credit)
+      best = { credit: c, stop: f.threshold, stopTotal: f.stepGearDps! };
   }
   return best;
 }
@@ -245,6 +294,24 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         const ctx = row.setContext;
         const where = `${name} row ${row.itemId} ${row.name}`;
 
+        if (ctx?.stepRanking) {
+          // 3s. the shipped credit equals the step rule's reference walk
+          const ref = referenceStep(ctx, floor);
+          const credit = view.rankableSetPotential(row, floor, "full");
+          expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
+            1e-9
+          );
+          // 4s. a credited row that replication did not rewrite shows the sim
+          // of its stop gear
+          if (ref.stop !== 0 && row.seMethod !== "paired-replicate") {
+            expect(
+              Math.abs(row.deltaDps + credit - ref.stopTotal),
+              `${where} stop gear`
+            ).toBeLessThanOrEqual(1e-6);
+          }
+          continue;
+        }
+
         for (const f of ctx?.futureBonuses ?? []) {
           // 1. every measured future has a path, and every piece a figure
           if (f.dps !== undefined)
@@ -276,7 +343,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
           !view.setCreditUnmeasured(ctx)
         ) {
           const { terms } = view.setPotentialTerms(ctx, floor);
-          const sum = terms.reduce((s, t) => s + t.dps, 0);
+          const sum = terms.reduce((s, t) => s + ("dps" in t ? t.dps : 0), 0);
           expect(Math.abs(sum - credit), `${where} terms`).toBeLessThan(1e-9);
         }
 
