@@ -119,3 +119,14 @@ This needs an owner or orchestrator decision before any code. The rest of
   edits: `npx vitest run packages/core/test/fork-set-net.test.ts
   packages/core/test/wowsims-fork-parity.test.ts` → rc=0 (22 passed, 1
   skipped).
+- 2026-10-02 (stage-gate 511-512-set-credit, step 39; owner-quote
+  correction): the parenthetical in the 2026-09-24 "owner confirmed" entry
+  above, "assume the player collects a set only while each step pays", is
+  an agent's gloss of the best-stop rule, not the owner's words. The owner
+  chose best-stop over full-path; the owner's own words are in
+  `.scratch/handoffs/owner-quotes-upgrades-tab-closeout.md` lines 57–66.
+  Gate B ruling N1 of that stage (its `decision-log.md`, gitignored) bars
+  quoting the gloss as the owner's words. The same gloss was removed from
+  ADR-0034 lines 72–74 with ADR-0035
+  (`docs/adr/0035-set-rows-valued-by-simmed-gear.md`). The entry above is
+  left as written; this comment corrects it. Status unchanged.

@@ -1,6 +1,6 @@
 # ADR-0034 — Set-bonus row values are not additive
 
-**Status:** accepted
+**Status:** accepted; superseded in part by [`ADR-0035`](0035-set-rows-valued-by-simmed-gear.md) on 2026-10-02: for a step ranking (the tab, with `measureBrokenSetValue` on), the walk (R1) and the rule for when a row equals the measured swap
 **Date:** 2026-09-24
 **Related:** tickets `.scratch/carry-forward/issues/467-set-bonus-ranking-hides-net-value.md` (the net-credit design), `478-net-set-bonus-minor-followups.md` (item D2, closed by this ADR), `502-scenario-d-tier4-outranks-new-tier-staff.md` (the other pieces' own stats); fork `view.ts` `rankableSetPotential`; fixture 476-A in `packages/core/test/fork-set-net.test.ts`
 
@@ -69,9 +69,8 @@ broke the Malorne 2pc (40), and the running totals were 50 then 90, which
 gave the pre-502 figure of 90 above. The figures in this paragraph are from
 before ticket 502; the ticket 502 paragraph below changes what each step adds.
 Fixtures 490-A and 490-B pin the rule (`view.ts` `setPotentialCredit`). The
-owner confirmed this "best-stop" rule on 2026-09-24 (assume the player
-collects a set only while each step pays) over "full-path" (charge every
-break on the path to every credited future). `setPotentialCredit` implements
+owner confirmed this "best-stop" rule on 2026-09-24 over "full-path" (charge
+every break on the path to every credited future). `setPotentialCredit` implements
 both rules; the exported `RULE_490` in `view.ts` selects the one
 `rankableSetPotential` uses. Fixture 490-B reads that constant from the
 engine and also asserts each rule's figures by calling `setPotentialCredit`
@@ -116,12 +115,24 @@ cover issue." The cover point became its own ticket.
   largest running total at such a step, or 0. Fork `view.ts`
   `setPotentialTerms` does this walk and returns the itemised terms, which
   the tab's popover lists as bonus, "{item name} stats" and "Breaks" lines.
+
+  > **Superseded 2026-10-02 by [`ADR-0035`](0035-set-rows-valued-by-simmed-gear.md) for a step ranking.**
+  > A step ranking does not walk single-swap, own-stats or bonus terms. Its
+  > credit is the best running value of one sim of the row's item plus a
+  > chosen partner set, minus the row's own single swap.
+
 - **When the row equals the measured swap.** For a row inside a measured
   package, `deltaDps + credit` equals that package's measured delta when
   three conditions hold: every bonus on its path is above the floor; path
   breaks are charged at their measured values; and paired replication
   rewrote none of the deltas involved. Test 502-A and
   `packages/core/test/fork-set-fixtures.test.ts` check this.
+
+  > **Superseded 2026-10-02 by [`ADR-0035`](0035-set-rows-valued-by-simmed-gear.md) for a step ranking.**
+  > On a step ranking, a credited row that paired replication did not
+  > rewrite equals the sim of its own stop gear, with none of the three
+  > conditions above.
+
 - **Estimates.** Every other set row shows an estimate built from
   single-item figures. It assumes the pieces' gains add up (hypothesis,
   untested).
