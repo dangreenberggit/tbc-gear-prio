@@ -3767,3 +3767,523 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * The set screen's on mode (ticket 511, stage K5ON). Literals are derived
+ * in docs/set-bonus-fixture-derivations.md, "The set screen's on mode".
+ * ------------------------------------------------------------------ */
+
+/** `Ranking.setScreen` when its mode is "on". */
+type OnScreen = {
+  mode: string;
+  seed: number;
+  iterations: number;
+  rule: Record<string, unknown>;
+  sigma?: number;
+  sets: Array<{
+    setId: number;
+    worn: number;
+    reach: number;
+    packageItemIds: number[];
+    pair: { dps?: number; pairedSe?: number };
+    bestStats?: number;
+    measure?: number;
+    kept: boolean;
+    reason: string;
+  }>;
+  simmed: number;
+  fromStore: number;
+};
+
+const onScreenOf = (ranking: ForkRanking) =>
+  ranking.setScreen as unknown as OnScreen | undefined;
+
+/** Each screened set as [setId, kept, reason], in set id order. */
+const verdictsOf = (screen: OnScreen | undefined) =>
+  (screen?.sets ?? []).map((s) => [s.setId, s.kept, s.reason]);
+
+/** True when a request wears any of `pieces` as a set-less or set-kept copy. */
+const wearsCopyOf = (ids: readonly number[], pieces: readonly number[]) =>
+  ids.some(
+    (id) =>
+      pieces.includes(id - COPY_OFFSET) || pieces.includes(id - SET_KEPT_OFFSET)
+  );
+
+/** What a row of a set the screen dropped must keep from the off run. */
+function droppedRowParts(ranking: ForkRanking, itemIds: readonly number[]) {
+  return itemIds.map((itemId) => {
+    const row = thRow(ranking, itemId);
+    return {
+      itemId,
+      deltaDps: row.deltaDps,
+      singleBreaks: row.setContext?.singleBreaks,
+      crossesThreshold: row.setContext?.crossesThreshold,
+      piecesAfterSwap: row.setContext?.piecesAfterSwap,
+    };
+  });
+}
+
+/** The set-screen fields of 511-SR's on-mode readings that every case shares. */
+function expectOnModeSims(
+  run: Awaited<ReturnType<typeof runScenario>>,
+  screened: number
+) {
+  const screen = onScreenOf(run.ranking)!;
+  expect(screen.mode).toBe("on");
+  expect(screen.iterations).toBe(300);
+  expect(screen.seed).toBe(11);
+  // W-ON5: two sims per screened set, all at N = 300, seed 11, with
+  // per-iteration values; no ladder rung and no other screen N.
+  expect(screen.simmed + screen.fromStore).toBe(2 * screened);
+  const screenOpts = run.callOpts.filter((o) => o.saveAllValues === true);
+  expect(screenOpts).toHaveLength(screen.simmed);
+  for (const o of screenOpts) {
+    expect(o).toEqual({ seed: 11, iterations: 300, saveAllValues: true });
+  }
+  expect(
+    run.callOpts.some((o) => o.iterations === 100 || o.iterations === 1000)
+  ).toBe(false);
+}
+
+const SIGMA_FAKE = (Math.SQRT2 * 30) / Math.sqrt(300);
+
+// 511-SN: 511-SR's gear and pool plus Justicar 626 (own value −30 each,
+// model bonuses 0, nothing worn, R = 4).
+const SN_SCENARIO: Scenario = {
+  ...SR_SCENARIO,
+  pool: [...SR_SCENARIO.pool, ...setPool(JUSTICAR)],
+  itemValue: withValues(
+    Object.values(JUSTICAR).map((id) => [id, -30] as const)
+  ),
+  setBonuses: { ...SET_BONUSES, 626: { b2: 0, b4: 0 } },
+};
+
+// 511-SB: nothing worn; four sets of two pool pieces each, M2 = d_a + d_b +
+// b2: Thunderheart 150, Malorne 100, Justicar 97, Crystalforge 96.
+const SB_SCENARIO: Scenario = {
+  worn: wornGear({}),
+  pool: [
+    { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+    { itemId: THUNDERHEART.chest, slot: "chest" },
+    { itemId: MALORNE.shoulder, slot: "shoulder" },
+    { itemId: MALORNE.legs, slot: "legs" },
+    { itemId: JUSTICAR.shoulder, slot: "shoulder" },
+    { itemId: JUSTICAR.hands, slot: "hands" },
+    { itemId: CRYSTALFORGE.chest, slot: "chest" },
+    { itemId: CRYSTALFORGE.hands, slot: "hands" },
+  ],
+  itemValue: withValues([
+    [THUNDERHEART.shoulder, 50],
+    [THUNDERHEART.chest, 50],
+    [MALORNE.shoulder, 40],
+    [MALORNE.legs, 40],
+    [JUSTICAR.shoulder, 40],
+    [JUSTICAR.hands, 37],
+    [CRYSTALFORGE.chest, 40],
+    [CRYSTALFORGE.hands, 36],
+  ]),
+  setBonuses: {
+    676: { b2: 50, b4: 0 },
+    640: { b2: 20, b4: 0 },
+    626: { b2: 20, b4: 0 },
+    629: { b2: 20, b4: 0 },
+  },
+  measureBrokenSetValue: true,
+};
+
+// 511-SD: worn Gauntlets of Malorne (Malorne at 1). Malorne's three pool
+// pieces are worth −155 each, so its best case is −115 + 110 = −5; its
+// crossing gate still clears (2pc 40). Thunderheart wrist, waist and feet
+// (−15, −15, −100) measure −30 + 50 = 20; Gladiator's Pursuit chest and
+// hands (−12.375 each, 2pc 20) measure −4.75.
+const SD_SCENARIO: Scenario = {
+  worn: wornGear({ hands: MALORNE.hands }),
+  pool: [
+    { itemId: MALORNE.shoulder, slot: "shoulder" },
+    { itemId: MALORNE.chest, slot: "chest" },
+    { itemId: MALORNE.legs, slot: "legs" },
+    { itemId: THUNDERHEART.wrist, slot: "wrist" },
+    { itemId: THUNDERHEART.waist, slot: "waist" },
+    { itemId: THUNDERHEART.feet, slot: "feet" },
+    { itemId: PURSUIT.chest, slot: "chest" },
+    { itemId: PURSUIT.hands, slot: "hands" },
+  ],
+  itemValue: withValues([
+    [MALORNE.shoulder, -155],
+    [MALORNE.chest, -155],
+    [MALORNE.legs, -155],
+    [THUNDERHEART.wrist, -15],
+    [THUNDERHEART.waist, -15],
+    [THUNDERHEART.feet, -100],
+    [PURSUIT.chest, -12.375],
+    [PURSUIT.hands, -12.375],
+  ]),
+  setBonuses: { ...SET_BONUSES, 586: { b2: 20, b4: 0 } },
+  measureBrokenSetValue: true,
+};
+
+type ScreenRuleMod = {
+  applyScreenRule: (
+    sets: ReadonlyArray<{ setId: number; pairDps?: number; measure?: number }>,
+    sigma: number | undefined
+  ) => Map<number, { kept: boolean; reason: string }>;
+  SCREEN_ON_RULE: Record<string, unknown>;
+};
+
+describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
+  it("511-SU: the rule keeps and drops sets in score_screen.py's order, ties included", async () => {
+    // Scenario kind: the rule alone, on synthetic readings, with σ = 2 so
+    // the band is 2·√2 and rule 2's margin is 4. Each expected map is what
+    // `apply_rule` gives (S/k5on/rule_cases.py).
+    const { applyScreenRule, SCREEN_ON_RULE } =
+      await importForkUpgrades<ScreenRuleMod>("engine/set-screen.ts");
+    expect(SCREEN_ON_RULE).toEqual({
+      measure: "M2",
+      iterations: 300,
+      keep: 2,
+      bandC: 1,
+      dropExactZero: true,
+      sigmaBoundScale: 1,
+    });
+    const verdicts = (
+      sets: ReadonlyArray<{
+        setId: number;
+        pairDps?: number;
+        measure?: number;
+      }>,
+      sigma: number | undefined
+    ) =>
+      [...applyScreenRule(sets, sigma).entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([setId, v]) => [setId, v.kept, v.reason]);
+
+    // Ties on measure go to the lower id; a set tied with the K-th is in
+    // the band.
+    expect(
+      verdicts(
+        [
+          { setId: 101, pairDps: 1, measure: 40 },
+          { setId: 103, pairDps: 1, measure: 25 },
+          { setId: 102, pairDps: 1, measure: 25 },
+        ],
+        2
+      )
+    ).toEqual([
+      [101, true, "top-k"],
+      [102, true, "top-k"],
+      [103, true, "band"],
+    ]);
+    // The band is inclusive at measure_K − √2·σ.
+    const edge = 10 - 2 * Math.SQRT2;
+    expect(
+      verdicts(
+        [
+          { setId: 201, pairDps: 1, measure: 20 },
+          { setId: 202, pairDps: 1, measure: 10 },
+          { setId: 203, pairDps: 1, measure: edge },
+          { setId: 204, pairDps: 1, measure: edge - 1e-9 },
+        ],
+        2
+      )
+    ).toEqual([
+      [201, true, "top-k"],
+      [202, true, "top-k"],
+      [203, true, "band"],
+      [204, false, "outside-band"],
+    ]);
+    // Rule 1 comes before the absence check; rule 2 drops measure + 2σ < 0.
+    expect(
+      verdicts(
+        [
+          { setId: 301, pairDps: 0 },
+          { setId: 302, pairDps: 5 },
+          { setId: 303, pairDps: -1, measure: -5 },
+          { setId: 304, pairDps: 1, measure: -3.5 },
+          { setId: 305, pairDps: 0, measure: 50 },
+        ],
+        2
+      )
+    ).toEqual([
+      [301, false, "exact-zero"],
+      [302, true, "readings-absent"],
+      [303, false, "below-zero"],
+      [304, true, "top-k"],
+      [305, false, "exact-zero"],
+    ]);
+    // With no σ, every set rule 1 does not drop is kept outside the ranking.
+    const noSigma = [
+      { setId: 401, pairDps: 0, measure: 7 },
+      { setId: 402, pairDps: 3, measure: 10 },
+      { setId: 403, pairDps: -1, measure: -50 },
+    ];
+    const noSigmaVerdicts = [
+      [401, false, "exact-zero"],
+      [402, true, "readings-absent"],
+      [403, true, "readings-absent"],
+    ];
+    expect(verdicts(noSigma, undefined)).toEqual(noSigmaVerdicts);
+    expect(verdicts(noSigma, Number.NaN)).toEqual(noSigmaVerdicts);
+    // Fewer ranked sets than K: all are kept.
+    expect(verdicts([{ setId: 501, pairDps: 2, measure: 1 }], 2)).toEqual([
+      [501, true, "top-k"],
+    ]);
+  });
+
+  it("511-SN: a set with no bonus in reach is dropped and costs only its two screen sims", async () => {
+    // Scenario kind: a set whose bonuses do nothing for this spec, beside a
+    // set worth collecting. Example: Justicar 626 next to 511-SR's
+    // Thunderheart (w = 1, R = 4, 2pc 50, 4pc 80).
+    const view = await stepView();
+    const off = await runScenario(SN_SCENARIO);
+    const on = await runScenario({ ...SN_SCENARIO, setScreen: "on" });
+    const screen = onScreenOf(on.ranking)!;
+    expectOnModeSims(on, 2);
+    expect(screen.sigma).toBeCloseTo(SIGMA_FAKE, 9);
+    expect(
+      screen.sets.map((s) => [
+        s.setId,
+        s.worn,
+        s.reach,
+        s.pair.dps,
+        s.pair.pairedSe,
+        s.bestStats,
+        s.measure,
+      ])
+    ).toEqual([
+      [626, 0, 4, 0, 0, -100, -100],
+      [676, 1, 4, 130, 0, 410, 540],
+    ]);
+    expect(verdictsOf(screen)).toEqual([
+      [626, false, "exact-zero"],
+      [676, true, "top-k"],
+    ]);
+    // W-ON2: after the singles, only the two screen sims wear a Justicar
+    // copy; the off run sends its gate sims too.
+    const justicar = Object.values(JUSTICAR);
+    const onCopies = on.calls
+      .map((ids, i) => [ids, on.callOpts[i]!] as const)
+      .filter(([ids]) => wearsCopyOf(ids, justicar));
+    expect(onCopies.map(([, o]) => o)).toEqual([
+      { seed: 11, iterations: 300, saveAllValues: true },
+      { seed: 11, iterations: 300, saveAllValues: true },
+    ]);
+    expect(
+      off.calls.filter((ids) => wearsCopyOf(ids, justicar)).length
+    ).toBeGreaterThan(2);
+    // One marker entry for the dropped set.
+    expect(
+      (on.ranking.setBonuses ?? [])
+        .filter((b) => b.setId === 626)
+        .map((b) => ({
+          threshold: b.threshold,
+          packageItemIds: b.packageItemIds,
+          packageDeltaDps: b.packageDeltaDps,
+          unmeasured: b.unmeasured,
+        }))
+    ).toEqual([
+      {
+        threshold: 2,
+        packageItemIds: [],
+        packageDeltaDps: 0,
+        unmeasured: "screened-out",
+      },
+    ]);
+    // Its rows keep their single-swap figure, breaks and crossing, and get
+    // no Set potential.
+    expect(droppedRowParts(on.ranking, justicar)).toEqual(
+      droppedRowParts(off.ranking, justicar)
+    );
+    for (const id of justicar) {
+      const row = thRow(on.ranking, id);
+      expect(row.setContext).toBeDefined();
+      expect(row.setContext?.futureBonuses ?? []).toEqual([]);
+      expect(row.setContext?.nextThreshold).toBeNull();
+      expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
+      expect(view.setCreditUnmeasured(row.setContext)).toBe(false);
+    }
+    // The Justicar shoulder and chest rows break the worn Malorne 2pc.
+    expect(
+      thRow(on.ranking, JUSTICAR.chest).setContext?.singleBreaks?.map((b) => [
+        b.setId,
+        b.threshold,
+      ])
+    ).toEqual([[640, 2]]);
+    // Thunderheart is kept, and its entries, rows and ON figures are the
+    // off run's.
+    const thParts = async (ranking: ForkRanking) =>
+      (await screenFreeParts(ranking)).rows.filter((r) =>
+        [THUNDERHEART.shoulder, THUNDERHEART.chest, THUNDERHEART.legs].includes(
+          r.itemId as never
+        )
+      );
+    expect(await thParts(on.ranking)).toEqual(await thParts(off.ranking));
+    expect(
+      (on.ranking.setBonuses ?? []).filter((b) => b.setId === 676)
+    ).toEqual((off.ranking.setBonuses ?? []).filter((b) => b.setId === 676));
+    expect(on.ranking.items.map((r) => [r.itemId, r.deltaDps])).toEqual(
+      off.ranking.items.map((r) => [r.itemId, r.deltaDps])
+    );
+  });
+
+  it("511-SB: a close third set survives in the band; the fourth does not", async () => {
+    // Scenario kind: three sets with real bonuses whose best cases are
+    // close (like C5's 617). Example: SB_SCENARIO; band 3.464102.
+    const on = await runScenario({ ...SB_SCENARIO, setScreen: "on" });
+    const screen = onScreenOf(on.ranking)!;
+    expectOnModeSims(on, 4);
+    expect(screen.sigma).toBeCloseTo(2.44949, 6);
+    expect(screen.sets.map((s) => [s.setId, s.pair.dps, s.measure])).toEqual([
+      [626, 20, 97],
+      [629, 20, 96],
+      [640, 20, 100],
+      [676, 50, 150],
+    ]);
+    expect(verdictsOf(screen)).toEqual([
+      [626, true, "band"],
+      [629, false, "outside-band"],
+      [640, true, "top-k"],
+      [676, true, "top-k"],
+    ]);
+    // The band set's gain side runs; the dropped set has only the marker.
+    const justicar2 = bonusOf(on.ranking, 626, 2);
+    expect(justicar2?.unmeasured).toBeUndefined();
+    expect(justicar2?.sameGearDps).toBeCloseTo(20, 9);
+    expect(
+      (on.ranking.setBonuses ?? [])
+        .filter((b) => b.setId === 629)
+        .map((b) => [b.threshold, b.unmeasured])
+    ).toEqual([[2, "screened-out"]]);
+  });
+
+  it("511-SD: a set whose best case loses to current gear is dropped, even below K", async () => {
+    // Scenario kind: a worn set's other pieces are much worse than the
+    // player's gear (a level-60 or off-spec set). Example: SD_SCENARIO;
+    // 2σ = 4.898979. The dropped set is worn at 1 and its crossing gate
+    // clears, so its rows keep a crossing line (GON-2).
+    const view = await stepView();
+    const off = await runScenario(SD_SCENARIO);
+    const on = await runScenario({ ...SD_SCENARIO, setScreen: "on" });
+    const screen = onScreenOf(on.ranking)!;
+    expectOnModeSims(on, 3);
+    expect(
+      screen.sets.map((s) => [s.setId, s.worn, s.reach, s.pair.dps, s.measure])
+    ).toEqual([
+      [586, 0, 2, 20, -4.75],
+      [640, 1, 4, 110, -5],
+      [676, 0, 3, 50, 20],
+    ]);
+    expect(verdictsOf(screen)).toEqual([
+      [586, true, "top-k"],
+      [640, false, "below-zero"],
+      [676, true, "top-k"],
+    ]);
+    // GON-2: the dropped worn set's crossing gate cleared, and its rows keep
+    // the off run's single breaks, crossing and piece count.
+    expect(
+      (on.ranking.crossingGates ?? [])
+        .filter((g) => g.setId === 640)
+        .map((g) => [g.count, g.cleared])
+    ).toEqual([[2, true]]);
+    expect(on.ranking.crossingGates).toEqual(off.ranking.crossingGates);
+    const malorne = [MALORNE.shoulder, MALORNE.chest, MALORNE.legs];
+    expect(droppedRowParts(on.ranking, malorne)).toEqual(
+      droppedRowParts(off.ranking, malorne)
+    );
+    for (const id of malorne) {
+      const row = thRow(on.ranking, id);
+      expect(row.setContext?.crossesThreshold).toBe(true);
+      expect(row.setContext?.piecesAfterSwap).toBe(2);
+      expect(row.setContext?.futureBonuses ?? []).toEqual([]);
+      expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
+      expect(view.setCreditUnmeasured(row.setContext)).toBe(false);
+    }
+    expect(
+      (on.ranking.setBonuses ?? [])
+        .filter((b) => b.setId === 640)
+        .map((b) => [b.threshold, b.unmeasured])
+    ).toEqual([[2, "screened-out"]]);
+  });
+
+  it("511-SA: a set whose screen readings failed is kept and measured as with the screen off", async () => {
+    // Scenario kind: off-class Cryptstalker 530 (ticket 532), whose sims
+    // fail. Example: 511-SR's gear; the screen's high rung (Thunderheart
+    // set-kept) fails at N = 300.
+    const off = await runScenario(SR_SCENARIO);
+    const on = await runScenario({
+      ...SR_SCENARIO,
+      setScreen: "on",
+      failWhen: (ids, opts) =>
+        opts.saveAllValues === true &&
+        opts.iterations === 300 &&
+        ids[SHOULDER_SLOT] === SET_KEPT_OFFSET + THUNDERHEART.shoulder &&
+        ids[CHEST_SLOT] === SET_KEPT_OFFSET + THUNDERHEART.chest &&
+        ids[LEGS_SLOT] === SET_KEPT_OFFSET + THUNDERHEART.legs,
+    });
+    const set = onScreenOf(on.ranking)!.sets[0]!;
+    expect(set.pair).toEqual({});
+    expect(set.measure).toBeUndefined();
+    expect([set.kept, set.reason]).toEqual([true, "readings-absent"]);
+    // W-ON4: the gain side runs as with the screen off.
+    expect(await screenFreeParts(on.ranking)).toEqual(
+      await screenFreeParts(off.ranking)
+    );
+  });
+
+  it("511-SL: the screen on changes only the gain-side set list", async () => {
+    // Scenario kind: Q6's invariant. (a) 511-SN's gear, which wears Malorne
+    // 2pc (so the ladder runs) and gives Thunderheart a crossing gate;
+    // (b) 511-SR's gear, where every set survives.
+    const offA = await runScenario(SN_SCENARIO);
+    const onA = await runScenario({ ...SN_SCENARIO, setScreen: "on" });
+    expect(offA.ranking.wornSetLadder?.length).toBeGreaterThan(0);
+    expect(offA.ranking.crossingGates?.length).toBeGreaterThan(0);
+    expect(onA.ranking.wornSetLadder).toEqual(offA.ranking.wornSetLadder);
+    expect(onA.ranking.brokenSetValues).toEqual(offA.ranking.brokenSetValues);
+    expect(onA.ranking.crossingGates).toEqual(offA.ranking.crossingGates);
+    // Without the screen sims and Justicar's off-run gain sims, the two
+    // runs send the same requests with the same options, in order.
+    const justicar = Object.values(JUSTICAR);
+    const offRest = offA.calls
+      .map((ids, i) => [ids, offA.callOpts[i]!] as const)
+      .filter(([ids]) => !wearsCopyOf(ids, justicar));
+    const onRest = onA.calls
+      .map((ids, i) => [ids, onA.callOpts[i]!] as const)
+      .filter(([, o]) => o.saveAllValues !== true);
+    expect(onRest).toEqual(offRest);
+    expectOnModeSims(onA, 2);
+
+    const offB = await runScenario(SR_SCENARIO);
+    const onB = await runScenario({ ...SR_SCENARIO, setScreen: "on" });
+    expect(verdictsOf(onScreenOf(onB.ranking))).toEqual([[676, true, "top-k"]]);
+    expect(await screenFreeParts(onB.ranking)).toEqual(
+      await screenFreeParts(offB.ranking)
+    );
+    expectOnModeSims(onB, 1);
+  });
+
+  it('511-SH: "on" has its own content hash, and unset hashes as before', async () => {
+    const storeMod = await importForkUpgrades<{
+      MemoryStore: new () => Record<string, unknown>;
+    }>("engine/seams/store.ts");
+    const store = new storeMod.MemoryStore();
+    const unset = await runScenario({ ...SR_SCENARIO, store });
+    // W-ON6: unset, the hashed object has no setScreen key, as before K5R.
+    expect(unset.ranking.contentHash).not.toContain('"setScreen"');
+    expect(unset.ranking.setScreen).toBeUndefined();
+    // "on" on the same store is not served the cached ranking: it sends only
+    // its two screen sims and answers everything else from the store.
+    const on = await runScenario({ ...SR_SCENARIO, store, setScreen: "on" });
+    expect(on.ranking.contentHash).toContain('"setScreen":"on"');
+    expect(onScreenOf(on.ranking)?.mode).toBe("on");
+    expect(on.runCount).toBe(2);
+    const explicitOff = await runScenario({ ...SR_SCENARIO, setScreen: "off" });
+    const record = await runScenario({ ...SR_SCENARIO, setScreen: "record" });
+    const hashes = new Set([
+      on.ranking.contentHash,
+      explicitOff.ranking.contentHash,
+      record.ranking.contentHash,
+      unset.ranking.contentHash,
+    ]);
+    expect(hashes.size).toBe(4);
+  });
+});

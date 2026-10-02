@@ -1012,3 +1012,131 @@ is also a tie on sim, and Z's order breaks it the same way.
   `530 − 100 = 430`, as before.
 - **511-PR.** Unset, `setStepSims.partnerRule` is "close-calls"; the hashed
   object still has no `partnerRule` key.
+
+## The set screen's on mode
+
+These are the K5ON cases of the same plan. With the flag and
+`Deps.setScreen` "on" (the tab's default), the engine screens each
+gain-side set with `R − w ≥ 2`, after the worn-set ladder and before the
+package loop, and keeps the gain side only for the sets the rule keeps.
+
+- **Sims.** Rungs 0 and `R − w` (the record mode's pair) at N = 300 only,
+  seed `seeds[0]`, with per-iteration values: 2 sims per screened set, no
+  ladder rung, no other N.
+- **Measure (M2).** `max` over `t = max(2, w + 1) … R` of the package
+  estimate at `t`, plus the pair. The estimate is rule Z's
+  (`sumOfSinglesEstimate`): the sum of the package pieces' single-swap
+  figures, plus `v_b · (m_b − L_b)` for each counted worn bonus `b`, with
+  the package's first added piece as the row.
+- **σ** = `√2 · stdev / √300` with the baseline's stdev. The model's stdev
+  is 30, so σ = 2.449490, the band `√2 · σ` = 3.464102 and `2σ` =
+  4.898979.
+- **Rule** (`applyScreenRule`, a port of `apply_rule` in
+  `.scratch/stage-gate/511-512-set-credit/k5e/score_screen.py`), in set id
+  order: a pair of exactly 0 is dropped ("exact-zero"), before the
+  absence check; an absent measure or σ keeps the set outside the ranking
+  ("readings-absent"); `measure + 2σ < 0` is dropped ("below-zero"); the
+  rest are ranked by (−measure, set id), the first two kept ("top-k"),
+  others kept when `measure ≥ measure_2 − √2 · σ` ("band"), else dropped
+  ("outside-band").
+- **A dropped set** gets one entry, `threshold max(2, w + 1)`,
+  `packageItemIds []`, `packageDeltaDps 0`, `unmeasured "screened-out"`,
+  and no gate, package or step sim. Its rows keep `setContext`
+  (`singleBreaks`, `crossesThreshold`, `piecesAfterSwap`) and get no
+  future, so `rankableSetPotential` is 0 and `setCreditUnmeasured` false.
+
+**511-SU — the rule alone.** σ = 2, so the band is `2√2` and rule 2's
+margin is 4. Each map is what `apply_rule` gives for the same readings:
+`python .scratch/stage-gate/511-512-set-credit/k5on/rule_cases.py`
+(σ = 2.0 exactly in bound mode with n = 2 and stdev 2; the no-σ case uses
+`apply_rule`'s own-error mode with no paired error).
+
+- Ties: 101 at 40, 102 and 103 at 25. Ranked 101, 102 (lower id), 103:
+  top-k, top-k, and 103 is tied with the second, so band.
+- Edge: 201 at 20, 202 at 10, 203 at `10 − 2√2`, 204 at `10 − 2√2 − 1e-9`:
+  top-k, top-k, band (inclusive), outside-band.
+- Rules: 301 pair 0 and no measure, exact-zero; 302 pair 5 and no measure,
+  readings-absent; 303 at −5, `−5 + 4 < 0`, below-zero; 304 at −3.5,
+  `−3.5 + 4 ≥ 0` and the only ranked set, top-k; 305 pair 0 at 50,
+  exact-zero (rule 1 first).
+- No σ (undefined, or NaN): 401 pair 0, exact-zero; 402 and 403 (even at
+  −50), readings-absent.
+- One ranked set (501 at 1), fewer than K: top-k.
+
+**511-SN — a set with no bonus in reach.** 511-SR's gear and pool
+(Thunderheart Gauntlets worn, Malorne shoulder and chest worn; pool
+Thunderheart Pauldrons, Chestguard, Leggings) plus Justicar 626's
+Breastplate, Shoulderplates, Gauntlets and Greaves at own value −30 each,
+model bonuses 0.
+
+- Justicar (`w 0`, `R 4`). Singles: chest and shoulder `−30 − 40 = −70`
+  (each breaks the worn Malorne 2pc, counted at 40), hands
+  `−30 − 100 = −130` (replaces the Thunderheart Gauntlets; Thunderheart
+  at 1 has no bonus), legs −30. Packages by best single, lowest id on a
+  tie: 2 = chest + legs, 3 adds the shoulder, 4 adds the hands. Estimates:
+  `−100` (the chest alone and the pair together each lose Malorne 2pc:
+  `m − L = 0`), `−170 + 40 = −130` (two pieces lose it alone, `m − L = 1`),
+  `−130 − 130 = −260`. Best −100. Every rung wears the same four stat sets
+  and bonuses of 0, so the pair is exactly 0, `pairedSe` 0: measure −100,
+  exact-zero.
+- Thunderheart (`w 1`, `R 4`). Singles: Pauldrons and Chestguard
+  `100 + 50 − 40 = 110`, Leggings `100 + 50 = 150`. Estimates: 150; 260
+  (Chestguard, the lower id, `m − L = 0`); `110 + 110 + 150 + 40 = 410`.
+  Pair 130 (511-SR). Measure 540, top-k (the only ranked set).
+- Sims: 4 screen sims, all simmed. After the singles, only those two
+  Justicar sims wear a Justicar copy; the off run also sends Justicar's
+  gate sims.
+- Justicar's marker: threshold `max(2, 0 + 1) = 2`. Its rows' `deltaDps`,
+  `singleBreaks` (Malorne 2pc on the chest and shoulder rows),
+  `crossesThreshold` and `piecesAfterSwap` equal the off run's; no future,
+  `nextThreshold` null.
+- Thunderheart's entries, rows and ON figures equal the off run's.
+
+**511-SB — a close third set in the band.** Nothing worn; two pool
+pieces per set, so `R = 2` and the pair is the 2pc; M2 = `d_a + d_b + b2`.
+Thunderheart Pauldrons and Chestguard 50 each, 2pc 50: 150. Malorne
+Mantle and Greaves 40 each, 2pc 20: 100. Justicar Shoulderplates 40 and
+Gauntlets 37, 2pc 20: 97. Crystalforge Breastplate 40 and Gauntlets 36,
+2pc 20: 96. The second measure is 100; the band's edge is
+`100 − 3.464102 = 96.535898`, so Justicar (97) is band and Crystalforge
+(96) outside-band. Justicar's 2pc gate runs: `sameGearDps` 20.
+Crystalforge has only its marker at 2. 8 screen sims.
+
+**511-SD — a best case below current gear.** Worn Gauntlets of Malorne
+(Malorne at 1).
+
+- Malorne (`w 1`, `R 4`): Mantle, Breastplate and Greaves at −155 each;
+  each single adds the second piece, `−155 + 40 = −115`. Estimates −115,
+  −230, −345 (no worn bonus is lost). Pair: count 4 against 1, `40 + 70 =
+110`. Measure −5; `−5 + 4.898979 = −0.101 < 0`: below-zero.
+- Thunderheart (`w 0`, `R 3`): wrist −15, waist −15, feet −100. Estimates
+  −30 and −130. Pair: count 3 against 0, the 2pc 50. Measure 20.
+- Gladiator's Pursuit 586 (`w 0`, `R 2`): chest and hands −12.375 each,
+  2pc 20 (the hands replace the Malorne Gauntlets; Malorne at 1 has no
+  bonus). Measure `−24.75 + 20 = −4.75`; `−4.75 + 4.898979 ≥ 0`, so it is
+  ranked. Two ranked sets, K = 2: both top-k.
+- GON-2: Malorne's crossing gate (the Breastplate, lowest id among equal
+  singles, count 2 against 1) reads 40 and clears, so its rows keep
+  `crossesThreshold` true and `piecesAfterSwap` 2, as in the off run. Its
+  marker is at `max(2, 1 + 1) = 2`. 6 screen sims.
+
+**511-SA — failed readings are kept.** 511-SR's gear; the fake sim fails
+the screen's high rung (Pauldrons, Chestguard and Leggings set-kept, N =
+300). The pair has no `dps` and no `pairedSe`, so there is no measure:
+readings-absent, kept. `setBonuses`, `brokenSetValues`, `wornSetLadder`,
+`crossingGates`, `setStepSims`, every row and every ON figure equal the
+off run's.
+
+**511-SL — only the gain-side set list changes.** (a) 511-SN's gear: the
+ladder, `brokenSetValues` and crossing gates equal the off run's. With the
+on run's screen sims (per-iteration values) and the off run's Justicar
+sims (each wears a Justicar copy: its gate sims, all below the gate, so no
+package or step sim) taken out, the requests and options are equal, in
+order. 4 screen sims. (b) 511-SR's gear: Thunderheart is kept (top-k), and
+everything 511-SA compares is equal. 2 screen sims.
+
+**511-SH — the hash.** Unset, the hashed object has no `setScreen` key, as
+before K5R. "on" adds `"setScreen":"on"`; on the store of an unset run it
+is not served the cached ranking, and it sends exactly its 2 screen sims
+(new `:all` keys at N = 300); every other sim comes from the store.
+Unset, "off", "record" and "on" give four different hashes.
