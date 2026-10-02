@@ -437,8 +437,8 @@ gate copies the hands (the first in slot order) in both sims: set-kept,
 `3000 + 200 + 50 = 3250`, and set-less, `3000 + 200`, so
 `sameGearDps = 50`, and `sameGearSe = √(2 · (30/√5000)²) = 0.6`. Nothing
 worn is broken, so the flag adds exactly these two sims. The package
-request is simmed once. The hands row's 2pc future carries 50 and 0.6; its
-4pc future carries neither.
+request is simmed once. The hands row's 2pc future has 50 and 0.6; its
+4pc future has neither.
 
 **511-G2 (the gate leaves out interactions).** 511-G with the term
 `{[hands, legs], 9}`. The package sims at `3259`, so today's
@@ -582,7 +582,7 @@ cannot be activated over this gemless gear.) The baseline is
 
 These are the K5 cases of plan `511-512-set-credit` (stage folder
 `.scratch/stage-gate/511-512-set-credit/`, gitignored). Under the flag a
-ranking is a step ranking: every set row carries `setContext.stepRanking`.
+ranking is a step ranking: every set row has `setContext.stepRanking`.
 
 K5S later made "close-calls" the default partner rule. The sim counts, rule
 names and the one failure scenario that change moved are restated in "The

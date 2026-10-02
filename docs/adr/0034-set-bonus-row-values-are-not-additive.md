@@ -35,7 +35,7 @@ Thunderheart candidates, each own delta 30; package net 90, which is the 2pc
 net 50 plus the 4pc net 80 minus the broken Malorne 2pc value 40):
 
 - **'full'** (`rankableSetPotential(row, floor, "full")`): every contributing
-  row carries the whole package credit. Since ticket 502 that credit also
+  row has the whole package credit. Since ticket 502 that credit also
   counts the other three pieces' own stats (100 each), so each of the four
   rows shows `390`, and its ON figure `30 + 390 = 420` equals the package's
   measured delta. The four rows sum to `1560`. Before ticket 502 each row

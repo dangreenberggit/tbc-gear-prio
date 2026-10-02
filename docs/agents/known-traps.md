@@ -30,13 +30,16 @@ the PATH pin works in either shell.
 
 - In the Bash tool, `cd` returns exit code 1 even when it changes directory: ~/.bashrc runs `fnm env --use-on-cd`, which replaces `cd` with fnm's `__fnmcd`, and fnm cannot find its settings in the agent shell. So `cd X && cmd` never runs `cmd`. Use the command's own directory flag (`git -C`, `pnpm -C`, `npm --prefix`), or separate commands with `;`.
 
-**Fork-gated suites never run in CI.** `fork-set-net.test.ts` and
-`wowsims-fork-parity.test.ts` are wrapped in `describe.skipIf(!forkPresent)`,
-and `vendor/` is gitignored, so CI collects them and skips them. A green CI
-run is no evidence for them. Run them locally with the fork present —
-`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
+**Fork-gated suites never run in CI.** `fork-set-net.test.ts`,
+`fork-set-fixtures.test.ts`, `fork-sim-database.test.ts` and
+`wowsims-fork-parity.test.ts` are wrapped in `describe.skipIf(!forkPresent)`
+(the parity suite in `describe.runIf(canRunForkSide)`), and `vendor/` is
+gitignored, so CI collects them and skips them. A green CI run is no
+evidence for them. Run them locally with the fork present —
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
 — and record the command and its rc in the commit or ticket (ticket 478,
-item A5).
+item A5). The `bulk-*` suites are fork-gated too;
+`grep -l forkPresent packages/core/test/*.test.ts` lists every fork-gated suite.
 
 ## Before any scripted or generated file edit
 

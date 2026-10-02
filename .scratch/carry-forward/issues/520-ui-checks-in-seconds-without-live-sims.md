@@ -81,8 +81,7 @@ None is chosen. These are options, not a design.
 
 ## Resolution (2026-09-28)
 
-Open until the owner rules on the proposed process text below. Stage-gate
-run `ui-storybook-lite`; the owner chose option A (fixture links and a smoke
+Stage-gate run `ui-storybook-lite`; the owner chose option A (fixture links and a smoke
 command) over Storybook itself.
 
 **Fork commits** (`vendor/tbc-new-fork`, `feat/upgrades-tab`, from bd6e76799):
