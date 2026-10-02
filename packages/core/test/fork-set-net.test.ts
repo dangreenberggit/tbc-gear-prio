@@ -395,6 +395,8 @@ async function runScenario(scenario: Scenario): Promise<{
   calls: number[][];
   /** The options of each of those requests, in the same order. */
   callOpts: SimRunOpts[];
+  /** Each of those requests, as the fake sim received it (K6B, 511-LR). */
+  requests: RaidSimRequest[];
 }> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
@@ -458,6 +460,7 @@ async function runScenario(scenario: Scenario): Promise<{
   let runCount = 0;
   const calls: number[][] = [];
   const callOpts: SimRunOpts[] = [];
+  const requests: RaidSimRequest[] = [];
   const { simCacheKey } = seamMod;
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
@@ -466,6 +469,7 @@ async function runScenario(scenario: Scenario): Promise<{
       const ids = equippedIds(req);
       calls.push(ids);
       callOpts.push({ ...opts });
+      requests.push(structuredClone(req));
       if (scenario.failWhen?.(ids, opts)) {
         return Promise.reject(new Error("the model sim failed on purpose"));
       }
@@ -515,7 +519,7 @@ async function runScenario(scenario: Scenario): Promise<{
     ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
   });
 
-  return { ranking, runCount, calls, callOpts };
+  return { ranking, runCount, calls, callOpts, requests };
 }
 
 /** A full 17-slot worn set, some slots filled by the given specs. */
@@ -723,7 +727,10 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
       (b) => b.dps !== undefined
     ).length;
     expect(bCount).toBe(1);
-    expect(on.runCount - off.runCount).toBe(2 + 6 + 5);
+    // K6B adds one bonus-off sim: the Pauldrons and Chestguard rows' 4pc
+    // steps share one gear before (Pauldrons + Chestguard) and lose Malorne
+    // 2pc by replacing the same two pieces.
+    expect(on.runCount - off.runCount).toBe(2 + 6 + 5 + 1);
   });
 
   it("case 9: split credit reorders via applyView", async () => {
@@ -984,7 +991,10 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // the counts 2, 3 and 4 (tickets 511 and 512), and the step gears no
     // package covers: every pair but the 2pc package, since each row's three
     // 2pc partner sets are close calls (K5S).
-    expect(on.runCount - off.runCount).toBe(4 + 6 + 5);
+    // K6B: three bonus-off sims, one per distinct gear before a 4pc step
+    // that newly loses Malorne 2pc (Gauntlets + Cover, shared by those two
+    // rows; Gauntlets + Chestguard; Gauntlets + Pauldrons).
+    expect(on.runCount - off.runCount).toBe(4 + 6 + 5 + 3);
     // C31 / ADR-0034: rows are not additive in either credit view. Each row
     // shows the whole swap; four rows sum to 1560 under full and 20 under split.
     const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
@@ -1577,7 +1587,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     // the counts 3, 4 and 5. The 2pc is one piece at worn 1, so it is not
     // measured and has no gate. Three step gears no package covers: every
     // 4pc partner set ties, so each is a close call (K5S).
-    expect(on.runCount - off.runCount).toBe(3 + 2 + 6 + 3);
+    // K6B: four bonus-off sims, because each row's 4pc step newly loses
+    // Malorne 2pc from its own single swap, a different gear before each.
+    expect(on.runCount - off.runCount).toBe(3 + 2 + 6 + 3 + 4);
     for (const id of [
       THUNDERHEART.head,
       THUNDERHEART.shoulder,
@@ -4336,3 +4348,543 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     expect(hashes.size).toBe(4);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * The popover's split break lines (511, K6B)
+ * ------------------------------------------------------------------ */
+
+/** A K6 step with the two line values a breaking step splits into (K6B). */
+type SplitStepTerm = StepTerm & {
+  breaksLineDps?: number;
+  piecesLineDps?: number;
+};
+
+/** The K6B fields of a step ranking's future, read through a cast. */
+type BonusOffFields = {
+  bonusOffDps?: number;
+  bonusOffSe?: number;
+  bonusOff?: Array<{ setId: number; threshold: number }>;
+};
+
+type SetBonusOffSims = {
+  gears: number;
+  simmed: number;
+  fromStore: number;
+  failedGears: number;
+  skippedSteps: number;
+  beforeInStore: number;
+};
+
+const bonusOffOf = (row: ForkRanking["items"][number], threshold: number) =>
+  futureOf(row, threshold) as BonusOffFields | undefined;
+
+const bonusOffSimsOf = (ranking: ForkRanking) =>
+  (ranking as { setBonusOffSims?: SetBonusOffSims }).setBonusOffSims;
+
+const nineOrNull = (v: number | undefined) =>
+  v === undefined ? null : Number(v.toFixed(9));
+
+/**
+ * A row's steps as [count, added piece ids, dps, Breaks line, pieces line,
+ * newly broken]; a line value is null when the step is not split.
+ */
+function splitStepsOf(view: StepViewMod, row: { setContext?: unknown }) {
+  return (
+    view.setPotentialSteps(row.setContext, FLOOR) as SplitStepTerm[] | null
+  )?.map((s) => [
+    s.threshold,
+    s.pieces.map((p) => p.itemId),
+    Number(s.dps.toFixed(9)),
+    nineOrNull(s.breaksLineDps),
+    nineOrNull(s.piecesLineDps),
+    s.broken.map((b) => [b.setId, b.threshold]),
+  ]);
+}
+
+/**
+ * Checks that every split step of the ranking's rows adds up to its step
+ * value (W-L1), and returns how many split steps there are.
+ */
+function expectSplitLinesAddUp(view: StepViewMod, ranking: ForkRanking) {
+  let split = 0;
+  for (const row of ranking.items) {
+    const steps = view.setPotentialSteps(row.setContext, FLOOR) as
+      SplitStepTerm[] | null;
+    for (const s of steps ?? []) {
+      if (s.breaksLineDps === undefined) continue;
+      split += 1;
+      expect(
+        Math.abs(s.breaksLineDps + s.piecesLineDps! - s.dps)
+      ).toBeLessThanOrEqual(1e-9);
+    }
+  }
+  return split;
+}
+
+const ZERO_BONUS_OFF: SetBonusOffSims = {
+  gears: 0,
+  simmed: 0,
+  fromStore: 0,
+  failedGears: 0,
+  skippedSteps: 0,
+  beforeInStore: 0,
+};
+
+// 511-LR: PS_SCENARIO's worn Malorne shoulder and chest, two Thunderheart
+// pool pieces, and a Thunderheart 2pc large enough to pay for the break.
+const LR_SCENARIO: Scenario = {
+  worn: wornGear({ shoulder: MALORNE.shoulder, chest: MALORNE.chest }),
+  pool: [
+    { itemId: THUNDERHEART.chest, slot: "chest" },
+    { itemId: THUNDERHEART.hands, slot: "hands" },
+  ],
+  setBonuses: {
+    ...SET_BONUSES,
+    640: { b2: 90, b4: 0 },
+    676: { b2: 150, b4: 80 },
+  },
+  itemValue: withValues([
+    [THUNDERHEART.chest, 12],
+    [THUNDERHEART.hands, 6],
+  ]),
+  measureBrokenSetValue: true,
+};
+
+// 511-L2: worn Malorne 4 (head, shoulder, chest, hands); only the
+// Thunderheart 4pc pays, so it is every row's only gated future.
+const L2_SCENARIO: Scenario = {
+  worn: wornGear(MALORNE_4),
+  pool: [
+    { itemId: THUNDERHEART.head, slot: "head" },
+    { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+    { itemId: THUNDERHEART.chest, slot: "chest" },
+    { itemId: THUNDERHEART.legs, slot: "legs" },
+  ],
+  setBonuses: {
+    ...SET_BONUSES,
+    640: { b2: 40, b4: 70 },
+    676: { b2: 0, b4: 80 },
+  },
+  itemValue: withValues([
+    [THUNDERHEART.head, 20],
+    [THUNDERHEART.shoulder, 20],
+    [THUNDERHEART.chest, 20],
+    [THUNDERHEART.legs, 10],
+  ]),
+  measureBrokenSetValue: true,
+};
+
+describe.skipIf(!forkPresent)(
+  "the popover's split break lines (511, K6B)",
+  () => {
+    it("511-LS: a step that newly loses a worn bonus is split into its Breaks line and its pieces line", async () => {
+      // Scenario kind: the owner's demo row, a 4pc step that replaces both
+      // worn Malorne pieces. Example: PS_SCENARIO (feral P2 BiS shape).
+      const view = await stepView();
+      const run = await runScenario(PS_SCENARIO);
+      const r = run.ranking;
+      const hands = thRow(r, THUNDERHEART.hands);
+      const legs = thRow(r, THUNDERHEART.legs);
+      // The gear before the 4pc step, Gauntlets + Leggings, is +44; with the
+      // Malorne shoulder and chest set-less it is 6 − 12 + 50 − 90 = −46.
+      // Breaks −46 − 44 = −90; pieces 54 − (−46) = 100; −90 + 100 = 10.
+      expect(splitStepsOf(view, hands)).toEqual([
+        [2, [THUNDERHEART.legs], 38, null, null, []],
+        [
+          4,
+          [THUNDERHEART.shoulder, THUNDERHEART.chest],
+          10,
+          -90,
+          100,
+          [[640, 2]],
+        ],
+      ]);
+      // The Leggings row's 4pc step has the same gear before (folded in slot
+      // order) and the same replaced pieces, so it shares the sim.
+      expect(splitStepsOf(view, legs)).toEqual([
+        [2, [THUNDERHEART.hands], 56, null, null, []],
+        [
+          4,
+          [THUNDERHEART.shoulder, THUNDERHEART.chest],
+          10,
+          -90,
+          100,
+          [[640, 2]],
+        ],
+      ]);
+      for (const row of [hands, legs]) {
+        const f = bonusOffOf(row, 4)!;
+        expect(f.bonusOffDps).toBeCloseTo(-46, 9);
+        expect(f.bonusOff).toEqual([{ setId: 640, threshold: 2 }]);
+        expect(f.bonusOffSe).toBe(futureOf(row, 4)?.stepGearSe);
+        expect(bonusOffOf(row, 2)?.bonusOffDps).toBeUndefined();
+      }
+      // Their own swap already broke Malorne 2pc: no step newly loses it.
+      for (const id of [THUNDERHEART.shoulder, THUNDERHEART.chest]) {
+        const row = thRow(r, id);
+        for (const s of splitStepsOf(view, row) ?? []) {
+          expect(s[3]).toBeNull();
+          expect(s[4]).toBeNull();
+        }
+        for (const f of row.setContext?.futureBonuses ?? []) {
+          expect((f as BonusOffFields).bonusOffDps).toBeUndefined();
+        }
+      }
+      expect(bonusOffSimsOf(r)).toEqual({
+        gears: 1,
+        simmed: 1,
+        fromStore: 0,
+        failedGears: 0,
+        skippedSteps: 0,
+        beforeInStore: 1,
+      });
+      const offIds = [
+        COPY_OFFSET + MALORNE.shoulder,
+        COPY_OFFSET + MALORNE.chest,
+        THUNDERHEART.hands,
+        THUNDERHEART.legs,
+      ];
+      expect(
+        run.calls.filter((ids) => offIds.every((id) => ids.includes(id)))
+      ).toHaveLength(1);
+      expect(expectSplitLinesAddUp(view, r)).toBe(2);
+    });
+
+    it("511-LN: steps that break nothing are not split and add no sim", async () => {
+      // Scenario kind: nothing worn, so no step can lose a worn bonus.
+      // Example: 511-R's scenario.
+      const view = await stepView();
+      const { ranking: r } = await runScenario(R_SCENARIO);
+      expect(splitStepsOf(view, thRow(r, THUNDERHEART.hands))).toEqual([
+        [2, [THUNDERHEART.chest], 150, null, null, []],
+        [4, [THUNDERHEART.shoulder, THUNDERHEART.legs], 240, null, null, []],
+      ]);
+      for (const row of r.items) {
+        for (const f of row.setContext?.futureBonuses ?? []) {
+          expect((f as BonusOffFields).bonusOffDps).toBeUndefined();
+          expect((f as BonusOffFields).bonusOff).toBeUndefined();
+        }
+      }
+      expect(expectSplitLinesAddUp(view, r)).toBe(0);
+      expect(bonusOffSimsOf(r)).toEqual(ZERO_BONUS_OFF);
+      expect(r.setStepSims).toEqual({
+        partnerRule: "close-calls",
+        gears: 4,
+        simmed: 5,
+        fromStore: 11,
+      });
+    });
+
+    it("511-LR: a first step's bonus-off request is the row's single-swap request with copies", async () => {
+      // Scenario kind: a row whose first step breaks a worn bonus, so the
+      // gear before the step is the row's own single swap. Example: worn
+      // Malorne shoulder and chest, Gauntlets row with a Chestguard partner.
+      const view = await stepView();
+      const run = await runScenario(LR_SCENARIO);
+      const r = run.ranking;
+      const hands = thRow(r, THUNDERHEART.hands);
+      expect(hands.setContext?.singleDeltaDps).toBeCloseTo(6, 9);
+      // 2pc with the Chestguard: 6 + 12 + 150 − 90 = 78, a step of 72. The
+      // Gauntlets swap with the Malorne chest set-less: 6 − 90 = −84.
+      // Breaks −84 − 6 = −90; pieces 78 − (−84) = 162.
+      expect(splitStepsOf(view, hands)).toEqual([
+        [2, [THUNDERHEART.chest], 72, -90, 162, [[640, 2]]],
+      ]);
+      // The Chestguard row breaks Malorne 2pc itself: 12 − 90 = −78; its
+      // step with the Gauntlets is 78 − (−78) = 156 and is not split.
+      const chest = thRow(r, THUNDERHEART.chest);
+      expect(chest.deltaDps).toBeCloseTo(-78, 9);
+      expect(splitStepsOf(view, chest)).toEqual([
+        [2, [THUNDERHEART.hands], 156, null, null, []],
+      ]);
+      expect(bonusOffSimsOf(r)).toEqual({
+        gears: 1,
+        simmed: 1,
+        fromStore: 0,
+        failedGears: 0,
+        skippedSteps: 0,
+        beforeInStore: 1,
+      });
+      // Request identity (C244): undo the copy and the bonus-off request is
+      // the request that gave the Gauntlets row's single swap.
+      const copyId = COPY_OFFSET + MALORNE.chest;
+      const offAt = run.calls.findIndex(
+        (ids) =>
+          ids.includes(copyId) &&
+          ids.includes(THUNDERHEART.hands) &&
+          !ids.includes(THUNDERHEART.chest)
+      );
+      expect(offAt).toBeGreaterThanOrEqual(0);
+      const undone = structuredClone(run.requests[offAt]!) as {
+        raid: {
+          parties: Array<{
+            players: Array<{
+              equipment: { items: Array<{ id?: number }> };
+              database?: { items?: Array<{ id?: number }> };
+            }>;
+          }>;
+        };
+      };
+      const player = undone.raid.parties[0]!.players[0]!;
+      const copied = player.equipment.items.find((i) => i.id === copyId)!;
+      copied.id = MALORNE.chest;
+      if (player.database?.items) {
+        player.database.items = player.database.items.filter(
+          (row) => row.id !== copyId
+        );
+      }
+      const singleIds = idsOf({
+        shoulder: MALORNE.shoulder,
+        chest: MALORNE.chest,
+        hands: THUNDERHEART.hands,
+      });
+      const singleAt = run.calls.findIndex(
+        (ids, i) =>
+          JSON.stringify(ids) === JSON.stringify(singleIds) &&
+          run.callOpts[i]!.saveAllValues !== true
+      );
+      expect(singleAt).toBeGreaterThanOrEqual(0);
+      expect(undone).toEqual(run.requests[singleAt]);
+      expect(expectSplitLinesAddUp(view, r)).toBe(1);
+    });
+
+    it("511-L2: a step that loses two bonuses gets one Breaks line valued by one sim", async () => {
+      // Scenario kind: a worn 4-piece set whose 2pc and 4pc are both lost
+      // by one step. Example: worn Malorne 4, the Thunderheart Leggings row
+      // taking the Cover, Pauldrons and Chestguard.
+      const view = await stepView();
+      const run = await runScenario(L2_SCENARIO);
+      const r = run.ranking;
+      expect(r.baseline.dps).toBeCloseTo(3110, 9);
+      // Leggings: 4pc gear 10 + 60 + 80 − 110 = +40, a step of 30. With the
+      // Malorne head, shoulder and chest set-less: 10 − 110 = −100.
+      // Breaks −100 − 10 = −110 (40 + 70 together); pieces 40 + 100 = 140.
+      const legs = thRow(r, THUNDERHEART.legs);
+      expect(splitStepsOf(view, legs)).toEqual([
+        [
+          4,
+          [THUNDERHEART.head, THUNDERHEART.shoulder, THUNDERHEART.chest],
+          30,
+          -110,
+          140,
+          [
+            [640, 4],
+            [640, 2],
+          ],
+        ],
+      ]);
+      expect(bonusOffOf(legs, 4)?.bonusOff).toEqual([
+        { setId: 640, threshold: 4 },
+        { setId: 640, threshold: 2 },
+      ]);
+      // Cover, Pauldrons, Chestguard: single 20 − 70 = −50 (own break 4pc);
+      // the 4pc step is 40 + 50 = 90 and newly loses the 2pc. The bonus-off
+      // gear copies the two Malorne pieces the step replaces: 20 − 110 = −90.
+      const others = [
+        THUNDERHEART.head,
+        THUNDERHEART.shoulder,
+        THUNDERHEART.chest,
+      ];
+      for (const id of others) {
+        const row = thRow(r, id);
+        expect(row.deltaDps).toBeCloseTo(-50, 9);
+        expect(splitStepsOf(view, row)).toEqual([
+          [
+            4,
+            [...others.filter((o) => o !== id), THUNDERHEART.legs],
+            90,
+            -40,
+            130,
+            [[640, 2]],
+          ],
+        ]);
+      }
+      expect(bonusOffSimsOf(r)).toEqual({
+        gears: 4,
+        simmed: 4,
+        fromStore: 0,
+        failedGears: 0,
+        skippedSteps: 0,
+        beforeInStore: 4,
+      });
+      // The Leggings row's request: head, shoulder and chest are copies, the
+      // Malorne hands stays real.
+      expect(run.calls).toContainEqual(
+        idsOf({
+          head: COPY_OFFSET + MALORNE.head,
+          shoulder: COPY_OFFSET + MALORNE.shoulder,
+          chest: COPY_OFFSET + MALORNE.chest,
+          hands: MALORNE.hands,
+          legs: THUNDERHEART.legs,
+        })
+      );
+      expect(expectSplitLinesAddUp(view, r)).toBe(4);
+    });
+
+    it("511-LF: a failed bonus-off sim leaves the step as K6 showed it", async () => {
+      // Scenario kind: the bonus-off sim fails. Example: PS_SCENARIO with
+      // the fake sim failing the one request that wears the Malorne
+      // shoulder's set-less copy with the Gauntlets and the Leggings.
+      const view = await stepView();
+      const failId = COPY_OFFSET + MALORNE.shoulder;
+      const { ranking: r } = await runScenario({
+        ...PS_SCENARIO,
+        failWhen: (ids) =>
+          ids.includes(failId) &&
+          ids.includes(THUNDERHEART.hands) &&
+          ids.includes(THUNDERHEART.legs),
+      });
+      const hands = thRow(r, THUNDERHEART.hands);
+      const legs = thRow(r, THUNDERHEART.legs);
+      const fourPc = [
+        4,
+        [THUNDERHEART.shoulder, THUNDERHEART.chest],
+        10,
+        null,
+        null,
+        [[640, 2]],
+      ];
+      expect(splitStepsOf(view, hands)).toEqual([
+        [2, [THUNDERHEART.legs], 38, null, null, []],
+        fourPc,
+      ]);
+      expect(splitStepsOf(view, legs)).toEqual([
+        [2, [THUNDERHEART.hands], 56, null, null, []],
+        fourPc,
+      ]);
+      for (const row of [hands, legs]) {
+        const f = bonusOffOf(row, 4)!;
+        expect(f.bonusOffDps).toBeUndefined();
+        expect(f.bonusOffSe).toBeUndefined();
+        expect(f.bonusOff).toBeUndefined();
+        expect(view.setCreditUnmeasured(row.setContext)).toBe(false);
+      }
+      expect(bonusOffSimsOf(r)).toEqual({
+        gears: 1,
+        simmed: 0,
+        fromStore: 0,
+        failedGears: 1,
+        skippedSteps: 0,
+        beforeInStore: 1,
+      });
+      // The credits are 511-PS's: 54 − 6 and 54 + 12.
+      expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(48, 9);
+      expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(66, 9);
+    });
+
+    it("511-LV: the view splits a step only when the bonus-off sim names exactly its lost bonuses", async () => {
+      // Scenario kind: the view's rule on a hand-built step-ranking row.
+      // Example: the 511-LS Gauntlets row's figures.
+      const view = await stepView();
+      const ctxWith = (
+        two: BonusOffFields = {},
+        four: BonusOffFields = {}
+      ) => ({
+        stepRanking: true,
+        setId: 676,
+        setName: "Thunderheart Harness",
+        singleDeltaDps: 6,
+        futureBonuses: [
+          {
+            threshold: 2,
+            piecesNeeded: 1,
+            sameGearDps: 50,
+            sameGearSe: 1,
+            stepGearDps: 44,
+            pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
+            ...two,
+          },
+          {
+            threshold: 4,
+            piecesNeeded: 3,
+            sameGearDps: 80,
+            sameGearSe: 1,
+            stepGearDps: 54,
+            pieces: [
+              { itemId: THUNDERHEART.shoulder, name: "Pauldrons" },
+              { itemId: THUNDERHEART.chest, name: "Chestguard" },
+              { itemId: THUNDERHEART.legs, name: "Leggings" },
+            ],
+            breaks: [
+              {
+                setId: 640,
+                setName: "Malorne Harness",
+                threshold: 2,
+                dps: 90,
+              },
+            ],
+            ...four,
+          },
+        ],
+      });
+      const fourOf = (ctx: unknown) =>
+        (view.setPotentialSteps(ctx, FLOOR) as SplitStepTerm[])[1]!;
+      // (a) The bonus-off sim names the lost Malorne 2pc: split.
+      const a = fourOf(
+        ctxWith(
+          {},
+          { bonusOffDps: -46, bonusOff: [{ setId: 640, threshold: 2 }] }
+        )
+      );
+      expect(a.breaksLineDps).toBeCloseTo(-90, 9);
+      expect(a.piecesLineDps).toBeCloseTo(100, 9);
+      expect(a.dps).toBeCloseTo(10, 9);
+      // (b) It names another bonus: not split.
+      const b = fourOf(
+        ctxWith(
+          {},
+          { bonusOffDps: -46, bonusOff: [{ setId: 640, threshold: 4 }] }
+        )
+      );
+      expect("breaksLineDps" in b).toBe(false);
+      expect("piecesLineDps" in b).toBe(false);
+      expect(b.dps).toBeCloseTo(10, 9);
+      // (c) A ranking saved before K6B: today's steps, no line fields.
+      const c = view.setPotentialSteps(ctxWith(), FLOOR) as SplitStepTerm[];
+      expect(c).toEqual([
+        {
+          kind: "step",
+          threshold: 2,
+          setName: "Thunderheart Harness",
+          pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
+          broken: [],
+          dps: 38,
+          isStop: false,
+        },
+        {
+          kind: "step",
+          threshold: 4,
+          setName: "Thunderheart Harness",
+          pieces: [
+            { itemId: THUNDERHEART.shoulder, name: "Pauldrons" },
+            { itemId: THUNDERHEART.chest, name: "Chestguard" },
+          ],
+          broken: [
+            {
+              setId: 640,
+              setName: "Malorne Harness",
+              threshold: 2,
+              dps: 90,
+            },
+          ],
+          dps: 10,
+          isStop: true,
+        },
+      ]);
+      for (const s of c) {
+        expect("breaksLineDps" in s).toBe(false);
+        expect("piecesLineDps" in s).toBe(false);
+      }
+      // (d) A bonus-off value on a step that loses nothing: not split.
+      const d = (
+        view.setPotentialSteps(
+          ctxWith({ bonusOffDps: -12, bonusOff: [] }),
+          FLOOR
+        ) as SplitStepTerm[]
+      )[0]!;
+      expect("breaksLineDps" in d).toBe(false);
+      expect("piecesLineDps" in d).toBe(false);
+      expect(d.dps).toBeCloseTo(38, 9);
+    });
+  }
+);

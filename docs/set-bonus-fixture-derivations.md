@@ -1177,3 +1177,108 @@ Credit 48 > 38, so the stop is the 4pc. This is the owner's demo row
 **511-PN.** The Leggings row's 2pc partner is the Gauntlets; its 4pc
 partners are the Chestguard, Wristguards and Waistguard, which do not
 include the Gauntlets. `setPotentialSteps` returns null.
+
+## The popover's split break lines (K6B)
+
+The owner chose to show a broken set's loss on its own line (2026-10-02).
+A shown step that newly loses a worn bonus gets one more sim: the gear
+just before the step, with the lost set's pieces in the step's new
+pieces' slots sent as set-less copies (the bonus-off gear). Its value is
+`bonusOffDps`, that sim minus the current gear's. The Breaks line is
+`bonusOffDps` − the previous total (−Y), and the pieces line is the step's
+total − `bonusOffDps` (X). X − Y is the step's total minus the previous
+total, which is the step (C249), so the lines add up. The fake sim counts
+a set-less copy toward no set (C252). Every value below is relative to the
+scenario's baseline.
+
+**511-LS.** `PS_SCENARIO`, baseline 3090 (Malorne shoulder and chest, own
+value 0, 2pc 90). The Gauntlets row's steps are 511-PS's: the Leggings,
+44 − 6 = 38; then the Pauldrons and Chestguard, 54 − 44 = 10, breaking
+Malorne 2pc. The gear before the 4pc step is Gauntlets + Leggings: 6 − 12
+
+- 50 = +44. Its bonus-off gear sends the Malorne shoulder and chest as
+  set-less copies: 6 − 12 + 50 − 90 = −46. Breaks line −46 − 44 = −90;
+  pieces line 54 − (−46) = 100; −90 + 100 = 10. The Leggings row (single
+  −12): its 2pc step with the Gauntlets is 44 − (−12) = 56 with no line
+  values; its 4pc step has the same gear before (Gauntlets + Leggings,
+  folded in slot order) and the same replaced pieces, so it shares the one
+  sim and reads −90 and 100. `bonusOffSe` combines one sim of stdev 30 with
+  the baseline's se, as `stepGearSe` does, so the two are equal. The
+  Pauldrons and Chestguard rows' own swaps already break Malorne 2pc
+  (`singleBreaks`), so no step newly loses it and nothing is split.
+  `setBonusOffSims`: one distinct request, simmed once; its plain gear
+  before (Gauntlets + Leggings) is the 2pc step gear, already in the store.
+  Exactly one call wears 1,029,100, 1,029,096, 31034 and 31044.
+
+**511-LN.** 511-R's scenario wears nothing, so no step loses a worn
+bonus: no line values, no `bonusOffDps`, and `setBonusOffSims` all zeros.
+The Gauntlets row's steps (150, 240) and `setStepSims` (gears 4, simmed
+5, from the store 11) are 511-R's.
+
+**511-LR.** Worn Malorne shoulder and chest (own value 0, 2pc 90); pool
+Chestguard (12) and Gauntlets (6); Thunderheart 2pc 150. Baseline 3090.
+The Gauntlets row: single +6, breaks nothing. Its only reachable future
+is the 2pc, with the Chestguard: 6 + 12 + 150 − 90 = +78, a step of 72
+that newly breaks Malorne 2pc. The gear before is the row's single swap;
+the bonus-off gear sends the Malorne chest as a set-less copy: 6 − 90 =
+−84. Breaks −84 − 6 = −90; pieces 78 − (−84) = 162; −90 + 162 = 72. The
+Chestguard row: single 12 − 90 = −78 with its own break; its step with
+the Gauntlets is 78 − (−78) = 156, not split. `setBonusOffSims`: one
+request, simmed once, and its plain request (the Gauntlets single swap)
+is in the store. Request identity (C244): the bonus-off request with the
+copy id 1,029,096 set back to 29096 and its copy row dropped equals the
+request whose sim gave the Gauntlets single swap.
+
+**511-L2.** Worn Malorne head, shoulder, chest and hands (own value 0,
+2pc 40, 4pc 70); pool Thunderheart Cover, Pauldrons and Chestguard (20
+each) and Leggings (10); Thunderheart 2pc 0 and 4pc 80, so the 2pc and
+3pc read 0 and are below the gate. Baseline 3000 + 40 + 70 = 3110. The
+Leggings row: single +10, no own break. Its 4pc step with the Cover,
+Pauldrons and Chestguard: 10 + 60 + 80 − 110 = +40, a step of 30, newly
+losing Malorne 4pc and 2pc (Malorne 4 → 1; `brokenSetBonuses` sorts by
+set, then count from high to low). The bonus-off gear is the Leggings
+single swap with the Malorne head, shoulder and chest as set-less copies,
+the hands real: 10 − 110 = −100. Breaks −100 − 10 = −110 (40 + 70
+together); pieces 40 − (−100) = 140; −110 + 140 = 30. The Cover,
+Pauldrons and Chestguard rows: single 20 − 70 = −50 (Malorne 4 → 3, own
+break 4pc). Each 4pc step is 40 − (−50) = 90 and newly loses the 2pc
+(Malorne 3 → 1). Each bonus-off gear copies the two Malorne pieces its
+step replaces: 20 − 110 = −90. Breaks −90 − (−50) = −40; pieces 40 −
+(−90) = 130; −40 + 130 = 90. Four distinct requests (the Leggings row and
+the three others each have their own gear before), four sims, and each
+plain gear before is a single swap in the store.
+
+**511-LF.** `PS_SCENARIO` with the fake sim failing every call that wears
+1,029,100 with 31034 and 31044, which only the bonus-off request does.
+The Gauntlets and Leggings rows keep 511-PS's steps (38, 10; 56, 10)
+with no line values, and their 4pc futures get none of the three fields.
+`setBonusOffSims`: one request, 0 simmed, 1 failed; its plain gear before
+is in the store. The credits stay 511-PS's: Gauntlets 54 − 6 = 48,
+Leggings 54 + 12 = 66.
+
+**511-LV.** A hand-built row: single 6; the 2pc future totals 44 with the
+Leggings; the 4pc future totals 54 with the Pauldrons, Chestguard and
+Leggings and breaks Malorne 2pc (90). (a) `bonusOffDps` −46 naming
+Malorne 2pc: Breaks −46 − 44 = −90, pieces 54 − (−46) = 100. (b) The same
+value naming Malorne 4pc does not match the step's lost bonus: no line
+values, the step stays 10. (c) Neither field: K6's output, steps 38 and 10. (d) A `bonusOffDps` on the 2pc future, which loses nothing: no line
+values, the step stays 38.
+
+**Moved sim counts.** Each scenario with a shown breaking step sends one
+more sim per distinct bonus-off request; no other literal moves.
+
+- **Case 8** (worn Malorne hands and legs, 2pc 40): +1. The Pauldrons and
+  Chestguard rows' 4pc steps add the Gauntlets and Leggings, which replace
+  both Malorne pieces. Both rows' gear before is Pauldrons + Chestguard and
+  the replaced slots are the same, so one request: 250 before, 210 with
+  the Malorne pieces set-less, Y = 40, X = 490 − 210 = 280, step 240.
+- **476-A** (worn Malorne 4): +3. Each row's 4pc step newly loses Malorne
+  2pc (its own swap already lost the 4pc). The gears before are Gauntlets
+  - Cover (the Gauntlets and Cover rows), Gauntlets + Chestguard and
+    Gauntlets + Pauldrons: three requests. Each reads Y = 40, X = 280, step
+  240.
+- **492-J** (worn Thunderheart hands, Malorne head, shoulder, chest): +4.
+  Each of the Cover, Chestguard, Leggings and Pauldrons rows has one step,
+  the 4pc, which newly loses Malorne 2pc; its gear before is the row's own
+  single swap, so the four requests differ. Each reads Y = 40, X = 280,
+  step 240.
