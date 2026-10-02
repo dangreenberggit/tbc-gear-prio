@@ -715,14 +715,15 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     expect(off.ranking.brokenSetValues ?? []).toHaveLength(0);
     // The flag adds one ladder rung per worn Malorne piece (2), two gate sims
     // for each count the pool reaches (2, 3 and 4: 6) and the step gears no
-    // package sim already covers (2), and nothing else (tickets 511 and 512;
-    // derivation "Ticket 511 (K5)", case 8).
+    // package sim already covers, the close calls' included (5), and nothing
+    // else (tickets 511 and 512; derivations "Ticket 511 (K5)" and "The
+    // close-calls partner rule", case 8).
     expect(on.runCount).toBeGreaterThan(off.runCount);
     const bCount = (on.ranking.brokenSetValues ?? []).filter(
       (b) => b.dps !== undefined
     ).length;
     expect(bCount).toBe(1);
-    expect(on.runCount - off.runCount).toBe(2 + 6 + 2);
+    expect(on.runCount - off.runCount).toBe(2 + 6 + 5);
   });
 
   it("case 9: split credit reorders via applyView", async () => {
@@ -980,9 +981,10 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       );
     }
     // One ladder rung per worn Malorne piece (4), two gate sims for each of
-    // the counts 2, 3 and 4 (tickets 511 and 512), and the two step gears no
-    // package covers (K5: chest + hands, shoulder + hands).
-    expect(on.runCount - off.runCount).toBe(4 + 6 + 2);
+    // the counts 2, 3 and 4 (tickets 511 and 512), and the step gears no
+    // package covers: every pair but the 2pc package, since each row's three
+    // 2pc partner sets are close calls (K5S).
+    expect(on.runCount - off.runCount).toBe(4 + 6 + 5);
     // C31 / ADR-0034: rows are not additive in either credit view. Each row
     // shows the whole swap; four rows sum to 1560 under full and 20 under split.
     const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
@@ -1093,12 +1095,12 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     );
     // The ladder sims one rung per worn Malorne piece (3), however many rows
     // share a break; (640,3) reads 0 and is not counted, so one B is kept.
-    // The others are the gates of counts 2 to 5 (8, ticket 511) and the four
-    // step gears no package covers (K5).
+    // The others are the gates of counts 2 to 5 (8, ticket 511) and the
+    // nine step gears no package covers, the close calls' included (K5S).
     const measured = (r.brokenSetValues ?? []).filter(
       (b) => b.dps !== undefined
     ).length;
-    expect(on.runCount - off.runCount).toBe(3 + 8 + 4);
+    expect(on.runCount - off.runCount).toBe(3 + 8 + 9);
     expect(measured).toBe(1);
     // The package's own members break nothing. Since 502 each shows the
     // package delta 680: wrist, waist and feet 150 + 530, hands 100 + 580.
@@ -1321,9 +1323,10 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     expect(near(r.baseline.dps, 3250, 0.5)).toBe(true);
     expect(near(bsvDps(r, 676, 2)!, 50, 0.5)).toBe(true);
     // Two ladder rungs (Thunderheart worn 2), two gate sims for each of the
-    // Malorne counts 2 to 5 (8), three step gears no package covers, and one
-    // package sim fewer: the 4pc, worth 0 here, is below the gate (K5).
-    expect(on.runCount - off.runCount).toBe(2 + 8 + 3 - 1);
+    // Malorne counts 2 to 5 (8), eight step gears no package covers (the
+    // close calls' included, K5S), and one package sim fewer: the 4pc, worth
+    // 0 here, is below the gate (K5).
+    expect(on.runCount - off.runCount).toBe(2 + 8 + 8 - 1);
     expect(sortedIds(bonusOf(r, 640, 2)?.packageItemIds)).toEqual([
       29096, 29098,
     ]);
@@ -1572,8 +1575,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     // Three ladder rungs (Malorne worn 3; Thunderheart worn 1 has no
     // ladder), the crossing gate's two sims, and two gate sims for each of
     // the counts 3, 4 and 5. The 2pc is one piece at worn 1, so it is not
-    // measured and has no gate. One step gear no package covers (K5).
-    expect(on.runCount - off.runCount).toBe(3 + 2 + 6 + 1);
+    // measured and has no gate. Three step gears no package covers: every
+    // 4pc partner set ties, so each is a close call (K5S).
+    expect(on.runCount - off.runCount).toBe(3 + 2 + 6 + 3);
     for (const id of [
       THUNDERHEART.head,
       THUNDERHEART.shoulder,
@@ -2801,7 +2805,7 @@ describe.skipIf(!forkPresent)(
       ).toEqual([]);
       expect(on.runCount).toBe(1 + 4 + 6);
       expect(on.ranking.setStepSims).toEqual({
-        partnerRule: "sum-of-singles",
+        partnerRule: "close-calls",
         gears: 0,
         simmed: 0,
         fromStore: 0,
@@ -2840,13 +2844,15 @@ describe.skipIf(!forkPresent)(
         [2, false],
         [4, true],
       ]);
-      // Four distinct step gears; the 2pc package (hands + chest) and the
-      // 4-piece package came from the store.
+      // Every row's three 2pc partner sets tie on estimate, so all are close
+      // calls: the choices sim the six pairs (12 calls; the 2pc package,
+      // hands + chest, from the store), then the four distinct step gears
+      // come from the store (K5S).
       expect(r.setStepSims).toEqual({
-        partnerRule: "sum-of-singles",
+        partnerRule: "close-calls",
         gears: 4,
-        simmed: 2,
-        fromStore: 2,
+        simmed: 5,
+        fromStore: 11,
       });
       // W-S1 on every row.
       for (const id of TH_FOUR) {
@@ -2956,15 +2962,16 @@ describe.skipIf(!forkPresent)(
         expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
         expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
       }
-      // W-S7: the Pauldrons row's 2pc step gear (Pauldrons + Gauntlets) is
-      // the only request with exactly those two Thunderheart pieces.
+      // W-S7: every 2pc gear of the Pauldrons row (the Pauldrons and one
+      // other real Thunderheart piece) fails. Its three partner sets are close
+      // calls, so one failure alone would only skip that set (K5S); with all
+      // three failed the row keeps Z's choice, whose step sim fails too.
+      const thSlots = [SHOULDER_SLOT, CHEST_SLOT, HANDS_SLOT, LEGS_SLOT];
       const step = await runScenario({
         ...base,
         failWhen: (ids) =>
           ids[SHOULDER_SLOT] === THUNDERHEART.shoulder &&
-          ids[HANDS_SLOT] === THUNDERHEART.hands &&
-          ids[CHEST_SLOT] === 0 &&
-          ids[LEGS_SLOT] === 0,
+          thSlots.filter((slot) => ids[slot] !== 0).length === 2,
       });
       const pauldrons = thRow(step.ranking, THUNDERHEART.shoulder);
       expect(futureOf(pauldrons, 2)?.stepGearDps).toBeUndefined();
@@ -3240,7 +3247,7 @@ describe.skipIf(!forkPresent)(
       }>("engine/seams/store.ts");
       const store = new storeMod.MemoryStore();
       const unset = await runScenario({ ...PS_SCENARIO, store });
-      expect(unset.ranking.setStepSims?.partnerRule).toBe("sum-of-singles");
+      expect(unset.ranking.setStepSims?.partnerRule).toBe("close-calls");
       // W-H1: unset, the hashed object has no partnerRule key, as before K5.
       expect(unset.ranking.contentHash).not.toContain('"partnerRule"');
       const again = await runScenario({ ...PS_SCENARIO, store });
@@ -3632,3 +3639,131 @@ describe.skipIf(!forkPresent)(
     });
   }
 );
+
+/* ------------------------------------------------------------------ *
+ * The close-calls partner rule (ticket 511, stage K5S). Literals are
+ * derived in docs/set-bonus-fixture-derivations.md, "The close-calls
+ * partner rule".
+ * ------------------------------------------------------------------ */
+
+// Nothing worn; Thunderheart Chestguard 110, Gauntlets 100, Leggings 100;
+// +20 when the Gauntlets and Leggings are worn together. Z's estimate for the
+// Gauntlets row's 2pc prefers the Chestguard (210 against 200), but the
+// Leggings gear sims higher (270 against 260).
+const PC_SCENARIO: Scenario = {
+  worn: wornGear({}),
+  pool: [
+    { itemId: THUNDERHEART.chest, slot: "chest" },
+    { itemId: THUNDERHEART.hands, slot: "hands" },
+    { itemId: THUNDERHEART.legs, slot: "legs" },
+  ],
+  itemValue: withValues([[THUNDERHEART.chest, 110]]),
+  interactions: [{ ids: [THUNDERHEART.hands, THUNDERHEART.legs], dps: 20 }],
+  measureBrokenSetValue: true,
+};
+
+describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
+  it("511-PC: two partner sets within the margin are both simmed, and the better sim wins", async () => {
+    // Scenario kind: a row whose partner sets' estimates are close, while
+    // their pieces' stats interact so that the estimate's order is wrong.
+    // Example: PC_SCENARIO, the Thunderheart Gauntlets row's 2pc.
+    const view = await stepView();
+    const { ranking: r } = await runScenario(PC_SCENARIO);
+    const hands = thRow(r, THUNDERHEART.hands);
+    expect(futureOf(hands, 2)?.partnerRule).toBe("close-calls");
+    expect(futureOf(hands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
+      THUNDERHEART.legs,
+    ]);
+    // model(G + Gauntlets + Leggings) − model(G) = 200 + 50 + 20.
+    expect(futureOf(hands, 2)?.stepGearDps).toBeCloseTo(270, 9);
+    expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(170, 9);
+    // The Chestguard row's two sets tie on estimate and on sim (260 each):
+    // Z's order, the lower id.
+    expect(
+      futureOf(thRow(r, THUNDERHEART.chest), 2)?.pieces?.map((p) => p.itemId)
+    ).toEqual([THUNDERHEART.hands]);
+    // Choices sim chest + hands (the 2pc package, from the store), chest +
+    // legs and hands + legs once each, then the two chosen gears come from
+    // the store.
+    expect(r.setStepSims).toEqual({
+      partnerRule: "close-calls",
+      gears: 2,
+      simmed: 2,
+      fromStore: 6,
+    });
+
+    // Rule Z alone keeps its estimate's choice: 100 + 110 + 50.
+    const { ranking: z } = await runScenario({
+      ...PC_SCENARIO,
+      partnerRule: "sum-of-singles",
+    });
+    const zHands = thRow(z, THUNDERHEART.hands);
+    expect(futureOf(zHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
+      THUNDERHEART.chest,
+    ]);
+    expect(futureOf(zHands, 2)?.stepGearDps).toBeCloseTo(260, 9);
+    expect(z.setStepSims).toEqual({
+      partnerRule: "sum-of-singles",
+      gears: 2,
+      simmed: 1,
+      fromStore: 1,
+    });
+  });
+
+  it("511-PC: only a set within 31.87 of the best estimate is simmed", async () => {
+    // The margin's edge: Leggings at 79 (estimate 31 below the
+    // Chestguard's) or 78 (32 below), +40 with the Gauntlets, so the
+    // Leggings gear sims 269 or 268 against the Chestguard's 260.
+    const handsPieces = async (legs: number) => {
+      const { ranking } = await runScenario({
+        ...PC_SCENARIO,
+        itemValue: withValues([
+          [THUNDERHEART.chest, 110],
+          [THUNDERHEART.legs, legs],
+        ]),
+        interactions: [
+          { ids: [THUNDERHEART.hands, THUNDERHEART.legs], dps: 40 },
+        ],
+      });
+      const f = futureOf(thRow(ranking, THUNDERHEART.hands), 2);
+      return [f?.pieces?.map((p) => p.itemId), f?.stepGearDps];
+    };
+    expect(await handsPieces(79)).toEqual([[THUNDERHEART.legs], 269]);
+    expect(await handsPieces(78)).toEqual([[THUNDERHEART.chest], 260]);
+  });
+
+  it("511-PC: a candidate whose sim fails is skipped; when every one fails, Z's choice stands", async () => {
+    const view = await stepView();
+    // Real (not copied) Thunderheart pieces worn, in slot order.
+    const realTh = (ids: readonly number[]) =>
+      [CHEST_SLOT, HANDS_SLOT, LEGS_SLOT]
+        .map((slot) => ids[slot]!)
+        .filter((id) => id !== 0 && id < COPY_OFFSET);
+    const isGear = (ids: readonly number[], want: readonly number[]) =>
+      JSON.stringify(realTh(ids)) === JSON.stringify(want);
+    // Only the Gauntlets + Leggings gear fails: the Chestguard wins.
+    const one = await runScenario({
+      ...PC_SCENARIO,
+      failWhen: (ids) => isGear(ids, [THUNDERHEART.hands, THUNDERHEART.legs]),
+    });
+    const oneHands = thRow(one.ranking, THUNDERHEART.hands);
+    expect(futureOf(oneHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
+      THUNDERHEART.chest,
+    ]);
+    expect(futureOf(oneHands, 2)?.stepGearDps).toBeCloseTo(260, 9);
+    // Both of the Gauntlets row's gears fail: the row keeps Z's choice, the
+    // Chestguard, whose step sim fails again, so the row is unmeasured.
+    const both = await runScenario({
+      ...PC_SCENARIO,
+      failWhen: (ids) =>
+        isGear(ids, [THUNDERHEART.hands, THUNDERHEART.legs]) ||
+        isGear(ids, [THUNDERHEART.chest, THUNDERHEART.hands]),
+    });
+    const bothHands = thRow(both.ranking, THUNDERHEART.hands);
+    expect(futureOf(bothHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
+      THUNDERHEART.chest,
+    ]);
+    expect(futureOf(bothHands, 2)?.stepGearDps).toBeUndefined();
+    expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
+  });
+});

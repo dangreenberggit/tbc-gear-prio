@@ -584,6 +584,10 @@ These are the K5 cases of plan `511-512-set-credit` (stage folder
 `.scratch/stage-gate/511-512-set-credit/`, gitignored). Under the flag a
 ranking is a step ranking: every set row carries `setContext.stepRanking`.
 
+K5S later made "close-calls" the default partner rule. The sim counts, rule
+names and the one failure scenario that change moved are restated in "The
+close-calls partner rule" at the end of this file; the text below is K5's.
+
 - **Counts.** The gain side tries every count from `max(2, w + 1)` up to
   the count `selectPackage` can fill, with no list. At `w + 1` the entry is
   `unmeasurable-at-this-worn-count` as before.
@@ -917,3 +921,94 @@ count-3 rung's at N = 300 are absent, since each needs its values. Every
 other rung and every pair keep their readings (W-SR3). The failed sim was
 sent, so `simmed` is still 14. The rest of the ranking equals the run
 without the screen.
+
+## The close-calls partner rule
+
+These are the K5S cases of the same plan. The default partner rule is now
+"close-calls": compute Z's estimate for every partner set; when two or more
+sets are within `M′ = 31.866872635956497` of the best estimate, sim each
+of them (through the step-gear sim, so the store answers a gear already
+simmed) and take the highest total, ties to Z's order (higher estimate,
+then lowest sorted ids). A single set within the margin is taken without a
+sim. A set whose sim fails is skipped; when every one fails, Z's choice
+stands. An undefined estimate gives Z's `break-unmeasured`.
+
+So a chosen gear's own step sim is always a store hit when its choice
+simmed, and `setStepSims` counts every choice sim. The model is exact, so a
+choice moves only where an interaction term makes Z's estimate wrong.
+
+**511-PC — close calls are simmed, and the better sim wins.** Nothing worn
+(`G = 3000`); Thunderheart Chestguard 110, Gauntlets 100, Leggings 100;
+`+20` when the Gauntlets and Leggings are worn together. The pool reaches
+3; count 3 has no model bonus and is below the gate, so each row's only
+eligible future is the 2pc. The 2pc package is chest + hands (the best
+single, then the hands, which win their tie with the legs as in 511-R).
+
+- Gauntlets row (`d 100`): estimates chest `210`, legs `200`, 10 apart:
+  both are simmed. Chest gear `100 + 110 + 50 = 3260`, legs gear
+  `100 + 100 + 50 + 20 = 3270`: the legs, `stepGearDps 270`, credit
+  `270 − 100 = 170`. The Leggings row mirrors it (hands, 270).
+- Chestguard row: estimates hands and legs tie at 210, and both sims read
+  260: Z's order, the hands (31034 < 31044).
+- `setStepSims`: the six choice calls touch chest + hands (the package,
+  from the store), chest + legs and hands + legs (new): 2 simmed, 4 from
+  the store; the two chosen gears (chest + hands, hands + legs) come from
+  the store: `gears 2, simmed 2, fromStore 6`.
+- With `partnerRule "sum-of-singles"` the Gauntlets row takes the chest,
+  `260`; chosen gears chest + hands (store) and chest + legs (new):
+  `gears 2, simmed 1, fromStore 1`.
+- The margin's edge: the Leggings at 79 with `+40` (estimate `179`, 31
+  below `210`) are simmed, `100 + 79 + 50 + 40 = 269 > 260`: the legs. At
+  78 (32 below) they are not: the chest, 260.
+- Failures: when only the hands + legs gear fails, the Gauntlets row takes
+  the chest, 260. When chest + hands fails as well (the package sim too),
+  every candidate failed: the row keeps Z's choice, the chest, whose step
+  sim fails again, so it has no `stepGearDps` and is unmeasured.
+
+### Existing cases under close-calls
+
+Cases that pass `partnerRule` explicitly do not move. These default-rule
+literals do; every choice below is unchanged, because each tie on estimate
+is also a tie on sim, and Z's order breaks it the same way.
+
+- **Case 8.** The hands row's three 2pc sets tie at 160 and the legs row's
+  likewise, all within the margin; each sim reads `3250 − 3040 = 210`. New
+  gears: hands + shoulder, hands + chest, hands + legs, legs + shoulder,
+  legs + chest (legs + hands is hands + legs). The shoulder and chest rows
+  have one set within 31.87 (chest or shoulder at 200 against 160). So
+  `2 + 6 + 5 = 13`.
+- **476-A.** Every row's three 2pc sets tie at 130 and sim `3290 − 3110 =
+180`, so all six pairs of the four pieces are simmed; one is the 2pc
+  package (head + hands). So `4 + 6 + 5 = 15`.
+- **477-T.** 2pc: the wrist, waist and feet rows each have two sets at 300
+  within the margin (the two other 150 pieces; hands and legs at 250 are
+  out); the hands and legs rows each have wrist, waist and feet at 250
+  (legs or hands at 160 is out). Every sim ties. New 2pc gears: wrist +
+  feet, waist + feet, and hands or legs with each of wrist, waist and feet:
+  8, against K5's 3 (feet + wrist, hands + wrist, legs + wrist). 4pc: the
+  wrist, waist and feet rows have two sets at 550 within the margin, the
+  4-piece package and legs + wrist + waist + feet, both simmed already.
+  So `3 + 8 + 9 = 20`.
+- **490-A.** The chest, head and shoulder rows each have two sets at 200
+  within the margin (the two other head/shoulder/chest pieces; hands and
+  legs at 50 are out); the hands and legs rows have head, shoulder and chest
+  at 50 (legs or hands at −50 is out). Every sim ties (240 and 90). New
+  gears: chest + shoulder, head + shoulder, and hands or legs with each of
+  chest, head and shoulder: 8. So `2 + 8 + 8 − 1 = 17`.
+- **492-J.** Every 4pc set of every row ties at 410 and sims 390, so all
+  four 3-piece subsets of head, shoulder, chest and legs are simmed; one
+  is the 4-piece package. So `3 + 2 + 6 + 3 = 14`.
+- **511-M.** No step gear: only the rule name moves, "close-calls".
+- **511-R.** Every row's three 2pc sets tie at 200 and sim 250: 12 choice
+  calls over the six pairs, one of them the 2pc package: 5 simmed, 7 from
+  the store. The four distinct chosen gears then come from the store:
+  `gears 4, simmed 5, fromStore 11`.
+- **511-U (W-S7).** The Pauldrons row's three 2pc sets are close calls, so
+  failing only Pauldrons + Gauntlets would just skip that set. The fake sim
+  now fails every request that wears the real Pauldrons and exactly one
+  other real Thunderheart piece. Every candidate fails, the row keeps Z's
+  choice (the hands), whose step sim fails again: unmeasured, credit 0.
+  The other rows' failed candidates are skipped, and they stop at the 4pc,
+  `530 − 100 = 430`, as before.
+- **511-PR.** Unset, `setStepSims.partnerRule` is "close-calls"; the hashed
+  object still has no `partnerRule` key.
