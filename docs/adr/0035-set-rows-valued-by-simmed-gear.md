@@ -40,7 +40,8 @@ Most measurements behind this ADR are **not in a clone**.
   gitignored (`.gitignore` line 59, `.scratch/stage-gate/*`). It holds the
   plan, the decision log, the execution report and every live result.
 - Claim ids in this ADR (C1, C74, …) are rows of the claims registers in
-  `S/plan.md` (C1–C202) and `S/plan-k5on-patch.md` (C203–C237). Each row names
+  `S/plan.md` (C1–C202), `S/plan-k5on-patch.md` (C203–C237) and
+  `S/plan-k6b-patch.md` (C238–C275). Each row names
   the command that checks it. Ids such as W-S1 and W-ON2 are those plans' win
   conditions.
 - The scripts that made the results are in that folder too: `S/k5p/run-check.mjs`,
@@ -196,10 +197,62 @@ The owner chose this form (decision-log line 200): "The only thing that makes
 sense is steps that add up."
 
 - Under "Set potential", one line per step up to the stop. Each step names the
-  pieces it adds and the worn bonuses it newly loses. The steps add up to the
-  Total. On the Gauntlets row: Item stats +6.4, Thunderheart Leggings (2pc)
-  +63.6, Thunderheart Pauldrons and Thunderheart Chestguard (4pc, breaks Malorne
-  Harness 2pc) +49.3, Total +119.3 (K6 visual check, `S/execution-report.md`).
+  pieces it adds and the bonus it reaches. The lines add up to the Total. On
+  FX-A's Gauntlets row: Item stats +6.4, Thunderheart Leggings (2pc) +63.6,
+  Breaks Malorne Harness 2pc −61.6, Thunderheart Pauldrons and Thunderheart
+  Chestguard (4pc) +110.9, Total +119.3 (K6B visual check,
+  `S/execution-report.md`). On the committed `feral-p3-p2bis` fixture the same
+  row reads +3.7, +62.5, −59.1, +109.9, Total +117.0 (K7 visual review,
+  `.scratch/handoffs/visual-review-511-512-set-credit-k7.md`).
+- **A step that newly loses a worn bonus is split** into two lines: "Breaks
+  {set} {n}pc" −Y, then the pieces line +X with no "breaks" text (chunk K6B).
+  - **The owner's words.** On choosing "steps that add up" (decision-log line
+    200): "One downside is that a lot of things are clustered together (I guess
+    to hide the complicated mystery bonus) but that also means combining gains
+    from a set with losses from breaking another set, if applicable (wordier, a
+    but harder to read, less actually detailed and informative)". Asked whether
+    to build the split, the owner answered "yes" (decision-log line 227) (C238).
+  - **The method** is "take the bonus away first" (`S/q-step-break-split.md`).
+    One extra sim per such step: the gear just before the step, with the lost
+    set's replaced pieces (the pieces the step's new items displace) sent as
+    set-less copies. Y = sim(gear before) − that sim, so Y is the lost bonus
+    valued on the gear just before the step. X = sim(gear after) − that sim.
+    X − Y equals the step exactly, so the row's figure, its rank and the Total
+    do not change (C243, C249).
+  - **Fallback, per step.** A step whose bonus-off sim failed, or whose request
+    could not be built, keeps the combined line "{pieces} ({count}pc, breaks
+    {set} {n}pc)" with its value. No value is guessed (fixture 511-LF). The
+    split is written only when the plain gear before was found in the run's
+    store, so Y is always a paired measurement (Gate B ruling GK6-2).
+  - **A step that loses two bonuses** gets one Breaks line naming both, valued
+    by the one sim (fixture 511-L2).
+  - **Unchanged:** the separate-outcomes layout, and the row's own break lines
+    above the heading.
+  - **Rejected: the stand-in (re-tag) method.** It needed an untested main step,
+    a new kind of copy and a new item-id rule, to save at most 4 sims in one run
+    (`S/q-step-break-split.md`).
+  - **Cost:** one sim per distinct pair of gear before and replaced pieces.
+    `feral-p3-p2bis` +2, `ret-p3-p2` 0; at most 8 per run in the check runs
+    (HUN-C3) (C256, C265, C269).
+  - **Live result** (K6B, `S/k6b/compare-FX-A.out` and
+    `S/k6b/compare-HUN-C3.out`, both "RESULT PASS"): each ranking equals the
+    same character's run on the code before K6B, apart from the four new
+    fields, and X − Y equals the step on all 11 split steps. Fork commit
+    `f09d218e`, main commit `7921a69a`.
+
+    | Run                       | Row                                            | Lost             | X            | Y           | Y on current gear (B) |
+    | ------------------------- | ---------------------------------------------- | ---------------- | ------------ | ----------- | --------------------- |
+    | FX-A, 10,000 it           | Thunderheart Gauntlets 31034, Leggings 31044   | Malorne 2pc      | 110.91       | 61.63       | 93.16                 |
+    | FX-A, 10,000 it           | Thunderheart Cover 31039                       | Malorne 2pc      | 112.92       | 58.47       | 93.16                 |
+    | HUN-C3, 3000 it           | 8 rows, Gronnstalker's and Rift Stalker pieces | Cryptstalker 2pc | 63.87–170.33 | 11.36–14.22 | 10.94                 |
+    | `feral-p3-p2bis`, 3000 it | Thunderheart Gauntlets 31034, Leggings 31044   | Malorne 2pc      | 109.87       | 59.17       | 96.26                 |
+    | `feral-p3-p2bis`, 3000 it | Thunderheart Cover 31039                       | Malorne 2pc      | 113.23       | 57.46       | 96.26                 |
+
+    The `feral-p3-p2bis` rows are from K7's re-record, compared with the
+    `4f19a468` recording by `S/k7/compare-feral.out` ("RESULT PASS": every row's
+    figure and rank unchanged). On feral, the Malorne 2pc is worth about 32 to 39
+    DPS less on the gear just before the four-piece step than on the current
+    gear. The SME follow-up's judgment of these values is in ticket 511.
 - **Rows whose partner sets do not nest** use the "separate outcomes" layout:
   one "{item} alone" line and one "With …" line per bonus in "N DPS more/less",
   no "+" signs, no Item stats line, no Total, and a "this row's figure" marker on
@@ -492,6 +545,10 @@ patch, "Changes to other plan sections" item 2; C224–C229).
   gears: 17 simmed, 10 from the store). The fixtures hold `setScreen` and
   `setStepSims`; the wall times are in the stage folder (`S/k7/k7-ret.log`,
   `S/k7/k7-feral.log`).
+- **Measured** (K7 re-record after K6B, same settings): `feral-p3-p2bis` took
+  193 s, with `setBonusOffSims` gears 2, simmed 2, from the store 0, failed 0,
+  skipped steps 0 (`S/k7/k7r-feral.log`; the fixture holds `setBonusOffSims`).
+  `ret-p3-p2` has no breaking step, so the split adds no sim there.
 - The close-calls rule adds 0–4.19% of a full-pool run (C229).
 - Screen sims run one at a time, while the tab keeps up to 4 other sims in flight
   against :3333 (C226).
@@ -514,7 +571,11 @@ From the plan (a)–(h):
 - (b) The gate is measured on the entry's package, not on the row's partner gear
   (C106; hypothesis).
 - (c) Bonuses and breaks are valued without the copied pieces' item-id-keyed
-  effects (C10).
+  effects (C10), except a split step's Breaks line (Y), which compares the real
+  replaced pieces with set-less copies. So an item-id effect of a replaced set
+  piece counts in Y. At least 5 of 1,957 set pieces in the effects list have
+  such an effect, plus the PvP gloves and the other id reads (ruling R5) (C268;
+  Gate B ruling GK6-3).
 - (d) Ring, trinket and weapon set pieces map to the first of their two slots
   (C138). A second-slot single can make the partner estimate wrong (C153;
   unverified). Two same-set rings, trinkets or one-hand weapons never count
@@ -538,6 +599,17 @@ From the screen, (i)–(m):
 - (m) N is 300 whatever the page's Iterations setting, and the screen sims run
   one at a time.
 
+From the split break lines, (n)–(p):
+
+- (n) Y also includes any bonus of the lost set between the two counts that the
+  ladder did not count; the line names only counted bonuses (C248).
+- (o) A step that loses two bonuses shows one Breaks line naming both, valued
+  together by one sim.
+- (p) A first step's Y needs the row's single swap stored under the same
+  request. The engine writes the split only when that request is found in the
+  run's store (Gate B ruling GK6-2), which holds for the tab's default loop
+  (C245); `setBonusOffSims.beforeInStore` records it.
+
 Added since:
 
 - The "this row's figure" marker in the separate-outcomes layout has no highlight
@@ -547,11 +619,10 @@ Added since:
 - Off-class Cryptstalker Armor sims fail, so those sets read "couldn't measure"
   (ticket 532).
 - The tab's replicate seeds overlap (ticket 530).
-- A step lumps a set's gain with a broken set's loss. A split into two honest
-  lines, for one extra sim per breaking step, is designed in
-  `S/q-step-break-split.md`. The owner asked for that design ("Yes pls.",
-  decision-log line 214); the owner's decision to build it
-  (Q-step-break-split-go) is open.
+- A step no longer lumps a set's gain with a broken set's loss. The owner asked
+  for the design ("Yes pls.", decision-log line 214) and then decided to build it
+  ("yes", decision-log line 227). Chunk K6B built it (fork `f09d218e`, main
+  `7921a69a`); see "The popover: steps that add up".
 
 ## Relation to ticket 523
 
