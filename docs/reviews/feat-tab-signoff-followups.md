@@ -723,3 +723,175 @@ fork-gated suites, so the local rc is the evidence.
 | P4  | Spec        | fixed       | Main `5c4b8002`: ADR-0034 says an unmeasured commit break still zeroes the credit.                                                                                                                                                                                                                               |
 | P5  | Spec        | fixed       | Main `8807b620`: comment on 490 recording the `7ed8c9941` wording fix.                                                                                                                                                                                                                                           |
 | P6  | Spec        | fixed       | Main `8807b620`: comment on 478 with a `node -e` check over `db.json` (`pairs 36 dups 0`, rc=0).                                                                                                                                                                                                                 |
+
+# Round 10 — the owed window: polish 481–489, set engine 490–502, tab fixtures 504/520, consumables 522, set credit 511/512
+
+Reviewed range: `7c54848f7a6e9799c295ad8839d870db32267eb1..fbd2e3dfb5d74a0d6ef535b1730ceedd35abafa2` (main); fork `7965a7d8482d1cd9c4a561882e1f5b14106544ff..f09d218ed4e9afc2d1a1350f3b67572c33b5cd0b`
+
+This round covers the whole window the targeted engine review left owed
+(its own note: "Round 10's full window (main `7c54848f..`, fork
+`7965a7d8..`) is still owed"). Main holds 150 commits, 132 of them this
+branch's own (`git log --no-merges --oneline 7c54848f..fbd2e3df ^dev`);
+the two `dev` merges (6f598de8, 59fb2e4b) were left out by diffing
+against tree `85120dd353e561b46540346e6ee3c39e2152a281`
+(`git merge-tree --write-tree 7c54848f a744c2ec`). Its own change is 33
+code and doc files (about 9k lines) plus recorded fixture and measurement
+JSON, which the axes spot-checked only. The fork window is 44 commits, 28
+files, +5561/−885.
+
+Dispatch: four fresh `general-task` agents on Opus (effort high) —
+adversarial and domain on the `.agents/reviews/` briefs, standards and
+spec via the `code-review` skill. No `codex` binary on PATH. Every axis
+was told it writes nothing; each reported the same dirty state (five
+untracked owner handoffs and this file's round header) and a clean fork
+at `f09d218e`. The spec axis ran
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts`
+under Node 22.17.1: rc=0, 89 passed, 1 skipped, 20.7 s.
+
+## Adversarial
+
+Nothing blocking. Every failure traced in the set-credit path either
+keeps the set or marks the row not counted; no path shows a wrong number
+with no warning. Material: **A1** `scripts/check_layout_gate.py` about
+lines 714-727 — with `data/tab-fixtures/feral-p3-p2bis.json` missing,
+the gate prints "the post-run checks are skipped", passes and still calls
+`write_baseline(digest)`; it also drops `check_fixture`'s readable flag,
+so a fixture marked ERROR does not stop a green run; and
+`check_tab_fixtures.py` exits 0 on zero fixtures. **A2** (known item K-a)
+— the `beforeAll` in `packages/core/test/fork-sim-database.test.ts`
+(line 169) has no timeout argument and `vitest.config.ts:30` sets only
+`testTimeout`, so the hook gets vitest's default 10 s for a 3.1 MB
+`db.json` parse plus proto transforms (about 3.3 s idle). **A3** — a set
+the screen drops gives its rows no future and no sub-line, with no
+"screened" wording anywhere; ADR-0035 accepts this as limit (i). Minor:
+**A4** Stop is not checked anywhere in the set phase (fork `rank.ts`
+reads `signal` before `buildSetBonuses` only). **A5** the same-gear
+gate's `se = √(on.se² + off.se²)` ignores the shared seed and overstates
+the noise; it errs toward no credit. **A6** `pairedSe` is only tested
+with zero spread (record mode). **A7** two checks in
+`fork-sim-database.test.ts` cannot fail. **A8** the layout-gate digest
+leaves out `upgrades/adapters/fixture.ts`, `upgrades/data/` and
+`vite.config.mts`. Known items: **K-b** minor (the lock is written only
+on a green run with a changed digest; CI never writes it, because
+`run_verify.mjs` passes `--preview-skip`); **K-c** cosmetic (the marker
+is text, `tip_figure_marker`); **K-d** not a defect on the shipped path
+(the tab always sets `measureBrokenSetValue: true`, and step credit reads
+no package-minus-singles figure). Checked clean: copies with unknown ids
+panic in Go rather than become empty items; failed screen readings keep
+the set; a failed ladder rung still counts as a break; the ranking cache
+key includes `partnerRule` and `setScreen`; fixture code and check hooks
+compile only under `__TBC_TAB_FIXTURES__`.
+
+## Domain
+
+No blocking findings. Every set-bonus and hit-cap fact checked matches
+the Go sim at fork `f09d218e`: Justicar 4pc affects only Judgement of
+Command and the default ret APL never judges Command
+(`sim/paladin/item_sets.go:13-28`,
+`ui/paladin/retribution/apls/default.apl.json`); Crystalforge 4pc is a
+party heal; Lightbringer 4pc's Hammer of Wrath is never cast; the hit cap
+(8% base, 1% suppression, Improved Faerie Fire 3%) and whole-point
+expertise; Burning Rage needs Blacksmithing; Go matches sets by id then
+name, which makes set-less copies work. Minor: **D1** the core/CLI path
+still credits Justicar 4pc and Crystalforge 4pc by "package minus
+singles" (`packages/core/src/set-value.ts:53-54`, `view.ts`,
+`rank-report.ts`), and ticket 514's close condition does not say whether
+that path is in scope. **D2** the popover shows one lost bonus at −96.3
+and −59.1 without naming the gear (the SME caveat in ticket 511, lines
+125-127). **D3** meta-gem repair may put hit gems on hit-capped set gear
+(hypothesis, untested). K-c has no domain angle.
+
+## Standards + Spec
+
+**Standards:** no code breaks a written repo rule, and all 36 PROVENANCE
+rows hash-match the fork files at `f09d218e`. Hard, writing style only:
+**ST1** commit messages with subjects over 50 characters (21 main, 9
+fork), unwrapped bodies, and bodies over six lines; **ST2** banned words
+in commit messages; **ST3** banned words ("carries", "lands"/"landed",
+"shapes") in new comments and docs — 17 added lines in the fork diff,
+more in `docs/set-bonus-fixture-derivations.md`, ADR-0034,
+`fork-sim-database.test.ts` and tickets 520-532. Judgement: **ST4** fork
+comments in `partner-choice.ts` (lines 13, 74) and `set-screen.ts`
+(lines 6, 61, 401) cite the gitignored stage folder as their source
+without saying it is gitignored; **ST5** `docs/agents/known-traps.md`
+"Fork-gated suites never run in CI" names two suites, and this branch
+adds two more; **ST6** the committed layout lock's `_comment` no longer
+matches what `write_baseline` writes, and its hash (`76c5e508…`) differs
+from the current digest (`607b6a56…`), so `pnpm merge-to-dev` will run
+the full gate; **ST7** the `partner-choice.ts` PROVENANCE row opens with
+the old provisional rule name; **ST8** duplicated test helpers and
+constants; **ST9** fork `rank.ts` is 3942 lines; **ST10** the same
+`stepRanking` branch at six sites; **ST11** partner rules and screen
+modes kept for scoring and dev hooks only; **ST12** `upgrades_tab.tsx`
+retells the ticket 312 → 486 history three times and keeps a process note
+("Confirmed no test asserts on the removed heading", line 2872). K-b is
+documented design; K-c is not a breach (the marker is text, and
+`docs/ui-tooltip-table-conventions.md:258` says colour is never the only
+sign).
+
+**Spec:** every closing item of tickets 511 and 512 holds at the tips.
+All 45 case ids named in 511, 512 and the plan appear in passing test
+titles and in `docs/set-bonus-fixture-derivations.md`; no set table came
+back into the fork engine
+(`git diff 063600a3 HEAD -- <engine>/set-value.ts` adds no
+`IMPLEMENTED_IN_SIM` entry); the ret fixture
+`data/tab-fixtures/ret-p3-p2.json` gives no ret row step credit; the
+owner's decisions are reflected in ADR-0035. No scope creep. The 27 other
+tickets closed in the window each meet their closing items or were
+changed by a later owner decision (479, 494, 502). Findings: **P1** most
+of 511/512's measurement evidence is in the gitignored stage folder,
+which ADR-0035 lines 37-53 states; **P2** ticket 514's missing reading
+was ruled out by the orchestrator, not the owner; **P3** (known item
+K-c) no spec asks for a marker colour (`plan-k6b-patch.md:511` puts it
+out of scope; ADR-0035:615 records it), and no gate-visual pass has
+judged the separate-outcomes layout on a real row; **P4** = D2; **P5** =
+A2 (522's closing evidence and 511/512's test command include that
+file); **P6** both `set_bonus.hover_hint` and `set_bonus.not_counted`
+read "set detail", so ticket 491's distinction no longer shows; **P7**
+some closed tickets quote old literals in dated comments (476, 477, 490,
+480), and ticket 520's body still says "Open until the owner rules".
+
+## Summary
+
+Nothing blocks a merge on correctness, domain facts or spec. Tickets 511
+and 512 meet their closing items, the set tests pass (89 passed, 1
+skipped), and PROVENANCE is clean. The findings worth acting on are small
+and are proposed as inline fixes (rows marked `pending` below): the 522
+test hook's timeout (A2, the known flake), the layout gate passing
+without its fixture checks (A1) and its digest gaps (A8), a stale
+known-traps entry (ST5), ticket 520's stale body line (P7), and one fork
+tidy commit for banned words, gitignored-source citations, a PROVENANCE
+wording slip and two comment-policy breaches (ST3, ST4, ST7, ST12). Three
+real follow-ups are new tickets: Stop during the set phase (533), the
+popover not naming the gear of a Breaks figure (534), and possible dead
+hit gems from meta repair (535). D1/P2 are a comment on ticket 514, and
+the optional test and smell items are a comment on ticket 513. Each
+`pending` row becomes `fixed` when its fix is applied, or `wontfix` when
+it is dropped; until then `pnpm merge-to-dev --check-only` refuses this
+file.
+
+## Disposition
+
+| ID                  | Axis                         | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                            |
+| ------------------- | ---------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1                  | Adversarial                  | pending     | Proposed fix PF2: the layout gate fails when the default fixture is missing or unreadable, and `check_tab_fixtures.py` fails on zero fixtures when the fork is present.                                                                                                                                                                  |
+| A2 / P5             | Adversarial, Spec            | pending     | Proposed fix PF1: `beforeAll(..., 30_000)` in `fork-sim-database.test.ts`, as `bulk-boundary.test.ts:115` does. This is known item K-a.                                                                                                                                                                                                  |
+| A3                  | Adversarial                  | wontfix     | ADR-0035 accepts screened-out sets showing no Set potential as its limit (i); a screened-out set's rows keep their breaks and crossing.                                                                                                                                                                                                  |
+| A4                  | Adversarial                  | defer       | `.scratch/carry-forward/issues/533-stop-does-not-abort-the-set-phase.md`                                                                                                                                                                                                                                                                 |
+| A5                  | Adversarial                  | wontfix     | The overstated `se` makes the same-gear gate stricter, so it can only withhold credit, never add a wrong figure. A paired formula would change which bonuses clear the gate, which needs its own measurement.                                                                                                                            |
+| A6, A7              | Adversarial                  | defer       | `.scratch/carry-forward/issues/513-set-engine-optional-cleanup.md` (comment added)                                                                                                                                                                                                                                                       |
+| A8                  | Adversarial                  | pending     | Proposed fix PF3: add `upgrades/adapters/`, `upgrades/data/` and `vite.config.mts` to the layout-gate digest.                                                                                                                                                                                                                            |
+| K-b                 | Adversarial, Standards       | wontfix     | Writing the lock after a green run on changed source is the documented design (the lock's `_comment`); CI never writes it, and `git checkout -- data/wowsims-fork-layout.lock.json` is the safe restore.                                                                                                                                 |
+| D1 / P2             | Domain, Spec                 | defer       | `.scratch/carry-forward/issues/514-set-bonus-value-carries-gear-dependent-residue.md` (comment added: say whether the core path is in scope; the missing reading was the orchestrator's ruling)                                                                                                                                          |
+| D2 / P4             | Domain, Spec                 | defer       | `.scratch/carry-forward/issues/534-popover-does-not-say-which-gear-a-break-is-measured-on.md`                                                                                                                                                                                                                                            |
+| D3                  | Domain                       | defer       | `.scratch/carry-forward/issues/535-meta-repair-may-add-dead-hit-gems-to-set-gear.md`                                                                                                                                                                                                                                                     |
+| ST1, ST2            | Standards                    | wontfix     | Pushed history; commits are not amended.                                                                                                                                                                                                                                                                                                 |
+| ST3, ST4, ST7, ST12 | Standards                    | pending     | Proposed fix PF5: one fork tidy commit (PROVENANCE cycle, then re-pin).                                                                                                                                                                                                                                                                  |
+| ST5                 | Standards                    | pending     | Proposed fix PF4: known-traps lists all four fork-gated suites and the four-file command.                                                                                                                                                                                                                                                |
+| ST6                 | Standards                    | wontfix     | The lock is generated: the next green gate run rewrites its `_comment` and hash, and `pnpm merge-to-dev` runs that gate because the hash differs.                                                                                                                                                                                        |
+| ST8, ST10, ST11     | Standards                    | defer       | `.scratch/carry-forward/issues/513-set-engine-optional-cleanup.md` (comment added)                                                                                                                                                                                                                                                       |
+| ST9                 | Standards                    | wontfix     | Splitting the ported `rank.ts` is a PROVENANCE-heavy refactor with no spec need now.                                                                                                                                                                                                                                                     |
+| P1                  | Spec                         | wontfix     | Stage-gate folders are gitignored by repo convention; ADR-0035 lines 37-53 say so, and the re-runnable part (tests and fixtures) passes.                                                                                                                                                                                                 |
+| P3 / K-c            | Spec, Standards, Adversarial | wontfix     | No spec, owner decision or visual acceptance asks for a marker colour, and the marker is text, so its meaning does not depend on colour. ADR-0035 lines 615-617 record why it has none (the stylesheet was outside K6's paths) and that no saved ranking has a row that shows it, so a colour could not be checked on a real render now. |
+| P6                  | Spec                         | wontfix     | Intended by the 494 redo: its plan review made `not_counted` an internal kind name with no "not counted" label (`.scratch/stage-gate/494-set-hover-redo/gate-b-amendments.md` N4), and ticket 494's closing comment records that the owner confirmed the copy and that `not_counted` now reads "set detail".                             |
+| P7                  | Spec                         | pending     | Old literals in dated comments on closed tickets stay as records. Proposed fix PF6: correct ticket 520's body line "Open until the owner rules".                                                                                                                                                                                         |

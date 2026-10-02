@@ -91,3 +91,21 @@ reading that item 2 asks for is missing.
 - **The tab no longer uses "package minus singles" on its path.** Each set
   row's total is one sim of wearable gear, and a bonus counts only when its
   same-gear value clears the noise gate (ADR-0035).
+- 2026-10-02, pre-merge review round 10 of feat/tab-signoff-followups
+  (`docs/reviews/feat-tab-signoff-followups.md`, findings D1 and P2).
+  - **D1: the core/CLI path still uses "package minus singles".**
+    `packages/core/src/set-value.ts` lines 53-54 mark Justicar 4pc and
+    Crystalforge 4pc as implemented, and `packages/core/src/view.ts`
+    (about lines 317, 343-357) and `rank-report.ts` (about line 401) rank
+    and print that credit. The comment above says the tab path no longer
+    uses it, and the close condition is one more tab-method reading. So
+    closing this ticket on that reading would leave the core path's
+    residue with no ticket. Whether a CLI ret run still shows the +17
+    credit is a hypothesis, untested. Before closing, say here whether the
+    core path is in scope.
+  - **P2: the missing reading was ruled out by the orchestrator, not the
+    owner.** Ticket 511's brief item 1 asked for a reading near 0 "on any
+    gear"; it is shown on one ret gear only, and the second gear is this
+    ticket's missing reading. "No new sims for it" is the orchestrator's
+    ruling (`.scratch/stage-gate/511-512-set-credit/decision-log.md` line
+    246, gitignored); no owner agreement is recorded.

@@ -42,3 +42,31 @@ A4), not in the round's fix list: test A3-U in
 Each item is optional. For each, either make the change, or note here why
 it stays. An engine change needs the PROVENANCE cycle in
 `docs/agents/known-traps.md` § Before editing a ported engine file.
+
+## Comments
+
+- 2026-10-02, pre-merge review round 10 of feat/tab-signoff-followups
+  (`docs/reviews/feat-tab-signoff-followups.md`). More optional items, each
+  found by reading the code at main `fbd2e3df` / fork `f09d218e`:
+  - **A6.** The `pairedSe` figures in `fork-set-net.test.ts` are only ever
+    tested with zero spread: the fake sim fills `allValues` with one
+    constant (about line 492), so a wrong formula at fork
+    `engine/set-screen.ts` about line 472 would still pass. Record mode
+    only.
+  - **A7.** In `fork-sim-database.test.ts`, the 522-G "no sim-failed rung"
+    check (about line 341) cannot fail, because the stub sim never
+    rejects; the 522-C expected counts (about line 244) repeat the `want`
+    value from the line before.
+  - **ST8.** `withValues` (`fork-set-net.test.ts` about line 2735) repeats
+    `withSetValues` (about line 1231). `SIM_ORDER`, `SIM_VERSION`,
+    `ITERATIONS` and `RaidSimRequest` are declared again in
+    `fork-sim-database.test.ts` (about lines 352-373). `FIXTURE_DIR` is in
+    both `scripts/check_layout_gate.py` and `scripts/check_tab_fixtures.py`.
+    The fixture schema version `1` is written in three places
+    (`adapters/fixture.ts`, `check_tab_fixtures.py`, `record.mjs` about
+    line 346).
+  - **ST10.** The same `stepRanking` branch recurs at fork `view.ts` about
+    lines 255, 331, 501, 572 and `upgrades_tab.tsx` about lines 489, 518.
+  - **ST11.** `PartnerRule` keeps "sum-of-singles-plain" and "single-swap"
+    for scoring only, and `setScreen` "off"/"record" are reachable only
+    through the dev check hooks.

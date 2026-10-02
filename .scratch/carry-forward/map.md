@@ -279,3 +279,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 517 Hide the popover "Item stats" line when it equals the DPS figure, after 494 (owner feedback on 494 proposal) 2026-09-25
 - 518 Delete the dead bulk-screening code, blocked until feat/tab-signoff-followups merges to dev (owner decision, follow-up to 406/411) 2026-09-25
 - 268 CLOSED 2026-09-25, feat/tab-signoff-followups — `fix/node-22-engines-floor` is in dev via merge `dc83b554` (`git merge-base --is-ancestor fix/node-22-engines-floor dev` exits 0), which is the close condition the ticket named
+- 533 Stop does nothing while the set phase runs (pre-merge review round 10, A4) 2026-10-02
+- 534 Set popover shows one lost bonus at two values without naming the gear (pre-merge review round 10, D2/P4) 2026-10-02
+- 535 Meta-gem repair may put hit gems on hit-capped set gear, hypothesis (pre-merge review round 10, D3) 2026-10-02
